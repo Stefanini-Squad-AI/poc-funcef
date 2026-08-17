@@ -1,0 +1,4177 @@
+program contab;
+
+uses
+  Forms,
+  UModulo in 'UModulo.pas',
+  FPai in '..\..\Cm\Forms\Source\FPai.pas' {frmPai},
+  FTelaAut in '..\..\Cm\Forms\Source\FTelaAut.pas' {frmTelaAutorizacao},
+  FOkCancelar in '..\..\Cm\Forms\Source\FOkCancelar.pas' {frmOkCancelar},
+  FPrincipal in 'FPrincipal.pas' {frmPrincipal},
+  FProcurar in '..\..\Cm\Forms\Source\FProcurar.pas' {CMProcurar},
+  FSelecionar in '..\..\Cm\Forms\Source\FSelecionar.pas' {frmCMSelecionar},
+  FSairAjuda in '..\..\Cm\Forms\Source\FSairAjuda.pas' {frmSairAjuda},
+  FCMEntrada in '..\..\Cm\Forms\Source\FCMEntrada.pas' {frmCMEntrada},
+  FCadastroPai in '..\..\CM\Forms\Source\FCadastroPai.pas' {FrmCadastroPai},
+  FCMPrincipalForms in '..\..\Cm\Forms\Source\FCMPrincipalForms.pas' {frmCMPrincipalForms},
+  FCMPrincipal in '..\..\Cm\Forms\CMPrincipal\FCMPrincipal.pas' {frmCMPrincipal},
+  uExcel in 'uExcel.pas',
+  UVerificaPreenchimento in 'UVerificaPreenchimento.pas',
+  FIntegraPlanilhasMT in '..\FontesMT\FIntegraPlanilhasMT.pas' {frmIntegraPlanilhasMT},
+  FDataMT in '..\FontesMT\FDataMT.pas' {frmDataMT},
+  fAguarde in '..\..\Cm\Forms\Source\fAguarde.pas' {frmAguarde},
+  FCmReport in '..\..\Cm\Forms\Source\FCmReport.pas' {FrmCmReport},
+  FIntegraDiasMT in '..\FontesMT\FIntegraDiasMT.pas' {frmIntegraDiasMT},
+  FVerifLancMT in '..\FontesMT\FVerifLancMT.pas' {frmVerifLancMT},
+  FEncerraPeriodoMT in '..\FontesMT\FEncerraPeriodoMT.pas' {frmEncerraPeriodoMT},
+  FAtuSaldoAnaMT in '..\FontesMT\FAtuSaldoAnaMT.pas' {frmAtuSaldoAnaMT},
+  FCadastroMT in '..\..\Cm\Forms\Source\FCadastroMT.pas' {FrmCadastroMT},
+  FCadastroMestreDetMT in '..\..\Cm\Forms\Source\FCadastroMestreDetMT.pas' {FrmCadastroMestreDetMT},
+  FCadPlanoContasMT in '..\FontesMT\FCadPlanoContasMT.pas' {frmCadPlanoContasMT},
+  FCadHistoricoMT in '..\FontesMT\FCadHistoricoMT.pas' {frmCadHistoricoMT},
+  FCadSubGrupoMT in '..\FontesMT\FCadSubGrupoMT.pas' {frmCadSubGrupoMT},
+  FCadSubContaMT in '..\FontesMT\FCadSubContaMT.pas' {frmCadSubContaMT},
+  FCadDemonstrativoMT in '..\FontesMT\FCadDemonstrativoMT.pas' {FrmCadDemonstrativoMT},
+  FCadPeriodoContabilMT in '..\FontesMT\FCadPeriodoContabilMT.pas' {FrmCadPeriodoContabilMT},
+  FCadTermoDiarioMT in '..\FontesMT\FCadTermoDiarioMT.pas' {frmCadTermoDiarioMT},
+  FCadContasContabMT in '..\FontesMT\FCadContasContabMT.pas' {frmCadContasContabMT},
+  FCadLinhasDemoMT in '..\FontesMT\FCadLinhasDemoMT.pas' {frmCadLinhasDemoMT},
+  FCadElemDemoMT in '..\FontesMT\FCadElemDemoMT.pas' {frmCadElemDemoMT},
+  FCadOrcamentoContabilMT in '..\FontesMT\FCadOrcamentoContabilMT.pas' {frmCadOrcamentoContabilMT},
+  FCadSaldoAnteriorMT in '..\FontesMT\FCadSaldoAnteriorMT.pas' {frmCadSaldoAnteriorMT},
+  FCadMovAnteriorMT in '..\FontesMT\FCadMovAnteriorMT.pas' {frmCadMovAnteriorMT},
+  FCadPlanilPreProntaMT in '..\FontesMT\FCadPlanilPreProntaMT.pas' {frmCadPlanilPreProntaMT},
+  FCadPlanilRateioMT in '..\FontesMT\FCadPlanilRateioMT.pas' {frmCadPlanilRateioMT},
+  FCadLancamAutomMT in '..\FontesMT\FCadLancamAutomMT.pas' {frmCadLancamAutomMT},
+  FCadRateioProgMT in '..\FontesMT\FCadRateioProgMT.pas' {frmCadRateioProgMT},
+  FEncerraResultadosMT in '..\FontesMT\FEncerraResultadosMT.pas' {frmEncerraResultadosMT},
+  FEncerraExercicioMT in '..\FontesMT\FEncerraExercicioMT.pas' {frmEncerraExercicioMT},
+  FCadRateioPlanPrevMT in '..\FontesMT\FCadRateioPlanPrevMT.pas' {frmCadRateioPlanPrevMT},
+  FAlteraDataMT in '..\FontesMT\FAlteraDataMT.pas' {frmAlteraDataMT},
+  FExcluiPlanilhaFaixaMT in '..\FontesMT\FExcluiPlanilhaFaixaMT.pas' {frmExcluiPlanilhaFaixaMT},
+  FCadLancRateioMT in '..\FontesMT\FCadLancRateioMT.pas' {frmCadLancRateioMT},
+  FCadParamContabMT in '..\FontesMT\FCadParamContabMT.pas' {frmCadParamContabMT},
+  FAtualizaSinMT in '..\FontesMT\FAtualizaSinMT.pas' {frmAtualizaSinMT},
+  FLancCadAutomMT in '..\FontesMT\FLancCadAutomMT.pas' {frmLancCadAutomMT},
+  fConfereRegraMT in '..\FontesMT\fConfereRegraMT.pas' {frmConfereRegraMT},
+  FImportaLancamentosMT in '..\FontesMT\FImportaLancamentosMT.pas' {frmImportaLancamentosMT},
+  FImportaExcelMT in '..\FontesMT\FImportaExcelMT.pas' {frmImportaExcelMT},
+  fParamReports_Padrao in '..\..\Cm\Forms\SourceMT\fParamReports_Padrao.pas' {frmParamReports_Padrao},
+  RBalancete in '..\Reports\Source\RBalancete.pas' {RptBalancete},
+  rCentroCustoxContas in '..\Reports\Source\rCentroCustoxContas.pas' {rptCentroCustoxContas},
+  rContasxCentroCusto in '..\Reports\Source\rContasxCentroCusto.pas' {rptContasxCentroCusto},
+  rHistoricoPadrao in '..\Reports\Source\rHistoricoPadrao.pas' {rptHistoricoPadrao},
+  RPeriodos in '..\Reports\Source\RPeriodos.pas' {RptPeriodos},
+  RPlanoContas in '..\Reports\Source\RPlanoContas.pas' {rptPlanoContas},
+  RRelatWeb in '..\Reports\Source\RRelatWeb.pas' {RptRelatWeb},
+  rConfCotas in '..\Reports\Source\rConfCotas.pas' {RPTConfCotas},
+  fParamConfCotas in '..\Reports\Source\fParamConfCotas.pas' {frmParamConfCotas},
+  RDiario in '..\Reports\Source\RDiario.pas' {RptDiario},
+  dContab in 'dContab.pas' {DtmContab: TDataModule},
+  FParamPlanilhas in '..\Reports\Source\FParamPlanilhas.pas' {frmParamPlanilhas},
+  FParamBalanco in '..\Reports\Source\FParamBalanco.pas' {frmParamBalanco},
+  RPlanilhas in '..\Reports\Source\RPlanilhas.pas' {rptPlanilhas},
+  RRazaoSintetico in '..\Reports\Source\RRazaoSintetico.pas' {RptRazaoSintetico},
+  FParamRazaoSint in '..\Reports\Source\FParamRazaoSint.pas' {frmParamRazaoSint},
+  fParamRazaoAnal in '..\Reports\Source\fParamRazaoAnal.pas' {frmParamRazaoAnal},
+  RSubContas in '..\Reports\Source\RSubContas.pas' {rptSubContas},
+  RRazaoAnalitico in '..\Reports\Source\RRazaoAnalitico.pas' {RptRazaoAnalitico},
+  RRazaoCCusto in '..\Reports\Source\RRazaoCCusto.pas' {RptRazaoCCusto},
+  FParamRazaoCCusto in '..\Reports\Source\FParamRazaoCCusto.pas' {frmParamRazaoCCusto},
+  rConfSubConta in '..\Reports\Source\rConfSubConta.pas' {rptConfSubConta},
+  FParamConfSubConta in '..\Reports\Source\FParamConfSubConta.pas' {frmParamConfSubConta},
+  rListaDemonst in '..\Reports\Source\rListaDemonst.pas' {rptListaDemonst},
+  FParamListaDemonst in '..\Reports\Source\FParamListaDemonst.pas' {frmParamListaDemonst},
+  rSaldoInicial in '..\Reports\Source\rSaldoInicial.pas' {rptSaldoInicial},
+  FParamSaldoInicial in '..\Reports\Source\FParamSaldoInicial.pas' {frmParamSaldoInicial},
+  rMapaEvolu in '..\Reports\Source\rMapaEvolu.pas' {rptMapaEvolu},
+  rBalanceteAnalAPSC in '..\Reports\Source\rBalanceteAnalAPSC.pas' {rptBalanceteAnalAPSC},
+  rBalanceteAnalAPCC in '..\Reports\Source\rBalanceteAnalAPCC.pas' {rptBalanceteAnalAPCC},
+  rBalanceteColMesCC in '..\Reports\Source\rBalanceteColMesCC.pas' {rptBalanceteColMesCC},
+  FParamBalanceteColMesCC in '..\Reports\Source\FParamBalanceteColMesCC.pas' {frmParamBalanceteColMesCC},
+  rBalanceteCxCC in '..\Reports\Source\rBalanceteCxCC.pas' {rptBalanceteCxCC},
+  FGeraCotaPlanPatroMT in '..\FontesMT\FGeraCotaPlanPatroMT.pas' {frmGeraCotaPlanPatroMT},
+  FCadSaldoCotasPlanPatroMT in '..\FontesMT\FCadSaldoCotasPlanPatroMT.pas' {frmCadSaldoCotasPlanPatroMT},
+  FSegregaPlanPatroMT in '..\FontesMT\FSegregaPlanPatroMT.pas' {frmSegregaPlanPatroMT},
+  rBalanceteCxAP in '..\Reports\Source\rBalanceteCxAP.pas' {rptBalanceteCxAP},
+  rSaldosAtuais in '..\Reports\Source\rSaldosAtuais.pas' {rptSaldosAtuais},
+  rBalConsolidado in '..\Reports\Source\rBalConsolidado.pas' {rptBalConsolid},
+  FParamBalConsolidado in '..\Reports\Source\FParamBalConsolidado.pas' {frmParamBalConsolidado},
+  FParamDemonstrativo1 in '..\Reports\Source\FParamDemonstrativo1.pas' {frmParamDemonstrativo1},
+  FGeraRatAdmPlanPatroMT in '..\FontesMT\FGeraRatAdmPlanPatroMT.pas' {frmGeraRatAdmPlanPatroMT},
+  FCadRatAdmPlanoPatroMT in '..\FontesMT\FCadRatAdmPlanoPatroMT.pas' {frmCadRatAdmPlanoPatroMT},
+  uCtrlRptDemonstrativo in '..\Reports\Source\uCtrlRptDemonstrativo.pas',
+  rDemonstrativo1 in '..\Reports\Source\rDemonstrativo1.pas' {rptDemonstrativo1},
+  rDemonstrativo3 in '..\Reports\Source\rDemonstrativo3.pas' {rptDemonstrativo3},
+  rDemonstrativo4 in '..\Reports\Source\rDemonstrativo4.pas' {rptDemonstrativo4},
+  FParamDemonstrativo4 in '..\Reports\Source\FParamDemonstrativo4.pas' {frmParamDemonstrativo4},
+  rDemonstrativo5 in '..\Reports\Source\rDemonstrativo5.pas' {rptDemonstrativo5},
+  rDemonstrativo6 in '..\Reports\Source\rDemonstrativo6.pas' {rptDemonstrativo6},
+  rDemoLayout in '..\Reports\Source\rDemoLayout.pas' {rptDemoLayout},
+  FParamDemonstrativo5 in '..\Reports\Source\FParamDemonstrativo5.pas' {frmParamDemonstrativo5},
+  rOrcamento in '..\Reports\Source\rOrcamento.pas' {rptOrcamento},
+  rBalanco in '..\Reports\Source\rBalanco.pas' {rptBalanco},
+  FImportaPlanoContasMT in '..\FontesMT\FImportaPlanoContasMT.pas' {frmImportaPlanoContasMT},
+  FImportaPlanoSaldosMT in '..\FontesMT\FImportaPlanoSaldosMT.pas' {frmImportaSaldosMT},
+  FImportaCorrespMT in '..\FontesMT\FImportaCorrespMT.pas' {frmImportaCorrespMT},
+  FCadFaixaDatasMT in '..\FontesMT\FCadFaixaDatasMT.pas' {frmCadFaixaDatasMT},
+  FCadDeParaContasMT in '..\FontesMT\FCadDeParaContasMT.pas' {frmCadDeParaContasMT},
+  FCadTabelasContabMT in '..\FontesMT\FCadTabelasContabMT.pas' {frmCadTabelasContabMT},
+  FRateioPlanoPrevMT in '..\FontesMT\FRateioPlanoPrevMT.pas' {frmRateioPlanoPrevMT},
+  FAtualizaMoedaMT in '..\FontesMT\FAtualizaMoedaMT.pas' {frmAtualizaMoedaMT},
+  FGeraSaldoCalcMT in '..\FontesMT\FGeraSaldoCalcMT.pas' {frmGeraSaldoCalcMT},
+  FDeficitSuperavitMT in '..\FontesMT\FDeficitSuperavitMT.pas' {frmDeficitSuperavitMT},
+  FVerificaBloqueadosMT in '..\FontesMT\FVerificaBloqueadosMT.pas' {frmVerificaBloqueadosMT},
+  uCtrlRptBalancete in '..\Reports\Source\uCtrlRptBalancete.pas',
+  dTermoDiario in '..\FontesMT\dTermoDiario.pas' {dtmTermo},
+  FParamDiario in '..\Reports\Source\FParamDiario.pas' {frmParamDiario},
+  FParamBalancete in '..\Reports\Source\FParamBalancete.pas' {frmParamBalancete},
+  FParamBalanceteCxSC in '..\Reports\Source\FParamBalanceteCxSC.pas' {frmParamBalanceteCxSC},
+  rBalanceteCxSC in '..\Reports\Source\rBalanceteCxSC.pas' {rptBalanceteCxSC},
+  FLancPesqMT in '..\FontesMT\FLancPesqMT.pas' {frmLancPesquisaMT},
+  FAcertaCodRedMT in '..\FontesMT\FAcertaCodRedMT.pas' {frmAcertaCodRedMT},
+  FAcertaNumPlanilhaMT in '..\FontesMT\FAcertaNumPlanilhaMT.pas' {frmAcertaNumPlanilhaMT},
+  FCadLancPreProntaMT in '..\FontesMT\FCadLancPreProntaMT.pas' {frmCadLancPreProntaMT},
+  uCtrlRptContab in '..\Reports\Source\uCtrlRptContab.pas',
+  RAvisoLan in '..\Reports\Source\RAvisoLan.pas' {RptAvisoLan},
+  RRazaoAnalSimples in '..\Reports\Source\RRazaoAnalSimples.pas' {RptRazaoAnalSimples},
+  FParamRazaoAnalSimples in '..\Reports\Source\FParamRazaoAnalSimples.pas' {frmParamRazaoAnalSimpl},
+  FCadLayoutDemoMT in '..\FontesMT\FCadLayoutDemoMT.pas' {frmCadLayoutDemoMT},
+  FParamOrcamentoCC in '..\Reports\Source\FParamOrcamentoCC.pas' {frmParamOrcamentoCC},
+  rBalanceteCCusto in '..\Reports\Source\rBalanceteCCusto.pas' {rptBalanceteCCusto},
+  uCtrlDemColuna in '..\CtrlObjects\uCtrlDemColuna.pas',
+  uCtrlDemLinha in '..\CtrlObjects\uCtrlDemLinha.pas',
+  uCtrlDemonstrativo in '..\CtrlObjects\uCtrlDemonstrativo.pas',
+  uCtrlDesenhoDemo in '..\CtrlObjects\uCtrlDesenhoDemo.pas',
+  uCtrlElemBalPatr in '..\CtrlObjects\uCtrlElemBalPatr.pas',
+  uCtrlListTerceiros in '..\CtrlObjects\uCtrlListTerceiros.pas',
+  uCtrlParamContab in '..\CtrlObjects\uCtrlParamContab.pas',
+  uCtrlPlanilha in '..\CtrlObjects\uCtrlPlanilha.pas',
+  uCtrlPlano in '..\CtrlObjects\uCtrlPlano.pas',
+  uCtrlCampoDePara in '..\CtrlObjects\uCtrlCampoDePara.pas',
+  uCtrlPlanoContaPer in '..\CtrlObjects\uCtrlPlanoContaPer.pas',
+  uCtrlPlanoDePara in '..\CtrlObjects\uCtrlPlanoDePara.pas',
+  uCtrlPlanoSaldo in '..\CtrlObjects\uCtrlPlanoSaldo.pas',
+  uCtrlPrePlanilha in '..\CtrlObjects\uCtrlPrePlanilha.pas',
+  uCtrlPrePlanilhaLA in '..\CtrlObjects\uCtrlPrePlanilhaLA.pas',
+  uCtrlPrePlanilhaPP in '..\CtrlObjects\uCtrlPrePlanilhaPP.pas',
+  uCtrlPrePlanilhaRA in '..\CtrlObjects\uCtrlPrePlanilhaRA.pas',
+  uCtrlPrePlanilhaRP in '..\CtrlObjects\uCtrlPrePlanilhaRP.pas',
+  uCtrlPrePlanilhaRPP in '..\CtrlObjects\uCtrlPrePlanilhaRPP.pas',
+  uCtrlProcessaContab in '..\CtrlObjects\uCtrlProcessaContab.pas',
+  uCtrlProcessaTotalPrev in '..\CtrlObjects\uCtrlProcessaTotalPrev.pas',
+  uCtrlRptAvisoLan in '..\CtrlObjects\uCtrlRptAvisoLan.pas',
+  uCtrlSubGrupo in '..\CtrlObjects\uCtrlSubGrupo.pas',
+  uCtrlTabelaDePara in '..\CtrlObjects\uCtrlTabelaDePara.pas',
+  uCtrlTermoDiario in '..\CtrlObjects\uCtrlTermoDiario.pas',
+  uDbTermodiario in '..\DbObjects\uDbTermoDiario.pas',
+  uDbCompoelemdem in '..\DbObjects\uDbCompoelemdem.pas',
+  uDbDemcolunas in '..\DbObjects\uDbDemcolunas.pas',
+  uDbDemcolxlin in '..\DbObjects\uDbDemcolxlin.pas',
+  uDbDemlinha in '..\DbObjects\uDbDemlinha.pas',
+  uDbDemonstrativo in '..\DbObjects\uDbDemonstrativo.pas',
+  uDbDesenhodemo in '..\DbObjects\uDbDesenhodemo.pas',
+  uDbElembalpatr in '..\DbObjects\uDbElembalpatr.pas',
+  uDbElemdemonstrativo in '..\DbObjects\uDbElemdemonstrativo.pas',
+  uDbPlano in '..\DbObjects\uDbPlano.pas',
+  uDbPlanocontaper in '..\DbObjects\uDbPlanocontaper.pas',
+  uDbPlanodepara in '..\DbObjects\uDbPlanodepara.pas',
+  uDbPredetalhe in '..\DbObjects\uDbPredetalhe.pas',
+  uDbPreplanilha in '..\DbObjects\uDbPreplanilha.pas',
+  uDbRataddetplanpatro in '..\DbObjects\uDbRataddetplanpatro.pas',
+  uDbRatadmplanpatro in '..\DbObjects\uDbRatadmplanpatro.pas',
+  uDbRateioplanpatro in '..\DbObjects\uDbRateioplanpatro.pas',
+  uDbSubgrupo in '..\DbObjects\uDbSubgrupo.pas',
+  uDbTabeladepara in '..\DbObjects\uDbTabeladepara.pas',
+  uDbCampodepara in '..\DbObjects\uDbCampodepara.pas',
+  FParamOrcamento in '..\Reports\Source\FParamOrcamento.pas' {frmParamOrcamento},
+  RBalanceteCad in '..\Reports\Source\RBalanceteCad.pas' {RptBalanceteCad},
+  FParamBalanceteCad in '..\Reports\Source\FParamBalanceteCad.pas' {frmParamBalanceteCad},
+  FParamBalanceteCCxC in '..\Reports\Source\FParamBalanceteCCxC.pas' {frmParamBalanceteCCxC},
+  FParamBalanceteCol in '..\Reports\Source\FParamBalanceteCol.pas' {frmParamBalanceteCol},
+  FParamBalanceteCxCC in '..\Reports\Source\FParamBalanceteCxCC.pas' {frmParamBalanceteCxCC},
+  FParamBalanceteAnalAPSC in '..\Reports\Source\FParamBalanceteAnalAPSC.pas' {frmParamBalanceteAnalAPSC},
+  FParamDemonstrativo3 in '..\Reports\Source\FParamDemonstrativo3.pas' {frmParamDemonstrativo3},
+  FParamDemonstrativo6 in '..\Reports\Source\FParamDemonstrativo6.pas' {frmParamDemonstrativo6},
+  FParamDemoLayout in '..\Reports\Source\FParamDemoLayout.pas' {frmparamdemolayout},
+  FParamDiarioResumido in '..\Reports\Source\FParamDiarioResumido.pas' {frmParamDiarioResumido},
+  FParamBalanceteAPCC in '..\Reports\Source\FParamBalanceteAPCC.pas' {frmParamBalanceteAPCC},
+  FParamBalanceteCxAP in '..\Reports\Source\FParamBalanceteCxAP.pas' {frmParamBalanceteCxAP},
+  FParamSaldosAtuais in '..\Reports\Source\FParamSaldosAtuais.pas' {frmParamSaldosAtuais},
+  FParamAvisoLan in '..\Reports\Source\FParamAvisoLan.pas' {frmParamAvisoLan},
+  FParamMapaEvolu in '..\Reports\Source\FParamMapaEvolu.pas' {frmParamMapaEvolu},
+  FParamCCConta in '..\Reports\Source\FParamCCConta.pas' {frmParamCCConta},
+  FParamContaCC in '..\Reports\Source\FParamContaCC.pas' {frmParamContaCC},
+  FParamHistorico in '..\Reports\Source\FParamHistorico.pas' {frmParamHistorico},
+  FParamPeriodo in '..\Reports\Source\FParamPeriodo.pas' {frmParamPeriodos},
+  FParamSubConta in '..\Reports\Source\FParamSubConta.pas' {frmParamSubConta},
+  FParamPlanoContas in '..\Reports\Source\FParamPlanoContas.pas' {frmParamPlanoContas},
+  FSaldosPesqMT in '..\FontesMT\FSaldosPesqMT.pas' {frmSaldosPesquisaMT},
+  FLancSaldosMT in '..\FontesMT\FLancSaldosMT.pas' {frmLancSaldosMT},
+  FCadDiasBloqModMT in '..\FontesMT\FCadDiasBloqModMT.pas' {frmCadDiasBloqModMT},
+  uCtrlDiasBloqMod in '..\CtrlObjects\uCtrlDiasBloqMod.pas',
+  uDbDiasbloqmod in '..\DbObjects\uDbDiasbloqmod.pas',
+  RBalanceteColunado in '..\Reports\Source\RBalanceteColunado.pas' {RptBalanceteColunado},
+  fLancaContabMT in '..\FontesMT\fLancaContabMT.pas' {FrmLancaContabMT},
+  FImportaOrcadoExcelMT in '..\FontesMT\FImportaOrcadoExcelMT.pas' {frmImportaOrcExcelMT},
+  FParamDemonstrativo7 in '..\Reports\Source\FParamDemonstrativo7.pas' {frmParamDemonstrativo7},
+  rDemonstrativo7 in '..\Reports\Source\rDemonstrativo7.pas' {rptDemonstrativo7},
+  FCadColunasDemoMT in '..\FontesMT\FCadColunasDemoMT.pas' {frmCadColunasDemoMT},
+  FCopiaDemonstrativoMT in '..\FontesMT\FCopiaDemonstrativoMT.pas' {frmCopiaDemonstrativomt},
+  FCadDemo2ColunasMT in '..\FontesMT\FCadDemo2ColunasMT.pas' {frmCadDemo2ColunasMT},
+  uCtrlElemDemonstrativo in '..\CtrlObjects\uCtrlElemDemonstrativo.pas',
+  rDemonstrativo2 in '..\Reports\Source\rDemonstrativo2.pas' {rptDemonstrativo2},
+  FParamDemonstrativo2 in '..\Reports\Source\FParamDemonstrativo2.pas' {frmParamDemonstrativo2},
+  rOrcamentoCC in '..\Reports\Source\rOrcamentoCC.pas' {rptOrcamentoCC},
+  rDiarioResumido in '..\Reports\Source\rDiarioResumido.pas' {rptDiarioResumido},
+  FCadastroGridMT in '..\..\Cm\Forms\Source\FCadastroGridMT.pas' {FrmCadastroGridMT},
+  FCadastroGridMTImob in '..\FontesMT\FCadastroGridMTImob.pas' {frmCadastroGridMTImob},
+  fCadCriterioSegregacao in '..\FontesMT\fCadCriterioSegregacao.pas' {frmCadCriterioSegregacao},
+  fCadSegregaCotacao in '..\FontesMT\fCadSegregaCotacao.pas',
+  FCadastroMestreDetMTImob in '..\FontesMT\FCadastroMestreDetMTImob.pas' {FrmCadastroMestreDetMTImob},
+  uMensErroMT in '..\FontesMT\uMensErroMT.pas',
+  fProcessaSegregacao in '..\FontesMT\fProcessaSegregacao.pas' {frmProcessaSegregacao},
+  FProgresso in '..\..\Cm\Forms\Source\FProgresso.pas' {frmProgresso},
+  uCtrlSegregacaoProc in '..\CtrlObjects\uCtrlSegregacaoProc.pas',
+  uDbSegregacao in '..\DbObjects\uDbSegregacao.pas',
+  uCtrlPlanoData in '..\CtrlObjects\uCtrlPlanoData.pas',
+  uDbPlanodata in '..\DbObjects\uDbPlanodata.pas',
+  FRelFluxoFinanceiro in '..\Reports\Source\FRelFluxoFinanceiro.pas' {FrmRelFluxoFinanceiro},
+  fCadSPCConsiste in '..\FontesMT\fCadSPCConsiste.pas' {frmCadSPCConsiste},
+  uDbSPCConsiste in '..\DbObjects\uDbSPCConsiste.pas',
+  uCtrlSPCConsiste in '..\CtrlObjects\uCtrlSPCConsiste.pas',
+  uDbItemSPCConsiste in '..\DbObjects\uDbItemSPCConsiste.pas',
+  FGeraSalCont2004MT in '..\FontesMT\FGeraSalCont2004MT.pas' {frmGeraSALCONT2004MT},
+  FExportaContabMT in '..\FontesMT\FExportaContabMT.pas' {FrmExportaContabMT},
+  FExcluiExportContabMT in '..\FontesMT\FExcluiExportContabMT.pas' {FrmExcluiExportContabMT},
+  FGeraSalContMT in '..\FontesMT\FGeraSalContMT.pas' {frmGeraSALCONTMT},
+  FRentabilidadeContabilMT in '..\FontesMT\FRentabilidadeContabilMT.pas' {FrmRentabilidadeContabilMT},
+  FCadTipoRentabilidade in '..\FontesMT\FCadTipoRentabilidade.pas' {FrmCadTipoRentabilidade},
+  RTipoRentabilidade in '..\Reports\Source\RTipoRentabilidade.pas' {RptTipoRentabilidade},
+  uDbContasxcc in '..\DbObjects\uDbContasxcc.pas',
+  fRateioProgMT in '..\FontesMT\fRateioProgMT.pas' {frmRateioProgMT},
+  FProgressoDuplo in '..\..\Cm\Forms\source\FProgressoDuplo.pas' {frmProgressoDuplo},
+  fAjustaSegregacaoMT in '..\FontesMT\fAjustaSegregacaoMT.pas' {FrmAjustaSegregacaoMT},
+  uCtrlImportaContab in '..\CtrlObjects\uCtrlImportaContab.pas',
+  FWizardMT in '..\..\Cm\Forms\SourceMT\FWizardMT.pas' {frmWizardMT},
+  FParamDemoSPC in '..\Reports\Source\FParamDemoSPC.pas' {FrmParamDemoSPC},
+  rDemoSPC in '..\Reports\Source\rDemoSPC.pas' {RptDemoPadraoSPC},
+  RBalPatrSPC in '..\Reports\Source\RBalPatrSPC.pas' {RptBalPatrSPC},
+  FBalPatrSPC in '..\Reports\Source\FBalPatrSPC.pas' {FrmBalPatrSPC},
+  FWizRenumPlanil in '..\FontesMT\FWizRenumPlanil.pas' {FrmWizRenumPlanil},
+  FParamBalanceteAnalPP in '..\Reports\Source\FParamBalanceteAnalPP.pas' {frmParamBalanceteAnalPP},
+  uCtrlRptBalanceteAnalPP in '..\Reports\Source\uCtrlRptBalanceteAnalPP.pas',
+  RBalanceteAnalPP in '..\Reports\Source\RBalanceteAnalPP.pas' {RptBalanceteAnalPP},
+  FExcluiApuracao in '..\FontesMT\FExcluiApuracao.pas' {FrmExcluiApuracao},
+  uDbApurresultado in '..\DbObjects\uDbApurresultado.pas',
+  FWizPlanilhaSPC in '..\FontesMT\FWizPlanilhaSPC.pas' {frmWizPlaniSpc},
+  FParamBalanceteAnalSubConta in '..\Reports\Source\FParamBalanceteAnalSubConta.pas' {frmParamBalanceteAnalSubConta},
+  uCtrlRptBalanceteAnalSubConta in '..\Reports\Source\uCtrlRptBalanceteAnalSubconta.pas',
+  RBalanceteAnalSubConta in '..\Reports\Source\RBalanceteAnalSubConta.pas' {RptBalanceteAnalSubConta},
+  FWizDesmembraAgrupa in '..\FontesMT\FWizDesmembraAgrupa.pas' {FrmWizDesmembraAgrupa},
+  FAlteraPlanoContabilMT in '..\FontesMT\FAlteraPlanoContabilMT.pas' {frmAlteraPlanoContabilMT},
+  FAtuSaldoEncerramentoMT in '..\FontesMT\FAtuSaldoEncerramentoMT.pas' {frmAtuSaldoEncerramentoMT},
+  FGeraSalCont2010MT in '..\FontesMT\FGeraSalCont2010MT.pas' {FrmGeraSalCont2010MT},
+  fParamCGPC28 in '..\Reports\Source\fParamCGPC28.pas' {frmParamCGPC28},
+  uCtrlRptCGPC28 in '..\Reports\Source\uCtrlRptCGPC28.pas',
+  rCGPC28 in '..\Reports\Source\rCGPC28.pas' {RptCGPC28};
+
+{$R *.RES}
+{$R CONTAB_RES.RES}
+
+begin
+  frmCMEntrada:= TfrmCMEntrada.Create(Application);
+  frmcmentrada.show;
+  frmCMEntrada.Update;
+  Application.Initialize;
+  Application.Title := 'Contabilidade';
+  Application.CreateForm(TDtmContab, DtmContab);
+  Application.CreateForm(TfrmPrincipal, frmPrincipal);
+  Application.CreateForm(TfrmAguarde, frmAguarde);
+  Application.CreateForm(TfrmProgresso, frmProgresso);
+  Application.CreateForm(TRptTipoRentabilidade, RptTipoRentabilidade);
+  Application.CreateForm(TfrmProgressoDuplo, frmProgressoDuplo);
+  frmCMEntrada.Hide;
+  frmCMEntrada.Free;
+  Application.Run;
+end.
+{CM$ALT
+================================================================================
+Histórico de alterações efetuadas no módulo Contabilidade
+================================================================================
+CM$VER      3.13.17r    25/06/2008
+--------------------------------------------------------------------------------
+Pendência 27800
+Relatorio: Balancete Colunado.
+Para a correção do Balancete Colunado, foi necessário a criação de 2 colunas na tabela Plano Saldos.
+Foi criada a rotina 'Atualiza Saldo de Encerramento das Contas', para que os saldos das contas analiticas e sintéticas possam ser acertados.
+Foram feitas alterações no relatório de Balancete Colunado, para utilização das 2 colunas novas.
+================================================================================
+CM$VER      3.13.17q    11/06/2008
+--------------------------------------------------------------------------------
+Pendência: 25873
+Tela: Processamentos\Rentabilidade
+Descrição: Ajustes na apuração do saldo final das contas de custo
+Pendência: 28065
+Tela: Processamentos\Rentabilidade
+Descrição: Ajustes na apuração do saldo inical 
+Pendência: 28056
+Tela: Processamentos\Rentabilidade
+Descrição: Ajustes na totalização final
+================================================================================
+CM$VER      3.13.17p    27/05/2008
+--------------------------------------------------------------------------------
+Pendência: 27852
+Tela: Processos \ Encerramento de períodos
+Descrição: No teste de saldo de contas sintéticas exibe o erro de saldo nas contas estatísticas i,pedindo o encerramento do período.
+================================================================================
+CM$VER      3.12.17o    16/04/2008
+--------------------------------------------------------------------------------
+Pendência: 27687 (Ajuste)
+Tela: PROCESSAMENTO\ RENTABILIDADE CONTABIL
+Descrição: Alterando o nome do relatório para imprimir o ultimo mês solicitado no período:
+          Exemplo: Rentabilidade de Fevereiro
+================================================================================
+CM$VER      3.12.17n    02/04/2008
+--------------------------------------------------------------------------------
+Pendência: 27688
+Descrição: Habilitando o item de menu Processamentos-Atualiza Moedas
+================================================================================
+CM$VER      3.12.17m    01/04/2008
+--------------------------------------------------------------------------------
+Pendência: 27687
+Tela: PROCESSAMENTO\ RENTABILIDADE CONTABIL
+Descrição: Alterando o nome do relatório para imprimir o ultimo mês solicitado no período:
+          Exemplo: Rentabilidade de Fevereiro
+================================================================================
+CM$VER      3.12.17l    20/03/2008
+--------------------------------------------------------------------------------
+Pendência: 27569
+Descrição: Acerto no HelpContext do Padrão
+================================================================================
+CM$VER      3.12.17j    10/03/2008
+--------------------------------------------------------------------------------
+Pendência: 27560
+Tela: RELATORIOS\ OPERACIONAIS\ DIÁRIO
+Descrição: Ao gerar o relatório "Diário" está dando o seguinte erro: ''Não foi possível abrir a Fonte de Dados.: lDiario Endereço: 014C8C08''
+Nº do chamado no SOL: O problema só ocorre caso não seja colocado filtro de conta contábil e somente na produção.
+================================================================================
+CM$VER      3.12.17i    26/02/2008
+--------------------------------------------------------------------------------
+Pendência: 27458
+Tela: Altera Plano de Contas
+Descrição: Ao realizar a rotina, o sistema apresenta erro em uma conta contábil.
+A conta em questão está cadastrada na tela 'Processamento\ De para do Plano de Contas\ De Para de Contas Contábeis'.
+================================================================================
+CM$VER      3.12.17h    15/02/2008
+--------------------------------------------------------------------------------
+Pendência: 27374
+Tela: Consultas/Relatório/Balancete/Balancete Analítico por plano e patrocinadora
+Descricão: Quando da geração do balancete analítico por plano e patrocinadora, marcando o flag: desconsiderar o encerramento de resultado,
+está gerando a mensagem de erro, sem a conclusão do referido relatório.
+================================================================================
+CM$VER      3.12.17g    11/02/2008
+--------------------------------------------------------------------------------
+Pendência: 25244
+Processo: atualização de saldos.
+Descrição: Pequeno ajuste da implementação da pendência 25244.
+================================================================================
+CM$VER      3.12.17f    01/02/2008
+--------------------------------------------------------------------------------
+Pendência  : 27042
+Alterações : Alterando a descrição exeibina no relatório Listagem do plano de contas,
+             para buscar como padrão a descrição gravada no cadastro do plano de contas. Criando um filtro
+             para que o relatório liste apenas as contas no padrão da secretaria.
+Pendência  : 27043
+Alterações : Incluindo no relatório "Balancete Analítico Por Conta, Subconta, Plano e Patrocinadora" um filtro para Expandir
+             apenas as contas analiticas.
+Pendência  : 27309
+Alterações : Alterando a consulta do relatório Balancete de Conta X Subconta para exibir 0(zero) nos campos de valor nulo.
+Pendência  : 27312
+Alterações : Incluindo no relatório Balancete de Conta X Subconta um filtro para listar apenas as contas do padrão da secretaria.
+Pendência  : 27313
+Alterações : Incluindo no relatório "Balancete Analítico Por Conta, Subconta, Plano e Patrocinadora" um filtro para listar apenas as
+             contas do padrão da secretaria.
+Pendência  : 22595
+Alterações : Inserido lista com plano de contas a ser verificado na Rentabilidade Contábil. Se preenchido, deverá filtrar a lista com
+             apenas retabilidades daquele plano contábil.
+================================================================================
+CM$VER      3.12.17e    21/01/2008
+--------------------------------------------------------------------------------
+Pendência  : 27263
+Alterações : Retirando as  telas Planilha/ Rateio e Cadastros/ Planilha/ Rateio por Centro de Custo do sistema.
+================================================================================
+CM$VER      3.12.17d    15/01/2008
+--------------------------------------------------------------------------------
+Pendencia 27196
+Ao imprimir o relatório de Demonstrativo de Resultado -  Modelo de Layout,
+O sistema gerava ERRO.
+================================================================================
+CM$VER      3.12.17c    08/01/2008
+--------------------------------------------------------------------------------
+Pendência: 25244
+Descrição: Implementação da opção de atualizar os saldos das contas analíticas e sintéticas através de
+stored procedure disparadas por triggers. Esta opção de ligar e deslicar se localiza na tela de cadastro de
+parâmetros do sistema.
+================================================================================
+CM$VER      3.12.17b    15/12/2007
+--------------------------------------------------------------------------------
+Pendência: 25356 (Ajuste)
+Tela: Relatórios | Aviso de lançamento | AP
+Descrição: Novos campos para relatório
+Pendência: 26719
+Tela: Rentabilidade contabil
+Descrição: Novo controle para exibir somente Rentabilidades que possuam PLANOS no
+           período selecionado.
+           Obs.: Caso existam dois planos no mesmo periodo o sistemna exibe mensagem de erro.
+================================================================================
+CM$VER      3.12.17a    28/11/2007
+--------------------------------------------------------------------------------
+Pendência: 26719
+Tela: Rentabilidade contabil
+Descrição: Ajustes nos totais mensais do relatório.
+Pendência: 25356
+Tela: Relatórios | Aviso de lançamento | AP
+Descrição: Agrupar os dados de um documento e outros ajustes
+================================================================================
+CM$VER      3.12.17     12/11/2007
+--------------------------------------------------------------------------------
+Liberação do padrão 5.10.18
+Pendência: 26719
+Tela: Rentabilidade contabil
+Descrição: Ajustes nos totais mensais do relatório.
+Pendência: 25282
+Tela: Consulta de Balancetes, e Fluxo Financeiro
+Descrição: Otimização das queryes de consulta quando da utilização do flag
+"Desconsiderar o Encerramento de Resultado" - Para consulta de Balancetes
+foram criados novos índices nas tabelas "Planilha" e "Lancamento";
+-Para consulta de Fluxo Financeiro foi feito prepação da query consulta de saldo.
+pendência 24892
+Descriçao: impedir lançamentos contábeis nas contas Estatísticas com Movimento.
+pendência 26772
+Descrição do problema: os demostrativos não estão consolidando por plano e patro conforme cadastrado 
+nos elementos de demonstrativo.
+================================================================================
+CM$VER      3.12.16k    06/11/2007
+--------------------------------------------------------------------------------
+Pendência: 26749
+Tela: Processamentos\Segregação de Recursos\Processa Segregação
+Descrição do problema: O sistema processa mas não apresenta nenhum resultado da segregação.
+Pendência: 26759
+Tela: Planilhas\Pre Pronta
+Descrição do problema: O centro de custo não está aparecendo quando é digitado uma planilha
+pré-pronta. É necessário para ir conferindo o lançamento, já que podem existir vários c.c. para uma mesma conta.
+Pendência 25052 (Desfazendo esta pendência)
+Pendência: 26791
+Descrição: a data de critério de segregação da baixa do documento deve respeitar a data de lançamento e não a data da baixa. 
+================================================================================
+CM$VER      3.12.16j    23/10/2007
+--------------------------------------------------------------------------------
+Pendência: 26617
+Tela: Sistema\Utililitários\Importação\Lançamentos externos (EXCEL)
+Descrição: Durante o processo de importação o sistema apresenta mensagem de erro:
+"Obrigatório a indicação do campo TIPOPOER".
+================================================================================
+CM$VER      3.12.16i    18/10/2007
+--------------------------------------------------------------------------------
+Pendência: 26641
+Tela: sistema\Utilitários\Importações\Lançamentos
+Descrição: O sistema apresenta crítica de relacionamento Contas contábíl X Centro de cisto mesmo que a mesma esteja relacionada ao centro de custo da importação.
+================================================================================
+CM$VER      3.12.16g    16/10/2007
+--------------------------------------------------------------------------------
+Pendência: 22712
+Tela: Agrupamento/desmembramento entre contas, alualização de saldos de contas Analíticas/Sintéticas
+Descrição: A crítica de dados da conta contábil destino (do desmembramento)  
+apresenta mensagem de erro mesmo quando a conta digitada não está errada.
+Pendência: 26617
+Tela: Sistema\Utililitários\Importação\Lançamentos externos (EXCEL) 
+Descrição: Durante o processo de importação o sistema apresenta mensagem de erro:
+"Obrigatório a indicação do campo TIPOOER".
+================================================================================
+CM$VER      3.12.16f    16/10/2007
+--------------------------------------------------------------------------------
+pendência: 26548
+Tela: Sistemas \ Configurações \ Parâmetros do sistema e Planilhas \ Lançamento
+Descrição: No Parâmetro do sistema, na aba Clientes "Lançamento Contabil" foi criado
+  uma opção para sugerir o Plano Previdenciário e a Patrocinadora no lançamento contabil.
+pendência: 26522
+Tela: Consulta \ Relatorio \ Balancetes \ Balancete
+Descrição: Criado uma opção para trazar apenas as contas do padrão da Secretaria
+pendência: 26535
+Tela: Planilhas \ Lançamento
+Descrição: Corrigido o erro de invalid data packet quando a opção "Exibe Consulta Resumida das Planilhas
+na Tela de Lançamento"
+================================================================================
+CM$VER      3.12.16e    02/10/2007
+--------------------------------------------------------------------------------
+Pendência: 26452 
+Tela: Planilhas\Pré-prontas
+Descrição do problema: Ao inserir a planilha 'Despesas Antecipadas', 
+aparece na tela o nº total de planilha errado, e ao lançar valor, o sistema acrescenta 
+dois créditos para um débito, conforme tela em anexo.
+================================================================================
+CM$VER      3.12.16d    25/09/2007
+--------------------------------------------------------------------------------
+pendência: 26384
+Tela: Processamentos \ Rentabilidade Contabil
+Descrição: Corrigido o cálculo da rentabilidade mensal e alterado
+          para 5 casas decimais os valores acumulados das rentabilidades contábeis
+================================================================================
+CM$VER      3.12.16c    13/09/2007
+--------------------------------------------------------------------------------
+pendência: 26345
+Tela: Processamentos \ Rentabilidade Contábil
+Descrição: Ajuste no cálculo da rentabilidade, em relação a vigência do plano contábil.
+================================================================================
+CM$VER      3.12.16b    10/09/2007
+--------------------------------------------------------------------------------
+pendência: 22712 (ajuste)
+Processos: Agrupamento/desmembramento entre contas, alualização de saldos de contas Analíticas/Sintéticas
+Descrição: Reestruturação e aperfeiçoamento dos processos de Agrupamento/desmembramento e
+dos processos de alualização de saldos de contas Analíticas/Sintéticas.
+Pendência: 25154 
+Tela: Sistema\Utilitários\Importações\Lançamentos Excel
+Descrição: A tela diz que foi gravada a planilha, mas não há nada na base.
+================================================================================
+CM$VER      3.12.16a    05/09/2007
+--------------------------------------------------------------------------------
+pendência: 26237
+Tela: Processamentos \ Rentabilidade Contábil
+Descrição: Corrigido o erro "Floating point overflow".
+================================================================================
+CM$VER      3.12.16     28/08/2007
+--------------------------------------------------------------------------------
+Liberação do padrão 5.10.17
+Pendência 26073 - Layouts de Demonstrativos
+- Corrigido problema de matriz inválida ao se tentar alterar o template do relatório.
+pendência 24982
+Descrição: implementar relatório de Balancete por plano com quebra de conta/plano, 
+totalizando o consolidado por conta contábil. Implementar novo balancete, com filtros idênticos ao por plano/patro, com quebras:
+Quebra por:
+Subconta 
+Plano ou Plano Spc
+Patro
+================================================================================
+CM$VER      3.12.15i    13/08/2007
+--------------------------------------------------------------------------------
+Pendência: 25973
+Tela : Processamentos \ Rentabilidade Contabil
+Descrição: Corrigido o cálculo da rentabilidade mensal.
+================================================================================
+CM$VER      3.12.15h    10/08/2007
+--------------------------------------------------------------------------------
+pendência: 22712 (ajuste)
+Processos: Agrupamento/desmembramento entre contas, alualização de saldos de contas Analíticas/Sintéticas
+Descrição: Reestruturação e aperfeiçoamento dos processos de Agrupamento/desmembramento e
+dos processos de alualização de saldos de contas Analíticas/Sintéticas.
+================================================================================
+CM$VER      3.12.15g    08/08/2007
+--------------------------------------------------------------------------------
+pendência: 25027 (ajuste)
+Rotinas  : Consulta \ Relatórios \ Razão Analítico
+Descrição: Corrigido o problema encontrado na coluna Lanc. na exportação da planilh excel.
+Retirada a barra '/' da string na exportação e substituída por '#' pois, o Excel interpretava
+a informação como uma data.
+================================================================================
+CM$VER      3.12.15f    07/08/2007
+--------------------------------------------------------------------------------
+pendência: 22712
+Processos: Agrupamento/desmembramento entre contas, alualização de saldos de contas Analíticas/Sintéticas
+Descrição: Reestruturação e aperfeiçoamento dos processos de Agrupamento/desmembramento e
+dos processos de alualização de saldos de contas Analíticas/Sintéticas.
+================================================================================
+CM$VER      3.12.15e    06/08/2007
+--------------------------------------------------------------------------------
+pendência: 25027 (ajuste)
+Rotinas  : Consulta \ Relatórios \ Razão Analítico
+Descrição: Corrige a formatação da data na planilha gerada em Excel.
+================================================================================
+CM$VER      3.12.15d    31/07/2007
+--------------------------------------------------------------------------------
+pendência: 25875 (ajuste)
+Rotinas: Atualizações de saldos de contas sintéticas
+Descrição: Em versão anterior havíamos colocado na query para busca do saldo das
+   contas sintéticas o atributo PLAATIVO = 'A'. Na época isto foi feito para
+   eliminarmos o efeito do agrupamento na atualização dos saldos das contas
+   sintéticas, só que, com esta modificação contas inativadas espontaneamente
+   passaram a não fazer parte do saldo da conta. Desta forma alteramos a query
+   inserindo a tabela PLANOCONTAPER e passamos a verificar os agrupamentos.
+================================================================================
+CM$VER      3.12.15c    26/07/2007
+--------------------------------------------------------------------------------
+pendência : 25027 - Ajuste
+Tela     : Consulta \ Relatórios \ Razão Analítico
+Descrição: Implementação de exportação diretamente para o Excel
+pendência: 22024 - Ajuste
+Tela:    Processamentos \ Rentabilidade Contábil
+Descrição: Implementada um aba para passar uma ou várias rentabilidades contábeis
+================================================================================
+CM$VER      3.12.15b    25/07/2007
+--------------------------------------------------------------------------------
+pendência: 25875 (ajuste)
+Rotinas: Atualizações de saldos de contas sintéticas e analíticas
+Descrição: correção na rotina de agrupamento das contas contábeis. Foi feito o 
+agrupamento das contas 12180209 e 21110402 e o saldo atual ficou duplicado
+================================================================================
+CM$VER      3.12.15a    24/07/2007
+--------------------------------------------------------------------------------
+pendência : 25027
+Tela     : Consulta \ Relatórios \ Razão Analítico
+Descrição: Implementação de exportação diretamente para o Excel
+================================================================================
+CM$VER      3.12.15     10/07/2007
+--------------------------------------------------------------------------------
+Liberação do padrão 5.10.16
+pendência : 25323
+Tela     : Várias telas: - Balancete - Balancete colunado - Balancete colunado 
+           mensal por centro de custo
+            - Mapa de evolução das contas - Diário - Razão analitico - Razão por centro de custo
+Descrição: Incluído botões para marcar e desmarcar todos e inverter seleção nos planos e patrocinadoras.
+pendência: 24589
+Tela : Processamentos/Segregação de Recursos/Processa Segregação e
+           Processamentos/Segregação de Recursos/Ajusta de Planilhas Divergentes
+Descrição: Implementado a segregação de recursos da memória de cálculo e
+           Implementado o ajuste da segregação da memória de cálculo.
+pendência: 23016
+Tela: consultas\Relatórios\Demonstrativos\Demonstrativos de Resultados - Modelo Layout
+Descrição: Incluído os filtros de plano e patro para serem exibidos nos layouts dos relatórios. 
+pendência: 22024
+Tela:    Processamentos \ Rentabilidade Contábil
+Descrição: Implementada um aba para passar uma ou várias rentabilidades contábeis
+pendência: 25013
+Tela:    Consulta \ Relatórios \ Balancete
+Descrição: A opção "Sintéticas(Com Movimentação)" em Imprimi contas zeradas. Passa a ser default. 
+Liberação do padrão 5.10.16
+================================================================================
+CM$VER      3.12.14a    19/06/2007
+--------------------------------------------------------------------------------
+ATENÇÃO: Correção de versionamento de aplicação.
+pendência: 22712
+Tela: Processamentos\Depara de Plano de Contas\Agrupamento e desmembramento de contas
+Descrição: Acerto e otimização do processo de desmembramento e agrupamento de contas.
+pendência: 25474
+Tela: consultas\Relatórios\Balancete por plano e patro
+Descrição: O relatório "balancete analítico por plano e patrocinadora" está trazendo o 
+mesmo valor para as colunas de débito e crédito, quando usado o filtro 
+"Quebra por plano SPC". Para cada código SPC é replicado o mesmo valor para 
+todas as contas relacionadas a este código."
+================================================================================
+CM$VER      3.12.13n    13/07/2007
+--------------------------------------------------------------------------------
+pendência: 22712 (ajuste no agrupamento de contas)
+Tela: Processamentos\Depara de Plano de Contas\Agrupamento e desmembramento de contas
+Descrição: Acerto e otimização do processo de desmembramento e agrupamento de contas.
+================================================================================
+CM$VER      3.12.13m    09/07/2007
+--------------------------------------------------------------------------------
+pendência: 25815
+Tela: Processamento \Segregação \Processa Segregação
+Descrição: Implementada a opção Ignorar Crítica Regra Prova Zero
+================================================================================
+CM$VER      3.12.13l    19/06/2007
+--------------------------------------------------------------------------------
+pendência: 22712
+Tela: Processamentos\Depara de Plano de Contas\Agrupamento e desmembramento de contas
+Descrição: Acerto e otimização do processo de desmembramento e agrupamento de contas.
+================================================================================
+CM$VER      3.12.13k    27/05/2007
+--------------------------------------------------------------------------------
+Pendência: 25444
+Tela      : Consultas \ Relatórios \ Gerenciais \ Mapa de Evolução das Contas
+Descrição : Corrigido a inconsistência dos valores nos movimentos das contas de resultado.
+================================================================================
+CM$VER      3.12.13j    26/05/2007
+--------------------------------------------------------------------------------
+Pendência: 25055
+Tela      : Cadastros \ Saldo Anterior
+Descrição : Não permitido a inserção de saldos anteriores em contas sintéticas no processo
+                de atualização dos saldos.
+================================================================================
+CM$VER      3.12.13i    25/05/2007
+--------------------------------------------------------------------------------
+Pendência: 25303
+Tela      : Consulta \ Relatórios \ Operacionais \ Diário
+Descrição : Corrigido o erro no relatório "Diário" a partir da página 50.000, como página inicial
+================================================================================
+CM$VER      3.12.13h    25/05/2007
+--------------------------------------------------------------------------------
+Pendência: 25025
+Tela      : Processamento \ Reteio por Padrão
+Descrição : Criado uma opção para Ignorar Lançamentos Rateados na Origem.
+================================================================================
+CM$VER      3.12.13g    25/05/2007
+--------------------------------------------------------------------------------
+Correção de versionamento de aplicação.
+================================================================================
+CM$VER      3.12.13f    24/05/2007
+--------------------------------------------------------------------------------
+Pendência: 25444
+Tela      : Consultas \ Relatórios \ Gerenciais \ Mapa de Evolução das Contas
+Descrição : Corrigido a inconsistência dos valores nos movimentos das contas de resultado.
+================================================================================
+CM$VER      3.12.13e    22/05/2007
+--------------------------------------------------------------------------------
+Pendência: 25055
+Tela      : Cadastros \ Saldo Anterior
+Descrição : Não permitido a inserção de saldos anteriores em contas sintéticas no processo
+                de atualização dos saldos.
+================================================================================
+CM$VER      3.12.13d    09/05/2007
+--------------------------------------------------------------------------------
+Pendência: 25303
+Tela      : Consulta \ Relatórios \ Operacionais \ Diário
+Descrição : Corrigido o erro no relatório "Diário" a partir da página 50.000, como página inicial
+================================================================================
+CM$VER      3.12.13c    07/05/2007
+--------------------------------------------------------------------------------
+Pendência : 25025
+Tela      : Processamento \ Reteio por Padrão
+Descrição : Criado uma opção para Ignorar Lançamentos Rateados na Origem.
+================================================================================
+CM$VER      3.12.13b    20/04/2007
+--------------------------------------------------------------------------------
+Pendência: 25111
+Tela      : Consulta \ Relatórios \ Cadastrais \ Tipo de Rentabilidade Contábil
+Descrição : O campo descrição foi ampliado para exibir toda a descrição da rentabilidade.
+================================================================================
+CM$VER      3.12.13a    18/04/2007
+--------------------------------------------------------------------------------
+Pendência: 15341 (Ajuste)
+Tela      : Consulta \ Relatórios \ Balancetes \ Balancetes de Contas x Centro de Custo
+Descrição : Alterado a exibição do codcentrocusto para codexterno.
+================================================================================
+CM$VER      3.12.13     10/04/2007
+--------------------------------------------------------------------------------
+Liberação do padrão 5.10.15
+Pendência: 24973 Consulta\Relatórios\Balancetes\Balancetes de Contas x Centro de Custo
+Descrição: Corrigido o erro de duplicação dos lançamentos
+Pendência : 15355
+Tela      : Consultas \ Relatórios \ Gerenciais \ Mapa de Evolução das Contas
+Descrição : Alterado o filtro do centro de custo, de codcentrocusto para codexterno.
+Pendência : 15353
+Tela      : Consultas \ Relatórios \ Demonstrativos \ Demonstrativo de Resultado - modelo 7
+Descrição : Alterado o filtro do centro de custo, de codcentrocusto para codexterno.
+Pendência : 15352
+Tela      : Consultas \ Relatórios \ Demonstrativos \ Demonstrativo de Resultado - modelo 6
+Descrição : Alterado o filtro do centro de custo, de codcentrocusto para codexterno.
+Pendência : 15351
+Tela      : Consultas \ Relatórios \ Demonstrativos \ Demonstrativo de Resultado - modelo 5
+Descrição : Alterado o filtro do centro de custo, de codcentrocusto para codexterno.
+Pendência : 15350
+Tela      : Consultas \ Relatórios \ Demonstrativos \ Demonstrativo de Resultado - modelo 4
+Descrição : Alterado o filtro do centro de custo, de codcentrocusto para codexterno.
+Pendência : 15349
+Tela      : Consultas \ Relatórios \ Demonstrativos \ Demonstrativo de Resultado - modelo 3
+Descrição : Alterado o filtro do centro de custo, de codcentrocusto para codexterno.
+Pendência : 15347
+Tela      : Consultas \ Relatórios \ Demonstrativos \ Demonstrativo de Resultado - modelo 1
+Descrição : Alterado o filtro do centro de custo, de codcentrocusto para codexterno.
+Pendência : 15348
+Tela      : Consultas \ Relatórios \ Demonstrativos \ Demonstrativo de Resultado - modelo 2
+Descrição : Alterado o filtro do centro de custo, de codcentrocusto para codexterno.
+Pendência : 15344
+Tela      : Consultas \ Relatórios \ Balancetes \ Balancetes Modelo Retrato (caderno)
+Descrição : Alterado o filtro do centro de custo, de codcentrocusto para codexterno.
+Pendência : 15343
+Tela      : Consultas \ Relatórios \ Balancetes \ Balancetes de Saldos Atuais
+Descrição : Alterado o filtro do centro de custo, de codcentrocusto para codexterno.
+================================================================================
+CM$VER      3.12.12e    10/04/2007
+--------------------------------------------------------------------------------
+pendência 25038
+Tela: Atualização de Contas Sintéticas
+Descrição: Otimização do processo, com retirada do processo de teste de outra moeda.
+================================================================================
+CM$VER      3.12.12d    10/04/2007
+--------------------------------------------------------------------------------
+Pendência: 24765
+Tela      : Consulta \ Relatórios \ Razões \ Razão por Centro de Custo
+Descrição : Corrigido erro no relatório.
+================================================================================
+CM$VER      3.12.12c    02/04/2007
+--------------------------------------------------------------------------------
+Pendência: 24973 Consulta\Relatórios\Balancetes\Balancetes de Contas x Centro de Custo
+Descrição: Corrigido o erro de duplicação dos lançamentos
+================================================================================
+CM$VER      3.12.12b    19/03/2007
+--------------------------------------------------------------------------------
+Pendência : 15335 (Ajuste)
+Tela      : Consulta \ Relatórios \ Balancetes \ Balancetes Analiticos de Centro Custo por Atividade Projeto.
+Descrição : Corrigido a busca do codcentrocusto para codexterno
+Pendência: 15340 (Ajuste)
+Tela: Consultas \ Relatórios \ Balancetes \ Contas x Atividades Projeto
+Descrição: Alterado o campo de pesquisa codcentrocusto para codexterno.
+Pendência: 15341 (Ajuste)
+Tela      : Consulta \ Relatórios \ Balancetes \ Balancetes de Contas x Centro de Custo
+Descrição : Alterado a exibição do codcentrocusto para codexterno.
+Pendência: 23695 (Ajuste)
+Tela      : Consulta \ Relatórios \ Razões \ Razão por Centro de Custo e
+                 Consulta \ Relatórios \ Balancetes \ Balancete Centros de Custo x Contas
+Descrição : Alterado a exibição do codcentrocusto para codexterno.
+================================================================================
+CM$VER      3.12.12a    06/03/2007
+--------------------------------------------------------------------------------
+Pendência : 15341
+Tela          : Consulta \ Relatórios \ Balancetes \ Balancetes de Contas x Centro de Custo
+Descrição : Alterado a exibição do codcentrocusto para codexterno.
+================================================================================
+CM$VER      3.12.12     07/02/2007
+--------------------------------------------------------------------------------
+Liberação do padrão 5.10.14
+Pendência : 24438
+Tela      : Processamentos \ Consiste Regras
+Descrição : Não estava sendo visualizado o ultimo registro mesmo usando a barra de rolagem
+Pendência : 23335
+Tela      : Processamentos \ Consiste regra
+Descrição : Incluído uma opção para marcar e desmarcar todos os itens.
+Pendência : 24284
+Tela      : Consultas\Fluxo Financeiro
+Descrição : Implementado a opção que desconsidera o encerramento do exercício no saldo geral.
+               Corrigida a diferença de registros na exibição do gauge.
+Pendência : 24375
+Tela      : Processamentos \Encerra Contas de Resultado
+Descrição : Na execução do processo é preciso ignorar as rotinas para
+            rotinas de segregação de recursos
+Pendência : 24363
+Tela      : Configuração / relatórios
+Descrição : Removido o Owner CM.
+Pendência : 23894
+Tela      : Planilhas / Lançamento
+Descrição : Implementada a memória de cálculo de segregação, para lançamentos segregados na
+            origem com o contábil segregado ao fim do mês.
+Pendência : 23748
+Tela :      Planilhas\Alteração de Data
+Descrição : Implementação do Campo Exercício. quando alterada a data da planilha,
+            alterar também o exercício, para o exercício da nova data.
+Tela      : Planilhas \ Pré - Prontas e Cadastro \ Planilhas \ Pré - Prontas
+Pendência : 23804
+Descrição : No cadastro de planilhas pré-prontas foi incluídos os Campos
+            número da ordem, atividade padrão, histórico padrão e status de conta:
+            débito ou crédito no momento de exibição de dados.
+            No lançamento de planilhas pré-prontas: Se a fundação optar por código
+            reduzido contabil, mostra-lo em vez do código da conta contabil.
+Pendência : 24271 - Exportação Contábil
+Descrição :
+    - Alteração do processo para que o arquivo seja gerado SEMPRE com as datas:
+      Data de Processamento = Ultimo dia do Mês ( ref. data final ) e Data do
+      Lançamento = Data efetiva do registro contábil.
+    - Retirada a opção de gerar ou não com data de lançamento sempre no último
+      dia do mês.
+    - Alterado o nome padrão do arquivo de GIM para TotalPrev
+Pendência 23897 - Novo campo: LANCAMENTO.CODDOCUMENTO
+-Destina-se a executar o bjunta para os lançamentos contábeis das contas de baixa em um
+pagameto por lote. O banco não terá este campo atribuído, já que ele é o somatório do lote
+pago.
+- Segregação de Recursos: retirada a marcação do critério para segregação quando houver
+segregação na origem com carimbo de um determinado plano.
+================================================================================
+CM$VER      3.12.11l    01/03/2007
+--------------------------------------------------------------------------------
+Pendência : 15335
+Tela      : Consulta \ Relatórios \ Balancetes \ Balancetes Analiticos de Centro Custo por Atividade Projeto.
+Descrição : Corrigido a busca do codcentrocusto para codexterno
+================================================================================
+CM$VER      3.12.11k    22/02/2007
+--------------------------------------------------------------------------------
+(Pendência 23695, Reajuste)
+Consultas / Relatório / Contabilidade /Razões / Razão por Centro Custo e
+/ Relatório / Contabilidade / Balancetes /  Balancetes por Centro de Custo x Conta
+Descrição: Corrigido o filtro do centro de custo inicial e final.
+================================================================================
+CM$VER      3.12.11j    15/02/2007
+--------------------------------------------------------------------------------
+(Pendência 23695, Reajuste)
+Consultas / Relatório / Contabilidade /Razões / Razão por Centro Custo e 
+/ Relatório / Contabilidade / Balancetes /  Balancetes por Centro de Custo x Conta
+Descrição: Corrigido o filtro do centro de custo inicial e final.
+================================================================================
+CM$VER      3.12.11i    09/02/2007
+--------------------------------------------------------------------------------
+Pendência : 23335
+Tela      : Processamentos \ Consiste regra
+Descrição : Incluído uma opção para marcar e desmarcar todos os itens.
+================================================================================
+CM$VER      3.12.11h    08/02/2007
+--------------------------------------------------------------------------------
+Pendência : 24438
+Tela          : Processamentos \ Consiste Regras
+Descrição : Não estava sendo visualizado o ultimo registro mesmo usando a barra de rolagem
+================================================================================
+CM$VER      3.12.11g    01/02/2007
+--------------------------------------------------------------------------------
+Pendência: 24375 - \Processamentos \Encerra Contas de Resultado   
+Na execução do processo é preciso ignorar as rotinas para rotinas de segregação de recursos
+================================================================================
+CM$VER      3.12.11f    30/01/2007
+--------------------------------------------------------------------------------
+Pendência 24271 - Alteração da data do lançamento exportado, mantendo a data real
+do registro contábil. Correção da busca do De/Para do Centro de Custos.
+================================================================================
+CM$VER      3.12.11e    24/01/2007
+--------------------------------------------------------------------------------
+Pendência: 23695  Consultas / Relatório / Contabilidade /Razões / Razão por Centro Custo
+Descrição: Corrigido o filtro do código do centro de custo inicial e final
+================================================================================
+CM$VER      3.12.11d    09/01/2007
+--------------------------------------------------------------------------------
+Pendência: 24117  Planilhas / Pré-Prontas
+Descrição: Corrigido o erro de numeração das planilhas.
+================================================================================
+CM$VER      3.12.11c    19/12/2006
+--------------------------------------------------------------------------------
+Pendência: 23578  (Reajuste) Consultas/Relatórios/Demostrativos/Demonstrativo modelo - 1
+Descrição: Corrigido o erro em que os elementos cadastrados como somatório e
+com condições não estavam sendo sensibilizados.
+================================================================================
+CM$VER      3.12.11b    19/12/2006
+--------------------------------------------------------------------------------
+Pendência: 23578  Consultas/Relatórios/Emissoões Diversas/Demonstrativo modelo - 1
+Descrição: Corrigido o erro em que os elementos cadastrados como somatório e
+com condições não estavam sendo sensibilizados.
+================================================================================
+CM$VER      3.12.11a    15/12/2006
+--------------------------------------------------------------------------------
+Pendência : Alterações de DE/PARA 
+Telas :     Consulta/Relatórios/Balancetes,
+            /Analítico de Atividade/Projeto e Sub-Contas ,
+            Balancete Analítico de Centros de Custo por Atividade/Projeto,
+            Balancete por Centro de Custo x Contas,
+            Balancete Colunado,
+            Balancete Colunado por Centro de Custo,
+            Balancete de Contas x Atividade/Projeto,
+            Balancete de Contas x Centros de Custo,
+            Balancete de Contas x Sub-Contas,
+            Balanço,
+            Listagem de Centros de Custo x Contas,
+            Conferência de Lançamentos sem Sub-Conta,
+            Relatório Demonstrativo de Resultado - Modelo de Layout,
+            Relatório Demonstrativo de Resultado - Modelo/01,
+            Relatório Demonstrativo de Resultado - Modelo 02,
+            Relatório Demonstrativo de Resultado - Modelo/03,
+            Relatório Demonstrativo de Resultado - Modelo/04,
+            Relatório Demonstrativo de Resultado - Modelo/05,
+            Relatório Demonstrativo de Resultado - Modelo/06,
+            Relatório Demonstrativo de Resultado - Modelo/07,
+            Diário,
+            Relatório Mapa de Evolução,
+            Orçado x Realizado,
+            Orçado x Realizado por Centro de Custo,
+            Planilhas Lançadas,
+            Razão Analítico,
+            Razão Simplificado [Modelo Caderno),
+            Razão por Centro de Custo,
+            Razão Sintético,
+            Balancete de Saldos Atuais
+================================================================================
+CM$VER      3.12.11     14/11/2006
+--------------------------------------------------------------------------------
+Liberação do padrão 5.10.13
+================================================================================
+CM$VER      3.12.10d    14/12/2006
+--------------------------------------------------------------------------------
+Pendência: 23578  Consultas/Relatórios/Emissoões Diversas/Demonstrativo modelo - 3
+Descrição: Corrigido o erro em que os elementos cadastrados como somatório e
+com condições não estavam sendo sensibilizados.
+================================================================================
+CM$VER      3.12.10c    28/11/2006
+--------------------------------------------------------------------------------
+Pendência : 23748
+Tela      : Planilhas\Alteração de Data 
+Descrição : Implementação do Campo Exercício. quando alterada a data da planilha,
+            alterar também o exercício, para o exercício da nova data.
+================================================================================
+CM$VER      3.12.10b    16/11/2006
+--------------------------------------------------------------------------------
+Pendência: 21543  (ajuste) Consultas/Relatórios/Emissões diversas/Aviso de lançamento
+Descrição: Corrigido o erro em que não estavam sendo selecionadas determinadas planilhas
+================================================================================
+CM$VER      3.12.10a    17/10/2006
+--------------------------------------------------------------------------------
+pendência: 23320 (ajuste)
+tela: \consultas\Relatórios\Balancete Analítico por plano e Patrocinadora
+solução refiz algumas subqueries e alterei alguns filtros, pois não esvam saindo as contas
+com saldos e sem movimentos.
+================================================================================
+CM$VER      3.12.10     24/10/2006
+--------------------------------------------------------------------------------
+Liberação do Padrão  5.10.12
+Pendência: 23510
+Tela: Planilha \ Lançamentos
+Descrição: A "Data do Critério" no detalhe do insert nãop estava alterando.
+pendência: 23320
+tela: \consultas\Relatórios\Balancete Analítico por plano e Patrocinadora
+solução refiz algumas subqueries e alterei alguns filtros, pois não esvam saindo as contas
+com saldos e sem movimentos.
+Pendência: 21543
+Tela: Consulta \ Relatórios \ Emissões diversas \ Aviso de lançamento.
+Descrição:  Foi implementado mais um filtro, busca por código interno.
+Pendência:  23157
+Tela:       Balancete
+Descrição: Implementar a máscara nos itens contábeis dos relatórios gerados em EXCELL.
+Pendência 22735
+Tela: Processamentos\Encerra Contas de Resultado
+      Colocar o Tipo de Operação na Tela apenas para visualização .
+Pendência: 23333
+Tela: Consulta\relatórios\Balancete Analítico por Plano ePatro
+Descrição: Incluir no Balancete Analítico por Plano e Patrocinadora a opção
+"Somente contas contra sua natureza",igual a que existe na tela do balance normal.
+================================================================================
+CM$VER      3.12.09d    03/10/2006
+--------------------------------------------------------------------------------
+pendência: 23320
+tela: \consultas\Relatórios\Balancete Analítico por plano e Patrocinadora
+solução refiz algumas subqueries e alterei alguns filtros, pois não esvam saindo as contas
+com saldos e sem movimentos.
+================================================================================
+CM$VER      3.12.09c    12/09/2006
+--------------------------------------------------------------------------------
+Pendência: 23269
+Tela: Consulta/Relatórios/Operacionais/Diário
+Descrição: Implementação do Id do  Módulo de Alteração.
+================================================================================
+CM$VER      3.12.09b    08/09/2006
+--------------------------------------------------------------------------------
+Pendência: 23265 Cadastros/Planilhas/Pré pronta
+Descrição: Criticar o campo Critério para segregação apenas quando a
+           mesma estiver ativa.
+================================================================================
+CM$VER      3.12.09a    22/08/2006
+--------------------------------------------------------------------------------
+Pendência: 22926 Cadastros/Planilhas/Pré pronta
+Descrição: Habilitado o campo Critério de segregação para o plano Operações
+           Administrativas.
+================================================================================
+CM$VER      3.12.09     18/08/2006
+--------------------------------------------------------------------------------
+pendência: 22994
+relatório : Utilitários\Importações\Lançamentos Excel
+Descrição: Correção do histórico do relatório ontre trazia # no histórico
+                da planilha  gerada.
+================================================================================
+CM$VER      3.12.08b    18/08/2006
+--------------------------------------------------------------------------------
+pendência: 22994
+relatório : Utilitários\Importações\Lançamentos Excel
+Descrição: Correção do histórico do relatório ontre trazia # no histórico
+           da planilha  gerada.
+================================================================================
+CM$VER      3.12.08a    15/08/2006
+--------------------------------------------------------------------------------
+pendência: 22921
+relatório : Consulta/Fluxo Financeiro
+Descrição: Correção do erro de referência de célula que ocorria ao tentar
+           gerar a planilha
+pendência: 22614 (ajuste)
+relatório : Balancetes\balancete analítico por plano e patrocinadora
+Descrição: Acreto do Saldo Anterior quando o relatório quebra somente por plano ou
+somente por patro.
+================================================================================
+CM$VER      3.12.08     20/07/2006
+--------------------------------------------------------------------------------
+ Liberação do Padrão  5.10.10
+================================================================================
+CM$VER      3.12.07g    20/07/2006
+--------------------------------------------------------------------------------
+pendência: 22614 (ajuste)
+relatório : Balancetes\balancete analítico por plano e patrocinadora
+Descrição: Acreto do Saldo Anterior quando o relatório quebra somente por plano ou
+somente por patro.
+================================================================================
+CM$VER      3.12.07f    13/07/2006
+--------------------------------------------------------------------------------
+pendência: 22614
+relatório : Balancetes\balancete analítico por plano e patrocinadora
+Descrição: Acreto do Saldo Anterior quando o relatório quebra por plano e patro.
+================================================================================
+CM$VER      3.12.07e    26/05/2006
+--------------------------------------------------------------------------------
+Pendência 22441  **** ajuste ****
+Tela: Cosultas\Relatórios\Balancetes\Balancete por plano e patrocinadora
+Descrição: Criar a opção de quebra por plano e plano/patro no balancete.
+           Criar novo relatório
+================================================================================
+CM$VER      3.12.07d    24/05/2006
+--------------------------------------------------------------------------------
+Pendência: 22377
+Tela: Sistemas/Utilitários/Importações/Plano de Contas
+Descrição: Adicionado caixa de checagem que indica se devem ser consideradas as
+                 restrições de chave exclusiva ou não.
+Pendência 22094
+Tela: Processamentos/DeParadoPlanodeContas/AgrupamentoeDesmembramento
+Descrição: Correção do Espelho de Lançamento, para que demonstre a nomenclatura
+           da  época do lançamento, para lançamentos subsequentes a mudança.
+================================================================================
+CM$VER      3.12.07c    18/05/2006
+--------------------------------------------------------------------------------
+Pendência: 22381
+Tela: Balancete Analitico por Plano e Patro
+Descrição do erro: As combos de "Imprimir contas até o Grau ..."  não está permitindo alteração pela barra de rolagem, se digitar um número qualquer, ao marcar outra opção dentro da tela de parâmetros, o que foi digitado na combo (em qualquer uma delas) retorna para o número 1.
+================================================================================
+CM$VER      3.12.07b    18/05/2006
+--------------------------------------------------------------------------------
+Pendência 22094
+Tela: Processamentos/DeParadoPlanodeContas/AgrupamentoeDesmembramento
+Descrição: Correção do Espelho de Lançamento, para que demonstre a nomemclatura
+           da  época do lançamento.
+================================================================================
+CM$VER      3.12.07a    16/05/2006
+--------------------------------------------------------------------------------
+Pendência 22202
+Tela: Processamentos/Rentabilidade Contábil
+Descrição: Reajuste na pendência, corrigindo o erro em que acontecia ao gerar
+           mais de um processamento sem fechar a tela
+Pendência 21746
+Tela: Processamentos/Apuração de Resultados
+Descrição: Implementação de submenu com as opções de incluir/excluir para
+gerenciar as apurações gerais ou individuais.
+================================================================================
+CM$VER      3.12.07     11/05/2006
+--------------------------------------------------------------------------------
+Liberação do padrão 5.10.09
+Pendência: 21166  Consulta/Fluxo Financeiro
+Descrição: Acerto do Plano que aparece na tela
+Pendência 19623
+Tela: Cosultas\Relatórios\Balancetes\Balancete por plano e patrocinadora
+Descrição: Criar a opção de quebra por plano e plano/patro no balancete.
+           Criar novo relatório
+================================================================================
+CM$VER      3.12.06g    11/05/2006
+--------------------------------------------------------------------------------
+Pendência 22202
+Tela: Processamentos/Rentabilidade Contábil
+Descrição: Implementado rotina para desconsiderar contas de resultado na
+           apuração da rentabilidade
+================================================================================
+CM$VER      3.12.06f    08/05/2006
+--------------------------------------------------------------------------------
+Pendência 21721
+Tela: Cosultas\Relatórios\Balancetes\Balancete
+Descrição: Quando uso opção, desconsiderar o encerramento de resultado, no
+           relatório, só aprecem as contas analíticas zeradas que tiveram
+           movimento no exercício. É necessário que apareçam todas as contas
+           analíticas.
+================================================================================
+CM$VER      3.12.06e    25/04/2006
+--------------------------------------------------------------------------------
+Pendência : 22058 Consultas/Relatórios/Balancetes/Balancete
+Descrição : Corrigido o erro em que ao solicitar o relatório por
+            período e desconsiderar o saldo das contas de resultado, saldo
+            de DEB/CRED estava divergente.
+================================================================================
+CM$VER      3.12.06d    05/04/2006
+--------------------------------------------------------------------------------
+Pendência : 21970 Planilhas\Lançamentos\Inserir
+Descrição : Correção no campo Histórico, que aparecia um caracter 'c'
+            não cadastrado no histórico padrão.
+================================================================================
+CM$VER      3.12.05c    02/03/2006
+--------------------------------------------------------------------------------
+Pendência : 21788 Consiste Regras
+Descrição : Acerto do saldo das contas da regra.
+================================================================================
+CM$VER      3.12.05b    02/03/2006
+--------------------------------------------------------------------------------
+Pendência : 21657 Cadastros\Planilhas\Pré-Pontas
+Descrição : Corrigido o método em que não estava trazendo as contas da planilha.
+================================================================================
+CM$VER      3.12.05a    16/02/200
+--------------------------------------------------------------------------------
+Pendência 20888
+Descrição: Correção da configuração do relatório de Planilhas Lançadas. Não estava
+           permitindo que o usuário configurasse os campos do relatório.
+Pendência 21336 (21293)
+Descrição: Demonstrativo Contábil gerado via template de planilha.
+================================================================================
+CM$VER      3.12.05     25/01/2006
+--------------------------------------------------------------------------------
+liberação para o padrão 5.10.08
+Pendência 19976
+Descrição: Implementação do parâmetro que enumera as planilhas por sequence
+(tela Sistema\Utilitários\Ativar Numeração de Planilhas por Seqüence).
+Pendência: 20900
+Descrição: Seleções múltiplas de Patrocinadoras e Planos na tela de consistência de
+regras
+================================================================================
+CM$VER      3.12.04e    29/12/2005
+--------------------------------------------------------------------------------
+Pendência : 20936 Relatórios - Balancete Colunado
+Descrição : Corrigido o problema da parametrização do grau da conta para exibição
+            do relatório.
+Pendência: 21161 Relatório Razão Analítico
+Descrição: - Parâmetro de contra-partida estará marcado ou desmarcado conforme o parâmetro de
+             configuração do sistema:
+             Menu Sistema/Configuração/Parâmetros do Sistema Aba 'Livres' >> Obriga Partida Dobrada
+           - Otimizado o relatório quando escolhido o parâmetro: Imprimir Contra-Partida
+Pendência: 21155 \Cadastros\Planilhas\Lançamentos Automáticos
+Descrição: Corrigida a exibição do código de centro de custo.
+================================================================================
+CM$VER      3.12.04d    13/12/2005
+--------------------------------------------------------------------------------
+Pendência : 17987 Sistema\Utilitários\Atualiza Saldos das Contas Analíticas
+Descrição : Corrigido o erro (Invalid Data Packet) do processamento
+================================================================================
+CM$VER      3.12.04c    02/12/2005
+--------------------------------------------------------------------------------
+Pendência : 17987 Processamentos\Integração\Por Planilha
+Descrição : Acrescentado colunas Plano x Patrocinadora no grid de Lançamentos
+Pendência: 20835 Consulta\Relatório\Contabilidade\Balancetes\Balancete
+Descrição: Corrigido o erro em que ao procurar por um centro de custo, o sistema
+           não buscava por código e sim por descrição. Corrigido também o mesmo
+           campo (Centro de Custo) no relatório, pois estava aparecendo diferente
+           do que foi cadastrado.
+Pendência: 20809 Consultas\Relatórios\Contabilidade\Demonstrativos
+Descrição: Impelmentado relatórios padrão SPC para Balanco Patrimonial e D.R.E
+           (Demonstrativo de Resultado).
+================================================================================
+CM$VER      3.12.04b    16/11/2005
+--------------------------------------------------------------------------------
+Pendência: 20695
+Descrição: Corrigido o erro em que o sistema estava misturando o histórico da
+           planilha que foi digitada anteriormente, com o histórico da próxima
+           planilha selecionada para fazer qualquer alteração de lançamento.
+================================================================================
+CM$VER      3.12.04a    20/10/2005
+--------------------------------------------------------------------------------
+Pendência : 20506 Consulta\Relatorios\Contabilidade\Operacionais\Planilhas Lancadas
+Descrição : Correção no campo Centro de Custo, pois o valor estava aparecendo
+            diferente do valor que era cadastrado.
+================================================================================
+CM$VER      3.12.04     05/09/2005
+--------------------------------------------------------------------------------
+Pendência : 19820
+Tela: Processamentos\Apuração de resultados do período
+Descrição :  A rotina não está excluindo a planilha feita anteriormente, isto é,
+quando a rotina é reprocessada pela segunda vez para o mesmo dia, está gerando outro lançamento.
+Liberação do Padrão 5.10.07
+Pendência: 19907 -  \Consultas \Relatórios \Razões \Razão Analítico
+Quando filtrado um módulo origem, passando a verificar na tabela PLANILHA ao
+invés da LANCAMENTO
+Pendência: 19648 Planilhas\Pré-pronta
+Descrição: Implementado o recurso de utilização do campo histórico de que, ao
+           digitar o texto por inteiro em cada linha, pular para próxima linha
+           automaticamente.
+Pendência: 19499 Processamentos\Segregação de Recursos\Processa Segregação
+Descrição: Correção no processo em que as vezes, ao selecionar - se um período,
+           estava preenchendo a data do lançamento com divergência
+================================================================================
+CM$VER      3.12.03m    05/09/2005
+--------------------------------------------------------------------------------
+Pendência: 20048(ajuste) - Sistema\Utilitários\Importações\Lançamentos
+Descrição: Correção do erro gerado ao importar arquivo.
+================================================================================
+CM$VER      3.12.03l    02/09/2005
+--------------------------------------------------------------------------------
+Pendência: 20096 - Processamentos\Rentabilidade Contábil
+Descrição: Corrigido o erro que era gerado ao tentar inserir um novo cadastro.
+Pendência: 20036 - Planilhas\Automáticas
+Descrição: Ajustes na pendência (Cálculo do saldo da conta).
+================================================================================
+CM$VER      3.12.03k    31/08/2005
+--------------------------------------------------------------------------------
+Pendência: 20048 - Cadastro\Plano de Contas (Reabertura)
+Descrição: Corrigido o erro que era gerado ao tentar inserir um novo cadastro.
+================================================================================
+CM$VER      3.12.03j    26/08/2005
+--------------------------------------------------------------------------------
+Pendência: 19801 - Consultas\Relatórios\Balancete
+Descrição: Implementado a função que faz o relatório trazer somente as contas
+           sintéticas que tenham valores em contas analiticas, mesmo que o valor
+           da sintetica seja zero.
+Pendência: 20046 - Planilhas\Automáticas
+Descrição: Corrigido o erro em que se no cadastro da planilha automática o
+           histórico padrão não for informado, o histórico do lançamento contábil
+           passa a ser a descrição da planilha.
+Pendência: 20048 - Cadastro\Plano de Contas
+Descrição: Corrigido o erro em que o código do Centro de Custo aparecia divergente
+           do que foi cadastrado no Global.
+================================================================================
+CM$VER      3.12.03i    23/08/2005
+--------------------------------------------------------------------------------
+Pendência: 20036 - Planilhas\Automáticas
+Descrição: Em algumas contas estatísticas, não existia saldo para a conta, porém
+           o sistema considerava um saldo existente,lançando assim uma planilha
+           incorreta.
+================================================================================
+CM$VER      3.12.03h    16/08/2005
+--------------------------------------------------------------------------------
+Pendência: 19986 - Processamentos\Rateio por Programa
+Descrição: Na geração do rateio por programa, para as contas com o mesmo nível,
+           não suprimir o 1º caracter da conta de destino
+Pendência: 19951 - Consultas\Relatórios\Razão Analítico
+Descrição: Correção no processo em que ao efetuar o cadastro no Global de um
+           centro de custo o sistema estava gerando o valor informado corretamente,
+           porém no relatório do Razão Analítico o mesmo centro de custo cadastrado
+           aparece com outro valor, diferente do informado no Global.
+================================================================================
+CM$VER      3.12.03g    03/08/2005
+--------------------------------------------------------------------------------
+Pendência: 19893 - \Consultas \Relatórios \Cadastrais \Tipo de Rentabilide Contábil
+Corrigida a impressão do relatório.
+================================================================================
+CM$VER      3.12.03f    02/08/2005
+--------------------------------------------------------------------------------
+Pendência: 19847 - Processamentos\Rentabilidade Contabil
+Descrição: Para cálculo da rentabilidade diária a rotina deverá utilizar a
+           seguinte premissa : Valor do dia dividido pelo liquido do dia anterior.
+================================================================================
+CM$VER      3.12.03e    28/07/2005
+--------------------------------------------------------------------------------
+Pendência: 19813 - Cadastros\Tipo de Rentabilidade Contabil
+Descrição: Inserido o fluxo diário para a rentabilidade contábil, independente
+           de ser sábado ou domingo.
+================================================================================
+CM$VER      3.12.03d    26/07/2005
+--------------------------------------------------------------------------------
+Pendência: 19747
+           Cadastros\Tipo de Rentabilidade Contabil
+Descrição: Corrigido o erro que no processamento do Consiste Regra, embora esteja
+           zerando, na tela apresentava como se  estivesse errado.
+================================================================================
+CM$VER      3.12.03c    25/07/2005
+--------------------------------------------------------------------------------
+Pendência: 19812
+           Cadastros\Tipo de Rentabilidade Contabil
+Descrição: Corrigido o erro que solicitava o preenchimento de campo que não era
+           necessário.
+           Processamentos\Rentabilidade Contábil
+           Permitir exportar o relatório para arquivos Word,Execl,PDF,etc...
+================================================================================
+CM$VER      3.12.03b    13/07/2005
+--------------------------------------------------------------------------------
+Pendência: 19319 (ajuste)
+Tela: Sistema\Utilitários\Importações\Lançamentos
+Descrição: Não estava gravando o campo Lacnumdoc da tabela LANCAMENTO.
+================================================================================
+CM$VER      3.12.03     14/06/2005
+--------------------------------------------------------------------------------
+Pendência: 19332
+Tela: Sistema\Configuração\Dias Bloqueado por Sistema
+Descrição: Implementado o campo Data Bloqueio
+Pendência: 19319
+Tela: Sistema\Utilitários\Importações\Lançamentos
+Descrição: Corrigir a importação quando selecionada o tipo de lançamento 2 ("Partida Dobrada")
+Pendência : 19242 Lançamentos\Planilhas Pré-Pronta
+Descrição : Correção da ordem dos lançamentos de planilhas cadastradas
+Pendência : 15342
+Descrição : Filtrar os centros de custo pelo campo idplancentcust.
+Pendência : 18434 Processamentos \ Segregação de Recursos \ Ajuste de Planilhas Divergentes
+Descrição : Criado uma tela para corrigir planilhas com divergências de valores
+nos processos de segregação na origem.
+Pendência : 18689
+Descrição: Criado o programa no cadastro de plano de contas para criticar o plano
+a segregar na origem
+Pendência: - Retirados os itens de menu:
+\Sistema \Utilitários \Importação \SAF
+\Processamentos \Apuração de Resultados do Exercício (Lançamento da Meia-Noite)
+================================================================================
+CM$VER      3.12.02o    14/04/2005
+--------------------------------------------------------------------------------
+Pendência: 19319 (ajuste)
+Tela: Sistema\Utilitários\Importações\Lançamentos
+Descrição: Não estava gravando o campo Lacnumdoc da tabela LANCAMENTO.
+================================================================================
+CM$VER      3.12.02n    14/04/2005
+--------------------------------------------------------------------------------
+Pendência : 19050  Processamentos \ Rateio por Programa
+Descrição : Corrigido o processo quando selecionada uma planilha apurada por
+            percentual
+================================================================================
+CM$VER      3.12.02m    13/04/2005
+--------------------------------------------------------------------------------
+Pendência : 18438  Processamentos\Apuração de Resultados do Período
+Descrição : Adicionar filtro por Plano x Patro
+================================================================================
+CM$VER      3.12.02l    11/04/2005
+--------------------------------------------------------------------------------
+Pendência : 18960  Utilitarios\Atualiza Saldo das Contas Analíticas
+                                                         Sintéticas
+Descrição : Corrigido o problema de saldo sem Plano/Patrocinadora na tabela
+            PLANOSALDO.
+================================================================================
+CM$VER      3.12.02k    07/04/2005
+--------------------------------------------------------------------------------
+Pendência: 18965 (Processamentos \ Rateio por Programa
+  1) Respeitar o cadastramento da planilha na marcação do atributo:
+     "Integra planilha manualmente"
+  2) Se o percentual de rateio for determinado pelo saldo das contas,
+     calcular um percentual de rateio único para aquele grupo contábil,
+     independente a marcação do parâmetro anterior.
+================================================================================
+CM$VER      3.12.02j    24/03/2005
+--------------------------------------------------------------------------------
+Pendência: - Processamentos / Rateio por Programa
+Corrigido processo
+Pendência: – Relatórios / Razão Analítico
+Otimizado o relatório
+================================================================================
+CM$VER      3.12.02i    16/03/2005
+--------------------------------------------------------------------------------
+Pendência: 18814 - Processamentos / Rateio por plano e patrocinadora
+                   Criada a possibilidade de se escolher a planilha de rateio a
+                   ser executada
+Pendência: 18804 – Cadastros \Regras de Consistência de Balancetes
+                   Criada a possibilidade de se verificar a regra de
+                   consistência dos balancetes pelo valor da movimentação da conta.
+Pendência: 18010 - \Planilhas \Automático Englobando o saldo de todas as
+                   Unidades de Negócio para calcular a planilha automática
+================================================================================
+CM$VER      3.12.02h    03/03/2005
+--------------------------------------------------------------------------------
+Pendência: 18743 (Razão Analítico)
+   - Acerto na exibição do valor do saldo das contas quando solicitada a
+     quebra por Plano X Patro
+Pendência: SIPC-CAP Modelo 2004
+   - Ajuste na query de montagem do relatório
+================================================================================
+CM$VER      3.12.02g    24/02/2005
+--------------------------------------------------------------------------------
+Pendência: 18439 / 17813
+   - Refeito todo cadastro e processo para rateio por programa
+Pendenicia: 18727 / 18537
+   - Correções no processo para se gerar o SIPC-CAP
+================================================================================
+CM$VER      3.12.02f    21/02/2005
+--------------------------------------------------------------------------------
+Pendência: 18694
+   - Ajutada a tela para verificar a consistencia das regras da SPC,
+     passa a aceitar por plano ou patro simultâneamente
+================================================================================
+CM$VER      3.12.02e    18/02/2005
+--------------------------------------------------------------------------------
+Pendência : 17924
+Descrição : - Bloquear lançamento de valores para contas sintéticas;
+            - Gravar o respectivo PLSTIPO na tabela PLANOSALDO;
+            - Obrigar o preenchimento das informações de Plano e Patro.
+Pendência : 18512
+Descrição : Incluído no relatório:
+            - descrição do centro de custo
+            - totalizador, considerando os débitos e os créditos
+Pendência : 18481
+Descrição : Transferido o item de  menu "Faixa de Datas do Plano Contábil"
+            De  :  Processamentos\De/Para Plano de Contas
+            Para: Cadastros
+================================================================================
+CM$VER      3.12.02d    16/02/2005
+--------------------------------------------------------------------------------
+Pendência: 18515
+   - Permitir o cadastramento de contas analiticas
+Pendência: 18537
+   - Incluído o campo Plano Previdenciário para a totalização do Plano Previdenciário Contábil
+     ao gerar o arquivo SIPC - CAP modelo 2004
+================================================================================
+CM$VER      3.12.02c    19/01/2005
+--------------------------------------------------------------------------------
+Pendência: 17425
+   - Implementar a regra zero para que seja conferido na hora do lançamento da planilha.
+================================================================================
+CM$VER      3.12.02b    18/01/2005
+--------------------------------------------------------------------------------
+Pendência: 18394
+   - Corrigir o número do plano de contas no arquivo, pois segundo a especificação da SPC,
+     precisa ser 4. Estava saindo o número do plano de contas cadastrado na fundação.
+================================================================================
+CM$VER      3.12.02a    13/01/2005
+--------------------------------------------------------------------------------
+Liberando menu de segregação anterior.
+================================================================================
+CM$VER      3.12.02     12/01/2005
+--------------------------------------------------------------------------------
+Pendência 18586
+Selecionar o campo Plano Previdenciário Contábil apenas se o mesmo estiver ativo
+Pendência: 17193 - \Planilhas \Lançamentos
+Remodelando a tela para acatar a nova regra para Segregação de Recursos na origem
+e Plano Administrativo
+   \Processamentos \Segregação de Recursos
+Preparando o processo para o Plano Administrativo
+Pendência: 17751 - \Planilhas \Alteração de data
+Corrigido o filtro da seleção de planilhas, permitindo apenas a visualiação do módulo contábil
+================================================================================
+CM$VER      3.12.01l    12/01/2005
+--------------------------------------------------------------------------------
+Pendência: 4928
+Rentabilidade Contábil - Colocar quebra por período.
+================================================================================
+CM$VER      3.12.01k    06/01/2005
+--------------------------------------------------------------------------------
+Pendência: 4928 (Reabertura)
+Rentabilidade Contábil - Pegar o plano vigente de acordo com o período e exercício selecionados.
+================================================================================
+CM$VER      3.12.01j    30/12/2004
+--------------------------------------------------------------------------------
+Pendência: 4928 - Rentabilidade Contábil
+Pendência: 18333 - Não funciona o filtro pelo número da Ap.
+================================================================================
+CM$VER      3.12.01i    09/11/2004
+--------------------------------------------------------------------------------
+Pendência: 15346
+Tela: Relatório Centro de Custo x Conta Contábil
+      Relatório Conta Contábil x Centro de Custo
+Descrição:
+  - verificar centro de custo ativo;
+  - verificar a obrigatoriedade do centro de custo da conta;
+  - colocar o campo CodExterno no lugar de CodCentroCusto
+Pendência 18215 - Relatório Conta Contábil x Centro de Custo  
+================================================================================
+CM$VER      3.12.01h    09/11/2004
+--------------------------------------------------------------------------------
+Pendência: 18077 - Importação de Lançamentos
+Corrigido o processo quando haviam números de planilhas sequenciais em datas diferentes
+Pendência: 17538 - De Para do Plano de Contas
+Inseirdo o período para se realizar um de para de um mês específico em diante.
+================================================================================
+CM$VER      3.12.01g    07/10/2004
+--------------------------------------------------------------------------------
+Pendência: 17667
+Tela: Relatórios \ Razões \ Razão Analítico
+Descrição: Criação de busca do plano de contas vigente, passa a ser automática ao
+           escolher as data de início de fim, não sendo mais necessário mudar o
+           parâmetro na tela de parâmetros do módulo Contabilidade.
+Pendência: 17698
+Tela: Relatórios \ Razões \ Razão Analítico
+Descrição: Foi retirado o /*+Rule*/, pois estava impactando no tempo de geração do relatório.
+================================================================================
+CM$VER      3.12.01e    21/09/2004
+--------------------------------------------------------------------------------
+Pendência: 17454
+Tela: Relatórios / Balancetes / Balancele Colunado
+Descrição O sistema não está respeitando a opção Desconsiderar o Encerramento de Resultado.
+Estando marcado ou não o resultado do relatório é o mesmo (Nº 3148)
+================================================================================
+CM$VER      3.12.01d    14/09/2004
+--------------------------------------------------------------------------------
+Pendência 17679 - | Planilhas | Automático
+Corrigido o processamento para planilhas que possuiam espaço em branco ao fim do nome.
+================================================================================
+CM$VER      3.12.01c    20/08/2004
+--------------------------------------------------------------------------------
+Pendência: 17116 - Relatórios: Razão Analítico e Razão Simplificado (Modelo Caderno)
+Os relatórios estavam dando erro selecionandos os seguintes filtros simultâneos:
+  Quebrapor sub-conta
+  Considerar contas com saldo e sem movimento
+================================================================================
+CM$VER      3.12.01b    18/08/2004
+--------------------------------------------------------------------------------
+Pendência: 17380 - | Processamentos | Rateio por Programa
+Utilizando-se o saldo do exercício, até o mês corrente, para ser utilizado como base para 
+o cálculo do rateio.
+================================================================================
+CM$VER      3.12.01a    13/08/2004
+--------------------------------------------------------------------------------
+Pendência: 16351 (ajuste)
+Tela: Processamentos\Gera Arquivo SIPC-CAP
+Descrição Implementação do novo Layout de interface com o sistema SIPC-CAP que será
+utilizado no exercício de 2004.
+================================================================================
+CM$VER      3.12.01     16/07/2004
+--------------------------------------------------------------------------------
+Pendência 16733
+Tela: Planilhas \ Lançamentos
+Descrição: ao clicar no excluir ou alterar, mostrar mensagem de alerta de que o lançamento
+a ser excluído é de origem de outro sistema.
+Pendência 16598
+Tela: Sistema\Utilitários\Verifica Lançamentos
+Descrição: Retirar a pergunta 'Atualizar o tipo de saldo pelo tipo de conta?'
+Pendência 16618
+Tela: Cadastro\Planilha\Pré Pronta
+Descrição: Incluir os campos Plano, Patrocinadora, Critério de segregação e Num. dse ordem.
+Pendência: 16351
+Tela: Processamentos\Gera Arquivo SIPC-CAP
+Descrição Implementação do novo Layout de interface com o sistema SIPC-CAP que será
+utilizado no exercício de 2004.
+Pendência 16346 - Regras de Consistência
+Implementação dos módulos de cadastro e de verificação de consistência das regras.
+Pendencia 16315 - Relatório de Mapa de Evolução de Contas
+Implementada  coluna com o mês de dezembro do ano anterior.
+Pendência: 16948
+Tela: Consultas\Relatórios\Emissões Diversas\Aviso de Lançamento
+Descrição: imnplementação dos filtros Plano e Patro e disponibilização dos campos
+PLANOME, NOMECENTCUST, TOTALLANCCRED e TOTALLANCDEB para
+que o usuário possa inserí-los no relatório através do menu Sistema\Configuração\Relatórios.
+Pendência 16743 - Cadastro de Planilha para Lançamento Automático
+Incluído flag que indica se a planilha será lançada manualmente ou não.
+Pendência 16744 - Lançamentos automáticos de planilha
+Testar se a planilha será lançada manualmente ou não.
+================================================================================
+CM$VER      3.12.00f    15/07/2004
+--------------------------------------------------------------------------------
+Pendência 17191 - | Processamentos | Rateio por Programa
+Processo corrigido, em alguns casos estava lançando nas contas sintéticas
+Pendência 17192 - | Processamentos | Rateio por Plano e Patrocinadora
+Processo corrigido
+================================================================================
+CM$VER      3.12.00e    21/06/2004
+--------------------------------------------------------------------------------
+- Pendência 17053: Diário
+Correção da passagem do campo IDMODULO para a query do relatório
+================================================================================
+CM$VER      3.12.00d    27/05/2004
+--------------------------------------------------------------------------------
+Pendência: 16858 - | Consultas | Relatórios | Balancetes | Balancete
+Corrigido o relatório quando selecionado filtro por data.
+================================================================================
+CM$VER      3.12.00c    27/05/2004
+--------------------------------------------------------------------------------
+Pendência: 16858 - | Cadastros | Segregação de Recursos | Cotação do Critério
+Implementada nova crítica para verificar a integridade do rateio por percentual.
+================================================================================
+CM$VER      3.12.00b    16/04/2004
+--------------------------------------------------------------------------------
+Pendencia 16345 : Validação de Plano / Patro no lançamento de documento conforme
+cadastro no Global.
+Novo relatório: Fluxo Financeiro, coforme res. 10
+Tela: \Consulas \Fluxo Financeiro
+================================================================================
+CM$VER      3.12.00a    22/03/2004
+--------------------------------------------------------------------------------
+Pendência 15904 - \Cadastros \Plano de Contas
+Incluído no resultado da Procura da Conta Contábil, todas as contas sintéticas,
+hierarquicamente superior a conta consultada.
+Pendência 16179 - \Consultas \Relatórios \Razões \Razão Analítico
+Corrigida a quebra de página do relatório, quando selecionado o parâmetro:
+"Quebra a página a cada conta"
+Pendência 16232 - \Sistema \Utilitários \Importações \Lançamentos
+Passando a inserir os lançamentos contábeis no o plano contábil informado na tela, 
+ao invés do plano cadastrado nos parâmetros da Contabilidade.
+Pendência 16239 - \Processamentos \De/Para de Plano de Contas 
+                             \Faixa de Datas do Plano Contábil
+Garantida a unicidade da faixa de vigência, com relação a outros planos cadastrados
+================================================================================
+CM$VER      3.12.00     01/03/2004
+--------------------------------------------------------------------------------
+Pendência: 14451 Nova Segregação de Recursos. Todas as customizações abaixo,
+são dependentes da ativação do parâmetro global "Segregação Virtual"
+**Menu: \Planilhas \Lançamentos
+Incluído o registro do Critério para segregação de recursos, no momento do
+lançamento de uma planilha.
+Incluída a Guia: Regra Prova Zero. Esta guia totaliza débitos e créditos por:
+Plano / Patrocinadora e Critério para Segregação, mostrando diferenças entre
+débitos e créditos nesta estrutura.
+**Menu: \Cadastros \Planilhas \Lançamento Automático
+Inclusão do campo da seleção "Conta base para Segregação". Esta será a conta
+preferencial para procurar o critério para segregação do lançamento de planilhas
+automáticas. Caso esteja nulo o valor para procura será a conta "Débito"
+**Menu: \Planilhas \Automático
+Corrigido o formulário para aceitar a nova segregação de recursos
+**Menu: \Planilhas \Rateio
+Desabilitada para análises futuras
+**Menu: \Cadastros \Planilhas \Rateio por Cento de Custo
+Desabilitada para análises futuras
+**Menu: \Planilhas \Pré-pronta
+Incluído o registro do Critério para segregação de recursos, no momento do
+lançamento de uma planilha pré-pronta.
+**Menu: \Processamentos \Segregação de Recursos
+Implementado o cálculo da segregação.
+**Menu: \Sistema \Utilitários \Importações \Lançamentos "EXCEL"
+Incluído na importação de lançamentos de planilhas Excel o campo: Critério para Segregação.
+**Menu: \Sistema \Utilitários \Importações \Lançamentos
+Incluído na importação de lançamentos o campo: Critério para Segregação.
+================================================================================
+CM$VER      3.11.00f    13/02/2004
+--------------------------------------------------------------------------------
+Pendência 15950
+Consulta\Relatórios\Razão\Razão Analítico
+acerto no relatório Razão Analítico, filtro por usuário que efetuou o lançamento
+================================================================================
+CM$VER      3.11.00e    10/02/2004
+--------------------------------------------------------------------------------
+Pendência 16076
+Consulta\Relatórios\Razão\Razão Analítico
+ajuste na quebra do relatório.
+================================================================================
+CM$VER      3.11.00d    19/01/2004
+--------------------------------------------------------------------------------
+Pendência 15950
+Consulta\Relatórios\Razão\Razão Analítico
+acerto no relatório Razão Analítico
+******************************************
+Pendência 15955
+Planilhas \ Automático
+acerto na geração de planilhas automática.
+================================================================================
+CM$VER      3.11.00c    07/01/2004
+--------------------------------------------------------------------------------
+Pendência 15873 - \Consulta \Relatórios \Contabilidade \Razões \Razão Analítico
+Otimização do relatório.
+Pendência 14451 - Nova segregação de recursos
+Menus Retirados:
+\Utilitários \Importações \Lançamentos "Folha RM"
+\Utilitários \Importações \Fidélio
+\Utilitários \Importações \Lançamentos "Folha Dinamica"
+\Utilitários \Importações \Lançamentos "SRH Plus"
+\Utilitários \Importações \Lançamentos "SRH Plus" \Cadastro de Eventos
+\Utilitários \Importações \Lançamentos "SRH Plus" \Importação
+\Utilitários \Exportações
+\Utilitários \Exportações \Arquivos Posadas
+\Processamentos \Geração de Lançamentos do Consolidado
+Habilitação de menus de forma condicional:
+Se Parâmetro Global "Segregação Virtual" estiver ligado
+  Habilitar Menus:
+    \Processamentos \Segregação de Recursos
+    \Cadastros \Segregação de Recursos
+  Desabilitar Menus:
+    \Processamentos \Rateio por Programa
+    \Processamentos \Rateio por Plano e Patrocinadora
+    \Processamentos \Segregação por Plano e Patrocinadora
+    \Cadastros \Planilhas \Rateio por Programa
+    \Cadastros \Planilhas \Rateio por Plano e Patrocinadora
+================================================================================
+CM$VER      3.11.00b    02/01/2004
+--------------------------------------------------------------------------------
+Pendência 15559
+Tela: Consulta\Relatórios\Contabilidade\Razões\Razão Analítico
+Descrição: Implementação da opcção de filtragem por Usuário.
+================================================================================
+CM$VER      3.11.00a    26/12/2003
+--------------------------------------------------------------------------------
+Pendência 14451 - Nova Segregação de Recursos.
+  \Cadastros \Plano de Contas  
+    Verificando se a Fundação se utiliza da Segregação Virtual e habilitando componentes 
+    para a mesma
+    Checando a ávore contábil da conta (pais e filhos) possuiem algum tipo de critério para
+    segregação e travando o cadastro.
+================================================================================
+CM$VER      3.11.00     17/12/2003
+--------------------------------------------------------------------------------
+Pendência 14451 - Nova Segregação de Recursos.
+Retirados os seguintes itens de menu:
+   \Processamentos \ Rateio por Atividade/Projeto
+   \Processamentos \ Rateio por Atividade/Projeto \Saldo Anterior
+   \Processamentos \ Rateio por Atividade/Projeto \Gera Rateio por Período
+   \Processamentos \ Rateio por Atividade/Projeto \Gera Lançamentos do Rateio
+   \Processamentos \ Rateio por Atividade/Projeto \Percentuais do Rateio Administrativo
+   \Processamentos \ Rateio por Atividade/Projeto \Gera Lançamentos do Rateio Administrativo
+Criados os seguintes itens de menu:
+   \Cadastros \Segregação de Recursos
+   \Cadastros \Segregação de Recursos \Critério para Segregação
+      => Cadastra os tipos de critério para segregação de recursos    
+   \Cadastros \Segregação de Recursos \Cotação do Critério 
+      => Cadastra o percentual ou a cota para os diversos tipos de critérios para 
+           segregação de recursos.
+   \Processamento \Segregação de Recursos (tela em construção)
+Alterações na tela \Cadastros \Plano de Contas
+   Retiradas as referências da segregação por atividade projeto
+   Inserida a referência para a nova Segregação de Recursos
+================================================================================
+CM$VER      3.10.34     04/12/2003
+--------------------------------------------------------------------------------
+Pendência 15608 - Consulta/ Relatório/ Operacionais/ Diario
+  Relatório corrigido quando selecionados múltiplos Planos de Benefício ou Patrocinadoras
+Pendência 15608 - Consulta/ Relatório/ Balancetes /Balancete
+  Criado novos conceitos para saldos zerados.
+  O saldo é considerado zerado quando: Saldo Inicial, Débito e Crédito forem igual a zero.
+  Criada a opção de filtro: Imprime contas zeradas, contendo as seguintes escolhas:
+     Sintéticas: escolhendo esta opção todas as contas sintéticas, mesmo com saldos zerados serão impressas
+     Analíticas:  escolhendo esta opção todas as contas sintéticas e analíticas, mesmo com saldos zerados serão impressas
+     Não Imprime: escolhendo esta opção nenhuma conta sintéticas ou analíticas, mesmo com saldos zerados serão impressas
+================================================================================
+CM$VER      3.10.33l    07/11/2003
+--------------------------------------------------------------------------------
+Pendência 14917 - \Consultas \Relatórios \Gerenciais \Mapa de Evolução das Contas
+   ** Incluído os filtros por Plano e Patrocinadora com CheckBoxes como solicitou o cliente, 
+tornando possível selecionar mais de umma Patro e Plano
+   ** Incluídos os labels no relatório contendo os planos e patros selecionados no filtro (conforme solicitado).
+================================================================================
+CM$VER      3.10.33k    30/10/2003
+--------------------------------------------------------------------------------
+Pendência 14915 - Planilhas/Lançamentos/Procurar
+   ** Implementar a Filtragem por plano e patrocinadora  
+Pendência 15206 - \Consultas \Relatórios \Balancetes \Balancete
+   ** Implementado filtro com a opção "Imprimir Saldos Zerados"
+Pendência 14917 - \Consultas \Relatórios \Gerenciais \Mapa de Evolução das Contas
+   ** Incluído os filtros por Plano e Patrocinadora
+Pendência 15532 - \Consultas \Relatórios \Gerenciais \Mapa de Evolução das Contas
+   ** Corrigido o cálculo da evolução percentual com valores negativos
+================================================================================
+CM$VER      3.10.33j    24/10/2003
+--------------------------------------------------------------------------------
+Pendência 15148 - \Cadastros \Planilhas \Lançamento Automático
+   ** Para planilhas que possuam Valor Fixo
+        Exigência da parametrização dos campos: Atividade/Projeto, Plano e Patrocinadora
+   ** Obrigatoriedade do Tipo de Operação para contas Débito e Crédito
+Pendência 15244 - \Consulta \Relatórios \Contabilidade \Razão Analítico
+   ** Corrigido o Relatório quando selecionado o campo "Considerar Contas com Saldo e sem Movimento"
+Pendência 15475 - \Sistema \Utilitários \Importação \Plano de Contas
+   ** Ler o Plano da tela de importação e não do parâmetro
+================================================================================
+CM$VER      3.10.33i    20/10/2003
+--------------------------------------------------------------------------------
+Correção Pendência 14842 - Consultas \Relatórios \Contabilidade \Balancetes \Balancete Colunado
+       Caso PLAGRUPO ("Grupo" no cadastro do Plano de Contas)
+          'A'tivo   ou 'D'espesa ==> saldo Devedor (+) ==> saldo Credor (-)
+          'P'assivo ou 'R'eceita ==> saldo Devedor (-) ==> saldo Credor (+)
+        SENÃO
+          'C'usto ou 'O'utros ou 'E'statistica ==> saldo Devedor (+) ==> saldo Credor (-)
+        
+Pendência 14842 - Cadastros\Plano de Conta: Relatório do Balancete Colunado
+Retirado o campo FLGCONTARETIF na tabela PLANOCONTA.
+================================================================================
+CM$VER      3.10.33h    29/09/2003
+--------------------------------------------------------------------------------
+Pendência 15095 - Consulta\Relatórios\Contabilidade\Operacionais\Diário
+  Retirado o filtro "Imprimir Diário Consolidado" caso o sistema esteja configurado como
+  mono-empresa. No caso do sistema estar configurado como multi-empresa o filtro
+  continua.
+Pendência 15061 - Planilhas\Pré-pronta
+  Corrigido o procedimento na seleção da planilha pré-pronta
+Pendência 14051 - Consultas\Relatórios\Razões
+  Implementar o Relatório Razão Analítico por Plano / Patrocinadora.
+  Para utilizar deta implementação é necessário restaurar o padrão do relatório em:
+  Sistema\Configuração\Relatórios
+================================================================================
+CM$VER      3.10.33g    26/09/2003
+--------------------------------------------------------------------------------
+Pendência 14960 - Sistema\Configuração\Parâmetros do Sistema
+    - Permite Lanç. com Valor Zero
+Corrigido a tela de lançamentos contábeis para verificar o flag no momento do
+lançamento
+================================================================================
+CM$VER      3.10.33f    05/09/2003
+--------------------------------------------------------------------------------
+Pendência 14842 - Cadastros\Plano de Conta: Relatório do Balancete Colunado
+Para ser possível resolver esta pendência foi necessário a criação do campo
+FLGCONTARETIF na tabela PLANOCONTA para identicicar uma conta contábil
+retificadora.
+Pendência 14616 - Cadastros\Plano de Conta
+  - Criado o campo Observacao na tabela planoconta e em seu respectivo
+    ControlObjest e DbObject.
+================================================================================
+CM$VER      3.10.33e    06/08/2003
+--------------------------------------------------------------------------------
+Pendência 14564 - Processamentos\Apuração de Resultados do Período
+Customizações realizadas no processo:
+Se a conta contábil "Fundo de Cob. e Oscliação Riscos" não for informada na
+tela de parâmetros do sistema, o processo registrará todo Superávit Técnico na conta
+"Reserva de Contingência"  informada também na tela de parâmetros do sistema;
+Senão, o processo fica inalterado.
+================================================================================
+CM$VER      3.10.33d    04/08/2003
+--------------------------------------------------------------------------------
+Ajustes nas rotinas:
+Processamentos\Apuração de Resultados do Período
+Processamentos\Apuração de Resultados do Exercício (Lançamento da Meia Noite)
+================================================================================
+CM$VER      3.10.33c    30/07/2003
+--------------------------------------------------------------------------------
+Pendência: 14503
+  Tela: Planilhas \ Automático.
+    - Incluído na lista a informação da fase da planilha.
+    - Acertado o filtro "marcar começando com".
+    - Informando o Nome da Planilha sendo gerada.
+    - Informando erros de parametrização das contas.
+    - Trocado os lançamentos gerados para partida dobrada.
+    - Retirado os componentes:
+      "Rateia Lançamentos por Atividade/Projeto", e
+      "Rateia Lançamentos por Plano/Patro"
+    - Refeito o processo objetivando apenas o cadastro pré-definido, se os campos 
+      plano x patro forem indicados no cadastro da planilha eles serão utilizados, 
+      caso contrário o sistema fará um rateio por todos os plano x patro lançados.
+    - Corrigido o processo, quando se executava a segunda vez, sem sair da tela, com 
+      novo filtro o processo não estava funcionando corretamente.
+  Tela: Cadastros \ Planilhas \ Lançamentos Automáticos
+    - Incluída a restrição de todas as contas de lançamento possuirem mesmos:
+      Plano, Patrocinadora e Atividade/Projeto
+================================================================================
+CM$VER      3.10.33b    15/07/2003
+--------------------------------------------------------------------------------
+Pendência: 14505 - Tela: Planilhas \ Automático
+Alterada a função de geração de planilha automática, agora a nova planilha passa
+a ser incluída como integrada, para que as próximas possam utilizar o saldo da
+anterior.
+Pendência: 14549 - Relatório: Consultas \ Relatórios \ Razões \ Razão Analítico
+Corrigido o relatório quando marcado o campo:
+"Considerar contas com Saldo e sem Movimento"
+================================================================================
+CM$VER      3.10.33a    25/06/2003
+--------------------------------------------------------------------------------
+Relatório: Operacionais \ Planilhas Lançadas. 
+Exportação dos campos abaixo relacionados, na query do relatório:
+IDPLANOPREV - Identificador do Plano de Benefícios
+IDPATRO - Identificador da Patrocinadora
+PANPREVCONTABIL - Nome do Plano de Benefícios
+PATRO - Nome da Patrocinadora
+================================================================================
+CM$VER      3.10.33     24/06/2003
+--------------------------------------------------------------------------------
+Correções de erros apresentados na rotina de lançamentos automáticos.
+================================================================================
+CM$VER      3.10.32     18/06/2003
+--------------------------------------------------------------------------------
+Acerto na tela de lançamento automático
+================================================================================
+CM$VER      3.10.31     03/06/2003
+--------------------------------------------------------------------------------
+Alterada query do rateio administrativo para considerar qualquer tipo de conta (analítica/sintética)
+================================================================================
+CM$VER      3.10.29     05/05/2003
+--------------------------------------------------------------------------------
+- Acerto no cadastro de planilhas pré-pronta (limpar  campo subconta)
+- Acerto no relatório demonstrativo1 e 6
+================================================================================
+CM$VER      3.10.28     22/04/2003
+--------------------------------------------------------------------------------
+- Implementação no relatorio balancete para Marquise (na seleção das Ativ.projetos)
+================================================================================
+CM$VER      3.10.27     17/04/2003
+--------------------------------------------------------------------------------
+- Implementacao do relatorio diario para impressora matricial
+================================================================================
+CM$VER      3.10.26     08/04/2003
+--------------------------------------------------------------------------------
+- Implementação da tela integração por planilha mostrando o numero do documento
+no grid de lancamentos. (marquise)
+- Acerto no relatorio diario por atividade/projeto (marquise)
+================================================================================
+CM$VER      3.10.25     07/04/2003
+--------------------------------------------------------------------------------
+- Acerto de planilhas/lancamentos. Em buscar resumido, o nome do modulo
+estava vindo com mascara.
+================================================================================
+CM$VER      3.10.24     07/04/2003
+--------------------------------------------------------------------------------
+- Acerto do relatorio diario resumido, permitindo selecionar empresas
+quando a opção de consolidado for selecionada.
+================================================================================
+CM$VER      3.10.23     05/04/2003
+--------------------------------------------------------------------------------
+- Acerto no programa Apura resultados do periodo
+- Acerto no programa de lançamentos de planilhas pre-pronta (debito não bate com credito)
+- Acerto no relatorio de balancete de centro de custo x contas.
+- Acerto no programa de importacao de lancamentos.
+================================================================================
+CM$VER      3.10.22     02/04/2003
+--------------------------------------------------------------------------------
+- Acerto no programa atualiza moeda.
+================================================================================
+CM$VER      3.10.21     27/03/2003
+--------------------------------------------------------------------------------
+- Acerto no relatório planilhas lançadas (colocar mascara das contas)
+para CBS
+================================================================================
+CM$VER      3.10.20     21/03/2003
+--------------------------------------------------------------------------------
+- Acerto no programa Gerasaldo Calculado :erro de sql
+- Acerto no relatorio contas x subcontas
+================================================================================
+CM$VER      3.10.19     21/03/2003
+--------------------------------------------------------------------------------
+- Acerto do cadastro de pre-planilha por centro de custo, pegando os centros de custo
+analiticos
+- Acerto da tela de Encerramento de Resultado, trazendo os centros de custo da
+conta de resultado e se somente for obrigatorio
+- Acerto de Planilha/Pre-Pronta (Foi acrescentado um alter join por empresa da subconta com a tabela predetalhe)
+- Acerto do balancete de centro de custo por atividade e projeto, para sair o título e o 
+subtitulo que o usuario entrar.
+================================================================================
+CM$VER      3.10.18     21/03/2003
+--------------------------------------------------------------------------------
+- Acerto no programa de importação de planilha (habilitando o botao importar)
+================================================================================
+CM$VER      3.10.17     12/03/2003
+--------------------------------------------------------------------------------
+Tela de lancamentos preparada para pesquisar planilha de forma resumida.
+Implementação preparada para a Marquise.
+================================================================================
+CM$VER      3.10.16     12/03/2003
+--------------------------------------------------------------------------------
+- Acerto do erro de FcadPlanilPrePronta.dcu
+================================================================================
+CM$VER      3.10.15     10/03/2003
+--------------------------------------------------------------------------------
+- Acerto no relatorio de demonstrativo 5 ao selecionar ativ/projeto
+================================================================================
+CM$VER      3.10.14     10/03/2003
+--------------------------------------------------------------------------------
+- Acerto no cadastro de periodo
+================================================================================
+CM$VER      3.10.13     06/03/2003
+--------------------------------------------------------------------------------
+- Criação da implementação da pendencia No. 12065
+================================================================================
+CM$VER      3.10.12     28/02/2003
+--------------------------------------------------------------------------------
+- Acerto na função Copia do cadastro do elemento do demonstrativo
+- Acerto da função AtuSaldoSintetica, comitando conta a conta
+- acerto do Gera arquivo Sip Cap.
+================================================================================
+CM$VER      3.10.11     21/02/2003
+--------------------------------------------------------------------------------
+- Criação do demonstrativo7
+- Otimização das importações
+- Otimização do cadastro de lancamentos, mostrando o nome do plano e da patro
+- Ajuste do razão analitico e simplificado ao selecionar mais de uma patro e plano
+- Acerto nos demonstrativos e orçados ao selecionar ativ. projeto (estava invertendo
+o campo digitado)
+================================================================================
+CM$VER      3.10.10     20/02/2003
+--------------------------------------------------------------------------------
+- Acerto do Balanço que somente estava imprimindo contas se ela tivesse saldo neste
+  exercício e no exercício anterior.
+- Inclusão do demonstrativo 7.
+================================================================================
+CM$VER      3.10.09     14/02/2003
+--------------------------------------------------------------------------------
+- Otmiação do programa de lanaçamentos das pre-planilhas
+- Acerto no relatório do razão ao selecionar atividade/projeto
+================================================================================
+CM$VER      3.10.08     14/02/2003
+--------------------------------------------------------------------------------
+- Acerto nos relatorios demonstrativos e os orçados x realizados
+ao buscar a atividade e projeto
+================================================================================
+CM$VER      3.10.07     14/02/2003
+--------------------------------------------------------------------------------
+- Acerto do programa de lançamentos das planilhas pre-pronta
+para Hotel Emiliano
+================================================================================
+CM$VER      3.10.06     13/02/2003
+--------------------------------------------------------------------------------
+- Acerto do cadastro de lançamentos da pre-planilha para o Hotel Emiliano
+================================================================================
+CM$VER      3.10.05     12/02/2003
+--------------------------------------------------------------------------------
+- Acerto do cadastro de lançamentos da pre-planilha, para trazer o lançamento
+na ordem das contas, como mostrado no cadastro de pre-planilha.
+================================================================================
+CM$VER      3.10.04     11/02/2003
+--------------------------------------------------------------------------------
+- Alteração no programa de parametros do sistema, permitindo selecionar um novo
+plano de contas, a pedido do cliente Moinhos Shopping;
+- Alteração do cadastro de pre-planilhas, com uma opção de manter os dados na tela
+a pedido do cliente Hotel Emiliano;
+- Otmização do programa lançamentos/planilhas - pre-planilhas.
+- Alteração do relatório diario, pode selecionar mais de uma patrocinadora e mais de um
+plano previdenciario.
+================================================================================
+CM$VER      3.10.03     07/02/2003
+--------------------------------------------------------------------------------
+- Implementação nos relatórios operacionais, cadastrais, balancetes para que
+saia as contas do plano data.
+- Relatorio Balancete colunado (acerto para sair o plano e a patrocinadora 
+selecionados, coluna total invisivel ao desconsiderar os movimentos)
+- Acerto no cadastro de elementos do demonstrativo. Dava erro ao selecionar o plano
+e a patrocinadora.
+- Acerto no cadastro de saldo de cotas por plano e patrocinadora
+  
+================================================================================
+CM$VER      3.10.02     05/02/2003
+--------------------------------------------------------------------------------
+Implentação nos balancetes, para sair as contas do plano data.
+================================================================================
+CM$VER      3.10.00     27/01/2003
+--------------------------------------------------------------------------------
+1)Implementação dos relatórios: Razão,Diário,Balancete, Balancete de Contas x Ativ.Projeto,
+Balancete de Contas x Subcontas, Relatório Plano de Contas, para trazer as contas (Plano-Data)..
+2)Importação de Lançamentos
+3)Relatório de Plano de Contas (sair as contas com máscaras)
+================================================================================
+CM$VER      3.09.02     22/01/2003
+--------------------------------------------------------------------------------
+- Alteração no razão para sair a patrocinadora selecionada ue estava dando erro
+- Alteração do razao para sair a conta do plano data
+- Alteracao do balancete para sair no cabeçalho o nome da patrocinadora
+que estava fazendo referencia ao parametro errado
+- Alteraçao do Agrupamento e desmembramento de contas
+- Acerto do gera consolidado que estava dando erro de parametro não implementado e
+implementação para gravar na tabela de relacionamento contascc
+================================================================================
+CM$VER      3.09.00     06/01/2003
+--------------------------------------------------------------------------------
+1) Cadastro de Bloqueio de dias por sistema
+2) Relatório Balancete de Contas x SubContas (colocar opção de imprimir contas analiticas)
+3) Tela Planilhas/Lancamentos ( bloqueio das funções quando a planilha estiver incorreta 
+e com status bloqueado)
+4) Tela de Integra Planilha (Otmização de mensagens - estava dando planilha não 
+selecionada quando terminava o processamento)
+OBS.: Precisou-se criar uma tabela - DIASBLOQMOD para o item 1
+================================================================================
+CM$VER      3.08.52     02/01/2003
+--------------------------------------------------------------------------------
+- Acerto nos demonstrativos ( trazer os periodos do exercicio selecionado, os quais
+só traziam os do exercicio atual)
+- Acerto no Balancete Colunado, o qual estava trazendo o mes de fevereiro zerado ( a pedido do Valente)
+- Pendencia 9617 ( importaçao dos valores orçados)
+- Acerto no Balancete ( mostrar zeros no lugar de brancos)
+================================================================================
+CM$VER      3.08.51     24/12/2002
+--------------------------------------------------------------------------------
+- Acerto do AcessViolation que estava dando no sistema ao usar o cadastro
+de contas.
+- Acerto do relatório Balanço (AccessViolation) , acertado para Geisa para pegar o PlanoData e não o
+plano corrente. O Balancete também está pegando o plano da época.
+- Implementação da pendencia no. 10801 ( Diário, Razoes, e Balancete) mostrar a
+razão social e nao o nome da empresa.
+- Implementação da pendencia no.3380 ( uma opção no balancete para sair somente as
+contas movimentadas).
+- Implementacão da pendencia no. 2077 ( Balancete de C.Custo x Contas - opção para
+não emitir contas zeradas).
+- Implementação da Pendnecia no. 9618 ( Relatório Orçado x Realizado - desconsiderar
+as contas estatísticas)
+- Implementação da pendencia no. 10084 ( Tela de Rateio Administrativo por Ativ/Proj,
+consisderar contas de segregaçao.
+================================================================================
+CM$VER      3.08.50     19/12/2002
+--------------------------------------------------------------------------------
+Colocar Grava Log de acordo com o pedido via Email :
+Verifica Lanaçamentos
+a) ArredondaValores - Tela alterada, uCtrlProcessaContab alterada e Aplic.Servidora alterada.
+b) AcertaTipoSaldopeloTipoConta - Tela alterada, uCtrlProcessaContab alterada e Aplic.Servidora alterada.
+c) Testa Consistencia dos Lancamentos -  Tela alterada, uCtrlProcessaContab alterada e Aplic.Servidora alterada.
+Atualiza Saldo das Contas Analíticas
+Atualiza Saldo das Contas Sintéticas
+Atualiza Códigos Reduzidos
+Atualiza Numeração das Planilhas
+Lançamentos
+Plano de Contas
+Saldo Anterior
+Conta Correspondente
+Planilhas/Lançamentos 
+Planilhas/Pré - Prontas
+Planilhas/Rateio
+Planilhas/Automático
+Planilhas/Alteração de Data
+Planilhas/Exclusão de Planilhas por Faixa
+Atualiza Moeda
+Integração \ Por dia
+Apuração do Resultado do Período
+Consiste Regras
+Encerra Período
+Gera Arquivo SPC_CAP
+Gera Saldo Calculado por Período
+Rateio por Programa
+Saldo Anterior
+Gera Rateio por Período
+Lançamentos do Rateio
+Percentuais do  Rateio Administrativo
+Cadastro do Saldo de Contas
+Rateio por Programa
+Regras
+Saldo Anterior
+================================================================================
+CM$VER      3.08.49     17/12/2002
+--------------------------------------------------------------------------------
+Relatório do Balancete e Balanço alterado para pegar o plano do periodo vigente,
+pedido pela Geisa.
+================================================================================
+CM$VER      3.08.48     16/12/2002
+--------------------------------------------------------------------------------
+- Pendencia No. 5257 ( colocar multiplas ativ/projetos em todos os relatorios 
+dos demonstrativos.
+- Acerto do cadastro do De/Para para permitir entrar com o centro de custo a pedido
+do Valente.
+- Pendencia No. 9154 ( colocar a tela de cadastro de lancamento na consulta de saldo)
+- Acerto na tela de estorna da planilha, trazer na mensagem o numero da planilha
+gerada.
+- Pendencia 10490 o Relatorio não estava alterando o título digitado pelo usuario
+================================================================================
+CM$VER      3.08.47     10/12/2002
+--------------------------------------------------------------------------------
+Alterações feitas:
+1) Colocou-se a clausula RULE em todas as querys dos Balancetes;
+2) Limpou-se os parametros da atividade e projeto de todos os relatórios da
+contabilidade porque estava guandando o último filtro;
+3) Acerto do relatório Demonstrativo5, que quando selecionava a atividade/projeto
+como filtro, dava erro na query feita para trazer o nome.
+4) Acerto do Balancete colunado que estava passando um parametro booleano como
+string, e não fazia a query.
+5) No cadastro de contas contábeis, foi feita uma otimização ao coorrelecionar todas as
+subcontas para a conta em questão, que estava lento.
+6) Otimização do Conolidado 
+================================================================================
+CM$VER      3.08.46     04/12/2002
+--------------------------------------------------------------------------------
+Os cadastros de Saldo Anterior, Orcamento e Movimentos Anteriores e Estatísticas,
+foram alteradas porque elas chamavam a mesma função (AlteraPlanoSaldo) para alteração 
+de saldo que estava errada. Cada uma agora chama sua própria função de alteração de Saldo. 
+Criou-se então as funções:
+1) alteraSaldoAnterior (chamada da tela de Cadastro Saldo Anterior)
+2) AlteraOrcamento (chamada da tela de Cadastro de Orcamento)
+3) AlteraMovimAnterior (chamada da tela de Cadastro de Movimentos Anteriores)
+Também estas tres novas funções tiveram que constar na aplicação servidora.
+OBS. Este erro no cadastro de Orçamento e no cadastro de Movimentos Anteriores foi
+apontado por Valente.
+OBS2.: Aversão 44 e 45 deream erro.
+================================================================================
+CM$VER      3.08.45     04/12/2002
+--------------------------------------------------------------------------------
+Liberarção no padrão 9.06 e verificação do erro que deu na versão 44.
+================================================================================
+CM$VER      3.08.44     03/12/2002
+--------------------------------------------------------------------------------
+Os cadastros de Saldo Anterior, Orcamento e Movimentos Anteriores e Estatísticas,
+foram alteradas porque elas chamavam a mesma função (AlteraPlanoSaldo) para alteração 
+de saldo que estava errada. Cada uma agora chama sua própria função de alteração de Saldo. 
+Criou-se então as funções:
+1) alteraSaldoAnterior (chamada da tela de Cadastro Saldo Anterior)
+2) AlteraOrcamento (chamada da tela de Cadastro de Orcamento)
+3) AlteraMovimAnterior (chamada da tela de Cadastro de Movimentos Anteriores)
+Também estas tres novas funções tiveram que constar na aplicação servidora.
+OBS. Este erro no cadastro de Orçamento e no cadastro de Movimentos Anteriores foi
+apontado por Valente.
+================================================================================
+CM$VER      3.08.43     03/12/2002
+--------------------------------------------------------------------------------
+Conserto dos Realtórios Orçado x Realizado e Orçado x Realizado por Centro de custo,
+porque eles estavam trazendo no título ''Provisório"  mesmo estando o período
+integrado. 
+================================================================================
+CM$VER      3.08.42     03/12/2002
+--------------------------------------------------------------------------------
+Alteração em todos os titulos dos relatórios dos balancetes para sair o nome do
+período e não os numeros referentes ao períodos selecionados.( Esta alteração
+foi pedida pela Audrey).
+Conserto do relatório Orçado x Realizado quando se selecionava Ativ/Projeto dava erro.
+Conserto do relatório Balancete colunado por centro de custo, pois estava passando o
+parametro errado em um dos exercícios.  
+================================================================================
+CM$VER      3.08.41     28/11/2002
+--------------------------------------------------------------------------------
+Implementação da pendência No. 4036 da FUNCEF (Colocar no Balanço a coluna
+com o saldo do exercicio anterior)
+================================================================================
+CM$VER      3.08.40     28/11/2002
+--------------------------------------------------------------------------------
+Criação das Telas Persolanizadas dos relatórios:
+1) Listagem de Contas x Centro de Custos
+2) Listagem de Histórico
+3) Listagem de Períodos
+4) Listagem de SubContas
+5) Listagem de Plano de Contas
+================================================================================
+CM$VER      3.08.39     27/11/2002
+--------------------------------------------------------------------------------
+Criação das telas personalizadas dos relatórios:
+1) Saldos Iniciais
+2) Mapa de Evolução
+3) Listagem de Centro de Custos  x Contas
+4) Aviso Lancamento
+================================================================================
+CM$VER      3.08.38     26/11/2002
+--------------------------------------------------------------------------------
+Alteração na CtrlRptBalancete, alterando a query do relatorio balancete, aumentando
+a filtragem, ficando mais rápido.
+================================================================================
+CM$VER      3.08.37     26/11/2002
+--------------------------------------------------------------------------------
+Alteração no relatorio razão, acrescentou-se filtro de exercicio.
+================================================================================
+CM$VER      3.08.36     26/11/2002
+--------------------------------------------------------------------------------
+Alteracao no relatorio orcadoxrealizado por centro de custo
+================================================================================
+CM$VER      3.08.33     20/11/2002
+--------------------------------------------------------------------------------
+Criação das telas personalizadas dos relatórios :Demonstrativo 2,3,6
+ e Layout do Demonstrativo
+================================================================================
+CM$VER      3.08.31     19/11/2002
+--------------------------------------------------------------------------------
+Ralatorio razão mais rápido (otimizacao)
+================================================================================
+CM$VER      3.08.29     08/11/2002
+--------------------------------------------------------------------------------
+Acerto no relatorio razão por centro de custo (filtrar empresa)
+================================================================================
+CM$VER      3.08.28     07/11/2002
+--------------------------------------------------------------------------------
+Alteração no cadastro de parametros para pedir as contas do cliente
+================================================================================
+CM$VER      3.08.27     06/11/2002
+--------------------------------------------------------------------------------
+Alteracao na tela de Planilha/Lançamentos - preparado para lançar pelo código
+correspondente. Relátorios Razão Analitico, Balancete, Razão Sintetico, o campo que
+representa a conta final é preenchido automaticamente com o valor da conta inicial.
+================================================================================
+CM$VER      3.08.25     30/10/2002
+--------------------------------------------------------------------------------
+Ateracao nos filtros de periodos dos demonstrativos
+================================================================================
+CM$VER      3.08.24     28/10/2002
+--------------------------------------------------------------------------------
+Alteração do programa FolhaRM, Balancete de Contas x CCusto,
+alteração de Planilhas/Automatico
+================================================================================
+CM$VER      3.08.22     25/10/2002
+--------------------------------------------------------------------------------
+Retirada da classe de negócio CtrlPlanoConta, das classes de persistencias
+uDBParamContab, uDBSubcontasxSC, uDBPlanoConta para TotalPrev - Imobiliario
+posto na BPL.
+================================================================================
+CM$VER      3.08.21     24/10/2002
+--------------------------------------------------------------------------------
+Ajustes da importação do Fidelio e Rateio por programa
+================================================================================
+CM$VER      3.08.01     31/07/2002
+--------------------------------------------------------------------------------
+* Incluída a possibilidade de relacionar todas as contas a uma nova subconta cadastrada.
+* Incluída a opção de marcar vários lançamentos de uma planilha para serem excluídos
+   de uma só vez.
+================================================================================
+CM$VER      3.08.00     26/07/2002
+--------------------------------------------------------------------------------
+* Alterado o De/Para para poder faze-lo para o mesmo plano de contas.
+* Criada  nova estrutura de rateio Administrativo por Plano e Patrocinadora.
+================================================================================
+CM$VER      3.07.17     15/07/2002
+--------------------------------------------------------------------------------
+* Alterada a forma de Consolidar as empresas por subconta. O sistema agora irá procurar
+   pelo nome, caso o nome não exista ele criará uma subconta nova na empresa consolidada.
+================================================================================
+CM$VER      3.07.16     03/07/2002
+--------------------------------------------------------------------------------
+* Acertado o relatório Balancete Colunado que no mês de fevereiro estava imprimindo o 
+   mesmo valor de janeiro quando a conta estava contra sua natureza.
+================================================================================
+CM$VER      3.07.15     01/07/2002
+--------------------------------------------------------------------------------
+* Alterada a cópia da planilha automática para gravar 0 no número da parcela atual.
+================================================================================
+CM$VER      3.07.14     19/06/2002
+--------------------------------------------------------------------------------
+* Acertado o razão analítico que estava duplicando a linha quando a contra partida era
+   uma partida dobrada.
+* Incluída a segregação do plano previdenciário.
+================================================================================
+CM$VER      3.07.13     23/05/2002
+--------------------------------------------------------------------------------
+* Incluída a geração de arquivos TXT para o grupo Posadas.
+================================================================================
+CM$VER      3.07.12     21/05/2002
+--------------------------------------------------------------------------------
+* Adaptação para o padrão 6.05.06.
+================================================================================
+CM$VER      3.07.11     09/05/2002
+--------------------------------------------------------------------------------
+* Incluído relatório de Diário Resumido.
+================================================================================
+CM$VER      3.07.10     29/04/2002
+--------------------------------------------------------------------------------
+* Acertado o razão analítico quando era solicitado com a opção de imprimir contas com
+   saldo e sem movimentação.
+* Adaptação para o padrão 6.
+* Alterado o rateio por Programa para considerar diretamente a conta que está no
+   cadastro.
+================================================================================
+CM$VER      3.07.09     22/04/2002
+--------------------------------------------------------------------------------
+* Alterada  a importação de arquivos para poder importar um atrás do outro sem 
+   precisar fechar a tela.
+================================================================================
+CM$VER      3.07.08     18/04/2002
+--------------------------------------------------------------------------------
+* Acertado o total transportado do diário que não estava correto quando era o último 
+   registro.
+================================================================================
+CM$VER      3.07.07     16/04/2002
+--------------------------------------------------------------------------------
+* Inserido o centro de custo na tela de Encerramento de Contas de Resultado.
+* Acertado o relatório de Planilhas Lançadas para quando filtravamos o Tipo de 
+   Operação.
+* Alterado o DE/PARA para processar somente do Plano Anterior para o Atual.
+================================================================================
+CM$VER      3.07.06     10/04/2002
+--------------------------------------------------------------------------------
+* Incluida a opção de imprimir o número da conta no balancete colunado e no   
+  balancete colunado por centro de custo.
+* Acertado o encerramento de exercicio para não passar saldo em contas estatísticas.
+================================================================================
+CM$VER      3.07.05     22/03/2002
+--------------------------------------------------------------------------------
+* Acertado o total do relatório Orçado x Realizado que estava saindo zerado.
+================================================================================
+CM$VER      3.07.04     20/03/2002
+--------------------------------------------------------------------------------
+* Acerto na importação da planilha excel quando esta não tinha histórico padrão 
+  preenchido.
+================================================================================
+CM$VER      3.07.03     19/03/2002
+--------------------------------------------------------------------------------
+* Alterado o Rateio por Atividade/Projeto para ter a opção de ratear somente os valores
+  da Atividade/Projeto indicada na tela. Caso não seja indicada nenhuma Atividade/Projeto
+  o sistema rateará o valor de todas.
+================================================================================
+CM$VER      3.07.02     18/03/2002
+--------------------------------------------------------------------------------
+* Acertado o cadastro do plano de contas para limpar a tela após a exclusão do registro.
+* Acertado o problema de divisão por zero na tela de rateio por Atividade/Projeto.
+================================================================================
+CM$VER      3.07.01     14/03/2002
+--------------------------------------------------------------------------------
+* Criada a possibilidade gerar o Contas x Centro de Custo e Contas x Subconta 
+  automaticamente no DE-PARA.
+================================================================================
+CM$VER      3.07.00     08/03/2002
+--------------------------------------------------------------------------------
+* Implementada nova forma de rateio por atividade/projeto usando uma conta segregadora
+   para receber os valores do rateio.
+* Implementada na integração com o Fidelio a possibilidade de dividir a contabilização 
+   da Receita em 2 contas contábeis distintas. Para tal, deve-se alterar o cadastro do 
+   Tipo de D/C no Módulo de Faturamento para Hotéis.
+================================================================================
+CM$VER      3.06.19     27/02/2002
+--------------------------------------------------------------------------------
+* Acertada a emissão do razão quando solicitada a opção de emitir contas conta saldo e
+   sem movimento.
+* Incluída na tela de saldo anterior o campo plano e patrocinadora.
+================================================================================
+CM$VER      3.06.18     22/02/2002
+--------------------------------------------------------------------------------
+* Acertada a tela de integração por dia.
+* Acertada a tela de lançamento da meia noite.
+* Incluído novo parâmetro no Demonstrativo Modelo 1 para considerar o ano anterior
+   até o último período.
+================================================================================
+CM$VER      3.06.17     13/02/2002
+--------------------------------------------------------------------------------
+* Acertado o De/Para para contas com centro de custo.
+* Acertado o Relatório Balancete de Contas x Atividade/Projeto quando era solicitado
+   para desconsiderar as contas do Rateio Administrativo.
+================================================================================
+CM$VER      3.06.16     31/01/2002
+--------------------------------------------------------------------------------
+* Possibilidade de emitir o razão para as contas com saldo e sem movimentação.
+* Incluída a manutenção do número de documento na planilha pre-pronta.
+================================================================================
+CM$VER      3.06.15     31/01/2002
+--------------------------------------------------------------------------------
+* Incluido teste no cadastro de contas contábeis, para não permitir contas que obriguem
+  centro de custo e subconta sem indicar quais os centros de custo e as subcontas 
+   vinculadas a esta conta.
+  
+================================================================================
+CM$VER      3.06.14     30/01/2002
+--------------------------------------------------------------------------------
+* Incluido no Razão e no Balancete a possibilidade de selecionar Atividades/Projetos alternadas.
+================================================================================
+CM$VER      3.06.13     23/01/2002
+--------------------------------------------------------------------------------
+* Acertos no De/Para do Plano de Contas
+================================================================================
+CM$VER      3.06.12     22/01/2002
+--------------------------------------------------------------------------------
+* Alterada a Atualização de Sintética para atualizar somente o período indicado.
+* Alterado o relatório "Orçado x Realizado" para desconsiderar o encerramento do 
+   Exercício.
+* Acertado o De/Para do plano de contas.
+================================================================================
+CM$VER      3.06.11     14/01/2002
+--------------------------------------------------------------------------------
+* Planilha Pré-Pronta:
+   - Acertada a planilha pre-pronta quando o lançamento era ambos.
+   - Mantido na tela o histórico de lançamentos.
+* Na tela de orçamento foi mantido o último valor digitado para facilitar a digitação.
+================================================================================
+CM$VER      3.06.10     29/11/2001
+--------------------------------------------------------------------------------
+* Acertado na tela de lançamento o preenchimento do centro de custo.
+* Acertado no razão para ele emitir de um exercício até outro.
+================================================================================
+CM$VER      3.06.09     05/11/2001
+--------------------------------------------------------------------------------
+* Acertado o balancete de Conta x Centro de Custo que só estava imprimindo as contas
+   com movimentação.
+================================================================================
+CM$VER      3.06.08     24/10/2001
+--------------------------------------------------------------------------------
+* Acertado o aumento do campo da subconta para 6 dígitos.
+================================================================================
+CM$VER      3.06.07     23/10/2001
+--------------------------------------------------------------------------------
+* Acertada a importação do plano de contas.
+* Aumentado o campo da subconta para 6 dígitos.
+================================================================================
+CM$VER      3.06.06     18/10/2001
+--------------------------------------------------------------------------------
+* Alterada a emissão do Aviso de Lançamento para ficar mais eficiente.
+================================================================================
+CM$VER      3.06.05     17/10/2001
+--------------------------------------------------------------------------------
+* Acertada na consulta de lançamento o nome do centro de custo e o nome da subconta
+   quando era multi-empresa.
+* Acertada a alteração de lançamento que estava limpando o centro de custo e a sub-conta.
+================================================================================
+CM$VER      3.06.04     10/10/2001
+--------------------------------------------------------------------------------
+* Incluída a opção de contabilizar a regularização dos depositos antecipados do VHF.
+================================================================================
+CM$VER      3.06.03     09/10/2001
+--------------------------------------------------------------------------------
+* Acertado o sinal na impressão do balancete colunado.
+================================================================================
+CM$VER      3.06.02     06/10/2001
+--------------------------------------------------------------------------------
+* Incluído log de operações em "Atualização de Códigos Reduzidos" e em "Atuliaza 
+Numeração de Planilhas".
+================================================================================
+CM$VER      3.06.01     05/10/2001
+--------------------------------------------------------------------------------
+* Alterado o balancete colunado para incluir no cabeçalho os filtros selecionados.
+* Alterada a ordem da consulta de lançamentos.
+* Alterada a emissão do "Aviso de Lançamento" para ser impresso pelo número da AP/GR
+  do contas a pagar/receber.
+================================================================================
+CM$VER      3.06.00     04/10/2001
+--------------------------------------------------------------------------------
+* Tela de Parametros:
+   - Criado parametro para não aceitar lançamentos zerados na contabilidade
+   - Criado parametro para somente lançar os históricos com caixa alta.
+* Tela de Cadastro de Plano de Contas:
+   - Quando do relacionamento de um centro de custo ou subconta, este sumirá da lista
+      original.
+* Acertada a impressão do histórico no Razão por Centro de Custo
+================================================================================
+CM$VER      3.05.02     03/10/2001
+--------------------------------------------------------------------------------
+* Implementado o Relatório "Balancete Colunado"
+* Bloquada a impressão do razão indicando-se o exercício não compatível com a faixa 
+   de datas.
+================================================================================
+CM$VER      3.05.01     25/09/2001
+--------------------------------------------------------------------------------
+* Acertado os balancetes que estavam dando erro na seleção dos períodos
+================================================================================
+CM$VER      3.05.00     21/09/2001
+--------------------------------------------------------------------------------
+* Inclusão do Log das opções executadas no sistema. Foi gerado log para as opções:
+   - Verifica Lançamentos
+   - Atualização de Analítica
+   - Atualização de Sintética
+   - Encerra Período
+   
+================================================================================
+CM$VER      3.04.05     19/09/2001
+--------------------------------------------------------------------------------
+* Acertada a escolha de período no Balancete que estava dando erro.
+================================================================================
+CM$VER      3.04.04     18/09/2001
+--------------------------------------------------------------------------------
+* Acertada a tela de Apuração de Resultado do Período quando deixavamos a data em branco.
+* Acertado o grupo do relatório de planilhas lançadas.
+================================================================================
+CM$VER      3.04.03     12/09/2001
+--------------------------------------------------------------------------------
+* Acertada a ordenação do relatório de planilhas lançadas.
+================================================================================
+CM$VER      3.04.02     06/09/2001
+--------------------------------------------------------------------------------
+* Acertada a tela de exclusão de planilha por faixa que não estava filtrando a empresa corretamente.
+================================================================================
+CM$VER      3.04.01     05/09/2001
+--------------------------------------------------------------------------------
+* Acertado o relatório Razão, Diário, Balancete e a tela de lançamento para considerar o 
+  plano em determinada data.
+================================================================================
+CM$VER      3.04.00     04/09/2001
+--------------------------------------------------------------------------------
+* Demonstrativo Colunado (Modelo 4):
+   - Incluída a possibilidade de passar um traço simples ou duplo entre as linhas
+   - Acertado o campo de somatório que não estava calculando
+   - Nas colunas em que não tiver valor para calcular, o sistema irá imprimir um traço.
+   
+================================================================================
+CM$VER      3.03.05     28/08/2001
+--------------------------------------------------------------------------------
+* Retirado o lixo do relatório demonstrativo 4.
+* Colocado o teste da conta contábil corretamente na tela de lançamento.
+================================================================================
+CM$VER      3.03.04     24/08/2001
+--------------------------------------------------------------------------------
+* Incluída a opção de emitir o relatório Demonstrativo Modelo 4 por Faixa de Datas.
+* Acertado o problema da inclusão de movimento de exercicios anteriores e contas estatísticas.
+* Acertado o problema da inclusão do orçamento
+================================================================================
+CM$VER      3.03.03     21/08/2001
+--------------------------------------------------------------------------------
+* Acertada a integração com o Fidelio/Contabilidade para quando era digitado um período.
+================================================================================
+CM$VER      3.03.02     13/08/2001
+--------------------------------------------------------------------------------
+* Alterado o histórico do lançamento para mudar de linha automaticamente ao termino
+  da digitação da linha do histórico.
+================================================================================
+CM$VER      3.03.01     10/08/2001
+--------------------------------------------------------------------------------
+* Alterada a consolidação para excluir as planilhas antes de consolidar o mês outra vez.
+* Feitas pequenas modificações na procura de consulta lançamentos.
+================================================================================
+CM$VER      3.03.00     30/07/2001
+--------------------------------------------------------------------------------
+* Criada a possibilidade de ter conta estatistica com lançamentos.
+* Incluido plano e patrocinadora na tela de Movimento de Exercicios Anteriores.
+* Incluida a possibilidade de marcar as planilhas automaticas por nome.
+================================================================================
+CM$VER      3.02.16     06/08/2001
+--------------------------------------------------------------------------------
+* Acertado o encerramento do período.
+================================================================================
+CM$VER      3.02.15     19/07/2001
+--------------------------------------------------------------------------------
+* Acertado o cadastro do rateio por plano e patrocinadora.
+* Acertado o rateio por plano e patrocinadora
+================================================================================
+CM$VER      3.02.14     18/07/2001
+--------------------------------------------------------------------------------
+* Acertada a copia do demonstrativo de resultado de uma empresa para outra.
+================================================================================
+CM$VER      3.02.13     10/07/2001
+--------------------------------------------------------------------------------
+* Acertada a inserção de planilhas automáticas que estava dando mensagem "missing
+   right cote"
+================================================================================
+CM$VER      3.02.12     09/07/2001
+--------------------------------------------------------------------------------
+* Acertado o cadastro de Lançamentos Automaticos para não obrigar o preenchimento da
+   conta base quando o campo Valor Fixo estiver preenchido.
+================================================================================
+CM$VER      3.02.11     26/06/2001
+--------------------------------------------------------------------------------
+* Acertado os relatorios de Demonstrativo de Resultado - Lay-Out
+================================================================================
+CM$VER      3.02.10     21/06/2001
+--------------------------------------------------------------------------------
+* Incluída a opção de desconsiderar o encerramento de exercício no Demonstrativo 
+   Modelo 5
+* Incluída a opção de copiar um Demonstrativo para outro ou para outra empresa.
+================================================================================
+CM$VER      3.02.09     15/06/2001
+--------------------------------------------------------------------------------
+* Acertado o problema de " '' is not a interger value " na integração por dia.
+================================================================================
+CM$VER      3.02.08     09/06/2001
+--------------------------------------------------------------------------------
+* Acerto na procura da Subconta no relatório Balancete de Conta x Subconta.
+   Resolução da Pendência: 2110
+* Incluido o teste no cadastro de período contábil para não aceitar a data inicial maior que a 
+   data final. Resolução da Pendência: 2314
+* Cadastro de Planilha Pré-Pronta: Resolução da Pendência: 1693
+   - Acertada a consulta dos Centros de Custo que estava mostrando de todas a empresas.
+   - Acertada a formatação do grid.
+* Lançamento de Planilha Pré-Pronta: Resolução da Pendência: 1693
+  - Acertada mensagem de débito não bate com o crédito, mesmo batendo estando batendo.
+   
+================================================================================
+CM$VER      3.02.07     07/06/2001
+--------------------------------------------------------------------------------
+* Acertada a inserção de períodos contábeis para quem tem multi-empresa.
+* Consolidação:
+   - Incluída a opção de consolidação por Subconta.
+   - Acertada a opção de consilidação por Atividade/Projeto que duplicava esta tabela 
+     na empresa Consolidada.
+      
+================================================================================
+CM$VER      3.02.06     06/06/2001
+--------------------------------------------------------------------------------
+* Implementada a possibilidade de escolher as empresas que se deseja consolidar no 
+   balancete consolidado.
+================================================================================
+CM$VER      3.02.05     06/06/2001
+--------------------------------------------------------------------------------
+* Incluída a opção de excluir os lançamentos feitos após o bloqueio do periodo contábil.
+================================================================================
+CM$VER      3.02.04     05/06/2001
+--------------------------------------------------------------------------------
+* Incluída na verificação de lançamentos em período bloqueado, a verificação quando
+   o período está bloqueado para integração.
+* Acertado o teste do balancete em relação as contas com movimentação.
+================================================================================
+CM$VER      3.02.03     04/06/2001
+--------------------------------------------------------------------------------
+* Balancete:
+   - Acertada a opção de imprimir desconsiderando o encerramento do exercicio.
+   - Incluida a opção de imprimir o balancete por dia.
+* Incluido no Balancete de Conta x Atividade/Projeto a opção de desconsiderando o encerramento do exercicio.
+* Incluido no Balancete de Subconta x Atividade/Projeto a opção de desconsiderando o encerramento do exercicio.
+================================================================================
+CM$VER      3.02.02     01/06/2001
+--------------------------------------------------------------------------------
+* Acertada procura da conta contabil no relatorio de planilhas lançadas, quando existia
+   mais de um plano na base de dados.
+* Incluida opção na Importação da RM para versão nova ou antiga.
+================================================================================
+CM$VER      3.02.01     31/05/2001
+--------------------------------------------------------------------------------
+* Acerto do relatório de razão por centro de custo.
+================================================================================
+CM$VER      3.02.00     29/05/2001
+--------------------------------------------------------------------------------
+* Criados campos para a Conta e Percentual do custo do telefone para integração com o 
+   Fidelio/Contabilidade.
+================================================================================
+CM$VER      3.01.04     25/05/2001
+--------------------------------------------------------------------------------
+* Implementada a integração com a folha de pagamento da Dinâmica.
+================================================================================
+CM$VER      3.01.03     24/05/2001
+--------------------------------------------------------------------------------
+* Incluída a opção de se bloquear os sistemas integrados com a contabilidade até 
+  determinada data.
+* Incluída a opção de se excluir planilhas por faixa.
+* Acertada a tela de montar lay-out de relatório.
+================================================================================
+CM$VER      3.01.02     18/05/2001
+--------------------------------------------------------------------------------
+* Retirado os saldos zerados da emissão do Balanço.
+* Alterados os relatórios de Contas x Atividade Projeto e de Contas x 
+   Atividade Projeto x Subconta.
+* Acertado o encerramento de período.
+* Acertado o lançamento da meia-noite.
+* Incluido no Razão a possibilidade de se totalizar por Período.
+* Incluido no Razão a possibilidade de se imprimir o razão sem passar para a tela.
+================================================================================
+CM$VER      3.01.01     08/05/2001
+--------------------------------------------------------------------------------
+* Acertado o Razão Sintético e o Razão Simplificado.
+================================================================================
+CM$VER      3.01.00     07/05/2001
+--------------------------------------------------------------------------------
+* Para as empresas de Previdência:
+   - Feita a tela de Apuração do Resultado do Exercício - Lançamento da Meia-Noite
+* Implementado o Balancete Modelo Retrato (Caderno).
+================================================================================
+CM$VER      3.00.01     28/04/2001
+--------------------------------------------------------------------------------
+* Tela de Lançamentos:
+   - Acertada a saida da data sem o seu preenchimento.
+   - Acertado o botão de inserir após o término da digitação da planilha.
+   - Retirado o cinza do campo valor para podermos vizualisar o cursor.
+   - Permitido alterar um lançamento de débito para crédito ou vice-versa.
+* Tela de Lançamento de Planilhas Pré-Prontas:
+   - Inserido o título no campo Total a Débito.
+================================================================================
+CM$VER      3.00.00     27/04/2001
+--------------------------------------------------------------------------------
+* Liberação de Versão Delphi5
+================================================================================
+CM$VER      2.24.11     02/03/2001
+--------------------------------------------------------------------------------
+* Incluído no Demonstrativo Modelo Lay-Out a possibilidade de Desconsiderar o 
+  Encerramento de exercício.
+================================================================================
+CM$VER      2.24.10     28/02/2001
+--------------------------------------------------------------------------------
+* Aumentada a margem inferior do razão.
+* Incluído no razão e no balancete a possibilidade de escolher vários planos e 
+   patrocinadoras. As seleções efetuadas serão impressas no cabeçalho destes relatórios.
+   Esta implementação é válida somente para quem é  de previdência.
+* Acertada a numeração da planilha quando era utilizada a opção de alterar data da  
+   planilha.
+================================================================================
+CM$VER      2.24.09     12/02/2001
+--------------------------------------------------------------------------------
+* Alterada a tabela de PLANO PREVIDENCIARIO para ENTIDADES CONTÁBEIS
+   FINANCEIRAS.
+* Implementada a opção de passar os saldos para o exercício seguinte sem fazer a efetiva
+   mudança de exercício.
+================================================================================
+CM$VER      2.24.08     12/02/2001
+--------------------------------------------------------------------------------
+* Incluída a possibilidade de gerar arquivo texto para o demonstrativo modelo 01.
+* Caso o histório padrão na importação da folha da RM esteja inválido, o sistema não
+   levará em consideração este histórico.
+================================================================================
+CM$VER      2.24.07     02/02/2001
+--------------------------------------------------------------------------------
+* Acertada a geração de planilhas automáticas quando se solicitava o rateio por 
+   Atividade/Projeto.
+================================================================================
+CM$VER      2.24.06     01/02/2001
+--------------------------------------------------------------------------------
+* Implementada a importação de lançamentos do SAF.
+================================================================================
+CM$VER      2.24.05     25/01/2001
+--------------------------------------------------------------------------------
+* Incluido utilitário para renumerar as planilhas da contabilidade.
+================================================================================
+CM$VER      2.24.04     19/01/2001
+--------------------------------------------------------------------------------
+* Acertada a verificação no cadastro de contas contábeis se a conta que está sendo
+   cadastrada pode ser analítica ou sintética.
+* Melhorada a performance para impressão dos demonstrativos de resultado.
+================================================================================
+CM$VER      2.24.03     13/01/2001
+--------------------------------------------------------------------------------
+* Alterada a tela de lançamentos para preencher automaticamente o período e o exercício
+   após a indicação da data do lançamento.
+* Alterada a geração de lançamentos automáticos para dar a possibilidade de ratear os
+   lançamentos por atividade/projeto.
+================================================================================
+CM$VER      2.24.02     10/01/2001
+--------------------------------------------------------------------------------
+* Acertada a consolidação quando não se indicava que deseja-se consolidação por 
+  Atividade/Projeto.
+================================================================================
+CM$VER      2.24.01     08/01/2001
+--------------------------------------------------------------------------------
+* Acertado o reteio por Plano e Patrocinadora
+* Acertada a atualização da Moeda Histórica.
+================================================================================
+CM$VER      2.24.00     29/12/2000
+--------------------------------------------------------------------------------
+* Incluido identificação no cadastro de contas contábeis para decidir quais contas 
+   deverão sair no Relatório Evolução das Contas.
+* Acertada a numeração dos códigos reduzidos que voltava a  numeração inicial todas as
+   vezes que se entrava na tela de parâmetro.
+* Incluído utilitário para acertar as numerações dos códigos reduzidos duplicados.
+   
+================================================================================
+CM$VER      2.23.00     27/12/2000
+--------------------------------------------------------------------------------
+* Criado o campo de taxa de juros e contra-partida para o juros na conta contábil. 
+   Na opção de "Atualiza outra Moeda" o sistema gerará os lançamentos referentes 
+   a este juros.
+================================================================================
+CM$VER      2.22.06     08/12/2000
+--------------------------------------------------------------------------------
+* Acertado o relatório de razão por centro de custo.
+================================================================================
+CM$VER      2.22.05     07/12/2000
+--------------------------------------------------------------------------------
+* Balancete:
+   - Acertada a folha de totalização que estava imprimindo valores errados
+   - Incluída linha de resultado 
+* Razão:
+   - Incluída a possibilidade de imprimir uma totalização de débito e crédito do dia.
+* Tela de Lançamento:
+   - Após efetuar o primeiro lançamento na planilha, o sistema mostrará o seu número.
+* Demonstrativo Modelo 2:
+   - Incluída a possibilidade de gerar um arquivo texto a partir de seus dados.
+* Demonstrativo Modelo 3:
+   - Incluída a possibilidade de imprimir valores das contas de resultado, mesmo após o
+     encerramento das mesmas.
+* Consolidação:
+   - Acertada a consolidação das contas estatísticas.
+   - Possibilitada a consolidação por atividade/projeto.
+================================================================================
+CM$VER      2.22.04     02/12/2000
+--------------------------------------------------------------------------------
+* Acertado o rateio administrativo por atividade/projeto.
+================================================================================
+CM$VER      2.22.03     30/11/2000
+--------------------------------------------------------------------------------
+* Acertado o erro na alteração de lançamentos contábeis vindos da tela de rateio.
+* Incluída nova opção de rateio por plano e patrocinadora. Esta opção somente aparecerá
+   para as empresas do tipo "Previdência".
+* Incluída na tela de Encerramento das Contas de Resultado a indicação do histórico padrão.
+================================================================================
+CM$VER      2.22.02     26/11/2000
+--------------------------------------------------------------------------------
+* Incluido teste para verificar a existencia da sub-conta na importação de arquivos
+  externos.
+================================================================================
+CM$VER      2.22.01     14/11/2000
+--------------------------------------------------------------------------------
+* Acertado o rateio por programa.
+================================================================================
+CM$VER      2.22.00     04/11/2000
+--------------------------------------------------------------------------------
+* Cadastro de Planilhas Automáticas:
+   - Incluída a possibilidade de gerar as planilhas automáticas por período, por dia ou em
+     um período específico.
+   - Melhorada a tela para ficar mais rápida sua operação.
+* Cadastro de Planilhas de Rateio por Programa:
+   - Incluído campo de percentual para fazer o rateio por percentuais fixos.
+================================================================================
+CM$VER      2.21.08     26/10/2000
+--------------------------------------------------------------------------------
+* Incluído número de página inicial nos Demonstrativos 1 - 6
+* Colocado negrito em toda linha, mesmo quando inserido pela configuração de relatório
+   um novo campo.
+================================================================================
+CM$VER      2.21.07     23/10/2000
+--------------------------------------------------------------------------------
+* Alterada a impressão do balancete para retirar as linhas zeradas.
+================================================================================
+CM$VER      2.21.06     20/10/2000
+--------------------------------------------------------------------------------
+* Acertado o balancete quando existiam mais de uma empresa.
+================================================================================
+CM$VER      2.21.04     05/10/2000
+--------------------------------------------------------------------------------
+- Acerto no Relatório de Aviso de Lançamento. 
+================================================================================
+CM$VER      2.21.02     04/10/2000
+--------------------------------------------------------------------------------
+* Acertado o bloqueio de lançamentos em período bloqueado.
+================================================================================
+CM$VER      2.21.01     03/10/2000
+--------------------------------------------------------------------------------
+* Acertado o relatório orçado x realizado que estava com erro ao selecionar um centro
+de custo específico e quando a data era diferente da do último dia do período.
+================================================================================
+CM$VER      2.21.00     03/10/2000
+--------------------------------------------------------------------------------
+* Incluido no cadastro das contas contábeis a conta para 
+  contra-partida para os lançamentos em moeda histórica.
+* Incluida a possibilidade de consultar o saldo das contas 
+  por dia.
+================================================================================
+CM$VER      2.20.05     11/09/2000
+--------------------------------------------------------------------------------
+* Alterado o relatório de Aviso de Lançamento para pedir planilhas alternadas.
+* Acertada a importação de lançamentos via planilha excell.
+================================================================================
+CM$VER      2.20.03     23/08/2000
+--------------------------------------------------------------------------------
+- Alterada a geração das planilhas automáticas para ficarem
+    mais rápidas e considerar o saldos das contas estatísticas.
+- Incluido limite de data no relatório ORÇADO x REALIZADO.
+- Alterado o balancete para não duplicar as contas quando
+    a empresa utiliza mais de um plano de contas dentro do mesmo
+    exercício.
+================================================================================
+CM$VER      2.20.02     22/08/2000
+--------------------------------------------------------------------------------
+* Refeita toda a parte de Regras Contábeis que passam a ser escritas em linguagem
+de script específica.
+================================================================================
+CM$VER      2.20.01     17/08/2000
+--------------------------------------------------------------------------------
+* Acertada a Atualização de Sintética.
+================================================================================
+CM$VER      2.20.00     16/08/2000
+--------------------------------------------------------------------------------
+* Acertada a Planilha Automática para limpar os campos Centro de Custo e Atividade/Projeto
+* Acerto na geração da Planilha Automática
+* Acerto na Atualização da Conta Sintética.
+* Incluído o número de referencia o relatório Aviso de Lançamento. Este número pode
+   ser um sequencial ou o número da AP/GR do Contas a Pagar/Receber
+- Resolução da Pendência Nº 2470
+  > Tela\Opçao No Sistema: RELATÓRIO AVISO DE LANCAMENTO
+  Colocar no relatório um número sequencial.
+================================================================================
+CM$VER      2.19.02     11/08/2000
+--------------------------------------------------------------------------------
+* Acertada a gravação do plano e patrocinadora na tela de cadastro de lançamentos
+   automáticos.
+================================================================================
+CM$VER      2.19.01     10/08/2000
+--------------------------------------------------------------------------------
+- Processamento\Integração\Planilha
+  Correção do erro '..Field('IDPROGRAMA') not found;
+================================================================================
+CM$VER      2.19.00     09/08/2000
+--------------------------------------------------------------------------------
+- Incluído plano e patrocinadora em todo o sistema contábil
+================================================================================
+CM$VER      2.18.04     07/08/2000
+--------------------------------------------------------------------------------
+- Na opção de consolidação, o sistema está consolidando também os valores orçados.
+- Resolução da Pendência Nº 2538
+  > Tela\Opçao No Sistema: Consolidação
+  Consolidar tambem os valores do Orcamento
+================================================================================
+CM$VER      2.18.03     01/08/2000
+--------------------------------------------------------------------------------
+- Corrigido relatório de "Balancete de Contas x Sub-Contas"
+ 
+- Na importação do Plano de Contas e na importação dos Lançamentos 
+foi criada a opção de escolha do plano a ser importado, que irá 
+substituir o parâmetro que era utilizado anteriormente.
+================================================================================
+CM$VER      2.18.02     27/07/2000
+--------------------------------------------------------------------------------
+- Incluídos os campos IDPLANOPREV e IDPATRO na tela de Cadastro de Lançamento Automático.
+- Corrigido Filtro de Contas na emissão do Relatório de Balancete.
+================================================================================
+CM$VER      2.18.01     19/07/2000
+--------------------------------------------------------------------------------
+* Acertada a geração do rateio por programa
+================================================================================
+CM$VER      2.18.00     14/07/2000
+--------------------------------------------------------------------------------
+* Colocado plano e patrocinadora na tela de planilha automática.
+* Incluida a opção de gerar rateio por programa.
+================================================================================
+CM$VER      2.17.01     10/07/2000
+--------------------------------------------------------------------------------
+* Ampliado o campo PANDESCRICAO para 60 posições.
+================================================================================
+CM$VER      2.17.00     28/06/2000
+--------------------------------------------------------------------------------
+ * Otimizado tempo de processamento do Relatório Balancete.
+ * Incluída no elemento do Demonstrativo a opção de imprimir sempre o valor 
+acumulado no Demonstrativo de Layout Colunado Mensal.
+================================================================================
+CM$VER      2.16.13     23/06/2000
+--------------------------------------------------------------------------------
+* Alterada a importação da RM para considerar o historico padrão informado no lay-out
+* Acertado o problema de dataset not in edit mode no demonstrativo de lay-out
+================================================================================
+CM$VER      2.16.12     20/06/2000
+--------------------------------------------------------------------------------
+* Acertado o balancete filtrando por plano e patrocinadora.
+* Melhorada a navegação da tela de cadastro de históricos padrões.
+* Melhorada a escolha de histórico padrão nas telas de cadastro de planilha pre-pronta e automáticas.
+================================================================================
+CM$VER      2.16.11     10/06/2000
+--------------------------------------------------------------------------------
+* Alterada a atualização de saldos de analíticas e sintéticas para suportar desmembramento
+   de contas.
+================================================================================
+CM$VER      2.16.10     02/06/2000
+--------------------------------------------------------------------------------
+- Configuração e Impressão de Layout de Demonstrativo
+  Correção na gravação e seleção do layout configurado
+================================================================================
+CM$VER      2.16.09     01/06/2000
+--------------------------------------------------------------------------------
+- Configuração do Layout do Demonstrativo
+  Alteração do Memo para gravação do layout do demonstrativo por um RichEdit
+================================================================================
+CM$VER      2.16.08     25/05/2000
+--------------------------------------------------------------------------------
+* Acertado o relatório Conta por Centro de Custo que não apresentava valor em determinada
+  situação.
+* Incluido um novo relatório de Aviso de Lançamento.
+================================================================================
+CM$VER      2.16.07     16/05/2000
+--------------------------------------------------------------------------------
+* Acertada a opção de alteração na tela de cadastro de conta contábil.
+================================================================================
+CM$VER      2.16.06     12/05/2000
+--------------------------------------------------------------------------------
+* Incluída a possibilidade de não se imprimir as linhas dos Demonstrativos de Resultado 
+que estejam zeradas (alteração feita em todos os Demonstrativos de Resultados, menos
+o Demonstrativo de Layout).
+================================================================================
+CM$VER      2.16.05     10/05/2000
+--------------------------------------------------------------------------------
+* Acertado o problema na Importação de Lançamentos, relacionado à importação do
+Plano e Patrocinadora
+* Acertado o problema na Importação de Saldos Anteriores, relacionado à importação do
+Plano e Patrocinadora
+================================================================================
+CM$VER      2.16.04     06/05/2000
+--------------------------------------------------------------------------------
+* Alterada a importação do saldo anterior para conter as colunas plano e patrocinadora.
+================================================================================
+CM$VER      2.16.03     03/05/2000
+--------------------------------------------------------------------------------
+* Acertado o problema da mensagem de erro ('' is not a valid integer value) na entrada da tela de Encerramento de Período
+* Tela de Cadastro de Regras contábeis refeito completamente
+* Inclusão dos campos de saldo do exercício anterior no Demonstrativo de Resultado modelo de Layout - tipo Balanço Patrimonial
+* Demonstrativo de Resultado modelo de Layout - tipo Balanço Patrimonial teve sua capacidade de 40 linhas diminuída 
+para 30 linhas por motivos de capacidade do banco de dados
+* Erro que impossibilitava a exclusão de um elemento do Balanço Patrimonial corrigido
+- Resolução da Pendência Nº 1874
+  Verificar e corrigir erros nos Demonstrativos de Resultado
+================================================================================
+CM$VER      2.16.02     26/04/2000
+--------------------------------------------------------------------------------
+* Acertado o sinal dos relatórios de demonstrativo quando a configuração do relatório 
+  era para não considerar o negativo.
+================================================================================
+CM$VER      2.16.01     20/04/2000
+--------------------------------------------------------------------------------
+* Alterada a filosofia da segunda analise vertical para ser em valor e não em percentual.
+* Aumentada a margem inferior do razão analítico
+================================================================================
+CM$VER      2.16.00     18/04/2000
+--------------------------------------------------------------------------------
+* Incluído mais um campo no elemento do demonstrativo para fazer analise vertical.
+* Alterado o demonstrativo modelo 2 para incluir estes novos campos de analise
+   vertical.
+* Fechada a query que estava sendo aberta na entrada do sistema.
+================================================================================
+CM$VER      2.15.01     13/04/2000
+--------------------------------------------------------------------------------
+* Alterada a impressão do diário para imprimir o número da planilha e não o número
+   interno do sistema.
+* Fechada a query que estava sendo aberta na entrada do sistema.
+* Acertada a atualização de sintética e analítica após ter incluido o plano e patrocinadora.
+================================================================================
+CM$VER      2.15.00     10/04/2000
+--------------------------------------------------------------------------------
+* Incluidos os campos plano e a patrocinadora nas seguintes funções:
+  - Importação de lançamentos
+  - Atualização de Analíticas
+  - Atualização de Sintéticas
+================================================================================
+CM$VER      2.14.38     04/04/2000
+--------------------------------------------------------------------------------
+* Acertada a inclusão da conta contábil que estava dando que conta não possuia pai
+  mas possuia.
+================================================================================
+CM$VER      2.14.37     03/04/2000
+--------------------------------------------------------------------------------
+* Acertada a inclusão da conta contábil que não estava buscando o grau corretamente.
+* Alterados os relatórios balancetes para imprimir o nome e o numero da corretamente
+   na quebra de página.
+================================================================================
+CM$VER      2.14.36     03/04/2000
+--------------------------------------------------------------------------------
+* Acertada a geração do arquivo do SPC que estava gravando com sinal de menos
+   os saldos credores. 
+================================================================================
+CM$VER      2.14.35     03/04/2000
+--------------------------------------------------------------------------------
+* Acertada a passagem da data para descobrir qual o plano vigente para a 
+  atualização das contas analíticas e sintéticas (I).
+================================================================================
+CM$VER      2.14.34     29/03/2000
+--------------------------------------------------------------------------------
+* Incluída a possibilidade de se selecionar a Atividade/Projeto dos lançamentos a
+serem importados na "Importação de Lançamentos da Folha RM"
+* Acertado o problema da Atualização dos saldos das contas Analíticas e 
+Sintéticas no caso de mais de um plano contábil (DE/PARA)
+* Acertado o problema da Contabilização no caso de mais de um plano contábil
+(DE/PARA - Acertado na ULancaContab)
+* Acertado o problema com a mensagem de erro quando se cancelava a busca 
+da conta na tela de Cadastro de Contas Contábeis
+* Acertado o problema do preenchimento dos centros de custo na tela de 
+Lançamentos de Planilhas do Rateio
+================================================================================
+CM$VER      2.14.33     22/03/2000
+--------------------------------------------------------------------------------
+* Acertado o problema da não impressão dos Saldos Anteriores no "Balancete de
+Contas x Centros de Custo"
+* Criado um novo layout de importação de lançamentos: "Layout Engenho"
+* Acertado o problema da verificação da data do Lançamento (não estava
+exibindo a mensagem)
+================================================================================
+CM$VER      2.14.32a    20/03/2000
+--------------------------------------------------------------------------------
+* Tela de Rateio por Centro de Custo refeita
+* Tela de Cadastro de Rateio por Centro de Custo refeita
+* Criada a tela de Geração de Dados para o DE/PARA
+* Criada a tela de Cadastro de Tabelas para o DE/PARA
+* Acertadas as funções de DE/PARA nas rotinas de lançamentos Contábeis
+* Incluída a opção de se imprimir uma página de totalizadores por Grupo de 
+Contas Contábeis no Balancete
+* Incluída a possibilidade de se consultar os totais de Débito e Crédito de uma
+Planilha na tela de Lançamentos enquanto ela está sendo feita  
+================================================================================
+CM$VER      2.14.31a    09/03/2000
+--------------------------------------------------------------------------------
+* Retorno ao antigo número de parâmetros da função FazDEPARA por motivos
+de liberação de versão
+================================================================================
+CM$VER      2.14.31     09/03/2000
+--------------------------------------------------------------------------------
+* Alterações na rotina de importação de Planilhas Excel (retirada a verificação 
+prévia de valores)
+* Alterada a importação de Lançamentos da Folha de Pagamentos RM, para
+incorporar o novo layout fornecido pela mesma.
+* Correções nas rotinas de DE/PARA (acertado o loop infinito quando existiam
+mais de dois planos sequenciais cadastrados)
+================================================================================
+CM$VER      2.14.30     25/02/2000
+--------------------------------------------------------------------------------
+* Feitas as funções de DE/PARA internas
+* Colocado o Filtro de Plano Contábil no relatório de Plano de Contas
+* Colocada a crítica de verificar se o saldo está zerado, e portanto não imprimir
+a letra 'C' ou 'D' em todos o relatórios
+* Acertada a natureza do saldo na geração de arquivos do SPC
+================================================================================
+CM$VER      2.14.29     15/02/2000
+--------------------------------------------------------------------------------
+* Possibilitada a geração de um arquivo texto a partir das informações do balancete.
+================================================================================
+CM$VER      2.14.28     11/02/2000
+--------------------------------------------------------------------------------
+* Alterada a tela de Cadastro de Contas para o DE/PARA, incluindo a 
+possibilidade de se cadastrar os Centros de Custo nas contas de origem e de 
+destino
+================================================================================
+CM$VER      2.14.27     03/02/2000
+--------------------------------------------------------------------------------
+* Acertado o razão analítico que somente estava mostrando o saldo anterior
+  considerando os lançamentos com sub-conta.
+================================================================================
+CM$VER      2.14.26     01/02/2000
+--------------------------------------------------------------------------------
+* Acertadas as rotinas de Encerramento de Resultados e Encerramento de
+Exercício
+* Alterações realizada da função de Integração - ULancaContab
+================================================================================
+CM$VER      2.14.25     28/01/2000
+--------------------------------------------------------------------------------
+* Acertado o problema do Encerramento de Resultados e Encerramento do
+Exercício
+* Acertado o problema com a configuração da Conta de Resultado na tela de
+Cadastro de Parâmetros
+================================================================================
+CM$VER      2.14.24     26/01/2000
+--------------------------------------------------------------------------------
+* Alterado o Relatório "Diário", possibilitando o total a Transportar e 
+o Total Transportado
+================================================================================
+CM$VER      2.14.23     26/01/2000
+--------------------------------------------------------------------------------
+* Acertado o problema da não contabilização dos saldos na última linha do "Razão
+Anaítico" em alguns casos.
+* Acertado o problema da não contabilização dos saldos na última linha do "Diário"
+em alguns casos.
+* Incluída a possibilidade de se ordenar o "Diário" pelo número do documento
+================================================================================
+CM$VER      2.14.22     20/01/2000
+--------------------------------------------------------------------------------
+* Acertado o problema da duplicação de lançamentos nos relatórios "Razão
+Analítico" e "Diário", quando duas empresas proprietárias têm a mesma estrutura
+de Sub-Contas.
+================================================================================
+CM$VER      2.14.21     17/01/2000
+--------------------------------------------------------------------------------
+* Acertado o balancete de Contas x Atividade Projeto para não imprimir 
+  corretamente as contas sem saldo e sem movimento.
+* Incluido no cadastro do plano de contas a indicação do plano para possibilitar
+   o cadastramento de novos planos para possibilitar a troca do plano de contas
+================================================================================
+CM$VER      2.14.20b    11/01/2000
+--------------------------------------------------------------------------------
+* Colocado o parâmetro "Imprimir apenas Contas Ativas" no Relatório Listagem
+do Plano de Contas
+* Acertado o problema da exibição dos períodos contábeis na tela de Geração de
+Dados do Consolidado
+================================================================================
+CM$VER      2.14.20     10/01/2000
+--------------------------------------------------------------------------------
+* Acertado o problema de saldos contra a sua natureza nos Demonstrativos
+de Resultado
+* Alterada a tela de Faixa de Data dos Planos Contábeis - novo campo: Plano
+Anterior
+================================================================================
+CM$VER      2.14.19b    05/01/2000
+--------------------------------------------------------------------------------
+* Criado o Relatório de "Balancete de Centros de Custo por Contas Contábeis"
+* Colocada a possibilidade de se escolher quais colunas (Débito/Crédito, 
+Movimentação ou Ambas) serão impressas em TODOS os Balancetes
+================================================================================
+CM$VER      2.14.19     04/01/2000
+--------------------------------------------------------------------------------
+* Criado o Relatório de Listagem de Elementos do Demonstrativo
+* Acertado o problema de impressão de saldos e movimento zerados nos Balancetes
+================================================================================
+CM$VER      2.14.18     20/12/1999
+--------------------------------------------------------------------------------
+* Acertado o problema da "Geração de Lançamentos do Consolidado" para o 
+Saldo Anterior quando as empresas a serem consolidadas tinha Atividade/Projeto
+Diferentes
+* Acertado o problema da "Importação de Planilhas Excel" quando o histórico
+excedia 40 posições
+================================================================================
+CM$VER      2.14.17b    10/12/1999
+--------------------------------------------------------------------------------
+* Acertado o problema na impressão do relatório "Demonstrativo de Layout",
+modelo colunado mensal
+* Acertado o problema de Verificação de Contas Contra sua Natureza e de 
+Planilhas com Saldos Zerados na tela de Encerramento de Período
+================================================================================
+CM$VER      2.14.17     06/12/1999
+--------------------------------------------------------------------------------
+* Incluída a tela de Cadastro de Colunas do Balanço Patrimonial
+* Incluída a possibilidade de se configurar um Demonstrativo de Layout como 
+sendo do tipo "Balanço Patrimonial", na tela de cadastro de Demonstrativos de 
+Layout.
+* Incluída a possibilidade de se imprimir o "Balancete de Contas x Ativ./Proj."
+com escolha de colunas a serem impressas (movimento, débito/crédito e ambos)
+* Incluída a possibilidade de se configurar o Tipo de Operação para a geração
+das Planilhas Pré-Pronta e Automática
+* Acertado o problema de valores com saldos contra sua natureza nos relatórios
+de Demonstrativo de Layout
+================================================================================
+CM$VER      2.14.16     29/11/1999
+--------------------------------------------------------------------------------
+* Acertada a mensagem de inclusão e alteração da tela de lançamentos, que sempre
+dizia que o lançamento foi realizado com sucesso, mesmo quando a operação era 
+cancelada.
+* Incluídas as telas de cadastro do De/Para do Plano de Contas
+* Acertado o problema de inclusão de períodos contábeis em Empresas novas
+================================================================================
+CM$VER      2.14.15c    17/11/1999
+--------------------------------------------------------------------------------
+* Incluídos os campos  de filtragem Centro de Custo e Atividade/Projeto da tela 
+de Parâmetros no cabeçalho de todos os relatórios do tipo "Demonstrativo de 
+Resultados"
+================================================================================
+CM$VER      2.14.15b    17/11/1999
+--------------------------------------------------------------------------------
+* Acertado o problema de Rollback do Banco de Dados para a Alteração de 
+Lançamentos Contábeis
+* Acertada a tela de Importação de Lançamentos da Folha RM
+================================================================================
+CM$VER      2.14.15     16/11/1999
+--------------------------------------------------------------------------------
+* Acertado o problema da busca rápida de Lançamentos Contábeis na tela de 
+Lançamentos
+* Permitida a alteração de vários Lançamentos sequencialmente na mesma 
+Planilha
+================================================================================
+CM$VER      2.14.14     12/11/1999
+--------------------------------------------------------------------------------
+* Acertado o problema do cálculo das Análises Verticais no relatório 
+"Demonstrativo de Resultados - Modelo Layout"
+================================================================================
+CM$VER      2.14.13d    10/11/1999
+--------------------------------------------------------------------------------
+* Incluído o parâmetro "Concatenar Histórico Importado com Histórico 
+Cadastrado" na tela de Importação de Lamçamentos Contábeis
+================================================================================
+CM$VER      2.14.13c    10/11/1999
+--------------------------------------------------------------------------------
+* Colocados os parâmetros de "Impressão de Contas do Rateio Administrativo e
+de Investimento" nos relatórios "Balancete", "Balancete de Contas por Ativ./Proj." 
+e "Balancete de Contas por Centro de Custo"
+================================================================================
+CM$VER      2.14.13b    09/11/1999
+--------------------------------------------------------------------------------
+* Acertado o problema da configuração de Parâmetros Contábeis para novas 
+empresas proprieárias
+================================================================================
+CM$VER      2.14.13     05/11/1999
+--------------------------------------------------------------------------------
+* Acertado o problema de geração de Saldos Orçamentários no Consolidado
+* Incluída a opção "Gerar somente Saldos Orçamentários" no Consolidado
+* Criado o Relatório "Balancete Analítico de Centros de Custo por Ativ./Proj." 
+================================================================================
+CM$VER      2.14.12     03/11/1999
+--------------------------------------------------------------------------------
+* Acertado o problema de geração de Saldos anteriores no Consolidado
+* Acertada a verificação de Planilhas com diferença entre Débitos e Créditos de
+acordo com a tela de Parâmetros
+* Acertado o problema de Geração de Planilhas Automáticas
+* Criado um botão de busca de Lançamentos na tela de Lançamentos Contábeis
+* Acertado o problema do cálculo de Saldos no Relatório "Razão Simplificado"
+================================================================================
+CM$VER      2.14.11     21/10/1999
+--------------------------------------------------------------------------------
+* Criada a tela de Geração de Lançamentos do Consolidado
+* Acertado o problema da diferença de valores na geração do Saldo Calculado
+* Melhorada a mensagem de escolha de lançamento do tipo "Ambos" na tela
+ de Planilhas Pré-Prontas
+* Permitida a limpeza do campo Código do Histórico na tela de Lamçamentos
+* Incluídos os parâmetros "Obriga Tipo de Operação", "Obriga Atividade Projeto"
+e "Obriga Numero do Documento" na tela de Parâmetros da Contabilidade
+* Tela de Parâmetros da Contabilidade refeita
+* Incluída a possibilidade de se filtrar o número do documento no relatório
+"Planilhas Lançadas"
+================================================================================
+CM$VER      2.14.10     14/10/1999
+--------------------------------------------------------------------------------
+* Acertada a Geração de Lançamentos do Rateio Administrativo e do 
+Rateio de Investimentos (acertado o arredondamento para valores muito 
+pequenos)
+* Acertada a verificação de períodos bloqueados no Rateio Administrativo e do 
+Rateio de Investimentos
+* Criada a verificação se as planilhas pré-pronta/automática/rateio já foram
+rodadas no período
+================================================================================
+CM$VER      2.14.09     08/10/1999
+--------------------------------------------------------------------------------
+- Acertada a totalização da planilha pre-pronta e o retorno para lançamentos anteriores.
+================================================================================
+CM$VER      2.14.08     07/10/1999
+--------------------------------------------------------------------------------
+* Acertado o problema da alteração da conta contábil na tela de lançamentos
+================================================================================
+CM$VER      2.14.07     05/10/1999
+--------------------------------------------------------------------------------
+* Criada a tela de Alteração de Datas de Planilhas
+* Acertado o problema da gravação do último Lançamento na tela de Planilhas
+Pré-Prontas
+================================================================================
+CM$VER      2.14.06     01/10/1999
+--------------------------------------------------------------------------------
+* Acertado o problema da inclusão de novos lançamentos depois da alteração de 
+um lançamento
+* Acertados os problemas de validação, centros de custo e atividade/projeto na 
+tela de Planilhas Pré-Prontas
+* Acertado o problema de inclusão na mesma planilha da tela de Importação de
+Lançamentos do Excel
+================================================================================
+CM$VER      2.14.05     29/09/1999
+--------------------------------------------------------------------------------
+* Acertado o problema de geração de saldos calculados com Centros de Custo
+* Possibilidade de se gerar os Saldos Calculados por Sub-Conta e/ou 
+Centro de Custo
+* Importação de Planilhas Excel refeita
+================================================================================
+CM$VER      2.14.04     28/09/1999
+--------------------------------------------------------------------------------
+* Agilizada a atualização de dados no arquivo calculado.
+================================================================================
+CM$VER      2.14.03     24/09/1999
+--------------------------------------------------------------------------------
+* Incluída a possibilidade de se exibir os valores do relatório "Demonstrativo de 
+Layout" divididos por 1000
+* Incluídos os novos campos PERIODOINI, PERIODOFIM e EXERCICIO para
+construção de cabeçalhos no relatório "Demonstrativo de Layout"
+* Acertado o problema de inclusão de lançamentos em planilhas já existente na 
+tela de lançamentos contábeis
+* Incluída a confirmação de exclusão de lançamentos na tela de lançamentos 
+contábeis
+* Retiradas as telas antigas de Lançamentos e Planilhas Pré-Prontas
+* Alterada a geração de dados dos saldos calculados.
+* Alterada a importação de Planilhas Excel
+================================================================================
+CM$VER      2.14.02     21/09/1999
+--------------------------------------------------------------------------------
+* Acertada a tela de Importação de Lançamentos Contábeis
+* Incluída a possibilidade da utilização das configurações de linha dos Elementos
+do Demonstrativo no relatório "Demonstrativo de Resultados - modelo de Layout"
+================================================================================
+CM$VER      2.14.01     15/09/1999
+--------------------------------------------------------------------------------
+* Tela de Consulta de Saldos refeita.
+* Criação das autorizações de acesso às funções do Sistema
+* Inclusão da possibilidade de imprimir ou não a coluna de diferença no Relatório
+Demonstrativo de Resultados 1
+================================================================================
+CM$VER      2.14.00a    09/09/1999
+--------------------------------------------------------------------------------
+* Acertado o problema na geração do movimento dos Saldos Calculados quando
+os valores eram nulos
+* Acertado o problema na Importação de Lançamentos
+* Acertado o problema da gravação do código da empresa proprietária nos 
+Centros de Custo nas telas de Saldos Anteriores e Movimentos Anteriores
+================================================================================
+CM$VER      2.14.00     08/09/1999
+--------------------------------------------------------------------------------
+* Incluia a geração de arquivo para facilitar a criação de relatórios pelo gerador.
+* Alterado o razão analítico para ficar mais rápida a sua geração.
+================================================================================
+CM$VER      2.13.08     02/09/1999
+--------------------------------------------------------------------------------
+* Incluída a possibilidade de se escolher a página inicial dos Relatórios
+* Acertado oproblema da tela de cadastro de Lançamentos Automáticos
+* Inclusão do campo Código da Sub-Conta no relatório "Diário"
+* Correção do campo sub-conta (não estava habilitado) na tela de 
+Planilhas Pré-Prontas
+* Acertado o problema da alteração de Lançamentos na nova tela de Cadastro
+de Lançamentos 
+================================================================================
+CM$VER      2.13.07     27/08/1999
+--------------------------------------------------------------------------------
+* Acertado o problema da validação das Contas Correspondentes na tela de 
+Cadastro de Contas Contábeis
+* Criado o Campo Código do Elemento do Demonstrativo na tela de Cadastro
+* Criado o processamento de condicionais vinculado ao Elemento do 
+Demonstrativo do tipo Somatório
+* Inclusão do novo campo Código no Relatório "Demonstrativo de Layout"
+* Capacidade de processamento da condicional do Somatório no Relatório
+ "Demonstrativo de Layout"
+================================================================================
+CM$VER      2.13.06     26/08/1999
+--------------------------------------------------------------------------------
+* Acertado o Relatório de Planilhas Pré-Prontas - incluída a ordenação 
+e alterado o título
+* Acertado o Relatório de Planilhas Automáticas - incluída a ordenação 
+e os campos fase e valor fixo
+* Inclusão da sequência de planilhas geradas na tela de Geração de Planilhas
+Automáticas
+* Inclusão do Número do Documento no Cadastro de Planilhas Automáticas
+e na Tela de Geração de Planilhas 
+* Incluída a fase do processo na tela de Apuração de Resultados
+================================================================================
+CM$VER      2.13.05     20/08/1999
+--------------------------------------------------------------------------------
+* Acertado o número de casas decimais (4) nos percentuais do Relatório de
+Conferência de Cotas
+* Correções de Performance na nova tela de Lançamentos Contábeis
+================================================================================
+CM$VER      2.13.04     18/08/1999
+--------------------------------------------------------------------------------
+* Criado o relatório "Balancete Consolidado"
+* Correções na função de lançamento contábil (ULancaContab)
+================================================================================
+CM$VER      2.13.03     17/08/1999
+--------------------------------------------------------------------------------
+* Tela de Lançamentos refeita
+================================================================================
+CM$VER      2.13.02     12/08/1999
+--------------------------------------------------------------------------------
+* Melhorada a performance das rotinas de Geração de Lançamentos dos Rateios
+ (Transações por Lançamento)
+* Acertado o problema da Geração de Planilhas Automáticas
+================================================================================
+CM$VER      2.13.01     10/08/1999
+--------------------------------------------------------------------------------
+* Relatório de Quantidade de Quotas por Atividade Projeto alterado para exibir
+4 casas decimais nos valores
+* Caixa de Seleção de Planilhas ordenado na tela de Lançamento 
+Planilha Pré-pronta
+* Aumentadas as caixas de seleção na tela de Cadastro de Panilha Pré-pronta
+* Relatório de Planilhas Lançadas com filtro por Tipo de Operação com possibilidade
+de exclusão do Tipo  
+* Acertado o problema da alteração do Cadastro de Planilha Pré-pronta (Atividade/Projeto
+estava sumindo)
+* Incluído o Campo "Valor Fixo" na tela de Cadastro de Planilhas Automáticas
+* Alterações no Banco de Dados (rodar scripts)
+================================================================================
+CM$VER      2.12.06     06/08/1999
+--------------------------------------------------------------------------------
+* Acertado o demonstrativo de resultado 2, 3 e lay-out no caso de mais de uma
+  empresa proprietária
+================================================================================
+CM$VER      2.12.05     04/08/1999
+--------------------------------------------------------------------------------
+* Ordem do Elemento exibido na consulta do cadastro das Linhas do
+   Demonstrativo Colunado
+* Exibição da Conta sendo processada nas telas de "Geração de Lançamentos do
+   Rateio por Ativ./Proj." e "Geração de Lançamentos do Rateio Administrativo" 
+* Acertado o problema com o campo "TotalLinha" no relatório "Demonstrativo de
+   Resultados - modelo Layout"
+* Criado o Relatório "Balancete de Saldos Atuais"
+================================================================================
+CM$VER      2.12.04     03/08/1999
+--------------------------------------------------------------------------------
+* Acertado o relatório de conferência de cotas.
+* Alterado o sistema para permitir somente lançamento em atividade/projeto 
+  analítica.
+================================================================================
+CM$VER      2.12.03     02/08/1999
+--------------------------------------------------------------------------------
+* Acertadas as funções de integração contábil
+* Melhorada a performance da Geração de Lançamentos do 
+Rateio por Atividade/Projeto e Rateio Administrativo
+* Corrigidos os problemas na tela de lançamentos de planilha pré-pronta 
+* Inclusão do campo Atividade/Projeto na tela de cadastro de planilhas automáticas
+* Inclusão do campo Ativ./Proj., sub-Conta e Número do Documento na tela
+de cadastro de Planilhas Pré-Prontas.
+* Inclusão do campo Número do Documento no Balancete Analítico
+* Filtragem dos lançamentos gerados nos rateios nos relatórios do grupo "Razão"
+================================================================================
+CM$VER      2.12.02     28/07/1999
+--------------------------------------------------------------------------------
+* Acertados os relatórios: Balancete de Contas x Atividade/Projeto, Sub-Conta, 
+   Centro de Custo, Analítico de Atividade/Projeto e Sub-Conta quando o período
+   final era diferente do inicial.
+* Bloqueados os botões de Exclusão e Alteração quando o período contábil está 
+   bloqueado.
+================================================================================
+CM$VER      2.12.01     27/07/1999
+--------------------------------------------------------------------------------
+* Inclusão dos campos Sub-Conta e Documanto na tela de Cadastro de Planilhas
+Pré-Prontas
+* Inclusão da capacidade de se trazer a Atividade/Projeto, Sub-Conta e Documento
+da Planilha Pre-Pronta na tela de Lançamentos Pré-Prontos
+* Inclusão da capacidade de se excluir dos relatórios "Razão Analítico", 
+"Razão Sintético" e "Diário" os lançamentos do rateio por Atividade/Projeto
+(filtrando pelo tipo da operação)
+* Inclusão da capacidade de se selecionar o tipo da operação nas telas de 
+geração de dados do Rateio por Ativ./Proj. e Rateio Administrativo
+================================================================================
+CM$VER      2.11.04     23/07/1999
+--------------------------------------------------------------------------------
+* Corrigido o problema de se apagar o campo de moeda histórica na tela 
+de Contas Contábeis
+* Inclusão da Sub-Conta na tela de Lançamentos Automáticos
+* Criação do Relatório "Demonstrativo de Resultados - Modelo de Layout"
+================================================================================
+CM$VER      2.11.03     19/07/1999
+--------------------------------------------------------------------------------
+* Criação da tela de cadastro de Layout's de Demonstrativos
+* Inclusão da possibilidade de se usar fórmulas nos Demonstrativos de Resultados
+* Criação da tela de Geração de Dados do Rateio Administrativo 
+* Correção na tela de Geração de Dados do Rateio por Atividade/Projeto
+================================================================================
+CM$VER      2.11.02     12/07/1999
+--------------------------------------------------------------------------------
+* Tela de "Cadastro de Planilhas de Rateio" refeita
+* Alterações nos Demonstrativos de Resultados 2 e 3 - colocação 
+  de casas decimais nos valores percentuais
+* Criação do Relatório Cadastral "Listagem de Centros de Custo x Contas"
+* Correção do erro de cadastro de Conta Correspondente na tela de Cadastro
+   de Contas Contábeis
+* Inclusão da possibilidade de se informar o numero de página inicial nos
+   Relatórios Diário e Balancete
+* Criação da tela de Cadastro de Percentuais do Rateio Administrativo por
+   Atividade/Projeto
+* Criação da tela de Geração de Lançamentos do Rateio Administrativo por
+   Atividade/Projeto
+* Criação do campo "Rateio por Atividade/Projeto" na tela de Cadastro de 
+   Contas Contábeis para associação de uma Conta Contábil a um Rateio
+================================================================================
+CM$VER      2.11.01     05/07/1999
+--------------------------------------------------------------------------------
+* Relatórios "Balancete de Contas x C.Custo", "Balancete de Contas x Sub-Conta",
+"Balancete de Contas x Ativ.Proj" e "Balancete Analítico de Ativ.Proj e Sub-Conta"   
+refeitos por causa de problemas de performance
+* Acertado o problema de exclusão de Centros de Custo relacionados a Contas
+* Criada a tela de Cadastro de Percentuais de Rateio por Ativ./Proj.
+* Alterações na tela de Geração de Dados do Rateio por Ativ./Proj. e na tela
+de Geração de Lançamentos do Rateio por Ativ./Proj.
+* Alterações no Banco de Dados (rodar scripts)
+================================================================================
+CM$VER      2.10.05     28/06/1999
+--------------------------------------------------------------------------------
+* Acertado o problema do cálculo das colunas de somatório do relatório
+"Demonstrativo de Resultados 4"
+* Acertado o problema de filtro de perídos no relatório "Demonstrativo
+de Resultados 1" 
+* Acertada a impressão em outra língua do "Demonstrativo de Resultados 5"
+* Acertado o cálculo dos valores nos relatórios "Demonstrativo de Resultados 2"
+e "Demonstrativo de Resultados 3"
+* Inclusão do filtro por Atividade/Projeto no "Balancete de Contas x Ativ.Proj."
+* Inclusão da possibilidade de se configurar as colunas impressas no relatório
+"Balancete" para 3 colunas (Saldo Ant., Movimentação e Saldo Atual), 
+4 colunas (Saldo Ant, Deb., Cred. e Saldo Atual) e 5 colunas (Saldo Ant, 
+Deb., Cred., Movimentação e Saldo Atual) 
+* Tela de Geração de Arquivo SPC-CAP refeita
+================================================================================
+CM$VER      2.10.04     18/06/1999
+--------------------------------------------------------------------------------
+* Acertados problemas de performance nos Relatórios "Balancete de Contas x
+Atividade/Projeto", "Balancete de Contas x Sub-Conta", "Balancete de Contas x
+Centro de Custo" e "Balancete de Analítico por Atividade/Projeto e Sub-Conta"
+* Acertado problema na tela de "Cadastro de Períodos Contábeis"
+================================================================================
+CM$VER      2.10.03     17/06/1999
+--------------------------------------------------------------------------------
+* Acertado o problema no Raltório Balancete de Contas x Sub-Contas
+================================================================================
+CM$VER      2.10.02     16/06/1999
+--------------------------------------------------------------------------------
+* Acertado problemas no relatório Demonstrativo de Resultado 4.
+* Incluida a possibilidade de digitar movimento no exercício atual na tela de 
+   cadastro de saldo de movimentos anterior (Contas estatísticas).
+================================================================================
+CM$VER      2.10.01     15/06/1999
+--------------------------------------------------------------------------------
+* Criado o Relatório "Demonstrativo de Resultados 6" - modelo 
+com as informações do Balancete
+* Criado o Relatório "Conferência de Cotas por Atividade/Projeto"
+* Criada a tela de inclusão de Saldos Anteriores de Cotas por Atividade/Projeto
+* Criada a tela de Geração de Dados de Cotas por Atividade/Projeto
+* Criado o Relatório "Balancete Analítico de Ativ./Proj. por Sub-Contas"
+* Inclusão do Indicador de "Linha Monetária" na tela de cadastro de 
+Linhas do Demonstrativo
+* Alterações no Banco de Dados (necessário rodar scripts)
+================================================================================
+CM$VER      2.09.04     07/06/1999
+--------------------------------------------------------------------------------
+* Incluída a possibilidade de se filtrar as planilhas por faixa, 
+   na tela de Integração por planilhas
+* Incluída a possibilidade de se filtrar os Demonstrativos de Resultados por 
+   Centro de Custo e Atividade/Projeto
+* Incluída a possibilidade de se filtrar os Demonstrativos de Resultados por faixa
+   de períodos contábeis
+* Incluída a possibilidade de se imprimir a logomarca da empresa proprietária 
+   nos Demosntrativos de Resultados
+* Inclusão do módulo IntegraBack (programação apenas) 
+================================================================================
+CM$VER      2.09.03     31/05/1999
+--------------------------------------------------------------------------------
+* Corrigido o problema do relatório "Balancete de Contas x Sub-Contas"
+* Acertado o tamanho do campo "Demonstrativo" nos relatórios de 
+"Demonstrativo de Resultados"
+* Acertado o problema de exclusão de Contas Contábeis
+================================================================================
+CM$VER      2.09.02     29/05/1999
+--------------------------------------------------------------------------------
+* Corrigido o problema de visualização dos Centros de Custo na tela de Planilhas 
+   Pré-Prontas
+* Corrigido o problema no filtro de Centros de Custo no relatório "Balancete de 
+   Contas x Centros de Custo"
+* Inclusão da visualização do nome dos Centros de Custo nos relatórios "Orçado 
+   x Realizado" e "Balancete de Contas x Centros de Custo"
+* Inclusão da faixa de períodos nos filtro dos relatórios "Balancete", "Balancete
+   de Contas x Centros de Custo", "Balancete de Contas x Ativ./Proj.", "Balancete
+   de Contas x Sub-Contas"
+* Inclusão da possibilidade de se editar o Título e o Sub-Título nos relatórios dos
+   grupos "Balancetes", "Razões" e "Operacionais"
+* Inclusão do filtro de faixa de Contas Contábeis no relatório de "Planilhas 
+   Lançadas"
+* Inclusão da coluna de planilhas integradas no relatório "Razão Analítico"
+* Acertado o cadastro das colunas do demonstrativo.
+ 
+================================================================================
+CM$VER      2.09.01     25/05/1999
+--------------------------------------------------------------------------------
+* Tela de Cadastro de Sub-Grupos refeita
+* Tela de Cadastro de Históricos Padrão refeita
+* Tela de Cadastro de Planos refeita
+* Tela de Cadastro de Saldos Anteriores refeita
+* Criado o relatório "Demonstrativo de Resultados modelo 5" (demonstrativo 
+   colunado por meses)
+* Incluído o cadastro de Conta x Sub-Contas na tela de Cadastro de 
+   Contas Contábeis
+* Corrigido o problema da visualização dos Centros de Custo na tela de 
+   Cadastro de Orçamento Contábil
+* Corrigido o problema da visualização dos Centros de Custo na tela de 
+   Cadastro de Movimento do Exercício Anterior
+* Corrigido o problema na inclusão da tela de Cadastro de Períodos Contábeis
+* Criação da tabela CONTASXSUBC no banco de dados (rodar script)
+================================================================================
+CM$VER      2.08.06     20/05/1999
+--------------------------------------------------------------------------------
+* Criado o relatório "Balancete de Contas x Atividade/Projeto"
+* Tela de Cadastro de Períodos Contábeis refeita;
+* Tela de Cadastro de Contas Contábeis refeita;
+* Tela de Cadastro de Centros de Custo x Contas Contábeis refeita - agora 
+   ela faz parte da tela de Cadastro de Contas Contábeis
+* Incluída a possibilidade de se filtrar apenas uma planilha pelo número na tela
+   de Integração por Planilhas
+* Liberada a nova versão da ULancContab
+================================================================================
+CM$VER      2.08.05     17/05/1999
+--------------------------------------------------------------------------------
+* Criada a tela de Cadastro de Movimentação do Exercício Anterior
+* Criado o relatório "Balancete de Contas x Sub-Contas"
+================================================================================
+CM$VER      2.08.04     17/05/1999
+--------------------------------------------------------------------------------
+* Tela de Cadastro de Orçamento refeita
+* Inclusão dos totalizadores do Relatório Orçado x Realizado
+* Acertado um problema na tela de Cadastro de Planilhas Pré-Prontas
+* Acertado um problema na tela de Cadastro de Planilhas de Rateio
+* Acertado um problema na tela de Cadastro de Planilhas Automáticas
+* Tela de Importação de Saldos Anteriores refeita
+* Criado o relatório "Balancete de Contas x Centros de Custo"
+* Criado o relatório "Conferência de Lançamentos sem Sub-Contas"
+================================================================================
+CM$VER      2.08.03     11/05/1999
+--------------------------------------------------------------------------------
+* Acertado o problema da tela de Orçamento na abertura
+* Acertado o problema da tela de Cadastro Planilhas Pré-Prontas 
+* Acertado o problema da tela de Parâmetros do Sistema
+* Acertado o problema da tela de Planilha|Rateio
+* Acertado o problema da Importação do Plano de Contas
+================================================================================
+CM$VER      2.08.02     06/05/1999
+--------------------------------------------------------------------------------
+* Correções na tela de Cadastro do Orçamento
+* Correções na tela de Lançamentos
+================================================================================
+CM$VER      2.08.01     06/05/1999
+--------------------------------------------------------------------------------
+* Incluído o relatório de Demonstrativo de Resultado modelo 04
+* Modificação na ordenação (nome da subconta em vez do código) no Razão 
+   Analítico por Sub-Contas
+* Alterações na tela de Importação de Arquivos RM (no. de colunas variável)
+* Tela de Cadastro de Planilhas Pré-Prontas refeita
+* Acertada a tela de Lançamentos Pré-Prontos
+* Incluída a tela de Cadastro de Colunas do Demonstrativo
+* Incluída a tela de Cadastro de Colunas x Linhas do Demonstrativo
+* Alterações na tela de Cadastro de Demonstrativo
+* Acertada a tela de Cadastro do Plano de Contas
+* Acertada a tela de Parâmetros do Sistema
+* Refeita a tela de Encerramento do Período
+* Alterações na ULancContab (TQuery -> TwwQuery)
+* Alterações na tela de lançamentos
+================================================================================
+CM$VER      2.07.04     29/04/1999
+--------------------------------------------------------------------------------
+* Melhoria na performance do razão analítico e do razão por centro de custo.
+* Acertado o Encerramento do Período
+* Refeita a tela de Encerramento das Contas de Resultado
+* Refeita a tela de Encerramento do Exercício
+================================================================================
+CM$VER      2.07.03     27/04/1999
+--------------------------------------------------------------------------------
+* Relatório 'Razão por Centro de Custo' refeito
+* Correções na consulta da tela de Lançamentos
+* Alterações de performance nos relatórios 'Razão Analítico' e 'Razão Sintético'
+================================================================================
+CM$VER      2.07.02     26/04/1999
+--------------------------------------------------------------------------------
+* Relatório 'Razão Sintético' refeito
+* Tela de Integração por Planilhas refeita
+* Correções na tela de Cadastro de Elementos do Demonstrativo 
+  (Centro de Custo com seleção livre)
+* Correções na tela de Atualização do Saldo das Sintéticas
+* Retirada da opção Relatórios do Menu Principal
+================================================================================
+CM$VER      2.07.01     23/04/1999
+--------------------------------------------------------------------------------
+* Relatório 'Demonstrativo de Resultados modelo 03' criado
+* Relatório 'Balanço' refeito
+* Relatório 'Diário' refeito
+* Relatório 'Saldos Iniciais' refeito
+* Relatório 'Contas Contra sua Natureza' refeito 
+   (agora é uma opção do 'Balancete')
+* Retirada das chamadas dos relatórios antigos no menu Relatórios
+* Tela de Importação de Plano de Contas corrigida
+* Tela de Importação de Saldos Anteriores refeita
+* Tela de Integração de Planilhas por Dia refeita
+* Alterações na ULancContab
+* Alterações em diversas telas devido à troca do nome dos campos (17 caracteres)
+================================================================================
+CM$VER      2.06.02     19/04/1999
+--------------------------------------------------------------------------------
+* Acertado o relatório 'Razão Analítico'.
+* Acertado o relatório 'Planilhas Lançadas'.
+* Tela de importação de lançamentos via planilha excel refeita.
+* Incluídos os relatórios de Demonstrativo de Resultado modelo 01 e 02. 
+================================================================================
+CM$VER      2.06.01     16/04/1999
+--------------------------------------------------------------------------------
+* Tela de Cadastro do Demonstrativo refeita
+* Tela de Cadastro dos Elementos do Demonstrativo refeita
+* Relatório de Demonstrativo de Resultados refeito
+* Acertado o balancete quando não tinha saldo anterior.
+* Incluida faixa de centros de custo nos Relatórios Razão Analítico e no Balancete.
+* Criação em consultas/relatórios o Relatório de Orçado x Realizado no modelo do Plano de Contas. 
+* Inclusão de novas opções de filtro nos relatórios Plano de Contas e Balancete
+================================================================================
+CM$VER      2.05.34     09/04/1999
+--------------------------------------------------------------------------------
+* Alterado o balancete para sair as contas sem movimentação, mas com saldo.
+================================================================================
+CM$VER      2.05.33     08/04/1999
+--------------------------------------------------------------------------------
+* Tela de Atualização de Contas Sintéticas refeita
+* Retorno ao estado antigo da rotina de Planilhas Automáticas
+* Alterações na ULancaContab
+================================================================================
+CM$VER      2.05.32     07/04/1999
+--------------------------------------------------------------------------------
+* Alterações na rotina de Planilhas Automáticas
+* Alterações na rotina de Importação de Lançamentos
+================================================================================
+CM$VER      2.05.31     06/04/1999
+--------------------------------------------------------------------------------
+* Relatório Listagem de Sub-Contas refeito (Consultas|Relatórios|Listagens)
+* Relatório Listagem de Históricos Padrão refeito (Consultas|Relatórios|Listagens)
+* Relatório Listagem de Períodos refeito (Consultas|Relatórios|Listagens)
+* Relatório Listagem de Contas por Centro de Custo refeito (Consultas|Relatórios|Listagens)
+* Retirada dos relatórios antigos e repostos do menu Relatórios no menu Principal
+================================================================================
+CM$VER      2.05.30     06/04/1999
+--------------------------------------------------------------------------------
+* Acertada a atualização de saldo das contas analíticas.
+================================================================================
+CM$VER      2.05.29     01/04/1999
+--------------------------------------------------------------------------------
+* Alteração da busca de Consulta de Lançamentos com inclusão de
+range de datas e de valores
+* Inclusão da opção de Gravar os valores da importação mesmo com erros
+* Acertos na tela de Cadastro de Orçamento
+* Acertos na tela de Consistência de Regras
+* Acertos na tela de Encerramento de Contas de Resultado
+================================================================================
+CM$VER      2.05.28     30/03/1999
+--------------------------------------------------------------------------------
+* Criação da tela de Pesquisa de Lancamentos dos Saldos (Consultas|Saldos -> 
+botão Lançamentos)
+* Alterações na rotina de Importação de Lançamentos
+* Alterações nas telas de Consulta de Saldos e Consulta de Lançamentos
+* Alterações nas mensagens geradas pela função LancaContabil
+================================================================================
+CM$VER      2.05.27     26/03/1999
+--------------------------------------------------------------------------------
+* Criação dos filtros avançados no Relatório Balancete
+* Criação do Relatório Plano de Contas
+================================================================================
+CM$VER      2.05.26     26/03/1999
+--------------------------------------------------------------------------------
+* Impressão da conta contábil em outra língua nos relatórios Balancete e Plano de 
+Contas
+* Inclusão dos filtros de Módulo, Tipo de Operação e Código do Histórico no 
+Razão analítico
+================================================================================
+CM$VER      2.05.25     25/03/1999
+--------------------------------------------------------------------------------
+* Quebra de página por sub-conta no relatório de Razão Analítico 
+* Busca das planilhas pelo código delas (PLNPLANIL), e não pelo sequence 
+(PLNCODIGO) na tela de parâmetros do relatório Planilhas Lançadas
+* Exibição do código da planilha em vez do número nas telas de Pesquisa de 
+Lançamentos, Planilhas Pré-Prontas e Importação de Lançamentos Externos
+* Unprepare nas telas de parâmetros de Relatórios
+Histórico de alterações efetuadas no módulo Contabilidade
+================================================================================
+CM$VER      2.05.24     24/03/1999
+--------------------------------------------------------------------------------
+* Acertado o relatório de planilhas lançadas
+================================================================================
+CM$VER      2.05.23     23/03/1999
+--------------------------------------------------------------------------------
+* Criação do Relatório de Planilhas Lançadas
+================================================================================
+CM$VER      2.05.22     23/03/1999
+--------------------------------------------------------------------------------
+* Correções nos Relatórios Balancete e Razão Analítico
+* Inclusão dos filtros de Atividade/Projeto nos relatórios acima
+================================================================================
+CM$VER      2.05.21     22/03/1999
+--------------------------------------------------------------------------------
+* Implantação da ordenação de Sub-Conta por código ou descrição de acordo
+com um parâmetro da Contabilidade na tela de Planilha|Lançamento
+* Correção do relatório Razão Sintético (FIELD SUM(L.LACVALOR) NOT
+FOUND)
+* Tela de Cadastro de Sub-Conta REFEITA
+* Inclusão da exibição e busca do campo PLNPLANIL na tela de consulta de
+Lançamentos
+* Tela de Importação de Lançamentos externos REFEITA (com exibição dos
+números das Planilhas e de suas datas na tela após a importação).
+================================================================================
+CM$ALT}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

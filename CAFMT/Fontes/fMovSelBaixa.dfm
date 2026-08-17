@@ -1,0 +1,1085 @@
+inherited frmMovSelBaixa: TfrmMovSelBaixa
+  Left = 16
+  Top = 111
+  HelpContext = 70031
+  BorderIcons = [biSystemMenu, biMinimize]
+  Caption = 'Seleção de Bens para Baixa'
+  ClientHeight = 431
+  ClientWidth = 755
+  PixelsPerInch = 96
+  TextHeight = 13
+  object Label3: TLabel [0]
+    Left = 360
+    Top = 128
+    Width = 69
+    Height = 13
+    Caption = 'Localização'
+  end
+  inherited pnlFundo: TPanel
+    Top = 35
+    Width = 755
+    Height = 361
+    inherited pnlMestre: TPanel
+      Width = 745
+      Height = 95
+      object Label1: TLabel
+        Left = 16
+        Top = 5
+        Width = 89
+        Height = 13
+        Caption = 'Termo de Baixa'
+      end
+      object Processo: TLabel
+        Left = 176
+        Top = 5
+        Width = 53
+        Height = 13
+        Caption = 'Processo'
+      end
+      object Label2: TLabel
+        Left = 611
+        Top = 6
+        Width = 85
+        Height = 13
+        Caption = 'Data do Termo'
+      end
+      object Label4: TLabel
+        Left = 16
+        Top = 48
+        Width = 141
+        Height = 13
+        Caption = 'Responsável pelo Termo'
+      end
+      object Label6: TLabel
+        Left = 387
+        Top = 48
+        Width = 69
+        Height = 13
+        Caption = 'Destinatário'
+      end
+      object dbeSbxTermo: TwwDBEdit
+        Left = 16
+        Top = 21
+        Width = 145
+        Height = 21
+        DataField = 'SBXTERMO'
+        DataSource = ds
+        TabOrder = 0
+        UnboundDataType = wwDefault
+        WantReturns = False
+        WordWrap = False
+      end
+      object dbeSbxProcesso: TwwDBEdit
+        Left = 176
+        Top = 21
+        Width = 425
+        Height = 21
+        DataField = 'SBXPROCESSO'
+        DataSource = ds
+        TabOrder = 1
+        UnboundDataType = wwDefault
+        WantReturns = False
+        WordWrap = False
+      end
+      object dbeSbxData: TCMDateTimePicker
+        Left = 611
+        Top = 21
+        Width = 121
+        Height = 21
+        CalendarAttributes.Font.Charset = DEFAULT_CHARSET
+        CalendarAttributes.Font.Color = clWindowText
+        CalendarAttributes.Font.Height = -11
+        CalendarAttributes.Font.Name = 'MS Sans Serif'
+        CalendarAttributes.Font.Style = []
+        ButtonStyle = cbsCustom
+        DataField = 'SBXDATA'
+        DataSource = ds
+        Epoch = 1950
+        ButtonGlyph.Data = {
+          06050000424D06050000000000003604000028000000100000000D0000000100
+          080000000000D000000000000000000000000001000000000000000000000000
+          80000080000000808000800000008000800080800000C0C0C000C0DCC000F0CA
+          A6000020400000206000002080000020A0000020C0000020E000004000000040
+          20000040400000406000004080000040A0000040C0000040E000006000000060
+          20000060400000606000006080000060A0000060C0000060E000008000000080
+          20000080400000806000008080000080A0000080C0000080E00000A0000000A0
+          200000A0400000A0600000A0800000A0A00000A0C00000A0E00000C0000000C0
+          200000C0400000C0600000C0800000C0A00000C0C00000C0E00000E0000000E0
+          200000E0400000E0600000E0800000E0A00000E0C00000E0E000400000004000
+          20004000400040006000400080004000A0004000C0004000E000402000004020
+          20004020400040206000402080004020A0004020C0004020E000404000004040
+          20004040400040406000404080004040A0004040C0004040E000406000004060
+          20004060400040606000406080004060A0004060C0004060E000408000004080
+          20004080400040806000408080004080A0004080C0004080E00040A0000040A0
+          200040A0400040A0600040A0800040A0A00040A0C00040A0E00040C0000040C0
+          200040C0400040C0600040C0800040C0A00040C0C00040C0E00040E0000040E0
+          200040E0400040E0600040E0800040E0A00040E0C00040E0E000800000008000
+          20008000400080006000800080008000A0008000C0008000E000802000008020
+          20008020400080206000802080008020A0008020C0008020E000804000008040
+          20008040400080406000804080008040A0008040C0008040E000806000008060
+          20008060400080606000806080008060A0008060C0008060E000808000008080
+          20008080400080806000808080008080A0008080C0008080E00080A0000080A0
+          200080A0400080A0600080A0800080A0A00080A0C00080A0E00080C0000080C0
+          200080C0400080C0600080C0800080C0A00080C0C00080C0E00080E0000080E0
+          200080E0400080E0600080E0800080E0A00080E0C00080E0E000C0000000C000
+          2000C0004000C0006000C0008000C000A000C000C000C000E000C0200000C020
+          2000C0204000C0206000C0208000C020A000C020C000C020E000C0400000C040
+          2000C0404000C0406000C0408000C040A000C040C000C040E000C0600000C060
+          2000C0604000C0606000C0608000C060A000C060C000C060E000C0800000C080
+          2000C0804000C0806000C0808000C080A000C080C000C080E000C0A00000C0A0
+          2000C0A04000C0A06000C0A08000C0A0A000C0A0C000C0A0E000C0C00000C0C0
+          2000C0C04000C0C06000C0C08000C0C0A000F0FBFF00A4A0A000808080000000
+          FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00010000000000
+          000000000000000000FFFF00FFFFFFFFFFFFFFFFFFFFFFFF00FFFF00FF07A407
+          A407A4F9A407A4FF00FFFF00FFA407A407A4F9A4F9A407FF00FFFF00FF07A407
+          A407A4F9A407A4FF00FFFF00FFA407A407A407A407A407FF00FFFF00FF07A407
+          A407A407A407A4FF00FFFF00FFA407A407A407A407A407FF00FFFF00FFFFFFFF
+          FFFFFFFFFFFFFFFF00FFFF00FF04FC04FC04FCA4A4A4A4FF00FFFF00FFFC04FC
+          04FC04A4A4A4A4FF00FFFF00FFFFFFFFFFFFFFFFFFFFFFFF00FFFF0000000000
+          000000000000000000FF}
+        ShowButton = True
+        TabOrder = 2
+      end
+      object dbeResponsavel: TwwDBEdit
+        Left = 16
+        Top = 64
+        Width = 337
+        Height = 21
+        DataField = 'DESCRESPONSAVEL'
+        DataSource = dsResp
+        TabOrder = 5
+        UnboundDataType = wwDefault
+        WantReturns = False
+        WordWrap = False
+      end
+      object bbtnSelResp: TBitBtn
+        Left = 352
+        Top = 64
+        Width = 21
+        Height = 21
+        TabOrder = 3
+        OnClick = bbtnSelRespClick
+        Glyph.Data = {
+          76010000424D7601000000000000760000002800000020000000100000000100
+          0400000000000001000000000000000000001000000010000000000000000000
+          80000080000000808000800000008000800080800000C0C0C000808080000000
+          FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00777777777887
+          777777777777F88F7777777777700F077777777777F8878F77777777700FFF07
+          77777777F8877787F77777700FFFFFF077777778877777F8F7777778FFFFFCF0
+          77777F78F77FF8787F771778FFCCCFFF07778FF87F88877F8F7711778FFFFFCF
+          077788FF8F77FF8787F711178FFCCCFFF077888F8FF88877F87F71110000FFFC
+          FF07788888887FF877877710E7E706CFFFF077887777888777F8770E7E7E70FF
+          F887778F777778F7F8877707E7E7E0F88777778F777778F88777770E7E7E7087
+          7777778F7777788777777707E7E7E07777777787F7777877777777707E7E0777
+          777777787FFF8777777777770000777777777777888877777777}
+        NumGlyphs = 2
+      end
+      object dbeDestBaixa: TwwDBEdit
+        Left = 388
+        Top = 64
+        Width = 323
+        Height = 21
+        DataField = 'DESCDESTINATARIO'
+        DataSource = dsDestBaixa
+        TabOrder = 6
+        UnboundDataType = wwDefault
+        WantReturns = False
+        WordWrap = False
+      end
+      object bbtnDestBaixa: TBitBtn
+        Left = 711
+        Top = 64
+        Width = 21
+        Height = 21
+        TabOrder = 4
+        OnClick = bbtnDestBaixaClick
+        Glyph.Data = {
+          76010000424D7601000000000000760000002800000020000000100000000100
+          0400000000000001000000000000000000001000000010000000000000000000
+          80000080000000808000800000008000800080800000C0C0C000808080000000
+          FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00777777777887
+          777777777777F88F7777777777700F077777777777F8878F77777777700FFF07
+          77777777F8877787F77777700FFFFFF077777778877777F8F7777778FFFFFCF0
+          77777F78F77FF8787F771778FFCCCFFF07778FF87F88877F8F7711778FFFFFCF
+          077788FF8F77FF8787F711178FFCCCFFF077888F8FF88877F87F71110000FFFC
+          FF07788888887FF877877710E7E706CFFFF077887777888777F8770E7E7E70FF
+          F887778F777778F7F8877707E7E7E0F88777778F777778F88777770E7E7E7087
+          7777778F7777788777777707E7E7E07777777787F7777877777777707E7E0777
+          777777787FFF8777777777770000777777777777888877777777}
+        NumGlyphs = 2
+      end
+    end
+    inherited tbcDetalhe: TTabControlDetalhe
+      Top = 100
+      Width = 745
+      Height = 256
+      Tabs.Strings = (
+        'Bens')
+      inherited Dock973: TDock97 [0]
+        Width = 737
+        Background.Data = {
+          760F0000424D760F0000000000007600000028000000800000003C0000000100
+          040000000000000F000000000000000000001000000000000000000000008080
+          80000080000000808000800000008000800080800000C0C0C000808080000000
+          FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00777777777777
+          777777777777171717777777777777177771777777777777777077F7FF7FFFF7
+          77F77F77F7F7F7F7F7F7F7F7F777777777771777177777777777777777777777
+          777777777771717717777777777777777717777777777777777777777FFFFF7F
+          7F7F77F7F7F7F7F7F7F7F7F77777777777777717177777777777777777777777
+          77777777777777171777777777777777717777777777777777777777777FF7FF
+          7F77777777F7F7FF7F7F77F77F77777777777777177777777777777777777777
+          7777777777771771777777777777777771777777777777777777777777777FFF
+          FF7F7777F7F7F7F7F7F77F777777777777777771717777777777777777777777
+          777777777777771777777777777777777777777777777777777777777777777F
+          F7F7F7F777F7F7F7F7F7F7F7F777777777777777177777777777777777777777
+          7777777777777777777777777777777777777777777777777777777777777777
+          FFFF7F7F7F7F7F7F7F7F777777777F7777777777777777777777777777777777
+          7777777777777777777777777777777777777777777777777777777777777777
+          7FF7F7F7F7F7F7FFFFF7F7F7F7F7777777777777717717177777777777777777
+          7777777777777777777777777777777777777777777777777777777777777771
+          77FFFFF7F7777F77F7F7F77F77777F7777777777777171777777777777777777
+          7777777777777177777777777777777777777777777777777777777777777777
+          777FFFFFF7F7F77F7F7FF7F7F77F777777777777777777177777777777777777
+          7777777777777777771777777777777777777777777777777777777777777777
+          7177FFFF7F7F77F7F7FF7FF7F7F7F77F77777777777171717777777777777777
+          7777777777777717771777777777777777777777777777777777777777777777
+          77777FFFFF7F7777F7F7FF7FF7F77F7777777777777777777777771777777777
+          7777777777777771777777777777777777777777777777777777777777777777
+          777777FFFF7F77F7F7F7F7F7F7F7F77F7F777777777771717771777177177777
+          7777777777777777777777777777777777777777777777777777777777777777
+          777777FFFFFF7F77F7F7F7FF7FF7F7F7777F7777777777771717717777777777
+          7777777777777777177777777777777777777777777777777777777777777777
+          7777777FFFF7F7F777F7F7F7F7F7F777F7777F77777777717771777777777777
+          7777777777777777717777777777777777777777777777777777777777777777
+          7777777F7FFF7F77F7F77F7FFF7F7F7F777F7777777777171717717777777F77
+          7777777777777777777771777777777777777777777777777777777777777777
+          7777777FFFF7F7777777F7F7F7F7F7F77F77F7777777777771771777777F7777
+          F7F7777777777777771777777777177777777777777777777777777777777777
+          77777177FFFFF7F777F77F7F7FF7F7F7F77F77F777777777171717177777F777
+          777F7F7777777777777177177771717777777777777777777777777777777777
+          77777777FFFF7F777777F7F7FF7F7F7F7F7F7F77777777777771717717777777
+          77777F7F77777777777717771777777777777777777777777777777777777777
+          777777177FFFF7F7F77F7F7FF7F7FF7F7F7F7F7F777777777717177177777777
+          1777777777777777777771717717777177777777777777777777777777777777
+          777777777FFFF7F77777777F7F7FF7F7F7F7F777F77777777771771717777771
+          7777777777771777777777177771777777777777777777777777777777777777
+          77777771777F7F7F77777F7F7F7F7F7F7F7F7F7F777777777777771717717717
+          7777777777777777777771777777777777777777777777777777777777777777
+          777777777777F7F7F7F77F7F7F7F7F7F7F7F7777777F77777777717717171717
+          7777777777171777777717777777777777777777777777777777777777777777
+          77777777777777F7F77777777F7F7F7F7F7F7F7F7F7777777777777777717777
+          7777777777777177777771777777777777777777777777777777777777777777
+          777777777777777F7F77777F7F7F7F7F7F7F7F777777F77F7777771777717777
+          7777777777777777777771177777777777777777777777777777777777777777
+          7177777777777777F7F7777777F77F7F7FF7F7F7F7F777777777777777717777
+          7777777777777777777777777777777777777777777777777777777777777777
+          7777777777777777777777777F77F7F7F7F7F7F77777F7777777777771777777
+          7777777777777777777771717777777777777777777777777777777777777777
+          777777177777771777777777777F7F7F7F7F7F7F7F7F777F7777777777717777
+          7777777777777777777777171777777777777777777777777777777777777777
+          71777777777777777777777777F7F7F7F7F7F7F7F7F77F777777777777177777
+          7777777777777777777777177777777777777777777777777777777777777717
+          77777777777777717777777777777F77F7F7F7F7F7F7F7777777777777777777
+          77777777777777777777777777777777777F7777777777777777777777777171
+          7171777777777777171777777777F77F7F7F7F7F7F7F7F777777777777777777
+          771777777777777777777777777777777177F777777777777777777777777717
+          171777177777777717771777777777F7F7F7F7FF7F7F77F77777777777777171
+          7777777777777777777777777777777777777F77777777777777777777777777
+          77717177777777777171717177777F77F7F7F7F7F7F7F77F7777777777777171
+          7177777177777777777777777777777777777FF7F77771777777777777777777
+          1717777777777777771777777777777F7F7F7F7F7F7F77F7F777777777777777
+          7777777717777777777777777777777777777777777777777777777777777777
+          717777777777777777777777717777F77F7F7F7F7F7F7F7F77F7777777777771
+          7177777777777777777777777777777777771777777777777777777777777777
+          77177777777777777777777777777777F7F77F7F7F7F7F7FF777F77777777717
+          777777F777777777777777777777777777777777717177717777777777777777
+          77177777777777777777777771777777777F77F7F7F7F7F777F7777777777777
+          171777F7F7777777777777177777777777777777777777777777777777777777
+          777777777777777777777777177177777F77F7F7F7F7F7F7F7F7F7F777777777
+          7777777F77777777777777777777777777777777777777777777777777777777
+          77777777777777777777777771777777777F77F7F7F7F7F7F7F77777F7777777
+          7717777F77777777777777717177777777777777777777777777777777777777
+          7777777777777777777777777717777777777F7F7F7F7F7F7777F7F777777777
+          777777777F777777777777777717777777777777777777777777777777777777
+          777777777777777777777777777777777777F7F7F7F7F7F7F7F7F77777777777
+          7777777777777777777777771777777777777777777777777777777777777777
+          77777777777777777777777777717771777777F7F77F7F7F7F7F77F777777777
+          7777777777777777777777777717177777777771777777777777777777777777
+          7777777777777777777777777777177777777F7F77F7F7F7F7F77F777F777777
+          7777777777777177777777777777777777777717177777777777777777777777
+          77777777777777777177777777717171777777777F7F7FF7F7F7F77F77777777
+          7777777777717777777777777717177777777777777777777777777777777777
+          777777777777777777177777777711717777777F7F7F7F7F7F77F7F7F7F77777
+          777777777717171717777777777777777777777771777777777F777777777777
+          777777777777777777777777777117117777777777F77F7F7F7F77F77777F777
+          77777777171777777777777777777777777777777777777777F7F77777777777
+          77777777777777777771777777771117177777777F77F7F7F777F7F7F7F77777
+          7777777777171777777777777777777777777777777777777777777777777777
+          777777777777777777777777777771777777777777F77F7F7F7F7F7F777F7777
+          7777777717177777777777777777777777777777777777777777777777777777
+          77777777777777777777777777777777777177777777F77F7F77F7F7F7F77F77
+          7777777777171777777777777777777777777777777777777777777777777777
+          7777777777777777777777777777777777177777777F7F7F7F7F7F7F777F7777
+          77777777777777777F7F77777717777777777777777777777777777771777777
+          7777777777777777777777777777777777717777777777F7F7F77F7F7F7F77F7
+          77777777777777777F7F7F777777777777777777777777777777771777777777
+          77777777177777777777777777771777777717777777F7F7F77F7F7F7F77F777
+          777777777777777777FFF77F7777717777777777777777777777777777177777
+          77777777777777777777777777771777777771777777777777F7F7F7F77F77F7
+          77F7777777777777777777F77777777777777777777777777777777777777777
+          77777777777777777777777777777777777777171777777F7F77F7F7F7F77F77
+          F77777777777777777777777F7F7777777777777777777777777777777777777
+          777777777717777777777777777777777777717777777777777F7F7F7F77F77F
+          77F77777777F77777717777777F7777777777777777777777777777777777777
+          77777777777177777777777777777777777777777177777777F7F7F77F7F77F7
+          7F77F77777777F77777717777777777777777777777777777777777777777777
+          7777777777771777777777777777777777777777777777777F77F7F7F777F777
+          F77F777777777777771771777777771777777777777777777777777777777777
+          777777777777777771777777777777777777777777177777777F7F7F7F7F77F7
+          F7F7777777777777777717171777777777777777777777777777777777777777
+          77777777777771777777777777777177777777777771777777777777F777F777
+          7777777777777777777171717177771777777777777777777777777777777777
+          77777777777777777777777777777777777777777777777777777F7F7F7F7777
+          F77F77F777777777777771771717177777777777777777777777777777777777
+          7777777777777777777777777777777777777777777177777777}
+        inherited tb97BotoesDetalhe: TToolbar97
+          inherited sbtnInsDet: TToolbarButton97
+            Flat = False
+          end
+          inherited sbtnAltDet: TToolbarButton97
+            Flat = False
+          end
+          inherited sbtnExcluiDet: TToolbarButton97
+            Flat = False
+          end
+        end
+        object Toolbar972: TToolbar97
+          Left = 79
+          Top = 0
+          Caption = 'tb97BotoesDetalhe'
+          DockPos = 79
+          TabOrder = 1
+          object bbtnGeraDet: TBitBtn
+            Left = 0
+            Top = 0
+            Width = 25
+            Height = 25
+            Hint = 'Carrega o grid com uma seleção de bens|'
+            ParentShowHint = False
+            ShowHint = True
+            TabOrder = 0
+            OnClick = bbtnGeraDetClick
+            Glyph.Data = {
+              76010000424D7601000000000000760000002800000020000000100000000100
+              0400000000000001000000000000000000001000000010000000000000000000
+              800000800000008080008000000080008000808000007F7F7F00BFBFBF000000
+              FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF003FF0000000F0
+              000033F77777773777773FFF0CCC0FF09990333F73F37337F33733FFF0C0FFF0
+              99903333F7373337F337333FFF0FFFF0999033333F73FFF7FFF73333FFF000F0
+              0000333333F77737777733333F07B70FFFFF3333337F337F33333333330BBB0F
+              FFFF3FFFFF7F337F333300000307B70FFFFF77777F73FF733F330EEE033000FF
+              0FFF7F337FF777337FF30EEE00033FF000FF7F33777F333777FF0EEE0E033300
+              000F7FFF7F7FFF77777F00000E00000000007777737773777777330EEE0E0330
+              00FF337FFF7F7F3777F33300000E033000FF337777737F3777F333330EEE0330
+              00FF33337FFF7FF77733333300000000033F3333777777777333}
+            NumGlyphs = 2
+          end
+          object bbtnLimpar: TBitBtn
+            Left = 25
+            Top = 0
+            Width = 25
+            Height = 25
+            Hint = 'Limpa o grid|'
+            ParentShowHint = False
+            ShowHint = True
+            TabOrder = 1
+            OnClick = bbtnLimparClick
+            Glyph.Data = {
+              76010000424D7601000000000000760000002800000020000000100000000100
+              0400000000000001000000000000000000001000000010000000000000000000
+              8000008000000080800080000000800080008080000080808000C0C0C0000000
+              FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00888888888888
+              88888888888888FF8888888888888778888888888888F77F8888888888800F08
+              8888888888F7787F88888888800FFF0888888888F7788878F88888800FFFFFF0
+              88888887788888F7F8888887FFFFFCF088888887FFF887878F888811111CCFFF
+              08888877777F788F7F8881999991FFCF088887777777F87878F8999999991CFF
+              F088777777777F88F78F998F9FF91FFCFF0877FF78877F8788789998FF991CCF
+              FFF0777F88777F7888F7999FF8991FFFF77877788F777F88F778998F9FF91FF7
+              788877FF7FF778F7788889999991777888888777777787788888889999988888
+              8888887777788888888888888888888888888888888888888888}
+            NumGlyphs = 2
+          end
+        end
+      end
+      inherited Dock974: TDock97 [1]
+        Left = 651
+        Height = 197
+      end
+      inherited pgctrlDetalhe: TPageControl [2]
+        Width = 647
+        Height = 197
+        inherited tbsDet: TTabSheet
+          Caption = 'Bens'
+          inherited pnlControlesDet: TPanel [0]
+            Width = 639
+            Height = 169
+            BevelInner = bvLowered
+            object Label26: TLabel
+              Left = 16
+              Top = 8
+              Width = 127
+              Height = 13
+              Caption = 'Placa de Tombamento'
+            end
+            object Label5: TLabel
+              Left = 16
+              Top = 56
+              Width = 51
+              Height = 13
+              Caption = 'Conjunto'
+            end
+            object Label7: TLabel
+              Left = 16
+              Top = 104
+              Width = 69
+              Height = 13
+              Caption = 'Localização'
+            end
+            object Label22: TLabel
+              Left = 184
+              Top = 8
+              Width = 104
+              Height = 13
+              Caption = 'Descrição do Bem'
+            end
+            object Label17: TLabel
+              Left = 320
+              Top = 104
+              Width = 74
+              Height = 13
+              Caption = 'Responsável'
+            end
+            object edPlaca: TEdit
+              Left = 16
+              Top = 24
+              Width = 137
+              Height = 21
+              TabOrder = 0
+              Text = 'edPlaca'
+              OnExit = edPlacaExit
+            end
+            object bbtnSelBem: TBitBtn
+              Left = 153
+              Top = 24
+              Width = 21
+              Height = 21
+              TabOrder = 1
+              OnClick = bbtnSelBemClick
+              Glyph.Data = {
+                76010000424D7601000000000000760000002800000020000000100000000100
+                0400000000000001000000000000000000001000000010000000000000000000
+                80000080000000808000800000008000800080800000C0C0C000808080000000
+                FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00777777777887
+                777777777777F88F7777777777700F077777777777F8878F77777777700FFF07
+                77777777F8877787F77777700FFFFFF077777778877777F8F7777778FFFFFCF0
+                77777F78F77FF8787F771778FFCCCFFF07778FF87F88877F8F7711778FFFFFCF
+                077788FF8F77FF8787F711178FFCCCFFF077888F8FF88877F87F71110000FFFC
+                FF07788888887FF877877710E7E706CFFFF077887777888777F8770E7E7E70FF
+                F887778F777778F7F8877707E7E7E0F88777778F777778F88777770E7E7E7087
+                7777778F7777788777777707E7E7E07777777787F7777877777777707E7E0777
+                777777787FFF8777777777770000777777777777888877777777}
+              Margin = 0
+              NumGlyphs = 2
+            end
+            object dbmDesBem: TDBMemo
+              Left = 184
+              Top = 24
+              Width = 417
+              Height = 21
+              DataField = 'DESBEM'
+              DataSource = dsSelBem
+              TabOrder = 2
+            end
+            object dbeConjunto: TwwDBEdit
+              Left = 16
+              Top = 72
+              Width = 585
+              Height = 21
+              DataField = 'DESCCONJUNTO'
+              DataSource = dsSelBem
+              TabOrder = 3
+              UnboundDataType = wwDefault
+              WantReturns = False
+              WordWrap = False
+            end
+            object dbeLocal: TwwDBEdit
+              Left = 16
+              Top = 120
+              Width = 295
+              Height = 21
+              DataField = 'DESCLOCALIZACAO'
+              DataSource = dsSelBem
+              TabOrder = 4
+              UnboundDataType = wwDefault
+              WantReturns = False
+              WordWrap = False
+            end
+            object dbeResp: TwwDBEdit
+              Left = 320
+              Top = 120
+              Width = 281
+              Height = 21
+              DataField = 'NOMERESPONSAVEL'
+              DataSource = dsSelBem
+              TabOrder = 5
+              UnboundDataType = wwDefault
+              WantReturns = False
+              WordWrap = False
+            end
+          end
+          inherited dbgrdDet: TwwDBGrid [1]
+            Width = 639
+            Height = 169
+            Selected.Strings = (
+              'PLACA'#9'15'#9'Placa'
+              'DESBEM'#9'72'#9'Descrição')
+            Options = [dgTitles, dgColLines, dgRowLines, dgTabs, dgRowSelect, dgConfirmDelete, dgCancelOnExit, dgWordWrap]
+            ParentFont = False
+            TitleAlignment = taCenter
+          end
+        end
+      end
+    end
+  end
+  inherited Dock972: TDock97
+    Width = 755
+    Height = 35
+    inherited Toolbar971: TToolbar97
+      inherited sbtnInserir: TToolbarButton97
+        Width = 85
+        Height = 29
+        Layout = blGlyphLeft
+        Spacing = 4
+      end
+      inherited sbtnAlterar: TToolbarButton97
+        Left = 85
+        Width = 85
+        Height = 29
+        Layout = blGlyphLeft
+        Spacing = 4
+      end
+      inherited sbtnProcurar: TToolbarButton97
+        Left = 255
+        Width = 85
+        Height = 29
+        Layout = blGlyphLeft
+        Spacing = 4
+      end
+      inherited sbtnApagar: TToolbarButton97
+        Left = 170
+        Width = 85
+        Height = 29
+        Layout = blGlyphLeft
+        Spacing = 4
+      end
+    end
+  end
+  inherited Dock971: TDock97
+    Top = 396
+    Width = 755
+    Height = 35
+    inherited tb97Fundo: TToolbar97
+      Left = 515
+      DockPos = 515
+      inherited sep1: TToolbarSep97
+        Left = 85
+      end
+      inherited sep3: TToolbarSep97
+        Left = 173
+      end
+      inherited bbtnSair: TBitBtn
+        Width = 85
+        Height = 29
+      end
+      inherited bbtnAjuda: TmaHelpBitBtn
+        Left = 88
+        Width = 85
+        Height = 29
+        HelpContext = 70031
+      end
+    end
+    inherited TB97oKCancelar: TToolbar97
+      Left = 338
+      DockPos = 338
+      inherited ToolbarSep971: TToolbarSep97
+        Left = 85
+      end
+      inherited bbtnConfirmar: TBitBtn
+        Width = 85
+        Height = 29
+      end
+      inherited bbtnCancelar: TBitBtn
+        Left = 88
+        Width = 85
+        Height = 29
+      end
+    end
+  end
+  inherited qry: TwwQuery
+    BeforePost = qryBeforePost
+    SQL.Strings = (
+      'SELECT'
+      '     IDSELBAIXA,'
+      '     SBXTERMO,'
+      '     SBXPROCESSO,'
+      '     SBXDATA,'
+      '     IDRESPONSAVEL,'
+      '     SBXFLGEXECUTADO,'
+      '     SBXDTAEXECUTADO,'
+      '     IDDESTINOBAIXA    '
+      'FROM'
+      '     SELBAIXA'
+      'WHERE'
+      '    (IDSELBAIXA =:PIDSELBAIXA)'
+      '')
+    Left = 376
+    Top = 0
+    ParamData = <
+      item
+        DataType = ftFloat
+        Name = 'PIDSELBAIXA'
+        ParamType = ptUnknown
+      end>
+    object qryIDSELBAIXA: TFloatField
+      FieldName = 'IDSELBAIXA'
+      Origin = 'SELBAIXA.IDSELBAIXA'
+    end
+    object qrySBXTERMO: TFloatField
+      FieldName = 'SBXTERMO'
+      Origin = 'SELBAIXA.SBXTERMO'
+    end
+    object qrySBXPROCESSO: TStringField
+      FieldName = 'SBXPROCESSO'
+      Origin = 'SELBAIXA.SBXPROCESSO'
+      Size = 80
+    end
+    object qrySBXDATA: TDateTimeField
+      FieldName = 'SBXDATA'
+      Origin = 'SELBAIXA.SBXDATA'
+    end
+    object qryIDRESPONSAVEL: TFloatField
+      FieldName = 'IDRESPONSAVEL'
+      Origin = 'SELBAIXA.IDRESPONSAVEL'
+    end
+    object qrySBXFLGEXECUTADO: TFloatField
+      FieldName = 'SBXFLGEXECUTADO'
+      Origin = 'SELBAIXA.SBXFLGEXECUTADO'
+    end
+    object qrySBXDTAEXECUTADO: TDateTimeField
+      FieldName = 'SBXDTAEXECUTADO'
+      Origin = 'SELBAIXA.SBXDTAEXECUTADO'
+    end
+    object qryIDDESTINOBAIXA: TFloatField
+      FieldName = 'IDDESTINOBAIXA'
+    end
+  end
+  inherited dsDet: TwwDataSource
+    DataSet = qryDet
+    Left = 608
+    Top = 0
+  end
+  inherited ivTradutor: TIvExtendedTranslator
+    Left = 27
+    Top = 491
+    TargetsData = (
+      1
+      1
+      (
+        ''
+        'Text'
+        0))
+  end
+  inherited upd: TUpdateSQL
+    ModifySQL.Strings = (
+      'update SELBAIXA'
+      'set'
+      '  SBXTERMO = :SBXTERMO,'
+      '  SBXPROCESSO = :SBXPROCESSO,'
+      '  SBXDATA = :SBXDATA,'
+      '  IDRESPONSAVEL = :IDRESPONSAVEL,'
+      '  SBXFLGEXECUTADO = :SBXFLGEXECUTADO,'
+      '  SBXDTAEXECUTADO = :SBXDTAEXECUTADO,'
+      '  IDDESTINOBAIXA = :IDDESTINOBAIXA'
+      'where'
+      '  IDSELBAIXA = :OLD_IDSELBAIXA')
+    InsertSQL.Strings = (
+      'insert into SELBAIXA'
+      
+        '  (IDSELBAIXA, SBXTERMO, SBXPROCESSO, SBXDATA, IDRESPONSAVEL, SB' +
+        'XFLGEXECUTADO, '
+      '   SBXDTAEXECUTADO, IDDESTINOBAIXA)'
+      'values'
+      
+        '  (:IDSELBAIXA, :SBXTERMO, :SBXPROCESSO, :SBXDATA, :IDRESPONSAVE' +
+        'L, :SBXFLGEXECUTADO, '
+      '   :SBXDTAEXECUTADO, :IDDESTINOBAIXA)')
+    DeleteSQL.Strings = (
+      'delete from SELBAIXA'
+      'where'
+      '  IDSELBAIXA = :OLD_IDSELBAIXA')
+    Left = 440
+    Top = 0
+  end
+  inherited MontaSelect: TMontaSelect
+    Colunas.Strings = (
+      'SELBAIXA.SBXTERMO'
+      'SELBAIXA.SBXPROCESSO'
+      'SELBAIXA.SBXDATA'
+      'PESSOA.NOME')
+    TipodeDado.Strings = (
+      'N'
+      'C'
+      'D'
+      'C')
+    Descricao.Strings = (
+      'Termo de Baixa'
+      'Processo'
+      'Data da Seleção'
+      'Responsável')
+    SensivelACaixa.Strings = (
+      'N'
+      'N'
+      'N'
+      'N')
+    Tabelas.Strings = (
+      'SELBAIXA'
+      'PESSOA')
+    CamposChave.Strings = (
+      'SELBAIXA.IDSELBAIXA')
+    Filtro.Strings = (
+      'SELBAIXA.IDRESPONSAVEL=PESSOA.IDPESSOA(+)'
+      'SBTIPOMOV = 0')
+    Mascaras.Strings = (
+      ''
+      ''
+      ''
+      '')
+    Larguras.Strings = (
+      '10'
+      '80'
+      '10'
+      '60')
+    Left = 496
+    Top = 0
+  end
+  inherited ds: TwwDataSource
+    Left = 408
+    Top = 0
+  end
+  inherited CmeCadastro: TCmEventosCadastro
+    OnFind = CmeCadastroFind
+    BeforeConfirma = CmeCadastroBeforeConfirma
+    Left = 358
+  end
+  inherited CmeDetalhe: TCmEventosCadastro
+    Left = 408
+    Top = 108
+  end
+  object qryDet: TwwQuery
+    CachedUpdates = True
+    DatabaseName = 'BaseDados'
+    SQL.Strings = (
+      'SELECT SBB.IDSELBAIXA, SBB.IDBEM, SBB.IDPESSOA,'
+      '       B.PLACA, B.DESBEM,B.BAIXATOTAL,'
+      '       SBB.SBBVALVENDA'
+      'FROM SELBAIXABENS SBB,'
+      '     BEM B'
+      'WHERE (SBB.IDSELBAIXA = :PIDSELBAIXA)'
+      '  AND (SBB.IDBEM    = B.IDBEM)'
+      '  AND (SBB.IDPESSOA = B.IDPESSOA)'
+      ''
+      ' ')
+    UpdateObject = updDet
+    ValidateWithMask = True
+    Left = 568
+    ParamData = <
+      item
+        DataType = ftFloat
+        Name = 'PIDSELBAIXA'
+        ParamType = ptUnknown
+      end>
+    object qryDetPLACA: TFloatField
+      DisplayLabel = 'Placa'
+      DisplayWidth = 15
+      FieldName = 'PLACA'
+      Origin = '"CM.BEM".PLACA'
+    end
+    object qryDetDESBEM: TStringField
+      DisplayLabel = 'Descrição'
+      DisplayWidth = 72
+      FieldName = 'DESBEM'
+      Origin = '"CM.BEM".DESBEM'
+      Size = 200
+    end
+    object qryDetSBBVALVENDA: TFloatField
+      DisplayLabel = 'Valor da Alienação'
+      DisplayWidth = 17
+      FieldName = 'SBBVALVENDA'
+      Visible = False
+      DisplayFormat = '#,0.00;(#,0.00)'
+      currency = True
+    end
+    object qryDetIDSELBAIXA: TFloatField
+      FieldName = 'IDSELBAIXA'
+      Origin = 'SELBAIXABENS.IDSELBAIXA'
+      Visible = False
+    end
+    object qryDetIDBEM: TFloatField
+      FieldName = 'IDBEM'
+      Origin = 'SELBAIXABENS.IDBEM'
+      Visible = False
+    end
+    object qryDetIDPESSOA: TFloatField
+      FieldName = 'IDPESSOA'
+      Origin = 'SELBAIXABENS.IDPESSOA'
+      Visible = False
+    end
+    object qryDetBAIXATOTAL: TStringField
+      FieldName = 'BAIXATOTAL'
+      Origin = 'BEM.BAIXATOTAL'
+      Visible = False
+      Size = 1
+    end
+  end
+  object qryResp: TwwQuery
+    DatabaseName = 'BaseDados'
+    SQL.Strings = (
+      'SELECT R.IDRESPONSAVEL, P.NOME AS DESCRESPONSAVEL'
+      'FROM RESPONSAVEL R, PESSOA P'
+      'WHERE (R.IDRESPONSAVEL = :PIDRESP)'
+      '  AND (R.IDRESPONSAVEL = P.IDPESSOA(+))'
+      'ORDER BY P.NOME')
+    ValidateWithMask = True
+    Left = 176
+    Top = 88
+    ParamData = <
+      item
+        DataType = ftFloat
+        Name = 'PIDRESP'
+        ParamType = ptUnknown
+      end>
+    object qryRespIDRESPONSAVEL: TFloatField
+      FieldName = 'IDRESPONSAVEL'
+    end
+    object qryRespDESCRESPONSAVEL: TStringField
+      FieldName = 'DESCRESPONSAVEL'
+      Size = 60
+    end
+  end
+  object dsResp: TwwDataSource
+    AutoEdit = False
+    DataSet = qryResp
+    Left = 224
+    Top = 88
+  end
+  object MSResponsavel: TMontaSelect
+    Template.IdConsulta = 0
+    Caption = 'Seleciona'
+    Colunas.Strings = (
+      'PESSOA.NOME')
+    TipodeDado.Strings = (
+      'C')
+    Descricao.Strings = (
+      'Nome do Responsável')
+    SensivelACaixa.Strings = (
+      'N')
+    Tabelas.Strings = (
+      'RESPONSAVEL'
+      'PESSOA')
+    CamposChave.Strings = (
+      'RESPONSAVEL.IDRESPONSAVEL')
+    Filtro.Strings = (
+      'RESPONSAVEL.FLGATIVOFIXO = 1'
+      'RESPONSAVEL.IDRESPONSAVEL=PESSOA.IDPESSOA(+)')
+    Mascaras.Strings = (
+      '')
+    Larguras.Strings = (
+      '60')
+    DataBaseName = 'BaseDados'
+    RepeteConsulta = False
+    UsaDistinct = False
+    SalvaConsulta = False
+    ExibePergunta = True
+    Left = 288
+    Top = 89
+  end
+  object qryPlaca: TwwQuery
+    DatabaseName = 'BaseDados'
+    SQL.Strings = (
+      'SELECT IDBEM'
+      'FROM BEM'
+      'WHERE (PLACA = :PPLACA)')
+    ValidateWithMask = True
+    Left = 344
+    Top = 280
+    ParamData = <
+      item
+        DataType = ftFloat
+        Name = 'PPLACA'
+        ParamType = ptUnknown
+      end>
+    object qryPlacaIDBEM: TFloatField
+      FieldName = 'IDBEM'
+      Origin = '"CM.BEM".IDBEM'
+    end
+  end
+  object qrySelBem: TwwQuery
+    DatabaseName = 'BaseDados'
+    SQL.Strings = (
+      'SELECT BEM.IDPESSOA, BEM.IDBEM, BEM.IDCONJUNTO,'
+      '       BEM.PLACA, CONJUNTO.DESCCONJUNTO,'
+      '       BEM.DESBEM, LOCALIZACAO.NOME AS DESCLOCALIZACAO,'
+      '       PESSOA.NOME AS NOMERESPONSAVEL'
+      'FROM BEM, CONJUNTO, LOCALIZACAO, PESSOA'
+      'WHERE (BEM.IDPESSOA = :PIDPESSOA)'
+      '  AND (BEM.IDBEM    = :PIDBEM)'
+      '  AND ((BEM.BAIXATOTAL <> '#39'S'#39') OR (BEM.BAIXATOTAL IS NULL))'
+      '  AND (BEM.IDCONJUNTO            = CONJUNTO.IDCONJUNTO)'
+      '  AND (CONJUNTO.IDLOCALIZACAO    = LOCALIZACAO.IDLOCALIZACAO(+))'
+      '  AND (CONJUNTO.IDRESPONSAVEL = PESSOA.IDPESSOA(+))')
+    ValidateWithMask = True
+    Left = 416
+    Top = 280
+    ParamData = <
+      item
+        DataType = ftFloat
+        Name = 'PIDPESSOA'
+        ParamType = ptUnknown
+      end
+      item
+        DataType = ftInteger
+        Name = 'PIDBEM'
+        ParamType = ptUnknown
+      end>
+    object qrySelBemIDPESSOA: TFloatField
+      FieldName = 'IDPESSOA'
+    end
+    object qrySelBemIDBEM: TFloatField
+      FieldName = 'IDBEM'
+    end
+    object qrySelBemIDCONJUNTO: TFloatField
+      FieldName = 'IDCONJUNTO'
+    end
+    object qrySelBemPLACA: TFloatField
+      FieldName = 'PLACA'
+    end
+    object qrySelBemDESCCONJUNTO: TStringField
+      FieldName = 'DESCCONJUNTO'
+      Size = 200
+    end
+    object qrySelBemDESBEM: TStringField
+      FieldName = 'DESBEM'
+      Size = 200
+    end
+    object qrySelBemDESCLOCALIZACAO: TStringField
+      FieldName = 'DESCLOCALIZACAO'
+      Size = 60
+    end
+    object qrySelBemNOMERESPONSAVEL: TStringField
+      FieldName = 'NOMERESPONSAVEL'
+      Size = 60
+    end
+  end
+  object dsSelBem: TwwDataSource
+    AutoEdit = False
+    DataSet = qrySelBem
+    Left = 472
+    Top = 280
+  end
+  object updDet: TUpdateSQL
+    ModifySQL.Strings = (
+      'update SELBAIXABENS'
+      'set'
+      '  SBBVALVENDA = :SBBVALVENDA'
+      'where'
+      '  IDSELBAIXA = :OLD_IDSELBAIXA and'
+      '  IDBEM = :OLD_IDBEM and'
+      '  IDPESSOA = :OLD_IDPESSOA')
+    InsertSQL.Strings = (
+      'insert into SELBAIXABENS'
+      '  (IDSELBAIXA, IDBEM, IDPESSOA, SBBVALVENDA)'
+      'values'
+      '  (:IDSELBAIXA, :IDBEM, :IDPESSOA, :SBBVALVENDA)')
+    DeleteSQL.Strings = (
+      'delete from SELBAIXABENS'
+      'where'
+      '  IDSELBAIXA = :OLD_IDSELBAIXA and'
+      '  IDBEM = :OLD_IDBEM and'
+      '  IDPESSOA = :OLD_IDPESSOA')
+    Left = 648
+  end
+  object qryDestBaixa: TwwQuery
+    DatabaseName = 'BaseDados'
+    SQL.Strings = (
+      'SELECT T.IDPESSOA AS IDDESTINOBAIXA,'
+      '       P.NOME AS DESCDESTINATARIO'
+      'FROM TERCEIRO T,'
+      '     PESSOA P'
+      'WHERE (T.IDPESSOA = :PIDDESTINOBAIXA)'
+      '  AND (T.IDPESSOA = P.IDPESSOA(+))'
+      '')
+    ValidateWithMask = True
+    Left = 504
+    Top = 88
+    ParamData = <
+      item
+        DataType = ftFloat
+        Name = 'PIDDESTINOBAIXA'
+        ParamType = ptUnknown
+      end>
+    object qryDestBaixaIDDESTINOBAIXA: TFloatField
+      FieldName = 'IDDESTINOBAIXA'
+    end
+    object qryDestBaixaDESCDESTINATARIO: TStringField
+      FieldName = 'DESCDESTINATARIO'
+      Size = 60
+    end
+  end
+  object dsDestBaixa: TwwDataSource
+    AutoEdit = False
+    DataSet = qryDestBaixa
+    Left = 576
+    Top = 88
+  end
+  object MSDestBaixa: TMontaSelect
+    Template.IdConsulta = 0
+    Caption = 'Seleciona Destinatário'
+    Colunas.Strings = (
+      'PESSOA.NOME')
+    TipodeDado.Strings = (
+      'C')
+    Descricao.Strings = (
+      'Nome Destinatário')
+    SensivelACaixa.Strings = (
+      'N')
+    Tabelas.Strings = (
+      'TERCEIRO'
+      'PESSOA')
+    CamposChave.Strings = (
+      'TERCEIRO.IDPESSOA')
+    Filtro.Strings = (
+      'TERCEIRO.TIPOTERCEIRO = 1'
+      'TERCEIRO.IDPESSOA=PESSOA.IDPESSOA(+)')
+    Mascaras.Strings = (
+      '')
+    Larguras.Strings = (
+      '60')
+    DataBaseName = 'BaseDados'
+    RepeteConsulta = False
+    UsaDistinct = False
+    SalvaConsulta = False
+    ExibePergunta = True
+    Left = 648
+    Top = 89
+  end
+end

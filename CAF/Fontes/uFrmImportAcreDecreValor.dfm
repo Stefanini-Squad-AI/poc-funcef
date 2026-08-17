@@ -1,0 +1,768 @@
+object FrmImportAcreDecreValor: TFrmImportAcreDecreValor
+  Left = 301
+  Top = 116
+  BorderStyle = bsDialog
+  Caption = 'Carga de Acréscimo/Decréscimo de Valor'
+  ClientHeight = 508
+  ClientWidth = 829
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'MS Sans Serif'
+  Font.Style = []
+  OldCreateOrder = False
+  Position = poScreenCenter
+  OnClose = FormClose
+  OnCreate = FormCreate
+  OnShow = FormShow
+  PixelsPerInch = 96
+  TextHeight = 13
+  object Dock971: TDock97
+    Left = 0
+    Top = 469
+    Width = 829
+    Height = 39
+    AllowDrag = False
+    Background.Data = {
+      760F0000424D760F0000000000007600000028000000800000003C0000000100
+      040000000000000F000000000000000000001000000000000000000000008080
+      80000080000000808000800000008000800080800000C0C0C000808080000000
+      FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00777777777777
+      777777777777171717777777777777177771777777777777777077F7FF7FFFF7
+      77F77F77F7F7F7F7F7F7F7F7F777777777771777177777777777777777777777
+      777777777771717717777777777777777717777777777777777777777FFFFF7F
+      7F7F77F7F7F7F7F7F7F7F7F77777777777777717177777777777777777777777
+      77777777777777171777777777777777717777777777777777777777777FF7FF
+      7F77777777F7F7FF7F7F77F77F77777777777777177777777777777777777777
+      7777777777771771777777777777777771777777777777777777777777777FFF
+      FF7F7777F7F7F7F7F7F77F777777777777777771717777777777777777777777
+      777777777777771777777777777777777777777777777777777777777777777F
+      F7F7F7F777F7F7F7F7F7F7F7F777777777777777177777777777777777777777
+      7777777777777777777777777777777777777777777777777777777777777777
+      FFFF7F7F7F7F7F7F7F7F777777777F7777777777777777777777777777777777
+      7777777777777777777777777777777777777777777777777777777777777777
+      7FF7F7F7F7F7F7FFFFF7F7F7F7F7777777777777717717177777777777777777
+      7777777777777777777777777777777777777777777777777777777777777771
+      77FFFFF7F7777F77F7F7F77F77777F7777777777777171777777777777777777
+      7777777777777177777777777777777777777777777777777777777777777777
+      777FFFFFF7F7F77F7F7FF7F7F77F777777777777777777177777777777777777
+      7777777777777777771777777777777777777777777777777777777777777777
+      7177FFFF7F7F77F7F7FF7FF7F7F7F77F77777777777171717777777777777777
+      7777777777777717771777777777777777777777777777777777777777777777
+      77777FFFFF7F7777F7F7FF7FF7F77F7777777777777777777777771777777777
+      7777777777777771777777777777777777777777777777777777777777777777
+      777777FFFF7F77F7F7F7F7F7F7F7F77F7F777777777771717771777177177777
+      7777777777777777777777777777777777777777777777777777777777777777
+      777777FFFFFF7F77F7F7F7FF7FF7F7F7777F7777777777771717717777777777
+      7777777777777777177777777777777777777777777777777777777777777777
+      7777777FFFF7F7F777F7F7F7F7F7F777F7777F77777777717771777777777777
+      7777777777777777717777777777777777777777777777777777777777777777
+      7777777F7FFF7F77F7F77F7FFF7F7F7F777F7777777777171717717777777F77
+      7777777777777777777771777777777777777777777777777777777777777777
+      7777777FFFF7F7777777F7F7F7F7F7F77F77F7777777777771771777777F7777
+      F7F7777777777777771777777777177777777777777777777777777777777777
+      77777177FFFFF7F777F77F7F7FF7F7F7F77F77F777777777171717177777F777
+      777F7F7777777777777177177771717777777777777777777777777777777777
+      77777777FFFF7F777777F7F7FF7F7F7F7F7F7F77777777777771717717777777
+      77777F7F77777777777717771777777777777777777777777777777777777777
+      777777177FFFF7F7F77F7F7FF7F7FF7F7F7F7F7F777777777717177177777777
+      1777777777777777777771717717777177777777777777777777777777777777
+      777777777FFFF7F77777777F7F7FF7F7F7F7F777F77777777771771717777771
+      7777777777771777777777177771777777777777777777777777777777777777
+      77777771777F7F7F77777F7F7F7F7F7F7F7F7F7F777777777777771717717717
+      7777777777777777777771777777777777777777777777777777777777777777
+      777777777777F7F7F7F77F7F7F7F7F7F7F7F7777777F77777777717717171717
+      7777777777171777777717777777777777777777777777777777777777777777
+      77777777777777F7F77777777F7F7F7F7F7F7F7F7F7777777777777777717777
+      7777777777777177777771777777777777777777777777777777777777777777
+      777777777777777F7F77777F7F7F7F7F7F7F7F777777F77F7777771777717777
+      7777777777777777777771177777777777777777777777777777777777777777
+      7177777777777777F7F7777777F77F7F7FF7F7F7F7F777777777777777717777
+      7777777777777777777777777777777777777777777777777777777777777777
+      7777777777777777777777777F77F7F7F7F7F7F77777F7777777777771777777
+      7777777777777777777771717777777777777777777777777777777777777777
+      777777177777771777777777777F7F7F7F7F7F7F7F7F777F7777777777717777
+      7777777777777777777777171777777777777777777777777777777777777777
+      71777777777777777777777777F7F7F7F7F7F7F7F7F77F777777777777177777
+      7777777777777777777777177777777777777777777777777777777777777717
+      77777777777777717777777777777F77F7F7F7F7F7F7F7777777777777777777
+      77777777777777777777777777777777777F7777777777777777777777777171
+      7171777777777777171777777777F77F7F7F7F7F7F7F7F777777777777777777
+      771777777777777777777777777777777177F777777777777777777777777717
+      171777177777777717771777777777F7F7F7F7FF7F7F77F77777777777777171
+      7777777777777777777777777777777777777F77777777777777777777777777
+      77717177777777777171717177777F77F7F7F7F7F7F7F77F7777777777777171
+      7177777177777777777777777777777777777FF7F77771777777777777777777
+      1717777777777777771777777777777F7F7F7F7F7F7F77F7F777777777777777
+      7777777717777777777777777777777777777777777777777777777777777777
+      717777777777777777777777717777F77F7F7F7F7F7F7F7F77F7777777777771
+      7177777777777777777777777777777777771777777777777777777777777777
+      77177777777777777777777777777777F7F77F7F7F7F7F7FF777F77777777717
+      777777F777777777777777777777777777777777717177717777777777777777
+      77177777777777777777777771777777777F77F7F7F7F7F777F7777777777777
+      171777F7F7777777777777177777777777777777777777777777777777777777
+      777777777777777777777777177177777F77F7F7F7F7F7F7F7F7F7F777777777
+      7777777F77777777777777777777777777777777777777777777777777777777
+      77777777777777777777777771777777777F77F7F7F7F7F7F7F77777F7777777
+      7717777F77777777777777717177777777777777777777777777777777777777
+      7777777777777777777777777717777777777F7F7F7F7F7F7777F7F777777777
+      777777777F777777777777777717777777777777777777777777777777777777
+      777777777777777777777777777777777777F7F7F7F7F7F7F7F7F77777777777
+      7777777777777777777777771777777777777777777777777777777777777777
+      77777777777777777777777777717771777777F7F77F7F7F7F7F77F777777777
+      7777777777777777777777777717177777777771777777777777777777777777
+      7777777777777777777777777777177777777F7F77F7F7F7F7F77F777F777777
+      7777777777777177777777777777777777777717177777777777777777777777
+      77777777777777777177777777717171777777777F7F7FF7F7F7F77F77777777
+      7777777777717777777777777717177777777777777777777777777777777777
+      777777777777777777177777777711717777777F7F7F7F7F7F77F7F7F7F77777
+      777777777717171717777777777777777777777771777777777F777777777777
+      777777777777777777777777777117117777777777F77F7F7F7F77F77777F777
+      77777777171777777777777777777777777777777777777777F7F77777777777
+      77777777777777777771777777771117177777777F77F7F7F777F7F7F7F77777
+      7777777777171777777777777777777777777777777777777777777777777777
+      777777777777777777777777777771777777777777F77F7F7F7F7F7F777F7777
+      7777777717177777777777777777777777777777777777777777777777777777
+      77777777777777777777777777777777777177777777F77F7F77F7F7F7F77F77
+      7777777777171777777777777777777777777777777777777777777777777777
+      7777777777777777777777777777777777177777777F7F7F7F7F7F7F777F7777
+      77777777777777777F7F77777717777777777777777777777777777771777777
+      7777777777777777777777777777777777717777777777F7F7F77F7F7F7F77F7
+      77777777777777777F7F7F777777777777777777777777777777771777777777
+      77777777177777777777777777771777777717777777F7F7F77F7F7F7F77F777
+      777777777777777777FFF77F7777717777777777777777777777777777177777
+      77777777777777777777777777771777777771777777777777F7F7F7F77F77F7
+      77F7777777777777777777F77777777777777777777777777777777777777777
+      77777777777777777777777777777777777777171777777F7F77F7F7F7F77F77
+      F77777777777777777777777F7F7777777777777777777777777777777777777
+      777777777717777777777777777777777777717777777777777F7F7F7F77F77F
+      77F77777777F77777717777777F7777777777777777777777777777777777777
+      77777777777177777777777777777777777777777177777777F7F7F77F7F77F7
+      7F77F77777777F77777717777777777777777777777777777777777777777777
+      7777777777771777777777777777777777777777777777777F77F7F7F777F777
+      F77F777777777777771771777777771777777777777777777777777777777777
+      777777777777777771777777777777777777777777177777777F7F7F7F7F77F7
+      F7F7777777777777777717171777777777777777777777777777777777777777
+      77777777777771777777777777777177777777777771777777777777F777F777
+      7777777777777777777171717177771777777777777777777777777777777777
+      77777777777777777777777777777777777777777777777777777F7F7F7F7777
+      F77F77F777777777777771771717177777777777777777777777777777777777
+      7777777777777777777777777777777777777777777177777777}
+    BoundLines = [blTop, blBottom]
+    LimitToOneRow = True
+    Position = dpBottom
+    object tb97Fundo: TToolbar97
+      Left = 655
+      Top = 0
+      Caption = 'tb97Fundo'
+      Color = clNone
+      CloseButton = False
+      DefaultDock = Dock971
+      DockPos = 655
+      TabOrder = 0
+      object sep1: TToolbarSep97
+        Left = 81
+        Top = 0
+        Blank = True
+        SizeHorz = 2
+      end
+      object CMSeparaWizard2: TToolbarSep97
+        Left = 83
+        Top = 0
+        Blank = True
+        SizeHorz = 2
+      end
+      object bbtnSair: TBitBtn
+        Left = 0
+        Top = 0
+        Width = 81
+        Height = 33
+        Caption = '&Sair'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'MS Sans Serif'
+        Font.Style = [fsBold]
+        ParentFont = False
+        TabOrder = 0
+        OnClick = bbtnSairClick
+        Glyph.Data = {
+          76010000424D7601000000000000760000002800000020000000100000000100
+          0400000000000001000000000000000000001000000000000000000000000000
+          8000008000000080800080000000800080008080000080808000C0C0C0000000
+          FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00888888888888
+          8888888888FFFFF8888888888000008888888888F777778FF88888800BBBBB00
+          88888887788888778F88887BBBBBBBBB088888788FFF888878F887FB707BBBBB
+          B08887F8777F888887F887FB000BBBBBB0888788777F888F878F7FBB000BBB0B
+          BB087F88777F887F887F7FBB0007B00BBB087F887777877F887F7FBBB000000B
+          BB087F888777777F887F7FBBBB70000BBB087F888877777F887F7FBBBB00000B
+          BB0878F88877777F887887FBB000007BB08887F88777777887F887FBBBBBBBBB
+          B088878F888888888788887FFBBBBBBB08888878FF88888F788888877FFFFF77
+          8888888778FFFF77888888888777778888888888877777888888}
+        NumGlyphs = 2
+      end
+      object bbtnAjuda: TmaHelpBitBtn
+        Left = 85
+        Top = 0
+        Width = 81
+        Height = 33
+        HelpContext = 520070
+        Caption = '&Ajuda'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'MS Sans Serif'
+        Font.Style = [fsBold]
+        ParentFont = False
+        TabOrder = 1
+        Glyph.Data = {
+          76010000424D7601000000000000760000002800000020000000100000000100
+          0400000000000001000000000000000000001000000000000000000000000000
+          8000008000000080800080000000800080008080000080808000C0C0C0000000
+          FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00888888888888
+          8888888888FFFFF8888888888000008888888888F777778FF888888004444400
+          888888877888F8778F888874447F7444088888788887FF8878F8874444FFF444
+          408887F88877788887F88744447F74444088878888878888878F7C4444444444
+          44087F888888F888887F7C44444F844444087F888887F888887F7C44444F8444
+          44087F8888878FF8887F7C444448FF4444087F888FF877FF887F7C44FF448FF4
+          440878F877F8877F887887C4FF848FF4408887F877FFF77887F887C44FFFFF84
+          4088878F877777888788887CC4FFF44408888878FF77788F788888877CCCCC77
+          8888888778FFFF77888888888777778888888888877777888888}
+        NumGlyphs = 2
+        ClickHelpContext = 0
+      end
+    end
+  end
+  object pnl_Top: TPanel
+    Left = 0
+    Top = 0
+    Width = 829
+    Height = 161
+    Align = alTop
+    BevelOuter = bvNone
+    TabOrder = 1
+    object lblTitulo: TfcLabel
+      Left = 8
+      Top = 0
+      Width = 419
+      Height = 24
+      Caption = 'Carga de Acréscimo/Decréscimo de Valor'
+      Color = clBtnFace
+      Font.Charset = ANSI_CHARSET
+      Font.Color = clNavy
+      Font.Height = -21
+      Font.Name = 'Arial'
+      Font.Style = [fsBold]
+      ParentColor = False
+      ParentFont = False
+      TextOptions.Alignment = taLeftJustify
+      TextOptions.Style = fclsRaised
+      TextOptions.VAlignment = vaTop
+    end
+    object gbDocumento: TGroupBox
+      Left = 0
+      Top = 24
+      Width = 497
+      Height = 65
+      Caption = 'Documento'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clBlue
+      Font.Height = -11
+      Font.Name = 'MS Sans Serif'
+      Font.Style = [fsBold]
+      ParentFont = False
+      TabOrder = 0
+      object lblCaminho: TLabel
+        Left = 11
+        Top = 18
+        Width = 170
+        Height = 13
+        Caption = 'Caminho completo da planilha'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'MS Sans Serif'
+        Font.Style = [fsBold]
+        ParentFont = False
+      end
+      object edtCaminho: TEdit
+        Left = 11
+        Top = 33
+        Width = 415
+        Height = 21
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Height = -11
+        Font.Name = 'MS Sans Serif'
+        Font.Style = []
+        ParentFont = False
+        ReadOnly = True
+        TabOrder = 0
+      end
+      object btnAbrir: TBitBtn
+        Left = 430
+        Top = 30
+        Width = 27
+        Height = 23
+        Hint = 'Selecionar arquivo excel.'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'MS Sans Serif'
+        Font.Style = [fsBold]
+        ParentFont = False
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 1
+        OnClick = btnAbrirClick
+        Glyph.Data = {
+          76010000424D7601000000000000760000002800000020000000100000000100
+          04000000000000010000120B0000120B00001000000000000000000000000000
+          800000800000008080008000000080008000808000007F7F7F00BFBFBF000000
+          FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00555555555555
+          5555555555555555555555555555555555555555555555555555555555555555
+          555555555555555555555555555555555555555FFFFFFFFFF555550000000000
+          55555577777777775F55500B8B8B8B8B05555775F555555575F550F0B8B8B8B8
+          B05557F75F555555575F50BF0B8B8B8B8B0557F575FFFFFFFF7F50FBF0000000
+          000557F557777777777550BFBFBFBFB0555557F555555557F55550FBFBFBFBF0
+          555557F555555FF7555550BFBFBF00055555575F555577755555550BFBF05555
+          55555575FFF75555555555700007555555555557777555555555555555555555
+          5555555555555555555555555555555555555555555555555555}
+        NumGlyphs = 2
+      end
+      object BtnExcelparaCds: TBitBtn
+        Left = 459
+        Top = 30
+        Width = 27
+        Height = 23
+        Hint = 'Obter dados do arquivo excel.'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'MS Sans Serif'
+        Font.Style = [fsBold]
+        ParentFont = False
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 2
+        OnClick = BtnExcelparaCdsClick
+        Glyph.Data = {
+          76010000424D7601000000000000760000002800000020000000100000000100
+          0400000000000001000000000000000000001000000000000000000000000000
+          8000008000000080800080000000800080008080000080808000C0C0C0000000
+          FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00888888888888
+          8888888888FFFFF8888888888000008888888888F777778FF888888002222200
+          88888887788888778F88887222222222088888788888888878F887A228822222
+          208887F88FFF888887F887A2FFF8222220888788777FF888878F7A22FFFF8222
+          22087F887777FF88887F7A22FFFFF82222087F8877777FF8887F7A22FF8FFF82
+          22087F8877F777FF887F7A22FF82FFF822087F8877F8777F887F7A22FF222FF8
+          220878F87788877FF87887A2222222FF208887F88888887787F887A222222222
+          2088878F888888888788887AA222222208888878FF88888F788888877AAAAA77
+          8888888778FFFF77888888888777778888888888877777888888}
+        NumGlyphs = 2
+      end
+    end
+    object gbProgresso: TGroupBox
+      Left = 0
+      Top = 89
+      Width = 497
+      Height = 65
+      Caption = 'Progresso'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clBlue
+      Font.Height = -11
+      Font.Name = 'MS Sans Serif'
+      Font.Style = [fsBold]
+      ParentFont = False
+      TabOrder = 1
+      object lblStatus_Progresso: TLabel
+        Left = 9
+        Top = 20
+        Width = 123
+        Height = 13
+        Caption = 'Pronto para começar.'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'MS Sans Serif'
+        Font.Style = [fsBold]
+        ParentFont = False
+      end
+      object gProgresso: TGauge
+        Left = 8
+        Top = 37
+        Width = 481
+        Height = 20
+        ForeColor = clNavy
+        Progress = 0
+      end
+    end
+  end
+  object gbDados: TGroupBox
+    Left = 0
+    Top = 161
+    Width = 829
+    Height = 308
+    Align = alClient
+    Caption = 'Importação'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clBlue
+    Font.Height = -11
+    Font.Name = 'MS Sans Serif'
+    Font.Style = [fsBold]
+    ParentFont = False
+    TabOrder = 2
+    object pgcImporta: TPageControl
+      Left = 2
+      Top = 15
+      Width = 825
+      Height = 291
+      Cursor = crHandPoint
+      ActivePage = tsLayout
+      Align = alClient
+      Style = tsFlatButtons
+      TabOrder = 0
+      object tsLayout: TTabSheet
+        Caption = 'Layout do Excel'
+        ImageIndex = 2
+        object mmoLayout: TMemo
+          Left = 0
+          Top = 0
+          Width = 817
+          Height = 260
+          Align = alClient
+          Font.Charset = ANSI_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -13
+          Font.Name = 'Verdana'
+          Font.Style = [fsBold]
+          Lines.Strings = (
+            ''
+            '             COLUNA           CAMPO'
+            
+              '             ------------'#9'    ----------------------------------' +
+              '-------'
+            
+              '             A '#9'                      Data de Movimentação (Data' +
+              ': DD/MM/YYYY)'
+            
+              '             B '#9'                      Placa de Tombamento (NUMÉR' +
+              'ICO)'
+            
+              '             C '#9'                      Movimentação ('#39'A'#39' - Acrésc' +
+              'imo ou '#39'D'#39' - Decréscimo)'
+            '             D '#9'                      Tipo de Movimentação (ID)'
+            '             E '#9'                      Valor (NÚMERICO)'
+            
+              '             F '#9'                      Descrição do Fato Gerador ' +
+              'da Movimentação (TEXTO)'
+            ''
+            ' '
+            ' '
+            ' '
+            ' '
+            ' ')
+          ParentFont = False
+          ReadOnly = True
+          TabOrder = 0
+        end
+      end
+      object tsDados: TTabSheet
+        Caption = 'Dados Excel'
+        ImageIndex = 2
+        object GroupBox1: TGroupBox
+          Left = 0
+          Top = 0
+          Width = 817
+          Height = 260
+          Align = alClient
+          Caption = 
+            'O(s) registro(s) em vermelho possui erro(s) e não será(ão) impor' +
+            'tado(s). - Dê um duplo clique na linha para exibir o Log de Erro'
+          TabOrder = 0
+          object dbgExcel: TDBGrid
+            Left = 2
+            Top = 15
+            Width = 813
+            Height = 243
+            Cursor = crHandPoint
+            Align = alClient
+            DataSource = dsExcel
+            Font.Charset = DEFAULT_CHARSET
+            Font.Color = clBlack
+            Font.Height = -11
+            Font.Name = 'MS Sans Serif'
+            Font.Style = []
+            Options = [dgTitles, dgIndicator, dgColumnResize, dgColLines, dgRowLines, dgTabs, dgConfirmDelete]
+            ParentFont = False
+            ReadOnly = True
+            TabOrder = 0
+            TitleFont.Charset = DEFAULT_CHARSET
+            TitleFont.Color = clBlue
+            TitleFont.Height = -11
+            TitleFont.Name = 'MS Sans Serif'
+            TitleFont.Style = [fsBold]
+            OnDrawColumnCell = dbgExcelDrawColumnCell
+            OnDblClick = dbgExcelDblClick
+            Columns = <
+              item
+                Expanded = False
+                FieldName = 'DT_MOVIMENTACAO'
+                Title.Alignment = taCenter
+                Title.Font.Charset = DEFAULT_CHARSET
+                Title.Font.Color = clWindowText
+                Title.Font.Height = -11
+                Title.Font.Name = 'MS Sans Serif'
+                Title.Font.Style = [fsBold]
+                Width = 109
+                Visible = True
+              end
+              item
+                Expanded = False
+                FieldName = 'PLACA'
+                Title.Alignment = taCenter
+                Title.Font.Charset = DEFAULT_CHARSET
+                Title.Font.Color = clWindowText
+                Title.Font.Height = -11
+                Title.Font.Name = 'MS Sans Serif'
+                Title.Font.Style = [fsBold]
+                Width = 135
+                Visible = True
+              end
+              item
+                Expanded = False
+                FieldName = 'MOVIMENTACAO'
+                Title.Alignment = taCenter
+                Title.Font.Charset = DEFAULT_CHARSET
+                Title.Font.Color = clWindowText
+                Title.Font.Height = -11
+                Title.Font.Name = 'MS Sans Serif'
+                Title.Font.Style = [fsBold]
+                Width = 87
+                Visible = True
+              end
+              item
+                Expanded = False
+                FieldName = 'TIPO_MOVIMENTACAO'
+                Title.Alignment = taCenter
+                Title.Font.Charset = DEFAULT_CHARSET
+                Title.Font.Color = clWindowText
+                Title.Font.Height = -11
+                Title.Font.Name = 'MS Sans Serif'
+                Title.Font.Style = [fsBold]
+                Visible = True
+              end
+              item
+                Expanded = False
+                FieldName = 'VALOR'
+                Title.Alignment = taCenter
+                Title.Font.Charset = DEFAULT_CHARSET
+                Title.Font.Color = clWindowText
+                Title.Font.Height = -11
+                Title.Font.Name = 'MS Sans Serif'
+                Title.Font.Style = [fsBold]
+                Visible = True
+              end
+              item
+                Expanded = False
+                FieldName = 'DESCRICAO'
+                Title.Alignment = taCenter
+                Title.Font.Charset = DEFAULT_CHARSET
+                Title.Font.Color = clWindowText
+                Title.Font.Height = -11
+                Title.Font.Name = 'MS Sans Serif'
+                Title.Font.Style = [fsBold]
+                Visible = True
+              end
+              item
+                Expanded = False
+                FieldName = 'REGISTROVALIDO'
+                Visible = False
+              end>
+          end
+        end
+      end
+      object tsImportacao: TTabSheet
+        Caption = 'Importação'
+        object Label1: TLabel
+          Left = 0
+          Top = 247
+          Width = 22
+          Height = 13
+          Align = alBottom
+          Caption = 'Log'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -11
+          Font.Name = 'MS Sans Serif'
+          Font.Style = [fsBold]
+          ParentFont = False
+        end
+        object btnComecaImportacao: TBitBtn
+          Left = 1
+          Top = 2
+          Width = 168
+          Height = 25
+          Caption = 'Começar Importação'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -11
+          Font.Name = 'MS Sans Serif'
+          Font.Style = []
+          ParentFont = False
+          TabOrder = 0
+          OnClick = btnComecaImportacaoClick
+          Glyph.Data = {
+            76010000424D7601000000000000760000002800000020000000100000000100
+            04000000000000010000130B0000130B00001000000000000000000000000000
+            800000800000008080008000000080008000808000007F7F7F00BFBFBF000000
+            FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00333333333303
+            333333333333337FF3333333333333903333333333333377FF33333333333399
+            03333FFFFFFFFF777FF3000000999999903377777777777777FF0FFFF0999999
+            99037F3337777777777F0FFFF099999999907F3FF777777777770F00F0999999
+            99037F773777777777730FFFF099999990337F3FF777777777330F00FFFFF099
+            03337F773333377773330FFFFFFFF09033337F3FF3FFF77733330F00F0000003
+            33337F773777777333330FFFF0FF033333337F3FF7F3733333330F08F0F03333
+            33337F7737F7333333330FFFF003333333337FFFF77333333333000000333333
+            3333777777333333333333333333333333333333333333333333}
+          NumGlyphs = 2
+        end
+        object btnPararImportacao: TBitBtn
+          Left = 4
+          Top = 2
+          Width = 168
+          Height = 25
+          Caption = 'Parar Importação'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -11
+          Font.Name = 'MS Sans Serif'
+          Font.Style = []
+          ParentFont = False
+          TabOrder = 2
+          Visible = False
+          OnClick = btnPararImportacaoClick
+          Glyph.Data = {
+            76010000424D7601000000000000760000002800000020000000100000000100
+            0400000000000001000000000000000000001000000000000000000000000000
+            8000008000000080800080000000800080008080000080808000C0C0C0000000
+            FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00888888888888
+            8888888888FFFFF8888888888000008888888888F777778FF888888009191900
+            88888887788888778F88887991919191088888788888888878F8879919191919
+            108887F888F888F887F887917F919F719088878887FF87FF878F7919FFF9FFF9
+            19087F88777F7778887F79919FFFFF9191087F8887777788887F791919FFF919
+            19087F8888777FF8887F79919FFFFF9191087F88877777FF887F7919FFF9FFF9
+            190878F877787778887887917F919F71908887F88788878887F8879919191919
+            1088878F88888888878888799191919108888878FF88888F7888888779999977
+            8888888778FFFF77888888888777778888888888877777888888}
+          NumGlyphs = 2
+        end
+        object btnSalvaLog: TBitBtn
+          Left = 177
+          Top = 2
+          Width = 168
+          Height = 25
+          Caption = 'Salvar Log'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -11
+          Font.Name = 'MS Sans Serif'
+          Font.Style = []
+          ParentFont = False
+          TabOrder = 1
+          OnClick = btnSalvaLogClick
+          Glyph.Data = {
+            76010000424D7601000000000000760000002800000020000000100000000100
+            04000000000000010000120B0000120B00001000000000000000000000000000
+            800000800000008080008000000080008000808000007F7F7F00BFBFBF000000
+            FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00333300000000
+            0000333377777777777733330FFFFFFFFFF033337F3FFF3F3FF733330F000F0F
+            00F033337F777373773733330FFFFFFFFFF033337F3FF3FF3FF733330F00F00F
+            00F033337F773773773733330FFFFFFFFFF033337FF3333FF3F7333300FFFF00
+            F0F03333773FF377F7373330FB00F0F0FFF0333733773737F3F7330FB0BF0FB0
+            F0F0337337337337373730FBFBF0FB0FFFF037F333373373333730BFBF0FB0FF
+            FFF037F3337337333FF700FBFBFB0FFF000077F333337FF37777E0BFBFB000FF
+            0FF077FF3337773F7F37EE0BFB0BFB0F0F03777FF3733F737F73EEE0BFBF00FF
+            00337777FFFF77FF7733EEEE0000000003337777777777777333}
+          NumGlyphs = 2
+        end
+        object mmoLog: TMemo
+          Left = 0
+          Top = 40
+          Width = 817
+          Height = 207
+          Align = alBottom
+          Font.Charset = ANSI_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -13
+          Font.Name = 'Arial'
+          Font.Style = [fsBold]
+          ParentFont = False
+          ReadOnly = True
+          ScrollBars = ssVertical
+          TabOrder = 3
+        end
+      end
+    end
+  end
+  object dlgOpen: TOpenDialog
+    Filter = 
+      'Arquivo Excel 2003 (*.xls)|*.xls|Arquivo Excel 2007 (*.xlsx)|*xl' +
+      'sx'
+    Left = 544
+    Top = 44
+  end
+  object dlgSave: TSaveDialog
+    Filter = 'Arquivo txt (*.txt)|*.txt'
+    Left = 516
+    Top = 44
+  end
+  object dsExcel: TDataSource
+    DataSet = cds_Excel
+    Left = 644
+    Top = 44
+  end
+  object cds_Excel: TClientDataSet
+    Aggregates = <>
+    Params = <>
+    OnNewRecord = cds_ExcelNewRecord
+    Left = 608
+    Top = 44
+    object cds_ExcelDT_MOVIMENTACAO: TStringField
+      DisplayLabel = 'Dt. Movimentação'
+      FieldName = 'DT_MOVIMENTACAO'
+      Size = 10
+    end
+    object cds_ExcelPLACA: TIntegerField
+      DisplayLabel = 'Placa de Tombamento'
+      FieldName = 'PLACA'
+    end
+    object cds_ExcelMOVIMENTACAO: TStringField
+      DisplayLabel = 'Movimentação'
+      FieldName = 'MOVIMENTACAO'
+      Size = 2
+    end
+    object cds_ExcelTIPO_MOVIMENTACAO: TIntegerField
+      DisplayLabel = 'Tipo de Movimentação'
+      FieldName = 'TIPO_MOVIMENTACAO'
+    end
+    object cds_ExcelVALOR: TFloatField
+      DisplayLabel = 'Valor'
+      FieldName = 'VALOR'
+    end
+    object cds_ExcelDESCRICAO: TStringField
+      DisplayLabel = 'Descrição do Fato Gerador da Movimentação'
+      DisplayWidth = 60
+      FieldName = 'DESCRICAO'
+      Size = 60
+    end
+    object cds_ExcelREGISTROVALIDO: TBooleanField
+      FieldName = 'REGISTROVALIDO'
+    end
+    object cds_ExcelLOG_ERRO: TMemoField
+      FieldName = 'LOG_ERRO'
+      BlobType = ftMemo
+    end
+  end
+end

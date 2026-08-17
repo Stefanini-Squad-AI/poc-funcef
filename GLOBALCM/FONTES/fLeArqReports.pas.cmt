@@ -1,0 +1,218 @@
+unit fLeArqReports;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  FTelaAut, StdCtrls, MontaSelect, Grids, Wwdbigrd, Wwdbgrid,
+  Db, Wwdatsrc, DBTables, CMwwQuery, DBCtrls, uString, uSistema, ppComm,
+  ppProd, ppClass, ppReport, ppBands, ppCache, Buttons, fOkCancelar,
+  MAHlpBtn, TB97Tlbr, TB97, ExtCtrls, DBGrids, ZipMstr, Wwtable, IvDictio,
+  IvMulti, IvEMulti, ComCtrls, fcStatusBar, CMDataTransf, Menus;
+
+type
+  TfrmLeArqReports = class(TfrmOkCancelar)
+    lbl2: TLabel;
+    spd2: TSpeedButton;
+    DlgOpen: TOpenDialog;
+    GroupBox1: TGroupBox;
+    chkddTable: TCheckBox;
+    chkddField: TCheckBox;
+    chkDataView: TCheckBox;
+    chkReports: TCheckBox;
+    chkGrupoRelatorio: TCheckBox;
+    GroupBox2: TGroupBox;
+    edNomeArquivo: TEdit;
+    SpeedButton1: TSpeedButton;
+    CkbConsultasGerais: TCheckBox;
+    CkbAutoriza: TCheckBox;
+    SbTransf: TfcStatusBar;
+    Pbtransf: TProgressBar;
+    CMDataTransf: TCMDataTransf;
+    MemErroImport: TMemo;
+    Label1: TLabel;
+    PpmErro: TPopupMenu;
+    Limparlog1: TMenuItem;
+    SalvarLog1: TMenuItem;
+    DlgSave: TSaveDialog;
+    procedure SpeedButton1Click(Sender: TObject);
+    procedure CMDataTransfRequestLoginDBA(Sender: TObject; var LoginName,
+      Password: String; var Continue: Boolean);
+    procedure bbtnConfirmarClick(Sender: TObject);
+    procedure CMDataTransfTransfProgress(const Msg: String;
+      Operation: TTransfOperation; StepNum, TotalSteps: Integer);
+    procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+    procedure CMDataTransfErrorMessage(Sender: TObject; sMessage: String);
+    procedure SalvarLog1Click(Sender: TObject);
+    procedure Limparlog1Click(Sender: TObject);
+  private
+    { Private declarations }
+
+  public
+    { Public declarations }
+  end;
+
+var
+  frmLeArqReports: TfrmLeArqReports;
+
+implementation
+
+uses fLogin;
+
+{$R *.DFM}
+
+procedure TfrmLeArqReports.SpeedButton1Click(Sender: TObject);
+begin
+  inherited;
+  with DlgOpen do
+       if Execute then
+          edNomeArquivo.text := FileName;
+end;
+
+procedure TfrmLeArqReports.CMDataTransfRequestLoginDBA(Sender: TObject;
+  var LoginName, Password: String; var Continue: Boolean);
+var
+  frmlogin: TfrmLogin;
+begin
+  Continue := False;
+  inherited;
+  Try
+    Application.CreateForm(TfrmLogin,frmLogin);
+    frmLogin.Caption := 'Login Para Autorização';
+    frmLogin.Label1.Caption := 'Usuário do Banco de Dados';
+    frmLogin.Label2.Caption := 'Senha de Acesso';
+
+    If (frmLogin.ShowModal = MrOk) Then
+    Begin
+      LoginName := frmLogin.edUsuario.Text;
+      Password := frmLogin.edSenha.Text;
+      Continue := True;
+    End;
+  finally
+    frmLogin.Free;
+    Repaint;
+    Application.ProcessMessages;
+  End;
+end;
+
+procedure TfrmLeArqReports.bbtnConfirmarClick(Sender: TObject);
+begin
+  inherited;
+  If edNomeArquivo.text <> '' Then
+     Try
+        Sistema.GravaLogOperacoes('Processamento do TransfRelatorios');
+
+        MemErroImport.Lines.Append('- Início do Processamento: ' + DateTimeToStr(Now));
+
+        bbtnConfirmar.Enabled := False;
+        bbtnCancelar.Enabled := False;
+        bbtnSair.Enabled := False;
+        bbtnAjuda.Enabled := False;
+
+        CMDataTransf.FileTransfs := [];
+
+        if chkReports.Checked Then
+        Begin
+           Sistema.GravaLogOperacoes('Importação da tabela REPORTS');
+           CMDataTransf.FileTransfs := CMDataTransf.FileTransfs + [ftReports];
+        End;
+
+        if chkDataView.Checked Then
+        Begin
+           Sistema.GravaLogOperacoes('Importação da tabela DATAVIEW');
+           CMDataTransf.FileTransfs := CMDataTransf.FileTransfs + [ftDataView];
+        End;
+
+        if chkGrupoRelatorio.Checked Then
+        Begin
+           Sistema.GravaLogOperacoes('Importação da tabela GRUPORELATORIO');
+           CMDataTransf.FileTransfs := CMDataTransf.FileTransfs + [ftGrupoRelatorio];
+        End;
+        
+        if CkbConsultasGerais.Checked Then
+        Begin
+           Sistema.GravaLogOperacoes('Importação da tabela CONSULTASGERAIS');
+           CMDataTransf.FileTransfs := CMDataTransf.FileTransfs + [ftConsultas];
+        End;
+
+        if chkddTable.Checked Then
+        Begin
+           Sistema.GravaLogOperacoes('Importação da tabela DDTABLE');
+           CMDataTransf.FileTransfs := CMDataTransf.FileTransfs + [ftDDTable];
+        End;
+
+        if chkddField.Checked Then
+        Begin
+           Sistema.GravaLogOperacoes('Importação da tabela DDFIELD');
+           CMDataTransf.FileTransfs := CMDataTransf.FileTransfs + [ftDDField];
+        End;
+
+        if CkbAutoriza.Checked Then
+        Begin
+           Sistema.GravaLogOperacoes('Importação da tabela AUTORIZACAO');
+           CMDataTransf.FileTransfs := CMDataTransf.FileTransfs + [ftAutorizacoes];
+        End;
+
+        If CMDataTransf.ImportFile(edNomeArquivo.text) Then
+        Begin
+           Sistema.GravaLogOperacoes('Processamento do TransfRelatorios Encerrado com Sucesso');
+           MemErroImport.Lines.Append('- Término do Processamento: ' + DateTimeToStr(Now));
+           ShowMessage('Dados Importados Com Sucesso.')
+        End
+        Else
+        Begin
+           Sistema.GravaLogOperacoes('Processamento do TransfRelatorios Encerrado com Erros');
+           MemErroImport.Lines.Append('- Término do Processamento: ' + DateTimeToStr(Now));
+           ShowMessage('Erro na Importação de Dados.');
+        End;
+     finally
+        bbtnConfirmar.Enabled := True;
+        bbtnCancelar.Enabled := True;
+        bbtnSair.Enabled := True;
+        bbtnAjuda.Enabled := True;
+     end;
+end;
+
+procedure TfrmLeArqReports.CMDataTransfTransfProgress(const Msg: String;
+  Operation: TTransfOperation; StepNum, TotalSteps: Integer);
+begin
+  inherited;
+  If TotalSteps <> 0 Then
+     Pbtransf.Max := TotalSteps;
+
+  Pbtransf.Position := StepNum;
+  SbTransf.Panels[0].Text := Msg;
+end;
+
+procedure TfrmLeArqReports.FormCloseQuery(Sender: TObject;
+  var CanClose: Boolean);
+begin
+  inherited;
+  CanClose := bbtnConfirmar.Enabled
+end;
+
+procedure TfrmLeArqReports.CMDataTransfErrorMessage(Sender: TObject;
+  sMessage: String);
+begin
+  inherited;
+  If Pos('ORA-02291',sMessage) > 0 Then
+  Begin
+    MemErroImport.Lines.Append(sMessage);
+    Application.ProcessMessages;
+  End;
+end;
+
+procedure TfrmLeArqReports.SalvarLog1Click(Sender: TObject);
+begin
+  inherited;
+  If DlgSave.Execute Then
+     MemErroImport.Lines.SaveToFile('- ' + DlgSave.FileName);
+end;
+
+procedure TfrmLeArqReports.Limparlog1Click(Sender: TObject);
+begin
+  inherited;
+  MemErroImport.Lines.Clear;
+end;
+
+end.

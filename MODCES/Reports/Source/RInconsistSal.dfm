@@ -1,0 +1,755 @@
+inherited RptInconsistSal: TRptInconsistSal
+  Left = 228
+  Top = 195
+  Width = 290
+  Height = 305
+  Caption = 'RptInconsistSal'
+  OldCreateOrder = True
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  PixelsPerInch = 96
+  TextHeight = 13
+  inherited CmpRptCM: TCmParamReport
+    Params = <
+      item
+        Caption = 'ListaIdFunc'
+        Controle = tcEdit
+        TipodeDado = tdString
+        LookupSettings.SQL.Strings = ()
+        LookupSettings.Tamanho = '0'
+        CheckBoxSetings.ValueChecked = 'True'
+        CheckBoxSetings.ValueUnChecked = 'False'
+        CheckBoxSetings.Checked = True
+        RadioGroupSettings.Items.Strings = ()
+        RadioGroupSettings.Values.Strings = ()
+        RadioGroupSettings.Columns = 1
+        RadioGroupSettings.ItemIndex = -1
+        RadioGroupSettings.Height = 40
+        ComboBoxSettings.Sorted = False
+        ComboBoxSettings.Style = csDropDownList
+        ComboBoxSettings.Items.Strings = ()
+        ComboBoxSettings.DropDownCount = 8
+        ComboBoxSettings.ItemIndex = -1
+        ListBoxSettings.Items.Strings = ()
+        ListBoxSettings.MultiSelect = False
+        ListBoxSettings.ExtendedSelect = False
+        ListBoxSettings.Sorted = False
+        ListBoxSettings.Style = lbStandard
+        ListBoxSettings.height = 70
+        MostraComboCompara = True
+        Required = False
+        EditSettings.Color = clWindow
+        EditSettings.Readonly = False
+        EditSettings.Font.Charset = DEFAULT_CHARSET
+        EditSettings.Font.Color = clWindowText
+        EditSettings.Font.Height = -11
+        EditSettings.Font.Name = 'MS Sans Serif'
+        EditSettings.Font.Style = [fsBold]
+        Name = 'ListaIdFunc'
+        SpinEditSettings.MaxValue = 0
+        SpinEditSettings.MinValue = 0
+        SpinEditSettings.Increment = 0
+        SpinEditSettings.Value = 0
+        MaskEditSettings.MaxLength = 0
+        ProcuraSTSettings.Subtipo = stFornecedor
+        ProcuraSTSettings.CampoEdit = ceRazaoSocial
+        ProcuraSTSettings.FiltraSubTipo = True
+        ProcuraFCSettings.Status = fcAll
+        ProcuraFCSettings.CampoEdit = ceRazaoSocial
+        ProcuraFCSettings.MostraEndereco = False
+        ProcuraFCSettings.ForCli = fcFornecedor
+        ProcuraCCSettings.Plano = 0
+        ProcuraCCSettings.Status = scSoAtiva
+        ProcuraCCSettings.AceitaTipoConta = Indiferente
+        Width = 0
+      end
+      item
+        Caption = 'IndPolitica'
+        Controle = tcEdit
+        TipodeDado = tdInteger
+        LookupSettings.SQL.Strings = ()
+        LookupSettings.Tamanho = '0'
+        CheckBoxSetings.ValueChecked = 'True'
+        CheckBoxSetings.ValueUnChecked = 'False'
+        CheckBoxSetings.Checked = True
+        RadioGroupSettings.Items.Strings = ()
+        RadioGroupSettings.Values.Strings = ()
+        RadioGroupSettings.Columns = 1
+        RadioGroupSettings.ItemIndex = -1
+        RadioGroupSettings.Height = 40
+        ComboBoxSettings.Sorted = False
+        ComboBoxSettings.Style = csDropDownList
+        ComboBoxSettings.Items.Strings = ()
+        ComboBoxSettings.DropDownCount = 8
+        ComboBoxSettings.ItemIndex = -1
+        ListBoxSettings.Items.Strings = ()
+        ListBoxSettings.MultiSelect = False
+        ListBoxSettings.ExtendedSelect = False
+        ListBoxSettings.Sorted = False
+        ListBoxSettings.Style = lbStandard
+        ListBoxSettings.height = 70
+        MostraComboCompara = True
+        Required = False
+        EditSettings.Color = clWindow
+        EditSettings.Readonly = False
+        EditSettings.Font.Charset = DEFAULT_CHARSET
+        EditSettings.Font.Color = clWindowText
+        EditSettings.Font.Height = -11
+        EditSettings.Font.Name = 'MS Sans Serif'
+        EditSettings.Font.Style = [fsBold]
+        Name = 'IndPolitica'
+        SpinEditSettings.MaxValue = 0
+        SpinEditSettings.MinValue = 0
+        SpinEditSettings.Increment = 0
+        SpinEditSettings.Value = 0
+        MaskEditSettings.MaxLength = 0
+        ProcuraSTSettings.Subtipo = stFornecedor
+        ProcuraSTSettings.CampoEdit = ceRazaoSocial
+        ProcuraSTSettings.FiltraSubTipo = True
+        ProcuraFCSettings.Status = fcAll
+        ProcuraFCSettings.CampoEdit = ceRazaoSocial
+        ProcuraFCSettings.MostraEndereco = False
+        ProcuraFCSettings.ForCli = fcFornecedor
+        ProcuraCCSettings.Plano = 0
+        ProcuraCCSettings.Status = scSoAtiva
+        ProcuraCCSettings.AceitaTipoConta = Indiferente
+        Width = 0
+      end
+      item
+        Caption = 'HayMin'
+        Controle = tcEdit
+        TipodeDado = tdReal
+        LookupSettings.SQL.Strings = ()
+        LookupSettings.Tamanho = '0'
+        CheckBoxSetings.ValueChecked = 'True'
+        CheckBoxSetings.ValueUnChecked = 'False'
+        CheckBoxSetings.Checked = True
+        RadioGroupSettings.Items.Strings = ()
+        RadioGroupSettings.Values.Strings = ()
+        RadioGroupSettings.Columns = 1
+        RadioGroupSettings.ItemIndex = -1
+        RadioGroupSettings.Height = 40
+        ComboBoxSettings.Sorted = False
+        ComboBoxSettings.Style = csDropDownList
+        ComboBoxSettings.Items.Strings = ()
+        ComboBoxSettings.DropDownCount = 8
+        ComboBoxSettings.ItemIndex = -1
+        ListBoxSettings.Items.Strings = ()
+        ListBoxSettings.MultiSelect = False
+        ListBoxSettings.ExtendedSelect = False
+        ListBoxSettings.Sorted = False
+        ListBoxSettings.Style = lbStandard
+        ListBoxSettings.height = 70
+        MostraComboCompara = True
+        Required = False
+        EditSettings.Color = clWindow
+        EditSettings.Readonly = False
+        EditSettings.Font.Charset = DEFAULT_CHARSET
+        EditSettings.Font.Color = clWindowText
+        EditSettings.Font.Height = -11
+        EditSettings.Font.Name = 'MS Sans Serif'
+        EditSettings.Font.Style = [fsBold]
+        Name = 'HayMin'
+        SpinEditSettings.MaxValue = 0
+        SpinEditSettings.MinValue = 0
+        SpinEditSettings.Increment = 0
+        SpinEditSettings.Value = 0
+        MaskEditSettings.MaxLength = 0
+        ProcuraSTSettings.Subtipo = stFornecedor
+        ProcuraSTSettings.CampoEdit = ceRazaoSocial
+        ProcuraSTSettings.FiltraSubTipo = True
+        ProcuraFCSettings.Status = fcAll
+        ProcuraFCSettings.CampoEdit = ceRazaoSocial
+        ProcuraFCSettings.MostraEndereco = False
+        ProcuraFCSettings.ForCli = fcFornecedor
+        ProcuraCCSettings.Plano = 0
+        ProcuraCCSettings.Status = scSoAtiva
+        ProcuraCCSettings.AceitaTipoConta = Indiferente
+        Width = 0
+      end
+      item
+        Caption = 'HayMax'
+        Controle = tcEdit
+        TipodeDado = tdReal
+        LookupSettings.SQL.Strings = ()
+        LookupSettings.Tamanho = '0'
+        CheckBoxSetings.ValueChecked = 'True'
+        CheckBoxSetings.ValueUnChecked = 'False'
+        CheckBoxSetings.Checked = True
+        RadioGroupSettings.Items.Strings = ()
+        RadioGroupSettings.Values.Strings = ()
+        RadioGroupSettings.Columns = 1
+        RadioGroupSettings.ItemIndex = -1
+        RadioGroupSettings.Height = 40
+        ComboBoxSettings.Sorted = False
+        ComboBoxSettings.Style = csDropDownList
+        ComboBoxSettings.Items.Strings = ()
+        ComboBoxSettings.DropDownCount = 8
+        ComboBoxSettings.ItemIndex = -1
+        ListBoxSettings.Items.Strings = ()
+        ListBoxSettings.MultiSelect = False
+        ListBoxSettings.ExtendedSelect = False
+        ListBoxSettings.Sorted = False
+        ListBoxSettings.Style = lbStandard
+        ListBoxSettings.height = 70
+        MostraComboCompara = True
+        Required = False
+        EditSettings.Color = clWindow
+        EditSettings.Readonly = False
+        EditSettings.Font.Charset = DEFAULT_CHARSET
+        EditSettings.Font.Color = clWindowText
+        EditSettings.Font.Height = -11
+        EditSettings.Font.Name = 'MS Sans Serif'
+        EditSettings.Font.Style = [fsBold]
+        Name = 'HayMax'
+        SpinEditSettings.MaxValue = 0
+        SpinEditSettings.MinValue = 0
+        SpinEditSettings.Increment = 0
+        SpinEditSettings.Value = 0
+        MaskEditSettings.MaxLength = 0
+        ProcuraSTSettings.Subtipo = stFornecedor
+        ProcuraSTSettings.CampoEdit = ceRazaoSocial
+        ProcuraSTSettings.FiltraSubTipo = True
+        ProcuraFCSettings.Status = fcAll
+        ProcuraFCSettings.CampoEdit = ceRazaoSocial
+        ProcuraFCSettings.MostraEndereco = False
+        ProcuraFCSettings.ForCli = fcFornecedor
+        ProcuraCCSettings.Plano = 0
+        ProcuraCCSettings.Status = scSoAtiva
+        ProcuraCCSettings.AceitaTipoConta = Indiferente
+        Width = 0
+      end>
+  end
+  inherited CrmRptCM: TCmRptManager
+    BeforePrint = CrmRptCMBeforePrint
+    DataBaseName = 'BaseDados'
+    Report = rpInconsistSal
+    ConnectionType = cntBDE
+  end
+  object rpInconsistSal: TppReport
+    AutoStop = False
+    DataPipeline = ppInconsistSal
+    PassSetting = psTwoPass
+    PrinterSetup.BinName = 'Default'
+    PrinterSetup.DocumentName = 'PpModeloReport1'
+    PrinterSetup.PaperName = 'A4'
+    PrinterSetup.PrinterName = 'Default'
+    PrinterSetup.mmMarginBottom = 6350
+    PrinterSetup.mmMarginLeft = 6350
+    PrinterSetup.mmMarginRight = 6350
+    PrinterSetup.mmMarginTop = 6350
+    PrinterSetup.mmPaperHeight = 297000
+    PrinterSetup.mmPaperWidth = 210000
+    PrinterSetup.PaperSize = 9
+    Template.SaveTo = stDatabase
+    Units = utMillimeters
+    AllowPrintToArchive = True
+    AllowPrintToFile = True
+    DeviceType = 'Screen'
+    OutlineSettings.CreateNode = True
+    OutlineSettings.CreatePageNodes = True
+    OutlineSettings.Enabled = False
+    OutlineSettings.Visible = False
+    TextSearchSettings.DefaultString = '<FindText>'
+    TextSearchSettings.Enabled = False
+    Left = 212
+    Top = 8
+    Version = '7.04'
+    mmColumnWidth = 197300
+    DataPipelineName = 'ppInconsistSal'
+    object InconsistSalHdrBnd1: TppHeaderBand
+      mmBottomOffset = 0
+      mmHeight = 22754
+      mmPrintPosition = 0
+      object InconsistSalLbl1: TppLabel
+        UserName = 'InconsistSalLbl1'
+        Caption = 'Listagem de Inconsistências Salariais'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 10
+        Font.Style = [fsBold]
+        TextAlignment = taCentered
+        Transparent = True
+        mmHeight = 4233
+        mmLeft = 64558
+        mmTop = 9790
+        mmWidth = 62971
+        BandType = 0
+      end
+      object InconsistSalLbl2: TppLabel
+        UserName = 'InconsistSalLbl2'
+        Caption = 'Folha:'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        TextAlignment = taRightJustified
+        Transparent = True
+        mmHeight = 3704
+        mmLeft = 152400
+        mmTop = 6085
+        mmWidth = 8467
+        BandType = 0
+      end
+      object InconsistSalLbl3: TppLabel
+        UserName = 'InconsistSalLbl3'
+        Caption = 'Emissão:'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        TextAlignment = taRightJustified
+        Transparent = True
+        mmHeight = 3704
+        mmLeft = 147638
+        mmTop = 10319
+        mmWidth = 13229
+        BandType = 0
+      end
+      object InconsistSalLbl4: TppLabel
+        UserName = 'InconsistSalLbl4'
+        AutoSize = False
+        Caption = 'Matrícula'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 3704
+        mmLeft = 8467
+        mmTop = 17727
+        mmWidth = 14288
+        BandType = 0
+      end
+      object InconsistSalLbl5: TppLabel
+        UserName = 'InconsistSalLbl5'
+        AutoSize = False
+        Caption = 'Nome / Cargo'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 3704
+        mmLeft = 26458
+        mmTop = 17727
+        mmWidth = 24871
+        BandType = 0
+      end
+      object InconsistSalLine1: TppLine
+        UserName = 'InconsistSalLine1'
+        Pen.Width = 2
+        Weight = 1.5
+        mmHeight = 1058
+        mmLeft = 8467
+        mmTop = 22225
+        mmWidth = 180446
+        BandType = 0
+      end
+      object InconsistSalDBTxt1: TppDBText
+        UserName = 'InconsistSalDBTxt1'
+        AutoSize = True
+        DataField = 'EMPRESA'
+        DataPipeline = ppInconsistSal
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 10
+        Font.Style = [fsBold]
+        TextAlignment = taCentered
+        Transparent = True
+        DataPipelineName = 'ppInconsistSal'
+        mmHeight = 4233
+        mmLeft = 87577
+        mmTop = 2381
+        mmWidth = 17198
+        BandType = 0
+      end
+      object InconsistSalLbl6: TppLabel
+        UserName = 'InconsistSalLbl6'
+        AutoSize = False
+        Caption = 'Salário Atual'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 3704
+        mmLeft = 111654
+        mmTop = 17727
+        mmWidth = 26194
+        BandType = 0
+      end
+      object InconsistSalLbl7: TppLabel
+        UserName = 'InconsistSalLbl7'
+        AutoSize = False
+        Caption = 'Valor Ref./ Observ.'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 3704
+        mmLeft = 152665
+        mmTop = 17727
+        mmWidth = 29898
+        BandType = 0
+      end
+      object InconsistSalCalc1: TppSystemVariable
+        UserName = 'InconsistSalCalc1'
+        VarType = vtPageSet
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        Transparent = True
+        mmHeight = 3704
+        mmLeft = 161661
+        mmTop = 6085
+        mmWidth = 7938
+        BandType = 0
+      end
+      object InconsistSalCalc2: TppSystemVariable
+        UserName = 'InconsistSalCalc2'
+        VarType = vtPrintDateTime
+        DisplayFormat = 'DD/MM/YYYY HH:MM'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        Transparent = True
+        mmHeight = 3704
+        mmLeft = 161661
+        mmTop = 10319
+        mmWidth = 22225
+        BandType = 0
+      end
+    end
+    object InconsistSalDtlBnd1: TppDetailBand
+      mmBottomOffset = 0
+      mmHeight = 11642
+      mmPrintPosition = 0
+      object InconsistSalDBTxt2: TppDBText
+        UserName = 'InconsistSalDBTxt2'
+        DataField = 'MATRICULA'
+        DataPipeline = ppInconsistSal
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        Transparent = True
+        DataPipelineName = 'ppInconsistSal'
+        mmHeight = 3704
+        mmLeft = 8467
+        mmTop = 794
+        mmWidth = 14288
+        BandType = 4
+      end
+      object InconsistSalDBTxt3: TppDBText
+        UserName = 'InconsistSalDBTxt3'
+        DataField = 'EMPREGADO'
+        DataPipeline = ppInconsistSal
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        Transparent = True
+        DataPipelineName = 'ppInconsistSal'
+        mmHeight = 3704
+        mmLeft = 26458
+        mmTop = 794
+        mmWidth = 81492
+        BandType = 4
+      end
+      object InconsistSalDBTxt4: TppDBText
+        UserName = 'InconsistSalDBTxt4'
+        DataField = 'CARGO'
+        DataPipeline = ppInconsistSal
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        Transparent = True
+        DataPipelineName = 'ppInconsistSal'
+        mmHeight = 3704
+        mmLeft = 26458
+        mmTop = 5821
+        mmWidth = 81492
+        BandType = 4
+      end
+      object InconsistSalDBTxt5: TppDBText
+        UserName = 'InconsistSalDBTxt5'
+        DataField = 'SALARIOATUAL'
+        DataPipeline = ppInconsistSal
+        DisplayFormat = '###,###,##0.00'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        TextAlignment = taRightJustified
+        Transparent = True
+        DataPipelineName = 'ppInconsistSal'
+        mmHeight = 3704
+        mmLeft = 111654
+        mmTop = 794
+        mmWidth = 19315
+        BandType = 4
+      end
+      object InconsistSalDBTxt6: TppDBText
+        UserName = 'InconsistSalDBTxt6'
+        DataField = 'TIPOPAGAMENTO'
+        DataPipeline = ppInconsistSal
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        Transparent = True
+        DataPipelineName = 'ppInconsistSal'
+        mmHeight = 3704
+        mmLeft = 132557
+        mmTop = 794
+        mmWidth = 15875
+        BandType = 4
+      end
+      object ppDBText1: TppDBText
+        UserName = 'DBText1'
+        DataField = 'OBSERV'
+        DataPipeline = ppInconsistSal
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        Transparent = True
+        DataPipelineName = 'ppInconsistSal'
+        mmHeight = 3175
+        mmLeft = 151342
+        mmTop = 6350
+        mmWidth = 37571
+        BandType = 4
+      end
+      object ppDBText2: TppDBText
+        UserName = 'DBText2'
+        DataField = 'VALOR_REF'
+        DataPipeline = ppInconsistSal
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        Transparent = True
+        DataPipelineName = 'ppInconsistSal'
+        mmHeight = 3175
+        mmLeft = 151342
+        mmTop = 794
+        mmWidth = 37571
+        BandType = 4
+      end
+    end
+    object InconsistSalFootBnd1: TppFooterBand
+      mmBottomOffset = 0
+      mmHeight = 10848
+      mmPrintPosition = 0
+    end
+    object rpInconsistSalSmryBnd: TppSummaryBand
+      AfterPrint = rpInconsistSalSmryBndAfterPrint
+      Visible = False
+      mmBottomOffset = 0
+      mmHeight = 2910
+      mmPrintPosition = 0
+    end
+    object rpInconsistSalGroup1: TppGroup
+      BreakName = 'EMPRESA'
+      DataPipeline = ppInconsistSal
+      OutlineSettings.CreateNode = True
+      UserName = 'rpInconsistSalGroup1'
+      mmNewColumnThreshold = 0
+      mmNewPageThreshold = 0
+      DataPipelineName = 'ppInconsistSal'
+      object InconsistSalGrpHdrBnd1: TppGroupHeaderBand
+        mmBottomOffset = 0
+        mmHeight = 0
+        mmPrintPosition = 0
+      end
+      object InconsistSalGrpFootBnd1: TppGroupFooterBand
+        mmBottomOffset = 0
+        mmHeight = 5292
+        mmPrintPosition = 0
+        object rpInconsistSalLabel1: TppLabel
+          UserName = 'rpInconsistSalLabel1'
+          Caption = 'Total de Pessoas:'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Name = 'Arial'
+          Font.Size = 8
+          Font.Style = []
+          Transparent = True
+          mmHeight = 3704
+          mmLeft = 8467
+          mmTop = 794
+          mmWidth = 22754
+          BandType = 5
+          GroupNo = 0
+        end
+        object rpInconsistSalDBCalc1: TppDBCalc
+          UserName = 'rpInconsistSalDBCalc1'
+          DataField = 'MATRICULA'
+          DataPipeline = ppInconsistSal
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Name = 'Arial'
+          Font.Size = 8
+          Font.Style = []
+          ResetGroup = rpInconsistSalGroup1
+          Transparent = True
+          DBCalcType = dcCount
+          DataPipelineName = 'ppInconsistSal'
+          mmHeight = 3704
+          mmLeft = 32544
+          mmTop = 794
+          mmWidth = 17198
+          BandType = 5
+          GroupNo = 0
+        end
+        object rpInconsistSalLabel2: TppLabel
+          UserName = 'rpInconsistSalLabel2'
+          AutoSize = False
+          Caption = 'Abaixo do Mínimo:'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Name = 'Arial'
+          Font.Size = 8
+          Font.Style = []
+          TextAlignment = taRightJustified
+          Transparent = True
+          mmHeight = 3704
+          mmLeft = 60325
+          mmTop = 794
+          mmWidth = 23813
+          BandType = 5
+          GroupNo = 0
+        end
+        object rpInconsistSalLabel3: TppLabel
+          UserName = 'rpInconsistSalLabel3'
+          AutoSize = False
+          Caption = 'Acima do Máximo:'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Name = 'Arial'
+          Font.Size = 8
+          Font.Style = []
+          TextAlignment = taRightJustified
+          Transparent = True
+          mmHeight = 3704
+          mmLeft = 124354
+          mmTop = 794
+          mmWidth = 23813
+          BandType = 5
+          GroupNo = 0
+        end
+        object ppDBCalc1: TppDBCalc
+          UserName = 'DBCalc1'
+          DataField = 'ABAIXO_MINIMO'
+          DataPipeline = ppInconsistSal
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Name = 'Arial'
+          Font.Size = 8
+          Font.Style = []
+          ResetGroup = rpInconsistSalGroup1
+          Transparent = True
+          DataPipelineName = 'ppInconsistSal'
+          mmHeight = 3704
+          mmLeft = 85196
+          mmTop = 794
+          mmWidth = 19315
+          BandType = 5
+          GroupNo = 0
+        end
+        object ppDBCalc2: TppDBCalc
+          UserName = 'DBCalc2'
+          DataField = 'ACIMA_MINIMO'
+          DataPipeline = ppInconsistSal
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Name = 'Arial'
+          Font.Size = 8
+          Font.Style = []
+          ResetGroup = rpInconsistSalGroup1
+          Transparent = True
+          DataPipelineName = 'ppInconsistSal'
+          mmHeight = 3704
+          mmLeft = 149225
+          mmTop = 794
+          mmWidth = 19315
+          BandType = 5
+          GroupNo = 0
+        end
+      end
+    end
+  end
+  object ppInconsistSal: TppBDEPipeline
+    DataSource = dsInconsistSal
+    CloseDataSource = True
+    OpenDataSource = False
+    SkipWhenNoRecords = False
+    UserName = 'InconsistSal'
+    Left = 212
+    Top = 56
+  end
+  object dsInconsistSal: TwwDataSource
+    DataSet = CdsInconsistSal
+    Left = 212
+    Top = 104
+  end
+  object sqlInconsistSal: TCMSqlParams
+    SQL.Strings = (
+      'SELECT'
+      
+        '  '#39'1234567890123456789012345678901234567890123456789012345678901' +
+        '234567890'#39' AS EMPRESA,'
+      '  '#39'12345678901234567890'#39' AS MATRICULA,'
+      
+        '  '#39'1234567890123456789012345678901234567890123456789012345678901' +
+        '234567890'#39' AS EMPREGADO,'
+      
+        '  '#39'1234567890123456789012345678901234567890123456789012345678901' +
+        '234567890'#39' AS CARGO,'
+      '  '#39'123456789012345678901234567890'#39' AS TIPOPAGAMENTO,'
+      '  0 AS SALARIOATUAL,'
+      '  0 AS ABAIXO_MINIMO,'
+      '  0 AS ACIMA_MINIMO,'
+      '  0 AS VALOR_REF,'
+      
+        '  '#39'123456789012345678901234567890123456789012345678901234567890'#39 +
+        ' AS OBSERV'
+      'FROM'
+      '  DUAL'
+      'WHERE'
+      '  (1 = 2)')
+    ClientDataSet = CdsInconsistSal
+    Left = 212
+    Top = 200
+  end
+  object CdsInconsistSal: TCMClientDataSet
+    Aggregates = <>
+    Params = <>
+    AfterScroll = CdsInconsistSalAfterScroll
+    Left = 212
+    Top = 152
+  end
+end

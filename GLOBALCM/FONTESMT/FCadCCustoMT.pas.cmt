@@ -1,0 +1,630 @@
+{*******************************************************}
+{                                                       }
+{ CM Soluções Informática                               }
+{ ** Todos os Direitos Reservados                       }
+{ Analista Responsável: Marco Antonio Abreu             }
+{ Atualizado Em: 18/03/2002                             }
+{                                                       }
+{*******************************************************}
+
+unit FCadCCustoMT;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  FCadastroMT, ComCtrls, uCMTreeViewMT, MontaSelect, Db, DBClient, uModulo,
+  uCMClientDataSet, CmEventosCadastro, ImgList, Wwdatsrc, IvDictio,
+  IvMulti, IvEMulti, MAHlpBtn, StdCtrls, Buttons, TB97Tlbr, TB97Ctls, TB97,
+  ExtCtrls, Grids, Wwdbigrd, Wwdbgrid, wwdblook, CMDBLookupCombo, DBCtrls,
+  wwdbedit, Mask, uCtrlCentroCusto, uCtrlParamGlobal, uCtrlPrograma
+{$IFNDEF VERSAO0505}
+  , uCmTypes
+{$ENDIF}
+;
+
+type
+  TFrmCadCCustoMT = class(TFrmCadastroMT)
+    pnlArvore: TPanel;
+    TreeCCusto: TCMTreeViewMT;
+    PageContabil: TPageControl;
+    TbsGeral: TTabSheet;
+    PnlGeral: TPanel;
+    Label2: TLabel;
+    Label3: TLabel;
+    Label4: TLabel;
+    Label5: TLabel;
+    Label6: TLabel;
+    dbedDescricao: TDBEdit;
+    pnAnaSint: TPanel;
+    sbtnAnalitico: TSpeedButton;
+    sbtnSintetico: TSpeedButton;
+    dbedCod: TwwDBEdit;
+    dbedResponsavel: TDBEdit;
+    DbeCodReduz: TwwDBEdit;
+    DbeCodCorresp: TwwDBEdit;
+    TbsContasXCC: TTabSheet;
+    Panel3: TPanel;
+    BtnApagar: TBitBtn;
+    BtnReplicar: TBitBtn;
+    PgIntContabil: TPageControl;
+    TbsContasCC: TTabSheet;
+    wwDBGrid1: TwwDBGrid;
+    TbsAranha: TTabSheet;
+    wwDBGrid2: TwwDBGrid;
+    DBCheckBox1: TDBCheckBox;
+    CdsParamGlobal: TCMClientDataSet;
+    PnlPrograma: TPanel;
+    CmbPrograma: TCMDBLookupCombo;
+    Label13: TLabel;
+    CdsContasXCc: TCMClientDataSet;
+    DsContasXCc: TwwDataSource;
+    CdsAranha: TCMClientDataSet;
+    DsAranha: TwwDataSource;
+    MsCentrodeCusto: TMontaSelect;
+    MsAranha: TMontaSelect;
+    CdsAux: TCMClientDataSet;
+    CdsCentroCusto: TCMClientDataSet;
+    CdsPrograma: TCMClientDataSet;
+    DsPrograma: TwwDataSource;
+    procedure FormCreate(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure CmeCadastroFind(Sender: TObject);
+    procedure CmeCadastroApplyInsert(sender: TObject; var Accept: Boolean);
+    procedure CmeCadastroApplyDelete(sender: TObject; var Accept: Boolean);
+    procedure CmeCadastroAbortConfirma(sender: TObject;
+      OrigemAbortConfirma: TOrigemAbortConfirma);
+    procedure CmeCadastroEdit(Sender: TObject);
+    procedure CmeCadastroInsert(Sender: TObject);
+    procedure TreeCCustoChange(Sender: TObject);
+    procedure CmeCadastroAtualizaBotoes(Sender: TObject);
+    procedure CmeCadastroAfterConfirma(Sender: TObject);
+    procedure BtnReplicarClick(Sender: TObject);
+    procedure BtnApagarClick(Sender: TObject);
+    procedure PageContabilChanging(Sender: TObject;
+      var AllowChange: Boolean);
+    procedure CmeCadastroDelete(Sender: TObject);
+    procedure CmeCadastroCancel(Sender: TObject);
+    procedure sbtnAnaliticoClick(Sender: TObject);
+    procedure sbtnSinteticoClick(Sender: TObject);
+    procedure bbtnConfirmarClick(Sender: TObject);
+    procedure CmeCadastroApplyEdit(sender: TObject; var Accept: Boolean);
+    procedure CmeCadastroBeforeConfirma(sender: TObject;
+      var Accept: Boolean);
+    procedure dbedCodExit(Sender: TObject);
+    procedure CdsAfterScroll(DataSet: TDataSet);
+  private
+    { Private declarations }
+    bMontandoArvore, bDeletando: Boolean;
+    sMascCCusto: String;
+    lNivel     : Array[0..20] of Integer;
+    ind        : Integer;
+  public
+    { Public declarations }
+    Modulo: TModulo;
+    CentroCusto: TCtrlCentroCusto;
+    ParamGlobal: TCtrlParamGlobal;
+    Programa:    TCtrlPrograma;
+    procedure PegaRegCCusto( State: TDataSetState; PegaFilhos: Boolean = False );
+    procedure CopiaRegCCusto( State: TDataSetState );
+    procedure Seleciona( IDPessoa: Double = 0; IdCentroCusto: String = '' );
+  end;
+
+var
+  FrmCadCCustoMT: TFrmCadCCustoMT;
+
+implementation
+
+{$R *.DFM}
+
+Uses uMensErro, dBasedados, uSistema, uMidasUtil, uCtrlParamIntegra;
+
+procedure TfrmCadCCustoMT.PegaRegCCusto( State: TDataSetState; PegaFilhos: Boolean = False );
+begin
+  If State = DsInsert Then
+     cdsCentroCusto.Data := CentroCusto.ListaCentroCusto( -1 )
+  Else
+     cdsCentroCusto.Data := CentroCusto.ListaCentroCusto( Sistema.IdEmpresa,
+                            Cds.FieldByName( 'CodCentroCusto'{ivlm} ).AsString, False );
+
+  If PegaFilhos Then Begin
+     CdsContasXCc.Data := CentroCusto.ListaContasXCC( Sistema.IdEmpresa, Cds.FieldByName( 'CODCENTROCUSTO'{ivlm} ).AsString );
+     CdsAranha.Data    := CentroCusto.ListaAranhaXCc( Sistema.IdEmpresa, Cds.FieldByName( 'CODCENTROCUSTO'{ivlm} ).AsString );
+  End;
+end;
+
+procedure TfrmCadCCustoMT.CopiaRegCCusto( State: TDatasetState );
+var
+  i: Integer;
+  snome: String;
+begin
+  If State = dsInsert Then
+     CdsCentroCusto.Append
+  Else
+     CdsCentroCusto.Edit;
+
+  For i := 0 To Cds.Fields.Count - 1 Do Begin
+      snome := Cds.Fields[ i ].FieldName;
+      CdsCentroCusto.FieldByName( snome ).Value := Cds.FieldByName( snome ).Value;
+  End;
+
+  CdsCentroCusto.Post;
+end;
+
+procedure TfrmCadCCustoMT.Seleciona( IDPessoa: Double; IdCentroCusto: String );
+begin
+  cds.Data := CentroCusto.ListaCentroCusto( IdPessoa, IdCentroCusto, False, 1 );
+end;
+
+procedure TfrmCadCCustoMT.FormCreate(Sender: TObject);
+begin
+  inherited;
+  bMontandoArvore := False;
+  bDeletando := False;
+//  CmeCadastro.RepetirInsert := False;
+  Modulo := TModulo.Create;
+  CentroCusto := TCtrlCentroCusto.Create;
+  CentroCusto.Initialize( DtmBaseDados.dbBaseDados, True, Sistema.ConnectionType,
+                          Sistema.ConnectionSide, Sistema.AppRemoteServer, True );
+
+  ParamGlobal := TCtrlParamGlobal.Create;
+  ParamGlobal.Initialize( DtmBaseDados.dbBaseDados, False, Sistema.ConnectionType,
+                          Sistema.ConnectionSide, Sistema.AppRemoteServer );
+
+  Programa := TCtrlPrograma.Create;
+  Programa.Initialize( DtmBaseDados.dbBaseDados, False, Sistema.ConnectionType,
+                       Sistema.ConnectionSide, Sistema.AppRemoteServer );
+
+  CentroCusto.Cds       := CdsCentroCusto;
+  CentroCusto.CdsAranha := CdsAranha;
+  CentroCusto.CdsContas := CdsContasXCc;
+
+  Try
+     CdsParamGlobal.Data := ParamGlobal.ListaParamGlobal( Sistema.IdEmpresa );
+     sMascCCusto := CdsParamGlobal.FieldByName('MASCARACC'{ivlm}).AsString;
+     CdsParamGlobal.Close;
+
+     PnlPrograma.Visible := ( UpperCase( Sistema.TipoEmpresa ) = 'P'{ivlm} );
+
+     If PnlPrograma.Visible Then
+        CdsPrograma.Data := Programa.ListaPrograma();
+
+     PageContabil.ActivePage := TbsGeral;
+     bMontandoArvore := False;
+
+     If Not Modulo.VerificaMascara( sMascCCusto, lNivel, ind ) Then Begin
+        MessageBeep(0);
+        ShowMessage('Máscara do Centro de Custo Inválida'{ivlm});
+        Exit;
+     End;
+
+     Seleciona( Sistema.IdEmpresa );
+     CdsCentroCusto.Data := Cds.Data;
+     CdsCentroCusto.EmptyDataSet;
+
+     MontaSelect.Filtro.Text := 'IDEMPRESA = '+ IntToStr( Sistema.IdEmpresa );
+     treeCCusto.mascara := sMascCCusto;
+
+     bMontandoArvore := True;
+     treeCCusto.MontaArvore;
+     bMontandoArvore := False;
+
+     cds.FieldByName( 'CODCENTROCUSTO' ).EditMask := sMascCCusto + ';0; ';
+
+     If Not Cds.IsEmpty Then
+        CmeCadastro.Operacao := OpIdle;
+  Except
+     Raise;
+  End;
+end;
+
+procedure TFrmCadCCustoMT.FormClose(Sender: TObject;
+  var Action: TCloseAction);
+begin
+  inherited;
+  Programa.Free;
+  ParamGlobal.Free;
+  CentroCusto.Free;
+  Modulo.Free;
+end;
+
+procedure TFrmCadCCustoMT.CmeCadastroFind(Sender: TObject);
+begin
+  inherited;
+  If MontaSelect.RetornouValor Then
+     cds.Locate( 'CODCENTROCUSTO', MontaSelect.ValoresChave[0], [loPartialKey] );
+end;
+
+procedure TFrmCadCCustoMT.CmeCadastroApplyInsert(sender: TObject;
+  var Accept: Boolean);
+begin
+  inherited;
+  CopiaRegCCusto( DsInsert );
+  Accept := CentroCusto.Gravar;
+end;
+
+procedure TFrmCadCCustoMT.CmeCadastroApplyDelete(sender: TObject;
+  var Accept: Boolean);
+begin
+  inherited;
+  CdsCentroCusto.Delete;
+  Accept := CentroCusto.Excluir;
+end;
+
+procedure TFrmCadCCustoMT.CmeCadastroAbortConfirma(sender: TObject;
+  OrigemAbortConfirma: TOrigemAbortConfirma);
+begin
+  inherited;
+  MsgDlg( CentroCusto.MessageInfo, 'Erro', mtError, [ mbOK ], 0 );
+  PnlPrograma.Enabled := False;
+end;
+
+procedure TFrmCadCCustoMT.CmeCadastroEdit(Sender: TObject);
+begin
+  inherited;
+  PegaRegCCusto( DsEdit );
+  treeCCusto.Enabled  := False;
+  BtnReplicar.Enabled := True;
+  BtnApagar.Enabled   := True;
+  dbedCod.Enabled     := False;
+  PnlPrograma.Enabled := True;
+
+  If dbedDescricao.CanFocus Then
+     dbedDescricao.SetFocus;
+end;
+
+procedure TFrmCadCCustoMT.CmeCadastroInsert(Sender: TObject);
+begin
+  inherited;
+  PegaRegCCusto( DsInsert );
+  treeCCusto.Enabled := False;
+  Cds.FieldByName( 'IDEMPRESA' ).AsFloat := Sistema.IdEmpresa;
+  Cds.FieldByName( 'ATIVO' ).AsString := 'S';
+  dbedCod.Enabled := True;
+  BtnReplicar.Enabled := False;
+  BtnApagar.Enabled   := False;
+  PnlPrograma.Enabled := True;
+
+  If dbedCod.CanFocus Then
+     dbedCod.SetFocus;
+
+  CdsContasXCc.Data := CentroCusto.ListaContasXCC( Sistema.IdEmpresa, Cds.FieldByName( 'CODCENTROCUSTO' ).AsString );
+  CdsAranha.Data    := CentroCusto.ListaAranhaXCc( Sistema.IdEmpresa, Cds.FieldByName( 'CODCENTROCUSTO' ).AsString );
+end;
+
+procedure TFrmCadCCustoMT.TreeCCustoChange(Sender: TObject);
+begin
+  inherited;
+  if Cds.FieldByName('STATUSGRUPOCDC').AsString = 'A' then
+     sbtnAnalitico.Down := True
+  else
+     if Cds.FieldByName('STATUSGRUPOCDC').AsString = 'S' then
+        sbtnSintetico.Down := True;
+end;
+
+procedure TFrmCadCCustoMT.CmeCadastroAtualizaBotoes(Sender: TObject);
+begin
+  inherited;
+  TreeCCusto.Enabled  := Not cds.IsEmpty;
+
+  If CmeCadastro.Operacao = OpInserir Then
+     sbtnAlterar.Enabled := False
+  Else
+     sbtnAlterar.Enabled := Not cds.IsEmpty;
+
+  If CmeCadastro.Operacao In [OpAlterar, OpInserir] Then
+     sbtnApagar.Enabled := False
+  Else
+     sbtnApagar.Enabled := Not cds.IsEmpty;
+
+  pnlFundo.Enabled    := True;
+  pnAnaSint.Enabled   := bbtnConfirmar.Enabled;
+end;
+
+procedure TFrmCadCCustoMT.CmeCadastroAfterConfirma(Sender: TObject);
+begin
+  inherited;
+  Seleciona( Sistema.IdEmpresa );
+  cds.FieldByName( 'CODCENTROCUSTO' ).EditMask := sMascCCusto + ';0; ';
+  PnlPrograma.Enabled := False;
+end;
+
+procedure TFrmCadCCustoMT.BtnReplicarClick(Sender: TObject);
+begin
+  inherited;
+
+  If PgIntContabil.ActivePageIndex = 0 Then Begin
+     If ( CmeCadastro.Operacao In [ OpInserir, OpAlterar ] ) And
+            ( MsgDlg( 'Atenção: Os relacionamentos anteriores, se existirem, serão excluídos. ' +
+                      'Confirma A Replicação das contas para o centro de custo específico ?',
+                      'Confirmação', mtConfirmation, [mbYes, mbNo, mbHelp], 0 ) = mrYes ) And
+            ( MsCentrodeCusto.Executar = MrOk ) Then Begin
+        Try
+           Screen.Cursor := CrHourGlass;
+           CentroCusto.ReplicarCC( Sistema.IdEmpresa, Cds.FieldByName( 'CODCENTROCUSTO' ).AsString,
+                                  MsCentrodeCusto.ValoresChave[ 0 ] );
+           CdsContasXCc.Data := CentroCusto.ListaContasXCC( Sistema.IdEmpresa, Cds.FieldByName( 'CODCENTROCUSTO' ).AsString );
+        Finally
+           Screen.Cursor := CrDefault;
+        End;
+     End;
+  End Else Begin
+     If ( CmeCadastro.Operacao In [OpInserir, OpAlterar] ) And
+            ( MsgDlg( 'Atenção: Os relacionamentos anteriores, se existirem, serão excluídos. ' +
+                      'Confirma A Replicação Do Relacionamento Tipo Desembolso X Programa X Conta o centro de custo específico ?',
+                      'Confirmação', mtConfirmation, [mbYes, mbNo, mbHelp], 0) = mrYes ) And
+            ( MsAranha.Executar = MrOk ) Then Begin
+
+        Try
+           Screen.Cursor := CrHourGlass;
+           CentroCusto.ReplicarAranha( Sistema.IdEmpresa, Cds.FieldByName( 'CODCENTROCUSTO' ).AsString,
+                                      MsAranha.ValoresChave[ 0 ] );
+           CdsAranha.Data := CentroCusto.ListaAranhaXCc( Sistema.IdEmpresa, Cds.FieldByName( 'CODCENTROCUSTO' ).AsString );
+        Finally
+           Screen.Cursor := CrDefault;
+        End;
+     End;
+  End;
+end;
+
+procedure TFrmCadCCustoMT.BtnApagarClick(Sender: TObject);
+begin
+  inherited;
+  If CmeCadastro.Operacao In [OpInserir, OpAlterar] Then Begin
+     If PgIntContabil.ActivePageIndex = 0 Then Begin
+        If Not CdsContasXCc.IsEmpty Then
+           CdsContasXCc.Delete;
+     End Else Begin
+        If Not CdsAranha.IsEmpty Then
+           CdsAranha.Delete;
+     End;
+  End;
+end;
+
+procedure TFrmCadCCustoMT.PageContabilChanging(Sender: TObject;
+  var AllowChange: Boolean);
+begin
+  inherited;
+  AllowChange := ( Not Cds.FieldByName( 'CODCENTROCUSTO' ).IsNull );
+
+  If Not AllowChange Then
+     MsgDlg( 'Centro de Custo não informado', 'Centro de Custo', mtError, [mbOk], 0 );
+end;
+
+procedure TFrmCadCCustoMT.CmeCadastroDelete(Sender: TObject);
+begin
+  Try
+     bDeletando := True;
+
+     If TreeCCusto.Selected.HasChildren Then
+        MsgDlg( 'O Centro de Centro de Custo possui Filho(s)', 'Atenção', mtWarning, [mbok], 0 )
+     Else Begin
+        PegaRegCCusto( DsEdit, True );
+        CdsContasXCc.First;
+
+        While Not CdsContasXCc.Eof Do
+              CdsContasXCc.Delete;
+
+        CdsAranha.First;
+
+        While Not CdsAranha.Eof Do
+              CdsAranha.Delete;
+
+        inherited;
+     End;
+
+     bDeletando := False;
+  Except
+     bDeletando := False;
+     Raise;
+  End;
+end;
+
+procedure TFrmCadCCustoMT.CmeCadastroCancel(Sender: TObject);
+begin
+  inherited;
+  TreeCCusto.Enabled      := True;
+  PageContabil.ActivePage := TbsGeral;
+  PnlPrograma.Enabled     := False;
+end;
+
+procedure TFrmCadCCustoMT.sbtnAnaliticoClick(Sender: TObject);
+begin
+  inherited;
+  Cds.FieldByName( 'STATUSGRUPOCDC' ).AsString := 'A';
+end;
+
+procedure TFrmCadCCustoMT.sbtnSinteticoClick(Sender: TObject);
+begin
+  inherited;
+  Cds.FieldByname( 'STATUSGRUPOCDC' ).AsString := 'S';
+end;
+
+procedure TFrmCadCCustoMT.bbtnConfirmarClick(Sender: TObject);
+begin
+  If Trim( dbedCod.Text ) = '' Then Begin
+     MsgDlg( 'Obrigatório preenchimento da código do Centro de Custo', 'Atenção', mtError, [mbOk], 0 );
+
+     If dbedCod.CanFocus Then
+        dbedCod.SetFocus;
+  End Else
+  If Trim( dbedDescricao.Text ) = '' Then Begin
+     MsgDlg( 'Obrigatório preenchimento da descrição do Centro de Custo', 'Atenção', mtError, [mbOk], 0 );
+
+     If dbedDescricao.CanFocus Then
+        dbedDescricao.SetFocus;
+  End Else
+     inherited;
+end;
+
+procedure TFrmCadCCustoMT.CmeCadastroApplyEdit(sender: TObject;
+  var Accept: Boolean);
+begin
+  inherited;
+  CopiaRegCCusto( DsEdit );
+  Accept := CentroCusto.Gravar;
+end;
+
+procedure TFrmCadCCustoMT.CmeCadastroBeforeConfirma(sender: TObject;
+  var Accept: Boolean);
+var
+  iGrau: Integer;
+  sPai: String;
+  EstadoQry: TDatasetState;
+begin
+  inherited;
+  PageContabil.ActivePage := TbsGeral;
+  EstadoQry := Cds.State;
+
+  If EstadoQry In [ DsEdit, DsInsert ] Then Begin
+     Try
+        If dbedCod.Enabled Then Begin
+           sPai  := '';
+           iGrau := Modulo.CalcGrau( Trim( dbedCod.Text ), lNivel, ind, sPai );
+
+           If iGrau = 0 Then Begin
+              MessageBeep( 0 );
+              ShowMessage( 'Máscara Inválida' );
+              Accept := False;
+              Exit;
+           End;
+
+           // Verifica se o tipo de Desemb já está cadastrado
+           CdsAux.Data := CentroCusto.ListaCentroCusto( Sistema.IdEmpresa, Trim( dbEdCod.Text ), False );
+
+           If Not CdsAux.IsEmpty Then Begin
+              CdsAux.Close;
+              MsgDlg( 'Centro de Custo já cadastrado', LerMensagem(2), mtError, [mbOk], 0 );
+              Accept := False;
+              DbEdCod.SetFocus;
+              Exit;
+           End;
+
+           If iGrau > 1 Then Begin
+              // Verifica se conta pai é sintética
+              CdsAux.Data := CentroCusto.ListaCentroCusto( Sistema.IdEmpresa, Trim( sPai ), False );
+
+              If CdsAux.IsEmpty Then Begin
+                 CdsAux.Close;
+                 MsgDlg( 'Não existe Centro de Custo Sintético relacionado', LerMensagem(2), mtError, [mbOk], 0 );
+                 Accept := False;
+                 Exit;
+              End Else Begin
+                 If CdsAux.FieldByName('STATUSGRUPOCDC').AsString = 'A' Then Begin // pai é analítico
+                    CdsAux.Close;
+                    MsgDlg( 'Centro de Custo Pai é analítico', LerMensagem(2), mtError, [mbOk], 0 );
+                    Accept := False;
+                    Exit;
+                 End;
+              End;
+           End;
+
+           CdsAux.Close;
+
+           If dbedCod.Modified Then Begin
+              If Not CdsContasXCc.IsEmpty Then Begin
+                 CdsContasXCc.First;
+
+                 While Not CdsContasXCc.Eof Do Begin
+                       CdsContasXCc.Edit;
+                       CdsContasXCc.FieldByName( 'CODCENTROCUSTO' ).AsString := Cds.FieldByName( 'CODCENTROCUSTO' ).AsString;
+                       CdsContasXCc.FieldByName( 'IDEMPRESA' ).AsInteger := Sistema.IdEmpresa;
+                       CdsContasXCc.Post;
+                       CdsContasXCc.Next;
+                 End;
+
+                 CdsContasXCc.First;
+              End;
+
+              If Not CdsAranha.IsEmpty Then Begin
+                 CdsAranha.First;
+
+                 While Not CdsAranha.Eof Do Begin
+                       CdsAranha.Edit;
+                       CdsAranha.FieldByName( 'CODCENTROCUSTO' ).AsString := Cds.FieldByName( 'CODCENTROCUSTO' ).AsString;
+                       CdsAranha.FieldByName( 'IDEMPRESA' ).AsInteger := Sistema.IdEmpresa;
+                       CdsAranha.Post;
+                       CdsAranha.Next;
+                 End;
+
+                 CdsAranha.First;
+              End;
+           End;
+        End;
+     Except
+        Raise;
+     End;
+
+     If sbtnAnalitico.Down Then
+        Cds.FieldByName( 'STATUSGRUPOCDC' ).AsString := 'A'
+     Else
+        Cds.FieldByName( 'STATUSGRUPOCDC' ).AsString := 'S';
+
+     Cds.FieldByName( 'IDUSUARIOINCLUSAO' ).AsFloat := Sistema.IdUsuario;
+     TreeCCusto.Enabled := ( Cds.State = dsEdit );
+  End;
+end;
+
+procedure TFrmCadCCustoMT.dbedCodExit(Sender: TObject);
+var
+  iGrau: Integer;
+  sPai: String;
+begin
+  inherited;
+  If Trim( dbedCod.Text ) = '' Then
+     Exit;
+
+  sPai  := '';
+  iGrau := Modulo.CalcGrau( Trim( dbedCod.Text ), lNivel, ind, sPai );
+
+  If iGrau = 0 Then Begin
+     MessageBeep( 0 );
+     ShowMessage( 'Máscara Inválida' );
+     Exit;
+  End Else
+     If iGrau > 1 Then Begin
+        // Verifica se conta pai é sintética
+        CdsAux.Data := CentroCusto.ListaCentroCusto( Sistema.IdEmpresa, Trim( sPai ), False );
+
+        If CdsAux.IsEmpty Then Begin
+           MsgDlg( 'Não existe Centro de Custo Sintético relacionado', LerMensagem(2), mtError, [mbOk], 0 );
+           Exit;
+        End Else Begin
+           If CdsAux.FieldByName('STATUSGRUPOCDC').AsString = 'A' Then Begin // pai é analítico
+              MsgDlg( 'Centro de Custo Pai é analítico', LerMensagem(2), mtError, [mbOk], 0 );
+              Exit;
+           End;
+        End;
+
+        CdsAux.Close;
+     End Else
+        If ( iGrau = 1 ) And ( ind + 1 > 1 ) Then Begin
+           sbtnSintetico.Down := True;
+           Cds.FieldByName( 'STATUSGRUPOCDC' ).AsString := 'S';
+           pnAnaSint.Enabled := false;
+        End Else
+           If iGrau = ind + 1 Then Begin
+              sbtnAnalitico.Down := True;
+              Cds.FieldByName( 'STATUSGRUPOCDC' ).AsString := 'A';
+              pnAnaSint.Enabled := false;
+           End;
+end;
+
+procedure TFrmCadCCustoMT.CdsAfterScroll(DataSet: TDataSet);
+begin
+  inherited;
+  If Not bMontandoArvore Then Begin
+     If cds.FieldByName('STATUSGRUPOCDC').AsString = 'A' Then
+        sbtnAnalitico.Down := True
+     Else
+         If cds.FieldByName('STATUSGRUPOCDC').AsString = 'S' Then
+            sbtnSintetico.Down := True;
+
+      If Not bDeletando Then Begin
+         CdsContasXCc.Data := CentroCusto.ListaContasXCC( Sistema.IdEmpresa, Cds.FieldByName( 'CODCENTROCUSTO' ).AsString );
+         CdsAranha.Data    := CentroCusto.ListaAranhaXCc( Sistema.IdEmpresa, Cds.FieldByName( 'CODCENTROCUSTO' ).AsString );
+      End;
+   end;
+end;
+
+end.

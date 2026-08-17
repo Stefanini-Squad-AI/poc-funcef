@@ -1,0 +1,89 @@
+ -- Declaração das Variaveis 
+ 
+declare
+  -- Variaveis Sequenciais
+  vIdForm      Integer;
+  vIdFuncao    Integer;
+  vIdObjeto    Integer;
+  vIdOperFunc  Integer;
+
+  -- Variaveis definidas
+  vIdModulo    Integer;
+  vIdFormPai   Integer; 
+  vIdFuncaoPai Integer;
+  vIdOperacao  Integer;
+
+begin
+  -- Variaveis definidas
+  vIdModulo    := 24;
+  vIdFormPai   := 117;
+  vIdFuncaoPai := 11629;
+  vIdOperacao  := 1;
+
+  -- Validação da Variavel Sequencial da Tabela Formularios
+  Begin
+    -- Select
+    Select IdForm into vIdForm From Form
+    where NomeForm = 'frmPrepararDARFFolBenef' and IdModulo = vIdModulo;
+    -- Exception
+    EXCEPTION WHEN OTHERS THEN vIdForm := -1;
+    -- Criação do Registro
+    If vIdForm = -1 then
+      Select Max(IdForm)+1 Into vIdForm From Form;
+      Insert Into Form(Idform,Nomeform,Idmodulo,Descform)
+                values(vIdForm,'frmPrepararDARFFolBenef',vIdModulo,'Preparar DARF - Folha de Benefícios');
+    End If;
+  End;
+
+  -- Validação da Variavel Sequencial da Tabela Funcao
+  Begin
+    -- Select
+    Select Idfuncao Into vIdFuncao From Funcao
+    where NomeFuncao = 'Preparar DARF - Folha de Benefícios'
+      and IdModulo = vIdModulo and IdFuncaoPai = vIdFuncaoPai;
+    -- Exception
+    EXCEPTION WHEN OTHERS THEN vIdFuncao := -1;
+    -- Criação do Registro
+    If vIdFuncao = -1 then
+      Select Max(IdFuncao)+1 Into vIdFuncao From Funcao;
+      Insert Into Funcao(IdFuncao,NomeFuncao,IdModulo,IdFuncaoPai)
+                  values(vIdFuncao,'Preparar DARF - Folha de Benefícios', vIdModulo, vIdFuncaoPai);
+    End If;
+  End;
+
+  -- Validação da Variavel Sequencial da Tabela Funcao
+  Begin
+    -- Select
+    Select IdObjeto Into vIdObjeto from Objeto
+    where NomeObjeto = 'mnuPrepararDARFFolhadeBeneficios';
+    -- Exception
+    EXCEPTION WHEN OTHERS THEN vIdObjeto := -1;
+    -- Criação do Registro
+    If vIdObjeto = -1 then
+      Select Max(IdObjeto)+1 Into vIdObjeto From Objeto;
+      Insert Into Objeto(IdObjeto,NomeObjeto) Values( vIdObjeto, 'mnuPrepararDARFFolhadeBeneficios');
+    End If;
+  End;
+
+  -- Validação da Variavel Sequencial da Tabela OperFunc
+  Begin
+    -- Select
+    Select IdOperFunc into vIdOperFunc from OperFunc
+    where idModulo = vIdModulo
+      and idOperacao = vIdOperacao
+      and IdFuncao = vIdFuncao;
+    -- Exception
+    EXCEPTION WHEN OTHERS THEN vIdOperFunc := -1;
+    -- Criação do Registro
+    If vIdOperFunc = -1 then
+      Select Max(IdOperFunc)+1 Into vIdOperFunc from OperFunc;
+      Insert Into Operfunc(idOperfunc,Idmodulo,Idoperacao,Idfuncao)
+                    Values(vIdOperFunc, vIdModulo, vIdOperacao, vIdFuncao);
+      Insert into frobfnop(idOperfunc,idobjeto,idform)
+                    values(vIdOperFunc, vIdObjeto, vIdFormPai);
+    End If;
+  End;
+
+  -- Grava Todas Informações no Banco
+  Commit;
+end;

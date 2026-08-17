@@ -1,0 +1,200 @@
+unit fMTCadLocalizacao;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  FCadastroMT, MontaSelect, Db, DBClient, uCMClientDataSet, uCMTypes,
+  CmEventosCadastro, ImgList, Wwdatsrc, IvDictio, IvMulti, Variants,
+  MAHlpBtn, StdCtrls, Buttons, TB97Tlbr, TB97Ctls, TB97, ExtCtrls,
+  Mask, wwdbedit, wwdblook, ComCtrls, CMTree, uCMTreeViewMT, DBCtrls,
+  uCtrlLocalizacoes, uCtrlTipoArea, uCtrlCentroCusto, uCtrlResponsavel, uCtrlPadroes;
+
+type
+  TfrmMTCadLocalizacao = class(TFrmCadastroMT)
+    lblNome: TLabel;
+    dbeNome: TwwDBEdit;
+    Label2: TLabel;
+    MSResponsavel: TMontaSelect;
+    Label1: TLabel;
+    dbeResponsavel: TwwDBEdit;
+    spdSelResponsavel: TBitBtn;
+    gbDescrCCusto: TGroupBox;
+    lbDescCentroCusto: TLabel;
+    dbeCentroCusto: TwwDBEdit;
+    spdCentroCusto: TBitBtn;
+    cdsCentroCusto: TCMClientDataSet;
+    cdsTipoArea: TCMClientDataSet;
+    cdsResponsavel: TCMClientDataSet;
+    dsResponsavel: TwwDataSource;
+    dsCentroCusto: TwwDataSource;
+    GroupBox1: TGroupBox;
+    dblcTipoArea: TwwDBLookupCombo;
+    dbmEndereco: TDBMemo;
+    Panel1: TPanel;
+    ckbSaidaTemp: TDBCheckBox;
+    MSCentroCusto: TMontaSelect;
+    procedure FormCreate(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure CmeCadastroApplyDelete(sender: TObject; var Accept: Boolean);
+    procedure CmeCadastroApplyEdit(sender: TObject; var Accept: Boolean);
+    procedure CmeCadastroApplyInsert(sender: TObject; var Accept: Boolean);
+    procedure CmeCadastroAbortConfirma(sender: TObject; OrigemAbortConfirma: TOrigemAbortConfirma);
+    procedure CmeCadastroFind(Sender: TObject);
+    procedure CmeCadastroAfterConfirma(Sender: TObject);
+    procedure spdSelResponsavelClick(Sender: TObject);
+    procedure spdCentroCustoClick(Sender: TObject);
+    procedure CmeCadastroInsert(Sender: TObject);
+    procedure CmeCadastroConfirma(Sender: TObject);
+  private
+    { Private declarations }
+    Localizacao : TCtrlLocalizacoes;
+    Responsavel : TCtrlResponsavel;
+    CentroCusto : TCtrlCentroCusto;
+    TipoArea    : TCtrlTipoArea;
+    Procedure SelLocalizacao(fIdLocalizacao, fIdPessoa : Extended);
+  public
+    { Public declarations }
+  end;
+
+var
+  frmMTCadLocalizacao: TfrmMTCadLocalizacao;
+
+implementation
+
+{$R *.DFM}
+
+Uses uMensErro, uSistema, uCtrlParamIntegra ;
+
+procedure TfrmMTCadLocalizacao.FormCreate(Sender: TObject);
+begin
+   inherited;
+   Localizacao := TCtrlLocalizacoes.Create;
+   Localizacao.InitializeAs(Padroes);
+   Localizacao.cds := cds;
+   //-------------------------------------------------------------------------------------
+   Responsavel := TCtrlResponsavel.Create;
+   Responsavel.InitializeAs(Padroes);
+   cdsResponsavel.Data := Responsavel.ListaResponsavel(0);  // -1 - Total, 0 - Nenhum
+   //-------------------------------------------------------------------------------------
+   CentroCusto := TCtrlCentroCusto.Create;
+   CentroCusto.InitializeAs(Padroes);
+   cdsCentroCusto.Data := CentroCusto.ListaCentroCusto(0,'',True,1);
+   lbDescCentroCusto.Caption := '';
+   //-------------------------------------------------------------------------------------
+   TipoArea := TCtrlTipoArea.Create;
+   TipoArea.InitializeAs(Padroes);
+   cdsTipoArea.Data := TipoArea.ListaTipoArea;
+   //-------------------------------------------------------------------------------------
+   SelLocalizacao(-1,Sistema.IdEmpresa);
+   MontaSelect.Filtro.Add('LOCALIZACAO.IDPESSOA = ' + IntToStr(Sistema.IdEmpresa));
+   MSCentroCusto.Filtro.Add('CENTCUST.IDEMPRESA = ' + IntToStr(Sistema.IdEmpresa));
+end;
+
+procedure TFrmMTCadLocalizacao.SelLocalizacao(fIdLocalizacao, fIdPessoa : Extended);
+begin
+   cds.Data := Localizacao.Procurar(fIdLocalizacao, fIdPessoa);
+   TFloatField(cds.FieldByName('CODCENTROCUSTO')).EditMask := ParamIntegra.MascaraCC + ';0;_';
+   //-------------------------------------------------------------------------------------
+   cdsResponsavel.Data := Responsavel.ListaResponsavel(cds.FieldByName('IDRESPONSAVEL').AsFloat);
+   if not cds.IsEmpty then
+      cdsCentroCusto.Data := CentroCusto.ListaCentroCusto(cds.FieldByName('IDEMPRESA').AsInteger,cds.FieldByName('CODCENTROCUSTO').AsString,True,1)
+   else
+      cdsCentroCusto.Data := CentroCusto.ListaCentroCusto(-2,'');
+   lbDescCentroCusto.Caption := cdsCentroCusto.FieldByName('NOME').AsString;
+end;
+
+procedure TfrmMTCadLocalizacao.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+   inherited;
+   Localizacao.Free;
+   Responsavel.Free;
+   CentroCusto.Free;
+   TipoArea.Free
+end;
+
+procedure TfrmMTCadLocalizacao.CmeCadastroApplyDelete(sender: TObject; var Accept: Boolean);
+begin
+   inherited;
+   Accept := Localizacao.AplicaOperacao;
+end;
+
+procedure TfrmMTCadLocalizacao.CmeCadastroApplyEdit(sender: TObject; var Accept: Boolean);
+begin
+   inherited;
+   Accept := Localizacao.AplicaOperacao;
+end;
+
+procedure TfrmMTCadLocalizacao.CmeCadastroApplyInsert(sender: TObject; var Accept: Boolean);
+begin
+   inherited;
+   Accept := Localizacao.AplicaOperacao;
+end;
+
+procedure TfrmMTCadLocalizacao.CmeCadastroAbortConfirma(sender: TObject; OrigemAbortConfirma: TOrigemAbortConfirma);
+begin
+   inherited;
+   MsgDlg(Localizacao.MessageInfo,'Erro',mtError,[mbOK],0);
+end;
+
+procedure TfrmMTCadLocalizacao.CmeCadastroFind(Sender: TObject);
+begin
+   inherited;
+   if MontaSelect.RetornouValor then
+      SelLocalizacao(strtofloat(MontaSelect.ValoresChave[0]),Sistema.IdEmpresa);
+end;
+
+procedure TfrmMTCadLocalizacao.CmeCadastroAfterConfirma(Sender: TObject);
+begin
+   //inherited;
+end;
+
+procedure TfrmMTCadLocalizacao.spdSelResponsavelClick(Sender: TObject);
+begin
+   inherited;
+   MSResponsavel.Executar;
+   if MSResponsavel.RetornouValor then
+   begin
+      cdsResponsavel.Data := Responsavel.ListaResponsavel(strtofloat(MSResponsavel.ValoresChave[0]));
+      cds.FieldByName('IDRESPONSAVEL').AsInteger := cdsResponsavel.FieldByName('IDRESPONSAVEL').AsInteger;
+   end;
+end;
+
+procedure TfrmMTCadLocalizacao.spdCentroCustoClick(Sender: TObject);
+begin
+   inherited;
+   MSCentroCusto.Executar;
+   if MSCentroCusto.RetornouValor then
+      if MSCentroCusto.ValoresChave[2] = 'A' then
+      begin
+         cdsCentroCusto.Data := CentroCusto.ListaCentroCusto(strtofloat(MSCentroCusto.ValoresChave[1]),MSCentroCusto.ValoresChave[0],True,1);
+         lbDescCentroCusto.Caption := cdsCentroCusto.FieldByName('NOME').AsString;
+         cds.FieldByName('CODCENTROCUSTO').AsString := cdsCentroCusto.FieldByName('CODCENTROCUSTO').AsString;
+         cds.FieldByName('IDEMPRESA').AsFloat       := cdsCentroCusto.FieldByName('IDEMPRESA').AsFloat;
+      end;
+end;
+
+procedure TfrmMTCadLocalizacao.CmeCadastroInsert(Sender: TObject);
+begin
+   SelLocalizacao(-1,Sistema.IdEmpresa);
+   inherited;
+   cds.FieldByName('IDPESSOA').AsInteger := Sistema.IdEmpresa;
+end;
+
+procedure TfrmMTCadLocalizacao.CmeCadastroConfirma(Sender: TObject);
+var
+   OldOperacao : TOperacao;
+begin
+   OldOperacao := CMECadastro.Operacao;
+   inherited;
+   if OldOperacao = opApagar then
+      SelLocalizacao(-1,Sistema.IdEmpresa)
+   else
+   if OldOperacao = opAlterar then
+      SelLocalizacao(cds.FieldByName('IDLOCALIZACAO').AsInteger,Sistema.IdEmpresa);
+end;
+
+
+end.
+
+

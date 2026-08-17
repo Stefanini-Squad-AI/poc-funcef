@@ -1,0 +1,202 @@
+object molParticipante: TmolParticipante
+  Left = 0
+  Top = 0
+  Width = 614
+  Height = 48
+  TabOrder = 0
+  object Label5: TLabel
+    Left = 8
+    Top = 2
+    Width = 55
+    Height = 13
+    Caption = 'Matrícula'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -11
+    Font.Name = 'MS Sans Serif'
+    Font.Style = [fsBold]
+    ParentFont = False
+  end
+  object Label2: TLabel
+    Left = 104
+    Top = 2
+    Width = 87
+    Height = 13
+    Caption = 'Inscrição Prev.'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -11
+    Font.Name = 'MS Sans Serif'
+    Font.Style = [fsBold]
+    ParentFont = False
+  end
+  object Label1: TLabel
+    Left = 200
+    Top = 2
+    Width = 33
+    Height = 13
+    Caption = 'Nome'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -11
+    Font.Name = 'MS Sans Serif'
+    Font.Style = [fsBold]
+    ParentFont = False
+  end
+  object edtMatricula: TEdit
+    Left = 8
+    Top = 16
+    Width = 97
+    Height = 21
+    Enabled = False
+    TabOrder = 0
+  end
+  object edtInscricao: TEdit
+    Left = 104
+    Top = 16
+    Width = 97
+    Height = 21
+    Enabled = False
+    TabOrder = 1
+  end
+  object edtNome: TEdit
+    Left = 200
+    Top = 16
+    Width = 361
+    Height = 21
+    Enabled = False
+    TabOrder = 2
+  end
+  object btnBuscaPart: TBitBtn
+    Left = 560
+    Top = 16
+    Width = 24
+    Height = 22
+    Hint = 'Busca um Participante'
+    TabOrder = 3
+    OnClick = btnBuscaPartClick
+    Glyph.Data = {
+      76010000424D7601000000000000760000002800000020000000100000000100
+      0400000000000001000000000000000000001000000010000000000000000000
+      80000080000000808000800000008000800080800000C0C0C000808080000000
+      FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00777777777887
+      777777777777F88F7777777777700F077777777777F8878F77777777700FFF07
+      77777777F8877787F77777700FFFFFF077777778877777F8F7777778FFFFFCF0
+      77777F78F77FF8787F771778FFCCCFFF07778FF87F88877F8F7711778FFFFFCF
+      077788FF8F77FF8787F711178FFCCCFFF077888F8FF88877F87F71110000FFFC
+      FF07788888887FF877877710E7E706CFFFF077887777888777F8770E7E7E70FF
+      F887778F777778F7F8877707E7E7E0F88777778F777778F88777770E7E7E7087
+      7777778F7777788777777707E7E7E07777777787F7777877777777707E7E0777
+      777777787FFF8777777777770000777777777777888877777777}
+    NumGlyphs = 2
+  end
+  object btnLimpaPart: TBitBtn
+    Left = 584
+    Top = 16
+    Width = 24
+    Height = 22
+    Hint = 'Limpa a seleção de Participante'
+    TabOrder = 4
+    OnClick = btnLimpaPartClick
+    Glyph.Data = {
+      76010000424D7601000000000000760000002800000020000000100000000100
+      0400000000000001000000000000000000001000000010000000000000000000
+      8000008000000080800080000000800080008080000080808000C0C0C0000000
+      FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00888888888888
+      88888888888FF8888888888888008888888888888F77F8888888888800F08888
+      8888888F7787F88888888800FFF0888888888F7788878F88888800FFFFFF0888
+      88887788888F788888887FFFFFCF888888887F88FF7888FF88887FFCCCF88008
+      888878F777888778F88887FFFF880110888887F88F8878878F8887FFC8809991
+      0888878F7887F88878F8887FF88099991088887F88878F88878F887FF8880999
+      03088878F88878F878788887F8888090B03088878F888787878788887888880B
+      0B038888788888787878888888888880B0B38888888888878788888888888888
+      0BBB88888888888878F888888888888880BB8888888888888788}
+    NumGlyphs = 2
+  end
+  object MS_Titular: TMontaSelect
+    Template.IdConsulta = 0
+    Caption = 'Seleciona'
+    Colunas.Strings = (
+      'PP.NOME'
+      'ST.DESCRICAO'
+      'EL.MATRICULA'
+      'PV.INSCRICAONUMERO'
+      'PL.NOME'
+      'PA.NOME')
+    TipodeDado.Strings = (
+      'C'
+      'C'
+      'C'
+      'N'
+      'C'
+      'C')
+    Descricao.Strings = (
+      'Participante'
+      'Sit.Part.'
+      'Matrícula'
+      'Insc.Prev.'
+      'Plano Previdenciário'
+      'Patrocinadora')
+    SensivelACaixa.Strings = (
+      'S'
+      'N'
+      'S'
+      'N'
+      'N'
+      'S')
+    Tabelas.Strings = (
+      'PESSOA       PP'
+      'PESSOA       PA'
+      'ELEGPATRO    EL'
+      'PARTPREVPLAN PV'
+      'PLANPREV     PL'
+      'SITPART      ST')
+    CamposChave.Strings = (
+      'PV.IDPESSOA'
+      'PV.IDPESSJUR'
+      'PV.IDPLANOPREV'
+      'PP.NOME'
+      'PV.INSCRICAONUMERO'
+      'EL.MATRICULA'
+      'PL.NOME'
+      'PA.NOME'
+      'ST.DESCRICAO'
+      'PV.SEQPROPOSTA'
+      'ST.IDSITPART'
+      'ST.FLGINTERNO'
+      'PP.NUMDOCUMENTO')
+    Filtro.Strings = (
+      'PV.IDSITPART     = ST.IDSITPART'
+      'PP.IDPESSOA      = PV.IDPESSOA'
+      'PA.IDPESSOA      = PV.IDPESSJUR'
+      'PL.IDPLANOPREV   = PV.IDPLANOPREV'
+      'EL.IDPESSJUR     = PV.IDPESSJUR'
+      'EL.IDPESSOA      = PV.IDPESSOA'
+      'ST.IDSITPART     = PV.IDSITPART'
+      
+        'PV.INSCRICAODATA = (SELECT MAX(B.INSCRICAODATA) FROM PARTPREVPLA' +
+        'N B WHERE B.IDPESSOA  = PV.IDPESSOA)')
+    Mascaras.Strings = (
+      ''
+      ''
+      ''
+      ''
+      ''
+      '')
+    Larguras.Strings = (
+      '40'
+      '10'
+      '10'
+      '10'
+      '30'
+      '30')
+    DataBaseName = 'BaseDados'
+    RepeteConsulta = False
+    UsaDistinct = False
+    SalvaConsulta = False
+    ExibePergunta = True
+    MultiSelect = False
+    Left = 448
+    Top = 53
+  end
+end

@@ -1,0 +1,553 @@
+inherited RptSaldoHist: TRptSaldoHist
+  Left = 511
+  Width = 429
+  Height = 151
+  Caption = 'RptSaldoHist'
+  OldCreateOrder = True
+  PixelsPerInch = 96
+  TextHeight = 13
+  inherited CmpRptCM: TCmParamReport
+    Caption = 'Saldo por Histórico'
+    DataBaseName = 'BaseDados'
+    Params = <
+      item
+        Caption = 'Histórico das Contas em'
+        Controle = tcEdit
+        TipodeDado = tdDate
+        LookupSettings.SQL.Strings = ()
+        LookupSettings.Tamanho = '0'
+        CheckBoxSetings.ValueChecked = 'True'
+        CheckBoxSetings.ValueUnChecked = 'False'
+        CheckBoxSetings.Checked = True
+        RadioGroupSettings.Items.Strings = ()
+        RadioGroupSettings.Values.Strings = ()
+        RadioGroupSettings.Columns = 1
+        RadioGroupSettings.ItemIndex = -1
+        RadioGroupSettings.Height = 40
+        ComboBoxSettings.Sorted = False
+        ComboBoxSettings.Style = csDropDownList
+        ComboBoxSettings.Items.Strings = ()
+        ComboBoxSettings.DropDownCount = 8
+        ComboBoxSettings.ItemIndex = -1
+        ListBoxSettings.Items.Strings = ()
+        ListBoxSettings.MultiSelect = False
+        ListBoxSettings.ExtendedSelect = False
+        ListBoxSettings.Sorted = False
+        ListBoxSettings.Style = lbStandard
+        ListBoxSettings.height = 70
+        MostraComboCompara = False
+        Required = True
+        EditSettings.Color = clWindow
+        EditSettings.Readonly = False
+        EditSettings.Font.Charset = DEFAULT_CHARSET
+        EditSettings.Font.Color = clWindowText
+        EditSettings.Font.Height = -11
+        EditSettings.Font.Name = 'MS Sans Serif'
+        EditSettings.Font.Style = [fsBold]
+        SpinEditSettings.MaxValue = 0
+        SpinEditSettings.MinValue = 0
+        SpinEditSettings.Increment = 0
+        SpinEditSettings.Value = 0
+        MaskEditSettings.MaxLength = 0
+        ProcuraSTSettings.Subtipo = stFornecedor
+        ProcuraSTSettings.CampoEdit = ceRazaoSocial
+        ProcuraSTSettings.FiltraSubTipo = True
+        ProcuraFCSettings.Status = fcAll
+        ProcuraFCSettings.CampoEdit = ceRazaoSocial
+        ProcuraFCSettings.MostraEndereco = False
+        ProcuraFCSettings.ForCli = fcFornecedor
+        ProcuraCCSettings.Plano = 0
+        ProcuraCCSettings.Status = scSoAtiva
+        ProcuraCCSettings.AceitaTipoConta = Indiferente
+        Width = 0
+      end
+      item
+        Caption = 'Conta'
+        Controle = tcLookupCombo
+        TipodeDado = tdReal
+        LookupSettings.SQL.Strings = (
+          'SELECT'
+          '  CODPORTADOR,DESCRICAO'
+          'FROM PORTADORCONTA'
+          'ORDER BY DESCRICAO')
+        LookupSettings.Chave = 'CODPORTADOR'
+        LookupSettings.Display = 'DESCRICAO'
+        LookupSettings.Descricao = 'Conta'
+        LookupSettings.Tamanho = '0'
+        CheckBoxSetings.ValueChecked = 'True'
+        CheckBoxSetings.ValueUnChecked = 'False'
+        CheckBoxSetings.Checked = True
+        RadioGroupSettings.Items.Strings = ()
+        RadioGroupSettings.Values.Strings = ()
+        RadioGroupSettings.Columns = 1
+        RadioGroupSettings.ItemIndex = -1
+        RadioGroupSettings.Height = 40
+        ComboBoxSettings.Sorted = False
+        ComboBoxSettings.Style = csDropDownList
+        ComboBoxSettings.Items.Strings = ()
+        ComboBoxSettings.DropDownCount = 8
+        ComboBoxSettings.ItemIndex = -1
+        ListBoxSettings.Items.Strings = ()
+        ListBoxSettings.MultiSelect = False
+        ListBoxSettings.ExtendedSelect = False
+        ListBoxSettings.Sorted = False
+        ListBoxSettings.Style = lbStandard
+        ListBoxSettings.height = 70
+        MostraComboCompara = False
+        Required = False
+        EditSettings.Color = clWindow
+        EditSettings.Readonly = False
+        EditSettings.Font.Charset = DEFAULT_CHARSET
+        EditSettings.Font.Color = clWindowText
+        EditSettings.Font.Height = -11
+        EditSettings.Font.Name = 'MS Sans Serif'
+        EditSettings.Font.Style = [fsBold]
+        SpinEditSettings.MaxValue = 0
+        SpinEditSettings.MinValue = 0
+        SpinEditSettings.Increment = 0
+        SpinEditSettings.Value = 0
+        MaskEditSettings.MaxLength = 0
+        ProcuraSTSettings.Subtipo = stFornecedor
+        ProcuraSTSettings.CampoEdit = ceRazaoSocial
+        ProcuraSTSettings.FiltraSubTipo = True
+        ProcuraFCSettings.Status = fcAll
+        ProcuraFCSettings.CampoEdit = ceRazaoSocial
+        ProcuraFCSettings.MostraEndereco = False
+        ProcuraFCSettings.ForCli = fcFornecedor
+        ProcuraCCSettings.Plano = 0
+        ProcuraCCSettings.Status = scSoAtiva
+        ProcuraCCSettings.AceitaTipoConta = Indiferente
+        Width = 0
+      end
+      item
+        Caption = 'Status'
+        Controle = tcRadioGroup
+        TipodeDado = tdInteger
+        LookupSettings.SQL.Strings = ()
+        LookupSettings.Tamanho = '0'
+        CheckBoxSetings.ValueChecked = 'True'
+        CheckBoxSetings.ValueUnChecked = 'False'
+        CheckBoxSetings.Checked = True
+        RadioGroupSettings.Items.Strings = (
+          'Todos'
+          'Só conciliados'
+          'Todos - na casa')
+        RadioGroupSettings.Values.Strings = (
+          '0'
+          '1'
+          '2')
+        RadioGroupSettings.Columns = 1
+        RadioGroupSettings.ItemIndex = 0
+        RadioGroupSettings.Height = 80
+        ComboBoxSettings.Sorted = False
+        ComboBoxSettings.Style = csDropDownList
+        ComboBoxSettings.Items.Strings = ()
+        ComboBoxSettings.DropDownCount = 8
+        ComboBoxSettings.ItemIndex = -1
+        ListBoxSettings.Items.Strings = ()
+        ListBoxSettings.MultiSelect = False
+        ListBoxSettings.ExtendedSelect = False
+        ListBoxSettings.Sorted = False
+        ListBoxSettings.Style = lbStandard
+        ListBoxSettings.height = 70
+        MostraComboCompara = False
+        Required = False
+        EditSettings.Color = clWindow
+        EditSettings.Readonly = False
+        EditSettings.Font.Charset = DEFAULT_CHARSET
+        EditSettings.Font.Color = clWindowText
+        EditSettings.Font.Height = -11
+        EditSettings.Font.Name = 'MS Sans Serif'
+        EditSettings.Font.Style = [fsBold]
+        SpinEditSettings.MaxValue = 0
+        SpinEditSettings.MinValue = 0
+        SpinEditSettings.Increment = 0
+        SpinEditSettings.Value = 0
+        MaskEditSettings.MaxLength = 0
+        ProcuraSTSettings.Subtipo = stFornecedor
+        ProcuraSTSettings.CampoEdit = ceRazaoSocial
+        ProcuraSTSettings.FiltraSubTipo = True
+        ProcuraFCSettings.Status = fcAll
+        ProcuraFCSettings.CampoEdit = ceRazaoSocial
+        ProcuraFCSettings.MostraEndereco = False
+        ProcuraFCSettings.ForCli = fcFornecedor
+        ProcuraCCSettings.Plano = 0
+        ProcuraCCSettings.Status = scSoAtiva
+        ProcuraCCSettings.AceitaTipoConta = Indiferente
+        Width = 0
+      end>
+    BeforeExecute = CmpRptCMBeforeExecute
+    Formheight = 210
+    FormWidth = 500
+    Left = 280
+  end
+  inherited DevRptCM: TExtraOptions
+    Left = 112
+  end
+  inherited CrmRptCM: TCmRptManager
+    BeforePrint = CrmRptCMBeforePrint
+    DataBaseName = 'BaseDados'
+    Report = rpSaldoHist
+    LabelEmpresa = pplblEmpresa
+    LabelSistema = pplblSistema
+    Left = 200
+  end
+  object rpSaldoHist: TppReport
+    AutoStop = False
+    DataPipeline = pplSaldoHist
+    PassSetting = psTwoPass
+    PrinterSetup.BinName = 'Default'
+    PrinterSetup.DocumentName = 'PpModeloReport1'
+    PrinterSetup.PaperName = 'A4 210 x 297 mm'
+    PrinterSetup.PrinterName = 'Default'
+    PrinterSetup.mmMarginBottom = 14000
+    PrinterSetup.mmMarginLeft = 6350
+    PrinterSetup.mmMarginRight = 6350
+    PrinterSetup.mmMarginTop = 6350
+    PrinterSetup.mmPaperHeight = 297000
+    PrinterSetup.mmPaperWidth = 210000
+    PrinterSetup.PaperSize = 9
+    Template.SaveTo = stDatabase
+    Units = utMillimeters
+    AllowPrintToArchive = True
+    AllowPrintToFile = True
+    DeviceType = 'Screen'
+    OutlineSettings.CreateNode = True
+    OutlineSettings.CreatePageNodes = True
+    OutlineSettings.Enabled = False
+    OutlineSettings.Visible = False
+    TextSearchSettings.DefaultString = '<FindText>'
+    TextSearchSettings.Enabled = False
+    Left = 368
+    Top = 72
+    Version = '7.04'
+    mmColumnWidth = 197300
+    DataPipelineName = 'pplSaldoHist'
+    object ppHeaderBand2: TppHeaderBand
+      mmBottomOffset = 0
+      mmHeight = 22225
+      mmPrintPosition = 0
+      object lbDataSaldoHist: TppLabel
+        UserName = 'lbDataSaldoHist'
+        Caption = 'lbDataSaldoHist'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 12
+        Font.Style = [fsBold]
+        TextAlignment = taCentered
+        Transparent = True
+        mmHeight = 5292
+        mmLeft = 82286
+        mmTop = 10848
+        mmWidth = 32808
+        BandType = 0
+      end
+      object pplblEmpresa: TppLabel
+        UserName = 'lblEmpresa'
+        Caption = 'LblEmpresa'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 14
+        Font.Style = [fsBold]
+        TextAlignment = taCentered
+        Transparent = True
+        mmHeight = 5821
+        mmLeft = 84667
+        mmTop = 3704
+        mmWidth = 28046
+        BandType = 0
+      end
+      object rpSaldoHistLabel2: TppLabel
+        UserName = 'rpSaldoHistLabel2'
+        Caption = 'Status:'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 10
+        Font.Style = [fsBold]
+        TextAlignment = taRightJustified
+        Transparent = True
+        mmHeight = 4233
+        mmLeft = 154782
+        mmTop = 17198
+        mmWidth = 11377
+        BandType = 0
+      end
+      object lbStatusSaldoHist: TppLabel
+        UserName = 'lbStatusSaldoHist'
+        Caption = 'lbStatusSaldoHist'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 10
+        Font.Style = []
+        Transparent = True
+        mmHeight = 3969
+        mmLeft = 167482
+        mmTop = 17198
+        mmWidth = 28046
+        BandType = 0
+      end
+    end
+    object ppDetailBand2: TppDetailBand
+      mmBottomOffset = 0
+      mmHeight = 3704
+      mmPrintPosition = 0
+      object rpSaldoHistDBText3: TppDBText
+        UserName = 'rpSaldoHistDBText3'
+        DataField = 'HISTORICO'
+        DataPipeline = pplSaldoHist
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        Transparent = True
+        DataPipelineName = 'pplSaldoHist'
+        mmHeight = 3704
+        mmLeft = 39952
+        mmTop = 0
+        mmWidth = 95250
+        BandType = 4
+      end
+      object rpSaldoHistDBText2: TppDBText
+        UserName = 'rpSaldoHistDBText2'
+        DataField = 'HISTPADFINAN'
+        DataPipeline = pplSaldoHist
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        TextAlignment = taRightJustified
+        Transparent = True
+        DataPipelineName = 'pplSaldoHist'
+        mmHeight = 3704
+        mmLeft = 1058
+        mmTop = 0
+        mmWidth = 13229
+        BandType = 4
+      end
+      object rpSaldoHistDBText4: TppDBText
+        UserName = 'rpSaldoHistDBText4'
+        AutoSize = True
+        DataField = 'VALOR'
+        DataPipeline = pplSaldoHist
+        DisplayFormat = '#,0.00;-#,0.00'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        TextAlignment = taRightJustified
+        Transparent = True
+        DataPipelineName = 'pplSaldoHist'
+        mmHeight = 3175
+        mmLeft = 166952
+        mmTop = 0
+        mmWidth = 9525
+        BandType = 4
+      end
+    end
+    object ppFooterBand2: TppFooterBand
+      mmBottomOffset = 0
+      mmHeight = 16140
+      mmPrintPosition = 0
+      object ppLine6: TppLine
+        UserName = 'ppLine6'
+        ParentWidth = True
+        Weight = 0.75
+        mmHeight = 1588
+        mmLeft = 0
+        mmTop = 3969
+        mmWidth = 197300
+        BandType = 8
+      end
+      object pplblSistema: TppLabel
+        UserName = 'lblSistema'
+        AutoSize = False
+        Caption = 'Nome do Sistema'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 3704
+        mmLeft = 0
+        mmTop = 5292
+        mmWidth = 197909
+        BandType = 8
+      end
+      object ppCalc5: TppSystemVariable
+        UserName = 'Calc5'
+        VarType = vtPageSetDesc
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        TextAlignment = taCentered
+        Transparent = True
+        mmHeight = 3704
+        mmLeft = 0
+        mmTop = 5292
+        mmWidth = 197644
+        BandType = 8
+      end
+      object ppCalc6: TppSystemVariable
+        UserName = 'Calc6'
+        VarType = vtDateTime
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        TextAlignment = taRightJustified
+        Transparent = True
+        mmHeight = 3704
+        mmLeft = 171450
+        mmTop = 5292
+        mmWidth = 26194
+        BandType = 8
+      end
+    end
+    object rpSaldoHistGroup1: TppGroup
+      BreakName = 'CODPORTADOR'
+      DataPipeline = pplSaldoHist
+      OutlineSettings.CreateNode = True
+      UserName = 'rpSaldoHistGroup1'
+      mmNewColumnThreshold = 0
+      mmNewPageThreshold = 0
+      DataPipelineName = 'pplSaldoHist'
+      object rpSaldoHistGroupHeaderBand1: TppGroupHeaderBand
+        mmBottomOffset = 0
+        mmHeight = 10583
+        mmPrintPosition = 0
+        object rpSaldoHistLabel1: TppLabel
+          UserName = 'rpSaldoHistLabel1'
+          Caption = 'Código'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Name = 'Arial'
+          Font.Size = 8
+          Font.Style = [fsBold]
+          TextAlignment = taRightJustified
+          Transparent = True
+          mmHeight = 3704
+          mmLeft = 3969
+          mmTop = 6615
+          mmWidth = 10319
+          BandType = 3
+          GroupNo = 0
+        end
+        object rpSaldoHistLine1: TppLine
+          UserName = 'rpSaldoHistLine1'
+          ParentWidth = True
+          Weight = 0.75
+          mmHeight = 1058
+          mmLeft = 0
+          mmTop = 5556
+          mmWidth = 197300
+          BandType = 3
+          GroupNo = 0
+        end
+        object rpSaldoHistLabel3: TppLabel
+          UserName = 'rpSaldoHistLabel3'
+          Caption = 'Histórico'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Name = 'Arial'
+          Font.Size = 8
+          Font.Style = [fsBold]
+          Transparent = True
+          mmHeight = 3704
+          mmLeft = 39952
+          mmTop = 6615
+          mmWidth = 12965
+          BandType = 3
+          GroupNo = 0
+        end
+        object rpSaldoHistLabel4: TppLabel
+          UserName = 'rpSaldoHistLabel4'
+          Caption = 'Valor'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Name = 'Arial'
+          Font.Size = 8
+          Font.Style = [fsBold]
+          TextAlignment = taRightJustified
+          Transparent = True
+          mmHeight = 3704
+          mmLeft = 168805
+          mmTop = 6879
+          mmWidth = 7673
+          BandType = 3
+          GroupNo = 0
+        end
+        object rpSaldoHistDBText1: TppDBText
+          UserName = 'rpSaldoHistDBText1'
+          AutoSize = True
+          DataField = 'DESCRICAO'
+          DataPipeline = pplSaldoHist
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Name = 'Arial'
+          Font.Size = 8
+          Font.Style = [fsBold]
+          Transparent = True
+          DataPipelineName = 'pplSaldoHist'
+          mmHeight = 3175
+          mmLeft = 3969
+          mmTop = 1058
+          mmWidth = 16669
+          BandType = 3
+          GroupNo = 0
+        end
+        object rpSaldoHistLine2: TppLine
+          UserName = 'rpSaldoHistLine2'
+          ParentWidth = True
+          Weight = 0.75
+          mmHeight = 1058
+          mmLeft = 0
+          mmTop = 0
+          mmWidth = 197300
+          BandType = 3
+          GroupNo = 0
+        end
+      end
+      object rpSaldoHistGroupFooterBand1: TppGroupFooterBand
+        mmBottomOffset = 0
+        mmHeight = 0
+        mmPrintPosition = 0
+      end
+    end
+  end
+  object dsSaldoHist: TwwDataSource
+    DataSet = cdsSaldoHist
+    Left = 200
+    Top = 72
+  end
+  object pplSaldoHist: TppBDEPipeline
+    DataSource = dsSaldoHist
+    CloseDataSource = True
+    SkipWhenNoRecords = False
+    UserName = 'lSaldoHist'
+    Left = 280
+    Top = 72
+  end
+  object spSaldoHist: TCMSqlParams
+    ClientDataSet = cdsSaldoHist
+    Left = 32
+    Top = 72
+  end
+  object cdsSaldoHist: TCMClientDataSet
+    Aggregates = <>
+    Params = <>
+    ProviderName = 'dsp'
+    Left = 112
+    Top = 72
+  end
+end

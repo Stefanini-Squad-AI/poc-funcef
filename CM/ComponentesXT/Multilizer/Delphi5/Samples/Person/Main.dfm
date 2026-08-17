@@ -1,0 +1,292 @@
+inherited MainForm: TMainForm
+  Left = 201
+  Top = 213
+  Width = 678
+  Height = 534
+  Caption = 'Person File'
+  Color = clAppWorkSpace
+  Font.Color = clBlack
+  FormStyle = fsMDIForm
+  Menu = MainMenu
+  Position = poDefault
+  WindowMenu = Window1
+  OnDestroy = FormDestroy
+  PixelsPerInch = 96
+  TextHeight = 13
+  object SpeedPanel: TPanel [0]
+    Left = 0
+    Top = 0
+    Width = 670
+    Height = 30
+    Align = alTop
+    ParentShowHint = False
+    ShowHint = True
+    TabOrder = 0
+    object OpenButton: TSpeedButton
+      Left = 2
+      Top = 2
+      Width = 25
+      Height = 25
+      Hint = 'Open|'
+      Glyph.Data = {
+        06020000424D0602000000000000760000002800000028000000140000000100
+        0400000000009001000000000000000000001000000010000000000000000000
+        80000080000000808000800000008000800080800000C0C0C000808080000000
+        FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00333333333333
+        3333333333333333333333333333333333333333333333333333333333333333
+        3333333333333333333333333333333333333333333333333333333333333333
+        333FFFFFFFFFFFFFF3333380000000000000333333888888888888883F333300
+        7B7B7B7B7B7B033333883F33333333338F33330F07B7B7B7B7B70333338F8F33
+        3333333383F3330B0B7B7B7B7B7B7033338F83F33333333338F3330FB0B7B7B7
+        B7B7B033338F38F333333333383F330BF07B7B7B7B7B7B03338F383FFFFF3333
+        338F330FBF000007B7B7B703338F33888883FFFFFF83330BFBFBFBF000000033
+        338F3333333888888833330FBFBFBFBFBFB03333338F333333333338F333330B
+        FBFBFBFBFBF03333338F33333FFFFFF83333330FBFBF0000000333333387FFFF
+        8888888333333330000033333333333333388888333333333333333333333333
+        3333333333333333333333333333333333333333333333333333333333333333
+        3333333333333333333333333333333333333333333333333333333333333333
+        33333333333333333333}
+      NumGlyphs = 2
+      OnClick = FileOpenItemClick
+    end
+    object SaveButton: TSpeedButton
+      Left = 26
+      Top = 2
+      Width = 25
+      Height = 25
+      Hint = 'Save|'
+      Enabled = False
+      Glyph.Data = {
+        06020000424D0602000000000000760000002800000028000000140000000100
+        0400000000009001000000000000000000001000000010000000000000000000
+        80000080000000808000800000008000800080800000C0C0C000808080000000
+        FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00333333333333
+        3333333333333333333333333333333333333333333333333333333333333333
+        3333333333333333333333333333FFFFFFFFFFFFFF3333380000000000008333
+        333888F8FF888F888F333330CC08CCF770CC0333333888F8FF888F888F333330
+        CC08CCF770CC0333333888F888888F888F333330CC07887770CC03333338888F
+        FFFFF8888F333330CC60000006CC033333388888888888888F333330CCCCCCCC
+        CCCC033333388888888888888F333330C6000000006C03333338888888888888
+        8F333330C0FFFFFFFF0C0333333888FFFFFFFF888F333330C0FFFFFFFF0C0333
+        333888FFFFFFFF888F333330C0FFFFFFFF0C0333333888FFFFFFFF888F333330
+        C0FFFFFFFF0C0333333888FFFFFFFF888F33333000FFFFFFFF000333333888FF
+        FFFFFF888F333330C0FFFFFFFF0C0333333888FFFFFFFF888F33333800000000
+        0000833333388888888888888333333333333333333333333333333333333333
+        3333333333333333333333333333333333333333333333333333333333333333
+        33333333333333333333}
+      NumGlyphs = 2
+      OnClick = FileSaveItemClick
+    end
+    object ExitButton: TSpeedButton
+      Left = 114
+      Top = 2
+      Width = 25
+      Height = 25
+      Hint = 'Exit|'
+      Glyph.Data = {
+        06020000424D0602000000000000760000002800000028000000140000000100
+        0400000000009001000000000000000000001000000010000000000000000000
+        80000080000000808000800000008000800080800000C0C0C000808080000000
+        FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00377777777777
+        777777773FFFFFFFFFFFF333333F888888888888F7F7F7888888888888883333
+        33888888888888877F7F788888888888888F333FF88844444400888FFF444444
+        88888888888333888883333334D5007FFF433333333338F888F3338F33333333
+        345D50FFFF4333333333388788F3338F3333333334D5D0FFFF433333333338F8
+        78F3338F33333333345D50FEFE4333333333388788F3338F3333333334D5D0FF
+        FF433333333338F878F3338F33333333345D50FEFE4333333333388788F3338F
+        3333333334D5D0FFFF433333333338F878F3338F33333333345D50FEFE433333
+        3333388788F3338F3333333334D5D0EFEF433333333338F878F3338F33333333
+        345D50FEFE4333333333388788F3338F3333333334D5D0EFEF433333333338F8
+        F8FFFF8F33333333344444444443333333333888888888833333333333333333
+        3333333333333333FFFFFF333333333333300000033333333333333888888F33
+        333333333330AAAA0333333333333338FFFF8F33333333333330000003333333
+        33333338888883333333}
+      NumGlyphs = 2
+      OnClick = FileExitItemClick
+    end
+    object LanguageButton: TSpeedButton
+      Left = 58
+      Top = 2
+      Width = 25
+      Height = 25
+      Hint = 'Language|'
+      Glyph.Data = {
+        76010000424D7601000000000000760000002800000020000000100000000100
+        0400000000000001000000000000000000001000000010000000000000000000
+        800000800000008080008000000080008000808000007F7F7F00BFBFBF000000
+        FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00333333333333
+        333333333333FF3333333333333C0C333333333333F777F3333333333CC0F0C3
+        333333333777377F33333333C30F0F0C333333337F737377F333333C00FFF0F0
+        C33333F7773337377F333CC0FFFFFF0F0C3337773F33337377F3C30F0FFFFFF0
+        F0C37F7373F33337377F00FFF0FFFFFF0F0C7733373F333373770FFFFF0FFFFF
+        F0F073F33373F333373730FFFFF0FFFFFF03373F33373F333F73330FFFFF0FFF
+        00333373F33373FF77333330FFFFF000333333373F333777333333330FFF0333
+        3333333373FF7333333333333000333333333333377733333333333333333333
+        3333333333333333333333333333333333333333333333333333}
+      NumGlyphs = 2
+      OnClick = Language1Click
+    end
+    object LocaleButton: TSpeedButton
+      Left = 82
+      Top = 2
+      Width = 25
+      Height = 25
+      Hint = 'Language|'
+      Glyph.Data = {
+        76010000424D7601000000000000760000002800000020000000100000000100
+        0400000000000001000000000000000000001000000010000000000000000000
+        80000080000000808000800000008000800080800000C0C0C000808080000000
+        FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF003339F9933333
+        333333333333FF333333333FFFFC0C333333333333F888F33333BBB9F990F0C3
+        333333333888388F33339999C30F0F0C333333338F838388F333000000FFF0F0
+        C33333F8883338388F333CC0FFFFFF0F0C3338883F33338388F3C30F0FFFFFF0
+        F0C38F8383F33338388F00FFF0FFFFFF0F0C8833383F333383880FFFFF0FFFFF
+        F0F083F33383F333383830FFFFF0FFFFFF03383F33383F333F83330FFFFF0FFF
+        00333383F33383FF88333330FFFFF000FCFF33383F333888F8FF33330FFF0333
+        CCCC333383FF83338888333330003CBCFCFF3333388838F8F8FF333333333BBB
+        B333333333333FFFF333333333333CBCC3333333333338F88333}
+      NumGlyphs = 2
+      OnClick = Sublanguage1Click
+    end
+  end
+  object StatusBar: TStatusBar [1]
+    Left = 0
+    Top = 469
+    Width = 670
+    Height = 19
+    Panels = <>
+    SimplePanel = True
+  end
+  object MainMenu: TMainMenu [2]
+    Left = 168
+    Top = 32
+    object File1: TMenuItem
+      Caption = 'File'
+      Hint = 'File related commands'
+      object FileNewItem: TMenuItem
+        Caption = 'New'
+        Hint = 'Create a new file'
+        ShortCut = 16462
+        OnClick = FileNewItemClick
+      end
+      object FileOpenItem: TMenuItem
+        Caption = 'Open...'
+        Hint = 'Open an existing file'
+        ShortCut = 16463
+        OnClick = FileOpenItemClick
+      end
+      object FileSaveItem: TMenuItem
+        Caption = 'Save'
+        ShortCut = 16467
+        OnClick = FileSaveItemClick
+      end
+      object FileSaveAsItem: TMenuItem
+        Caption = 'Save As...'
+        OnClick = FileSaveAsItemClick
+      end
+      object FileCloseItem: TMenuItem
+        Caption = 'Close'
+        OnClick = FileCloseItemClick
+      end
+      object N1: TMenuItem
+        Caption = '-'
+      end
+      object FileExitItem: TMenuItem
+        Caption = 'Exit'
+        Hint = 'Exit the application'
+        OnClick = FileExitItemClick
+      end
+    end
+    object Options1: TMenuItem
+      Caption = 'Options'
+      GroupIndex = 2
+      object Language1: TMenuItem
+        Caption = 'Language...'
+        OnClick = Language1Click
+      end
+      object Languagenative1: TMenuItem
+        Caption = 'Language (native)...'
+        OnClick = Languagenative1Click
+      end
+      object Sublanguage1: TMenuItem
+        Caption = 'Sublanguage...'
+        OnClick = Sublanguage1Click
+      end
+    end
+    object Window1: TMenuItem
+      Caption = 'Window'
+      GroupIndex = 2
+      Hint = 'Window related commands such as Tile and Cascade'
+      object WindowCascadeItem: TMenuItem
+        Caption = 'Cascade'
+        Hint = 'Arrange windows to overlap'
+        OnClick = WindowCascadeItemClick
+      end
+      object WindowTileItem: TMenuItem
+        Caption = 'Tile'
+        Hint = 'Arrange windows without overlap'
+        OnClick = WindowTileItemClick
+      end
+      object WindowArrangeItem: TMenuItem
+        Caption = 'Arrange Icons'
+        Hint = 'Arrange window icons at bottom of main window'
+        OnClick = WindowArrangeItemClick
+      end
+      object WindowMinimizeItem: TMenuItem
+        Caption = 'Minimize All'
+        Hint = 'Minimize all windows'
+        OnClick = WindowMinimizeItemClick
+      end
+    end
+    object Help1: TMenuItem
+      Caption = 'Help'
+      GroupIndex = 2
+      Hint = 'Help topics'
+      object Contents1: TMenuItem
+        Caption = 'Contents'
+        OnClick = Contents1Click
+      end
+      object N2: TMenuItem
+        Caption = '-'
+      end
+      object HelpAboutItem: TMenuItem
+        Caption = 'About...'
+        OnClick = HelpAboutItemClick
+      end
+    end
+  end
+  object SaveDialog: TSaveDialog [3]
+    DefaultExt = 'per'
+    Filter = 'All files (*.*)|*.*|Person files (*.per)|*.per'
+    FilterIndex = 2
+    Options = [ofHideReadOnly]
+    Left = 136
+    Top = 32
+  end
+  object OpenDialog: TOpenDialog [4]
+    DefaultExt = 'per'
+    Filter = 'All files (*.*)|*.*|Person files (*.per)|*.per'
+    FilterIndex = 2
+    Options = []
+    Left = 104
+    Top = 32
+  end
+  inherited Translator: TIvTranslator
+    OnLanguageChange = TranslatorLanguageChange
+    TargetsData = (
+      1
+      0)
+  end
+  object Dictionary: TIvBinaryDictionary
+    DictionaryName = 'Dictionary1'
+    OnLanguageChange = DictionaryLanguageChange
+    FileName = 'person.mld'
+    Left = 40
+    Top = 32
+    DictionaryCode = 4
+  end
+  object IvDialogModule1: TIvDialogModule
+    Left = 72
+    Top = 32
+  end
+end

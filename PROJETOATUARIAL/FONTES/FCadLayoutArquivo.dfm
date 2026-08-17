@@ -1,0 +1,1749 @@
+inherited frmCadLayoutArquivo: TfrmCadLayoutArquivo
+  Left = 398
+  Top = 206
+  HelpContext = 40152
+  BorderIcons = [biSystemMenu, biMinimize, biMaximize, biHelp]
+  Caption = 'Lay-out de Arquivo'
+  ClientHeight = 482
+  ClientWidth = 696
+  PixelsPerInch = 96
+  TextHeight = 13
+  inherited pnlFundo: TPanel
+    Width = 696
+    Height = 396
+    object Label1: TLabel
+      Left = 13
+      Top = 8
+      Width = 98
+      Height = 13
+      Caption = 'Nome do Arquivo'
+      FocusControl = DBdtNomeArquivo
+    end
+    object Label2: TLabel
+      Left = 13
+      Top = 97
+      Width = 75
+      Height = 13
+      Caption = 'Observações'
+    end
+    object Label6: TLabel
+      Left = 582
+      Top = 9
+      Width = 105
+      Height = 13
+      Caption = 'Código do Arquivo'
+      FocusControl = DBEdit3
+    end
+    object DBdtNomeArquivo: TDBEdit
+      Left = 10
+      Top = 23
+      Width = 541
+      Height = 21
+      AutoSelect = False
+      DataField = 'NO_ARQUIVO'
+      DataSource = ds
+      TabOrder = 0
+    end
+    object DBMemo1: TDBMemo
+      Left = 10
+      Top = 112
+      Width = 446
+      Height = 34
+      DataField = 'DS_ARQUIVO'
+      DataSource = ds
+      TabOrder = 1
+    end
+    object PgCtrlDetalhe: TPageControl
+      Left = 5
+      Top = 150
+      Width = 686
+      Height = 241
+      ActivePage = TbShtExemplo
+      Align = alBottom
+      HotTrack = True
+      TabOrder = 2
+      object TbShtExemplo: TTabSheet
+        Caption = 'Visualização do Lay-out'
+        Enabled = False
+        object MmExemplo: TMemo
+          Left = 0
+          Top = 0
+          Width = 678
+          Height = 213
+          Align = alClient
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -16
+          Font.Name = 'MS Sans Serif'
+          Font.Style = [fsBold]
+          Lines.Strings = (
+            'MmExemplo')
+          ParentFont = False
+          TabOrder = 0
+        end
+      end
+      object tbshDetalhe: TTabSheet
+        Caption = 'Campos do Arquivo'
+        object PnlDetalhe: TPanel
+          Left = 0
+          Top = 34
+          Width = 678
+          Height = 179
+          Align = alClient
+          TabOrder = 1
+          object Label7: TLabel
+            Left = 6
+            Top = 3
+            Width = 103
+            Height = 13
+            Caption = 'Número do campo'
+            FocusControl = DBEdtNumCampo
+          end
+          object Label3: TLabel
+            Left = 126
+            Top = 3
+            Width = 92
+            Height = 13
+            Caption = 'Nome do campo'
+            FocusControl = DBEdtNumCampo
+          end
+          object Label4: TLabel
+            Left = 6
+            Top = 43
+            Width = 117
+            Height = 13
+            Caption = 'Descrição do campo'
+            FocusControl = DBEdtNumCampo
+          end
+          object GroupBox1: TGroupBox
+            Left = 280
+            Top = 80
+            Width = 306
+            Height = 61
+            Caption = 'Ocorre em função do campo'
+            TabOrder = 7
+            object SpdBttnExcluiOcorr: TSpeedButton
+              Left = 260
+              Top = 25
+              Width = 16
+              Height = 21
+              Caption = 'X'
+              OnClick = SpdBttnExcluiOcorrClick
+            end
+            object DBLkpCmbBxOcorr: TDBLookupComboBox
+              Left = 5
+              Top = 25
+              Width = 251
+              Height = 21
+              DataField = 'SQ_CAMPO_MASTER'
+              DataSource = dsDet
+              KeyField = 'SQ_CAMPO'
+              ListField = 'NO_CAMPO_ARQUIVO'
+              ListSource = dsCampos
+              TabOrder = 0
+            end
+          end
+          object DBRdGrpTipoCampo: TDBRadioGroup
+            Left = 445
+            Top = 5
+            Width = 141
+            Height = 76
+            Caption = 'Tipo do campo'
+            DataField = 'TP_ATRIBUTO'
+            DataSource = dsDet
+            Items.Strings = (
+              'Alfanumérico'
+              'Numérico inteiro'
+              'Numérico decimal'
+              'Data')
+            TabOrder = 3
+            Values.Strings = (
+              'A'
+              'N'
+              'F'
+              'D')
+            OnChange = DBRdGrpTipoCampoChange
+          end
+          object bbtnOkDet: TBitBtn
+            Left = 593
+            Top = 100
+            Width = 81
+            Height = 27
+            Caption = '&OK'
+            Default = True
+            TabOrder = 9
+            OnClick = bbtnOkDetClick
+            Glyph.Data = {
+              BE060000424DBE06000000000000360400002800000024000000120000000100
+              0800000000008802000000000000000000000001000000010000000000000000
+              80000080000000808000800000008000800080800000C0C0C000C0DCC000F0CA
+              A600000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              000000000000000000000000000000000000F0FBFF00A4A0A000808080000000
+              FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00030303030303
+              0303030303030303030303030303030303030303030303030303030303030303
+              03030303030303030303030303030303030303030303FF030303030303030303
+              03030303030303040403030303030303030303030303030303F8F8FF03030303
+              03030303030303030303040202040303030303030303030303030303F80303F8
+              FF030303030303030303030303040202020204030303030303030303030303F8
+              03030303F8FF0303030303030303030304020202020202040303030303030303
+              0303F8030303030303F8FF030303030303030304020202FA0202020204030303
+              0303030303F8FF0303F8FF030303F8FF03030303030303020202FA03FA020202
+              040303030303030303F8FF03F803F8FF0303F8FF03030303030303FA02FA0303
+              03FA0202020403030303030303F8FFF8030303F8FF0303F8FF03030303030303
+              FA0303030303FA0202020403030303030303F80303030303F8FF0303F8FF0303
+              0303030303030303030303FA0202020403030303030303030303030303F8FF03
+              03F8FF03030303030303030303030303FA020202040303030303030303030303
+              0303F8FF0303F8FF03030303030303030303030303FA02020204030303030303
+              03030303030303F8FF0303F8FF03030303030303030303030303FA0202020403
+              030303030303030303030303F8FF0303F8FF03030303030303030303030303FA
+              0202040303030303030303030303030303F8FF03F8FF03030303030303030303
+              03030303FA0202030303030303030303030303030303F8FFF803030303030303
+              030303030303030303FA0303030303030303030303030303030303F803030303
+              0303030303030303030303030303030303030303030303030303030303030303
+              0303}
+            NumGlyphs = 2
+            Spacing = 0
+          end
+          object bbtnCancelarDet: TBitBtn
+            Left = 592
+            Top = 140
+            Width = 81
+            Height = 27
+            Cancel = True
+            Caption = '&Cancelar'
+            TabOrder = 10
+            OnClick = bbtnCancelarDetClick
+            Glyph.Data = {
+              BE060000424DBE06000000000000360400002800000024000000120000000100
+              0800000000008802000000000000000000000001000000010000000000000000
+              80000080000000808000800000008000800080800000C0C0C000C0DCC000F0CA
+              A600000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              000000000000000000000000000000000000F0FBFF00A4A0A000808080000000
+              FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00030303030303
+              0303030303030303030303030303030303030303030303030303030303030303
+              0303F8F80303030303030303030303030303030303FF03030303030303030303
+              0303030303F90101F80303030303F9F80303030303030303F8F8FF0303030303
+              03FF03030303030303F9010101F8030303F90101F8030303030303F8FF03F8FF
+              030303FFF8F8FF030303030303F901010101F803F901010101F80303030303F8
+              FF0303F8FF03FFF80303F8FF030303030303F901010101F80101010101F80303
+              030303F8FF030303F8FFF803030303F8FF030303030303F90101010101010101
+              F803030303030303F8FF030303F803030303FFF80303030303030303F9010101
+              010101F8030303030303030303F8FF030303030303FFF8030303030303030303
+              030101010101F80303030303030303030303F8FF0303030303F8030303030303
+              0303030303F901010101F8030303030303030303030303F8FF030303F8030303
+              0303030303030303F90101010101F8030303030303030303030303F803030303
+              F8FF030303030303030303F9010101F8010101F803030303030303030303F803
+              03030303F8FF0303030303030303F9010101F803F9010101F803030303030303
+              03F8030303F8FF0303F8FF03030303030303F90101F8030303F9010101F80303
+              03030303F8FF0303F803F8FF0303F8FF03030303030303F9010303030303F901
+              0101030303030303F8FFFFF8030303F8FF0303F8FF0303030303030303030303
+              030303F901F903030303030303F8F80303030303F8FFFFFFF803030303030303
+              03030303030303030303030303030303030303030303030303F8F8F803030303
+              0303030303030303030303030303030303030303030303030303030303030303
+              0303}
+            NumGlyphs = 2
+            Spacing = 0
+          end
+          object DBEdtNumCampo: TDBEdit
+            Left = 35
+            Top = 17
+            Width = 46
+            Height = 21
+            DataField = 'NR_ORDEM'
+            DataSource = dsDet
+            MaxLength = 3
+            TabOrder = 0
+          end
+          object DBEdtNomeCampo: TDBEdit
+            Left = 125
+            Top = 17
+            Width = 316
+            Height = 21
+            DataField = 'NO_CAMPO_ARQUIVO'
+            DataSource = dsDet
+            TabOrder = 1
+          end
+          object DBEdtDescrCampo: TDBEdit
+            Left = 5
+            Top = 57
+            Width = 436
+            Height = 21
+            DataField = 'DS_CAMPO_ARQUIVO'
+            DataSource = dsDet
+            TabOrder = 2
+          end
+          object DBChckBxRelatOcorr: TDBCheckBox
+            Left = 285
+            Top = 150
+            Width = 266
+            Height = 17
+            Caption = 'Deverá ser emitido no relatório ocorrência'
+            DataField = 'IR_RELATORIO_OCORRENCIA'
+            DataSource = dsDet
+            TabOrder = 8
+            ValueChecked = 'S'
+            ValueUnchecked = 'N'
+          end
+          object GrpBxData: TGroupBox
+            Left = 165
+            Top = 80
+            Width = 111
+            Height = 91
+            Hint = 'Use D=Dia;M=Mês;A=Ano e se necessário inclua o Separador'
+            Caption = 'Datas'
+            ParentShowHint = False
+            ShowHint = True
+            TabOrder = 6
+            object Label10: TLabel
+              Left = 7
+              Top = 18
+              Width = 49
+              Height = 13
+              Alignment = taRightJustify
+              Caption = 'Máscara'
+            end
+            object DBEdtMaskData: TDBEdit
+              Left = 5
+              Top = 35
+              Width = 101
+              Height = 21
+              DataField = 'DS_MASCARA_DATA'
+              DataSource = dsDet
+              ParentShowHint = False
+              ShowHint = False
+              TabOrder = 0
+            end
+          end
+          object GrpBxNumero: TGroupBox
+            Left = 5
+            Top = 80
+            Width = 156
+            Height = 91
+            Caption = 'Números'
+            TabOrder = 5
+            object Label5: TLabel
+              Left = 23
+              Top = 18
+              Width = 98
+              Height = 13
+              Alignment = taRightJustify
+              Caption = 'Símbolo decimal:'
+            end
+            object Label8: TLabel
+              Left = 12
+              Top = 43
+              Width = 109
+              Height = 13
+              Alignment = taRightJustify
+              Caption = 'Nº casas decimais:'
+            end
+            object Label9: TLabel
+              Left = 8
+              Top = 68
+              Width = 113
+              Height = 13
+              Alignment = taRightJustify
+              Caption = 'Símbolo Agrupador:'
+            end
+            object DBEditSimboloDecimal: TDBEdit
+              Left = 125
+              Top = 10
+              Width = 21
+              Height = 21
+              DataField = 'DS_SIMBOLO_DECIMAL'
+              DataSource = dsDet
+              Font.Charset = DEFAULT_CHARSET
+              Font.Color = clWindowText
+              Font.Height = -11
+              Font.Name = 'MS Sans Serif'
+              Font.Style = [fsBold]
+              ParentFont = False
+              TabOrder = 0
+            end
+            object DBEdtCasasDecimais: TDBEdit
+              Left = 125
+              Top = 35
+              Width = 21
+              Height = 21
+              DataField = 'NR_DECIMAL'
+              DataSource = dsDet
+              Font.Charset = DEFAULT_CHARSET
+              Font.Color = clWindowText
+              Font.Height = -11
+              Font.Name = 'MS Sans Serif'
+              Font.Style = [fsBold]
+              MaxLength = 2
+              ParentFont = False
+              TabOrder = 1
+            end
+            object DBEdtSimboloAgrupador: TDBEdit
+              Left = 125
+              Top = 60
+              Width = 21
+              Height = 21
+              DataField = 'DS_SIMBOLO_AGRUPADOR'
+              DataSource = dsDet
+              Font.Charset = DEFAULT_CHARSET
+              Font.Color = clWindowText
+              Font.Height = -11
+              Font.Name = 'MS Sans Serif'
+              Font.Style = [fsBold]
+              ParentFont = False
+              TabOrder = 2
+            end
+          end
+          object GrpBxTamCampo: TGroupBox
+            Left = 595
+            Top = 5
+            Width = 76
+            Height = 76
+            Caption = 'Tamanho'
+            TabOrder = 4
+            object DBEdtTamCampo: TDBEdit
+              Left = 15
+              Top = 30
+              Width = 36
+              Height = 21
+              DataField = 'NR_TAM_CAMPO'
+              DataSource = dsDet
+              MaxLength = 3
+              TabOrder = 0
+            end
+          end
+        end
+        object DbGrdDet: TwwDBGrid
+          Left = 0
+          Top = 34
+          Width = 678
+          Height = 179
+          Selected.Strings = (
+            'NR_ORDEM'#9'5'#9'Ordem'
+            'NO_CAMPO_ARQUIVO'#9'47'#9'Nome do Campo'
+            'TP_ATRIBUTO'#9'5'#9'Tipo'
+            'NR_TAM_CAMPO'#9'7'#9'Tamanho'
+            'IR_RELATORIO_OCORRENCIA'#9'13'#9'Relat. Ocorrência')
+          IniAttributes.Delimiter = ';;'
+          TitleColor = clBtnFace
+          FixedCols = 0
+          ShowHorzScrollBar = True
+          Align = alClient
+          DataSource = dsDet
+          Options = [dgTitles, dgIndicator, dgColumnResize, dgColLines, dgRowLines, dgTabs, dgRowSelect, dgConfirmDelete, dgCancelOnExit, dgWordWrap]
+          ReadOnly = True
+          TabOrder = 2
+          TitleAlignment = taLeftJustify
+          TitleFont.Charset = DEFAULT_CHARSET
+          TitleFont.Color = clWindowText
+          TitleFont.Height = -9
+          TitleFont.Name = 'MS Sans Serif'
+          TitleFont.Style = [fsBold]
+          TitleLines = 1
+          TitleButtons = False
+          IndicatorColor = icBlack
+        end
+        object pnlBarraDetalhe: TPanel
+          Left = 0
+          Top = 0
+          Width = 678
+          Height = 34
+          Align = alTop
+          TabOrder = 0
+          object BtProc: TSpeedButton
+            Left = 61
+            Top = 4
+            Width = 25
+            Height = 25
+            Hint = 'Procurar por registro|'
+            AllowAllUp = True
+            Glyph.Data = {
+              76010000424D7601000000000000760000002800000020000000100000000100
+              0400000000000001000000000000000000001000000010000000000000000000
+              800000800000008080008000000080008000808000007F7F7F00BFBFBF000000
+              FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF0033333CCCCC33
+              33333FFFF77777FFFFFFCCCCCC808CCCCCC3777777F7F777777F008888070888
+              8003777777777777777F0F0770F7F0770F0373F33337F333337370FFFFF7FFFF
+              F07337F33337F33337F370FFFB99FBFFF07337F33377F33337F330FFBF99BFBF
+              F033373F337733333733370BFBF7FBFB0733337F333FF3337F33370FBF98BFBF
+              0733337F3377FF337F333B0BFB990BFB03333373FF777FFF73333FB000B99000
+              B33333377737777733333BFBFBFB99FBF33333333FF377F333333FBF99BF99BF
+              B333333377F377F3333333FB99FB99FB3333333377FF77333333333FB9999FB3
+              333333333777733333333333FBFBFB3333333333333333333333}
+            Layout = blGlyphTop
+            NumGlyphs = 2
+            ParentShowHint = False
+            ShowHint = True
+            Spacing = 0
+            OnClick = BtProcClick
+          end
+          object BtExcl: TSpeedButton
+            Left = 86
+            Top = 4
+            Width = 25
+            Height = 25
+            Hint = 'Remover o registro selecionado|'
+            AllowAllUp = True
+            Glyph.Data = {
+              76010000424D7601000000000000760000002800000020000000100000000100
+              0400000000000001000000000000000000001000000010000000000000000000
+              800000800000008080008000000080008000808000007F7F7F00BFBFBF000000
+              FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00500005000555
+              555557777F777555F55500000000555055557777777755F75555005500055055
+              555577F5777F57555555005550055555555577FF577F5FF55555500550050055
+              5555577FF77577FF555555005050110555555577F757777FF555555505099910
+              555555FF75777777FF555005550999910555577F5F77777775F5500505509990
+              3055577F75F77777575F55005055090B030555775755777575755555555550B0
+              B03055555F555757575755550555550B0B335555755555757555555555555550
+              BBB35555F55555575F555550555555550BBB55575555555575F5555555555555
+              50BB555555555555575F555555555555550B5555555555555575}
+            Layout = blGlyphTop
+            NumGlyphs = 2
+            ParentShowHint = False
+            ShowHint = True
+            Spacing = 0
+            OnClick = BtExclClick
+          end
+          object btAlt: TSpeedButton
+            Left = 36
+            Top = 4
+            Width = 25
+            Height = 25
+            Hint = 'Alterar o registro selecionado|'
+            AllowAllUp = True
+            GroupIndex = 1
+            Glyph.Data = {
+              76010000424D7601000000000000760000002800000020000000100000000100
+              0400000000000001000000000000000000001000000010000000000000000000
+              800000800000008080008000000080008000808000007F7F7F00BFBFBF000000
+              FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00333333000000
+              000033333377777777773333330FFFFFFFF03FF3FF7FF33F3FF700300000FF0F
+              00F077F777773F737737E00BFBFB0FFFFFF07773333F7F3333F7E0BFBF000FFF
+              F0F077F3337773F3F737E0FBFBFBF0F00FF077F3333FF7F77F37E0BFBF00000B
+              0FF077F3337777737337E0FBFBFBFBF0FFF077F33FFFFFF73337E0BF0000000F
+              FFF077FF777777733FF7000BFB00B0FF00F07773FF77373377373330000B0FFF
+              FFF03337777373333FF7333330B0FFFF00003333373733FF777733330B0FF00F
+              0FF03333737F37737F373330B00FFFFF0F033337F77F33337F733309030FFFFF
+              00333377737FFFFF773333303300000003333337337777777333}
+            Layout = blGlyphTop
+            NumGlyphs = 2
+            ParentShowHint = False
+            ShowHint = True
+            Spacing = 0
+            OnClick = btAltClick
+          end
+          object BtIns: TSpeedButton
+            Left = 11
+            Top = 4
+            Width = 25
+            Height = 25
+            Hint = 'Inserir novo registro|'
+            AllowAllUp = True
+            GroupIndex = 1
+            Glyph.Data = {
+              76010000424D7601000000000000760000002800000020000000100000000100
+              0400000000000001000000000000000000001000000010000000000000000000
+              800000800000008080008000000080008000808000007F7F7F00BFBFBF000000
+              FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF0033333333B333
+              333B33FF33337F3333F73BB3777BB7777BB3377FFFF77FFFF77333B000000000
+              0B3333777777777777333330FFFFFFFF07333337F33333337F333330FFFFFFFF
+              07333337F33333337F333330FFFFFFFF07333337F33333337F333330FFFFFFFF
+              07333FF7F33333337FFFBBB0FFFFFFFF0BB37777F3333333777F3BB0FFFFFFFF
+              0BBB3777F3333FFF77773330FFFF000003333337F333777773333330FFFF0FF0
+              33333337F3337F37F3333330FFFF0F0B33333337F3337F77FF333330FFFF003B
+              B3333337FFFF77377FF333B000000333BB33337777777F3377FF3BB3333BB333
+              3BB33773333773333773B333333B3333333B7333333733333337}
+            Layout = blGlyphTop
+            NumGlyphs = 2
+            ParentShowHint = False
+            ShowHint = True
+            Spacing = 0
+            OnClick = BtInsClick
+          end
+        end
+      end
+      object TabSheet1: TTabSheet
+        Caption = 'Vinculação a Campos do Sistema'
+        object PnlDetalheVinc: TPanel
+          Left = 0
+          Top = 73
+          Width = 678
+          Height = 140
+          Align = alClient
+          TabOrder = 3
+          object bbtnOkDetVinc: TBitBtn
+            Left = 592
+            Top = 64
+            Width = 81
+            Height = 27
+            Caption = '&OK'
+            Default = True
+            TabOrder = 0
+            OnClick = bbtnOkDetVincClick
+            Glyph.Data = {
+              BE060000424DBE06000000000000360400002800000024000000120000000100
+              0800000000008802000000000000000000000001000000010000000000000000
+              80000080000000808000800000008000800080800000C0C0C000C0DCC000F0CA
+              A600000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              000000000000000000000000000000000000F0FBFF00A4A0A000808080000000
+              FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00030303030303
+              0303030303030303030303030303030303030303030303030303030303030303
+              03030303030303030303030303030303030303030303FF030303030303030303
+              03030303030303040403030303030303030303030303030303F8F8FF03030303
+              03030303030303030303040202040303030303030303030303030303F80303F8
+              FF030303030303030303030303040202020204030303030303030303030303F8
+              03030303F8FF0303030303030303030304020202020202040303030303030303
+              0303F8030303030303F8FF030303030303030304020202FA0202020204030303
+              0303030303F8FF0303F8FF030303F8FF03030303030303020202FA03FA020202
+              040303030303030303F8FF03F803F8FF0303F8FF03030303030303FA02FA0303
+              03FA0202020403030303030303F8FFF8030303F8FF0303F8FF03030303030303
+              FA0303030303FA0202020403030303030303F80303030303F8FF0303F8FF0303
+              0303030303030303030303FA0202020403030303030303030303030303F8FF03
+              03F8FF03030303030303030303030303FA020202040303030303030303030303
+              0303F8FF0303F8FF03030303030303030303030303FA02020204030303030303
+              03030303030303F8FF0303F8FF03030303030303030303030303FA0202020403
+              030303030303030303030303F8FF0303F8FF03030303030303030303030303FA
+              0202040303030303030303030303030303F8FF03F8FF03030303030303030303
+              03030303FA0202030303030303030303030303030303F8FFF803030303030303
+              030303030303030303FA0303030303030303030303030303030303F803030303
+              0303030303030303030303030303030303030303030303030303030303030303
+              0303}
+            NumGlyphs = 2
+            Spacing = 0
+          end
+          object bbtnCancelarDetVinc: TBitBtn
+            Left = 592
+            Top = 99
+            Width = 81
+            Height = 27
+            Cancel = True
+            Caption = '&Cancelar'
+            TabOrder = 1
+            OnClick = bbtnCancelarDetVincClick
+            Glyph.Data = {
+              BE060000424DBE06000000000000360400002800000024000000120000000100
+              0800000000008802000000000000000000000001000000010000000000000000
+              80000080000000808000800000008000800080800000C0C0C000C0DCC000F0CA
+              A600000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              000000000000000000000000000000000000F0FBFF00A4A0A000808080000000
+              FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00030303030303
+              0303030303030303030303030303030303030303030303030303030303030303
+              0303F8F80303030303030303030303030303030303FF03030303030303030303
+              0303030303F90101F80303030303F9F80303030303030303F8F8FF0303030303
+              03FF03030303030303F9010101F8030303F90101F8030303030303F8FF03F8FF
+              030303FFF8F8FF030303030303F901010101F803F901010101F80303030303F8
+              FF0303F8FF03FFF80303F8FF030303030303F901010101F80101010101F80303
+              030303F8FF030303F8FFF803030303F8FF030303030303F90101010101010101
+              F803030303030303F8FF030303F803030303FFF80303030303030303F9010101
+              010101F8030303030303030303F8FF030303030303FFF8030303030303030303
+              030101010101F80303030303030303030303F8FF0303030303F8030303030303
+              0303030303F901010101F8030303030303030303030303F8FF030303F8030303
+              0303030303030303F90101010101F8030303030303030303030303F803030303
+              F8FF030303030303030303F9010101F8010101F803030303030303030303F803
+              03030303F8FF0303030303030303F9010101F803F9010101F803030303030303
+              03F8030303F8FF0303F8FF03030303030303F90101F8030303F9010101F80303
+              03030303F8FF0303F803F8FF0303F8FF03030303030303F9010303030303F901
+              0101030303030303F8FFFFF8030303F8FF0303F8FF0303030303030303030303
+              030303F901F903030303030303F8F80303030303F8FFFFFFF803030303030303
+              03030303030303030303030303030303030303030303030303F8F8F803030303
+              0303030303030303030303030303030303030303030303030303030303030303
+              0303}
+            NumGlyphs = 2
+            Spacing = 0
+          end
+          object GroupBox2: TGroupBox
+            Left = 301
+            Top = 5
+            Width = 285
+            Height = 121
+            Caption = 'Selecione a informação desejada'
+            TabOrder = 2
+            object DBLkpListBxGrupoAtributo: TDBLookupListBox
+              Left = 10
+              Top = 15
+              Width = 266
+              Height = 95
+              KeyField = 'CHAVE'
+              ListField = 'DS_ATRIBUTO_TABELA'
+              ListSource = dsGrupoAtributo
+              TabOrder = 0
+            end
+          end
+          object GroupBox3: TGroupBox
+            Left = 5
+            Top = 6
+            Width = 286
+            Height = 120
+            Caption = 'Selecione o grupo de informações desejado'
+            TabOrder = 3
+            object DBLkpLstBxGrupo: TDBLookupListBox
+              Left = 10
+              Top = 15
+              Width = 266
+              Height = 95
+              KeyField = 'CD_GRUPO'
+              ListField = 'NO_GRUPO'
+              ListSource = dsGrupoLogico
+              TabOrder = 0
+            end
+          end
+        end
+        object DbGrdDetVinc: TwwDBGrid
+          Left = 0
+          Top = 73
+          Width = 678
+          Height = 140
+          Selected.Strings = (
+            'NO_GRUPO'#9'38'#9'Grupo de Informações'
+            'DS_ATRIBUTO_TABELA'#9'41'#9'Informação à qual o campo está vinculado')
+          IniAttributes.Delimiter = ';;'
+          TitleColor = clBtnFace
+          FixedCols = 0
+          ShowHorzScrollBar = True
+          Align = alClient
+          DataSource = dsDetalheVinc
+          Options = [dgTitles, dgIndicator, dgColumnResize, dgColLines, dgRowLines, dgTabs, dgRowSelect, dgConfirmDelete, dgCancelOnExit, dgWordWrap]
+          ReadOnly = True
+          TabOrder = 2
+          TitleAlignment = taLeftJustify
+          TitleFont.Charset = DEFAULT_CHARSET
+          TitleFont.Color = clWindowText
+          TitleFont.Height = -9
+          TitleFont.Name = 'MS Sans Serif'
+          TitleFont.Style = [fsBold]
+          TitleLines = 1
+          TitleButtons = False
+          IndicatorColor = icBlack
+        end
+        object wwDBGrid1: TwwDBGrid
+          Left = 0
+          Top = 0
+          Width = 678
+          Height = 39
+          Selected.Strings = (
+            'NR_ORDEM'#9'5'#9'Ordem'
+            'NO_CAMPO_ARQUIVO'#9'47'#9'Nome do Campo'
+            'TP_ATRIBUTO'#9'5'#9'Tipo'
+            'NR_TAM_CAMPO'#9'7'#9'Tamanho'
+            'IR_RELATORIO_OCORRENCIA'#9'13'#9'Relat. Ocorrência')
+          IniAttributes.Delimiter = ';;'
+          TitleColor = clBtnFace
+          FixedCols = 0
+          ShowHorzScrollBar = True
+          Align = alTop
+          DataSource = dsDet
+          Options = [dgTitles, dgIndicator, dgColumnResize, dgColLines, dgRowLines, dgTabs, dgRowSelect, dgConfirmDelete, dgCancelOnExit, dgWordWrap]
+          ReadOnly = True
+          TabOrder = 0
+          TitleAlignment = taLeftJustify
+          TitleFont.Charset = DEFAULT_CHARSET
+          TitleFont.Color = clWindowText
+          TitleFont.Height = -9
+          TitleFont.Name = 'MS Sans Serif'
+          TitleFont.Style = [fsBold]
+          TitleLines = 1
+          TitleButtons = False
+          IndicatorColor = icBlack
+        end
+        object Panel1: TPanel
+          Left = 0
+          Top = 39
+          Width = 678
+          Height = 34
+          Align = alTop
+          TabOrder = 1
+          object BtProcVinc: TSpeedButton
+            Left = 61
+            Top = 4
+            Width = 25
+            Height = 25
+            Hint = 'Procurar por registro|'
+            AllowAllUp = True
+            Glyph.Data = {
+              76010000424D7601000000000000760000002800000020000000100000000100
+              0400000000000001000000000000000000001000000010000000000000000000
+              800000800000008080008000000080008000808000007F7F7F00BFBFBF000000
+              FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF0033333CCCCC33
+              33333FFFF77777FFFFFFCCCCCC808CCCCCC3777777F7F777777F008888070888
+              8003777777777777777F0F0770F7F0770F0373F33337F333337370FFFFF7FFFF
+              F07337F33337F33337F370FFFB99FBFFF07337F33377F33337F330FFBF99BFBF
+              F033373F337733333733370BFBF7FBFB0733337F333FF3337F33370FBF98BFBF
+              0733337F3377FF337F333B0BFB990BFB03333373FF777FFF73333FB000B99000
+              B33333377737777733333BFBFBFB99FBF33333333FF377F333333FBF99BF99BF
+              B333333377F377F3333333FB99FB99FB3333333377FF77333333333FB9999FB3
+              333333333777733333333333FBFBFB3333333333333333333333}
+            Layout = blGlyphTop
+            NumGlyphs = 2
+            ParentShowHint = False
+            ShowHint = True
+            Spacing = 0
+            OnClick = BtProcVincClick
+          end
+          object BtExclVinc: TSpeedButton
+            Left = 86
+            Top = 4
+            Width = 25
+            Height = 25
+            Hint = 'Remover o registro selecionado|'
+            AllowAllUp = True
+            Glyph.Data = {
+              76010000424D7601000000000000760000002800000020000000100000000100
+              0400000000000001000000000000000000001000000010000000000000000000
+              800000800000008080008000000080008000808000007F7F7F00BFBFBF000000
+              FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00500005000555
+              555557777F777555F55500000000555055557777777755F75555005500055055
+              555577F5777F57555555005550055555555577FF577F5FF55555500550050055
+              5555577FF77577FF555555005050110555555577F757777FF555555505099910
+              555555FF75777777FF555005550999910555577F5F77777775F5500505509990
+              3055577F75F77777575F55005055090B030555775755777575755555555550B0
+              B03055555F555757575755550555550B0B335555755555757555555555555550
+              BBB35555F55555575F555550555555550BBB55575555555575F5555555555555
+              50BB555555555555575F555555555555550B5555555555555575}
+            Layout = blGlyphTop
+            NumGlyphs = 2
+            ParentShowHint = False
+            ShowHint = True
+            Spacing = 0
+            OnClick = BtExclVincClick
+          end
+          object btAltVinc: TSpeedButton
+            Left = 36
+            Top = 4
+            Width = 25
+            Height = 25
+            Hint = 'Alterar o registro selecionado|'
+            AllowAllUp = True
+            GroupIndex = 1
+            Glyph.Data = {
+              76010000424D7601000000000000760000002800000020000000100000000100
+              0400000000000001000000000000000000001000000010000000000000000000
+              800000800000008080008000000080008000808000007F7F7F00BFBFBF000000
+              FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00333333000000
+              000033333377777777773333330FFFFFFFF03FF3FF7FF33F3FF700300000FF0F
+              00F077F777773F737737E00BFBFB0FFFFFF07773333F7F3333F7E0BFBF000FFF
+              F0F077F3337773F3F737E0FBFBFBF0F00FF077F3333FF7F77F37E0BFBF00000B
+              0FF077F3337777737337E0FBFBFBFBF0FFF077F33FFFFFF73337E0BF0000000F
+              FFF077FF777777733FF7000BFB00B0FF00F07773FF77373377373330000B0FFF
+              FFF03337777373333FF7333330B0FFFF00003333373733FF777733330B0FF00F
+              0FF03333737F37737F373330B00FFFFF0F033337F77F33337F733309030FFFFF
+              00333377737FFFFF773333303300000003333337337777777333}
+            Layout = blGlyphTop
+            NumGlyphs = 2
+            ParentShowHint = False
+            ShowHint = True
+            Spacing = 0
+            OnClick = btAltVincClick
+          end
+          object BtInsVinc: TSpeedButton
+            Left = 11
+            Top = 4
+            Width = 25
+            Height = 25
+            Hint = 'Inserir novo registro|'
+            AllowAllUp = True
+            GroupIndex = 1
+            Glyph.Data = {
+              76010000424D7601000000000000760000002800000020000000100000000100
+              0400000000000001000000000000000000001000000010000000000000000000
+              800000800000008080008000000080008000808000007F7F7F00BFBFBF000000
+              FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF0033333333B333
+              333B33FF33337F3333F73BB3777BB7777BB3377FFFF77FFFF77333B000000000
+              0B3333777777777777333330FFFFFFFF07333337F33333337F333330FFFFFFFF
+              07333337F33333337F333330FFFFFFFF07333337F33333337F333330FFFFFFFF
+              07333FF7F33333337FFFBBB0FFFFFFFF0BB37777F3333333777F3BB0FFFFFFFF
+              0BBB3777F3333FFF77773330FFFF000003333337F333777773333330FFFF0FF0
+              33333337F3337F37F3333330FFFF0F0B33333337F3337F77FF333330FFFF003B
+              B3333337FFFF77377FF333B000000333BB33337777777F3377FF3BB3333BB333
+              3BB33773333773333773B333333B3333333B7333333733333337}
+            Layout = blGlyphTop
+            NumGlyphs = 2
+            ParentShowHint = False
+            ShowHint = True
+            Spacing = 0
+            OnClick = BtInsVincClick
+          end
+          object BtBtnDetalheVincValores: TBitBtn
+            Left = 120
+            Top = 5
+            Width = 91
+            Height = 25
+            Caption = 'Valores >>'
+            TabOrder = 0
+            OnClick = BtBtnDetalheVincValoresClick
+            Glyph.Data = {
+              76010000424D7601000000000000760000002800000020000000100000000100
+              0400000000000001000000000000000000001000000010000000000000000000
+              800000800000008080008000000080008000808000007F7F7F00BFBFBF000000
+              FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF003FF0000000F0
+              000033F77777773777773FFF0CCC0FF09990333F73F37337F33733FFF0C0FFF0
+              99903333F7373337F337333FFF0FFFF0999033333F73FFF7FFF73333FFF000F0
+              0000333333F77737777733333F07B70FFFFF3333337F337F33333333330BBB0F
+              FFFF3FFFFF7F337F333300000307B70FFFFF77777F73FF733F330EEE033000FF
+              0FFF7F337FF777337FF30EEE00033FF000FF7F33777F333777FF0EEE0E033300
+              000F7FFF7F7FFF77777F00000E00000000007777737773777777330EEE0E0330
+              00FF337FFF7F7F3777F33300000E033000FF337777737F3777F333330EEE0330
+              00FF33337FFF7FF77733333300000000033F3333777777777333}
+            NumGlyphs = 2
+          end
+        end
+      end
+    end
+    object DBRdGrupTipoArquivo: TDBRadioGroup
+      Left = 10
+      Top = 45
+      Width = 106
+      Height = 51
+      Caption = 'Tipo do arquivo'
+      DataField = 'TP_ARQUIVO'
+      DataSource = ds
+      Items.Strings = (
+        'Delimitado'
+        'Largura Fixa')
+      TabOrder = 3
+      Values.Strings = (
+        'D'
+        'F')
+      OnChange = DBRdGrupTipoArquivoChange
+    end
+    object DBRdGrpDelimitador: TDBRadioGroup
+      Left = 120
+      Top = 45
+      Width = 336
+      Height = 51
+      Caption = 'Delimitador'
+      Columns = 3
+      DataField = 'TP_DELIMITADOR_CAMPO'
+      DataSource = ds
+      Items.Strings = (
+        'Tabulação'
+        'Espaço'
+        'Vírgula'
+        'Ponto e Vírgula'
+        'Outro')
+      TabOrder = 4
+      Values.Strings = (
+        'T'
+        'E'
+        'V'
+        'P'
+        'O')
+      OnChange = DBRdGrpDelimitadorChange
+    end
+    object DBEdtOutroDelimitador: TDBEdit
+      Left = 405
+      Top = 55
+      Width = 21
+      Height = 21
+      DataField = 'DS_OUTRO_DELIMITADOR'
+      DataSource = ds
+      TabOrder = 5
+      Visible = False
+      OnChange = DBEdtOutroDelimitadorChange
+    end
+    object DBRdGrpQualificador: TDBRadioGroup
+      Left = 460
+      Top = 45
+      Width = 226
+      Height = 51
+      Caption = 'Qualificador do Texto'
+      Columns = 3
+      DataField = 'TP_QUALIFICADOR_TEXTO'
+      DataSource = ds
+      Items.Strings = (
+        'Aspas'
+        'Plic'
+        'Nenhum')
+      TabOrder = 6
+      Values.Strings = (
+        'A'
+        'P'
+        'N')
+      OnChange = DBRdGrpQualificadorChange
+    end
+    object DBEdit3: TDBEdit
+      Left = 580
+      Top = 24
+      Width = 106
+      Height = 21
+      Color = clSilver
+      DataField = 'CD_ARQUIVO'
+      DataSource = ds
+      Enabled = False
+      ReadOnly = True
+      TabOrder = 7
+    end
+    object BtBtnValidaLayout: TBitBtn
+      Left = 570
+      Top = 110
+      Width = 115
+      Height = 36
+      Caption = 'Valida Lay-out'
+      TabOrder = 8
+      OnClick = BtBtnValidaLayoutClick
+      Glyph.Data = {
+        76010000424D7601000000000000760000002800000020000000100000000100
+        0400000000000001000000000000000000001000000010000000000000000000
+        800000800000008080008000000080008000808000007F7F7F00BFBFBF000000
+        FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00555555555555
+        555555555555555555555555555555555555555555FF55555555555559055555
+        55555555577FF5555555555599905555555555557777F5555555555599905555
+        555555557777FF5555555559999905555555555777777F555555559999990555
+        5555557777777FF5555557990599905555555777757777F55555790555599055
+        55557775555777FF5555555555599905555555555557777F5555555555559905
+        555555555555777FF5555555555559905555555555555777FF55555555555579
+        05555555555555777FF5555555555557905555555555555777FF555555555555
+        5990555555555555577755555555555555555555555555555555}
+      NumGlyphs = 2
+    end
+    object DBChckBxImportacao: TDBCheckBox
+      Left = 470
+      Top = 110
+      Width = 91
+      Height = 17
+      Caption = 'Importação'
+      DataField = 'IR_PARA_IMPORTACAO'
+      DataSource = ds
+      TabOrder = 9
+      ValueChecked = 'S'
+      ValueUnchecked = 'N'
+    end
+    object DBChckBxExportacao: TDBCheckBox
+      Left = 470
+      Top = 130
+      Width = 91
+      Height = 17
+      Caption = 'Exportação'
+      DataField = 'IR_PARA_EXPORTACAO'
+      DataSource = ds
+      TabOrder = 10
+      ValueChecked = 'S'
+      ValueUnchecked = 'N'
+    end
+  end
+  inherited Dock972: TDock97
+    Width = 696
+    inherited Toolbar971: TToolbar97
+      object SBtnGerar: TToolbarButton97
+        Left = 246
+        Top = 0
+        Width = 77
+        Height = 41
+        AllowAllUp = True
+        GroupIndex = 1
+        Caption = '&Imprimir'
+        Glyph.Data = {
+          76010000424D7601000000000000760000002800000020000000100000000100
+          0400000000000001000000000000000000001000000010000000000000000000
+          800000800000008080008000000080008000808000007F7F7F00BFBFBF000000
+          FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00300000000000
+          00033FFFFFFFFFFFFFFF0888888888888880777777777777777F088888888888
+          8880777777777777777F0000000000000000FFFFFFFFFFFFFFFF0F8F8F8F8F8F
+          8F80777777777777777F08F8F8F8F8F8F9F0777777777777777F0F8F8F8F8F8F
+          8F807777777777777F7F0000000000000000777777777777777F3330FFFFFFFF
+          03333337F3FFFF3F7F333330F0000F0F03333337F77773737F333330FFFFFFFF
+          03333337F3FF3FFF7F333330F00F000003333337F773777773333330FFFF0FF0
+          33333337F3FF7F3733333330F08F0F0333333337F7737F7333333330FFFF0033
+          33333337FFFF7733333333300000033333333337777773333333}
+        Layout = blGlyphTop
+        NumGlyphs = 2
+        Opaque = False
+        Spacing = 0
+        OnClick = SBtnGerarClick
+      end
+      object ToolbarSep972: TToolbarSep97
+        Left = 240
+        Top = 0
+      end
+    end
+  end
+  inherited Dock971: TDock97
+    Top = 443
+    Width = 696
+    inherited tb97Fundo: TToolbar97
+      Left = 351
+      DockPos = 351
+    end
+    inherited TB97oKCancelar: TToolbar97
+      Left = 183
+      DockPos = 183
+    end
+    inherited dbnav: TDBNavigator
+      Hints.Strings = ()
+    end
+  end
+  inherited ivTradutor: TIvExtendedTranslator
+    TargetsData = (
+      1
+      1
+      (
+        ''
+        'Text'
+        0))
+  end
+  inherited ds: TwwDataSource
+    DataSet = QryPrincipal
+    Left = 396
+    Top = 133
+  end
+  inherited srchdlgProcura: TwwSearchDialog
+    Left = 403
+    Top = 7
+  end
+  inherited seldlgProcuraQry: TcmSelectDlg
+    Left = 318
+    Top = 8
+  end
+  object QryPrincipal: TwwQuery
+    CachedUpdates = True
+    AfterOpen = QryPrincipalAfterOpen
+    AfterInsert = QryPrincipalAfterInsert
+    BeforePost = QryPrincipalBeforePost
+    AfterPost = QryPrincipalAfterPost
+    AfterDelete = QryPrincipalAfterDelete
+    OnUpdateError = QryPrincipalUpdateError
+    DatabaseName = 'BaseDados'
+    SQL.Strings = (
+      'Select * from FI_ARQUIVO'
+      'ORDER BY NO_ARQUIVO')
+    UpdateObject = UpdtSQLPrincipal
+    ValidateWithMask = True
+    Left = 360
+    Top = 132
+    object QryPrincipalNO_ARQUIVO: TStringField
+      DisplayLabel = 'Nome do Arquivo'
+      DisplayWidth = 60
+      FieldName = 'NO_ARQUIVO'
+      Origin = 'FI_ARQUIVO.NO_ARQUIVO'
+      Size = 60
+    end
+    object QryPrincipalIR_PARA_IMPORTACAO: TStringField
+      DisplayLabel = 'Importacao'
+      DisplayWidth = 1
+      FieldName = 'IR_PARA_IMPORTACAO'
+      Origin = '"CM.FI_ARQUIVO".CD_ARQUIVO'
+      Size = 1
+    end
+    object QryPrincipalIR_PARA_EXPORTACAO: TStringField
+      DisplayLabel = 'Exportacao'
+      DisplayWidth = 1
+      FieldName = 'IR_PARA_EXPORTACAO'
+      Origin = '"CM.FI_ARQUIVO".CD_ARQUIVO'
+      Size = 1
+    end
+    object QryPrincipalCD_ARQUIVO: TFloatField
+      DisplayWidth = 10
+      FieldName = 'CD_ARQUIVO'
+      Origin = 'FI_ARQUIVO.CD_ARQUIVO'
+      Visible = False
+    end
+    object QryPrincipalDS_ARQUIVO: TMemoField
+      DisplayWidth = 10
+      FieldName = 'DS_ARQUIVO'
+      Origin = 'FI_ARQUIVO.DS_ARQUIVO'
+      Visible = False
+      BlobType = ftMemo
+      Size = 2000
+    end
+    object QryPrincipalTP_ARQUIVO: TStringField
+      DisplayWidth = 1
+      FieldName = 'TP_ARQUIVO'
+      Origin = 'FI_ARQUIVO.TP_ARQUIVO'
+      Visible = False
+      Size = 1
+    end
+    object QryPrincipalTP_DELIMITADOR_CAMPO: TStringField
+      DisplayWidth = 1
+      FieldName = 'TP_DELIMITADOR_CAMPO'
+      Origin = 'FI_ARQUIVO.TP_DELIMITADOR_CAMPO'
+      Visible = False
+      Size = 1
+    end
+    object QryPrincipalDS_OUTRO_DELIMITADOR: TStringField
+      DisplayWidth = 1
+      FieldName = 'DS_OUTRO_DELIMITADOR'
+      Origin = 'FI_ARQUIVO.DS_OUTRO_DELIMITADOR'
+      Visible = False
+      Size = 1
+    end
+    object QryPrincipalTP_QUALIFICADOR_TEXTO: TStringField
+      DisplayWidth = 1
+      FieldName = 'TP_QUALIFICADOR_TEXTO'
+      Origin = 'FI_ARQUIVO.TP_QUALIFICADOR_TEXTO'
+      Visible = False
+      Size = 1
+    end
+  end
+  object UpdtSQLPrincipal: TUpdateSQL
+    ModifySQL.Strings = (
+      'update FI_ARQUIVO'
+      'set'
+      '  NO_ARQUIVO = :NO_ARQUIVO,'
+      '  DS_ARQUIVO = :DS_ARQUIVO,'
+      '  TP_ARQUIVO = :TP_ARQUIVO,'
+      '  TP_DELIMITADOR_CAMPO = :TP_DELIMITADOR_CAMPO,'
+      '  DS_OUTRO_DELIMITADOR = :DS_OUTRO_DELIMITADOR,'
+      '  TP_QUALIFICADOR_TEXTO = :TP_QUALIFICADOR_TEXTO,'
+      '  IR_PARA_IMPORTACAO = :IR_PARA_IMPORTACAO,'
+      '  IR_PARA_EXPORTACAO = :IR_PARA_EXPORTACAO'
+      'where'
+      '  CD_ARQUIVO = :OLD_CD_ARQUIVO')
+    InsertSQL.Strings = (
+      'insert into FI_ARQUIVO'
+      '  (CD_ARQUIVO, NO_ARQUIVO, DS_ARQUIVO, TP_ARQUIVO, '
+      'TP_DELIMITADOR_CAMPO, '
+      '   DS_OUTRO_DELIMITADOR, TP_QUALIFICADOR_TEXTO, '
+      'IR_PARA_IMPORTACAO, IR_PARA_EXPORTACAO)'
+      'values'
+      '  (:CD_ARQUIVO, :NO_ARQUIVO, :DS_ARQUIVO, :TP_ARQUIVO, '
+      ':TP_DELIMITADOR_CAMPO, '
+      '   :DS_OUTRO_DELIMITADOR, :TP_QUALIFICADOR_TEXTO, '
+      ':IR_PARA_IMPORTACAO, '
+      '   :IR_PARA_EXPORTACAO)')
+    DeleteSQL.Strings = (
+      'delete from FI_ARQUIVO'
+      'where'
+      '  CD_ARQUIVO = :OLD_CD_ARQUIVO')
+    Left = 425
+    Top = 132
+  end
+  object QryAux: TwwQuery
+    DatabaseName = 'BaseDados'
+    ValidateWithMask = True
+    Left = 360
+    Top = 7
+  end
+  object QryDetalhe: TwwQuery
+    CachedUpdates = True
+    AfterOpen = QryDetalheAfterOpen
+    AfterInsert = QryDetalheAfterInsert
+    BeforePost = QryDetalheBeforePost
+    AfterPost = QryDetalheAfterPost
+    AfterDelete = QryDetalheAfterDelete
+    OnUpdateError = QryDetalheUpdateError
+    DatabaseName = 'BaseDados'
+    DataSource = ds
+    SQL.Strings = (
+      'Select * from FI_LAYOUT_ARQUIVO'
+      'where CD_ARQUIVO = :CD_ARQUIVO'
+      'order by NR_ORDEM')
+    UpdateObject = UpdtSQLDetalhe
+    ControlType.Strings = (
+      'IR_RELATORIO_OCORRENCIA;CheckBox;S;N')
+    ValidateWithMask = True
+    Left = 69
+    Top = 173
+    ParamData = <
+      item
+        DataType = ftFloat
+        Name = 'CD_ARQUIVO'
+        ParamType = ptUnknown
+      end>
+    object QryDetalheNR_ORDEM: TFloatField
+      DisplayLabel = 'Ordem'
+      DisplayWidth = 5
+      FieldName = 'NR_ORDEM'
+      Origin = '"CM.FI_LAYOUT_ARQUIVO".NR_ORDEM'
+    end
+    object QryDetalheNO_CAMPO_ARQUIVO: TStringField
+      DisplayLabel = 'Nome do Campo'
+      DisplayWidth = 47
+      FieldName = 'NO_CAMPO_ARQUIVO'
+      Origin = '"CM.FI_LAYOUT_ARQUIVO".NO_CAMPO_ARQUIVO'
+      Size = 60
+    end
+    object QryDetalheTP_ATRIBUTO: TStringField
+      DisplayLabel = 'Tipo'
+      DisplayWidth = 5
+      FieldName = 'TP_ATRIBUTO'
+      Origin = '"CM.FI_LAYOUT_ARQUIVO".SE_GRUPO_OCORRENCIA'
+      Size = 1
+    end
+    object QryDetalheNR_TAM_CAMPO: TFloatField
+      DisplayLabel = 'Tamanho'
+      DisplayWidth = 7
+      FieldName = 'NR_TAM_CAMPO'
+      Origin = '"CM.FI_LAYOUT_ARQUIVO".NR_TAM_CAMPO'
+    end
+    object QryDetalheIR_RELATORIO_OCORRENCIA: TStringField
+      DisplayLabel = 'Relat. Ocorrência'
+      DisplayWidth = 13
+      FieldName = 'IR_RELATORIO_OCORRENCIA'
+      Origin = '"CM.FI_LAYOUT_ARQUIVO".CD_ARQUIVO_MASTER'
+      Size = 1
+    end
+    object QryDetalheCD_ARQUIVO: TFloatField
+      FieldName = 'CD_ARQUIVO'
+      Origin = '"CM.FI_LAYOUT_ARQUIVO".CD_ARQUIVO'
+      Visible = False
+    end
+    object QryDetalheSQ_CAMPO: TFloatField
+      FieldName = 'SQ_CAMPO'
+      Origin = '"CM.FI_LAYOUT_ARQUIVO".SQ_CAMPO'
+      Visible = False
+    end
+    object QryDetalheDS_CAMPO_ARQUIVO: TStringField
+      FieldName = 'DS_CAMPO_ARQUIVO'
+      Origin = '"CM.FI_LAYOUT_ARQUIVO".DS_CAMPO_ARQUIVO'
+      Visible = False
+      Size = 60
+    end
+    object QryDetalheDS_SIMBOLO_DECIMAL: TStringField
+      FieldName = 'DS_SIMBOLO_DECIMAL'
+      Origin = '"CM.FI_LAYOUT_ARQUIVO".IR_TIPO_ATRIBUTO'
+      Visible = False
+      Size = 1
+    end
+    object QryDetalheNR_DECIMAL: TFloatField
+      FieldName = 'NR_DECIMAL'
+      Origin = '"CM.FI_LAYOUT_ARQUIVO".NR_INTEIRO'
+      Visible = False
+    end
+    object QryDetalheDS_SIMBOLO_AGRUPADOR: TStringField
+      FieldName = 'DS_SIMBOLO_AGRUPADOR'
+      Origin = '"CM.FI_LAYOUT_ARQUIVO".IR_SEPARADOR_INTEIRO'
+      Visible = False
+      Size = 1
+    end
+    object QryDetalheDS_MASCARA_DATA: TStringField
+      FieldName = 'DS_MASCARA_DATA'
+      Origin = '"CM.FI_LAYOUT_ARQUIVO".NR_DECIMAL'
+      Visible = False
+      Size = 11
+    end
+    object QryDetalheCD_ARQUIVO_MASTER: TFloatField
+      FieldName = 'CD_ARQUIVO_MASTER'
+      Origin = '"CM.FI_LAYOUT_ARQUIVO".IR_SEPARADOR_DECIMAL'
+      Visible = False
+    end
+    object QryDetalheSQ_CAMPO_MASTER: TFloatField
+      FieldName = 'SQ_CAMPO_MASTER'
+      Origin = '"CM.FI_LAYOUT_ARQUIVO".DS_MASCARA_DATA'
+      Visible = False
+    end
+  end
+  object dsDet: TwwDataSource
+    DataSet = QryDetalhe
+    Left = 94
+    Top = 173
+  end
+  object UpdtSQLDetalhe: TUpdateSQL
+    ModifySQL.Strings = (
+      'update FI_LAYOUT_ARQUIVO'
+      'set'
+      '  NR_ORDEM = :NR_ORDEM,'
+      '  NO_CAMPO_ARQUIVO = :NO_CAMPO_ARQUIVO,'
+      '  DS_CAMPO_ARQUIVO = :DS_CAMPO_ARQUIVO,'
+      '  NR_TAM_CAMPO = :NR_TAM_CAMPO,'
+      '  TP_ATRIBUTO = :TP_ATRIBUTO,'
+      '  DS_SIMBOLO_DECIMAL = :DS_SIMBOLO_DECIMAL,'
+      '  NR_DECIMAL = :NR_DECIMAL,'
+      '  DS_SIMBOLO_AGRUPADOR = :DS_SIMBOLO_AGRUPADOR,'
+      '  DS_MASCARA_DATA = :DS_MASCARA_DATA,'
+      '  CD_ARQUIVO_MASTER = :CD_ARQUIVO_MASTER,'
+      '  SQ_CAMPO_MASTER = :SQ_CAMPO_MASTER,'
+      '  IR_RELATORIO_OCORRENCIA = :IR_RELATORIO_OCORRENCIA'
+      'where'
+      '  CD_ARQUIVO = :OLD_CD_ARQUIVO and'
+      '  SQ_CAMPO = :OLD_SQ_CAMPO')
+    InsertSQL.Strings = (
+      'insert into FI_LAYOUT_ARQUIVO'
+      '  (CD_ARQUIVO, SQ_CAMPO, NR_ORDEM, NO_CAMPO_ARQUIVO, '
+      'DS_CAMPO_ARQUIVO, '
+      '   NR_TAM_CAMPO, TP_ATRIBUTO, DS_SIMBOLO_DECIMAL, NR_DECIMAL, '
+      'DS_SIMBOLO_AGRUPADOR, '
+      '   DS_MASCARA_DATA, CD_ARQUIVO_MASTER, SQ_CAMPO_MASTER, '
+      'IR_RELATORIO_OCORRENCIA)'
+      'values'
+      '  (:CD_ARQUIVO, :SQ_CAMPO, :NR_ORDEM, :NO_CAMPO_ARQUIVO, '
+      ':DS_CAMPO_ARQUIVO, '
+      
+        '   :NR_TAM_CAMPO, :TP_ATRIBUTO, :DS_SIMBOLO_DECIMAL, :NR_DECIMAL' +
+        ', '
+      ':DS_SIMBOLO_AGRUPADOR, '
+      '   :DS_MASCARA_DATA, :CD_ARQUIVO_MASTER, :SQ_CAMPO_MASTER, '
+      ':IR_RELATORIO_OCORRENCIA)')
+    DeleteSQL.Strings = (
+      'delete from FI_LAYOUT_ARQUIVO'
+      'where'
+      '  CD_ARQUIVO = :OLD_CD_ARQUIVO and'
+      '  SQ_CAMPO = :OLD_SQ_CAMPO')
+    Left = 119
+    Top = 173
+  end
+  object QryCampos: TwwQuery
+    DatabaseName = 'BaseDados'
+    DataSource = ds
+    SQL.Strings = (
+      '  SELECT CD_ARQUIVO,'
+      '         SQ_CAMPO,'
+      '         NO_CAMPO_ARQUIVO'
+      '    FROM FI_LAYOUT_ARQUIVO'
+      '   WHERE CD_ARQUIVO = :CD_ARQUIVO'
+      '     AND CD_ARQUIVO_MASTER IS NULL'
+      'ORDER BY NR_ORDEM')
+    ValidateWithMask = True
+    Left = 164
+    Top = 173
+    ParamData = <
+      item
+        DataType = ftFloat
+        Name = 'CD_ARQUIVO'
+        ParamType = ptUnknown
+      end>
+    object QryCamposCD_ARQUIVO: TFloatField
+      FieldName = 'CD_ARQUIVO'
+      Origin = '"CM.FI_LAYOUT_ARQUIVO".CD_ARQUIVO'
+    end
+    object QryCamposSQ_CAMPO: TFloatField
+      FieldName = 'SQ_CAMPO'
+      Origin = '"CM.FI_LAYOUT_ARQUIVO".SQ_CAMPO'
+    end
+    object QryCamposNO_CAMPO_ARQUIVO: TStringField
+      FieldName = 'NO_CAMPO_ARQUIVO'
+      Origin = '"CM.FI_LAYOUT_ARQUIVO".NO_CAMPO_ARQUIVO'
+      Size = 60
+    end
+  end
+  object dsCampos: TwwDataSource
+    DataSet = QryCampos
+    Left = 189
+    Top = 173
+  end
+  object qryDetalheVinc: TwwQuery
+    CachedUpdates = True
+    AfterOpen = qryDetalheVincAfterOpen
+    BeforePost = qryDetalheVincBeforePost
+    AfterPost = qryDetalheVincAfterPost
+    AfterDelete = qryDetalheVincAfterDelete
+    OnUpdateError = qryDetalheVincUpdateError
+    DatabaseName = 'BaseDados'
+    DataSource = dsDet
+    SQL.Strings = (
+      'SELECT '
+      'A.NO_TABELA,'
+      'A.NO_ATRIBUTO_TABELA,'
+      'A.CD_ARQUIVO,'
+      'A.SQ_CAMPO,'
+      'B.DS_ATRIBUTO_TABELA,'
+      'B.TP_ATRIBUTO,'
+      'B.NR_TAM_ATRIBUTO_TABELA,'
+      'C.NO_GRUPO'
+      'FROM '
+      'FI_LAYOUT_ARQUIVO_TABELA A,'
+      'FI_ATRIBUTO_TABELA B,'
+      'FI_GRUPO_LOGICO C'
+      'WHERE'
+      'A.NO_TABELA = B.NO_TABELA AND'
+      'A.NO_ATRIBUTO_TABELA = B.NO_ATRIBUTO_TABELA AND'
+      'B.CD_GRUPO = C.CD_GRUPO AND'
+      'A.CD_ARQUIVO = :CD_ARQUIVO AND'
+      'A.SQ_CAMPO = :SQ_CAMPO'
+      'ORDER BY C.NR_ORDEM,B.NR_ORDEM')
+    UpdateObject = UpdtSQLDetalheVinc
+    ValidateWithMask = True
+    Left = 240
+    Top = 172
+    ParamData = <
+      item
+        DataType = ftFloat
+        Name = 'CD_ARQUIVO'
+        ParamType = ptUnknown
+      end
+      item
+        DataType = ftFloat
+        Name = 'SQ_CAMPO'
+        ParamType = ptUnknown
+      end>
+    object qryDetalheVincNO_GRUPO: TStringField
+      DisplayLabel = 'Grupo de Informações'
+      DisplayWidth = 38
+      FieldName = 'NO_GRUPO'
+      Origin = 'FI_GRUPO_LOGICO.NO_GRUPO'
+      Size = 60
+    end
+    object qryDetalheVincDS_ATRIBUTO_TABELA: TStringField
+      DisplayLabel = 'Informação à qual o campo está vinculado'
+      DisplayWidth = 41
+      FieldName = 'DS_ATRIBUTO_TABELA'
+      Origin = '"CM.FI_ATRIBUTO_TABELA".DS_ATRIBUTO_TABELA'
+      Size = 60
+    end
+    object qryDetalheVincNO_TABELA: TStringField
+      FieldName = 'NO_TABELA'
+      Origin = 'FI_LAYOUT_ARQUIVO_TABELA.NO_TABELA'
+      Visible = False
+      Size = 60
+    end
+    object qryDetalheVincNO_ATRIBUTO_TABELA: TStringField
+      FieldName = 'NO_ATRIBUTO_TABELA'
+      Origin = 'FI_LAYOUT_ARQUIVO_TABELA.NO_ATRIBUTO_TABELA'
+      Visible = False
+      Size = 60
+    end
+    object qryDetalheVincCD_ARQUIVO: TFloatField
+      FieldName = 'CD_ARQUIVO'
+      Origin = 'FI_LAYOUT_ARQUIVO_TABELA.CD_ARQUIVO'
+      Visible = False
+    end
+    object qryDetalheVincSQ_CAMPO: TFloatField
+      FieldName = 'SQ_CAMPO'
+      Origin = 'FI_LAYOUT_ARQUIVO_TABELA.SQ_CAMPO'
+      Visible = False
+    end
+    object qryDetalheVincTP_ATRIBUTO: TStringField
+      FieldName = 'TP_ATRIBUTO'
+      Origin = 'FI_ATRIBUTO_TABELA.TP_ATRIBUTO'
+      Visible = False
+      Size = 1
+    end
+    object qryDetalheVincNR_TAM_ATRIBUTO_TABELA: TFloatField
+      FieldName = 'NR_TAM_ATRIBUTO_TABELA'
+      Origin = 'FI_ATRIBUTO_TABELA.NR_TAM_ATRIBUTO_TABELA'
+      Visible = False
+    end
+  end
+  object qryGrupoLogico: TwwQuery
+    DatabaseName = 'BaseDados'
+    SQL.Strings = (
+      'SELECT * FROM FI_GRUPO_LOGICO'
+      'ORDER BY NR_ORDEM')
+    ValidateWithMask = True
+    Left = 340
+    Top = 172
+    object qryGrupoLogicoCD_GRUPO: TFloatField
+      FieldName = 'CD_GRUPO'
+      Origin = 'FI_GRUPO_LOGICO.CD_GRUPO'
+    end
+    object qryGrupoLogicoNO_GRUPO: TStringField
+      FieldName = 'NO_GRUPO'
+      Origin = 'FI_GRUPO_LOGICO.NO_GRUPO'
+      Size = 60
+    end
+    object qryGrupoLogicoNR_ORDEM: TFloatField
+      FieldName = 'NR_ORDEM'
+      Origin = 'FI_GRUPO_LOGICO.NR_ORDEM'
+    end
+  end
+  object dsGrupoLogico: TwwDataSource
+    DataSet = qryGrupoLogico
+    Left = 370
+    Top = 172
+  end
+  object qryGrupoAtributo: TwwQuery
+    DatabaseName = 'BaseDados'
+    DataSource = dsGrupoLogico
+    SQL.Strings = (
+      'SELECT '
+      'NO_TABELA || NO_ATRIBUTO_TABELA CHAVE,'
+      'NO_TABELA,'
+      'NO_ATRIBUTO_TABELA,'
+      'DS_ATRIBUTO_TABELA '
+      'FROM FI_ATRIBUTO_TABELA'
+      'WHERE CD_GRUPO = :CD_GRUPO'
+      'ORDER BY NR_ORDEM')
+    ValidateWithMask = True
+    Left = 400
+    Top = 172
+    ParamData = <
+      item
+        DataType = ftFloat
+        Name = 'CD_GRUPO'
+        ParamType = ptUnknown
+      end>
+    object qryGrupoAtributoCHAVE: TStringField
+      FieldName = 'CHAVE'
+      Origin = '"CM.FI_ATRIBUTO_TABELA".NO_TABELA'
+      Size = 120
+    end
+    object qryGrupoAtributoNO_TABELA: TStringField
+      FieldName = 'NO_TABELA'
+      Origin = '"CM.FI_ATRIBUTO_TABELA".NO_TABELA'
+      Size = 60
+    end
+    object qryGrupoAtributoNO_ATRIBUTO_TABELA: TStringField
+      FieldName = 'NO_ATRIBUTO_TABELA'
+      Origin = '"CM.FI_ATRIBUTO_TABELA".NO_ATRIBUTO_TABELA'
+      Size = 60
+    end
+    object qryGrupoAtributoDS_ATRIBUTO_TABELA: TStringField
+      FieldName = 'DS_ATRIBUTO_TABELA'
+      Origin = '"CM.FI_ATRIBUTO_TABELA".DS_ATRIBUTO_TABELA'
+      Size = 60
+    end
+  end
+  object dsGrupoAtributo: TwwDataSource
+    DataSet = qryGrupoAtributo
+    Left = 425
+    Top = 172
+  end
+  object dsDetalheVinc: TwwDataSource
+    DataSet = qryDetalheVinc
+    Left = 265
+    Top = 172
+  end
+  object UpdtSQLDetalheVinc: TUpdateSQL
+    ModifySQL.Strings = (
+      'update FI_LAYOUT_ARQUIVO_TABELA'
+      'set'
+      '  NO_TABELA = :NO_TABELA,'
+      '  NO_ATRIBUTO_TABELA = :NO_ATRIBUTO_TABELA,'
+      '  CD_ARQUIVO = :CD_ARQUIVO,'
+      '  SQ_CAMPO = :SQ_CAMPO'
+      'where'
+      '  RTRIM(NO_TABELA) = :OLD_NO_TABELA and'
+      '  RTRIM(NO_ATRIBUTO_TABELA) = :OLD_NO_ATRIBUTO_TABELA and'
+      '  CD_ARQUIVO = :OLD_CD_ARQUIVO and'
+      '  SQ_CAMPO = :OLD_SQ_CAMPO')
+    InsertSQL.Strings = (
+      'insert into FI_LAYOUT_ARQUIVO_TABELA'
+      '  (NO_TABELA, NO_ATRIBUTO_TABELA, CD_ARQUIVO, SQ_CAMPO)'
+      'values'
+      '  (:NO_TABELA, :NO_ATRIBUTO_TABELA, :CD_ARQUIVO, :SQ_CAMPO)')
+    DeleteSQL.Strings = (
+      'delete from FI_LAYOUT_ARQUIVO_TABELA'
+      'where'
+      '  RTRIM(NO_TABELA) = :OLD_NO_TABELA and'
+      '  RTRIM(NO_ATRIBUTO_TABELA) = :OLD_NO_ATRIBUTO_TABELA and'
+      '  CD_ARQUIVO = :OLD_CD_ARQUIVO and'
+      '  SQ_CAMPO = :OLD_SQ_CAMPO')
+    Left = 290
+    Top = 172
+  end
+  object MontaSelect: TMontaSelect
+    Template.IdConsulta = 0
+    Caption = 'Seleciona'
+    Colunas.Strings = (
+      'FI_ARQUIVO.NO_ARQUIVO')
+    TipodeDado.Strings = (
+      'C')
+    Descricao.Strings = (
+      'Nome do Layout')
+    SensivelACaixa.Strings = (
+      'N')
+    Tabelas.Strings = (
+      'FI_ARQUIVO')
+    CamposChave.Strings = (
+      'FI_ARQUIVO.CD_ARQUIVO')
+    Mascaras.Strings = (
+      '')
+    Larguras.Strings = (
+      '60')
+    DataBaseName = 'BaseDados'
+    RepeteConsulta = False
+    UsaDistinct = False
+    SalvaConsulta = False
+    ExibePergunta = True
+    Left = 288
+    Top = 79
+  end
+end

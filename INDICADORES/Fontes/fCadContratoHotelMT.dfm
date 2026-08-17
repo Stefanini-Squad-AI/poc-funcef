@@ -1,0 +1,1255 @@
+inherited frmCadContratoHotelMT: TfrmCadContratoHotelMT
+  Left = 70
+  Top = 67
+  HelpContext = 4390013
+  Caption = 'Cadastro de Contratos de Hotéis'
+  ClientHeight = 433
+  ClientWidth = 676
+  OnDestroy = FormDestroy
+  PixelsPerInch = 96
+  TextHeight = 13
+  inherited pnlFundo: TPanel
+    Width = 676
+    Height = 347
+    inherited pnlMestre: TPanel
+      Width = 674
+      Height = 87
+      object Label1: TLabel
+        Left = 16
+        Top = 3
+        Width = 70
+        Height = 13
+        Caption = 'Nr. Contrato'
+      end
+      object Label2: TLabel
+        Left = 128
+        Top = 3
+        Width = 58
+        Height = 13
+        Caption = 'Descrição'
+      end
+      object edNumContrato: TwwDBEdit
+        Left = 16
+        Top = 17
+        Width = 105
+        Height = 21
+        DataField = 'NUMCONTRATO'
+        DataSource = ds
+        TabOrder = 0
+        UnboundDataType = wwDefault
+        WantReturns = False
+        WordWrap = False
+      end
+      object edNomContrato: TwwDBEdit
+        Left = 128
+        Top = 17
+        Width = 513
+        Height = 21
+        DataField = 'NOMCONTRATO'
+        DataSource = ds
+        TabOrder = 1
+        UnboundDataType = wwDefault
+        WantReturns = False
+        WordWrap = False
+      end
+      inline molImovel1: TmolImovel
+        Left = 8
+        Top = 41
+        Width = 641
+        TabOrder = 2
+        inherited edtImovel: TEdit
+          Width = 601
+        end
+        inherited btnBuscaImovel: TBitBtn
+          Left = 608
+          OnClick = molImovel1btnBuscaImovelClick
+        end
+        inherited btnLimpaImovel: TBitBtn
+          Left = 576
+          Enabled = False
+          Visible = False
+        end
+      end
+    end
+    inherited tbcDetalhe: TTabControlDetalhe
+      Top = 88
+      Width = 674
+      Height = 258
+      Tabs.Strings = (
+        'Geral'
+        'Complemento do Imóvel'
+        'Observações'
+        'Eventos')
+      detdbGrids.Strings = (
+        ''
+        'dbgrdDet'
+        ''
+        'dbgrdEvento')
+      inherited Dock974: TDock97 [0]
+        Left = 580
+        Height = 199
+      end
+      inherited Dock973: TDock97
+        Width = 666
+      end
+      inherited pgctrlDetalhe: TPageControl [2]
+        Width = 576
+        Height = 199
+        ActivePage = tbsEventos
+        object tbsGeral: TTabSheet [0]
+          Caption = 'Geral'
+          ImageIndex = 1
+          object GroupBox1: TGroupBox
+            Left = 11
+            Top = 12
+            Width = 270
+            Height = 64
+            Caption = 'Período do Contrato'
+            TabOrder = 0
+            object Label4: TLabel
+              Left = 10
+              Top = 16
+              Width = 34
+              Height = 13
+              Caption = 'Início'
+            end
+            object Label5: TLabel
+              Left = 138
+              Top = 16
+              Width = 46
+              Height = 13
+              Caption = 'Término'
+            end
+            object cmdtIni: TCMDateTimePicker
+              Left = 10
+              Top = 30
+              Width = 113
+              Height = 21
+              CalendarAttributes.Font.Charset = DEFAULT_CHARSET
+              CalendarAttributes.Font.Color = clWindowText
+              CalendarAttributes.Font.Height = -11
+              CalendarAttributes.Font.Name = 'MS Sans Serif'
+              CalendarAttributes.Font.Style = []
+              ButtonStyle = cbsCustom
+              DataField = 'DATINICIO'
+              DataSource = ds
+              Epoch = 1950
+              ButtonGlyph.Data = {
+                06050000424D06050000000000003604000028000000100000000D0000000100
+                080000000000D000000000000000000000000001000000000000000000000000
+                80000080000000808000800000008000800080800000C0C0C000C0DCC000F0CA
+                A6000020400000206000002080000020A0000020C0000020E000004000000040
+                20000040400000406000004080000040A0000040C0000040E000006000000060
+                20000060400000606000006080000060A0000060C0000060E000008000000080
+                20000080400000806000008080000080A0000080C0000080E00000A0000000A0
+                200000A0400000A0600000A0800000A0A00000A0C00000A0E00000C0000000C0
+                200000C0400000C0600000C0800000C0A00000C0C00000C0E00000E0000000E0
+                200000E0400000E0600000E0800000E0A00000E0C00000E0E000400000004000
+                20004000400040006000400080004000A0004000C0004000E000402000004020
+                20004020400040206000402080004020A0004020C0004020E000404000004040
+                20004040400040406000404080004040A0004040C0004040E000406000004060
+                20004060400040606000406080004060A0004060C0004060E000408000004080
+                20004080400040806000408080004080A0004080C0004080E00040A0000040A0
+                200040A0400040A0600040A0800040A0A00040A0C00040A0E00040C0000040C0
+                200040C0400040C0600040C0800040C0A00040C0C00040C0E00040E0000040E0
+                200040E0400040E0600040E0800040E0A00040E0C00040E0E000800000008000
+                20008000400080006000800080008000A0008000C0008000E000802000008020
+                20008020400080206000802080008020A0008020C0008020E000804000008040
+                20008040400080406000804080008040A0008040C0008040E000806000008060
+                20008060400080606000806080008060A0008060C0008060E000808000008080
+                20008080400080806000808080008080A0008080C0008080E00080A0000080A0
+                200080A0400080A0600080A0800080A0A00080A0C00080A0E00080C0000080C0
+                200080C0400080C0600080C0800080C0A00080C0C00080C0E00080E0000080E0
+                200080E0400080E0600080E0800080E0A00080E0C00080E0E000C0000000C000
+                2000C0004000C0006000C0008000C000A000C000C000C000E000C0200000C020
+                2000C0204000C0206000C0208000C020A000C020C000C020E000C0400000C040
+                2000C0404000C0406000C0408000C040A000C040C000C040E000C0600000C060
+                2000C0604000C0606000C0608000C060A000C060C000C060E000C0800000C080
+                2000C0804000C0806000C0808000C080A000C080C000C080E000C0A00000C0A0
+                2000C0A04000C0A06000C0A08000C0A0A000C0A0C000C0A0E000C0C00000C0C0
+                2000C0C04000C0C06000C0C08000C0C0A000F0FBFF00A4A0A000808080000000
+                FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00010000000000
+                000000000000000000FFFF00FFFFFFFFFFFFFFFFFFFFFFFF00FFFF00FF07A407
+                A407A4F9A407A4FF00FFFF00FFA407A407A4F9A4F9A407FF00FFFF00FF07A407
+                A407A4F9A407A4FF00FFFF00FFA407A407A407A407A407FF00FFFF00FF07A407
+                A407A407A407A4FF00FFFF00FFA407A407A407A407A407FF00FFFF00FFFFFFFF
+                FFFFFFFFFFFFFFFF00FFFF00FF04FC04FC04FCA4A4A4A4FF00FFFF00FFFC04FC
+                04FC04A4A4A4A4FF00FFFF00FFFFFFFFFFFFFFFFFFFFFFFF00FFFF0000000000
+                000000000000000000FF}
+              ShowButton = True
+              TabOrder = 0
+            end
+            object cmdtFim: TCMDateTimePicker
+              Left = 138
+              Top = 30
+              Width = 113
+              Height = 21
+              CalendarAttributes.Font.Charset = DEFAULT_CHARSET
+              CalendarAttributes.Font.Color = clWindowText
+              CalendarAttributes.Font.Height = -11
+              CalendarAttributes.Font.Name = 'MS Sans Serif'
+              CalendarAttributes.Font.Style = []
+              ButtonStyle = cbsCustom
+              DataField = 'DATTERMINO'
+              DataSource = ds
+              Epoch = 1950
+              ButtonGlyph.Data = {
+                06050000424D06050000000000003604000028000000100000000D0000000100
+                080000000000D000000000000000000000000001000000000000000000000000
+                80000080000000808000800000008000800080800000C0C0C000C0DCC000F0CA
+                A6000020400000206000002080000020A0000020C0000020E000004000000040
+                20000040400000406000004080000040A0000040C0000040E000006000000060
+                20000060400000606000006080000060A0000060C0000060E000008000000080
+                20000080400000806000008080000080A0000080C0000080E00000A0000000A0
+                200000A0400000A0600000A0800000A0A00000A0C00000A0E00000C0000000C0
+                200000C0400000C0600000C0800000C0A00000C0C00000C0E00000E0000000E0
+                200000E0400000E0600000E0800000E0A00000E0C00000E0E000400000004000
+                20004000400040006000400080004000A0004000C0004000E000402000004020
+                20004020400040206000402080004020A0004020C0004020E000404000004040
+                20004040400040406000404080004040A0004040C0004040E000406000004060
+                20004060400040606000406080004060A0004060C0004060E000408000004080
+                20004080400040806000408080004080A0004080C0004080E00040A0000040A0
+                200040A0400040A0600040A0800040A0A00040A0C00040A0E00040C0000040C0
+                200040C0400040C0600040C0800040C0A00040C0C00040C0E00040E0000040E0
+                200040E0400040E0600040E0800040E0A00040E0C00040E0E000800000008000
+                20008000400080006000800080008000A0008000C0008000E000802000008020
+                20008020400080206000802080008020A0008020C0008020E000804000008040
+                20008040400080406000804080008040A0008040C0008040E000806000008060
+                20008060400080606000806080008060A0008060C0008060E000808000008080
+                20008080400080806000808080008080A0008080C0008080E00080A0000080A0
+                200080A0400080A0600080A0800080A0A00080A0C00080A0E00080C0000080C0
+                200080C0400080C0600080C0800080C0A00080C0C00080C0E00080E0000080E0
+                200080E0400080E0600080E0800080E0A00080E0C00080E0E000C0000000C000
+                2000C0004000C0006000C0008000C000A000C000C000C000E000C0200000C020
+                2000C0204000C0206000C0208000C020A000C020C000C020E000C0400000C040
+                2000C0404000C0406000C0408000C040A000C040C000C040E000C0600000C060
+                2000C0604000C0606000C0608000C060A000C060C000C060E000C0800000C080
+                2000C0804000C0806000C0808000C080A000C080C000C080E000C0A00000C0A0
+                2000C0A04000C0A06000C0A08000C0A0A000C0A0C000C0A0E000C0C00000C0C0
+                2000C0C04000C0C06000C0C08000C0C0A000F0FBFF00A4A0A000808080000000
+                FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00010000000000
+                000000000000000000FFFF00FFFFFFFFFFFFFFFFFFFFFFFF00FFFF00FF07A407
+                A407A4F9A407A4FF00FFFF00FFA407A407A4F9A4F9A407FF00FFFF00FF07A407
+                A407A4F9A407A4FF00FFFF00FFA407A407A407A407A407FF00FFFF00FF07A407
+                A407A407A407A4FF00FFFF00FFA407A407A407A407A407FF00FFFF00FFFFFFFF
+                FFFFFFFFFFFFFFFF00FFFF00FF04FC04FC04FCA4A4A4A4FF00FFFF00FFFC04FC
+                04FC04A4A4A4A4FF00FFFF00FFFFFFFFFFFFFFFFFFFFFFFF00FFFF0000000000
+                000000000000000000FF}
+              ShowButton = True
+              TabOrder = 1
+            end
+          end
+          object dbcbIndeterminado: TDBCheckBox
+            Left = 23
+            Top = 84
+            Width = 217
+            Height = 17
+            Caption = 'Término Indeterminado'
+            DataField = 'FLGINDETERMINADO'
+            DataSource = ds
+            TabOrder = 1
+            ValueChecked = 'S'
+            ValueUnchecked = 'N'
+            OnClick = dbcbIndeterminadoClick
+          end
+          object GroupBox2: TGroupBox
+            Left = 314
+            Top = 12
+            Width = 185
+            Height = 64
+            Caption = 'Nr. de Apartamentos'
+            TabOrder = 2
+            object dbedtAptos: TDBRealEdit
+              Left = 40
+              Top = 27
+              Width = 105
+              Height = 21
+              Alignment = taRightJustify
+              Lines.Strings = (
+                '      0,00')
+              TabOrder = 0
+              WordWrap = False
+              IntDigits = 10
+              DecDigits = 2
+              NumberFormat = fNumber
+              Signal = False
+              DataField = 'QTDEABL'
+              DataSource = ds
+            end
+          end
+        end
+        inherited tbsDet: TTabSheet
+          Caption = 'Complemento do Imóvel'
+          inherited pnlControlesDet: TPanel
+            Width = 568
+            Height = 171
+            object Label37: TLabel
+              Left = 40
+              Top = 32
+              Width = 161
+              Height = 13
+              Caption = 'Tipo de Dado Complementar'
+            end
+            object Label38: TLabel
+              Left = 40
+              Top = 82
+              Width = 107
+              Height = 13
+              Caption = 'Valor "outro dado"'
+            end
+            object dbcboOutroDado: TwwDBLookupCombo
+              Left = 40
+              Top = 48
+              Width = 385
+              Height = 21
+              DropDownAlignment = taLeftJustify
+              Selected.Strings = (
+                'ODODESCRICAO'#9'40'#9'Descrição'#9'F')
+              DataField = 'IDOUTRODADO'
+              DataSource = dsDet
+              LookupTable = cdsComplemento
+              LookupField = 'IDOUTRODADO'
+              TabOrder = 0
+              AutoDropDown = False
+              ShowButton = True
+              AllowClearKey = False
+            end
+            object dbedtOutroDado: TDBEdit
+              Left = 40
+              Top = 96
+              Width = 385
+              Height = 21
+              DataField = 'ODIVALOR'
+              DataSource = dsDet
+              TabOrder = 1
+            end
+          end
+          inherited dbgrdDet: TwwDBGrid
+            Width = 568
+            Height = 171
+            Selected.Strings = (
+              'ODODESCRICAO'#9'51'#9'Descrição'
+              'ODIVALOR'#9'35'#9'Valor'#9'F')
+          end
+        end
+        object tbsObs: TTabSheet
+          Caption = 'Observações'
+          ImageIndex = 2
+          object Panel1: TPanel
+            Left = 0
+            Top = 0
+            Width = 568
+            Height = 171
+            Align = alClient
+            BevelOuter = bvLowered
+            TabOrder = 0
+            object DBmemObservacao: TwwDBRichEdit
+              Left = 1
+              Top = 1
+              Width = 566
+              Height = 132
+              ScrollBars = ssVertical
+              Align = alClient
+              AutoURLDetect = True
+              DataField = 'DESCRICAO'
+              DataSource = ds
+              Font.Charset = DEFAULT_CHARSET
+              Font.Color = clWindowText
+              Font.Height = -9
+              Font.Name = 'MS Sans Serif'
+              Font.Style = []
+              MaxLength = 1750
+              ParentFont = False
+              PrintJobName = 'Delphi 5'
+              TabOrder = 1
+              PopupOptions = [rpoPopupEdit, rpoPopupCut, rpoPopupCopy, rpoPopupPaste, rpoPopupFont]
+              EditorCaption = 'Descrição do Imóvel'
+              EditorPosition.Left = 0
+              EditorPosition.Top = 0
+              EditorPosition.Width = 0
+              EditorPosition.Height = 0
+              MeasurementUnits = muCentimeters
+              PrintMargins.Top = 1
+              PrintMargins.Bottom = 1
+              PrintMargins.Left = 1
+              PrintMargins.Right = 1
+              RichEditVersion = 2
+              Data = {
+                730000007B5C727466315C616E73695C616E7369637067313235325C64656666
+                305C6465666C616E67313034367B5C666F6E7474626C7B5C66305C666E696C20
+                4D532053616E732053657269663B7D7D0D0A5C766965776B696E64345C756331
+                5C706172645C66305C667331345C7061720D0A7D0D0A00}
+            end
+            object pnlSituacao: TPanel
+              Left = 1
+              Top = 133
+              Width = 566
+              Height = 37
+              Align = alBottom
+              TabOrder = 0
+              object Label13: TLabel
+                Left = 12
+                Top = 18
+                Width = 113
+                Height = 13
+                Caption = 'Situação Contratual'
+              end
+              object wwDBLookupCombo1: TwwDBLookupCombo
+                Left = 138
+                Top = 10
+                Width = 305
+                Height = 21
+                DropDownAlignment = taLeftJustify
+                Selected.Strings = (
+                  'DESCRICAO'#9'60'#9'Descrição'#9'T')
+                DataField = 'IDSITCONTIMOB'
+                DataSource = ds
+                LookupTable = cdsSitContImob
+                LookupField = 'IDSITCONTIMOB'
+                Style = csDropDownList
+                DropDownWidth = 8
+                TabOrder = 0
+                AutoDropDown = True
+                ShowButton = True
+                AllowClearKey = True
+              end
+            end
+          end
+        end
+        object tbsEventos: TTabSheet
+          Caption = 'Eventos'
+          ImageIndex = 3
+          object Panel5: TPanel
+            Left = 0
+            Top = 78
+            Width = 568
+            Height = 93
+            Align = alClient
+            BevelOuter = bvNone
+            BorderWidth = 3
+            TabOrder = 0
+            object gbEvento: TGroupBox
+              Left = 3
+              Top = 3
+              Width = 562
+              Height = 87
+              Align = alClient
+              Caption = 'Descrição do Evento'
+              Enabled = False
+              TabOrder = 0
+              object Panel7: TPanel
+                Left = 2
+                Top = 15
+                Width = 558
+                Height = 70
+                Align = alClient
+                BevelOuter = bvNone
+                BorderWidth = 4
+                TabOrder = 0
+                object DBmemDescricao: TwwDBRichEdit
+                  Left = 4
+                  Top = 4
+                  Width = 550
+                  Height = 62
+                  TabStop = False
+                  Align = alClient
+                  AutoURLDetect = True
+                  DataField = 'EVIDESCRICAO'
+                  DataSource = dsEventos
+                  MaxLength = 1750
+                  PrintJobName = 'Delphi 5'
+                  TabOrder = 0
+                  PopupOptions = [rpoPopupEdit, rpoPopupCut, rpoPopupCopy, rpoPopupPaste, rpoPopupFont]
+                  EditorOptions = [reoShowLoad, reoShowSaveExit, reoShowPrint, reoShowPageSetup, reoShowFormatBar, reoShowToolBar, reoShowStatusBar, reoShowHints, reoCloseOnEscape]
+                  EditorCaption = 'Descrição'
+                  EditorPosition.Left = 0
+                  EditorPosition.Top = 0
+                  EditorPosition.Width = 0
+                  EditorPosition.Height = 0
+                  MeasurementUnits = muCentimeters
+                  PrintMargins.Top = 1
+                  PrintMargins.Bottom = 1
+                  PrintMargins.Left = 1
+                  PrintMargins.Right = 1
+                  RichEditVersion = 2
+                  Data = {
+                    840000007B5C727466315C616E73695C616E7369637067313235325C64656666
+                    305C6465666C616E67313034367B5C666F6E7474626C7B5C66305C666E696C20
+                    4D532053616E732053657269663B7D7D0D0A5C766965776B696E64345C756331
+                    5C706172645C625C66305C667331342044426D656D44657363726963616F5C70
+                    61720D0A7D0D0A00}
+                end
+              end
+            end
+          end
+          object Panel4: TPanel
+            Left = 0
+            Top = 0
+            Width = 568
+            Height = 78
+            Align = alTop
+            BevelOuter = bvNone
+            TabOrder = 1
+            object dbgrdEvento: TwwDBGrid2
+              Left = 0
+              Top = 0
+              Width = 568
+              Height = 78
+              Selected.Strings = (
+                'EVIDATA'#9'10'#9'Data'#9'T'
+                'EVICABECALHO'#9'31'#9'Histórico'#9'T'
+                'EVIVLRANTERIOR'#9'12'#9'Valor Anterior'#9'T'
+                'EVIVLRAJUSTADO'#9'12'#9'Valor Corrigido'#9'T'
+                'EVIPERCENT'#9'7'#9'Reajuste'#9'T'
+                'EVIDATAPROX'#9'10'#9'Próximo'#9'T')
+              IniAttributes.Delimiter = ';;'
+              TitleColor = clBtnFace
+              FixedCols = 0
+              ShowHorzScrollBar = True
+              Align = alClient
+              DataSource = dsEventos
+              KeyOptions = []
+              Options = [dgTitles, dgIndicator, dgColumnResize, dgColLines, dgRowLines, dgTabs, dgRowSelect, dgConfirmDelete, dgWordWrap]
+              TabOrder = 1
+              TitleAlignment = taLeftJustify
+              TitleFont.Charset = DEFAULT_CHARSET
+              TitleFont.Color = clWindowText
+              TitleFont.Height = -9
+              TitleFont.Name = 'MS Sans Serif'
+              TitleFont.Style = [fsBold]
+              TitleLines = 1
+              TitleButtons = True
+              UseTFields = False
+              OnTitleButtonClick = DBgrdEventoTitleButtonClick
+              IndicatorColor = icBlack
+            end
+            object Panel10: TPanel
+              Left = 0
+              Top = 0
+              Width = 568
+              Height = 78
+              Align = alClient
+              BevelOuter = bvNone
+              TabOrder = 0
+              object Label3: TLabel
+                Left = 18
+                Top = 3
+                Width = 90
+                Height = 13
+                Caption = 'Data do Evento'
+              end
+              object Label6: TLabel
+                Left = 152
+                Top = 3
+                Width = 61
+                Height = 13
+                Caption = 'Cabeçalho'
+              end
+              object Label10: TLabel
+                Left = 18
+                Top = 41
+                Width = 78
+                Height = 13
+                Caption = 'Valor Anterior'
+              end
+              object Label23: TLabel
+                Left = 152
+                Top = 41
+                Width = 63
+                Height = 13
+                Caption = 'Valor Atual'
+              end
+              object Label32: TLabel
+                Left = 296
+                Top = 41
+                Width = 62
+                Height = 13
+                Caption = 'Percentual'
+              end
+              object Label36: TLabel
+                Left = 391
+                Top = 41
+                Width = 89
+                Height = 13
+                Caption = 'Próximo Evento'
+              end
+              object DBedtDataEvento: TCMDateTimePicker
+                Left = 18
+                Top = 17
+                Width = 121
+                Height = 21
+                CalendarAttributes.Font.Charset = DEFAULT_CHARSET
+                CalendarAttributes.Font.Color = clWindowText
+                CalendarAttributes.Font.Height = -11
+                CalendarAttributes.Font.Name = 'MS Sans Serif'
+                CalendarAttributes.Font.Style = []
+                ButtonStyle = cbsCustom
+                DataField = 'EVIDATA'
+                DataSource = dsEventos
+                Epoch = 1950
+                ButtonGlyph.Data = {
+                  06050000424D06050000000000003604000028000000100000000D0000000100
+                  080000000000D000000000000000000000000001000000000000000000000000
+                  80000080000000808000800000008000800080800000C0C0C000C0DCC000F0CA
+                  A6000020400000206000002080000020A0000020C0000020E000004000000040
+                  20000040400000406000004080000040A0000040C0000040E000006000000060
+                  20000060400000606000006080000060A0000060C0000060E000008000000080
+                  20000080400000806000008080000080A0000080C0000080E00000A0000000A0
+                  200000A0400000A0600000A0800000A0A00000A0C00000A0E00000C0000000C0
+                  200000C0400000C0600000C0800000C0A00000C0C00000C0E00000E0000000E0
+                  200000E0400000E0600000E0800000E0A00000E0C00000E0E000400000004000
+                  20004000400040006000400080004000A0004000C0004000E000402000004020
+                  20004020400040206000402080004020A0004020C0004020E000404000004040
+                  20004040400040406000404080004040A0004040C0004040E000406000004060
+                  20004060400040606000406080004060A0004060C0004060E000408000004080
+                  20004080400040806000408080004080A0004080C0004080E00040A0000040A0
+                  200040A0400040A0600040A0800040A0A00040A0C00040A0E00040C0000040C0
+                  200040C0400040C0600040C0800040C0A00040C0C00040C0E00040E0000040E0
+                  200040E0400040E0600040E0800040E0A00040E0C00040E0E000800000008000
+                  20008000400080006000800080008000A0008000C0008000E000802000008020
+                  20008020400080206000802080008020A0008020C0008020E000804000008040
+                  20008040400080406000804080008040A0008040C0008040E000806000008060
+                  20008060400080606000806080008060A0008060C0008060E000808000008080
+                  20008080400080806000808080008080A0008080C0008080E00080A0000080A0
+                  200080A0400080A0600080A0800080A0A00080A0C00080A0E00080C0000080C0
+                  200080C0400080C0600080C0800080C0A00080C0C00080C0E00080E0000080E0
+                  200080E0400080E0600080E0800080E0A00080E0C00080E0E000C0000000C000
+                  2000C0004000C0006000C0008000C000A000C000C000C000E000C0200000C020
+                  2000C0204000C0206000C0208000C020A000C020C000C020E000C0400000C040
+                  2000C0404000C0406000C0408000C040A000C040C000C040E000C0600000C060
+                  2000C0604000C0606000C0608000C060A000C060C000C060E000C0800000C080
+                  2000C0804000C0806000C0808000C080A000C080C000C080E000C0A00000C0A0
+                  2000C0A04000C0A06000C0A08000C0A0A000C0A0C000C0A0E000C0C00000C0C0
+                  2000C0C04000C0C06000C0C08000C0C0A000F0FBFF00A4A0A000808080000000
+                  FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00010000000000
+                  000000000000000000FFFF00FFFFFFFFFFFFFFFFFFFFFFFF00FFFF00FF07A407
+                  A407A4F9A407A4FF00FFFF00FFA407A407A4F9A4F9A407FF00FFFF00FF07A407
+                  A407A4F9A407A4FF00FFFF00FFA407A407A407A407A407FF00FFFF00FF07A407
+                  A407A407A407A4FF00FFFF00FFA407A407A407A407A407FF00FFFF00FFFFFFFF
+                  FFFFFFFFFFFFFFFF00FFFF00FF04FC04FC04FCA4A4A4A4FF00FFFF00FFFC04FC
+                  04FC04A4A4A4A4FF00FFFF00FFFFFFFFFFFFFFFFFFFFFFFF00FFFF0000000000
+                  000000000000000000FF}
+                ShowButton = True
+                TabOrder = 0
+              end
+              object DBedtCabEvento: TDBEdit
+                Left = 152
+                Top = 17
+                Width = 401
+                Height = 21
+                DataField = 'EVICABECALHO'
+                DataSource = dsEventos
+                TabOrder = 1
+              end
+              object DBedtVlrAnterior: TDBEdit
+                Left = 18
+                Top = 56
+                Width = 121
+                Height = 21
+                DataField = 'EVIVLRANTERIOR'
+                DataSource = dsEventos
+                TabOrder = 2
+              end
+              object DBedtVlrAjustado: TDBEdit
+                Left = 152
+                Top = 56
+                Width = 121
+                Height = 21
+                DataField = 'EVIVLRAJUSTADO'
+                DataSource = dsEventos
+                TabOrder = 3
+              end
+              object DBedtPercent: TDBEdit
+                Left = 296
+                Top = 56
+                Width = 73
+                Height = 21
+                DataField = 'EVIPERCENT'
+                DataSource = dsEventos
+                TabOrder = 4
+              end
+              object CMDateTimePicker1: TCMDateTimePicker
+                Left = 391
+                Top = 56
+                Width = 121
+                Height = 21
+                CalendarAttributes.Font.Charset = DEFAULT_CHARSET
+                CalendarAttributes.Font.Color = clWindowText
+                CalendarAttributes.Font.Height = -11
+                CalendarAttributes.Font.Name = 'MS Sans Serif'
+                CalendarAttributes.Font.Style = []
+                ButtonStyle = cbsCustom
+                DataField = 'EVIDATAPROX'
+                DataSource = dsEventos
+                Epoch = 1950
+                ButtonGlyph.Data = {
+                  06050000424D06050000000000003604000028000000100000000D0000000100
+                  080000000000D000000000000000000000000001000000000000000000000000
+                  80000080000000808000800000008000800080800000C0C0C000C0DCC000F0CA
+                  A6000020400000206000002080000020A0000020C0000020E000004000000040
+                  20000040400000406000004080000040A0000040C0000040E000006000000060
+                  20000060400000606000006080000060A0000060C0000060E000008000000080
+                  20000080400000806000008080000080A0000080C0000080E00000A0000000A0
+                  200000A0400000A0600000A0800000A0A00000A0C00000A0E00000C0000000C0
+                  200000C0400000C0600000C0800000C0A00000C0C00000C0E00000E0000000E0
+                  200000E0400000E0600000E0800000E0A00000E0C00000E0E000400000004000
+                  20004000400040006000400080004000A0004000C0004000E000402000004020
+                  20004020400040206000402080004020A0004020C0004020E000404000004040
+                  20004040400040406000404080004040A0004040C0004040E000406000004060
+                  20004060400040606000406080004060A0004060C0004060E000408000004080
+                  20004080400040806000408080004080A0004080C0004080E00040A0000040A0
+                  200040A0400040A0600040A0800040A0A00040A0C00040A0E00040C0000040C0
+                  200040C0400040C0600040C0800040C0A00040C0C00040C0E00040E0000040E0
+                  200040E0400040E0600040E0800040E0A00040E0C00040E0E000800000008000
+                  20008000400080006000800080008000A0008000C0008000E000802000008020
+                  20008020400080206000802080008020A0008020C0008020E000804000008040
+                  20008040400080406000804080008040A0008040C0008040E000806000008060
+                  20008060400080606000806080008060A0008060C0008060E000808000008080
+                  20008080400080806000808080008080A0008080C0008080E00080A0000080A0
+                  200080A0400080A0600080A0800080A0A00080A0C00080A0E00080C0000080C0
+                  200080C0400080C0600080C0800080C0A00080C0C00080C0E00080E0000080E0
+                  200080E0400080E0600080E0800080E0A00080E0C00080E0E000C0000000C000
+                  2000C0004000C0006000C0008000C000A000C000C000C000E000C0200000C020
+                  2000C0204000C0206000C0208000C020A000C020C000C020E000C0400000C040
+                  2000C0404000C0406000C0408000C040A000C040C000C040E000C0600000C060
+                  2000C0604000C0606000C0608000C060A000C060C000C060E000C0800000C080
+                  2000C0804000C0806000C0808000C080A000C080C000C080E000C0A00000C0A0
+                  2000C0A04000C0A06000C0A08000C0A0A000C0A0C000C0A0E000C0C00000C0C0
+                  2000C0C04000C0C06000C0C08000C0C0A000F0FBFF00A4A0A000808080000000
+                  FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00010000000000
+                  000000000000000000FFFF00FFFFFFFFFFFFFFFFFFFFFFFF00FFFF00FF07A407
+                  A407A4F9A407A4FF00FFFF00FFA407A407A4F9A4F9A407FF00FFFF00FF07A407
+                  A407A4F9A407A4FF00FFFF00FFA407A407A407A407A407FF00FFFF00FF07A407
+                  A407A407A407A4FF00FFFF00FFA407A407A407A407A407FF00FFFF00FFFFFFFF
+                  FFFFFFFFFFFFFFFF00FFFF00FF04FC04FC04FCA4A4A4A4FF00FFFF00FFFC04FC
+                  04FC04A4A4A4A4FF00FFFF00FFFFFFFFFFFFFFFFFFFFFFFF00FFFF0000000000
+                  000000000000000000FF}
+                ShowButton = True
+                TabOrder = 5
+              end
+            end
+          end
+        end
+      end
+    end
+  end
+  inherited Dock972: TDock97
+    Width = 676
+    object lblVigencia: TLabel [0]
+      Left = 462
+      Top = 9
+      Width = 198
+      Height = 24
+      Alignment = taRightJustify
+      Caption = 'Vigente / Encerrado'
+      Color = clBtnFace
+      Font.Charset = ANSI_CHARSET
+      Font.Color = clNavy
+      Font.Height = -21
+      Font.Name = 'Arial'
+      Font.Style = [fsBold]
+      ParentColor = False
+      ParentFont = False
+      Transparent = True
+    end
+  end
+  inherited Dock971: TDock97
+    Top = 394
+    Width = 676
+    inherited tb97Fundo: TToolbar97
+      Left = 367
+    end
+    inherited TB97oKCancelar: TToolbar97
+      Left = 190
+    end
+  end
+  inherited ivTradutor: TIvExtendedTranslator
+    Left = 290
+    Top = 65535
+    TargetsData = (
+      1
+      3
+      (
+        'TwwDBRichEdit'
+        'Text'
+        0)
+      (
+        'TDBRealEdit'
+        'Text'
+        0)
+      (
+        'TDBMemo'
+        'Text'
+        0))
+  end
+  inherited ds: TwwDataSource
+    Left = 438
+  end
+  inherited ImlPadrao: TImageList
+    Left = 248
+    Top = 65535
+  end
+  inherited CmeCadastro: TCmEventosCadastro
+    OnFind = CmeCadastroFind
+    ApplyEdit = CmeCadastroApplyInsert
+    ApplyDelete = CmeCadastroApplyDelete
+    Left = 480
+  end
+  inherited Cds: TCMClientDataSet
+    Left = 396
+    object CdsIDCONTRATO: TFloatField
+      FieldName = 'IDCONTRATO'
+    end
+    object CdsIDIMOVEL: TFloatField
+      FieldName = 'IDIMOVEL'
+    end
+    object CdsNUMCONTRATO: TStringField
+      FieldName = 'NUMCONTRATO'
+    end
+    object CdsNOMCONTRATO: TStringField
+      FieldName = 'NOMCONTRATO'
+      Size = 60
+    end
+    object CdsTIPOCONTRATO: TStringField
+      FieldName = 'TIPOCONTRATO'
+      FixedChar = True
+      Size = 1
+    end
+    object CdsLOJAS: TStringField
+      FieldName = 'LOJAS'
+    end
+    object CdsVLRALUGMIN: TFloatField
+      FieldName = 'VLRALUGMIN'
+    end
+    object CdsDATINICIO: TDateTimeField
+      FieldName = 'DATINICIO'
+    end
+    object CdsDATTERMINO: TDateTimeField
+      FieldName = 'DATTERMINO'
+    end
+    object CdsPERALUGVARIAVEL: TFloatField
+      FieldName = 'PERALUGVARIAVEL'
+    end
+    object CdsDATULTAUDITORIA: TDateTimeField
+      FieldName = 'DATULTAUDITORIA'
+    end
+    object CdsIDATIVIDADE: TFloatField
+      FieldName = 'IDATIVIDADE'
+    end
+    object CdsIDMARCA: TFloatField
+      FieldName = 'IDMARCA'
+    end
+    object CdsNOME_EXTENSO: TStringField
+      FieldName = 'NOME_EXTENSO'
+      Size = 123
+    end
+    object CdsINDICEREAJUSTE: TFloatField
+      FieldName = 'INDICEREAJUSTE'
+    end
+    object CdsDATREAJUSTE: TDateTimeField
+      FieldName = 'DATREAJUSTE'
+    end
+    object CdsDATPROXREAJUSTE: TDateTimeField
+      FieldName = 'DATPROXREAJUSTE'
+    end
+    object CdsPERREAJUSTE: TFloatField
+      FieldName = 'PERREAJUSTE'
+    end
+    object CdsDESCRICAO: TMemoField
+      FieldName = 'DESCRICAO'
+      BlobType = ftMemo
+      Size = 2000
+    end
+    object CdsQTDEABL: TFloatField
+      FieldName = 'QTDEABL'
+    end
+    object CdsFLGINDETERMINADO: TStringField
+      FieldName = 'FLGINDETERMINADO'
+      FixedChar = True
+      Size = 1
+    end
+    object CdsFLGSTATUS: TStringField
+      FieldName = 'FLGSTATUS'
+      FixedChar = True
+      Size = 1
+    end
+    object CdsIDSITCONTIMOB: TFloatField
+      FieldName = 'IDSITCONTIMOB'
+    end
+    object CdsCODTIPIMOVEL: TStringField
+      FieldName = 'CODTIPIMOVEL'
+      Size = 5
+    end
+  end
+  inherited MontaSelect: TMontaSelect
+    Colunas.Strings = (
+      'IM.IMONOME'
+      'I.IMONOME'
+      'CL.NUMCONTRATO'
+      'CL.NOMCONTRATO')
+    TipodeDado.Strings = (
+      'C'
+      'C'
+      'C'
+      'C')
+    Descricao.Strings = (
+      'Nome do Mestre'
+      'Nome do Imóvel'
+      'Nr. do Contrato'
+      'Nome do Contrato')
+    SensivelACaixa.Strings = (
+      'N'
+      'N'
+      'N'
+      'N')
+    Tabelas.Strings = (
+      'INDCONTRATOLOJA CL'
+      'IMOVEL I'
+      'IMOVEL IM')
+    CamposChave.Strings = (
+      'CL.IDCONTRATO')
+    Filtro.Strings = (
+      'CL.IDIMOVEL = I.IDIMOVEL'
+      'IM.IDIMOVEL = I.IDIMOVELMESTRE'
+      'CL.TIPOCONTRATO = '#39'H'#39)
+    Mascaras.Strings = (
+      ''
+      ''
+      ''
+      '')
+    Larguras.Strings = (
+      '30'
+      '30'
+      '20'
+      '60')
+    Left = 344
+  end
+  inherited CmeDetalhe: TCmEventosCadastro
+    Left = 580
+    Top = 303
+  end
+  inherited dsDet: TwwDataSource
+    DataSet = cdsOutroDado
+    Left = 461
+    Top = 63
+  end
+  object DataSetProvider1: TDataSetProvider
+    DataSet = Query1
+    Constraints = True
+    Left = 568
+    Top = 7
+  end
+  object Query1: TQuery
+    DatabaseName = 'BaseDados'
+    SQL.Strings = (
+      'select * from outrodadoximovel, outrodado')
+    Left = 568
+    Top = 23
+  end
+  object cdsLoja: TCMClientDataSet
+    Aggregates = <>
+    Params = <>
+    ProviderName = 'Dsp'
+    Left = 612
+    Top = 375
+    object cdsLojaPISO: TStringField
+      DisplayLabel = 'Piso'
+      DisplayWidth = 15
+      FieldName = 'PISO'
+      FixedChar = True
+      Size = 5
+    end
+    object cdsLojaNUMLOJA: TStringField
+      DisplayLabel = 'Nr. da Loja'
+      DisplayWidth = 15
+      FieldName = 'NUMLOJA'
+      FixedChar = True
+      Size = 5
+    end
+    object cdsLojaQTDEABL: TFloatField
+      DisplayLabel = 'ABL'
+      DisplayWidth = 15
+      FieldName = 'QTDEABL'
+      DisplayFormat = '##,##0.00'
+    end
+    object cdsLojaIDIMOVEL: TFloatField
+      DisplayWidth = 10
+      FieldName = 'IDIMOVEL'
+      Visible = False
+    end
+    object cdsLojaIDCONTRATO: TFloatField
+      DisplayWidth = 10
+      FieldName = 'IDCONTRATO'
+      Visible = False
+    end
+    object cdsLojaIDLOJA: TFloatField
+      DisplayWidth = 10
+      FieldName = 'IDLOJA'
+      Visible = False
+    end
+  end
+  object cdsEventos: TCMClientDataSet
+    Aggregates = <>
+    FieldDefs = <
+      item
+        Name = 'IDEVENTOIMOVEL'
+        DataType = ftFloat
+      end
+      item
+        Name = 'IDIMOVEL'
+        DataType = ftFloat
+      end
+      item
+        Name = 'EVIDATA'
+        DataType = ftDateTime
+      end
+      item
+        Name = 'EVICABECALHO'
+        DataType = ftString
+        Size = 60
+      end
+      item
+        Name = 'EVIDESCRICAO'
+        DataType = ftMemo
+        Size = 2000
+      end
+      item
+        Name = 'IDUSUARIO'
+        DataType = ftFloat
+      end
+      item
+        Name = 'IDCONTRATOIMOVEL'
+        DataType = ftFloat
+      end
+      item
+        Name = 'FLGTIPOEVENTO'
+        DataType = ftString
+        Size = 2
+      end
+      item
+        Name = 'EVIVLRANTERIOR'
+        DataType = ftFloat
+      end
+      item
+        Name = 'EVIVLRAJUSTADO'
+        DataType = ftFloat
+      end
+      item
+        Name = 'EVIDATAPROX'
+        DataType = ftDateTime
+      end
+      item
+        Name = 'EVIPERCENT'
+        DataType = ftFloat
+      end
+      item
+        Name = 'EVIINDICEREAJUSTE'
+        DataType = ftFloat
+      end
+      item
+        Name = 'IDHISTCARTINV'
+        DataType = ftFloat
+      end
+      item
+        Name = 'IDCONTRATOLOJA'
+        DataType = ftFloat
+      end
+      item
+        Name = 'DSC_INDICE'
+        DataType = ftString
+        Size = 10
+      end>
+    IndexDefs = <
+      item
+        Name = 'idxEviData'
+        Fields = 'EVIDATA'
+      end
+      item
+        Name = 'idxEviCabecalho'
+        Fields = 'EVICABECALHO'
+      end
+      item
+        Name = 'idxEviVlrAnterior'
+        Fields = 'EVIVLRANTERIOR'
+      end
+      item
+        Name = 'idxEviVlrAjustado'
+        Fields = 'EVIVLRAJUSTADO'
+      end
+      item
+        Name = 'idxEviVlrPercent'
+        Fields = 'EVIVLRPERCENT'
+      end
+      item
+        Name = 'idxDscIndice'
+        Fields = 'DSC_INDICE'
+      end
+      item
+        Name = 'idxEviDataProx'
+        Fields = 'EVIDATAPROX'
+      end>
+    Params = <>
+    StoreDefs = True
+    Left = 590
+    Top = 148
+    object cdsEventosEVIDATA: TDateTimeField
+      DisplayLabel = 'Data'
+      DisplayWidth = 10
+      FieldName = 'EVIDATA'
+    end
+    object cdsEventosEVICABECALHO: TStringField
+      DisplayLabel = 'Evento'
+      DisplayWidth = 40
+      FieldName = 'EVICABECALHO'
+      Size = 60
+    end
+    object cdsEventosEVIVLRANTERIOR: TFloatField
+      DisplayLabel = ' Valor Anterior'
+      DisplayWidth = 13
+      FieldName = 'EVIVLRANTERIOR'
+      DisplayFormat = '###,##0.00'
+    end
+    object cdsEventosEVIVLRAJUSTADO: TFloatField
+      DisplayLabel = ' Valor Corrigido'
+      DisplayWidth = 13
+      FieldName = 'EVIVLRAJUSTADO'
+      DisplayFormat = '###,##0.00'
+    end
+    object cdsEventosEVIPERCENT: TFloatField
+      DisplayLabel = ' Reajuste'
+      DisplayWidth = 8
+      FieldName = 'EVIPERCENT'
+      DisplayFormat = '##0.0000%'
+    end
+    object cdsEventosDSC_INDICE: TStringField
+      DisplayLabel = 'Indice'
+      DisplayWidth = 6
+      FieldName = 'DSC_INDICE'
+      Size = 10
+    end
+    object cdsEventosEVIDATAPROX: TDateTimeField
+      DisplayLabel = 'Próximo'
+      DisplayWidth = 10
+      FieldName = 'EVIDATAPROX'
+    end
+    object cdsEventosEVIDESCRICAO: TMemoField
+      FieldName = 'EVIDESCRICAO'
+      Visible = False
+      BlobType = ftMemo
+      Size = 2000
+    end
+    object cdsEventosIDUSUARIO: TFloatField
+      FieldName = 'IDUSUARIO'
+      Visible = False
+    end
+    object cdsEventosFLGTIPOEVENTO: TStringField
+      FieldName = 'FLGTIPOEVENTO'
+      Visible = False
+      Size = 2
+    end
+    object cdsEventosIDCONTRATOLOJA: TFloatField
+      FieldName = 'IDCONTRATOLOJA'
+      Visible = False
+    end
+    object cdsEventosIDEVENTOIMOVEL: TFloatField
+      FieldName = 'IDEVENTOIMOVEL'
+      Visible = False
+    end
+  end
+  object dsEventos: TwwDataSource
+    DataSet = cdsEventos
+    Left = 590
+    Top = 161
+  end
+  object cdsSitContImob: TCMClientDataSet
+    Aggregates = <>
+    Params = <>
+    Left = 501
+    Top = 148
+    object cdsSitContImobDESCRICAO: TStringField
+      DisplayLabel = 'Descrição'
+      DisplayWidth = 60
+      FieldName = 'DESCRICAO'
+      Size = 60
+    end
+    object cdsSitContImobIDSITCONTIMOB: TFloatField
+      FieldName = 'IDSITCONTIMOB'
+      Visible = False
+    end
+  end
+  object dsSitContImob: TwwDataSource
+    DataSet = cdsSitContImob
+    Left = 501
+    Top = 161
+  end
+  object cdsComplemento: TCMClientDataSet
+    Aggregates = <>
+    Params = <>
+    Left = 510
+    Top = 242
+    object cdsComplementoODODESCRICAO: TStringField
+      DisplayLabel = 'Descrição'
+      DisplayWidth = 40
+      FieldName = 'ODODESCRICAO'
+      Size = 40
+    end
+    object cdsComplementoIDOUTRODADO: TFloatField
+      FieldName = 'IDOUTRODADO'
+      Visible = False
+    end
+  end
+  object cdsOutroDado: TCMClientDataSet
+    Aggregates = <>
+    FieldDefs = <
+      item
+        Name = 'IDOUTRODADO'
+        DataType = ftFloat
+      end
+      item
+        Name = 'IDIMOVEL'
+        DataType = ftFloat
+      end
+      item
+        Name = 'ODIVALOR'
+        DataType = ftString
+        Size = 60
+      end
+      item
+        Name = 'IDOUTRODADO_1'
+        DataType = ftFloat
+      end
+      item
+        Name = 'ODODESCRICAO'
+        DataType = ftString
+        Size = 40
+      end>
+    IndexDefs = <>
+    IndexFieldNames = 'ODODESCRICAO'
+    Params = <>
+    StoreDefs = True
+    Left = 460
+    Top = 76
+    object cdsOutroDadoODODESCRICAO: TStringField
+      DisplayLabel = 'Descrição'
+      DisplayWidth = 51
+      FieldName = 'ODODESCRICAO'
+      Size = 40
+    end
+    object cdsOutroDadoODIVALOR: TStringField
+      DisplayLabel = 'Valor'
+      DisplayWidth = 35
+      FieldName = 'ODIVALOR'
+      Size = 60
+    end
+    object cdsOutroDadoIDIMOVEL: TFloatField
+      DisplayWidth = 10
+      FieldName = 'IDIMOVEL'
+      Visible = False
+    end
+    object cdsOutroDadoIDOUTRODADO: TFloatField
+      DisplayWidth = 10
+      FieldName = 'IDOUTRODADO'
+      Visible = False
+    end
+  end
+end

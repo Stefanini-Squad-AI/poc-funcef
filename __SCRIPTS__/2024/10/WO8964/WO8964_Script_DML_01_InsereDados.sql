@@ -1,0 +1,10 @@
+Insert into cm.gruporelatorio
+(IDGRUPORELATORIO,
+DESCRICAO,
+ORIGEMCMGR,
+IDGRUPOMESTRE)
+values (
+24, 
+'GESEG - CONTRIBUIÇÃO',
+ 1 , 
+ 0);

@@ -1,0 +1,420 @@
+object dtmFolha: TdtmFolha
+  Left = 144
+  Top = 104
+  Height = 405
+  Width = 524
+  object qryIRRF: TwwQuery
+    DatabaseName = 'BaseDados'
+    SQL.Strings = (
+      'SELECT   ALIQUOTA_IRRF, PARCDEDUZIRRF '
+      'FROM     IRRF'
+      'WHERE    FAIXA_IRRF >=  :pBase'
+      'AND      ROWNUM = 1'
+      'ORDER BY FAIXA_IRRF')
+    Params.Data = {010001000570426173650006080000000000000000000000}
+    ValidateWithMask = True
+    Left = 33
+    Top = 7
+  end
+  object qryEscreveRubrica: TwwQuery
+    DatabaseName = 'BaseDados'
+    ValidateWithMask = True
+    Left = 126
+    Top = 7
+  end
+  object qryIntegraRubXPlano: TwwQuery
+    DatabaseName = 'BaseDados'
+    SQL.Strings = (
+      'SELECT IDPESSJUR,IDRUBRICA,IDPLANOPREV,TIPCODIGO,CODTIPRECDES,'
+      '       RECPAG,IDPESSOA,CODTIPDOC,CODPORTFORMA,CODCENTRORESPON,'
+      '       CODSUBCONTA,CODCENTROCUSTOD,IDEMPRESA,CODCENTROCUSTOC,'
+      '       PLACONTAD,PLANO,PLACONTAC,UNIDNEGOC,IDEMPRESAPROP'
+      'FROM   RUBRICAXPLANO'
+      'WHERE  IDPESSJUR   = :pIdPessJur'
+      'AND    IDRUBRICA   = :pIdRubrica'
+      'AND    IDPLANOPREV = :pIdPlanoPrev')
+    Params.Data = {
+      010003000A704964506573734A7572000304000000000000000A704964527562
+      72696361000304000000000000000C704964506C616E6F507265760003040000
+      0000000000}
+    ValidateWithMask = True
+    Left = 241
+    Top = 7
+  end
+  object qryIntegraPlano: TwwQuery
+    DatabaseName = 'BaseDados'
+    SQL.Strings = (
+      
+        'SELECT IDPLANOPREV,RECPAG,IDEMPRESAPROP,CODTIPRECDES,IDFUNDACAO,' +
+        'CODTIPDOC'
+      'FROM   PLANPREV'
+      'WHERE  IDPLANOPREV = :pIdPlanoPrev')
+    Params.Data = {010001000C704964506C616E6F5072657600030400000000000000}
+    ValidateWithMask = True
+    Left = 331
+    Top = 7
+  end
+  object qryIntegraIRRF: TwwQuery
+    DatabaseName = 'BaseDados'
+    SQL.Strings = (
+      
+        'SELECT IDPESSOA,CODSUBCONTAIRRF,CODTIPRECDESIRRF,IDEMPRESAPROPIR' +
+        'RF,RECPAGIRRF,'
+      
+        '       CODCENTCUSTDIRRF,IDEMPRESAIRRF,TIPCODIGOIRRF,CODTIPDOCIRR' +
+        'F,'
+      
+        '       CODCENTCUSTCIRRF,CODPORTFORMAIRRF,PLACONTADIRRF,PLANOIRRF' +
+        ','
+      
+        '       UNIDNEGOCIRRF,PLACONTACIRRF,CODCENTRESPIRRF,IDFAVORECIDOI' +
+        'RRF'
+      'FROM   FUNDACAO'
+      'WHERE  IDPESSOA   = :pIdFundacao')
+    Params.Data = {010001000B70496446756E646163616F00030400000000000000}
+    ValidateWithMask = True
+    Left = 422
+    Top = 7
+  end
+  object qryCodProvDesc: TwwQuery
+    DatabaseName = 'BaseDados'
+    SQL.Strings = (
+      'SELECT CODPROVDESC'
+      'FROM   RUBRICAXPESS'
+      'WHERE  IDPESSOA = :pIdPessJur'
+      'AND    IDRUBRICA = :pIdRubrica')
+    Params.Data = {
+      010002000A704964506573734A7572000304000000000000000A704964527562
+      7269636100030400000000000000}
+    ValidateWithMask = True
+    Left = 33
+    Top = 63
+  end
+  object qryDescFolha1: TwwQuery
+    DatabaseName = 'BaseDados'
+    SQL.Strings = (
+      
+        'SELECT   TD.MESREFERENCIA,TD.CODALTERADOR,TD.PLNCODIGOPREV,TD.CO' +
+        'DTIPRECDES,'
+      
+        '         TD.CODSUBCONTA,TD.RECPAG,TD.IDEMPRESAPROP,TD.CODTIPDOC,' +
+        'TD.PLACONTAD,'
+      
+        '         TD.PLANO,TD.PLACONTAC,TD.IDPESSOA,TD.CODDOCUMENTOPREV,T' +
+        'D.FLGTIPODESC,'
+      
+        '         TD.CODPORTFORMA,TD.VALOR,TD.IDTITULAR,TD.IDPLANASS,TD.I' +
+        'DDESCONTO,'
+      
+        '         TD.UNIDNEGOC,TD.IDMOTIVO,TD.DATARECEBIMENTO,TD.CODCENTR' +
+        'ORESPON,'
+      
+        '         TD.MESCOBRANCA,TD.CODCENTROCUSTOD,TD.IDPESSJUR,TD.IDPRO' +
+        'VENTO,'
+      
+        '         TD.CODCENTROCUSTOC,TD.IDPLANOPREV,TD.IDEMPRESA,TD.VALOR' +
+        'RECEBIDO,'
+      
+        '         TD.NUMPRIORIDADE,TD.ORDEM,TD.MATRICULA,TD.INSCRICAONUME' +
+        'RO,TD.VALORBASE1,'
+      
+        '         TD.VALORBASE2,TD.VALORBASE3,TD.FLGDESCONTO,TD.CODRETORN' +
+        'O,TD.NUMDEPENDSEGURO,'
+      
+        '         TD.CODPROVDESC,TD.FLGDESCFOLHA,TD.DATAREFERENCIA,TD.DES' +
+        'CRICAO,TD.REFERENCIA,'
+      
+        '         TD.FLGFORNPAG,TD.FLGFORNCOMISS,TD.IDFUNDACAO,TD.CODDOCU' +
+        'MENTOEFET,TD.PLNCODIGOEFET,'
+      
+        '         TD.SISTORIGEM,TD.FLGALTERADOR,TD.PERIODO,TD.EXERCICIO,T' +
+        'D.FLGATRASODEVOL,'
+      
+        '         TD.DATACOBRANCA,TD.NODOCUMENTO,TD.COMPLDOCUMENTO,TD.IDF' +
+        'AVORECIDO,'
+      '         TD.IDLOTE,TD.IDEMPCOBRANCA,TD.TIPCODIGO,TD.SITENVIO,'
+      '         PD.FLGIRRF, PD.FLGCOMPOESALPART, PD.FLGCOMPOESALBENEF,'
+      '         PD.NUMPRIORIDADE, PATRO.CODMOEDA'
+      'FROM     TMPDESC TD, PROVDESC PD, PATRO'
+      'WHERE    TD.IDPESSOA = :pIdPessoa'
+      'AND      TD.IDPESSJUR = :pIdPessJur'
+      'AND      TD.IDPLANOPREV = :pIdPlanoPrev'
+      'AND      TD.MESCOBRANCA = :pMesRef'
+      'AND      TD.FLGDESCFOLHA = :pFlgDescFolha'
+      'AND      TD.FLGDESCONTO = 1'
+      'AND      TD.FLGTIPODESC IN ('#39'P'#39','#39'A'#39','#39'E'#39')'
+      'AND      TD.IDPROVENTO = PD.IDPROVENTO'
+      'AND      TD.IDPESSJUR = PATRO.IDPESSOA'
+      'ORDER BY PD.NUMPRIORIDADE, TD.CODPROVDESC, TD.REFERENCIA'
+      '')
+    Params.Data = {
+      0100050009704964506573736F61000304000000000000000A70496450657373
+      4A7572000304000000000000000C704964506C616E6F50726576000304000000
+      0000000007704D657352656600010200300000000D70466C6744657363466F6C
+      68610001020030000000}
+    ValidateWithMask = True
+    Left = 331
+    Top = 63
+  end
+  object qryDescFolha2: TwwQuery
+    DatabaseName = 'BaseDados'
+    ValidateWithMask = True
+    Left = 422
+    Top = 63
+  end
+  object qryUpdDescFolha1: TwwQuery
+    DatabaseName = 'BaseDados'
+    SQL.Strings = (
+      '')
+    ValidateWithMask = True
+    Left = 331
+    Top = 117
+  end
+  object qryExcluiRub1: TwwQuery
+    DatabaseName = 'BaseDados'
+    ValidateWithMask = True
+    Left = 33
+    Top = 118
+  end
+  object qryUpdExcluiRub: TwwQuery
+    DatabaseName = 'BaseDados'
+    ValidateWithMask = True
+    Left = 33
+    Top = 177
+  end
+  object qryAux: TwwQuery
+    DatabaseName = 'BaseDados'
+    SQL.Strings = (
+      '')
+    ValidateWithMask = True
+    Left = 126
+    Top = 63
+  end
+  object qryReserva: TwwQuery
+    DatabaseName = 'BaseDados'
+    ValidateWithMask = True
+    Left = 241
+    Top = 66
+  end
+  object qryUpdReserva: TwwQuery
+    DatabaseName = 'BaseDados'
+    ValidateWithMask = True
+    Left = 241
+    Top = 114
+  end
+  object qryRubIndiv: TwwQuery
+    DatabaseName = 'BaseDados'
+    SQL.Strings = (
+      
+        'SELECT RI.IDPESSOA,RI.IDEMPRESA,RI.IDRUBRICA,RI.NUMOCORRENCIAS,R' +
+        'I.IDFAVORECIDO,'
+      
+        '       RI.IDREGRACALCULO,RI.VALORRUBRICA,RI.ANOMESINICIO,RI.FLGP' +
+        'ERMANENTE,RI.PARCELAS,'
+      
+        '       PD.FLGIRRF, PD.FLGCOMPOESALPART, PD.FLGCOMPOESALBENEF, RP' +
+        '.CODPROVDESC,'
+      
+        '       P.NOME, PD.DESCRICAO, EP.MATRICULA, PPP.INSCRICAONUMERO, ' +
+        'PATRO.CODMOEDA'
+      'FROM   RUBRICAINDIV RI, PROVDESC PD, RUBRICAXPESS RP, PESSOA P,'
+      '       ELEGPATRO EP, PARTPREVPLAN PPP, PATRO'
+      'WHERE  RI.IDPESSOA = :pIdPessoa  AND'
+      '       RI.ANOMESINICIO <= :pMes  AND'
+      '       RI.IDEMPRESA = :pIdFundacao AND'
+      '       ((RI.NUMOCORRENCIAS < RI.PARCELAS AND'
+      '         RI.FLGPERMANENTE = 0) OR'
+      '        (RI.FLGPERMANENTE = 1)) AND'
+      '       PD.FLGDESCONTO = :pFlgDesconto AND'
+      '       EP.IDPESSJUR = :pIdPessJur AND'
+      '       PPP.IDPLANOPREV = :pIdPlanoPrev AND'
+      '       PATRO.IDPESSOA = EP.IDPESSJUR AND'
+      '       EP.IDPESSOA = PPP.IDPESSOA AND'
+      '       EP.IDPESSJUR = PPP.IDPESSJUR AND'
+      '       RP.IDPESSOA = RI.IDEMPRESA AND'
+      '       PPP.IDPESSJUR = EP.IDPESSJUR AND'
+      '       RI.IDRUBRICA = PD.IDPROVENTO AND'
+      '       RI.IDPESSOA = P.IDPESSOA AND'
+      '       RI.IDPESSOA = EP.IDPESSOA AND'
+      '       PPP.IDPESSOA = RI.IDPESSOA AND'
+      '       RP.IDRUBRICA = RI.IDRUBRICA ')
+    Params.Data = {
+      0100060009704964506573736F610003040078000000000104704D6573000108
+      00313939382F30390000010B70496446756E646163616F000304000100000000
+      010C70466C67446573636F6E746F000304000000000000010A70496450657373
+      4A7572000304001000000000010C704964506C616E6F50726576000304001000
+      00000001}
+    ValidateWithMask = True
+    Left = 241
+    Top = 172
+  end
+  object qryUpdRubIndiv: TwwQuery
+    DatabaseName = 'BaseDados'
+    SQL.Strings = (
+      'UPDATE RUBRICAINDIV'
+      'SET    NUMOCORRENCIAS = :pNumOcorrencias'
+      'WHERE  IDPESSOA = :pIdPessoa'
+      'AND    IDEMPRESA = :pIdEmpresa'
+      'AND    IDRUBRICA = :pIdRubrica')
+    Params.Data = {
+      010004000F704E756D4F636F7272656E63696173000304000000000000000970
+      4964506573736F61000304000000000000000A704964456D7072657361000304
+      000000000000000A7049645275627269636100030400000000000000}
+    ValidateWithMask = True
+    Left = 241
+    Top = 217
+  end
+  object qryExcluiRub2: TwwQuery
+    DatabaseName = 'BaseDados'
+    SQL.Strings = (
+      
+        'SELECT   TD.MESREFERENCIA,TD.CODALTERADOR,TD.PLNCODIGOPREV,TD.CO' +
+        'DTIPRECDES,'
+      
+        '         TD.CODSUBCONTA,TD.RECPAG,TD.IDEMPRESAPROP,TD.CODTIPDOC,' +
+        'TD.PLACONTAD,'
+      
+        '         TD.PLANO,TD.PLACONTAC,TD.IDPESSOA,TD.CODDOCUMENTOPREV,T' +
+        'D.FLGTIPODESC,'
+      
+        '         TD.CODPORTFORMA,TD.VALOR,TD.IDTITULAR,TD.IDPLANASS,TD.I' +
+        'DDESCONTO,'
+      
+        '         TD.UNIDNEGOC,TD.IDMOTIVO,TD.DATARECEBIMENTO,TD.CODCENTR' +
+        'ORESPON,'
+      
+        '         TD.MESCOBRANCA,TD.CODCENTROCUSTOD,TD.IDPESSJUR,TD.IDPRO' +
+        'VENTO,'
+      
+        '         TD.CODCENTROCUSTOC,TD.IDPLANOPREV,TD.IDEMPRESA,TD.VALOR' +
+        'RECEBIDO,'
+      
+        '         TD.NUMPRIORIDADE,TD.ORDEM,TD.MATRICULA,TD.INSCRICAONUME' +
+        'RO,TD.VALORBASE1,'
+      
+        '         TD.VALORBASE2,TD.VALORBASE3,TD.FLGDESCONTO,TD.CODRETORN' +
+        'O,TD.NUMDEPENDSEGURO,'
+      
+        '         TD.CODPROVDESC,TD.FLGDESCFOLHA,TD.DATAREFERENCIA,TD.DES' +
+        'CRICAO,TD.REFERENCIA,'
+      
+        '         TD.FLGFORNPAG,TD.FLGFORNCOMISS,TD.IDFUNDACAO,TD.CODDOCU' +
+        'MENTOEFET,TD.PLNCODIGOEFET,'
+      
+        '         TD.SISTORIGEM,TD.FLGALTERADOR,TD.PERIODO,TD.EXERCICIO,T' +
+        'D.FLGATRASODEVOL,'
+      
+        '         TD.DATACOBRANCA,TD.NODOCUMENTO,TD.COMPLDOCUMENTO,TD.IDF' +
+        'AVORECIDO,'
+      '         TD.IDLOTE,TD.IDEMPCOBRANCA,TD.TIPCODIGO,TD.SITENVIO,'
+      '         PD.FLGIRRF'
+      'FROM     TMPDESC TD, PROVDESC PD'
+      'WHERE    TD.IDPESSOA = :pIdPessoa'
+      'AND      TD.IDPESSJUR = :pIdPessJur'
+      'AND      TD.IDPLANOPREV = :pIdPlanoPrev'
+      'AND      TD.MESCOBRANCA = :pMes'
+      'AND      TD.CODPROVDESC = :pCodProvDesc'
+      'AND      TD.DATARECEBIMENTO IS NOT NULL'
+      'AND      TD.VALORRECEBIDO IS NOT NULL'
+      'AND      TD.FLGDESCFOLHA = :pFlgDescFolha'
+      'AND      TD.FLGDESCONTO = 1'
+      'AND      TD.IDPROVENTO = PD.IDPROVENTO'
+      'ORDER BY TD.NUMPRIORIDADE DESC')
+    Params.Data = {
+      0100060009704964506573736F61000304000000000000000A70496450657373
+      4A7572000304000000000000000C704964506C616E6F50726576000304000000
+      0000000004704D657300010200300000000C70436F6450726F76446573630001
+      0200300000000D70466C6744657363466F6C68610001020030000000}
+    ValidateWithMask = True
+    Left = 129
+    Top = 117
+  end
+  object qryUpdDescFolha2: TwwQuery
+    DatabaseName = 'BaseDados'
+    ValidateWithMask = True
+    Left = 424
+    Top = 117
+  end
+  object qryABNPart: TwwQuery
+    SQL.Strings = (
+      
+        'SELECT IDPESSJUR,IDPLANOPREV,IDPESSOA,IDBENEFICIO,SEQPROPOSTA,RE' +
+        'GPAGABN,'
+      
+        '       IDEMPRESAPROPABN,CODCENTROCUSTOCABN,CODCENTROCUSTODABN,PL' +
+        'ACONTADABN,'
+      
+        '       PLACONTACABN,PLANOABN,IDEMPRESAABN,UNIDNEGOCABN,CODCENTRO' +
+        'RESPONABN,'
+      
+        '       CODSUBCONTAABN,CODALTERACORRABN,CODALTERAJUROSABN,CODTIPR' +
+        'ECDESABN,'
+      '       TIPCODIGOABN,CODTIPDOCABN,CODPORTFORMAABN'
+      'FROM   BENEFPLANOPART'
+      'WHERE  IDPESSOA = :pIdPessoa'
+      'AND    IDBENEFICIO = :pIdBeneficio'
+      'AND    SEQPROPOSTA = :pSeqProposta'
+      'AND    IDPLANOPREV = :pIdPlanoPrev'
+      'AND    IDPESSJUR = :pIdPessJur'
+      '')
+    Params.Data = {
+      0100050009704964506573736F61000304000000000000000C70496442656E65
+      666963696F000304000000000000000C7053657150726F706F73746100030400
+      0000000000000C704964506C616E6F50726576000304000000000000000A7049
+      64506573734A757200030400000000000000}
+    ValidateWithMask = True
+    Left = 33
+    Top = 270
+  end
+  object qryABNPlanoPatro: TwwQuery
+    SQL.Strings = (
+      'SELECT IDPESSJUR,IDPLANOPREV,IDBENEFICIO,REGPAGABN,'
+      
+        '       IDEMPRESAPROPABN,CODCENTROCUSTOCABN,CODCENTROCUSTODABN,PL' +
+        'ACONTADABN,'
+      
+        '       PLACONTACABN,PLANOABN,IDEMPRESAABN,UNIDNEGOCABN,CODCENTRO' +
+        'RESPONABN,'
+      
+        '       CODSUBCONTAABN,CODALTERACORRABN,CODALTERAJUROSABN,CODTIPR' +
+        'ECDESABN,'
+      '       TIPCODIGOABN,CODTIPDOCABN,CODPORTFORMAABN'
+      'FROM   BENEFPLANPATRO'
+      'WHERE  IDBENEFICIO = :pIdBeneficio'
+      'AND    IDPLANOPREV = :pIdPlanoPrev'
+      'AND    IDPESSJUR = :pIdPessJur'
+      '')
+    Params.Data = {
+      010003000C70496442656E65666963696F000304000000000000000C70496450
+      6C616E6F50726576000304000000000000000A704964506573734A7572000304
+      00000000000000}
+    ValidateWithMask = True
+    Left = 126
+    Top = 270
+  end
+  object qryABNPlano: TwwQuery
+    SQL.Strings = (
+      'SELECT IDPLANOPREV,IDBENEFICIO,REGPAGABN,'
+      
+        '       IDEMPRESAPROPABN,CODCENTROCUSTOCABN,CODCENTROCUSTODABN,PL' +
+        'ACONTADABN,'
+      
+        '       PLACONTACABN,PLANOABN,IDEMPRESAABN,UNIDNEGOCABN,CODCENTRO' +
+        'RESPONABN,'
+      
+        '       CODSUBCONTAABN,CODALTERACORRABN,CODALTERAJUROSABN,CODTIPR' +
+        'ECDESABN,'
+      '       TIPCODIGOABN,CODTIPDOCABN,CODPORTFORMAABN'
+      'FROM   BENEFPLANPREV'
+      'WHERE  IDBENEFICIO = :pIdBeneficio'
+      'AND    IDPLANOPREV = :pIdPlanoPrev'
+      ''
+      '')
+    Params.Data = {
+      010002000C70496442656E65666963696F000304000000000000000C70496450
+      6C616E6F5072657600030400000000000000}
+    ValidateWithMask = True
+    Left = 33
+    Top = 321
+  end
+end

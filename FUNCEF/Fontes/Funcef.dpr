@@ -1,0 +1,578 @@
+program Funcef;
+
+uses
+  Forms,
+  uAutorizacao,
+  fCMEntrada,
+  FPai in '..\..\CM\Forms\Source\FPai.pas' {frmPai},
+  FTelaAut in '..\..\CM\Forms\Source\FTelaAut.pas' {frmTelaAutorizacao},
+  fAguarde in '..\..\CM\Forms\Source\fAguarde.pas' {frmAguarde},
+  FCMPrincipalForms in '..\..\Cm\Forms\Source\FCMPrincipalForms.pas' {frmCMPrincipalForms},
+  FCMPrincipal in '..\..\Cm\Forms\CMPrincipal\FCMPrincipal.pas' {frmCMPrincipal},
+  FPrincipal in 'FPrincipal.pas' {frmPrincipal},
+  FSairAjuda in '..\..\CM\Forms\Source\FSairAjuda.pas' {frmSairAjuda},
+  FOkCancelar in '..\..\CM\Forms\Source\FOkCancelar.pas' {frmOkCancelar},
+  FCadastroCS in '..\..\CM\Forms\Source\FCadastroCS.pas' {frmCadastroCS},
+  UModuloFuncef in 'UModuloFuncef.pas',
+  FConversaoLayOutMant in 'FConversaoLayOutMant.pas' {frmConversaoLayOutMant},
+  FSeparadorArqFuncef in 'FSeparadorArqFuncef.pas' {frmSeparadorArqFuncef},
+  FSeparadorArqFinanc in 'FSeparadorArqFinanc.pas' {frmSeparadorArqFinanc},
+  FExecCriticaCaixa in 'FExecCriticaCaixa.pas' {frmCriticaCaixa},
+  FInsereFunc in 'FInsereFunc.pas' {frmInsereFunc},
+  uIntegraPrevRH in 'uIntegraPrevRH.pas',
+  FUpdateTmpdesc in 'FUpdateTmpdesc.pas' {frmUpdateTmpdesc},
+  fImportCotMoeda in 'fImportCotMoeda.pas' {frmImportCotMoeda},
+  fBatimentoReservas in 'fBatimentoReservas.pas' {frmBatimentoReservas},
+  fBatimentoVlrContrib in 'fBatimentoVlrContrib.pas' {frmBatimentoVlrContrib},
+  FIgualaContribCaixa in 'FIgualaContribCaixa.pas' {frmIgualaContribCaixa},
+  fLerArquivoSIAFI in 'fLerArquivoSIAFI.pas' {frmLerArquivoSIAFI},
+  Fpht in 'Fpht.pas' {frmPHT},
+  FInscricaoNovoPlano in 'FInscricaoNovoPlano.pas' {frmInscricaoNovoPlano},
+  fFrameLista in 'fFrameLista.pas' {frmFrameListaBenef: TFrame},
+  uFuncoesFuncef in 'uFuncoesFuncef.pas',
+  FWizardMT in '..\..\Cm\Forms\SourceMT\FWizardMT.pas' {frmWizardMT},
+  FExecImportaReserva in 'FExecImportaReserva.pas' {frmExecImportaReserva},
+  FProgresso in '..\..\Cm\Forms\Source\FProgresso.pas' {frmProgresso},
+  uFuncoesSaldamento in 'uFuncoesSaldamento.pas',
+  FPreparoSaldamento in 'FPreparoSaldamento.pas' {FrmPreparoSaldamento},
+  USaldamento in 'USaldamento.pas',
+  FSelecionaLoteFuncef in 'FSelecionaLoteFuncef.pas' {frmSelecionaLoteFuncef},
+  UFuncoesUteis in 'UFuncoesUteis.pas',
+  FCancSaldamento in 'FCancSaldamento.pas' {frmCancSaldamento},
+  FSaldamento in 'FSaldamento.pas' {FrmSaldamento},
+  fValidaInforme in 'fValidaInforme.pas' {frmValidaInforme},
+  uValidaInforme in 'uValidaInforme.pas',
+  FGeraArqDarfJud in '..\FontesMT\FGeraArqDarfJud.pas' {FrmGeraArqDarfJud},
+  uCtrlGeraArqDarfJud in '..\CtrlObjects\uCtrlGeraArqDarfJud.pas',
+  mVersaoPagto in 'mVersaoPagto.pas' {molVersaoPagto: TFrame},
+  DAPrev in '..\..\Cm\CMAdmPrev\Fontes\DAPrev.pas' {dtmAPrev: TDataModule};
+
+{$R *.RES}
+{$R FUNCEF_RES.RES}
+
+begin
+  frmCMEntrada:= TfrmCMEntrada.Create(Application);
+  frmCMEntrada.Show;
+  frmCMEntrada.Update;
+
+  Application.Initialize;
+  Application.Title := 'Funcef';
+  Application.CreateForm(TfrmPrincipal, frmPrincipal);
+  Application.CreateForm(TfrmAguarde, frmAguarde);
+  Application.CreateForm(TfrmProgresso, frmProgresso);
+  Application.CreateForm(TdtmAPrev, dtmAPrev);
+  frmCMEntrada.Hide;
+  frmCMEntrada.Free;
+  Application.Run;
+
+end.
+{CM$ALT
+================================================================================
+Histórico de alterações efetuadas no módulo Funcef
+================================================================================
+CM$VER      3.01.04i    05/06/2008
+--------------------------------------------------------------------------------
+- Pendência             : 27988 (Reabertura)
+  Tela\Opção no Sistema : Principal
+  Descrição             : Acerto para inicializar classe de Integração com o Back.
+================================================================================
+CM$VER      3.01.04h    29/05/2008
+--------------------------------------------------------------------------------
+- Pendência             : 27988
+  Tela\Opção no Sistema : Principal
+  Descrição             : Acerto para inicializar classe de Integração com o Back.
+================================================================================
+CM$VER      3.01.04g    26/05/2008
+--------------------------------------------------------------------------------
+- Pendência             : 22537(ReAbertura)
+  Tela\Opção no Sistema : Principal
+  Descrição             : Gerar automaticamente o contra-cheque
+================================================================================
+CM$VER      3.01.04f    07/05/2008
+--------------------------------------------------------------------------------
+- Pendência             : 27874
+  Tela\Opção no Sistema : Saldamento
+  Descrição             : Atualizar reajuste de 5,35 para apartir de 2008/01
+================================================================================
+CM$VER      3.01.04e    24/03/2008
+--------------------------------------------------------------------------------
+- Pendência             : 27338
+  Tela\Opção no Sistema : Separador do Arquivo Financeiro.
+  Descrição             : Ajuste para tratar valores de rubricas negativas.
+================================================================================
+CM$VER      3.01.04d    13/03/2008
+--------------------------------------------------------------------------------
+- Pendência             : 27523
+  Tela\Opção no Sistema : Saldamento
+  Descrição             : Ajuste para não atualizar contribuição incluida no saldamento
+================================================================================
+CM$VER      3.01.04c    27/02/2008
+--------------------------------------------------------------------------------
+- Pendência             : 27481
+  Tela\Opção no Sistema : Separador do arquivo financeiro da funcef.
+  Descrição             : Truncar a linha de entrada do arquivo srh17.txt em 45 posições.
+- Pendência             : 22537
+  Tela\Opção no Sistema : Principal
+  Descrição             : Gerar automaticamente a geração do contra-cheque
+================================================================================
+CM$VER      3.01.04b    26/02/2008
+--------------------------------------------------------------------------------
+- Pendência             : 27372
+  Tela\Opção no Sistema : Saldamento
+  Descrição             : Acerto na coluna FLGTIPORESGISTRO da antecipação do Abono
+- Pendência             : 27373
+  Tela\Opção no Sistema : Saldamento
+  Descrição             : Não incluir diferença de adiantamento de abono independente de plano
+- Pendência             : 27376
+  Tela\Opção no Sistema : Saldamento
+  Descrição             : Ajuste no SITRECEBIMENTO da contribuição adiantamento de abono
+================================================================================
+CM$VER      3.01.04a    07/02/2008
+--------------------------------------------------------------------------------
+- Pendência             : 27208
+  Tela\Opção no Sistema : Saldamento
+  Descrição             : Ajustes na migração do adiantamento de abono
+- Pendência             : 27209
+  Tela\Opção no Sistema : Saldamento
+  Descrição             : Disparar a geração automaticamente a geração do arquivo dos demonstrativos no modulo FUNCEF (Contra-Cheque).
+================================================================================
+CM$VER      3.01.04     08/11/2007
+--------------------------------------------------------------------------------
+Versão para liberacão do padrão 05.10.18
+- Pendência             : 22537
+  Tela\Opção no Sistema : Módulos | Folha de Benefício | Contra Cheque
+  Descrição             : Disparar a geração automaticamente a geração do arquivo dos demonstrativos no modulo FUNCEF (Contra-Cheque).
+- Pendência             : 24157
+  Tela\Opção no Sistema : Conversão de LayOut de Arquivos Cadastrais da CAIXA para InterfacePREV
+  Descrição             : implementando a validação do CPF, passando em branco se estiver inválido.
+- Pendência             : 26804
+  Tela\Opção no Sistema : Novo Plano | Saldamento
+  Descrição             : Acerto na migração do adiantamento de abono.
+- Pendência             : 26921
+  Tela\Opção no Sistema : Processar | Conversão de LayOut de Arquivos Financeiros da CAIXA para InterfacePREV
+  Descrição             : Acerto para tratamento de valor negativo de rubica de 13º.  
+================================================================================
+CM$VER      3.01.02b    08/11/2007
+--------------------------------------------------------------------------------
+- Pendência             : 26688
+  Tela\Opção no Sistema : Processos | Conversão de LayOut de Arquivos Cadastrais da CAIXA para InterfacePREV
+  Descrição             : Acerto para gravar no arquivo de eventos as inscriçoes de participantes com adesão ao novo plano.
+================================================================================
+CM$VER      3.01.02a    05/11/2007
+--------------------------------------------------------------------------------
+- Pendência             : 26478
+  Tela\Opção no Sistema : Processos | Conversão de LayOut de Arquivos Cadastrais da CAIXA para InterfacePREV
+  Descrição             : Criada nova função.
+- Pendência             : 26479
+  Tela\Opção no Sistema : Processos | Conversão de LayOut de Arquivos Cadastrais da CAIXA para InterfacePREV
+  Descrição             : Ajuste na leitura e processamento do arquivo SRH16 para gerar todos os arquivos de saída corretamente.
+- Pendência             : 26254
+  Tela\Opção no Sistema : Processos | Conversão de LayOut de Arquivos Cadastrais da CAIXA para InterfacePREV
+  Descrição             : Ajuste na leitura e processamento do arquivo SRH16 para gerar todos os arquivos de saída corretamente.
+================================================================================
+CM$VER      3.01.02     03/08/2007
+--------------------------------------------------------------------------------
+Versão para liberacão do padrão 05.10.17
+- Pendência             : 26042
+  Tela\Opção no Sistema : Saldamento
+  Descrição             : Inclusao do incentivo de 3,54 apartir de 2007/01
+- Pendência             : 26110
+  Tela\Opção no Sistema : Módulos | Folha de Benefícios | Contracheque
+  Descrição             : Correção na busca de informações de benefício do INSS
+                          se estiver em plano previdenciário desativado.
+================================================================================
+CM$VER      3.01.00c    03/08/2007
+--------------------------------------------------------------------------------
+- Pendência             : 25959
+  Tela\Opção no Sistema : Módulos | Folha de Benefícios | Contracheque
+  Descrição             : Ajuste na busca das rubricas das pessoas que terão contracheque
+                          para a versão de pagamento selecionada.
+================================================================================
+CM$VER      3.01.00b    26/07/2007
+--------------------------------------------------------------------------------
+- Pendência             : 25950
+  Tela\Opção no Sistema : Módulos | Folha de Benefícios | Contracheque
+  Descrição             : Buscar o número de dependentes de imposto de renda e de
+                          salário família do histórico de rubricas salariais.
+================================================================================
+CM$VER      3.01.00a    12/07/2007
+--------------------------------------------------------------------------------
+- Pendência             : 25654
+  Tela\Opção no Sistema : Processos | Conversão de LayOut de Arquivos Cadastrais da CAIXA para InterfacePREV
+  Descrição             : Criado tratamento para novo cargo: CONTR2
+- Pendência             : 18990
+  Tela\Opção no Sistema : Processar | Conversão de LayOut de Arquivos Financeiros da CAIXA para InterfacePREV
+  Descrição             : Alteração para gravar o valor '1A13' caso a rubrica de 13º vier negativa.
+================================================================================
+CM$VER      3.01.00     22/06/2007
+--------------------------------------------------------------------------------
+Versão para liberacão do padrão 05.10.16
+- Pendência             : 23315
+  Tela\Opção no Sistema : Processar | Conversão de LayOut de Arquivos Financeiros da CAIXA para InterfacePREV
+  Descrição             : Gravação das rubricas de margem mesmo com valor igual a zero
+- Pendência             : 25243
+  Tela\Opção no Sistema : Processos | Conversão de LayOut de Arquivos Cadastrais da CAIXA para InterfacePREV
+  Descrição             : Implementa atualização cadastral segundo as novas condições:
+    - apenas para associados ativos (flginterno = 'AT').
+    - caso o associado tenha apenas INSS gerar arquivo de atualização para todas
+      as informações exceto conta bancária. Neste caso colocar no arquivo os
+      dados bancários como brancos (o número do banco fica com zeros).
+    - caso o associado tenha benefício fundação não efetuar qualquer atualização
+      cadastral.
+- Pendência             : 25465
+  Tela\Opção no Sistema : Processos | Conversão de LayOut de Arquivos Cadastrais da CAIXA para InterfacePREV
+  Descrição             : Ajuste no cálculo do tempo total de processamento, para tratar quando este se inicia num dia e termina num dia consecutivo.
+- Pendência             : 23867
+  Tela\Opção no Sistema : Módulos | Folha de Benefícios | Contra cheque
+  Descrição             : Gravação do IR compensado
+================================================================================
+CM$VER      3.00.11c    22/06/2007
+--------------------------------------------------------------------------------
+- Pendência             : 25465
+  Tela\Opção no Sistema : Processos | Conversão de LayOut de Arquivos Cadastrais da CAIXA para InterfacePREV
+  Descrição             : Ajuste no cálculo do tempo total de processamento, para tratar quando este se inicia num dia e termina num dia consecutivo.
+================================================================================
+CM$VER      3.00.11b    21/05/2007
+--------------------------------------------------------------------------------
+- Resolução da Pendência No. 25243
+  Tela\Opção no Sistema: Processos | Conversão de LayOut de Arquivos Cadastrais da CAIXA para InterfacePREV
+  Descrição: Implementa atualização cadastral segundo as novas condições:
+    - apenas para associados ativos (flginterno = 'AT').
+    - caso o associado tenha apenas INSS gerar arquivo de atualização para todas
+      as informações exceto conta bancária. Neste caso colocar no arquivo os
+      dados bancários como brancos (o número do banco fica com zeros).
+    - caso o associado tenha benefício fundação não efetuar qualquer atualização
+      cadastral.
+================================================================================
+CM$VER      3.00.11a    23/04/2007
+--------------------------------------------------------------------------------
+- Resolução da Pendência No. 25064
+  Tela\Opção no Sistema: Processos | Conversão de LayOut de Arquivos Cadastrais da CAIXA para InterfacePREV
+  Descrição: Inclusão de novas funçoes conforme EBM.
+- Resolução da Pendência No. 25105
+  Tela\Opção no Sistema: Processos | Conversão de LayOut de Arquivos Cadastrais da CAIXA para InterfacePREV
+  Descrição: Inclusão de novos cargos conforme EBM.
+================================================================================
+CM$VER      3.00.11     05/04/2007
+--------------------------------------------------------------------------------
+Liberação de versão para o padrão 5.10.15.
+- Resolução da Pendência No. 24139
+  Tela\Opção no Sistema: Saldamento
+  Descrição: Acerto na pesquisa dos meses a processar abono quando em 2007
+- Resolução da Pendência No. 24944
+  Tela\Opção no Sistema: Módulos / Folha de Benefícios / Contra cheque
+  Descrição: Correção na busca dos dados de benefícios Funcef de forma a selecionar, preferencialmente, os dados do benefício ativo.
+================================================================================
+CM$VER      3.00.10d    26/03/2007
+--------------------------------------------------------------------------------
+- Resolução da Pendência No. 24893
+  Tela\Opção no Sistema: Sistema | Utilitários | Validação do Informe
+  Descrição: Verifca se existe numero de processo para linhas do tipo 6
+================================================================================
+CM$VER      3.00.10c    26/03/2007
+--------------------------------------------------------------------------------
+- Resolução da Pendência No. 24811
+  Tela\Opção no Sistema: Novo Plano | Saldamento
+  Descrição: 1) No caso de acertos financeiros nos pensionistas já saldados
+                não reprocessar o Pecúlio e no demonstrativo exibir somente
+                os pecúlios do Lote
+             2) Voltar a deflacionar 2006
+- Resolução da Pendência No. 24806
+  Tela\Opção no Sistema: Novo Plano | Saldamento
+  Descrição: 1) Pesquisar valor do beneficio pago no mês final do processo
+- Resolução da Pendência No. 24257
+  Tela\Opção no Sistema: Módulos | IRRF | Geração de Arquivo de Darf Judicial
+  Descrição: Implementação da rotina de geração de arquivo de darf's judicial.
+================================================================================
+CM$VER      3.00.10b    23/03/2007
+--------------------------------------------------------------------------------
+- Resolução da Pendência No. 24832
+  Tela\Opção no Sistema: Processos | Conversão de LayOut de Arquivos Cadastrais da CAIXA para InterfacePREV
+  Descrição: Acerto no de-para de cargos
+- Resolução da Pendência No. 24508
+  Tela\Opção no Sistema: Processos | Conversão de LayOut de Arquivos Cadastrais da CAIXA para InterfacePREV
+  Descrição: Inclusão de vários cargos conforme EBM.
+================================================================================
+CM$VER      3.00.10a    08/03/2007
+--------------------------------------------------------------------------------
+- Resolução da Pendência No. 24651
+  Tela\Opção no Sistema: Sistema | Utilitários | Validação de Informe
+  Descrição: Nova tela para a validação do arquivo de informe gerado pelo IRRF (Folha de Benefício)
+================================================================================
+CM$VER      3.00.10     12/02/2007
+--------------------------------------------------------------------------------
+Liberação de versão para o padrão 5.10.14.
+================================================================================
+CM$VER      3.00.09     21/11/2006
+--------------------------------------------------------------------------------
+Liberação de versão para o padrão 5.10.13.
+================================================================================
+CM$VER      3.00.08g    18/01/2007
+--------------------------------------------------------------------------------
+- Resolução da Pendência No. 24242
+  Tela\Opção no Sistema: Novo Plano | Saldamento
+  Descrição: No caso de DIBs em 2006 não deflacionar o ano de 2006
+================================================================================
+CM$VER      3.00.08f    08/01/2007
+--------------------------------------------------------------------------------
+- Resolução da Pendência No.24161
+  Tela\Opção no Sistema: Novo Plano | Saldamento
+  Descrição: Acerto no preencimento da DATAINICIO da contribuição da CONTRIBPREVPARTP
+- Resolução da Pendência No.24152
+  Tela\Opção no Sistema: Novo Plano | Saldamento
+  Descrição: Acerto financeioro para pensionista
+- Resolução da Pendência No.24127
+  Tela\Opção no Sistema: Novo Plano | Saldamento
+  Descrição: Volta do incentivo de 4%
+================================================================================
+CM$VER      3.00.08e    27/12/2006
+--------------------------------------------------------------------------------
+- Resolução da Pendência No.24052
+  Tela\Opção no Sistema: Novo Plano | Saldamento
+  Descrição: Acertos no Saldamento de aposentadoss
+================================================================================
+CM$VER      3.00.08d    21/12/2006
+--------------------------------------------------------------------------------
+- Resolução da Pendência No.23981
+  Tela\Opção no Sistema: Novo Plano | Saldamento
+  Descrição: Saldamento de REBs puros
+- Resolução da Pendência No.23624
+  Tela\Opção no Sistema: Novo Plano | Saldamento
+  Descrição: Acerto no prenchimento do CODPORTFORMA 
+- Resolução da Pendência No.23826
+  Tela\Opção no Sistema: Novo Plano | Saldamento
+  Descrição: Acerto no prenchimento do FLGCOBRA
+================================================================================
+CM$VER      3.00.08c    21/11/2006
+--------------------------------------------------------------------------------
+- Resolução da Pendência No.
+  Tela\Opção no Sistema: Novo Plano | Saldamento
+  Descrição: 1) Acerto nas pesquisas de empérsimo
+             2) Acerto no calculo do Abono no saldamento de assistido
+             3) Pesquisa na TMPDESC antes de saldar Ativos
+             4) Novo tratamento do PLANOCONTABIL para ativos
+================================================================================
+CM$VER      3.00.08b    07/11/2006
+--------------------------------------------------------------------------------
+- Resolução da Pendência No. 23354
+  Tela\Opção no Sistema: Processar | Conversão de LayOut de Arquivos Financeiros da CAIXA para InterfacePREV
+  Descrição: Tratar casos que o plano previdenciario ficou errado, pois a data de inscrição em plano desativado não segue uma ordem cronológica.
+- Resolução da Pendência No. 23678
+  Tela\Opção no Sistema: Novo Plano / Saldamento
+  Descrição: Tratamento de Abono
+- Resolução da Pendência No. 23680
+  Tela\Opção no Sistema: Novo Plano / Saldamento
+  Descrição: Tratamento do Plano Contabil para ativo
+================================================================================
+CM$VER      3.00.08a    30/10/2006
+--------------------------------------------------------------------------------
+- Resolução da Pendência No. 23583
+  Tela\Opção no Sistema: Novo Plano / Saldamentos
+  Descrição: Alteração na versão de saldamento de assistido para que contemple revisão de tábua mesmo havendo registro do benefício único antecipado.
+- Resolução da Pendência No. 23604
+  Tela\Opção no Sistema: Novo Plano / Saldamentos de Assistidos
+  Descrição: Bloquear o saldamento de assistidos para as pessoas que tiverem registro na Tmpdesc no mês do saldamento em plano diferente do plano saldado.
+- Resolução da Pendência No. 23650
+  Tela\Opção no Sistema: Novo Plano / Desfazer Saldamento
+  Descrição: Desfazer emprestimo e TMPDESC
+- Resolução da Pendência No. 23583
+  Tela\Opção no Sistema: Novo Plano / Saldamentos
+  Descrição: Alteração na versão de saldamento de assistido para que contemple revisão de tábua mesmo havendo registro do benefício único antecipado.
+- Resolução da Pendência No. 23604
+  Tela\Opção no Sistema: Novo Plano / Saldamentos de Assistidos
+  Descrição: Bloquear o saldamento de assistidos para as pessoas que tiverem registro na Tmpdesc no mês do saldamento em plano diferente do plano saldado.
+================================================================================
+CM$VER      3.00.08     03/10/2006
+--------------------------------------------------------------------------------
+Liberação de versão para o padrão 5.10.12.
+================================================================================
+CM$VER      3.00.07c    27/09/2006
+--------------------------------------------------------------------------------
+- Resolução da Pendência No. 23257
+  Tela\Opção no Sistema: ? | Importação de Reservas da COATE
+  Descrição: Novo processo de importação de reservas a partir de arquivo-texto;
+- Resolução da Pendência No. 23222
+  Tela\Opção no Sistema: Processar / Conversão de LayOut de Arquivos Cadastrais da CAIXA para InterfacePREV
+  Descrição: Inclusão de novos cargos conforme EBM, criados pela CAIXA
+- Resolução da Pendência No. 23339
+  Tela\Opção no Sistema: Módulos / Folha de Benefícios / Contra cheque
+  Descrição: Acerto na emissão do contracheque quando a pessoa é aposentado e pensionista no mesmo mês.
+             Estava gerando mais de um contracheque, quando deveria gerar apenas 2, um do pagamento da
+             Aposentadoria e outro com o pagamento da Pensão.
+- Resolução da Pendência No. 20988
+  Tela\Opção no Sistema: Novo Plano | Saldamento de Aposentado
+  Descrição: Saldamento de Benefício, após apuração da Reserva e do valor do
+             Benefício pela área Atuarial (GEPAC), deverá contemplar os critérios
+             em anexo
+- Resolução da Pendência No. 21201
+  Tela\Opção no Sistema: Novo Plano | Desfazer Saldamento
+  Descrição: Evento de retorno para o plano REG/REPLAN dos participantes que
+             migraram para o REB2002 e optarão pelo saldamento, uma vez que o
+             módulo ADMPREV não contempla tal função.
+- Resolução da Pendência No. 21242
+  Tela\Opção no Sistema: Novo Plano | Saldamento de Ativo
+  Descrição: Evento de Saldamento dos participantes que ainda estão no REG/REPLAN
+             e dos que retornarão do REB2002, que optaram por essa forma de
+             benefício, tanto Assistidos como Ativos.
+- Resolução da Pendência No. 22587
+  Tela\Opção no Sistema: Módulos | Folha de Benefícios | Contra cheque
+  Descrição: Adequar os Demonstrativos de Proventos para o Novo Plano.
+- Resolução da Pendência No. 22937
+  Tela\Opção no Sistema: Novo Plano | Desfazer Saldamento
+  Descrição: Tela que desfaz o saldamento.
+================================================================================
+CM$VER      3.00.07b    22/08/2006
+--------------------------------------------------------------------------------
+- Resolução da Pendência No. 22811
+  Tela\Opção no Sistema: Processar | Conversão de LayOut de Arquivos Cadastrais da CAIXA para InterfacePREV
+  Descrição: Alteração para tratar o novo layout do arquivo SRH2.
+================================================================================
+CM$VER      3.00.07a    18/08/2006
+--------------------------------------------------------------------------------
+- Resolução da Pendência No. 22846
+  Tela\Opção no Sistema: Processar | Conversão de LayOut de Arquivos Cadastrais da CAIXA para InterfacePREV
+  Descrição: Tratamento de gravação de evento de inscrição no novo plano e gravação de arquivo de log com
+             as inconsistências
+- Resolução da Pendência No. 22450
+  Tela\Opção no Sistema: Processar | Conversão de LayOut de Arquivos Cadastrais da CAIXA para InterfacePREV
+  Descrição: Implementação do novo modo função.
+================================================================================
+CM$VER      3.00.07     15/08/2006
+--------------------------------------------------------------------------------
+Liberação de versão para o padrão 5.10.11.
+================================================================================
+CM$VER      3.00.06     12/07/2006
+--------------------------------------------------------------------------------
+Liberação de versão para o padrão 5.10.10.
+================================================================================
+CM$VER      3.00.05f    06/07/2006
+--------------------------------------------------------------------------------
+- Resolução da Pendência No. 22748 (Reabertura)
+  Tela\Opção no Sistema: Processar | Conversão de LayOut de Arquivos Cadastrais da CAIXA para InterfacePREV
+  Descrição: Gravar no arquivo a data final do cargo anterior com um dia antes da data de início, da cargo atual.
+================================================================================
+CM$VER      3.00.05e    06/07/2006
+--------------------------------------------------------------------------------
+- Resolução da Pendência No. 22748 (Reabertura)
+  Tela\Opção no Sistema: Processar | Conversão de LayOut de Arquivos Cadastrais da CAIXA para InterfacePREV
+  Descrição: Gravar no arquivo a data final do cargo anterior com um dia antes da data de início, da cargo atual.
+================================================================================
+CM$VER      3.00.05d    05/07/2006
+--------------------------------------------------------------------------------
+- Resolução da Pendência No. 22748
+  Tela\Opção no Sistema: Processar | Conversão de LayOut de Arquivos Cadastrais da CAIXA para InterfacePREV
+  Descrição: Gravar no arquivo a data final do cargo anterior com um dia antes da data de início, da cargo atual.
+================================================================================
+CM$VER      3.00.05c    19/06/2006
+--------------------------------------------------------------------------------
+- Resolução da Pendência No. 22336
+  Tela\Opção no Sistema: Processar | Conversão de LayOut de Arquivos Cadastrais da CAIXA para InterfacePREV
+  Descrição: Implementação para gravar cargo anterior no evolução funcional.
+- Resolução da Pendência No. 22513
+  Tela\Opção no Sistema: Processar | Conversão de LayOut de Arquivos Cadastrais da CAIXA para InterfacePREV
+  Descrição: Acerto para gravar o modofunção FA para funções facultativos. Acerto também do percentual desta função que tem de ser 100.
+================================================================================
+CM$VER      3.00.05b    05/06/2006
+--------------------------------------------------------------------------------
+- Resolução da Pendência No. 22498
+  Tela\Opção no Sistema: Módulos / Folha de Benefícios / Contra cheque
+  Descrição: Inclusão da opção de emissão do contracheque no módulo FUNCEF.
+    Gravar no arquivo de contra cheque a NB do benefício de INSS ativo se existir.
+================================================================================
+CM$VER      3.00.05a    02/06/2006
+--------------------------------------------------------------------------------
+- Resolução da Pendência No. 21900
+  Tela\Opção no Sistema: Alimentação Rápida Funcef
+  Descrição: Rotina de realimentação rápida no REPLAN (módulo FUNCEF) não está tratando corretamente os períodos de incidência ou não de IRRF, na RESERVAPART. Testar com a Matricula: 2121618 (limpando HISTMOVRESERVA , alterando FLGCALCRESERVA = 0 na HSTCONTRIBPREV).
+- Resolução da Pendência No. 22189
+  Tela\Opção no Sistema: Alimentação Rápida Funcef
+  Descrição: Parametrizei novas regras de alimentação de reserva de poupança, para as contribuições facultativas, parcela patronal, do Plano REG/REPLAN. Fiz o teste no ADMPREV com Sete matriculas, uma para cada situação, e os resultados foram um sucesso. Porém, a alimentação do REG/REPLAN, para a massa total de participantes só funciona no Módulo FUNCEF. Fiz um teste com a matricula 3374008, o processo fez a alimentação dessa parcela, porém não respeitou a regra, ou seja, alimentou 100% da contribuição facultativa patronal, quando deveria ter descontado o custeio administrativo, também não foi observado a DATA a partir de 30/10/2003. Dessa forma, solicito ajuste imediato no programa, pois ao disparar esse processo para todos, haverá um ERRO gravíssimo nos resultados. Já solicitei a GESIS para deletar todos os registros da HISTMOVRESERVA da matricula utilizada no teste. Enquanto estou aqui relatando o fato, o usuário deste pode estar disparando o processo. Não temos como controlar as atividades diá
+- Resolução da Pendência No. 22454
+  Tela\Opção no Sistema: Processos | Conversão de LayOut de Arquivos Cadastrais da CAIXA para InterfacePREV
+  Descrição: Na rotina do separador de arquivo cadastral a partir do arquivo SRH16, deve-se buscar apenas as agências bancárias ativas (FLGATIVO='S').
+================================================================================
+CM$VER      3.00.05     04/05/2006
+--------------------------------------------------------------------------------
+Liberação de versão para o padrão 5.10.09.
+================================================================================
+CM$VER      3.00.04d    03/05/2006
+--------------------------------------------------------------------------------
+- Resolução da Pendência No. 22105
+  Tela\Opção no Sistema: Processos | Conversão de LayOut de Arquivos Cadastrais da CAIXA para InterfacePREV
+  Descrição: Implementação para gravar no arquivo as informações da função efetiva anterior, da função não efetiva, e da função de instrutoria e consultoria. Acerto da data final da função efetiva. 
+================================================================================
+CM$VER      3.00.04c    03/04/2006
+--------------------------------------------------------------------------------
+- Resolução da Pendência No. 21506
+  Tela\Opção no Sistema: Separação cadastral.
+  Descrição: Separação de funções com modo 'DP'.
+- Resolução da Pendência No. 21323
+  Tela\Opção no Sistema: Separação cadastral.
+  Descrição:  Separação do cargo ARQS6H, conforme EBM.
+- Resolução da Pendência No. 21242
+  Tela\Opção no Sistema: Inscrições Novo Plano
+  Descrição: Criação da função para inscrições de não-participantes e ativos Replan.
+================================================================================
+CM$VER      3.00.04b    15/03/2006
+--------------------------------------------------------------------------------
+- Resolução da Pendência No. 20986
+  Tela\Opção no Sistema: Processar | Conversão de LayOut de Arquivos Financeiros da CAIXA para InterfacePREV
+  Descrição: Alteração na busca do plano. Caso a rubrica não exista no plano atual e o participante seja migrado,
+                   jogar como aberto no plano anterior.
+- Resolução da Pendência No. 21713
+  Tela\Opção no Sistema: Processar | Conversão de LayOut de Arquivos Cadastrais
+  Descrição: Modificação para importação do DDD das filiais.
+================================================================================
+CM$VER      3.00.04a    07/03/2006
+--------------------------------------------------------------------------------
+- Resolução da Pendência No. 21536
+  Tela\Opção no Sistema: Processar | Conversão de LayOut de Arquivos Financeiros da CAIXA para InterfacePREV
+  Descrição: Modificação na separação para gravar a data final da função caso seja diferente da atual.
+================================================================================
+CM$VER      3.00.01a    27/04/2005
+--------------------------------------------------------------------------------
+- Resolução da Pendência No. 18947
+  Tela\Opção no Sistema: Processar | Conversão de LayOut de Arquivos Financeiros da CAIXA para InterfacePREV
+  Descrição: Alteração para que os registros na situação "excesso de débito" sejam tratados.
+================================================================================
+CM$ALT}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

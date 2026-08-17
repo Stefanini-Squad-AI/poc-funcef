@@ -1,0 +1,39 @@
+SELECT 
+   U.CodTipRecDes, 
+   U.RecPag,  
+   SUM(U.NaoZerados) AS NaoZerados
+FROM
+    (SELECT 
+        TRD.CodTipRecDes, 
+        TRD.RecPag,
+        COUNT(*) AS NaoZerados 
+     FROM FluxoOrcado Flx, 
+          TIPORECEBDESEMB TRD 
+     WHERE 
+        (Flx.IDPessoa = 1) AND 
+        (Flx.IDPessoa = TRD.IDPessoa) AND 
+        (SubStr(Flx.CodTipRecDes,1,Length(RTrim(TRD.CODTIPRECDES)))=RTrim(TRD.CODTIPRECDES)) AND 
+        (Flx.RecPag=TRD.RecPag) AND 
+        (Flx.VALOR<>0) AND (Flx.VALOR IS NOT NULL) 
+        AND (Flx.Prazo='C') 
+        AND (Flx.DATAPROGRAMADA>=To_Date( '01/07/2002', 'DD/MM/YYYY')) 
+        AND (Flx.DATAPROGRAMADA<=To_Date( '22/07/2002', 'DD/MM/YYYY')) 
+     GROUP BY TRD.CodTipRecDes, TRD.RecPag
+	UNION
+     SELECT 
+        TRD.CodTipRecDes, 
+        TRD.RecPag,
+        COUNT(*) AS NaoZerados 
+     FROM FluxoReal Flx, 
+          TIPORECEBDESEMB TRD 
+     WHERE 
+        (Flx.IDPessoa = 1) AND 
+        (Flx.IDPessoa = TRD.IDPessoa) AND 
+        (SubStr(Flx.CodTipRecDes,1,Length(RTrim(TRD.CODTIPRECDES)))=RTrim(TRD.CODTIPRECDES)) AND 
+        (Flx.RecPag=TRD.RecPag) AND 
+        (Flx.VALOR<>0) AND (Flx.VALOR IS NOT NULL) 
+        AND (Flx.DATACFLOAT>=To_Date( '01/07/2002', 'DD/MM/YYYY')) 
+        AND (Flx.DATACFLOAT<=To_Date( '22/07/2002', 'DD/MM/YYYY')) 
+     GROUP BY TRD.CodTipRecDes, TRD.RecPag) U
+	  
+GROUP BY U.CodTipRecDes, U.RecPag

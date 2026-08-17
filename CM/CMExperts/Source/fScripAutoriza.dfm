@@ -1,0 +1,711 @@
+object frmScriptAutoriza: TfrmScriptAutoriza
+  Left = 261
+  Top = 184
+  BorderStyle = bsSingle
+  Caption = 'Gerar scripts'
+  ClientHeight = 336
+  ClientWidth = 516
+  Color = clBtnFace
+  Constraints.MaxHeight = 363
+  Constraints.MaxWidth = 524
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'MS Sans Serif'
+  Font.Style = [fsBold]
+  OldCreateOrder = True
+  OnCreate = FormCreate
+  PixelsPerInch = 96
+  TextHeight = 13
+  object PnlFundo: TPanel
+    Left = 0
+    Top = 0
+    Width = 516
+    Height = 299
+    Align = alClient
+    BevelInner = bvLowered
+    BevelOuter = bvNone
+    BorderWidth = 3
+    TabOrder = 0
+    object Bevel2: TBevel
+      Left = 227
+      Top = 4
+      Width = 27
+      Height = 291
+      Align = alLeft
+      Shape = bsLeftLine
+    end
+    object Panel1: TPanel
+      Left = 4
+      Top = 4
+      Width = 223
+      Height = 291
+      Align = alLeft
+      BevelOuter = bvNone
+      BorderWidth = 5
+      Caption = 'Panel1'
+      TabOrder = 0
+      object dbgModuloEscolhe: TwwDBGrid
+        Left = 5
+        Top = 24
+        Width = 213
+        Height = 262
+        Selected.Strings = (
+          'IDMODULO'#9'3'#9'Id'
+          'NOMEMODULO'#9'50'#9'Módulo')
+        IniAttributes.Delimiter = ';;'
+        TitleColor = clBtnFace
+        FixedCols = 0
+        ShowHorzScrollBar = False
+        Align = alClient
+        DataSource = dsModuloEscolhe
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'MS Sans Serif'
+        Font.Style = [fsBold]
+        KeyOptions = []
+        MultiSelectOptions = [msoShiftSelect]
+        Options = [dgTitles, dgColumnResize, dgColLines, dgTabs, dgRowSelect, dgAlwaysShowSelection, dgConfirmDelete, dgCancelOnExit, dgMultiSelect]
+        ParentFont = False
+        TabOrder = 0
+        TitleAlignment = taLeftJustify
+        TitleFont.Charset = DEFAULT_CHARSET
+        TitleFont.Color = clWindowText
+        TitleFont.Height = -11
+        TitleFont.Name = 'MS Sans Serif'
+        TitleFont.Style = [fsBold]
+        TitleLines = 1
+        TitleButtons = True
+        OnTitleButtonClick = dbgModuloEscolheTitleButtonClick
+        OnDrawDataCell = dbgModuloEscolheDrawDataCell
+        OnMouseDown = dbgModuloEscolheMouseDown
+        IndicatorColor = icBlack
+      end
+      object Panel2: TPanel
+        Left = 5
+        Top = 5
+        Width = 213
+        Height = 19
+        Align = alTop
+        Alignment = taLeftJustify
+        BevelInner = bvRaised
+        BevelOuter = bvLowered
+        Caption = ' Módulos disponiveis'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'MS Sans Serif'
+        Font.Style = [fsBold]
+        ParentFont = False
+        TabOrder = 1
+      end
+    end
+    object chkObjetos: TCheckBox
+      Left = 240
+      Top = 7
+      Width = 97
+      Height = 17
+      Caption = 'Gera Objetos'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'MS Sans Serif'
+      Font.Style = [fsBold]
+      ParentFont = False
+      TabOrder = 1
+      OnClick = chkObjetosClick
+    end
+    object grpObjeto: TGroupBox
+      Left = 239
+      Top = 9
+      Width = 265
+      Height = 151
+      TabOrder = 2
+      object spd1: TSpeedButton
+        Left = 234
+        Top = 74
+        Width = 22
+        Height = 22
+        Glyph.Data = {
+          76010000424D7601000000000000760000002800000020000000100000000100
+          0400000000000001000000000000000000001000000010000000000000000000
+          800000800000008080008000000080008000808000007F7F7F00BFBFBF000000
+          FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00303333333333
+          333337F3333333333333303333333333333337F33FFFFF3FF3FF303300000300
+          300337FF77777F77377330000BBB0333333337777F337F33333330330BB00333
+          333337F373F773333333303330033333333337F3377333333333303333333333
+          333337F33FFFFF3FF3FF303300000300300337FF77777F77377330000BBB0333
+          333337777F337F33333330330BB00333333337F373F773333333303330033333
+          333337F3377333333333303333333333333337FFFF3FF3FFF333000003003000
+          333377777F77377733330BBB0333333333337F337F33333333330BB003333333
+          333373F773333333333330033333333333333773333333333333}
+        NumGlyphs = 2
+        OnClick = spd1Click
+      end
+      object lbl1: TLabel
+        Left = 12
+        Top = 60
+        Width = 66
+        Height = 13
+        Caption = 'Script geral'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'MS Sans Serif'
+        Font.Style = [fsBold]
+        ParentFont = False
+      end
+      object spd2: TSpeedButton
+        Left = 234
+        Top = 116
+        Width = 22
+        Height = 22
+        Glyph.Data = {
+          76010000424D7601000000000000760000002800000020000000100000000100
+          0400000000000001000000000000000000001000000010000000000000000000
+          800000800000008080008000000080008000808000007F7F7F00BFBFBF000000
+          FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00303333333333
+          333337F3333333333333303333333333333337F33FFFFF3FF3FF303300000300
+          300337FF77777F77377330000BBB0333333337777F337F33333330330BB00333
+          333337F373F773333333303330033333333337F3377333333333303333333333
+          333337F33FFFFF3FF3FF303300000300300337FF77777F77377330000BBB0333
+          333337777F337F33333330330BB00333333337F373F773333333303330033333
+          333337F3377333333333303333333333333337FFFF3FF3FFF333000003003000
+          333377777F77377733330BBB0333333333337F337F33333333330BB003333333
+          333373F773333333333330033333333333333773333333333333}
+        NumGlyphs = 2
+        OnClick = spd2Click
+      end
+      object lbl2: TLabel
+        Left = 12
+        Top = 102
+        Width = 161
+        Height = 13
+        Caption = 'Script de criação de objetos'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'MS Sans Serif'
+        Font.Style = [fsBold]
+        ParentFont = False
+      end
+      object edScrGeral: TEdit
+        Left = 12
+        Top = 75
+        Width = 220
+        Height = 21
+        TabOrder = 0
+        OnChange = edScrGeralChange
+      end
+      object mem1: TMemo
+        Left = 17
+        Top = 15
+        Width = 241
+        Height = 40
+        BorderStyle = bsNone
+        Color = clBtnFace
+        Ctl3D = False
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'MS Sans Serif'
+        Font.Style = []
+        Lines.Strings = (
+          'A partir de um script com todos os objetos do '
+          'Banco de dados FUNCEF, gera um novo script '
+          'somente com as informações '
+          'dos Módulos escolhidos.')
+        ParentCtl3D = False
+        ParentFont = False
+        TabOrder = 1
+      end
+      object edscrObjeto: TEdit
+        Left = 12
+        Top = 117
+        Width = 220
+        Height = 21
+        TabOrder = 2
+        OnChange = edScrGeralChange
+      end
+    end
+    object grpAutoriza: TGroupBox
+      Left = 239
+      Top = 160
+      Width = 265
+      Height = 124
+      TabOrder = 3
+      object spd3: TSpeedButton
+        Left = 234
+        Top = 95
+        Width = 22
+        Height = 22
+        Glyph.Data = {
+          76010000424D7601000000000000760000002800000020000000100000000100
+          0400000000000001000000000000000000001000000010000000000000000000
+          800000800000008080008000000080008000808000007F7F7F00BFBFBF000000
+          FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00303333333333
+          333337F3333333333333303333333333333337F33FFFFF3FF3FF303300000300
+          300337FF77777F77377330000BBB0333333337777F337F33333330330BB00333
+          333337F373F773333333303330033333333337F3377333333333303333333333
+          333337F33FFFFF3FF3FF303300000300300337FF77777F77377330000BBB0333
+          333337777F337F33333330330BB00333333337F373F773333333303330033333
+          333337F3377333333333303333333333333337FFFF3FF3FFF333000003003000
+          333377777F77377733330BBB0333333333337F337F33333333330BB003333333
+          333373F773333333333330033333333333333773333333333333}
+        NumGlyphs = 2
+        OnClick = spd3Click
+      end
+      object lbl3: TLabel
+        Left = 12
+        Top = 80
+        Width = 184
+        Height = 13
+        Caption = 'Script dos dados de autorização'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'MS Sans Serif'
+        Font.Style = [fsBold]
+        ParentFont = False
+      end
+      object edscrAutoriza: TEdit
+        Left = 12
+        Top = 95
+        Width = 220
+        Height = 21
+        TabOrder = 0
+        OnChange = edScrGeralChange
+      end
+      object mem2: TMemo
+        Left = 25
+        Top = 29
+        Width = 233
+        Height = 28
+        BorderStyle = bsNone
+        Color = clBtnFace
+        Ctl3D = False
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'MS Sans Serif'
+        Font.Style = []
+        Lines.Strings = (
+          'Cria um script com os dados referentes ao '
+          'sistema de Autorização dos Módulos escolhidos.')
+        ParentCtl3D = False
+        ParentFont = False
+        TabOrder = 1
+      end
+      object CkbApaga: TCheckBox
+        Left = 14
+        Top = 58
+        Width = 201
+        Height = 17
+        Caption = 'Apaga Repositório de Objetos'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'MS Sans Serif'
+        Font.Style = [fsBold]
+        ParentFont = False
+        TabOrder = 2
+        Visible = False
+      end
+    end
+    object chkAutoriza: TCheckBox
+      Left = 253
+      Top = 172
+      Width = 124
+      Height = 17
+      Caption = 'Gera Autorização '
+      Checked = True
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'MS Sans Serif'
+      Font.Style = [fsBold]
+      ParentFont = False
+      State = cbChecked
+      TabOrder = 4
+      OnClick = chkAutorizaClick
+    end
+  end
+  object CMOkCancel: TCMOkCancelar
+    Left = 0
+    Top = 299
+    Width = 516
+    Height = 37
+    AllowDrag = False
+    Background.Data = {
+      760F0000424D760F0000000000007600000028000000800000003C0000000100
+      040000000000000F000000000000000000001000000000000000000000000000
+      8000008000000080800080000000800080008080000080808000C0C0C0000000
+      FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00888888888888
+      888888888888787878888888888888788887888888888888888088F8FF8FFFF8
+      88F88F88F8F8F8F8F8F8F8F8F888888888887888788888888888888888888888
+      888888888887878878888888888888888878888888888888888888888FFFFF8F
+      8F8F88F8F8F8F8F8F8F8F8F88888888888888878788888888888888888888888
+      88888888888888787888888888888888878888888888888888888888888FF8FF
+      8F88888888F8F8FF8F8F88F88F88888888888888788888888888888888888888
+      8888888888887887888888888888888887888888888888888888888888888FFF
+      FF8F8888F8F8F8F8F8F88F888888888888888887878888888888888888888888
+      888888888888887888888888888888888888888888888888888888888888888F
+      F8F8F8F888F8F8F8F8F8F8F8F888888888888888788888888888888888888888
+      8888888888888888888888888888888888888888888888888888888888888888
+      FFFF8F8F8F8F8F8F8F8F888888888F8888888888888888888888888888888888
+      8888888888888888888888888888888888888888888888888888888888888888
+      8FF8F8F8F8F8F8FFFFF8F8F8F8F8888888888888878878788888888888888888
+      8888888888888888888888888888888888888888888888888888888888888887
+      88FFFFF8F8888F88F8F8F88F88888F8888888888888787888888888888888888
+      8888888888888788888888888888888888888888888888888888888888888888
+      888FFFFFF8F8F88F8F8FF8F8F88F888888888888888888788888888888888888
+      8888888888888888887888888888888888888888888888888888888888888888
+      8788FFFF8F8F88F8F8FF8FF8F8F8F88F88888888888787878888888888888888
+      8888888888888878887888888888888888888888888888888888888888888888
+      88888FFFFF8F8888F8F8FF8FF8F88F8888888888888888888888887888888888
+      8888888888888887888888888888888888888888888888888888888888888888
+      888888FFFF8F88F8F8F8F8F8F8F8F88F8F888888888887878887888788788888
+      8888888888888888888888888888888888888888888888888888888888888888
+      888888FFFFFF8F88F8F8F8FF8FF8F8F8888F8888888888887878878888888888
+      8888888888888888788888888888888888888888888888888888888888888888
+      8888888FFFF8F8F888F8F8F8F8F8F888F8888F88888888878887888888888888
+      8888888888888888878888888888888888888888888888888888888888888888
+      8888888F8FFF8F88F8F88F8FFF8F8F8F888F8888888888787878878888888F88
+      8888888888888888888887888888888888888888888888888888888888888888
+      8888888FFFF8F8888888F8F8F8F8F8F88F88F8888888888887887888888F8888
+      F8F8888888888888887888888888788888888888888888888888888888888888
+      88888788FFFFF8F888F88F8F8FF8F8F8F88F88F888888888787878788888F888
+      888F8F8888888888888788788887878888888888888888888888888888888888
+      88888888FFFF8F888888F8F8FF8F8F8F8F8F8F88888888888887878878888888
+      88888F8F88888888888878887888888888888888888888888888888888888888
+      888888788FFFF8F8F88F8F8FF8F8FF8F8F8F8F8F888888888878788788888888
+      7888888888888888888887878878888788888888888888888888888888888888
+      888888888FFFF8F88888888F8F8FF8F8F8F8F888F88888888887887878888887
+      8888888888887888888888788887888888888888888888888888888888888888
+      88888887888F8F8F88888F8F8F8F8F8F8F8F8F8F888888888888887878878878
+      8888888888888888888887888888888888888888888888888888888888888888
+      888888888888F8F8F8F88F8F8F8F8F8F8F8F8888888F88888888878878787878
+      8888888888787888888878888888888888888888888888888888888888888888
+      88888888888888F8F88888888F8F8F8F8F8F8F8F8F8888888888888888878888
+      8888888888888788888887888888888888888888888888888888888888888888
+      888888888888888F8F88888F8F8F8F8F8F8F8F888888F88F8888887888878888
+      8888888888888888888887788888888888888888888888888888888888888888
+      8788888888888888F8F8888888F88F8F8FF8F8F8F8F888888888888888878888
+      8888888888888888888888888888888888888888888888888888888888888888
+      8888888888888888888888888F88F8F8F8F8F8F88888F8888888888887888888
+      8888888888888888888887878888888888888888888888888888888888888888
+      888888788888887888888888888F8F8F8F8F8F8F8F8F888F8888888888878888
+      8888888888888888888888787888888888888888888888888888888888888888
+      87888888888888888888888888F8F8F8F8F8F8F8F8F88F888888888888788888
+      8888888888888888888888788888888888888888888888888888888888888878
+      88888888888888878888888888888F88F8F8F8F8F8F8F8888888888888888888
+      88888888888888888888888888888888888F8888888888888888888888888787
+      8787888888888888787888888888F88F8F8F8F8F8F8F8F888888888888888888
+      887888888888888888888888888888888788F888888888888888888888888878
+      787888788888888878887888888888F8F8F8F8FF8F8F88F88888888888888787
+      8888888888888888888888888888888888888F88888888888888888888888888
+      88878788888888888787878788888F88F8F8F8F8F8F8F88F8888888888888787
+      8788888788888888888888888888888888888FF8F88887888888888888888888
+      7878888888888888887888888888888F8F8F8F8F8F8F88F8F888888888888888
+      8888888878888888888888888888888888888888888888888888888888888888
+      878888888888888888888888878888F88F8F8F8F8F8F8F8F88F8888888888887
+      8788888888888888888888888888888888887888888888888888888888888888
+      88788888888888888888888888888888F8F88F8F8F8F8F8FF888F88888888878
+      888888F888888888888888888888888888888888878788878888888888888888
+      88788888888888888888888887888888888F88F8F8F8F8F888F8888888888888
+      787888F8F8888888888888788888888888888888888888888888888888888888
+      888888888888888888888888788788888F88F8F8F8F8F8F8F8F8F8F888888888
+      8888888F88888888888888888888888888888888888888888888888888888888
+      88888888888888888888888887888888888F88F8F8F8F8F8F8F88888F8888888
+      8878888F88888888888888878788888888888888888888888888888888888888
+      8888888888888888888888888878888888888F8F8F8F8F8F8888F8F888888888
+      888888888F888888888888888878888888888888888888888888888888888888
+      888888888888888888888888888888888888F8F8F8F8F8F8F8F8F88888888888
+      8888888888888888888888887888888888888888888888888888888888888888
+      88888888888888888888888888878887888888F8F88F8F8F8F8F88F888888888
+      8888888888888888888888888878788888888887888888888888888888888888
+      8888888888888888888888888888788888888F8F88F8F8F8F8F88F888F888888
+      8888888888888788888888888888888888888878788888888888888888888888
+      88888888888888888788888888878787888888888F8F8FF8F8F8F88F88888888
+      8888888888878888888888888878788888888888888888888888888888888888
+      888888888888888888788888888877878888888F8F8F8F8F8F88F8F8F8F88888
+      888888888878787878888888888888888888888887888888888F888888888888
+      888888888888888888888888888778778888888888F88F8F8F8F88F88888F888
+      88888888787888888888888888888888888888888888888888F8F88888888888
+      88888888888888888887888888887778788888888F88F8F8F888F8F8F8F88888
+      8888888888787888888888888888888888888888888888888888888888888888
+      888888888888888888888888888887888888888888F88F8F8F8F8F8F888F8888
+      8888888878788888888888888888888888888888888888888888888888888888
+      88888888888888888888888888888888888788888888F88F8F88F8F8F8F88F88
+      8888888888787888888888888888888888888888888888888888888888888888
+      8888888888888888888888888888888888788888888F8F8F8F8F8F8F888F8888
+      88888888888888888F8F88888878888888888888888888888888888887888888
+      8888888888888888888888888888888888878888888888F8F8F88F8F8F8F88F8
+      88888888888888888F8F8F888888888888888888888888888888887888888888
+      88888888788888888888888888887888888878888888F8F8F88F8F8F8F88F888
+      888888888888888888FFF88F8888878888888888888888888888888888788888
+      88888888888888888888888888887888888887888888888888F8F8F8F88F88F8
+      88F8888888888888888888F88888888888888888888888888888888888888888
+      88888888888888888888888888888888888888787888888F8F88F8F8F8F88F88
+      F88888888888888888888888F8F8888888888888888888888888888888888888
+      888888888878888888888888888888888888878888888888888F8F8F8F88F88F
+      88F88888888F88888878888888F8888888888888888888888888888888888888
+      88888888888788888888888888888888888888888788888888F8F8F88F8F88F8
+      8F88F88888888F88888878888888888888888888888888888888888888888888
+      8888888888887888888888888888888888888888888888888F88F8F8F888F888
+      F88F888888888888887887888888887888888888888888888888888888888888
+      888888888888888887888888888888888888888888788888888F8F8F8F8F88F8
+      F8F8888888888888888878787888888888888888888888888888888888888888
+      88888888888887888888888888888788888888888887888888888888F888F888
+      8888888888888888888787878788887888888888888888888888888888888888
+      88888888888888888888888888888888888888888888888888888F8F8F8F8888
+      F88F88F888888888888887887878788888888888888888888888888888888888
+      8888888888888888888888888888888888888888888788888888}
+    OnSairClick = CMOkCancelSairClick
+    OnOkClick = CMOkCancelOkClick
+    Buttons.BtnOk.Visible = True
+    Buttons.BtnOk.Caption = '&Gerar'
+    Buttons.BtnOk.Enabled = True
+    Buttons.BtnOk.Tag = 0
+    Buttons.BtnOk.ShowHint = False
+    Buttons.BtnOk.Default = False
+    Buttons.BtnOk.Cancel = False
+    Buttons.BtnCancelar.Visible = False
+    Buttons.BtnCancelar.Caption = '&Cancelar'
+    Buttons.BtnCancelar.Enabled = True
+    Buttons.BtnCancelar.Tag = 0
+    Buttons.BtnCancelar.ShowHint = False
+    Buttons.BtnCancelar.Default = False
+    Buttons.BtnCancelar.Cancel = False
+    Buttons.BtnSair.Visible = True
+    Buttons.BtnSair.Caption = '&Sair'
+    Buttons.BtnSair.Enabled = True
+    Buttons.BtnSair.Tag = 0
+    Buttons.BtnSair.ShowHint = False
+    Buttons.BtnSair.Default = False
+    Buttons.BtnSair.Cancel = False
+    Buttons.BtnAjuda.Visible = False
+    Buttons.BtnAjuda.Caption = 'Aju&da'
+    Buttons.BtnAjuda.Enabled = True
+    Buttons.BtnAjuda.Tag = 0
+    Buttons.BtnAjuda.ShowHint = False
+    Buttons.BtnAjuda.Default = False
+    Buttons.BtnAjuda.Cancel = False
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -11
+    Font.Name = 'MS Sans Serif'
+    Font.Style = []
+    ParentFont = True
+  end
+  object qryModulo: TwwQuery
+    DatabaseName = 'BaseSAD'
+    SQL.Strings = (
+      'SELECT '
+      '  CM$_OBJMODULO.IDMODULO , '
+      '  CM$_OBJMODULO.NOMEOBJETO , '
+      '  CM$_OBJMODULO.TIPOOBJETO'
+      'FROM '
+      '  CM$_OBJMODULO')
+    ValidateWithMask = True
+    Left = 92
+    Top = 164
+  end
+  object qryOperFunc: TwwQuery
+    DatabaseName = 'BaseSAD'
+    DataSource = dsModulo
+    SQL.Strings = (
+      'SELECT'
+      '  OPERFUNC.IDMODULO , '
+      '  OPERFUNC.IDOPERFUNC , '
+      '  OPERFUNC.IDFUNCAO , '
+      '  OPERFUNC.IDOPERACAO'
+      'FROM OPERFUNC'
+      'WHERE ( OPERFUNC.IDMODULO =:IdModulo )')
+    ValidateWithMask = True
+    Left = 34
+    Top = 108
+    ParamData = <
+      item
+        DataType = ftUnknown
+        Name = 'IdModulo'
+        ParamType = ptUnknown
+      end>
+  end
+  object qryfrobfnop: TwwQuery
+    DatabaseName = 'BaseSAD'
+    DataSource = dsModulo
+    SQL.Strings = (
+      'SELECT  '
+      '  DISTINCT FROBFNOP.IDOPERFUNC , '
+      '  FROBFNOP.IDOBJETO , '
+      '  FROBFNOP.IDFORM , '
+      '  OPERFUNC.IDMODULO'
+      'FROM '
+      '  FROBFNOP , '
+      '  OPERFUNC'
+      'WHERE '
+      '( FROBFNOP.IDOPERFUNC = OPERFUNC.IDOPERFUNC )'
+      '  AND'
+      ' ('
+      ' ( OPERFUNC.IDMODULO =:IdModulo )'
+      ' )')
+    ValidateWithMask = True
+    Left = 92
+    Top = 222
+    ParamData = <
+      item
+        DataType = ftUnknown
+        Name = 'IdModulo'
+        ParamType = ptUnknown
+      end>
+  end
+  object qryForm: TwwQuery
+    DatabaseName = 'BaseSAD'
+    DataSource = dsModulo
+    SQL.Strings = (
+      'SELECT  '
+      '  DISTINCT FORM.IDFORM , '
+      '  FORM.NOMEFORM , '
+      '  OPERFUNC.IDMODULO'
+      'FROM '
+      '  FORM ,'
+      '  FROBFNOP,'
+      '  OPERFUNC'
+      'WHERE '
+      '( OPERFUNC.IDOPERFUNC = FROBFNOP.IDOPERFUNC )'
+      '  AND'
+      ' ( FROBFNOP.IDFORM = FORM.IDFORM )'
+      '  AND'
+      ' ('
+      ' ( OPERFUNC.IDMODULO =:IdModulo )'
+      ' )')
+    ValidateWithMask = True
+    Left = 41
+    Top = 233
+    ParamData = <
+      item
+        DataType = ftInteger
+        Name = 'IdModulo'
+        ParamType = ptUnknown
+      end>
+  end
+  object qryObjeto: TwwQuery
+    DatabaseName = 'BaseSAD'
+    DataSource = dsModulo
+    SQL.Strings = (
+      'SELECT  '
+      '  DISTINCT OBJETO.IDOBJETO , '
+      '  OBJETO.NOMEOBJETO , '
+      '  OPERFUNC.IDMODULO'
+      'FROM '
+      '  OBJETO , '
+      '  FROBFNOP , '
+      '  OPERFUNC'
+      'WHERE '
+      '( OPERFUNC.IDOPERFUNC = FROBFNOP.IDOPERFUNC )'
+      '  AND'
+      ' ( OBJETO.IDOBJETO = FROBFNOP.IDOBJETO )'
+      '  AND'
+      ' ('
+      ' ( OPERFUNC.IDMODULO =:IdModulo )'
+      ' )')
+    ValidateWithMask = True
+    Left = 144
+    Top = 270
+    ParamData = <
+      item
+        DataType = ftUnknown
+        Name = 'IdModulo'
+        ParamType = ptUnknown
+      end>
+  end
+  object qryFuncao: TwwQuery
+    DatabaseName = 'BaseSAD'
+    DataSource = dsModulo
+    SQL.Strings = (
+      'SELECT  '
+      '  DISTINCT FUNCAO.IDFUNCAO , '
+      '  FUNCAO.NOMEFUNCAO , '
+      '  FUNCAO.IDMODULO , '
+      '  FUNCAO.IDFUNCAOPAI'
+      'FROM '
+      '  FUNCAO'
+      'WHERE ( FUNCAO.IDMODULO =:IdModulo )')
+    ValidateWithMask = True
+    Left = 38
+    Top = 165
+    ParamData = <
+      item
+        DataType = ftInteger
+        Name = 'IdModulo'
+        ParamType = ptUnknown
+      end>
+  end
+  object qryOperacao: TwwQuery
+    DatabaseName = 'BaseSAD'
+    DataSource = dsModulo
+    SQL.Strings = (
+      'SELECT  '
+      '  DISTINCT OPERACAO.IDOPERACAO , '
+      '  OPERACAO.NOMEOPERACAO , '
+      '  OPERFUNC.IDMODULO'
+      'FROM '
+      '  OPERACAO , '
+      '  OPERFUNC'
+      'WHERE '
+      '  ( OPERFUNC.IDOPERACAO = OPERACAO.IDOPERACAO )'
+      '  AND'
+      ' ( OPERFUNC.IDMODULO =:IdModulo )')
+    ValidateWithMask = True
+    Left = 90
+    Top = 108
+    ParamData = <
+      item
+        DataType = ftInteger
+        Name = 'IdModulo'
+        ParamType = ptUnknown
+      end>
+  end
+  object dsModulo: TwwDataSource
+    DataSet = qryModulo
+    Left = 147
+    Top = 204
+  end
+  object qryModuloEscolhe: TwwQuery
+    DatabaseName = 'BaseSAD'
+    SQL.Strings = (
+      'SELECT   MODULO.IDMODULO ,   MODULO.NOMEMODULO'
+      'FROM  MODULO'
+      'ORDER BY MODULO.IDMODULO')
+    ValidateWithMask = True
+    Left = 37
+    Top = 54
+  end
+  object dsModuloEscolhe: TwwDataSource
+    DataSet = qryModuloEscolhe
+    Left = 86
+    Top = 54
+  end
+  object SaveDialog1: TSaveDialog
+    DefaultExt = 'sql'
+    FileName = 'IniAutorizacao.sql'
+    Filter = 'Scripts SQL|*.sql|Texto|*.txt|Todos os arquivos|*.*'
+    FilterIndex = 0
+    Options = [ofOverwritePrompt, ofHideReadOnly, ofExtensionDifferent, ofCreatePrompt]
+    Title = 'Salvar script de Autorização'
+    Left = 161
+    Top = 120
+  end
+  object OpenDialog1: TOpenDialog
+    DefaultExt = '*.sql'
+    FileName = 'scrGeralCM.sql'
+    Filter = 'Scripts|*.sql|Todos os arquivos|*.*'
+    FilterIndex = 0
+    Options = [ofHideReadOnly, ofExtensionDifferent, ofPathMustExist, ofFileMustExist]
+    Title = 'Script geral CM'
+    Left = 155
+    Top = 64
+  end
+end

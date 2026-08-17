@@ -1,0 +1,1454 @@
+inherited dtmTempoServico: TdtmTempoServico
+  Left = 162
+  Top = 156
+  Width = 542
+  Height = 342
+  Caption = 'dtmRelTempoServico'
+  PixelsPerInch = 96
+  TextHeight = 13
+  inherited pplExemplo: TppBDEPipeline
+    Top = 104
+    object pplExemploppField1: TppField
+      FieldAlias = 'NOME'
+      FieldName = 'NOME'
+      FieldLength = 0
+      DisplayWidth = 0
+      Position = 0
+    end
+    object pplExemploppField2: TppField
+      FieldAlias = 'RAZAOSOCIAL'
+      FieldName = 'RAZAOSOCIAL'
+      FieldLength = 60
+      DisplayWidth = 60
+      Position = 1
+    end
+  end
+  inherited dsExemplo: TwwDataSource
+    Top = 104
+  end
+  inherited qryExemplo: TwwQuery
+    Top = 104
+  end
+  inherited rpExemplo: TppReport
+    Top = 104
+  end
+  object ppTempoServico: TppBDEPipeline
+    DataSource = dsTempoServico
+    UserName = 'lExemplo1'
+    Left = 157
+    Top = 16
+    object ppTempoServicoppField1: TppField
+      FieldAlias = 'MATRICULAATUAL'
+      FieldName = 'MATRICULAATUAL'
+      FieldLength = 13
+      DisplayWidth = 13
+      Position = 0
+    end
+    object ppTempoServicoppField2: TppField
+      Alignment = taRightJustify
+      FieldAlias = 'IDPESSOA'
+      FieldName = 'IDPESSOA'
+      FieldLength = 0
+      DataType = dtDouble
+      DisplayWidth = 10
+      Position = 1
+    end
+    object ppTempoServicoppField3: TppField
+      Alignment = taRightJustify
+      FieldAlias = 'IDPESSJUR'
+      FieldName = 'IDPESSJUR'
+      FieldLength = 0
+      DataType = dtDouble
+      DisplayWidth = 10
+      Position = 2
+    end
+    object ppTempoServicoppField4: TppField
+      Alignment = taRightJustify
+      FieldAlias = 'SEQHISTFUNC'
+      FieldName = 'SEQHISTFUNC'
+      FieldLength = 0
+      DataType = dtDouble
+      DisplayWidth = 10
+      Position = 3
+    end
+    object ppTempoServicoppField5: TppField
+      Alignment = taRightJustify
+      FieldAlias = 'IDDOCUMENTO'
+      FieldName = 'IDDOCUMENTO'
+      FieldLength = 0
+      DataType = dtDouble
+      DisplayWidth = 10
+      Position = 4
+    end
+    object ppTempoServicoppField6: TppField
+      FieldAlias = 'CODTPINSALUBRI'
+      FieldName = 'CODTPINSALUBRI'
+      FieldLength = 10
+      DisplayWidth = 10
+      Position = 5
+    end
+    object ppTempoServicoppField7: TppField
+      FieldAlias = 'FLGCONTATSTRANSF'
+      FieldName = 'FLGCONTATSTRANSF'
+      FieldLength = 3
+      DisplayWidth = 3
+      Position = 6
+    end
+    object ppTempoServicoppField8: TppField
+      FieldAlias = 'DATAINICIO'
+      FieldName = 'DATAINICIO'
+      FieldLength = 0
+      DataType = dtDateTime
+      DisplayWidth = 18
+      Position = 7
+    end
+    object ppTempoServicoppField9: TppField
+      FieldAlias = 'DATAFINAL'
+      FieldName = 'DATAFINAL'
+      FieldLength = 0
+      DataType = dtDateTime
+      DisplayWidth = 18
+      Position = 8
+    end
+    object ppTempoServicoppField10: TppField
+      FieldAlias = 'CARGO'
+      FieldName = 'CARGO'
+      FieldLength = 40
+      DisplayWidth = 40
+      Position = 9
+    end
+    object ppTempoServicoppField11: TppField
+      Alignment = taRightJustify
+      FieldAlias = 'VALORCARGO'
+      FieldName = 'VALORCARGO'
+      FieldLength = 0
+      DataType = dtDouble
+      DisplayWidth = 10
+      Position = 10
+    end
+    object ppTempoServicoppField12: TppField
+      FieldAlias = 'FUNCAO'
+      FieldName = 'FUNCAO'
+      FieldLength = 40
+      DisplayWidth = 40
+      Position = 11
+    end
+    object ppTempoServicoppField13: TppField
+      FieldAlias = 'VINCEMPREG'
+      FieldName = 'VINCEMPREG'
+      FieldLength = 2
+      DisplayWidth = 2
+      Position = 12
+    end
+    object ppTempoServicoppField14: TppField
+      FieldAlias = 'MATRICULA'
+      FieldName = 'MATRICULA'
+      FieldLength = 13
+      DisplayWidth = 13
+      Position = 13
+    end
+    object ppTempoServicoppField15: TppField
+      FieldAlias = 'EMPRESA'
+      FieldName = 'EMPRESA'
+      FieldLength = 60
+      DisplayWidth = 60
+      Position = 14
+    end
+    object ppTempoServicoppField16: TppField
+      Alignment = taRightJustify
+      FieldAlias = 'TEMPOCALC'
+      FieldName = 'TEMPOCALC'
+      FieldLength = 0
+      DataType = dtDouble
+      DisplayWidth = 10
+      Position = 15
+    end
+    object ppTempoServicoppField17: TppField
+      FieldAlias = 'FLGCONCOMITANTETRANSF'
+      FieldName = 'FLGCONCOMITANTETRANSF'
+      FieldLength = 3
+      DisplayWidth = 3
+      Position = 16
+    end
+    object ppTempoServicoppField18: TppField
+      FieldAlias = 'CPF'
+      FieldName = 'CPF'
+      FieldLength = 18
+      DisplayWidth = 18
+      Position = 17
+    end
+    object ppTempoServicoppField19: TppField
+      Alignment = taRightJustify
+      FieldAlias = 'FATOR'
+      FieldName = 'FATOR'
+      FieldLength = 0
+      DataType = dtDouble
+      DisplayWidth = 10
+      Position = 18
+    end
+    object ppTempoServicoppField20: TppField
+      Alignment = taRightJustify
+      FieldAlias = 'TEMPOSERVANTERIOR'
+      FieldName = 'TEMPOSERVANTERIOR'
+      FieldLength = 0
+      DataType = dtDouble
+      DisplayWidth = 10
+      Position = 19
+    end
+    object ppTempoServicoppField21: TppField
+      Alignment = taRightJustify
+      FieldAlias = 'TEMPOSITESPECIAL'
+      FieldName = 'TEMPOSITESPECIAL'
+      FieldLength = 0
+      DataType = dtDouble
+      DisplayWidth = 10
+      Position = 20
+    end
+    object ppTempoServicoppField22: TppField
+      Alignment = taRightJustify
+      FieldAlias = 'TEMPONAOCREDITADO'
+      FieldName = 'TEMPONAOCREDITADO'
+      FieldLength = 0
+      DataType = dtDouble
+      DisplayWidth = 10
+      Position = 21
+    end
+    object ppTempoServicoppField23: TppField
+      FieldAlias = 'NOME'
+      FieldName = 'NOME'
+      FieldLength = 60
+      DisplayWidth = 60
+      Position = 22
+    end
+    object ppTempoServicoppField24: TppField
+      Alignment = taRightJustify
+      FieldAlias = 'FLGCONTATS'
+      FieldName = 'FLGCONTATS'
+      FieldLength = 0
+      DataType = dtDouble
+      DisplayWidth = 10
+      Position = 23
+    end
+    object ppTempoServicoppField25: TppField
+      Alignment = taRightJustify
+      FieldAlias = 'TEMPOSERVCALC'
+      FieldName = 'TEMPOSERVCALC'
+      FieldLength = 0
+      DataType = dtDouble
+      DisplayWidth = 10
+      Position = 24
+    end
+    object ppTempoServicoppField26: TppField
+      Alignment = taRightJustify
+      FieldAlias = 'TEMPOSEMCONVERSAO'
+      FieldName = 'TEMPOSEMCONVERSAO'
+      FieldLength = 0
+      DataType = dtDouble
+      DisplayWidth = 10
+      Position = 25
+    end
+    object ppTempoServicoppField27: TppField
+      FieldAlias = 'TEMPOSEMCONVERSAOEXT'
+      FieldName = 'TEMPOSEMCONVERSAOEXT'
+      FieldLength = 35
+      DisplayWidth = 35
+      Position = 26
+    end
+    object ppTempoServicoppField28: TppField
+      FieldAlias = 'TEMPOINDIVEXT'
+      FieldName = 'TEMPOINDIVEXT'
+      FieldLength = 35
+      DisplayWidth = 35
+      Position = 27
+    end
+    object ppTempoServicoppField29: TppField
+      FieldAlias = 'TEMPOTOTALEXT'
+      FieldName = 'TEMPOTOTALEXT'
+      FieldLength = 35
+      DisplayWidth = 35
+      Position = 28
+    end
+  end
+  object dsTempoServico: TwwDataSource
+    DataSet = qryTempoServico
+    Left = 95
+    Top = 16
+  end
+  object qryTempoServico: TwwQuery
+    CachedUpdates = True
+    AutoRefresh = True
+    DatabaseName = 'BaseDados'
+    SQL.Strings = (
+      'SELECT EL.MATRICULA AS MATRICULAATUAL,'
+      
+        '  H.IDPESSOA,   H.IDPESSJUR,  H.SEQHISTFUNC, H.IDDOCUMENTO, H.CO' +
+        'DTPINSALUBRI,'
+      
+        '  DECODE(H.FLGCONTATS,1,'#39'Sim'#39','#39'Não'#39') AS FLGCONTATSTRANSF, H.DATA' +
+        'INICIO, H.DATAFINAL,'
+      
+        '  H.CARGO,       H.VALORCARGO,  H.FUNCAO,     H.VINCEMPREG, H.MA' +
+        'TRICULA,   H.EMPRESA,'
+      
+        '  H.TEMPOCALC,  DECODE(H.FLGCONCOMITANTE,1,'#39'Sim'#39','#39'Não'#39') AS FLGCO' +
+        'NCOMITANTETRANSF,'
+      
+        '  H.NUMDOCUMENTO AS CPF,  TI.FATOR,  EL.TEMPOSERVANTERIOR, EL.TE' +
+        'MPOSITESPECIAL,'
+      '  EL.TEMPONAOCREDITADO, P.NOME, H.FLGCONTATS,'
+      '  EL.TEMPOSERVCALC,'
+      '  EL.TEMPOSIMPLES AS TEMPOSEMCONVERSAO,'
+      '  '#39'100 ano(s), 11 mes(es) e 29 dia(s) '#39' AS TEMPOSEMCONVERSAOEXT,'
+      '  '#39'100 ano(s), 11 mes(es) e 29 dia(s) '#39' AS TEMPOINDIVEXT,'
+      '  '#39'100 ano(s), 11 mes(es) e 29 dia(s) '#39' AS TEMPOTOTALEXT'
+      'FROM'
+      '  PESSOA P,'
+      '  ELEGPATRO EL,'
+      '  HISTFUNCPREV H,'
+      '  TPINSALUBRI TI'
+      'WHERE'
+      '    (H.IDPESSOA = :IDPESSOA)'
+      'AND (EL.IDPESSOA = H.IDPESSOA)'
+      'AND (P.IDPESSOA  = H.IDPESSOA)'
+      'AND (H.CODTPINSALUBRI = TI.CODTPINSALUBRI(+))'
+      'AND (TO_CHAR(H.DATAINICIO,'#39'YYYY/MM/DD'#39') <= :ANOMESDIAREF)'
+      'ORDER BY H.DATAINICIO, H.SEQHISTFUNC'
+      ''
+      ' '
+      ' ')
+    UpdateObject = updTS
+    ValidateWithMask = True
+    Left = 26
+    Top = 16
+    ParamData = <
+      item
+        DataType = ftInteger
+        Name = 'idpessoa'
+        ParamType = ptUnknown
+        Value = 10240
+      end
+      item
+        DataType = ftString
+        Name = 'ANOMESDIAREF'
+        ParamType = ptUnknown
+      end>
+  end
+  object ppRTempoServico: TppReport
+    AutoStop = False
+    DataPipeline = ppTempoServico
+    PassSetting = psTwoPass
+    PrinterSetup.BinName = 'Default'
+    PrinterSetup.DocumentName = 'PpModeloReport1'
+    PrinterSetup.Orientation = poLandscape
+    PrinterSetup.PaperName = 'A4'
+    PrinterSetup.PrinterName = 'Default'
+    PrinterSetup.mmMarginBottom = 6350
+    PrinterSetup.mmMarginLeft = 6350
+    PrinterSetup.mmMarginRight = 6350
+    PrinterSetup.mmMarginTop = 6350
+    PrinterSetup.mmPaperHeight = 210000
+    PrinterSetup.mmPaperWidth = 297000
+    PrinterSetup.PaperSize = 9
+    Template.SaveTo = stDatabase
+    AllowPrintToArchive = True
+    AllowPrintToFile = True
+    DeviceType = 'Screen'
+    Left = 258
+    Top = 16
+    Version = '5.5'
+    mmColumnWidth = 197300
+    object ppHeaderBand1: TppHeaderBand
+      mmBottomOffset = 0
+      mmHeight = 28840
+      mmPrintPosition = 0
+      object ppLabel1: TppLabel
+        UserName = 'Label11'
+        Caption = 'Relatório de Tempos de Serviço'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 12
+        Font.Style = [fsBold]
+        TextAlignment = taCentered
+        Transparent = True
+        mmHeight = 5292
+        mmLeft = 109802
+        mmTop = 22754
+        mmWidth = 64823
+        BandType = 0
+      end
+      object rpResumoCobrDBImage1: TppDBImage
+        UserName = 'rpResumoCobrDBImage1'
+        MaintainAspectRatio = True
+        Stretch = True
+        DataField = 'IMAGEM'
+        DataPipeline = ppFundacao
+        GraphicType = 'Bitmap'
+        ParentDataPipeline = False
+        mmHeight = 25135
+        mmLeft = 1323
+        mmTop = 529
+        mmWidth = 39688
+        BandType = 0
+      end
+      object rpResumoCobrDBText1: TppDBText
+        UserName = 'rpResumoCobrDBText1'
+        DataField = 'NOME'
+        DataPipeline = ppFundacao
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 14
+        Font.Style = [fsBold]
+        ParentDataPipeline = False
+        Transparent = True
+        mmHeight = 5821
+        mmLeft = 41804
+        mmTop = 794
+        mmWidth = 133615
+        BandType = 0
+      end
+      object rpResumoCobrDBText2: TppDBText
+        UserName = 'rpResumoCobrDBText2'
+        AutoSize = True
+        DataField = 'RAZAOSOCIAL'
+        DataPipeline = ppFundacao
+        Font.Charset = ANSI_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 10
+        Font.Style = [fsBold]
+        ParentDataPipeline = False
+        Transparent = True
+        mmHeight = 4233
+        mmLeft = 41804
+        mmTop = 7144
+        mmWidth = 97367
+        BandType = 0
+      end
+      object rpResumoCobrDBText3: TppDBText
+        UserName = 'rpResumoCobrDBText3'
+        DataField = 'LOGRADOURO'
+        DataPipeline = ppFundacao
+        Font.Charset = ANSI_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        ParentDataPipeline = False
+        Transparent = True
+        mmHeight = 3704
+        mmLeft = 41804
+        mmTop = 12435
+        mmWidth = 69586
+        BandType = 0
+      end
+      object rpResumoCobrDBText11: TppDBText
+        UserName = 'rpResumoCobrDBText11'
+        DataField = 'BAIRRO'
+        DataPipeline = ppFundacao
+        Font.Charset = ANSI_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        ParentDataPipeline = False
+        Transparent = True
+        mmHeight = 3704
+        mmLeft = 41804
+        mmTop = 16933
+        mmWidth = 20108
+        BandType = 0
+      end
+      object rpResumoCobrLabel10: TppLabel
+        UserName = 'rpResumoCobrLabel10'
+        Caption = 'CEP'
+        Font.Charset = ANSI_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        Transparent = True
+        mmHeight = 3704
+        mmLeft = 41804
+        mmTop = 21431
+        mmWidth = 5027
+        BandType = 0
+      end
+      object rpResumoCobrDBText14: TppDBText
+        UserName = 'rpResumoCobrDBText14'
+        DataField = 'CEP'
+        DataPipeline = ppFundacao
+        Font.Charset = ANSI_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        ParentDataPipeline = False
+        Transparent = True
+        mmHeight = 3704
+        mmLeft = 49213
+        mmTop = 21431
+        mmWidth = 17198
+        BandType = 0
+      end
+      object rpResumoCobrDBText12: TppDBText
+        UserName = 'rpResumoCobrDBText12'
+        DataField = 'CIDADE'
+        DataPipeline = ppFundacao
+        Font.Charset = ANSI_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        ParentDataPipeline = False
+        Transparent = True
+        mmHeight = 3704
+        mmLeft = 62442
+        mmTop = 16933
+        mmWidth = 48419
+        BandType = 0
+      end
+      object rpResumoCobrDBText13: TppDBText
+        UserName = 'rpResumoCobrDBText13'
+        DataField = 'CODESTADO'
+        DataPipeline = ppFundacao
+        Font.Charset = ANSI_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        ParentDataPipeline = False
+        Transparent = True
+        mmHeight = 3704
+        mmLeft = 111390
+        mmTop = 16933
+        mmWidth = 17198
+        BandType = 0
+      end
+      object rpResumoCobrDBText10: TppDBText
+        UserName = 'rpResumoCobrDBText10'
+        DataField = 'NUMERO'
+        DataPipeline = ppFundacao
+        Font.Charset = ANSI_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        ParentDataPipeline = False
+        Transparent = True
+        mmHeight = 3704
+        mmLeft = 111654
+        mmTop = 12435
+        mmWidth = 17198
+        BandType = 0
+      end
+    end
+    object ppDetailBand1: TppDetailBand
+      BeforePrint = ppDetailBand1BeforePrint
+      mmBottomOffset = 0
+      mmHeight = 4233
+      mmPrintPosition = 0
+      object ppLinha: TppShape
+        UserName = 'Linha'
+        Brush.Color = clSilver
+        ParentWidth = True
+        Pen.Style = psClear
+        mmHeight = 4233
+        mmLeft = 0
+        mmTop = 0
+        mmWidth = 284300
+        BandType = 4
+      end
+      object ppDBText1: TppDBText
+        UserName = 'DBText1'
+        DataField = 'EMPRESA'
+        DataPipeline = ppTempoServico
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 9
+        Font.Style = []
+        Transparent = True
+        mmHeight = 3704
+        mmLeft = 1058
+        mmTop = 265
+        mmWidth = 57150
+        BandType = 4
+      end
+      object ppDBText2: TppDBText
+        UserName = 'DBText2'
+        AutoSize = True
+        DataField = 'DATAINICIO'
+        DataPipeline = ppTempoServico
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 9
+        Font.Style = []
+        Transparent = True
+        mmHeight = 3704
+        mmLeft = 60325
+        mmTop = 265
+        mmWidth = 18256
+        BandType = 4
+      end
+      object ppDBText3: TppDBText
+        UserName = 'DBText3'
+        AutoSize = True
+        DataField = 'DATAFINAL'
+        DataPipeline = ppTempoServico
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 9
+        Font.Style = []
+        Transparent = True
+        mmHeight = 3704
+        mmLeft = 80169
+        mmTop = 265
+        mmWidth = 17463
+        BandType = 4
+      end
+      object ppDBText7: TppDBText
+        UserName = 'DBText7'
+        DataField = 'FLGCONTATSTRANSF'
+        DataPipeline = ppTempoServico
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 9
+        Font.Style = []
+        TextAlignment = taRightJustified
+        Transparent = True
+        mmHeight = 3704
+        mmLeft = 101336
+        mmTop = 265
+        mmWidth = 6350
+        BandType = 4
+      end
+      object ppDBText8: TppDBText
+        UserName = 'DBText8'
+        DataField = 'FLGCONCOMITANTETRANSF'
+        DataPipeline = ppTempoServico
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 9
+        Font.Style = []
+        TextAlignment = taRightJustified
+        Transparent = True
+        mmHeight = 3704
+        mmLeft = 113242
+        mmTop = 265
+        mmWidth = 6350
+        BandType = 4
+      end
+      object ppDBText9: TppDBText
+        UserName = 'DBText9'
+        DataField = 'CARGO'
+        DataPipeline = ppTempoServico
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 9
+        Font.Style = []
+        Transparent = True
+        mmHeight = 3704
+        mmLeft = 121973
+        mmTop = 265
+        mmWidth = 32015
+        BandType = 4
+      end
+      object ppDBText10: TppDBText
+        UserName = 'DBText10'
+        DataField = 'FUNCAO'
+        DataPipeline = ppTempoServico
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 9
+        Font.Style = []
+        Transparent = True
+        mmHeight = 3704
+        mmLeft = 154517
+        mmTop = 265
+        mmWidth = 30163
+        BandType = 4
+      end
+      object ppDBText11: TppDBText
+        UserName = 'DBText11'
+        DataField = 'CODTPINSALUBRI'
+        DataPipeline = ppTempoServico
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 9
+        Font.Style = []
+        Transparent = True
+        mmHeight = 3704
+        mmLeft = 185473
+        mmTop = 265
+        mmWidth = 19579
+        BandType = 4
+      end
+      object ppDBText12: TppDBText
+        UserName = 'DBText12'
+        DataField = 'FATOR'
+        DataPipeline = ppTempoServico
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 9
+        Font.Style = []
+        TextAlignment = taRightJustified
+        Transparent = True
+        mmHeight = 3704
+        mmLeft = 206111
+        mmTop = 265
+        mmWidth = 17198
+        BandType = 4
+      end
+      object ppDBText4: TppDBText
+        UserName = 'DBText4'
+        DataField = 'TEMPOINDIVEXT'
+        DataPipeline = ppTempoServico
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 9
+        Font.Style = []
+        Transparent = True
+        mmHeight = 3704
+        mmLeft = 226484
+        mmTop = 265
+        mmWidth = 54240
+        BandType = 4
+      end
+    end
+    object ppFooterBand1: TppFooterBand
+      mmBottomOffset = 0
+      mmHeight = 7144
+      mmPrintPosition = 0
+      object ppSystemVariable1: TppSystemVariable
+        UserName = 'Calc2'
+        VarType = vtPageSetDesc
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        TextAlignment = taCentered
+        Transparent = True
+        mmHeight = 3704
+        mmLeft = 265
+        mmTop = 3175
+        mmWidth = 278871
+        BandType = 8
+      end
+      object ppLine2: TppLine
+        UserName = 'Line2'
+        ParentWidth = True
+        Weight = 0.75
+        mmHeight = 1588
+        mmLeft = 0
+        mmTop = 1852
+        mmWidth = 284300
+        BandType = 8
+      end
+      object ppLabel3: TppLabel
+        OnPrint = LblSistemaPrint
+        UserName = 'LblSistema'
+        AutoSize = False
+        Caption = 'AdmPrev'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 3704
+        mmLeft = 265
+        mmTop = 3175
+        mmWidth = 278871
+        BandType = 8
+      end
+      object ppSystemVariable2: TppSystemVariable
+        UserName = 'Calc1'
+        VarType = vtDateTime
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        TextAlignment = taRightJustified
+        Transparent = True
+        mmHeight = 3704
+        mmLeft = 252942
+        mmTop = 3175
+        mmWidth = 26194
+        BandType = 8
+      end
+    end
+    object ppGroup1: TppGroup
+      BreakName = 'NOME'
+      DataPipeline = ppTempoServico
+      KeepTogether = True
+      UserName = 'Group1'
+      mmNewColumnThreshold = 0
+      mmNewPageThreshold = 0
+      object ppGroupHeaderBand1: TppGroupHeaderBand
+        BeforePrint = ppGroupHeaderBand1BeforePrint
+        mmBottomOffset = 0
+        mmHeight = 27252
+        mmPrintPosition = 0
+        object ppShape1: TppShape
+          UserName = 'Shape1'
+          ParentWidth = True
+          Shape = stRoundRect
+          mmHeight = 21167
+          mmLeft = 0
+          mmTop = 0
+          mmWidth = 284300
+          BandType = 3
+          GroupNo = 0
+        end
+        object ppLabel4: TppLabel
+          UserName = 'Label1'
+          Caption = 'Empresa'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Name = 'Arial'
+          Font.Size = 9
+          Font.Style = []
+          Transparent = True
+          mmHeight = 3704
+          mmLeft = 1588
+          mmTop = 21960
+          mmWidth = 12965
+          BandType = 3
+          GroupNo = 0
+        end
+        object ppLabel5: TppLabel
+          UserName = 'Label2'
+          Caption = 'Data Inicial'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Name = 'Arial'
+          Font.Size = 9
+          Font.Style = []
+          Transparent = True
+          mmHeight = 3704
+          mmLeft = 60325
+          mmTop = 21960
+          mmWidth = 16140
+          BandType = 3
+          GroupNo = 0
+        end
+        object ppLabel7: TppLabel
+          UserName = 'Label7'
+          Caption = 'Data Final'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Name = 'Arial'
+          Font.Size = 9
+          Font.Style = []
+          Transparent = True
+          mmHeight = 3704
+          mmLeft = 80169
+          mmTop = 21960
+          mmWidth = 14817
+          BandType = 3
+          GroupNo = 0
+        end
+        object ppLabel9: TppLabel
+          UserName = 'Label4'
+          Caption = 'Conta TS'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Name = 'Arial'
+          Font.Size = 9
+          Font.Style = []
+          Transparent = True
+          mmHeight = 3704
+          mmLeft = 97367
+          mmTop = 21960
+          mmWidth = 13494
+          BandType = 3
+          GroupNo = 0
+        end
+        object ppLabel11: TppLabel
+          UserName = 'Label6'
+          Caption = 'Cargo'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Name = 'Arial'
+          Font.Size = 9
+          Font.Style = []
+          Transparent = True
+          mmHeight = 3704
+          mmLeft = 121973
+          mmTop = 21960
+          mmWidth = 8731
+          BandType = 3
+          GroupNo = 0
+        end
+        object ppLabel12: TppLabel
+          UserName = 'Label9'
+          Caption = 'Função'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Name = 'Arial'
+          Font.Size = 9
+          Font.Style = []
+          Transparent = True
+          mmHeight = 3704
+          mmLeft = 154517
+          mmTop = 21960
+          mmWidth = 10583
+          BandType = 3
+          GroupNo = 0
+        end
+        object ppLabel13: TppLabel
+          UserName = 'Label10'
+          Caption = 'Especial'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Name = 'Arial'
+          Font.Size = 9
+          Font.Style = []
+          Transparent = True
+          mmHeight = 3704
+          mmLeft = 185473
+          mmTop = 21960
+          mmWidth = 12171
+          BandType = 3
+          GroupNo = 0
+        end
+        object ppLabel14: TppLabel
+          UserName = 'Label12'
+          Caption = 'Fator'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Name = 'Arial'
+          Font.Size = 9
+          Font.Style = []
+          TextAlignment = taRightJustified
+          Transparent = True
+          mmHeight = 3704
+          mmLeft = 215900
+          mmTop = 21960
+          mmWidth = 7408
+          BandType = 3
+          GroupNo = 0
+        end
+        object ppLabel21: TppLabel
+          UserName = 'Label21'
+          Caption = 'Conc.'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Name = 'Arial'
+          Font.Size = 9
+          Font.Style = []
+          Transparent = True
+          mmHeight = 3704
+          mmLeft = 112184
+          mmTop = 21960
+          mmWidth = 8467
+          BandType = 3
+          GroupNo = 0
+        end
+        object ppLabel2: TppLabel
+          UserName = 'Label20'
+          Caption = 'Participante :'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Name = 'Arial'
+          Font.Size = 10
+          Font.Style = [fsBold]
+          Transparent = True
+          mmHeight = 4233
+          mmLeft = 1588
+          mmTop = 794
+          mmWidth = 22490
+          BandType = 3
+          GroupNo = 0
+        end
+        object ppDBText5: TppDBText
+          UserName = 'DBText5'
+          DataField = 'NOME'
+          DataPipeline = ppTempoServico
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Name = 'Arial'
+          Font.Size = 10
+          Font.Style = [fsBold]
+          Transparent = True
+          mmHeight = 3969
+          mmLeft = 24342
+          mmTop = 794
+          mmWidth = 101600
+          BandType = 3
+          GroupNo = 0
+        end
+        object pplblDescTempo: TppLabel
+          UserName = 'pplblDescTempo'
+          Caption = 'pplblDescTempo'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Name = 'Arial'
+          Font.Size = 10
+          Font.Style = [fsBold]
+          Transparent = True
+          mmHeight = 4233
+          mmLeft = 1588
+          mmTop = 5292
+          mmWidth = 28840
+          BandType = 3
+          GroupNo = 0
+        end
+        object ppLabel23: TppLabel
+          UserName = 'Label22'
+          Caption = 'Matrícula : '
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Name = 'Arial'
+          Font.Size = 10
+          Font.Style = [fsBold]
+          Transparent = True
+          mmHeight = 4233
+          mmLeft = 196586
+          mmTop = 794
+          mmWidth = 18785
+          BandType = 3
+          GroupNo = 0
+        end
+        object ppDBText15: TppDBText
+          UserName = 'DBText15'
+          DataField = 'MATRICULAATUAL'
+          DataPipeline = ppTempoServico
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Name = 'Arial'
+          Font.Size = 10
+          Font.Style = [fsBold]
+          Transparent = True
+          mmHeight = 3969
+          mmLeft = 216165
+          mmTop = 794
+          mmWidth = 17198
+          BandType = 3
+          GroupNo = 0
+        end
+        object ppLabel15: TppLabel
+          UserName = 'Label13'
+          Caption = 'Tempo de Serviço'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Name = 'Arial'
+          Font.Size = 9
+          Font.Style = []
+          Transparent = True
+          mmHeight = 3704
+          mmLeft = 225955
+          mmTop = 21960
+          mmWidth = 25929
+          BandType = 3
+          GroupNo = 0
+        end
+        object ppLabel16: TppLabel
+          UserName = 'Label14'
+          Caption = 'Tempo Total com Conversão :'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Name = 'Arial'
+          Font.Size = 10
+          Font.Style = []
+          Transparent = True
+          mmHeight = 3969
+          mmLeft = 1588
+          mmTop = 9790
+          mmWidth = 47890
+          BandType = 3
+          GroupNo = 0
+        end
+        object ppDBText13: TppDBText
+          UserName = 'DBText13'
+          DataField = 'TEMPOSERVCALC'
+          DataPipeline = ppTempoServico
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Name = 'Arial'
+          Font.Size = 10
+          Font.Style = []
+          TextAlignment = taRightJustified
+          Transparent = True
+          mmHeight = 3969
+          mmLeft = 50271
+          mmTop = 9790
+          mmWidth = 14023
+          BandType = 3
+          GroupNo = 0
+        end
+        object ppLabel17: TppLabel
+          UserName = 'Label15'
+          Caption = '('
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Name = 'Arial'
+          Font.Size = 10
+          Font.Style = []
+          Transparent = True
+          mmHeight = 3969
+          mmLeft = 64823
+          mmTop = 9790
+          mmWidth = 1058
+          BandType = 3
+          GroupNo = 0
+        end
+        object ppDBText14: TppDBText
+          UserName = 'DBText14'
+          DataField = 'TEMPOTOTALEXT'
+          DataPipeline = ppTempoServico
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Name = 'Arial'
+          Font.Size = 10
+          Font.Style = []
+          Transparent = True
+          mmHeight = 3969
+          mmLeft = 67733
+          mmTop = 9790
+          mmWidth = 58208
+          BandType = 3
+          GroupNo = 0
+        end
+        object ppLabel18: TppLabel
+          UserName = 'Label16'
+          Caption = ')'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Name = 'Arial'
+          Font.Size = 10
+          Font.Style = []
+          Transparent = True
+          mmHeight = 3969
+          mmLeft = 126736
+          mmTop = 9790
+          mmWidth = 1058
+          BandType = 3
+          GroupNo = 0
+        end
+        object ppLine1: TppLine
+          UserName = 'Line1'
+          ParentWidth = True
+          Weight = 0.75
+          mmHeight = 265
+          mmLeft = 0
+          mmTop = 26723
+          mmWidth = 284300
+          BandType = 3
+          GroupNo = 0
+        end
+        object ppLabel22: TppLabel
+          UserName = 'Label19'
+          Caption = 'Tempo Total sem Conversão :'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Name = 'Arial'
+          Font.Size = 10
+          Font.Style = []
+          Transparent = True
+          mmHeight = 3969
+          mmLeft = 1588
+          mmTop = 14817
+          mmWidth = 47890
+          BandType = 3
+          GroupNo = 0
+        end
+        object ppDBText16: TppDBText
+          UserName = 'DBText16'
+          DataField = 'TEMPOSEMCONVERSAO'
+          DataPipeline = ppTempoServico
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Name = 'Arial'
+          Font.Size = 10
+          Font.Style = []
+          TextAlignment = taRightJustified
+          Transparent = True
+          mmHeight = 3969
+          mmLeft = 50271
+          mmTop = 14817
+          mmWidth = 14023
+          BandType = 3
+          GroupNo = 0
+        end
+        object ppLabel24: TppLabel
+          UserName = 'Label24'
+          Caption = '('
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Name = 'Arial'
+          Font.Size = 10
+          Font.Style = []
+          Transparent = True
+          mmHeight = 3969
+          mmLeft = 64823
+          mmTop = 14817
+          mmWidth = 1058
+          BandType = 3
+          GroupNo = 0
+        end
+        object ppDBText17: TppDBText
+          UserName = 'DBText17'
+          DataField = 'TEMPOSEMCONVERSAOEXT'
+          DataPipeline = ppTempoServico
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Name = 'Arial'
+          Font.Size = 10
+          Font.Style = []
+          Transparent = True
+          mmHeight = 3969
+          mmLeft = 67733
+          mmTop = 14817
+          mmWidth = 58207
+          BandType = 3
+          GroupNo = 0
+        end
+        object ppLabel25: TppLabel
+          UserName = 'Label25'
+          Caption = ')'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Name = 'Arial'
+          Font.Size = 10
+          Font.Style = []
+          Transparent = True
+          mmHeight = 3969
+          mmLeft = 126736
+          mmTop = 14817
+          mmWidth = 1058
+          BandType = 3
+          GroupNo = 0
+        end
+        object ppLabel26: TppLabel
+          UserName = 'Label26'
+          Caption = 'Data Ref.:'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Name = 'Arial'
+          Font.Size = 10
+          Font.Style = [fsBold]
+          Transparent = True
+          mmHeight = 4233
+          mmLeft = 196586
+          mmTop = 5292
+          mmWidth = 16404
+          BandType = 3
+          GroupNo = 0
+        end
+        object lblDataRef: TppLabel
+          UserName = 'lblDataRef'
+          Caption = 'lblDataRef'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Name = 'Arial'
+          Font.Size = 10
+          Font.Style = [fsBold]
+          Transparent = True
+          mmHeight = 4233
+          mmLeft = 216165
+          mmTop = 5556
+          mmWidth = 17463
+          BandType = 3
+          GroupNo = 0
+        end
+      end
+      object ppGroupFooterBand1: TppGroupFooterBand
+        mmBottomOffset = 0
+        mmHeight = 0
+        mmPrintPosition = 0
+      end
+    end
+  end
+  object updTS: TUpdateSQL
+    ModifySQL.Strings = (
+      'update PESSOA'
+      'set'
+      '  IDPESSOA = :IDPESSOA,'
+      '  IDPESSJUR = :IDPESSJUR,'
+      '  SEQHISTFUNC = :SEQHISTFUNC,'
+      '  IDDOCUMENTO = :IDDOCUMENTO,'
+      '  CODTPINSALUBRI = :CODTPINSALUBRI,'
+      '  FLGCONTATS = :FLGCONTATS,'
+      '  DATAINICIO = :DATAINICIO,'
+      '  DATAFINAL = :DATAFINAL,'
+      '  CARGO = :CARGO,'
+      '  VALORCARGO = :VALORCARGO,'
+      '  FUNCAO = :FUNCAO,'
+      '  VINCEMPREG = :VINCEMPREG,'
+      '  MATRICULA = :MATRICULA,'
+      '  EMPRESA = :EMPRESA,'
+      '  TEMPOCALC = :TEMPOCALC,'
+      '  FLGCONCOMITANTE = :FLGCONCOMITANTE,'
+      '  CPF = :CPF,'
+      '  FATOR = :FATOR,'
+      '  TEMPOSERVANTERIOR = :TEMPOSERVANTERIOR,'
+      '  TEMPOSITESPECIAL = :TEMPOSITESPECIAL,'
+      '  TEMPONAOCREDITADO = :TEMPONAOCREDITADO,'
+      '  NOME = :NOME,'
+      '  TEMPOSERVCALC = :TEMPOSERVCALC,'
+      '  TEMPOINDIVEXT = :TEMPOINDIVEXT,'
+      '  TEMPOTOTALEXT = :TEMPOTOTALEXT'
+      'where'
+      '  IDPESSOA = :OLD_IDPESSOA and'
+      '  IDPESSJUR = :OLD_IDPESSJUR and'
+      '  SEQHISTFUNC = :OLD_SEQHISTFUNC')
+    InsertSQL.Strings = (
+      'insert into PESSOA'
+      
+        '  (IDPESSOA, IDPESSJUR, SEQHISTFUNC, IDDOCUMENTO, CODTPINSALUBRI' +
+        ', FLGCONTATS, '
+      
+        '   DATAINICIO, DATAFINAL, CARGO, VALORCARGO, FUNCAO, VINCEMPREG,' +
+        ' MATRICULA, '
+      
+        '   EMPRESA, TEMPOCALC, FLGCONCOMITANTE, CPF, FATOR, TEMPOSERVANT' +
+        'ERIOR, '
+      
+        '   TEMPOSITESPECIAL, TEMPONAOCREDITADO, NOME, TEMPOSERVCALC, TEM' +
+        'POINDIVEXT, '
+      '   TEMPOTOTALEXT)'
+      'values'
+      
+        '  (:IDPESSOA, :IDPESSJUR, :SEQHISTFUNC, :IDDOCUMENTO, :CODTPINSA' +
+        'LUBRI, '
+      
+        '   :FLGCONTATS, :DATAINICIO, :DATAFINAL, :CARGO, :VALORCARGO, :F' +
+        'UNCAO, '
+      
+        '   :VINCEMPREG, :MATRICULA, :EMPRESA, :TEMPOCALC, :FLGCONCOMITAN' +
+        'TE, :CPF, '
+      
+        '   :FATOR, :TEMPOSERVANTERIOR, :TEMPOSITESPECIAL, :TEMPONAOCREDI' +
+        'TADO, :NOME, '
+      '   :TEMPOSERVCALC, :TEMPOINDIVEXT, :TEMPOTOTALEXT)')
+    DeleteSQL.Strings = (
+      'delete from PESSOA'
+      'where'
+      '  IDPESSOA = :OLD_IDPESSOA and'
+      '  IDPESSJUR = :OLD_IDPESSJUR and'
+      '  SEQHISTFUNC = :OLD_SEQHISTFUNC')
+    Left = 280
+    Top = 104
+  end
+  object ppFundacao: TppBDEPipeline
+    DataSource = dsFundacao
+    UserName = 'Fundacao'
+    Left = 438
+    Top = 95
+    object ppFundacaoppField1: TppField
+      FieldAlias = 'NOME'
+      FieldName = 'NOME'
+      FieldLength = 60
+      DisplayWidth = 60
+      Position = 0
+    end
+    object ppFundacaoppField2: TppField
+      FieldAlias = 'RAZAOSOCIAL'
+      FieldName = 'RAZAOSOCIAL'
+      FieldLength = 60
+      DisplayWidth = 60
+      Position = 1
+    end
+    object ppFundacaoppField3: TppField
+      FieldAlias = 'LOGRADOURO'
+      FieldName = 'LOGRADOURO'
+      FieldLength = 60
+      DisplayWidth = 60
+      Position = 2
+    end
+    object ppFundacaoppField4: TppField
+      FieldAlias = 'NUMERO'
+      FieldName = 'NUMERO'
+      FieldLength = 8
+      DisplayWidth = 8
+      Position = 3
+    end
+    object ppFundacaoppField5: TppField
+      FieldAlias = 'COMPLEMENTO'
+      FieldName = 'COMPLEMENTO'
+      FieldLength = 20
+      DisplayWidth = 20
+      Position = 4
+    end
+    object ppFundacaoppField6: TppField
+      FieldAlias = 'BAIRRO'
+      FieldName = 'BAIRRO'
+      FieldLength = 20
+      DisplayWidth = 20
+      Position = 5
+    end
+    object ppFundacaoppField7: TppField
+      FieldAlias = 'CIDADE'
+      FieldName = 'CIDADE'
+      FieldLength = 50
+      DisplayWidth = 50
+      Position = 6
+    end
+    object ppFundacaoppField8: TppField
+      FieldAlias = 'CODESTADO'
+      FieldName = 'CODESTADO'
+      FieldLength = 3
+      DisplayWidth = 3
+      Position = 7
+    end
+    object ppFundacaoppField9: TppField
+      FieldAlias = 'CEP'
+      FieldName = 'CEP'
+      FieldLength = 8
+      DisplayWidth = 8
+      Position = 8
+    end
+    object ppFundacaoppField10: TppField
+      FieldAlias = 'IMAGEM'
+      FieldName = 'IMAGEM'
+      FieldLength = 1
+      DataType = dtBLOB
+      DisplayWidth = 10
+      Position = 9
+      Searchable = False
+      Sortable = False
+    end
+  end
+  object dsFundacao: TwwDataSource
+    DataSet = qryFundacao
+    Left = 462
+    Top = 60
+  end
+  object qryFundacao: TwwQuery
+    DatabaseName = 'basedados'
+    SQL.Strings = (
+      'SELECT P.NOME , P.RAZAOSOCIAL, E.LOGRADOURO,'
+      '       E.NUMERO, E.COMPLEMENTO, E.BAIRRO,'
+      '       C.NOME AS CIDADE, C.CODESTADO, E.CEP, I.IMAGEM'
+      'FROM PESSOA P, ENDPESS E, IMAGENS I, CIDADES C'
+      'WHERE (P.IDPESSOA = :pFundacao) AND '
+      '      ( P.IDPESSOA =  E.IDPESSOA(+)) AND'
+      '      (E.IDCIDADES   = C.IDCIDADES(+))  AND'
+      '      ( P.IDIMAGEM = I.IDIMAGEM(+))'
+      ' ')
+    ValidateWithMask = True
+    Left = 429
+    Top = 47
+    ParamData = <
+      item
+        DataType = ftInteger
+        Name = 'pFundacao'
+        ParamType = ptUnknown
+        Value = 1
+      end>
+  end
+end

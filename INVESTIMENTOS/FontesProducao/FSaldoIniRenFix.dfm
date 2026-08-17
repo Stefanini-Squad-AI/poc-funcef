@@ -1,0 +1,2190 @@
+inherited frmVerSaldoRenFix: TfrmVerSaldoRenFix
+  Left = 184
+  Top = 106
+  Caption = 'Verificação de Saldo'
+  ClientHeight = 578
+  ClientWidth = 804
+  PixelsPerInch = 96
+  TextHeight = 13
+  inherited pnlFundo: TPanel
+    Width = 804
+    Height = 539
+    inherited bvlSepTit: TBevel
+      Width = 794
+    end
+    object Splitter1: TSplitter [1]
+      Left = 5
+      Top = 431
+      Width = 794
+      Height = 1
+      Cursor = crVSplit
+      Align = alBottom
+    end
+    object Splitter3: TSplitter [2]
+      Left = 5
+      Top = 217
+      Width = 794
+      Height = 1
+      Cursor = crVSplit
+      Align = alTop
+    end
+    inherited pnlTitulo: TPanel
+      Width = 794
+      inherited lbNomDescricao: TfcLabel
+        Width = 379
+        Caption = 'Implantação de Saldos de Renda Fixa'
+      end
+    end
+    object pnlTopo: TPanel
+      Left = 5
+      Top = 49
+      Width = 794
+      Height = 168
+      Align = alTop
+      Caption = 'pnlTopo'
+      TabOrder = 1
+      object Splitter5: TSplitter
+        Left = 329
+        Top = 1
+        Width = 1
+        Height = 166
+        Cursor = crHSplit
+      end
+      object pnlHistorico: TPanel
+        Left = 1
+        Top = 1
+        Width = 328
+        Height = 166
+        Align = alLeft
+        TabOrder = 0
+        object wwDBGrid1: TwwDBGrid
+          Left = 1
+          Top = 19
+          Width = 326
+          Height = 105
+          Selected.Strings = (
+            'DATAHISTRENFIX'#9'10'#9'Data'
+            'DESCINVESTIMENTO'#9'17'#9'Investimento'
+            'VLRHISTRENFIX'#9'15'#9'Valor'
+            'QTDHISTRENFIX'#9'15'#9'Quantidade'
+            'SALDOVLRHISTRENFI'#9'18'#9'Saldo Valor'
+            'SALDOQTDHISTRENFI'#9'18'#9'Saldo Quantidades'
+            'IDOPERRENFIXAPLIC'#9'7'#9'Operação'
+            'IDHISTRENFIX'#9'9'#9'ID Histórico'
+            'IDCARTEIRAINVEST'#9'6'#9'Carteira'
+            'IDTIPOOPERACAO'#9'14'#9'Tipo de Operação'
+            'IDOPERRENFIX'#9'10'#9'ID Operação'
+            'CODDOCUMENTO'#9'15'#9'CODDOCUMENTO'
+            'PLNCODIGO'#9'10'#9'PLNCODIGO'
+            'IDPLANPREVCTBPATR'#9'19'#9'IDPLANPREVCTBPATR'
+            'IDMODULO'#9'10'#9'IDMODULO'
+            'IDEMPRESAPROP'#9'15'#9'IDEMPRESAPROP'
+            'TIPMOVHISRENFIX'#9'16'#9'TIPMOVHISRENFIX'
+            'IDINVESTIMENTO'#9'4'#9'Inv.')
+          IniAttributes.Delimiter = ';;'
+          TitleColor = clBtnFace
+          FixedCols = 0
+          ShowHorzScrollBar = True
+          Align = alClient
+          DataSource = dsHistorico
+          TabOrder = 0
+          TitleAlignment = taLeftJustify
+          TitleFont.Charset = DEFAULT_CHARSET
+          TitleFont.Color = clWindowText
+          TitleFont.Height = -9
+          TitleFont.Name = 'MS Sans Serif'
+          TitleFont.Style = [fsBold]
+          TitleLines = 1
+          TitleButtons = False
+          IndicatorColor = icBlack
+        end
+        object Panel2: TPanel
+          Left = 1
+          Top = 1
+          Width = 326
+          Height = 18
+          Align = alTop
+          Caption = 'Histórico - HISTRENFIX'
+          TabOrder = 1
+        end
+        object Panel7: TPanel
+          Left = 1
+          Top = 124
+          Width = 326
+          Height = 41
+          Align = alBottom
+          TabOrder = 2
+          object btnAltHistorico: TBitBtn
+            Left = 8
+            Top = 5
+            Width = 81
+            Height = 33
+            Caption = '&Alterar'
+            Default = True
+            ModalResult = 1
+            TabOrder = 0
+            OnClick = btnAltHistoricoClick
+            Glyph.Data = {
+              26040000424D2604000000000000360000002800000012000000120000000100
+              180000000000F003000000000000000000000000000000000000FFFFFFFFFFFF
+              FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+              FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF0000D8E9ECD8E9ECD8E9ECD8E9ECD8E9
+              ECD8E9EC00000000000000000000000000000000000000000000000000000000
+              0000FFFFFFFFFFFF0000D8E9ECD8E9ECD8E9ECD8E9ECD8E9ECD8E9EC000000FF
+              FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF000000FFFFFFFFFFFF
+              0000000000000000D8E9EC000000000000000000000000000000FFFFFFFFFFFF
+              000000FFFFFF000000000000FFFFFF000000FFFFFFFFFFFF0000FFFF00000000
+              00000000FFFFFFFFFF00FFFFFFFFFF00FFFF000000FFFFFFFFFFFFFFFFFFFFFF
+              FFFFFFFFFFFFFF000000FFFFFFFFFFFF0000FFFF0000000000FFFFFFFFFF00FF
+              FFFFFFFF000000000000000000FFFFFFFFFFFFFFFFFFFFFFFF000000FFFFFF00
+              0000FFFFFFFFFFFF0000FFFF00000000FFFFFF00FFFFFFFFFF00FFFFFFFFFF00
+              FFFFFFFFFF000000FFFFFF000000000000FFFFFFFFFFFF000000FFFFFFFFFFFF
+              0000FFFF0000000000FFFFFFFFFF00FFFFFFFFFF000000000000000000000000
+              00000000FFFF000000FFFFFFFFFFFF000000FFFFFFFFFFFF0000FFFF00000000
+              FFFFFF00FFFFFFFFFF00FFFFFFFFFF00FFFFFFFFFF00FFFFFFFFFF000000FFFF
+              FFFFFFFFFFFFFF000000FFFFFFFFFFFF0000FFFF0000000000FFFFFFFFFF0000
+              00000000000000000000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFF00
+              0000FFFFFFFFFFFF000000000000000000000000FFFFFFFFFF00FFFF00000000
+              000000FFFF000000FFFFFFFFFFFF000000000000FFFFFF000000FFFFFFFFFFFF
+              0000D8E9ECD8E9ECD8E9EC00000000000000000000000000FFFF000000FFFFFF
+              FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF000000FFFFFFFFFFFF0000D8E9ECD8E9EC
+              D8E9ECD8E9ECD8E9EC00000000FFFF000000FFFFFFFFFFFFFFFFFFFFFFFF0000
+              00000000000000000000FFFFFFFFFFFF0000D8E9ECD8E9ECD8E9ECD8E9EC0000
+              0000FFFF000000FFFFFFFFFFFF000000000000FFFFFF000000FFFFFFFFFFFF00
+              0000FFFFFFFFFFFF0000D8E9ECD8E9ECD8E9EC00000000FFFF000000000000FF
+              FFFFFFFFFFFFFFFFFFFFFFFFFFFF000000FFFFFF000000D8E9ECFFFFFFFFFFFF
+              0000D8E9ECD8E9EC0000000000FF000000D8E9EC000000FFFFFFFFFFFFFFFFFF
+              FFFFFFFFFFFF000000000000D8E9ECD8E9ECFFFFFFFFFFFF0000D8E9ECD8E9EC
+              D8E9EC000000D8E9ECD8E9EC0000000000000000000000000000000000000000
+              00D8E9ECD8E9ECD8E9ECFFFFFFFFFFFF0000D8E9ECD8E9ECD8E9ECD8E9ECD8E9
+              ECD8E9ECD8E9ECD8E9ECD8E9ECD8E9ECD8E9ECD8E9ECD8E9ECD8E9ECD8E9ECD8
+              E9ECFFFFFFFFFFFF0000}
+          end
+          object btnOKHistorico: TBitBtn
+            Left = 96
+            Top = 5
+            Width = 81
+            Height = 33
+            Caption = '&Ok'
+            Default = True
+            ModalResult = 1
+            TabOrder = 1
+            OnClick = btnOKHistoricoClick
+            Glyph.Data = {
+              76010000424D7601000000000000760000002800000020000000100000000100
+              0400000000000001000000000000000000001000000000000000000000000000
+              8000008000000080800080000000800080008080000080808000C0C0C0000000
+              FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00888888888888
+              8888888888FFFFF8888888888000008888888888F777778FF888888002222200
+              88888887788888778F88887222222222088888788888888878F887A228822222
+              208887F88FFF888887F887A2FFF8222220888788777FF888878F7A22FFFF8222
+              22087F887777FF88887F7A22FFFFF82222087F8877777FF8887F7A22FF8FFF82
+              22087F8877F777FF887F7A22FF82FFF822087F8877F8777F887F7A22FF222FF8
+              220878F87788877FF87887A2222222FF208887F88888887787F887A222222222
+              2088878F888888888788887AA222222208888878FF88888F788888877AAAAA77
+              8888888778FFFF77888888888777778888888888877777888888}
+            NumGlyphs = 2
+          end
+        end
+      end
+      object pnlOperacoes: TPanel
+        Left = 330
+        Top = 1
+        Width = 463
+        Height = 166
+        Align = alClient
+        TabOrder = 1
+        object wwDBGrid2: TwwDBGrid
+          Left = 1
+          Top = 19
+          Width = 461
+          Height = 105
+          Selected.Strings = (
+            'DATAOPERACAO'#9'10'#9'Data'#9'F'
+            'VLROPERACAO'#9'15'#9'Valor'#9'F'
+            'QTDEOPERACAO'#9'10'#9'Quantidade'#9'F'
+            'PUOPERACAO'#9'10'#9'PU Operação'#9'F'
+            'PUEMISSAO'#9'10'#9'PU Emissão'#9'F'
+            'DATAEMISSAO'#9'10'#9'Emissão'#9'F'
+            'VENCOPERACAO'#9'10'#9'Vencimento'#9'F'
+            'NATUREZAOPERACAO'#9'7'#9'Natureza'#9'F')
+          IniAttributes.Delimiter = ';;'
+          TitleColor = clBtnFace
+          FixedCols = 0
+          ShowHorzScrollBar = True
+          Align = alClient
+          DataSource = dsOperacoes
+          TabOrder = 0
+          TitleAlignment = taLeftJustify
+          TitleFont.Charset = DEFAULT_CHARSET
+          TitleFont.Color = clWindowText
+          TitleFont.Height = -9
+          TitleFont.Name = 'MS Sans Serif'
+          TitleFont.Style = [fsBold]
+          TitleLines = 1
+          TitleButtons = False
+          IndicatorColor = icBlack
+        end
+        object Panel3: TPanel
+          Left = 1
+          Top = 1
+          Width = 461
+          Height = 18
+          Align = alTop
+          Caption = 'Operações - OPERRENFIX'
+          TabOrder = 1
+        end
+        object Panel9: TPanel
+          Left = 1
+          Top = 124
+          Width = 461
+          Height = 41
+          Align = alBottom
+          TabOrder = 2
+          object btnAltOperRenFix: TBitBtn
+            Left = 8
+            Top = 5
+            Width = 81
+            Height = 33
+            Caption = '&Alterar'
+            Default = True
+            ModalResult = 1
+            TabOrder = 0
+            OnClick = btnAltOperRenFixClick
+            Glyph.Data = {
+              26040000424D2604000000000000360000002800000012000000120000000100
+              180000000000F003000000000000000000000000000000000000FFFFFFFFFFFF
+              FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+              FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF0000D8E9ECD8E9ECD8E9ECD8E9ECD8E9
+              ECD8E9EC00000000000000000000000000000000000000000000000000000000
+              0000FFFFFFFFFFFF0000D8E9ECD8E9ECD8E9ECD8E9ECD8E9ECD8E9EC000000FF
+              FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF000000FFFFFFFFFFFF
+              0000000000000000D8E9EC000000000000000000000000000000FFFFFFFFFFFF
+              000000FFFFFF000000000000FFFFFF000000FFFFFFFFFFFF0000FFFF00000000
+              00000000FFFFFFFFFF00FFFFFFFFFF00FFFF000000FFFFFFFFFFFFFFFFFFFFFF
+              FFFFFFFFFFFFFF000000FFFFFFFFFFFF0000FFFF0000000000FFFFFFFFFF00FF
+              FFFFFFFF000000000000000000FFFFFFFFFFFFFFFFFFFFFFFF000000FFFFFF00
+              0000FFFFFFFFFFFF0000FFFF00000000FFFFFF00FFFFFFFFFF00FFFFFFFFFF00
+              FFFFFFFFFF000000FFFFFF000000000000FFFFFFFFFFFF000000FFFFFFFFFFFF
+              0000FFFF0000000000FFFFFFFFFF00FFFFFFFFFF000000000000000000000000
+              00000000FFFF000000FFFFFFFFFFFF000000FFFFFFFFFFFF0000FFFF00000000
+              FFFFFF00FFFFFFFFFF00FFFFFFFFFF00FFFFFFFFFF00FFFFFFFFFF000000FFFF
+              FFFFFFFFFFFFFF000000FFFFFFFFFFFF0000FFFF0000000000FFFFFFFFFF0000
+              00000000000000000000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFF00
+              0000FFFFFFFFFFFF000000000000000000000000FFFFFFFFFF00FFFF00000000
+              000000FFFF000000FFFFFFFFFFFF000000000000FFFFFF000000FFFFFFFFFFFF
+              0000D8E9ECD8E9ECD8E9EC00000000000000000000000000FFFF000000FFFFFF
+              FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF000000FFFFFFFFFFFF0000D8E9ECD8E9EC
+              D8E9ECD8E9ECD8E9EC00000000FFFF000000FFFFFFFFFFFFFFFFFFFFFFFF0000
+              00000000000000000000FFFFFFFFFFFF0000D8E9ECD8E9ECD8E9ECD8E9EC0000
+              0000FFFF000000FFFFFFFFFFFF000000000000FFFFFF000000FFFFFFFFFFFF00
+              0000FFFFFFFFFFFF0000D8E9ECD8E9ECD8E9EC00000000FFFF000000000000FF
+              FFFFFFFFFFFFFFFFFFFFFFFFFFFF000000FFFFFF000000D8E9ECFFFFFFFFFFFF
+              0000D8E9ECD8E9EC0000000000FF000000D8E9EC000000FFFFFFFFFFFFFFFFFF
+              FFFFFFFFFFFF000000000000D8E9ECD8E9ECFFFFFFFFFFFF0000D8E9ECD8E9EC
+              D8E9EC000000D8E9ECD8E9EC0000000000000000000000000000000000000000
+              00D8E9ECD8E9ECD8E9ECFFFFFFFFFFFF0000D8E9ECD8E9ECD8E9ECD8E9ECD8E9
+              ECD8E9ECD8E9ECD8E9ECD8E9ECD8E9ECD8E9ECD8E9ECD8E9ECD8E9ECD8E9ECD8
+              E9ECFFFFFFFFFFFF0000}
+          end
+          object btnOkOperRenFix: TBitBtn
+            Left = 96
+            Top = 5
+            Width = 81
+            Height = 33
+            Caption = '&Ok'
+            Default = True
+            Enabled = False
+            ModalResult = 1
+            TabOrder = 1
+            OnClick = btnOkOperRenFixClick
+            Glyph.Data = {
+              76010000424D7601000000000000760000002800000020000000100000000100
+              0400000000000001000000000000000000001000000000000000000000000000
+              8000008000000080800080000000800080008080000080808000C0C0C0000000
+              FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00888888888888
+              8888888888FFFFF8888888888000008888888888F777778FF888888002222200
+              88888887788888778F88887222222222088888788888888878F887A228822222
+              208887F88FFF888887F887A2FFF8222220888788777FF888878F7A22FFFF8222
+              22087F887777FF88887F7A22FFFFF82222087F8877777FF8887F7A22FF8FFF82
+              22087F8877F777FF887F7A22FF82FFF822087F8877F8777F887F7A22FF222FF8
+              220878F87788877FF87887A2222222FF208887F88888887787F887A222222222
+              2088878F888888888788887AA222222208888878FF88888F788888877AAAAA77
+              8888888778FFFF77888888888777778888888888877777888888}
+            NumGlyphs = 2
+          end
+        end
+      end
+    end
+    object pnlRodape: TPanel
+      Left = 5
+      Top = 432
+      Width = 794
+      Height = 102
+      Align = alBottom
+      Caption = 'pnlRodape'
+      TabOrder = 2
+      object Splitter6: TSplitter
+        Left = 441
+        Top = 1
+        Width = 1
+        Height = 100
+        Cursor = crHSplit
+      end
+      object pnlItensCurvas: TPanel
+        Left = 1
+        Top = 1
+        Width = 440
+        Height = 100
+        Align = alLeft
+        Caption = 'pnlItensCurvas'
+        TabOrder = 0
+        object wwDBGrid4: TwwDBGrid
+          Left = 1
+          Top = 25
+          Width = 438
+          Height = 74
+          Selected.Strings = (
+            'DESCITEMRENFIX'#9'30'#9'Descrição'
+            'SEQCALCULO'#9'6'#9'Seq. de Cálculo'
+            'IDCURVARENFIX'#9'6'#9'ID Curva'
+            'IDITEMRENFIX'#9'6'#9'ID Item'
+            'IDREGRA'#9'6'#9'ID Regra'
+            'FLGMOEDA'#9'1'#9'FLG Moeda'
+            'FLGDESTACADO'#9'1'#9'FLG Destacado'
+            'FLGCENTRALIZADO'#9'1'#9'FLG Centralizado'#9'F')
+          IniAttributes.Delimiter = ';;'
+          TitleColor = clBtnFace
+          FixedCols = 0
+          ShowHorzScrollBar = True
+          Align = alClient
+          DataSource = dsItensCurva
+          TabOrder = 0
+          TitleAlignment = taLeftJustify
+          TitleFont.Charset = DEFAULT_CHARSET
+          TitleFont.Color = clWindowText
+          TitleFont.Height = -9
+          TitleFont.Name = 'MS Sans Serif'
+          TitleFont.Style = [fsBold]
+          TitleLines = 1
+          TitleButtons = False
+          IndicatorColor = icBlack
+        end
+        object Panel5: TPanel
+          Left = 1
+          Top = 1
+          Width = 438
+          Height = 24
+          Align = alTop
+          Caption = 'Itens da Curva - CURVASXITEMRENFIX'
+          TabOrder = 1
+        end
+      end
+      object Panel6: TPanel
+        Left = 442
+        Top = 1
+        Width = 351
+        Height = 100
+        Align = alClient
+        TabOrder = 1
+        object Label1: TLabel
+          Left = 17
+          Top = 12
+          Width = 28
+          Height = 13
+          Caption = 'Data'
+        end
+        object Label4: TLabel
+          Left = 16
+          Top = 52
+          Width = 73
+          Height = 13
+          Caption = 'Investimento'
+        end
+        object dtFinal: TCMDateTimePicker
+          Left = 18
+          Top = 28
+          Width = 140
+          Height = 21
+          CalendarAttributes.Font.Charset = DEFAULT_CHARSET
+          CalendarAttributes.Font.Color = clWindowText
+          CalendarAttributes.Font.Height = -11
+          CalendarAttributes.Font.Name = 'MS Sans Serif'
+          CalendarAttributes.Font.Style = []
+          ButtonStyle = cbsCustom
+          Epoch = 1950
+          ButtonGlyph.Data = {
+            06050000424D06050000000000003604000028000000100000000D0000000100
+            080000000000D000000000000000000000000001000000000000000000000000
+            80000080000000808000800000008000800080800000C0C0C000C0DCC000F0CA
+            A6000020400000206000002080000020A0000020C0000020E000004000000040
+            20000040400000406000004080000040A0000040C0000040E000006000000060
+            20000060400000606000006080000060A0000060C0000060E000008000000080
+            20000080400000806000008080000080A0000080C0000080E00000A0000000A0
+            200000A0400000A0600000A0800000A0A00000A0C00000A0E00000C0000000C0
+            200000C0400000C0600000C0800000C0A00000C0C00000C0E00000E0000000E0
+            200000E0400000E0600000E0800000E0A00000E0C00000E0E000400000004000
+            20004000400040006000400080004000A0004000C0004000E000402000004020
+            20004020400040206000402080004020A0004020C0004020E000404000004040
+            20004040400040406000404080004040A0004040C0004040E000406000004060
+            20004060400040606000406080004060A0004060C0004060E000408000004080
+            20004080400040806000408080004080A0004080C0004080E00040A0000040A0
+            200040A0400040A0600040A0800040A0A00040A0C00040A0E00040C0000040C0
+            200040C0400040C0600040C0800040C0A00040C0C00040C0E00040E0000040E0
+            200040E0400040E0600040E0800040E0A00040E0C00040E0E000800000008000
+            20008000400080006000800080008000A0008000C0008000E000802000008020
+            20008020400080206000802080008020A0008020C0008020E000804000008040
+            20008040400080406000804080008040A0008040C0008040E000806000008060
+            20008060400080606000806080008060A0008060C0008060E000808000008080
+            20008080400080806000808080008080A0008080C0008080E00080A0000080A0
+            200080A0400080A0600080A0800080A0A00080A0C00080A0E00080C0000080C0
+            200080C0400080C0600080C0800080C0A00080C0C00080C0E00080E0000080E0
+            200080E0400080E0600080E0800080E0A00080E0C00080E0E000C0000000C000
+            2000C0004000C0006000C0008000C000A000C000C000C000E000C0200000C020
+            2000C0204000C0206000C0208000C020A000C020C000C020E000C0400000C040
+            2000C0404000C0406000C0408000C040A000C040C000C040E000C0600000C060
+            2000C0604000C0606000C0608000C060A000C060C000C060E000C0800000C080
+            2000C0804000C0806000C0808000C080A000C080C000C080E000C0A00000C0A0
+            2000C0A04000C0A06000C0A08000C0A0A000C0A0C000C0A0E000C0C00000C0C0
+            2000C0C04000C0C06000C0C08000C0C0A000F0FBFF00A4A0A000808080000000
+            FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00010000000000
+            000000000000000000FFFF00FFFFFFFFFFFFFFFFFFFFFFFF00FFFF00FF07A407
+            A407A4F9A407A4FF00FFFF00FFA407A407A4F9A4F9A407FF00FFFF00FF07A407
+            A407A4F9A407A4FF00FFFF00FFA407A407A407A407A407FF00FFFF00FF07A407
+            A407A407A407A4FF00FFFF00FFA407A407A407A407A407FF00FFFF00FFFFFFFF
+            FFFFFFFFFFFFFFFF00FFFF00FF04FC04FC04FCA4A4A4A4FF00FFFF00FFFC04FC
+            04FC04A4A4A4A4FF00FFFF00FFFFFFFFFFFFFFFFFFFFFFFF00FFFF0000000000
+            000000000000000000FF}
+          ShowButton = True
+          TabOrder = 0
+        end
+        object dblInvestimento: TwwDBLookupCombo
+          Left = 16
+          Top = 68
+          Width = 297
+          Height = 21
+          DropDownAlignment = taLeftJustify
+          Selected.Strings = (
+            'DESCINVESTIMENTO'#9'60'#9'Investimento'#9'F')
+          LookupTable = qryInvestimento
+          LookupField = 'IDINVESTIMENTO'
+          TabOrder = 1
+          AutoDropDown = True
+          ShowButton = True
+          AllowClearKey = False
+        end
+      end
+    end
+    object pnlMeio: TPanel
+      Left = 5
+      Top = 218
+      Width = 794
+      Height = 213
+      Align = alClient
+      Caption = 'pnlMeio'
+      TabOrder = 3
+      object Splitter4: TSplitter
+        Left = 329
+        Top = 1
+        Width = 1
+        Height = 211
+        Cursor = crHSplit
+      end
+      object pnlHistItems: TPanel
+        Left = 1
+        Top = 1
+        Width = 328
+        Height = 211
+        Align = alLeft
+        TabOrder = 0
+        object wwDBGrid5: TwwDBGrid
+          Left = 1
+          Top = 19
+          Width = 326
+          Height = 150
+          Selected.Strings = (
+            'PUITEM'#9'17'#9'PU do Item'
+            'PUACUITEM'#9'18'#9'PU Acumulado'
+            'IDITEMRENFIX'#9'6'#9'ID Item'
+            'IDHISTRENFIX'#9'9'#9'ID Histórico'
+            'IDCURVARENFIX'#9'7'#9'ID Curva'
+            'IDREGRACALCULO'#9'14'#9'Regra de Cálculo')
+          IniAttributes.Delimiter = ';;'
+          TitleColor = clBtnFace
+          OnRowChanged = wwDBGrid5RowChanged
+          FixedCols = 0
+          ShowHorzScrollBar = True
+          Align = alClient
+          DataSource = dsItemsHistorico
+          TabOrder = 0
+          TitleAlignment = taLeftJustify
+          TitleFont.Charset = DEFAULT_CHARSET
+          TitleFont.Color = clWindowText
+          TitleFont.Height = -9
+          TitleFont.Name = 'MS Sans Serif'
+          TitleFont.Style = [fsBold]
+          TitleLines = 1
+          TitleButtons = False
+          IndicatorColor = icBlack
+        end
+        object Panel1: TPanel
+          Left = 1
+          Top = 1
+          Width = 326
+          Height = 18
+          Align = alTop
+          Caption = 'Itens de Histórico - HISTRENFIXXITENS'
+          TabOrder = 1
+        end
+        object Panel8: TPanel
+          Left = 1
+          Top = 169
+          Width = 326
+          Height = 41
+          Align = alBottom
+          TabOrder = 2
+          object btnAltItensHistorico: TBitBtn
+            Left = 8
+            Top = 5
+            Width = 81
+            Height = 33
+            Caption = '&Alterar'
+            Default = True
+            ModalResult = 1
+            TabOrder = 0
+            OnClick = btnAltItensHistoricoClick
+            Glyph.Data = {
+              26040000424D2604000000000000360000002800000012000000120000000100
+              180000000000F003000000000000000000000000000000000000FFFFFFFFFFFF
+              FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+              FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF0000D8E9ECD8E9ECD8E9ECD8E9ECD8E9
+              ECD8E9EC00000000000000000000000000000000000000000000000000000000
+              0000FFFFFFFFFFFF0000D8E9ECD8E9ECD8E9ECD8E9ECD8E9ECD8E9EC000000FF
+              FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF000000FFFFFFFFFFFF
+              0000000000000000D8E9EC000000000000000000000000000000FFFFFFFFFFFF
+              000000FFFFFF000000000000FFFFFF000000FFFFFFFFFFFF0000FFFF00000000
+              00000000FFFFFFFFFF00FFFFFFFFFF00FFFF000000FFFFFFFFFFFFFFFFFFFFFF
+              FFFFFFFFFFFFFF000000FFFFFFFFFFFF0000FFFF0000000000FFFFFFFFFF00FF
+              FFFFFFFF000000000000000000FFFFFFFFFFFFFFFFFFFFFFFF000000FFFFFF00
+              0000FFFFFFFFFFFF0000FFFF00000000FFFFFF00FFFFFFFFFF00FFFFFFFFFF00
+              FFFFFFFFFF000000FFFFFF000000000000FFFFFFFFFFFF000000FFFFFFFFFFFF
+              0000FFFF0000000000FFFFFFFFFF00FFFFFFFFFF000000000000000000000000
+              00000000FFFF000000FFFFFFFFFFFF000000FFFFFFFFFFFF0000FFFF00000000
+              FFFFFF00FFFFFFFFFF00FFFFFFFFFF00FFFFFFFFFF00FFFFFFFFFF000000FFFF
+              FFFFFFFFFFFFFF000000FFFFFFFFFFFF0000FFFF0000000000FFFFFFFFFF0000
+              00000000000000000000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFF00
+              0000FFFFFFFFFFFF000000000000000000000000FFFFFFFFFF00FFFF00000000
+              000000FFFF000000FFFFFFFFFFFF000000000000FFFFFF000000FFFFFFFFFFFF
+              0000D8E9ECD8E9ECD8E9EC00000000000000000000000000FFFF000000FFFFFF
+              FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF000000FFFFFFFFFFFF0000D8E9ECD8E9EC
+              D8E9ECD8E9ECD8E9EC00000000FFFF000000FFFFFFFFFFFFFFFFFFFFFFFF0000
+              00000000000000000000FFFFFFFFFFFF0000D8E9ECD8E9ECD8E9ECD8E9EC0000
+              0000FFFF000000FFFFFFFFFFFF000000000000FFFFFF000000FFFFFFFFFFFF00
+              0000FFFFFFFFFFFF0000D8E9ECD8E9ECD8E9EC00000000FFFF000000000000FF
+              FFFFFFFFFFFFFFFFFFFFFFFFFFFF000000FFFFFF000000D8E9ECFFFFFFFFFFFF
+              0000D8E9ECD8E9EC0000000000FF000000D8E9EC000000FFFFFFFFFFFFFFFFFF
+              FFFFFFFFFFFF000000000000D8E9ECD8E9ECFFFFFFFFFFFF0000D8E9ECD8E9EC
+              D8E9EC000000D8E9ECD8E9EC0000000000000000000000000000000000000000
+              00D8E9ECD8E9ECD8E9ECFFFFFFFFFFFF0000D8E9ECD8E9ECD8E9ECD8E9ECD8E9
+              ECD8E9ECD8E9ECD8E9ECD8E9ECD8E9ECD8E9ECD8E9ECD8E9ECD8E9ECD8E9ECD8
+              E9ECFFFFFFFFFFFF0000}
+          end
+          object btnOKItensHistorico: TBitBtn
+            Left = 96
+            Top = 5
+            Width = 81
+            Height = 33
+            Caption = '&Ok'
+            Default = True
+            ModalResult = 1
+            TabOrder = 1
+            OnClick = btnOKItensHistoricoClick
+            Glyph.Data = {
+              76010000424D7601000000000000760000002800000020000000100000000100
+              0400000000000001000000000000000000001000000000000000000000000000
+              8000008000000080800080000000800080008080000080808000C0C0C0000000
+              FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00888888888888
+              8888888888FFFFF8888888888000008888888888F777778FF888888002222200
+              88888887788888778F88887222222222088888788888888878F887A228822222
+              208887F88FFF888887F887A2FFF8222220888788777FF888878F7A22FFFF8222
+              22087F887777FF88887F7A22FFFFF82222087F8877777FF8887F7A22FF8FFF82
+              22087F8877F777FF887F7A22FF82FFF822087F8877F8777F887F7A22FF222FF8
+              220878F87788877FF87887A2222222FF208887F88888887787F887A222222222
+              2088878F888888888788887AA222222208888878FF88888F788888877AAAAA77
+              8888888778FFFF77888888888777778888888888877777888888}
+            NumGlyphs = 2
+          end
+        end
+      end
+      object pnlOperItens: TPanel
+        Left = 330
+        Top = 1
+        Width = 463
+        Height = 211
+        Align = alClient
+        Caption = 'pnlOperItens'
+        TabOrder = 1
+        object wwDBGrid3: TwwDBGrid
+          Left = 1
+          Top = 19
+          Width = 461
+          Height = 150
+          IniAttributes.Delimiter = ';;'
+          TitleColor = clBtnFace
+          OnRowChanged = wwDBGrid3RowChanged
+          FixedCols = 0
+          ShowHorzScrollBar = True
+          Align = alClient
+          DataSource = dsItensOperacao
+          TabOrder = 0
+          TitleAlignment = taLeftJustify
+          TitleFont.Charset = DEFAULT_CHARSET
+          TitleFont.Color = clWindowText
+          TitleFont.Height = -9
+          TitleFont.Name = 'MS Sans Serif'
+          TitleFont.Style = [fsBold]
+          TitleLines = 1
+          TitleButtons = False
+          IndicatorColor = icBlack
+        end
+        object Panel4: TPanel
+          Left = 1
+          Top = 1
+          Width = 461
+          Height = 18
+          Align = alTop
+          Caption = 'Itens de Operação - OPERRENFIXXCURVAS'
+          TabOrder = 1
+        end
+        object Panel10: TPanel
+          Left = 1
+          Top = 169
+          Width = 461
+          Height = 41
+          Align = alBottom
+          TabOrder = 2
+          object btnAltItensOper: TBitBtn
+            Left = 8
+            Top = 5
+            Width = 81
+            Height = 33
+            Caption = '&Alterar'
+            Default = True
+            ModalResult = 1
+            TabOrder = 0
+            OnClick = btnAltItensOperClick
+            Glyph.Data = {
+              26040000424D2604000000000000360000002800000012000000120000000100
+              180000000000F003000000000000000000000000000000000000FFFFFFFFFFFF
+              FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+              FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF0000D8E9ECD8E9ECD8E9ECD8E9ECD8E9
+              ECD8E9EC00000000000000000000000000000000000000000000000000000000
+              0000FFFFFFFFFFFF0000D8E9ECD8E9ECD8E9ECD8E9ECD8E9ECD8E9EC000000FF
+              FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF000000FFFFFFFFFFFF
+              0000000000000000D8E9EC000000000000000000000000000000FFFFFFFFFFFF
+              000000FFFFFF000000000000FFFFFF000000FFFFFFFFFFFF0000FFFF00000000
+              00000000FFFFFFFFFF00FFFFFFFFFF00FFFF000000FFFFFFFFFFFFFFFFFFFFFF
+              FFFFFFFFFFFFFF000000FFFFFFFFFFFF0000FFFF0000000000FFFFFFFFFF00FF
+              FFFFFFFF000000000000000000FFFFFFFFFFFFFFFFFFFFFFFF000000FFFFFF00
+              0000FFFFFFFFFFFF0000FFFF00000000FFFFFF00FFFFFFFFFF00FFFFFFFFFF00
+              FFFFFFFFFF000000FFFFFF000000000000FFFFFFFFFFFF000000FFFFFFFFFFFF
+              0000FFFF0000000000FFFFFFFFFF00FFFFFFFFFF000000000000000000000000
+              00000000FFFF000000FFFFFFFFFFFF000000FFFFFFFFFFFF0000FFFF00000000
+              FFFFFF00FFFFFFFFFF00FFFFFFFFFF00FFFFFFFFFF00FFFFFFFFFF000000FFFF
+              FFFFFFFFFFFFFF000000FFFFFFFFFFFF0000FFFF0000000000FFFFFFFFFF0000
+              00000000000000000000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFF00
+              0000FFFFFFFFFFFF000000000000000000000000FFFFFFFFFF00FFFF00000000
+              000000FFFF000000FFFFFFFFFFFF000000000000FFFFFF000000FFFFFFFFFFFF
+              0000D8E9ECD8E9ECD8E9EC00000000000000000000000000FFFF000000FFFFFF
+              FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF000000FFFFFFFFFFFF0000D8E9ECD8E9EC
+              D8E9ECD8E9ECD8E9EC00000000FFFF000000FFFFFFFFFFFFFFFFFFFFFFFF0000
+              00000000000000000000FFFFFFFFFFFF0000D8E9ECD8E9ECD8E9ECD8E9EC0000
+              0000FFFF000000FFFFFFFFFFFF000000000000FFFFFF000000FFFFFFFFFFFF00
+              0000FFFFFFFFFFFF0000D8E9ECD8E9ECD8E9EC00000000FFFF000000000000FF
+              FFFFFFFFFFFFFFFFFFFFFFFFFFFF000000FFFFFF000000D8E9ECFFFFFFFFFFFF
+              0000D8E9ECD8E9EC0000000000FF000000D8E9EC000000FFFFFFFFFFFFFFFFFF
+              FFFFFFFFFFFF000000000000D8E9ECD8E9ECFFFFFFFFFFFF0000D8E9ECD8E9EC
+              D8E9EC000000D8E9ECD8E9EC0000000000000000000000000000000000000000
+              00D8E9ECD8E9ECD8E9ECFFFFFFFFFFFF0000D8E9ECD8E9ECD8E9ECD8E9ECD8E9
+              ECD8E9ECD8E9ECD8E9ECD8E9ECD8E9ECD8E9ECD8E9ECD8E9ECD8E9ECD8E9ECD8
+              E9ECFFFFFFFFFFFF0000}
+          end
+          object btnOkItensOper: TBitBtn
+            Left = 96
+            Top = 5
+            Width = 81
+            Height = 33
+            Caption = '&Ok'
+            Default = True
+            ModalResult = 1
+            TabOrder = 1
+            OnClick = btnOkItensOperClick
+            Glyph.Data = {
+              76010000424D7601000000000000760000002800000020000000100000000100
+              0400000000000001000000000000000000001000000000000000000000000000
+              8000008000000080800080000000800080008080000080808000C0C0C0000000
+              FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00888888888888
+              8888888888FFFFF8888888888000008888888888F777778FF888888002222200
+              88888887788888778F88887222222222088888788888888878F887A228822222
+              208887F88FFF888887F887A2FFF8222220888788777FF888878F7A22FFFF8222
+              22087F887777FF88887F7A22FFFFF82222087F8877777FF8887F7A22FF8FFF82
+              22087F8877F777FF887F7A22FF82FFF822087F8877F8777F887F7A22FF222FF8
+              220878F87788877FF87887A2222222FF208887F88888887787F887A222222222
+              2088878F888888888788887AA222222208888878FF88888F788888877AAAAA77
+              8888888778FFFF77888888888777778888888888877777888888}
+            NumGlyphs = 2
+          end
+        end
+      end
+    end
+  end
+  inherited Dock971: TDock97
+    Top = 539
+    Width = 804
+    inherited tb97Fundo: TToolbar97
+      Left = 367
+    end
+    inherited TB97oKCancelar: TToolbar97
+      Left = 160
+      DockPos = 160
+      inherited ToolbarSep971: TToolbarSep97
+        Left = 113
+      end
+      inherited bbtnConfirmar: TBitBtn
+        Width = 113
+        Caption = '&Busca Saldos'
+        OnClick = bbtnConfirmarClick
+      end
+      inherited bbtnCancelar: TBitBtn
+        Left = 116
+        OnClick = bbtnCancelarClick
+      end
+    end
+  end
+  inherited ivTradutor: TIvExtendedTranslator
+    Left = 5
+    Top = 5
+  end
+  object dsHistorico: TwwDataSource
+    AutoEdit = False
+    DataSet = qryBuscaSaldosHist
+    Left = 80
+    Top = 80
+  end
+  object dsOperacoes: TwwDataSource
+    AutoEdit = False
+    DataSet = qryBuscaSaldosOper
+    Left = 536
+    Top = 113
+  end
+  object dsItensOperacao: TwwDataSource
+    AutoEdit = False
+    DataSet = qryBuscaSaldosItemsOper
+    Left = 392
+    Top = 256
+  end
+  object dsItensCurva: TwwDataSource
+    AutoEdit = False
+    DataSet = qryBuscaSaldosItemsXCurvas
+    Left = 305
+    Top = 472
+  end
+  object dsItemsHistorico: TwwDataSource
+    AutoEdit = False
+    DataSet = qryBuscaSaldosItems
+    Left = 50
+    Top = 248
+  end
+  object qryInvestimento: TwwQuery
+    DatabaseName = 'BaseDados'
+    SQL.Strings = (
+      'SELECT IV.* FROM'
+      'INVESTIMENTO IV, CLASSETITRENFIX CL'
+      'WHERE IDTIPOINVEST = 1'
+      'AND IV.IDCLASSETIT = CL.IDCLASSETIT'
+      'ORDER BY DESCINVESTIMENTO'
+      ''
+      ' '
+      ' ')
+    ValidateWithMask = True
+    Left = 670
+    Top = 440
+    object qryInvestimentoDESCINVESTIMENTO: TStringField
+      DisplayLabel = 'Investimento'
+      DisplayWidth = 60
+      FieldName = 'DESCINVESTIMENTO'
+      Origin = 'BASEDADOS.INVESTIMENTO.DESCINVESTIMENTO'
+      Size = 60
+    end
+    object qryInvestimentoIDINVESTIMENTO: TFloatField
+      DisplayWidth = 10
+      FieldName = 'IDINVESTIMENTO'
+      Origin = 'BASEDADOS.INVESTIMENTO.IDINVESTIMENTO'
+      Visible = False
+    end
+    object qryInvestimentoIDMOEDACONTAB: TFloatField
+      DisplayWidth = 10
+      FieldName = 'IDMOEDACONTAB'
+      Origin = 'BASEDADOS.INVESTIMENTO.IDMOEDACONTAB'
+      Visible = False
+    end
+    object qryInvestimentoIDEMISSOR: TFloatField
+      DisplayWidth = 10
+      FieldName = 'IDEMISSOR'
+      Origin = 'BASEDADOS.INVESTIMENTO.IDEMISSOR'
+      Visible = False
+    end
+    object qryInvestimentoIDTIPOINVEST: TFloatField
+      DisplayWidth = 10
+      FieldName = 'IDTIPOINVEST'
+      Origin = 'BASEDADOS.INVESTIMENTO.IDTIPOINVEST'
+      Visible = False
+    end
+    object qryInvestimentoFLGATIVO: TStringField
+      DisplayWidth = 1
+      FieldName = 'FLGATIVO'
+      Origin = 'BASEDADOS.INVESTIMENTO.FLGATIVO'
+      Visible = False
+      FixedChar = True
+      Size = 1
+    end
+    object qryInvestimentoOBSINVESTIMENTO: TStringField
+      DisplayWidth = 200
+      FieldName = 'OBSINVESTIMENTO'
+      Origin = 'BASEDADOS.INVESTIMENTO.OBSINVESTIMENTO'
+      Visible = False
+      Size = 200
+    end
+    object qryInvestimentoDESCCLASSINVEST: TStringField
+      DisplayWidth = 60
+      FieldName = 'DESCCLASSINVEST'
+      Origin = 'BASEDADOS.INVESTIMENTO.DESCCLASSINVEST'
+      Visible = False
+      Size = 60
+    end
+    object qryInvestimentoCODISIN: TStringField
+      DisplayWidth = 14
+      FieldName = 'CODISIN'
+      Origin = 'BASEDADOS.INVESTIMENTO.CODISIN'
+      Visible = False
+      Size = 14
+    end
+    object qryInvestimentoIDCLASSETIT: TFloatField
+      DisplayWidth = 10
+      FieldName = 'IDCLASSETIT'
+      Origin = 'BASEDADOS.INVESTIMENTO.IDCLASSETIT'
+      Visible = False
+    end
+  end
+  object updOperacoes: TUpdateSQL
+    ModifySQL.Strings = (
+      'update OPERRENFIX'
+      'set'
+      '  IDINVESTIMENTO = :IDINVESTIMENTO,'
+      '  IDTIPOOPERACAO = :IDTIPOOPERACAO,'
+      '  IDCARTEIRAINVEST = :IDCARTEIRAINVEST,'
+      '  IDCUSTODIANTE = :IDCUSTODIANTE,'
+      '  IDFORCLI = :IDFORCLI,'
+      '  MOECODIGO = :MOECODIGO,'
+      '  IDPLANPREVCTBPATR = :IDPLANPREVCTBPATR,'
+      '  DATAOPERACAO = :DATAOPERACAO,'
+      '  PUOPERACAO = :PUOPERACAO,'
+      '  DATAEMISSAO = :DATAEMISSAO,'
+      '  PUEMISSAO = :PUEMISSAO,'
+      '  VLROPERACAO = :VLROPERACAO,'
+      '  QTDEOPERACAO = :QTDEOPERACAO,'
+      '  VENCOPERACAO = :VENCOPERACAO,'
+      '  OBSERVACAO = :OBSERVACAO,'
+      '  IDUSUARIO = :IDUSUARIO,'
+      '  IDOPERRENFIXAPLIC = :IDOPERRENFIXAPLIC'
+      'where'
+      '  IDOPERRENFIX = :OLD_IDOPERRENFIX')
+    InsertSQL.Strings = (
+      'insert into OPERRENFIX'
+      
+        '  (IDOPERRENFIX, IDINVESTIMENTO, IDTIPOOPERACAO, IDCARTEIRAINVES' +
+        'T, '
+      'IDCUSTODIANTE, '
+      '   IDFORCLI, MOECODIGO, IDPLANPREVCTBPATR, DATAOPERACAO, '
+      'PUOPERACAO, DATAEMISSAO, '
+      '   PUEMISSAO, VLROPERACAO, QTDEOPERACAO, VENCOPERACAO, '
+      'OBSERVACAO,IDUSUARIO,  IDOPERRENFIXAPLIC)'
+      'values'
+      '  (:IDOPERRENFIX, :IDINVESTIMENTO, :IDTIPOOPERACAO, '
+      ':IDCARTEIRAINVEST, '
+      '   :IDCUSTODIANTE, :IDFORCLI, :MOECODIGO, :IDPLANPREVCTBPATR, '
+      ':DATAOPERACAO, '
+      '   :PUOPERACAO, :DATAEMISSAO, :PUEMISSAO, :VLROPERACAO, '
+      ':QTDEOPERACAO, '
+      '   :VENCOPERACAO, :OBSERVACAO,:IDUSUARIO, :IDOPERRENFIXAPLIC)')
+    DeleteSQL.Strings = (
+      'delete from OPERRENFIX'
+      'where'
+      '  IDOPERRENFIX = :OLD_IDOPERRENFIX')
+    Left = 466
+    Top = 113
+  end
+  object updItemsHistorico: TUpdateSQL
+    ModifySQL.Strings = (
+      'update OPERRENFIX'
+      'set'
+      '  IDINVESTIMENTO = :IDINVESTIMENTO,'
+      '  IDTIPOOPERACAO = :IDTIPOOPERACAO,'
+      '  IDCARTEIRAINVEST = :IDCARTEIRAINVEST,'
+      '  IDCUSTODIANTE = :IDCUSTODIANTE,'
+      '  IDFORCLI = :IDFORCLI,'
+      '  MOECODIGO = :MOECODIGO,'
+      '  IDPLANPREVCTBPATR = :IDPLANPREVCTBPATR,'
+      '  DATAOPERACAO = :DATAOPERACAO,'
+      '  PUOPERACAO = :PUOPERACAO,'
+      '  DATAEMISSAO = :DATAEMISSAO,'
+      '  PUEMISSAO = :PUEMISSAO,'
+      '  VLROPERACAO = :VLROPERACAO,'
+      '  QTDEOPERACAO = :QTDEOPERACAO,'
+      '  VENCOPERACAO = :VENCOPERACAO,'
+      '  OBSERVACAO = :OBSERVACAO,'
+      '  IDUSUARIO = :IDUSUARIO,'
+      '  IDOPERRENFIXAPLIC = :IDOPERRENFIXAPLIC'
+      'where'
+      '  IDOPERRENFIX = :OLD_IDOPERRENFIX')
+    InsertSQL.Strings = (
+      'insert into OPERRENFIX'
+      
+        '  (IDOPERRENFIX, IDINVESTIMENTO, IDTIPOOPERACAO, IDCARTEIRAINVES' +
+        'T, '
+      'IDCUSTODIANTE, '
+      '   IDFORCLI, MOECODIGO, IDPLANPREVCTBPATR, DATAOPERACAO, '
+      'PUOPERACAO, DATAEMISSAO, '
+      '   PUEMISSAO, VLROPERACAO, QTDEOPERACAO, VENCOPERACAO, '
+      'OBSERVACAO,IDUSUARIO,  IDOPERRENFIXAPLIC)'
+      'values'
+      '  (:IDOPERRENFIX, :IDINVESTIMENTO, :IDTIPOOPERACAO, '
+      ':IDCARTEIRAINVEST, '
+      '   :IDCUSTODIANTE, :IDFORCLI, :MOECODIGO, :IDPLANPREVCTBPATR, '
+      ':DATAOPERACAO, '
+      '   :PUOPERACAO, :DATAEMISSAO, :PUEMISSAO, :VLROPERACAO, '
+      ':QTDEOPERACAO, '
+      '   :VENCOPERACAO, :OBSERVACAO,:IDUSUARIO, :IDOPERRENFIXAPLIC)')
+    DeleteSQL.Strings = (
+      'delete from OPERRENFIX'
+      'where'
+      '  IDOPERRENFIX = :OLD_IDOPERRENFIX')
+    Left = 50
+    Top = 302
+  end
+  object updItensCurva: TUpdateSQL
+    ModifySQL.Strings = (
+      'update OPERRENFIX'
+      'set'
+      '  IDINVESTIMENTO = :IDINVESTIMENTO,'
+      '  IDTIPOOPERACAO = :IDTIPOOPERACAO,'
+      '  IDCARTEIRAINVEST = :IDCARTEIRAINVEST,'
+      '  IDCUSTODIANTE = :IDCUSTODIANTE,'
+      '  IDFORCLI = :IDFORCLI,'
+      '  MOECODIGO = :MOECODIGO,'
+      '  IDPLANPREVCTBPATR = :IDPLANPREVCTBPATR,'
+      '  DATAOPERACAO = :DATAOPERACAO,'
+      '  PUOPERACAO = :PUOPERACAO,'
+      '  DATAEMISSAO = :DATAEMISSAO,'
+      '  PUEMISSAO = :PUEMISSAO,'
+      '  VLROPERACAO = :VLROPERACAO,'
+      '  QTDEOPERACAO = :QTDEOPERACAO,'
+      '  VENCOPERACAO = :VENCOPERACAO,'
+      '  OBSERVACAO = :OBSERVACAO,'
+      '  IDUSUARIO = :IDUSUARIO,'
+      '  IDOPERRENFIXAPLIC = :IDOPERRENFIXAPLIC'
+      'where'
+      '  IDOPERRENFIX = :OLD_IDOPERRENFIX')
+    InsertSQL.Strings = (
+      'insert into OPERRENFIX'
+      
+        '  (IDOPERRENFIX, IDINVESTIMENTO, IDTIPOOPERACAO, IDCARTEIRAINVES' +
+        'T, '
+      'IDCUSTODIANTE, '
+      '   IDFORCLI, MOECODIGO, IDPLANPREVCTBPATR, DATAOPERACAO, '
+      'PUOPERACAO, DATAEMISSAO, '
+      '   PUEMISSAO, VLROPERACAO, QTDEOPERACAO, VENCOPERACAO, '
+      'OBSERVACAO,IDUSUARIO,  IDOPERRENFIXAPLIC)'
+      'values'
+      '  (:IDOPERRENFIX, :IDINVESTIMENTO, :IDTIPOOPERACAO, '
+      ':IDCARTEIRAINVEST, '
+      '   :IDCUSTODIANTE, :IDFORCLI, :MOECODIGO, :IDPLANPREVCTBPATR, '
+      ':DATAOPERACAO, '
+      '   :PUOPERACAO, :DATAEMISSAO, :PUEMISSAO, :VLROPERACAO, '
+      ':QTDEOPERACAO, '
+      '   :VENCOPERACAO, :OBSERVACAO,:IDUSUARIO, :IDOPERRENFIXAPLIC)')
+    DeleteSQL.Strings = (
+      'delete from OPERRENFIX'
+      'where'
+      '  IDOPERRENFIX = :OLD_IDOPERRENFIX')
+    Left = 237
+    Top = 471
+  end
+  object qryBuscaSaldosHist: TwwQuery
+    CachedUpdates = True
+    DatabaseName = 'BaseDados'
+    SQL.Strings = (
+      'SELECT'
+      
+        '   HR.IDHISTRENFIX,HR.IDEMPRESAPROP,HR.IDMODULO,HR.IDPLANPREVCTB' +
+        'PATR,HR.PLNCODIGO,'
+      
+        '   HR.CODDOCUMENTO,HR.IDTIPOINVEST,HR.IDTIPOOPERACAO,HR.IDCARTEI' +
+        'RAINVEST,HR.IDOPERRENFIXAPLIC,'
+      
+        '   HR.IDOPERRENFIX,HR.IDINVESTIMENTO,HR.DATAHISTRENFIX,HR.VLRHIS' +
+        'TRENFIX,HR.QTDHISTRENFIX,'
+      
+        '   HR.SALDOVLRHISTRENFI,HR.SALDOQTDHISTRENFI,HR.TIPMOVHISRENFIX,' +
+        'HR.NATURMOVHISTRENFI,HR.HISTMOVRENFIX,'
+      '   IV.DESCINVESTIMENTO, IV.IDCLASSETIT, IV.CARENCIA,'
+      '   EM.SIGLAEMISSOR'
+      'FROM   HISTRENFIX HR, INVESTIMENTO IV, EMISSOR EM'
+      'WHERE  IDHISTRENFIX IN (SELECT MAX(IDHISTRENFIX)'
+      '                        FROM HISTRENFIX'
+      
+        '                        WHERE (((:DATAHISTRENFIX IS NOT NULL)   ' +
+        ' AND'
+      
+        '                                 (DATAHISTRENFIX <= :DATAHISTREN' +
+        'FIX))      OR'
+      
+        '                                (:DATAHISTRENFIX IS NULL))      ' +
+        '             AND'
+      
+        '                              (((:IDINVESTIMENTO IS NOT NULL)   ' +
+        ' AND'
+      
+        '                                 (IDINVESTIMENTO = :IDINVESTIMEN' +
+        'TO))       OR'
+      
+        '                                (:IDINVESTIMENTO IS NULL))      ' +
+        '             AND'
+      
+        '                              (((:IDOPERRENFIXAPLIC IS NOT NULL)' +
+        ' AND'
+      
+        '                                 (IDOPERRENFIXAPLIC = :IDOPERREN' +
+        'FIXAPLIC)) OR'
+      '                                (:IDOPERRENFIXAPLIC IS NULL))'
+      '                        GROUP BY IDOPERRENFIXAPLIC)   AND'
+      '       (((:DATAHISTRENFIX IS NOT NULL)    AND'
+      '         (HR.DATAHISTRENFIX <= :DATAHISTRENFIX))   OR'
+      '         (:DATAHISTRENFIX IS NULL))                  AND'
+      '       (((:IDINVESTIMENTO IS NOT NULL)    AND'
+      '         (HR.IDINVESTIMENTO = :IDINVESTIMENTO))    OR'
+      '         (:IDINVESTIMENTO IS NULL))                  AND'
+      '       (((:IDOPERRENFIXAPLIC IS NOT NULL) AND'
+      '         (IDOPERRENFIXAPLIC = :IDOPERRENFIXAPLIC)) OR'
+      '         (:IDOPERRENFIXAPLIC IS NULL))               AND'
+      '       (((:IDCLASSETIT IS NOT NULL)       AND'
+      '         (IV.IDCLASSETIT = :IDCLASSETIT))          OR'
+      '         (:IDCLASSETIT IS NULL))                     AND'
+      '       (IV.IDTIPOINVEST = 1)                         AND'
+      '       (HR.IDINVESTIMENTO = IV.IDINVESTIMENTO)       AND'
+      '       (HR.SALDOQTDHISTRENFI > 0) AND'
+      '       (IV.IDEMISSOR = EM.IDEMISSOR)'
+      ''
+      ''
+      ' ')
+    UpdateObject = updHistorico
+    ValidateWithMask = True
+    Left = 176
+    Top = 80
+    ParamData = <
+      item
+        DataType = ftDateTime
+        Name = 'DATAHISTRENFIX'
+        ParamType = ptUnknown
+      end
+      item
+        DataType = ftDateTime
+        Name = 'DATAHISTRENFIX'
+        ParamType = ptUnknown
+      end
+      item
+        DataType = ftDateTime
+        Name = 'DATAHISTRENFIX'
+        ParamType = ptUnknown
+      end
+      item
+        DataType = ftInteger
+        Name = 'IDINVESTIMENTO'
+        ParamType = ptUnknown
+      end
+      item
+        DataType = ftInteger
+        Name = 'IDINVESTIMENTO'
+        ParamType = ptUnknown
+      end
+      item
+        DataType = ftInteger
+        Name = 'IDINVESTIMENTO'
+        ParamType = ptUnknown
+      end
+      item
+        DataType = ftInteger
+        Name = 'IDOPERRENFIXAPLIC'
+        ParamType = ptUnknown
+      end
+      item
+        DataType = ftInteger
+        Name = 'IDOPERRENFIXAPLIC'
+        ParamType = ptUnknown
+      end
+      item
+        DataType = ftInteger
+        Name = 'IDOPERRENFIXAPLIC'
+        ParamType = ptUnknown
+      end
+      item
+        DataType = ftDateTime
+        Name = 'DATAHISTRENFIX'
+        ParamType = ptUnknown
+      end
+      item
+        DataType = ftDateTime
+        Name = 'DATAHISTRENFIX'
+        ParamType = ptUnknown
+      end
+      item
+        DataType = ftDateTime
+        Name = 'DATAHISTRENFIX'
+        ParamType = ptUnknown
+      end
+      item
+        DataType = ftInteger
+        Name = 'IDINVESTIMENTO'
+        ParamType = ptUnknown
+      end
+      item
+        DataType = ftInteger
+        Name = 'IDINVESTIMENTO'
+        ParamType = ptUnknown
+      end
+      item
+        DataType = ftInteger
+        Name = 'IDINVESTIMENTO'
+        ParamType = ptUnknown
+      end
+      item
+        DataType = ftInteger
+        Name = 'IDOPERRENFIXAPLIC'
+        ParamType = ptUnknown
+      end
+      item
+        DataType = ftInteger
+        Name = 'IDOPERRENFIXAPLIC'
+        ParamType = ptUnknown
+      end
+      item
+        DataType = ftInteger
+        Name = 'IDOPERRENFIXAPLIC'
+        ParamType = ptUnknown
+      end
+      item
+        DataType = ftInteger
+        Name = 'IDCLASSETIT'
+        ParamType = ptResult
+      end
+      item
+        DataType = ftInteger
+        Name = 'IDCLASSETIT'
+        ParamType = ptResult
+      end
+      item
+        DataType = ftInteger
+        Name = 'IDCLASSETIT'
+        ParamType = ptResult
+      end>
+    object qryBuscaSaldosHistDATAHISTRENFIX: TDateTimeField
+      DisplayLabel = 'Data'
+      DisplayWidth = 10
+      FieldName = 'DATAHISTRENFIX'
+      Origin = 'BASEDADOS.HISTRENFIX.DATAHISTRENFIX'
+    end
+    object qryBuscaSaldosHistDESCINVESTIMENTO: TStringField
+      DisplayLabel = 'Investimento'
+      DisplayWidth = 17
+      FieldName = 'DESCINVESTIMENTO'
+      Origin = 'BASEDADOS.INVESTIMENTO.DESCINVESTIMENTO'
+      Size = 60
+    end
+    object qryBuscaSaldosHistVLRHISTRENFIX: TFloatField
+      DisplayLabel = 'Valor'
+      DisplayWidth = 15
+      FieldName = 'VLRHISTRENFIX'
+      Origin = 'BASEDADOS.HISTRENFIX.VLRHISTRENFIX'
+      DisplayFormat = '###,###,###,##0.00'
+    end
+    object qryBuscaSaldosHistQTDHISTRENFIX: TFloatField
+      DisplayLabel = 'Quantidade'
+      DisplayWidth = 15
+      FieldName = 'QTDHISTRENFIX'
+      Origin = 'BASEDADOS.HISTRENFIX.QTDHISTRENFIX'
+      DisplayFormat = '###,###,###,##0'
+    end
+    object qryBuscaSaldosHistSALDOVLRHISTRENFI: TFloatField
+      DisplayLabel = 'Saldo Valor'
+      DisplayWidth = 18
+      FieldName = 'SALDOVLRHISTRENFI'
+      Origin = 'BASEDADOS.HISTRENFIX.SALDOVLRHISTRENFI'
+      DisplayFormat = '###,###,###,##0.00'
+    end
+    object qryBuscaSaldosHistSALDOQTDHISTRENFI: TFloatField
+      DisplayLabel = 'Saldo Quantidades'
+      DisplayWidth = 18
+      FieldName = 'SALDOQTDHISTRENFI'
+      Origin = 'BASEDADOS.HISTRENFIX.SALDOQTDHISTRENFI'
+      DisplayFormat = '###,###,###,##0'
+    end
+    object qryBuscaSaldosHistIDOPERRENFIXAPLIC: TFloatField
+      DisplayLabel = 'Operação'
+      DisplayWidth = 7
+      FieldName = 'IDOPERRENFIXAPLIC'
+      Origin = 'BASEDADOS.HISTRENFIX.IDOPERRENFIXAPLIC'
+    end
+    object qryBuscaSaldosHistIDHISTRENFIX: TFloatField
+      DisplayLabel = 'ID Histórico'
+      DisplayWidth = 9
+      FieldName = 'IDHISTRENFIX'
+      Origin = 'BASEDADOS.HISTRENFIX.IDHISTRENFIX'
+    end
+    object qryBuscaSaldosHistIDCARTEIRAINVEST: TFloatField
+      DisplayLabel = 'Carteira'
+      DisplayWidth = 6
+      FieldName = 'IDCARTEIRAINVEST'
+      Origin = 'BASEDADOS.HISTRENFIX.IDCARTEIRAINVEST'
+    end
+    object qryBuscaSaldosHistIDTIPOOPERACAO: TFloatField
+      DisplayLabel = 'Tipo de Operação'
+      DisplayWidth = 14
+      FieldName = 'IDTIPOOPERACAO'
+      Origin = 'BASEDADOS.HISTRENFIX.IDTIPOOPERACAO'
+    end
+    object qryBuscaSaldosHistIDOPERRENFIX: TFloatField
+      DisplayLabel = 'ID Operação'
+      DisplayWidth = 10
+      FieldName = 'IDOPERRENFIX'
+      Origin = 'BASEDADOS.HISTRENFIX.IDOPERRENFIX'
+    end
+    object qryBuscaSaldosHistCODDOCUMENTO: TFloatField
+      DisplayWidth = 15
+      FieldName = 'CODDOCUMENTO'
+      Origin = 'BASEDADOS.HISTRENFIX.CODDOCUMENTO'
+    end
+    object qryBuscaSaldosHistPLNCODIGO: TFloatField
+      DisplayWidth = 10
+      FieldName = 'PLNCODIGO'
+      Origin = 'BASEDADOS.HISTRENFIX.PLNCODIGO'
+    end
+    object qryBuscaSaldosHistIDPLANPREVCTBPATR: TFloatField
+      DisplayWidth = 19
+      FieldName = 'IDPLANPREVCTBPATR'
+      Origin = 'BASEDADOS.HISTRENFIX.IDPLANPREVCTBPATR'
+    end
+    object qryBuscaSaldosHistIDMODULO: TFloatField
+      DisplayWidth = 10
+      FieldName = 'IDMODULO'
+      Origin = 'BASEDADOS.HISTRENFIX.IDMODULO'
+    end
+    object qryBuscaSaldosHistIDEMPRESAPROP: TFloatField
+      DisplayWidth = 15
+      FieldName = 'IDEMPRESAPROP'
+      Origin = 'BASEDADOS.HISTRENFIX.IDEMPRESAPROP'
+    end
+    object qryBuscaSaldosHistTIPMOVHISRENFIX: TStringField
+      DisplayWidth = 16
+      FieldName = 'TIPMOVHISRENFIX'
+      Origin = 'BASEDADOS.HISTRENFIX.TIPMOVHISRENFIX'
+      Size = 3
+    end
+    object qryBuscaSaldosHistIDINVESTIMENTO: TFloatField
+      DisplayLabel = 'Inv.'
+      DisplayWidth = 4
+      FieldName = 'IDINVESTIMENTO'
+      Origin = 'BASEDADOS.HISTRENFIX.IDINVESTIMENTO'
+    end
+    object qryBuscaSaldosHistIDTIPOINVEST: TFloatField
+      FieldName = 'IDTIPOINVEST'
+      Origin = 'BASEDADOS.HISTRENFIX.IDTIPOINVEST'
+      Visible = False
+    end
+    object qryBuscaSaldosHistNATURMOVHISTRENFI: TStringField
+      FieldName = 'NATURMOVHISTRENFI'
+      Origin = 'BASEDADOS.HISTRENFIX.NATURMOVHISTRENFI'
+      Visible = False
+      FixedChar = True
+      Size = 1
+    end
+    object qryBuscaSaldosHistHISTMOVRENFIX: TStringField
+      FieldName = 'HISTMOVRENFIX'
+      Origin = 'BASEDADOS.HISTRENFIX.HISTMOVRENFIX'
+      Visible = False
+      Size = 60
+    end
+    object qryBuscaSaldosHistIDCLASSETIT: TFloatField
+      FieldName = 'IDCLASSETIT'
+      Visible = False
+    end
+    object qryBuscaSaldosHistCARENCIA: TFloatField
+      FieldName = 'CARENCIA'
+      Visible = False
+    end
+    object qryBuscaSaldosHistSIGLAEMISSOR: TStringField
+      FieldName = 'SIGLAEMISSOR'
+      Visible = False
+      Size = 15
+    end
+  end
+  object qryBuscaSaldosOper: TwwQuery
+    CachedUpdates = True
+    DatabaseName = 'BaseDados'
+    SQL.Strings = (
+      
+        'SELECT OP.IDOPERRENFIX, OP.IDINVESTIMENTO, OP.IDCUSTODIANTE, OP.' +
+        'IDCARTEIRAINVEST,'
+      
+        '       OP.IDPLANPREVCTBPATR, OP.IDFORCLI, OP.MOECODIGO, OP.DATAO' +
+        'PERACAO, OP.PUOPERACAO,'
+      
+        '       OP.PUEMISSAO, OP.VLROPERACAO, OP.QTDEOPERACAO, OP.VENCOPE' +
+        'RACAO, OP.OBSERVACAO,'
+      
+        '       OP.IDTIPOOPERACAO, OP.DATAEMISSAO, TP.NATUREZAOPERACAO, T' +
+        'P.FLGGERACONTAB'
+      ''
+      'FROM OPERRENFIX OP, TIPOOPERACAO TP'
+      'WHERE IDOPERRENFIX = :IDOPERRENFIX AND'
+      '      OP.IDTIPOOPERACAO = TP.IDTIPOOPERACAO'
+      ' '
+      ' ')
+    UpdateObject = updOperacoes
+    ValidateWithMask = True
+    Left = 376
+    Top = 112
+    ParamData = <
+      item
+        DataType = ftInteger
+        Name = 'IDOPERRENFIX'
+        ParamType = ptResult
+      end>
+    object qryBuscaSaldosOperDATAOPERACAO: TDateTimeField
+      DisplayLabel = 'Data'
+      DisplayWidth = 10
+      FieldName = 'DATAOPERACAO'
+      Origin = 'BASEDADOS.OPERRENFIX.DATAOPERACAO'
+      DisplayFormat = 'DD/MM/YYYY'
+    end
+    object qryBuscaSaldosOperVLROPERACAO: TFloatField
+      DisplayLabel = 'Valor'
+      DisplayWidth = 15
+      FieldName = 'VLROPERACAO'
+      Origin = 'BASEDADOS.OPERRENFIX.VLROPERACAO'
+      DisplayFormat = '###,###,###,##0.000000'
+    end
+    object qryBuscaSaldosOperQTDEOPERACAO: TFloatField
+      DisplayLabel = 'Quantidade'
+      DisplayWidth = 10
+      FieldName = 'QTDEOPERACAO'
+      Origin = 'BASEDADOS.OPERRENFIX.QTDEOPERACAO'
+      DisplayFormat = '###,###,###,##0.000000'
+    end
+    object qryBuscaSaldosOperPUOPERACAO: TFloatField
+      DisplayLabel = 'PU Operação'
+      DisplayWidth = 10
+      FieldName = 'PUOPERACAO'
+      Origin = 'BASEDADOS.OPERRENFIX.PUOPERACAO'
+      DisplayFormat = '###,###,###,##0.000000'
+    end
+    object qryBuscaSaldosOperPUEMISSAO: TFloatField
+      DisplayLabel = 'PU Emissão'
+      DisplayWidth = 10
+      FieldName = 'PUEMISSAO'
+      Origin = 'BASEDADOS.OPERRENFIX.PUEMISSAO'
+      DisplayFormat = '###,###,###,##0.000000'
+    end
+    object qryBuscaSaldosOperDATAEMISSAO: TDateTimeField
+      DisplayLabel = 'Emissão'
+      DisplayWidth = 10
+      FieldName = 'DATAEMISSAO'
+      Origin = 'BASEDADOS.OPERRENFIX.IDTIPOOPERACAO'
+      DisplayFormat = 'DD/MM/YYYY'
+    end
+    object qryBuscaSaldosOperVENCOPERACAO: TDateTimeField
+      DisplayLabel = 'Vencimento'
+      DisplayWidth = 10
+      FieldName = 'VENCOPERACAO'
+      Origin = 'BASEDADOS.OPERRENFIX.VENCOPERACAO'
+      DisplayFormat = 'DD/MM/YYYY'
+    end
+    object qryBuscaSaldosOperNATUREZAOPERACAO: TStringField
+      DisplayLabel = 'Natureza'
+      DisplayWidth = 7
+      FieldName = 'NATUREZAOPERACAO'
+      Origin = 'BASEDADOS.TIPOOPERACAO.NATUREZAOPERACAO'
+      FixedChar = True
+      Size = 1
+    end
+    object qryBuscaSaldosOperMOECODIGO: TFloatField
+      DisplayLabel = 'ID Moeda'
+      DisplayWidth = 7
+      FieldName = 'MOECODIGO'
+      Origin = 'BASEDADOS.OPERRENFIX.MOECODIGO'
+      Visible = False
+    end
+    object qryBuscaSaldosOperIDOPERRENFIX: TFloatField
+      DisplayLabel = 'Operação'
+      DisplayWidth = 8
+      FieldName = 'IDOPERRENFIX'
+      Origin = 'BASEDADOS.OPERRENFIX.IDOPERRENFIX'
+      Visible = False
+    end
+    object qryBuscaSaldosOperIDINVESTIMENTO: TFloatField
+      DisplayLabel = 'ID Investimento'
+      DisplayWidth = 12
+      FieldName = 'IDINVESTIMENTO'
+      Origin = 'BASEDADOS.OPERRENFIX.IDINVESTIMENTO'
+      Visible = False
+    end
+    object qryBuscaSaldosOperIDCUSTODIANTE: TFloatField
+      DisplayLabel = 'ID Custodiante'
+      DisplayWidth = 12
+      FieldName = 'IDCUSTODIANTE'
+      Origin = 'BASEDADOS.OPERRENFIX.IDCUSTODIANTE'
+      Visible = False
+    end
+    object qryBuscaSaldosOperIDCARTEIRAINVEST: TFloatField
+      DisplayLabel = 'ID Carteira'
+      DisplayWidth = 8
+      FieldName = 'IDCARTEIRAINVEST'
+      Origin = 'BASEDADOS.OPERRENFIX.IDCARTEIRAINVEST'
+      Visible = False
+    end
+    object qryBuscaSaldosOperIDPLANPREVCTBPATR: TFloatField
+      DisplayWidth = 19
+      FieldName = 'IDPLANPREVCTBPATR'
+      Origin = 'BASEDADOS.OPERRENFIX.IDPLANPREVCTBPATR'
+      Visible = False
+    end
+    object qryBuscaSaldosOperIDFORCLI: TFloatField
+      DisplayLabel = 'ID ForCli'
+      DisplayWidth = 7
+      FieldName = 'IDFORCLI'
+      Origin = 'BASEDADOS.OPERRENFIX.IDFORCLI'
+      Visible = False
+    end
+    object qryBuscaSaldosOperIDTIPOOPERACAO: TFloatField
+      DisplayLabel = 'ID Tipo de Operação'
+      DisplayWidth = 17
+      FieldName = 'IDTIPOOPERACAO'
+      Origin = 'BASEDADOS.OPERRENFIX.IDTIPOOPERACAO'
+      Visible = False
+    end
+    object qryBuscaSaldosOperOBSERVACAO: TStringField
+      DisplayWidth = 200
+      FieldName = 'OBSERVACAO'
+      Origin = 'BASEDADOS.OPERRENFIX.OBSERVACAO'
+      Visible = False
+      Size = 200
+    end
+    object qryBuscaSaldosOperFLGGERACONTAB: TFloatField
+      FieldName = 'FLGGERACONTAB'
+      Origin = 'BASEDADOS.TIPOOPERACAO.FLGGERACONTAB'
+      Visible = False
+    end
+  end
+  object qryBuscaSaldosItems: TwwQuery
+    CachedUpdates = True
+    DatabaseName = 'BaseDados'
+    Filtered = True
+    SQL.Strings = (
+      
+        'SELECT HT.IDHISTRENFIX, HT.IDCURVARENFIX, HT.IDITEMRENFIX, HT.PU' +
+        'ITEM, HT.PUACUITEM, '
+      
+        '       HT.IDREGRACALCULO, IT.CODITEMRENFIX, CI.IDREGRA, CI.FLGMO' +
+        'EDA, CI.FLGDESTACADO,'
+      '       CI.FLGCENTRALIZADO, CI.SEQCALCULO, IT.DESCITEMRENFIX'
+      'FROM   HISTRENFIXXITENS HT, ITEMRENFIX IT, CURVASXITEMRENFIX CI'
+      'WHERE  HT.IDHISTRENFIX = :IDHISTRENFIX AND'
+      '       HT.IDITEMRENFIX = IT.IDITEMRENFIX AND'
+      '       HT.IDCURVARENFIX = CI.IDCURVARENFIX AND'
+      '       HT.IDITEMRENFIX = CI.IDITEMRENFIX'
+      'ORDER BY CI.SEQCALCULO'
+      '')
+    UpdateObject = updItemsHistorico
+    ValidateWithMask = True
+    Left = 168
+    Top = 248
+    ParamData = <
+      item
+        DataType = ftInteger
+        Name = 'IDHISTRENFIX'
+        ParamType = ptResult
+      end>
+    object qryBuscaSaldosItemsPUITEM: TFloatField
+      DisplayLabel = 'PU do Item'
+      DisplayWidth = 17
+      FieldName = 'PUITEM'
+      Origin = 'BASEDADOS.HISTRENFIXXITENS.PUITEM'
+      DisplayFormat = '###,###,###,##0.000000'
+    end
+    object qryBuscaSaldosItemsPUACUITEM: TFloatField
+      DisplayLabel = 'PU Acumulado'
+      DisplayWidth = 18
+      FieldName = 'PUACUITEM'
+      Origin = 'BASEDADOS.HISTRENFIXXITENS.PUACUITEM'
+      DisplayFormat = '###,###,###,##0.000000'
+    end
+    object qryBuscaSaldosItemsIDITEMRENFIX: TFloatField
+      DisplayLabel = 'ID Item'
+      DisplayWidth = 6
+      FieldName = 'IDITEMRENFIX'
+      Origin = 'BASEDADOS.HISTRENFIXXITENS.IDITEMRENFIX'
+    end
+    object qryBuscaSaldosItemsIDHISTRENFIX: TFloatField
+      DisplayLabel = 'ID Histórico'
+      DisplayWidth = 9
+      FieldName = 'IDHISTRENFIX'
+      Origin = 'BASEDADOS.HISTRENFIXXITENS.IDHISTRENFIX'
+    end
+    object qryBuscaSaldosItemsIDCURVARENFIX: TFloatField
+      DisplayLabel = 'ID Curva'
+      DisplayWidth = 7
+      FieldName = 'IDCURVARENFIX'
+      Origin = 'BASEDADOS.HISTRENFIXXITENS.IDCURVARENFIX'
+    end
+    object qryBuscaSaldosItemsIDREGRACALCULO: TFloatField
+      DisplayLabel = 'Regra de Cálculo'
+      DisplayWidth = 14
+      FieldName = 'IDREGRACALCULO'
+      Origin = 'BASEDADOS.HISTRENFIXXITENS.IDREGRACALCULO'
+    end
+    object qryBuscaSaldosItemsCODITEMRENFIX: TStringField
+      FieldName = 'CODITEMRENFIX'
+      Origin = 'BASEDADOS.ITEMRENFIX.CODITEMRENFIX'
+      Visible = False
+      Size = 12
+    end
+    object qryBuscaSaldosItemsIDREGRA: TFloatField
+      FieldName = 'IDREGRA'
+      Origin = 'BASEDADOS.CURVASXITEMRENFIX.IDREGRA'
+      Visible = False
+    end
+    object qryBuscaSaldosItemsFLGMOEDA: TStringField
+      FieldName = 'FLGMOEDA'
+      Origin = 'BASEDADOS.CURVASXITEMRENFIX.FLGMOEDA'
+      Visible = False
+      FixedChar = True
+      Size = 1
+    end
+    object qryBuscaSaldosItemsFLGDESTACADO: TStringField
+      FieldName = 'FLGDESTACADO'
+      Origin = 'BASEDADOS.CURVASXITEMRENFIX.FLGDESTACADO'
+      Visible = False
+      FixedChar = True
+      Size = 1
+    end
+    object qryBuscaSaldosItemsFLGCENTRALIZADO: TStringField
+      FieldName = 'FLGCENTRALIZADO'
+      Origin = 'BASEDADOS.CURVASXITEMRENFIX.FLGCENTRALIZADO'
+      Visible = False
+      FixedChar = True
+      Size = 1
+    end
+    object qryBuscaSaldosItemsSEQCALCULO: TFloatField
+      FieldName = 'SEQCALCULO'
+      Origin = 'BASEDADOS.CURVASXITEMRENFIX.SEQCALCULO'
+      Visible = False
+    end
+    object qryBuscaSaldosItemsDESCITEMRENFIX: TStringField
+      FieldName = 'DESCITEMRENFIX'
+      Origin = 'BASEDADOS.ITEMRENFIX.DESCITEMRENFIX'
+      Visible = False
+      Size = 60
+    end
+  end
+  object qryBuscaSaldosItemsOper: TwwQuery
+    CachedUpdates = True
+    DatabaseName = 'BaseDados'
+    SQL.Strings = (
+      
+        'SELECT OP.IDOPERRENFIX, OP.IDITEMRENFIX, OP.IDCURVARENFIX, OP.MO' +
+        'ECODIGO, OP.VLRCURVA,'
+      
+        '       OP.PERCCURVA, IT.CODITEMRENFIX, CI.IDREGRA, CI.FLGMOEDA, ' +
+        'CI.FLGDESTACADO,'
+      
+        '       CI.FLGCENTRALIZADO, CI.SEQCALCULO, IT.DESCITEMRENFIX, MO.' +
+        'MOESIGLA'
+      
+        'FROM   OPERRENFIXXCURVAS OP, ITEMRENFIX IT, CURVASXITEMRENFIX CI' +
+        ', MOEDA MO'
+      'WHERE  OP.IDOPERRENFIX = :IDOPERRENFIX  AND'
+      '       OP.IDITEMRENFIX = IT.IDITEMRENFIX AND'
+      '       OP.IDCURVARENFIX = CI.IDCURVARENFIX AND'
+      '       OP.IDITEMRENFIX = CI.IDITEMRENFIX AND'
+      '       OP.MOECODIGO = MO.MOECODIGO(+)'
+      'ORDER BY CI.SEQCALCULO'
+      ' '
+      ' '
+      ' ')
+    UpdateObject = UpdItensOperacao
+    ValidateWithMask = True
+    Left = 512
+    Top = 256
+    ParamData = <
+      item
+        DataType = ftInteger
+        Name = 'IDOPERRENFIX'
+        ParamType = ptUnknown
+      end>
+    object qryBuscaSaldosItemsOperIDITEMRENFIX: TFloatField
+      DisplayLabel = 'ID Item'
+      DisplayWidth = 6
+      FieldName = 'IDITEMRENFIX'
+      Origin = 'BASEDADOS.OPERRENFIXXCURVAS.IDITEMRENFIX'
+    end
+    object qryBuscaSaldosItemsOperDESCITEMRENFIX: TStringField
+      DisplayLabel = 'Item'
+      DisplayWidth = 30
+      FieldName = 'DESCITEMRENFIX'
+      Origin = 'BASEDADOS.ITEMRENFIX.DESCITEMRENFIX'
+      Size = 60
+    end
+    object qryBuscaSaldosItemsOperVLRCURVA: TFloatField
+      DisplayLabel = 'Valor'
+      DisplayWidth = 15
+      FieldName = 'VLRCURVA'
+      Origin = 'BASEDADOS.OPERRENFIXXCURVAS.VLRCURVA'
+    end
+    object qryBuscaSaldosItemsOperPERCCURVA: TFloatField
+      DisplayLabel = 'Percentual'
+      DisplayWidth = 6
+      FieldName = 'PERCCURVA'
+      Origin = 'BASEDADOS.OPERRENFIXXCURVAS.PERCCURVA'
+    end
+    object qryBuscaSaldosItemsOperCODITEMRENFIX: TStringField
+      DisplayLabel = 'Cod. no Regra'
+      DisplayWidth = 12
+      FieldName = 'CODITEMRENFIX'
+      Origin = 'BASEDADOS.ITEMRENFIX.CODITEMRENFIX'
+      Size = 12
+    end
+    object qryBuscaSaldosItemsOperSEQCALCULO: TFloatField
+      DisplayLabel = 'Seq. Cálculo'
+      DisplayWidth = 4
+      FieldName = 'SEQCALCULO'
+      Origin = 'BASEDADOS.CURVASXITEMRENFIX.SEQCALCULO'
+    end
+    object qryBuscaSaldosItemsOperMOESIGLA: TStringField
+      DisplayLabel = 'Moeda'
+      DisplayWidth = 10
+      FieldName = 'MOESIGLA'
+      Size = 10
+    end
+    object qryBuscaSaldosItemsOperIDOPERRENFIX: TFloatField
+      DisplayLabel = 'ID Operação'
+      DisplayWidth = 6
+      FieldName = 'IDOPERRENFIX'
+      Origin = 'BASEDADOS.OPERRENFIXXCURVAS.IDOPERRENFIX'
+    end
+    object qryBuscaSaldosItemsOperIDCURVARENFIX: TFloatField
+      DisplayLabel = 'ID Curva'
+      DisplayWidth = 6
+      FieldName = 'IDCURVARENFIX'
+      Origin = 'BASEDADOS.OPERRENFIXXCURVAS.IDCURVARENFIX'
+    end
+    object qryBuscaSaldosItemsOperIDREGRA: TFloatField
+      DisplayLabel = 'ID Regra'
+      DisplayWidth = 6
+      FieldName = 'IDREGRA'
+      Origin = 'BASEDADOS.CURVASXITEMRENFIX.IDREGRA'
+    end
+    object qryBuscaSaldosItemsOperFLGMOEDA: TStringField
+      DisplayLabel = 'FLG Moeda'
+      DisplayWidth = 1
+      FieldName = 'FLGMOEDA'
+      Origin = 'BASEDADOS.CURVASXITEMRENFIX.FLGMOEDA'
+      FixedChar = True
+      Size = 1
+    end
+    object qryBuscaSaldosItemsOperFLGDESTACADO: TStringField
+      DisplayLabel = 'FLG Destacado'
+      DisplayWidth = 1
+      FieldName = 'FLGDESTACADO'
+      Origin = 'BASEDADOS.CURVASXITEMRENFIX.FLGDESTACADO'
+      FixedChar = True
+      Size = 1
+    end
+    object qryBuscaSaldosItemsOperFLGCENTRALIZADO: TStringField
+      DisplayLabel = 'FLG Centralizado'
+      DisplayWidth = 1
+      FieldName = 'FLGCENTRALIZADO'
+      Origin = 'BASEDADOS.CURVASXITEMRENFIX.FLGCENTRALIZADO'
+      FixedChar = True
+      Size = 1
+    end
+    object qryBuscaSaldosItemsOperMOECODIGO: TFloatField
+      FieldName = 'MOECODIGO'
+      Origin = 'BASEDADOS.OPERRENFIXXCURVAS.MOECODIGO'
+      Visible = False
+    end
+  end
+  object qryBuscaSaldosItemsXCurvas: TwwQuery
+    CachedUpdates = True
+    DatabaseName = 'BaseDados'
+    SQL.Strings = (
+      'SELECT'
+      
+        '    CV.IDCURVARENFIX,CV.IDITEMRENFIX,CV.IDREGRA,CV.FLGMOEDA,CV.F' +
+        'LGDESTACADO,CV.FLGCENTRALIZADO,CV.SEQCALCULO,'
+      '    IT.DESCITEMRENFIX'
+      'FROM CURVASXITEMRENFIX CV,ITEMRENFIX IT'
+      'WHERE'
+      '   (CV.IDCURVARENFIX = :IDCURVARENFIX) AND'
+      '   (CV.IDITEMRENFIX = :IDITEMRENFIX) AND'
+      '   (CV.IDITEMRENFIX = IT.IDITEMRENFIX)'
+      ' '
+      ' ')
+    UpdateObject = updItensCurva
+    ValidateWithMask = True
+    Left = 128
+    Top = 472
+    ParamData = <
+      item
+        DataType = ftInteger
+        Name = 'IDCURVARENFIX'
+        ParamType = ptResult
+      end
+      item
+        DataType = ftInteger
+        Name = 'IDITEMRENFIX'
+        ParamType = ptResult
+      end>
+    object qryBuscaSaldosItemsXCurvasDESCITEMRENFIX: TStringField
+      DisplayLabel = 'Descrição'
+      DisplayWidth = 30
+      FieldName = 'DESCITEMRENFIX'
+      Origin = 'BASEDADOS.ITEMRENFIX.DESCITEMRENFIX'
+      Size = 60
+    end
+    object qryBuscaSaldosItemsXCurvasSEQCALCULO: TFloatField
+      DisplayLabel = 'Seq. de Cálculo'
+      DisplayWidth = 6
+      FieldName = 'SEQCALCULO'
+      Origin = 'BASEDADOS.CURVASXITEMRENFIX.SEQCALCULO'
+    end
+    object qryBuscaSaldosItemsXCurvasIDCURVARENFIX: TFloatField
+      DisplayLabel = 'ID Curva'
+      DisplayWidth = 6
+      FieldName = 'IDCURVARENFIX'
+      Origin = 'BASEDADOS.CURVASXITEMRENFIX.IDCURVARENFIX'
+    end
+    object qryBuscaSaldosItemsXCurvasIDITEMRENFIX: TFloatField
+      DisplayLabel = 'ID Item'
+      DisplayWidth = 6
+      FieldName = 'IDITEMRENFIX'
+      Origin = 'BASEDADOS.CURVASXITEMRENFIX.IDITEMRENFIX'
+    end
+    object qryBuscaSaldosItemsXCurvasIDREGRA: TFloatField
+      DisplayLabel = 'ID Regra'
+      DisplayWidth = 6
+      FieldName = 'IDREGRA'
+      Origin = 'BASEDADOS.CURVASXITEMRENFIX.IDREGRA'
+    end
+    object qryBuscaSaldosItemsXCurvasFLGMOEDA: TStringField
+      DisplayLabel = 'FLG Moeda'
+      DisplayWidth = 1
+      FieldName = 'FLGMOEDA'
+      Origin = 'BASEDADOS.CURVASXITEMRENFIX.FLGMOEDA'
+      FixedChar = True
+      Size = 1
+    end
+    object qryBuscaSaldosItemsXCurvasFLGDESTACADO: TStringField
+      DisplayLabel = 'FLG Destacado'
+      DisplayWidth = 1
+      FieldName = 'FLGDESTACADO'
+      Origin = 'BASEDADOS.CURVASXITEMRENFIX.FLGDESTACADO'
+      FixedChar = True
+      Size = 1
+    end
+    object qryBuscaSaldosItemsXCurvasFLGCENTRALIZADO: TStringField
+      DisplayLabel = 'FLG Centralizado'
+      DisplayWidth = 1
+      FieldName = 'FLGCENTRALIZADO'
+      Origin = 'BASEDADOS.CURVASXITEMRENFIX.FLGCENTRALIZADO'
+      FixedChar = True
+      Size = 1
+    end
+  end
+  object qryUpdHistorico: TwwQuery
+    DatabaseName = 'BaseDados'
+    SQL.Strings = (
+      'update HISTRENFIX'
+      'set'
+      '  VLRHISTRENFIX = :VLRHISTRENFIX,'
+      '  QTDHISTRENFIX = :QTDHISTRENFIX,'
+      '  SALDOVLRHISTRENFI = :SALDOVLRHISTRENFI,'
+      '  SALDOQTDHISTRENFI = :SALDOQTDHISTRENFI'
+      'where'
+      '  IDHISTRENFIX = :IDHISTRENFIX'
+      ' '
+      ' '
+      ' '
+      ' ')
+    ValidateWithMask = True
+    Left = 78
+    Top = 131
+    ParamData = <
+      item
+        DataType = ftFloat
+        Name = 'VLRHISTRENFIX'
+        ParamType = ptUnknown
+      end
+      item
+        DataType = ftFloat
+        Name = 'QTDHISTRENFIX'
+        ParamType = ptUnknown
+      end
+      item
+        DataType = ftFloat
+        Name = 'SALDOVLRHISTRENFI'
+        ParamType = ptUnknown
+      end
+      item
+        DataType = ftFloat
+        Name = 'SALDOQTDHISTRENFI'
+        ParamType = ptUnknown
+      end
+      item
+        DataType = ftInteger
+        Name = 'IDHISTRENFIX'
+        ParamType = ptUnknown
+      end>
+  end
+  object updHistorico: TUpdateSQL
+    ModifySQL.Strings = (
+      'update OPERRENFIX'
+      'set'
+      '  IDINVESTIMENTO = :IDINVESTIMENTO,'
+      '  IDTIPOOPERACAO = :IDTIPOOPERACAO,'
+      '  IDCARTEIRAINVEST = :IDCARTEIRAINVEST,'
+      '  IDCUSTODIANTE = :IDCUSTODIANTE,'
+      '  IDFORCLI = :IDFORCLI,'
+      '  MOECODIGO = :MOECODIGO,'
+      '  IDPLANPREVCTBPATR = :IDPLANPREVCTBPATR,'
+      '  DATAOPERACAO = :DATAOPERACAO,'
+      '  PUOPERACAO = :PUOPERACAO,'
+      '  DATAEMISSAO = :DATAEMISSAO,'
+      '  PUEMISSAO = :PUEMISSAO,'
+      '  VLROPERACAO = :VLROPERACAO,'
+      '  QTDEOPERACAO = :QTDEOPERACAO,'
+      '  VENCOPERACAO = :VENCOPERACAO,'
+      '  OBSERVACAO = :OBSERVACAO,'
+      '  IDUSUARIO = :IDUSUARIO,'
+      '  IDOPERRENFIXAPLIC = :IDOPERRENFIXAPLIC'
+      'where'
+      '  IDOPERRENFIX = :OLD_IDOPERRENFIX')
+    InsertSQL.Strings = (
+      'insert into OPERRENFIX'
+      
+        '  (IDOPERRENFIX, IDINVESTIMENTO, IDTIPOOPERACAO, IDCARTEIRAINVES' +
+        'T, '
+      'IDCUSTODIANTE, '
+      '   IDFORCLI, MOECODIGO, IDPLANPREVCTBPATR, DATAOPERACAO, '
+      'PUOPERACAO, DATAEMISSAO, '
+      '   PUEMISSAO, VLROPERACAO, QTDEOPERACAO, VENCOPERACAO, '
+      'OBSERVACAO,IDUSUARIO,  IDOPERRENFIXAPLIC)'
+      'values'
+      '  (:IDOPERRENFIX, :IDINVESTIMENTO, :IDTIPOOPERACAO, '
+      ':IDCARTEIRAINVEST, '
+      '   :IDCUSTODIANTE, :IDFORCLI, :MOECODIGO, :IDPLANPREVCTBPATR, '
+      ':DATAOPERACAO, '
+      '   :PUOPERACAO, :DATAEMISSAO, :PUEMISSAO, :VLROPERACAO, '
+      ':QTDEOPERACAO, '
+      '   :VENCOPERACAO, :OBSERVACAO,:IDUSUARIO, :IDOPERRENFIXAPLIC)')
+    DeleteSQL.Strings = (
+      'delete from OPERRENFIX'
+      'where'
+      '  IDOPERRENFIX = :OLD_IDOPERRENFIX')
+    Left = 170
+    Top = 134
+  end
+  object qryUpdBuscaSaldosItems: TwwQuery
+    DatabaseName = 'BaseDados'
+    SQL.Strings = (
+      'update HISTRENFIXXITENS'
+      'set'
+      '  PUITEM = :PUITEM,'
+      '  PUACUITEM = :PUACUITEM'
+      'where'
+      
+        '  IDHISTRENFIX = :IDHISTRENFIX AND IDCURVARENFIX = :IDCURVARENFI' +
+        'X AND IDITEMRENFIX = :IDITEMRENFIX'
+      ' '
+      ' '
+      ' '
+      ' '
+      ' ')
+    ValidateWithMask = True
+    Left = 166
+    Top = 307
+    ParamData = <
+      item
+        DataType = ftFloat
+        Name = 'PUITEM'
+        ParamType = ptUnknown
+      end
+      item
+        DataType = ftFloat
+        Name = 'PUACUITEM'
+        ParamType = ptUnknown
+      end
+      item
+        DataType = ftInteger
+        Name = 'IDHISTRENFIX'
+        ParamType = ptUnknown
+      end
+      item
+        DataType = ftInteger
+        Name = 'IDCURVARENFIX'
+        ParamType = ptUnknown
+      end
+      item
+        DataType = ftInteger
+        Name = 'IDITEMRENFIX'
+        ParamType = ptUnknown
+      end>
+  end
+  object qryUpdItensOperacao: TwwQuery
+    CachedUpdates = True
+    DatabaseName = 'BaseDados'
+    SQL.Strings = (
+      'UPDATE'
+      '   OPERRENFIXXCURVAS'
+      'SET'
+      '   VLRCURVA = :VLRCURVA'
+      'WHERE'
+      '   IDOPERRENFIX  = :IDOPERRENFIX  AND'
+      '   IDITEMRENFIX  = :IDITEMRENFIX AND'
+      '   IDCURVARENFIX = :IDCURVARENFIX')
+    ValidateWithMask = True
+    Left = 392
+    Top = 312
+    ParamData = <
+      item
+        DataType = ftFloat
+        Name = 'VLRCURVA'
+        ParamType = ptUnknown
+      end
+      item
+        DataType = ftInteger
+        Name = 'IDOPERRENFIX'
+        ParamType = ptUnknown
+      end
+      item
+        DataType = ftInteger
+        Name = 'IDITEMRENFIX'
+        ParamType = ptUnknown
+      end
+      item
+        DataType = ftInteger
+        Name = 'IDCURVARENFIX'
+        ParamType = ptUnknown
+      end>
+    object FloatField1: TFloatField
+      DisplayLabel = 'ID Item'
+      DisplayWidth = 6
+      FieldName = 'IDITEMRENFIX'
+      Origin = 'BASEDADOS.OPERRENFIXXCURVAS.IDITEMRENFIX'
+    end
+    object StringField1: TStringField
+      DisplayLabel = 'Item'
+      DisplayWidth = 30
+      FieldName = 'DESCITEMRENFIX'
+      Origin = 'BASEDADOS.ITEMRENFIX.DESCITEMRENFIX'
+      Size = 60
+    end
+    object FloatField2: TFloatField
+      DisplayLabel = 'Valor'
+      DisplayWidth = 15
+      FieldName = 'VLRCURVA'
+      Origin = 'BASEDADOS.OPERRENFIXXCURVAS.VLRCURVA'
+    end
+    object FloatField3: TFloatField
+      DisplayLabel = 'Percentual'
+      DisplayWidth = 6
+      FieldName = 'PERCCURVA'
+      Origin = 'BASEDADOS.OPERRENFIXXCURVAS.PERCCURVA'
+    end
+    object StringField2: TStringField
+      DisplayLabel = 'Cod. no Regra'
+      DisplayWidth = 12
+      FieldName = 'CODITEMRENFIX'
+      Origin = 'BASEDADOS.ITEMRENFIX.CODITEMRENFIX'
+      Size = 12
+    end
+    object FloatField4: TFloatField
+      DisplayLabel = 'Seq. Cálculo'
+      DisplayWidth = 4
+      FieldName = 'SEQCALCULO'
+      Origin = 'BASEDADOS.CURVASXITEMRENFIX.SEQCALCULO'
+    end
+    object StringField3: TStringField
+      DisplayLabel = 'Moeda'
+      DisplayWidth = 10
+      FieldName = 'MOESIGLA'
+      Size = 10
+    end
+    object FloatField5: TFloatField
+      DisplayLabel = 'ID Operação'
+      DisplayWidth = 6
+      FieldName = 'IDOPERRENFIX'
+      Origin = 'BASEDADOS.OPERRENFIXXCURVAS.IDOPERRENFIX'
+    end
+    object FloatField6: TFloatField
+      DisplayLabel = 'ID Curva'
+      DisplayWidth = 6
+      FieldName = 'IDCURVARENFIX'
+      Origin = 'BASEDADOS.OPERRENFIXXCURVAS.IDCURVARENFIX'
+    end
+    object FloatField7: TFloatField
+      DisplayLabel = 'ID Regra'
+      DisplayWidth = 6
+      FieldName = 'IDREGRA'
+      Origin = 'BASEDADOS.CURVASXITEMRENFIX.IDREGRA'
+    end
+    object StringField4: TStringField
+      DisplayLabel = 'FLG Moeda'
+      DisplayWidth = 1
+      FieldName = 'FLGMOEDA'
+      Origin = 'BASEDADOS.CURVASXITEMRENFIX.FLGMOEDA'
+      FixedChar = True
+      Size = 1
+    end
+    object StringField5: TStringField
+      DisplayLabel = 'FLG Destacado'
+      DisplayWidth = 1
+      FieldName = 'FLGDESTACADO'
+      Origin = 'BASEDADOS.CURVASXITEMRENFIX.FLGDESTACADO'
+      FixedChar = True
+      Size = 1
+    end
+    object StringField6: TStringField
+      DisplayLabel = 'FLG Centralizado'
+      DisplayWidth = 1
+      FieldName = 'FLGCENTRALIZADO'
+      Origin = 'BASEDADOS.CURVASXITEMRENFIX.FLGCENTRALIZADO'
+      FixedChar = True
+      Size = 1
+    end
+    object FloatField8: TFloatField
+      FieldName = 'MOECODIGO'
+      Origin = 'BASEDADOS.OPERRENFIXXCURVAS.MOECODIGO'
+      Visible = False
+    end
+  end
+  object UpdItensOperacao: TUpdateSQL
+    ModifySQL.Strings = (
+      'UPDATE'
+      '   OPERRENFIXXCURVAS'
+      'SET'
+      '   VLRCURVA = :VLRCURVA'
+      'WHERE'
+      '   IDOPERRENFIX  = :IDOPERRENFIX  AND'
+      '   IDITEMRENFIX  = :IDITEMRENFIX AND'
+      '   IDCURVARENFIX = :IDCURVARENFIX')
+    InsertSQL.Strings = (
+      'insert into OPERRENFIX'
+      
+        '  (IDOPERRENFIX, IDINVESTIMENTO, IDTIPOOPERACAO, IDCARTEIRAINVES' +
+        'T, '
+      'IDCUSTODIANTE, '
+      '   IDFORCLI, MOECODIGO, IDPLANPREVCTBPATR, DATAOPERACAO, '
+      'PUOPERACAO, DATAEMISSAO, '
+      '   PUEMISSAO, VLROPERACAO, QTDEOPERACAO, VENCOPERACAO, '
+      'OBSERVACAO,IDUSUARIO,  IDOPERRENFIXAPLIC)'
+      'values'
+      '  (:IDOPERRENFIX, :IDINVESTIMENTO, :IDTIPOOPERACAO, '
+      ':IDCARTEIRAINVEST, '
+      '   :IDCUSTODIANTE, :IDFORCLI, :MOECODIGO, :IDPLANPREVCTBPATR, '
+      ':DATAOPERACAO, '
+      '   :PUOPERACAO, :DATAEMISSAO, :PUEMISSAO, :VLROPERACAO, '
+      ':QTDEOPERACAO, '
+      '   :VENCOPERACAO, :OBSERVACAO,:IDUSUARIO, :IDOPERRENFIXAPLIC)')
+    DeleteSQL.Strings = (
+      'delete from OPERRENFIX'
+      'where'
+      '  IDOPERRENFIX = :OLD_IDOPERRENFIX')
+    Left = 514
+    Top = 318
+  end
+  object qryUpdOperacoes: TwwQuery
+    DatabaseName = 'BaseDados'
+    SQL.Strings = (
+      'UPDATE'
+      '   OPERRENFIX'
+      'SET'
+      '   DATAOPERACAO = TO_DATE(:DATAOPERACAO,'#39'DD/MM/YYYY'#39'),'
+      '   VLROPERACAO  = :VLROPERACAO,'
+      '   QTDEOPERACAO = :QTDEOPERACAO,'
+      '   PUOPERACAO   = :PUOPERACAO,'
+      '   PUEMISSAO    = :PUEMISSAO,'
+      '   DATAEMISSAO  = TO_DATE(:DATAEMISSAO,'#39'DD/MM/YYYY'#39'),'
+      '   VENCOPERACAO = TO_DATE(:VENCOPERACAO,'#39'DD/MM/YYYY'#39')'
+      'WHERE'
+      '   IDOPERRENFIX  = :IDOPERRENFIX'
+      ' '
+      ' '
+      ' '
+      ' '
+      ' '
+      ' ')
+    ValidateWithMask = True
+    Left = 631
+    Top = 114
+    ParamData = <
+      item
+        DataType = ftUnknown
+        Name = 'DATAOPERACAO'
+        ParamType = ptUnknown
+      end
+      item
+        DataType = ftFloat
+        Name = 'VLROPERACAO'
+        ParamType = ptInput
+      end
+      item
+        DataType = ftFloat
+        Name = 'QTDEOPERACAO'
+        ParamType = ptInput
+      end
+      item
+        DataType = ftFloat
+        Name = 'PUOPERACAO'
+        ParamType = ptInput
+      end
+      item
+        DataType = ftFloat
+        Name = 'PUEMISSAO'
+        ParamType = ptInput
+      end
+      item
+        DataType = ftString
+        Name = 'DATAEMISSAO'
+        ParamType = ptInput
+      end
+      item
+        DataType = ftString
+        Name = 'VENCOPERACAO'
+        ParamType = ptInput
+      end
+      item
+        DataType = ftInteger
+        Name = 'IDOPERRENFIX'
+        ParamType = ptInput
+      end>
+  end
+end

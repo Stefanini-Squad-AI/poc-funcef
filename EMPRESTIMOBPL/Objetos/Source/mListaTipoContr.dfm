@@ -1,0 +1,93 @@
+object MolListaTipoContr: TMolListaTipoContr
+  Left = 0
+  Top = 0
+  Width = 307
+  Height = 163
+  TabOrder = 0
+  object Label6: TLabel
+    Left = 8
+    Top = 10
+    Width = 79
+    Height = 13
+    Caption = 'Tipo de Contrato'
+  end
+  object lstTipoContr: TCheckListBox
+    Left = 8
+    Top = 24
+    Width = 289
+    Height = 129
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -9
+    Font.Name = 'MS Sans Serif'
+    Font.Style = []
+    ItemHeight = 13
+    ParentFont = False
+    TabOrder = 0
+  end
+  object btnInverte: TBitBtn
+    Left = 255
+    Top = 7
+    Width = 21
+    Height = 20
+    Hint = 'Inverte a Seleção de Patrocinadoras'
+    ParentShowHint = False
+    ShowHint = True
+    TabOrder = 1
+    OnClick = btnInverteClick
+    Glyph.Data = {
+      F6000000424DF600000000000000760000002800000010000000100000000100
+      0400000000008000000000000000000000001000000000000000000000000000
+      8000008000000080800080000000800080008080000080808000C0C0C0000000
+      FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00888888888888
+      8888888888488888888888888844888888888888444448888888888444444488
+      1888884444444888118884448844888881188448884888888118844888888188
+      8118844888881188111888448881111111888884881111111888888888811111
+      8888888888881188888888888888818888888888888888888888}
+  end
+  object btnMarcaTodos: TBitBtn
+    Left = 276
+    Top = 7
+    Width = 21
+    Height = 20
+    Hint = 'Seleciona todas as Patrocinadoras'
+    ParentShowHint = False
+    ShowHint = True
+    TabOrder = 2
+    OnClick = btnMarcaTodosClick
+    Glyph.Data = {
+      D6000000424DD60000000000000076000000280000000C0000000C0000000100
+      0400000000006000000000000000000000001000000000000000000000000000
+      8000008000000080800080000000800080008080000080808000C0C0C0000000
+      FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00888848888888
+      0000888224888888000088222248888800008822822488880000882848224888
+      0000888224822488000088222248228800008822822482880000882888224888
+      0000888888822488000088888888228800008888888882880000}
+  end
+  object qry: TwwQuery
+    DatabaseName = 'BaseDados'
+    SQL.Strings = (
+      'SELECT'
+      '    TCE.IDTIPOCONTREMPTMO, TCE.TCEDESCRICAO'
+      'FROM'
+      '    TIPOCONTREMPTMO TCE,'
+      '    TIPOSUSPEMPTMO  TSE,'
+      '    TIPOCONTRXSUSP  TCS'
+      'WHERE'
+      '    TSE.FLGSUSPCONCESSAO   = 1'
+      'AND TCS.IDTIPOSUSPEMPTMO   = TSE.IDTIPOSUSPEMPTMO'
+      'AND TCE.IDTIPOCONTREMPTMO  = TCS.IDTIPOCONTREMPTMO ')
+    ValidateWithMask = True
+    Left = 136
+    Top = 8
+    object qryIDTIPOCONTREMPTMO: TFloatField
+      FieldName = 'IDTIPOCONTREMPTMO'
+      Origin = 'BASEDADOS.TIPOCONTREMPTMO.IDTIPOCONTREMPTMO'
+    end
+    object qryTCEDESCRICAO: TStringField
+      FieldName = 'TCEDESCRICAO'
+      Origin = 'BASEDADOS.TIPOCONTREMPTMO.TCEDESCRICAO'
+      Size = 60
+    end
+  end
+end

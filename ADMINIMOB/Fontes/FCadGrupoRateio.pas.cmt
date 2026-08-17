@@ -1,0 +1,699 @@
+unit FCadGrupoRateio;
+
+//	-------------------------------------------------------------------------------------------------
+//
+//	   Cadastro de Grupos para Rateio
+//
+//	Autor             :  André Pontes
+//	Data de Início    :  21/04/2000
+//	Data de Término   :  23/04/2000
+//
+//	Modificações	   :  26/04/2000  1) Função VerificaLinhaGrid (para apontar duplicidade
+//                                     de Imóveis antes do CmeCadastro.Confirma(Self))
+//                                  2) Criada função VerificaRateio
+//
+// -------------------------------------------------------------------------------------------------
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  FCadMestreDetCS, StdCtrls, DBCtrls, TREdit, wwdblook,
+  Mask, wwdbedit, MontaSelect, DBTables, Db, Wwdatsrc, Wwquery, TB97Ctls,
+  MAHlpBtn, TB97Tlbr, Buttons, Grids, Wwdbigrd, Wwdbgrid, ComCtrls, TB97,
+  TabControlDetalhe, ExtCtrls, CMDBLookupCombo, wwriched, Wwdbspin,
+  IvDictio, IvMulti, IvEMulti, FCadastroMestreDetImob, DBCtrls2,
+  CmEventosCadastro, ImgList;
+
+type
+  TfrmCadGrupoRateio = class(TfrmCadastroMestreDetImob)
+    updDetImoveis: TUpdateSQL;
+    qryDetImoveis: TwwQuery;
+    btnBuscaImovel: TBitBtn;
+    Label10: TLabel;
+    Label1: TLabel;
+    DBedtNomeGrupo: TDBEdit;
+    DBedtNomeImovel: TDBEdit;
+    Label2: TLabel;
+    DBedtPercentRateio: TDBEdit;
+    DBedtCodigo: TDBEdit2;
+    Label21: TLabel;
+    qryIDGRUPORATEIO: TFloatField;
+    qryGRRDESCRICAO: TStringField;
+    qryIMOCODIGO: TStringField;
+    qryDetImoveisNOME_EXTENSO: TStringField;
+    qryDetImoveisIDGRUPORATEIO: TFloatField;
+    qryDetImoveisIDIMOVEL: TFloatField;
+    qryDetImoveisGXIPERCENTRATEIO: TFloatField;
+    btnCalcular: TToolbarButton97;
+    edtTotalRateio: TEdit;
+    Label3: TLabel;
+    qryDetImoveisIMOAREA: TFloatField;
+    lblQuantImoveis: TLabel;
+    qryDetImoveisIMOCODIGO: TStringField;
+    qryInsGrupoRateio: TwwQuery;
+    qryInsGrupoXImovel: TwwQuery;
+    qryDetImoveisCODTIPIMOVEL: TStringField;
+    ToolbarSep976: TToolbarSep97;
+
+    procedure bbtnConfirmarClick(Sender: TObject);
+    procedure FormShow(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure bbtnOkDetClick(Sender: TObject);
+    procedure btnBuscaImovelClick(Sender: TObject);
+    procedure btnRefreshClick(Sender: TObject);
+    procedure btnCalcularClick(Sender: TObject);
+
+    Procedure CmeDetalheConfirma(Sender: TObject);
+    Procedure CmeDetalheEdit(Sender: TObject);
+    Procedure CmeDetalheInsert(Sender: TObject);
+    Procedure CmeCadastroConfirma(Sender: TObject);
+    Procedure CmeCadastroEdit(Sender: TObject);
+    Procedure CmeCadastroInsert(Sender: TObject);
+    Procedure CmeCadastroFind(Sender: TObject);
+    procedure CmeCadastroAtualizaBotoes(Sender: TObject);
+    procedure btnTrazerClick(Sender: TObject);
+    procedure CmeCadastroBeforeConfirma(sender: TObject; var Accept: Boolean);
+    procedure CmeCadastroDelete(Sender: TObject);
+
+  private { Private declarations }
+    PrimeiroControle  : TWinControl;
+    iGrupo            : integer;
+
+    procedure Sel(i: integer);
+
+    procedure AbreDetalhes(i: integer);
+    procedure FechaDetalhes;
+    procedure FechaQueries; override;
+
+    function VerificaPreenchimento: boolean;
+    function VerificaPreenchimentoDetalhe: boolean;
+    function VerificaPreenchimentoImovel: boolean;
+
+    function VerificaRateio: boolean;
+    function TotalizaRateio: currency;
+
+    procedure ContaImoveis;
+
+    function TotalizaArea: currency;
+    procedure RefazRateio(fAreaTotal: currency);
+
+
+  public { Public declarations }
+
+  end;
+
+
+
+var
+  frmCadGrupoRateio: TfrmCadGrupoRateio;
+
+
+
+implementation
+{$R *.DFM}
+Uses
+  USistema, UMensErro, UDatabase, DBaseDados, UModulo, FCadastroCS, UComunsImobiliario, uVerificaPreenchimento,
+  dLookImobiliario, uFuncoesImob, dImobiliario, DMS;
+
+
+
+procedure TfrmCadGrupoRateio.CmeCadastroFind(Sender: TObject);
+begin
+	inherited;
+
+	// redesenha o form na volta do MontaSelect
+	Repaint;
+
+	// se houve busca, abre a query principal com apenas o registro buscado
+	if MontaSelect.RetornouValor then begin
+
+      Screen.Cursor := crHourGlass;
+
+		FechaDetalhes;
+
+		iGrupo := StrToInt(MontaSelect.ValoresChave[0]);
+      Sel(iGrupo);
+
+      AbreDetalhes(iGrupo);
+
+      edtTotalRateio.Text     := FormatFloat('##0.0000 %', TotalizaRateio);
+      ContaImoveis;
+
+      Screen.Cursor := crDefault;
+   end;
+end;
+
+
+
+procedure TfrmCadGrupoRateio.CmeCadastroInsert(Sender: TObject);
+begin
+	FechaDetalhes;
+
+	// abre a query principal contendo zero registros
+   Sel(-1);
+
+	inherited; { = CmeCadastro.Cancel(Self);
+                  ds.DataSet.Insert; }
+
+   // define logo o id do registro que se está inserindo, para poder gravar nos detalhes
+   iGrupo := LeUltRegistro(nil, 'GRUPORATEIO');
+   qryIDGRUPORATEIO.asInteger := iGrupo;
+
+	// abre as queries detalhe com zero registros (o novo registro não tem filhos, afinal...)
+	AbreDetalhes(iGrupo);
+
+   tbcDetalheChange(tbcDetalhe);
+
+   if PrimeiroControle.CanFocus then PrimeiroControle.SetFocus;
+end;
+
+
+
+procedure TfrmCadGrupoRateio.CmeCadastroEdit(Sender: TObject);
+begin
+   inherited;
+
+   tbcDetalheChange(tbcDetalhe);
+
+   if PrimeiroControle.CanFocus then PrimeiroControle.SetFocus;
+end;
+
+
+
+
+procedure TfrmCadGrupoRateio.CmeCadastroConfirma(Sender: TObject);
+begin
+   try
+      if CmeCadastro.Operacao in [opInserir, opAlterar] then begin
+
+         // grava a Empresa Proprietária
+//         qry.FieldByName('IDPESSOA').asInteger  := Sistema.idEmpresa;
+
+      end;
+
+      inherited; { AplicaAlteracoes([TDBDataSet(ds.DataSet)]); }
+
+      AplicaAlteracoes([qryDetImoveis]);
+
+   except
+      Screen.Cursor := crDefault;
+      Raise;
+      Repaint;
+   end;
+end;
+
+
+
+procedure TfrmCadGrupoRateio.Sel(i: integer);
+begin
+   with qry do begin
+      LimpaParametros(qry);
+      Params[0].asInteger := i;
+      Open;
+   end;
+end;
+
+
+
+procedure TfrmCadGrupoRateio.CmeDetalheInsert(Sender: TObject);
+begin
+   inherited;
+
+   qryDetImoveisGXIPERCENTRATEIO.asFloat := 1;
+
+   if btnBuscaImovel.CanFocus then btnBuscaImovel.SetFocus;
+end;
+
+
+
+procedure TfrmCadGrupoRateio.CmeDetalheEdit(Sender: TObject);
+begin
+   inherited;
+   if btnBuscaImovel.CanFocus then btnBuscaImovel.SetFocus;
+end;
+
+
+
+procedure TfrmCadGrupoRateio.CmeDetalheConfirma(Sender: TObject);
+begin
+	if ( (qryDetalheAtual <> nil) and (qryDetalheAtual.State in [dsInsert, dsEdit]) ) then begin
+
+      // grava o id do Cadastro Mestre (qualquer que seja a query detalhe)
+      qryDetalheAtual.FieldByName('IDGRUPORATEIO').asInteger := iGrupo;
+
+      inherited;
+
+      ContaImoveis;
+   end;
+end;
+
+
+
+procedure TfrmCadGrupoRateio.AbreDetalhes(i: integer);
+begin
+	with qryDetImoveis do begin
+      LimpaParametros(qryDetImoveis);
+      Params[0].asInteger := i;
+      Open;
+   end;
+end;
+
+
+
+procedure TfrmCadGrupoRateio.FechaDetalhes;
+begin
+   qryDetImoveis.Close;
+end;
+
+
+
+procedure TfrmCadGrupoRateio.FechaQueries;
+begin
+	qryDetImoveis.Close;
+	qry.Close;
+end;
+
+
+
+function TfrmCadGrupoRateio.VerificaPreenchimento: boolean;
+begin
+	Result := False;
+
+	try
+
+		// Nome do Grupo
+      if ( qryGRRDESCRICAO.isNULL ) then
+         raise EValidacao.CreateVal('É necessário indicar o Nome do Grupo!', DBedtNomeGrupo);
+
+		// Código do Grupo
+      if ( qryIMOCODIGO.isNULL ) then
+         raise EValidacao.CreateVal('É necessário indicar o Código do Grupo!', DBedtCodigo);
+
+      if not(qryDetImoveis.isEmpty) then
+         if not(VerificaRateio) then
+            raise EValidacao.CreateVal('O total do Rateio não perfaz 100%!', DBedtNomeGrupo);
+
+	except
+
+      on ev : EValidacao do begin
+         Screen.Cursor := crDefault;
+         if ev.Show then MsgDlg(ev.message, 'Aviso', mtWarning, [mbOk], 0);
+			Repaint;
+         if ev.Control.CanFocus then ev.Control.SetFocus;
+         Exit;
+      end;
+
+   end;
+
+   if not(qryDetImoveis.IsEmpty) then begin
+      if not(VerificaLinhaGrid(qryDetImoveis, 1{chave}, 2{vazio}, 'Imóveis do Grupo', True{permite vazio})) then Exit;
+   end;
+
+   Result := True;
+end;
+
+
+
+function TfrmCadGrupoRateio.VerificaPreenchimentoDetalhe: boolean;
+var
+   bPreenchido : boolean;
+begin
+   bPreenchido := False;
+
+   // só verifica se estiver fazendo uma inclusão ou alteração
+	if ( (qryDetalheAtual <> nil) and (qryDetalheAtual.State in [dsInsert, dsEdit]) ) then begin
+
+		// verifica o preenchimento de acordo com a query em questão
+      Case tbcDetalhe.TabIndex of
+         0: if VerificaPreenchimentoImovel then bPreenchido := True;
+      end;
+
+   end else begin
+      bPreenchido := True;
+   end;
+
+   Result := bPreenchido;
+end;
+
+
+
+function TfrmCadGrupoRateio.VerificaPreenchimentoImovel: boolean;
+begin
+   Result := False;
+	try
+
+      // Nome do Imóvel
+      if ( (length(trim(DBedtNomeImovel.Text)) = 0) or (qryDetImoveisIDIMOVEL.isNULL) ) then
+         raise EValidacao.CreateVal('É necessário indicar o Imóvel!', btnBuscaImovel);
+
+      // Valor
+      if qryDetImoveisGXIPERCENTRATEIO.asFloat <= 0 then
+         raise EValidacao.CreateVal('É necessário indicar o Percentual de Rateio!', DBedtPercentRateio);
+
+	except
+
+    	on ev : EValidacao do begin
+         Screen.Cursor := crDefault;
+			if ev.Show then MsgDlg(ev.message, 'Aviso', mtWarning, [mbOk], 0);
+			Repaint;
+			pgctrlDetalhe.ActivePage   := tbsDet;
+         tbcDetalhe.TabIndex        := 0;
+         if ev.Control.CanFocus then ev.Control.SetFocus;
+         Exit;
+      end;
+
+   end;
+
+   Result := True;
+end;
+
+
+
+function TfrmCadGrupoRateio.TotalizaRateio: currency;
+var
+   fPercentRateio, fTotalRateio: currency;
+begin
+   fTotalRateio := 0;
+
+   if ( (qryDetImoveis.Active) and not(qryDetImoveis.isEmpty) ) then begin
+      with qryDetImoveis do begin
+         First;
+         while not(EOF) do begin
+            fPercentRateio := Arredonda(qryDetImoveisGXIPERCENTRATEIO.asFloat, 4);
+            fTotalRateio   := fTotalRateio + fPercentRateio;
+            Next;
+         end;
+      end;
+   end;
+
+   Result := fTotalRateio;
+end;
+
+
+
+function TfrmCadGrupoRateio.VerificaRateio: boolean;
+begin
+   Result := Arredonda(TotalizaRateio, 4) = 100.0000;
+end;
+
+
+
+procedure TfrmCadGrupoRateio.ContaImoveis;
+var
+   fQuant : double;
+begin
+   fQuant := qryDetImoveis.RecordCount;
+   if fQuant = 1 then begin
+      lblQuantImoveis.Caption := FormatFloat('#0', fQuant) + ' Imóvel';
+   end else begin
+      lblQuantImoveis.Caption := FormatFloat('#0', fQuant) + ' Imóveis';
+   end;
+end;
+
+
+
+function TfrmCadGrupoRateio.TotalizaArea: currency;
+var
+   fArea: currency;
+begin
+   fArea := 0;
+
+   if ( (qryDetImoveis.Active) and not(qryDetImoveis.isEmpty) ) then begin
+      with qryDetImoveis do begin
+         First;
+         while not(EOF) do begin
+            fArea := fArea + qryDetImoveisIMOAREA.asFloat;
+            Next;
+         end;
+      end;
+   end;
+
+   Result := fArea;
+end;
+
+
+
+procedure TfrmCadGrupoRateio.RefazRateio(fAreaTotal: currency);
+var
+   fPercent          : currency;
+   fPercentRestante  : currency;
+   iContador         : integer;
+begin
+   fPercentRestante := 100;
+
+   if ( (qryDetImoveis.Active) and not(qryDetImoveis.isEmpty) ) then begin
+
+      with qryDetImoveis do begin
+
+         First;
+         iContador := 1;
+
+         while not(EOF) do begin
+            if fAreaTotal = 0 then begin
+               fPercent := 0;
+            end else begin
+               fPercent := Arredonda(qryDetImoveisIMOAREA.asFloat / fAreaTotal * 100, 4);
+            end;
+
+            // se estiver no último registro, usa o "saldo" restante
+            // (para não gerar erro de arredondamento)
+            if iContador = qryDetImoveis.RecordCount then fPercent := fPercentRestante;
+
+            // subtrai do restante;
+            fPercentRestante  := fPercentRestante - fPercent;
+
+            Edit;
+            qryDetImoveisGXIPERCENTRATEIO.asFloat := fPercent;
+            Post;
+
+            Next;
+            inc(iContador);
+         end;
+
+      end;
+   end;
+end;
+
+
+
+procedure TfrmCadGrupoRateio.bbtnConfirmarClick(Sender: TObject);
+begin
+	Screen.Cursor := crHourGlass;
+
+   if CmeCadastro.Operacao in [opInserir, opAlterar] then begin
+
+      if VerificaPreenchimentoDetalhe then begin
+         CmeDetalhe.Confirma(Self);
+         CmeDetalhe.Cancel(Self);
+
+         if VerificaPreenchimento then begin
+            inherited;
+         end;
+      end;
+
+   end;
+
+	Screen.Cursor := crDefault;
+end;
+
+
+
+procedure TfrmCadGrupoRateio.FormShow(Sender: TObject);
+begin
+	inherited;
+
+   PrimeiroControle := DBedtNomeGrupo;
+end;
+
+
+
+procedure TfrmCadGrupoRateio.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+	FechaQueries;
+	inherited;
+end;
+
+
+
+procedure TfrmCadGrupoRateio.bbtnOkDetClick(Sender: TObject);
+begin
+   if VerificaPreenchimentoDetalhe then inherited;
+end;
+
+
+
+procedure TfrmCadGrupoRateio.btnBuscaImovelClick(Sender: TObject);
+begin
+   if qry.State in [dsInsert, dsEdit] then begin
+
+      dtmMS.MS_ImovelAtivo.Executar;
+
+      // redesenha o form na volta do MontaSelect
+      Repaint;
+
+      // se houve busca, abre a query de Custos/Recebimentos por Imovel com apenas o registro buscado
+      if dtmMS.MS_ImovelAtivo.RetornouValor then begin
+
+         Screen.Cursor := crHourGlass;
+
+         qryDetImoveisIDIMOVEL.asInteger     := StrToInt(dtmMS.MS_ImovelAtivo.ValoresChave[1]);
+         qryDetImoveisNOME_EXTENSO.asString  := dtmMS.MS_ImovelAtivo.ValoresChave[2] + ' - ' +
+                                                dtmMS.MS_ImovelAtivo.ValoresChave[3];
+         qryDetImoveisIMOAREA.AsFloat        := StrToFloat(dtmMS.MS_ImovelAtivo.ValoresChave[8]);
+         qryDetImoveisCODTIPIMOVEL.AsString  := dtmMS.MS_ImovelAtivo.ValoresChave[4];
+      end;
+
+      btnBuscaImovel.SetFocus;
+   end;
+
+   Screen.Cursor := crDefault;
+end;
+
+
+
+procedure TfrmCadGrupoRateio.btnRefreshClick(Sender: TObject);
+begin
+   inherited;
+
+   if qryDetImoveis.State in [dsInsert, dsEdit] then CmeDetalhe.Cancel(Self);
+
+   edtTotalRateio.Text := FormatFloat('##0.0000 %', TotalizaRateio);
+   ContaImoveis;
+end;
+
+
+
+procedure TfrmCadGrupoRateio.btnCalcularClick(Sender: TObject);
+begin
+   inherited;
+
+   if qry.State in dsEditModes then begin
+
+      try
+         if MsgDlg('Deseja realmente recalcular os percentuais de rateio?', 'Confirmação', mtConfirmation, [mbYes, mbNo], 0) = mrYes then begin
+            Repaint;
+            if qryDetImoveis.State in dsEditModes then CmeDetalhe.Cancel(Self);
+
+            Screen.Cursor := crHourGlass;
+            RefazRateio(TotalizaArea);
+
+            edtTotalRateio.Text := FormatFloat('##0.0000 %', TotalizaRateio);
+            ContaImoveis;
+         end;
+
+         Repaint;
+
+      finally
+         btnCalcular.Down := False;
+         Screen.Cursor := crDefault;
+      end;
+
+   end;
+end;
+
+
+
+procedure TfrmCadGrupoRateio.CmeCadastroAtualizaBotoes(Sender: TObject);
+begin
+   inherited;
+   btnTrazer.Enabled := not(bbtnCancelar.Enabled);
+end;
+
+
+
+procedure TfrmCadGrupoRateio.btnTrazerClick(Sender: TObject);
+var
+   iNovoGrupo: integer;
+begin
+   inherited;
+
+   if qry.IsEmpty then Exit;
+
+   if MsgDlg('Confirma a cópia do grupo?', 'Confirmação', mtConfirmation, [mbYes, mbNo], 0) = mrYes then begin
+
+      StartTransacao;
+
+      try
+         iNovoGrupo := LeUltRegistro(nil, 'GRUPORATEIO');
+
+         qryInsGrupoRateio.ParamByName('PIDGRUPORATEIO').AsInteger := iNovoGrupo;
+         qryInsGrupoRateio.ParamByName('PGRRDESCRICAO').AsString   := 'Cópia de ' + qryGRRDESCRICAO.AsString;
+         qryInsGrupoRateio.ParamByName('PIMOCODIGO').AsString      := qryIMOCODIGO.AsString;
+         qryInsGrupoRateio.ExecSQL;
+
+         qryDetImoveis.First;
+         while not qryDetImoveis.Eof do begin
+            qryInsGrupoXImovel.ParamByName('PIDGRUPORATEIO').AsInteger  := iNovoGrupo;
+            qryInsGrupoXImovel.ParamByName('PIDIMOVEL').AsInteger       := qryDetImoveisIDIMOVEL.AsInteger;
+            qryInsGrupoXImovel.ParamByName('PGXIPERCENTRATEIO').AsFloat := qryDetImoveisGXIPERCENTRATEIO.AsFloat;
+            qryInsGrupoXImovel.ExecSQL;
+            qryDetImoveis.Next;
+         end;
+
+         CommitTransacao;
+
+         iGrupo := iNovoGrupo;
+         Sel(iNovoGrupo);
+
+         AbreDetalhes(iNovoGrupo);
+
+         edtTotalRateio.Text := FormatFloat('##0.0000 %', TotalizaRateio);
+         ContaImoveis;
+
+         MsgDlg('Cópia concluída com sucesso.', 'Informação', mtInformation, [mbOk], 0);
+         Repaint;
+
+      except
+         RollBackTransacao;
+         MsgDlg('Erro ao se tentar copiar o grupo.', 'Erro', mtError, [mbOk], 0);
+         Repaint;
+      end;
+   end;
+end;
+
+
+
+procedure TfrmCadGrupoRateio.CmeCadastroBeforeConfirma(sender: TObject; var Accept: Boolean);
+var
+   sCodTipImovel  : string;
+   bDiferente     : boolean;
+begin
+   inherited;
+   bDiferente     := False;
+
+   ParametrosSistema;
+   if dtmImobiliario.qryParamImobFLGMULTITIPO.AsInteger <> 1 then begin
+      qryDetImoveis.First;
+      sCodTipImovel  := qryDetImoveisCODTIPIMOVEL.AsString;
+      while (not qryDetImoveis.Eof) and (not bDiferente) do begin
+
+         if qryDetImoveisCODTIPIMOVEL.AsString <> sCodTipImovel then begin
+            bDiferente := True;
+            MsgDlg('Todos os imóveis devem possuir o mesmo tipo.','Aviso',mtwarning,[mbok],0);
+            Repaint;
+         end;
+
+         qryDetImoveis.Next;
+      end;
+   end;
+   Accept := not(bDiferente);
+end;
+
+
+
+procedure TfrmCadGrupoRateio.CmeCadastroDelete(Sender: TObject);
+var
+   sSql: string;
+begin
+   sSql := 'DELETE FROM GRUPOXIMOVEL WHERE IDGRUPORATEIO = ' + IntToStr(qryIDGRUPORATEIO.AsInteger);
+
+   if ExecutaQuery(dtmImobiliario.qryAux, sSql) then begin
+      inherited;
+      FechaDetalhes;
+   end;
+end;
+
+
+
+end.

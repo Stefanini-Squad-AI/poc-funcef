@@ -1,0 +1,54 @@
+--CRIAÇÃO DA TRIGGER DA TABELA DE LOG.       
+CREATE OR REPLACE TRIGGER CM.TUDLOGALT_IRRF_REDUCAO
+BEFORE UPDATE OF                             
+   FAIXA_TRIBUTAVEL
+   ,REDUCAO
+   ,FATOR
+   ,DATAINIVIGENCIA
+OR DELETE ON CM.IRRF_REDUCAO
+FOR EACH ROW                          
+DECLARE                               
+  vTipoOperacao CHAR(1);              
+BEGIN                                 
+  IF deleting THEN                    
+     vTipoOperacao := 'D';          
+  END IF;                             
+  IF updating THEN                    
+     vTipoOperacao := 'A';          
+  END IF;                             
+  IF (:NEW.FAIXA_TRIBUTAVEL <> :OLD.FAIXA_TRIBUTAVEL) OR
+  (:NEW.FAIXA_TRIBUTAVEL IS NULL AND :OLD.FAIXA_TRIBUTAVEL IS NOT NULL) OR 
+  (:NEW.FAIXA_TRIBUTAVEL IS NOT NULL AND :OLD.FAIXA_TRIBUTAVEL IS NULL)    
+  OR (:NEW.REDUCAO <> :OLD.REDUCAO) OR
+  (:NEW.REDUCAO IS NULL AND :OLD.REDUCAO IS NOT NULL) OR 
+  (:NEW.REDUCAO IS NOT NULL AND :OLD.REDUCAO IS NULL)    
+  OR (:NEW.FATOR <> :OLD.FATOR) OR
+  (:NEW.FATOR IS NULL AND :OLD.FATOR IS NOT NULL) OR 
+  (:NEW.FATOR IS NOT NULL AND :OLD.FATOR IS NULL)    
+  OR (:NEW.DATAINIVIGENCIA <> :OLD.DATAINIVIGENCIA) OR
+  (:NEW.DATAINIVIGENCIA IS NULL AND :OLD.DATAINIVIGENCIA IS NOT NULL) OR 
+  (:NEW.DATAINIVIGENCIA IS NOT NULL AND :OLD.DATAINIVIGENCIA IS NULL)    
+  THEN                                
+   INSERT INTO LOGPLANUS.LOG_PLANUS_IRRF_REDUCAO
+    (IDLOGIRRF_REDUCAO,
+     FAIXA_TRIBUTAVEL,
+     REDUCAO,
+     FATOR,
+     DATAINIVIGENCIA,
+     ROWIDORIGEM,      
+     Operacao,         
+     TRGDTALTERACAO,   
+     TRGUSERALTERACAO  
+    ) VALUES (         
+     LOGPLANUS.SEQLOGPLANUS_IRRF_REDUCAO.NEXTVAL, 
+     :OLD.FAIXA_TRIBUTAVEL,
+     :OLD.REDUCAO,
+     :OLD.FATOR,
+     :OLD.DATAINIVIGENCIA,
+     :OLD.ROWID,     
+     vTipoOperacao,  
+     SYSDATE,        
+     USER            
+    );               
+  END IF;            
+END;                 

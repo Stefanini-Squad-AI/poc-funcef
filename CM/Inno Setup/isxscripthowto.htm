@@ -1,0 +1,528 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<meta name="GENERATOR" content="Microsoft FrontPage 4.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<title>My Inno Setup Extensions</title>
+<style>
+  <!--a            { text-decoration: none }
+-->
+  <!--a:hover      { text-decoration: underline }
+-->
+</style>
+</head>
+
+<body bgcolor="white" text="black" link="#0000FF" vlink="#0000FF" alink="#0000FF">
+
+<table width="100%">
+  <tr>
+    <td bgcolor="#0000FF"><b><font color="#FFFFFF" face="Verdana, Arial" size="6">My
+      Inno Setup Extensions: how to</font></b></td>
+  </tr>
+  <tr>
+    <td>
+      <p><font face="Verdana,Arial" size="-1"><br>
+      <img border="0" src="Isx.gif" align="right" width="256" height="196">Welcome
+      to the <a href="http://www.wintax.nl/isx">My Inno Setup Extensions</a>
+      advanced Pascal scripting 'how to' page.</font></p>
+      <p><font face="Verdana,Arial" size="-1">The scripting engine currently
+      used by My Inno Setup Extensions is Innerfuse Pascal Script by Carlo Kok
+      from Innerfuse. Like My Inno Setup Extensions, Innerfuse Pascal Script is
+      freely available and comes with source. See <a href="http://www.weyert.com/ifs">http://www.weyert.com/ifs</a>
+      for more information.</font></p>
+      <p><font face="Verdana,Arial" size="-1">The scripting support adds about
+      25 kb to the size of an installer.</font></p>
+      <p><font face="Verdana,Arial" size="-1"><i>(Updated December 20 2000)</i></font></p>
+      <div align="center">
+        <center>
+        <table border="0" cellpadding="2" cellspacing="0" width="95%">
+          <tr>
+            <td><font size="-2" face="Verdana,Arial">Go to [ <a href="#general">General</a>
+              | <a href="#event">'Event' functions</a> | <a href="#check">'Check' functions</a> |
+              <a href="#constant"> 'Constant' functions</a> | <a href="#misc">
+              Misc.</a> | <a href="#supportfunctions"> Support functions</a>]</font></td>
+          </tr>
+          <tr>
+            <td><font size="-2" face="verdana,arial">&nbsp;</font></td>
+          </tr>
+          <tr>
+            <td bgcolor="#0000FF"><a name="general"><b><font color="#FFFFFF" size="5" face="Verdana, Arial">General</font></b></a></td>
+          </tr>
+          <tr>
+            <td><font face="Verdana,Arial" size="-1"><br>
+              The advanced Pascal scripting feature is completely optional, but
+              if used it adds lots of new possibilities. Some examples:</font>
+              <ul>
+                <li><font face="Verdana,Arial" size="-1">Support for aborting
+                  setup under custom conditions.</font></li>
+                <li><font face="Verdana,Arial" size="-1">Support for extracting
+                  and running or calling files
+                  from the Pascal script before, during or after the installation.</font></li>
+                <li><font face="Verdana,Arial" size="-1">Support for scripted
+                  constants that can do anything the normal constants, the
+                  read-from-registry, read-from-ini and read-from-commandline
+                  constants can do + more.</font></li>
+                <li><font face="Verdana,Arial" size="-1">Support for runtime
+                  removal of types, components and/or tasks under custom
+                  conditions</font></li>
+                <li><font face="Verdana,Arial" size="-1">Support for conditional
+                  installation of [Files], [Registry], [Run] etc. entries based on
+                  custom conditions.</font></li>
+                <li><font face="Verdana,Arial" size="-1">Lots of support
+                  functions to do from the Pascal script just about everything
+                  Inno Setup itself does/can do + more.</font></li>
+              </ul>
+              <p><font face="Verdana,Arial" size="-1">The Pascal script is interpreted
+              at run time, which means that syntax error messages and similar errors will be displayed while actually running Setup
+              and not while compiling your setup.exe file.</font></p>
+              <p><font face="Verdana,Arial" size="-1">A <a href="Sample1.ifs">sample
+              Pascal script</a>.</font></p>
+              <p><font face="Verdana,Arial" size="-1">One new directive is used
+              to specify the Pascal script file that has to be used:&nbsp;</font></p>
+              <p><font face="Verdana,Arial" size="-1"><b>[Setup]</b></font></p>
+              <p><font face="Verdana,Arial" size="-1">The following is a list of
+              new directives:</font></p>
+              <p><font face="Verdana,Arial" size="-1"><i>CodeFile<br>
+              </i>
+              Default value: none<br>
+              Description:<br>
+              Name of the My Inno Setup Extension/Innerfuse Pascal Script
+              compatible Pascal script file.</font></p>
+              <p>&nbsp;</p>
+            </td>
+          </tr>
+          <tr>
+            <td bgcolor="#0000FF"><font color="#FFFFFF"><a name="event"><b><font size="5" face="Verdana, Arial">'Event'
+              function</font></b><font size="5" face="Verdana, Arial"><b>s</b></font></a></font></td>
+          </tr>
+          <tr>
+            <td><font face="Verdana,Arial" size="-1"><br>
+              The Pascal script file can contain several 'event' functions which
+              are called at appropiate times. These are:</font>
+                <ul>
+                  <li><font face="Verdana,Arial" size="-1">function InitializeSetup(): Boolean;<br>
+                    <i>return False to abort Setup</i></font></li>
+                  <li><font face="Verdana,Arial" size="-1">procedure DeInitializeSetup();</font></li>
+                  <li><font face="Verdana,Arial" size="-1">procedure CurStepChanged(CurStep: Integer);</font></li>
+                  <li><font face="Verdana,Arial" size="-1">function NextButtonClick(CurPage: Integer): Boolean;<br>
+                    <i>return False to surpress the click on the Next button</i></font></li>
+                  <li><font face="Verdana,Arial" size="-1">function BackButtonClick(CurPage: Integer): Boolean;<i><br>
+                    return False to surpress the click on the Back button</i><br>
+                    function SkipCurPage(CurPage: Integer): Boolean;</font></li>
+                  <li><font face="Verdana,Arial" size="-1"><i>return True to
+                    skip the CurPage page</i><br>
+                    procedure CurPageChanged(CurPage: Integer);</font></li>
+                </ul>
+              <p><font face="Verdana,Arial" size="-1">Remarks:</font></p>
+              <p><font face="Verdana,Arial" size="-1">-None of these functions
+              are required.<br>
+              -See the bottom of this page for
+              possible values of the <a href="#curstep"> CurStep</a> and <a href="#curpage"> CurPage</a> parameters.<br>
+              -SkipCurPage isn't called if Setup already determined that the
+              page should be skipped.<br>
+              -SkipCurPage isn't called for the Welcome (wpWelcome) and the
+              Installing (wpInstalling) pages.</font></p>
+              <p>&nbsp;</p>
+            </td>
+          </tr>
+          <tr>
+            <td bgcolor="#0000FF"><font color="#FFFFFF"><b><font size="5" face="Verdana, Arial"><a name="check">'</a></font></b><a name="check"><font size="5" face="Verdana, Arial"><b>Check'
+              functions</b></font></a></font></td>
+          </tr>
+          <tr>
+            <td><font face="Verdana,Arial" size="-1"><br>
+              The Pascal script file can contain several 'check' functions which
+              are called during the installation and determine whether entries
+              in sections like [Files], [Registry], [Run], etc. should be
+              processed or not.</font>
+              <p><font face="Verdana,Arial" size="-1"><b>[Types], [Components],
+              [Tasks], [Dirs], [Files],
+              [Icons], [INI], [InstallDelete], [Registry], [Run],
+              [UninstallDelete], [UninstallRun]</b></font></p>
+              <p><font face="Verdana,Arial" size="-1">The following is a
+              list of new parameters for entries in the above sections:&nbsp;</font></p>
+              <p><font face="Verdana,Arial" size="-1"><i>Check:<br>
+              </i>The name of the function in the Pascal script file that
+              determines&nbsp;whether an entry has to be processed or not.</font></p>
+              <p><font face="Verdana,Arial" size="-1">Here is a example,
+              for the .iss file:</font></p>
+              <blockquote>
+                <p><font face="Verdana,Arial" size="-1">[Files]<br>
+                Source: MyProg.exe; DestDir: {app}; Check: MyProgCheck</font></p>
+              </blockquote>
+                <p><font face="Verdana,Arial" size="-1">and for the Pascal
+                script file:</font></p>
+              <blockquote>
+                <p><font face="Verdana,Arial" size="-1">function MyProgCheck(): Boolean;<br>
+                begin<br>
+                &nbsp; Result := MsgBox('Do you want to install MyProg.exe?', mbConfirmation, MB_YESNO) = idYes;<br>
+                end;</font></p>
+              </blockquote>
+              <p><font face="Verdana,Arial" size="-1">Remarks:&nbsp;</font></p>
+              <p><font face="Verdana,Arial" size="-1">-The 'check' function has to
+              have the same prototype as in the example above: no parameters and
+              a Boolean return value. If the 'check' function returns True, the
+              entry is processed otherwise it's skipped.<br>
+              -If several entries have the same Check parameter, Setup will
+              call the script function several times. If your function performs
+              the same code each time, you can optimize it by performing to code
+              only once and 'caching' the result in a global variable.<br>
+              -An entry without a Check parameter is always installed, unless it's Components
+              and/or Tasks parameter
+              says it shouldn't.<br>
+              -The 'check' function isn't called if Setup already determined
+              from the entry's Components and/or Tasks parameter that it
+              shouldn't be processed.</font></p>
+              <p>&nbsp;</p>
+            </td>
+          </tr>
+          <tr>
+            <td bgcolor="#0000FF"><b><font color="#FFFFFF" size="5" face="Verdana, Arial"><a name="constant">'Constant'
+              functions</a></font></b></td>
+          </tr>
+          <tr>
+            <td><font face="Verdana,Arial" size="-1"><br>
+              The Pascal script file can contain several 'constant' functions which
+              are called when Setup wants to know the value of a 'scripted
+              constant'. These constants work similar to the read-from-registry
+              and similar constants:</font>
+              <blockquote>
+                <p><font face="Verdana,Arial" size="-1">{code:functionname|defaultvalue}</font></p>
+              </blockquote>
+              <p><font face="Verdana,Arial" size="-1">An example of the use of
+              such a constant, for the .iss file:</font></p>
+              <blockquote>
+                <p><font face="Verdana,Arial" size="-1">DefaultDirName={code:myconst}\MyProg</font></p>
+              </blockquote>
+              <p><font face="Verdana,Arial" size="-1">and in the Pascal script
+              file:</font></p>
+              <blockquote>
+                <p><font face="Verdana,Arial" size="-1">function MyConst(Default: String): String;<br>
+                begin<br>
+                &nbsp; Result := ChangeDirConst('{pf}');<br>
+                end;</font></p>
+              </blockquote>
+              <p><font face="Verdana,Arial" size="-1">Remarks:</font></p>
+              <p><font face="Verdana,Arial" size="-1">-The 'constant' function has to
+              have the same prototype as in the example above: 1 parameter
+              containing the Default value (as possibly specified in the .iss
+              file) and
+              a String return value. The return string of the function is used
+              as the value for the constant.</font></p>
+              <p>&nbsp;
+            </td>
+          </tr>
+          <tr>
+            <td bgcolor="#0000FF"><a name="misc"><b><font color="#FFFFFF" size="5" face="Verdana, Arial">Misc.</font></b></a></td>
+          </tr>
+          <tr>
+            <td><font face="Verdana,Arial" size="-1"><br>
+              <i>Some text about Pascal gotchas will be added here.</i>
+              </font>
+              <p>&nbsp;</p>
+            </td>
+          </tr>
+          <tr>
+            <td bgcolor="#0000FF"><a name="supportfunctions"><b><font color="#FFFFFF" size="5" face="Verdana, Arial">Support
+              functions</font></b></a></td>
+          </tr>
+          <tr>
+            <td><font face="Verdana,Arial" size="-1"><br>
+              Here's the list of support functions that can currently be called
+              from within the Pascal script:
+              </font>
+              <blockquote>
+                <p><font face="Verdana,Arial" size="-1">function MsgBox (const
+              Text: String; const <a href="#msgboxtyp">Typ</a>: Integer; const <a href="#msgboxbuttons">Buttons</a>: Integer):
+                <a href="#msgboxreturn">Integer</a>;<br>
+              <br>
+                function FileExists (const Name: String): Boolean;<br>
+                function DirExists (const Name: String): Boolean;<br>
+                function FileOrDirExists (const Name: String): Boolean;<br>
+                function GetIniString (const Section, Key, Default, Filename:
+              String): String;<br>
+                function GetIniInt (const Section, Key: String; const Default,
+              Min, Max: Longint; const Filename: String): Longint;<br>
+                function GetIniBool (const Section, Key: String; const Default:
+              Boolean; const Filename: String): Boolean;<br>
+                function IniKeyExists (const Section, Key, Filename: String):
+                Boolean;<br>
+                function IsIniSectionEmpty (const Section, Filename: String):
+                Boolean;<br>
+                function SetIniString (const Section, Key, Value, Filename:
+              String): Boolean;<br>
+                function SetIniInt (const Section, Key: String; const Value:
+              Longint; const Filename: String): Boolean;<br>
+                function SetIniBool (const Section, Key: String; const Value:
+              Boolean; const Filename: String): Boolean;<br>
+                procedure DeleteIniEntry (const Section, Key, Filename: String);<br>
+                procedure DeleteIniSection (const Section, Filename: String);<br>
+                function GetEnv (const EnvVar: String): String;<br>
+                function GetCmdTail: String;<br>
+                function ParamCount: Integer;<br>
+                function ParamStr (Index: Integer): string;<br>
+                function AddBackslash (const S: String): String;<br>
+                function RemoveBackslash (const S: String): String;<br>
+                function RemoveBackslashUnlessRoot (const S: String): String;<br>
+                function AddQuotes (const S: String): String;<br>
+                function RemoveQuotes (const S: String): String;<br>
+                function GetShortName (const LongName: String): String;<br>
+                function GetWinDir: String;<br>
+                function GetSystemDir: String;<br>
+                function GetTempDir: String;<br>
+                procedure StringChange (var S: String; const FromStr, ToStr:
+                String);<br>
+                function UsingWinNT: Boolean;<br>
+                function UsingNewGUI: Boolean;<br>
+                function FileCopy (const ExistingFile, NewFile: String; const
+              FailIfExists: Boolean; const <a href="#filecopyreadmode">AReadMode</a>: Byte):
+                Boolean;<br>
+                function ConvertPercentStr (var S: String): Boolean;<br>
+                function UsingWindows4: Boolean;<br>
+                function RegQueryStringValue (const <a href="#regrootkey">RootKey</a>: Integer; const
+              SubKeyName, ValueName: String; var ResultStr: String): Boolean;<br>
+                function IsAdminLoggedOn: Boolean;<br>
+              <br>
+                function ExtractTemporaryFiles (const Files: String): Boolean;<br>
+                <br>
+                function CheckForMutexes (Mutexes: String): Boolean;<br>
+                procedure DelayDeleteFile (const Filename: String; const Tries:
+                Integer);<br>
+                function DelTree (const Path: String; const IsDir, DeleteFiles,
+              DeleteSubdirsAlso: Boolean): Boolean;<br>
+                function GenerateUniqueName (Path: String; const Extension:
+              String): String;<br>
+                function GetComputerNameString: String;<br>
+                function GetUserNameString: String;<br>
+              Boolean;<br>
+                procedure IncrementSharedCount (const Filename: String; const
+              AlreadyExisted: Boolean);<br>
+                function InstExec (const Filename, Params: String; WorkingDir:
+              String; const WaitUntilTerminated, WaitUntilIdle: Boolean; const <a href="#instshowcmd">ShowCmd</a>: Integer; var ErrorCode: Integer):
+                Boolean;<br>
+                function InstShellExec (const Filename, Params: String;
+              WorkingDir: String; const <a href="#instshowcmd">ShowCmd</a>: Integer; var ErrorCode:
+              Integer): Boolean;<br>
+                function ModifyPifFile (const Filename: String; const
+              CloseOnExit: Boolean): Boolean;<br>
+                procedure RestartReplace (const TempFile, DestFile: String);<br>
+              <br>
+                function CreateShellLink (const Filename, Description,
+              ShortcutTo, Parameters, WorkingDir, IconFilename: String; const
+              IconIndex, ShowCmd: Integer): Boolean;<br>
+                procedure RegisterTypeLibrary (const Filename: String);<br>
+              <br>
+                function ChangeDirConst (const S: String): String;<br>
+                function ChangeDirConstEx (const S: String; const CustomConst, CustomValue: String):
+                String;<br>
+                function ExitSetupMsgBox: Boolean;<br>
+                function GetShellFolder (Common: Boolean; const <a href="#getshellfolderid">ID</a>: Cardinal):
+                String;<br>
+                function InstallOnThisVersion (const MinVersion,
+              OnlyBelowVersion: String): <a href="#installonthisversionreturn">Integer</a>;<br>
+              <br>
+                function SelectDir (var Directory: String): Boolean;<br>
+              <br>
+                procedure Beep;<br>
+                function Trim(const S: string): string;<br>
+                function TrimLeft(const S: string): string;<br>
+                function TrimRight(const S: string): string;<br>
+                function GetCurrentDir: string;<br>
+                function SetCurrentDir(const Dir: string): Boolean;<br>
+                function ExpandFileName(const FileName: string): string;<br>
+                function ExpandUNCFileName(const FileName: string): string;<br>
+                function ExtractFileDir(const FileName: string): string;<br>
+                function ExtractFileDrive(const FileName: string): string;<br>
+                function ExtractFileExt(const FileName: string): string;<br>
+                function ExtractFileName(const FileName: string): string;<br>
+                function ExtractFilePath(const FileName: string): string;<br>
+                function ChangeFileExt(const FileName, Extension: string):
+                string;<br>
+                function FileSearch(const Name, DirList: string): string;<br>
+                function RenameFile(const OldName, NewName: string): Boolean;<br>
+                function DeleteFile(const FileName: string): Boolean;<br>
+                function CreateDir(const Dir: string): Boolean;<br>
+                function RemoveDir(const Dir: string): Boolean;<br>
+                function DiskFree(Drive: Byte): Integer;<br>
+                function DiskSize(Drive: Byte): Integer;<br>
+                function CompareStr(const S1, S2: string): Integer;<br>
+                function CompareText(const S1, S2: string): Integer;<br>
+                function SysErrorMessage(ErrorCode: Integer): string;<br>
+              <br>
+                procedure ForceDirectories(Dir: string);<br>
+              <br>
+                procedure Sleep(const Milliseconds: LongInt);<br>
+                function FindWindowByClassName(const ClassName: String):
+                Longint;<br>
+                function FindWindowByWindowName(const WindowName: String):
+                Longint;<br>
+                function SendMessage(const Wnd, Msg, WParam, LParam: Longint):
+                Longint;<br>
+                function LoadDLL(const DLLName: String; var ErrorCode: Integer):
+                Longint;<br>
+                Boolean,<br>
+                function CallDLLProc(const DLLHandle: Longint; const ProcName:
+              String; const Param1, Param2: Longint; var Result: Longint):
+                Boolean,<br>
+                function FreeDLL(const DLLHandle: Longint): Boolean<br>
+              <br>
+                procedure BringToFrontAndRestore;<br>
+                function WizardDirValue: String;<br>
+                function WizardGroupValue: String;<br>
+                function WizardNoIcons: Boolean;<br>
+                function WizardSetupType: String;<br>
+                function WizardSelectedComponents(const Descriptions: Boolean):
+                String;<br>
+                function WizardSelectedTasks(const Descriptions: Boolean):
+                String;<br>
+                function CastStringToInteger(var S: String): Longint;<br>
+                function CastIntegerToString(const L: Longint): String;<br>
+              <br>
+              function StrGet(S: String; I:
+              Integer): Char;<br>
+              function StrSet(c: Char; I: Integer; var s: String): Char;<br>
+              function Ord(C: Char): Byte;<br>
+              function Chr(B: Byte): Char;<br>
+              function StrToInt(s: string; def: Longint): Longint;<br>
+              function IntToStr(i: Longint): String;<br>
+              function Uppercase(s: string): string;<br>
+              function Copy(S: String; Indx, Count: Integer): String;<br>
+              procedure Delete(var S: String; Indx, Count: Integer);<br>
+              procedure Insert(Source: String; var Dest: String; Indx: Integer);<br>
+              function Pos(SubStr, S: String): Integer;<br>
+              procedure SetArrayLength(var Arr: Array; I: Longint);<br>
+              function GetArrayLength(var Arr: Array): Longint;<br>
+              function Length(s: String): Longint;<br>
+              function Sin(e: Extended): Extended;<br>
+              function Cos(e: Extended): Extended;<br>
+              function Sqrt(e: Extended): Extended;<br>
+              function Round(e: Extended): Longint;<br>
+              function Trunc(e: Extended): Longint;<br>
+              function Pi: Extended;<br>
+              function Lowercase(s: string): string;<br>
+              function Trim(s: string): string;<br>
+              function Int(e: Extended): Longint;<br>
+              function Sqrt(e: Extended): Extended;<br>
+              function FloatToStr(e: Extended): String;<br>
+              function Version: string;<br>
+              function Left(s: string; I: longInt): string;<br>
+              function StringOfChar(c: char;I : longInt): string;const
+              </font>
+                </p>
+              </blockquote>
+              <p><font face="Verdana,Arial" size="-1">Here's the list of
+              constants used by these functions and the 'event' functions:</font></p>
+              <blockquote>
+                <p><font face="Verdana,Arial" size="-1"><i><a name="curstep">CurStep
+                values<br>
+                </a></i>csStart, csWizard, csCopy, csFinished, csTerminate</font></p>
+                <p><font face="Verdana,Arial" size="-1">
+                <i><a name="curpage">CurPage values</a><br>
+                </i>wpWelcome, wpPassword, wpLicense, wpInfoBefore, wpSelectDir,
+                wpSelectComponents, wpSelectProgramGroup, wpSelectTasks, wpReady,
+                wpInstalling, wpInfoAfter, wpFinished<br>
+                <br>
+                <i><a name="msgboxtyp">MsgBox - Typ values<br>
+                </a></i>mbInformation, mbConfirmation, mbError, mbCriticalError<br>
+                <br>
+                <i><a name="msgboxbuttons">MsgBox - Buttons flags</a></i><br>
+  MB_OK, MB_OKCANCEL, MB_ABORTRETRYIGNORE, MB_YESNOCANCEL, MB_YESNO, MB_RETRYCANCEL,
+                MB_DEFBUTTON1, MB_DEFBUTTON2, MB_DEFBUTTON3, MB_SETFOREGROUND<br>
+                <br>
+                <i><a name="msgboxreturn">MsgBox - return values<br>
+                </a></i>  IDOK, IDCANCEL, IDABORT, IDRETRY, IDIGNORE, IDYES, IDNO<br>
+                <br>
+                <i><a name="getshellfolderid">GetShellFolder - ID values</a></i><br>
+  sfDesktop, sfStartMenu, sfPrograms, sfStartup, sfSendTo, sfFonts, sfAppData, sfDocs,
+                sfTemplates, sfFavorites, sfLocalAppData<br>
+                <br>
+                <i><a name="#filecopyreadmode">FileCopy - ReadMode values</a></i><br>
+  fmOpenRead, fmOpenWrite, fmOpenReadWrite, fmShareCompat, fmShareExclusive, fmShareDenyWrite,
+                fmShareDenyRead, fmShareDenyNone<br>
+                <br>
+                <i><a name="regrootkey">Reg* - RooKey values</a></i><br>
+  HKEY_CLASSES_ROOT, HKEY_CURRENT_USER, HKEY_LOCAL_MACHINE, HKEY_USERS, HKEY_PERFORMANCE_DATA,
+                HKEY_CURRENT_CONFIG, HKEY_DYN_DATA<br>
+                <br>
+                <i><a name="installonthisversionreturn">InstallOnThisVersion -
+                return values<br>
+                </a></i>irInstall, irNotOnThisPlatform, irVerTooLow, irVerTooHigh,
+                irInvalid<br>
+                <br>
+                <i><a name="instshowcmd">Inst*Exec - ShowCmd values</a></i><a name="instshowcmd"><br>
+                </a>  SW_SHOWNORMAL, SW_SHOWMAXIMIZED, SW_SHOWMINNOACTIVE</font></p>
+              </blockquote>
+              <p>&nbsp;
+            </td>
+          </tr>
+        </table>
+        </center>
+      </div>
+    </td>
+  <tr>
+    <td bgcolor="#0000FF">&nbsp;</td>
+  </tr>
+</table>
+<p align="center"><font size="1" face="Verdana,Arial">Martijn Laan, Aalsmeer,
+The Netherlands, </font><a href="mailto:mlaan@wintax.nl"><font size="1" face="Verdana,Arial">mlaan@wintax.nl</font></a></p>
+
+<!-- Start of Nedstat Basic code -->
+
+<a href="http://nl.nedstatbasic.net/cgi-bin/viewstat?name=isxscripthowto"><img
+src="http://nl.nedstatbasic.net/cgi-bin/nedstat.gif?name=isxscripthowto"
+border=0 alt="" nosave width=22 height=22></a>
+<script type="text/javascript" language="JavaScript">
+<!--
+ d=document;
+ d.write("<img src=\"http://nl.nedstatbasic.net");
+ d.write("/cgi-bin/referstat.gif?");
+ d.write("name=isxscripthowto&refer=");
+ d.write(escape(top.document.referrer));
+ d.write("\" width=1 height=1 align=\"right\">");
+// -->
+</script>
+
+<!-- End of Nedstat Basic code -->
+
+<!--STATS4ALL_START-->
+<script language="javascript"><!--
+sver = 10;screensize="";colors="";navlan="";plug="";
+ref = escape(document.referrer)+"";
+sUrl = escape(document.URL)+"";
+if((ref=="") || (ref=="undefined")){ref="bookmark";};
+nav=navigator.appName;
+if(nav.substring(0,9)=="Microsoft"){nav="MSIE";};
+version=Math.round(parseFloat(navigator.appVersion)*100);
+if((nav=="MSIE") && (parseInt(version)==2)){version=301;};java="";
+if(navigator.appName=="Netscape"){ if(version>400) navlan=navigator.language;
+if(version>300)for(var i=0;i<navigator.plugins.length;i++)plug +=navigator.plugins[i].name+":"};
+//--></script>
+<script language="javascript1.1"><!--
+sver=11;java=(navigator.javaEnabled()==true)?"y":"n";
+//--></script>
+<script language="javascript1.2"><!--
+sver=12;screensize=screen.width+"*"+screen.height;
+colors=(nav=="MSIE")?screen.colorDepth:screen.pixelDepth;
+if(colors=="undefined"){colors="";};
+//--></script>
+<script language="javascript1.3"><!--
+sver=13;
+//--></script>
+<script language="javascript"><!--
+arguments="&nav="+nav+"&version="+version+"&screensize="+screensize+"&colors="+colors+"&sver="+sver;
+arguments+="&java="+java+"&rf="+ref+"&navlan="+navlan+"&plug="+escape(plug)+"&sUrl="+sUrl;
+document.write ("<A HREF='http://www.stats4all.com/asp/login.asp?sSiteName=ISX' target=_blank><IMG BORDER=0 SRC='http://www.hit.stats4all.com/asp/hit.asp?sSiteName=ISX" + arguments + "&sExtra=None'></A>")
+//--></script>
+<script language="javascript1.2"><!--
+document.write("<");document.write("!--");
+//--></script>
+<noscript>
+ <a href="http://www.stats4all.com/asp/login.asp?sSiteName=ISX" target="_blank"><img border="0" src="http://www.hit.stats4all.com/asp/hit.asp?sSiteName=ISX"></a>
+</noscript>
+<script language="javascript1.2"><!--
+document.write("--");document.write(">");
+//--></script>
+<!--STATS4ALL_END-->
+
+</body>

@@ -1,0 +1,4984 @@
+(* ------------------  Histórico de Alterações  ------------------------------*)
+{
+---------------------------------------------------------------------------------------------------
+Pendência: WO27960
+Analista : Leandro
+Data     : 28/11/2025
+Solução  : Ordenação plano contas processamento planilha diaria
+================================================================================
+N. Chamado....: WO28011
+Dt Alterações.: 25/11/2025
+Responsável...: Paulo Nobre
+Descrição.....: Incluso o TRUNC na data PLNDATDIA para evitar trazer pra grid data no formato
+                TIMESTAMP, na função: SelecionaPlanilhas.
+---------------------------------------------------------------------------------------------------
+Pendência: MIGRACAO-ORACLE
+Analista : edilaine
+Data     : 13/10/2025
+Solução  : remover concatenaçao de espaços nas contas contábeis
+           mudança de CHAR para VARCHAR2 na migração
+================================================================================
+Pendência   : 65187
+Responsável : Darivaldo Alencar
+Data        : 09/08/2019
+Descrição   : Números zerados sendo inseridos nas tabelas PLANILHA e LANCAMENTO.
+Solução     : Validação de números zerados com ROUNDCM
+--------------------------------------------------------------------------------
+Pendência   : SOL 244657 PPM 604753
+Responsável : Fernando Xavier
+Data        : 09/12/2013
+Descrição   : Após versão os lançamentos passaram a serem feitos na segunda fórmula.
+Solução     : Removido as alterações do SOL 184871.
+--------------------------------------------------------------------------------
+{
+Analista : José Roberto Marque - JRM6
+Data     : 31/08/2012 - 09/2012
+Pendência: SOL : 184871 Kintana : 1747071
+Solução  : Passa a agrupar os lançamentos ao contabilizar;
+           O Agrupamento é feito por PLNCODIGO - D/C - PLACONTA - PLANOPREV -
+           PATRO -  CENTRO  DE  CUSTO,  de  forma  a  diminuir  o  número  de
+           lançamentos gerados.
+          - Para tanto, nos dois pontos onde é feita a chamada a função
+            _dbLancamento.Insert será feita a pesquisa pela pré-existencia de
+            lançamento semelhante. Havendo o Lançamento, o mesmo é alterado,
+            sendo sensibilizado seu valor ao invés de ser incluído.
+}
+{
+--------------------------------------------------------------------------------
+Pendência   : SOL 207368 KINTANA 2021675
+Responsável : Fernando Xavier
+Data        : 16/07/2013
+Descrição   : envio individual de contribuições
+--------------------------------------------------------------------------------
+Rotina............: VerificaSobraRateio, RoundNExtend
+N. Sol............: 124845-14262
+N. Kintana........: 1977287
+Data..............: 08/04/2013
+Responsável.......: Edilaine Ferraresi
+Descrição.........: Ajuste da rotina de arredondamento para diferença de centavos
+
+
+Rotina............: getPlacontaDePara
+N. Sol............: 132232
+N. Kintana........: 761030
+Data..............: 22/04/2010
+Responsável.......: Arnaldo V. Scarin
+Descrição.........: Correção da rotina de pesquisa de DePara.
+}
+{
+Rotina............: Destroy, InsereLancaContab
+N. Sol.............: 103843
+N. Kintana......: 464129
+Data...............: 02/02/2009
+Responsável...: Ricardo Alves
+Descrição........: Modificado código para que os objetos sejam corretamente liberados
+					da memória após sua utilização.
+}
+{
+Rotina............: Destroy, InsereLancaContab
+N. Sol.............: 103843
+N. Kintana......: 464129
+Data...............: 02/02/2009
+Responsável...: Ricardo Alves
+Descrição........: Modificado código para que os objetos sejam corretamente liberados
+					da memória após sua utilização.
+}
+// Alterado por Arnaldo V. Scarin, em 28/12/2009
+// SOL.: 128563 Kintana: 690151
+// Valida a Data de reguralização, e se essa data for maior que 31/12/2009,
+// deverá ser valido o IdPlanoPrev (que contem a informação do Plano Prev Contabil,
+// para o plano "Operações Comuns", e esse deverá ser trocado para o plano
+// específico para o PGA
+(* ---------------------------------------------------------------------------*)
+
+
+unit uCtrlLancamento;
+{--------------------------------
+Autor: Igor Ferreira (Iferreira)
+pendência 27129 - 20/02/2008
+Rotina: AlteraLancaContab
+Impedir que o CODDOCUMENTO, seja excluido quando houver alguma alteração no contabilidade
+--------------------------------}
+//--------------------------------
+//pendência 27253 - 22/01/2008
+//Rotina: AtuSaldoSintetica
+//alguns planos de conta não possuem todas as contas sintéticas cadastradas, portanto antes de atualizar o saldo
+//destas, a rotina tem que verificar se a mesma existe.
+//--------------------------------
+{
+ pendência 24892 12/11/2006
+ Métodos: insereLancaContab;
+ Descriçao: impedir lançamentos contábeis nas contas Estatísticas com Movimento.
+}
+{
+Autor    : Antonio Marcos (amf)
+Data     : 02.07.2007
+Pendência: 24589
+Descrição: Alteração na função que testa a regra prova zero.
+-----------------------------------------------------------------------------------------------
+Autor: Alex Pereira
+Data: 29/01/2007 e 30/01/2007
+Pendência: 23897 - bJunta para baixa de documentos
+Descrição: Implementar o Bjunta com as seguintes características:
+Segregação Virtual Ativa
+  Segregação Origem (apenas do financeiro)
+    Pagamento de documento, operações 5 e 15
+Criado uma coluna CODDOCUMENTO na tabela LANCAMENTO e MEMOCALCSEGREGA
+Fazer com que o bJunta olhe também para esta coluna, em sua rotina.
+Poquê? Daí podemos passar o bjunta true na baixa de documentos dentro de um lote
+que apenas os documentos com o mesmo CODDOCMENTO serão juntados.
+Premissa: o CODDOCUMENTO somente pode ser passado na conta de baixa, pois o banco
+deve de fato ser juntado nos vários lançamentos do lote. Como exceção a esta regra
+o lançamento do banco pode ter o CODDOCUMENTO atribuído quando a empresa utiliza-se
+da partida dobrada. Assim o sistema pode detectar os lançamentos de baixa de um documento
+}
+{
+Autor: Andre Tavares
+Data: 30/10/2006
+Pendência: 21604
+Descrição: Coloquei valor default (parâmetros opcionais) nos parâmetros IDSEGREGACRITER e DATASEGREGACRITER do método RetornaNumLanc
+criei a variável privada da classe _iIdSegregaContr para não haver o problema de instaciamento do parâmetro iIdSegregaContr nas
+chamadas recursivas do método InsereLancaContab.
+---------------------------------------------------------------------------------------------------
+Data 15/12/2005
+Pendencia 19976
+Autor: andre tavares
+Descrição: Implementação da ativação da numeração das planilhas por sequences
+}
+{---------------------------------------------------------------------------------------------------
+ Data      : 01/12/2005
+ Pendência : 17987
+ Autor     : Rodolpho da Silva
+ Descrição : Acrescentar colunas Plano x Patro na qry
+--------------------------------------------------------------------------------------------------- }
+{---------------------------------------------------------------------------------------------------
+  Desenvolvedor: Alex Pereira
+  Data         : 11/05/05
+  Pendência    : 18689 - Se o programa da conta for Administrativo utilizar o
+                         plano de operações administrativas para segregar o lançamento.
+  Metodo       : InserelancaContab / SegregaLancamento
+                 RetPlanoSegregar / Critica Plano
+                 se a segregação é do tipo tsOrigem e a conta é do programa Administrativo.
+                 Utilizar o plano administrativo para segregar o lançamento.
+
+      // 13/05/05 Alex 18689 - Nova Propriedae PlanoSegregar
+      // Esta propriedade determinará qual o plano a ser utilizado na segregação de recursos
+      // Plano O.C. ou Plano Adm. Porque da criação?
+      // Vamos supor que o usuário faça uma apropriação de uma despesa do programa administrativo, ex:
+      // D 5210101   PRG ADM
+      // C 2130101   PRG ADM
+      // Para o lançamento acima a propriedade não faz sentido, visto que as duas contas são do mesmo programa, ou seja ADM
+      // Agora vamos ao problema, a baixa desta provisão
+      // D 2130101   PRG ADM
+      // C 1110101   CONTA SEM PROGRAMA, OU SEJA, PAGA QQ TIPO DE PROGAMA
+      // Esta propriedade, neste exemplo, armazenará o PRG ADM, e no crédito o PRG ADM será passado
+
+--------------------------------------------------------------------------------------------------- }
+{---------------------------------------------------------------------------------------------------
+Rotina    : AlteraLancaContab
+Data      : 13/01/2005
+Autor     : Alex Pereira
+pendência : 18405 - Erro ao se alterar uma planilha contábil. Constraint.
+            O erro ocorre porque o sistema na alteração leva o mesmo número do lançamento para o novo,
+            desta forma a rotina de segregação ao tentar criar diversos lançamentos com o mesmo número.
+            Negociei com a Ivete: proibir alteração de lançamentos segregados.
+
+            Encontrado um erro na segregação da origem com carimbo e partida dobrada, checar com Ivete
+            se já tem algum caso. Rodar Script.
+
+pendência : 18474 - implementar a data inicial da segregação virtual na origem
+---------------------------------------------------------------------------------------------------}
+{---------------------------------------------------------------------------------------------------
+Rotina    : ExcluiLancaContab
+Data      : 04/10/2004
+Autor     : Vinícius Lana
+pendência : 16888
+Descrição : Não permitir a exlusão de uma planilha exportada ( VALIA )
+---------------------------------------------------------------------------------------------------}
+{---------------------------------------------------------------------------------------------------
+Rotina    : InsereLancaContab
+Data      : 16/09/2004
+Autor     : Alex Pereira
+pendência : 17623
+Descrição : Travar relacionamentos inválidos entre plano e patro
+---------------------------------------------------------------------------------------------------}
+{---------------------------------------------------------------------------------------------------
+Rotina    : Divs
+Data      : 06-14/10/2004
+Autor     : Alex Pereira
+pendência : 17193
+Descrição : Segregação de recursos - Conceito de rateio do fluxo financeiro
+            Toda segregação passa a ser controlada apenas pelo método contábil.
+            Implementar a segregação de acordo com os critérios.
+            Se ParamIntega.SegregaVirtual
+              Se ContaContábil possua critério para segregação
+                Se Plano Contábil <> Comum  // ex: cta: 111 Plano: CD Déb
+                  Lancto = cta: 111 Plano: Comum Déb  // este lançamento originalmente seria no plano CD
+                           cta: 119 Plano: Comum Créd
+                           cta: 119 Plano: CD    Déb
+                Senão  // ex: cta: 111 Plano: Comum Déb
+                  Lancto = cta: 111 Plano: Comum Déb
+                           cta: 119 Plano: Comum Créd
+                           cta: 119 Plano: CD    Déb
+              Senão
+                Se plano = Comun ==>> não acatar o lançamento. A conta conábil não possui segregação e o plano = Comum
+
+Rotina   : InsereLancaContab
+Solução  : Criar o parâmetro bSegregaOrigem : boolean  default: true
+           Este parâmetro deve ser passado sempre como true pelos módulos de origem
+           apenas a rotina de segregação passará este parâmetro como false pela
+           recursividade da camada do método.
+
+Rotina   : InsereLancaContab / SelecionaLancamentosEsp / RetornaNumLanc
+Solução  : criar estrutura para gerar uma capa de lote para lançamentos de segregação
+           Novo campo LANCAMENTO.IDSEGREGACONTR
+
+Rotina   : InsereLancaContab, tratar novos parâmetros
+             CtrlSegregacao.PlanoPrevAdm   => Plano Operações Administrativas
+             CtrlSegregacao.SegregaOrComum => Segrega o Plano de Operações Comuns          na Origem ( CtrlSegregacao.PlanoPrevComum )
+             CtrlSegregacao.SegregaOrAdm   => Segrega o Plano de Operações Administrativas na Origem ( CtrlSegregacao.PlanoPrevAdm   )
+----------------------------------------------------------------------------------------------------}
+(*==============================================================================
+ Analista  : Marchetti
+ data      : 28/06/2004
+ pendência : 14881
+ Descrição : Garantir a unicidade do campo PLNPLANIL
+ Rotina    : RetornaProximaPlanilha
+==============================================================================*)
+(*==============================================================================
+ Analista  : André Tavares
+ data      : 18/05/2004
+ pendência : 16734
+ Descrição : não levantar exceção quando não houver lançamentos contábeis de um
+             documento para que seja possível excluí-lo quando seus lançamentos contábeis já
+             tenham sido previamente excluídos.
+ Rotina    : ExcluiLancaContab
+==============================================================================*)
+(*==============================================================================
+Analista : Alex Pereira
+Data     : 05/01/04
+Pendência: 14451
+Rotina   : InsereLancaContab / FazRateio / AlteraLancContab / RetornaNumLanc
+Solução  : Criar a estrutura IDSEGREGACRITER e DATASEGREGACRITER
+           no lançamento contábil
+
+Data     : 07/01/04
+Rotina   : SelecionaLancamentosEsp
+
+Data     : 08/01/04
+Método   : SelecionaProvaZero (Novo) -
+           retorna o total do lançamento por plano, patro e critério de segregação
+
+Data     : 19/01/04
+Método   : InsereLancaConta / AlteraLancContab
+           Retirada a obrigatoriedade de IdSegregaCriter
+
+==============================================================================*)
+(*==============================================================================
+Analista : Alex Pereira
+Data     : 12/12/03
+Pendência: 15792
+Solução  : Na exclusão de um lançamento contábil não excluir a planilha caso o
+           campo PARAMCONTAB.PACNAOAPAGAPLANIL = 1
+==============================================================================*)
+
+// 23/10/03 - by Alex - Pend 15148 - Retornar os números do PLNPLANIL NA FUNÇÃO INSERELANCACONTAB
+
+interface
+
+Uses SysUtils, Classes, Graphics, Controls, Forms, Dialogs, uMidasUtil, uCtrlGeral,
+     DB, uDataBase, uDbLancamento, uCmControlObject, dbclient, Provider, uCtrlHistoContab,
+     uCtrlContab,StdCtrls, ComCtrls, uCtrlPeriodo, uCtrlContaContabil, uDbPlanoSaldo,
+     uDbPlanilha,  math, jclMath, uCMTypes , uCMSqlParams,uCtrlPadroes,
+     uCtrlSegregacao, uCtrlPlanPrevContabPatro, uCMDBObject,
+     uCMClientDataSet;  // Edilaine - SOL 124845-14262 / KTN 1977287
+
+Type
+  { tpSoPeriodo  => Somente o período indicado
+    tpMenorIgual => Todos os períodos menor ou igual ao indicado, incluindo o anterior
+    tpSoAnterior => Somente o anterior
+  }
+  TTipoPeriodo    = (tpSoPeriodo, tpMenorIgual, tpSoAnterior);
+  { teNaoEfetivado => Somente os não efetivados
+    teEfetivado    => Somente os efetivados
+    teAmbos        => Efetivados e não efetivados
+  }
+  TTipoEfetivado = (teNaoEfetivado, teEfetivado, teAmbos);
+  { tomNaoAtualizada => Somente os lançamentos com outra moeda não atualizada
+    tomAtualizada    => Somente os lançamentos com outra moeda atualizada
+    tomAmbos        => Atualizados e não atualizados
+  }
+  TTipoOutraMoeda = (tomNaoAtualizada, tomAtualizada, tomAmbos);
+  { tolData      => Ordenados por data e Planilha
+    tolPlnCodigo => Ordenados por plncodigo
+  }
+  TTipoOrdenaLanc  = (tolData, tolPlnCodigo);
+  { tsPeriodo => Somar acumulando por periodo
+    tsData    => Somar acumulando por dia
+    tsSemSoma => Não acumular, mostrar todos os lançamentos
+  }
+  TTipoSomatorio = (tsPeriodo,tsData,tsSemSoma);
+  { tapSoSinteticaAP => Somente as Ativ/Proj Sinteticas
+    tapSoAnaliticaAP    => Somente as Ativ/Proj Analiticas
+    tapAmbos => Todas as Ativ/Proj
+   }
+  TCtrlLancamento = class(TCmControlObject)
+
+  Protected
+      procedure AfterInitialize;override;
+
+      procedure DoChangeDataBase; Override;
+
+  private
+
+    _iIdSegregaContr: integer; //andré tavares - pendência 21604 - 03/10/2006
+
+    Periodo        : TCtrlPeriodo;
+    Padroes        : TCtrlPadroes;
+    ContaContabil  : TCtrlContaContabil;
+    HistoContab    : TCtrlHistoContab;
+    Contab         : TCtrlContab;
+    Geral          : TCtrlGeral;
+    // Alex 06/09/04 17193
+    CtrlSegregacao : TCtrlSegregacao;
+    // Alex 16/09/04 17623
+    CtrlPlanPrevContabPatro : TCtrlPlanPrevContabPatro;
+    _dbLancamento  : TdbLancamento;
+    _dbPlanoSaldo  : TdbPlanoSaldo;
+    _dbPlanilha    : TdbPlanilha;
+    _sql           : TCmSqlParams;
+
+
+    //A variável abaixo serbirá para "apontar" a tabela destino para gravação de lançamentos
+    DbGravaLanc        : TdbLancamento;
+
+    _cdsAux        : TClientDataSet;
+
+    FProgresso: Integer;
+    FMaxProgresso: Integer;
+    FRetornoPlnCodigo: Double;
+    FlcTestaConta: Boolean;
+    FlcValGe2Cre: Double;
+    FlcValOfiDeb: Double;
+    FlcValHisDeb: Double;
+    FlcValGe1Deb: Double;
+    FlcValGerDeb: Double;
+    FlcValGe2Deb: Double;
+    FlcElemento: Double;
+    FlcValOfiCre: Double;
+    FlcValGe1Cre: Double;
+    FlcValHisCre: Double;
+    FlcValGerCre: Double;
+    FlcTipConvGe2Cre: String;
+    FlcTipConvGerCre: String;
+    FlcTipConvOfiCre: String;
+    FlcTipConvGe1Cre: String;
+    FlcOriAplDeb: String;
+    FlcTipConvGe1Deb: String;
+    FlcTipConvGerDeb: String;
+    FlcTipConvGe2Deb: String;
+    FlcTipConvOfiDeb: String;
+    FlcOriAplCre: String;
+    FlcSubConta: Double;
+    FlcCentroCusto: String;
+    FlcPanCodigo: Double;
+    FlcPlnEstorno: Double;
+    FValorCotacao: Double;
+    FRetornoPlnPlanil: Double;
+    FAtivProjPadrao: Double;
+    FProxPlanilha: Double;
+    FsMensAPS :String;
+    FsMensAPS_Log :String;
+    FCodDC :string;
+    FsMensAdd :string;
+    FNumLancamento: Integer;
+    FlcEDePara: String;
+    FlcPeriodoEsp: Boolean;
+    FPlanoSegregar: Integer;
+
+    procedure SetlcElemento(const Value: Double);
+    procedure SetlcOriAplCre(const Value: String);
+    procedure SetlcOriAplDeb(const Value: String);
+    procedure SetlcTestaConta(const Value: Boolean);
+    procedure SetlcTipConvGe1Cre(const Value: String);
+    procedure SetlcTipConvGe1Deb(const Value: String);
+    procedure SetlcTipConvGe2Cre(const Value: String);
+    procedure SetlcTipConvGe2Deb(const Value: String);
+    procedure SetlcTipConvGerCre(const Value: String);
+    procedure SetlcTipConvGerDeb(const Value: String);
+    procedure SetlcTipConvOfiCre(const Value: String);
+    procedure SetlcTipConvOfiDeb(const Value: String);
+    procedure SetlcValGe1Cre(const Value: Double);
+    procedure SetlcValGe1Deb(const Value: Double);
+    procedure SetlcValGe2Cre(const Value: Double);
+    procedure SetlcValGe2Deb(const Value: Double);
+    procedure SetlcValGerCre(const Value: Double);
+    procedure SetlcValGerDeb(const Value: Double);
+    procedure SetlcValHisCre(const Value: Double);
+    procedure SetlcValHisDeb(const Value: Double);
+    procedure SetlcValOfiCre(const Value: Double);
+    procedure SetlcValOfiDeb(const Value: Double);
+    procedure SetlcCentroCusto(const Value: String);
+    procedure SetlcSubConta(const Value: Double);
+    procedure SetlcPanCodigo(const Value: Double);
+    procedure SetlcPlnEstorno(const Value: Double);
+    procedure SetValorCotacao(const Value: Double);
+    procedure SetAtivProjPadrao(const Value: Double);
+    procedure SetProxPlanilha(const Value: Double);
+    procedure SetNumLancamento(const Value: Integer);
+    procedure SetlcEDePara(const Value: String);
+    procedure SetlcPeriodoEsp(const Value: Boolean);
+    procedure SetPlanoSegregar(const Value: Integer);
+
+      //início - andre tavares - pendência 21604 - 30/10/2006
+      {Esta function tem como objetivo retornar o numero do lancamento se este existir}
+      // 01/11/2006 - Trocado o escopo do método para privado
+      Function RetornaNumLanc(idEmpresa,liPlnCodigo, liCodPlano, liSubConta, liUnidNegoc,
+                              iPlanoPrev, iPatro: Double; sConta, sCentroCusto, sDebCre,sHistPadrao: String;
+                              iIdSegregaCriter: integer; dDataSegregaCriter: tDateTime;
+                              // 29/01/2007 23897 Alex - Melhora o BJunta para juntar os lançamentos de baixa do mesmo documento
+                              // este campo só esta preparado para o lançamento das Operações 5 e 15 do documento
+                              const iCodDocumento: integer) : Boolean;
+      //fim - andre tavares - pendência 21604 - 30/10/2006
+
+      //Monta a query de seleção da planilha de lançamento na tabela LANCAMENTO ou na MEMOCALCSEGREGA
+      function SQLPlanilhaLancamento( IdPlnCodigo : Double; sTabela : string ) : string;
+      // Alterado por Arnaldo V. Scarin, em 28/12/2009
+      // SOL.: 128563 Kintana: 690151
+      // Valida a Data de reguralização, e se essa data for maior que 31/12/2009,
+      // deverá ser valido o IdPlanoPrev (que contem a informação do Plano Prev Contabil,
+      // para o plano "Operações Comuns", e esse deverá ser trocado para o plano
+      // específico para o PGA
+      function SelecionaPlanoPGA(var pIdPlano,pIdPatro: Double): Boolean;
+
+  public
+      // Alterado por Arnaldo V. Scarin, em 28/12/2009
+      // SOL.: 128563 Kintana: 690151
+      // Valida a Data de reguralização, e se essa data for maior que 31/12/2009,
+      // deverá ser valido o IdPlanoPrev (que contem a informação do Plano Prev Contabil,
+      // para o plano "Operações Comuns", e esse deverá ser trocado para o plano
+      // específico para o PGA
+      F_bUsaPlanoPatro2010 : Boolean;
+
+      Property RetornoPlnCodigo : Double read FRetornoPlnCodigo;
+      Property RetornoPlnPlanil: Double read FRetornoPlnPlanil;
+      Property lcElemento      : Double read FlcElemento write SetlcElemento;
+      Property ProxPlanilha    : Double read FProxPlanilha write SetProxPlanilha;
+      Property NumLancamento   : Integer read FNumLancamento write SetNumLancamento;
+      Property lcEDePara       : String read FlcEDePara write SetlcEDePara;
+      Property lcTipConvOfiDeb : String read FlcTipConvOfiDeb write SetlcTipConvOfiDeb;
+      Property lcTipConvGerDeb : String read FlcTipConvGerDeb write SetlcTipConvGerDeb;
+      Property lcTipConvGe1Deb : String read FlcTipConvGe1Deb write SetlcTipConvGe1Deb;
+      Property lcTipConvGe2Deb : String read FlcTipConvGe2Deb write SetlcTipConvGe2Deb;
+      Property lcOriAplDeb     : String read FlcOriAplDeb write SetlcOriAplDeb;
+      Property lcTipConvOfiCre : String read FlcTipConvOfiCre write SetlcTipConvOfiCre;
+      Property lcTipConvGerCre : String read FlcTipConvGerCre write SetlcTipConvGerCre;
+      Property lcTipConvGe1Cre : String read FlcTipConvGe1Cre write SetlcTipConvGe1Cre;
+      Property lcTipConvGe2Cre : String read FlcTipConvGe2Cre write SetlcTipConvGe2Cre;
+      Property lcOriAplCre     : String read FlcOriAplCre write SetlcOriAplCre;
+      Property lcPanCodigo     : Double read FlcPanCodigo write SetlcPanCodigo;
+      Property lcPlnEstorno    : Double read FlcPlnEstorno write SetlcPlnEstorno;
+      Property lcValOfiDeb     : Double read FlcValOfiDeb write SetlcValOfiDeb;
+      Property lcValGerDeb     : Double read FlcValGerDeb write SetlcValGerDeb;
+      Property lcValGe1Deb     : Double read FlcValGe1Deb write SetlcValGe1Deb;
+      Property lcValGe2Deb     : Double read FlcValGe2Deb write SetlcValGe2Deb;
+      Property lcValHisDeb     : Double read FlcValHisDeb write SetlcValHisDeb;
+      Property lcValOfiCre     : Double read FlcValOfiCre write SetlcValOfiCre;
+      Property lcValGerCre     : Double read FlcValGerCre write SetlcValGerCre;
+      Property lcValGe1Cre     : Double read FlcValGe1Cre write SetlcValGe1Cre;
+      Property lcValGe2Cre     : Double read FlcValGe2Cre write SetlcValGe2Cre;
+      Property lcPeriodoEsp    : Boolean read FlcPeriodoEsp write SetlcPeriodoEsp;
+      Property lcValHisCre     : Double read FlcValHisCre write SetlcValHisCre;
+      Property lcTestaConta    : Boolean read FlcTestaConta write SetlcTestaConta;
+      Property lcSubConta      : Double read FlcSubConta write SetlcSubConta;
+      Property lcCentroCusto   : String read FlcCentroCusto write SetlcCentroCusto;
+      Property sMensAPS : String read FsMensAPS write FsMensAPS;
+      Property sMensAPS_Log : String read FsMensAPS_Log write FsMensAPS_Log;
+      Property CodDC : String read FCodDC write FCodDC;
+      Property Progresso : Integer read FProgresso write FProgresso;
+      Property MaxProgresso : Integer read FMaxProgresso;
+      Property sMensAdd : String read FsMensAdd write FsMensAdd;
+      Property ValorCotacao    : Double read FValorCotacao write SetValorCotacao;
+      Property AtivProjPadrao  : Double read FAtivProjPadrao write SetAtivProjPadrao;
+      // 13/05/05 Alex 18689 - Nova Propriedae PlanoSegregar
+      Property PlanoSegregar   : Integer read FPlanoSegregar write SetPlanoSegregar;
+
+
+      Constructor Create; Override;
+      Destructor  Destroy;Override;
+
+      Function FloatToStrPonto(dValor :Double) :string;
+      // Metodos de Regra de negócio
+      {Esta function atualiza o saldo das contas }
+      Function AtuSaldoContas(IdEmpresa, iUnidNegoc, iUsuario,
+               iPlanoPrev, iPatro, iPlano : Double; iExercicio, iPeriodo: Integer; iSubConta : Double;
+               sCCust, sConta, sDebCre, sTipoConta: string; rValCorrente, rValOrcado,
+               rValOficial, rValGeren, rValGeren1, rValGeren2, rValHist: Double;
+               bUsaPlanoPatro: boolean): Boolean;
+
+      {Esta function atualiza o saldo das contas sintética}
+      Function AtuSaldoSintetica(IdEmpresa, iUnidNegoc, iUsuario,
+               iPlanoPrev, iPatro, iPlano : Double; iExercicio, iPeriodo: Integer; iSubConta : double;
+               sCCust, sConta, sDebCre, sMascara: string; rValCorrente, rValOrcado,
+               rValOficial, rValGeren, rValGeren1, rValGeren2, rValHist: Double;
+               bUsaPlanoPatro: boolean): Boolean;
+
+      {Esta function tem como objetivo selecionar os lançamentos }
+      Function SelecionaLancamentos(IdPlnCodigo,IdEmpresa : Double; iExercicio, iPeriodo : Integer;
+               TipoPeriodo : TTipoPeriodo; sDataIni, sDataFim, sModulos, sTipoOper : String;
+               TipoEfetivado : TTipoEfetivado; TipoOutraMoeda : TTipoOutraMoeda;
+               TipoOrdenaLanc : TTipoOrdenaLanc; TipoSomatorio : TTipoSomatorio; bComConta : Boolean;
+               // Rodolpho da Silva - P: 17987
+               bInserePlanoPatro: boolean = false) : OleVariant;
+
+      {Esta função seleciona planilhas, usada em pre-planilhas - lançamentos}
+      Function SelecionaPlanilhas(IdPlnCodigo, IdPlanilhaIni,IdPlanilhaFim,IdEmpresa: Double;
+                    iExercicio, iPeriodo: Integer; TipoPeriodo: TTipoPeriodo; sDataIni,
+                    sDataFim, sModulos, sTipoOper: String; TipoEfetivado: TTipoEfetivado;
+                    TipoOrdenaLanc: TTipoOrdenaLanc) : OleVariant;
+
+      {Esta função insere lançamentos de acordo com os parametros passados}
+      Function InsereLancaContab(cTipoLanc : Char; IdEmpresa, iModuloOrigem,
+                      liUsuario, liCodPlano, liUnidNegoc, liSubContaDeb,
+                      liSubContaCre, iPlanoPrev, iPatro, liPlnCodigo : Double; iNumLan : LongInt;
+                      sDataLanc, sNumDoc, sHist1, sHist2,  sHist3,  sHist4,
+                      sHist5, sTipoOper, cCCustd, cContad, cCCustc, cContac, sCodHist : string;
+                      rValLanc : double; bJunta, bUsaPlanoPatro : Boolean;
+                      // 05/01/03 Alex 14451 - Nova estrutura SEGREGACRITER
+                      iIdSegregaCriter: integer = -1; dDataSegregaCriter: TDateTime = -1;
+                      // 29/09/09 Alex 17193 - segregação na origem
+                      // este campo é uma capa de lote para o mesmo lançamento que foi segregado
+                      iIdSegregaContr: integer = -1;
+                      // 06/09/04 Alex 17193 - segregação na origem.
+                      // Nas integrações com sistemas de origem esta propriedade sermpre deverá ser passada como true
+                      const bSegregaOrigem: boolean = true;
+                      // 29/01/2007 23897 Alex - Melhora o BJunta para juntar os lançamentos de baixa do mesmo documento
+                      // este campo só esta preparado para o lançamento das Operações 5 e 15 do documento
+                      const iCodDocumento: integer = -1;
+                      //DAVID - Pendência 23894 - 06/03/2007
+                      //Indica se o lançamentos deve obrigatoriamente ser salvo na MEMOCALCSEGREGA independentemente das parametrizações
+                      const bForcaGravacaoMemoCalc : boolean = False;
+                      //Cássio - SOL Nº 124569 KINTANA Nº 363457
+                      //Flag que indica se o lanaçamento é faz parte de um rateio do Valor
+                      const OrdemLancaRateado : integer = -1) : Boolean;
+
+      {Esta função altera lançamentos de acordo com os parametros passados}
+      Function AlteraLancaContab(cTipoLanc : Char; IdEmpresa, iModuloOrigem,
+                      liUsuario, liCodPlano, liUnidNegoc, liSubContaDeb,
+                      liSubContaCre, iPlanoPrev, iPatro, liPlnCodigo: Double; iNumLan : LongInt;
+                      sDataLanc, sNumDoc, sHist1, sHist2,  sHist3,  sHist4,
+                      sHist5, sTipoOper, cCCustd, cContad, cCCustc, cContac, sCodHist : string;
+                      rValLanc : double; bJunta, bUsaPlanoPatro : Boolean;
+                      // 05/01/03 Alex 14451 - Nova estrutura SEGREGACRITER
+                      const iIdSegregaCriter: integer = -1; const dDataSegregaCriter: TDateTime = -1;
+                      const bUsaMesmaPlanilha: Boolean =  true) : Boolean; //andre tavares - pendência 24748 - 20/03/2007
+
+      {Esta função exclui lançamentos de acordo com os parametros passados}
+      Function ExcluiLancaContab(iUsuario,iPlnCodigo, iModuloOrigem : Double; iNumLan : LongInt; bUsaPlanoPatro, bExcluiPlanilha : Boolean ) : Boolean;
+
+      {Esta função estorna lançamentos}
+      Function EstornaLancaContab(iUsuario,iPlnCodigo, iModuloOrigem, iEmpresa : Double; bUsaPlanoPatro : Boolean; sDataEstorno : String ) : Boolean;
+
+      {Esta função limpa as veriaveis usadas na movimentação de lancamentos}
+      Procedure IniciaVariavelLancamento;
+
+      {Esta função conta lançamentos de acordo com os parametros passados}
+      Function TestaContaLancamento(sConta, sTipoDC, sDataLanc : String; liCodPlano, idEmpresa, idModulo, iPeriodo,iExercicio:Double) : Boolean;
+
+      {Esta function tem como objetivo retornar a cotação de uma moeda }
+      Function RetornaCotacao(iMoeda: Double; sData: String; bExato : Boolean): Boolean;
+
+      {Esta function tem como objetivo retornar a Atividade/Projeto padrão}
+      Function RetornaAtivProjPadrao(idEmpresa: Double): Boolean;
+
+      {Esta function tem como objetivo selecionar lançamentos de uma planilha de maneira a ficar os lançamentos de
+                                                partida dobrada no mesmo registro}
+      Function SelecionaLancamentosEsp(IdPlnCodigo : Double): OleVariant;
+
+      {Selecionar lançamentos de uma planilha quando flags de memória de cálculo de segregação estão ativos}
+      Function SelecionaLancMemoCalcSegrega( IdPlnCodigo : Double): OleVariant;
+
+      {Esta função tem o objetivo de arrendondar valores}
+      Function RoundCM(fNum : Extended) : Extended;
+
+      {Esta função tem o objetivo de Listar os modulos}
+      Function ListModulos( bOrdenaModulo : Boolean  ) : OleVariant;
+
+      {Esta função tem o objetivo de fazer o rateio}
+      Function FazRateio(liEmpresa, liModulo, liUsuario, liCodPlano,
+               liPlanilRateio, liPlanoPrev, liPatro, liSubContaCp, liSubContaRt,
+               liUnidNegoc: Integer;  sDataLanc, sNumDoc, sTipoOper, sCcustoCp,
+               sContaCp, sCodHistCp, sHist1Cp, sHist2Cp, sHist3Cp, sHist4Cp,
+               sHist5Cp, sCcustoRt, sContaRt, sCodHistRt, sHist1Rt, sHist2Rt,
+               sHist3Rt, sHist4Rt, sHist5Rt, sDebCre: string; dValor: Double;
+               bJunta, bUsaPPatro: Boolean;
+               // Alex 05/01/04 - nova estrutura SEGREGACRITER. Avaliar
+               const iIdSegregaCriter: integer; const dDataSegregaCriter: tDateTime) :Boolean;
+
+      Function BuscaContaContabil(liIdEmpresa, liIdPrograma: Integer;
+                                 sTipRecDes, sCentroCusto, sRecPag: String): String;
+
+      //iTipo: 1 - lançamento; 2 - Memória de cálculo de segregação
+      function SelecionaProvaZero(const liIdPlanilha: Double; const iTipo : integer = 1 ): OleVariant;
+      {amf 02.07.2007 -
+           Esta função corrige o erro encontrado na regra prova zero quando há segregação de
+           plano e patro (segregação de recursos). Para corrigir este problema, deve-se levar
+           em consideração os lançamentos da planilha e os lançamentos da memória de cálculo da segregação }
+      function getProvaZero(const liIdPlanilha: Double): OleVariant; overload;
+
+      //amf 02.07.2007 24589 - prova zero por exercício e período
+      function getProvaZero(exercicio, periodo: integer): OleVariant; overload;
+
+      //amf 30.07.2007 24589 - Regra prova zero do Lançamento e da Segregação da Memória de Cálculo
+      function getProvaZeroLancamentoMaisMemoCalc(planilha: double): OleVariant; overload;
+
+      {verifica se o sistema está parametrizado para utilizar stored procedure para atualizar saldos em tempo real}
+      function UsaStoredProc(const idempresa: integer): boolean; //pendência 25244 - 07/01/2008
+
+      //Cássio - SOl Nº124569 KINTANA Nº633457
+      //Retorna o número do último lançamento
+      function RetornaQntLancamento(plnCodigo: double): Integer;
+
+      // Edilaine - SOL 124845-14262 / KTN 1977287
+      function VerificaSobraRateio(_cds : TClientDataSet; Valor, rSaldoMoeda,
+                                   rValorCotacao, rTotalDocGeral, rTotalDocOMGeral, rValOutroMoeda : currency;
+                                   sCampoValor : string ) : boolean;
+
+      function RoundNExtend(x: Extended; d: Integer; const bArred5 : boolean = true): Extended;
+      // Edilaine - SOL 124845-14262 / KTN 1977287 - fim
+
+  end;
+
+implementation
+
+uses
+  // APAGAR
+  uDbLogopcao, uDbHistsenha,
+     uDbLogAcessoSis, USistema ;
+
+procedure TCtrlLancamento.DoChangeDataBase;
+begin
+  inherited;
+  _dbLancamento.DataBaseName := DataBaseName;
+  _dbPlanoSaldo.DataBaseName := DataBaseName;
+  _dbPlanilha.DataBaseName   := DataBaseName;
+
+  //17/01/07 - Pendência 23894 - David Ayrolla
+  DbGravaLanc.DataBaseName := DataBaseName;
+end;
+
+
+constructor TCtrlLancamento.Create;
+begin
+  inherited;
+  _iIdSegregaContr := -1; //andré tavares - pendência 21604 - 03/10/2006
+
+  _dbLancamento  := TdbLancamento.Create(Self);
+  _dbPlanoSaldo  := TdbPlanoSaldo.Create(Self);
+  _dbPlanilha    := TdbPlanilha.Create(Self);
+
+  //17/01/07 - Pendência 23894 - David Ayrolla
+  DbGravaLanc := TdbLancamento.Create(Self);
+
+  // Alterado por Arnaldo V. Scarin, em 28/12/2009
+  // SOL.: 128563 Kintana: 690151
+  // Valida a Data de reguralização, e se essa data for maior que 31/12/2009,
+  // deverá ser valido o IdPlanoPrev (que contem a informação do Plano Prev Contabil,
+  // para o plano "Operações Comuns", e esse deverá ser trocado para o plano
+  // específico para o PGA
+  F_bUsaPlanoPatro2010 := False;
+
+  //
+  Periodo        := TCtrlPeriodo.Create;
+  Periodo.OnMessageInfo := nil;
+
+  ContaContabil  := TCtrlContaContabil.Create;
+  HistoContab    := TCtrlHistoContab.Create;
+  Contab         := TCtrlContab.Create;
+  Geral          := TCtrlGeral.Create;
+  Padroes        := TCtrlPadroes.Create;
+
+  // Alex 06/09/04 17193
+  CtrlSegregacao := TCtrlSegregacao.Create;
+
+  // Alex 16/09/04 17623
+  CtrlPlanPrevContabPatro := TCtrlPlanPrevContabPatro.Create;
+
+  _sql           := TCmSqlParams.Create(nil);
+  _sql.ControlObject := Self;
+
+
+  IniciaVariavelLancamento;
+
+  _cdsAux        := TClientDataSet.Create(Nil);
+
+end;
+
+
+
+
+destructor TCtrlLancamento.Destroy;
+begin
+  // Ricardo A. SOL: 103843
+  FreeAndNil( _dbLancamento );
+  FreeAndNil( _dbPlanoSaldo );
+  FreeAndNil( _dbPlanilha );
+  FreeAndNil( _sql );
+
+  //17/01/07 - Pendência 23894 - David Ayrolla
+  FreeAndNil( DbGravaLanc );
+
+  FreeAndNil( Periodo );
+  FreeAndNil( ContaContabil );
+  FreeAndNil( HistoContab );
+  FreeAndNil( Contab );
+  FreeAndNil( Geral );
+  FreeAndNil( Padroes );
+  FreeAndNil( CtrlSegregacao );
+  // Alex 06/09/04 17193
+  FreeAndNil( CtrlPlanPrevContabPatro );
+  // Alex 16/09/04 17623
+  FreeAndNil( _cdsAux );
+  inherited;
+end;
+
+
+
+
+function TCtrlLancamento.BuscaContaContabil(liIdEmpresa,
+  liIdPrograma: Integer; sTipRecDes, sCentroCusto, sRecPag: String): String;
+begin
+
+  // implementacao Gustavo
+  With _sql Do
+    Try
+      ClientDataSet := _Cds;
+      SQL.Clear;
+      SQL.Add('SELECT ');
+      SQL.Add('  TIPORDXCCXCONTA.PLACONTA ');
+      SQL.Add('FROM ');
+      SQL.Add('  TIPORDXCCXCONTA ');
+      SQL.Add('WHERE ');
+      SQL.Add('  RTRIM(TIPORDXCCXCONTA.CODTIPRECDES) = :CODTIPRECDES AND ');
+      SQL.Add('  TIPORDXCCXCONTA.RECPAG = :RECPAG AND ');
+      SQL.Add('  TIPORDXCCXCONTA.IDPESSOA = :IDPESSOA AND ');
+      SQL.Add('  RTRIM(TIPORDXCCXCONTA.CODCENTROCUSTO) = :CODCENTROCUSTO AND');
+      SQL.Add('  TIPORDXCCXCONTA.IDEMPRESA = :IDEMPRESA AND ');
+
+      If liIdPrograma <= 0 Then
+         SQL.Add('  TIPORDXCCXCONTA.IDPROGRAMA IS NULL ')
+      Else
+         SQL.Add('  TIPORDXCCXCONTA.IDPROGRAMA = ' + IntToStr(liIdPrograma));
+
+      Prepare;
+
+      ParamByName('CODTIPRECDES').AsString   := Trim(sTipRecDes);
+      ParamByName('IDPESSOA').AsInteger      := liIdEmpresa;
+      ParamByName('CODCENTROCUSTO').AsString := Trim(sCentroCusto);
+      ParamByName('IDEMPRESA').AsFloat       := liIdEmpresa;
+      ParamByName('RECPAG').AsString := sRecPag;
+
+      Open;
+
+      If Not _Cds.IsEmpty Then
+         Result := _Cds.FieldByName('PLACONTA').AsString
+      Else
+      Begin
+         SQL.Clear;
+         SQL.Add('SELECT ');
+         SQL.Add('  TIPORECEBDESEMB.PLACONTA ');
+         SQL.Add('FROM ');
+         SQL.Add('  TIPORECEBDESEMB ');
+         SQL.Add('WHERE ');
+         SQL.Add('  RTRIM(TIPORECEBDESEMB.CODTIPRECDES) = :CODTIPRECDES AND');
+         SQL.Add('  TIPORECEBDESEMB.RECPAG = :RECPAG AND ');
+         SQL.Add('  TIPORECEBDESEMB.IDPESSOA = :IDPESSOA ');
+
+         Prepare;
+
+         ParamByName('CODTIPRECDES').AsString   := Trim(sTipRecDes);
+         ParamByName('IDPESSOA').AsInteger      := liIdEmpresa;
+         ParamByName('RECPAG').AsString := sRecPag;
+
+         Open;
+
+         If Not _Cds.IsEmpty Then
+            Result := _Cds.FieldByName('PLACONTA').AsString
+         Else
+            Result := '';
+      End;
+
+      If _Cds.Active Then _Cds.Close;
+    Except
+      If _Cds.Active Then _Cds.Close;
+      Result := '';
+      Raise;
+    End;
+end;
+
+function TCtrlLancamento.AtuSaldoContas(IdEmpresa, iUnidNegoc, iUsuario,
+  iPlanoPrev, iPatro, iPlano : Double; iExercicio, iPeriodo: Integer; iSubConta : Double;
+  sCCust, sConta, sDebCre, sTipoConta: string; rValCorrente, rValOrcado,  rValOficial, rValGeren, rValGeren1, rValGeren2,
+  rValHist: Double;   bUsaPlanoPatro: boolean): Boolean;
+var bInclui : Boolean;
+    sSql :string;
+    iIDPlanoSaldo: Double;
+begin
+   Try
+       if bUsaPlanoPatro and ((iPlanoPrev = 0) or (iPatro = 0)) then begin
+          Result      := False;
+          MessageInfo := 'Plano ou Patrocinadora não preenchido';
+       end else begin
+          if not bUsaPlanoPatro then begin
+             iPlanoPrev := 0;
+             iPatro
+                  := 0;
+          end;
+          bInclui := True;
+
+          With _Sql Do
+             Try
+                SQL.Clear;
+                SQL.Add('SELECT IDPLANOSALDO, ROUND(PLSORCADODEBITO,2) AS PLSORCADODEBITO, ROUND(PLSORCADOCREDITO,2) AS PLSORCADOCREDITO,     ');
+                SQL.Add('       ROUND(PLSDEBITOOFICIAL,2) AS PLSDEBITOOFICIAL, ROUND(PLSDEBITOHIST,2) AS PLSDEBITOHIST, ROUND(PLSDEBITOGEREN2,2) AS PLSDEBITOGEREN2,    ');
+                SQL.Add('       ROUND(PLSDEBITOGEREN1,2) AS PLSDEBITOGEREN1, ROUND(PLSDEBITOGER,2) AS PLSDEBITOGER, ROUND(PLSDEBITOCORRENTE,2) AS PLSDEBITOCORRENTE,    ');
+                SQL.Add('       ROUND(PLSCREDITOOFICIAL,2) AS PLSCREDITOOFICIAL, ROUND(PLSCREDITOHIST,2) AS PLSCREDITOHIST, ROUND(PLSCREDITOGEREN2,2) AS PLSCREDITOGEREN2, ');
+                SQL.Add('       ROUND(PLSCREDITOGEREN1,2) AS PLSCREDITOGEREN1, ROUND(PLSCREDITOGER,2) AS PLSCREDITOGER, ROUND(PLSCREDITOCOR,2) AS PLSCREDITOCOR      ');
+                SQL.Add('FROM PLANOSALDO                                       ');
+                SQL.Add('WHERE (PEREXERCICIO = ' + IntToStr(iExercicio) + ')   ');
+                if iPeriodo > 0 then
+                   SQL.Add('  AND (PERNUMERO = '+IntToStr(iPeriodo)+')         ')
+                else
+                   SQL.Add('  AND (PERNUMERO IS NULL)                          ');
+
+                SQL.Add('  AND (IDPESSOA = '+FloatToStr(IdEmpresa)+')          ');
+                SQL.Add('  AND (PLANO    = '+FloatToStr(iPlano)+')             ');
+                //SQL.Add('  AND (PLACONTA = '''+Copy(trim(sConta)+'                 ',1,18)+''')');    //MIGRACAO-ORACLE
+                SQL.Add('  AND (PLACONTA = '+Quotedstr(trim(sConta))+')');                              //MIGRACAO-ORACLE
+                SQL.Add('  AND (PLSTIPO  = '''+sTipoConta+''')                 ');
+                if sCCust = '' then begin
+                   SQL.Add('  AND (CODCENTROCUSTO IS NULL)                     ');
+                   SQL.Add('  AND (IDEMPRESA IS NULL)                          ');
+                end else begin
+                   //SQL.Add('  AND (CODCENTROCUSTO = '''+Copy(trim(sCCust)+'         ',1,10)+''')');       //MIGRACAO-ORACLE
+                   SQL.Add('  AND (CODCENTROCUSTO = '+QuotedStr(trim(sCCust))+')');                         //MIGRACAO-ORACLE
+                   SQL.Add('  AND (IDEMPRESA      = '+FloatToStr(IdEmpresa)+') ');
+                end;
+                if iUnidNegoc = 0 then begin
+                   SQL.Add('  AND (UNIDNEGOC IS NULL)                          ');
+                end else begin
+                   SQL.Add('  AND (UNIDNEGOC = '+FloatToStr(iUnidNegoc)+')     ');
+                end;
+                if iSubConta = 0 then begin
+                   SQL.Add('  AND (CODSUBCONTA IS NULL)                        ');
+                end else begin
+                   SQL.Add('  AND (CODSUBCONTA = '+FloatToStr(iSubConta)+')    ');
+                end;
+                if iPlanoPrev = 0 then begin
+                   SQL.Add('  AND (IDPLANOPREV IS NULL)                        ');
+                end else begin
+                   SQL.Add('  AND (IDPLANOPREV = '+FloatToStr(iPlanoPrev)+')   ');
+                end;
+                if iPatro = 0 then begin
+                   SQL.Add('  AND (IDPATRO IS NULL)                            ');
+                end else begin
+                   SQL.Add('  AND (IDPATRO = '+FloatToStr(iPatro)+')           ');
+                end;
+                OpenDataSet(SQL.Text);
+
+             Finally
+
+             End;
+
+          If not _lDataSet.isEmpty then bInclui := False;
+
+          //=============================================================
+          // Insere registros no tabela PlanoSaldo
+          //=============================================================
+          If bInclui Then
+          Begin
+             iIDPlanoSaldo := GetSequence('PLANOSALDO');
+
+             sSql := 'INSERT INTO PLANOSALDO                                    ' +
+                     '  ( PLANO, IDPLANOSALDO, IDPATRO,IDPLANOPREV,             ' +
+                     '    IDPESSOA,UNIDNEGOC,CODSUBCONTA,IDUSUARIOINCLUSAO,     ' +
+                     '    PEREXERCICIO, PERNUMERO, PLSTIPO,PLACONTA,            ' +
+                     '    CODCENTROCUSTO, IDEMPRESA, PLSORCADODEBITO,           ' +
+                     '    PLSDEBITOOFICIAL,PLSDEBITOHIST, PLSDEBITOGER,         ' +
+                     '    PLSDEBITOGEREN1, PLSDEBITOGEREN2, PLSDEBITOCORRENTE,  ' +
+                     '    PLSORCADOCREDITO, PLSCREDITOOFICIAL,PLSCREDITOHIST,   ' +
+                     '    PLSCREDITOGER,  PLSCREDITOGEREN1,PLSCREDITOGEREN2,    ' +
+                     '    PLSCREDITOCOR )                                       ' +
+                     'VALUES ( ' +
+                     FloatToStr(iPlano)    +  ','  + FloatToStr(iIDPlanoSaldo) + ',';
+
+                     if  iPatro <>  0 then
+                         sSql := sSql + FloatToStr(iPatro)  +  ','
+                     else
+                         sSql := sSql + 'null' +  ',';
+
+                     if iPlanoPrev <> 0 then
+                        sSql := sSql  + FloatToStr(iPlanoPrev)  + ','
+                     else
+                        sSql := sSql  + 'null'  + ',';
+
+                     sSql := sSql + FloatToStr(IdEmpresa) +  ',';
+
+                     if iUnidNegoc <> 0 then
+                        sSql := sSql + FloatToStr(iUnidNegoc) + ','
+                     else
+                        sSql := sSql + 'null' + ',';
+
+                     if iSubConta <> 0 then
+                        sSql := sSql +  FloatToStr(iSubConta) +  ','
+                     else
+                        sSql := sSql +  'null' +  ',';
+
+                     sSql := sSql + FloatToStr(iUsuario) + ',' + IntToStr(iExercicio) + ',';
+
+                     if iPeriodo <> 0 then
+                        sSql := sSql  + IntToStr(iPeriodo)  + ','
+                     else
+                        sSql := sSql  + 'null' + ',';
+
+                     sSql := sSql +  #39+sTipoConta+#39 + ',' + #39+sConta+#39 + ',';
+
+
+             if (sCCust = '') then
+             begin
+                sSql := sSql + 'null' +  ',';
+                sSql := sSql + 'null' +  ',';
+             end else
+             begin
+                sSql := sSql + #39+sCCust+#39 + ',';
+                sSql := sSql + FloatToStr(IdEmpresa) + ',';
+             end;
+
+             if sDebCre = 'D' then
+             begin
+                sSql := sSql + FloatToStrPonto(RoundCM(rValOrcado))   + ',';
+                sSql := sSql + FloatToStrPonto(RoundCM(rValOficial))  + ',';
+                sSql := sSql + FloatToStrPonto(RoundCM(rValHist))     + ',';
+                sSql := sSql + FloatToStrPonto(RoundCM(rValGeren))    + ',';
+                sSql := sSql + FloatToStrPonto(RoundCM(rValGeren1))   + ',';
+                sSql := sSql + FloatToStrPonto(RoundCM(rValGeren2))   + ',';
+                sSql := sSql + FloatToStrPonto(RoundCM(rValCorrente)) + ',';
+
+                sSql := sSql + '0' + ',';    // orcadocredito
+                sSql := sSql + '0' + ',';    // creditooficial
+                sSql := sSql + '0' + ',';    // creditohist
+                sSql := sSql + '0' + ',';    // creditoger
+                sSql := sSql + '0' + ',';    // creditogeren1
+                sSql := sSql + '0' + ',';    // creditogeren2
+                sSql := sSql + '0' + ')';    // creditocor
+             end else
+             begin
+                sSql := sSql + '0' + ',';    // orcadodebito
+                sSql := sSql + '0' + ',';    // debitooficial
+                sSql := sSql + '0' + ',';    // debitohist
+                sSql := sSql + '0' + ',';    // debitoger
+                sSql := sSql + '0' + ',';    // debitogeren1
+                sSql := sSql + '0' + ',';    // debitogeren2
+                sSql := sSql + '0' + ',';    // debitocor
+
+
+                sSql := sSql + FloatToStrPonto(RoundCM(rValOrcado))   + ',';
+                sSql := sSql + FloatToStrPonto(RoundCM(rValOficial))  + ',';
+                sSql := sSql + FloatToStrPonto(RoundCM(rValHist))     + ',';
+                sSql := sSql + FloatToStrPonto(RoundCM(rValGeren))    + ',';
+                sSql := sSql + FloatToStrPonto(RoundCM(rValGeren1))   + ',';
+                sSql := sSql + FloatToStrPonto(RoundCM(rValGeren2))   + ',';
+                sSql := sSql + FloatToStrPonto(RoundCM(rValCorrente)) + ')';
+             end;
+
+          End Else
+          Begin
+             //=============================================================
+             // Altera registros na tabela PlanoSaldo
+             //=============================================================
+             sSql := 'UPDATE PLANOSALDO SET  ';
+             sSql := sSql + 'PLANO = ' + FloatToStr(iPlano)     + ',';
+
+             if iPatro <> 0 then
+                 sSql := sSql + 'IDPATRO = ' + FloatToStr(iPatro)     + ','
+             else
+                 sSql := sSql + 'IDPATRO = null' + ',';
+
+             if iPlanoPrev <> 0 then
+                sSql := sSql + 'IDPLANOPREV = ' + FloatToStr(iPlanoPrev) + ','
+             else
+                sSql := sSql + 'IDPLANOPREV = null' +  ',';
+
+             sSql := sSql + 'IDPESSOA  = ' + FloatToStr(IdEmpresa)  + ',';
+
+             if  iUnidNegoc <> 0 then
+                 sSql := sSql + 'UNIDNEGOC = ' + FloatToStr(iUnidNegoc) + ','
+             else
+                 sSql := sSql + 'UNIDNEGOC = null' + ',';
+
+             if iSubConta <> 0 then
+                sSql := sSql + 'CODSUBCONTA = ' + FloatToStr(iSubConta)  + ','
+             else
+                sSql := sSql + 'CODSUBCONTA = null' + ',';
+
+             sSql := sSql + 'IDUSUARIOINCLUSAO = ' + FloatToStr(iUsuario)   + ',';
+             sSql := sSql + 'PEREXERCICIO      = ' + IntToStr(iExercicio)   + ',';
+
+             if  iPeriodo <> 0 then
+                 sSql := sSql + 'PERNUMERO = ' + IntToStr(iPeriodo) + ','
+             else
+                 sSql := sSql + 'PERNUMERO = null' + ',';
+
+             sSql := sSql + 'PLSTIPO   = ' + #39+sTipoConta+#39 + ',';
+             sSql := sSql + 'PLACONTA  = ' + #39+sConta+#39     + ',';
+
+
+             if (sCCust = '') then
+             begin
+                 sSql := sSql + 'CODCENTROCUSTO = null' + ',';
+                 sSql := sSql + 'IDEMPRESA      = null' + ',';
+             end else
+             begin
+                sSql := sSql + 'CODCENTROCUSTO = ' + #39+sCCust+#39        + ',';
+                sSql := sSql + 'IDEMPRESA      = ' + FloatToStr(IdEmpresa) + ',';
+             end;
+
+             if sDebCre = 'D' then begin
+                sSql := sSql + 'PLSORCADODEBITO   = ' + FloatToStrPonto(RoundCM(_lDataSet.FieldByName('PLSORCADODEBITO').AsFloat  +rValOrcado))   + ',';
+                sSql := sSql + 'PLSDEBITOOFICIAL  = ' + FloatToStrPonto(RoundCM(_lDataSet.FieldByName('PLSDEBITOOFICIAL').AsFloat +rValOficial))  + ',';
+                sSql := sSql + 'PLSDEBITOHIST     = ' + FloatToStrPonto(RoundCM(_lDataSet.FieldByName('PLSDEBITOHIST').AsFloat    +rValHist))     + ',';
+                sSql := sSql + 'PLSDEBITOGEREN2   = ' + FloatToStrPonto(RoundCM(_lDataSet.FieldByName('PLSDEBITOGEREN2').AsFloat  +rValGeren2))   + ',';
+                sSql := sSql + 'PLSDEBITOGEREN1   = ' + FloatToStrPonto(RoundCM(_lDataSet.FieldByName('PLSDEBITOGEREN1').AsFloat  +rValGeren1))   + ',';
+                sSql := sSql + 'PLSDEBITOGER      = ' + FloatToStrPonto(RoundCM(_lDataSet.FieldByName('PLSDEBITOGER').AsFloat     +rValGeren))    + ',';
+                sSql := sSql + 'PLSDEBITOCORRENTE = ' + FloatToStrPonto(RoundCM(_lDataSet.FieldByName('PLSDEBITOCORRENTE').AsFloat+rValCorrente)) + ',';
+
+                sSql := sSql + 'PLSORCADOCREDITO  = ' + FloatToStrPonto(RoundCM(_lDataSet.FieldByName('PLSORCADOCREDITO').AsFloat)) + ',';
+                sSql := sSql + 'PLSCREDITOOFICIAL = ' + FloatToStrPonto(RoundCM(_lDataSet.FieldByName('PLSCREDITOOFICIAL').AsFloat))+ ',';
+                sSql := sSql + 'PLSCREDITOHIST    = ' + FloatToStrPonto(RoundCM(_lDataSet.FieldByName('PLSCREDITOHIST').AsFloat))   + ',';
+                sSql := sSql + 'PLSCREDITOGEREN2  = ' + FloatToStrPonto(RoundCM(_lDataSet.FieldByName('PLSCREDITOGEREN2').AsFloat)) + ',';
+                sSql := sSql + 'PLSCREDITOGEREN1  = ' + FloatToStrPonto(RoundCM(_lDataSet.FieldByName('PLSCREDITOGEREN1').AsFloat)) + ',';
+                sSql := sSql + 'PLSCREDITOGER     = ' + FloatToStrPonto(RoundCM(_lDataSet.FieldByName('PLSCREDITOGER').AsFloat))    + ',';
+                sSql := sSql + 'PLSCREDITOCOR     = ' + FloatToStrPonto(RoundCM(_lDataSet.FieldByName('PLSCREDITOCOR').AsFloat));
+             end else
+             begin
+                sSql := sSql + 'PLSORCADODEBITO   = ' + FloatToStrPonto(RoundCM(_lDataSet.FieldByName('PLSORCADODEBITO').AsFloat))  + ',';
+                sSql := sSql + 'PLSDEBITOOFICIAL  = ' + FloatToStrPonto(RoundCM(_lDataSet.FieldByName('PLSDEBITOOFICIAL').AsFloat)) + ',';
+                sSql := sSql + 'PLSDEBITOHIST     = ' + FloatToStrPonto(RoundCM(_lDataSet.FieldByName('PLSDEBITOHIST').AsFloat))    + ',';
+                sSql := sSql + 'PLSDEBITOGEREN2   = ' + FloatToStrPonto(RoundCM(_lDataSet.FieldByName('PLSDEBITOGEREN2').AsFloat))  + ',';
+                sSql := sSql + 'PLSDEBITOGEREN1   = ' + FloatToStrPonto(RoundCM(_lDataSet.FieldByName('PLSDEBITOGEREN1').AsFloat))  + ',';
+                sSql := sSql + 'PLSDEBITOGER      = ' + FloatToStrPonto(RoundCM(_lDataSet.FieldByName('PLSDEBITOGER').AsFloat))     + ',';
+                sSql := sSql + 'PLSDEBITOCORRENTE = ' + FloatToStrPonto(RoundCM(_lDataSet.FieldByName('PLSDEBITOCORRENTE').AsFloat))+ ',';
+
+                sSql := sSql + 'PLSORCADOCREDITO  = ' + FloatToStrPonto(RoundCM(_lDataSet.FieldByName('PLSORCADOCREDITO').AsFloat +rValOrcado))  + ',';
+                sSql := sSql + 'PLSCREDITOOFICIAL = ' + FloatToStrPonto(RoundCM(_lDataSet.FieldByName('PLSCREDITOOFICIAL').AsFloat+rValOficial)) + ',';
+                sSql := sSql + 'PLSCREDITOHIST    = ' + FloatToStrPonto(RoundCM(_lDataSet.FieldByName('PLSCREDITOHIST').AsFloat   +rValHist))    + ',';
+                sSql := sSql + 'PLSCREDITOGEREN2  = ' + FloatToStrPonto(RoundCM(_lDataSet.FieldByName('PLSCREDITOGEREN2').AsFloat +rValGeren2))  + ',';
+                sSql := sSql + 'PLSCREDITOGEREN1  = ' + FloatToStrPonto(RoundCM(_lDataSet.FieldByName('PLSCREDITOGEREN1').AsFloat +rValGeren1))  + ',';
+                sSql := sSql + 'PLSCREDITOGER     = ' + FloatToStrPonto(RoundCM(_lDataSet.FieldByName('PLSCREDITOGER').AsFloat    +rValGeren))   + ',';
+                sSql := sSql + 'PLSCREDITOCOR     = ' + FloatToStrPonto(RoundCM(_lDataSet.FieldByName('PLSCREDITOCOR').AsFloat    +rValCorrente));
+             end;
+             sSql := sSql + ' WHERE (IDPLANOSALDO  = ' + FloatToStr(_lDataSet.FieldByName('IDPLANOSALDO').AsFloat) + ')';
+
+          End;
+
+          Result := ExecSQL(sSql);
+
+          If Not Result Then
+          Begin
+             If bInclui Then
+                Raise Exception.Create('Erro ao Tentar Incluir Plano Saldos.' + #10#13+MessageInfo)
+             Else
+                Raise Exception.Create('Erro ao Tentar Alterar Plano Saldos.'+ #10#13+MessageInfo);
+          End;
+
+       End;
+
+   Except
+       on E:Exception Do
+       Begin
+          Result := False;
+          MessageInfo := E.Message;
+       End;
+  End;
+
+end;
+
+function TCtrlLancamento.FazRateio(liEmpresa, liModulo, liUsuario, liCodPlano,
+         liPlanilRateio, liPlanoPrev, liPatro, liSubContaCp, liSubContaRt,
+         liUnidNegoc: Integer;  sDataLanc, sNumDoc, sTipoOper, sCcustoCp,
+         sContaCp, sCodHistCp, sHist1Cp, sHist2Cp, sHist3Cp, sHist4Cp,
+         sHist5Cp, sCcustoRt, sContaRt, sCodHistRt, sHist1Rt, sHist2Rt,
+         sHist3Rt, sHist4Rt, sHist5Rt, sDebCre: string; dValor: Double;
+         bJunta, bUsaPPatro: Boolean;
+         // Alex 05/01/04 - nova estrutura SEGREGACRITER. Avaliar
+         const iIdSegregaCriter: integer; const dDataSegregaCriter: tDateTime) :Boolean;
+var
+  sSql,sTipoRateio,sContaD,sContaC,sMens,sCCustoD,sCCustoC :string;
+  _cdsPlanilRateio : TClientDataSet;
+  _cdsSaldoRateio  : TClientDataSet;
+  rValorRateio,  dPlnCodigo : Double;
+  sTipoLanc :char;
+
+  iSubContaD,iSubContaC,iUnidNegoc :Integer;
+begin
+   {Funcão implementada na Aplicação Servidora}
+   If ConnectionSide = cnsClient Then Begin
+      Result := Connection.AppServer.FazRateio(liEmpresa, liModulo, liUsuario, liCodPlano,
+                                 liPlanilRateio, liPlanoPrev, liPatro, liSubContaCp,
+                                 liSubContaRt,liUnidNegoc, sDataLanc, sNumDoc, sTipoOper,
+                                 sCcustoCp, sContaCp, sCodHistCp, sHist1Cp, sHist2Cp,
+                                 sHist3Cp, sHist4Cp, sHist5Cp, sCcustoRt, sContaRt,
+                                 sCodHistRt, sHist1Rt, sHist2Rt,  sHist3Rt, sHist4Rt,
+                                 sHist5Rt, sDebCre, dValor,bJunta, bUsaPPatro,FRetornoPlnPlanil,
+                                 // Alex 05/01/04 - nova estrutura SEGREGACRITER. Avaliar
+                                 iIdSegregaCriter, dDataSegregaCriter );
+
+      If Not Result Then
+         MessageInfo := Connection.AppServer.MessageInfo
+      Else
+         MessageInfo := Connection.AppServer.MessageInfo;
+
+   End Else
+   Begin
+      Result := True;
+      iUnidNegoc := liUnidNegoc;
+      dPlnCodigo := 0;
+      _cdsPlanilRateio := TClientDataSet.Create(nil);
+      _cdsSaldoRateio  := TClientDataSet.Create(nil);
+
+     Try
+
+        StartTransaction;
+
+        // *** verifica se a planilha existe antes de fazer o processamento
+        sSql := 'SELECT  '+
+                '   P.PANCONTAPERC, D.PANNUMLANC, '+
+                '   D.PLANO, D.PANCONTABASE, D.PANCCUSTOBASE, '+
+                '   D.PLACONTA, D.CODCENTROCUSTO, '+
+                '   D.IDEMPRESA, D.IDPESSOA, D.PANPERC, ' +
+                '   D.UNIDNEGOC, D.CODSUBCONTA, D.TIPCODIGO '+
+                '   FROM  PREPLANILHA P, PREDETALHE D ' +
+                'WHERE '  +
+                '   (P.PANCODIGO = ' + IntToStr(liPlanilRateio) + ') AND '+
+                '   (P.PANCODIGO = D.PANCODIGO) ' +
+                'ORDER BY  D.PANNUMLANC ';
+
+        _cdsPlanilRateio.Data := GetDataPacket(sSql);
+
+       If _cdsPlanilRateio.isEmpty Then
+       Begin
+         sMens := 'Código da Planilha de Rateio não existe.';
+         Raise Exception.Create(sMens);
+       End;
+
+       sTipoRateio := _cdsPlanilRateio.FieldByName('PANCONTAPERC').asString;
+       Periodo.PeriodoEsp := FlcPeriodoEsp;
+       If Not Periodo.RetornaPeriodoExercicioDataProc(liEmpresa,sDataLanc)  Then
+       Begin
+         sMens := Periodo.MessageInfo;
+         Raise Exception.Create(sMens);
+       End;
+
+
+       //** Se for do Tipo Percentual, gera os lançamentos na Conta a ser
+       // Rateada fazendo o rateio do Valor pelos percentuais
+
+       If sTipoRateio = 'P' Then
+       Begin
+
+         While Not _cdsPlanilRateio.Eof do
+         Begin
+
+            If Not _cdsPlanilRateio.FieldByName('UNIDNEGOC').isNull Then
+            Begin
+               iUnidNegoc := _cdsPlanilRateio.FieldByName('UNIDNEGOC').asInteger;
+            End;
+
+            If Not _cdsPlanilRateio.FieldByName('TIPCODIGO').isNull Then
+            Begin
+               sTipoOper := _cdsPlanilRateio.FieldByName('TIPCODIGO').asString;
+            End;
+
+            rValorRateio := (dValor * (_cdsPlanilRateio.FieldByName('PANPERC').asFloat / 100));
+
+            If sDebCre = 'D' Then
+            Begin
+               sTipoLanc  := '0';
+
+               If _cdsPlanilRateio.FieldByName('PLACONTA').isNull Then
+                  sContaD    := sContaRt
+               Else
+                  sContaD    := _cdsPlanilRateio.FieldByName('PLACONTA').asString;
+
+               If _cdsPlanilRateio.FieldByName('CODCENTROCUSTO').isNull Then
+                  sCCustoD   := sCCustoRt
+               Else
+                  sCCustoD   := _cdsPlanilRateio.FieldByName('CODCENTROCUSTO').asString;
+
+               If _cdsPlanilRateio.FieldByName('CODSUBCONTA').isNull Then
+                  iSubContaD := liSubContaRt
+               Else
+                  iSubContaD := _cdsPlanilRateio.FieldByName('CODSUBCONTA').asInteger;
+
+               sContaC    := '';
+               sCCustoC   := '';
+               iSubContaC := 0;
+
+            End Else
+            Begin
+
+               sTipoLanc := '1';
+
+               If _cdsPlanilRateio.FieldByName('PLACONTA').isNull Then
+                  sContaC    := sContaRt
+               Else
+                  sContaC    := _cdsPlanilRateio.FieldByName('PLACONTA').asString;
+
+               If _cdsPlanilRateio.FieldByName('CODCENTROCUSTO').isNull Then
+                  sCCustoC   := sCCustoRt
+               Else
+                  sCCustoC   := _cdsPlanilRateio.FieldByName('CODCENTROCUSTO').asString;
+
+               If _cdsPlanilRateio.FieldByName('CODSUBCONTA').isNull Then
+                  iSubContaC := liSubContaRt
+               Else
+                  iSubContaC := _cdsPlanilRateio.FieldByName('CODSUBCONTA').asInteger;
+
+               sContaD    := '';
+               sCCustoD   := '';
+               iSubContaD := 0;
+            End;
+
+            FlcTestaConta := True;
+            If Not InsereLancaContab(sTipoLanc,liEmpresa,liModulo,liUsuario,
+                                    liCodPlano,iUnidNegoc,iSubContaD,iSubContaC,
+                                    liPlanoPrev,liPatro,dPlnCodigo,0,
+                                    sDataLanc,sNumDoc,sHist1Rt,sHist2Rt,sHist3Rt,
+                                    sHist4Rt,sHist5Rt,sTipoOper,sCCustoD,sContaD,
+                                    sCCustoC,sContaC,sCodHistRt,
+                                    rValorRateio,bJunta,bUsaPPatro,
+                                    // 05/01/03 Alex - nova estrutura SEGREGACRITER
+                                    iIdSegregaCriter, dDataSegregaCriter) Then
+
+            Begin
+              sMens  := MessageInfo;
+              Raise Exception.Create(sMens);
+            End Else
+            Begin
+               dPlnCodigo := RetornoPlnCodigo;
+            End;
+
+            _cdsPlanilRateio.Next;
+         End;
+
+      End Else
+      Begin
+         //** Se for do Tipo Conta Base, verifica se o Centro de Custo da Conta
+         // de Rateio foi passado, para se escolher os dados de saldo,
+         // (com ou sem Centro de Custo como parâmetro)
+
+         If sCCustoRt <> '' Then
+         Begin
+            sSql := 'SELECT '+
+                    '   S.PLANO, S.PLACONTA, S.CODCENTROCUSTO, S.IDEMPRESA, '+
+                    '   S.CODSUBCONTA, S.IDPESSOA, S.UNIDNEGOC, '+
+                    '   DECODE(B.SALDORATEIO, 0, 0, SUM(DECODE(S.PLSDEBITOCORRENTE, NULL, 0, S.PLSDEBITOCORRENTE) - '+
+                    '   DECODE(S.PLSCREDITOCOR, NULL, 0, S.PLSCREDITOCOR))/B.SALDORATEIO) AS PERCRATEIO '+
+                    'FROM '+
+                    '   PLANOSALDO S, '+
+                    '   (SELECT '+
+                    '       SUM(DECODE(PLSDEBITOCORRENTE, NULL, 0, PLSDEBITOCORRENTE) - '+
+                    '           DECODE(PLSCREDITOCOR, NULL, 0, PLSCREDITOCOR)) AS SALDORATEIO '+
+                    '    FROM '+
+                    '       PLANOSALDO '+
+                    '    WHERE '+
+                    '           (PLANO     = ' + IntToStr(liCodPlano) + ') '+
+                    '       AND (RTRIM(PLACONTA)  = ' + Trim(_cdsPlanilRateio.FieldByName('PANCONTABASE').asString) + ') ';
+
+            If sCCustoRt <> '' Then
+            Begin
+              sSql := sSql + '  AND (RTRIM(CODCENTROCUSTO) = ' + Trim(_cdsPlanilRateio.FieldByName('PANCCUSTOBASE').asString) + ') '+
+                             '  AND (IDEMPRESA      = ' + IntToStr(liEmpresa) + ') ';
+            End;
+
+            sSql := SSql +  '   AND (PEREXERCICIO   = '+ IntToStr(Periodo.Exercicio)+ ') ' +
+                            '   AND (PERNUMERO      = '+ IntToStr(Periodo.Exercicio)+ ') ' +
+                            '   AND (IDPESSOA       = '+ IntToStr(liEmpresa) + ')) B '+
+                            'WHERE  '+
+                            '       (S.PLANO     = ' + IntToStr(liCodPlano) + ') '+
+                            '   AND (RTRIM(S.PLACONTA)  = ' + Trim(_cdsPlanilRateio.FieldByName('PANCONTABASE').asString) + ') ';
+
+            If sCCustoRt <> '' Then
+            Begin
+              sSql := sSql + '  AND (RTRIM(CODCENTROCUSTO) = '+ Trim(_cdsPlanilRateio.FieldByName('PANCCUSTOBASE').asString)+ ') '+
+                             '  AND (IDEMPRESA      = ' + IntToStr(liEmpresa) + ') ';
+            End;
+
+            sSql := sSql +  '   AND (S.PEREXERCICIO   = '+ IntToStr(Periodo.Exercicio)+ ') ' +
+                            '   AND (S.PERNUMERO      = '+ IntToStr(Periodo.Periodo)+ ') ' +
+                            '   AND (S.IDPESSOA       = '+ IntToStr(liEmpresa)+ ') ' +
+                            'GROUP BY  '+
+                            '   S.PLANO, S.PLACONTA, S.CODCENTROCUSTO, S.IDEMPRESA, '+
+                            '   S.CODSUBCONTA, S.IDPESSOA, S.UNIDNEGOC, B.SALDORATEIO ';
+
+            _cdsSaldoRateio.Data  := GetDataPacket(sSql);
+
+         End Else
+         Begin
+            sSql := 'SELECT '+
+                    '   S.PLANO, S.PLACONTA, S.CODCENTROCUSTO, S.IDEMPRESA, '+
+                    '   S.CODSUBCONTA, S.IDPESSOA, S.UNIDNEGOC, '+
+                    '   DECODE(B.SALDORATEIO, 0, 0, SUM(DECODE(S.PLSDEBITOCORRENTE, NULL, 0, S.PLSDEBITOCORRENTE) - '+
+                    '       DECODE(S.PLSCREDITOCOR, NULL, 0, S.PLSCREDITOCOR))/B.SALDORATEIO) AS PERCRATEIO '+
+                    'FROM '+
+                    '   PLANOSALDO S, '+
+                    '   (SELECT  '+
+                    '       SUM(DECODE(PLSDEBITOCORRENTE, NULL, 0, PLSDEBITOCORRENTE) - '+
+                    '           DECODE(PLSCREDITOCOR, NULL, 0, PLSCREDITOCOR)) AS SALDORATEIO '+
+                    '    FROM  '+
+                    '       PLANOSALDO '+
+                    '    WHERE '+
+                    '           (PLANO           = '+ IntToStr(liCodPlano) + ') '+
+                    '       AND (RTRIM(PLACONTA) = '+ Trim(_cdsPlanilRateio.FieldByName('PANCONTABASE').asString) + ') ' +
+                    '       AND (PEREXERCICIO    = '+ IntToStr(Periodo.Exercicio)+ ') ' +
+                    '       AND (PERNUMERO       = '+ IntToStr(Periodo.Periodo)+ ') ' +
+                    '       AND (IDPESSOA        = '+ IntToStr(liEmpresa)+ ')) B '+
+                    'WHERE  '+
+                    '       (S.PLANO           = ' + IntToStr(liCodPlano) + ') '+
+                    '   AND (RTRIM(S.PLACONTA) = ' + Trim(_cdsPlanilRateio.FieldByName('PANCONTABASE').asString) + ') '+
+                    '   AND (S.PEREXERCICIO    = '+ IntToStr(Periodo.Exercicio)+ ') ' +
+                    '   AND (S.PERNUMERO       = '+ IntToStr(Periodo.Periodo)+ ') ' +
+                    '   AND (S.IDPESSOA        = '+ IntToStr(liEmpresa) + ') ' +
+                    'GROUP BY ' +
+                    '   S.PLANO, S.PLACONTA, S.CODCENTROCUSTO, S.IDEMPRESA, '+
+                    '   S.CODSUBCONTA, S.IDPESSOA, S.UNIDNEGOC, B.SALDORATEIO ';
+
+
+            _cdsSaldoRateio.Data  := GetDataPacket(sSql);
+         End;
+
+         //Varre o cds de valores para fazer o Rateio
+         While not _cdsSaldoRateio.eof do
+         Begin
+            rValorRateio := (dValor * (_cdsSaldoRateio.FieldByName('PERCRATEIO').asFloat));
+
+            If sDebCre = 'D' Then
+            Begin
+               sTipoLanc  := '0';
+               sContaD    := _cdsSaldoRateio.FieldByName('PLACONTA').asString;
+               sCCustoD   := _cdsSaldoRateio.FieldByName('CODCENTROCUSTO').asString;
+               iSubContaD := _cdsSaldoRateio.FieldByName('CODSUBCONTA').asInteger;
+               sContaC    := '';
+               sCCustoC   := '';
+               iSubContaC := 0;
+            End Else
+            Begin
+               sTipoLanc := '1';
+               sContaC    := _cdsSaldoRateio.FieldByName('PLACONTA').asString;
+               sCCustoC   := _cdsSaldoRateio.FieldByName('CODCENTROCUSTO').asString;
+               iSubContaC := _cdsSaldoRateio.FieldByName('CODSUBCONTA').asInteger;
+               sContaD    := '';
+               sCCustoD   := '';
+               iSubContaD := 0;
+            End;
+
+            If Not _cdsSaldoRateio.FieldByName('UNIDNEGOC').isNull Then
+               iUnidNegoc := _cdsSaldoRateio.FieldByName('UNIDNEGOC').asInteger
+            Else
+               iUnidNegoc := liUnidNegoc;
+
+            If Not _cdsSaldoRateio.FieldByName('TIPCODIGO').isNull Then
+               sTipoOper := _cdsSaldoRateio.FieldByName('TIPCODIGO').asString;
+
+
+            FlcTestaConta := True;
+            If not InsereLancaContab (sTipoLanc,liEmpresa,liModulo,
+                                      liUsuario,liCodPlano,iUnidNegoc,
+                                      iSubContaD,iSubContaC,
+                                      liPlanoPrev,liPatro,dPlnCodigo,0,
+                                      sDataLanc,sNumDoc,sHist1Rt,sHist2Rt,sHist3Rt,
+                                      sHist4Rt,sHist5Rt,sTipoOper,sCCustoD,sContaD,
+                                      sCCustoC,sContaC,sCodHistRt, rValorRateio,
+                                      bJunta, bUsaPPatro,
+                                      // 05/01/03 Alex - nova estrutura SEGREGACRITER
+                                      iIdSegregaCriter, dDataSegregaCriter) Then
+
+            Begin
+              sMens  := MessageInfo;
+              Raise Exception.Create(sMens);
+            End Else
+            Begin
+               dPlnCodigo := RetornoPlnCodigo;
+            End;
+            _cdsSaldoRateio.Next;
+         End;
+      End;
+
+      //Gera os lançamentos na Conta de Contra-Partida, que só
+      // faz se a Conta de Contra-Partida estiver Preenchida
+      If sContaCP <> '' Then
+      Begin
+
+         If sDebCre = 'C' then begin
+            sTipoLanc  := '0';
+            sDebCre    := 'D';
+            sContaD    := sContaCP;
+            sCCustoD   := sCCustoCP;
+            iSubContaD := liSubContaCP;
+            sContaC    := '';
+            sCCustoC   := '';
+            iSubContaC := 0;
+         End Else
+         Begin
+            sTipoLanc  := '1';
+            sDebCre    := 'C';
+            sContaC    := sContaCP;
+            sCCustoC   := sCCustoCP;
+            iSubContaC := liSubContaCP;
+            sContaD    := '';
+            sCCustoD   := '';
+            iSubContaD := 0;
+         End;
+
+         FlcTestaConta := True;
+         If not InsereLancaContab (sTipoLanc,liEmpresa,liModulo,liUsuario,
+                                   liCodPlano,iUnidNegoc,iSubContaD,iSubContaC,
+                                   liPlanoPrev,liPatro,dPlnCodigo,0,
+                                   sDataLanc,sNumDoc,sHist1Cp,sHist2Cp,sHist3Cp,
+                                   sHist4Cp,sHist5Cp,sTipoOper,sCCustoD,sContaD,
+                                   sCCustoC,sContaC, sCodHistCp, dValor,
+                                   bJunta,bUsaPPatro,
+                                   // 05/01/03 Alex - nova estrutura SEGREGACRITER
+                                   iIdSegregaCriter, dDataSegregaCriter) Then
+ 
+         Begin
+           sMens  := MessageInfo;
+           Raise Exception.Create(sMens);
+         End;
+      End;
+
+      _Sql.SQL.Clear;
+      _Sql.SQL.Add('SELECT P.PLNPLANIL FROM PLANILHA P ');
+      _Sql.SQL.Add(' WHERE (P.PLNCODIGO = :PLNCODIGO)  ');
+
+      _Sql.Prepare;
+      _Sql.ParamByName('PLNCODIGO').AsFloat := RetornoPlnCodigo;
+      _cds.data := _Sql.Data;
+
+      FRetornoPlnPlanil := _cds.FieldByName('PLNPLANIL').asFloat;
+      MessageInfo  := FloatToStr(_cds.FieldByName('PLNPLANIL').asFloat);
+        If not Padroes.GravaLogOperacoes(liEmpresa, liModulo, liUsuario, 'Planilhas - Rateio',False) then
+           Raise Exception.Create( Padroes.MessageInfo );
+      Commit;
+
+     Except
+         on E:Exception Do
+         Begin
+            RollBack;
+            Result := False;
+            MessageInfo := E.Message;
+         End;
+     End;
+   End;
+
+end;
+
+
+function TCtrlLancamento.AtuSaldoSintetica(IdEmpresa, iUnidNegoc, iUsuario,
+  iPlanoPrev, iPatro, iPlano: Double; iExercicio, iPeriodo: Integer;iSubConta : double;
+   sCCust, sConta, sDebCre, sMascara: string; rValCorrente,
+  rValOrcado, rValOficial, rValGeren, rValGeren1, rValGeren2,
+  rValHist: Double; bUsaPlanoPatro: boolean): Boolean;
+var iGrau,iNumEle : Integer;
+    _cdsConta : TClientDataset; //pendência 27253 - 22/01/2008
+begin
+   Result := True;
+   sConta :=trim(sConta);
+   iGrau  :=Geral.CalcGrau(sMascara,sConta);
+   _cdsConta := TClientDataset.Create(nil); //pendência 27253 - 22/01/2008
+   try
+     while iGrau > 0 do begin
+        iGrau  :=iGrau-1;
+        if iGrau > 0 then begin
+           iNumEle:=Geral.CalcNumEleGrau(sMascara,iGrau);
+           sConta :=copy(sConta,1,iNumEle);
+
+           //pendência 27253 - 22/01/2008 - alguns planos de conta não possuem todas as contas sintéticas cadastradas
+           //_cdsConta.Data := getDataPacket('SELECT PLACONTA FROM PLANOCONTA WHERE PLACONTA = '''+ copy( sConta +'                  ', 1, 18 ) +''' AND PLANO = '+ FloatToStr(iPlano) );   //MIGRACAO-ORACLE
+           _cdsConta.Data := getDataPacket('SELECT PLACONTA FROM PLANOCONTA WHERE PLACONTA = '+ Quotedstr(trim(sConta))+' AND PLANO = '+ FloatToStr(iPlano) );   //MIGRACAO-ORACLE
+           if not _cdsConta.IsEmpty then
+             Result := AtuSaldoContas(IdEmpresa, iUnidNegoc, iUsuario,
+                            iPlanoPrev, iPatro, iPlano, iExercicio, iPeriodo, iSubConta,
+                            sCCust, sConta, sDebCre,'S', rValCorrente, rValOrcado, rValOficial,
+                            rValGeren, rValGeren1, rValGeren2, rValHist, bUsaPlanoPatro);
+                            
+           if not Result then break;
+        end;
+     end;
+   finally
+     _cdsConta.Free; //pendência 27253 - 22/01/2008
+   end;
+end;
+function TCtrlLancamento.ListModulos(bOrdenaModulo: Boolean): OleVariant;
+var
+  sSql,sOrdena :string;
+begin
+      sOrdena := '';
+      Result := True;
+
+      sSql := 'SELECT IDMODULO, NOMEMODULO ' +
+              'FROM MODULO ';
+
+      if bOrdenaModulo then
+         sOrdena := 'ORDER BY IDMODULO '
+      else
+         sOrdena := 'ORDER BY NOMEMODULO ';
+
+      sSql := sSql + sOrdena;
+      result := GetDataPacket(sSql);
+
+end;
+
+function TCtrlLancamento.SelecionaLancamentos(IdPlnCodigo,IdEmpresa: Double;
+  iExercicio, iPeriodo: Integer; TipoPeriodo: TTipoPeriodo; sDataIni,
+  sDataFim, sModulos, sTipoOper: String; TipoEfetivado: TTipoEfetivado;
+  TipoOutraMoeda: TTipoOutraMoeda;  TipoOrdenaLanc: TTipoOrdenaLanc;
+  TipoSomatorio : TTipoSomatorio; bComConta : Boolean;
+  // Rodolpho da Silva - P: 17987
+  bInserePlanoPatro: boolean = false): OleVariant;
+begin
+
+    With _sql Do
+      Try
+          SQL.Clear;
+          SQL.Add('SELECT                                                        ');
+
+          // Rodolpho da Silva - P: 17987 - 01/12/2005
+          if bInserePlanoPatro then
+             SQL.Add('   PRV.NOME AS PLANOPREV, PE.NOME AS PATRO,');
+
+          SQL.Add('   P.PERNUMERO,P.PEREXERCICIO,L.PLANO,L.PLACONTA, L.TIPCODIGO,');
+          SQL.Add('   L.CODSUBCONTA,L.IDEMPRESA,L.UNIDNEGOC,L.CODCENTROCUSTO,    ');
+          SQL.Add('   L.IDPLANOPREV, L.IDPATRO, L.LACDEBCRE,                     ');
+
+          if bComConta then begin
+             SQL.Add('   C.PLANOME, C.PLATIPO, C.PLAGRUPO, C.PLANOMEOUTLING, C.PLACCUST,    ');
+          end;
+
+          if (TipoSomatorio = tsPeriodo) or (TipoSomatorio = tsData) then
+          begin
+
+             if (TipoSomatorio = tsData) then
+                SQL.Add('   P.PLNDATDIA,                     ');
+
+             SQL.Add('   ROUND(SUM(NVL(L.LACVALOR,0)),2) AS LACVALOR,               ');
+             SQL.Add('   ROUND(SUM(NVL(L.LACVALOFICIAL,0)),2) AS LACVALOFICIAL,     ');
+             SQL.Add('   ROUND(SUM(NVL(L.LACVALGERENCIAL,0)),2) AS LACVALGERENCIAL, ');
+             SQL.Add('   ROUND(SUM(NVL(L.LACVALGEREN1,0)),2) AS LACVALGEREN1,       ');
+             SQL.Add('   ROUND(SUM(NVL(L.LACVALGEREN2,0)),2) AS LACVALGEREN2,       ');
+             SQL.Add('   ROUND(SUM(NVL(L.LACVALHIST,0)),2) AS LACVALHIST            ');
+          end else
+          begin
+             SQL.Add('   L.LACNUMLAN, P.PLNPLANIL,P.PLNCODIGO, P.PLNDATDIA,         ');
+             SQL.Add('   L.LACVALOR, L.LACVALOFICIAL, L.LACVALGERENCIAL,L.LACNUMDOC,');
+             SQL.Add('   L.LACVALGEREN1, L.LACVALGEREN2, L.LACVALHIST               ');
+          end;
+
+          SQL.Add('FROM                                                          ');
+          SQL.Add('   PLANILHA P, LANCAMENTO L                                   ');
+
+          // Rodolpho da Silva - P: 17987 - 01/12/2005
+          if bInserePlanoPatro then
+             SQL.Add('   ,PLANPREVCONTABIL PRV, PESSOA PE ');
+
+          if bComConta then
+             SQL.Add('   ,PLANOCONTA C                                           ');
+
+          SQL.Add('WHERE (P.IDPESSOA = '+FloatToStr(IdEmpresa)+')                ');
+
+          // Rodolpho da Silva - P: 17987 - 01/12/2005
+          if bInserePlanoPatro then
+          begin
+             SQL.Add('  AND (L.IDPATRO = PE.IDPESSOA)' );
+             SQL.Add('  AND (L.IDPLANOPREV = PRV.IDPLANOPREV) ');
+          end;
+
+          if IdPlnCodigo <> 0 then
+             SQL.Add('  AND (P.PLNCODIGO = '+FloatToStr(IdPlnCodigo)+')             ');
+
+          if iExercicio > 0 then
+             SQL.Add('  AND (P.PEREXERCICIO = '+IntToStr(iExercicio)+')             ');
+
+          if iPeriodo > 0 then begin
+             Case TipoPeriodo of
+                tpSoPeriodo  : SQL.Add('  AND (P.PERNUMERO = '+IntToStr(iPeriodo)+')     ');
+                tpMenorIgual : SQL.Add('  AND (P.PERNUMERO <= '+IntToStr(iPeriodo)+')    ');
+             end;
+          end;
+
+          if sModulos <> '' then
+             SQL.Add('  AND (P.IDMODULO IN ('+sModulos+'))                  ');
+
+          if sTipoOper <> '' then
+             SQL.Add('  AND (L.TIPCODIGO ='''+sTipoOper+''')                ');
+
+          if sDataIni <> '' then
+             SQL.Add('  AND (P.PLNDATDIA >= TO_DATE('''+sDataIni+''',''DD/MM/YYYY''))  ');
+
+          if sDataFim <> '' then
+             SQL.Add('  AND (P.PLNDATDIA <= TO_DATE('''+sDataFim+''',''DD/MM/YYYY''))  ');
+
+
+          if bComConta then begin
+             SQL.Add('  AND (C.PLANO    = L.PLANO)                              ');
+             SQL.Add('  AND (C.PLACONTA = L.PLACONTA)                           ');
+          end;
+
+          Case TipoOutraMoeda of
+             tomNaoAtualizada : SQL.Add('  AND ((L.LACATOUTMOEDA = ''N'') OR (L.LACATOUTMOEDA IS NULL)) ');
+             tomAtualizada    : SQL.Add('  AND (L.LACATOUTMOEDA = ''S'')                                ');
+          end;
+
+          Case TipoEfetivado of
+             teNaoEfetivado : SQL.Add('  AND ((P.PLNEFETIVADO <> ''S'') OR (P.PLNEFETIVADO IS NULL)) ');
+             teEfetivado    : SQL.Add('  AND (P.PLNEFETIVADO = ''S'')                                ');
+          end;
+
+          SQL.Add('  AND (P.PLNCODIGO = L.PLNCODIGO)                             ');
+
+          if (TipoSomatorio = tsPeriodo) or (TipoSomatorio = tsData) then
+          begin
+             SQL.Add('GROUP BY P.PERNUMERO,P.PEREXERCICIO,L.PLANO,L.PLACONTA, L.TIPCODIGO,');
+
+             // Rodolpho da Silva - P: 17987 - 01/12/2005
+             if bInserePlanoPatro then
+                SQL.Add('PRV.NOME, PE.NOME, ');
+
+             if (TipoSomatorio = tsData) then
+                SQL.Add('   P.PLNDATDIA,                     ');
+
+             SQL.Add('   L.CODSUBCONTA,L.IDEMPRESA,L.UNIDNEGOC,L.CODCENTROCUSTO,    ');
+
+             if bComConta then
+             begin
+                SQL.Add('   C.PLANOME, C.PLATIPO, C.PLAGRUPO, C.PLANOMEOUTLING,  C.PLACCUST,   ');
+             end;
+             SQL.Add('   L.IDPLANOPREV, L.IDPATRO, L.LACDEBCRE       ');
+
+             SQL.Add('ORDER BY PLACONTA  '); //WO27960 Leandro
+          end else
+          begin
+             Case TipoOrdenaLanc of
+                tolData     : SQL.Add('ORDER BY P.PLNDATDIA, P.PLNPLANIL, L.LACNUMLAN  ');
+                tolPlnCodigo: SQL.Add('ORDER BY P.PLNCODIGO, L.LACNUMLAN  ');
+             end;
+          end;
+          Result := Data;
+      Finally
+         
+      End;
+
+end;
+
+function TCtrlLancamento.SelecionaLancamentosEsp(IdPlnCodigo : Double): OleVariant;
+begin
+  //16/01/07 - Pendência 23894 - David Ayrolla
+  SQLPlanilhaLancamento( IdPlnCodigo, 'LANCAMENTO' );
+  With _Sql Do
+  begin
+    Prepare;
+    ParamByName('PLNCODIGO').asFloat := IdPlnCodigo;
+    Result := Data;
+  end;
+end;
+
+function TCtrlLancamento.SelecionaPlanilhas(IdPlnCodigo, IdPlanilhaIni,IdPlanilhaFim,IdEmpresa: Double;
+  iExercicio, iPeriodo: Integer; TipoPeriodo: TTipoPeriodo; sDataIni,
+  sDataFim, sModulos, sTipoOper: String; TipoEfetivado: TTipoEfetivado;
+  TipoOrdenaLanc: TTipoOrdenaLanc) : OleVariant;
+begin
+    With _Sql Do
+      Try
+           SQL.Clear;
+           SQL.Add('SELECT M.NOMEMODULO, P.PLNPLANIL, TRUNC(P.PLNDATDIA) AS PLNDATDIA, P.PLNCODIGO,'); // Paulo Nobre - WO28011
+           SQL.Add('       P.IDMODULO, P.PERNUMERO, P.PEREXERCICIO, P.IDPESSOA,   ');
+           SQL.Add('       P.PLNNUMLAN, P.PLNTOTDEB, P.PLNTOTCRE, T.TIPDESCRICAO, ');
+           SQL.Add('       P.PLNTOTDEBOFICIAL, P.PLNTOTCREOFICIAL, P.PLNTOTDEBGER,');
+           SQL.Add('       P.PLNTOTCREGER, P.PLNTOTDEBGEREN1, P.PLNTOTCREGEREN1,  ');
+           SQL.Add('       P.PLNTOTDEBGEREN2, P.PLNTOTCREGEREN2, P.PLNEFETIVADO,  ');
+           SQL.Add('       P.PLNTOTDEBHIST, P.PLNTOTCREHIST, P.PLNPLANESTORNO,    ');
+           SQL.Add('       P.PLNREFERENCIA, P.PANCODIGO, PE.PERNOME,              ');
+           SQL.Add('       PS.NOME,(P.PLNTOTDEB-P.PLNTOTCRE) AS DIFERENCA         ');
+           SQL.Add('FROM PLANILHA P, MODULO M, TIPOPER T, PERIODO PE, PESSOA PS   ');
+           SQL.Add('WHERE (P.IDPESSOA = '+FloatToStr(IdEmpresa)+')                ');
+
+           if IdPlnCodigo <> 0 then
+              SQL.Add('  AND (P.PLNCODIGO = '+FloatToStr(IdPlnCodigo)+')           ');
+
+           if IdPlanilhaIni > 0 then
+              SQL.Add('  AND (P.PLNPLANIL >= '+FloatToStr(IdPlanilhaIni)+')        ');
+
+           if IdPlanilhaFim > 0 then
+               SQL.Add('  AND (P.PLNPLANIL <= '+FloatToStr(IdPlanilhaFim)+')       ');
+
+           if iExercicio > 0 then
+              SQL.Add('  AND (P.PEREXERCICIO = '+IntToStr(iExercicio)+')           ');
+
+           if iPeriodo > 0 then begin
+              Case TipoPeriodo of
+                 tpSoPeriodo  : SQL.Add('  AND (P.PERNUMERO = '+IntToStr(iPeriodo)+')  ');
+                 tpMenorIgual : SQL.Add('  AND (P.PERNUMERO <= '+IntToStr(iPeriodo)+')  ');
+              end;
+           end;
+
+          if sModulos <> '' then
+             SQL.Add('  AND (P.IDMODULO IN ('+sModulos+'))                  ');
+
+          if sTipoOper <> '' then
+             SQL.Add('  AND (P.TIPCODIGO ='''+sTipoOper+''')                ');
+
+          if sDataIni <> '' then
+             SQL.Add('  AND (P.PLNDATDIA >= TO_DATE('''+sDataIni+''',''DD/MM/YYYY''))  ');
+
+          if sDataFim <> '' then
+             SQL.Add('  AND (P.PLNDATDIA <= TO_DATE('''+sDataFim+''',''DD/MM/YYYY''))  ');
+
+          Case TipoEfetivado of
+             teNaoEfetivado : SQL.Add('  AND ((P.PLNEFETIVADO <> ''S'') OR (P.PLNEFETIVADO IS NULL)) ');
+             teEfetivado    : SQL.Add('  AND (P.PLNEFETIVADO = ''S'')                                ');
+          end;
+
+          SQL.Add('  AND (P.IDMODULO          = M.IDMODULO(+))                    ');
+          SQL.Add('  AND (P.TIPCODIGO         = T.TIPCODIGO(+))                   ');
+          SQL.Add('  AND (P.IDUSUARIOINCLUSAO = PS.IDPESSOA(+))                   ');
+          SQL.Add('  AND (P.PERNUMERO         = PE.PERNUMERO)                     ');
+          SQL.Add('  AND (P.PEREXERCICIO      = PE.PEREXERCICIO)                  ');
+          SQL.Add('  AND (P.IDPESSOA          = PE.IDPESSOA)                      ');
+
+          Case TipoOrdenaLanc of
+             tolData     : SQL.Add('ORDER BY P.PLNDATDIA, P.PLNPLANIL  ');
+             tolPlnCodigo: SQL.Add('ORDER BY P.PLNCODIGO               ');
+          end;
+
+          Result := Data;
+
+      Finally
+
+      End;
+end;
+
+// Alterado por Arnaldo V. Scarin, em 28/12/2009
+// SOL.: 128563 Kintana: 690151
+// Valida a Data de reguralização, e se essa data for maior que 31/12/2009,
+// deverá ser valido o IdPlanoPrev (que contem a informação do Plano Prev Contabil,
+// para o plano "Operações Comuns", e esse deverá ser trocado para o plano
+// específico para o PGA
+Function TCtrlLancamento.SelecionaPlanoPGA(var pIdPlano,pIdPatro : Double) : Boolean;
+var oQry : TClientDataSet;
+begin
+  pIdPlano := -1;
+  pIdPatro := -1;
+  oQry := TClientDataSet.Create(Nil);
+  Try
+    With oQry do
+    Begin
+      Data := GetDataPacket('select ppc.idplanoprev,' + #13#10 +
+                            '       ppcp.idpatro' + #13#10 +
+                            'from PlanPrevContabil ppc,' + #13#10 +
+                            '     PlanPrevContabPatro ppcp' + #13#10 +
+                            'where ppc.idplanoprev = ppcp.idplanoprev' + #13#10 +
+                            '  and ppc.flgusopga = ''S''' + #13#10 +
+                            '  and ppc.ativo = ''S''');
+      Open;
+      Result := Not IsEmpty;
+      If Result then
+      begin
+        pIdPlano := FieldByName('IdPlanoPrev').asFloat;
+        pIdPatro := FieldByName('IdPatro').asFloat;
+      end;
+      Close;
+    end;
+  finally
+    FreeAndNil(oQry);
+  end;
+end;
+
+
+function TCtrlLancamento.EstornaLancaContab(iUsuario,iPlnCodigo, iModuloOrigem,iEmpresa : Double; bUsaPlanoPatro : Boolean; sDataEstorno : String ) : Boolean;
+var sHistorico,sCCustoDeb,sCCustoCre,sContaDeb,sContaCre,sMens, sEfetivado : String;
+    iPlnCodigoNovo,liSubContaCre, liSubContaDeb :Double;
+    iNumLan : LongInt;
+    sTipoLanc : Char;
+    CdsEstorna : TClientDataSet;
+
+  //pendência 27793 - 24/04/2008 - método para buscar a conta atual caso a conta tenha sido desmembrada no plano contábil atual
+  function getPlacontaDePara(const iPlano: integer; const sPlaconta: string): string;
+  var sSql : String;
+  begin
+    result := sPlaconta;
+    sSql := 'SELECT PD.CONTA2 AS PLACONTA'+#13#10+
+            'FROM PLANODEPARA PD, PLANOCONTA P '+#13#10+
+            'WHERE PD.CONTA1 = '+ quotedStr(sPlaconta)+#13#10+
+            '  AND PD.PLANO1 = '+ intToStr(iPlano)+#13#10+
+            '  AND PD.CONTA1 <> PD.CONTA2'+#13#10+
+            '  AND PD.CONTA1 = P.PLACONTA'+#13#10+
+            '  AND PD.PLANO1 = P.PLANO'+#13#10+
+            '  AND P.PLATIPO = ''S''';
+    _cds.data := getDataPacket( sSql );
+
+    if not _cds.isEmpty then
+      result := _cds.fieldByName('PLACONTA').asString;
+
+  end;
+
+  procedure GravaEstorno( bGravacaoMemoCalc : boolean );
+  var
+    sTableName : string;
+    rIdPlanoPrev : Double;
+    rIdPatro     : Double;
+  begin
+    if not bGravacaoMemoCalc then
+      sTableName := 'LANCAMENTO'
+    else
+      sTableName := 'MEMOCALCSEGREGA';
+
+    DbGravaLanc.TableName := sTableName;
+
+    CdsEstorna.Data := GetDataPacket('SELECT * FROM ' + sTableName + ' WHERE (PLNCODIGO = '+FloatToStr(iPlnCodigo)+') ORDER BY LACNUMLAN');
+
+    CdsEstorna.First;//pendência 27793 - 24/04/2008
+    while not CdsEstorna.eof do
+    begin
+
+      //pendência 27793 - 24/04/2008 - se a placonta corrente foi alterada então utiliza a nova conta para lançar o estorno.
+      CdsEstorna.Edit;
+      CdsEstorna.FieldByName('PLACONTA').AsString := getPlacontaDePara(CdsEstorna.FieldByName('PLANO').AsInteger,
+                                                                       CdsEstorna.FieldByName('PLACONTA').AsString);
+      CdsEstorna.Post;
+
+      if CdsEstorna.FieldByName('LACTIPO').AsString = '2' then
+      begin
+        iNumLan := CdsEstorna.FieldByName('LACNUMLAN').AsInteger;
+        if CdsEstorna.FieldByName('LACDEBCRE').AsString = 'D' Then
+        begin
+          sTipoLanc    := '1';
+          FlcValOfiCre := CdsEstorna.FieldByName('LACVALOFICIAL').AsFloat;
+          FlcValHisCre := CdsEstorna.FieldByName('LACVALHIST').AsFloat;
+          FlcValGerCre := CdsEstorna.FieldByName('LACVALGERENCIAL').AsFloat;
+          FlcValGe1Cre := CdsEstorna.FieldByName('LACVALGEREN1').AsFloat;
+          FlcValGe2Cre := CdsEstorna.FieldByName('LACVALGEREN2').AsFloat;
+          liSubContaDeb:= 0;
+          liSubContaCre:= CdsEstorna.FieldByName('CODSUBCONTA').AsFloat;
+          sContaDeb    := '';
+          sContaCre    := CdsEstorna.FieldByName('PLACONTA').AsString;
+          sCCustoDeb   := '';
+          sCCustoCre   := CdsEstorna.FieldByName('CODCENTROCUSTO').AsString;
+
+          FlcTipConvOfiCre := CdsEstorna.FieldByName('LACTIPCONVOFICIAL').AsString;
+          FlcTipConvGerCre := CdsEstorna.FieldByName('LACTIPCONVGER').AsString;
+          FlcTipConvGe1Cre := CdsEstorna.FieldByName('LACTIPCONVGEREN1').AsString;
+          FlcTipConvGe2Cre := CdsEstorna.FieldByName('LACTIPCONVGEREN2').AsString;
+          
+          FlcValOfiDeb := 0;
+          FlcValHisDeb := 0;
+          FlcValGerDeb := 0;
+          FlcValGe1Deb := 0;
+          FlcValGe2Deb := 0;
+          
+          FlcTipConvOfiDeb := '';
+          FlcTipConvGerDeb := '';
+          FlcTipConvGe1Deb := '';
+          FlcTipConvGe2Deb := '';
+          
+          FlcOriAplDeb     := '';
+          FlcOriAplCre     := CdsEstorna.FieldByName('LACORIGEMAPLIC').AsString;
+        end
+        else
+        begin
+          sTipoLanc    := '0';
+          FlcValOfiDeb := CdsEstorna.FieldByName('LACVALOFICIAL').AsFloat;
+          FlcValHisDeb := CdsEstorna.FieldByName('LACVALHIST').AsFloat;
+          FlcValGerDeb := CdsEstorna.FieldByName('LACVALGERENCIAL').AsFloat;
+          FlcValGe1Deb := CdsEstorna.FieldByName('LACVALGEREN1').AsFloat;
+          FlcValGe2Deb := CdsEstorna.FieldByName('LACVALGEREN2').AsFloat;
+          
+          liSubContaCre:= 0;
+          liSubContaDeb:= CdsEstorna.FieldByName('CODSUBCONTA').AsFloat;
+          sContaCre    := '';
+          sContaDeb    := CdsEstorna.FieldByName('PLACONTA').AsString;
+          sCCustoCre   := '';
+          sCCustoDeb   := CdsEstorna.FieldByName('CODCENTROCUSTO').AsString;
+          
+          FlcTipConvOfiDeb := CdsEstorna.FieldByName('LACTIPCONVOFICIAL').AsString;
+          FlcTipConvGerDeb := CdsEstorna.FieldByName('LACTIPCONVGER').AsString;
+          FlcTipConvGe1Deb := CdsEstorna.FieldByName('LACTIPCONVGEREN1').AsString;
+          FlcTipConvGe2Deb := CdsEstorna.FieldByName('LACTIPCONVGEREN2').AsString;
+          
+          FlcValOfiCre := 0;
+          FlcValHisCre := 0;
+          FlcValGerCre := 0;
+          FlcValGe1Cre := 0;
+          FlcValGe2Cre := 0;
+          
+          FlcTipConvOfiCre := '';
+          FlcTipConvGerCre := '';
+          FlcTipConvGe1Cre := '';
+          FlcTipConvGe2Cre := '';
+          
+          FlcOriAplCre     := '';
+          FlcOriAplDeb     := CdsEstorna.FieldByName('LACORIGEMAPLIC').AsString;
+        end;
+
+        CdsEstorna.Next;
+
+        //a situação de partida dobrada não havia sido prevista nesta pendência, por isso foi reaberta.
+        //pendência 27793 - 11/06/2008 - se a placonta corrente foi alterada então utiliza a nova conta para lançar o estorno.
+        CdsEstorna.Edit;
+        CdsEstorna.FieldByName('PLACONTA').AsString := getPlacontaDePara(CdsEstorna.FieldByName('PLANO').AsInteger,
+                                                                         CdsEstorna.FieldByName('PLACONTA').AsString);
+        CdsEstorna.Post;
+
+        if iNumLan = CdsEstorna.FieldByName('LACNUMLAN').AsFloat then
+        begin
+          if CdsEstorna.FieldByName('LACDEBCRE').AsString = 'D' Then
+          begin
+            FlcValOfiCre     := CdsEstorna.FieldByName('LACVALOFICIAL').AsFloat;
+            FlcValHisCre     := CdsEstorna.FieldByName('LACVALHIST').AsFloat;
+            FlcValGerCre     := CdsEstorna.FieldByName('LACVALGERENCIAL').AsFloat;
+            FlcValGe1Cre     := CdsEstorna.FieldByName('LACVALGEREN1').AsFloat;
+            FlcValGe2Cre     := CdsEstorna.FieldByName('LACVALGEREN2').AsFloat;
+            liSubContaCre    := CdsEstorna.FieldByName('CODSUBCONTA').AsFloat;
+            sContaCre        := CdsEstorna.FieldByName('PLACONTA').AsString;
+            sCCustoCre       := CdsEstorna.FieldByName('CODCENTROCUSTO').AsString;
+            FlcTipConvOfiCre := CdsEstorna.FieldByName('LACTIPCONVOFICIAL').AsString;
+            FlcTipConvGerCre := CdsEstorna.FieldByName('LACTIPCONVGER').AsString;
+            FlcTipConvGe1Cre := CdsEstorna.FieldByName('LACTIPCONVGEREN1').AsString;
+            FlcTipConvGe2Cre := CdsEstorna.FieldByName('LACTIPCONVGEREN2').AsString;
+            FlcOriAplCre     := CdsEstorna.FieldByName('LACORIGEMAPLIC').AsString;
+          end
+          else
+          begin
+            FlcValOfiDeb     := CdsEstorna.FieldByName('LACVALOFICIAL').AsFloat;
+            FlcValHisDeb     := CdsEstorna.FieldByName('LACVALHIST').AsFloat;
+            FlcValGerDeb     := CdsEstorna.FieldByName('LACVALGERENCIAL').AsFloat;
+            FlcValGe1Deb     := CdsEstorna.FieldByName('LACVALGEREN1').AsFloat;
+            FlcValGe2Deb     := CdsEstorna.FieldByName('LACVALGEREN2').AsFloat;
+            liSubContaDeb    := CdsEstorna.FieldByName('CODSUBCONTA').AsFloat;
+            sContaDeb        := CdsEstorna.FieldByName('PLACONTA').AsString;
+            sCCustoDeb       := CdsEstorna.FieldByName('CODCENTROCUSTO').AsString;
+            FlcTipConvOfiDeb := CdsEstorna.FieldByName('LACTIPCONVOFICIAL').AsString;
+            FlcTipConvGerDeb := CdsEstorna.FieldByName('LACTIPCONVGER').AsString;
+            FlcTipConvGe1Deb := CdsEstorna.FieldByName('LACTIPCONVGEREN1').AsString;
+            FlcTipConvGe2Deb := CdsEstorna.FieldByName('LACTIPCONVGEREN2').AsString;
+            FlcOriAplDeb     := CdsEstorna.FieldByName('LACORIGEMAPLIC').AsString;
+          end;
+          sTipoLanc    := '2';
+        end
+        else
+        begin
+          if not CdsEstorna.Eof then
+            CdsEstorna.Prior;
+        end;
+      end
+      else
+      begin
+        if CdsEstorna.FieldByName('LACDEBCRE').AsString = 'D' Then
+        begin
+          sTipoLanc    := '1';
+          FlcValOfiCre := CdsEstorna.FieldByName('LACVALOFICIAL').AsFloat;
+          FlcValHisCre := CdsEstorna.FieldByName('LACVALHIST').AsFloat;
+          FlcValGerCre := CdsEstorna.FieldByName('LACVALGERENCIAL').AsFloat;
+          FlcValGe1Cre := CdsEstorna.FieldByName('LACVALGEREN1').AsFloat;
+          FlcValGe2Cre := CdsEstorna.FieldByName('LACVALGEREN2').AsFloat;
+          liSubContaDeb:= 0;
+          liSubContaCre:= CdsEstorna.FieldByName('CODSUBCONTA').AsFloat;
+          sContaDeb    := '';
+          sContaCre    := CdsEstorna.FieldByName('PLACONTA').AsString;
+          sCCustoDeb   := '';
+          sCCustoCre   := CdsEstorna.FieldByName('CODCENTROCUSTO').AsString;
+          
+          FlcTipConvOfiCre := CdsEstorna.FieldByName('LACTIPCONVOFICIAL').AsString;
+          FlcTipConvGerCre := CdsEstorna.FieldByName('LACTIPCONVGER').AsString;
+          FlcTipConvGe1Cre := CdsEstorna.FieldByName('LACTIPCONVGEREN1').AsString;
+          FlcTipConvGe2Cre := CdsEstorna.FieldByName('LACTIPCONVGEREN2').AsString;
+          
+          FlcValOfiDeb := 0;
+          FlcValHisDeb := 0;
+          FlcValGerDeb := 0;
+          FlcValGe1Deb := 0;
+          FlcValGe2Deb := 0;
+          
+          FlcTipConvOfiDeb := '';
+          FlcTipConvGerDeb := '';
+          FlcTipConvGe1Deb := '';
+          FlcTipConvGe2Deb := '';
+          
+          FlcOriAplDeb     := '';
+          FlcOriAplCre     := CdsEstorna.FieldByName('LACORIGEMAPLIC').AsString;
+        end
+        else
+        begin
+          sTipoLanc    := '0';
+          FlcValOfiDeb := CdsEstorna.FieldByName('LACVALOFICIAL').AsFloat;
+          FlcValHisDeb := CdsEstorna.FieldByName('LACVALHIST').AsFloat;
+          FlcValGerDeb := CdsEstorna.FieldByName('LACVALGERENCIAL').AsFloat;
+          FlcValGe1Deb := CdsEstorna.FieldByName('LACVALGEREN1').AsFloat;
+          FlcValGe2Deb := CdsEstorna.FieldByName('LACVALGEREN2').AsFloat;
+          
+          liSubContaCre:= 0;
+          liSubContaDeb:= CdsEstorna.FieldByName('CODSUBCONTA').AsFloat;
+          sContaCre    := '';
+          sContaDeb    := CdsEstorna.FieldByName('PLACONTA').AsString;
+          sCCustoCre   := '';
+          sCCustoDeb   := CdsEstorna.FieldByName('CODCENTROCUSTO').AsString;
+          
+          FlcTipConvOfiDeb := CdsEstorna.FieldByName('LACTIPCONVOFICIAL').AsString;
+          FlcTipConvGerDeb := CdsEstorna.FieldByName('LACTIPCONVGER').AsString;
+          FlcTipConvGe1Deb := CdsEstorna.FieldByName('LACTIPCONVGEREN1').AsString;
+          FlcTipConvGe2Deb := CdsEstorna.FieldByName('LACTIPCONVGEREN2').AsString;
+          
+          FlcValOfiCre := 0;
+          FlcValHisCre := 0;
+          FlcValGerCre := 0;
+          FlcValGe1Cre := 0;
+          FlcValGe2Cre := 0;
+          
+          FlcTipConvOfiCre := '';
+          FlcTipConvGerCre := '';
+          FlcTipConvGe1Cre := '';
+          FlcTipConvGe2Cre := '';
+          
+          FlcOriAplCre     := '';
+          FlcOriAplDeb     := CdsEstorna.FieldByName('LACORIGEMAPLIC').AsString;
+        end;
+      end;
+      FlcElemento      := CdsEstorna.FieldByName('IDELEMDEMONSTRAT').AsFloat;
+      FlcPanCodigo     := _dbPlanilha.PanCodigo.AsFloat;
+      FlcPlnEstorno    := iPlnCodigo;
+      sHistorico := Trim('ESTORNO '+CdsEstorna.FieldByName('LACHIST1').AsString+' '+
+                               CdsEstorna.FieldByName('LACHIST2').AsString+' '+
+                               CdsEstorna.FieldByName('LACHIST3').AsString+' '+
+                               CdsEstorna.FieldByName('LACHIST4').AsString+' '+
+                               CdsEstorna.FieldByName('LACHIST5').AsString);
+
+      // Alterado por Arnaldo V. Scarin, em 28/12/2009
+      // SOL.: 128563 Kintana: 690151
+      // Valida a Data de reguralização, e se essa data for maior que 31/12/2009,
+      // deverá ser valido o IdPlanoPrev (que contem a informação do Plano Prev Contabil,
+      // para o plano "Operações Comuns", e esse deverá ser trocado para o plano
+      // específico para o PGA
+      If F_bUsaPlanoPatro2010 then
+        SelecionaPlanoPGA(rIdPlanoPrev,rIdPatro)
+      else
+      begin
+        rIdPlanoPrev := CdsEstorna.FieldByName('IDPLANOPREV').AsFloat;
+        rIdPatro     := CdsEstorna.FieldByName('IDPATRO').AsFloat;
+      end;
+
+      if not InsereLancaContab( sTipoLanc, iEmpresa, iModuloOrigem,
+                        iUsuario, CdsEstorna.FieldByName('PLANO').AsFloat,
+                        CdsEstorna.FieldByName('UNIDNEGOC').AsFloat,
+                        liSubContaDeb,liSubContaCre,
+                        rIdPlanoPrev,   // Alterado Por Arnaldo V. Scarin - SOL 128563
+                        rIdPatro,       // Alterado Por Arnaldo V. Scarin - SOL 128563
+                        iPlnCodigoNovo,0,
+                        sDataEstorno, CdsEstorna.FieldByName('LACNUMDOC').AsString,
+                        sHistorico,'', '', '','', CdsEstorna.FieldByName('TIPCODIGO').AsString,
+                        sCCustoDeb, sContaDeb, sCCustoCre, sContaCre,
+                        CdsEstorna.FieldByName('HITCODHIST').AsString,
+                        CdsEstorna.FieldByName('LACVALOR').AsFloat,False,
+                        bUsaPlanoPatro,
+                        // 05/01/03 Alex - voltar e passar parâmetro
+                        CdsEstorna.FieldByName('IDSEGREGACRITER').AsInteger,
+                        CdsEstorna.FieldByName('DATASEGREGACRITER').AsDateTime,
+                        // 29/11/04 Alex o estorno não pode passar pelo controle da segregação
+                        CdsEstorna.FieldByName('IDSEGREGACONTR').AsInteger,
+                        False, -1,
+                        //DAVID - Pendência 23894 - 06/03/2007
+                        bGravacaoMemoCalc
+                        ) Then
+      begin
+         sMens := MessageInfo;
+         Raise Exception.Create(sMens);
+      end;
+
+      iPlnCodigoNovo := FRetornoPlnCodigo;
+      CdsEstorna.Next;
+    end;
+    
+  end;
+
+begin
+   sMens := '';
+   Result := True;
+   CdsEstorna := TClientDataSet.Create(nil);
+   try
+     Try
+        _dbPlanilha.Plncodigo.AsFloat := iPlnCodigo;
+        if not _dbPlanilha.LoadFromDb then begin
+           sMens := 'Planilha não encontrada';
+           Raise Exception.Create(sMens);
+        end;
+        if iEmpresa  <> _dbPlanilha.idPessoa.AsFloat then begin
+           sMens := 'Planilha não pertence a empresa '+FloatToStr(iEmpresa);
+           Raise Exception.Create(sMens);
+        end;
+        If Not Contab.SelecionaParametrosProc(_dbPlanilha.idPessoa.AsFloat) Then Begin
+           sMens := Contab.MessageInfo;
+           Abort;
+        End;
+        Periodo.PeriodoEsp := FlcPeriodoEsp;
+        if not Periodo.RetornaPeriodoExercicioDataProc(_dbPlanilha.idPessoa.AsFloat,sDataEstorno) then begin
+           sMens := Periodo.MessageInfo;
+           Raise Exception.Create(sMens);
+        end;
+        if iModuloOrigem = 1 then begin
+           if Periodo.TestaPeriodoBloqueadoProc(_dbPlanilha.idPessoa.AsFloat,tbBloqueado,Periodo.Periodo,Periodo.Exercicio,False) then begin
+              sMens := Periodo.MessageInfo+' para estorno de lançamento';
+              Raise Exception.Create(sMens);
+           end;
+           sEfetivado := 'S';
+        end else begin
+           if Periodo.TestaPeriodoBloqueadoProc(_dbPlanilha.idPessoa.AsFloat,tbBloqOuInt,Periodo.Periodo,Periodo.Exercicio,False) then begin
+              sMens := Periodo.MessageInfo+' para estorno de lançamento';
+              Raise Exception.Create(sMens);
+           end;
+           if not Contab.TestaDataBloqueadaProc(_dbPlanilha.idPessoa.AsFloat,iModuloOrigem,sDataEstorno) then begin
+              sMens := Contab.MessageInfo;
+              Raise Exception.Create(sMens);
+           end;
+           sEfetivado := 'N';
+        end;
+
+        //DAVID - Pendência 23894 - 06/03/2007
+
+        //Zera o número da nova planilha 
+        iPlnCodigoNovo := 0;
+
+        //Grava os lançamentos
+        GravaEstorno( False );
+
+        //Grava memória de cálculo
+        GravaEstorno( True );
+
+     Except
+       On E : Exception do
+       begin
+         MessageInfo := E.Message;
+         Result      := False;
+       end;
+     end;
+
+   finally
+     FreeCds([CdsEstorna]);
+   end;
+end;
+
+function TCtrlLancamento.ExcluiLancaContab(iUsuario,iPlnCodigo, iModuloOrigem : Double; iNumLan : LongInt; bUsaPlanoPatro, bExcluiPlanilha : Boolean ) : Boolean;
+var sMens, sEfetivado, sSegregaControle : String;
+    idEmpresa : Double;
+    cdsLancamento, _CdsLocal : TClientDataSet;
+    bUsaStoredProc: boolean;
+
+begin
+
+   //16/01/07 - Implementado a pedido do Alex (David)
+   if iNumLan = -1 then iNumLan := 0;
+
+   sMens := '';
+   Result := True;
+   cdsLancamento   := TClientDataSet.Create(nil);
+   // 12/12/03 - Alex - Emergencial Funcef
+   _CdsLocal := TClientDataSet.Create(nil);
+   // fim 12/12/03 - Alex - Emergencial Funcef
+
+   Try
+      _dbPlanilha.Plncodigo.AsFloat := iPlnCodigo;
+      if not _dbPlanilha.LoadFromDb then begin
+         sMens := 'Planilha não encontrada';
+         Raise Exception.Create(sMens);
+      end;
+
+      // Pend. 16888 - Vinícius
+      if _dbPlanilha.IdLoteExportaCTB.AsFloat > 0 then begin
+         sMens := 'A Planilha foi exportada e não poderá ser excluída';
+         Raise Exception.Create(sMens);
+      end;
+
+      If Not Contab.SelecionaParametrosProc(_dbPlanilha.idPessoa.AsFloat) Then
+      Begin
+         sMens := Contab.MessageInfo;
+         Raise Exception.Create(sMens);
+      End;
+      Periodo.PeriodoEsp := FlcPeriodoEsp;
+      if not Periodo.RetornaPeriodoExercicioDataProc(_dbPlanilha.idPessoa.AsFloat,_dbPlanilha.PlnDatDia.AsString) then begin
+         sMens := Periodo.MessageInfo;
+         Raise Exception.Create(sMens);
+      end;
+      if iModuloOrigem = 1 then begin
+         if Periodo.TestaPeriodoBloqueadoProc(_dbPlanilha.idPessoa.AsFloat,tbBloqueado,_dbPlanilha.perNumero.AsInteger,_dbPlanilha.perExercicio.AsInteger,False) then begin
+            sMens := Periodo.MessageInfo+' para exclusão de lançamento';
+            Raise Exception.Create(sMens);
+         end;
+      end else begin
+         if Periodo.TestaPeriodoBloqueadoProc(_dbPlanilha.idPessoa.AsFloat,tbBloqOuInt,_dbPlanilha.perNumero.AsInteger,_dbPlanilha.perExercicio.AsInteger,False) then begin
+            sMens := Periodo.MessageInfo+' para exclusão de lançamento';
+            Raise Exception.Create(sMens);
+         end;
+         if not Contab.TestaDataBloqueadaProc(_dbPlanilha.idPessoa.AsFloat,iModuloOrigem, _dbPlanilha.PlnDatDia.AsString) then begin
+            sMens := Contab.MessageInfo;
+            Raise Exception.Create(sMens);
+         end;
+      end;
+
+      sEfetivado := _dbPlanilha.PlnEfetivado.AsString;
+      idEmpresa  := _dbPlanilha.idPessoa.AsFloat;
+
+      //pendência 25244 - 07/01/2008
+      bUsaStoredProc := UsaStoredProc(trunc(IdEmpresa));
+
+      _CdsLocal.Data := GetDataPacket ('SELECT PACNAOAPAGAPLANIL FROM PARAMCONTAB WHERE IDPESSOA = ' +FloatToStr(idEmpresa));
+      if _CdsLocal.FieldByName('PACNAOAPAGAPLANIL').AsInteger = 1 then
+         bExcluiPlanilha := False;
+
+      if iNumLan = 0 then begin
+         if not bExcluiPlanilha then begin
+            _dbPlanilha.Plntotdeboficial.AsFloat := 0;
+            _dbPlanilha.Plntotdebhist.AsFloat    := 0;
+            _dbPlanilha.Plntotdebgeren2.AsFloat  := 0;
+            _dbPlanilha.Plntotdebgeren1.AsFloat  := 0;
+            _dbPlanilha.Plntotdebger.AsFloat     := 0;
+            _dbPlanilha.Plntotdeb.AsFloat        := 0;
+            _dbPlanilha.Plntotcreoficial.AsFloat := 0;
+            _dbPlanilha.Plntotcrehist.AsFloat    := 0;
+            _dbPlanilha.Plntotcregeren2.AsFloat  := 0;
+            _dbPlanilha.Plntotcregeren1.AsFloat  := 0;
+            _dbPlanilha.Plntotcreger.AsFloat     := 0;
+            _dbPlanilha.Plntotcre.AsFloat        := 0;
+            _dbPlanilha.PlnNumLan.AsFloat        := 0;
+            if not _dbPlanilha.UpDate then begin
+               sMens := _dbPlanilha.MessageInfo;
+               Raise Exception.Create(sMens);
+            end;
+         end;
+         cdsLancamento.Data := SelecionaLancamentos(iPlncodigo,idEmpresa,0,0,tpSoPeriodo,'','','','',teAmbos,
+                              tomAmbos,tolPlnCodigo,tsSemSoma,False);
+                              
+         if not cdsLancamento.isEmpty then begin
+
+            while not cdsLancamento.Eof do begin
+               _dbLancamento.PlnCodigo.AsFloat := iPlnCodigo;
+               _dbLancamento.LacNumLan.AsFloat := cdsLancamento.FieldByName('LACNUMLAN').AsFloat;
+               _dbLancamento.LacDebCre.AsString:= cdsLancamento.FieldByName('LACDEBCRE').AsString;
+
+               if _dbLancamento.LoadFromDb then
+               begin
+                  {24/12/2007 - pendência 25244 - o saldo contábil será atualizado automaticamente através de uma storage procedure que é chamada no trigger da tabela lancamento}
+                  // perguntar se existe A STRORAGE PROCEDURE antes de prosseguir
+                  if (not bUsaStoredProc) and (sEfetivado = 'S') then
+                  begin
+                     if not ContaContabil.BuscaMascaraConta(_dbLancamento.Plano.AsFloat) then begin
+                        sMens:=ContaContabil.MessageInfo;
+                        Raise Exception.Create(sMens);
+                     end;
+                     if not AtuSaldoContas (IdEmpresa, _dbLancamento.UnidNegoc.AsFloat,
+                                           iUsuario, _dbLancamento.idPlanoPrev.AsFloat,
+                                           _dbLancamento.idPatro.AsFloat,
+                                           _dbLancamento.Plano.AsFloat,
+                                           Periodo.Exercicio,Periodo.Periodo,
+                                           _dbLancamento.CodSubConta.AsInteger,
+                                           _dbLancamento.CodCentroCusto.AsString,
+                                           _dbLancamento.PlaConta.AsString,
+                                           cdsLancamento.FieldByName('LACDEBCRE').AsString,'A',
+                                           _dbLancamento.Lacvalor.AsFloat*-1,0,
+                                           _dbLancamento.Lacvaloficial.AsFloat*-1,
+                                           _dbLancamento.Lacvalgerencial.AsFloat*-1,
+                                           _dbLancamento.Lacvalgeren1.AsFloat*-1,
+                                           _dbLancamento.Lacvalgeren2.AsFloat*-1,
+                                           _dbLancamento.Lacvalhist.AsFloat*-1, bUsaPlanoPatro) then begin
+                        sMens := MessageInfo;
+                        Raise Exception.Create(sMens);
+                     end;
+                     if not AtuSaldoSintetica(IdEmpresa, _dbLancamento.UnidNegoc.AsFloat,
+                                           iUsuario, _dbLancamento.idPlanoPrev.AsFloat,
+                                           _dbLancamento.idPatro.AsFloat,
+                                           _dbLancamento.Plano.AsFloat,
+                                           Periodo.Exercicio,Periodo.Periodo,
+                                           _dbLancamento.CodSubConta.AsInteger,
+                                           _dbLancamento.CodCentroCusto.AsString,
+                                           _dbLancamento.PlaConta.AsString,
+                                           cdsLancamento.FieldByName('LACDEBCRE').AsString,ContaContabil.MascaraConta,
+                                           _dbLancamento.Lacvalor.AsFloat*-1,0,
+                                           _dbLancamento.Lacvaloficial.AsFloat*-1,
+                                           _dbLancamento.Lacvalgerencial.AsFloat*-1,
+                                           _dbLancamento.Lacvalgeren1.AsFloat*-1,
+                                           _dbLancamento.Lacvalgeren2.AsFloat*-1,
+                                           _dbLancamento.Lacvalhist.AsFloat*-1, bUsaPlanoPatro) then begin
+                        sMens := MessageInfo;
+                        Raise Exception.Create(sMens);
+                     end;
+                  end;
+
+                  if not _dbLancamento.Delete then begin
+                     sMens := _dbLancamento.MessageInfo;
+                     Raise Exception.Create(sMens);
+                  end;
+               end;
+               cdsLancamento.Next;
+            end;
+
+            //17/01/07 - Pendência 23894 - David Ayrolla
+            //Apaga a memória de cálculo de segregação de toda a planilha
+            ExecSQL( ' delete from MEMOCALCSEGREGA where PLNCODIGO = ' + FloatToStr( iPlnCodigo ) );
+
+            if bExcluiPlanilha then begin
+               if not _dbPlanilha.Delete then begin
+                  sMens := _dbPlanilha.MessageInfo;
+                  Raise Exception.Create(sMens);
+               end;
+            end;
+         end;
+      end else begin
+
+
+         //17/01/07 - Pendência 23894 - David Ayrolla
+         //Recupera o seqüencial de segregação do lançamento
+         sSegregaControle := '';
+         _CdsLocal.Data := GetDataPacket (' select IDSEGREGACONTR from LANCAMENTO ' +
+           ' where PLNCODIGO = ' + FloatToStr( iPlnCodigo ) + ' and LACNUMLAN = ' + FloatToStr( iNumLan ) );
+         _CdsLocal.First;
+         while not _CdsLocal.Eof do
+         begin
+           if sSegregaControle <> '' then sSegregaControle := sSegregaControle + ', ';
+           sSegregaControle := sSegregaControle + _CdsLocal.FieldByName('IDSEGREGACONTR').AsString;
+           _CdsLocal.Next;
+         end;
+
+         _dbLancamento.PlnCodigo.AsFloat := iPlnCodigo;
+         _dbLancamento.LacNumLan.AsInteger := iNumLan;
+         _dbLancamento.LacDebCre.AsString:= 'D';
+         if _dbLancamento.LoadFromDb then begin
+            _dbPlanilha.Plntotdeboficial.AsFloat := _dbPlanilha.Plntotdeboficial.AsFloat - _dbLancamento.Lacvaloficial.AsFloat;
+            _dbPlanilha.Plntotdebhist.AsFloat    := _dbPlanilha.Plntotdebhist.AsFloat    - _dbLancamento.Lacvalhist.AsFloat;
+            _dbPlanilha.Plntotdebgeren2.AsFloat  := _dbPlanilha.Plntotdebgeren2.AsFloat  - _dbLancamento.Lacvalgeren2.AsFloat;
+            _dbPlanilha.Plntotdebgeren1.AsFloat  := _dbPlanilha.Plntotdebgeren1.AsFloat  - _dbLancamento.Lacvalgeren1.AsFloat;
+            _dbPlanilha.Plntotdebger.AsFloat     := _dbPlanilha.Plntotdebger.AsFloat     - _dbLancamento.Lacvalgerencial.AsFloat;
+            _dbPlanilha.Plntotdeb.AsFloat        := _dbPlanilha.Plntotdeb.AsFloat        - _dbLancamento.Lacvalor.AsFloat;
+{24/12/2007 - pendência 25244 - o saldo contábil será atualizado automaticamente através de uma storage procedure que é chamada no trigger da tabela lancamento}
+            // perguntar se existe A STRORAGE PROCEDURE antes de prosseguir
+            if (not bUsaStoredProc) and (sEfetivado = 'S') then
+            begin
+               if not ContaContabil.BuscaMascaraConta(_dbLancamento.Plano.AsFloat) then begin
+                  sMens:=ContaContabil.MessageInfo;
+                  Raise Exception.Create(sMens);
+               end;
+               if not AtuSaldoContas(IdEmpresa, _dbLancamento.UnidNegoc.AsFloat,
+                                     iUsuario, _dbLancamento.idPlanoPrev.AsFloat,
+                                     _dbLancamento.idPatro.AsFloat,
+                                     _dbLancamento.Plano.AsFloat,
+                                     Periodo.Exercicio,Periodo.Periodo,
+                                     _dbLancamento.CodSubConta.AsInteger,
+                                     _dbLancamento.CodCentroCusto.AsString,
+                                     _dbLancamento.PlaConta.AsString,'D','A',
+                                     _dbLancamento.Lacvalor.AsFloat*-1,0,
+                                     _dbLancamento.Lacvaloficial.AsFloat*-1,
+                                     _dbLancamento.Lacvalgerencial.AsFloat*-1,
+                                     _dbLancamento.Lacvalgeren1.AsFloat*-1,
+                                     _dbLancamento.Lacvalgeren2.AsFloat*-1,
+                                     _dbLancamento.Lacvalhist.AsFloat*-1, bUsaPlanoPatro) then begin
+                  sMens := MessageInfo;
+                  Raise Exception.Create(sMens);
+               end;
+               if not AtuSaldoSintetica(IdEmpresa, _dbLancamento.UnidNegoc.AsFloat,
+                                     iUsuario, _dbLancamento.idPlanoPrev.AsFloat,
+                                     _dbLancamento.idPatro.AsFloat,
+                                     _dbLancamento.Plano.AsFloat,
+                                     Periodo.Exercicio,Periodo.Periodo,
+                                     _dbLancamento.CodSubConta.AsInteger,
+                                     _dbLancamento.CodCentroCusto.AsString,
+                                     _dbLancamento.PlaConta.AsString,'D',ContaContabil.MascaraConta,
+                                     _dbLancamento.Lacvalor.AsFloat*-1,0,
+                                     _dbLancamento.Lacvaloficial.AsFloat*-1,
+                                     _dbLancamento.Lacvalgerencial.AsFloat*-1,
+                                     _dbLancamento.Lacvalgeren1.AsFloat*-1,
+                                     _dbLancamento.Lacvalgeren2.AsFloat*-1,
+                                     _dbLancamento.Lacvalhist.AsFloat*-1, bUsaPlanoPatro) then begin
+                  sMens := MessageInfo;
+                  Raise Exception.Create(sMens);
+               end;
+            end;
+
+            if not _dbLancamento.Delete then begin
+               sMens := _dbLancamento.MessageInfo;
+               Raise Exception.Create(sMens);
+            end;
+         end;
+         _dbLancamento.PlnCodigo.AsFloat := iPlnCodigo;
+         _dbLancamento.LacNumLan.AsInteger := iNumLan;
+         _dbLancamento.LacDebCre.AsString:= 'C';
+         if _dbLancamento.LoadFromDb then begin
+            _dbPlanilha.Plntotcreoficial.AsFloat := _dbPlanilha.Plntotcreoficial.AsFloat - _dbLancamento.Lacvaloficial.AsFloat;
+            _dbPlanilha.Plntotcrehist.AsFloat    := _dbPlanilha.Plntotcrehist.AsFloat    - _dbLancamento.Lacvalhist.AsFloat;
+            _dbPlanilha.Plntotcregeren2.AsFloat  := _dbPlanilha.Plntotcregeren2.AsFloat  - _dbLancamento.Lacvalgeren2.AsFloat;
+            _dbPlanilha.Plntotcregeren1.AsFloat  := _dbPlanilha.Plntotcregeren1.AsFloat  - _dbLancamento.Lacvalgeren1.AsFloat;
+            _dbPlanilha.Plntotcreger.AsFloat     := _dbPlanilha.Plntotcreger.AsFloat     - _dbLancamento.Lacvalgerencial.AsFloat;
+            _dbPlanilha.Plntotcre.AsFloat        := _dbPlanilha.Plntotcre.AsFloat        - _dbLancamento.Lacvalor.AsFloat;
+{24/12/2007 - pendência 25244 - o saldo contábil será atualizado automaticamente através de uma storage procedure que é chamada no trigger da tabela lancamento}
+            // perguntar se existe A STRORAGE PROCEDURE antes de prosseguir
+            if (not bUsaStoredProc) and (sEfetivado = 'S') then
+            begin
+               if not ContaContabil.BuscaMascaraConta(_dbLancamento.Plano.AsFloat) then begin
+                  sMens:=ContaContabil.MessageInfo;
+                  Raise Exception.Create(sMens);
+               end;
+               if not AtuSaldoContas(IdEmpresa, _dbLancamento.UnidNegoc.AsFloat,
+                                     iUsuario, _dbLancamento.idPlanoPrev.AsFloat,
+                                     _dbLancamento.idPatro.AsFloat,
+                                     _dbLancamento.Plano.AsFloat,
+                                     Periodo.Exercicio,Periodo.Periodo,
+                                     _dbLancamento.CodSubConta.AsInteger,
+                                     _dbLancamento.CodCentroCusto.AsString,
+                                     _dbLancamento.PlaConta.AsString,'C','A',
+                                     _dbLancamento.Lacvalor.AsFloat*-1,0,
+                                     _dbLancamento.Lacvaloficial.AsFloat*-1,
+                                     _dbLancamento.Lacvalgerencial.AsFloat*-1,
+                                     _dbLancamento.Lacvalgeren1.AsFloat*-1,
+                                     _dbLancamento.Lacvalgeren2.AsFloat*-1,
+                                     _dbLancamento.Lacvalhist.AsFloat*-1, bUsaPlanoPatro) then begin
+                  sMens := MessageInfo;
+                  Raise Exception.Create(sMens);
+               end;
+               if not AtuSaldoSintetica(IdEmpresa, _dbLancamento.UnidNegoc.AsFloat,
+                                     iUsuario, _dbLancamento.idPlanoPrev.AsFloat,
+                                     _dbLancamento.idPatro.AsFloat,
+                                     _dbLancamento.Plano.AsFloat,
+                                     Periodo.Exercicio,Periodo.Periodo,
+                                     _dbLancamento.CodSubConta.AsInteger,
+                                     _dbLancamento.CodCentroCusto.AsString,
+                                     _dbLancamento.PlaConta.AsString,'C',ContaContabil.MascaraConta,
+                                     _dbLancamento.Lacvalor.AsFloat*-1,0,
+                                     _dbLancamento.Lacvaloficial.AsFloat*-1,
+                                     _dbLancamento.Lacvalgerencial.AsFloat*-1,
+                                     _dbLancamento.Lacvalgeren1.AsFloat*-1,
+                                     _dbLancamento.Lacvalgeren2.AsFloat*-1,
+                                     _dbLancamento.Lacvalhist.AsFloat*-1, bUsaPlanoPatro) then begin
+                  sMens := MessageInfo;
+                  Raise Exception.Create(sMens);
+               end;
+            end;
+
+            if not _dbLancamento.Delete then begin
+               sMens := _dbLancamento.MessageInfo;
+               Raise Exception.Create(sMens);
+            end;
+         end;
+
+         if iNumLan = _dbPlanilha.PlnNumLan.AsInteger then
+            _dbPlanilha.PlnNumLan.AsFloat := _dbPlanilha.PlnNumLan.AsFloat -1;
+         if not _dbPlanilha.UpDate then
+         begin
+            sMens := _dbPlanilha.MessageInfo;
+            Raise Exception.Create(sMens);
+         end;
+
+         if trim(sSegregaControle) <> '' then  //andré tavares - 20/03/2007 - tive que colocar este if aqui, pois está dando erro de sql quando a variável sSegregaControle é nula
+           //17/01/07 - Pendência 23894 - David Ayrolla
+           //Apaga a memória de cálculo de segregação do lançamento excluído
+           if not ExecSQL( ' delete from MEMOCALCSEGREGA ' +
+                           ' where IDSEGREGACONTR in ( ' + sSegregaControle + ' ) ' ) then
+           begin
+              sMens := MessageInfo;
+              Raise Exception.Create(sMens);
+           end;
+
+      end;
+
+      FRetornoPlnCodigo := iPlnCodigo;
+      cdsLancamento.Free;
+      // 12/12/03 - Alex - Emergencial Funcef
+      _CdsLocal.Free;
+      // fim 12/12/03 - Alex - Emergencial Funcef
+   Except
+       On E : Exception do
+       begin
+          cdsLancamento.Free;
+          // 12/12/03 - Alex - Emergencial Funcef
+          _CdsLocal.Free;
+          // fim 12/12/03 - Alex - Emergencial Funcef
+          MessageInfo := E.Message;
+          Result      := False;
+       end;
+   end;
+end;
+
+
+function TCtrlLancamento.InsereLancaContab(cTipoLanc : Char; IdEmpresa, iModuloOrigem,
+                      liUsuario, liCodPlano, liUnidNegoc, liSubContaDeb,
+                      liSubContaCre, iPlanoPrev, iPatro, liPlnCodigo: Double; iNumLan : LongInt;
+                      sDataLanc, sNumDoc, sHist1, sHist2,  sHist3,  sHist4,
+                      sHist5, sTipoOper, cCCustd, cContad, cCCustc, cContac, sCodHist : string;
+                      rValLanc : double; bJunta, bUsaPlanoPatro : Boolean;
+                      // 05/01/03 Alex 14451 - Nova estrutura SEGREGACRITER
+                      iIdSegregaCriter: integer; dDataSegregaCriter: TDateTime;
+                      // 29/09/09 Alex 17193 - segregação na origem
+                      // este campo é uma capa de lote para o mesmo lançamento que foi segregado
+                      iIdSegregaContr: integer;
+                      // 06/09/04 Alex 17193 - segregação na origem.
+                      // Nas integrações esta propriedade sermpre deverá ser passada como true
+                      const bSegregaOrigem: boolean;
+                      // 29/01/2007 23897 Alex - Melhora o BJunta para juntar os lançamentos de baixa do mesmo documento
+                      const iCodDocumento: integer;
+                      //DAVID - Pendência 23894 - 06/03/2007 - Indica se o lançamentos deve obrigatoriamente ser salvo na MEMOCALCSEGREGA independentemente das parametrizações
+                      const bForcaGravacaoMemoCalc : boolean;
+                      //Cássio - SOL Nº 124569 KINTANA Nº 363457
+                      //Flag que indica se o lançamento é faz parte de um rateio do Valor
+                      const OrdemLancaRateado : integer) : Boolean;
+
+// Alex 08/09/04 17193
+type  TTipoSegregacao    = (tsRateio, tsOrigem, tsSegregacao, tsFluxoPrimario);
+{ tsRateio        = Lançamentos no plano de operações comum em conta contábil que tenha segregação de recursos.
+                    Neste caso: Se PARAMINTEGRA.SEGREGAFINAN
+                                  rateio na origem
+                                Senão
+                                  rateio ao fim do mês
+  tsOrigem        = Lançamentos no plano "carimbado"        em conta contábil que tenha segregação de recursos.
+                    Neste caso sempre o rateio deve ser feito na origem
+  tsSegregação    = Lançamentos na própria conta contábil para segregação
+                    Não deve aceitar critérios para rateio.
+                    O lançamento deve ser acatado como veio.
+  tsFluxoPrimario = Lançamentos no plano "carimbado"        em conta contábil que não segregação de recursos.
+}
+var rAux : Double;
+    sConta, sEfetivado, sMens, sAux : String;
+    bIncluiPlanilha, bIncluiLanc : Boolean;
+
+    //17/01/07 - Pendência 23894 - David Ayrolla
+    bGravaMemoriaDeCalculo : boolean;
+
+   bUsaStoredProc: boolean;
+
+
+   // Alex 11/05/05 18689 - verificar: se a conta é do programa de investimentos com segregação
+   // e o lançamento é carimbado, utilizar o plano administrativo para segregar na origem.
+   // verificar ainda se a conta é do PRG ADM e está recebendo lançamento no PRG INV
+   procedure RetPlanoSegregar(const sConta: string);
+   var iPlanoSegregar: integer;
+   begin
+      // se o iPlanoSegregar vier 0, o programa da conta não foi parametrizado, não trocar o plano a segregar, usar o anterior
+      iPlanoSegregar := CtrlSegregacao.RetornaPlanoSegregar (trunc(liCodPlano), sConta, trunc(iPlanoPrev));
+      if iPlanoSegregar = -1 then begin
+        raise Exception.Create (CtrlSegregacao.MessageInfo);
+      end else if iPlanoSegregar > 0 then begin
+        FPlanoSegregar := iPlanoSegregar;
+      end;
+   end;
+
+   // **************************************************************************
+   // este função retorna o tipo de segregação que o lançamento irá efetuar
+   // **************************************************************************
+   function VerificaContaxSegregacao(const sContaLancada: string; var sContaSegrega: string): TTipoSegregacao;
+   begin
+      RetPlanoSegregar(sContaLancada);  // Verifica se existe inversão de programa ou qual o plano a segregar uma conta
+
+      sContaSegrega := '';
+      // verificar se a conta contábil é a conta para segregação
+      if CtrlSegregacao.ContaContabilDeSegregacao(sContaLancada) then begin
+         if iIdSegregaCriter <> -1 then
+            raise exception.Create ('A conta contábil "Segregação de Recursos" não permite critério para segregação. ')
+         else
+           Result := tsSegregacao;
+
+      end else begin
+         sContaSegrega := CtrlSegregacao.ContaContabilSegregacao (sContaLancada);
+         // este grupo não possui conta para segregação de recursos - fluxo primário
+         if sContaSegrega = '' then begin
+            // verificar se está tentando fazer o lançamento no plano O.C.
+            if (CtrlSegregacao.PlanoPrevComum = iPlanoPrev) or (CtrlSegregacao.PatroComum = iPatro) or
+               (CtrlSegregacao.PlanoPrevAdm   = iPlanoPrev) then begin
+               raise exception.Create ('A conta contábil: ' + sContaLancada + ' não possui Segregação de Recursos. ' + #13 +
+                                       'Nestas contas não é permitido o lançamento no plano de Operações Comum, na Patrocinadora Comum ou no Plano Administrativo!')
+            end else begin
+               Result := tsFluxoPrimario;
+            end;
+         end else begin
+           // conta contábil com o grupo para segreação parametrizado
+            // verificar se está tentando fazer o lançamento no plano O.C.
+            if (CtrlSegregacao.PlanoPrevComum = iPlanoPrev) or (CtrlSegregacao.PatroComum = iPatro) or
+               (CtrlSegregacao.PlanoPrevAdm   = iPlanoPrev) then
+               Result := tsRateio
+            else begin
+               // Alex 31/01/2006
+               // Verifiquei que se tivermos segregação na origem para dois documentos
+               // diferentes, e os documentos tiverem critérios distintos para segregação.
+               // O lançamento de baixa não pode passar o critério para segregação, senão,
+               // o lançamento contábil do banco não será juntado.
+               // O critério neste momento deve ser eliminado
+
+               // 07/11/2007 - Desfazendo pendência 25052
+               //iIdSegregaCriter   := -1;
+               //dDataSegregaCriter := -1;
+               Result := tsOrigem;
+            end;
+         end;
+      end;
+   end;
+
+
+    //17/01/07 - Pendência 23894 - David Ayrolla
+    //Este método faz a inserção efetiva na tabela de lançamentos ou na
+    //de memória de cálculo da segregação, de acordo com a propriedade DbGravaLanc
+    procedure GravaDadosLancamento;
+    begin
+      if bIncluiLanc then
+      begin
+
+        // 05/01/03 Alex - 14451 nova estrutura SEGREGACRITER
+        // acho que não precisa escrever no else.
+        if iIdSegregaCriter = -1 then begin
+          DbGravaLanc.Idsegregacriter.Clear;
+          DbGravaLanc.Datasegregacriter.Clear;
+        end else begin
+          DbGravaLanc.Idsegregacriter.AsInteger := iIdSegregaCriter;
+
+          //andré tavares - pendência 25049 - 12/04/2007 - coloquei esta condição para preencher a data de segregação
+          //mesmo que o módulo de origem não a preencha
+          if (trunc(dDataSegregaCriter) <= 0) then 
+            DbGravaLanc.Datasegregacriter.AsDateTime := strToDate(sDataLanc)
+          else //senão continua como estava antes
+            DbGravaLanc.Datasegregacriter.AsDateTime := dDataSegregaCriter;
+        end;
+        // Fim 05/01/03 Alex - 14451 nova estrutura SEGREGACRITER
+
+        // 29/09/04 Alex - 17193 - nova estrutura IdSegregaContr
+        //início - andré tavares - pendência 21604 - 03/10/2006
+        if _iIdSegregaContr = -1 then
+        //fim - andré tavares - pendência 21604 - 03/10/2006
+          DbGravaLanc.IdSegregaContr.Clear
+        else
+          DbGravaLanc.IdSegregaContr.AsInteger := _iIdSegregaContr;
+        // fim 29/09/04 Alex - 17193 - nova estrutura IdSegregaContr
+
+        // 29/01/2007 23897 Alex - Melhora o BJunta para juntar os lançamentos de baixa do mesmo documento
+        // este campo só esta preparado para o lançamento das Operações 5 e 15 do documento
+        if iCodDocumento = -1 then
+           DbGravaLanc.CodDocumento.Clear
+        else
+           DbGravaLanc.CodDocumento.AsFloat := iCodDocumento;
+
+
+        DbGravaLanc.Plncodigo.AsFloat := _dbPlanilha.Plncodigo.AsFloat;
+        DbGravaLanc.Lacnumlan.AsFloat := FNumLancamento;
+        DbGravaLanc.Lactipo.AsString  := cTipoLanc;
+        DbGravaLanc.Unidnegoc.AsFloat := liUnidNegoc;
+        DbGravaLanc.Idpessoa.AsFloat  := idEmpresa;
+        DbGravaLanc.Tipcodigo.AsString:= sTipoOper;
+        DbGravaLanc.Plano.AsFloat     := liCodPlano;
+        DbGravaLanc.Lacvalor.AsFloat  := RoundCM(rValLanc);
+        DbGravaLanc.Lacnumdoc.AsString:= sNumDoc;
+        DbGravaLanc.Lachist1.AsString := sHist1;
+        DbGravaLanc.Lachist2.AsString := sHist2;
+        DbGravaLanc.Lachist3.AsString := sHist3;
+        DbGravaLanc.Lachist4.AsString := sHist4;
+        DbGravaLanc.Lachist5.AsString := sHist5;
+        DbGravaLanc.Lacatoutmoeda.AsString    := 'N';
+        DbGravaLanc.Idusuarioinclusao.AsFloat := liUsuario;
+        DbGravaLanc.Idplanoprev.AsFloat       := iPlanoPrev;
+        DbGravaLanc.Idpatro.AsFloat           := iPatro;
+        DbGravaLanc.Idmodulo.AsFloat          := iModuloOrigem;
+        DbGravaLanc.Hitcodhist.AsString       := sCodHist;
+        DbGravaLanc.Idelemdemonstrat.AsFloat  := FlcElemento;
+
+        //Cássio - SOL Nº 124569 KINTANA Nº 363457 - Início
+        if OrdemLancaRateado > 0 then
+          DbGravaLanc.OrdLancaRateado.AsInteger := OrdemLancaRateado
+        else
+          DbGravaLanc.OrdLancaRateado.AsInteger := -1;
+        // FIM Ricardo A. SOL 130350/941 KTN 745297
+
+        if cContaD <> '' then begin
+           DbGravaLanc.Lacdebcre.AsString         := 'D';
+           DbGravaLanc.Placonta.AsString          := cContaD;
+           DbGravaLanc.Codcentrocusto.AsString    := cCCustD;
+           DbGravaLanc.Codsubconta.AsFloat        := liSubContaDeb;
+           DbGravaLanc.Lacvaloficial.AsFloat      := RoundCM(FlcValOfiDeb);
+           DbGravaLanc.Lacvalhist.AsFloat         := RoundCM(FlcValHisDeb);
+           DbGravaLanc.Lacvalgeren2.AsFloat       := RoundCM(FlcValGe2Deb);
+           DbGravaLanc.Lacvalgeren1.AsFloat       := RoundCM(FlcValGe1Deb);
+           DbGravaLanc.Lacvalgerencial.AsFloat    := RoundCM(FlcValGerDeb);
+           DbGravaLanc.Lactipconvoficial.AsString := FlcTipConvOfiDeb;
+           DbGravaLanc.Lactipconvger.AsString     := FlcTipConvGerDeb;
+           DbGravaLanc.Lactipconvgeren1.AsString  := FlcTipConvGe1Deb;
+           DbGravaLanc.Lactipconvgeren2.AsString  := FlcTipConvGe2Deb;
+           DbGravaLanc.Lacorigemaplic.AsString    := FlcOriAplDeb;
+           if cCCustD <> '' then
+              DbGravaLanc.Idempresa.AsFloat    := idEmpresa;
+           if not DbGravaLanc.Insert then begin
+              sMens := DbGravaLanc.MessageInfo;
+              Raise Exception.Create(sMens);
+           end;
+        end;
+        if cContaC <> '' then begin
+           DbGravaLanc.Lacdebcre.AsString         := 'C';
+           DbGravaLanc.Placonta.AsString          := cContaC;
+           DbGravaLanc.Codcentrocusto.AsString    := cCCustC;
+           DbGravaLanc.Codsubconta.AsFloat        := liSubContaCre;
+           DbGravaLanc.Lacvaloficial.AsFloat      := RoundCM(FlcValOfiCre);
+           DbGravaLanc.Lacvalhist.AsFloat         := RoundCM(FlcValHisCre);
+           DbGravaLanc.Lacvalgeren2.AsFloat       := RoundCM(FlcValGe2Cre);
+           DbGravaLanc.Lacvalgeren1.AsFloat       := RoundCM(FlcValGe1Cre);
+           DbGravaLanc.Lacvalgerencial.AsFloat    := RoundCM(FlcValGerCre);
+           DbGravaLanc.Lactipconvoficial.AsString := FlcTipConvOfiCre;
+           DbGravaLanc.Lactipconvger.AsString     := FlcTipConvGerCre;
+           DbGravaLanc.Lactipconvgeren1.AsString  := FlcTipConvGe1Cre;
+           DbGravaLanc.Lactipconvgeren2.AsString  := FlcTipConvGe2Cre;
+           DbGravaLanc.Lacorigemaplic.AsString    := FlcOriAplCre;
+           if cCCustC <> '' then
+              DbGravaLanc.Idempresa.AsFloat    := idEmpresa;
+
+           if not DbGravaLanc.Insert then begin
+              sMens := DbGravaLanc.MessageInfo;
+              Raise Exception.Create(sMens);
+           end;
+        end;
+      end
+      else
+      begin
+        if cContaD <> '' then begin
+           DbGravaLanc.Plncodigo.AsFloat := _dbPlanilha.Plncodigo.AsFloat;
+           DbGravaLanc.Lacdebcre.AsString:= 'D';
+           DbGravaLanc.Lacnumlan.AsFloat := FNumLancamento;
+           DbGravaLanc.LoadFromDb;
+           DbGravaLanc.Lacvalor.AsFloat        := DbGravaLanc.Lacvalor.AsFloat        + RoundCM(rValLanc);
+           DbGravaLanc.Lacvaloficial.AsFloat   := DbGravaLanc.Lacvaloficial.AsFloat   + RoundCM(FlcValOfiDeb);
+           DbGravaLanc.Lacvalhist.AsFloat      := DbGravaLanc.Lacvalhist.AsFloat      + RoundCM(FlcValHisDeb);
+           DbGravaLanc.Lacvalgeren2.AsFloat    := DbGravaLanc.Lacvalgeren2.AsFloat    + RoundCM(FlcValGe2Deb);
+           DbGravaLanc.Lacvalgeren1.AsFloat    := DbGravaLanc.Lacvalgeren1.AsFloat    + RoundCM(FlcValGe1Deb);
+           DbGravaLanc.Lacvalgerencial.AsFloat := DbGravaLanc.Lacvalgerencial.AsFloat + RoundCM(FlcValGerDeb);
+           if not DbGravaLanc.UpDate then begin
+              sMens := DbGravaLanc.MessageInfo;
+              Raise Exception.Create(sMens);
+           end;
+        end;
+        if cContaC <> '' then begin
+           DbGravaLanc.Plncodigo.AsFloat := _dbPlanilha.Plncodigo.AsFloat;
+           DbGravaLanc.Lacdebcre.AsString:= 'C';
+           DbGravaLanc.Lacnumlan.AsFloat := FNumLancamento;
+           DbGravaLanc.LoadFromDb;
+           DbGravaLanc.Lacvalor.AsFloat        := DbGravaLanc.Lacvalor.AsFloat       + RoundCM(rValLanc);
+           DbGravaLanc.Lacvaloficial.AsFloat   := DbGravaLanc.Lacvaloficial.AsFloat  + RoundCM(FlcValOfiCre);
+           DbGravaLanc.Lacvalhist.AsFloat      := DbGravaLanc.Lacvalhist.AsFloat     + RoundCM(FlcValHisCre);
+           DbGravaLanc.Lacvalgeren2.AsFloat    := DbGravaLanc.Lacvalgeren2.AsFloat   + RoundCM(FlcValGe2Cre);
+           DbGravaLanc.Lacvalgeren1.AsFloat    := DbGravaLanc.Lacvalgeren1.AsFloat   + RoundCM(FlcValGe1Cre);
+           DbGravaLanc.Lacvalgerencial.AsFloat := DbGravaLanc.Lacvalgerencial.AsFloat+ RoundCM(FlcValGerCre);
+           if not DbGravaLanc.UpDate then begin
+              sMens := DbGravaLanc.MessageInfo;
+              Raise Exception.Create(sMens);
+           end;
+        end;
+      end;
+
+    end;
+
+
+
+   // **************************************************************************
+   // este procedimento insere o lançamento contábil efetivamente
+   // **************************************************************************
+   procedure InsereLancamento; // Alex 11/04/2007 25052( bLancSegregacao : boolean );
+   begin
+      // verificar se o identificador de controle que une os lançamentos de segregação é -1,
+      // se for chamar o seequence para atribuí-lo
+
+
+      if iIdSegregaContr = -1 then iIdSegregaContr := CtrlSegregacao.GetSegregaCtrl;
+
+
+      //Define a tabela de lançamentos como a tabela destino de gravação dos lançamentos
+      DbGravaLanc.TableName := 'LANCAMENTO';
+
+      if _iIdSegregaContr = -1 then
+      begin
+        _iIdSegregaContr := CtrlSegregacao.GetSegregaCtrl;
+        bGravaMemoriaDeCalculo :=
+            //Se o plano é comum e o flag de memória de cálculo de segregação está ligado...
+            ( ( ( iPlanoPrev = CtrlSegregacao.PlanoPrevComum ) and ( CtrlSegregacao.SegregaOrComum ) ) and CtrlSegregacao.FlgSegOrComFin )
+            //Se o plano é administrativo e o flag de memória de cálculo de segregação está ligado...
+         or ( ( ( iPlanoPrev = CtrlSegregacao.PlanoPrevAdm ) and ( CtrlSegregacao.SegregaOrAdm ) ) and CtrlSegregacao.FlgSegOrAdmFin ) ;
+      end
+      else
+      begin
+        if bGravaMemoriaDeCalculo then
+          DbGravaLanc.TableName := 'MEMOCALCSEGREGA';
+      end;
+
+
+      //Se o flag estiver ligado, ignora as configurações e salva obrigatoriamente na MEMOCALCSEGREGA
+      if bForcaGravacaoMemoCalc then
+        DbGravaLanc.TableName := 'MEMOCALCSEGREGA';
+
+
+      //fim - andré tavares - pendência 21604 - 03/10/2006
+
+      if not InsereLancaContab(cTipoLanc, IdEmpresa, iModuloOrigem,
+                 liUsuario, liCodPlano, liUnidNegoc, liSubContaDeb,
+                 liSubContaCre, iPlanoPrev, iPatro, liPlnCodigo,
+                 {iNumLan, Alex 16.02.2005 - Na tentativa de alteração de lançamentos que devem ser
+                  segregados na origem está dando erro de constraint pois o sistema está tentando
+                  gerar mais de um lançamento contábil com o mesmo número. Solução zerar o iNumLan }
+                 0,
+                 sDataLanc, sNumDoc, sHist1, sHist2,  sHist3,  sHist4,
+                 sHist5, sTipoOper, cCCustd, cContad, cCCustc, cContac, sCodHist,
+                 rValLanc, bJunta, bUsaPlanoPatro,
+                 // Alex 11/04/2007 25052 - Retirado o critério de segregação para
+                 // os lançamentos já segregados. Motivo: estava dando erro no bjunta
+                 // quando tinhamos um lote por exemplo com critério, segregação na origem
+                 // por rateio ou por carimbo - gerava problema na regra prova zero.
+                 // Outro ponto é que esta infomação é irrelevante.
+                 iIdSegregaCriter, dDataSegregaCriter,
+                 // 07/11/2007 desfazendo pendência 25052 -1, -1, O cliente está reclamando de perder o critério
+                 // para segregação de lançamentos segregados na origem, isto dificulta
+                 // a conciliação contábil. Pendência 25052 desfeita
+
+                 // este parâmetro que o lançamento não cairá neste método novamente
+                 //início - andré tavares - pendência 21604 - 03/10/2006
+                 //iIdSegregaContr, false) then
+                 _iIdSegregaContr, false,
+                 //fim - andré tavares - pendência 21604 - 03/10/2006
+                 // Alex 31/01/2007 - o bjunta passa a levar em conta o CodDocumento
+                 // para contabilização da conta de passagem na baixa do documento
+                 iCodDocumento) then
+         raise exception.Create (MessageInfo)
+      else
+         // neste procedimento vários lançamentos de segregação serão feitos,
+         // gravar o liPlnCodigo para utilizar a mesma planilha para os próximos
+         // lançamentos
+         liPlnCodigo := FRetornoPlnCodigo;
+   end;
+
+
+   //16/01/07 - Pendência 23894 - David Ayrolla
+   //Indica se o plano passado como parâmetro deve ser segregado na origem
+   function SegregaOrigem( _PlanoPrev : Double ) : boolean;
+   begin
+     // Testa o plano comum
+     Result := ( ( _PlanoPrev = CtrlSegregacao.PlanoPrevComum ) and ( CtrlSegregacao.SegregaOrComum ) );
+
+     //Testa o plano administrativo
+     if ( not Result ) and ( CtrlSegregacao.PlanoPrevAdm > 0 ) then
+       Result := ( ( _PlanoPrev = CtrlSegregacao.PlanoPrevAdm ) and ( CtrlSegregacao.SegregaOrAdm ) );
+   end;
+
+
+   // Alex 06/09/04 17193
+   // este procedimento intercepta os lançamentos contábeis para segregá-los na origem
+   function SegregaLancamento: boolean;
+   // se retornar true a segregação foi feita por este procedimento, é para abortar
+   // o InsereLancaContab logo após a chamada dese método
+   // senão o lançamento não foi interceptado devendo continuar o método InsereLancaContab
+   var
+       TipoSegregacaoD, TipoSegregacaoC: TTipoSegregacao;
+       sContaSegregaD, sContaSegregaC, sContaAux: string;
+       sCentroCustoAux: string;
+       iPlanPrevAux, iPatroAux: Double;
+   begin
+      Result := false;
+      sContaSegregaD := '';
+      sContaSegregaC := '';
+
+      //Define a tabela de lançamentos como a tabela destino de gravação dos lançamentos
+      DbGravaLanc.TableName := 'LANCAMENTO';
+
+      //Se o flag estiver ligado, ignora as configurações e salva obrigatoriamente na MEMOCALCSEGREGA
+      if bForcaGravacaoMemoCalc then
+        DbGravaLanc.TableName := 'MEMOCALCSEGREGA';
+
+      case cTipoLanc of
+         '0':
+            begin
+               TipoSegregacaoD := VerificaContaxSegregacao(cContad, sContaSegregaD);
+               case TipoSegregacaoD of
+                 tsSegregacao: exit;    // o lançamento é como o passado, nada a fazer
+                 tsFluxoPrimario: exit; // o lançamento é como o passado, nada a fazer
+
+                 tsRateio:
+                    // o lançamento é para ser segregado
+                    begin
+                       // Verificar se a fundação escolheu segregação na origem
+                       // se a segregação for no fim do mês nada a fazer
+                       if not SegregaOrigem( iPlanoPrev ) then exit;
+
+                       if iIdSegregaCriter = -1 then exit; // a segregação não foi informada...
+
+                       if not CtrlSegregacao.RateiaValor (rValLanc, iIdSegregaCriter, StrtoDate (sDataLanc)) then begin
+                         sMens := CtrlSegregacao.MessageInfo;
+                         raise Exception.Create (sMens);
+                       end else begin
+
+                         // Fazer o Lançamento na conta contábil com o plano de O.C., já foi passado na origem
+                         InsereLancamento; // Alex 11/04/2007 25052( False );
+
+                         // zerar o plano O.C. na conta de segregação de recursos
+                         cTipoLanc := '1';
+                         cContad := '';
+                         cContac := sContaSegregaD;
+                         cCCustc := cCCustd;  // levar o centro de custo para os lançamentos da segregação
+                         InsereLancamento; // Alex 11/04/2007 25052( True );
+
+                         // acertar a conta contábil para os lançamentos segregados
+                         cTipoLanc := '0';
+                         cContac    := '';
+                         cContad    := sContaSegregaD;
+
+                         // fazer a segreação de recursos na origem
+                         CtrlSegregacao.CdsRateio.First;
+                         while not CtrlSegregacao.CdsRateio.Eof do begin
+
+                           // Lançar nos plano encontrados pelo rateio
+                           iPlanoPrev := CtrlSegregacao.CdsRateio.FieldByName('IDPLANOPREV').AsInteger;
+                           iPatro     := CtrlSegregacao.CdsRateio.FieldByName('IDPATRO').AsInteger;
+                           rValLanc   := CtrlSegregacao.CdsRateio.FieldByName('VALOR').AsFloat;
+                           InsereLancamento; // Alex 11/04/2007 25052( True );
+
+                           CtrlSegregacao.CdsRateio.Next;
+                         end;
+                         Result := true;
+                       end;
+                     end;
+
+                 tsOrigem:
+                    // aqui é que deveríamos armazenar os lançamentos com carimbo
+                    // nas contas que iremos perder
+                    begin
+                       // Fazer o Lançamento na conta contábil com o plano de O.C.
+                       iPlanPrevAux := iPlanoPrev;
+                       iPatroAux    := iPatro;
+                       iPlanoPrev   := FPlanoSegregar; // este plano é obtido do método retPlanoSegregar
+                       iPatro       := CtrlSegregacao.PatroComum;
+                       InsereLancamento; // Alex 11/04/2007 25052( False );
+
+                       // zerar o plano O.C. na conta de segregação de recursos
+                       cTipoLanc := '1';
+                       cContad := '';
+                       cContac := sContaSegregaD;
+                       cCCustc := cCCustd;  // levar o centro de custo para os lançamentos da segregação
+                       InsereLancamento; // Alex 11/04/2007 25052( True );
+
+                       // Lançar no plano "carimbado" na conta de segregação de recursos
+                       cTipoLanc := '0';
+                       iPlanoPrev := iPlanPrevAux;
+                       iPatro     := iPatroAux;
+                       cContac    := '';
+                       cContad    := sContaSegregaD;
+                       InsereLancamento; // Alex 11/04/2007 25052( True );
+
+                       Result := true;
+                    end;
+               end;
+            end;
+         '1':
+            begin
+               TipoSegregacaoC := VerificaContaxSegregacao(cContac, sContaSegregaC);
+               case TipoSegregacaoC of
+                 tsSegregacao: exit;    // o lançamento é como o passado, nada a fazer
+                 tsFluxoPrimario: exit; // o lançamento é como o passado, nada a fazer
+
+                 tsRateio:
+                    // o lançamento é para ser segregado
+                    begin
+                       // Verificar se a fundação escolheu segregação na origem
+                       // se a segregação for no fim do mês nada a fazer
+                       if not SegregaOrigem( iPlanoPrev ) then exit;
+
+                       if iIdSegregaCriter = -1 then exit; // a segregação não foi informada...
+
+                       if not CtrlSegregacao.RateiaValor (rValLanc, iIdSegregaCriter, StrtoDate (sDataLanc)) then begin
+                         sMens := CtrlSegregacao.MessageInfo;
+                         raise Exception.Create (sMens);
+                       end else begin
+
+                         // Fazer o Lançamento na conta contábil com o plano de O.C., já foi passado na origem
+                         InsereLancamento; // Alex 11/04/2007 25052( False );
+
+                         // zerar o plano O.C. na conta de segregação de recursos
+                         cTipoLanc := '0';
+                         cContac := '';
+                         cContad := sContaSegregaC;
+                         cCCustd := cCCustc;  // levar o centro de custo para os lançamentos da segregação
+                         InsereLancamento; // Alex 11/04/2007 25052( True );
+
+                         // acertar a conta contábil para os lançamentos segregados
+                         cTipoLanc := '1';
+                         cContad    := '';
+                         cContac    := sContaSegregaC;
+
+                         // fazer a segreação de recursos na origem
+                         CtrlSegregacao.CdsRateio.First;
+                         while not CtrlSegregacao.CdsRateio.Eof do begin
+
+                           // Lançar nos plano encontrados pelo rateio
+                           iPlanoPrev := CtrlSegregacao.CdsRateio.FieldByName('IDPLANOPREV').AsInteger;
+                           iPatro     := CtrlSegregacao.CdsRateio.FieldByName('IDPATRO').AsInteger;
+                           rValLanc   := CtrlSegregacao.CdsRateio.FieldByName('VALOR').AsFloat;
+                           InsereLancamento; // Alex 11/04/2007 25052( True );
+
+                           CtrlSegregacao.CdsRateio.Next;
+                         end;
+                         Result := true;
+                       end;
+                     end;
+
+                 tsOrigem:
+                    // aqui é que deveríamos armazenar os lançamentos com carimbo
+                    // nas contas que iremos perder
+                    begin
+                       // Fazer o Lançamento na conta contábil com o plano de O.C.
+                       iPlanPrevAux := iPlanoPrev;
+                       iPatroAux    := iPatro;
+                       iPlanoPrev   := FPlanoSegregar; // este plano é obtido do método retPlanoSegregar
+                       iPatro       := CtrlSegregacao.PatroComum;
+                       InsereLancamento; // Alex 11/04/2007 25052( False );
+
+                       // zerar o plano O.C. na conta de segregação de recursos
+                       cTipoLanc := '0';
+                       cContac := '';
+                       cContad := sContaSegregaC;
+                       cCCustd := cCCustc;  // levar o centro de custo para os lançamentos da segregação
+                       InsereLancamento; // Alex 11/04/2007 25052( True );
+
+                       // Lançar no plano "carimbado" na conta de segregação de recursos
+                       cTipoLanc := '1';
+                       iPlanoPrev := iPlanPrevAux;
+                       iPatro     := iPatroAux;
+                       cContad    := '';
+                       cContac    := sContaSegregaC;
+                       InsereLancamento; // Alex 11/04/2007 25052( True );
+
+                       Result := true;
+                    end;
+               end;
+            end;
+         '2':
+            begin
+               TipoSegregacaoD := VerificaContaxSegregacao(cContad, sContaSegregaD);
+               TipoSegregacaoC := VerificaContaxSegregacao(cContac, sContaSegregaC);
+
+               if (TipoSegregacaoD = tsSegregacao) and (TipoSegregacaoC = tsSegregacao) then
+                  // este é um lançamento normal de segregação, nada a fazer
+                  exit;
+
+               //***************************************************************
+               // lançamento com critério para segregação
+               //***************************************************************
+               if (TipoSegregacaoD = tsRateio) and (TipoSegregacaoC = tsRateio) then begin
+
+                 // Verificar se a fundação escolheu segregação na origem
+                 // se a segregação for no fim do mês nada a fazer
+                 if not SegregaOrigem( iPlanoPrev ) then exit;
+
+                 if iIdSegregaCriter = -1 then exit; // a segregação não foi informada...
+
+                 if not CtrlSegregacao.RateiaValor (rValLanc, iIdSegregaCriter, StrtoDate (sDataLanc)) then begin
+                   sMens := CtrlSegregacao.MessageInfo;
+                   raise Exception.Create (sMens);
+                 end else begin
+
+                   // Fazer o Lançamento na conta contábil com o plano de O.C., já foi passado na origem
+                   InsereLancamento; // Alex 11/04/2007 25052( False );
+
+                   // zerar o plano O.C. na conta de segregação de recursos
+                   cContad := sContaSegregaC;
+                   cContac := sContaSegregaD;
+                   sCentroCustoAux := cCCustc;
+                   cCCustc := cCCustd;  // levar o centro de custo para os lançamentos da segregação
+                   cCCustd := sCentroCustoAux;
+                   InsereLancamento; // Alex 11/04/2007 25052( True );
+
+                   // acertar a conta contábil para os lançamentos segregados
+                   cContac    := sContaSegregaC;
+                   cContad    := sContaSegregaD;
+                   cCCustd    := cCCustc;
+                   cCCustc    := sCentroCustoAux;
+
+                   // fazer a segreação de recursos na origem
+                   CtrlSegregacao.CdsRateio.First;
+                   while not CtrlSegregacao.CdsRateio.Eof do begin
+
+                     // Lançar nos plano encontrados pelo rateio
+                     iPlanoPrev := CtrlSegregacao.CdsRateio.FieldByName('IDPLANOPREV').AsInteger;
+                     iPatro     := CtrlSegregacao.CdsRateio.FieldByName('IDPATRO').AsInteger;
+                     rValLanc   := CtrlSegregacao.CdsRateio.FieldByName('VALOR').AsFloat;
+                     InsereLancamento; // Alex 11/04/2007 25052( True );
+
+                     CtrlSegregacao.CdsRateio.Next;
+                   end;
+                   Result := true;
+                 end;
+               end;
+
+
+               //***************************************************************
+               // segregação na origem
+               //***************************************************************
+               if (TipoSegregacaoD = tsOrigem) and (TipoSegregacaoC = tsOrigem) then begin
+                  // lançamento a ser segregado na origem
+
+                  // primeiro lançamento trocando o plano por OC na própria conta contábil
+                  iPlanPrevAux := iPlanoPrev;
+                  iPatroAux    := iPatro;
+                  iPlanoPrev   := FPlanoSegregar; // este plano é obtido do método retPlanoSegregar
+                  iPatro       := CtrlSegregacao.PatroComum;
+                  InsereLancamento; // Alex 11/04/2007 25052( False );
+
+                  // zerar o plano O.C.
+                  cContac   := sContaSegregaD;
+                  cContad   := sContaSegregaC;
+                  // levar o centro de custo para os lançamentos de segregação
+                  sCentroCustoAux := cCCustd;
+                  cCCustd := cCCustc;
+                  cCCustc := sCentroCustoAux;
+                  InsereLancamento; // Alex 11/04/2007 25052( True );
+
+                  // lançar no plano do "carimbo"
+                  cContac   := sContaSegregaC;
+                  cContad   := sContaSegregaD;
+                  sCentroCustoAux := cCCustd;
+                  cCCustd := cCCustc;
+                  cCCustc := sCentroCustoAux;
+                  // levar o centro de custo para os lançamentos de segregação
+
+                  // 12/01/05 Alex 18405 - corrigir o plano x patro com o carimbo original, erro na primeira versão
+                  iPatro     := iPatroAux;
+                  iPlanoPrev := iPlanPrevAux;
+
+                  InsereLancamento; // Alex 11/04/2007 25052( True );
+
+                  result := true;
+               end;
+
+               if ((TipoSegregacaoD = tsSegregacao) or (TipoSegregacaoC = tsSegregacao)) and
+                  ((TipoSegregacaoD <> tsSegregacao) or (TipoSegregacaoC <> tsSegregacao)) then
+                  // lançamentos em conta de segregação devem ter como contra-partida contas de segregação
+                  raise exception.Create ('Lançamentos em conta para segregação recursos devem ter como contra-partida, contas também para segregação de recursos.' +#13 +
+                                          'Débito:  ' + cContad + #13 +
+                                          'Crédito: ' + cContac);
+
+               //***************************************************************
+               // lançamento contra fluxo primário
+               //***************************************************************
+               // verificar lançamentos em fluxo primário, contra fluxo secundário, ex:
+               // Déb  Cta: 1.2.1 Plano: BD
+               // Créd Cta: 1.1.1 Plano: BD
+               // Os seguintes lançamentos serão gerados, ex:
+
+               // Déb  Cta: 1.2.1 Plano: BD
+               // Créd Cta: 1.1.9 Plano: BD
+
+               // Déb  Cta: 1.9.1 Plano: OC
+               // Créd Cta: 1.1.1 Plano: OC
+               if (TipoSegregacaoD = tsFluxoPrimario) then begin
+                  // se a outra perna do lançamento também for fluxo primário, nada a fazer
+                  if (TipoSegregacaoC = tsFluxoPrimario) then exit;
+
+                  // fazer o lançamento com o "carimbo"
+                  sContaAux := cContac;
+                  cContac   := sContaSegregaC;
+                  InsereLancamento; // Alex 11/04/2007 25052( False );
+
+                  // fazer o lançamento com o plano O.C.
+                  cContad    := sContaSegregaC;
+                  cContac    := sContaAux;
+                  iPlanoPrev := CtrlSegregacao.PlanoPrevComum;
+                  iPatro     := CtrlSegregacao.PatroComum;
+                  // levar o ccusto para a conta de segregação
+                  cCCustd := cCCustc;
+                  InsereLancamento; // Alex 11/04/2007 25052( True );
+
+                  result := true;
+
+               end else if (TipoSegregacaoC = tsFluxoPrimario) then begin
+
+                  // fazer o lançamento com o "carimbo"
+                  sContaAux := cContad;
+                  cContad   := sContaSegregaD;
+                  InsereLancamento; // Alex 11/04/2007 25052( False );
+
+                  // fazer o lançamento com o plano O.C.
+                  cContac    := sContaSegregaD;
+                  cContad    := sContaAux;
+                  iPlanoPrev := CtrlSegregacao.PlanoPrevComum;
+                  iPatro     := CtrlSegregacao.PatroComum;
+                  // levar o ccusto para a conta de segregação
+                  cCCustc := cCCustd;
+                  InsereLancamento; // Alex 11/04/2007 25052( True );
+
+                  result := true;
+
+               end;
+
+            end;
+      else
+         raise Exception.Create ('Tipo de Lançamento Inválido!');
+      end;
+   end;
+
+   //12/11/2007 - pendência 24892 - não permite lançamentos em contas estatísticas sem movimento
+   function excluiContaEstatiscaMov(const sPlaconta: string): boolean;
+   var splacontaAux: string;
+   begin
+     result := true;
+     if (trim(sPlaconta) <> '') then
+     begin
+       splacontaAux := sPlaconta + '                  ';
+       //_cds.data := getDataPacket(' SELECT FLGESTATCOMLANC, PLAGRUPO FROM PLANOCONTA WHERE PLACONTA = '+ quotedStr( copy(splacontaAux, 1, 18) ) +    //MIGRACAO-ORACLE
+       _cds.data := getDataPacket(' SELECT FLGESTATCOMLANC, PLAGRUPO FROM PLANOCONTA WHERE PLACONTA = '+quotedStr(trim(splacontaAux)) +                //MIGRACAO-ORACLE
+                                  ' AND PLANO = '+ floatToStr(liCodPlano) );
+       if ( _cds.FieldByName('PLAGRUPO').asString = 'E' ) and ( _cds.FieldByName('FLGESTATCOMLANC').asString <> 'S' ) then
+       begin
+         result := false;
+         messageInfo := 'A conta '+ sPlaconta + ' é do tipo "Estatística Sem Movimento" e não é permitido lançamentos neste tipo de conta.';
+         raise exception.Create(messageInfo);
+       end;
+     end;
+   end;
+
+   // 14/11/2007 - pendência 24892 - verifica se os lançamentos na planilha são do mesmo tipo (ex.: se a planilha possui 1 ou mais lançamentos
+   // com contas estatística, então todos os demais laçamentos terão que ser com contas estatísticas)
+   function verificaLancPlanilhaEstat(const iplncodigo: longint): Boolean;
+   begin
+     _cds.data := getDataPacket(' SELECT DISTINCT P.PLAGRUPO FROM LANCAMENTO L, PLANOCONTA P '+
+                                ' WHERE L.PLNCODIGO = '+ intToStr(iplncodigo) +' AND '+
+                                ' L.PLACONTA = P.PLACONTA AND '+
+                                ' P.PLANO = L.PLANO ');
+
+     //result = true se a planilha tiver somente lançamento em contas estatísticas ou nenhum lancamento
+     result := ( (_cds.fieldByName('PLAGRUPO').asString = 'E') and (_cds.recordCount = 1) );
+   end;
+
+   // 14/11/2007 - pendência 24892 - verifica se a conta é do grupo estatística
+   function eContaEstatistica(const sPlaconta: string): Boolean;
+   var splacontaAux: string;
+   begin
+     result := false;
+     if (trim(sPlaconta) <> '') then
+     begin
+       splacontaAux := sPlaconta + '                  ';
+       //_cds.data := getDataPacket(' SELECT FLGESTATCOMLANC, PLAGRUPO FROM PLANOCONTA WHERE PLACONTA = '+ quotedStr( copy(splacontaAux, 1, 18) ) +   //MIGRACAO-ORACLE
+       _cds.data := getDataPacket(' SELECT FLGESTATCOMLANC, PLAGRUPO FROM PLANOCONTA WHERE PLACONTA = '+ quotedStr(trim(splacontaAux)) +              //MIGRACAO-ORACLE
+                                  ' AND PLANO = '+ floatToStr(liCodPlano) );
+       result := ( _cds.FieldByName('PLAGRUPO').asString = 'E' );
+     end;
+   end;
+
+begin
+
+    bUsaStoredProc := UsaStoredProc(trunc(IdEmpresa));
+
+    _iIdSegregaContr := iIdSegregaContr; //andré tavares - pendência 21604 - 03/10/2006
+
+    //17/01/07 - Pendência 23894 - David Ayrolla
+    bGravaMemoriaDeCalculo := False;
+
+    //12/11/2007 - pendência 24892
+   if (not excluiContaEstatiscaMov(cContac)) or (not excluiContaEstatiscaMov(cContad)) then
+   begin
+     result := false;
+     exit;
+   end;
+
+   If Not Contab.SelecionaParametrosProc(IdEmpresa) Then
+   Begin
+      Result := False;
+      MessageInfo := Contab.MessageInfo;
+      Exit;
+   End;
+   // 06/09/04 Alex 17193 - selecionar os parâmetros do ctrlSegregacao
+   if not CtrlSegregacao.Active then begin
+      CtrlSegregacao.GetParams(trunc(IdEmpresa));
+      // Alex 18689 16/05/05 o Default do plano para segregar os lançamentos é o plano O.C.
+      // se a conta for do programa ADM esta propriedade será alterada
+      FPlanoSegregar := CtrlSegregacao.PlanoPrevComum;
+   end;
+
+   Result := True;
+   FRetornoPlnCodigo := liPlnCodigo;
+   sMens  := '';
+   //SIG65187 -Inicio
+   //if (Contab.PermiteZero = 'N') and (rValLanc = 0) and (FlcValHisDeb = 0) and (FlcValHisCre = 0)
+   //    and (FlcValOfiDeb = 0) and (FlcValOfiCre = 0) and (FlcValGerDeb = 0) and (FlcValGerCre = 0)
+   //    and (FlcValGe1Deb = 0) and (FlcValGe1Cre = 0) and (FlcValGe2Deb = 0) and (FlcValGe2Cre = 0) then begin
+   if (Contab.PermiteZero = 'N') and (RoundCM(rValLanc) = 0) and (RoundCM(FlcValHisDeb) = 0) and (RoundCM(FlcValHisCre) = 0)
+       and (RoundCM(FlcValOfiDeb) = 0) and (RoundCM(FlcValOfiCre) = 0) and (RoundCM(FlcValGerDeb) = 0) and (RoundCM(FlcValGerCre) = 0)
+       and (RoundCM(FlcValGe1Deb) = 0) and (RoundCM(FlcValGe1Cre) = 0) and (RoundCM(FlcValGe2Deb) = 0) and (RoundCM(FlcValGe2Cre) = 0) then begin
+   //SIG65187 - Fim
+
+       // Não fazer Nada. Sair do lançamento
+   end else begin
+      Try
+         if bUsaPlanoPatro then begin
+            if ((iPlanoPrev = 0) or (iPatro = 0)) then begin
+               sMens := 'Plano ou Patrocinadora não preenchido';
+               Raise Exception.Create(sMens);
+            end;
+            // Alex 16/09/04 17623 verificar relacionamentos válidos entre plano e patro
+            if not CtrlPlanPrevContabPatro.ValidaPlanoPatro( trunc(iPatro), trunc(iPlanoPrev) ) then begin
+              sMens := CtrlPlanPrevContabPatro.MessageInfo;
+              Raise Exception.Create(sMens);
+            end;
+
+            // Ricardo A. SOL 126865 KTN 667421
+            if Sistema.IdModulo <> 1 then // contabilidade
+            begin
+              _Cds.Data := GetDataPacket( 'SELECT NOME, FLGEXCLUSIVOCONTAB FROM PLANPREVCONTABIL' +
+                ' WHERE IDPLANOPREV = ' + IntToStr( Trunc( iPlanoPrev ) ) );
+              if _Cds.FieldByName( 'FLGEXCLUSIVOCONTAB' ).AsString = 'S' then
+              begin
+                sMens := 'Não é permitido lançamento neste plano contábil.' + #13+#10 +
+                  _Cds.FieldByName( 'NOME' ).AsString;
+                raise Exception.Create(sMens);
+              end;
+            end;
+            // Ricardo A. SOL 126865 KTN 667421
+         end
+         else
+         begin
+            iPlanoPrev := 0;
+            iPatro     := 0;
+         end;
+         if sTipoOper = '' then begin
+            if Contab.ObrigaTipoOper = 'S' then begin
+               sMens := 'Obrigatório indicar o Tipo de Operação';
+               Raise Exception.Create(sMens);
+            end else begin
+               sTipoOper := Contab.TipoOperLanca;
+            end;
+         end;
+         Periodo.PeriodoEsp := FlcPeriodoEsp;
+         if not Periodo.RetornaPeriodoExercicioDataProc(IdEmpresa,sDataLanc) then begin
+            sMens := Periodo.MessageInfo;
+            Raise Exception.Create(sMens);
+         end;
+         if iModuloOrigem = 1 then begin
+            if Periodo.TestaPeriodoBloqueadoProc(idEmpresa,tbBloqueado,Periodo.Periodo,Periodo.Exercicio,False) then begin
+               sMens := Periodo.MessageInfo+' para lançamento';
+               Raise Exception.Create(sMens);
+            end;
+         end else begin
+            if Periodo.TestaPeriodoBloqueadoProc(idEmpresa,tbBloqOuInt,Periodo.Periodo,Periodo.Exercicio,False) then begin
+               sMens := Periodo.MessageInfo+' para lançamento';
+               Raise Exception.Create(sMens);
+            end;
+            if not Contab.TestaDataBloqueadaProc(idEmpresa,iModuloOrigem, sDataLanc) then begin
+               sMens := Contab.MessageInfo;
+               Raise Exception.Create(sMens);
+            end;
+         end;
+
+         { Alex 09/09/04 - movido este bloco de baixo 17193 }
+         if not Contab.SelecionaPlanoDataProc(idEmpresa,sDataLanc) then begin
+            sMens := 'Plano de Contas Inválido';
+            Raise Exception.Create(sMens);
+         end;
+
+         // Alex 28/10/04 - movido este bloco de baixo 17193
+         Case cTipoLanc of
+           '2' : Begin
+                    if ((cContaD = '') or (cContaC = '')) then begin
+                       sMens := 'Para lançamento de partida dobrada obrigatório indicar a conta a débito e a crédito';
+                       Raise Exception.Create(sMens);
+                    end;
+                 End;
+           '0' : Begin
+                    if (cContaD = '') then begin
+                       sMens := 'Para lançamento a Débito obrigatório indicar a conta a débito';
+                       Raise Exception.Create(sMens);
+                    end;
+                 End;
+           '1' : Begin
+                    if (cContaC = '') then begin
+                       sMens := 'Para lançamento a Crédito obrigatório indicar a conta a crédito';
+                      Raise Exception.Create(sMens);
+                    end;
+                 end;
+         end;
+
+         // Alex 13/01/04 - 18474 - implementar a data inicial da segregação virtual na origem
+         _Cds.Data := GetDataPacket ('SELECT DTSEGREGAVIRTUAL FROM PARAMGLOBAL');
+         // Alex 06/09/04 - Incluir um método para realizar a segregação de recursos.
+         if ((_Cds.FieldByName('DTSEGREGAVIRTUAL').AsDateTime) <= ( strtodate(sDataLanc) )) and
+            (bSegregaOrigem) and (CtrlSegregacao.SegregaVirtual) then begin
+            if liCodPlano = 0 then
+              liCodPlano := Contab.PlanoData;  // o liCodPlano estava vindo zero em alguns casos. Colocado o plano do parâmetro
+            if SegregaLancamento  then exit;  // o lançamento foi interceptado pelo método
+         end;
+
+         cContaD := Trim(cContaD);
+         cContaC := Trim(cContaC);
+
+         if liSubContaDeb < 0 then liSubContaDeb := 0;
+         if liSubContaCre < 0 then liSubContaCre := 0;
+         
+         FlcValOfiCre     := RoundCM(FlcValOfiCre);
+         FlcValGerCre     := RoundCM(FlcValGerCre);
+         FlcValGe1Cre     := RoundCM(FlcValGe1Cre);
+         FlcValGe2Cre     := RoundCM(FlcValGe2Cre);
+         FlcValOfiDeb     := RoundCM(FlcValOfiDeb);
+         FlcValGerDeb     := RoundCM(FlcValGerDeb);
+         FlcValGe1Deb     := RoundCM(FlcValGe1Deb);
+         FlcValGe2Deb     := RoundCM(FlcValGe2Deb);
+         FlcValHisCre     := RoundCM(FlcValHisCre);
+         FlcValHisDeb     := RoundCM(FlcValHisDeb);
+         rValLanc         := RoundCM(rValLanc);
+         Case cTipoLanc of
+           '2' : Begin
+                    bJunta := False;
+                    if rValLanc < 0 then begin
+                       rValLanc         := rValLanc*(-1);
+                       sAux             := FlcTipConvOfiCre;
+                       FlcTipConvOfiCre := FlcTipConvOfiDeb;
+                       FlcTipConvOfiDeb := sAux;
+                       sAux             := FlcTipConvGerCre;
+                       FlcTipConvGerCre := FlcTipConvGerDeb;
+                       FlcTipConvGerDeb := sAux;
+                       sAux             := FlcTipConvGe1Cre;
+                       FlcTipConvGe1Cre := FlcTipConvGe1Deb;
+                       FlcTipConvGe1Deb := sAux;
+                       sAux             := FlcTipConvGe2Cre;
+                       FlcTipConvGe2Cre := FlcTipConvGe2Deb;
+                       FlcTipConvGe2Deb := sAux;
+                       rAux             := FlcValOfiCre*(-1);
+                       FlcValOfiCre     := FlcValOfiDeb*(-1);
+                       FlcValOfiDeb     := rAux;
+                       rAux             := FlcValGerCre*(-1);
+                       FlcValGerCre     := FlcValGerDeb*(-1);
+                       FlcValGerDeb     := rAux;
+                       rAux             := FlcValGe1Cre*(-1);
+                       FlcValGe1Cre     := FlcValGe1Deb*(-1);
+                       FlcValGe1Deb     := rAux;
+                       rAux             := FlcValGe2Cre*(-1);
+                       FlcValGe2Cre     := FlcValGe2Deb*(-1);
+                       FlcValGe2Deb     := rAux;
+                       sAux             := FlcOriAplDeb;
+                       FlcOriAplDeb     := FlcOriAplCre;
+                       FlcOriAplCre     := sAux;
+                       rAux             := liSubContaDeb;
+                       liSubContaDeb    := liSubContaCre;
+                       liSubContaCre    := rAux;
+                       sAux             := cCCustD;
+                       cCCustD          := cCCustC;
+                       cCCustC          := sAux;
+                       sAux             := cContaD;
+                       cContaD          := cContaC;
+                       cContaC          := sAux;
+                       rAux             := FlcValHisDeb*(-1);
+                       FlcValHisDeb    := FlcValHisCre*(-1);
+                       FlcValHisCre    := rAux;
+                    end;
+                 end;
+           '0' : Begin
+                    cContaC := '';
+                    if rValLanc < 0 then begin
+                       cTipoLanc        := '1';
+                       rValLanc         := rValLanc*(-1);
+                       FlcTipConvOfiCre := FlcTipConvOfiDeb;
+                       FlcTipConvGerCre := FlcTipConvGerDeb;
+                       FlcTipConvGe1Cre := FlcTipConvGe1Deb;
+                       FlcTipConvGe2Cre := FlcTipConvGe2Deb;
+                       FlcTipConvOfiDeb := '';
+                       FlcTipConvGerDeb := '';
+                       FlcTipConvGe1Deb := '';
+                       FlcTipConvGe2Deb := '';
+                       FlcValOfiCre     := FlcValOfiDeb*(-1);
+                       FlcValGerCre     := FlcValGerDeb*(-1);
+                       FlcValGe1Cre     := FlcValGe1Deb*(-1);
+                       FlcValGe2Cre     := FlcValGe2Deb*(-1);
+                       FlcValOfiDeb     := 0;
+                       FlcValGerDeb     := 0;
+                       FlcValGe1Deb     := 0;
+                       FlcValGe2Deb     := 0;
+                       FlcOriAplCre     := FlcOriAplDeb;
+                       FlcOriAplDeb     := '';
+                       liSubContaCre    := liSubContaDeb;
+                       liSubContaDeb    := 0;
+                       cCCustC          := cCCustD;
+                       cCCustD          := '';
+                       cContaC          := cContaD;
+                       cContaD          := '';
+                       FlcValHisCre    := FlcValHisDeb*(-1);
+                       FlcValHisDeb    := 0;
+                    end;
+                 end;
+           '1' : Begin
+                    cContaD := '';
+                    if rValLanc < 0 then begin
+                       cTipoLanc        := '0';
+                       rValLanc         := rValLanc*(-1);
+                       FlcTipConvOfiDeb := FlcTipConvOfiCre;
+                       FlcTipConvGerDeb := FlcTipConvGerCre;
+                       FlcTipConvGe1Deb := FlcTipConvGe1Cre;
+                       FlcTipConvGe2Deb := FlcTipConvGe2Cre;
+                       FlcTipConvOfiCre := '';
+                       FlcTipConvGerCre := '';
+                       FlcTipConvGe1Cre := '';
+                       FlcTipConvGe2Cre := '';
+                       FlcValOfiDeb     := FlcValOfiCre*(-1);
+                       FlcValGerDeb     := FlcValGerCre*(-1);
+                       FlcValGe1Deb     := FlcValGe1Cre*(-1);
+                       FlcValGe2Deb     := FlcValGe2Cre*(-1);
+                       FlcValOfiCre     := 0;
+                       FlcValGerCre     := 0;
+                       FlcValGe1Cre     := 0;
+                       FlcValGe2Cre     := 0;
+                       FlcOriAplDeb     := FlcOriAplCre;
+                       FlcOriAplCre     := '';
+                       liSubContaDeb    := liSubContaCre;
+                       liSubContaCre    := 0;
+                       cCCustD          := cCCustC;
+                       cCCustC          := '';
+                       cContaD          := cContaC;
+                       cContaC          := '';
+                       FlcValHisDeb    := FlcValHisCre*(-1);
+                       FlcValHisCre    := 0;
+                    end;
+                 end;
+         end;
+         //Faz o DE-Para do plano de contas
+         if (liCodPlano <> Contab.PlanoData) and (FlcEDePara = 'N') then begin
+            if ContaContabil.FazDeParaConta(idEmpresa,liCodPlano,Contab.PlanoData,cContaD,cCCustD) then begin
+               cContaD := ContaContabil.ContaContabilPara;
+               if ContaContabil.CentroCustoPara <> '' then
+                  cCCustD := ContaContabil.CentroCustoPara;
+            end;
+            if ContaContabil.FazDeParaConta(idEmpresa,liCodPlano,Contab.PlanoData,cContaC,cCCustC) then begin
+               cContaC := ContaContabil.ContaContabilPara;
+               if ContaContabil.CentroCustoPara <> '' then
+                  cCCustC := ContaContabil.CentroCustoPara;
+            end;
+            liCodPlano := Contab.PlanoData;
+         end;
+         if FlcTestaConta or (iModuloOrigem <> 1) then begin
+            if cContaD <> '' then begin
+               FlcCentroCusto := cCCustd;
+               FlcSubConta    := liSubContaDeb;
+               if not TestaContaLancamento(cContaD,'D', sDataLanc,liCodPlano,idEmpresa,iModuloOrigem,Periodo.Periodo,Periodo.Exercicio) then begin
+                  sMens := MessageInfo;
+                  Raise Exception.Create(sMens);
+               end;
+               cCCustd       :=FlcCentroCusto;
+               liSubContaDeb :=FlcSubConta;
+               // Faz cálculo da outra moeda para débito
+               if ContaContabil.MoedaHistorica <> 0 then begin
+                  if not RetornaCotacao(ContaContabil.MoedaHistorica,sDataLanc,True) then begin
+                     sMens:=MessageInfo+' para a conta a Débito '+cContaD;
+                     Raise Exception.Create(sMens);
+                  end else begin
+                     if FValorCotacao <> 0 then
+                        FlcValHisDeb := RoundCM(rValLanc / FValorCotacao);
+                  end;
+               end;
+            end;
+            if (cContaC <> '') then begin
+               FlcCentroCusto:=cCCustC;
+               FlcSubConta   :=liSubContaCre;
+               if not TestaContaLancamento(cContaC,'C', sDataLanc,liCodPlano,idEmpresa,iModuloOrigem,Periodo.Periodo,Periodo.Exercicio) then begin
+                  sMens := MessageInfo;
+                  Raise Exception.Create(sMens);
+               end;
+               cCCustc       :=FlcCentroCusto;
+               liSubContaCre :=FlcSubConta;
+               // Faz cálculo da outra moeda para crédito
+               if ContaContabil.MoedaHistorica <> 0 then begin
+                  if not RetornaCotacao(ContaContabil.MoedaHistorica,sDataLanc,True) then begin
+                     sMens:=MessageInfo+' para a conta a Crédito '+cContaC;
+                     Raise Exception.Create(sMens);
+                  end else begin
+                     if FValorCotacao <> 0 then
+                        FlcValHisCre := RoundCM(rValLanc / FValorCotacao);
+                  end;
+               end;
+            end;
+         end;
+         
+         sNumDoc := Copy(Trim(sNumDoc),1,15);
+         
+         if (iModuloOrigem = 1) and (FlcTestaConta) then
+            sEfetivado := 'S'
+         else
+            sEfetivado := 'N';
+         
+         if (length(trim(sHist1)) > 40) and (sHist2 = '') then begin
+            HistoContab.ArrumaHistorico(sHist1);
+            sHist1:=HistoContab.Hist1;
+            sHist2:=HistoContab.Hist2;
+            sHist3:=HistoContab.Hist3;
+            sHist4:=HistoContab.Hist4;
+            sHist5:=HistoContab.Hist5;
+         end;
+         if Contab.CaixaAlta = 'S' then begin
+            sHist1 := AnsiUpperCase(Copy(trim(sHist1),1,40));
+            sHist2 := AnsiUpperCase(Copy(trim(sHist2),1,40));
+            sHist3 := AnsiUpperCase(Copy(trim(sHist3),1,40));
+            sHist4 := AnsiUpperCase(Copy(trim(sHist4),1,40));
+            sHist5 := AnsiUpperCase(Copy(trim(sHist5),1,40));
+         end else begin
+            sHist1 := Copy(trim(sHist1),1,40);
+            sHist2 := Copy(trim(sHist2),1,40);
+            sHist3 := Copy(trim(sHist3),1,40);
+            sHist4 := Copy(trim(sHist4),1,40);
+            sHist5 := Copy(trim(sHist5),1,40);
+         end;
+         //Setar Atividade/Projeto Padrão
+         if (liUnidNegoc = 0) then begin
+            if Contab.ObrigaAtivProj = 'S' then begin
+               sMens := 'Obrigatório indicar a atividade/projeto';
+               Raise Exception.Create(sMens);
+            end else begin
+               if not RetornaAtivProjPadrao(idEmpresa) then begin
+                  sMens:=MessageInfo;
+                  Raise Exception.Create(sMens);
+               end else begin
+                  liUnidNegoc := FAtivProjPadrao;
+               end;
+            end;
+         end;
+
+         //início 14/11/2007 - pendência 24892
+         if (trunc(liPlnCodigo) <> 0) then
+         begin
+           if ( verificaLancPlanilhaEstat(trunc(liPlnCodigo)) ) then
+           begin
+             // SOL 129666 KTN 713177 Ricardo A.
+             if ( Trim( cContac ) <> '' ) and (not eContaEstatistica(cContac)) then
+             begin
+               MessageInfo := 'A planilha de código interno '+ FloatToStr(liPlnCodigo) + ' só aceita lançamentos contábeis de Contas do Grupo Estatístico '+#13+
+               'e a conta '+ cContac + ' não pertence a esse grupo.';
+               Raise Exception.Create(MessageInfo);
+             end;
+
+             if ( Trim( cContad ) <> '' ) and (not eContaEstatistica(cContad)) then
+             begin
+               MessageInfo := 'A planilha de código interno '+ FloatToStr(liPlnCodigo) + ' só aceita lançamentos contábeis de Contas do Grupo Estatístico '+#13+
+               'e a conta '+ cContad + ' não pertence a esse grupo.';
+               Raise Exception.Create(MessageInfo);
+             end;
+             // FIM SOL 129666 KTN 713177 Ricardo A.
+           end;
+         end;
+         //fim 14/11/2007 - pendência 24892
+
+         bIncluiPlanilha := True;
+         bIncluiLanc     := True;
+         //if liPlnCodigo <> 0 then begin //SOL 207368 KINTANA 2021675
+         if liPlnCodigo > 0 then begin //SOL 207368 KINTANA 2021675
+            _Cds.Data := SelecionaPlanilhas(liPlnCodigo,0,0,idEmpresa,0,0,tpSoPeriodo,'','','','',teAmbos,tolPlnCodigo);
+            if not _Cds.isEmpty then
+            begin
+              if _Cds.FieldByName('PLNDATDIA').AsDateTime <> StrToDate(sDataLanc) then begin
+                 sMens:='Planilha com código interno '+_Cds.FieldByName('PLNCODIGO').AsString+' não pertence ao dia '+sDataLanc;
+                 Raise Exception.Create(sMens);
+              end;
+              bIncluiPlanilha := False;
+              sEfetivado      := _Cds.FieldByName('PLNEFETIVADO').AsString;
+            end else begin
+               // Alex 30/11/2006 Se o _Cds está vazio a mensagem deve ser baseada na variável
+               sMens := 'Planilha com código interno ' + FloatToStr(liPlnCodigo) + ' não encontrada';
+               Raise Exception.Create(sMens);
+            end;
+         end;
+         if bIncluiPlanilha then begin
+            FProxPlanilha  := 1;
+            FNumLancamento := 1;
+            //andre tavares - pendencia 19976 - 15/12/2005
+            if not Periodo.RetornaProximaPlanilha(idEmpresa,sDataLanc, Periodo.Periodo, Periodo.Exercicio) then
+              Abort;
+            FProxPlanilha := Periodo.ProxPlanilha; //andre tavares - pendencia 19976 - 15/12/2005
+            _dbPlanilha.Plnplanil.AsFloat         := FProxPlanilha;
+            _dbPlanilha.Plnnumlan.AsFloat         := 1;
+            _dbPlanilha.Tipcodigo.AsString        := sTipoOper;
+            _dbPlanilha.Plnefetivado.AsString     := sEfetivado;
+            _dbPlanilha.Plndatdia.AsDateTime      := StrToDate(sDataLanc);
+            _dbPlanilha.Pernumero.AsInteger       := Periodo.Periodo;
+            _dbPlanilha.Perexercicio.AsInteger    := Periodo.Exercicio;
+            _dbPlanilha.Pancodigo.AsFloat         := FlcPanCodigo;
+            _dbPlanilha.Idusuarioinclusao.AsFloat := liUsuario;
+            _dbPlanilha.Idpessoa.AsFloat          := idEmpresa;
+            _dbPlanilha.Idmodulo.AsFloat          := iModuloOrigem;
+            _dbPlanilha.Plnplanestorno.AsFloat    := FlcPlnEstorno;
+
+            // Alex 31/01/2007 - 23897 - totalizar os lançamentos da planilha apenas se estamos manipulando a mesma.
+            // Se estivermos trabalhando com a MEMOCALCSEGREGA não é para fazer.
+            if DbGravaLanc.TableName = 'LANCAMENTO' then begin
+               if (cTipoLanc = '0') or (cTipoLanc = '2') then begin
+                  _dbPlanilha.Plntotdeboficial.AsFloat := RoundCM(FlcValOfiDeb);
+                  _dbPlanilha.Plntotdebhist.AsFloat    := RoundCM(FlcValHisDeb);
+                  _dbPlanilha.Plntotdebgeren2.AsFloat  := RoundCM(FlcValGe2Deb);
+                  _dbPlanilha.Plntotdebgeren1.AsFloat  := RoundCM(FlcValGe1Deb);
+                  _dbPlanilha.Plntotdebger.AsFloat     := RoundCM(FlcValGerDeb);
+                  _dbPlanilha.Plntotdeb.AsFloat        := RoundCM(rValLanc);
+               end else begin
+                  _dbPlanilha.Plntotdeboficial.AsFloat := 0;
+                  _dbPlanilha.Plntotdebhist.AsFloat    := 0;
+                  _dbPlanilha.Plntotdebgeren2.AsFloat  := 0;
+                  _dbPlanilha.Plntotdebgeren1.AsFloat  := 0;
+                  _dbPlanilha.Plntotdebger.AsFloat     := 0;
+                  _dbPlanilha.Plntotdeb.AsFloat        := 0;
+               end;
+
+               if (cTipoLanc = '1') or (cTipoLanc = '2') then begin
+                  _dbPlanilha.Plntotcreoficial.AsFloat := RoundCM(FlcValOfiCre);
+                  _dbPlanilha.Plntotcrehist.AsFloat    := RoundCM(FlcValHisCre);
+                  _dbPlanilha.Plntotcregeren2.AsFloat  := RoundCM(FlcValGe2Cre);
+                  _dbPlanilha.Plntotcregeren1.AsFloat  := RoundCM(FlcValGe1Cre);
+                  _dbPlanilha.Plntotcreger.AsFloat     := RoundCM(FlcValGerCre);
+                  _dbPlanilha.Plntotcre.AsFloat        := RoundCM(rValLanc);
+               end else begin
+                  _dbPlanilha.Plntotcreoficial.AsFloat := 0;
+                  _dbPlanilha.Plntotcrehist.AsFloat    := 0;
+                  _dbPlanilha.Plntotcregeren2.AsFloat  := 0;
+                  _dbPlanilha.Plntotcregeren1.AsFloat  := 0;
+                  _dbPlanilha.Plntotcreger.AsFloat     := 0;
+                  _dbPlanilha.Plntotcre.AsFloat        := 0;
+               end;
+            end;
+
+            if not _dbPlanilha.Insert then begin
+               sMens := _dbPlanilha.MessageInfo;
+               Raise Exception.Create(sMens);
+            end;
+         end else begin
+            //Verifica bJunta
+
+            if bJunta then begin
+               if cTipoLanc = '0' then begin
+                  if RetornaNumLanc(idEmpresa,liPlnCodigo, liCodPlano,
+                            liSubContaDeb,liUnidNegoc, iPlanoPrev, iPatro, cContaD,
+                            cCCustD,'D',sCodHist,
+                            // 05/01/04 - Alex 14451 - nova estrutura SEGREGACRITER
+                            iIdSegregaCriter, dDataSegregaCriter,
+                            // Alex 30/01/07 23897
+                            iCodDocumento) then bIncluiLanc := False;
+                            //fim - andré tavares - pendência 21604 - 03/10/2006
+               end else begin
+                  if RetornaNumLanc(idEmpresa,liPlnCodigo, liCodPlano,
+                            liSubContaCre,liUnidNegoc, iPlanoPrev, iPatro, cContaC,
+                            cCCustC,'C',sCodHist,
+                            // 05/01/04 - Alex 14451 - nova estrutura SEGREGACRITER
+                            iIdSegregaCriter, dDataSegregaCriter,
+                            // Alex 30/01/07 23897
+                            iCodDocumento) then bIncluiLanc := False;
+                            //fim - andré tavares - pendência 21604 - 03/10/2006
+               end;
+            end;
+            _dbPlanilha.Plncodigo.AsFloat := liPlnCodigo;
+            _dbPlanilha.LoadFromDb;
+
+            // Ricardo A. SOL 133740 KTN 781322
+            // pegar o valor calculado da base para corrigir planilhas com erro na base
+            _Cds.Data := GetDatapacket( 'SELECT SUM(DECODE(LACDEBCRE, ''C'', LACVALOR, 0)) AS CREDITO,' +
+                ' SUM(DECODE(LACDEBCRE, ''D'', LACVALOR, 0)) AS DEBITO' +
+                ' FROM LANCAMENTO' +
+                ' WHERE PLNCODIGO = ' + _dbPlanilha.Plncodigo.AsString );
+            _dbPlanilha.Plntotcre.AsFloat := _Cds.FieldByName( 'CREDITO' ).AsFloat;
+            _dbPlanilha.Plntotdeb.AsFloat := _Cds.FieldByName( 'DEBITO' ).AsFloat;
+            // FIM Ricardo A. SOL 133740 KTN 781322
+
+            if _dbPlanilha.Plndatdia.AsDateTime <> StrToDate(sDataLanc) then begin
+               //início andre tavares - pendencia 19976 - 15/12/2005
+               if not Periodo.RetornaProximaPlanilha(idEmpresa,sDataLanc, Periodo.Periodo, Periodo.Exercicio) then Abort;
+               FProxPlanilha := Periodo.ProxPlanilha;
+               _dbPlanilha.Plnplanil.AsFloat := FProxPlanilha;
+               //fim andre tavares - pendencia 19976 - 15/12/2005
+            end;
+            _dbPlanilha.Tipcodigo.AsString        := sTipoOper;
+            _dbPlanilha.Plnefetivado.AsString     := sEfetivado;
+            _dbPlanilha.Plndatdia.AsDateTime      := StrToDate(sDataLanc);
+            _dbPlanilha.Pernumero.AsInteger       := Periodo.Periodo;
+            _dbPlanilha.Perexercicio.AsInteger    := Periodo.Exercicio;
+            _dbPlanilha.Idpessoa.AsFloat          := idEmpresa;
+            if bIncluiLanc then begin
+               // Alex 31/01/2007 23897 - totalizar os lançamentos da planilha apenas se estamos manipulando a mesma.
+               // Se estivermos trabalhando com a MEMOCALCSEGREGA não é para fazer.
+               if DbGravaLanc.TableName = 'LANCAMENTO' then begin
+                  if iNumLan > 0 then begin
+                     FNumLancamento := iNumLan;
+                     if iNumLan > _dbPlanilha.Plnnumlan.AsInteger then
+                        _dbPlanilha.Plnnumlan.AsInteger := iNumLan;
+                  end else begin
+                     _dbPlanilha.Plnnumlan.AsInteger := _dbPlanilha.Plnnumlan.AsInteger + 1;
+                     FNumLancamento := _dbPlanilha.Plnnumlan.AsInteger;
+                  end;
+               end else begin
+                  if _dbPlanilha.NumLanSegrega.IsNull then _dbPlanilha.NumLanSegrega.AsInteger :=0;
+                  _dbPlanilha.NumLanSegrega.AsInteger := _dbPlanilha.NumLanSegrega.AsInteger + 1;
+                  FNumLancamento := _dbPlanilha.NumLanSegrega.AsInteger;
+               end;
+            end;
+            _dbPlanilha.Plncodigo.AsFloat := liPlnCodigo;
+            // Alex 31/01/2007 23897 - totalizar os lançamentos da planilha apenas se estamos manipulando a mesma.
+            // Se estivermos trabalhando com a MEMOCALCSEGREGA não é para fazer.
+            if DbGravaLanc.TableName = 'LANCAMENTO' then begin
+               if (cTipoLanc = '0') or (cTipoLanc = '2') then begin
+                  _dbPlanilha.Plntotdeboficial.AsFloat := _dbPlanilha.Plntotdeboficial.AsFloat + RoundCM(FlcValOfiDeb);
+                  _dbPlanilha.Plntotdebhist.AsFloat    := _dbPlanilha.Plntotdebhist.AsFloat    + RoundCM(FlcValHisDeb);
+                  _dbPlanilha.Plntotdebgeren2.AsFloat  := _dbPlanilha.Plntotdebgeren2.AsFloat  + RoundCM(FlcValGe2Deb);
+                  _dbPlanilha.Plntotdebgeren1.AsFloat  := _dbPlanilha.Plntotdebgeren1.AsFloat  + RoundCM(FlcValGe1Deb);
+                  _dbPlanilha.Plntotdebger.AsFloat     := _dbPlanilha.Plntotdebger.AsFloat     + RoundCM(FlcValGerDeb);
+                  _dbPlanilha.Plntotdeb.AsFloat        := _dbPlanilha.Plntotdeb.AsFloat        + RoundCM(rValLanc);
+               end;
+               if (cTipoLanc = '1') or (cTipoLanc = '2') then begin
+                  _dbPlanilha.Plntotcreoficial.AsFloat := _dbPlanilha.Plntotcreoficial.AsFloat + RoundCM(FlcValOfiCre);
+                  _dbPlanilha.Plntotcrehist.AsFloat    := _dbPlanilha.Plntotcrehist.AsFloat    + RoundCM(FlcValHisCre);
+                  _dbPlanilha.Plntotcregeren2.AsFloat  := _dbPlanilha.Plntotcregeren2.AsFloat  + RoundCM(FlcValGe2Cre);
+                  _dbPlanilha.Plntotcregeren1.AsFloat  := _dbPlanilha.Plntotcregeren1.AsFloat  + RoundCM(FlcValGe1Cre);
+                  _dbPlanilha.Plntotcreger.AsFloat     := _dbPlanilha.Plntotcreger.AsFloat     + RoundCM(FlcValGerCre);
+                  _dbPlanilha.Plntotcre.AsFloat        := _dbPlanilha.Plntotcre.AsFloat        + RoundCM(rValLanc);
+               end;
+            end;
+
+            if not _dbPlanilha.Update then begin
+               sMens := _dbPlanilha.MessageInfo;
+               Raise Exception.Create(sMens);
+            end;
+         end;
+
+         //17/01/07 - Pendência 23894 - David Ayrolla
+         //Inserção efetiva do lançamento
+         GravaDadosLancamento;
+
+         //
+         FRetornoPlnCodigo := _dbPlanilha.Plncodigo.AsFloat;
+         // 23/10/03 - by Alex - Pend 15148 - Retornar os números do PLNPLANIL NA FUNÇÃO INSERELANCACONTAB
+         FRetornoPlnPlanil := _dbPlanilha.Plnplanil.AsFloat;
+         // FIM 23/10/03 - by Alex - Pend 15148 - Retornar os números do PLNPLANIL NA FUNÇÃO INSERELANCACONTAB
+
+{24/12/2007 - pendência 25244 - o saldo contábil será atualizado automaticamente através de uma storage procedure que é chamada no trigger da tabela lancamento}
+          // perguntar se existe A STRORAGE PROCEDURE antes de prosseguir
+          if (not bUsaStoredProc) and (sEfetivado = 'S') then
+          begin
+            if not ContaContabil.BuscaMascaraConta(liCodPlano) then begin
+               sMens:=ContaContabil.MessageInfo;
+               Raise Exception.Create(sMens);
+            end;
+            if cContaD <> '' then begin
+               if not AtuSaldoContas(IdEmpresa, liUnidNegoc,
+                                     liUsuario, iPlanoPrev, iPatro, liCodPlano,
+                                     Periodo.Exercicio,Periodo.Periodo,
+                                     liSubContaDeb, cCCustD,cContaD,'D','A',
+                                     rValLanc,0, FlcValOfiDeb,FlcValGerDeb, FlcValGe1Deb,
+                                     FlcValGe2Deb, FlcValHisDeb, bUsaPlanoPatro) then begin
+                  sMens := MessageInfo;
+                  Raise Exception.Create(sMens);
+               end;
+               if not AtuSaldoSintetica(IdEmpresa, liUnidNegoc,
+                                     liUsuario, iPlanoPrev, iPatro, liCodPlano,
+                                     Periodo.Exercicio,Periodo.Periodo,
+                                     liSubContaDeb, cCCustD,cContaD,'D',
+                                     ContaContabil.MascaraConta,
+                                     rValLanc,0, FlcValOfiDeb,FlcValGerDeb, FlcValGe1Deb,
+                                     FlcValGe2Deb, FlcValHisDeb, bUsaPlanoPatro) then begin
+                  sMens := MessageInfo;
+                  Raise Exception.Create(sMens);
+               end;
+            end;
+            if cContaC <> '' then begin
+               if not AtuSaldoContas(IdEmpresa, liUnidNegoc,
+                                     liUsuario, iPlanoPrev, iPatro, liCodPlano,
+                                     Periodo.Exercicio,Periodo.Periodo,
+                                     liSubContaCre, cCCustC,cContaC,'C','A',
+                                     rValLanc,0, FlcValOfiCre,FlcValGerCre, FlcValGe1Cre,
+                                     FlcValGe2Cre, FlcValHisCre, bUsaPlanoPatro) then begin
+                  sMens := MessageInfo;
+                  Raise Exception.Create(sMens);
+               end;
+               if not AtuSaldoSintetica(IdEmpresa, liUnidNegoc,
+                                     liUsuario, iPlanoPrev, iPatro, liCodPlano,
+                                     Periodo.Exercicio,Periodo.Periodo,
+                                     liSubContaCre, cCCustC,cContaC,'C',
+                                     ContaContabil.MascaraConta,
+                                     rValLanc,0, FlcValOfiCre,FlcValGerCre, FlcValGe1Cre,
+                                     FlcValGe2Cre, FlcValHisCre, bUsaPlanoPatro) then begin
+                  sMens := MessageInfo;
+                  Raise Exception.Create(sMens);
+               end;
+            end;
+         end;
+
+      Except
+         On E : Exception do
+         begin
+            FRetornoPlnCodigo := -1;
+            // 23/10/03 - by Alex - Pend 15148 - Retornar os números do PLNPLANIL NA FUNÇÃO INSERELANCACONTAB
+            FRetornoPlnPlanil := -1;
+            // FIM 23/10/03 - by Alex - Pend 15148 - Retornar os números do PLNPLANIL NA FUNÇÃO INSERELANCACONTAB
+            MessageInfo := E.Message;
+            Result := False;
+         end;
+      End;
+   end;
+   IniciaVariavelLancamento;
+end;
+
+procedure TCtrlLancamento.SetlcElemento(const Value: Double);
+begin
+  FlcElemento := Value;
+end;
+
+procedure TCtrlLancamento.SetlcOriAplCre(const Value: String);
+begin
+  FlcOriAplCre := Value;
+end;
+
+procedure TCtrlLancamento.SetlcOriAplDeb(const Value: String);
+begin
+  FlcOriAplDeb := Value;
+end;
+
+procedure TCtrlLancamento.SetlcTestaConta(const Value: Boolean);
+begin
+  FlcTestaConta := Value;
+end;
+
+procedure TCtrlLancamento.SetlcTipConvGe1Cre(const Value: String);
+begin
+  FlcTipConvGe1Cre := Value;
+end;
+
+procedure TCtrlLancamento.SetlcTipConvGe1Deb(const Value: String);
+begin
+  FlcTipConvGe1Deb := Value;
+end;
+
+procedure TCtrlLancamento.SetlcTipConvGe2Cre(const Value: String);
+begin
+  FlcTipConvGe2Cre := Value;
+end;
+
+procedure TCtrlLancamento.SetlcTipConvGe2Deb(const Value: String);
+begin
+  FlcTipConvGe2Deb := Value;
+end;
+
+procedure TCtrlLancamento.SetlcTipConvGerCre(const Value: String);
+begin
+  FlcTipConvGerCre := Value;
+end;
+
+procedure TCtrlLancamento.SetlcTipConvGerDeb(const Value: String);
+begin
+  FlcTipConvGerDeb := Value;
+end;
+
+procedure TCtrlLancamento.SetlcTipConvOfiCre(const Value: String);
+begin
+  FlcTipConvOfiCre := Value;
+end;
+
+procedure TCtrlLancamento.SetlcTipConvOfiDeb(const Value: String);
+begin
+  FlcTipConvOfiDeb := Value;
+end;
+
+procedure TCtrlLancamento.SetlcValGe1Cre(const Value: Double);
+begin
+  FlcValGe1Cre := Value;
+end;
+
+procedure TCtrlLancamento.SetlcValGe1Deb(const Value: Double);
+begin
+  FlcValGe1Deb := Value;
+end;
+
+procedure TCtrlLancamento.SetlcValGe2Cre(const Value: Double);
+begin
+  FlcValGe2Cre := Value;
+end;
+
+procedure TCtrlLancamento.SetlcValGe2Deb(const Value: Double);
+begin
+  FlcValGe2Deb := Value;
+end;
+
+procedure TCtrlLancamento.SetlcValGerCre(const Value: Double);
+begin
+  FlcValGerCre := Value;
+end;
+
+procedure TCtrlLancamento.SetlcValGerDeb(const Value: Double);
+begin
+  FlcValGerDeb := Value;
+end;
+
+procedure TCtrlLancamento.SetlcValHisCre(const Value: Double);
+begin
+  FlcValHisCre := Value;
+end;
+
+procedure TCtrlLancamento.SetlcValHisDeb(const Value: Double);
+begin
+  FlcValHisDeb := Value;
+end;
+
+procedure TCtrlLancamento.SetlcValOfiCre(const Value: Double);
+begin
+  FlcValOfiCre := Value;
+end;
+
+procedure TCtrlLancamento.SetlcValOfiDeb(const Value: Double);
+begin
+  FlcValOfiDeb := Value;
+end;
+
+
+procedure TCtrlLancamento.IniciaVariavelLancamento;
+begin
+   FlcElemento      := 0;
+   FlcTipConvOfiDeb := '';
+   FlcTipConvGerDeb := '';
+   FlcTipConvGe1Deb := '';
+   FlcTipConvGe2Deb := '';
+   FlcOriAplDeb     := '';
+   FlcTipConvOfiCre := '';
+   FlcEDePara       := 'N';
+   FlcTipConvGerCre := '';
+   FlcTipConvGe1Cre := '';
+   FlcTipConvGe2Cre := '';
+   FlcOriAplCre     := '';
+   FlcPanCodigo     := 0;
+   FlcPlnEstorno    := 0;
+   FlcValOfiDeb     := 0;
+   FlcValGerDeb     := 0;
+   FlcValGe1Deb     := 0;
+   FlcValGe2Deb     := 0;
+   FlcValHisDeb     := 0;
+   FlcValOfiCre     := 0;
+   FlcValGerCre     := 0;
+   FlcValGe1Cre     := 0;
+   FlcValGe2Cre     := 0;
+   FlcValHisCre     := 0;
+   FlcTestaConta    := true;
+   FlcPeriodoEsp    := False;
+end;
+
+
+function TCtrlLancamento.TestaContaLancamento(sConta, sTipoDC, sDataLanc: String; liCodPlano, idEmpresa, idModulo,iPeriodo,iExercicio :Double): Boolean;
+var sMens, sMensDC : String;
+begin
+   Result := True;
+   sMens  := '';
+   try
+      if sTipoDC = 'D' then sMensDC := ' a Débito ' else sMensDC := ' a Crédito ';
+      if not ContaContabil.TestaContaContabilProc(liCodPlano,idEmpresa,iPeriodo,iExercicio, sConta,False, False) then begin
+         sMens := 'Conta '+sConta+sMensDC+ContaContabil.MessageInfo;
+         Abort;
+      end;
+      if ContaContabil.ObrigaCentroCusto = 'N' then begin
+         FlcCentroCusto := '';
+      end else begin
+         if FlcCentroCusto = '' then begin
+            sMens := 'Conta '+sConta+sMensDC+'Obriga Centro de Custo';
+            Abort;
+         end;
+         if not ContaContabil.TestaContaxCC(liCodPlano,idEmpresa,sConta,FlcCentroCusto) then begin
+            sMens := ContaContabil.MessageInfo+sMensDC;
+            Abort;
+         end;
+      end;
+
+      if ContaContabil.ObrigaSubConta = 'S' then begin
+         if FlcSubConta = 0 then begin
+            sMens := 'Conta '+sConta+sMensDC+' Obriga Subconta';
+            Abort;
+         end;
+         if not ContaContabil.TestaContaxSC(liCodPlano,idEmpresa,FlcSubConta,sConta) then begin
+            sMens := ContaContabil.MessageInfo+sMensDC;
+            Abort;
+         end;
+      end else begin
+         FlcSubConta := 0;
+      end;
+
+      if (ContaContabil.AceitaAlteraContab = 'N') and (idModulo = 1) then begin
+         sMens := 'Conta '+sConta+sMensDC+'não permite movimentação pela Contabilidade';
+         Abort;
+      end;
+      if (ContaContabil.ContaBloqueada = 'S') and (ContaContabil.DataBloqueio >= StrToDate(sDataLanc)) then begin
+         sMens := 'Conta '+sConta+sMensDC+'está bloqueada até '+DateToStr(ContaContabil.DataBloqueio);
+         Abort;
+      end;
+      if sTipoDC = 'D' then begin
+         if FlcTipConvOfiDeb = '' then FlcTipConvOfiDeb := ContaContabil.TipoConvOfi;
+         if FlcTipConvGerDeb = '' then FlcTipConvGerDeb := ContaContabil.TipoConvGeren;
+         if FlcTipConvGe1Deb = '' then FlcTipConvGe1Deb := ContaContabil.TipoConvGeren1;
+         if FlcTipConvGe2Deb = '' then FlcTipConvGe2Deb := ContaContabil.TipoConvGeren2;
+      end else begin
+         if FlcTipConvOfiCre = '' then FlcTipConvOfiCre := ContaContabil.TipoConvOfi;
+         if FlcTipConvGerCre = '' then FlcTipConvGerCre := ContaContabil.TipoConvGeren;
+         if FlcTipConvGe1Cre = '' then FlcTipConvGe1Cre := ContaContabil.TipoConvGeren1;
+         if FlcTipConvGe2Cre = '' then FlcTipConvGe2Cre := ContaContabil.TipoConvGeren2;
+      end;
+   Except
+      MessageInfo := sMens;
+      Result := False;
+   end;
+end;
+
+procedure TCtrlLancamento.SetlcCentroCusto(const Value: String);
+begin
+  FlcCentroCusto := Value;
+end;
+
+procedure TCtrlLancamento.SetlcSubConta(const Value: Double);
+begin
+  FlcSubConta := Value;
+end;
+
+procedure TCtrlLancamento.SetlcPanCodigo(const Value: Double);
+begin
+  FlcPanCodigo := Value;
+end;
+
+procedure TCtrlLancamento.SetlcPlnEstorno(const Value: Double);
+begin
+  FlcPlnEstorno := Value;
+end;
+
+function TCtrlLancamento.RetornaCotacao(iMoeda: Double;
+  sData: String; bExato : Boolean): Boolean;
+var sNome, sPeriodo : String;
+begin
+   {Funcão implementada na Aplicação Servidora}
+      Result := True;
+      {** GUSTAVO VIEGAS 23/04/2002 **}
+      _Cds.Data := GetDataPacket( 'SELECT  MOEDESC, MOEPERIODICIDADE          ' +
+                                  'FROM MOEDA                                 ' +
+                                  'WHERE (MOECODIGO = '+FloatToStr(iMoeda)+') ');
+
+      if _Cds.isEmpty then begin
+         MessageInfo := 'Moeda '+FloatToStr(iMoeda)+' não existe no cadastro';
+         Result := False;
+      end else begin
+         sNome    := _Cds.FieldByName('MOEDESC').AsString;
+         sPeriodo := _Cds.FieldByName('MOEPERIODICIDADE').AsString;
+
+         {** GUSTAVO VIEGAS 23/04/2002 **}
+         With _Sql Do
+           Try
+              SQL.Clear;
+              SQL.Add('SELECT COTDATA, COTVALOR                   ');
+              SQL.Add('FROM COTACAOMOEDA                          ');
+              SQL.Add('WHERE (MOECODIGO = '+FloatToStr(iMoeda)+') ');
+              if not bExato then begin
+                 SQL.Add('  AND ((COTDATA  <= TO_DATE('''+sData+''',''DD/MM/YYYY''))');
+                 if (sPeriodo = 'D') then
+                    SQL.Add(')')
+                 else
+                    SQL.Add('  OR (TO_DATE('''+sData+''',''DD/MM/YYYY'') <= (DECODE(COTDATAFIM,NULL,COTDATA,COTDATAFIM)))) ');
+              end else begin
+                 if (sPeriodo = 'D') then
+                    SQL.Add('  AND (COTDATA  = TO_DATE('''+sData+''',''DD/MM/YYYY''))')
+                 else
+                    SQL.Add('  AND (TO_DATE('''+sData+''',''DD/MM/YYYY'') BETWEEN COTDATA AND (DECODE(COTDATAFIM,NULL,COTDATA,COTDATAFIM)))');
+              end;
+              SQL.Add('ORDER BY COTDATA DESC                      ');
+
+              _Cds.Data := Data;
+           finally
+             
+           end;
+
+         if _Cds.isEmpty then begin
+            MessageInfo := 'Moeda '+sNome+' não tem cotação para o dia '+sData;
+            Result := False;
+         end else begin
+            FValorCotacao := _Cds.FieldByName('COTVALOR').AsFloat;
+         end;
+      end;
+end;
+
+procedure TCtrlLancamento.SetValorCotacao(const Value: Double);
+begin
+  FValorCotacao := Value;
+end;
+
+function TCtrlLancamento.RetornaAtivProjPadrao(idEmpresa: Double): Boolean;
+begin
+      Result := True;
+      {** GUSTAVO VIEGAS 23/04/2002 **}
+      _Cds.Data := GetDataPacket('SELECT UNIDNEGOC                             ' +
+                                 'FROM PARAMGLOBAL                             ' +
+                                 'WHERE (IDPESSOA = '+FloatToStr(idEmpresa)+') ' +
+                                 '  AND (UNIDNEGOC IS NOT NULL)                ');
+
+      if _Cds.isEmpty then begin
+         MessageInfo := 'Atividade/Projeto Padrão não cadastrada no Parâmetro Global';
+         Result := False;
+      end else begin
+         FAtivProjPadrao := _Cds.FieldByName('UNIDNEGOC').AsFloat;
+      end;
+end;
+
+procedure TCtrlLancamento.SetAtivProjPadrao(const Value: Double);
+begin
+  FAtivProjPadrao := Value;
+end;
+
+procedure TCtrlLancamento.SetProxPlanilha(const Value: Double);
+begin
+  FProxPlanilha := Value;
+end;
+
+//início - andre tavares - pendência 21604 - 30/10/2006
+function TCtrlLancamento.RetornaNumLanc(idEmpresa,liPlnCodigo,
+  liCodPlano, liSubConta, liUnidNegoc, iPlanoPrev, iPatro: Double; sConta,
+  sCentroCusto, sDebCre,sHistPadrao: String;
+  iIdSegregaCriter: integer; dDataSegregaCriter: tDateTime;
+  // 29/01/2007 23897 Alex - Melhora o BJunta para juntar os lançamentos de baixa do mesmo documento
+  // este campo só esta preparado para o lançamento das Operações 5 e 15 do documento
+  const iCodDocumento: integer) : Boolean;
+//fim - andre tavares - pendência 21604 - 30/10/2006
+begin
+   Result := True;
+   FNumLancamento := 0;
+   {** GUSTAVO VIEGAS 23/04/2002 **}
+   With _sql Do
+      Try
+         SQL.Clear;
+         SQL.Add('SELECT LACNUMLAN, IDSEGREGACONTR                ');
+
+
+         SQL.Add('FROM ' + DbGravaLanc.TableName );  //LANCAMENTO
+
+
+         SQL.Add('WHERE (PLNCODIGO = '+FloatToStr(liPlnCodigo)+') ');
+         SQL.Add('  AND (LACDEBCRE = '''+sDebCre+''')             ');
+         //SQL.Add('  AND (PLACONTA = '''+Copy(sConta+'                  ',1,18)+''')    ');         //MIGRACAO-ORACLE
+         SQL.Add('  AND (PLACONTA = '+Quotedstr(trim(sConta))+')    ');                              //MIGRACAO-ORACLE
+         SQL.Add('  AND (PLANO = '+FloatToStr(liCodPlano)+')      ');
+         if sCentroCusto <> '' then begin
+            //SQL.Add('  AND (CODCENTROCUSTO = '''+Copy(sCentroCusto+'          ',1,10)+''')    ');   //MIGRACAO-ORACLE
+            SQL.Add('  AND (CODCENTROCUSTO = '+Quotedstr(trim(sCentroCusto))+')    ');                //MIGRACAO-ORACLE
+            SQL.Add('  AND (IDEMPRESA = '+FloatToStr(idEmpresa)+')      ');
+         end;
+         if liUnidNegoc <> 0 then begin
+            SQL.Add('  AND (UNIDNEGOC = '+FloatToStr(liUnidNegoc)+')    ');
+            SQL.Add('  AND (IDPESSOA  = '+FloatToStr(idEmpresa)+')      ');
+         end;
+         if liSubConta <> 0 then begin
+            SQL.Add('  AND (CODSUBCONTA = '+FloatToStr(liSubConta)+')   ');
+            SQL.Add('  AND (IDPESSOA  = '+FloatToStr(idEmpresa)+')      ');
+         end;
+         if iPlanoPrev <> 0 then
+            SQL.Add('  AND (IDPLANOPREV = '+FloatToStr(iPlanoPrev)+')   ');
+         if iPatro <> 0 then
+            SQL.Add('  AND (IDPATRO = '+FloatToStr(iPatro)+')   ');
+
+         if sHistPadrao <> '' then
+            SQL.Add('  AND (HITCODHIST = '''+Copy(sHistPadrao+'          ',1,4)+''')    ');
+
+         // 05/01/04 - Alex 14451 - nova estrutura SEGREGACRITER
+         // Alex 24838 - 22/03/04 - inserindo o bloco if ddatasegregacriter dentro deste if
+         if iIdSegregaCriter <> -1 then begin
+            SQL.Add('  AND (IDSEGREGACRITER = '+IntToStr(iIdSegregaCriter)+')   ');
+            if dDataSegregaCriter <> -1 then
+               SQL.Add('  AND (DATASEGREGACRITER = TO_DATE('+ QuotedStr(FormatDateTime('dd/mm/yyyy', dDataSegregaCriter)) +', ''DD/MM/YYYY''))   ');
+         end;
+         // FIM 05/01/04 - Alex 14451 - nova estrutura SEGREGACRITER
+
+         // 29/09/04 - 17193 - Alex - nova estrutura IDSEGREGACONTR
+         // 01/11/2006 - retirado do bjunta o segregacontrole, motivo:
+         // 1) toda segregação na origem tem um critério para segregação testado acima
+         // 2) a data do critério também é testada acima
+         // 3) desta forma lançamentos segregados na origem como o mesmo histórico podem ser juntados
+         // 4) Lançamentos de carimbo que são segregados na origem passando pela conta de segregação também podem ser juntados
+
+         // 29/01/2007 23897 Alex - Melhora o BJunta para juntar os lançamentos de baixa do mesmo documento
+         // este campo só esta preparado para o lançamento das Operações 5 e 15 do documento
+         if iCodDocumento = -1 then
+            SQL.Add ('  AND (CODDOCUMENTO IS NULL) ')
+         else
+            SQL.Add ('  AND (CODDOCUMENTO = ' + IntToStr (iCodDocumento) + ') ');
+
+
+         _Cds.Data := Data;
+
+      finally
+
+      end;
+
+   if _Cds.isEmpty then begin
+      Result := False;
+   end else begin
+      FNumLancamento := _Cds.FieldByName('LACNUMLAN').AsInteger;
+      // 01/11/2006 Alex se juntou uma segregação na origem, todos os lançamentos devem possuir o mesmo controle para segregação
+
+     if _iIdSegregaContr <> _Cds.FieldByName('IDSEGREGACONTR').AsInteger then
+       _iIdSegregaContr := _Cds.FieldByName('IDSEGREGACONTR').AsInteger;
+//fim - andré tavares - pendência 21604 - 03/10/2006
+
+   end;
+end;
+
+procedure TCtrlLancamento.SetNumLancamento(const Value: Integer);
+begin
+  FNumLancamento := Value;
+end;
+
+
+function TCtrlLancamento.AlteraLancaContab(cTipoLanc: Char; IdEmpresa,
+  iModuloOrigem, liUsuario, liCodPlano, liUnidNegoc, liSubContaDeb,
+  liSubContaCre, iPlanoPrev, iPatro, liPlnCodigo: Double; iNumLan : LongInt;
+  sDataLanc, sNumDoc, sHist1, sHist2, sHist3, sHist4, sHist5, sTipoOper,
+  cCCustd, cContad, cCCustc, cContac, sCodHist: string; rValLanc: double;
+  bJunta, bUsaPlanoPatro: Boolean;
+  // 05/01/03 Alex 14451 - Nova estrutura SEGREGACRITER
+  const iIdSegregaCriter: integer = -1; const dDataSegregaCriter: TDateTime = -1;
+  const bUsaMesmaPlanilha: Boolean = true) : Boolean;  //andre tavares - pendência 24748 - 20/03/2007
+var sMens : String;
+    bUsaStoredProc : boolean;
+    FCodDocumento: Integer;
+begin
+   Result := True;
+   sMens  := '';
+   Try
+      //pendência 25244 - 07/01/2008
+      bUsaStoredProc := UsaStoredProc(trunc(IdEmpresa));
+
+      // Alex 13/01/05 18405 - não permitir a alteração de lançamentos contábeis segregados na origem
+      {_Cds.Data := GetDataPacket('SELECT IDSEGREGACONTR FROM LANCAMENTO WHERE PLNCODIGO = ' + FloatTostr(liPlnCodigo) + ' AND LACNUMLAN = ' + IntToStr(iNumLan) + ' AND IDSEGREGACONTR IS NOT NULL ' );
+      if not _Cds.IsEmpty then begin
+        sMens := 'Lançamentos contábeis segregados na origem não podem ser alterados! ' + #13 +
+                 'Exclua todos os lançamentos com o Contr. Segregação = ' + _Cds.FieldByName('IDSEGREGACONTR').AsString + ',' + #13 +
+                 'e inclua o lançamento novamente!';
+        Raise Exception.Create (sMens)
+      end;}
+      // 20/02/08 IFerreira - 27129
+      FCodDocumento := -1;
+      _Cds.Data     := GetDataPacket('SELECT IDSEGREGACONTR, CODDOCUMENTO FROM LANCAMENTO WHERE PLNCODIGO = ' + FloatTostr(liPlnCodigo) + ' AND LACNUMLAN = ' + IntToStr(iNumLan) );
+      if not _Cds.IsEmpty then begin
+        if not _Cds.FieldByName('CODDOCUMENTO').IsNull then
+          FCodDocumento := _Cds.FieldByName('CODDOCUMENTO').AsInteger;
+        if not _Cds.FieldByName('IDSEGREGACONTR').IsNull then
+        begin
+          sMens := 'Lançamentos contábeis segregados na origem não podem ser alterados! ' + #13 +
+                   'Exclua todos os lançamentos com o Contr. Segregação = ' + _Cds.FieldByName('IDSEGREGACONTR').AsString + ',' + #13 +
+                   'e inclua o lançamento novamente!';
+          Raise Exception.Create (sMens)
+        end;
+      end;
+
+
+      if not ExcluiLancaContab(liUsuario,liPlnCodigo,iModuloOrigem,iNumLan, bUsaPlanoPatro,False) then begin
+         sMens:=MessageInfo;
+         Raise Exception.Create(sMens);
+      end;
+
+
+      if not bUsaMesmaPlanilha then  //andre tavares - pendência 24748 - 20/03/2007
+        liPlnCodigo := 0;
+
+      if not InsereLancaContab(cTipoLanc, IdEmpresa, iModuloOrigem, liUsuario, liCodPlano,
+             liUnidNegoc, liSubContaDeb,liSubContaCre, iPlanoPrev, iPatro, liPlnCodigo,
+             iNumLan, sDataLanc, sNumDoc, sHist1, sHist2, sHist3, sHist4, sHist5, sTipoOper,
+             cCCustd, cContad, cCCustc, cContac, sCodHist, rValLanc,bJunta, bUsaPlanoPatro,
+             // 05/01/03 Alex 14451 - Nova estrutura SEGREGACRITER
+             //iIdSegregaCriter, dDataSegregaCriter) Then begin
+             // 20/02/08 IFerreira - 27129
+             iIdSegregaCriter, dDataSegregaCriter , -1 , True , FCodDocumento ) Then begin
+         sMens:=MessageInfo;
+         Raise Exception.Create(sMens);
+      end;
+
+   Except
+      On E : Exception do
+       begin
+         MessageInfo := E.Message;
+         Result := False;
+       end;
+   end;
+end;
+
+
+function TCtrlLancamento.RoundCM(fNum : Extended) : Extended;
+begin
+ Result := strtofloat(Format('%20.2f',[fNum]));
+end;
+
+procedure TCtrlLancamento.AfterInitialize;
+begin
+  inherited;
+  Periodo.initializeas(self);
+  Periodo.OnMessageInfo := nil;
+
+  Contab.initializeas(self);
+  ContaContabil.initializeas(self);
+  HistoContab.initializeas(self);
+  Geral.initializeas(self);
+  Padroes.initializeas(self);
+  // Alex 06/09/04 17193
+  CtrlSegregacao.InitializeAs (self);
+  // Alex 16/09/04 17623
+  CtrlPlanPrevContabPatro.InitializeAs (self);
+
+end;
+procedure TCtrlLancamento.SetlcEDePara(const Value: String);
+begin
+  FlcEDePara := Value;
+end;
+
+function TCtrlLancamento.FloatToStrPonto(dValor: Double): string;
+var
+  s :string;
+  p :integer;
+begin
+  s := FloatToStr(dValor);
+  p := Pos(',', s);
+  if p <> 0 then
+     s[p] := '.';
+  result := s;
+end;
+
+procedure TCtrlLancamento.SetlcPeriodoEsp(const Value: Boolean);
+begin
+  FlcPeriodoEsp := Value;
+end;
+
+// 07/01/04 Alex 14451
+function TCtrlLancamento.SelecionaProvaZero(const liIdPlanilha: Double; const iTipo : integer = 1 ): OleVariant;
+var sSql: string;
+begin
+  sSql := 'SELECT ' + #13 +
+          // 09/02/04 Alex 14451 - incluídos os ids para utilização na segregação
+          '  L.IDPLANOPREV, L.IDPATRO, L.IDSEGREGACRITER, L.PLNCODIGO, ' + #13 +
+          '  P.NOME AS PANOPREV, PE.NOME AS PATRO, S.DESCRICAO AS SEGREGA, L.DATASEGREGACRITER, ' + #13 +
+          '  SUM (DECODE(L.LACDEBCRE, ''D'', L.LACVALOR, 0)) AS TOT_DEBITO, ' + #13 +
+          '  SUM (DECODE(L.LACDEBCRE, ''C'', L.LACVALOR, 0)) AS TOT_CREDITO, ' + #13 +
+          '  SUM (DECODE(L.LACDEBCRE, ''D'', L.LACVALOR, L.LACVALOR*(-1))) AS TOT_SALDO ' + #13 +
+          'FROM ' + #13 ;
+
+  if iTipo = 1 then
+    sSql := sSql + ' LANCAMENTO '
+  else
+    sSql := sSql + ' MEMOCALCSEGREGA ';
+
+  sSql := sSql +
+          ' L, PLANPREVCONTABIL P, PATRO PT, PESSOA PE, SEGREGACRITER S ' + #13 +
+          'WHERE ' + #13 +
+          '  L.PLNCODIGO = ' + FloatToStr (liIdPlanilha) + #13 +
+          '  AND L.IDPLANOPREV = P.IDPLANOPREV (+)' + #13 +
+          '  AND L.IDPATRO = PT.IDPESSOA (+)' + #13 +
+          '  AND PT.IDPESSOA = PE.IDPESSOA (+)' + #13 +
+          '  AND L.IDSEGREGACRITER = S.IDSEGREGACRITER (+) ' + #13 +
+          'GROUP BY ' + #13 +
+          '  P.NOME, PE.NOME, S.DESCRICAO, L.DATASEGREGACRITER, L.IDPLANOPREV, L.IDPATRO, L.IDSEGREGACRITER, L.PLNCODIGO ';
+
+  Result := GetDataPacket (sSql);
+end;
+// fim 07/01/04 Alex 14451
+
+procedure TCtrlLancamento.SetPlanoSegregar(const Value: Integer);
+begin
+  FPlanoSegregar := Value;
+end;
+
+
+function TCtrlLancamento.SelecionaLancMemoCalcSegrega( IdPlnCodigo : Double ) : OleVariant;
+begin
+  SQLPlanilhaLancamento( IdPlnCodigo, 'MEMOCALCSEGREGA' );
+  With _Sql Do
+  begin
+    Prepare;
+    ParamByName('PLNCODIGO').asFloat := IdPlnCodigo;
+    Result := Data;
+  end;
+end;
+
+
+function TCtrlLancamento.SQLPlanilhaLancamento( IdPlnCodigo : Double; sTabela: string ): string;
+begin
+  With _Sql Do
+  begin
+    SQL.Clear;
+    SQL.Add('SELECT ''N'' AS MARCA, U.PLNCODIGO, U.LACNUMLAN, U.UNIDNEGOC, U.IDPLANOPREV,    ');
+    SQL.Add('       U.IDSEGREGACRITER, U.DATASEGREGACRITER, U.DESCSEGREGACRITER,   ');
+    SQL.Add('       U.IDSEGREGACONTR,                                              ');
+    SQL.Add('       U.IDPATRO, U.IDELEMDEMONSTRAT, U.HITCODHIST, U.IDPESSOA,       ');
+    SQL.Add('       U.IDMODULO, U.IDUSUARIOINCLUSAO, U.LACVALOR,                   ');
+    SQL.Add('       U.TIPCODIGO, MAX(U.SUBCONTADEB) AS SUBCONTADEB, MAX(U.SUBCONTACRE) AS SUBCONTACRE,');
+    SQL.Add('       MAX(U.CCUSTDEB) AS CCUSTDEB, MAX(U.CCUSTCRE) AS CCUSTCRE,      ');
+    SQL.Add('       MAX(U.PLACONTAD) AS PLACONTAD, MAX(U.PLACONTAC) AS PLACONTAC,  ');
+    SQL.Add('       MAX(U.PLACONCORRESPD) AS PLACONCORRESPD, MAX(U.PLACONCORRESPC) AS PLACONCORRESPC,  ');
+    SQL.Add('       DECODE(MAX(U.PLAREDUZD),0,NULL,TO_CHAR(MAX(U.PLAREDUZD))) AS PLAREDUZD, DECODE(MAX(U.PLAREDUZC),0,NULL,TO_CHAR(MAX(U.PLAREDUZC))) AS PLAREDUZC,  ');
+    SQL.Add('       U.PLANO, U.LACTIPO, U.LACNUMDOC, U.LACHIST1,                   ');
+    SQL.Add('       U.LACHIST2, U.LACHIST3, U.LACHIST4, U.LACHIST5,                ');
+    SQL.Add('       U.NOMEPATRO,U.NOMEPLANOPREV,                                   ');
+    SQL.Add('       MAX(U.TIPCONVOFIDEB) AS TIPCONVOFIDEB, MAX(U.TIPCONVGERDEB) AS TIPCONVGERDEB, ');
+    SQL.Add('       MAX(U.TIPCONVGE1DEB) AS TIPCONVGE1DEB, MAX(U.TIPCONVGE2DEB) AS TIPCONVGE2DEB, ');
+    SQL.Add('       MAX(U.TIPCONVOFICRE) AS TIPCONVOFICRE, MAX(U.TIPCONVGERCRE) AS TIPCONVGERCRE, ');
+    SQL.Add('       MAX(U.TIPCONVGE1CRE) AS TIPCONVGE1CRE, MAX(U.TIPCONVGE2CRE) AS TIPCONVGE2CRE, ');
+    SQL.Add('       SUM(U.VALOFIDEB) AS VALOFIDEB, SUM(U.VALGERDEB) AS VALGERDEB,  ');
+    SQL.Add('       SUM(U.VALGE1DEB) AS VALGE1DEB, SUM(U.VALGE2DEB) AS VALGE2DEB,  ');
+    SQL.Add('       SUM(U.VALOFICRE) AS VALOFICRE, SUM(U.VALGERCRE) AS VALGERCRE,  ');
+    SQL.Add('       SUM(U.VALGE1CRE) AS VALGE1CRE, SUM(U.VALGE2CRE) AS VALGE2CRE,  ');
+    SQL.Add('       MAX(U.ORIAPLDEB) AS ORIAPLDEB, MAX(U.ORIAPLCRE) AS ORIAPLCRE,  ');
+    SQL.Add('       SUM(U.VALHISDEB) AS VALHISDEB, SUM(U.VALHISCRE) AS VALHISCRE,  ');
+    SQL.Add('       MAX(U.NOMECONTAD) AS NOMECONTAD, MAX(U.NOMECONTAC) AS NOMECONTAC, U.NOMEATIVPROJ, U.UNECODIGO,');
+    SQL.Add('       MAX(U.NOMESUBCONTAD) AS NOMESUBCONTAD,MAX(U.NOMESUBCONTAC) AS NOMESUBCONTAC, ');
+    SQL.Add('       MAX(U.NOMECCUSTOD) AS NOMECCUSTOD, MAX(U.NOMECCUSTOC) AS NOMECCUSTOC');
+    //Cássio - SOL Nº 124569 KINTANA Nº 363457
+    if sTabela = 'LANCAMENTO' then
+      SQL.Add('     , U.ORDLANCARATEADO                   ');
+    SQL.Add('FROM ');
+    SQL.Add('(SELECT L.PLNCODIGO, L.LACNUMLAN, L.UNIDNEGOC, L.IDPLANOPREV,                     ');
+    SQL.Add('        L.IDSEGREGACRITER, L.DATASEGREGACRITER, S.DESCRICAO AS DESCSEGREGACRITER, ');
+    SQL.Add('        L.IDSEGREGACONTR,                                                         ');
+    SQL.Add('        L.IDPATRO, L.IDELEMDEMONSTRAT, L.HITCODHIST, L.IDPESSOA,       ');
+    SQL.Add('        L.IDMODULO, L.IDUSUARIOINCLUSAO, L.LACVALOR,                   ');
+    SQL.Add('        L.TIPCODIGO, L.CODSUBCONTA AS SUBCONTADEB, (0) AS SUBCONTACRE, ');
+    SQL.Add('        CC.CODEXTERNO AS CCUSTDEB, ('''') AS CCUSTCRE,              ');
+    SQL.Add('        L.PLACONTA AS PLACONTAD, ('''') AS PLACONTAC,                  ');
+    SQL.Add('        C.PLACONCORRESP AS PLACONCORRESPD, ('''') AS PLACONCORRESPC,   ');
+    SQL.Add('        C.PLAREDUZ AS PLAREDUZD, (0) AS PLAREDUZC,                     ');
+    SQL.Add('        L.PLANO, L.LACTIPO, L.LACNUMDOC, L.LACHIST1,                   ');
+    SQL.Add('        L.LACHIST2, L.LACHIST3, L.LACHIST4, L.LACHIST5,                ');
+    SQL.Add('        L.LACTIPCONVOFICIAL AS TIPCONVOFIDEB, L.LACTIPCONVGER AS TIPCONVGERDEB,   ');
+    SQL.Add('        L.LACTIPCONVGEREN1 AS TIPCONVGE1DEB, L.LACTIPCONVGEREN2 AS TIPCONVGE2DEB, ');
+    SQL.Add('        ('''') AS TIPCONVOFICRE, ('''') AS TIPCONVGERCRE,                             ');
+    SQL.Add('        ('''') AS TIPCONVGE1CRE,('''') AS TIPCONVGE2CRE,                              ');
+    SQL.Add('        L.LACVALOFICIAL AS VALOFIDEB, L.LACVALGERENCIAL AS VALGERDEB,             ');
+    SQL.Add('        L.LACVALGEREN1 AS VALGE1DEB, L.LACVALGEREN2 AS VALGE2DEB,                 ');
+    SQL.Add('        (0) AS VALOFICRE, (0) AS VALGERCRE, (0) AS VALGE1CRE, (0) AS VALGE2CRE,   ');
+    SQL.Add('        L.LACORIGEMAPLIC AS ORIAPLDEB, ('''') AS ORIAPLCRE, L.LACVALHIST AS VALHISDEB, (0) AS VALHISCRE,      ');
+    SQL.Add('        C.PLANOME AS NOMECONTAD, ('''') AS NOMECONTAC, UN.NOME AS NOMEATIVPROJ, UN.UNECODIGO,                 ');
+    SQL.Add('        SC.NOMESUBCONTA AS NOMESUBCONTAD,('''') AS NOMESUBCONTAC, CC.NOME AS NOMECCUSTOD, ('''') AS NOMECCUSTOC, ');
+    //Cássio - SOL Nº 124569 KINTANA Nº 363457 - Início
+    if sTabela = 'LANCAMENTO' then
+    begin
+      SQL.Add('        PE.NOME AS NOMEPATRO,PP.NOME AS NOMEPLANOPREV,                                                      ');
+      SQL.Add('        L.ORDLANCARATEADO                   ');
+    end
+    else
+      SQL.Add('        PE.NOME AS NOMEPATRO,PP.NOME AS NOMEPLANOPREV                                                      ');
+    //Cássio - SOL Nº 124569 KINTANA Nº 363457 - Fim
+    SQL.Add(' FROM ' + sTabela + ' L, PLANOCONTA C, UNIDNEGOCIO UN, SUBCONTA SC, CENTCUST CC,PESSOA PE, PLANPREVCONTABIL PP, SEGREGACRITER S ');
+    SQL.Add(' WHERE (L.PLNCODIGO = :PLNCODIGO)                ');
+    SQL.Add('   AND (L.PLANO = C.PLANO)                       ');
+    SQL.Add('   AND (L.LACDEBCRE = ''D'')                     ');
+    SQL.Add('   AND (L.PLACONTA = C.PLACONTA)                 ');
+    SQL.Add('   AND (L.IDPESSOA = UN.IDPESSOA(+))             ');
+    SQL.Add('   AND (L.UNIDNEGOC = UN.UNIDNEGOC(+))           ');
+    SQL.Add('   AND (L.IDPESSOA = SC.IDPESSOA(+))             ');
+    SQL.Add('   AND (L.CODSUBCONTA = SC.CODSUBCONTA(+))       ');
+    SQL.Add('   AND (L.IDEMPRESA = CC.IDEMPRESA(+))           ');
+    SQL.Add('   AND (L.CODCENTROCUSTO = CC.CODCENTROCUSTO(+)) ');
+    SQL.Add('   AND (L.IDPATRO        = PE.IDPESSOA(+))       ');
+    SQL.Add('   AND (L.IDPLANOPREV    = PP.IDPLANOPREV(+))    ');
+    SQL.Add('   AND (L.IDSEGREGACRITER= S.IDSEGREGACRITER(+)) ');
+    SQL.Add('UNION                                            ');
+    SQL.Add(' SELECT L.PLNCODIGO, L.LACNUMLAN, L.UNIDNEGOC, L.IDPLANOPREV,          ');
+    SQL.Add('        L.IDSEGREGACRITER, L.DATASEGREGACRITER, S.DESCRICAO AS DESCSEGREGACRITER, ');
+    SQL.Add('        L.IDSEGREGACONTR,                                                         ');
+    SQL.Add('        L.IDPATRO, L.IDELEMDEMONSTRAT, L.HITCODHIST, L.IDPESSOA,       ');
+    SQL.Add('        L.IDMODULO, L.IDUSUARIOINCLUSAO, L.LACVALOR,                   ');
+    SQL.Add('        L.TIPCODIGO, (0) AS SUBCONTADEB, L.CODSUBCONTA AS SUBCONTACRE, ');
+    SQL.Add('        ('''') AS CCUSTDEB, CC.CODEXTERNO AS CCUSTCRE,              ');
+    SQL.Add('        ('''') AS PLACONTAD, L.PLACONTA AS PLACONTAC,                  ');
+    SQL.Add('        ('''') AS PLACONCORRESPD, C.PLACONCORRESP AS PLACONCORRESPC,   ');
+    SQL.Add('        (0) AS PLAREDUZD, C.PLAREDUZ AS PLAREDUZC,                     ');
+    SQL.Add('        L.PLANO, L.LACTIPO, L.LACNUMDOC, L.LACHIST1,                   ');
+    SQL.Add('        L.LACHIST2, L.LACHIST3, L.LACHIST4, L.LACHIST5,                ');
+    SQL.Add('        ('''') AS TIPCONVOFIDEB, ('''') AS TIPCONVGERDEB,                             ');
+    SQL.Add('        ('''') AS TIPCONVGE1DEB,('''') AS TIPCONVGE2DEB,                              ');
+    SQL.Add('        L.LACTIPCONVOFICIAL AS TIPCONVOFICRE, L.LACTIPCONVGER AS TIPCONVGERCRE,   ');
+    SQL.Add('        L.LACTIPCONVGEREN1 AS TIPCONVGE1CRE, L.LACTIPCONVGEREN2 AS TIPCONVGE2CRE, ');
+    SQL.Add('        (0) AS VALOFIDEB, (0) AS VALGERDEB, (0) AS VALGE1DEB, (0) AS VALGE2DEB,   ');
+    SQL.Add('        L.LACVALOFICIAL AS VALOFICRE, L.LACVALGERENCIAL AS VALGERCRE,             ');
+    SQL.Add('        L.LACVALGEREN1 AS VALGE1CRE, L.LACVALGEREN2 AS VALGE2CRE,                 ');
+    SQL.Add('        ('''') AS ORIAPLDEB, L.LACORIGEMAPLIC AS ORIAPLCRE, (0) AS VALHISDEB, L.LACVALHIST AS VALHISCRE,       ');
+    SQL.Add('        ('''') AS NOMECONTAD, C.PLANOME AS NOMECONTAC, UN.NOME AS NOMEATIVPROJ, UN.UNECODIGO,                  ');
+    SQL.Add('        ('''') AS NOMESUBCONTAD, SC.NOMESUBCONTA AS NOMESUBCONTAC, ('''') AS NOMECCUSTOD, CC.NOME AS NOMECCUSTOC, ');
+    //Cássio - SOL Nº 124569 KINTANA Nº 363457 - Início
+    if sTabela = 'LANCAMENTO' then
+    begin
+      SQL.Add('        PE.NOME AS NOMEPATRO,PP.NOME AS NOMEPLANOPREV,                                                      ');
+      SQL.Add('        L.ORDLANCARATEADO                   ');
+    end
+    else
+      SQL.Add('        PE.NOME AS NOMEPATRO,PP.NOME AS NOMEPLANOPREV                                                      ');
+    //Cássio - SOL Nº 124569 KINTANA Nº 363457 - Fim
+    SQL.Add(' FROM ' + sTabela + ' L, PLANOCONTA C, UNIDNEGOCIO UN, SUBCONTA SC, CENTCUST CC,PESSOA PE, PLANPREVCONTABIL PP, SEGREGACRITER S   ');
+    SQL.Add(' WHERE (L.PLNCODIGO      = :PLNCODIGO)                    ');
+    SQL.Add('   AND (L.PLANO          = C.PLANO)                       ');
+    SQL.Add('   AND (L.LACDEBCRE      = ''C'')                         ');
+    SQL.Add('   AND (L.PLACONTA       = C.PLACONTA)                    ');
+    SQL.Add('   AND (L.IDPESSOA       = UN.IDPESSOA(+))                ');
+    SQL.Add('   AND (L.UNIDNEGOC      = UN.UNIDNEGOC(+))               ');
+    SQL.Add('   AND (L.IDPESSOA       = SC.IDPESSOA(+))                ');
+    SQL.Add('   AND (L.CODSUBCONTA    = SC.CODSUBCONTA(+))             ');
+    SQL.Add('   AND (L.IDEMPRESA      = CC.IDEMPRESA(+))               ');
+    SQL.Add('   AND (L.CODCENTROCUSTO = CC.CODCENTROCUSTO(+))          ');
+    SQL.Add('   AND (L.IDPATRO        = PE.IDPESSOA(+))                ');
+    SQL.Add('   AND (L.IDPLANOPREV    = PP.IDPLANOPREV(+))             ');
+    SQL.Add('   AND (L.IDSEGREGACRITER= S.IDSEGREGACRITER(+)) ) U      ');
+    SQL.Add('GROUP BY U.PLNCODIGO, U.LACNUMLAN, U.UNIDNEGOC, U.IDPLANOPREV,    ');
+    SQL.Add('         U.IDSEGREGACRITER, U.DATASEGREGACRITER, U.DESCSEGREGACRITER, ');
+    SQL.Add('         U.IDSEGREGACONTR,                                            ');
+    SQL.Add('         U.IDPATRO, U.IDELEMDEMONSTRAT, U.HITCODHIST, U.IDPESSOA, ');
+    SQL.Add('         U.IDMODULO, U.IDUSUARIOINCLUSAO, U.LACVALOR,             ');
+    SQL.Add('         U.PLANO, U.LACTIPO, U.LACNUMDOC, U.LACHIST1,             ');
+    SQL.Add('         U.LACHIST2, U.LACHIST3, U.LACHIST4, U.LACHIST5,          ');
+    SQL.Add('         U.TIPCODIGO,U.NOMEATIVPROJ, U.UNECODIGO,                 ');
+    if sTabela = 'LANCAMENTO' then
+      SQL.Add('        U.NOMEPATRO,U.NOMEPLANOPREV, U.ORDLANCARATEADO ')
+    else
+      SQL.Add('        U.NOMEPATRO,U.NOMEPLANOPREV                              ');
+
+    if sTabela = 'LANCAMENTO' then
+      SQL.Add('ORDER BY U.PLNCODIGO, U.LACNUMLAN                               ')
+    else
+      SQL.Add('ORDER BY U.PLNCODIGO, U.IDSEGREGACONTR, U.LACNUMLAN             ');
+  end;
+end;
+
+function TCtrlLancamento.GetProvaZero(const liIdPlanilha: Double): OleVariant;
+var
+  sSQL: string;
+begin
+  sSQL :=
+   ' SELECT UN.IDPLANOPREV, '+
+         ' UN.IDPATRO, '+
+         ' P.NOME AS PANOPREV, '+
+         ' PE.NOME AS PATRO, '+
+         ' S.DESCRICAO AS SEGREGA, '+
+         ' UN.DATASEGREGACRITER, '+
+         ' SUM (VALOR) AS VALOR '+
+   ' FROM  PLANPREVCONTABIL P, '+
+         ' PATRO PT, '+
+         ' PESSOA PE, '+
+         ' SEGREGACRITER S, '+
+        '( '+
+          ' SELECT L.PLNCODIGO, L.IDPLANOPREV, L.IDPATRO, L.IDSEGREGACRITER, L.DATASEGREGACRITER, SUM(DECODE(L.LACDEBCRE, ''D'', L.LACVALOR, L.LACVALOR*-1)) VALOR '+
+          ' FROM  LANCAMENTO L '+
+          ' WHERE L.PLNCODIGO = ' + floattostr (liidplanilha) +
+          ' GROUP BY L.PLNCODIGO, L.IDPLANOPREV, L.IDPATRO, L.IDSEGREGACRITER, L.DATASEGREGACRITER '+
+          ' UNION '+
+          ' SELECT  M.PLNCODIGO, M.IDPLANOPREV, M.IDPATRO, M.IDSEGREGACRITER, M.DATASEGREGACRITER, SUM(DECODE(M.LACDEBCRE, ''D'', M.LACVALOR, M.LACVALOR*-1)) VALOR '+
+          ' FROM  MEMOCALCSEGREGA M '+
+          ' WHERE M.PLNCODIGO = ' + floattostr (liidplanilha) +
+          ' GROUP BY M.PLNCODIGO, M.IDPLANOPREV, M.IDPATRO, M.IDSEGREGACRITER, M.DATASEGREGACRITER '+
+        ') UN '+
+   ' WHERE  UN.IDPLANOPREV = P.IDPLANOPREV (+) '+
+   '   AND UN.IDPATRO = PT.IDPESSOA (+) '+
+   '   AND PT.IDPESSOA = PE.IDPESSOA (+) '+
+   '   AND UN.IDSEGREGACRITER = S.IDSEGREGACRITER (+) '+
+   ' GROUP BY P.NOME, PE.NOME, S.DESCRICAO, UN.DATASEGREGACRITER, UN.IDPLANOPREV, UN.IDPATRO ';
+
+  Result := GetDataPacket (sSql);
+end;
+
+function TCtrlLancamento.getProvaZero(exercicio,
+  periodo: integer): OleVariant;
+var
+  sSQL: string;
+begin
+   sSQL :=
+      ' SELECT DISTINCT PLNCODIGO ' +
+      'FROM ' +
+      '(SELECT P.PLNCODIGO, m.IDSEGREGACRITER, m.DATASEGREGACRITER, m.IDPLANOPREV, m.IDPATRO, ' +
+      '        SUM (DECODE(m.LACDEBCRE, ''D'', m.LACVALOR, m.LACVALOR*(-1))) AS VALOR ' +
+      ' FROM MEMOCALCSEGREGA M, PLANILHA P ' +
+      ' WHERE P.PEREXERCICIO = ' + IntToStr(exercicio) +
+      '       AND P.PERNUMERO = ' + IntToStr(periodo) +
+      '       AND M.PLNCODIGO = P.PLNCODIGO ' +
+      ' GROUP BY P.PLNCODIGO, M.IDSEGREGACRITER, M.DATASEGREGACRITER, M.IDPLANOPREV, M.IDPATRO ' +
+      ' UNION ' +
+      ' SELECT P.PLNCODIGO, L.IDSEGREGACRITER, L.DATASEGREGACRITER, L.IDPLANOPREV, L.IDPATRO, ' +
+      '        SUM (DECODE(L.LACDEBCRE, ''D'', L.LACVALOR, L.LACVALOR*(-1))) AS VALOR ' +
+      ' FROM LANCAMENTO L, PLANILHA P ' +
+      ' WHERE P.PEREXERCICIO = ' + IntToStr(exercicio) +
+      '       AND P.PERNUMERO = ' + IntToStr(periodo) +
+      '       AND L.PLNCODIGO = P.PLNCODIGO ' +
+      ' GROUP BY P.PLNCODIGO, L.IDSEGREGACRITER, L.DATASEGREGACRITER, L.IDPLANOPREV, L.IDPATRO ' +
+      ') ' +
+      'GROUP BY PLNCODIGO, ' +
+      'IDSEGREGACRITER, '+
+      'DATASEGREGACRITER, '+
+      'IDPLANOPREV, '+
+      'IDPATRO '+
+
+      'HAVING SUM(VALOR) <> 0 ' ;
+   Result := getDataPacket(sSQL);
+end;
+
+function TCtrlLancamento.getProvaZeroLancamentoMaisMemoCalc(planilha: double): OleVariant;
+var
+  sSQL: string;
+begin
+  try
+     sSQL :=
+       'SELECT IDPLANOPREV, IDPATRO, PANOPREV, PATRO, SEGREGA, DATASEGREGACRITER, ' +
+       '       SUM(TOT_DEBITO) AS TOT_DEBITO, ' +
+       '       SUM(TOT_CREDITO) AS TOT_CREDITO, ' +
+       '       SUM(TOT_SALDO) AS TOT_SALDO ' +
+       'FROM ( ' +
+       'SELECT L.IDPLANOPREV, L.IDPATRO, ' +
+       '       P.NOME AS PANOPREV, PE.NOME AS PATRO, S.DESCRICAO AS SEGREGA, L.DATASEGREGACRITER, ' +
+       '       SUM (DECODE(L.LACDEBCRE, ''D'', L.LACVALOR, 0)) AS TOT_DEBITO, '+
+       '       SUM (DECODE(L.LACDEBCRE, ''C'', L.LACVALOR, 0)) AS TOT_CREDITO,' +
+       '       SUM (DECODE(L.LACDEBCRE, ''D'', L.LACVALOR, L.LACVALOR*(-1))) AS TOT_SALDO '+
+       'FROM    LANCAMENTO L, '+
+       '        PLANPREVCONTABIL P,'+
+       '        PATRO PT,'+
+       '        PESSOA PE, '+
+       '        SEGREGACRITER S '+
+       'WHERE   L.PLNCODIGO = ' + floatToStr(planilha) +
+       '    AND L.IDPLANOPREV = P.IDPLANOPREV (+) ' +
+       '    AND L.IDPATRO = PT.IDPESSOA (+) ' +
+       '    AND PT.IDPESSOA = PE.IDPESSOA (+) ' +
+       '    AND L.IDSEGREGACRITER = S.IDSEGREGACRITER (+) '+
+       'GROUP BY P.NOME, ' +
+       '         PE.NOME,' +
+       '         S.DESCRICAO, '+
+       '         L.DATASEGREGACRITER,'+
+       '         L.IDPLANOPREV,      '+
+       '         L.IDPATRO           '+
+       'UNION ALL '+
+       'SELECT  M.IDPLANOPREV, M.IDPATRO, ' +
+       '        P.NOME AS PANOPREV, PE.NOME AS PATRO, S.DESCRICAO AS SEGREGA, M.DATASEGREGACRITER,'+
+       '        SUM (DECODE(M.LACDEBCRE, ''D'', M.LACVALOR, 0)) AS TOT_DEBITO, '+
+       '        SUM (DECODE(M.LACDEBCRE, ''C'', M.LACVALOR, 0)) AS TOT_CREDITO,  '+
+       '        SUM (DECODE(M.LACDEBCRE, ''D'', M.LACVALOR, M.LACVALOR*(-1))) AS TOT_SALDO '+
+       'FROM    MEMOCALCSEGREGA M, '+
+       '        PLANPREVCONTABIL P,'+
+       '        PATRO PT, '+
+       '        PESSOA PE, '+
+       '        SEGREGACRITER S '+
+       'WHERE   M.PLNCODIGO = ' + floatToStr(planilha) +
+       '    AND M.IDPLANOPREV = P.IDPLANOPREV (+) '+
+       '    AND M.IDPATRO = PT.IDPESSOA (+) '+
+       '    AND PT.IDPESSOA = PE.IDPESSOA (+) '+
+       '    AND M.IDSEGREGACRITER = S.IDSEGREGACRITER (+) '+
+       'GROUP BY P.NOME, '+
+       '     PE.NOME, '+
+       '     S.DESCRICAO, '+
+       '     M.DATASEGREGACRITER, '+
+       '     M.IDPLANOPREV, '+
+       '     M.IDPATRO '+
+       '     ) ' +
+       'GROUP BY IDPLANOPREV, IDPATRO, PANOPREV, PATRO, SEGREGA, DATASEGREGACRITER';
+
+     Result := getDataPacket(sSQL);
+
+    except
+     on e:exception do
+        MessageInfo := e.message;
+    end;
+end;
+
+function TCtrlLancamento.UsaStoredProc(const idempresa: integer): boolean;
+var cds : TClientDataset;
+begin
+  result := false;
+  cds := TClientDataset.Create(nil);
+  try
+    cds.data := getDataPacket(' SELECT NVL(FLGUSASPLANCASLD, ''N'') AS FLGUSASPLANCASLD FROM PARAMCONTAB WHERE IDPESSOA = '+ intToStr(idempresa) );
+    result := cds.fieldByName('FLGUSASPLANCASLD').asString = 'S';
+    cds.data := getDataPacket('SELECT OBJECT_NAME FROM ALL_PROCEDURES WHERE OBJECT_NAME =  ''LANCASALDOCONTAB''');
+    result := result and (uppercase(cds.fieldByName('OBJECT_NAME').asString) = 'LANCASALDOCONTAB')
+  finally
+    cds.free;
+  end;
+end;
+
+function TCtrlLancamento.RetornaQntLancamento(plnCodigo: double): Integer;
+var
+  _cdsLancamento : TClientDataSet;
+  sSQL : string;
+begin
+  _cdsLancamento := TClientDataSet.Create(nil);
+  Result := 0;
+  try
+    sSQL := ' SELECT MAX(ORDLANCARATEADO) AS MAXLANCAMENTO FROM LANCAMENTO ' +
+            ' WHERE PLNCODIGO = ' + FloatToStr(plnCodigo);
+
+    _cdsLancamento.Data := GetDataPacket(sSQL);
+    if _cdsLancamento.FieldByName('MAXLANCAMENTO').asFloat > 0 then
+      Result := _cdsLancamento.FieldByName('MAXLANCAMENTO').asInteger;
+  finally
+   FreeAndNil(_cdsLancamento);
+  end;
+end;
+
+
+// Edilaine - SOL 124845-14262 / KTN 1977287
+function TCtrlLancamento.VerificaSobraRateio(_cds : TClientDataSet; Valor, rSaldoMoeda,
+                                         rValorCotacao, rTotalDocGeral, rTotalDocOMGeral, rValOutroMoeda : currency;
+                                         sCampoValor : string ) : boolean;
+var
+  rAcum, rRateio : currency;
+  rPropRateio     : currency;
+  rRateio2        : double;
+begin
+  rAcum := 0;
+
+  // faz o rateio e verifica se haverá sobra
+  while not _cds.eof do
+  begin
+    rPropRateio  := 0;
+
+    if (rValorCotacao<>0) and (rTotalDocOMGeral<>0) and (rSaldoMoeda<>0) then
+       rPropRateio  := ( rValOutroMoeda/ rTotalDocOMGeral*rSaldoMoeda)*rValorCotacao
+    else
+       if (rTotalDocGeral<>0) then
+          rPropRateio  := (Valor*_cds.fieldbyname( sCampoValor ).ascurrency)/rTotalDocGeral;
+
+    rRateio := RoundNExtend(rPropRateio, 2);   // calculo do valor atual
+
+    rAcum   := rAcum + rRateio;
+
+    _cds.next;
+  end;
+
+  if FloatTostr(rAcum) <= FloatTostr(Valor) then
+     Result := true     // arredonda pra cima se a sobra for positiva (faltou centavos)
+  else
+     Result := False;   // senão o no. 5 não será arredondado para nenhuma casa
+end;
+// Edilaine - SOL 124845-14262 / KTN 1977287 - fim
+
+
+// Edilaine - SOL 124845-14262 / KTN 1977287
+function TCtrlLancamento.RoundNExtend(x: Extended; d: Integer;const bArred5 : boolean): Extended;
+{ RoundN(123,456, 0) = 123,00
+  RoundN(123,456, 2) = 123,46
+  RoundN(123456, -3) = 123000 }
+var
+  i, j : byte;
+  decimal : real;
+  sValorInt  : string;
+  sValorFrac : string;
+const
+  t: array [0..18] of int64 = (1, 10, 100, 1000, 10000, 100000,
+    1000000, 10000000, 100000000, 1000000000, 10000000000,
+    100000000000, 1000000000000,
+                  10000000000000,
+                  100000000000000,
+                  1000000000000000,
+                  10000000000000000,
+                  100000000000000000,
+                  1000000000000000000
+                  );
+begin
+  if Abs(d) > 12 then
+    raise ERangeError.Create('RoundN: Value must be in -12..12');
+
+  if (d = 0) or (x = 0) then
+    Result := Int(x) + Int(Frac(x) * 2)
+  else
+    if d > 0 then                                                             
+    begin
+      if (not bArred5) then
+      begin
+        if Int(abs(x)) > 0 then
+        begin
+          sValorFrac := Floattostr(x);
+          i := (length( sValorFrac ) - pos(',', sValorFrac)) - 1;  // arredonda digito por digito
+
+          //for j := i downto 2 do //'0,0375468954443932'
+          while (i+1) > Abs(d) do
+          begin
+            x := x * t[i];
+            // se a decimal for 5, não arredondar para cima
+            if (Pos(',', floattostr(x)) <> 0) and (Pos(',5', floattostr(x)) = 0) then
+               x := (Int(x) + Int(Frac(x) * 2)) / t[i]
+            else
+               x := Int(x) / t[i];
+
+            if (Pos(',', floattostr(x)) <> 0) then
+               i := length( floattostr(x))- Length(IntToStr(Trunc(x)))- 2
+            else
+               i := 0;
+          end;
+        end
+        else
+        begin
+           x := x * t[d];
+           x := (Int(x) + Int(Frac(x) * 2)) / t[d]
+        end;
+        {
+        i := length( sValor )- Length(IntToStr(Trunc(x)))- 2;  // arredonda digito por digito
+
+        while (i+1) > Abs(d) do
+        begin
+          x := x * t[i];           '0,0375468954443932'
+          // se a decimal for 5, não arredondar para cima
+          if (Pos(',', floattostr(x)) <> 0) and (Pos(',5', floattostr(x)) = 0) then
+             x := (Int(x) + Int(Frac(x) * 2)) / t[i]
+          else
+             x := Int(x) / t[i];
+
+          if (Pos(',', floattostr(x)) <> 0) then
+             i := length( floattostr(x))- Length(IntToStr(Trunc(x)))- 2
+          else
+             i := 0;
+        end;
+        }
+      end
+      else
+      begin
+{
+         i := length( floattostr(x))- Length(IntToStr(Trunc(x)))- 2;  // arredonda digito por digito
+         if i > d then
+         begin
+
+        while (i+1) > Abs(d) do
+        begin
+          x := x * t[i];
+          x := (Int(x) + Int(Frac(x) * 2)) / t[i];
+
+          if (Pos(',', floattostr(x)) <> 0) then
+             i := length( floattostr(x))- Length(IntToStr(Trunc(x)))- 2
+          else
+             i := 0;
+        end;
+
+           i := 3;
+           x := StrToFloat( Copy( FloatToStr(x), 1, Pos( ',', FloatToStr(x))+4) );
+
+           while (i+1) > Abs(d) do
+           begin
+             x := x * t[i];
+
+             if (Pos(',', floattostr(x)) <> 0) and
+                (((i=3) and (StrToInt(Copy( FloatToStr(x), Pos(',', FloatToStr(x))+1,1)) > 5)) or
+                 ((i<3) and (StrToInt(Copy( FloatToStr(x), Pos(',', FloatToStr(x))+1,1)) >= 5))) then
+                x := (Int(x) + Int(Frac(x) * 2)) / t[i]
+             else
+                x := Int(x) / t[i];
+
+
+             if (Pos(',', floattostr(x)) <> 0) then
+                i := length( floattostr(x))- Length(IntToStr(Trunc(x)))- 2
+             else
+                i := 0;
+           end;
+           
+         end
+         else
+}
+         begin
+           x := x * t[d];
+           x := (Int(x) + Int(Frac(x) * 2)) / t[d]
+         end;
+      end;
+      Result := x;
+    end
+    else
+    begin  // d < 0
+      x := x / t[-d];
+      Result := (Int(x) + Int(Frac(x) * 2)) * t[-d];
+    end;
+end;
+// Edilaine - SOL 124845-14262 / KTN 1977287 - fim
+
+
+
+end.

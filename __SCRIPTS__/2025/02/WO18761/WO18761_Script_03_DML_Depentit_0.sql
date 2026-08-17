@@ -1,0 +1,1 @@
+update cm.depentit set percalimentic = 0 /*Hoje os campos estão NULL e 0,00, não tem nenhum com valor*/

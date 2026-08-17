@@ -1,0 +1,247 @@
+unit DCmBack;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  Db, DBTables, CMwwQuery, uFuncaoGeral, wwstorep, Wwdatsrc, Wwquery;
+
+type
+  TDtmCmBack = class(TDataModule)
+    Qry: TwwQuery;
+    qryParamGlobal: TwwQuery;
+    qryCotMoeda: TwwQuery;
+    qryVerifPlanil: TwwQuery;
+    qryNumLanc: TwwQuery;
+    qryParamContab: TwwQuery;
+    qryProxPlanilD: TwwQuery;
+    qryProxPlanilP: TwwQuery;
+    qryProxPlanilE: TwwQuery;
+    qryPlanilIns: TwwQuery;
+    qryProxLanc: TwwQuery;
+    qryLancIns: TwwQuery;
+    qryLancUpd: TwwQuery;
+    qryPlanilUpd: TwwQuery;
+    qryPeriodo: TwwQuery;
+    qryTestaConta: TwwQuery;
+    qryVerifSaldo: TwwQuery;
+    qrySaldoUpd: TwwQuery;
+    qrySaldoIns: TwwQuery;
+    qryTestaData: TwwQuery;
+    qryTestaPer: TwwQuery;
+    qryLancamento: TwwQuery;
+    qryEstornoUpd: TwwQuery;
+    qryPlanilDel: TwwQuery;
+    qryLancDel: TwwQuery;
+    qryParamGlobalUNIDNEGOC: TFloatField;
+    qryCotMoedaCOTVALOR: TFloatField;
+    qryVerifPlanilPLNCODIGO: TFloatField;
+    qryVerifPlanilPLNPLANIL: TFloatField;
+    qryVerifPlanilPLNEFETIVADO: TStringField;
+    qryVerifPlanilPLNDATDIA: TDateTimeField;
+    qryVerifPlanilPEREXERCICIO: TFloatField;
+    qryVerifPlanilPERNUMERO: TFloatField;
+    qryNumLancPLNCODIGO: TFloatField;
+    qryNumLancLACNUMLAN: TFloatField;
+    qryParamContabPACDIAMES: TStringField;
+    qryProxPlanilDIDPROXPLANIL: TFloatField;
+    qryProxPlanilPIDPROXPLANIL: TFloatField;
+    qryProxPlanilEIDPROXPLANIL: TFloatField;
+    qryProxLancIDNUMLAN: TFloatField;
+    qryTestaContaPLACCUST: TStringField;
+    qryTestaContaPLATIPO: TStringField;
+    qryTestaContaPLAINATIVA: TStringField;
+    qryTestaContaPLAALTERA: TStringField;
+    qryTestaContaPLABLOQUE: TStringField;
+    qryTestaContaPLABLOQUEDATA: TDateTimeField;
+    qryTestaContaPLASUBCONTA: TStringField;
+    qryTestaContaPLAMOEDAHISTORICA: TFloatField;
+    qryTestaContaPLATIPCONVGER: TStringField;
+    qryTestaContaPLATIPCONVGEREN1: TStringField;
+    qryTestaContaPLATIPCONVGEREN2: TStringField;
+    qryTestaContaPLATIPCONVOFICIAL: TStringField;
+    qryVerifSaldoIDPLANOSALDO: TFloatField;
+    qryTestaPerPERNUMERO: TFloatField;
+    qryTestaPerPEREXERCICIO: TFloatField;
+    qryTestaPerPERBLOQUE: TStringField;
+    qryTestaPerPERBLOINT: TStringField;
+    qryLancamentoPLNCODIGO: TFloatField;
+    qryLancamentoIDMODULO: TFloatField;
+    qryLancamentoLACNUMLAN: TFloatField;
+    qryLancamentoLACDEBCRE: TStringField;
+    qryLancamentoIDEMPRESA: TFloatField;
+    qryLancamentoCODSUBCONTA: TFloatField;
+    qryLancamentoIDPESSOA: TFloatField;
+    qryLancamentoIDMODULO_1: TFloatField;
+    qryLancamentoUNIDNEGOC: TFloatField;
+    qryLancamentoIDUSUARIOINCLUSAO: TFloatField;
+    qryLancamentoCODCENTROCUSTO: TStringField;
+    qryLancamentoPLACONTA: TStringField;
+    qryLancamentoPLANO: TFloatField;
+    qryLancamentoLACTIPO: TStringField;
+    qryLancamentoLACNUMDOC: TStringField;
+    qryLancamentoLACHIST1: TStringField;
+    qryLancamentoLACHIST2: TStringField;
+    qryLancamentoLACHIST3: TStringField;
+    qryLancamentoLACHIST4: TStringField;
+    qryLancamentoLACHIST5: TStringField;
+    qryLancamentoLACVALOR: TFloatField;
+    qryLancamentoLACTIPCONVOFICIAL: TStringField;
+    qryLancamentoLACVALOFICIAL: TFloatField;
+    qryLancamentoLACTIPCONVGER: TStringField;
+    qryLancamentoLACVALGERENCIAL: TFloatField;
+    qryLancamentoLACTIPCONVGEREN1: TStringField;
+    qryLancamentoLACVALGEREN1: TFloatField;
+    qryLancamentoLACTIPCONVGEREN2: TStringField;
+    qryLancamentoLACVALGEREN2: TFloatField;
+    qryLancamentoLACATOUTMOEDA: TStringField;
+    qryLancamentoLACORIGEMAPLIC: TStringField;
+    qryLancamentoTIPCODIGO: TStringField;
+    qryLancamentoLACVALHIST: TFloatField;
+    qryLancamentoHITCODHIST: TStringField;
+    qryLancamentoIDELEMDEMONSTRAT: TFloatField;
+    qryUmLancamento: TwwQuery;
+    FloatField1: TFloatField;
+    FloatField2: TFloatField;
+    FloatField3: TFloatField;
+    StringField1: TStringField;
+    FloatField4: TFloatField;
+    FloatField5: TFloatField;
+    FloatField6: TFloatField;
+    FloatField7: TFloatField;
+    FloatField8: TFloatField;
+    FloatField9: TFloatField;
+    StringField2: TStringField;
+    StringField3: TStringField;
+    FloatField10: TFloatField;
+    StringField4: TStringField;
+    StringField5: TStringField;
+    StringField6: TStringField;
+    StringField7: TStringField;
+    StringField8: TStringField;
+    StringField9: TStringField;
+    StringField10: TStringField;
+    FloatField11: TFloatField;
+    StringField11: TStringField;
+    FloatField12: TFloatField;
+    StringField12: TStringField;
+    FloatField13: TFloatField;
+    StringField13: TStringField;
+    FloatField14: TFloatField;
+    StringField14: TStringField;
+    FloatField15: TFloatField;
+    StringField15: TStringField;
+    StringField16: TStringField;
+    StringField17: TStringField;
+    FloatField16: TFloatField;
+    StringField18: TStringField;
+    FloatField17: TFloatField;
+    qryUmLancDel: TwwQuery;
+    qryVerifSaldoCCp: TwwQuery;
+    FloatField18: TFloatField;
+    qryVerifSaldoSCp: TwwQuery;
+    FloatField19: TFloatField;
+    qryVerifSaldoNull: TwwQuery;
+    FloatField20: TFloatField;
+    qryNumLancSC: TwwQuery;
+    FloatField21: TFloatField;
+    FloatField22: TFloatField;
+    qryNumLancCC: TwwQuery;
+    FloatField23: TFloatField;
+    FloatField24: TFloatField;
+    qryNumLancNull: TwwQuery;
+    FloatField25: TFloatField;
+    FloatField26: TFloatField;
+    qryPlanoVigente: TwwQuery;
+    qryParamContabPLANO: TFloatField;
+    qryPlanoAnterior: TwwQuery;
+    qryDePara: TwwQuery;
+    qryPlanoAnteriorPLANOANTERIOR: TFloatField;
+    qryDeParaCONTA2: TStringField;
+    qryDeParaCENTROCUSTO2: TStringField;
+    qryMoeda: TwwQuery;
+    qryMoedaMOEDESC: TStringField;
+    QryDelRateioDesemb: TwwQuery;
+    qryPlanilRateio: TwwQuery;
+    qryPlanilRateioPANCONTAPERC: TStringField;
+    qryPlanilRateioPLANO: TFloatField;
+    qryPlanilRateioPANCONTABASE: TStringField;
+    qryPlanilRateioPANCCUSTOBASE: TStringField;
+    qryPlanilRateioPLACONTA: TStringField;
+    qryPlanilRateioCODCENTROCUSTO: TStringField;
+    qryPlanilRateioIDEMPRESA: TFloatField;
+    qryPlanilRateioIDPESSOA: TFloatField;
+    qryPlanilRateioPANPERC: TFloatField;
+    qryPlanilRateioCODSUBCONTA: TFloatField;
+    qryPlanilRateioTIPCODIGO: TStringField;
+    qrySaldoRateioCCusto: TwwQuery;
+    qrySaldoRateioCCustoPLANO: TFloatField;
+    qrySaldoRateioCCustoPLACONTA: TStringField;
+    qrySaldoRateioCCustoCODCENTROCUSTO: TStringField;
+    qrySaldoRateioCCustoIDEMPRESA: TFloatField;
+    qrySaldoRateioCCustoCODSUBCONTA: TFloatField;
+    qrySaldoRateioCCustoIDPESSOA: TFloatField;
+    qrySaldoRateioCCustoUNIDNEGOC: TFloatField;
+    qrySaldoRateioCCustoPERCRATEIO: TFloatField;
+    qrySaldoRateio: TwwQuery;
+    qrySaldoRateioPLANO: TFloatField;
+    qrySaldoRateioPLACONTA: TStringField;
+    qrySaldoRateioCODCENTROCUSTO: TStringField;
+    qrySaldoRateioIDEMPRESA: TFloatField;
+    qrySaldoRateioCODSUBCONTA: TFloatField;
+    qrySaldoRateioIDPESSOA: TFloatField;
+    qrySaldoRateioUNIDNEGOC: TFloatField;
+    qrySaldoRateioPERCRATEIO: TFloatField;
+    QryPortForma: TwwQuery;
+    QryPortFormaIDFORCLI: TFloatField;
+    qryPlanoVigentePLANO: TFloatField;
+    qryPlanoVigenteDATAINICIO: TDateTimeField;
+    qryPlanoVigenteDATAFIM: TDateTimeField;
+    qryPlanoVigentePLANOANTERIOR: TFloatField;
+    qryPlanoVigenteMASCARA: TStringField;
+    QryParGlobal: TwwQuery;
+    QryParGlobalMASCARANUMAGENCIA: TStringField;
+    QryParGlobalFLGCRIAAGENCIA: TStringField;
+    qryPlanilRateioUNIDNEGOC: TFloatField;
+    QryPortFormaCONTACONTABIL: TStringField;
+    QryPortFormaCODCENTROCUSTO: TStringField;
+    QryPortFormaCODSUBCONTA: TFloatField;
+    QryPortFormaUNIDNEGOC: TFloatField;
+    qryVerifSaldoSCpCCp: TwwQuery;
+    FloatField27: TFloatField;
+    qryVerifSaldoCCpPVp: TwwQuery;
+    FloatField28: TFloatField;
+    qryVerifSaldoSCpPVp: TwwQuery;
+    FloatField29: TFloatField;
+    qryVerifSaldoPVp: TwwQuery;
+    FloatField30: TFloatField;
+    qryLancamentoIDPLANOPREV: TFloatField;
+    qryLancamentoIDPATRO: TFloatField;
+    qryUmLancamentoIDPLANOPREV: TFloatField;
+    qryUmLancamentoIDPATRO: TFloatField;
+    qryTestaCC: TwwQuery;
+    qryTestaCCCODCENTROCUSTO: TStringField;
+    qryParamContabPACDATABLOQ: TDateTimeField;
+    qryParamContabFLGPERMITEZERO: TStringField;
+    qryParamContabFLGHISTCAIXAALTA: TStringField;
+    qryTravaParam: TwwQuery;
+    procedure DtmCmBackDestroy(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  DtmCmBack: TDtmCmBack;
+
+implementation
+
+{$R *.DFM}
+
+procedure TDtmCmBack.DtmCmBackDestroy(Sender: TObject);
+begin
+ {}
+end;
+
+end.

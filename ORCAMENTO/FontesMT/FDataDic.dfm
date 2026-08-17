@@ -1,0 +1,963 @@
+object FrmDataDic: TFrmDataDic
+  Left = 36
+  Top = 41
+  BorderStyle = bsSingle
+  Caption = 'Dicionário de Dados'
+  ClientHeight = 581
+  ClientWidth = 800
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'MS Sans Serif'
+  Font.Style = [fsBold]
+  OldCreateOrder = True
+  WindowState = wsMaximized
+  OnActivate = FormActivate
+  OnClose = FormClose
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  OnShow = FormShow
+  PixelsPerInch = 96
+  TextHeight = 13
+  object Splitter1: TSplitter
+    Left = 207
+    Top = 0
+    Width = 3
+    Height = 581
+    Cursor = crHSplit
+  end
+  object ScbDataDic: TScrollBox
+    Left = 210
+    Top = 0
+    Width = 590
+    Height = 581
+    Align = alClient
+    Color = clBtnFace
+    ParentColor = False
+    TabOrder = 0
+    object NtbTabFields: TNotebook
+      Left = -1
+      Top = 42
+      Width = 542
+      Height = 535
+      Color = clBtnFace
+      ParentColor = False
+      TabOrder = 0
+      object TPage
+        Left = 0
+        Top = 0
+        Caption = 'Tabelas'
+        object DadosTabelas: TPageControl
+          Left = 8
+          Top = 8
+          Width = 430
+          Height = 488
+          ActivePage = TbsTabela
+          TabOrder = 0
+          object TbsTabela: TTabSheet
+            Caption = 'Tabela'
+            object Label1: TLabel
+              Left = 8
+              Top = 19
+              Width = 33
+              Height = 13
+              Caption = 'Nome'
+            end
+            object Label2: TLabel
+              Left = 8
+              Top = 88
+              Width = 58
+              Height = 13
+              Caption = 'Descrição'
+            end
+            object Label10: TLabel
+              Left = 8
+              Top = 52
+              Width = 80
+              Height = 13
+              Caption = 'Nome Original'
+            end
+            object wwDBRichEdit2: TwwDBRichEdit
+              Left = 8
+              Top = 112
+              Width = 401
+              Height = 337
+              AutoURLDetect = False
+              DataField = 'DESCRICAO'
+              DataSource = DsDetalheTabela
+              PrintJobName = 'Delphi 5'
+              TabOrder = 0
+              EditorCaption = 'Edit Rich Text'
+              EditorPosition.Left = 0
+              EditorPosition.Top = 0
+              EditorPosition.Width = 0
+              EditorPosition.Height = 0
+              MeasurementUnits = muInches
+              PrintMargins.Top = 1
+              PrintMargins.Bottom = 1
+              PrintMargins.Left = 1
+              PrintMargins.Right = 1
+              RichEditVersion = 2
+              Data = {
+                680000007B5C727466315C616E73695C64656666307B5C666F6E7474626C7B5C
+                66305C666E696C204D532053616E732053657269663B7D7D0D0A5C766965776B
+                696E64345C7563315C706172645C6C616E67313034365C625C66305C66733136
+                200D0A5C706172207D0D0A00}
+            end
+            object wwDBEdit6: TwwDBEdit
+              Left = 48
+              Top = 16
+              Width = 361
+              Height = 21
+              DataField = 'TABLEALIAS'
+              DataSource = DsDetalheTabela
+              TabOrder = 1
+              UnboundDataType = wwDefault
+              WantReturns = False
+              WordWrap = False
+            end
+            object wwDBEdit7: TwwDBEdit
+              Left = 96
+              Top = 48
+              Width = 313
+              Height = 21
+              DataField = 'TABLENAME'
+              DataSource = DsDetalheTabela
+              TabOrder = 2
+              UnboundDataType = wwDefault
+              WantReturns = False
+              WordWrap = False
+            end
+          end
+          object TbsRelacionamentos: TTabSheet
+            Caption = 'Relacionamentos'
+            object Bevel2: TBevel
+              Left = 12
+              Top = 210
+              Width = 399
+              Height = 8
+              Shape = bsBottomLine
+            end
+            object Memo2: TMemo
+              Left = 10
+              Top = 30
+              Width = 400
+              Height = 179
+              TabOrder = 0
+            end
+            object Memo3: TMemo
+              Left = 9
+              Top = 249
+              Width = 401
+              Height = 203
+              TabOrder = 1
+            end
+            object Panel3: TPanel
+              Left = 10
+              Top = 4
+              Width = 401
+              Height = 25
+              BevelInner = bvLowered
+              Caption = 'Tabelas Ascendentes'
+              Color = clGray
+              Font.Charset = DEFAULT_CHARSET
+              Font.Color = clWhite
+              Font.Height = -13
+              Font.Name = 'MS Sans Serif'
+              Font.Style = [fsBold]
+              ParentFont = False
+              TabOrder = 2
+            end
+            object Panel4: TPanel
+              Left = 9
+              Top = 223
+              Width = 402
+              Height = 25
+              BevelInner = bvLowered
+              Caption = 'Tabelas Descendentes'
+              Color = clGray
+              Font.Charset = DEFAULT_CHARSET
+              Font.Color = clWhite
+              Font.Height = -13
+              Font.Name = 'MS Sans Serif'
+              Font.Style = [fsBold]
+              ParentFont = False
+              TabOrder = 3
+            end
+          end
+        end
+      end
+      object TPage
+        Left = 0
+        Top = 0
+        Caption = 'Campos'
+        object PageControl1: TPageControl
+          Left = 8
+          Top = 8
+          Width = 416
+          Height = 503
+          ActivePage = TabSheet1
+          TabOrder = 0
+          object TabSheet1: TTabSheet
+            Caption = 'Campos'
+            object Label3: TLabel
+              Left = 10
+              Top = 13
+              Width = 33
+              Height = 13
+              Caption = 'Nome'
+            end
+            object Label4: TLabel
+              Left = 10
+              Top = 282
+              Width = 58
+              Height = 13
+              Caption = 'Descrição'
+            end
+            object Bevel4: TBevel
+              Left = 10
+              Top = 202
+              Width = 386
+              Height = 73
+              Shape = bsFrame
+            end
+            object Label5: TLabel
+              Left = 10
+              Top = 82
+              Width = 78
+              Height = 13
+              Caption = 'Tipo de Dado'
+            end
+            object Label6: TLabel
+              Left = 292
+              Top = 82
+              Width = 53
+              Height = 13
+              Caption = 'Tamanho'
+            end
+            object Label7: TLabel
+              Left = 10
+              Top = 113
+              Width = 86
+              Height = 13
+              Caption = 'Tipo de Campo'
+            end
+            object Label8: TLabel
+              Left = 10
+              Top = 46
+              Width = 80
+              Height = 13
+              Caption = 'Nome Original'
+            end
+            object Bevel3: TBevel
+              Left = 10
+              Top = 141
+              Width = 386
+              Height = 50
+              Shape = bsFrame
+            end
+            object Label9: TLabel
+              Left = 42
+              Top = 169
+              Width = 60
+              Height = 13
+              Caption = 'Da Tabela'
+            end
+            object DBText1: TDBText
+              Left = 193
+              Top = 149
+              Width = 50
+              Height = 13
+              AutoSize = True
+              DataField = 'FIELDALIAS'
+            end
+            object DBText2: TDBText
+              Left = 107
+              Top = 169
+              Width = 50
+              Height = 13
+              AutoSize = True
+              DataField = 'FIELDALIAS'
+            end
+            object DBCheckBox1: TDBCheckBox
+              Left = 23
+              Top = 211
+              Width = 209
+              Height = 17
+              Caption = 'Pode ser incluso numa consulta'
+              DataField = 'SELECTABLE'
+              DataSource = DsDetalheCampos
+              TabOrder = 0
+              ValueChecked = '1'
+              ValueUnchecked = '0'
+            end
+            object DBCheckBox2: TDBCheckBox
+              Left = 23
+              Top = 231
+              Width = 285
+              Height = 17
+              Caption = 'Pode ser incluso na ordenação da consulta'
+              DataField = 'SEARCHABLE'
+              DataSource = DsDetalheCampos
+              TabOrder = 1
+              ValueChecked = '1'
+              ValueUnchecked = '0'
+            end
+            object DBCheckBox3: TDBCheckBox
+              Left = 23
+              Top = 251
+              Width = 353
+              Height = 17
+              Caption = 'Pode ser incluso em cláusullas condicionais da consulta'
+              DataField = 'SORTABLE'
+              DataSource = DsDetalheCampos
+              TabOrder = 2
+              ValueChecked = '1'
+              ValueUnchecked = '0'
+            end
+            object DBCheckBox4: TDBCheckBox
+              Left = 23
+              Top = 147
+              Width = 168
+              Height = 17
+              Caption = 'Faz Referência ao campo'
+              DataField = 'SELECTABLE'
+              DataSource = DsDetalheCampos
+              TabOrder = 3
+              ValueChecked = 'True'
+              ValueUnchecked = 'False'
+            end
+            object wwDBEdit1: TwwDBEdit
+              Left = 53
+              Top = 10
+              Width = 348
+              Height = 21
+              DataField = 'FIELDALIAS'
+              DataSource = DsDetalheCampos
+              TabOrder = 4
+              UnboundDataType = wwDefault
+              WantReturns = False
+              WordWrap = False
+            end
+            object wwDBEdit2: TwwDBEdit
+              Left = 96
+              Top = 42
+              Width = 305
+              Height = 21
+              DataField = 'FIELDNAME'
+              DataSource = DsDetalheCampos
+              TabOrder = 5
+              UnboundDataType = wwDefault
+              WantReturns = False
+              WordWrap = False
+            end
+            object wwDBEdit3: TwwDBEdit
+              Left = 96
+              Top = 80
+              Width = 193
+              Height = 21
+              DataField = 'TIPODEDADO'
+              DataSource = DsDetalheCampos
+              TabOrder = 6
+              UnboundDataType = wwDefault
+              WantReturns = False
+              WordWrap = False
+            end
+            object wwDBEdit4: TwwDBEdit
+              Left = 352
+              Top = 80
+              Width = 49
+              Height = 21
+              DataField = 'TAMANHO'
+              DataSource = DsDetalheCampos
+              TabOrder = 7
+              UnboundDataType = wwDefault
+              WantReturns = False
+              WordWrap = False
+            end
+            object wwDBEdit5: TwwDBEdit
+              Left = 104
+              Top = 112
+              Width = 297
+              Height = 21
+              DataField = 'TIPOCHAVE'
+              DataSource = DsDetalheCampos
+              TabOrder = 8
+              UnboundDataType = wwDefault
+              WantReturns = False
+              WordWrap = False
+            end
+            object wwDBRichEdit1: TwwDBRichEdit
+              Left = 11
+              Top = 299
+              Width = 385
+              Height = 165
+              AutoURLDetect = False
+              DataField = 'DESCRICAO'
+              DataSource = DsDetalheCampos
+              PrintJobName = 'Delphi 5'
+              TabOrder = 9
+              EditorCaption = 'Edit Rich Text'
+              EditorPosition.Left = 0
+              EditorPosition.Top = 0
+              EditorPosition.Width = 0
+              EditorPosition.Height = 0
+              MeasurementUnits = muInches
+              PrintMargins.Top = 1
+              PrintMargins.Bottom = 1
+              PrintMargins.Left = 1
+              PrintMargins.Right = 1
+              RichEditVersion = 2
+              Data = {
+                680000007B5C727466315C616E73695C64656666307B5C666F6E7474626C7B5C
+                66305C666E696C204D532053616E732053657269663B7D7D0D0A5C766965776B
+                696E64345C7563315C706172645C6C616E67313034365C625C66305C66733136
+                200D0A5C706172207D0D0A00}
+            end
+          end
+        end
+      end
+    end
+    object Panel2: TPanel
+      Left = 0
+      Top = 0
+      Width = 586
+      Height = 46
+      Align = alTop
+      BevelInner = bvLowered
+      TabOrder = 1
+      object SpeedButton1: TSpeedButton
+        Left = 8
+        Top = 7
+        Width = 128
+        Height = 32
+        Caption = 'Procurar Tabelas'
+        Flat = True
+        Glyph.Data = {
+          66010000424D6601000000000000760000002800000014000000140000000100
+          040000000000F000000000000000000000001000000010000000000000000000
+          8000008000000080800080000000800080008080000080808000C0C0C0000000
+          FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00DDDDDDDDDDDD
+          DDDDDDDD0000DDDDDDDDDDD77D77D77D0000DDD707DDDD007007007D0000DD73
+          307DDD00D00D00DD0000DD7F3307DDDDDDDDDDDD0000DDD3F3307DDDDDDDDDDD
+          0000DDDD3F330777777DDDDD0000DDDDD3F330000077DDDD0000DDDDDD3F3377
+          CC707DDD0000DDDDDDD03787CC8707DD0000DDDDDDD07FF7CCFF777D0000DDDD
+          D4D0F8F7CC8F804D0000DDDDD4408F87CCFF80DD0000DDDDD4D0F777CCFF80DD
+          0000DDDDDD4777CCCCCC774D0000DDDDDDDD07CCCCCC0DDD0000DDDDDDDDD07F
+          8F70DDDD0000DDDDDDDDDD70007DDDDD0000DDDDDDDDDDDDDDDDDDDD0000DDDD
+          DDDDDDDDDDDDDDDD0000}
+        OnClick = SpeedButton1Click
+      end
+      object SpeedButton2: TSpeedButton
+        Left = 141
+        Top = 7
+        Width = 128
+        Height = 32
+        Caption = 'Procurar Campos'
+        Flat = True
+        Glyph.Data = {
+          66010000424D6601000000000000760000002800000014000000140000000100
+          040000000000F000000000000000000000001000000010000000000000000000
+          8000008000000080800080000000800080008080000080808000C0C0C0000000
+          FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00DDDDDDDDDDDD
+          DDDDDDDD0000DDDDDDDDDDD77D77D77D0000DDD707DDDD007007007D0000DD73
+          307DDD00D00D00DD0000DD7F3307DDDDDDDDDDDD0000DDD3F3307DDDDDDDDDDD
+          0000DDDD3F330777777DDDDD0000DDDDD3F330000077DDDD0000DDDDDD3F3378
+          88707DDD0000DDDDDDD037FCCCC707DD0000DDDDDDD07FCCCCCF777D0000DDDD
+          D4D0F8CCFFFF804D0000DDDDD4408FCCFFFF80DD0000DDDDD4D0F8CCFFFF80DD
+          0000DDDDDD477FCCCCCF774D0000DDDDDDDD07FCCCC70DDD0000DDDDDDDDD07F
+          8F70DDDD0000DDDDDDDDDD70007DDDDD0000DDDDDDDDDDDDDDDDDDDD0000DDDD
+          DDDDDDDDDDDDDDDD0000}
+        OnClick = SpeedButton2Click
+      end
+      object SpeedButton4: TSpeedButton
+        Left = 274
+        Top = 7
+        Width = 128
+        Height = 32
+        Caption = 'Sair'
+        Flat = True
+        Glyph.Data = {
+          56070000424D5607000000000000360400002800000028000000140000000100
+          0800000000002003000000000000000000000001000000010000000000000000
+          80000080000000808000800000008000800080800000C0C0C000C0DCC000F0CA
+          A600000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          000000000000000000000000000000000000F0FBFF00A4A0A000808080000000
+          FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00030707070707
+          070707070707070707070707070703FFFFFFFFFFFFFFFFFFFFFFFF0303030303
+          03FFF8F8F8F8F8F8F8F8F8F8F8F8FF07FF07FF07F8F8F8F8F8F8F8F8F8F8F8F8
+          F8F8030303030303F8F8F8F8F8F8F8F8F8F8F8F8F80707FF07FF07F8F8F8F8F8
+          F8F8F8F8F8F8F8F8F8FF030303FFFFF8F8F80404040404040000F8F8F8FFFFFF
+          040404040404F8F8F8F8F8F8F8F8F8F8F8030303F8F8F8F8F803030303030304
+          FD05000007FFFFFF0403030303030303030303F8FFF8F8F8FF030303F8FF0303
+          030303030303030405FD0500FFFFFFFF0403030303030303030303F8F807F8F8
+          FF030303F8FF03030303030303030304FD05FD00FFFFFFFF0403030303030303
+          030303F8FFF807F8FF030303F8FF0303030303030303030405FD0500FFFEFFFE
+          0403030303030303030303F8F807F8F8FF030303F8FF03030303030303030304
+          FD05FD00FFFFFFFF0403030303030303030303F8FFF807F8FF030303F8FF0303
+          030303030303030405FD0500FFFEFFFE0403030303030303030303F8F807F8F8
+          FF030303F8FF03030303030303030304FD05FD00FFFFFFFF0403030303030303
+          030303F8FFF807F8FF030303F8FF0303030303030303030405FD0500FFFEFFFE
+          0403030303030303030303F8F807F8F8FF030303F8FF03030303030303030304
+          FD05FD00FEFFFEFF0403030303030303030303F8FFF807F8FF030303F8FF0303
+          030303030303030405FD0500FFFEFFFE0403030303030303030303F8F807F8F8
+          FF030303F8FF03030303030303030304FD05FD00FEFFFEFF0403030303030303
+          030303F8FFF8FFF8FFFFFFFFF8FF030303030303030303040404040404040404
+          0403030303030303030303F8F8F8F8F8F8F8F8F8F80303030303030303030303
+          03030303030303030303030303030303030303030303FFFFFFFFFFFF03030303
+          0303030303030303030000000000000303030303030303030303030303F8F8F8
+          F8F8F8FF0303030303030303030303030300FAFAFAFA00030303030303030303
+          0303030303F8FFFFFFFFF8FF0303030303030303030303030300000000000003
+          03030303030303030303030303F8F8F8F8F8F803030303030303}
+        NumGlyphs = 2
+        OnClick = SpeedButton4Click
+      end
+    end
+  end
+  object Panel1: TPanel
+    Left = 0
+    Top = 0
+    Width = 207
+    Height = 581
+    Align = alLeft
+    Alignment = taLeftJustify
+    BevelInner = bvLowered
+    TabOrder = 1
+    object TreeDataDic: TTreeView
+      Left = 2
+      Top = 2
+      Width = 203
+      Height = 577
+      Align = alClient
+      Color = clWhite
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'MS Sans Serif'
+      Font.Style = []
+      Images = ImageList1
+      Indent = 25
+      ParentFont = False
+      ReadOnly = True
+      TabOrder = 0
+      OnChange = TreeDataDicChange
+      OnClick = TreeDataDicClick
+    end
+  end
+  object ImageList1: TImageList
+    Left = 134
+    Top = 298
+    Bitmap = {
+      494C010102000500040010001000FFFFFFFFFF00FFFFFFFFFFFFFFFF424D3600
+      0000000000003600000028000000400000002000000001001000000000000010
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000100010001000100010001000
+      1000100010001000100010001000100010000000000000000000000000001863
+      0000000000000000000000000000186300000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      00000000000000000000000000000000000000001000FF7FFF7FFF7FFF7FFF7F
+      FF7FFF7FFF7FFF7FFF7FFF7FFF7FFF7F10000000000000000000000000000000
+      0000104200000000000010420000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      00000000000000000000000000000000000000001000FF7F000000000000FF7F
+      000000000000FF7F000000000000FF7F10000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      00000000000000000000000000000000000000001000FF7FFF7FFF7FFF7FFF7F
+      FF7FFF7FFF7FFF7FFF7FFF7FFF7FFF7F10000000100010001000100000001863
+      0000000000000000186300000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      00000000000000000000000000000000000000001000FF7F000000000000FF7F
+      000000000000FF7F000000000000FF7F100000001000FF7FFF7FFF7F00001863
+      0000000000000000186300000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      00000000000000000000000000000000000000001000FF7FFF7FFF7FFF7FFF7F
+      FF7FFF7FFF7FFF7FFF7FFF7FFF7FFF7F100000001000FF7F1042104200000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      00000000000000000000000000000000000000001000FF7F000000000000FF7F
+      000000000000FF7F000000000000FF7F100000001000FF7FFF7FFF7FFF7F0000
+      0000000000001863000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      00000000000000000000000000000000000000001000FF7FFF7FFF7FFF7FFF7F
+      FF7FFF7FFF7FFF7FFF7FFF7FFF7FFF7F100000001000FF7F10421042FF7F1042
+      0000000010421042FF7F00000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      00000000000000000000000000000000000000001000FF7F000000000000FF7F
+      000000000000FF7F000000000000FF7F100000001000FF7FFF7FFF7FFF7FFF7F
+      00000000FF7FFF7FFF7F00000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      00000000000000000000000000000000000000001000FF7FFF7FFF7FFF7FFF7F
+      FF7FFF7FFF7FFF7FFF7FFF7FFF7FFF7F100000001000FF7F10421042FF7F1042
+      0000000010421042FF7F00000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000100010001000100010001000
+      10001000100010001000100010001000100000001000FF7FFF7FFF7FFF7FFF7F
+      FF7FFF7FFF7FFF7FFF7F10000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      00000000000000000000000000000000000000001000FF7F100010001000FF7F
+      100010001000FF7F100010001000FF7F10000000100010001000100010001000
+      1000100010001000100010000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000100010001000100010001000
+      1000100010001000100010001000100010000000100018631000100018631000
+      1000186310001000186310000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000100010001000100010001000
+      1000100010001000100010000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      000000000000000000000000000000000000424D3E000000000000003E000000
+      2800000040000000200000000100010000000000000100000000000000000000
+      000000000000000000000000FFFFFF0000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      00000000000000000000000000000000FFFFF8F8000000008000F8F800000000
+      8000F870000000008000F8000000000080008000000000008000800000000000
+      8000800000000000800080010000000080008003000000008000800300000000
+      8000800300000000800080070000000080008007000000008000800700000000
+      FFFF800700000000FFFFFFFF00000000}
+  end
+  object DsDetalheTabela: TwwDataSource
+    DataSet = QryDetalheTabela
+    Left = 48
+    Top = 144
+  end
+  object QryDetalheTabela: TwwQuery
+    DatabaseName = 'BaseDados'
+    SQL.Strings = (
+      'SELECT TABLENAME, TABLEALIAS, DESCRICAO'
+      'FROM DDTABLE '
+      'WHERE IDDDTABLE = :PIDDDTABLE')
+    ValidateWithMask = True
+    Left = 48
+    Top = 200
+    ParamData = <
+      item
+        DataType = ftInteger
+        Name = 'PIDDDTABLE'
+        ParamType = ptUnknown
+      end>
+    object QryDetalheTabelaTABLENAME: TStringField
+      FieldName = 'TABLENAME'
+      Origin = 'DDTABLE.TABLENAME'
+      Size = 100
+    end
+    object QryDetalheTabelaTABLEALIAS: TStringField
+      FieldName = 'TABLEALIAS'
+      Origin = 'DDTABLE.TABLEALIAS'
+      Size = 100
+    end
+    object QryDetalheTabelaDESCRICAO: TMemoField
+      FieldName = 'DESCRICAO'
+      Origin = 'DDTABLE.DESCRICAO'
+      BlobType = ftMemo
+      Size = 2000
+    end
+  end
+  object QryTableField: TwwQuery
+    DatabaseName = 'BaseDados'
+    SQL.Strings = (
+      
+        'SELECT T.IDDDTABLE, T.TABLENAME, T.TABLEALIAS, F.FIELDNAME, F.ID' +
+        'DDFIELD, F.FIELDALIAS'
+      'FROM DDTABLE T, DDFIELD F'
+      'WHERE T.IDDDTABLE = F.IDDDTABLE'
+      'ORDER BY T.TABLENAME, F.FIELDNAME ASC')
+    ValidateWithMask = True
+    Left = 48
+    Top = 256
+    object QryTableFieldIDDDTABLE: TFloatField
+      FieldName = 'IDDDTABLE'
+      Origin = 'DDTABLE.IDDDTABLE'
+    end
+    object QryTableFieldTABLENAME: TStringField
+      FieldName = 'TABLENAME'
+      Origin = 'DDTABLE.TABLENAME'
+      Size = 100
+    end
+    object QryTableFieldTABLEALIAS: TStringField
+      FieldName = 'TABLEALIAS'
+      Origin = 'DDTABLE.TABLEALIAS'
+      Size = 100
+    end
+    object QryTableFieldFIELDNAME: TStringField
+      FieldName = 'FIELDNAME'
+      Origin = 'DDFIELD.FIELDNAME'
+      Size = 100
+    end
+    object QryTableFieldIDDDFIELD: TFloatField
+      FieldName = 'IDDDFIELD'
+      Origin = 'DDFIELD.IDDDFIELD'
+    end
+    object QryTableFieldFIELDALIAS: TStringField
+      FieldName = 'FIELDALIAS'
+      Origin = 'DDFIELD.FIELDALIAS'
+      Size = 100
+    end
+  end
+  object DsDetalheCampos: TwwDataSource
+    AutoEdit = False
+    DataSet = QryDetalheCampos
+    Left = 48
+    Top = 336
+  end
+  object QryDetalheCampos: TwwQuery
+    DatabaseName = 'BaseDados'
+    SQL.Strings = (
+      'SELECT FIELDNAME, FIELDALIAS, DESCRICAO, TAMANHO, TIPOCHAVE,  '
+      '       SELECTABLE, SEARCHABLE, SORTABLE, TIPODEDADO '
+      'FROM DDFIELD '
+      'WHERE IDDDFIELD = :PIDDDFIELD')
+    ValidateWithMask = True
+    Left = 48
+    Top = 392
+    ParamData = <
+      item
+        DataType = ftInteger
+        Name = 'PIDDDFIELD'
+        ParamType = ptUnknown
+      end>
+    object QryDetalheCamposFIELDNAME: TStringField
+      FieldName = 'FIELDNAME'
+      Origin = 'DDFIELD.FIELDNAME'
+      Size = 100
+    end
+    object QryDetalheCamposFIELDALIAS: TStringField
+      FieldName = 'FIELDALIAS'
+      Origin = 'DDFIELD.FIELDALIAS'
+      Size = 100
+    end
+    object QryDetalheCamposDESCRICAO: TMemoField
+      FieldName = 'DESCRICAO'
+      Origin = 'DDFIELD.DESCRICAO'
+      BlobType = ftMemo
+      Size = 2000
+    end
+    object QryDetalheCamposTAMANHO: TFloatField
+      FieldName = 'TAMANHO'
+      Origin = 'DDFIELD.TAMANHO'
+    end
+    object QryDetalheCamposTIPOCHAVE: TFloatField
+      FieldName = 'TIPOCHAVE'
+      Origin = 'DDFIELD.TIPOCHAVE'
+    end
+    object QryDetalheCamposSELECTABLE: TFloatField
+      FieldName = 'SELECTABLE'
+      Origin = 'DDFIELD.SELECTABLE'
+    end
+    object QryDetalheCamposSEARCHABLE: TFloatField
+      FieldName = 'SEARCHABLE'
+      Origin = 'DDFIELD.SEARCHABLE'
+    end
+    object QryDetalheCamposSORTABLE: TFloatField
+      FieldName = 'SORTABLE'
+      Origin = 'DDFIELD.SORTABLE'
+    end
+    object QryDetalheCamposTIPODEDADO: TStringField
+      FieldName = 'TIPODEDADO'
+      Origin = 'DDFIELD.TIPODEDADO'
+      Size = 9
+    end
+  end
+  object MsTabelas: TMontaSelect
+    Template.IdConsulta = 0
+    Caption = 'Seleciona'
+    Colunas.Strings = (
+      'DDTABLE.TABLEALIAS'
+      'DDTABLE.TABLENAME'
+      'SUBSTR(DDTABLE.DESCRICAO,1,200)')
+    TipodeDado.Strings = (
+      'C'
+      'C'
+      'C')
+    Descricao.Strings = (
+      'Nome'
+      'Nome no Banco'
+      'Descrição')
+    Tabelas.Strings = (
+      'DDTABLE')
+    CamposChave.Strings = (
+      'DDTABLE.IDDDTABLE')
+    Mascaras.Strings = (
+      ''
+      ''
+      '')
+    Larguras.Strings = (
+      '100'
+      '20'
+      '200')
+    DataBaseName = 'BaseDados'
+    RepeteConsulta = False
+    UsaDistinct = False
+    SalvaConsulta = False
+    ExibePergunta = True
+    Left = 411
+    Top = 60
+  end
+  object MsCampos: TMontaSelect
+    Template.IdConsulta = 0
+    Caption = 'Seleciona'
+    Colunas.Strings = (
+      'DDFIELD.FIELDALIAS'
+      'DDFIELD.FIELDNAME'
+      'DDFIELD.TIPODEDADO'
+      'DDFIELD.TIPOCHAVE'
+      'SUBSTR(DDFIELD.DESCRICAO,1,200)'
+      'DDTABLE.TABLEALIAS'
+      'DDTABLE.TABLENAME'
+      'SUBSTR(DDTABLE.DESCRICAO,1,200)')
+    TipodeDado.Strings = (
+      'C'
+      'C'
+      'C'
+      'C'
+      'C'
+      'C'
+      'C'
+      'C')
+    Descricao.Strings = (
+      'Nome Campo'
+      'Campo No Banco'
+      'Tipo'
+      'Tipo Chave'
+      'Descrição Campo'
+      'Nome Tabela'
+      'Nome Tabela No Banco'
+      'Descrição Tabela')
+    Tabelas.Strings = (
+      'DDTABLE'
+      'DDFIELD')
+    CamposChave.Strings = (
+      'DDFIELD.IDDDTABLE'
+      'DDFIELD.IDDDFIELD')
+    Filtro.Strings = (
+      'DDFIELD.IDDDTABLE = DDTABLE.IDDDTABLE')
+    Mascaras.Strings = (
+      ''
+      ''
+      ''
+      ''
+      ''
+      ''
+      ''
+      '')
+    Larguras.Strings = (
+      '100'
+      '20'
+      '9'
+      '1'
+      '200'
+      '100'
+      '100'
+      '200')
+    DataBaseName = 'BaseDados'
+    RepeteConsulta = False
+    UsaDistinct = False
+    SalvaConsulta = False
+    ExibePergunta = True
+    Left = 539
+    Top = 60
+  end
+end

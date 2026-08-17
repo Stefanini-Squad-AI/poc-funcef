@@ -1,0 +1,336 @@
+{*******************************************************}
+{                                                       }
+{ CM Soluções Informática                               }
+{ ** Todos os Direitos Reservados                       }
+{ Analista Responsável: Davi Ramos                      }
+{ Atualizado Em: Julho/2002                             }
+{                                                       }
+{*******************************************************}
+Unit FCadCRespxUsuMT;
+
+Interface
+
+Uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  IvDictio, IvMulti, IvEMulti, MontaSelect, DBTables, Db,
+  Wwdatsrc, Wwquery, TB97Ctls, MAHlpBtn, StdCtrls, Buttons, TB97Tlbr, TB97,
+  ExtCtrls, Grids, Wwdbigrd, Wwdbgrid, CmEventosCadastro, ImgList,
+  FCadastroMT, DBClient, uCMClientDataSet, uCtrlCadUsuxCResp, uCMTypes,
+  ComCtrls, DBGrids;
+
+Type
+  TFrmCadUsuxCResp = Class(TFrmCadastroMT)
+    Label1: TLabel;
+    EdUsu: TEdit;
+    plnTransf: TPanel;
+    btnAdiciona: TSpeedButton;
+    BtnRemove: TSpeedButton;
+    Panel1: TPanel;
+    Panel2: TPanel;
+    BtnAdicionaTudo: TSpeedButton;
+    btnRemoveTudo: TSpeedButton;
+    ltvDisponiveis: TListView;
+    ltvSelecionados: TListView;
+    Procedure FormCreate(Sender: TObject);
+    Procedure btnAdicionaClick(Sender: TObject);
+    Procedure BtnRemoveClick(Sender: TObject);
+    Procedure BtnAdicionaTudoClick(Sender: TObject);
+    Procedure btnRemoveTudoClick(Sender: TObject);
+    Procedure CmeCadastroFind(Sender: TObject);
+    Procedure CmeCadastroInsert(Sender: TObject);
+    Procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    Procedure AlternaCoresDoGrid(Sender: TObject; Field: TField;
+      State: TGridDrawState; Highlight: Boolean; AFont: TFont;
+      ABrush: TBrush);
+    procedure CmeCadastroCancel(Sender: TObject);
+    procedure bbtnConfirmarClick(Sender: TObject);
+  Private
+    { Private declarations }
+
+    CtrlCadUsuxCResp : TCtrlCadUsuxCResp;
+
+    Procedure Separa;
+    Procedure IncluirEm( pLtvDestino : TListView;
+                                       pCaption,
+                                       pSubItems0 : String );
+    Procedure RetirarDe( pLtvDestino : TListView;
+                         pPosicao    : Integer );
+    procedure AtualizaPESSOAXCRESP;
+    Procedure PosicionaEm( pCodCResp : String );
+  Public
+    { Public declarations }
+
+  End;
+
+Var
+  FrmCadUsuxCResp : TFrmCadUsuxCResp;
+
+Implementation
+
+{$R *.DFM}
+
+Uses
+  uSistema, uMensErro, dBaseDados;
+//************************************************
+Procedure TFrmCadUsuxCResp.FormCreate(Sender: TObject);
+Begin
+  Inherited;
+
+  CmeCadastro.RepetirInsert := False;
+  edUsu.Clear;
+  ltvDisponiveis.Items.Clear;
+  ltvSelecionados.Items.Clear;
+
+  CtrlCadUsuxCResp := TCtrlCadUsuxCResp.Create;
+  CtrlCadUsuxCResp.Initialize( DtmBaseDados.dbBaseDados, True,
+                               Sistema.ConnectionType,   Sistema.ConnectionSide,
+                               Sistema.AppRemoteServer,  True, nil, nil, False );
+
+  CtrlCadUsuxCResp.IdEmpresa := Sistema.IdEmpresa;
+  CtrlCadUsuxCResp.IdUsuario := Sistema.IdUsuario;
+
+  CtrlCadUsuxCResp.CdsDisponiveis  := Cds;
+
+  Cds.Close;
+  Cds.Data := CtrlCadUsuxCResp.ProcuraCentResponXPessoa( -1, -1 );
+End;
+//************************************************
+Procedure TFrmCadUsuxCResp.FormClose(Sender: TObject;
+  var Action: TCloseAction);
+Begin
+  Inherited;
+
+  CtrlCadUsuxCResp.Free;
+End;
+//************************************************
+Procedure TFrmCadUsuxCResp.CmeCadastroFind(Sender: TObject);
+Begin
+  Inherited;
+  If ( MontaSelect.RetornouValor ) Then Begin
+
+    Cds.Close;
+    edUsu.Text := MontaSelect.ValoresChave[1];
+    Cds.Data   := CtrlCadUsuxCResp.ProcuraCentResponXPessoa( StrToInt( MontaSelect.ValoresChave[ 0 ] ), Sistema.IdEmpresa );
+    Separa;
+  End;
+End;
+//************************************************
+Procedure TFrmCadUsuxCResp.CmeCadastroInsert(Sender: TObject);
+Begin
+  CmeCadastro.RepetirInsert := False;
+
+  Inherited;
+  If ( Trim(edUsu.Text) = '' ) Then Begin
+
+    MsgDlg( 'Não há Nenhum usuário selecionado', 'Atenção', mtWarning, [ mbOk ], 0 );
+    bbtnCancelar.Click;
+  End Else Begin
+
+    Cds.Cancel;
+  End;
+End;
+//************************************************
+Procedure TFrmCadUsuxCResp.btnAdicionaClick(Sender: TObject);
+Var
+  Posicao : Integer;
+
+Begin
+  If ( ltvDisponiveis.Items.Count > 0 ) Then Begin
+
+    If ( ltvDisponiveis.Selected = Nil ) Then Begin
+
+      Posicao := 0;
+
+    End Else Begin
+
+      Posicao := ltvDisponiveis.Selected.Index;
+    End;
+
+    IncluirEm( ltvSelecionados,
+               ltvDisponiveis.Items[ Posicao ].Caption,
+               ltvDisponiveis.Items[ Posicao ].SubItems[ 0 ] );
+    RetirarDe( ltvDisponiveis, Posicao );
+  End;
+End;
+//************************************************
+Procedure TFrmCadUsuxCResp.BtnRemoveClick(Sender: TObject);
+Var
+  Posicao : Integer;
+
+Begin
+  If ( ltvSelecionados.Items.Count > 0 ) Then Begin
+
+    If ( ltvSelecionados.Selected = Nil ) Then Begin
+
+      Posicao := 0;
+
+    End Else Begin
+
+      Posicao := ltvSelecionados.Selected.Index;
+    End;
+
+    IncluirEm( ltvDisponiveis,
+               ltvSelecionados.Items[ Posicao ].Caption,
+               ltvSelecionados.Items[ Posicao ].SubItems[ 0 ] );
+    RetirarDe( ltvSelecionados, Posicao );
+  End;
+End;
+//************************************************
+Procedure TFrmCadUsuxCResp.BtnAdicionaTudoClick(Sender: TObject);
+Var
+  Posicao : Integer;
+Begin
+
+  For Posicao := ltvDisponiveis.Items.Count - 1 DownTo 0 Do
+    btnAdicionaClick( Self );
+End;
+//************************************************
+Procedure TFrmCadUsuxCResp.btnRemoveTudoClick(Sender: TObject);
+Var
+  Posicao : Integer;
+Begin
+
+  For Posicao := ltvSelecionados.Items.Count - 1 DownTo 0 Do
+    btnRemoveClick( Self );
+End;
+//************************************************
+Procedure TFrmCadUsuxCResp.AlternaCoresDoGrid(Sender: TObject;
+  Field: TField; State: TGridDrawState; Highlight: Boolean; AFont: TFont;
+  ABrush: TBrush);
+Begin
+  Inherited;
+
+  //Faz com que as linhas do grid tenham cores alternadas
+  AFont.Color  := $00C0FFFF; //Amarelo Bebê
+
+  If ( State <> [gdSelected] ) Then Begin
+
+    If ( Not Highlight ) Then Begin
+
+      If ( ( ( Sender as TwwDBGrid ).CalcCellRow mod 2 ) = 0 ) Then Begin
+
+        ABrush.color := clwhite;
+        AFont.Color  := clBlack;
+      End Else Begin
+
+        ABrush.Color := $00C0FFFF; //Amarelo Bebê
+        AFont.Color  := clBlack;
+      End;
+    End;
+  End Else Begin
+
+    ABrush.Color := clHighLight;
+  End;
+End;
+//************************************************
+Procedure TFrmCadUsuxCResp.CmeCadastroCancel(Sender: TObject);
+Begin
+  Inherited;
+
+  Cds.Close;
+  If ( MontaSelect.RetornouValor ) Then Begin
+    Cds.Data := CtrlCadUsuxCResp.ProcuraCentResponXPessoa( StrToInt( MontaSelect.ValoresChave[ 0 ] ), Sistema.IdEmpresa );
+    Separa;
+  End;
+End;
+//************************************************
+Procedure TFrmCadUsuxCResp.Separa;
+Begin
+
+  ltvDisponiveis.Items.Clear;
+  ltvSelecionados.Items.Clear;
+
+  With Cds Do Begin
+    First;
+    While ( Not Eof ) Do Begin
+
+      If ( FieldByName( 'IDPESSOAACESSO'{ivlm} ).AsInteger = 0 ) Then Begin
+
+        IncluirEm( ltvDisponiveis,
+                   FieldByName( 'CODCENTRORESPON'{ivlm} ).AsString,
+                   FieldByName( 'NOME'{ivlm} ).AsString );
+
+      End Else Begin
+
+        IncluirEm( ltvSelecionados,
+                   FieldByName( 'CODCENTRORESPON'{ivlm} ).AsString,
+                   FieldByName( 'NOME'{ivlm} ).AsString );
+      End;
+
+      Next;
+    End;
+  End;
+End;
+//************************************************
+Procedure TFrmCadUsuxCResp.IncluirEm( pLtvDestino : TListView;
+                                       pCaption,
+                                       pSubItems0 : String );
+Begin
+  pltvDestino.Items.Add;
+  pltvDestino.Items.Item[ pltvDestino.Items.Count - 1 ].Caption := pCaption;
+  pltvDestino.Items.Item[ pltvDestino.Items.Count - 1 ].SubItems.Add( pSubItems0 );
+End;
+//************************************************
+Procedure TFrmCadUsuxCResp.RetirarDe( pLtvDestino : TListView;
+                                       pPosicao    : Integer );
+Begin
+
+ pLtvDestino.Items.Delete( pPosicao );
+End;
+//************************************************
+Procedure TFrmCadUsuxCResp.AtualizaPESSOAXCRESP;
+Var
+  Posicao : Integer;
+
+Begin
+
+  With Cds Do Begin
+    For Posicao := 0 To ltvDisponiveis.Items.Count - 1 Do Begin
+
+      PosicionaEm( ltvDisponiveis.Items[ Posicao ].Caption );
+
+      If ( FieldByName( 'IDPESSOAACESSO'{ivlm} ).AsFloat <> 0 ) Then Begin
+
+        CtrlCadUsuxCResp.ExcluiPESSOAXCRESP( FieldByName( 'IDPESSOAACESSO'{ivlm} ).AsString,
+                                             FieldByName( 'CODCENTRORESPON'{ivlm} ).AsString,
+                                             FloatToStr( Sistema.IdEmpresa ) );
+      End;
+    End;
+
+    For Posicao := 0 To ltvSelecionados.Items.Count - 1 Do Begin
+
+      PosicionaEm( ltvSelecionados.Items[ Posicao ].Caption );
+
+      If ( FieldByName( 'IDPESSOAACESSO'{ivlm} ).AsInteger = 0 ) Then Begin
+
+        CtrlCadUsuxCResp.IncluiPESSOAXCRESP( MontaSelect.ValoresChave[ 0 ],
+                                             FieldByName( 'CODCENTRORESPON'{ivlm} ).AsString,
+                                             FloatToStr( Sistema.IdEmpresa ) );
+      End;
+    End;
+  End;
+End;
+//************************************************
+Procedure TFrmCadUsuxCResp.PosicionaEm( pCodCResp : String );
+Begin
+
+  With Cds Do Begin
+    First;
+    While ( Not EOF ) And
+          ( FieldByName( 'CODCENTRORESPON'{ivlm} ).AsString <> pCodCResp ) Do Begin
+      Next;
+    End;
+  End;
+End;
+//************************************************
+Procedure TFrmCadUsuxCResp.bbtnConfirmarClick(Sender: TObject);
+Begin
+
+  AtualizaPESSOAXCRESP;
+  CmeCadastroCancel( Self );
+  MsgDlg( 'Dados Gravados', 'Aviso', mtWarning, [ mbOk ] , 0 );
+  Inherited;
+
+End;
+//************************************************
+End.

@@ -1,0 +1,2168 @@
+inherited RptPosiFornCli: TRptPosiFornCli
+  Left = 400
+  Top = 212
+  Height = 311
+  Caption = 'RptPosiFornCli'
+  OldCreateOrder = True
+  PixelsPerInch = 96
+  TextHeight = 13
+  inherited CmpRptCM: TCmParamReport
+    Params = <
+      item
+        Controle = tcEdit
+        TipodeDado = tdBoolean
+        LookupSettings.SQL.Strings = ()
+        LookupSettings.Tamanho = '0'
+        CheckBoxSetings.ValueChecked = 'True'
+        CheckBoxSetings.ValueUnChecked = 'False'
+        CheckBoxSetings.Checked = True
+        RadioGroupSettings.Items.Strings = ()
+        RadioGroupSettings.Values.Strings = ()
+        RadioGroupSettings.Columns = 1
+        RadioGroupSettings.ItemIndex = -1
+        RadioGroupSettings.Height = 40
+        ComboBoxSettings.Sorted = False
+        ComboBoxSettings.Style = csDropDownList
+        ComboBoxSettings.Items.Strings = ()
+        ComboBoxSettings.DropDownCount = 8
+        ComboBoxSettings.ItemIndex = -1
+        ListBoxSettings.Items.Strings = ()
+        ListBoxSettings.MultiSelect = False
+        ListBoxSettings.ExtendedSelect = False
+        ListBoxSettings.Sorted = False
+        ListBoxSettings.Style = lbStandard
+        ListBoxSettings.height = 70
+        MostraComboCompara = False
+        Required = True
+        EditSettings.Color = clWindow
+        EditSettings.Readonly = False
+        EditSettings.Font.Charset = DEFAULT_CHARSET
+        EditSettings.Font.Color = clWindowText
+        EditSettings.Font.Height = -11
+        EditSettings.Font.Name = 'MS Sans Serif'
+        EditSettings.Font.Style = [fsBold]
+        SpinEditSettings.MaxValue = 0
+        SpinEditSettings.MinValue = 0
+        SpinEditSettings.Increment = 0
+        SpinEditSettings.Value = 0
+        MaskEditSettings.MaxLength = 0
+        ProcuraSTSettings.Subtipo = stFornecedor
+        ProcuraSTSettings.CampoEdit = ceRazaoSocial
+        ProcuraSTSettings.FiltraSubTipo = True
+        ProcuraFCSettings.Status = fcAll
+        ProcuraFCSettings.CampoEdit = ceRazaoSocial
+        ProcuraFCSettings.MostraEndereco = False
+        ProcuraFCSettings.ForCli = fcFornecedor
+        ProcuraCCSettings.Plano = 0
+        ProcuraCCSettings.Status = scSoAtiva
+        ProcuraCCSettings.AceitaTipoConta = Indiferente
+        Width = 0
+      end
+      item
+        Controle = tcEdit
+        TipodeDado = tdBoolean
+        LookupSettings.SQL.Strings = ()
+        LookupSettings.Tamanho = '0'
+        CheckBoxSetings.ValueChecked = 'True'
+        CheckBoxSetings.ValueUnChecked = 'False'
+        CheckBoxSetings.Checked = True
+        RadioGroupSettings.Items.Strings = ()
+        RadioGroupSettings.Values.Strings = ()
+        RadioGroupSettings.Columns = 1
+        RadioGroupSettings.ItemIndex = -1
+        RadioGroupSettings.Height = 40
+        ComboBoxSettings.Sorted = False
+        ComboBoxSettings.Style = csDropDownList
+        ComboBoxSettings.Items.Strings = ()
+        ComboBoxSettings.DropDownCount = 8
+        ComboBoxSettings.ItemIndex = -1
+        ListBoxSettings.Items.Strings = ()
+        ListBoxSettings.MultiSelect = False
+        ListBoxSettings.ExtendedSelect = False
+        ListBoxSettings.Sorted = False
+        ListBoxSettings.Style = lbStandard
+        ListBoxSettings.height = 70
+        MostraComboCompara = False
+        Required = False
+        EditSettings.Color = clWindow
+        EditSettings.Readonly = False
+        EditSettings.Font.Charset = DEFAULT_CHARSET
+        EditSettings.Font.Color = clWindowText
+        EditSettings.Font.Height = -11
+        EditSettings.Font.Name = 'MS Sans Serif'
+        EditSettings.Font.Style = [fsBold]
+        SpinEditSettings.MaxValue = 0
+        SpinEditSettings.MinValue = 0
+        SpinEditSettings.Increment = 0
+        SpinEditSettings.Value = 0
+        MaskEditSettings.MaxLength = 0
+        ProcuraSTSettings.Subtipo = stFornecedor
+        ProcuraSTSettings.CampoEdit = ceRazaoSocial
+        ProcuraSTSettings.FiltraSubTipo = True
+        ProcuraFCSettings.Status = fcAll
+        ProcuraFCSettings.CampoEdit = ceRazaoSocial
+        ProcuraFCSettings.MostraEndereco = False
+        ProcuraFCSettings.ForCli = fcFornecedor
+        ProcuraCCSettings.Plano = 0
+        ProcuraCCSettings.Status = scSoAtiva
+        ProcuraCCSettings.AceitaTipoConta = Indiferente
+        Width = 0
+      end
+      item
+        Controle = tcEdit
+        TipodeDado = tdBoolean
+        LookupSettings.SQL.Strings = ()
+        LookupSettings.Tamanho = '0'
+        CheckBoxSetings.ValueChecked = 'True'
+        CheckBoxSetings.ValueUnChecked = 'False'
+        CheckBoxSetings.Checked = True
+        RadioGroupSettings.Items.Strings = ()
+        RadioGroupSettings.Values.Strings = ()
+        RadioGroupSettings.Columns = 1
+        RadioGroupSettings.ItemIndex = -1
+        RadioGroupSettings.Height = 40
+        ComboBoxSettings.Sorted = False
+        ComboBoxSettings.Style = csDropDownList
+        ComboBoxSettings.Items.Strings = ()
+        ComboBoxSettings.DropDownCount = 8
+        ComboBoxSettings.ItemIndex = -1
+        ListBoxSettings.Items.Strings = ()
+        ListBoxSettings.MultiSelect = False
+        ListBoxSettings.ExtendedSelect = False
+        ListBoxSettings.Sorted = False
+        ListBoxSettings.Style = lbStandard
+        ListBoxSettings.height = 70
+        MostraComboCompara = False
+        Required = False
+        EditSettings.Color = clWindow
+        EditSettings.Readonly = False
+        EditSettings.Font.Charset = DEFAULT_CHARSET
+        EditSettings.Font.Color = clWindowText
+        EditSettings.Font.Height = -11
+        EditSettings.Font.Name = 'MS Sans Serif'
+        EditSettings.Font.Style = [fsBold]
+        SpinEditSettings.MaxValue = 0
+        SpinEditSettings.MinValue = 0
+        SpinEditSettings.Increment = 0
+        SpinEditSettings.Value = 0
+        MaskEditSettings.MaxLength = 0
+        ProcuraSTSettings.Subtipo = stFornecedor
+        ProcuraSTSettings.CampoEdit = ceRazaoSocial
+        ProcuraSTSettings.FiltraSubTipo = True
+        ProcuraFCSettings.Status = fcAll
+        ProcuraFCSettings.CampoEdit = ceRazaoSocial
+        ProcuraFCSettings.MostraEndereco = False
+        ProcuraFCSettings.ForCli = fcFornecedor
+        ProcuraCCSettings.Plano = 0
+        ProcuraCCSettings.Status = scSoAtiva
+        ProcuraCCSettings.AceitaTipoConta = Indiferente
+        Width = 0
+      end
+      item
+        Controle = tcEdit
+        TipodeDado = tdBoolean
+        LookupSettings.SQL.Strings = ()
+        LookupSettings.Tamanho = '0'
+        CheckBoxSetings.ValueChecked = 'True'
+        CheckBoxSetings.ValueUnChecked = 'False'
+        CheckBoxSetings.Checked = True
+        RadioGroupSettings.Items.Strings = ()
+        RadioGroupSettings.Values.Strings = ()
+        RadioGroupSettings.Columns = 1
+        RadioGroupSettings.ItemIndex = -1
+        RadioGroupSettings.Height = 40
+        ComboBoxSettings.Sorted = False
+        ComboBoxSettings.Style = csDropDownList
+        ComboBoxSettings.Items.Strings = ()
+        ComboBoxSettings.DropDownCount = 8
+        ComboBoxSettings.ItemIndex = -1
+        ListBoxSettings.Items.Strings = ()
+        ListBoxSettings.MultiSelect = False
+        ListBoxSettings.ExtendedSelect = False
+        ListBoxSettings.Sorted = False
+        ListBoxSettings.Style = lbStandard
+        ListBoxSettings.height = 70
+        MostraComboCompara = False
+        Required = False
+        EditSettings.Color = clWindow
+        EditSettings.Readonly = False
+        EditSettings.Font.Charset = DEFAULT_CHARSET
+        EditSettings.Font.Color = clWindowText
+        EditSettings.Font.Height = -11
+        EditSettings.Font.Name = 'MS Sans Serif'
+        EditSettings.Font.Style = [fsBold]
+        SpinEditSettings.MaxValue = 0
+        SpinEditSettings.MinValue = 0
+        SpinEditSettings.Increment = 0
+        SpinEditSettings.Value = 0
+        MaskEditSettings.MaxLength = 0
+        ProcuraSTSettings.Subtipo = stFornecedor
+        ProcuraSTSettings.CampoEdit = ceRazaoSocial
+        ProcuraSTSettings.FiltraSubTipo = True
+        ProcuraFCSettings.Status = fcAll
+        ProcuraFCSettings.CampoEdit = ceRazaoSocial
+        ProcuraFCSettings.MostraEndereco = False
+        ProcuraFCSettings.ForCli = fcFornecedor
+        ProcuraCCSettings.Plano = 0
+        ProcuraCCSettings.Status = scSoAtiva
+        ProcuraCCSettings.AceitaTipoConta = Indiferente
+        Width = 0
+      end
+      item
+        Controle = tcEdit
+        TipodeDado = tdBoolean
+        LookupSettings.SQL.Strings = ()
+        LookupSettings.Tamanho = '0'
+        CheckBoxSetings.ValueChecked = 'True'
+        CheckBoxSetings.ValueUnChecked = 'False'
+        CheckBoxSetings.Checked = True
+        RadioGroupSettings.Items.Strings = ()
+        RadioGroupSettings.Values.Strings = ()
+        RadioGroupSettings.Columns = 1
+        RadioGroupSettings.ItemIndex = -1
+        RadioGroupSettings.Height = 40
+        ComboBoxSettings.Sorted = False
+        ComboBoxSettings.Style = csDropDownList
+        ComboBoxSettings.Items.Strings = ()
+        ComboBoxSettings.DropDownCount = 8
+        ComboBoxSettings.ItemIndex = -1
+        ListBoxSettings.Items.Strings = ()
+        ListBoxSettings.MultiSelect = False
+        ListBoxSettings.ExtendedSelect = False
+        ListBoxSettings.Sorted = False
+        ListBoxSettings.Style = lbStandard
+        ListBoxSettings.height = 70
+        MostraComboCompara = False
+        Required = False
+        EditSettings.Color = clWindow
+        EditSettings.Readonly = False
+        EditSettings.Font.Charset = DEFAULT_CHARSET
+        EditSettings.Font.Color = clWindowText
+        EditSettings.Font.Height = -11
+        EditSettings.Font.Name = 'MS Sans Serif'
+        EditSettings.Font.Style = [fsBold]
+        SpinEditSettings.MaxValue = 0
+        SpinEditSettings.MinValue = 0
+        SpinEditSettings.Increment = 0
+        SpinEditSettings.Value = 0
+        MaskEditSettings.MaxLength = 0
+        ProcuraSTSettings.Subtipo = stFornecedor
+        ProcuraSTSettings.CampoEdit = ceRazaoSocial
+        ProcuraSTSettings.FiltraSubTipo = True
+        ProcuraFCSettings.Status = fcAll
+        ProcuraFCSettings.CampoEdit = ceRazaoSocial
+        ProcuraFCSettings.MostraEndereco = False
+        ProcuraFCSettings.ForCli = fcFornecedor
+        ProcuraCCSettings.Plano = 0
+        ProcuraCCSettings.Status = scSoAtiva
+        ProcuraCCSettings.AceitaTipoConta = Indiferente
+        Width = 0
+      end
+      item
+        Controle = tcEdit
+        TipodeDado = tdString
+        LookupSettings.SQL.Strings = ()
+        LookupSettings.Tamanho = '0'
+        CheckBoxSetings.ValueChecked = 'True'
+        CheckBoxSetings.ValueUnChecked = 'False'
+        CheckBoxSetings.Checked = True
+        RadioGroupSettings.Items.Strings = ()
+        RadioGroupSettings.Values.Strings = ()
+        RadioGroupSettings.Columns = 1
+        RadioGroupSettings.ItemIndex = -1
+        RadioGroupSettings.Height = 40
+        ComboBoxSettings.Sorted = False
+        ComboBoxSettings.Style = csDropDownList
+        ComboBoxSettings.Items.Strings = ()
+        ComboBoxSettings.DropDownCount = 8
+        ComboBoxSettings.ItemIndex = -1
+        ListBoxSettings.Items.Strings = ()
+        ListBoxSettings.MultiSelect = False
+        ListBoxSettings.ExtendedSelect = False
+        ListBoxSettings.Sorted = False
+        ListBoxSettings.Style = lbStandard
+        ListBoxSettings.height = 70
+        MostraComboCompara = False
+        Required = False
+        EditSettings.Color = clWindow
+        EditSettings.Readonly = False
+        EditSettings.Font.Charset = DEFAULT_CHARSET
+        EditSettings.Font.Color = clWindowText
+        EditSettings.Font.Height = -11
+        EditSettings.Font.Name = 'MS Sans Serif'
+        EditSettings.Font.Style = [fsBold]
+        SpinEditSettings.MaxValue = 0
+        SpinEditSettings.MinValue = 0
+        SpinEditSettings.Increment = 0
+        SpinEditSettings.Value = 0
+        MaskEditSettings.MaxLength = 0
+        ProcuraSTSettings.Subtipo = stFornecedor
+        ProcuraSTSettings.CampoEdit = ceRazaoSocial
+        ProcuraSTSettings.FiltraSubTipo = True
+        ProcuraFCSettings.Status = fcAll
+        ProcuraFCSettings.CampoEdit = ceRazaoSocial
+        ProcuraFCSettings.MostraEndereco = False
+        ProcuraFCSettings.ForCli = fcFornecedor
+        ProcuraCCSettings.Plano = 0
+        ProcuraCCSettings.Status = scSoAtiva
+        ProcuraCCSettings.AceitaTipoConta = Indiferente
+        Width = 0
+      end
+      item
+        Controle = tcEdit
+        TipodeDado = tdString
+        LookupSettings.SQL.Strings = ()
+        LookupSettings.Tamanho = '0'
+        CheckBoxSetings.ValueChecked = 'True'
+        CheckBoxSetings.ValueUnChecked = 'False'
+        CheckBoxSetings.Checked = True
+        RadioGroupSettings.Items.Strings = ()
+        RadioGroupSettings.Values.Strings = ()
+        RadioGroupSettings.Columns = 1
+        RadioGroupSettings.ItemIndex = -1
+        RadioGroupSettings.Height = 40
+        ComboBoxSettings.Sorted = False
+        ComboBoxSettings.Style = csDropDownList
+        ComboBoxSettings.Items.Strings = ()
+        ComboBoxSettings.DropDownCount = 8
+        ComboBoxSettings.ItemIndex = -1
+        ListBoxSettings.Items.Strings = ()
+        ListBoxSettings.MultiSelect = False
+        ListBoxSettings.ExtendedSelect = False
+        ListBoxSettings.Sorted = False
+        ListBoxSettings.Style = lbStandard
+        ListBoxSettings.height = 70
+        MostraComboCompara = False
+        Required = False
+        EditSettings.Color = clWindow
+        EditSettings.Readonly = False
+        EditSettings.Font.Charset = DEFAULT_CHARSET
+        EditSettings.Font.Color = clWindowText
+        EditSettings.Font.Height = -11
+        EditSettings.Font.Name = 'MS Sans Serif'
+        EditSettings.Font.Style = [fsBold]
+        SpinEditSettings.MaxValue = 0
+        SpinEditSettings.MinValue = 0
+        SpinEditSettings.Increment = 0
+        SpinEditSettings.Value = 0
+        MaskEditSettings.MaxLength = 0
+        ProcuraSTSettings.Subtipo = stFornecedor
+        ProcuraSTSettings.CampoEdit = ceRazaoSocial
+        ProcuraSTSettings.FiltraSubTipo = True
+        ProcuraFCSettings.Status = fcAll
+        ProcuraFCSettings.CampoEdit = ceRazaoSocial
+        ProcuraFCSettings.MostraEndereco = False
+        ProcuraFCSettings.ForCli = fcFornecedor
+        ProcuraCCSettings.Plano = 0
+        ProcuraCCSettings.Status = scSoAtiva
+        ProcuraCCSettings.AceitaTipoConta = Indiferente
+        Width = 0
+      end
+      item
+        Controle = tcEdit
+        TipodeDado = tdString
+        LookupSettings.SQL.Strings = ()
+        LookupSettings.Tamanho = '0'
+        CheckBoxSetings.ValueChecked = 'True'
+        CheckBoxSetings.ValueUnChecked = 'False'
+        CheckBoxSetings.Checked = True
+        RadioGroupSettings.Items.Strings = ()
+        RadioGroupSettings.Values.Strings = ()
+        RadioGroupSettings.Columns = 1
+        RadioGroupSettings.ItemIndex = -1
+        RadioGroupSettings.Height = 40
+        ComboBoxSettings.Sorted = False
+        ComboBoxSettings.Style = csDropDownList
+        ComboBoxSettings.Items.Strings = ()
+        ComboBoxSettings.DropDownCount = 8
+        ComboBoxSettings.ItemIndex = -1
+        ListBoxSettings.Items.Strings = ()
+        ListBoxSettings.MultiSelect = False
+        ListBoxSettings.ExtendedSelect = False
+        ListBoxSettings.Sorted = False
+        ListBoxSettings.Style = lbStandard
+        ListBoxSettings.height = 70
+        MostraComboCompara = False
+        Required = False
+        EditSettings.Color = clWindow
+        EditSettings.Readonly = False
+        EditSettings.Font.Charset = DEFAULT_CHARSET
+        EditSettings.Font.Color = clWindowText
+        EditSettings.Font.Height = -11
+        EditSettings.Font.Name = 'MS Sans Serif'
+        EditSettings.Font.Style = [fsBold]
+        SpinEditSettings.MaxValue = 0
+        SpinEditSettings.MinValue = 0
+        SpinEditSettings.Increment = 0
+        SpinEditSettings.Value = 0
+        MaskEditSettings.MaxLength = 0
+        ProcuraSTSettings.Subtipo = stFornecedor
+        ProcuraSTSettings.CampoEdit = ceRazaoSocial
+        ProcuraSTSettings.FiltraSubTipo = True
+        ProcuraFCSettings.Status = fcAll
+        ProcuraFCSettings.CampoEdit = ceRazaoSocial
+        ProcuraFCSettings.MostraEndereco = False
+        ProcuraFCSettings.ForCli = fcFornecedor
+        ProcuraCCSettings.Plano = 0
+        ProcuraCCSettings.Status = scSoAtiva
+        ProcuraCCSettings.AceitaTipoConta = Indiferente
+        Width = 0
+      end
+      item
+        Controle = tcEdit
+        TipodeDado = tdString
+        LookupSettings.SQL.Strings = ()
+        LookupSettings.Tamanho = '0'
+        CheckBoxSetings.ValueChecked = 'True'
+        CheckBoxSetings.ValueUnChecked = 'False'
+        CheckBoxSetings.Checked = True
+        RadioGroupSettings.Items.Strings = ()
+        RadioGroupSettings.Values.Strings = ()
+        RadioGroupSettings.Columns = 1
+        RadioGroupSettings.ItemIndex = -1
+        RadioGroupSettings.Height = 40
+        ComboBoxSettings.Sorted = False
+        ComboBoxSettings.Style = csDropDownList
+        ComboBoxSettings.Items.Strings = ()
+        ComboBoxSettings.DropDownCount = 8
+        ComboBoxSettings.ItemIndex = -1
+        ListBoxSettings.Items.Strings = ()
+        ListBoxSettings.MultiSelect = False
+        ListBoxSettings.ExtendedSelect = False
+        ListBoxSettings.Sorted = False
+        ListBoxSettings.Style = lbStandard
+        ListBoxSettings.height = 70
+        MostraComboCompara = False
+        Required = False
+        EditSettings.Color = clWindow
+        EditSettings.Readonly = False
+        EditSettings.Font.Charset = DEFAULT_CHARSET
+        EditSettings.Font.Color = clWindowText
+        EditSettings.Font.Height = -11
+        EditSettings.Font.Name = 'MS Sans Serif'
+        EditSettings.Font.Style = [fsBold]
+        SpinEditSettings.MaxValue = 0
+        SpinEditSettings.MinValue = 0
+        SpinEditSettings.Increment = 0
+        SpinEditSettings.Value = 0
+        MaskEditSettings.MaxLength = 0
+        ProcuraSTSettings.Subtipo = stFornecedor
+        ProcuraSTSettings.CampoEdit = ceRazaoSocial
+        ProcuraSTSettings.FiltraSubTipo = True
+        ProcuraFCSettings.Status = fcAll
+        ProcuraFCSettings.CampoEdit = ceRazaoSocial
+        ProcuraFCSettings.MostraEndereco = False
+        ProcuraFCSettings.ForCli = fcFornecedor
+        ProcuraCCSettings.Plano = 0
+        ProcuraCCSettings.Status = scSoAtiva
+        ProcuraCCSettings.AceitaTipoConta = Indiferente
+        Width = 0
+      end
+      item
+        Controle = tcEdit
+        TipodeDado = tdString
+        LookupSettings.SQL.Strings = ()
+        LookupSettings.Tamanho = '0'
+        CheckBoxSetings.ValueChecked = 'True'
+        CheckBoxSetings.ValueUnChecked = 'False'
+        CheckBoxSetings.Checked = True
+        RadioGroupSettings.Items.Strings = ()
+        RadioGroupSettings.Values.Strings = ()
+        RadioGroupSettings.Columns = 1
+        RadioGroupSettings.ItemIndex = -1
+        RadioGroupSettings.Height = 40
+        ComboBoxSettings.Sorted = False
+        ComboBoxSettings.Style = csDropDownList
+        ComboBoxSettings.Items.Strings = ()
+        ComboBoxSettings.DropDownCount = 8
+        ComboBoxSettings.ItemIndex = -1
+        ListBoxSettings.Items.Strings = ()
+        ListBoxSettings.MultiSelect = False
+        ListBoxSettings.ExtendedSelect = False
+        ListBoxSettings.Sorted = False
+        ListBoxSettings.Style = lbStandard
+        ListBoxSettings.height = 70
+        MostraComboCompara = False
+        Required = False
+        EditSettings.Color = clWindow
+        EditSettings.Readonly = False
+        EditSettings.Font.Charset = DEFAULT_CHARSET
+        EditSettings.Font.Color = clWindowText
+        EditSettings.Font.Height = -11
+        EditSettings.Font.Name = 'MS Sans Serif'
+        EditSettings.Font.Style = [fsBold]
+        SpinEditSettings.MaxValue = 0
+        SpinEditSettings.MinValue = 0
+        SpinEditSettings.Increment = 0
+        SpinEditSettings.Value = 0
+        MaskEditSettings.MaxLength = 0
+        ProcuraSTSettings.Subtipo = stFornecedor
+        ProcuraSTSettings.CampoEdit = ceRazaoSocial
+        ProcuraSTSettings.FiltraSubTipo = True
+        ProcuraFCSettings.Status = fcAll
+        ProcuraFCSettings.CampoEdit = ceRazaoSocial
+        ProcuraFCSettings.MostraEndereco = False
+        ProcuraFCSettings.ForCli = fcFornecedor
+        ProcuraCCSettings.Plano = 0
+        ProcuraCCSettings.Status = scSoAtiva
+        ProcuraCCSettings.AceitaTipoConta = Indiferente
+        Width = 0
+      end
+      item
+        Controle = tcEdit
+        TipodeDado = tdString
+        LookupSettings.SQL.Strings = ()
+        LookupSettings.Tamanho = '0'
+        CheckBoxSetings.ValueChecked = 'True'
+        CheckBoxSetings.ValueUnChecked = 'False'
+        CheckBoxSetings.Checked = True
+        RadioGroupSettings.Items.Strings = ()
+        RadioGroupSettings.Values.Strings = ()
+        RadioGroupSettings.Columns = 1
+        RadioGroupSettings.ItemIndex = -1
+        RadioGroupSettings.Height = 40
+        ComboBoxSettings.Sorted = False
+        ComboBoxSettings.Style = csDropDownList
+        ComboBoxSettings.Items.Strings = ()
+        ComboBoxSettings.DropDownCount = 8
+        ComboBoxSettings.ItemIndex = -1
+        ListBoxSettings.Items.Strings = ()
+        ListBoxSettings.MultiSelect = False
+        ListBoxSettings.ExtendedSelect = False
+        ListBoxSettings.Sorted = False
+        ListBoxSettings.Style = lbStandard
+        ListBoxSettings.height = 70
+        MostraComboCompara = False
+        Required = False
+        EditSettings.Color = clWindow
+        EditSettings.Readonly = False
+        EditSettings.Font.Charset = DEFAULT_CHARSET
+        EditSettings.Font.Color = clWindowText
+        EditSettings.Font.Height = -11
+        EditSettings.Font.Name = 'MS Sans Serif'
+        EditSettings.Font.Style = [fsBold]
+        SpinEditSettings.MaxValue = 0
+        SpinEditSettings.MinValue = 0
+        SpinEditSettings.Increment = 0
+        SpinEditSettings.Value = 0
+        MaskEditSettings.MaxLength = 0
+        ProcuraSTSettings.Subtipo = stFornecedor
+        ProcuraSTSettings.CampoEdit = ceRazaoSocial
+        ProcuraSTSettings.FiltraSubTipo = True
+        ProcuraFCSettings.Status = fcAll
+        ProcuraFCSettings.CampoEdit = ceRazaoSocial
+        ProcuraFCSettings.MostraEndereco = False
+        ProcuraFCSettings.ForCli = fcFornecedor
+        ProcuraCCSettings.Plano = 0
+        ProcuraCCSettings.Status = scSoAtiva
+        ProcuraCCSettings.AceitaTipoConta = Indiferente
+        Width = 0
+      end
+      item
+        Controle = tcEdit
+        TipodeDado = tdString
+        LookupSettings.SQL.Strings = ()
+        LookupSettings.Tamanho = '0'
+        CheckBoxSetings.ValueChecked = 'True'
+        CheckBoxSetings.ValueUnChecked = 'False'
+        CheckBoxSetings.Checked = True
+        RadioGroupSettings.Items.Strings = ()
+        RadioGroupSettings.Values.Strings = ()
+        RadioGroupSettings.Columns = 1
+        RadioGroupSettings.ItemIndex = -1
+        RadioGroupSettings.Height = 40
+        ComboBoxSettings.Sorted = False
+        ComboBoxSettings.Style = csDropDownList
+        ComboBoxSettings.Items.Strings = ()
+        ComboBoxSettings.DropDownCount = 8
+        ComboBoxSettings.ItemIndex = -1
+        ListBoxSettings.Items.Strings = ()
+        ListBoxSettings.MultiSelect = False
+        ListBoxSettings.ExtendedSelect = False
+        ListBoxSettings.Sorted = False
+        ListBoxSettings.Style = lbStandard
+        ListBoxSettings.height = 70
+        MostraComboCompara = False
+        Required = False
+        EditSettings.Color = clWindow
+        EditSettings.Readonly = False
+        EditSettings.Font.Charset = DEFAULT_CHARSET
+        EditSettings.Font.Color = clWindowText
+        EditSettings.Font.Height = -11
+        EditSettings.Font.Name = 'MS Sans Serif'
+        EditSettings.Font.Style = [fsBold]
+        SpinEditSettings.MaxValue = 0
+        SpinEditSettings.MinValue = 0
+        SpinEditSettings.Increment = 0
+        SpinEditSettings.Value = 0
+        MaskEditSettings.MaxLength = 0
+        ProcuraSTSettings.Subtipo = stFornecedor
+        ProcuraSTSettings.CampoEdit = ceRazaoSocial
+        ProcuraSTSettings.FiltraSubTipo = True
+        ProcuraFCSettings.Status = fcAll
+        ProcuraFCSettings.CampoEdit = ceRazaoSocial
+        ProcuraFCSettings.MostraEndereco = False
+        ProcuraFCSettings.ForCli = fcFornecedor
+        ProcuraCCSettings.Plano = 0
+        ProcuraCCSettings.Status = scSoAtiva
+        ProcuraCCSettings.AceitaTipoConta = Indiferente
+        Width = 0
+      end
+      item
+        Controle = tcEdit
+        TipodeDado = tdString
+        LookupSettings.SQL.Strings = ()
+        LookupSettings.Tamanho = '0'
+        CheckBoxSetings.ValueChecked = 'True'
+        CheckBoxSetings.ValueUnChecked = 'False'
+        CheckBoxSetings.Checked = True
+        RadioGroupSettings.Items.Strings = ()
+        RadioGroupSettings.Values.Strings = ()
+        RadioGroupSettings.Columns = 1
+        RadioGroupSettings.ItemIndex = -1
+        RadioGroupSettings.Height = 40
+        ComboBoxSettings.Sorted = False
+        ComboBoxSettings.Style = csDropDownList
+        ComboBoxSettings.Items.Strings = ()
+        ComboBoxSettings.DropDownCount = 8
+        ComboBoxSettings.ItemIndex = -1
+        ListBoxSettings.Items.Strings = ()
+        ListBoxSettings.MultiSelect = False
+        ListBoxSettings.ExtendedSelect = False
+        ListBoxSettings.Sorted = False
+        ListBoxSettings.Style = lbStandard
+        ListBoxSettings.height = 70
+        MostraComboCompara = False
+        Required = False
+        EditSettings.Color = clWindow
+        EditSettings.Readonly = False
+        EditSettings.Font.Charset = DEFAULT_CHARSET
+        EditSettings.Font.Color = clWindowText
+        EditSettings.Font.Height = -11
+        EditSettings.Font.Name = 'MS Sans Serif'
+        EditSettings.Font.Style = [fsBold]
+        SpinEditSettings.MaxValue = 0
+        SpinEditSettings.MinValue = 0
+        SpinEditSettings.Increment = 0
+        SpinEditSettings.Value = 0
+        MaskEditSettings.MaxLength = 0
+        ProcuraSTSettings.Subtipo = stFornecedor
+        ProcuraSTSettings.CampoEdit = ceRazaoSocial
+        ProcuraSTSettings.FiltraSubTipo = True
+        ProcuraFCSettings.Status = fcAll
+        ProcuraFCSettings.CampoEdit = ceRazaoSocial
+        ProcuraFCSettings.MostraEndereco = False
+        ProcuraFCSettings.ForCli = fcFornecedor
+        ProcuraCCSettings.Plano = 0
+        ProcuraCCSettings.Status = scSoAtiva
+        ProcuraCCSettings.AceitaTipoConta = Indiferente
+        Width = 0
+      end
+      item
+        Controle = tcEdit
+        TipodeDado = tdString
+        LookupSettings.SQL.Strings = ()
+        LookupSettings.Tamanho = '0'
+        CheckBoxSetings.ValueChecked = 'True'
+        CheckBoxSetings.ValueUnChecked = 'False'
+        CheckBoxSetings.Checked = True
+        RadioGroupSettings.Items.Strings = ()
+        RadioGroupSettings.Values.Strings = ()
+        RadioGroupSettings.Columns = 1
+        RadioGroupSettings.ItemIndex = -1
+        RadioGroupSettings.Height = 40
+        ComboBoxSettings.Sorted = False
+        ComboBoxSettings.Style = csDropDownList
+        ComboBoxSettings.Items.Strings = ()
+        ComboBoxSettings.DropDownCount = 8
+        ComboBoxSettings.ItemIndex = -1
+        ListBoxSettings.Items.Strings = ()
+        ListBoxSettings.MultiSelect = False
+        ListBoxSettings.ExtendedSelect = False
+        ListBoxSettings.Sorted = False
+        ListBoxSettings.Style = lbStandard
+        ListBoxSettings.height = 70
+        MostraComboCompara = False
+        Required = False
+        EditSettings.Color = clWindow
+        EditSettings.Readonly = False
+        EditSettings.Font.Charset = DEFAULT_CHARSET
+        EditSettings.Font.Color = clWindowText
+        EditSettings.Font.Height = -11
+        EditSettings.Font.Name = 'MS Sans Serif'
+        EditSettings.Font.Style = [fsBold]
+        SpinEditSettings.MaxValue = 0
+        SpinEditSettings.MinValue = 0
+        SpinEditSettings.Increment = 0
+        SpinEditSettings.Value = 0
+        MaskEditSettings.MaxLength = 0
+        ProcuraSTSettings.Subtipo = stFornecedor
+        ProcuraSTSettings.CampoEdit = ceRazaoSocial
+        ProcuraSTSettings.FiltraSubTipo = True
+        ProcuraFCSettings.Status = fcAll
+        ProcuraFCSettings.CampoEdit = ceRazaoSocial
+        ProcuraFCSettings.MostraEndereco = False
+        ProcuraFCSettings.ForCli = fcFornecedor
+        ProcuraCCSettings.Plano = 0
+        ProcuraCCSettings.Status = scSoAtiva
+        ProcuraCCSettings.AceitaTipoConta = Indiferente
+        Width = 0
+      end
+      item
+        Controle = tcEdit
+        TipodeDado = tdString
+        LookupSettings.SQL.Strings = ()
+        LookupSettings.Tamanho = '0'
+        CheckBoxSetings.ValueChecked = 'True'
+        CheckBoxSetings.ValueUnChecked = 'False'
+        CheckBoxSetings.Checked = True
+        RadioGroupSettings.Items.Strings = ()
+        RadioGroupSettings.Values.Strings = ()
+        RadioGroupSettings.Columns = 1
+        RadioGroupSettings.ItemIndex = -1
+        RadioGroupSettings.Height = 40
+        ComboBoxSettings.Sorted = False
+        ComboBoxSettings.Style = csDropDownList
+        ComboBoxSettings.Items.Strings = ()
+        ComboBoxSettings.DropDownCount = 8
+        ComboBoxSettings.ItemIndex = -1
+        ListBoxSettings.Items.Strings = ()
+        ListBoxSettings.MultiSelect = False
+        ListBoxSettings.ExtendedSelect = False
+        ListBoxSettings.Sorted = False
+        ListBoxSettings.Style = lbStandard
+        ListBoxSettings.height = 70
+        MostraComboCompara = False
+        Required = False
+        EditSettings.Color = clWindow
+        EditSettings.Readonly = False
+        EditSettings.Font.Charset = DEFAULT_CHARSET
+        EditSettings.Font.Color = clWindowText
+        EditSettings.Font.Height = -11
+        EditSettings.Font.Name = 'MS Sans Serif'
+        EditSettings.Font.Style = [fsBold]
+        SpinEditSettings.MaxValue = 0
+        SpinEditSettings.MinValue = 0
+        SpinEditSettings.Increment = 0
+        SpinEditSettings.Value = 0
+        MaskEditSettings.MaxLength = 0
+        ProcuraSTSettings.Subtipo = stFornecedor
+        ProcuraSTSettings.CampoEdit = ceRazaoSocial
+        ProcuraSTSettings.FiltraSubTipo = True
+        ProcuraFCSettings.Status = fcAll
+        ProcuraFCSettings.CampoEdit = ceRazaoSocial
+        ProcuraFCSettings.MostraEndereco = False
+        ProcuraFCSettings.ForCli = fcFornecedor
+        ProcuraCCSettings.Plano = 0
+        ProcuraCCSettings.Status = scSoAtiva
+        ProcuraCCSettings.AceitaTipoConta = Indiferente
+        Width = 0
+      end
+      item
+        Controle = tcEdit
+        TipodeDado = tdString
+        LookupSettings.SQL.Strings = ()
+        LookupSettings.Tamanho = '0'
+        CheckBoxSetings.ValueChecked = 'True'
+        CheckBoxSetings.ValueUnChecked = 'False'
+        CheckBoxSetings.Checked = True
+        RadioGroupSettings.Items.Strings = ()
+        RadioGroupSettings.Values.Strings = ()
+        RadioGroupSettings.Columns = 1
+        RadioGroupSettings.ItemIndex = -1
+        RadioGroupSettings.Height = 40
+        ComboBoxSettings.Sorted = False
+        ComboBoxSettings.Style = csDropDownList
+        ComboBoxSettings.Items.Strings = ()
+        ComboBoxSettings.DropDownCount = 8
+        ComboBoxSettings.ItemIndex = -1
+        ListBoxSettings.Items.Strings = ()
+        ListBoxSettings.MultiSelect = False
+        ListBoxSettings.ExtendedSelect = False
+        ListBoxSettings.Sorted = False
+        ListBoxSettings.Style = lbStandard
+        ListBoxSettings.height = 70
+        MostraComboCompara = False
+        Required = False
+        EditSettings.Color = clWindow
+        EditSettings.Readonly = False
+        EditSettings.Font.Charset = DEFAULT_CHARSET
+        EditSettings.Font.Color = clWindowText
+        EditSettings.Font.Height = -11
+        EditSettings.Font.Name = 'MS Sans Serif'
+        EditSettings.Font.Style = [fsBold]
+        SpinEditSettings.MaxValue = 0
+        SpinEditSettings.MinValue = 0
+        SpinEditSettings.Increment = 0
+        SpinEditSettings.Value = 0
+        MaskEditSettings.MaxLength = 0
+        ProcuraSTSettings.Subtipo = stFornecedor
+        ProcuraSTSettings.CampoEdit = ceRazaoSocial
+        ProcuraSTSettings.FiltraSubTipo = True
+        ProcuraFCSettings.Status = fcAll
+        ProcuraFCSettings.CampoEdit = ceRazaoSocial
+        ProcuraFCSettings.MostraEndereco = False
+        ProcuraFCSettings.ForCli = fcFornecedor
+        ProcuraCCSettings.Plano = 0
+        ProcuraCCSettings.Status = scSoAtiva
+        ProcuraCCSettings.AceitaTipoConta = Indiferente
+        Width = 0
+      end
+      item
+        Controle = tcEdit
+        TipodeDado = tdString
+        LookupSettings.SQL.Strings = ()
+        LookupSettings.Tamanho = '0'
+        CheckBoxSetings.ValueChecked = 'True'
+        CheckBoxSetings.ValueUnChecked = 'False'
+        CheckBoxSetings.Checked = True
+        RadioGroupSettings.Items.Strings = ()
+        RadioGroupSettings.Values.Strings = ()
+        RadioGroupSettings.Columns = 1
+        RadioGroupSettings.ItemIndex = -1
+        RadioGroupSettings.Height = 40
+        ComboBoxSettings.Sorted = False
+        ComboBoxSettings.Style = csDropDownList
+        ComboBoxSettings.Items.Strings = ()
+        ComboBoxSettings.DropDownCount = 8
+        ComboBoxSettings.ItemIndex = -1
+        ListBoxSettings.Items.Strings = ()
+        ListBoxSettings.MultiSelect = False
+        ListBoxSettings.ExtendedSelect = False
+        ListBoxSettings.Sorted = False
+        ListBoxSettings.Style = lbStandard
+        ListBoxSettings.height = 70
+        MostraComboCompara = False
+        Required = False
+        EditSettings.Color = clWindow
+        EditSettings.Readonly = False
+        EditSettings.Font.Charset = DEFAULT_CHARSET
+        EditSettings.Font.Color = clWindowText
+        EditSettings.Font.Height = -11
+        EditSettings.Font.Name = 'MS Sans Serif'
+        EditSettings.Font.Style = [fsBold]
+        SpinEditSettings.MaxValue = 0
+        SpinEditSettings.MinValue = 0
+        SpinEditSettings.Increment = 0
+        SpinEditSettings.Value = 0
+        MaskEditSettings.MaxLength = 0
+        ProcuraSTSettings.Subtipo = stFornecedor
+        ProcuraSTSettings.CampoEdit = ceRazaoSocial
+        ProcuraSTSettings.FiltraSubTipo = True
+        ProcuraFCSettings.Status = fcAll
+        ProcuraFCSettings.CampoEdit = ceRazaoSocial
+        ProcuraFCSettings.MostraEndereco = False
+        ProcuraFCSettings.ForCli = fcFornecedor
+        ProcuraCCSettings.Plano = 0
+        ProcuraCCSettings.Status = scSoAtiva
+        ProcuraCCSettings.AceitaTipoConta = Indiferente
+        Width = 0
+      end
+      item
+        Controle = tcEdit
+        TipodeDado = tdString
+        LookupSettings.SQL.Strings = ()
+        LookupSettings.Tamanho = '0'
+        CheckBoxSetings.ValueChecked = 'True'
+        CheckBoxSetings.ValueUnChecked = 'False'
+        CheckBoxSetings.Checked = True
+        RadioGroupSettings.Items.Strings = ()
+        RadioGroupSettings.Values.Strings = ()
+        RadioGroupSettings.Columns = 1
+        RadioGroupSettings.ItemIndex = -1
+        RadioGroupSettings.Height = 40
+        ComboBoxSettings.Sorted = False
+        ComboBoxSettings.Style = csDropDownList
+        ComboBoxSettings.Items.Strings = ()
+        ComboBoxSettings.DropDownCount = 8
+        ComboBoxSettings.ItemIndex = -1
+        ListBoxSettings.Items.Strings = ()
+        ListBoxSettings.MultiSelect = False
+        ListBoxSettings.ExtendedSelect = False
+        ListBoxSettings.Sorted = False
+        ListBoxSettings.Style = lbStandard
+        ListBoxSettings.height = 70
+        MostraComboCompara = True
+        Required = False
+        EditSettings.Color = clWindow
+        EditSettings.Readonly = False
+        EditSettings.Font.Charset = DEFAULT_CHARSET
+        EditSettings.Font.Color = clWindowText
+        EditSettings.Font.Height = -11
+        EditSettings.Font.Name = 'MS Sans Serif'
+        EditSettings.Font.Style = [fsBold]
+        SpinEditSettings.MaxValue = 0
+        SpinEditSettings.MinValue = 0
+        SpinEditSettings.Increment = 0
+        SpinEditSettings.Value = 0
+        MaskEditSettings.MaxLength = 0
+        ProcuraSTSettings.Subtipo = stFornecedor
+        ProcuraSTSettings.CampoEdit = ceRazaoSocial
+        ProcuraSTSettings.FiltraSubTipo = True
+        ProcuraFCSettings.Status = fcAll
+        ProcuraFCSettings.CampoEdit = ceRazaoSocial
+        ProcuraFCSettings.MostraEndereco = False
+        ProcuraFCSettings.ForCli = fcFornecedor
+        ProcuraCCSettings.Plano = 0
+        ProcuraCCSettings.Status = scSoAtiva
+        ProcuraCCSettings.AceitaTipoConta = Indiferente
+        Width = 0
+      end>
+  end
+  inherited CrmRptCM: TCmRptManager
+    BeforePrint = CrmRptCMBeforePrint
+    Report = RptPosiFornCli
+    LabelEmpresa = ppLabel4
+    LabelSistema = ppLabel5
+  end
+  object PpPosiFornCli: TppBDEPipeline
+    DataSource = DsPosiFornCli
+    CloseDataSource = True
+    UserName = 'PpPosiFornCli'
+    Left = 141
+    Top = 98
+  end
+  object RptPosiFornCli: TppReport
+    AutoStop = False
+    DataPipeline = PpPosiFornCli
+    PassSetting = psTwoPass
+    PrinterSetup.BinName = 'Default'
+    PrinterSetup.DocumentName = 'PpModeloReport1'
+    PrinterSetup.Orientation = poLandscape
+    PrinterSetup.PaperName = 'A4'
+    PrinterSetup.PrinterName = 'Default'
+    PrinterSetup.mmMarginBottom = 13000
+    PrinterSetup.mmMarginLeft = 10000
+    PrinterSetup.mmMarginRight = 15000
+    PrinterSetup.mmMarginTop = 13000
+    PrinterSetup.mmPaperHeight = 210000
+    PrinterSetup.mmPaperWidth = 297000
+    PrinterSetup.PaperSize = 9
+    Template.SaveTo = stDatabase
+    Units = utMillimeters
+    AllowPrintToArchive = True
+    AllowPrintToFile = True
+    DeviceType = 'Screen'
+    OutlineSettings.CreateNode = True
+    OutlineSettings.CreatePageNodes = True
+    OutlineSettings.Enabled = False
+    OutlineSettings.Visible = False
+    TextSearchSettings.DefaultString = '<FindText>'
+    TextSearchSettings.Enabled = False
+    Left = 197
+    Top = 100
+    Version = '7.04'
+    mmColumnWidth = 0
+    DataPipelineName = 'PpPosiFornCli'
+    object ppHeaderBand2: TppHeaderBand
+      mmBottomOffset = 0
+      mmHeight = 22754
+      mmPrintPosition = 0
+      object LblTitulo: TppLabel
+        UserName = 'LblTitulo'
+        Caption = 'Posição Por Clientes'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 12
+        Font.Style = [fsBold]
+        TextAlignment = taCentered
+        Transparent = True
+        mmHeight = 5027
+        mmLeft = 114829
+        mmTop = 7673
+        mmWidth = 42069
+        BandType = 0
+      end
+      object ppLabel4: TppLabel
+        UserName = 'ppLabel4'
+        Caption = 'LblEmpresa'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 14
+        Font.Style = [fsBold]
+        TextAlignment = taCentered
+        Transparent = True
+        mmHeight = 5821
+        mmLeft = 121709
+        mmTop = 265
+        mmWidth = 28310
+        BandType = 0
+      end
+      object RptPosiFornCliLabel1: TppLabel
+        UserName = 'RptPosiFornCliLabel1'
+        Caption = 'Histórico:'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 9
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 3969
+        mmLeft = 101071
+        mmTop = 18521
+        mmWidth = 14288
+        BandType = 0
+      end
+      object RptPosiFornCliLabel2: TppLabel
+        UserName = 'RptPosiFornCliLabel2'
+        Caption = 'Outra Moeda:'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 9
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 3969
+        mmLeft = 218017
+        mmTop = 18521
+        mmWidth = 20108
+        BandType = 0
+      end
+      object RptPosiFornCliLabel3: TppLabel
+        UserName = 'RptPosiFornCliLabel3'
+        Caption = 'Valor:'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 9
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 3969
+        mmLeft = 262467
+        mmTop = 18521
+        mmWidth = 8731
+        BandType = 0
+      end
+      object RptPosiFornCliLabel4: TppLabel
+        UserName = 'RptPosiFornCliLabel4'
+        AutoSize = False
+        Caption = 'Vencimento'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 9
+        Font.Style = [fsBold]
+        TextAlignment = taCentered
+        Transparent = True
+        mmHeight = 3969
+        mmLeft = 56092
+        mmTop = 18521
+        mmWidth = 20902
+        BandType = 0
+      end
+      object RptPosiFornCliLabel5: TppLabel
+        UserName = 'RptPosiFornCliLabel5'
+        AutoSize = False
+        Caption = 'Programada'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 9
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 3969
+        mmLeft = 78581
+        mmTop = 18521
+        mmWidth = 20902
+        BandType = 0
+      end
+      object RptPosiFornCliLabel6: TppLabel
+        UserName = 'RptPosiFornCliLabel6'
+        AutoSize = False
+        Caption = 'Lançamento'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 9
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 3969
+        mmLeft = 265
+        mmTop = 18521
+        mmWidth = 20902
+        BandType = 0
+      end
+      object RptPosiFornCliLabel7: TppLabel
+        UserName = 'RptPosiFornCliLabel7'
+        AutoSize = False
+        Caption = 'Documento:'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 9
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 3969
+        mmLeft = 22490
+        mmTop = 18521
+        mmWidth = 20108
+        BandType = 0
+      end
+      object LblTipoPosCli: TppLabel
+        UserName = 'LblTipoPosCli'
+        Caption = 'LblTipoPosCli'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 10
+        Font.Style = [fsBold]
+        TextAlignment = taCentered
+        Transparent = True
+        mmHeight = 4233
+        mmLeft = 123825
+        mmTop = 12965
+        mmWidth = 23813
+        BandType = 0
+      end
+      object LblJuros: TppLabel
+        UserName = 'LblJuros'
+        Caption = 'Juros\Multa:'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 9
+        Font.Style = [fsBold]
+        Transparent = True
+        Visible = False
+        mmHeight = 3969
+        mmLeft = 186267
+        mmTop = 18785
+        mmWidth = 18521
+        BandType = 0
+      end
+    end
+    object ppDetailBand2: TppDetailBand
+      PrintHeight = phDynamic
+      mmBottomOffset = 0
+      mmHeight = 3704
+      mmPrintPosition = 0
+      object RptPosiFornCliDBText9: TppDBText
+        UserName = 'RptPosiFornCliDBText9'
+        DataField = 'HISTORICOCOMPL'
+        DataPipeline = PpPosiFornCli
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        Transparent = True
+        DataPipelineName = 'PpPosiFornCli'
+        mmHeight = 3704
+        mmLeft = 101071
+        mmTop = 0
+        mmWidth = 85196
+        BandType = 4
+      end
+      object RptPosiFornCliDBText2: TppDBText
+        UserName = 'RptPosiFornCliDBText2'
+        DataField = 'DATALANCTO'
+        DataPipeline = PpPosiFornCli
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        TextAlignment = taCentered
+        Transparent = True
+        DataPipelineName = 'PpPosiFornCli'
+        mmHeight = 3704
+        mmLeft = 265
+        mmTop = 0
+        mmWidth = 20902
+        BandType = 4
+      end
+      object RptPosiFornCliDBText3: TppDBText
+        UserName = 'RptPosiFornCliDBText3'
+        DataField = 'NODOCUMENTO'
+        DataPipeline = PpPosiFornCli
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        Transparent = True
+        DataPipelineName = 'PpPosiFornCli'
+        mmHeight = 3704
+        mmLeft = 22490
+        mmTop = 265
+        mmWidth = 24606
+        BandType = 4
+      end
+      object RptPosiFornCliDBText5: TppDBText
+        UserName = 'RptPosiFornCliDBText5'
+        DataField = 'DATAVENCTO'
+        DataPipeline = PpPosiFornCli
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        TextAlignment = taCentered
+        Transparent = True
+        DataPipelineName = 'PpPosiFornCli'
+        mmHeight = 3704
+        mmLeft = 56092
+        mmTop = 0
+        mmWidth = 20902
+        BandType = 4
+      end
+      object RptPosiFornCliDBText6: TppDBText
+        UserName = 'RptPosiFornCliDBText6'
+        DataField = 'DATAPROGRAMADA'
+        DataPipeline = PpPosiFornCli
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        TextAlignment = taCentered
+        Transparent = True
+        DataPipelineName = 'PpPosiFornCli'
+        mmHeight = 3704
+        mmLeft = 78581
+        mmTop = 0
+        mmWidth = 20902
+        BandType = 4
+      end
+      object RptPosiFornCliDBText7: TppDBText
+        UserName = 'RptPosiFornCliDBText7'
+        AutoSize = True
+        DataField = 'SALDO'
+        DataPipeline = PpPosiFornCli
+        DisplayFormat = '#,0.00;(#,0.00)'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        TextAlignment = taRightJustified
+        Transparent = True
+        DataPipelineName = 'PpPosiFornCli'
+        mmHeight = 3175
+        mmLeft = 261673
+        mmTop = 0
+        mmWidth = 9525
+        BandType = 4
+      end
+      object RptPosiFornCliDBText8: TppDBText
+        UserName = 'RptPosiFornCliDBText8'
+        AutoSize = True
+        DataField = 'SALDOOM'
+        DataPipeline = PpPosiFornCli
+        DisplayFormat = '#,0.00;(#,0.00)'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        TextAlignment = taRightJustified
+        Transparent = True
+        DataPipelineName = 'PpPosiFornCli'
+        mmHeight = 3175
+        mmLeft = 224103
+        mmTop = 0
+        mmWidth = 14023
+        BandType = 4
+      end
+      object LblDbJuros: TppDBText
+        UserName = 'LblDbJuros'
+        AutoSize = True
+        DataField = 'VALORJUROS'
+        DataPipeline = PpPosiFornCli
+        DisplayFormat = '#,0.00;(#,0.00)'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        TextAlignment = taRightJustified
+        Transparent = True
+        Visible = False
+        DataPipelineName = 'PpPosiFornCli'
+        mmHeight = 3175
+        mmLeft = 185738
+        mmTop = 0
+        mmWidth = 19050
+        BandType = 4
+      end
+      object RptPosiFornCliDBText4: TppDBText
+        UserName = 'RptPosiFornCliDBText4'
+        DataField = 'COMPLDOCUMENTO'
+        DataPipeline = PpPosiFornCli
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        TextAlignment = taRightJustified
+        Transparent = True
+        DataPipelineName = 'PpPosiFornCli'
+        mmHeight = 3704
+        mmLeft = 48683
+        mmTop = 0
+        mmWidth = 7408
+        BandType = 4
+      end
+    end
+    object ppFooterBand2: TppFooterBand
+      mmBottomOffset = 0
+      mmHeight = 13229
+      mmPrintPosition = 0
+      object ppCalc3: TppSystemVariable
+        UserName = 'Calc3'
+        VarType = vtPageSetDesc
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        TextAlignment = taCentered
+        Transparent = True
+        mmHeight = 3704
+        mmLeft = 265
+        mmTop = 3175
+        mmWidth = 270140
+        BandType = 8
+      end
+      object ppLabel5: TppLabel
+        UserName = 'ppLabel5'
+        AutoSize = False
+        Caption = 'Nome do Sistema'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 3704
+        mmLeft = 0
+        mmTop = 3175
+        mmWidth = 284428
+        BandType = 8
+      end
+      object ppLine4: TppLine
+        UserName = 'ppLine4'
+        ParentWidth = True
+        Weight = 0.75
+        mmHeight = 1588
+        mmLeft = 0
+        mmTop = 1852
+        mmWidth = 272000
+        BandType = 8
+      end
+      object ppCalc4: TppSystemVariable
+        UserName = 'Calc4'
+        VarType = vtDateTime
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        TextAlignment = taRightJustified
+        Transparent = True
+        mmHeight = 3704
+        mmLeft = 245005
+        mmTop = 3175
+        mmWidth = 26194
+        BandType = 8
+      end
+    end
+    object RptPosiFornCliSummaryBand1: TppSummaryBand
+      mmBottomOffset = 0
+      mmHeight = 6879
+      mmPrintPosition = 0
+      object RptPosiFornCliDBCalc3: TppDBCalc
+        UserName = 'RptPosiFornCliDBCalc3'
+        AutoSize = True
+        DataField = 'SALDO'
+        DataPipeline = PpPosiFornCli
+        DisplayFormat = '#,0.00;(#,0.00)'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 9
+        Font.Style = [fsBold]
+        TextAlignment = taRightJustified
+        Transparent = True
+        DataPipelineName = 'PpPosiFornCli'
+        mmHeight = 3969
+        mmLeft = 247650
+        mmTop = 1058
+        mmWidth = 23548
+        BandType = 7
+      end
+      object RptPosiFornCliDBCalc4: TppDBCalc
+        UserName = 'RptPosiFornCliDBCalc4'
+        AutoSize = True
+        DataField = 'SALDOOM'
+        DataPipeline = PpPosiFornCli
+        DisplayFormat = '#,0.00;(#,0.00)'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 9
+        Font.Style = [fsBold]
+        TextAlignment = taRightJustified
+        Transparent = True
+        DataPipelineName = 'PpPosiFornCli'
+        mmHeight = 3969
+        mmLeft = 209286
+        mmTop = 1058
+        mmWidth = 28840
+        BandType = 7
+      end
+      object RptPosiFornCliLabel10: TppLabel
+        UserName = 'RptPosiFornCliLabel10'
+        Caption = 'Total Geral:'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 9
+        Font.Style = [fsBold]
+        TextAlignment = taRightJustified
+        Transparent = True
+        mmHeight = 3969
+        mmLeft = 66146
+        mmTop = 1058
+        mmWidth = 16933
+        BandType = 7
+      end
+      object RptPosiFornCliLine2: TppLine
+        UserName = 'RptPosiFornCliLine2'
+        ParentWidth = True
+        Weight = 0.75
+        mmHeight = 1058
+        mmLeft = 0
+        mmTop = 6085
+        mmWidth = 272000
+        BandType = 7
+      end
+      object RptPosiFornCliLine1: TppLine
+        UserName = 'RptPosiFornCliLine1'
+        ParentWidth = True
+        Weight = 0.75
+        mmHeight = 1058
+        mmLeft = 0
+        mmTop = 0
+        mmWidth = 272000
+        BandType = 7
+      end
+      object LblDbSumJuros: TppDBCalc
+        UserName = 'LblDbSumJuros'
+        AutoSize = True
+        DataField = 'VALORJUROS'
+        DataPipeline = PpPosiFornCli
+        DisplayFormat = '#,0.00;(#,0.00)'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 9
+        Font.Style = [fsBold]
+        TextAlignment = taRightJustified
+        Transparent = True
+        Visible = False
+        DataPipelineName = 'PpPosiFornCli'
+        mmHeight = 3969
+        mmLeft = 170392
+        mmTop = 1058
+        mmWidth = 34396
+        BandType = 7
+      end
+    end
+    object RptPosiFornCliGroup1: TppGroup
+      BreakName = 'NOME'
+      DataPipeline = PpPosiFornCli
+      OutlineSettings.CreateNode = True
+      UserName = 'RptPosiFornCliGroup1'
+      mmNewColumnThreshold = 0
+      mmNewPageThreshold = 0
+      DataPipelineName = 'PpPosiFornCli'
+      object RptPosiFornCliGroupHeaderBand1: TppGroupHeaderBand
+        PrintHeight = phDynamic
+        mmBottomOffset = 0
+        mmHeight = 7408
+        mmPrintPosition = 0
+        object RptPosiFornCliDBText1: TppDBText
+          UserName = 'RptPosiFornCliDBText1'
+          AutoSize = True
+          DataField = 'NOME'
+          DataPipeline = PpPosiFornCli
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Name = 'Arial'
+          Font.Size = 10
+          Font.Style = [fsBold]
+          Transparent = True
+          DataPipelineName = 'PpPosiFornCli'
+          mmHeight = 4233
+          mmLeft = 22490
+          mmTop = 1588
+          mmWidth = 10583
+          BandType = 3
+          GroupNo = 0
+        end
+        object ppLine3: TppLine
+          UserName = 'ppLine3'
+          ParentWidth = True
+          Weight = 0.75
+          mmHeight = 1058
+          mmLeft = 0
+          mmTop = 0
+          mmWidth = 272000
+          BandType = 3
+          GroupNo = 0
+        end
+        object RptPosiFornCliLine3: TppLine
+          UserName = 'RptPosiFornCliLine3'
+          ParentWidth = True
+          Weight = 0.75
+          mmHeight = 265
+          mmLeft = 0
+          mmTop = 6879
+          mmWidth = 272000
+          BandType = 3
+          GroupNo = 0
+        end
+        object lblDescricao: TppLabel
+          UserName = 'lblDescricao'
+          Caption = 'Fornecedor:'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Name = 'Arial'
+          Font.Size = 9
+          Font.Style = [fsBold]
+          Transparent = True
+          mmHeight = 3969
+          mmLeft = 0
+          mmTop = 1588
+          mmWidth = 18785
+          BandType = 3
+          GroupNo = 0
+        end
+      end
+      object RptPosiFornCliGroupFooterBand1: TppGroupFooterBand
+        PrintHeight = phDynamic
+        mmBottomOffset = 0
+        mmHeight = 4763
+        mmPrintPosition = 0
+        object RptPosiFornCliDBCalc1: TppDBCalc
+          UserName = 'RptPosiFornCliDBCalc1'
+          AutoSize = True
+          DataField = 'SALDO'
+          DataPipeline = PpPosiFornCli
+          DisplayFormat = '#,0.00;(#,0.00)'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Name = 'Arial'
+          Font.Size = 9
+          Font.Style = [fsBold]
+          ResetGroup = RptPosiFornCliGroup1
+          TextAlignment = taRightJustified
+          Transparent = True
+          DataPipelineName = 'PpPosiFornCli'
+          mmHeight = 3969
+          mmLeft = 247650
+          mmTop = 265
+          mmWidth = 23548
+          BandType = 5
+          GroupNo = 0
+        end
+        object RptPosiFornCliDBCalc2: TppDBCalc
+          UserName = 'RptPosiFornCliDBCalc2'
+          AutoSize = True
+          DataField = 'SALDOOM'
+          DataPipeline = PpPosiFornCli
+          DisplayFormat = '#,0.00;(#,0.00)'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Name = 'Arial'
+          Font.Size = 9
+          Font.Style = [fsBold]
+          ResetGroup = RptPosiFornCliGroup1
+          TextAlignment = taRightJustified
+          Transparent = True
+          DataPipelineName = 'PpPosiFornCli'
+          mmHeight = 3969
+          mmLeft = 209286
+          mmTop = 265
+          mmWidth = 28840
+          BandType = 5
+          GroupNo = 0
+        end
+        object RptPosiFornCliLabel9: TppLabel
+          UserName = 'RptPosiFornCliLabel9'
+          Caption = 'Sub Total:'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Name = 'Arial'
+          Font.Size = 9
+          Font.Style = [fsBold]
+          TextAlignment = taRightJustified
+          Transparent = True
+          mmHeight = 3969
+          mmLeft = 68263
+          mmTop = 265
+          mmWidth = 14817
+          BandType = 5
+          GroupNo = 0
+        end
+        object LblSumJuros: TppDBCalc
+          UserName = 'LblSumJuros'
+          AutoSize = True
+          DataField = 'VALORJUROS'
+          DataPipeline = PpPosiFornCli
+          DisplayFormat = '#,0.00;(#,0.00)'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Name = 'Arial'
+          Font.Size = 9
+          Font.Style = [fsBold]
+          ResetGroup = RptPosiFornCliGroup1
+          TextAlignment = taRightJustified
+          Transparent = True
+          Visible = False
+          DataPipelineName = 'PpPosiFornCli'
+          mmHeight = 3969
+          mmLeft = 170392
+          mmTop = 265
+          mmWidth = 34396
+          BandType = 5
+          GroupNo = 0
+        end
+      end
+    end
+  end
+  object CdsPosiFornCli: TCMClientDataSet
+    Aggregates = <>
+    Params = <>
+    Left = 48
+    Top = 160
+    object CdsPosiFornCliIDFORCLI: TFloatField
+      FieldName = 'IDFORCLI'
+    end
+    object CdsPosiFornCliNOME: TStringField
+      FieldName = 'NOME'
+      Size = 60
+    end
+    object CdsPosiFornCliSALDO: TFloatField
+      FieldName = 'SALDO'
+    end
+    object CdsPosiFornCliCODDOCUMENTO: TFloatField
+      FieldName = 'CODDOCUMENTO'
+    end
+    object CdsPosiFornCliNUMDOCUMENTO: TStringField
+      FieldName = 'NUMDOCUMENTO'
+      FixedChar = True
+      Size = 18
+    end
+    object CdsPosiFornCliNODOCUMENTO: TFloatField
+      FieldName = 'NODOCUMENTO'
+    end
+    object CdsPosiFornCliCOMPLDOCUMENTO: TStringField
+      FieldName = 'COMPLDOCUMENTO'
+      FixedChar = True
+      Size = 3
+    end
+    object CdsPosiFornCliSALDOOM: TFloatField
+      FieldName = 'SALDOOM'
+    end
+    object CdsPosiFornCliDATAPROGRAMADA: TDateTimeField
+      FieldName = 'DATAPROGRAMADA'
+    end
+    object CdsPosiFornCliHISTORICOCOMPL: TStringField
+      FieldName = 'HISTORICOCOMPL'
+      Size = 60
+    end
+    object CdsPosiFornCliDATALANCTO: TDateTimeField
+      FieldName = 'DATALANCTO'
+    end
+    object CdsPosiFornCliDATAVENCTO: TDateTimeField
+      FieldName = 'DATAVENCTO'
+    end
+    object CdsPosiFornCliINDICECORRECAO: TFloatField
+      FieldName = 'INDICECORRECAO'
+    end
+    object CdsPosiFornCliVLRMULTA: TFloatField
+      FieldName = 'VLRMULTA'
+    end
+    object CdsPosiFornCliVALORJUROS: TFloatField
+      FieldName = 'VALORJUROS'
+    end
+    object CdsPosiFornCliIDTIPOCLIENTE: TFloatField
+      FieldName = 'IDTIPOCLIENTE'
+    end
+    object CdsPosiFornCliUSUARIO: TStringField
+      FieldName = 'USUARIO'
+      Size = 60
+    end
+    object CdsPosiFornCliNOMEUSUARIO: TStringField
+      FieldName = 'NOMEUSUARIO'
+      FixedChar = True
+    end
+    object CdsPosiFornCliIDUSUARIOINCLUSAO: TFloatField
+      FieldName = 'IDUSUARIOINCLUSAO'
+    end
+  end
+  object SqlPosiFornCli: TCMSqlParams
+    SQL.Strings = (
+      
+        'SELECT  /*+ RULE */ D.IDFORCLI,D.NOME,                          ' +
+        '           '
+      
+        '       SUM(U.SALDO) AS SALDO, U.CODDOCUMENTO, D.NUMDOCUMENTO,   ' +
+        '           '
+      
+        '       D.NODOCUMENTO, D.COMPLDOCUMENTO, SUM(U.SALDOOM) AS SALDOO' +
+        'M,         '
+      
+        '       D.DATAPROGRAMADA,                                        ' +
+        '           '
+      
+        '       D.HISTORICOCOMPL,                                        ' +
+        '           '
+      
+        '       D.DATALANCTO,                                            ' +
+        '           '
+      
+        '       D.DATAVENCTO,                                            ' +
+        '           '
+      
+        '       D.INDICECORRECAO,                                        ' +
+        '           '
+      
+        '       D.VLRMULTA,                                              ' +
+        '           '
+      
+        '       D.VALORJUROS,                                            ' +
+        '           '
+      
+        '       D.IDTIPOCLIENTE                                          ' +
+        '           '
+      ' ,P.NOME AS USUARIO, USU.NOMEUSUARIO, D.IDUSUARIOINCLUSAO '
+      
+        'FROM                                                            ' +
+        '           '
+      
+        '(SELECT D.IDFORCLI,P.RAZAOSOCIAL AS NOME,                       ' +
+        '           '
+      
+        '        D.CODDOCUMENTO, P.NUMDOCUMENTO,                         ' +
+        '           '
+      
+        '        D.NODOCUMENTO, D.COMPLDOCUMENTO,                        ' +
+        '           '
+      
+        '        D.DATAPROGRAMADA, D.CODTIPDOC,                          ' +
+        '           '
+      
+        '        MAX(L.HISTORICOCOMPL) AS HISTORICOCOMPL,                ' +
+        '           '
+      
+        '        MIN(L.DATALANCTO) AS DATALANCTO,                        ' +
+        '           '
+      
+        '        D.DATAVENCTO,                                           ' +
+        '           '
+      
+        '        D.INDICECORRECAO,                                       ' +
+        '           '
+      
+        '        D.VLRMULTA,                                             ' +
+        '           '
+      
+        '        D.VALORJUROS,                                           ' +
+        '           '
+      
+        '       T.IDTIPOCLIENTE                                          ' +
+        '           '
+      ', L.IDUSUARIOINCLUSAO  '
+      
+        'FROM                                                            ' +
+        '           '
+      
+        '   DOCUMENTO D,                                                 ' +
+        '           '
+      
+        '   LANCTODOCUM L,                                               ' +
+        '           '
+      
+        '   CLIENTEPESS C,                                               ' +
+        '           '
+      
+        '   TIPOCLIENTE T,                                               ' +
+        '           '
+      
+        '   PESSOA P                                                     ' +
+        '           '
+      
+        'WHERE (D.IDFORCLI = P.IDPESSOA)                                 ' +
+        '           '
+      
+        '  AND (D.RECPAG = '#39'R'#39')                                          ' +
+        '       '
+      
+        '  AND (D.IDPESSOA = 1)                                          ' +
+        '   '
+      
+        '  AND (D.CODDOCUMENTO = L.CODDOCUMENTO)                         ' +
+        '           '
+      
+        '  AND (D.OPERACAO     = L.OPERACAO)                             ' +
+        '           '
+      
+        '  AND (D.CODTIPDOC = 88)                                        ' +
+        '   '
+      
+        '  AND (D.IDFORCLI = C.IDPESSOA(+))                              ' +
+        '           '
+      
+        '  AND (C.IDTIPOCLIENTE = T.IDTIPOCLIENTE(+))                    ' +
+        '           '
+      
+        'GROUP BY D.IDFORCLI,P.RAZAOSOCIAL, D.CODTIPDOC,                 ' +
+        '           '
+      
+        '         D.CODDOCUMENTO, P.NUMDOCUMENTO,                        ' +
+        '           '
+      
+        '         D.NODOCUMENTO, D.COMPLDOCUMENTO,                       ' +
+        '           '
+      
+        '         T.IDTIPOCLIENTE,                                       ' +
+        '           '
+      
+        '         D.DATAPROGRAMADA,                                      ' +
+        '           '
+      
+        '         D.DATAVENCTO,                                          ' +
+        '           '
+      
+        '         D.INDICECORRECAO,                                      ' +
+        '           '
+      
+        '         D.VLRMULTA,                                            ' +
+        '           '
+      ' L.IDUSUARIOINCLUSAO,  '
+      
+        '         D.VALORJUROS) D,                                       ' +
+        '           '
+      
+        '(                                                               ' +
+        '           '
+      
+        '(SELECT D.CODDOCUMENTO,                                         ' +
+        '           '
+      
+        '        SUM(DECODE(D.RECPAG,'#39'R'#39',DECODE(L.DEBCRE,'#39'D'#39',L.VALOROUTRA' +
+        'MOEDA,L.VALOROUTRAMOEDA*-1),DECODE(L.DEBCRE,'#39'C'#39',L.VALOROUTRAMOED' +
+        'A,L.VALOROUTRAMOEDA*-1))) AS SALDOOM, '
+      
+        '        SUM(DECODE(D.RECPAG,'#39'R'#39',DECODE(L.DEBCRE,'#39'D'#39',L.VALOR,L.VA' +
+        'LOR*-1),DECODE(L.DEBCRE,'#39'C'#39',L.VALOR,L.VALOR*-1))) AS SALDO    '
+      '--        ,L.IDUSUARIOINCLUSAO  '
+      
+        'FROM DOCUMENTO D,                                               ' +
+        '           '
+      
+        '     LANCTODOCUM L                                              ' +
+        '           '
+      
+        'WHERE (D.CODDOCUMENTO = L.CODDOCUMENTO)                         ' +
+        '           '
+      
+        '  AND (D.RECPAG = '#39'R'#39')                                          ' +
+        '       '
+      
+        '  AND (D.IDPESSOA = 1)                                          ' +
+        '   '
+      
+        '  AND (L.DATALANCTO <= TO_DATE('#39'27/01/2004'#39','#39'DD/MM/YYYY'#39'))      ' +
+        '             '
+      
+        '  AND ((D.OPERACAO = '#39'2 '#39') OR                                   ' +
+        '         '
+      
+        '      (D.OPERACAO = '#39'15'#39') OR                                    ' +
+        '         '
+      
+        '      ((D.OPERACAO = '#39'1 '#39') AND (D.NUMFATURA IS NULL ) ) )       ' +
+        '         '
+      
+        'GROUP BY                                                        ' +
+        '           '
+      
+        '       D.CODDOCUMENTO                                           ' +
+        '           '
+      '--        ,L.IDUSUARIOINCLUSAO  '
+      
+        ')                                                               ' +
+        '           '
+      
+        'UNION ALL                                                       ' +
+        '           '
+      
+        '(                                                               ' +
+        '           '
+      
+        'SELECT D.CODDOCUMENTO,                                          ' +
+        '         '
+      
+        '       (SUM(DECODE(D.RECPAG,'#39'R'#39',DECODE(L.DEBCRE,'#39'D'#39',L.VALOROUTRA' +
+        'MOEDA,L.VALOROUTRAMOEDA*-1),DECODE(L.DEBCRE,'#39'C'#39',L.VALOROUTRAMOED' +
+        'A,L.VALOROUTRAMOEDA*-1))))*S1.SALDOOM1/DECODE(S3.SALDOOM3,0,NULL' +
+        ',S3.SALDOOM3)  AS SALDOOM, '
+      
+        '       (SUM(DECODE(D.RECPAG,'#39'R'#39',DECODE(L.DEBCRE,'#39'D'#39',L.VALOR,L.VA' +
+        'LOR*-1),DECODE(L.DEBCRE,'#39'C'#39',L.VALOR,L.VALOR*-1))))*S1.SALDO1/DEC' +
+        'ODE(S3.SALDO3,0,NULL,S3.SALDO3) AS SALDO '
+      '--        ,L.IDUSUARIOINCLUSAO  '
+      
+        'FROM DOCUMENTO D,                                               ' +
+        '           '
+      
+        '     LANCTODOCUM L,                                             ' +
+        '           '
+      
+        '     (SELECT D.NUMFATURA,                                       ' +
+        '           '
+      
+        '             SUM(DECODE(D.RECPAG,'#39'R'#39',DECODE(L.DEBCRE,'#39'D'#39',L.VALOR' +
+        'OUTRAMOEDA,L.VALOROUTRAMOEDA*-1),DECODE(L.DEBCRE,'#39'C'#39',L.VALOROUTR' +
+        'AMOEDA,L.VALOROUTRAMOEDA*-1))) AS SALDOOM1, '
+      
+        '             SUM(DECODE(D.RECPAG,'#39'R'#39',DECODE(L.DEBCRE,'#39'D'#39',L.VALOR' +
+        ',L.VALOR*-1),DECODE(L.DEBCRE,'#39'C'#39',L.VALOR,L.VALOR*-1))) AS SALDO1' +
+        ' '
+      
+        '      FROM DOCUMENTO D,                                         ' +
+        '           '
+      
+        '           LANCTODOCUM L                                        ' +
+        '           '
+      
+        '      WHERE (D.CODDOCUMENTO = L.CODDOCUMENTO)                   ' +
+        '           '
+      
+        '        AND (D.OPERACAO = '#39'1 '#39')                                 ' +
+        '         '
+      
+        '        AND (D.RECPAG = '#39'R'#39')                                    ' +
+        '       '
+      
+        '        AND (D.IDPESSOA = 1)                                    ' +
+        '         '
+      
+        '        AND (L.DATALANCTO <= TO_DATE('#39'27/01/2004'#39','#39'DD/MM/YYYY'#39'))' +
+        '             '
+      
+        '        AND (D.NUMFATURA IS NOT NULL)                           ' +
+        '           '
+      
+        '      GROUP BY D.NUMFATURA) S1,                                 ' +
+        '           '
+      
+        '     (SELECT D.NUMFATURA,                                       ' +
+        '           '
+      
+        '            DECODE( NVL(  SUM(DECODE(D.RECPAG,'#39'R'#39',DECODE(L.DEBCR' +
+        'E,'#39'D'#39',L.VALOROUTRAMOEDA,L.VALOROUTRAMOEDA*-1),DECODE(L.DEBCRE,'#39'C' +
+        #39',L.VALOROUTRAMOEDA,L.VALOROUTRAMOEDA*-1))) ,0),0,1,  '
+      
+        '            SUM(DECODE(D.RECPAG,'#39'R'#39',DECODE(L.DEBCRE,'#39'D'#39',L.VALORO' +
+        'UTRAMOEDA,L.VALOROUTRAMOEDA*-1),DECODE(L.DEBCRE,'#39'C'#39',L.VALOROUTRA' +
+        'MOEDA,L.VALOROUTRAMOEDA*-1)))) AS SALDOOM3, '
+      
+        '            DECODE( NVL(  SUM(DECODE(D.RECPAG,'#39'R'#39',DECODE(L.DEBCR' +
+        'E,'#39'D'#39',L.VALOR,L.VALOR*-1),DECODE(L.DEBCRE,'#39'C'#39',L.VALOR,L.VALOR*-1' +
+        '))),0),0,1, '
+      
+        '            SUM(DECODE(D.RECPAG,'#39'R'#39',DECODE(L.DEBCRE,'#39'D'#39',L.VALOR,' +
+        'L.VALOR*-1),DECODE(L.DEBCRE,'#39'C'#39',L.VALOR,L.VALOR*-1)))) AS SALDO3' +
+        ' '
+      '--        ,L.IDUSUARIOINCLUSAO  '
+      
+        '      FROM DOCUMENTO D,                                         ' +
+        '           '
+      
+        '           LANCTODOCUM L                                        ' +
+        '           '
+      
+        '      WHERE (D.CODDOCUMENTO = L.CODDOCUMENTO)                   ' +
+        '           '
+      
+        '        AND (D.OPERACAO = L.OPERACAO)                           ' +
+        '           '
+      
+        '        AND (D.OPERACAO = '#39'3 '#39')                                 ' +
+        '         '
+      
+        '        AND (D.RECPAG = '#39'R'#39')                                    ' +
+        '         '
+      
+        '        AND (D.IDPESSOA = 1)                                    ' +
+        '         '
+      
+        '        AND (D.NUMFATURA IS NOT NULL)                           ' +
+        '           '
+      '      GROUP BY D.NUMFATURA '
+      '--        ,L.IDUSUARIOINCLUSAO  '
+      ' ) S3 '
+      
+        'WHERE (D.CODDOCUMENTO = L.CODDOCUMENTO)                         ' +
+        '           '
+      
+        '  AND (D.OPERACAO = L.OPERACAO)                                 ' +
+        '           '
+      
+        '  AND (D.NUMFATURA = S1.NUMFATURA)                              ' +
+        '           '
+      
+        '  AND (D.NUMFATURA = S3.NUMFATURA)                              ' +
+        '           '
+      
+        '  AND (D.RECPAG = '#39'R'#39')                                          ' +
+        '       '
+      
+        '  AND (D.IDPESSOA = 1)                                          ' +
+        '   '
+      
+        '  AND (D.OPERACAO ='#39'3 '#39')                                        ' +
+        '         '
+      
+        'GROUP BY                                                        ' +
+        '           '
+      
+        '       D.CODDOCUMENTO,                                          ' +
+        '           '
+      
+        '       S1.SALDOOM1,                                             ' +
+        '           '
+      
+        '       S3.SALDOOM3,                                             ' +
+        '           '
+      
+        '       S1.SALDO1,                                               ' +
+        '           '
+      '--       L.IDUSUARIOINCLUSAO,  '
+      
+        '       S3.SALDO3)                                               ' +
+        '           '
+      
+        'UNION ALL                                                       ' +
+        '           '
+      
+        '(                                                               ' +
+        '           '
+      
+        'SELECT D.CODDOCUMENTO,                                          ' +
+        '           '
+      
+        '       SUM(DECODE(D.RECPAG,'#39'R'#39',DECODE(L.DEBCRE,'#39'D'#39',L.VALOROUTRAM' +
+        'OEDA,L.VALOROUTRAMOEDA*-1),DECODE(L.DEBCRE,'#39'C'#39',L.VALOROUTRAMOEDA' +
+        ',L.VALOROUTRAMOEDA*-1))) AS SALDOOM, '
+      
+        '       SUM(DECODE(D.RECPAG,'#39'R'#39',DECODE(L.DEBCRE,'#39'D'#39',L.VALOR,L.VAL' +
+        'OR*-1),DECODE(L.DEBCRE,'#39'C'#39',L.VALOR,L.VALOR*-1))) AS SALDO '
+      '--        ,L.IDUSUARIOINCLUSAO  '
+      
+        'FROM DOCUMENTO D,                                               ' +
+        '           '
+      
+        '     LANCTODOCUM L                                              ' +
+        '           '
+      
+        'WHERE (D.CODDOCUMENTO = L.CODDOCUMENTO)                         ' +
+        '           '
+      
+        '  AND (D.RECPAG = '#39'R'#39')                                          ' +
+        '    '
+      
+        '  AND (D.IDPESSOA = 1)                                          ' +
+        '   '
+      
+        '  AND (L.DATALANCTO <= TO_DATE('#39'27/01/2004'#39','#39'DD/MM/YYYY'#39'))      ' +
+        '          '
+      
+        '  AND (D.OPERACAO ='#39'3 '#39')                                        ' +
+        '      '
+      
+        '  AND (L.OPERACAO <> '#39'3 '#39')                                      ' +
+        '      '
+      
+        'GROUP BY                                                        ' +
+        '           '
+      '--       L.IDUSUARIOINCLUSAO,  '
+      
+        '       D.CODDOCUMENTO)                                          ' +
+        '           '
+      
+        ') U                                                             ' +
+        '           '
+      ' ,PESSOA P, USUARIOSISTEMA USU '
+      
+        'WHERE                                                           ' +
+        '           '
+      
+        '      (U.CODDOCUMENTO = D.CODDOCUMENTO)                         ' +
+        '           '
+      
+        '  AND (D.CODTIPDOC = 88)                                        ' +
+        '   '
+      '  and   (D.IDUSUARIOINCLUSAO = P.IDPESSOA)          AND '
+      '     (P.IDPESSOA = USU.IDUSUARIO)                '
+      '      and D.IDUSUARIOINCLUSAO = 26998 and 1 = 2'
+      
+        'GROUP BY D.IDFORCLI,D.NOME,                                     ' +
+        '           '
+      
+        '         U.CODDOCUMENTO, D.NUMDOCUMENTO,                        ' +
+        '           '
+      
+        '         D.NODOCUMENTO, D.COMPLDOCUMENTO,                       ' +
+        '           '
+      
+        '         D.DATAPROGRAMADA,                                      ' +
+        '           '
+      
+        '         D.HISTORICOCOMPL,                                      ' +
+        '           '
+      
+        '         D.DATALANCTO,                                          ' +
+        '           '
+      
+        '         D.DATAVENCTO,                                          ' +
+        '           '
+      
+        '         D.INDICECORRECAO,                                      ' +
+        '           '
+      
+        '         D.VLRMULTA,                                            ' +
+        '           '
+      
+        '         D.VALORJUROS,                                          ' +
+        '           '
+      
+        '         D.IDTIPOCLIENTE                                        ' +
+        '           '
+      '         ,P.NOME, USU.NOMEUSUARIO,  D.IDUSUARIOINCLUSAO '
+      
+        'HAVING ROUND(SUM(U.SALDO),2) <> 0                               ' +
+        '           '
+      
+        'ORDER BY D.NOME, D.IDFORCLI,                                    ' +
+        '           '
+      
+        '         D.DATAPROGRAMADA                                       ' +
+        '        ')
+    ClientDataSet = CdsPosiFornCli
+    Left = 128
+    Top = 160
+  end
+  object DsPosiFornCli: TDataSource
+    DataSet = CdsPosiFornCli
+    Left = 96
+    Top = 96
+  end
+end

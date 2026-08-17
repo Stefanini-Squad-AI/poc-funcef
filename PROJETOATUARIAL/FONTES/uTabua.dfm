@@ -1,0 +1,977 @@
+inherited frmTabua: TfrmTabua
+  Left = 146
+  Top = 80
+  HelpContext = 40376
+  ActiveControl = DBEdit1
+  Caption = 'Tábua'
+  ClientHeight = 448
+  ClientWidth = 559
+  PixelsPerInch = 96
+  TextHeight = 13
+  inherited pnlFundo: TPanel
+    Width = 559
+    Height = 362
+    object Label7: TLabel
+      Left = 20
+      Top = 9
+      Width = 58
+      Height = 13
+      Caption = 'Descrição'
+    end
+    object Label8: TLabel
+      Left = 20
+      Top = 89
+      Width = 84
+      Height = 13
+      Caption = 'Tipo da Tábua'
+    end
+    object Label6: TLabel
+      Left = 292
+      Top = 49
+      Width = 93
+      Height = 13
+      Caption = 'Data de Criação'
+    end
+    object Label2: TLabel
+      Left = 19
+      Top = 49
+      Width = 81
+      Height = 13
+      Caption = 'Especificação'
+    end
+    object DBEdit2: TDBEdit
+      Left = 20
+      Top = 104
+      Width = 390
+      Height = 21
+      AutoSelect = False
+      DataField = 'DS_TIPO_TABUA'
+      DataSource = ds
+      TabOrder = 5
+    end
+    object LkcTbTipoTabua: TwwDBLookupCombo
+      Left = 20
+      Top = 104
+      Width = 384
+      Height = 21
+      DropDownAlignment = taLeftJustify
+      Selected.Strings = (
+        'DS_TIPO_TABUA'#9'40'#9'Tipo da Tábua')
+      DataField = 'CD_TIPO_TABUA'
+      DataSource = ds
+      LookupTable = qryTipoTabua
+      LookupField = 'CD_TIPO_TABUA'
+      Options = [loColLines, loRowLines]
+      TabOrder = 4
+      Visible = False
+      AutoDropDown = True
+      ShowButton = True
+      AllowClearKey = False
+    end
+    object DBEdit3: TDBEdit
+      Left = 292
+      Top = 64
+      Width = 118
+      Height = 21
+      DataField = 'DT_REF_TABUA'
+      DataSource = ds
+      TabOrder = 3
+    end
+    object DBEdit4: TDBEdit
+      Left = 20
+      Top = 64
+      Width = 234
+      Height = 21
+      DataField = 'SG_TABUA'
+      DataSource = ds
+      TabOrder = 1
+    end
+    object PgCtrlDetalhe: TPageControl
+      Left = 1
+      Top = 135
+      Width = 557
+      Height = 226
+      ActivePage = tbshDetalhe
+      Align = alBottom
+      TabOrder = 6
+      object tbshDetalhe: TTabSheet
+        Caption = 'Ocorrências'
+        object PnlDetalhe: TPanel
+          Left = 0
+          Top = -24
+          Width = 549
+          Height = 222
+          Align = alBottom
+          TabOrder = 1
+          object Label3: TLabel
+            Left = 12
+            Top = 10
+            Width = 118
+            Height = 13
+            Caption = 'Descrição do Grupo '
+          end
+          object Label4: TLabel
+            Left = 24
+            Top = 62
+            Width = 33
+            Height = 13
+            Caption = 'Idade'
+          end
+          object Label5: TLabel
+            Left = 152
+            Top = 101
+            Width = 14
+            Height = 13
+            Caption = 'px'
+          end
+          object Label12: TLabel
+            Left = 281
+            Top = 101
+            Width = 14
+            Height = 13
+            Caption = 'dx'
+          end
+          object Label1: TLabel
+            Left = 24
+            Top = 103
+            Width = 10
+            Height = 13
+            Caption = 'lx'
+          end
+          object Label9: TLabel
+            Left = 24
+            Top = 142
+            Width = 14
+            Height = 13
+            Caption = 'qx'
+          end
+          object Label10: TLabel
+            Left = 152
+            Top = 140
+            Width = 10
+            Height = 13
+            Caption = 'ix'
+          end
+          object bbtnOkDet: TBitBtn
+            Left = 256
+            Top = 187
+            Width = 81
+            Height = 27
+            Caption = '&OK'
+            Default = True
+            TabOrder = 6
+            OnClick = bbtnOkDetClick
+            Glyph.Data = {
+              BE060000424DBE06000000000000360400002800000024000000120000000100
+              0800000000008802000000000000000000000001000000010000000000000000
+              80000080000000808000800000008000800080800000C0C0C000C0DCC000F0CA
+              A600000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              000000000000000000000000000000000000F0FBFF00A4A0A000808080000000
+              FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00030303030303
+              0303030303030303030303030303030303030303030303030303030303030303
+              03030303030303030303030303030303030303030303FF030303030303030303
+              03030303030303040403030303030303030303030303030303F8F8FF03030303
+              03030303030303030303040202040303030303030303030303030303F80303F8
+              FF030303030303030303030303040202020204030303030303030303030303F8
+              03030303F8FF0303030303030303030304020202020202040303030303030303
+              0303F8030303030303F8FF030303030303030304020202FA0202020204030303
+              0303030303F8FF0303F8FF030303F8FF03030303030303020202FA03FA020202
+              040303030303030303F8FF03F803F8FF0303F8FF03030303030303FA02FA0303
+              03FA0202020403030303030303F8FFF8030303F8FF0303F8FF03030303030303
+              FA0303030303FA0202020403030303030303F80303030303F8FF0303F8FF0303
+              0303030303030303030303FA0202020403030303030303030303030303F8FF03
+              03F8FF03030303030303030303030303FA020202040303030303030303030303
+              0303F8FF0303F8FF03030303030303030303030303FA02020204030303030303
+              03030303030303F8FF0303F8FF03030303030303030303030303FA0202020403
+              030303030303030303030303F8FF0303F8FF03030303030303030303030303FA
+              0202040303030303030303030303030303F8FF03F8FF03030303030303030303
+              03030303FA0202030303030303030303030303030303F8FFF803030303030303
+              030303030303030303FA0303030303030303030303030303030303F803030303
+              0303030303030303030303030303030303030303030303030303030303030303
+              0303}
+            NumGlyphs = 2
+            Spacing = 0
+          end
+          object bbtnCancelarDet: TBitBtn
+            Left = 340
+            Top = 187
+            Width = 81
+            Height = 27
+            Cancel = True
+            Caption = '&Cancelar'
+            TabOrder = 7
+            OnClick = bbtnCancelarDetClick
+            Glyph.Data = {
+              BE060000424DBE06000000000000360400002800000024000000120000000100
+              0800000000008802000000000000000000000001000000010000000000000000
+              80000080000000808000800000008000800080800000C0C0C000C0DCC000F0CA
+              A600000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              0000000000000000000000000000000000000000000000000000000000000000
+              000000000000000000000000000000000000F0FBFF00A4A0A000808080000000
+              FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00030303030303
+              0303030303030303030303030303030303030303030303030303030303030303
+              0303F8F80303030303030303030303030303030303FF03030303030303030303
+              0303030303F90101F80303030303F9F80303030303030303F8F8FF0303030303
+              03FF03030303030303F9010101F8030303F90101F8030303030303F8FF03F8FF
+              030303FFF8F8FF030303030303F901010101F803F901010101F80303030303F8
+              FF0303F8FF03FFF80303F8FF030303030303F901010101F80101010101F80303
+              030303F8FF030303F8FFF803030303F8FF030303030303F90101010101010101
+              F803030303030303F8FF030303F803030303FFF80303030303030303F9010101
+              010101F8030303030303030303F8FF030303030303FFF8030303030303030303
+              030101010101F80303030303030303030303F8FF0303030303F8030303030303
+              0303030303F901010101F8030303030303030303030303F8FF030303F8030303
+              0303030303030303F90101010101F8030303030303030303030303F803030303
+              F8FF030303030303030303F9010101F8010101F803030303030303030303F803
+              03030303F8FF0303030303030303F9010101F803F9010101F803030303030303
+              03F8030303F8FF0303F8FF03030303030303F90101F8030303F9010101F80303
+              03030303F8FF0303F803F8FF0303F8FF03030303030303F9010303030303F901
+              0101030303030303F8FFFFF8030303F8FF0303F8FF0303030303030303030303
+              030303F901F903030303030303F8F80303030303F8FFFFFFF803030303030303
+              03030303030303030303030303030303030303030303030303F8F8F803030303
+              0303030303030303030303030303030303030303030303030303030303030303
+              0303}
+            NumGlyphs = 2
+            Spacing = 0
+          end
+          object DBEdit9: TDBEdit
+            Left = 152
+            Top = 116
+            Width = 99
+            Height = 21
+            DataField = 'NR_P_X'
+            DataSource = DsDet
+            TabOrder = 2
+          end
+          object DBEdit10: TDBEdit
+            Left = 281
+            Top = 116
+            Width = 99
+            Height = 21
+            DataField = 'NR_D_X'
+            DataSource = DsDet
+            TabOrder = 3
+          end
+          object DBEdit5: TDBEdit
+            Left = 24
+            Top = 76
+            Width = 99
+            Height = 21
+            DataField = 'NR_IDADE'
+            DataSource = DsDet
+            TabOrder = 0
+          end
+          object DBEdit6: TDBEdit
+            Left = 24
+            Top = 116
+            Width = 99
+            Height = 21
+            DataField = 'NR_L_X'
+            DataSource = DsDet
+            TabOrder = 1
+          end
+          object DBEdit7: TDBEdit
+            Left = 24
+            Top = 155
+            Width = 99
+            Height = 21
+            DataField = 'NR_Q_X'
+            DataSource = DsDet
+            TabOrder = 4
+          end
+          object DBEdit8: TDBEdit
+            Left = 152
+            Top = 155
+            Width = 99
+            Height = 21
+            DataField = 'NR_I_X'
+            DataSource = DsDet
+            TabOrder = 5
+          end
+        end
+        object DbGrdDet: TwwDBGrid
+          Left = 0
+          Top = 34
+          Width = 549
+          Height = 164
+          Selected.Strings = (
+            'NR_IDADE'#9'3'#9'Idade'
+            'NR_L_X'#9'12'#9'lx'
+            'NR_P_X'#9'10'#9'px'
+            'NR_D_X'#9'10'#9'dx'
+            'NR_Q_X'#9'10'#9'qx'
+            'NR_I_X'#9'10'#9'ix')
+          IniAttributes.Delimiter = ';;'
+          TitleColor = clBtnFace
+          FixedCols = 0
+          ShowHorzScrollBar = True
+          Align = alClient
+          DataSource = DsDet
+          Options = [dgTitles, dgIndicator, dgColumnResize, dgColLines, dgRowLines, dgTabs, dgRowSelect, dgConfirmDelete, dgCancelOnExit, dgWordWrap]
+          TabOrder = 2
+          TitleAlignment = taLeftJustify
+          TitleFont.Charset = DEFAULT_CHARSET
+          TitleFont.Color = clWindowText
+          TitleFont.Height = -9
+          TitleFont.Name = 'MS Sans Serif'
+          TitleFont.Style = [fsBold]
+          TitleLines = 1
+          TitleButtons = False
+          IndicatorColor = icBlack
+        end
+        object pnlBarraDetalhe: TPanel
+          Left = 0
+          Top = 0
+          Width = 549
+          Height = 34
+          Align = alTop
+          TabOrder = 0
+          object BtProc: TSpeedButton
+            Left = 111
+            Top = 4
+            Width = 25
+            Height = 25
+            Hint = 'Procurar por registro|'
+            AllowAllUp = True
+            Glyph.Data = {
+              76010000424D7601000000000000760000002800000020000000100000000100
+              0400000000000001000000000000000000001000000010000000000000000000
+              800000800000008080008000000080008000808000007F7F7F00BFBFBF000000
+              FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF0033333CCCCC33
+              33333FFFF77777FFFFFFCCCCCC808CCCCCC3777777F7F777777F008888070888
+              8003777777777777777F0F0770F7F0770F0373F33337F333337370FFFFF7FFFF
+              F07337F33337F33337F370FFFB99FBFFF07337F33377F33337F330FFBF99BFBF
+              F033373F337733333733370BFBF7FBFB0733337F333FF3337F33370FBF98BFBF
+              0733337F3377FF337F333B0BFB990BFB03333373FF777FFF73333FB000B99000
+              B33333377737777733333BFBFBFB99FBF33333333FF377F333333FBF99BF99BF
+              B333333377F377F3333333FB99FB99FB3333333377FF77333333333FB9999FB3
+              333333333777733333333333FBFBFB3333333333333333333333}
+            Layout = blGlyphTop
+            NumGlyphs = 2
+            ParentShowHint = False
+            ShowHint = True
+            Spacing = 0
+            OnClick = BtProcClick
+          end
+          object BtExcl: TSpeedButton
+            Left = 61
+            Top = 4
+            Width = 25
+            Height = 25
+            Hint = 'Remover o registro selecionado'
+            AllowAllUp = True
+            Glyph.Data = {
+              76010000424D7601000000000000760000002800000020000000100000000100
+              0400000000000001000000000000000000001000000010000000000000000000
+              800000800000008080008000000080008000808000007F7F7F00BFBFBF000000
+              FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00500005000555
+              555557777F777555F55500000000555055557777777755F75555005500055055
+              555577F5777F57555555005550055555555577FF577F5FF55555500550050055
+              5555577FF77577FF555555005050110555555577F757777FF555555505099910
+              555555FF75777777FF555005550999910555577F5F77777775F5500505509990
+              3055577F75F77777575F55005055090B030555775755777575755555555550B0
+              B03055555F555757575755550555550B0B335555755555757555555555555550
+              BBB35555F55555575F555550555555550BBB55575555555575F5555555555555
+              50BB555555555555575F555555555555550B5555555555555575}
+            Layout = blGlyphTop
+            NumGlyphs = 2
+            ParentShowHint = False
+            ShowHint = True
+            Spacing = 0
+            OnClick = BtExclClick
+          end
+          object btAlt: TSpeedButton
+            Left = 36
+            Top = 4
+            Width = 25
+            Height = 25
+            Hint = 'Alterar o registro selecionado|'
+            AllowAllUp = True
+            GroupIndex = 1
+            Glyph.Data = {
+              76010000424D7601000000000000760000002800000020000000100000000100
+              0400000000000001000000000000000000001000000010000000000000000000
+              800000800000008080008000000080008000808000007F7F7F00BFBFBF000000
+              FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00333333000000
+              000033333377777777773333330FFFFFFFF03FF3FF7FF33F3FF700300000FF0F
+              00F077F777773F737737E00BFBFB0FFFFFF07773333F7F3333F7E0BFBF000FFF
+              F0F077F3337773F3F737E0FBFBFBF0F00FF077F3333FF7F77F37E0BFBF00000B
+              0FF077F3337777737337E0FBFBFBFBF0FFF077F33FFFFFF73337E0BF0000000F
+              FFF077FF777777733FF7000BFB00B0FF00F07773FF77373377373330000B0FFF
+              FFF03337777373333FF7333330B0FFFF00003333373733FF777733330B0FF00F
+              0FF03333737F37737F373330B00FFFFF0F033337F77F33337F733309030FFFFF
+              00333377737FFFFF773333303300000003333337337777777333}
+            Layout = blGlyphTop
+            NumGlyphs = 2
+            ParentShowHint = False
+            ShowHint = True
+            Spacing = 0
+            OnClick = btAltClick
+          end
+          object BtIns: TSpeedButton
+            Left = 11
+            Top = 4
+            Width = 25
+            Height = 25
+            Hint = 'Inserir novo registro|'
+            AllowAllUp = True
+            GroupIndex = 1
+            Glyph.Data = {
+              76010000424D7601000000000000760000002800000020000000100000000100
+              0400000000000001000000000000000000001000000010000000000000000000
+              800000800000008080008000000080008000808000007F7F7F00BFBFBF000000
+              FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF0033333333B333
+              333B33FF33337F3333F73BB3777BB7777BB3377FFFF77FFFF77333B000000000
+              0B3333777777777777333330FFFFFFFF07333337F33333337F333330FFFFFFFF
+              07333337F33333337F333330FFFFFFFF07333337F33333337F333330FFFFFFFF
+              07333FF7F33333337FFFBBB0FFFFFFFF0BB37777F3333333777F3BB0FFFFFFFF
+              0BBB3777F3333FFF77773330FFFF000003333337F333777773333330FFFF0FF0
+              33333337F3337F37F3333330FFFF0F0B33333337F3337F77FF333330FFFF003B
+              B3333337FFFF77377FF333B000000333BB33337777777F3377FF3BB3333BB333
+              3BB33773333773333773B333333B3333333B7333333733333337}
+            Layout = blGlyphTop
+            NumGlyphs = 2
+            ParentShowHint = False
+            ShowHint = True
+            Spacing = 0
+            OnClick = BtInsClick
+          end
+          object BtExclAll: TSpeedButton
+            Left = 86
+            Top = 4
+            Width = 25
+            Height = 25
+            Hint = 'Remover Todos os Registros'
+            AllowAllUp = True
+            Glyph.Data = {
+              76010000424D7601000000000000760000002800000020000000100000000100
+              0400000000000001000000000000000000001000000010000000000000000000
+              800000800000008080008000000080008000808000007F7F7F00BFBFBF000000
+              FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00500005000555
+              555557777F777555F55500000000555055557777777755F75555005500055055
+              555577F5777F57555555005550055555555577FF577F5FF55555500550050055
+              5555577FF77577FF555555005050110555555577F757777FF555555505099910
+              555555FF75777777FF555005550999910555577F5F77777775F5500505509990
+              3055577F75F77777575F55005055090B030555775755777575755555555550B0
+              B03055555F555757575755550555550B0B335555755555757555555555555550
+              BBB35555F55555575F555550555555550BBB55575555555575F5555555555555
+              50BB555555555555575F555555555555550B5555555555555575}
+            Layout = blGlyphTop
+            NumGlyphs = 2
+            ParentShowHint = False
+            ShowHint = True
+            Spacing = 0
+            OnClick = BtExclAllClick
+          end
+        end
+      end
+    end
+    object DBEdit1: TDBEdit
+      Left = 20
+      Top = 24
+      Width = 390
+      Height = 21
+      AutoSelect = False
+      DataField = 'DS_TABUA'
+      DataSource = ds
+      TabOrder = 0
+    end
+    object DtEdit: TCMDateTimePicker
+      Left = 292
+      Top = 64
+      Width = 113
+      Height = 21
+      CalendarAttributes.Font.Charset = DEFAULT_CHARSET
+      CalendarAttributes.Font.Color = clWindowText
+      CalendarAttributes.Font.Height = -11
+      CalendarAttributes.Font.Name = 'MS Sans Serif'
+      CalendarAttributes.Font.Style = []
+      ButtonStyle = cbsCustom
+      DataField = 'DT_REF_TABUA'
+      DataSource = ds
+      Epoch = 1950
+      ButtonGlyph.Data = {
+        06050000424D06050000000000003604000028000000100000000D0000000100
+        080000000000D000000000000000000000000001000000000000000000000000
+        80000080000000808000800000008000800080800000C0C0C000C0DCC000F0CA
+        A6000020400000206000002080000020A0000020C0000020E000004000000040
+        20000040400000406000004080000040A0000040C0000040E000006000000060
+        20000060400000606000006080000060A0000060C0000060E000008000000080
+        20000080400000806000008080000080A0000080C0000080E00000A0000000A0
+        200000A0400000A0600000A0800000A0A00000A0C00000A0E00000C0000000C0
+        200000C0400000C0600000C0800000C0A00000C0C00000C0E00000E0000000E0
+        200000E0400000E0600000E0800000E0A00000E0C00000E0E000400000004000
+        20004000400040006000400080004000A0004000C0004000E000402000004020
+        20004020400040206000402080004020A0004020C0004020E000404000004040
+        20004040400040406000404080004040A0004040C0004040E000406000004060
+        20004060400040606000406080004060A0004060C0004060E000408000004080
+        20004080400040806000408080004080A0004080C0004080E00040A0000040A0
+        200040A0400040A0600040A0800040A0A00040A0C00040A0E00040C0000040C0
+        200040C0400040C0600040C0800040C0A00040C0C00040C0E00040E0000040E0
+        200040E0400040E0600040E0800040E0A00040E0C00040E0E000800000008000
+        20008000400080006000800080008000A0008000C0008000E000802000008020
+        20008020400080206000802080008020A0008020C0008020E000804000008040
+        20008040400080406000804080008040A0008040C0008040E000806000008060
+        20008060400080606000806080008060A0008060C0008060E000808000008080
+        20008080400080806000808080008080A0008080C0008080E00080A0000080A0
+        200080A0400080A0600080A0800080A0A00080A0C00080A0E00080C0000080C0
+        200080C0400080C0600080C0800080C0A00080C0C00080C0E00080E0000080E0
+        200080E0400080E0600080E0800080E0A00080E0C00080E0E000C0000000C000
+        2000C0004000C0006000C0008000C000A000C000C000C000E000C0200000C020
+        2000C0204000C0206000C0208000C020A000C020C000C020E000C0400000C040
+        2000C0404000C0406000C0408000C040A000C040C000C040E000C0600000C060
+        2000C0604000C0606000C0608000C060A000C060C000C060E000C0800000C080
+        2000C0804000C0806000C0808000C080A000C080C000C080E000C0A00000C0A0
+        2000C0A04000C0A06000C0A08000C0A0A000C0A0C000C0A0E000C0C00000C0C0
+        2000C0C04000C0C06000C0C08000C0C0A000F0FBFF00A4A0A000808080000000
+        FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00010000000000
+        000000000000000000FFFF00FFFFFFFFFFFFFFFFFFFFFFFF00FFFF00FF07A407
+        A407A4F9A407A4FF00FFFF00FFA407A407A4F9A4F9A407FF00FFFF00FF07A407
+        A407A4F9A407A4FF00FFFF00FFA407A407A407A407A407FF00FFFF00FF07A407
+        A407A407A407A4FF00FFFF00FFA407A407A407A407A407FF00FFFF00FFFFFFFF
+        FFFFFFFFFFFFFFFF00FFFF00FF04FC04FC04FCA4A4A4A4FF00FFFF00FFFC04FC
+        04FC04A4A4A4A4FF00FFFF00FFFFFFFFFFFFFFFFFFFFFFFF00FFFF0000000000
+        000000000000000000FF}
+      ShowButton = True
+      TabOrder = 2
+      Visible = False
+    end
+    object btbtnImportar: TBitBtn
+      Left = 424
+      Top = 60
+      Width = 118
+      Height = 33
+      Caption = '&Importar Tábua'
+      Enabled = False
+      ModalResult = 4
+      TabOrder = 7
+      OnClick = btbtnImportarClick
+      Glyph.Data = {
+        DE010000424DDE01000000000000760000002800000024000000120000000100
+        0400000000006801000000000000000000001000000010000000000000000000
+        80000080000000808000800000008000800080800000C0C0C000808080000000
+        FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00333333444444
+        33333333333F8888883F33330000324334222222443333388F3833333388F333
+        000032244222222222433338F8833FFFFF338F3300003222222AAAAA22243338
+        F333F88888F338F30000322222A33333A2224338F33F8333338F338F00003222
+        223333333A224338F33833333338F38F00003222222333333A444338FFFF8F33
+        3338888300003AAAAAAA33333333333888888833333333330000333333333333
+        333333333333333333FFFFFF000033333333333344444433FFFF333333888888
+        00003A444333333A22222438888F333338F3333800003A2243333333A2222438
+        F38F333333833338000033A224333334422224338338FFFFF8833338000033A2
+        22444442222224338F3388888333FF380000333A2222222222AA243338FF3333
+        33FF88F800003333AA222222AA33A3333388FFFFFF8833830000333333AAAAAA
+        3333333333338888883333330000333333333333333333333333333333333333
+        0000}
+      NumGlyphs = 2
+      Spacing = 0
+    end
+  end
+  inherited Dock972: TDock97
+    Width = 559
+    object Toolbar972: TToolbar97
+      Left = 244
+      Top = 0
+      Caption = 'Toolbar971'
+      CloseButton = False
+      DefaultDock = Dock971
+      DockPos = 244
+      TabOrder = 1
+      object SBtnGerar: TToolbarButton97
+        Left = 8
+        Top = 0
+        Width = 89
+        Height = 41
+        AllowAllUp = True
+        GroupIndex = 1
+        Caption = '&Gerar Tábua'
+        Enabled = False
+        Glyph.Data = {
+          76010000424D7601000000000000760000002800000020000000100000000100
+          0400000000000001000000000000000000001000000010000000000000000000
+          800000800000008080008000000080008000808000007F7F7F00BFBFBF000000
+          FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00300000000000
+          00033FFFFFFFFFFFFFFF0888888888888880777777777777777F088888888888
+          8880777777777777777F0000000000000000FFFFFFFFFFFFFFFF0F8F8F8F8F8F
+          8F80777777777777777F08F8F8F8F8F8F9F0777777777777777F0F8F8F8F8F8F
+          8F807777777777777F7F0000000000000000777777777777777F3330FFFFFFFF
+          03333337F3FFFF3F7F333330F0000F0F03333337F77773737F333330FFFFFFFF
+          03333337F3FF3FFF7F333330F00F000003333337F773777773333330FFFF0FF0
+          33333337F3FF7F3733333330F08F0F0333333337F7737F7333333330FFFF0033
+          33333337FFFF7733333333300000033333333337777773333333}
+        Layout = blGlyphTop
+        NumGlyphs = 2
+        Opaque = False
+        Spacing = 0
+        OnClick = SBtnGerarClick
+      end
+      object ToolbarSep972: TToolbarSep97
+        Left = 0
+        Top = 0
+        Blank = True
+        SizeHorz = 8
+      end
+    end
+  end
+  inherited Dock971: TDock97
+    Top = 409
+    Width = 559
+    inherited tb97Fundo: TToolbar97
+      Left = 361
+      DockPos = 361
+      TabOrder = 2
+    end
+    inherited TB97oKCancelar: TToolbar97
+      Left = 192
+      DockPos = 192
+      TabOrder = 1
+    end
+    inherited dbnav: TDBNavigator
+      Left = 19
+      Hints.Strings = ()
+    end
+  end
+  inherited ivTradutor: TIvExtendedTranslator
+    Left = 460
+    Top = 13
+    TargetsData = (
+      1
+      1
+      (
+        ''
+        'Text'
+        0))
+  end
+  inherited ds: TwwDataSource
+    DataSet = QryPrincipal
+    Left = 432
+    Top = 41
+  end
+  inherited ImlPadrao: TImageList
+    Left = 432
+    Top = 13
+  end
+  inherited CmeCadastro: TCmEventosCadastro
+    Left = 404
+    Top = 97
+  end
+  inherited srchdlgProcura: TwwSearchDialog
+    Left = 404
+    Top = 13
+  end
+  inherited seldlgProcuraQry: TcmSelectDlg
+    Left = 488
+    Top = 13
+  end
+  object QryPrincipal: TwwQuery
+    CachedUpdates = True
+    AfterOpen = QryPrincipalAfterOpen
+    AfterInsert = QryPrincipalAfterInsert
+    BeforePost = QryPrincipalBeforePost
+    AfterPost = QryPrincipalAfterPost
+    DatabaseName = 'BaseDados'
+    SQL.Strings = (
+      'Select a.CD_TABUA, a.SG_TABUA, a.DS_TABUA, a.DT_REF_TABUA,'
+      '           a.CD_TIPO_TABUA, b.DS_TIPO_TABUA'
+      'from FI_TABUA a, FI_TIPO_TABUA b'
+      'where a.CD_TIPO_TABUA = b.CD_TIPO_TABUA'
+      'order by a.DS_TABUA')
+    UpdateObject = UpdtSQLPrincipal
+    ValidateWithMask = True
+    Left = 404
+    Top = 41
+    object QryPrincipalDS_TABUA: TStringField
+      DisplayLabel = 'Descrição'
+      DisplayWidth = 40
+      FieldName = 'DS_TABUA'
+      Origin = '"CM.FI_TABUA".DS_TABUA'
+      Size = 50
+    end
+    object QryPrincipalSG_TABUA: TStringField
+      DisplayLabel = 'Referência'
+      DisplayWidth = 15
+      FieldName = 'SG_TABUA'
+      Origin = '"CM.FI_TABUA".SG_TABUA'
+      Size = 15
+    end
+    object QryPrincipalDS_TIPO_TABUA: TStringField
+      DisplayLabel = 'Tipo da Tábua'
+      DisplayWidth = 20
+      FieldName = 'DS_TIPO_TABUA'
+      Origin = '"CM.FI_TIPO_TABUA".DS_TIPO_TABUA'
+      Size = 40
+    end
+    object QryPrincipalCD_TABUA: TFloatField
+      DisplayWidth = 10
+      FieldName = 'CD_TABUA'
+      Origin = '"CM.FI_TABUA".CD_TABUA'
+      Visible = False
+    end
+    object QryPrincipalDT_REF_TABUA: TDateTimeField
+      DisplayWidth = 10
+      FieldName = 'DT_REF_TABUA'
+      Origin = '"CM.FI_TABUA".DT_REF_TABUA'
+      Visible = False
+    end
+    object QryPrincipalCD_TIPO_TABUA: TFloatField
+      DisplayWidth = 10
+      FieldName = 'CD_TIPO_TABUA'
+      Origin = '"CM.FI_TABUA".CD_TIPO_TABUA'
+      Visible = False
+    end
+  end
+  object qryTipoTabua: TwwQuery
+    DatabaseName = 'BaseDados'
+    SQL.Strings = (
+      'Select CD_TIPO_TABUA, DS_TIPO_TABUA'
+      'from FI_TIPO_TABUA')
+    ValidateWithMask = True
+    Left = 488
+    Top = 69
+    object qryTipoTabuaDS_TIPO_TABUA: TStringField
+      DisplayLabel = 'Tipo da Tábua'
+      DisplayWidth = 40
+      FieldName = 'DS_TIPO_TABUA'
+      Origin = '"CM.FI_TIPO_TABUA".DS_TIPO_TABUA'
+      Size = 40
+    end
+    object qryTipoTabuaCD_TIPO_TABUA: TFloatField
+      DisplayWidth = 10
+      FieldName = 'CD_TIPO_TABUA'
+      Origin = '"CM.FI_TIPO_TABUA".CD_TIPO_TABUA'
+      Visible = False
+    end
+  end
+  object UpdtSQLPrincipal: TUpdateSQL
+    ModifySQL.Strings = (
+      'update FI_TABUA'
+      'set'
+      '  SG_TABUA = :SG_TABUA,'
+      '  DS_TABUA = :DS_TABUA,'
+      '  DT_REF_TABUA = :DT_REF_TABUA,'
+      '  CD_TIPO_TABUA = :CD_TIPO_TABUA'
+      'where'
+      '  CD_TABUA = :OLD_CD_TABUA')
+    InsertSQL.Strings = (
+      'insert into FI_TABUA'
+      '  (CD_TABUA, SG_TABUA, DS_TABUA, DT_REF_TABUA, CD_TIPO_TABUA)'
+      'values'
+      
+        '  (:CD_TABUA, :SG_TABUA, :DS_TABUA, :DT_REF_TABUA, :CD_TIPO_TABU' +
+        'A)')
+    DeleteSQL.Strings = (
+      'delete from FI_TABUA'
+      'where'
+      '  CD_TABUA = :OLD_CD_TABUA')
+    Left = 460
+    Top = 41
+  end
+  object qryAux: TwwQuery
+    DatabaseName = 'BaseDados'
+    SQL.Strings = (
+      'Select max(CD_TABUA) as Max_CD'
+      'from FI_TABUA')
+    ValidateWithMask = True
+    Left = 488
+    Top = 41
+  end
+  object QryDetalhe: TwwQuery
+    CachedUpdates = True
+    AfterOpen = QryDetalheAfterOpen
+    BeforePost = QryDetalheBeforePost
+    DatabaseName = 'BaseDados'
+    DataSource = ds
+    SQL.Strings = (
+      'Select CD_TABUA, NR_IDADE, NR_L_X, NR_P_X, NR_D_X,'
+      '           NR_Q_X, NR_I_X'
+      'from FI_OCORR_TABUA'
+      'where CD_TABUA = :CD_TABUA'
+      'order by NR_IDADE')
+    UpdateObject = UpdtSQLDet
+    ValidateWithMask = True
+    Left = 404
+    Top = 69
+    ParamData = <
+      item
+        DataType = ftInteger
+        Name = 'CD_TABUA'
+        ParamType = ptUnknown
+      end>
+    object QryDetalheNR_IDADE: TFloatField
+      DisplayLabel = 'Idade'
+      DisplayWidth = 3
+      FieldName = 'NR_IDADE'
+      Origin = '"CM.FI_OCORR_TABUA".NR_IDADE'
+    end
+    object QryDetalheNR_L_X: TFloatField
+      DisplayLabel = 'lx'
+      DisplayWidth = 12
+      FieldName = 'NR_L_X'
+      Origin = '"CM.FI_OCORR_TABUA".NR_L_X'
+      DisplayFormat = '#,###,###,##0.0000'
+      EditFormat = '#,###,###,##0.0000'
+    end
+    object QryDetalheNR_P_X: TFloatField
+      DisplayLabel = 'px'
+      DisplayWidth = 10
+      FieldName = 'NR_P_X'
+      Origin = '"CM.FI_OCORR_TABUA".NR_P_X'
+      DisplayFormat = '###0.00000000'
+      EditFormat = '###0.00000000'
+    end
+    object QryDetalheNR_D_X: TFloatField
+      DisplayLabel = 'dx'
+      DisplayWidth = 10
+      FieldName = 'NR_D_X'
+      Origin = '"CM.FI_OCORR_TABUA".NR_D_X'
+      DisplayFormat = '#,###,###,##0.0000'
+      EditFormat = '#,###,###,##0.0000'
+    end
+    object QryDetalheNR_Q_X: TFloatField
+      DisplayLabel = 'qx'
+      DisplayWidth = 10
+      FieldName = 'NR_Q_X'
+      Origin = '"CM.FI_OCORR_TABUA".NR_Q_X'
+      DisplayFormat = '###0.00000000'
+      EditFormat = '###0.00000000'
+    end
+    object QryDetalheNR_I_X: TFloatField
+      DisplayLabel = 'ix'
+      DisplayWidth = 10
+      FieldName = 'NR_I_X'
+      Origin = '"CM.FI_OCORR_TABUA".NR_I_X'
+      DisplayFormat = '###0.00000000'
+      EditFormat = '###0.00000000'
+    end
+    object QryDetalheCD_TABUA: TFloatField
+      DisplayWidth = 10
+      FieldName = 'CD_TABUA'
+      Origin = '"CM.FI_OCORR_TABUA".CD_TABUA'
+      Visible = False
+    end
+  end
+  object DsDet: TwwDataSource
+    AutoEdit = False
+    DataSet = QryDetalhe
+    Left = 432
+    Top = 69
+  end
+  object UpdtSQLDet: TUpdateSQL
+    ModifySQL.Strings = (
+      'update FI_OCORR_TABUA'
+      'set'
+      '  NR_L_X = :NR_L_X,'
+      '  NR_P_X = :NR_P_X,'
+      '  NR_D_X = :NR_D_X,'
+      '  NR_Q_X = :NR_Q_X,'
+      '  NR_I_X = :NR_I_X'
+      'where'
+      '  CD_TABUA = :OLD_CD_TABUA and'
+      '  NR_IDADE = :OLD_NR_IDADE')
+    InsertSQL.Strings = (
+      'insert into FI_OCORR_TABUA'
+      '  (CD_TABUA, NR_IDADE, NR_L_X, NR_P_X, NR_D_X, NR_Q_X, NR_I_X)'
+      'values'
+      
+        '  (:CD_TABUA, :NR_IDADE, :NR_L_X, :NR_P_X, :NR_D_X, :NR_Q_X, :NR' +
+        '_I_X)')
+    DeleteSQL.Strings = (
+      'delete from FI_OCORR_TABUA'
+      'where'
+      '  CD_TABUA = :OLD_CD_TABUA and'
+      '  NR_IDADE = :OLD_NR_IDADE')
+    Left = 460
+    Top = 69
+  end
+  object MontaSelect: TMontaSelect
+    Template.IdConsulta = 0
+    Caption = 'Seleciona'
+    Colunas.Strings = (
+      'FI_TABUA.DS_TABUA'
+      'FI_TIPO_TABUA.DS_TIPO_TABUA')
+    TipodeDado.Strings = (
+      'C'
+      'C')
+    Descricao.Strings = (
+      'Descrição'
+      'Tipo da Tábua')
+    SensivelACaixa.Strings = (
+      'N'
+      'N')
+    Tabelas.Strings = (
+      'FI_TABUA'
+      'FI_TIPO_TABUA')
+    CamposChave.Strings = (
+      'FI_TABUA.CD_TABUA')
+    Filtro.Strings = (
+      'FI_TABUA.CD_TIPO_TABUA = FI_TIPO_TABUA.CD_TIPO_TABUA')
+    Mascaras.Strings = (
+      ''
+      '')
+    Larguras.Strings = (
+      '50'
+      '40')
+    DataBaseName = 'BaseDados'
+    RepeteConsulta = False
+    UsaDistinct = False
+    SalvaConsulta = False
+    ExibePergunta = True
+    MultiSelect = False
+    Left = 432
+    Top = 97
+  end
+end

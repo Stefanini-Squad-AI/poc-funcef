@@ -1,0 +1,527 @@
+// *****************************************************************************
+// ***************************** REGISTRO DE ALTERAÇÕES ************************
+// *****************************************************************************
+// Rotina    : MontaSelectConta
+// Autor(a)  : Gleyber
+// Data      : 18/08/2003
+// Pendência : 14006
+// Alteração : Incluído filtros para refinar a busca.
+// -----------------------------------------------------------------------------
+unit FReservaMT;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  FCadastroMT, MontaSelect, Db, DBClient, uCMClientDataSet,
+  CmEventosCadastro, ImgList, Wwdatsrc, IvDictio, IvMulti, IvEMulti,
+  MAHlpBtn, StdCtrls, Buttons, TB97Tlbr, TB97Ctls, TB97, ExtCtrls, DBCtrls,
+  wwdbdatetimepicker, CMDateTimePicker, Mask, wwdbedit, TREdit,
+  uCtrlReservaorcamen, uCtrlSaldoorcado, uCMTypes, uCmSqlParams, uCtrlRptOrcamen,
+  AppEvnts, CMApplicationEvents, uCMMath;
+
+type
+  TfrmReservaMT = class(TFrmCadastroMT)
+    dbrReservaNum: TDBRealEdit;
+    Label4: TLabel;
+    Label5: TLabel;
+    bbtnImprime: TBitBtn;
+    Bevel1: TBevel;
+    lblCodigoConta: TLabel;
+    dbeCodigoConta: TwwDBEdit;
+    lblNome: TLabel;
+    edtNomeConta: TEdit;
+    Label3: TLabel;
+    edtCentroResp: TEdit;
+    Label11: TLabel;
+    edtGrupo: TEdit;
+    lblDataIni: TLabel;
+    dbeDataRef: TCMDateTimePicker;
+    Label1: TLabel;
+    dbrValor: TDBRealEdit;
+    Label12: TLabel;
+    redSaldo: TRealEdit;
+    Label2: TLabel;
+    cdsSaldos: TCMClientDataSet;
+    cdsProxReserva: TCMClientDataSet;
+    MontaSelectConta: TMontaSelect;
+    bbtnPermiteNeg: TBitBtn;
+    bbtnBuscaConta: TBitBtn;
+    dbeStatus: TEdit;
+    procedure FormCreate(Sender: TObject);
+    procedure dbeCodigoContaExit(Sender: TObject);
+    procedure dbeDataRefExit(Sender: TObject);
+    procedure bbtnBuscaContaClick(Sender: TObject);
+    function STATUS:string;
+    procedure bbtnImprimeClick(Sender: TObject);
+    function VerificaPreenchimento:boolean;
+    procedure bbtnConfirmarClick(Sender: TObject);
+    procedure CmeCadastroBeforeConfirma(sender: TObject;
+      var Accept: Boolean);
+    procedure CmeCadastroConfirma(Sender: TObject);
+    procedure CmeCadastroAfterConfirma(Sender: TObject);
+    procedure CmeCadastroAbortConfirma(sender: TObject;
+      OrigemAbortConfirma: TOrigemAbortConfirma);
+    procedure CmeCadastroApplyDelete(sender: TObject; var Accept: Boolean);
+    procedure CmeCadastroApplyEdit(sender: TObject; var Accept: Boolean);
+    procedure CmeCadastroApplyInsert(sender: TObject; var Accept: Boolean);
+    procedure CmeCadastroCancel(Sender: TObject);
+    procedure CmeCadastroEdit(Sender: TObject);
+    procedure CmeCadastroFind(Sender: TObject);
+    procedure CmeCadastroInsert(Sender: TObject);
+    procedure ImprimirReserva;
+  private
+    { Private declarations }
+    iIndice : longint;
+    CtrlReservaorcamen: TCtrlReservaorcamen;
+    CtrlSaldoorcado: TCtrlSaldoorcado;
+  public
+    { Public declarations }
+  end;
+
+var
+  frmReservaMT: TfrmReservaMT;
+  rValorAnt: Extended;
+
+implementation
+
+uses UMensErro, uDatabase, DBaseDados, uAutorizacao, uSistema, uModulo, ppTypes,
+  uCtrlOrcamento, rReserva;
+
+{$R *.DFM}
+
+procedure TfrmReservaMT.FormCreate(Sender: TObject);
+begin
+  inherited;
+  //Adiciona o filtro por Empresa Proprietária no MontaSelect
+  MontaSelect.Filtro.Add('RESERVAORCAMEN.IDPESSOA = ' + IntToStr(Sistema.IdEmpresa));
+  MontaSelectConta.Filtro.Add('CONTASORCAMEN.IDPLANOORCAMEN = ' + IntToStr(modulo.iPlanoOrc));
+  MontaSelectConta.Filtro.Add('CONTASORCAMEN.CODCENTRORESPON IN (SELECT ' +
+                              'CODCENTRORESPON FROM PESSOAXCRESP WHERE ' +
+                              'IDPESSOAACESSO = ' + IntToStr(Sistema.idUsuario)+')');
+  MontaSelectConta.Filtro.Add('CONTASORCAMEN.TIPOCALCREALIZADO = ''X''');
+
+  CtrlReservaorcamen := TCtrlReservaorcamen.Create;
+  CtrlSaldoorcado    := TCtrlSaldoorcado.Create;
+  CtrlReservaorcamen.Initialize( DtmBaseDados.dbBaseDados, True,
+                                 Sistema.ConnectionType,   Sistema.ConnectionSide,
+                                 Sistema.AppRemoteServer,  True, nil, nil, False );
+  CtrlSaldoorcado.Initialize   ( DtmBaseDados.dbBaseDados, True,
+                                 Sistema.ConnectionType,   Sistema.ConnectionSide,
+                                 Sistema.AppRemoteServer,  True, nil, nil, False );
+
+  //Atribui os ClientDataSets local a ser persistido pelo objeto de negócios
+  CtrlReservaorcamen.CdsReservaorcamen := cds;
+  cds.Data := CtrlReservaorcamen.Procurar(-1);
+end;
+
+Procedure TfrmReservaMT.dbeCodigoContaExit(Sender: TObject);
+Var
+  sNomeConta, sCodCentroRespon, sNomeCentroRespon,
+  sCodGrupo,  sNomeGrupo,       sUnid,
+  sPPrev,     sCCusto,          sPatro            : String;
+Begin
+  Inherited;
+  If ( dbeCodigoConta.text <> '' ) Then Begin
+
+    If ( OrcamentoBackMT.BuscaContaOrcamen( modulo.iPlanoOrc,
+                                           dbeCodigoConta.text,
+                                           true,
+                                           true,
+                                           sNomeConta,
+                                           sCodCentroRespon,
+                                           sNomeCentroRespon,
+                                           sCodGrupo,
+                                           sNomeGrupo,
+                                           sUnid,
+                                           sPPrev,
+                                           sCCusto,
+                                           sPatro) = 0 ) Then Begin
+      edtNomeConta.text  := sNomeConta;
+      edtCentroResp.text := FormatMaskText( modulo.sMascaraCentRespon +
+                                            ';0; ',
+                                            sCodCentroRespon ) + ' - ' + sNomeCentroRespon;
+      edtGrupo.text      := FormatMaskText( modulo.sMascaraGrupo +
+                                            ';0; ',
+                                            sCodGrupo ) + ' - ' + sNomeGrupo;
+      redSaldo.value     := OrcamentoBackMT.ExibeSaldo( modulo.iPlanoOrc,
+                                                        dbeCodigoConta.text,
+                                                        DateToStr(date),
+                                                        modulo.sTipoSaldo );
+    End Else Begin
+
+      dbeCodigoConta.clear;
+      edtNomeConta.clear;
+      edtCentroResp.clear;
+      edtGrupo.clear;
+      redSaldo.clear;
+      If ( dbeCodigoConta.CanFocus ) Then dbeCodigoConta.SetFocus;
+    End;
+  End;
+End;
+
+procedure TfrmReservaMT.dbeDataRefExit(Sender: TObject);
+begin
+  inherited;
+  if trim(dbeDataRef.Text) <> '' then begin
+    redSaldo.value := OrcamentoBackMT.ExibeSaldo(modulo.iPlanoOrc,
+                      dbeCodigoConta.text,FormatDateTime('dd/mm/yyyy',
+                      dbeDataRef.date),modulo.sTipoSaldo);
+  end;
+end;
+
+procedure TfrmReservaMT.bbtnBuscaContaClick(Sender: TObject);
+var sNomeConta, sCodCentroRespon, sNomeCentroRespon, sCodGrupo,
+    sNomeGrupo, sUnid, sPPrev, sCCusto, sPatro : string;
+begin
+  inherited;
+  //Busca a Conta Orçamentária
+  MontaSelectConta.Executar;
+  if MontaSelectConta.RetornouValor then begin
+    if OrcamentoBackMT.BuscaContaOrcamen(modulo.iPlanoOrc,
+       MontaSelectConta.ValoresChave[1],true,true,sNomeConta,sCodCentroRespon,
+       sNomeCentroRespon,sCodGrupo,sNomeGrupo, sUnid,sPPrev,sCCusto,sPatro) = 0
+       then begin
+      dbeCodigoConta.text := MontaSelectConta.ValoresChave[1];
+      cds.FieldByName('IDCONTAORCAMEN').asString := MontaSelectConta.ValoresChave[1];
+      edtNomeConta.text  := sNomeConta;
+      edtCentroResp.text := FormatMaskText(modulo.sMascaraCentRespon + ';0; ',
+                            sCodCentroRespon) + ' - ' + sNomeCentroRespon;
+      edtGrupo.text      := FormatMaskText(modulo.sMascaraGrupo + ';0; ',
+                            sCodGrupo) + ' - ' + sNomeGrupo;
+      redSaldo.value     := OrcamentoBackMT.ExibeSaldo(modulo.iPlanoOrc,
+                            dbeCodigoConta.text,DateToStr(date),
+                            modulo.sTipoSaldo);
+    end else begin
+      dbeCodigoConta.clear;
+      edtNomeConta.clear;
+      edtCentroResp.clear;
+      edtGrupo.clear;
+      redSaldo.clear;
+      if dbeCodigoConta.CanFocus then dbeCodigoConta.SetFocus;
+    end;
+  end;
+end;
+
+function TfrmReservaMT.STATUS: string;
+begin
+  inherited;
+  //Preenche o campo de Status da Reserva
+  if cds.FieldByName('FLGRESERVA').asString = 'A' then begin
+    dbeStatus.Font.Color := clBlack;
+    Result := ' Aguardando...';
+  end else begin
+    if cds.FieldByName('FLGRESERVA').asString = 'E' then begin
+      dbeStatus.Font.Color := clBlue;
+      Result := ' Efetivada';
+    end else begin
+      if cds.FieldByName('FLGRESERVA').asString = 'C' then begin
+        dbeStatus.Font.Color := clRed;
+        Result := ' Cancelada';
+      end else begin
+        if cds.FieldByName('FLGRESERVA').asString = 'U' then begin
+          dbeStatus.Font.Color := clGreen;
+          Result := ' Em Uso';
+        end else begin
+          dbeStatus.Font.Color := clBlack;
+          Result := '';
+        end;
+      end;
+    end;
+  end;
+end;
+
+procedure TfrmReservaMT.bbtnImprimeClick(Sender: TObject);
+begin
+  inherited;
+  if not VerificaPreenchimento then Exit;
+  ImprimirReserva;
+end;
+
+function TfrmReservaMT.VerificaPreenchimento:boolean;
+var sDataRef, sTipo : string;
+    iExercicio, iPeriodo : integer;
+begin
+  if ( frmReservaMT.CmeCadastro.Operacao in [opInserir, opAlterar] ) then begin
+    //Inicializa as variáveis
+    sTipo          := modulo.sTipoSaldo;
+    sDataRef       := FormatDateTime('dd/mm/yyyy', dbeDataRef.date);
+    iExercicio     := StrToInt(copy(sDataRef,7,4));
+    iPeriodo       := OrcamentoBackMT.EncontraPeriodo(sDataRef);
+    //Faz a verificação do preenchimento dos campos
+    if (dbeCodigoConta.text = '') then begin
+      MsgDlg('Código da Conta não informado.','Erro',mtError,[mbOk],0);
+      if dbeCodigoConta.CanFocus then dbeCodigoConta.SetFocus;
+      result := false;
+      exit;
+    end;
+    if (dbeDataRef.Text = '') then begin
+      MsgDlg('Data de Referência não informada.','Erro',mtError,[mbOk],0);
+      if dbeDataRef.CanFocus then dbeDataRef.SetFocus;
+      result := false;
+      exit;
+    end;
+    if iPeriodo = -1 then begin
+      MsgDlg('Período Bloqueado.','Erro',mtError,[mbOk],0);
+      if dbeDataRef.CanFocus then dbeDataRef.SetFocus;
+      result := false;
+      exit;
+    end;
+    if iPeriodo = 0 then begin
+      MsgDlg('Não existe um Período ou Exercício para a Data de Referência ' +
+             'informada.','Erro',mtError,[mbOk],0);
+      if dbeDataRef.CanFocus then dbeDataRef.SetFocus;
+      result := false;
+      exit;
+    end;
+    if (dbrValor.Value = 0) then begin
+      MsgDlg('Valor da Reserva não informado.','Erro',mtError,[mbOk],0);
+      if dbrValor.CanFocus then dbrValor.SetFocus;
+      result := false;
+      exit;
+    end;
+    //Verifica a tabela de Saldos para ver se a reserva pode ser feita
+    //com o Saldo corrente
+    If ( Modulo.sPermiteSaldoNeg = 'N' ) Then Begin
+
+      If ( Not OrcamentoBackMT.VerificaSaldoProcesso( Modulo.iPlanoOrc,
+                                                      dbeCodigoConta.text,
+                                                      iExercicio,
+                                                      iPeriodo,
+                                                      ( dbrValor.value - rValorAnt),
+                                                      True ) ) Then Begin
+        Result := false;
+        MsgDlg( 'Não existe saldo suficiente para esta Reserva.', 'Aviso', mtWarning, [ mbOk ], 0 );
+        Exit;
+      End;
+    End;
+  End;
+  Result := True;
+End;
+
+procedure TfrmReservaMT.bbtnConfirmarClick(Sender: TObject);
+begin
+  if not VerificaPreenchimento then Exit;
+  inherited;
+end;
+
+procedure TfrmReservaMT.CmeCadastroApplyDelete(sender: TObject;
+  var Accept: Boolean);
+begin
+  Inherited;
+  Accept := CtrlReservaorcamen.AplicaOperacaoReservaOrcamen;
+end;
+
+procedure TfrmReservaMT.CmeCadastroApplyEdit(sender: TObject;
+  var Accept: Boolean);
+begin
+  Inherited;
+  Accept := CtrlReservaorcamen.AplicaOperacaoReservaOrcamen;
+end;
+
+procedure TfrmReservaMT.CmeCadastroApplyInsert(sender: TObject;
+  var Accept: Boolean);
+begin
+  Inherited;
+  Accept := CtrlReservaorcamen.AplicaOperacaoReservaOrcamen;
+end;
+
+
+procedure TfrmReservaMT.CmeCadastroCancel(Sender: TObject);
+begin
+  inherited;
+  bbtnImprime.enabled := false;
+  edtNomeConta.text  := '';
+  edtCentroResp.text := '';
+  edtGrupo.text      := '';
+  dbeStatus.text     := '';
+end;
+
+
+procedure TfrmReservaMT.CmeCadastroEdit(Sender: TObject);
+begin
+  inherited;
+  rValorAnt := cds.FieldByName('VLRRESERVA').AsFloat;
+  if dbeDataRef.CanFocus then dbeDataRef.SetFocus;
+end;
+
+procedure TfrmReservaMT.CmeCadastroFind(Sender: TObject);
+var sNomeConta, sCodCentroRespon, sNomeCentroRespon, sCodGrupo,
+    sNomeGrupo, sUnid, sPPrev, sCCusto, sPatro: string;
+begin
+  inherited;
+  if MontaSelect.RetornouValor then begin
+    //Se houve busca, abre a query principal apenas com o registro buscado
+    iIndice := StrToInt(MontaSelect.ValoresChave[0]);
+    bbtnImprime.enabled := true;
+    with cds do begin
+      Data := CtrlReservaorcamen.Procurar(iIndice);
+      if OrcamentoBackMT.BuscaContaOrcamen(modulo.iPlanoOrc,
+         FieldByName('IDCONTAORCAMEN').asString,true,true,sNomeConta,
+         sCodCentroRespon,sNomeCentroRespon,sCodGrupo,sNomeGrupo,sUnid,sPPrev,
+         sCCusto,sPatro) = 0 then
+         begin
+        edtNomeConta.text  := sNomeConta;
+        edtCentroResp.text := FormatMaskText(modulo.sMascaraCentRespon + ';0; ',
+                              sCodCentroRespon) + ' - ' + sNomeCentroRespon;
+        edtGrupo.text      := FormatMaskText(modulo.sMascaraGrupo + ';0; ',
+                              sCodGrupo) + ' - ' + sNomeGrupo;
+        redSaldo.value     := OrcamentoBackMT.ExibeSaldo(modulo.iPlanoOrc,
+                              FieldByName('IDCONTAORCAMEN').asString,
+                              DateToStr(date),modulo.sTipoSaldo);
+      end;
+    end;
+    dbeStatus.text := STATUS;
+  end;
+end;
+
+procedure TfrmReservaMT.CmeCadastroInsert(Sender: TObject);
+begin
+  rValorAnt := 0;
+  edtNomeConta.text  := '';
+  edtCentroResp.text := '';
+  edtGrupo.text      := '';
+  dbeStatus.text     := '';
+  inherited;
+  cds.FieldByName('FLGRESCOMP').asString := 'R';
+  cds.FieldByName('IDMODULO').asInteger  := 52;
+  if dbeCodigoConta.CanFocus then dbeCodigoConta.SetFocus;
+end;
+//************************************************
+Procedure TfrmReservaMT.ImprimirReserva;
+Var
+  sMensagem : String;
+Begin
+
+  redSaldo.value := OrcamentoBackMT.ExibeSaldo(modulo.iPlanoOrc,
+                    dbeCodigoConta.text,FormatDateTime('dd/mm/yyyy', dbeDataRef.date),
+                    modulo.sTipoSaldo);
+
+  If Not TrptReserva.PrintReport( 3155, 1, Sistema.IdEmpresa, Sistema.IdUsuario, Sistema.IdModulo,
+                                  cds.FieldByName('NUMRESERVA').AsString + '|=|' +
+                                  FloatToStr( redSaldo.value )         + '|=|',
+                                  '', 'BaseDados', Sistema.NomeEmpresa, Sistema.NomeModulo, sMensagem ) Then Begin
+    MsgDlg(sMensagem, 'Impressão da Reserva', mtError, [], 0);
+  End;
+End;
+
+procedure TfrmReservaMT.CmeCadastroBeforeConfirma(sender: TObject;
+  var Accept: Boolean);
+begin
+
+  Accept := False;
+  if frmReservaMT.CmeCadastro.Operacao in [opAlterar] then begin
+    if cds.FieldByName('FLGRESERVA').asString <> 'A' then begin
+      MsgDlg('O Status da Reserva não permite alteração.','Erro',mtError,
+             [mbOk],0);
+      if dbeDataRef.CanFocus then dbeDataRef.SetFocus;
+      exit;
+    end;
+  end;
+
+  if frmReservaMT.CmeCadastro.Operacao = opInserir then begin
+    //Cria o número da próxima reserva
+    with cdsProxReserva do begin
+      Close;
+      Data := CtrlReservaorcamen.ProximaReserva(Sistema.idEmpresa);
+      cds.FieldByName('NUMRESERVA').asInteger := FieldByName('PROXIMA').asInteger + 1;
+    end;
+  end;
+  //Completa o código do plano orçamentario
+  cds.FieldByName('IDPLANOORCAMEN').AsInteger := Modulo.iPlanoOrc;
+  cds.FieldByName('FLGRESERVA').AsString      := 'A';
+  cds.FieldByName('IDPESSOA').AsFloat         := Sistema.idEmpresa;
+  cds.FieldByName('EXERCICIO').AsInteger      :=
+                                    StrToInt( copy( FormatDateTime( 'dd/mm/yyyy', dbeDataRef.date ), 7,4));
+  cds.FieldByName('PERIODO').AsInteger := OrcamentoBackMT.EncontraPeriodo
+                                 (FormatDateTime('dd/mm/yyyy',dbeDataRef.date));
+  dbeStatus.text := STATUS;
+  //Gera o número sequencial da próxima reserva
+  if cds.FieldByName('IDRESERVAORCAMEN').asInteger <= 0 then begin
+    cds.FieldByName('IDRESERVAORCAMEN').AsInteger := CtrlReservaOrcamen.LerUltimaSequencia;
+  end;
+
+  Accept := True;
+  inherited;
+end;
+
+
+procedure TfrmReservaMT.CmeCadastroConfirma(Sender: TObject);
+var sDataRef: string;
+    iExercicio, iPeriodo: integer;
+begin
+  bbtnImprime.enabled := false;
+  if ( frmReservaMT.CmeCadastro.Operacao in [opInserir, opAlterar] ) then begin
+    //Inicializa as variáveis
+    sDataRef       := FormatDateTime('dd/mm/yyyy', dbeDataRef.date);
+    iExercicio     := StrToInt(copy(sDataRef,7,4));
+    iPeriodo       := OrcamentoBackMT.EncontraPeriodo(sDataRef);
+
+    try
+      //Atualiza a tabela de Saldos com o Valor do Saldo Reservado
+      If ( OrcamentoBackMT.VerificaSaldo( Modulo.iPlanoOrc,
+                                          dbeCodigoConta.text,
+                                          OrcamentoBackMT.PrimeiroDiaPeriodo( iExercicio,
+                                                                              iPeriodo ) ) ) Then Begin
+        CtrlSaldoorcado.AtualizaVlrReservado( Modulo.iPlanoOrc,
+                                              Sistema.idEmpresa,
+                                              dbeCodigoConta.text,
+                                              OrcamentoBackMT.PrimeiroDiaPeriodo( iExercicio,
+                                                                                  iPeriodo ),
+                                              dbrValor.value-rValorAnt );
+      End Else Begin
+
+        CtrlSaldoorcado.InsereSaldo( iExercicio,
+                                     iPeriodo,
+                                     Modulo.iPlanoOrc,
+                                     Sistema.idEmpresa,
+                                     dbeCodigoConta.Text,
+                                     OrcamentoBackMT.PrimeiroDiaPeriodo ( iExercicio,
+                                                                          iPeriodo),
+                                     0,
+                                     0,
+                                     dbrValor.value-rValorAnt,
+                                     0,
+                                     0,
+                                     0);
+      End;
+
+      Inherited;
+      MsgDlg( 'Reserva efetuada com sucesso.', 'Aviso', mtWarning, [ mbOk ], 0 );
+
+      If ( MsgDlg( 'Deseja imprimir esta reserva?', 'Aviso', mtConfirmation, [ mbYes, mbNo ], 0 ) = mrYes ) Then Begin
+
+        ImprimirReserva;
+      End;
+    Except
+
+      MsgDlg( 'Foram detectados problemas na realização da Reserva.', 'Aviso', mtWarning, [ mbOk ], 0 );
+    End;
+  End;
+
+  redSaldo.value     := 0;
+  edtNomeConta.text  := '';
+  edtCentroResp.text := '';
+  edtGrupo.text      := '';
+  dbeStatus.text     := '';
+End;
+
+
+procedure TfrmReservaMT.CmeCadastroAfterConfirma(Sender: TObject);
+begin
+  //Inherited;
+  cds.Data := CtrlReservaorcamen.Procurar
+                                  (cds.FieldByName('IDRESERVAORCAMEN').AsFloat);
+end;
+
+procedure TfrmReservaMT.CmeCadastroAbortConfirma(sender: TObject;
+  OrigemAbortConfirma: TOrigemAbortConfirma);
+begin
+  Inherited;
+  If OrigemAbortConfirma <> OaBeforeConfirma Then Begin
+    MsgDlg('Ocorreu o seguinte erro : '+ CtrlReservaorcamen.MessageInfo,
+           'Aviso', mtError,[mbOK],0);
+  End;
+end;
+
+end.

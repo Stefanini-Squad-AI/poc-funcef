@@ -1,0 +1,553 @@
+inherited RptCAFCadConjunto: TRptCAFCadConjunto
+  Left = 479
+  Top = 182
+  Width = 275
+  Height = 149
+  Caption = 'RptCAFCadConjunto'
+  OldCreateOrder = True
+  PixelsPerInch = 96
+  TextHeight = 13
+  inherited CmpRptCM: TCmParamReport
+    Caption = 'Cadastro de Conjuntos'
+    DataBaseName = 'BaseDados'
+    Params = <
+      item
+        Caption = 'Localização'
+        Controle = tcLookupCombo
+        TipodeDado = tdInteger
+        LookupSettings.SQL.Strings = (
+          'SELECT NOME, IDLOCALIZACAO'
+          'FROM LOCALIZACAO'
+          'ORDER BY NOME')
+        LookupSettings.Chave = 'IDLOCALIZACAO'
+        LookupSettings.Display = 'NOME'
+        LookupSettings.Descricao = 'Localização'
+        LookupSettings.Tamanho = '50'
+        CheckBoxSetings.ValueChecked = 'False'
+        CheckBoxSetings.ValueUnChecked = 'False'
+        CheckBoxSetings.Checked = True
+        RadioGroupSettings.Items.Strings = ()
+        RadioGroupSettings.Values.Strings = ()
+        RadioGroupSettings.Columns = 1
+        RadioGroupSettings.ItemIndex = -1
+        RadioGroupSettings.Height = 40
+        ComboBoxSettings.Sorted = False
+        ComboBoxSettings.Style = csDropDownList
+        ComboBoxSettings.Items.Strings = ()
+        ComboBoxSettings.DropDownCount = 8
+        ListBoxSettings.Items.Strings = ()
+        ListBoxSettings.MultiSelect = False
+        ListBoxSettings.ExtendedSelect = False
+        ListBoxSettings.Sorted = False
+        ListBoxSettings.Style = lbStandard
+        ListBoxSettings.height = 70
+        MostraComboCompara = True
+        Required = False
+      end
+      item
+        Caption = 'Responsável'
+        Controle = tcLookupCombo
+        TipodeDado = tdInteger
+        LookupSettings.SQL.Strings = (
+          'SELECT P.NOME, R.IDRESPONSAVEL'
+          'FROM PESSOA P,'
+          '     RESPONSAVEL R'
+          'WHERE (R.IDRESPONSAVEL = P.IDPESSOA)'
+          'ORDER BY P.NOME')
+        LookupSettings.Chave = 'IDRESPONSAVEL'
+        LookupSettings.Display = 'NOME'
+        LookupSettings.Descricao = 'Responsável'
+        LookupSettings.Tamanho = '50'
+        CheckBoxSetings.ValueChecked = 'False'
+        CheckBoxSetings.ValueUnChecked = 'False'
+        CheckBoxSetings.Checked = True
+        RadioGroupSettings.Items.Strings = ()
+        RadioGroupSettings.Values.Strings = ()
+        RadioGroupSettings.Columns = 1
+        RadioGroupSettings.ItemIndex = -1
+        RadioGroupSettings.Height = 40
+        ComboBoxSettings.Sorted = False
+        ComboBoxSettings.Style = csDropDownList
+        ComboBoxSettings.Items.Strings = ()
+        ComboBoxSettings.DropDownCount = 8
+        ListBoxSettings.Items.Strings = ()
+        ListBoxSettings.MultiSelect = False
+        ListBoxSettings.ExtendedSelect = False
+        ListBoxSettings.Sorted = False
+        ListBoxSettings.Style = lbStandard
+        ListBoxSettings.height = 70
+        MostraComboCompara = True
+        Required = False
+      end>
+    Formheight = 122
+    Left = 24
+  end
+  inherited DevRptCM: TExtraOptions
+    Left = 152
+  end
+  inherited CrmRptCM: TCmRptManager
+    BeforePrint = CrmRptCMBeforePrint
+    ChangeDataBaseName = CrmRptCMChangeDataBaseName
+    DataBaseName = 'BaseDados'
+    Report = rpCadConj
+    Left = 88
+  end
+  object qryCadConj: TwwQuery
+    DatabaseName = 'BaseDados'
+    SQL.Strings = (
+      
+        'SELECT C.IDCONJUNTO,C.DESCCONJUNTO,L.NOME AS NOMELOCAL,P.NOME AS' +
+        ' NOMERESP,'
+      
+        '       RD.CODCENTROCUSTO,CC.NOME AS DESCCENTROCUSTO,RD.PARTICIPA' +
+        'CAO'
+      'FROM RATEIODEPRECIACAO RD,'
+      '     CONJUNTO C,'
+      '     LOCALIZACAO L,'
+      '     PESSOA P,'
+      '     CENTCUST CC'
+      'WHERE (C.IDPESSOA        = :PIDPESSOA)'
+      ''
+      ''
+      '  AND (RD.IDCONJUNTO     = C.IDCONJUNTO)'
+      '  AND (RD.CODCENTROCUSTO = CC.CODCENTROCUSTO)'
+      '  AND (RD.IDEMPRESA      = CC.IDEMPRESA)'
+      '  AND (C.IDLOCALIZACAO   = L.IDLOCALIZACAO)'
+      '  AND (C.IDRESPONSAVEL   = P.IDPESSOA)'
+      'ORDER BY C.IDCONJUNTO'
+      '')
+    ValidateWithMask = True
+    Left = 24
+    Top = 64
+    ParamData = <
+      item
+        DataType = ftFloat
+        Name = 'PIDPESSOA'
+        ParamType = ptUnknown
+      end>
+    object qryCadConjIDCONJUNTO: TFloatField
+      FieldName = 'IDCONJUNTO'
+      Origin = 'BASEDADOS.CONJUNTO.IDCONJUNTO'
+    end
+    object qryCadConjDESCCONJUNTO: TStringField
+      FieldName = 'DESCCONJUNTO'
+      Origin = 'BASEDADOS.CONJUNTO.DESCCONJUNTO'
+      Size = 200
+    end
+    object qryCadConjNOMELOCAL: TStringField
+      FieldName = 'NOMELOCAL'
+      Origin = 'BASEDADOS.LOCALIZACAO.NOME'
+      Size = 60
+    end
+    object qryCadConjNOMERESP: TStringField
+      FieldName = 'NOMERESP'
+      Origin = 'BASEDADOS.PESSOA.NOME'
+      Size = 60
+    end
+    object qryCadConjCODCENTROCUSTO: TStringField
+      FieldName = 'CODCENTROCUSTO'
+      Origin = 'BASEDADOS.RATEIODEPRECIACAO.CODCENTROCUSTO'
+      FixedChar = True
+      Size = 10
+    end
+    object qryCadConjDESCCENTROCUSTO: TStringField
+      FieldName = 'DESCCENTROCUSTO'
+      Origin = 'BASEDADOS.CENTCUST.NOME'
+      Size = 30
+    end
+    object qryCadConjPARTICIPACAO: TFloatField
+      FieldName = 'PARTICIPACAO'
+      Origin = 'BASEDADOS.RATEIODEPRECIACAO.PARTICIPACAO'
+    end
+  end
+  object dsCadConj: TwwDataSource
+    DataSet = qryCadConj
+    Left = 88
+    Top = 64
+  end
+  object ppCadConj: TppBDEPipeline
+    DataSource = dsCadConj
+    UserName = 'CadConj'
+    Left = 152
+    Top = 64
+  end
+  object rpCadConj: TppReport
+    AutoStop = False
+    DataPipeline = ppCadConj
+    PassSetting = psTwoPass
+    PrinterSetup.BinName = 'Default'
+    PrinterSetup.DocumentName = 'PpModeloReport1'
+    PrinterSetup.PaperName = 'A4'
+    PrinterSetup.PrinterName = 'Default'
+    PrinterSetup.mmMarginBottom = 12000
+    PrinterSetup.mmMarginLeft = 6350
+    PrinterSetup.mmMarginRight = 6350
+    PrinterSetup.mmMarginTop = 6350
+    PrinterSetup.mmPaperHeight = 297127
+    PrinterSetup.mmPaperWidth = 210079
+    PrinterSetup.PaperSize = 0
+    Template.SaveTo = stDatabase
+    Units = utMillimeters
+    AllowPrintToArchive = True
+    AllowPrintToFile = True
+    DeviceType = 'Screen'
+    Left = 216
+    Top = 64
+    Version = '5.5'
+    mmColumnWidth = 197300
+    object ppHeaderBand5: TppHeaderBand
+      mmBottomOffset = 0
+      mmHeight = 17992
+      mmPrintPosition = 0
+      object ppLabel26: TppLabel
+        UserName = 'ppLabel26'
+        Caption = 'Cadastro de Conjuntos'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 12
+        Font.Style = [fsBold]
+        TextAlignment = taCentered
+        Transparent = True
+        mmHeight = 5292
+        mmLeft = 75142
+        mmTop = 8731
+        mmWidth = 46831
+        BandType = 0
+      end
+      object ppLabel27: TppLabel
+        UserName = 'ppLabel27'
+        Caption = 'LblEmpresa'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 14
+        Font.Style = [fsBold]
+        TextAlignment = taCentered
+        Transparent = True
+        mmHeight = 5821
+        mmLeft = 84667
+        mmTop = 1588
+        mmWidth = 28046
+        BandType = 0
+      end
+      object rpCadConjLine2: TppLine
+        UserName = 'rpCadConjLine2'
+        ParentWidth = True
+        Weight = 0.75
+        mmHeight = 1058
+        mmLeft = 0
+        mmTop = 16669
+        mmWidth = 197379
+        BandType = 0
+      end
+    end
+    object ppDetailBand5: TppDetailBand
+      mmBottomOffset = 0
+      mmHeight = 4763
+      mmPrintPosition = 0
+      object rpCadConjDBText3: TppDBText
+        UserName = 'rpCadConjDBText3'
+        DataField = 'CODCENTROCUSTO'
+        DataPipeline = ppCadConj
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        Transparent = True
+        mmHeight = 3704
+        mmLeft = 21167
+        mmTop = 529
+        mmWidth = 17198
+        BandType = 4
+      end
+      object rpCadConjDBText4: TppDBText
+        UserName = 'rpCadConjDBText4'
+        AutoSize = True
+        DataField = 'DESCCENTROCUSTO'
+        DataPipeline = ppCadConj
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        Transparent = True
+        mmHeight = 3175
+        mmLeft = 42598
+        mmTop = 529
+        mmWidth = 29633
+        BandType = 4
+      end
+      object rpCadConjDBText5: TppDBText
+        UserName = 'rpCadConjDBText5'
+        DataField = 'PARTICIPACAO'
+        DataPipeline = ppCadConj
+        DisplayFormat = '0.00 %'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        TextAlignment = taRightJustified
+        Transparent = True
+        mmHeight = 3704
+        mmLeft = 176742
+        mmTop = 265
+        mmWidth = 12700
+        BandType = 4
+      end
+    end
+    object ppFooterBand5: TppFooterBand
+      mmBottomOffset = 0
+      mmHeight = 6085
+      mmPrintPosition = 0
+      object ppLine12: TppLine
+        UserName = 'ppLine12'
+        ParentWidth = True
+        Weight = 0.75
+        mmHeight = 1588
+        mmLeft = 0
+        mmTop = 265
+        mmWidth = 197379
+        BandType = 8
+      end
+      object ppLabel31: TppLabel
+        UserName = 'ppLabel31'
+        Caption = 'Nome do Sistema'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 3704
+        mmLeft = 0
+        mmTop = 1323
+        mmWidth = 35983
+        BandType = 8
+      end
+      object ppCalc9: TppSystemVariable
+        UserName = 'Calc9'
+        VarType = vtPageSetDesc
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        TextAlignment = taCentered
+        Transparent = True
+        mmHeight = 3704
+        mmLeft = 71438
+        mmTop = 1323
+        mmWidth = 54504
+        BandType = 8
+      end
+      object ppCalc10: TppSystemVariable
+        UserName = 'ppCalc101'
+        VarType = vtDateTime
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        TextAlignment = taRightJustified
+        Transparent = True
+        mmHeight = 3704
+        mmLeft = 171450
+        mmTop = 1323
+        mmWidth = 26194
+        BandType = 8
+      end
+    end
+    object rpCadConjGroup1: TppGroup
+      BreakName = 'IDCONJUNTO'
+      DataPipeline = ppCadConj
+      UserName = 'rpCadConjGroup1'
+      mmNewColumnThreshold = 0
+      mmNewPageThreshold = 0
+      object rpCadConjGroupHeaderBand1: TppGroupHeaderBand
+        mmBottomOffset = 0
+        mmHeight = 16669
+        mmPrintPosition = 0
+        object rpCadConjLabel1: TppLabel
+          UserName = 'rpCadConjLabel1'
+          Caption = 'Conjunto'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Name = 'Arial'
+          Font.Size = 8
+          Font.Style = [fsBold]
+          Transparent = True
+          mmHeight = 3704
+          mmLeft = 265
+          mmTop = 529
+          mmWidth = 13229
+          BandType = 3
+          GroupNo = 0
+        end
+        object rpCadConjLabel2: TppLabel
+          UserName = 'rpCadConjLabel2'
+          Caption = 'Localização'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Name = 'Arial'
+          Font.Size = 8
+          Font.Style = []
+          Transparent = True
+          mmHeight = 3704
+          mmLeft = 265
+          mmTop = 3969
+          mmWidth = 15346
+          BandType = 3
+          GroupNo = 0
+        end
+        object rpCadConjLabel3: TppLabel
+          UserName = 'rpCadConjLabel3'
+          Caption = 'Responsável'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Name = 'Arial'
+          Font.Size = 8
+          Font.Style = []
+          Transparent = True
+          mmHeight = 3704
+          mmLeft = 265
+          mmTop = 7408
+          mmWidth = 16669
+          BandType = 3
+          GroupNo = 0
+        end
+        object ppDBText17: TppDBText
+          UserName = 'ppDBText17'
+          DataField = 'DESCCONJUNTO'
+          DataPipeline = ppCadConj
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Name = 'Arial'
+          Font.Size = 8
+          Font.Style = [fsBold]
+          Transparent = True
+          mmHeight = 3704
+          mmLeft = 21167
+          mmTop = 529
+          mmWidth = 174361
+          BandType = 3
+          GroupNo = 0
+        end
+        object rpCadConjDBText1: TppDBText
+          UserName = 'rpCadConjDBText1'
+          DataField = 'NOMELOCAL'
+          DataPipeline = ppCadConj
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Name = 'Arial'
+          Font.Size = 8
+          Font.Style = []
+          Transparent = True
+          mmHeight = 3704
+          mmLeft = 21167
+          mmTop = 3969
+          mmWidth = 174361
+          BandType = 3
+          GroupNo = 0
+        end
+        object rpCadConjDBText2: TppDBText
+          UserName = 'rpCadConjDBText2'
+          DataField = 'NOMERESP'
+          DataPipeline = ppCadConj
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Name = 'Arial'
+          Font.Size = 8
+          Font.Style = []
+          Transparent = True
+          mmHeight = 3704
+          mmLeft = 21167
+          mmTop = 7408
+          mmWidth = 156104
+          BandType = 3
+          GroupNo = 0
+        end
+        object rpCadConjLine1: TppLine
+          UserName = 'rpCadConjLine1'
+          ParentWidth = True
+          Weight = 0.75
+          mmHeight = 529
+          mmLeft = 0
+          mmTop = 11642
+          mmWidth = 197379
+          BandType = 3
+          GroupNo = 0
+        end
+        object rpCadConjLabel4: TppLabel
+          UserName = 'rpCadConjLabel4'
+          Caption = 'Centro de Custo'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Name = 'Arial'
+          Font.Size = 8
+          Font.Style = []
+          Transparent = True
+          mmHeight = 3704
+          mmLeft = 21167
+          mmTop = 12435
+          mmWidth = 20638
+          BandType = 3
+          GroupNo = 0
+        end
+        object rpCadConjLabel6: TppLabel
+          UserName = 'rpCadConjLabel6'
+          Caption = 'Participação'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Name = 'Arial'
+          Font.Size = 8
+          Font.Style = []
+          Transparent = True
+          mmHeight = 3704
+          mmLeft = 173832
+          mmTop = 12435
+          mmWidth = 15610
+          BandType = 3
+          GroupNo = 0
+        end
+        object rpCadConjDBText6: TppDBText
+          UserName = 'rpCadConjDBText6'
+          DataField = 'IDCONJUNTO'
+          DataPipeline = ppCadConj
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Name = 'Arial'
+          Font.Size = 8
+          Font.Style = []
+          TextAlignment = taRightJustified
+          Transparent = True
+          mmHeight = 3704
+          mmLeft = 178330
+          mmTop = 7408
+          mmWidth = 17198
+          BandType = 3
+          GroupNo = 0
+        end
+      end
+      object rpCadConjGroupFooterBand1: TppGroupFooterBand
+        mmBottomOffset = 0
+        mmHeight = 1852
+        mmPrintPosition = 0
+        object ppLine11: TppLine
+          UserName = 'ppLine11'
+          Pen.Width = 2
+          ParentWidth = True
+          Weight = 1.5
+          mmHeight = 1058
+          mmLeft = 0
+          mmTop = 794
+          mmWidth = 197379
+          BandType = 5
+          GroupNo = 0
+        end
+      end
+    end
+  end
+end

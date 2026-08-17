@@ -1,0 +1,1 @@
+alter table cm.depentit modify percalimentic number(17,2) default 0;

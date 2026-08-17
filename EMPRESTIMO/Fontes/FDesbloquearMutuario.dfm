@@ -1,0 +1,1209 @@
+inherited frmDesbloquearMutuario: TfrmDesbloquearMutuario
+  Left = 64
+  Top = 154
+  Caption = 'Consulta Quitação Financiamento Habitacional'
+  ClientHeight = 443
+  ClientWidth = 697
+  Constraints.MinHeight = 445
+  Constraints.MinWidth = 705
+  PixelsPerInch = 96
+  TextHeight = 13
+  inherited pnlFundo: TPanel
+    Top = 33
+    Width = 697
+    Height = 371
+    object pcDesbloqueioMutuario: TPageControl
+      Left = 1
+      Top = 102
+      Width = 695
+      Height = 268
+      ActivePage = tsMutuario
+      Align = alClient
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -9
+      Font.Name = 'MS Sans Serif'
+      Font.Style = [fsBold]
+      ParentFont = False
+      TabOrder = 1
+      OnChange = pcDesbloqueioMutuarioChange
+      object tsMutuario: TTabSheet
+        Caption = 'Desbloquear Mutuário'
+        object pnlListaMutuarios: TPanel
+          Left = 0
+          Top = 0
+          Width = 687
+          Height = 240
+          Align = alClient
+          TabOrder = 0
+          object lvMutuariosArquivo: TListView
+            Left = 1
+            Top = 27
+            Width = 659
+            Height = 193
+            Align = alClient
+            Checkboxes = True
+            Columns = <
+              item
+                Caption = 'Matricula'
+                Width = 100
+              end
+              item
+                Caption = 'Nome'
+                Width = 270
+              end
+              item
+                Alignment = taCenter
+                Caption = 'Data Liquidação'
+                Width = 100
+              end
+              item
+                Alignment = taRightJustify
+                Caption = 'Valor Liquidação'
+                Width = 100
+              end
+              item
+                Caption = 'CPF'
+                Width = 200
+              end>
+            Font.Charset = DEFAULT_CHARSET
+            Font.Color = clWindowText
+            Font.Height = -9
+            Font.Name = 'MS Sans Serif'
+            Font.Style = []
+            FlatScrollBars = True
+            GridLines = True
+            HotTrack = True
+            ReadOnly = True
+            RowSelect = True
+            ParentFont = False
+            SmallImages = ilListaMutuario
+            TabOrder = 4
+            ViewStyle = vsReport
+            OnClick = lvMutuariosArquivoClick
+            OnDblClick = lvMutuariosArquivoDblClick
+          end
+          object pnlDesbloquearMutuarioArquivoBotoes: TPanel
+            Left = 660
+            Top = 27
+            Width = 26
+            Height = 193
+            Align = alRight
+            BevelOuter = bvNone
+            BorderWidth = 1
+            TabOrder = 0
+            object ToolBarOperacoesItensImportador: TToolBar
+              Left = 1
+              Top = 1
+              Width = 24
+              Height = 121
+              ButtonWidth = 24
+              Caption = 'ToolBarOperacoesItensImportador'
+              Images = imglstToolBar
+              TabOrder = 0
+              object tlbtnImportarMarcarTodos: TToolButton
+                Left = 0
+                Top = 2
+                Caption = 'tlbtnImportarMarcarTodos'
+                ImageIndex = 0
+                Wrap = True
+                OnClick = tlbtnImportarMarcarTodosClick
+              end
+              object tlbtnImportarInverteSelecao: TToolButton
+                Left = 0
+                Top = 24
+                Caption = 'tlbtnImportarInverteSelecao'
+                ImageIndex = 1
+                Wrap = True
+                OnClick = tlbtnImportarInverteSelecaoClick
+              end
+              object btnInformacoesMatricula: TToolButton
+                Left = 0
+                Top = 46
+                Hint = 'Informações sobre a matrícula '
+                Caption = 'btnInformacoesMatricula'
+                ImageIndex = 2
+                OnClick = btnInformacoesMatriculaClick
+              end
+            end
+          end
+          object pnlDesbloquearMutuarioArquivoSelecionar: TPanel
+            Left = 1
+            Top = 1
+            Width = 685
+            Height = 26
+            Align = alTop
+            BevelOuter = bvNone
+            TabOrder = 1
+            object plnDesbloquearMutuarioArquivo: TPanel
+              Left = 1
+              Top = 3
+              Width = 80
+              Height = 21
+              BevelOuter = bvLowered
+              Caption = 'Arquivo'
+              TabOrder = 1
+            end
+            object edtArquivoMutuarioCSV: TEdit
+              Left = 85
+              Top = 3
+              Width = 548
+              Height = 21
+              Anchors = [akLeft, akTop, akRight]
+              Font.Charset = DEFAULT_CHARSET
+              Font.Color = clWindowText
+              Font.Height = -9
+              Font.Name = 'MS Sans Serif'
+              Font.Style = []
+              ParentFont = False
+              ReadOnly = True
+              TabOrder = 0
+            end
+            object btnSelecionarArquivoCSV: TBitBtn
+              Left = 635
+              Top = 2
+              Width = 24
+              Height = 22
+              Hint = 'Localizar arquivo para importação'
+              Anchors = [akTop, akRight]
+              Font.Charset = DEFAULT_CHARSET
+              Font.Color = clBlue
+              Font.Height = -9
+              Font.Name = 'MS Sans Serif'
+              Font.Style = [fsBold]
+              ParentFont = False
+              TabOrder = 2
+              OnClick = btnSelecionarArquivoCSVClick
+              Glyph.Data = {
+                76010000424D7601000000000000760000002800000020000000100000000100
+                0400000000000001000000000000000000001000000010000000000000000000
+                80000080000000808000800000008000800080800000C0C0C000808080000000
+                FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00777777777887
+                777777777777F88F7777777777700F077777777777F8878F77777777700FFF07
+                77777777F8877787F77777700FFFFFF077777778877777F8F7777778FFFFFCF0
+                77777F78F77FF8787F771778FFCCCFFF07778FF87F88877F8F7711778FFFFFCF
+                077788FF8F77FF8787F711178FFCCCFFF077888F8FF88877F87F71110000FFFC
+                FF07788888887FF877877710E7E706CFFFF077887777888777F8770E7E7E70FF
+                F887778F777778F7F8877707E7E7E0F88777778F777778F88777770E7E7E7087
+                7777778F7777788777777707E7E7E07777777787F7777877777777707E7E0777
+                777777787FFF8777777777770000777777777777888877777777}
+              NumGlyphs = 2
+            end
+            object btnLimparDadosArquivo: TBitBtn
+              Left = 660
+              Top = 2
+              Width = 24
+              Height = 22
+              Hint = 'Limpa a seleção do arquivo'
+              Anchors = [akTop, akRight]
+              TabOrder = 3
+              OnClick = btnLimparDadosArquivoClick
+              Glyph.Data = {
+                76010000424D7601000000000000760000002800000020000000100000000100
+                0400000000000001000000000000000000001000000010000000000000000000
+                8000008000000080800080000000800080008080000080808000C0C0C0000000
+                FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00888888888888
+                88888888888FF8888888888888008888888888888F77F8888888888800F08888
+                8888888F7787F88888888800FFF0888888888F7788878F88888800FFFFFF0888
+                88887788888F788888887FFFFFCF888888887F88FF7888FF88887FFCCCF88008
+                888878F777888778F88887FFFF880110888887F88F8878878F8887FFC8809991
+                0888878F7887F88878F8887FF88099991088887F88878F88878F887FF8880999
+                03088878F88878F878788887F8888090B03088878F888787878788887888880B
+                0B038888788888787878888888888880B0B38888888888878788888888888888
+                0BBB88888888888878F888888888888880BB8888888888888788}
+              NumGlyphs = 2
+            end
+          end
+          object stsArquivoDesbloqueio: TStatusBar
+            Left = 1
+            Top = 220
+            Width = 685
+            Height = 19
+            Panels = <>
+            SimplePanel = False
+          end
+          object pnlNenhumMutuarioImportado: TPanel
+            Left = 1
+            Top = 27
+            Width = 659
+            Height = 193
+            Align = alClient
+            BevelOuter = bvLowered
+            Color = clWhite
+            Font.Charset = DEFAULT_CHARSET
+            Font.Color = clWindowText
+            Font.Height = -9
+            Font.Name = 'MS Sans Serif'
+            Font.Style = []
+            ParentFont = False
+            TabOrder = 2
+          end
+        end
+      end
+      object tsHistoricoDesbloqueio: TTabSheet
+        Caption = 'Histórico de Desbloqueio'
+        ImageIndex = 1
+        object grdHistoricoDesbloqueio: TDBGrid
+          Left = 0
+          Top = 27
+          Width = 687
+          Height = 194
+          Align = alClient
+          DataSource = dsHistoricoDesbloqueio
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -9
+          Font.Name = 'MS Sans Serif'
+          Font.Style = []
+          Options = [dgTitles, dgIndicator, dgColumnResize, dgColLines, dgRowLines, dgTabs, dgRowSelect, dgCancelOnExit]
+          ParentFont = False
+          TabOrder = 0
+          TitleFont.Charset = DEFAULT_CHARSET
+          TitleFont.Color = clWindowText
+          TitleFont.Height = -9
+          TitleFont.Name = 'MS Sans Serif'
+          TitleFont.Style = []
+          Columns = <
+            item
+              Expanded = False
+              FieldName = 'matricula'
+              ReadOnly = True
+              Title.Caption = 'Matrícula'
+              Width = 80
+              Visible = True
+            end
+            item
+              Expanded = False
+              FieldName = 'nome'
+              ReadOnly = True
+              Title.Caption = 'Mutuário'
+              Width = 275
+              Visible = True
+            end
+            item
+              Expanded = False
+              FieldName = 'valliquid'
+              ReadOnly = True
+              Title.Caption = 'Valor da Liquidação'
+              Width = 100
+              Visible = True
+            end
+            item
+              Expanded = False
+              FieldName = 'dataliquid'
+              ReadOnly = True
+              Title.Caption = 'Data de Liquidação'
+              Width = 100
+              Visible = True
+            end
+            item
+              Expanded = False
+              FieldName = 'cpf'
+              ReadOnly = True
+              Title.Caption = 'CPF'
+              Width = 120
+              Visible = True
+            end
+            item
+              Expanded = False
+              FieldName = 'idusuario'
+              ReadOnly = True
+              Title.Caption = 'Usuário'
+              Width = 80
+              Visible = True
+            end
+            item
+              Expanded = False
+              FieldName = 'datadesbloqueio'
+              ReadOnly = True
+              Title.Caption = 'Data do Desbloqueio'
+              Width = 150
+              Visible = True
+            end>
+        end
+        object pnlPeriodoDatasBase: TPanel
+          Left = 0
+          Top = 0
+          Width = 687
+          Height = 27
+          Align = alTop
+          BevelOuter = bvNone
+          TabOrder = 1
+          object pnlHistoricoDesbloqueioPeriodoDatas: TPanel
+            Left = 1
+            Top = 3
+            Width = 262
+            Height = 21
+            BevelOuter = bvLowered
+            Caption = 'Período de Datas (Desbloqueio)'
+            TabOrder = 2
+          end
+          object pnlHistoricoDesbloqueioPeriodoDatasAte: TPanel
+            Left = 433
+            Top = 3
+            Width = 30
+            Height = 21
+            BevelOuter = bvLowered
+            Caption = 'até:'
+            TabOrder = 3
+          end
+          object pnlHistoricoDesbloqueioPeriodoDatasDe: TPanel
+            Left = 267
+            Top = 3
+            Width = 30
+            Height = 21
+            BevelOuter = bvLowered
+            Caption = 'de:'
+            TabOrder = 4
+          end
+          object btnBuscarHistoricoDesbloqueio: TBitBtn
+            Left = 600
+            Top = 1
+            Width = 86
+            Height = 22
+            Hint = 'Busca um Participante'
+            Caption = 'Buscar'
+            Font.Charset = DEFAULT_CHARSET
+            Font.Color = clBlue
+            Font.Height = -9
+            Font.Name = 'MS Sans Serif'
+            Font.Style = [fsBold]
+            ParentFont = False
+            TabOrder = 5
+            OnClick = btnBuscarHistoricoDesbloqueioClick
+            Glyph.Data = {
+              76010000424D7601000000000000760000002800000020000000100000000100
+              0400000000000001000000000000000000001000000010000000000000000000
+              80000080000000808000800000008000800080800000C0C0C000808080000000
+              FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00777777777887
+              777777777777F88F7777777777700F077777777777F8878F77777777700FFF07
+              77777777F8877787F77777700FFFFFF077777778877777F8F7777778FFFFFCF0
+              77777F78F77FF8787F771778FFCCCFFF07778FF87F88877F8F7711778FFFFFCF
+              077788FF8F77FF8787F711178FFCCCFFF077888F8FF88877F87F71110000FFFC
+              FF07788888887FF877877710E7E706CFFFF077887777888777F8770E7E7E70FF
+              F887778F777778F7F8877707E7E7E0F88777778F777778F88777770E7E7E7087
+              7777778F7777788777777707E7E7E07777777787F7777877777777707E7E0777
+              777777787FFF8777777777770000777777777777888877777777}
+            NumGlyphs = 2
+          end
+          object edtHistoricoDataInicial: TwwDBDateTimePicker
+            Left = 302
+            Top = 3
+            Width = 130
+            Height = 21
+            CalendarAttributes.Font.Charset = DEFAULT_CHARSET
+            CalendarAttributes.Font.Color = clWindowText
+            CalendarAttributes.Font.Height = -11
+            CalendarAttributes.Font.Name = 'MS Sans Serif'
+            CalendarAttributes.Font.Style = []
+            ButtonStyle = cbsCustom
+            Epoch = 1950
+            ButtonWidth = 21
+            ButtonGlyph.Data = {
+              F6000000424DF600000000000000760000002800000010000000100000000100
+              0400000000008000000000000000000000001000000000000000000000000000
+              8000008000000080800080000000800080008080000080808000C0C0C0000000
+              FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00888888888888
+              88888888888888888888800000000000000880FFFFFFFFFFFF0880F878787978
+              7F0880F7878797978F0880F8787879787F0880F7878787878F0880F878787878
+              7F0880F7878787878F0880FFFFFFFFFFFF0880F4C4C4C7777F0880FC4C4C4777
+              7F0880FFFFFFFFFFFF0880000000000000088888888888888888}
+            ShowButton = True
+            TabOrder = 0
+            UnboundDataType = wwDTEdtDate
+            DisplayFormat = 'dd/mm/yyyy'
+          end
+          object edtHistoricoDataFinal: TwwDBDateTimePicker
+            Left = 467
+            Top = 3
+            Width = 130
+            Height = 21
+            CalendarAttributes.Font.Charset = DEFAULT_CHARSET
+            CalendarAttributes.Font.Color = clWindowText
+            CalendarAttributes.Font.Height = -11
+            CalendarAttributes.Font.Name = 'MS Sans Serif'
+            CalendarAttributes.Font.Style = []
+            ButtonStyle = cbsCustom
+            Epoch = 1950
+            ButtonWidth = 21
+            ButtonGlyph.Data = {
+              F6000000424DF600000000000000760000002800000010000000100000000100
+              0400000000008000000000000000000000001000000000000000000000000000
+              8000008000000080800080000000800080008080000080808000C0C0C0000000
+              FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00888888888888
+              88888888888888888888800000000000000880FFFFFFFFFFFF0880F878787978
+              7F0880F7878797978F0880F8787879787F0880F7878787878F0880F878787878
+              7F0880F7878787878F0880FFFFFFFFFFFF0880F4C4C4C7777F0880FC4C4C4777
+              7F0880FFFFFFFFFFFF0880000000000000088888888888888888}
+            ShowButton = True
+            TabOrder = 1
+            UnboundDataType = wwDTEdtDate
+            DisplayFormat = 'dd/mm/yyyy'
+          end
+        end
+        object stsHistoricoDesbloqueio: TStatusBar
+          Left = 0
+          Top = 221
+          Width = 687
+          Height = 19
+          Panels = <
+            item
+              Width = 50
+            end>
+          SimplePanel = False
+        end
+        object pnlNenhumHistoricoDesbloqueio: TPanel
+          Left = 0
+          Top = 27
+          Width = 687
+          Height = 194
+          Align = alClient
+          BevelOuter = bvLowered
+          Caption = 'Informe os parâmetros e clique em <Buscar>'
+          Color = clWhite
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlue
+          Font.Height = -9
+          Font.Name = 'MS Sans Serif'
+          Font.Style = [fsBold]
+          ParentFont = False
+          TabOrder = 3
+        end
+      end
+    end
+    object pnlCamposEntradaManual: TPanel
+      Left = 1
+      Top = 1
+      Width = 695
+      Height = 101
+      Align = alTop
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -9
+      Font.Name = 'MS Sans Serif'
+      Font.Style = [fsBold]
+      ParentFont = False
+      TabOrder = 0
+      object lblMutuarioMatricula: TLabel
+        Left = 16
+        Top = 10
+        Width = 55
+        Height = 13
+        Caption = 'Matrícula'
+      end
+      object lblMutuarioCPF: TLabel
+        Left = 188
+        Top = 10
+        Width = 24
+        Height = 13
+        Caption = 'CPF'
+      end
+      object lblMutuarioNome: TLabel
+        Left = 327
+        Top = 10
+        Width = 50
+        Height = 13
+        Caption = 'Mutuário'
+      end
+      object lblDataLiquidacao: TLabel
+        Left = 16
+        Top = 49
+        Width = 112
+        Height = 13
+        Caption = 'Data de Liquidação'
+      end
+      object lblValorLiquidacao: TLabel
+        Left = 188
+        Top = 49
+        Width = 114
+        Height = 13
+        Caption = 'Valor da Liquidação'
+      end
+      object edtMutuarioMatricula: TEdit
+        Left = 16
+        Top = 24
+        Width = 113
+        Height = 21
+        ReadOnly = True
+        TabOrder = 0
+      end
+      object edtMutuarioCPF: TEdit
+        Left = 188
+        Top = 24
+        Width = 129
+        Height = 21
+        ReadOnly = True
+        TabOrder = 3
+      end
+      object edtMutuarioNome: TEdit
+        Left = 328
+        Top = 24
+        Width = 354
+        Height = 21
+        Anchors = [akLeft, akTop, akRight]
+        ReadOnly = True
+        TabOrder = 4
+      end
+      object btnBuscaMutuario: TBitBtn
+        Left = 131
+        Top = 22
+        Width = 24
+        Height = 22
+        Hint = 'Busca um Participante'
+        Anchors = [akTop, akRight]
+        TabOrder = 1
+        OnClick = btnBuscaMutuarioClick
+        Glyph.Data = {
+          76010000424D7601000000000000760000002800000020000000100000000100
+          0400000000000001000000000000000000001000000010000000000000000000
+          80000080000000808000800000008000800080800000C0C0C000808080000000
+          FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00777777777887
+          777777777777F88F7777777777700F077777777777F8878F77777777700FFF07
+          77777777F8877787F77777700FFFFFF077777778877777F8F7777778FFFFFCF0
+          77777F78F77FF8787F771778FFCCCFFF07778FF87F88877F8F7711778FFFFFCF
+          077788FF8F77FF8787F711178FFCCCFFF077888F8FF88877F87F71110000FFFC
+          FF07788888887FF877877710E7E706CFFFF077887777888777F8770E7E7E70FF
+          F887778F777778F7F8877707E7E7E0F88777778F777778F88777770E7E7E7087
+          7777778F7777788777777707E7E7E07777777787F7777877777777707E7E0777
+          777777787FFF8777777777770000777777777777888877777777}
+        NumGlyphs = 2
+      end
+      object btnLimpaCamposEntradaManual: TBitBtn
+        Left = 155
+        Top = 22
+        Width = 24
+        Height = 22
+        Hint = 'Limpa a seleção de Participante'
+        Anchors = [akTop, akRight]
+        TabOrder = 2
+        OnClick = btnLimpaCamposEntradaManualClick
+        Glyph.Data = {
+          76010000424D7601000000000000760000002800000020000000100000000100
+          0400000000000001000000000000000000001000000010000000000000000000
+          8000008000000080800080000000800080008080000080808000C0C0C0000000
+          FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00888888888888
+          88888888888FF8888888888888008888888888888F77F8888888888800F08888
+          8888888F7787F88888888800FFF0888888888F7788878F88888800FFFFFF0888
+          88887788888F788888887FFFFFCF888888887F88FF7888FF88887FFCCCF88008
+          888878F777888778F88887FFFF880110888887F88F8878878F8887FFC8809991
+          0888878F7887F88878F8887FF88099991088887F88878F88878F887FF8880999
+          03088878F88878F878788887F8888090B03088878F888787878788887888880B
+          0B038888788888787878888888888880B0B38888888888878788888888888888
+          0BBB88888888888878F888888888888880BB8888888888888788}
+        NumGlyphs = 2
+      end
+      object edtValorLiquidacao: TDBRealEdit
+        Left = 188
+        Top = 64
+        Width = 128
+        Height = 21
+        Alignment = taRightJustify
+        Lines.Strings = (
+          '0,00')
+        TabOrder = 6
+        WordWrap = False
+        IntDigits = 10
+        DecDigits = 2
+        NumberFormat = fNumber
+        Signal = False
+      end
+      object edtDataLiquidacao: TwwDBDateTimePicker
+        Left = 16
+        Top = 64
+        Width = 165
+        Height = 21
+        CalendarAttributes.Font.Charset = DEFAULT_CHARSET
+        CalendarAttributes.Font.Color = clWindowText
+        CalendarAttributes.Font.Height = -11
+        CalendarAttributes.Font.Name = 'MS Sans Serif'
+        CalendarAttributes.Font.Style = []
+        ButtonStyle = cbsCustom
+        Epoch = 1950
+        ButtonWidth = 21
+        ButtonGlyph.Data = {
+          F6000000424DF600000000000000760000002800000010000000100000000100
+          0400000000008000000000000000000000001000000000000000000000000000
+          8000008000000080800080000000800080008080000080808000C0C0C0000000
+          FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00888888888888
+          88888888888888888888800000000000000880FFFFFFFFFFFF0880F878787978
+          7F0880F7878797978F0880F8787879787F0880F7878787878F0880F878787878
+          7F0880F7878787878F0880FFFFFFFFFFFF0880F4C4C4C7777F0880FC4C4C4777
+          7F0880FFFFFFFFFFFF0880000000000000088888888888888888}
+        ShowButton = True
+        TabOrder = 5
+        UnboundDataType = wwDTEdtDate
+        DisplayFormat = 'dd/mm/yyyy'
+      end
+    end
+  end
+  inherited Dock971: TDock97
+    Top = 404
+    Width = 697
+    inherited tb97Fundo: TToolbar97
+      Left = 529
+      DockPos = 768
+      inherited bbtnAjuda: TmaHelpBitBtn
+        ClickHelpContext = 150001
+      end
+    end
+    object tbBotoesDesbloquear: TToolbar97
+      Left = 317
+      Top = 0
+      Caption = 'tbBotoesDesbloquear'
+      DockPos = 348
+      TabOrder = 1
+      object ToolbarSep972: TToolbarSep97
+        Left = 103
+        Top = 0
+        Blank = True
+        SizeHorz = 2
+      end
+      object ToolbarSep974: TToolbarSep97
+        Left = 206
+        Top = 0
+        Blank = True
+        SizeHorz = 2
+      end
+      object ToolbarSep975: TToolbarSep97
+        Left = 0
+        Top = 0
+        Blank = True
+        SizeHorz = 2
+      end
+      object bbtnDesbloqueiarMutuario: TBitBtn
+        Left = 2
+        Top = 0
+        Width = 101
+        Height = 33
+        Caption = '&Desbloquear'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlue
+        Font.Height = -9
+        Font.Name = 'MS Sans Serif'
+        Font.Style = [fsBold]
+        ParentFont = False
+        TabOrder = 0
+        OnClick = bbtnDesbloqueiarMutuarioClick
+        Glyph.Data = {
+          76010000424D7601000000000000760000002800000020000000100000000100
+          0400000000000001000000000000000000001000000000000000000000000000
+          8000008000000080800080000000800080008080000080808000C0C0C0000000
+          FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00888888888888
+          8888888888FFFFF8888888888000008888888888F777778FF888888002222200
+          88888887788888778F88887222222222088888788888888878F887A228822222
+          208887F88FFF888887F887A2FFF8222220888788777FF888878F7A22FFFF8222
+          22087F887777FF88887F7A22FFFFF82222087F8877777FF8887F7A22FF8FFF82
+          22087F8877F777FF887F7A22FF82FFF822087F8877F8777F887F7A22FF222FF8
+          220878F87788877FF87887A2222222FF208887F88888887787F887A222222222
+          2088878F888888888788887AA222222208888878FF88888F788888877AAAAA77
+          8888888778FFFF77888888888777778888888888877777888888}
+        NumGlyphs = 2
+      end
+      object bbtnCancelarDesbloqueio: TBitBtn
+        Left = 105
+        Top = 0
+        Width = 101
+        Height = 33
+        Cancel = True
+        Caption = '&Cancelar'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clRed
+        Font.Height = -9
+        Font.Name = 'MS Sans Serif'
+        Font.Style = [fsBold]
+        ParentFont = False
+        TabOrder = 1
+        OnClick = bbtnCancelarDesbloqueioClick
+        Glyph.Data = {
+          76010000424D7601000000000000760000002800000020000000100000000100
+          0400000000000001000000000000000000001000000000000000000000000000
+          8000008000000080800080000000800080008080000080808000C0C0C0000000
+          FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00888888888888
+          8888888888FFFFF8888888888000008888888888F777778FF888888009191900
+          88888887788888778F88887991919191088888788888888878F8879919191919
+          108887F888F888F887F887917F919F719088878887FF87FF878F7919FFF9FFF9
+          19087F88777F7778887F79919FFFFF9191087F8887777788887F791919FFF919
+          19087F8888777FF8887F79919FFFFF9191087F88877777FF887F7919FFF9FFF9
+          190878F877787778887887917F919F71908887F88788878887F8879919191919
+          1088878F88888888878888799191919108888878FF88888F7888888779999977
+          8888888778FFFF77888888888777778888888888877777888888}
+        NumGlyphs = 2
+      end
+    end
+  end
+  object pnlTituloTela: TPanel [2]
+    Left = 0
+    Top = 0
+    Width = 697
+    Height = 33
+    Align = alTop
+    BevelOuter = bvNone
+    TabOrder = 2
+    object lblTituloTela: TfcLabel
+      Left = 16
+      Top = 8
+      Width = 470
+      Height = 24
+      Caption = 'Consulta Quitação Financiamento Habitacional'
+      Color = clBtnFace
+      Font.Charset = ANSI_CHARSET
+      Font.Color = clNavy
+      Font.Height = -21
+      Font.Name = 'Arial'
+      Font.Style = [fsBold]
+      ParentColor = False
+      ParentFont = False
+      TextOptions.Alignment = taLeftJustify
+      TextOptions.Style = fclsRaised
+      TextOptions.VAlignment = vaTop
+    end
+  end
+  inherited ivTradutor: TIvExtendedTranslator
+    Left = 41
+    Top = 411
+    TargetsData = (
+      1
+      2
+      (
+        ''
+        'Items'
+        0)
+      (
+        'TDBRealEdit'
+        'Text'
+        0))
+  end
+  object imglstToolBar: TImageList
+    Left = 7
+    Top = 411
+    Bitmap = {
+      494C010103000400040010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      0000000000003600000028000000400000001000000001002000000000000010
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000080000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      000000000000FFFFFF007F7F7F000000FF007F7F7F00FFFFFF00000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000080000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000080000000800000000000000000000000000000000000
+      00000000000000000000000000000000000000000000000000000000000000FF
+      FF00FFFFFF0000FFFF000000FF000000FF000000FF0000FFFF00FFFFFF0000FF
+      FF00000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000080000000800000800000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000800000008000000080000000800000008000000000000000000000000000
+      000000000000000000000000000000000000000000000000000000FFFF00FFFF
+      FF0000FFFF00FFFFFF007F7F7F000000FF007F7F7F00FFFFFF0000FFFF00FFFF
+      FF0000FFFF000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000008000000080000000800000008000008000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000008000
+      0000800000008000000080000000800000008000000080000000000000000000
+      0000000080000000000000000000000000000000000000FFFF00FFFFFF0000FF
+      FF00FFFFFF0000FFFF00FFFFFF0000FFFF00FFFFFF0000FFFF00FFFFFF0000FF
+      FF00FFFFFF0000FFFF0000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000008000000080000000000000008000000080000080000000000000000000
+      0000000000000000000000000000000000000000000000000000800000008000
+      0000800000008000000080000000800000008000000000000000000000000000
+      00000000800000008000000000000000000000000000FFFFFF0000FFFF00FFFF
+      FF0000FFFF00FFFFFF0000FFFF000000FF0000FFFF00FFFFFF0000FFFF00FFFF
+      FF0000FFFF00FFFFFF0000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000008000000000000080000000000000000080000000800000800000000000
+      0000000000000000000000000000000000000000000080000000800000008000
+      0000000000000000000080000000800000000000000000000000000000000000
+      000000000000000080000000800000000000FFFFFF0000FFFF00FFFFFF0000FF
+      FF00FFFFFF0000FFFF00FFFFFF000000FF007F7F7F0000FFFF00FFFFFF0000FF
+      FF00FFFFFF0000FFFF00FFFFFF00000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000080000000800000800000000000000000800000008000008000
+      0000000000000000000000000000000000000000000080000000800000000000
+      0000000000000000000080000000000000000000000000000000000000000000
+      00000000000000008000000080000000000000FFFF00FFFFFF0000FFFF00FFFF
+      FF0000FFFF00FFFFFF0000FFFF000000FF000000FF00FFFFFF0000FFFF00FFFF
+      FF0000FFFF00FFFFFF0000FFFF00000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000008000000080000000800000008000008000000000000000008000000080
+      0000000000000000000000000000000000000000000080000000800000000000
+      0000000000000000000000000000000000000000000000008000000000000000
+      000000000000000080000000800000000000FFFFFF0000FFFF00FFFFFF0000FF
+      FF00FFFFFF0000FFFF00FFFFFF0000FFFF000000FF000000FF00FFFFFF0000FF
+      FF00FFFFFF0000FFFF00FFFFFF00000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000008000000080000000000000008000000080000080000000000000000080
+      0000000000000000000000000000000000000000000080000000800000000000
+      0000000000000000000000000000000000000000800000008000000000000000
+      00000000800000008000000080000000000000FFFF00FFFFFF0000FFFF00FFFF
+      FF007F7F7F007F7F7F0000FFFF00FFFFFF007F7F7F000000FF000000FF00FFFF
+      FF0000FFFF00FFFFFF0000FFFF00000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000008000000000000000000000000000000080000000800000800000000000
+      0000000000000000000000000000000000000000000000000000800000008000
+      0000000000000000000000000000000080000000800000008000000080000000
+      800000008000000080000000000000000000FFFFFF0000FFFF00FFFFFF0000FF
+      FF000000FF000000FF00FFFFFF0000FFFF007F7F7F000000FF000000FF0000FF
+      FF00FFFFFF0000FFFF00FFFFFF00000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000800000008000008000
+      0000000000000000000000000000000000000000000000000000000000008000
+      0000000000000000000000008000000080000000800000008000000080000000
+      80000000800000000000000000000000000000000000FFFFFF0000FFFF00FFFF
+      FF000000FF000000FF007F7F7F00FFFFFF007F7F7F000000FF000000FF00FFFF
+      FF0000FFFF00FFFFFF0000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000008000000080
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000080000000800000008000000080000000
+      8000000000000000000000000000000000000000000000FFFF00FFFFFF0000FF
+      FF00FFFFFF000000FF000000FF000000FF000000FF000000FF00FFFFFF0000FF
+      FF00FFFFFF0000FFFF0000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000080
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000800000008000000000000000
+      000000000000000000000000000000000000000000000000000000FFFF00FFFF
+      FF0000FFFF00FFFFFF000000FF000000FF000000FF00FFFFFF0000FFFF00FFFF
+      FF0000FFFF000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000008000000000000000
+      00000000000000000000000000000000000000000000000000000000000000FF
+      FF00FFFFFF0000FFFF00FFFFFF0000FFFF00FFFFFF0000FFFF00FFFFFF0000FF
+      FF00000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      000000000000FFFFFF0000FFFF00FFFFFF0000FFFF00FFFFFF00000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      000000000000000000000000000000000000424D3E000000000000003E000000
+      2800000040000000100000000100010000000000800000000000000000000000
+      000000000000000000000000FFFFFF00FFFFFFFFFFFF0000FFFFFDFFF83F0000
+      FDFFFCFFE00F0000F8FFF07FC0070000F07FE03780030000F23FC07380030000
+      F51F8CF900010000F88F9DF900010000F04F9FB900010000F22F9F3100010000
+      F71FCE0300010000FF8FEC0780030000FFCFFE0F80030000FFEFFF3FC0070000
+      FFFFFFBFE00F0000FFFFFFFFF83F000000000000000000000000000000000000
+      000000000000}
+  end
+  object ilListaMutuario: TImageList
+    Left = 80
+    Top = 411
+    Bitmap = {
+      494C010103000400040010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      0000000000003600000028000000400000001000000001002000000000000010
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      00000000000000000000BFBFBF00BFBFBF00BFBFBF00BFBFBF00BFBFBF000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      00007F7F7F007F7F7F00BFBFBF007F7F7F00000000007F7F7F00BFBFBF007F7F
+      7F007F7F7F0000000000000000000000000000000000000000000000FF000000
+      FF000000FF0000000000000000007F7F7F00000000007F7F7F00000000000000
+      00000000FF000000FF000000FF00000000000000000000000000000000000000
+      0000000000000000FF0000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      000000000000000000000000000000000000000000000000000000000000BFBF
+      BF00BFBFBF00BFBFBF00BFBFBF007F7F7F00000000007F7F7F00BFBFBF00BFBF
+      BF00BFBFBF00BFBFBF0000000000000000000000000000000000000000000000
+      FF000000FF000000FF0000000000000000000000000000000000000000000000
+      FF000000FF000000FF0000000000000000000000000000000000000000000000
+      00000000FF000000FF000000FF00000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000007F7F
+      7F007F7F7F007F7F7F00BFBFBF00BFBFBF0000000000BFBFBF00BFBFBF007F7F
+      7F007F7F7F007F7F7F0000000000000000000000000000000000000000000000
+      00000000FF000000FF000000FF007F7F7F00000000007F7F7F000000FF000000
+      FF000000FF000000000000000000000000000000000000000000000000000000
+      00000000FF000000FF000000FF00000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      000000000000000000000000000000000000000000000000000000000000BFBF
+      BF00BFBFBF00BFBFBF00BFBFBF00000000000000000000000000BFBFBF00BFBF
+      BF00BFBFBF00BFBFBF0000000000000000000000000000000000000000000000
+      0000000000000000FF000000FF000000FF00000000000000FF000000FF000000
+      FF00000000000000000000000000000000000000000000000000000000000000
+      FF000000FF000000FF000000FF000000FF000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000007F7F
+      7F007F7F7F007F7F7F007F7F7F000000000000000000000000007F7F7F007F7F
+      7F007F7F7F007F7F7F0000000000000000000000000000000000000000000000
+      000000000000000000000000FF000000FF00000000000000FF000000FF000000
+      00000000000000000000000000000000000000000000000000000000FF000000
+      FF000000FF000000FF000000FF000000FF000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      000000000000000000000000000000000000000000000000000000000000BFBF
+      BF00BFBFBF00BFBFBF00BFBFBF00BFBFBF00BFBFBF00BFBFBF00BFBFBF00BFBF
+      BF00BFBFBF00BFBFBF0000000000000000000000000000000000000000000000
+      0000000000000000000000000000000080000000000000008000000000000000
+      000000000000000000000000000000000000000000007F7F7F000000FF000000
+      FF0000000000000000000000FF000000FF000000FF0000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      000000000000000000000000FF000000800000000000000080000000FF000000
+      0000000000000000000000000000000000007F7F7F000000FF00000000000000
+      00000000000000000000000000000000FF000000FF0000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      000000000000BFBFBF000000000000000000000000000000000000000000BFBF
+      BF00000000000000000000000000000000000000000000000000000000000000
+      0000000000000000FF000000FF000000000000000000000000000000FF000000
+      FF00000000000000000000000000000000000000000000000000000000000000
+      00000000000000000000000000000000FF000000FF000000FF00000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      000000000000BFBFBF000000000000000000000000000000000000000000BFBF
+      BF00000000000000000000000000000000000000000000000000000000000000
+      00000000FF000000FF000000FF000000000000000000000000000000FF000000
+      FF000000FF000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000FF000000FF00000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      000000000000BFBFBF000000000000000000000000000000000000000000BFBF
+      BF00000000000000000000000000000000000000000000000000000000000000
+      FF000000FF000000FF0000000000000000000000000000000000000000000000
+      FF000000FF000000FF0000000000000000000000000000000000000000000000
+      000000000000000000000000000000000000000000000000FF000000FF000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      00007F7F7F007F7F7F00BFBFBF00000000000000000000000000BFBFBF007F7F
+      7F007F7F7F0000000000000000000000000000000000000000000000FF000000
+      FF000000FF0000000000000000007F7F7F00000000007F7F7F00000000000000
+      00000000FF000000FF000000FF00000000000000000000000000000000000000
+      00000000000000000000000000000000000000000000000000007F7F7F000000
+      FF00000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      00000000000000000000BFBFBF00BFBFBF00BFBFBF00BFBFBF00BFBFBF000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000007F7F
+      7F000000FF000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000FF000000FF00000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      000000000000000000000000000000000000424D3E000000000000003E000000
+      2800000040000000100000000100010000000000800000000000000000000000
+      000000000000000000000000FFFFFF00FC1FFFFFFFFF0000F007FFFFFFFF0000
+      E003C631F9FF0000C001E223F0FF0000C001F007F0FF0000C001F88FE07F0000
+      C001FC1FC07F0000C001FE3F843F0000E003FC1F1E3F0000F1C7F80FFE1F0000
+      F1C7F007FF1F0000F1C7E223FF8F0000F007C631FFC70000F80FFFFFFFE30000
+      FC1FFFFFFFF80000FFFFFFFFFFFF000000000000000000000000000000000000
+      000000000000}
+  end
+  object qryHistoricoDesbloqueio: TwwQuery
+    DatabaseName = 'BaseDados'
+    ValidateWithMask = True
+    Left = 217
+    Top = 411
+  end
+  object opLocalizarArquivo: TOpenDialog
+    DefaultExt = '*.txt'
+    Filter = 'Texto (*.txt)|*.txt|CSV (*.csv)|*.csv|Todos Arquivos|*.*'
+    Options = [ofHideReadOnly, ofNoChangeDir, ofEnableSizing]
+    Title = 'Selecionar Arquivo'
+    Left = 114
+    Top = 411
+  end
+  object msBuscaMutuarioBloqueado: TMontaSelect
+    Template.IdConsulta = 0
+    Caption = 'Seleciona mutuário com histórico de bloqueio'
+    Colunas.Strings = (
+      'DT.MATRICULA'
+      'P.NUMDOCUMENTO'
+      'P.NOME')
+    TipodeDado.Strings = (
+      'C'
+      'C'
+      'C')
+    Descricao.Strings = (
+      'Matricula'
+      'CPF'
+      'Mutuário')
+    SensivelACaixa.Strings = (
+      'N'
+      'N'
+      'N')
+    Tabelas.Strings = (
+      'DEPENTIT DT'
+      'PESSOA P')
+    CamposChave.Strings = (
+      'P.NOME'
+      'P.NUMDOCUMENTO'
+      'DT.MATRICULA')
+    Filtro.Strings = (
+      'P.IDPESSOA = DT.IDPESSOA'
+      'P.TIPO = '#39'F'#39
+      
+        'EXISTS (SELECT 1 FROM EPHISTSIAFI EHS WHERE EHS.IDPESSOA = DT.ID' +
+        'PESSOA)')
+    Mascaras.Strings = (
+      ''
+      ''
+      '')
+    Larguras.Strings = (
+      '15'
+      '18'
+      '60')
+    OperComparador.Strings = (
+      '-1'
+      '-1'
+      '-1')
+    DataBaseName = 'BaseDados'
+    RepeteConsulta = False
+    UsaDistinct = False
+    SalvaConsulta = False
+    ExibePergunta = True
+    MultiSelect = False
+    LookupSQL.Strings = (
+      ''
+      ''
+      '')
+    LookupCampoChave.Strings = (
+      ''
+      ''
+      '')
+    LookupCampoExibe.Strings = (
+      ''
+      ''
+      '')
+    Left = 150
+    Top = 411
+  end
+  object dsHistoricoDesbloqueio: TDataSource
+    DataSet = qryHistoricoDesbloqueio
+    OnStateChange = dsHistoricoDesbloqueioStateChange
+    Left = 251
+    Top = 411
+  end
+  object msBuscaMutuario: TMontaSelect
+    Template.IdConsulta = 0
+    Caption = 'Seleciona mutuário'
+    Colunas.Strings = (
+      'DT.MATRICULA'
+      'P.NUMDOCUMENTO'
+      'P.NOME')
+    TipodeDado.Strings = (
+      'C'
+      'C'
+      'C')
+    Descricao.Strings = (
+      'Matricula'
+      'CPF'
+      'Mutuário')
+    SensivelACaixa.Strings = (
+      'N'
+      'N'
+      'N')
+    Tabelas.Strings = (
+      'DEPENTIT DT'
+      'PESSOA P')
+    CamposChave.Strings = (
+      'P.NOME'
+      'P.NUMDOCUMENTO'
+      'DT.MATRICULA')
+    Filtro.Strings = (
+      'P.IDPESSOA = DT.IDPESSOA'
+      'P.TIPO = '#39'F'#39)
+    Mascaras.Strings = (
+      ''
+      ''
+      '')
+    Larguras.Strings = (
+      '15'
+      '18'
+      '60')
+    OperComparador.Strings = (
+      '-1'
+      '-1'
+      '-1')
+    DataBaseName = 'BaseDados'
+    RepeteConsulta = False
+    UsaDistinct = False
+    SalvaConsulta = False
+    ExibePergunta = True
+    MultiSelect = False
+    LookupSQL.Strings = (
+      ''
+      ''
+      '')
+    LookupCampoChave.Strings = (
+      ''
+      ''
+      '')
+    LookupCampoExibe.Strings = (
+      ''
+      ''
+      '')
+    Left = 184
+    Top = 411
+  end
+end

@@ -1,0 +1,1028 @@
+inherited cfgRelTIRImovel: TcfgRelTIRImovel
+  Left = 6
+  Top = 122
+  BorderStyle = bsSingle
+  Caption = 'TIR por Imóvel'
+  ClientHeight = 380
+  ClientWidth = 744
+  PixelsPerInch = 96
+  TextHeight = 13
+  inherited pnlFundo: TPanel
+    Width = 744
+    Height = 347
+    object Label12: TLabel
+      Left = 16
+      Top = 224
+      Width = 29
+      Height = 13
+      Caption = 'Bens'
+    end
+    object Panel2: TPanel
+      Left = 16
+      Top = 16
+      Width = 441
+      Height = 189
+      TabOrder = 1
+      TabStop = True
+      object Label1: TLabel
+        Left = 16
+        Top = 98
+        Width = 66
+        Height = 13
+        Caption = 'Data Inicial'
+      end
+      object Label2: TLabel
+        Left = 16
+        Top = 138
+        Width = 59
+        Height = 13
+        Caption = 'Data Final'
+      end
+      object Label14: TLabel
+        Left = 16
+        Top = 50
+        Width = 38
+        Height = 13
+        Caption = 'Imóvel'
+      end
+      object Label5: TLabel
+        Left = 16
+        Top = 10
+        Width = 80
+        Height = 13
+        Caption = 'Imóvel Mestre'
+      end
+      object btnBuscaImovel: TBitBtn
+        Left = 402
+        Top = 63
+        Width = 23
+        Height = 22
+        Hint = 'Busca um Imóvel'
+        TabOrder = 2
+        OnClick = btnBuscaImovelClick
+        Glyph.Data = {
+          76010000424D7601000000000000760000002800000020000000100000000100
+          0400000000000001000000000000000000001000000010000000000000000000
+          80000080000000808000800000008000800080800000C0C0C000808080000000
+          FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00777777777887
+          777777777777F88F7777777777700F077777777777F8878F77777777700FFF07
+          77777777F8877787F77777700FFFFFF077777778877777F8F7777778FFFFFCF0
+          77777F78F77FF8787F771778FFCCCFFF07778FF87F88877F8F7711778FFFFFCF
+          077788FF8F77FF8787F711178FFCCCFFF077888F8FF88877F87F71110000FFFC
+          FF07788888887FF877877710E7E706CFFFF077887777888777F8770E7E7E70FF
+          F887778F777778F7F8877707E7E7E0F88777778F777778F88777770E7E7E7087
+          7777778F7777788777777707E7E7E07777777787F7777877777777707E7E0777
+          777777787FFF8777777777770000777777777777888877777777}
+        NumGlyphs = 2
+      end
+      object edtDataFim: TCMDateTimePicker
+        Left = 16
+        Top = 152
+        Width = 105
+        Height = 21
+        CalendarAttributes.Font.Charset = DEFAULT_CHARSET
+        CalendarAttributes.Font.Color = clWindowText
+        CalendarAttributes.Font.Height = -11
+        CalendarAttributes.Font.Name = 'MS Sans Serif'
+        CalendarAttributes.Font.Style = []
+        ButtonStyle = cbsCustom
+        Epoch = 1950
+        ButtonGlyph.Data = {
+          06050000424D06050000000000003604000028000000100000000D0000000100
+          080000000000D000000000000000000000000001000000000000000000000000
+          80000080000000808000800000008000800080800000C0C0C000C0DCC000F0CA
+          A6000020400000206000002080000020A0000020C0000020E000004000000040
+          20000040400000406000004080000040A0000040C0000040E000006000000060
+          20000060400000606000006080000060A0000060C0000060E000008000000080
+          20000080400000806000008080000080A0000080C0000080E00000A0000000A0
+          200000A0400000A0600000A0800000A0A00000A0C00000A0E00000C0000000C0
+          200000C0400000C0600000C0800000C0A00000C0C00000C0E00000E0000000E0
+          200000E0400000E0600000E0800000E0A00000E0C00000E0E000400000004000
+          20004000400040006000400080004000A0004000C0004000E000402000004020
+          20004020400040206000402080004020A0004020C0004020E000404000004040
+          20004040400040406000404080004040A0004040C0004040E000406000004060
+          20004060400040606000406080004060A0004060C0004060E000408000004080
+          20004080400040806000408080004080A0004080C0004080E00040A0000040A0
+          200040A0400040A0600040A0800040A0A00040A0C00040A0E00040C0000040C0
+          200040C0400040C0600040C0800040C0A00040C0C00040C0E00040E0000040E0
+          200040E0400040E0600040E0800040E0A00040E0C00040E0E000800000008000
+          20008000400080006000800080008000A0008000C0008000E000802000008020
+          20008020400080206000802080008020A0008020C0008020E000804000008040
+          20008040400080406000804080008040A0008040C0008040E000806000008060
+          20008060400080606000806080008060A0008060C0008060E000808000008080
+          20008080400080806000808080008080A0008080C0008080E00080A0000080A0
+          200080A0400080A0600080A0800080A0A00080A0C00080A0E00080C0000080C0
+          200080C0400080C0600080C0800080C0A00080C0C00080C0E00080E0000080E0
+          200080E0400080E0600080E0800080E0A00080E0C00080E0E000C0000000C000
+          2000C0004000C0006000C0008000C000A000C000C000C000E000C0200000C020
+          2000C0204000C0206000C0208000C020A000C020C000C020E000C0400000C040
+          2000C0404000C0406000C0408000C040A000C040C000C040E000C0600000C060
+          2000C0604000C0606000C0608000C060A000C060C000C060E000C0800000C080
+          2000C0804000C0806000C0808000C080A000C080C000C080E000C0A00000C0A0
+          2000C0A04000C0A06000C0A08000C0A0A000C0A0C000C0A0E000C0C00000C0C0
+          2000C0C04000C0C06000C0C08000C0C0A000F0FBFF00A4A0A000808080000000
+          FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00010000000000
+          000000000000000000FFFF00FFFFFFFFFFFFFFFFFFFFFFFF00FFFF00FF07A407
+          A407A4F9A407A4FF00FFFF00FFA407A407A4F9A4F9A407FF00FFFF00FF07A407
+          A407A4F9A407A4FF00FFFF00FFA407A407A407A407A407FF00FFFF00FF07A407
+          A407A407A407A4FF00FFFF00FFA407A407A407A407A407FF00FFFF00FFFFFFFF
+          FFFFFFFFFFFFFFFF00FFFF00FF04FC04FC04FCA4A4A4A4FF00FFFF00FFFC04FC
+          04FC04A4A4A4A4FF00FFFF00FFFFFFFFFFFFFFFFFFFFFFFF00FFFF0000000000
+          000000000000000000FF}
+        ShowButton = True
+        TabOrder = 4
+        OnExit = edtDataIniExit
+      end
+      object edtDataIni: TCMDateTimePicker
+        Left = 16
+        Top = 112
+        Width = 105
+        Height = 21
+        CalendarAttributes.Font.Charset = DEFAULT_CHARSET
+        CalendarAttributes.Font.Color = clWindowText
+        CalendarAttributes.Font.Height = -11
+        CalendarAttributes.Font.Name = 'MS Sans Serif'
+        CalendarAttributes.Font.Style = []
+        ButtonStyle = cbsCustom
+        Epoch = 1950
+        ButtonGlyph.Data = {
+          06050000424D06050000000000003604000028000000100000000D0000000100
+          080000000000D000000000000000000000000001000000000000000000000000
+          80000080000000808000800000008000800080800000C0C0C000C0DCC000F0CA
+          A6000020400000206000002080000020A0000020C0000020E000004000000040
+          20000040400000406000004080000040A0000040C0000040E000006000000060
+          20000060400000606000006080000060A0000060C0000060E000008000000080
+          20000080400000806000008080000080A0000080C0000080E00000A0000000A0
+          200000A0400000A0600000A0800000A0A00000A0C00000A0E00000C0000000C0
+          200000C0400000C0600000C0800000C0A00000C0C00000C0E00000E0000000E0
+          200000E0400000E0600000E0800000E0A00000E0C00000E0E000400000004000
+          20004000400040006000400080004000A0004000C0004000E000402000004020
+          20004020400040206000402080004020A0004020C0004020E000404000004040
+          20004040400040406000404080004040A0004040C0004040E000406000004060
+          20004060400040606000406080004060A0004060C0004060E000408000004080
+          20004080400040806000408080004080A0004080C0004080E00040A0000040A0
+          200040A0400040A0600040A0800040A0A00040A0C00040A0E00040C0000040C0
+          200040C0400040C0600040C0800040C0A00040C0C00040C0E00040E0000040E0
+          200040E0400040E0600040E0800040E0A00040E0C00040E0E000800000008000
+          20008000400080006000800080008000A0008000C0008000E000802000008020
+          20008020400080206000802080008020A0008020C0008020E000804000008040
+          20008040400080406000804080008040A0008040C0008040E000806000008060
+          20008060400080606000806080008060A0008060C0008060E000808000008080
+          20008080400080806000808080008080A0008080C0008080E00080A0000080A0
+          200080A0400080A0600080A0800080A0A00080A0C00080A0E00080C0000080C0
+          200080C0400080C0600080C0800080C0A00080C0C00080C0E00080E0000080E0
+          200080E0400080E0600080E0800080E0A00080E0C00080E0E000C0000000C000
+          2000C0004000C0006000C0008000C000A000C000C000C000E000C0200000C020
+          2000C0204000C0206000C0208000C020A000C020C000C020E000C0400000C040
+          2000C0404000C0406000C0408000C040A000C040C000C040E000C0600000C060
+          2000C0604000C0606000C0608000C060A000C060C000C060E000C0800000C080
+          2000C0804000C0806000C0808000C080A000C080C000C080E000C0A00000C0A0
+          2000C0A04000C0A06000C0A08000C0A0A000C0A0C000C0A0E000C0C00000C0C0
+          2000C0C04000C0C06000C0C08000C0C0A000F0FBFF00A4A0A000808080000000
+          FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00010000000000
+          000000000000000000FFFF00FFFFFFFFFFFFFFFFFFFFFFFF00FFFF00FF07A407
+          A407A4F9A407A4FF00FFFF00FFA407A407A4F9A4F9A407FF00FFFF00FF07A407
+          A407A4F9A407A4FF00FFFF00FFA407A407A407A407A407FF00FFFF00FF07A407
+          A407A407A407A4FF00FFFF00FFA407A407A407A407A407FF00FFFF00FFFFFFFF
+          FFFFFFFFFFFFFFFF00FFFF00FF04FC04FC04FCA4A4A4A4FF00FFFF00FFFC04FC
+          04FC04A4A4A4A4FF00FFFF00FFFFFFFFFFFFFFFFFFFFFFFF00FFFF0000000000
+          000000000000000000FF}
+        ShowButton = True
+        TabOrder = 3
+        OnExit = edtDataIniExit
+      end
+      object rdgLancamento: TRadioGroup
+        Left = 152
+        Top = 101
+        Width = 273
+        Height = 72
+        Enabled = False
+        ItemIndex = 0
+        Items.Strings = (
+          'Calcular a TIR projetada'
+          'Calcular a TIR efetiva')
+        TabOrder = 5
+        TabStop = True
+      end
+      object edtMestre: TEdit
+        Left = 16
+        Top = 24
+        Width = 409
+        Height = 21
+        Enabled = False
+        TabOrder = 0
+      end
+      object edtImovel: TEdit
+        Left = 16
+        Top = 64
+        Width = 386
+        Height = 21
+        Enabled = False
+        TabOrder = 1
+      end
+    end
+    object pnlResultado: TPanel
+      Left = 472
+      Top = 16
+      Width = 257
+      Height = 189
+      BevelOuter = bvNone
+      BorderStyle = bsSingle
+      Color = clWindow
+      Enabled = False
+      TabOrder = 2
+      object Label11: TLabel
+        Left = 16
+        Top = 27
+        Width = 217
+        Height = 37
+        AutoSize = False
+        Caption = '_____________'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -32
+        Font.Name = 'MS Sans Serif'
+        Font.Style = [fsBold]
+        ParentFont = False
+      end
+      object Label3: TLabel
+        Left = 16
+        Top = 24
+        Width = 50
+        Height = 13
+        Caption = 'Período:'
+      end
+      object Label4: TLabel
+        Left = 56
+        Top = 72
+        Width = 93
+        Height = 13
+        Alignment = taRightJustify
+        Caption = 'TIR do Período:'
+      end
+      object Label8: TLabel
+        Left = 220
+        Top = 72
+        Width = 10
+        Height = 13
+        Caption = '%'
+      end
+      object Label6: TLabel
+        Left = 49
+        Top = 104
+        Width = 100
+        Height = 13
+        Alignment = taRightJustify
+        Caption = 'TIR Mensalizada:'
+      end
+      object Label7: TLabel
+        Left = 220
+        Top = 104
+        Width = 10
+        Height = 13
+        Caption = '%'
+      end
+      object Label9: TLabel
+        Left = 57
+        Top = 136
+        Width = 92
+        Height = 13
+        Alignment = taRightJustify
+        Caption = 'TIR Anualizada:'
+      end
+      object Label10: TLabel
+        Left = 220
+        Top = 136
+        Width = 10
+        Height = 13
+        Caption = '%'
+      end
+      object lblDatas: TLabel
+        Left = 72
+        Top = 24
+        Width = 165
+        Height = 13
+        Caption = '                                         '
+      end
+      object Label13: TLabel
+        Left = 112
+        Top = 40
+        Width = 24
+        Height = 13
+        Caption = 'dias'
+      end
+      object lblDias: TLabel
+        Left = 16
+        Top = 40
+        Width = 89
+        Height = 13
+        Alignment = taRightJustify
+        Caption = '                      '
+      end
+      object edtTIR: TRealEdit
+        Left = 152
+        Top = 72
+        Width = 65
+        Height = 21
+        Alignment = taRightJustify
+        BorderStyle = bsNone
+        Lines.Strings = (
+          '      0,00')
+        TabOrder = 0
+        WordWrap = False
+        IntDigits = 10
+        DecDigits = 2
+        NumberFormat = fNumber
+        Signal = False
+      end
+      object edtTIRMes: TRealEdit
+        Left = 152
+        Top = 104
+        Width = 65
+        Height = 21
+        Alignment = taRightJustify
+        BorderStyle = bsNone
+        Lines.Strings = (
+          '      0,00')
+        TabOrder = 1
+        WordWrap = False
+        IntDigits = 10
+        DecDigits = 2
+        NumberFormat = fNumber
+        Signal = False
+      end
+      object edtTIRAno: TRealEdit
+        Left = 152
+        Top = 136
+        Width = 65
+        Height = 21
+        Alignment = taRightJustify
+        BorderStyle = bsNone
+        Lines.Strings = (
+          '      0,00')
+        TabOrder = 2
+        WordWrap = False
+        IntDigits = 10
+        DecDigits = 2
+        NumberFormat = fNumber
+        Signal = False
+      end
+    end
+    object DBgrdBemXImovel: TwwDBGrid
+      Left = 16
+      Top = 240
+      Width = 712
+      Height = 89
+      TabStop = False
+      Selected.Strings = (
+        'PLACA'#9'15'#9'Nº Tombamento'
+        'DESBEM'#9'48'#9'Descrição'
+        'GrupoExtenso'#9'20'#9'Grupo')
+      IniAttributes.Delimiter = ';;'
+      TitleColor = clBtnFace
+      FixedCols = 0
+      ShowHorzScrollBar = True
+      DataSource = dsBemXImovel
+      Enabled = False
+      TabOrder = 3
+      TitleAlignment = taLeftJustify
+      TitleFont.Charset = DEFAULT_CHARSET
+      TitleFont.Color = clWindowText
+      TitleFont.Height = -9
+      TitleFont.Name = 'MS Sans Serif'
+      TitleFont.Style = [fsBold]
+      TitleLines = 1
+      TitleButtons = False
+      IndicatorColor = icBlack
+    end
+    object SpreadSheet: TF1Book
+      Left = 355
+      Top = 241
+      Width = 372
+      Height = 87
+      TabOrder = 0
+      Visible = False
+      ControlData = {
+        0000010073260000FE08000060000000010001074631426F6F6B310101010101
+        01010101010101010101010013080000000009080800000505006C09C907EE7E
+        040000000000EF7E140000000000000000000000FFFFFFFFFFFFFFFFF3FF3D00
+        1200CD141F0ECC1519053800000000000100580222000200000031001400C800
+        0000FF7F900100000000000005417269616C31001400C8000000FF7FBC020000
+        0000000005417269616C31001400C8000200FF7F900100000000000005417269
+        616C31001400C8000200FF7FBC0200000000000005417269616C31001400C800
+        0000FF7F900100000000000005417269616C1E041C0005001922522422232C23
+        23305F293B5C2822522422232C2323305C291E04210006001E22522422232C23
+        23305F293B5B5265645D5C2822522422232C2323305C291E04220007001F2252
+        2422232C2323302E30305F293B5C2822522422232C2323302E30305C291E0427
+        0008002422522422232C2323302E30305F293B5B5265645D5C2822522422232C
+        2323302E30305C291E0432002A002F5F285C242A20232C2323305F293B5F285C
+        242A205C28232C2323305C293B5F285C242A20222D225F293B5F28405F291E04
+        2C002900295F282A20232C2323305F293B5F282A205C28232C2323305C293B5F
+        282A20222D225F293B5F28405F291E043A002C00375F285C242A20232C232330
+        2E30305F293B5F285C242A205C28232C2323302E30305C293B5F285C242A2022
+        2D223F3F5F293B5F28405F291E0434002B00315F282A20232C2323302E30305F
+        293B5F282A205C28232C2323302E30305C293B5F282A20222D223F3F5F293B5F
+        28405F291E04210032001E22522422232C2323305F293B5B5265645D5C282252
+        2422232C2323305C291E04270033002422522422232C2323302E30305F293B5B
+        5265645D5C2822522422232C2323302E30305C291E0424003400212252242022
+        232C2323302E30305F293B5C282252242022232C2323302E30305C291E040A00
+        350007302E30303030251E040C00360009302E303030305C20251E0435003700
+        3222522420222323232C2323232C2323302E30305F293B5B5265645D5C282252
+        2420222323232C2323232C2323302E30305C291E041E0038001B232C2323302E
+        303030305F293B5C28232C2323302E303030305C291E041D0039001A23302E30
+        3030305F293B5B5265645D5C2823302E303030305C29ED7E05000000000000EC
+        7E0300000000E000140000000000F5FF2000C02000000000000000000000E000
+        140001000000F5FF20C4C02000000000000000000000E000140001000000F5FF
+        20C4C02000000000000000000000E000140002000000F5FF20C4C02000000000
+        000000000000E000140002000000F5FF20C4C02000000000000000000000E000
+        140000000000F5FF20C4C02000000000000000000000E000140000000000F5FF
+        20C4C02000000000000000000000E000140000000000F5FF20C4C02000000000
+        000000000000E000140000000000F5FF20C4C02000000000000000000000E000
+        140000000000F5FF20C4C02000000000000000000000E000140000000000F5FF
+        20C4C02000000000000000000000E000140000000000F5FF20C4C02000000000
+        000000000000E000140000000000F5FF20C4C02000000000000000000000E000
+        140000000000F5FF20C4C02000000000000000000000E000140000000000F5FF
+        20C4C02000000000000000000000E00014000000000001002000C02000000000
+        000000000000E000140005003300F5FF20C8C02000000000000000000000E000
+        140005003200F5FF20C8C02000000000000000000000E000140005000C00F5FF
+        20C8C02000000000000000000000E000140005000A00F5FF20C8C02000000000
+        000000000000E000140005000D00F5FF20C8C02000000000000000000000E000
+        140004000000F0FF1248C02000000000000000000000E0001400000034000100
+        2004C02000000000000000000000E00014000000090001002004C02000000000
+        000000000000E00014000000370001002004C02000000000000000000000E000
+        1400010039000100200CC0200000000000000000000093020400108003FF9302
+        0400118006FF93020400128004FF93020400138007FF93020400008000FF9302
+        0400148005FF850015001106000000000E466C75786F2070617261205449520A
+        00000009080800000510006C09C9070D00020001000C00020064000F00020001
+        0011000200000010000800FCA9F1D24D62503F5F00020001002A00020000002B
+        0002000100250204000100FF008C0004000100370081000200C1041400030002
+        2641150008000750616765202650830002000000840002000000260008000000
+        00000000E83F27000800000000000000E83F28000800000000000000F03F2900
+        0800000000000000F03FA1002200010064000100010001000600000000000000
+        00000000E03F000000000000E03F010055000200080000020A00000001000100
+        02000000F77E18009200FFCCFFFFFF00C0C0C0000900FF3F0000000000000000
+        F27E10000000000000000000000000000000FFFFF67E0A00150015001500FF00
+        4006F37E0600020003544952F37E110001000E466C75786F2064652043616978
+        61F37E0700000004446174617D000C0000000000250C1600000000007D000C00
+        01000100B7131800000000007D000C0002000200250C1900000000007D000C00
+        03000300491217000000000008021000000001000200FF000000000040010F00
+        010206000000010018001D000F000300000000000001000000000000003E020A
+        0036020000000000000000A000040064006400AB0022002000F0FFFFFFFFFFFF
+        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF9900020026090A
+        0000000000000452E30B918FCE119DE300AA004BB8516C740000800200000100
+        0000640000000000000000000000FFFFFFFFFFFFFFFF0000000000000000007D
+        0000C05D000020454D4600000100800200001000000004000000000000000000
+        000000000000200300005802000040010000F000000000000000000000000000
+        00001B000000100000000000000000000000520000004C01000001000000F5FF
+        FFFF0000000000000000000000009001000000000001000000004D0053002000
+        530061006E007300200053006500720069006600000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000002C01
+        000036000000E4FC1200B773E777000014000000000040491400F447520064C5
+        4801ECFD1200ECFD1200894AF67738491400000014000000000094FEF877D8B4
+        F977FFFFFFFFD8FC1200D0FC1200A24BF67700001400384914007C4CF6774805
+        14000A0000000C00000040491400B8FC12000100000036000000000012004C54
+        00411C000000A0DA4801581E004118FD12000D000000A0DA480184DA48011C00
+        00007D210041A521004100540041AD210041ACDA480190124801000000000000
+        0000000000000000000000000000000000000101010101010101010148012500
+        00000C00000001000000180000000C00000000000000260000001C0000000200
+        000000000000010000000000000000000000250000000C000000020000001400
+        00000C0000000D00000027000000180000000300000000000000FFFFFF000000
+        0000250000000C00000003000000190000000C000000FFFFFF00120000000C00
+        000002000000250000000C00000007000080250000000C000000050000802500
+        00000C0000000D0000800E0000001400000000000000100000001400000001}
+    end
+  end
+  inherited Dock971: TDock97
+    Top = 347
+    Width = 744
+    inherited tb97Fundo: TToolbar97
+      Left = 452
+      DockPos = 452
+    end
+    inherited TB97oKCancelar: TToolbar97
+      Left = 190
+      inherited ToolbarSep971: TToolbarSep97
+        Left = 171
+      end
+      inherited ToolbarSep974: TToolbarSep97
+        Left = 169
+      end
+      object ToolbarSep975: TToolbarSep97 [3]
+        Left = 87
+        Top = 0
+        Blank = True
+        SizeHorz = 1
+        SizeVert = 1
+      end
+      inherited bbtnConfirmar: TBitBtn
+        Left = 88
+        Caption = '&Calcular'
+        Default = False
+        OnClick = bbtnConfirmarClick
+        Glyph.Data = {
+          F6000000424DF600000000000000760000002800000010000000100000000100
+          0400000000008000000000000000000000001000000000000000000000000000
+          80000080000000808000800000008000800080800000C0C0C000808080000000
+          FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00777777777777
+          77777777777777777777700000000000000766444444444444406E6666666666
+          66406E60F0F0F067F0406E666666666666406E60F0F0F0F0F0406E6666666666
+          66406E077777776666406E0FFFFFF76666406E000000006666406EEEEEEEEEEE
+          EE60766666666666666777777777777777777777777777777777}
+        NumGlyphs = 1
+      end
+      inherited bbtnCancelar: TBitBtn
+        Left = 173
+        Caption = 'Cancelar'
+        Enabled = False
+        Visible = False
+      end
+      object btnExibir: TBitBtn
+        Left = 2
+        Top = 0
+        Width = 85
+        Height = 27
+        Caption = '&Exibir'
+        ModalResult = 1
+        TabOrder = 2
+        OnClick = btnExibirClick
+        Glyph.Data = {
+          76010000424D7601000000000000760000002800000020000000100000000100
+          0400000000000001000000000000000000001000000010000000000000000000
+          80000080000000808000800000008000800080800000C0C0C000808080000000
+          FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00777777777887
+          777777777777F88F7777777777700F077777777777F8878F77777777700FFF07
+          77777777F8877787F77777700FFFFFF077777778877777F8F7777778FFFFFCF0
+          77777F78F77FF8787F771778FFCCCFFF07778FF87F88877F8F7711778FFFFFCF
+          077788FF8F77FF8787F711178FFCCCFFF077888F8FF88877F87F71110000FFFC
+          FF07788888887FF877877710E7E706CFFFF077887777888777F8770E7E7E70FF
+          F887778F777778F7F8877707E7E7E0F88777778F777778F88777770E7E7E7087
+          7777778F7777788777777707E7E7E07777777787F7777877777777707E7E0777
+          777777787FFF8777777777770000777777777777888877777777}
+        NumGlyphs = 2
+      end
+    end
+  end
+  inherited ivTradutor: TIvExtendedTranslator
+    Left = 65499
+    Top = 65499
+    TargetsData = (
+      1
+      1
+      (
+        ''
+        'Text'
+        0))
+  end
+  object qryBemXImovel: TwwQuery
+    CachedUpdates = True
+    OnCalcFields = qryBemXImovelCalcFields
+    DatabaseName = 'BaseDados'
+    SQL.Strings = (
+      'SELECT'
+      '   IXB.IDBEM, IXB.IDIMOVEL, IXB.IXBGRUPO,'
+      '   B.DESBEM, B.PLACA'
+      'FROM'
+      '   IMOVELXBEM IXB, BEM B'
+      'WHERE'
+      '   ('
+      '   ( IXB.IDIMOVEL =:IMOVEL ) AND'
+      '   ( IXB.IDPESSOA =:EMPRESAPROP )'
+      '   )'
+      '   AND'
+      '   ( IXB.IDBEM = B.IDBEM )'
+      '')
+    ValidateWithMask = True
+    Left = 288
+    Top = 292
+    ParamData = <
+      item
+        DataType = ftInteger
+        Name = 'IMOVEL'
+        ParamType = ptUnknown
+      end
+      item
+        DataType = ftInteger
+        Name = 'EMPRESAPROP'
+        ParamType = ptUnknown
+      end>
+    object qryBemXImovelPLACA: TFloatField
+      DisplayLabel = 'Nº Tombamento'
+      DisplayWidth = 15
+      FieldName = 'PLACA'
+      Origin = 'BEM.PLACA'
+    end
+    object qryBemXImovelDESBEM: TStringField
+      DisplayLabel = 'Descrição'
+      DisplayWidth = 48
+      FieldName = 'DESBEM'
+      Origin = 'BEM.DESBEM'
+      Size = 200
+    end
+    object qryBemXImovelGrupoExtenso: TStringField
+      DisplayLabel = 'Grupo'
+      DisplayWidth = 20
+      FieldKind = fkCalculated
+      FieldName = 'GrupoExtenso'
+      Size = 25
+      Calculated = True
+    end
+    object qryBemXImovelIDBEM: TFloatField
+      FieldName = 'IDBEM'
+      Origin = 'IMOVELXBEM.IDBEM'
+      Visible = False
+    end
+    object qryBemXImovelIDIMOVEL: TFloatField
+      FieldName = 'IDIMOVEL'
+      Origin = 'IMOVELXBEM.IDIMOVEL'
+      Visible = False
+    end
+    object qryBemXImovelIXBGRUPO: TStringField
+      FieldName = 'IXBGRUPO'
+      Origin = 'IMOVELXBEM.IXBGRUPO'
+      Visible = False
+      Size = 1
+    end
+  end
+  object qryLancamentos: TwwQuery
+    DatabaseName = 'BaseDados'
+    SQL.Strings = (
+      'SELECT'
+      
+        '   LI.VLRLANCPAGAR, LI.VLRLANCOMPAGAR, LI.VLRLANCRECEB, LI.VLRLA' +
+        'NCOMRECEB,'
+      '   LI.DATALANCAMENTO, LI.DATAVENCIMENTO,'
+      
+        '   SUM(LI.VLRLANCPAGAR) AS TOT_PAGAR, SUM(LI.VLRLANCRECEB) AS TO' +
+        'T_RECEBER,'
+      '   D.STATUS,'
+      '   SUM(DECODE(D.STATUS, 2, VLRLANCPAGAR, 0)) AS TOT_PAGO,'
+      '   SUM(DECODE(D.STATUS, 2, VLRLANCRECEB, 0)) AS TOT_RECEBIDO'
+      'FROM'
+      '   LANCAMENTOSIMOVEL LI, DOCUMENTO D'
+      'WHERE'
+      '   ('
+      '   ( LI.IDIMOVEL =:IMOVEL ) AND'
+      '   ( LI.DATAVENCIMENTO =:DATA )'
+      '   )'
+      '   AND'
+      '   ( LI.CODDOCUMENTO = D.CODDOCUMENTO )'
+      'GROUP BY'
+      '   LI.VLRLANCPAGAR, LI.VLRLANCOMPAGAR,'
+      '   LI.VLRLANCRECEB, LI.VLRLANCOMRECEB,'
+      '   LI.DATALANCAMENTO, LI.DATAVENCIMENTO,'
+      '   D.STATUS')
+    ValidateWithMask = True
+    Left = 112
+    Top = 284
+    ParamData = <
+      item
+        DataType = ftInteger
+        Name = 'IMOVEL'
+        ParamType = ptUnknown
+      end
+      item
+        DataType = ftDate
+        Name = 'DATA'
+        ParamType = ptUnknown
+      end>
+    object qryLancamentosTOT_PAGO: TFloatField
+      FieldName = 'TOT_PAGO'
+    end
+    object qryLancamentosTOT_RECEBIDO: TFloatField
+      FieldName = 'TOT_RECEBIDO'
+    end
+    object qryLancamentosVLRLANCPAGAR: TFloatField
+      FieldName = 'VLRLANCPAGAR'
+    end
+    object qryLancamentosVLRLANCOMPAGAR: TFloatField
+      FieldName = 'VLRLANCOMPAGAR'
+    end
+    object qryLancamentosVLRLANCRECEB: TFloatField
+      FieldName = 'VLRLANCRECEB'
+    end
+    object qryLancamentosVLRLANCOMRECEB: TFloatField
+      FieldName = 'VLRLANCOMRECEB'
+    end
+    object qryLancamentosDATALANCAMENTO: TDateTimeField
+      FieldName = 'DATALANCAMENTO'
+    end
+    object qryLancamentosDATAVENCIMENTO: TDateTimeField
+      FieldName = 'DATAVENCIMENTO'
+    end
+    object qryLancamentosTOT_PAGAR: TFloatField
+      FieldName = 'TOT_PAGAR'
+    end
+    object qryLancamentosTOT_RECEBER: TFloatField
+      FieldName = 'TOT_RECEBER'
+    end
+    object qryLancamentosSTATUS: TStringField
+      FieldName = 'STATUS'
+      Size = 1
+    end
+  end
+  object dsBemXImovel: TwwDataSource
+    AutoEdit = False
+    DataSet = qryBemXImovel
+    Left = 288
+    Top = 280
+  end
+  object qryHistoricoCarteira_1: TwwQuery
+    DatabaseName = 'BaseDados'
+    SQL.Strings = (
+      'SELECT'
+      '   H.IDHISTCARTINV,'
+      '   SUM(H.VLRMOVCARTINV) AS TOT_MOVIMENTO,'
+      '   HO.TOT_NLANC, HO.TOT_NLANC_BAIXADOS,'
+      '   HL.TOT_LANC, HL.TOT_LANC_BAIXADOS'
+      'FROM'
+      '   HISTCARTINV H, DOCUMENTO D,'
+      ''
+      '   ('
+      '   SELECT'
+      '      H.IDHISTCARTINV,'
+      
+        '      SUM(DECODE(H.CODDOCUMENTO, NULL, H.VLRMOVCARTINV, 0)) AS T' +
+        'OT_NLANC,'
+      
+        '      SUM(DECODE(D.STATUS, 2, H.VLRMOVCARTINV, 0)) AS TOT_NLANC_' +
+        'BAIXADOS'
+      '   FROM'
+      '      HISTCARTINV H, DOCUMENTO D'
+      '   WHERE'
+      '      ('
+      '      ( H.IDLANCIMOVEL IS NULL ) AND'
+      '      ( H.IDEMPRESAPROP =:EMPRESAPROP ) AND'
+      '      ( H.IDTIPOINVEST = 3 ) AND'
+      '      ( H.IDINVESTIMENTO =:IMOVEL ) AND'
+      '      ( H.DATAMOVCARTINV =:DATA ) AND'
+      '      ( H.IDMODULO = 64 )'
+      '      )'
+      '      AND'
+      '      ( H.CODDOCUMENTO = D.CODDOCUMENTO(+) )'
+      '   GROUP BY'
+      '      H.IDHISTCARTINV'
+      '   ) HO,'
+      ''
+      '   ('
+      '   SELECT'
+      '      H.IDHISTCARTINV,'
+      '      SUM(H.VLRMOVCARTINV) AS TOT_LANC,'
+      
+        '      SUM(DECODE(D.STATUS, 2, H.VLRMOVCARTINV, 0)) AS TOT_LANC_B' +
+        'AIXADOS'
+      '   FROM'
+      '      HISTCARTINV H, DOCUMENTO D, LANCAMENTOSIMOVEL LI'
+      '   WHERE'
+      '      ('
+      '      ( H.IDLANCIMOVEL IS NOT NULL ) AND'
+      '      ( H.IDEMPRESAPROP =:EMPRESAPROP ) AND'
+      '      ( H.IDTIPOINVEST = 3 ) AND'
+      '      ( H.IDINVESTIMENTO =:IMOVEL ) AND'
+      '      ( H.DATAMOVCARTINV =:DATA ) AND'
+      '      ( H.IDMODULO = 64 )'
+      '      )'
+      '      AND'
+      '      ('
+      '      ( H.IDLANCIMOVEL = LI.IDLANCIMOVEL ) AND'
+      '      ( LI.CODDOCUMENTO = D.CODDOCUMENTO (+) )'
+      '      )'
+      '   GROUP BY'
+      '      H.IDHISTCARTINV'
+      '   ) HL'
+      ''
+      'WHERE'
+      '   ('
+      '   ( H.IDEMPRESAPROP =:EMPRESAPROP ) AND'
+      '   ( H.IDTIPOINVEST = 3 ) AND'
+      '   ( H.IDINVESTIMENTO =:IMOVEL ) AND'
+      '   ( H.DATAMOVCARTINV =:DATA ) AND'
+      '   ( H.IDMODULO = 64 )'
+      '   )'
+      '   AND'
+      '   ('
+      '   ( H.CODDOCUMENTO = D.CODDOCUMENTO(+) )'
+      '   )'
+      'GROUP BY'
+      '   H.IDHISTCARTINV,'
+      '   HO.TOT_NLANC, HO.TOT_NLANC_BAIXADOS,'
+      '   HL.TOT_LANC, HL.TOT_LANC_BAIXADOS')
+    ValidateWithMask = True
+    Left = 288
+    Top = 252
+    ParamData = <
+      item
+        DataType = ftInteger
+        Name = 'EMPRESAPROP'
+        ParamType = ptUnknown
+      end
+      item
+        DataType = ftInteger
+        Name = 'IMOVEL'
+        ParamType = ptUnknown
+      end
+      item
+        DataType = ftDateTime
+        Name = 'DATA'
+        ParamType = ptUnknown
+      end
+      item
+        DataType = ftInteger
+        Name = 'EMPRESAPROP'
+        ParamType = ptUnknown
+      end
+      item
+        DataType = ftInteger
+        Name = 'IMOVEL'
+        ParamType = ptUnknown
+      end
+      item
+        DataType = ftDateTime
+        Name = 'DATA'
+        ParamType = ptUnknown
+      end
+      item
+        DataType = ftInteger
+        Name = 'EMPRESAPROP'
+        ParamType = ptUnknown
+      end
+      item
+        DataType = ftInteger
+        Name = 'IMOVEL'
+        ParamType = ptUnknown
+      end
+      item
+        DataType = ftDateTime
+        Name = 'DATA'
+        ParamType = ptUnknown
+      end>
+  end
+  object qryDespesas: TwwQuery
+    DatabaseName = 'BaseDados'
+    SQL.Strings = (
+      'SELECT'
+      '   SUM(H.VLRMOVCARTINV) AS TOT_DIA'
+      '   /*SUM(DECODE(D.STATUS, 2, H.VLRMOVCARTINV, 0)) AS TOT_DIA*/'
+      'FROM'
+      '   HISTCARTINV H, DOCUMENTO D, DESPOPERINVEST DP'
+      'WHERE'
+      '   ('
+      '   ( H.IDINVESTIMENTO =:IMOVEL ) AND'
+      '   ( DP.DATAVENCDESPOPER =:DATA )'
+      '   )'
+      '   AND'
+      '   ('
+      '   ( H.CODDOCUMENTO = D.CODDOCUMENTO ) AND'
+      '   ( H.IDOPERACAOINVEST = DP.IDOPERACAOINVEST )'
+      '   )')
+    ValidateWithMask = True
+    Left = 112
+    Top = 272
+    ParamData = <
+      item
+        DataType = ftInteger
+        Name = 'IMOVEL'
+        ParamType = ptUnknown
+      end
+      item
+        DataType = ftDate
+        Name = 'DATA'
+        ParamType = ptUnknown
+      end>
+    object qryDespesasTOT_DIA: TFloatField
+      FieldName = 'TOT_DIA'
+    end
+  end
+  object qryOperacoes: TwwQuery
+    DatabaseName = 'BaseDados'
+    SQL.Strings = (
+      'SELECT'
+      
+        '   SUM(DECODE(D.STATUS, 2, H.VLRMOVCARTINV, 0)) AS TOT_DIA_EFETI' +
+        'VO,'
+      '   SUM(VLRMOVCARTINV) AS TOT_DIA'
+      'FROM'
+      '   HISTCARTINV H, DOCUMENTO D, OPERACAOINVEST O'
+      'WHERE'
+      '   ('
+      '   ( H.IDINVESTIMENTO =:IMOVEL ) AND'
+      '   ( O.DATAVENCOPER =:DATA )'
+      '   )'
+      '   AND'
+      '   ('
+      '   ( H.CODDOCUMENTO = D.CODDOCUMENTO ) AND'
+      '   ( H.IDOPERACAOINVEST = O.IDOPERACAOINVEST )'
+      '   )')
+    ValidateWithMask = True
+    Left = 112
+    Top = 260
+    ParamData = <
+      item
+        DataType = ftInteger
+        Name = 'IMOVEL'
+        ParamType = ptUnknown
+      end
+      item
+        DataType = ftDate
+        Name = 'DATA'
+        ParamType = ptUnknown
+      end>
+    object qryOperacoesTOT_DIA: TFloatField
+      FieldName = 'TOT_DIA'
+    end
+  end
+  object qryTirPrevista: TwwQuery
+    DatabaseName = 'BaseDados'
+    SQL.Strings = (
+      'SELECT'
+      
+        '   SUM(DECODE(H.RECPAG, '#39'R'#39', ABS(H.VLRMOVCARTINV), 0) ) AS TOT_R' +
+        'ECEB,'
+      
+        '   SUM(DECODE(H.RECPAG, '#39'P'#39', ABS(H.VLRMOVCARTINV), 0) ) AS TOT_P' +
+        'AG'
+      'FROM'
+      '   HISTCARTINV H'
+      'WHERE'
+      '   ( H.IDEMPRESAPROP =:EMPRESAPROP )'
+      '   AND ( H.IDTIPOINVEST = 3 )'
+      '   AND ( H.IDINVESTIMENTO =:IMOVEL )'
+      '   AND ( H.DATAMOVCARTINV =:DATA )'
+      '   AND ( H.IDMODULO = 64 )')
+    ValidateWithMask = True
+    Left = 192
+    Top = 264
+    ParamData = <
+      item
+        DataType = ftInteger
+        Name = 'EMPRESAPROP'
+        ParamType = ptUnknown
+      end
+      item
+        DataType = ftInteger
+        Name = 'IMOVEL'
+        ParamType = ptUnknown
+      end
+      item
+        DataType = ftDateTime
+        Name = 'DATA'
+        ParamType = ptUnknown
+      end>
+    object qryTirPrevistaTOT_RECEB: TFloatField
+      FieldName = 'TOT_RECEB'
+    end
+    object qryTirPrevistaTOT_PAG: TFloatField
+      FieldName = 'TOT_PAG'
+    end
+  end
+  object qryTirEfetiva: TwwQuery
+    DatabaseName = 'BaseDados'
+    SQL.Strings = (
+      'SELECT'
+      
+        '   DECODE(RTRIM(LD.OPERACAO), '#39'5'#39', DECODE(D.RECPAG, '#39'R'#39', LD.VALO' +
+        'R, 0), 0) AS TOT_RECEB,'
+      
+        '   DECODE(RTRIM(LD.OPERACAO), '#39'5'#39', DECODE(D.RECPAG, '#39'P'#39', LD.VALO' +
+        'R, 0), 0) AS TOT_PAG'
+      'FROM'
+      '   HISTCARTINV H, DOCUMENTO D, LANCTODOCUM LD'
+      'WHERE'
+      '   ('
+      '   ( H.IDEMPRESAPROP =:EMPRESAPROP )'
+      '   AND ( H.IDTIPOINVEST = 3 )'
+      '   AND ( H.IDINVESTIMENTO =:IMOVEL )'
+      '   AND ( H.IDMODULO = 64 )'
+      '   AND ( LD.DATALANCTO =:DATA )'
+      '   )'
+      '   AND'
+      '   ('
+      '   ( H.CODDOCUMENTO = D.CODDOCUMENTO )'
+      '   AND ( D.CODDOCUMENTO = LD.CODDOCUMENTO )'
+      '   )')
+    ValidateWithMask = True
+    Left = 192
+    Top = 248
+    ParamData = <
+      item
+        DataType = ftInteger
+        Name = 'EMPRESAPROP'
+        ParamType = ptUnknown
+      end
+      item
+        DataType = ftInteger
+        Name = 'IMOVEL'
+        ParamType = ptUnknown
+      end
+      item
+        DataType = ftDateTime
+        Name = 'DATA'
+        ParamType = ptUnknown
+      end>
+    object qryTirEfetivaTOT_RECEB: TFloatField
+      FieldName = 'TOT_RECEB'
+    end
+    object qryTirEfetivaTOT_PAG: TFloatField
+      FieldName = 'TOT_PAG'
+    end
+  end
+end

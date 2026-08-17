@@ -1,0 +1,920 @@
+inherited RptAlterFuncional: TRptAlterFuncional
+  Left = 400
+  Top = 192
+  Height = 233
+  Caption = 'RptAlterFuncional'
+  PixelsPerInch = 96
+  TextHeight = 13
+  inherited pplExemplo: TppBDEPipeline
+    object pplExemploppField1: TppField
+      FieldAlias = 'NOME'
+      FieldName = 'NOME'
+      FieldLength = 60
+      DisplayWidth = 60
+      Position = 0
+    end
+    object pplExemploppField2: TppField
+      FieldAlias = 'RAZAOSOCIAL'
+      FieldName = 'RAZAOSOCIAL'
+      FieldLength = 60
+      DisplayWidth = 60
+      Position = 1
+    end
+  end
+  object rpAlterFuncional: TppReport
+    AutoStop = False
+    DataPipeline = ppAlterFuncional
+    PassSetting = psTwoPass
+    PrinterSetup.BinName = 'Default'
+    PrinterSetup.DocumentName = 'Férias Programadas'
+    PrinterSetup.PaperName = 'A4 297 x 210 mm'
+    PrinterSetup.PrinterName = 'Default'
+    PrinterSetup.mmMarginBottom = 7350
+    PrinterSetup.mmMarginLeft = 6350
+    PrinterSetup.mmMarginRight = 6350
+    PrinterSetup.mmMarginTop = 6350
+    PrinterSetup.mmPaperHeight = 297000
+    PrinterSetup.mmPaperWidth = 210000
+    PrinterSetup.PaperSize = 9
+    Template.SaveTo = stDatabase
+    Units = utMillimeters
+    AllowPrintToArchive = True
+    AllowPrintToFile = True
+    CachePages = True
+    DeviceType = 'Screen'
+    Left = 126
+    Top = 102
+    Version = '5.5'
+    mmColumnWidth = 197300
+    object DestacamentoppHeaderBand5: TppHeaderBand
+      mmBottomOffset = 0
+      mmHeight = 28840
+      mmPrintPosition = 0
+      object DestacamentoppLblTitulo: TppLabel
+        UserName = 'DestacamentoppLblTitulo'
+        Caption = 'RELATÓRIO DE ALTERAÇÕES FUNCIONAIS'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        TextAlignment = taCentered
+        Transparent = True
+        mmHeight = 3440
+        mmLeft = 65088
+        mmTop = 9525
+        mmWidth = 59002
+        BandType = 0
+      end
+      object DestacamentoppDBTxtEmpresa: TppDBText
+        UserName = 'DestacamentoppDBTxtEmpresa'
+        DataField = 'EMPRESA'
+        DataPipeline = ppAlterFuncional
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 3704
+        mmLeft = 794
+        mmTop = 794
+        mmWidth = 102923
+        BandType = 0
+      end
+      object DestacamentoppDBTxtCPFCGC: TppDBText
+        UserName = 'DestacamentoppDBTxtCPFCGC'
+        DataField = 'CGC'
+        DataPipeline = ppAlterFuncional
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        Transparent = True
+        mmHeight = 3704
+        mmLeft = 794
+        mmTop = 5556
+        mmWidth = 38365
+        BandType = 0
+      end
+      object DestacamentoppDBTxtTipo: TppDBText
+        UserName = 'DestacamentoppDBTxtTipo'
+        DataField = 'INSCRICAO'
+        DataPipeline = ppAlterFuncional
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        Transparent = True
+        mmHeight = 3704
+        mmLeft = 794
+        mmTop = 9525
+        mmWidth = 38365
+        BandType = 0
+      end
+      object DestacamentoppDBTxtEndereco: TppDBText
+        UserName = 'DestacamentoppDBTxtEndereco'
+        DataField = 'ENDERECO'
+        DataPipeline = ppAlterFuncional
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        Transparent = True
+        mmHeight = 3704
+        mmLeft = 794
+        mmTop = 14288
+        mmWidth = 131234
+        BandType = 0
+      end
+      object DestacamentorpLabel1: TppLabel
+        UserName = 'DestacamentorpLabel1'
+        AutoSize = False
+        Caption = 'Folha:'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        TextAlignment = taRightJustified
+        Transparent = True
+        mmHeight = 3704
+        mmLeft = 141817
+        mmTop = 6615
+        mmWidth = 19844
+        BandType = 0
+      end
+      object DestacamentorpLabel2: TppLabel
+        UserName = 'DestacamentorpLabel2'
+        AutoSize = False
+        Caption = 'Emissão:'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        TextAlignment = taRightJustified
+        Transparent = True
+        mmHeight = 3704
+        mmLeft = 141817
+        mmTop = 10848
+        mmWidth = 19844
+        BandType = 0
+      end
+      object rpDestacamentoLabel1: TppLabel
+        UserName = 'rpDestacamentoLabel1'
+        AutoSize = False
+        Caption = 'UF:'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        TextAlignment = taRightJustified
+        Transparent = True
+        mmHeight = 3704
+        mmLeft = 141817
+        mmTop = 2381
+        mmWidth = 19844
+        BandType = 0
+      end
+      object rpDestacamentoDBText1: TppDBText
+        UserName = 'rpDestacamentoDBText1'
+        DataField = 'UF'
+        DataPipeline = ppAlterFuncional
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        ParentDataPipeline = False
+        Transparent = True
+        mmHeight = 3704
+        mmLeft = 162454
+        mmTop = 2381
+        mmWidth = 23548
+        BandType = 0
+      end
+      object rpCadDependenteLabel5: TppLabel
+        UserName = 'rpCadDependenteLabel5'
+        AutoSize = False
+        Caption = 'Período:'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        TextAlignment = taRightJustified
+        Transparent = True
+        mmHeight = 3704
+        mmLeft = 141817
+        mmTop = 15081
+        mmWidth = 19844
+        BandType = 0
+      end
+      object rpCadDependenteDBText1: TppDBText
+        UserName = 'rpCadDependenteDBText1'
+        DataField = 'REFERENCIA'
+        DataPipeline = ppAlterFuncional
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        Transparent = True
+        mmHeight = 3704
+        mmLeft = 162454
+        mmTop = 15081
+        mmWidth = 33338
+        BandType = 0
+      end
+      object rpGerencialChildReport1Line1: TppLine
+        UserName = 'rpGerencialChildReport1Line1'
+        Pen.Width = 2
+        Weight = 1.5
+        mmHeight = 2117
+        mmLeft = 794
+        mmTop = 27781
+        mmWidth = 196057
+        BandType = 0
+      end
+      object DestacamentorpLblMatricula: TppLabel
+        UserName = 'DestacamentorpLblMatricula'
+        AutoSize = False
+        Caption = 'Matrícula'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 7
+        Font.Style = []
+        Transparent = True
+        mmHeight = 3175
+        mmLeft = 794
+        mmTop = 24077
+        mmWidth = 12435
+        BandType = 0
+      end
+      object DestacamentorpLblNome: TppLabel
+        UserName = 'DestacamentorpLblNome'
+        AutoSize = False
+        Caption = 'Cargo e Função (se houver)'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 7
+        Font.Style = []
+        Transparent = True
+        mmHeight = 3175
+        mmLeft = 14552
+        mmTop = 24077
+        mmWidth = 68263
+        BandType = 0
+      end
+      object rpCadDependenteLabel2: TppLabel
+        UserName = 'rpCadDependenteLabel2'
+        Caption = 'Percentual'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 7
+        Font.Style = []
+        TextAlignment = taCentered
+        Transparent = True
+        mmHeight = 2910
+        mmLeft = 167217
+        mmTop = 24077
+        mmWidth = 11377
+        BandType = 0
+      end
+      object rpCadDependenteLabel6: TppLabel
+        UserName = 'rpCadDependenteLabel6'
+        Caption = 'Data Efetiv.'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 7
+        Font.Style = []
+        Transparent = True
+        mmHeight = 2910
+        mmLeft = 84138
+        mmTop = 24077
+        mmWidth = 12435
+        BandType = 0
+      end
+      object rpFeriasProgramLabel2: TppLabel
+        UserName = 'rpFeriasProgramLabel2'
+        Caption = 'Motivo da Alteração'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 7
+        Font.Style = []
+        TextAlignment = taCentered
+        Transparent = True
+        mmHeight = 2910
+        mmLeft = 98690
+        mmTop = 24077
+        mmWidth = 21167
+        BandType = 0
+      end
+      object DestacamentorpCalc1: TppSystemVariable
+        UserName = 'DestacamentorpCalc1'
+        AutoSize = False
+        VarType = vtPageSet
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        Transparent = True
+        mmHeight = 3704
+        mmLeft = 162454
+        mmTop = 6615
+        mmWidth = 23548
+        BandType = 0
+      end
+      object DestacamentorpCalc2: TppSystemVariable
+        UserName = 'DestacamentorpCalc2'
+        AutoSize = False
+        VarType = vtPrintDateTime
+        DisplayFormat = 'DD/MM/YYYY HH:MM'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        Transparent = True
+        mmHeight = 3704
+        mmLeft = 162454
+        mmTop = 10848
+        mmWidth = 23548
+        BandType = 0
+      end
+      object ppLabel23: TppLabel
+        UserName = 'Label2'
+        Caption = 'Salário'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 7
+        Font.Style = []
+        TextAlignment = taCentered
+        Transparent = True
+        mmHeight = 2910
+        mmLeft = 187590
+        mmTop = 24077
+        mmWidth = 7408
+        BandType = 0
+      end
+      object ppLabel1: TppLabel
+        UserName = 'Label1'
+        Caption = 'Cod.C.Custo'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 7
+        Font.Style = []
+        Transparent = True
+        mmHeight = 2910
+        mmLeft = 144463
+        mmTop = 24077
+        mmWidth = 14023
+        BandType = 0
+      end
+      object ppLabel2: TppLabel
+        UserName = 'DestacamentorpLblNome1'
+        AutoSize = False
+        Caption = 'Nome'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 7
+        Font.Style = []
+        Transparent = True
+        mmHeight = 3175
+        mmLeft = 14552
+        mmTop = 20108
+        mmWidth = 68263
+        BandType = 0
+      end
+    end
+    object rpAlterFuncinalDtlBand: TppDetailBand
+      BeforePrint = rpAlterFuncinalDtlBandBeforePrint
+      mmBottomOffset = 0
+      mmHeight = 10054
+      mmPrintPosition = 0
+      object rpAlterFuncinalDBMatric: TppDBText
+        UserName = 'rpAlterFuncinalDBMatric'
+        DataField = 'MATRICULA'
+        DataPipeline = ppAlterFuncional
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 7
+        Font.Style = []
+        ParentDataPipeline = False
+        Transparent = True
+        mmHeight = 3175
+        mmLeft = 794
+        mmTop = 794
+        mmWidth = 12435
+        BandType = 4
+      end
+      object rpAlterFuncinalDBNome: TppDBText
+        UserName = 'rpAlterFuncinalDBNome'
+        DataField = 'EMPREGADO'
+        DataPipeline = ppAlterFuncional
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 7
+        Font.Style = []
+        ParentDataPipeline = False
+        Transparent = True
+        mmHeight = 3175
+        mmLeft = 14552
+        mmTop = 794
+        mmWidth = 68263
+        BandType = 4
+      end
+      object rpAlterFuncinalDBDataAlt: TppDBText
+        UserName = 'rpAlterFuncinalDBDataAlt'
+        DataField = 'DATAALTERFUNC'
+        DataPipeline = ppAlterFuncional
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 7
+        Font.Style = []
+        Transparent = True
+        mmHeight = 3175
+        mmLeft = 84138
+        mmTop = 794
+        mmWidth = 12700
+        BandType = 4
+      end
+      object rpAlterFuncinalDBMotivo: TppDBText
+        UserName = 'rpAlterFuncinalDBMotivo'
+        DataField = 'MOTIVO'
+        DataPipeline = ppAlterFuncional
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 7
+        Font.Style = []
+        Transparent = True
+        mmHeight = 3175
+        mmLeft = 98690
+        mmTop = 794
+        mmWidth = 45244
+        BandType = 4
+      end
+      object rpAlterFuncinalDBCargo: TppDBText
+        UserName = 'rpAlterFuncinalDBCargo'
+        DataField = 'CARGO'
+        DataPipeline = ppAlterFuncional
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 7
+        Font.Style = []
+        ParentDataPipeline = False
+        Transparent = True
+        Visible = False
+        mmHeight = 3175
+        mmLeft = 794
+        mmTop = 7500
+        mmWidth = 95250
+        BandType = 4
+      end
+      object ppLine6: TppLine
+        UserName = 'Line6'
+        Pen.Width = 2
+        Weight = 1.5
+        mmHeight = 1000
+        mmLeft = 794
+        mmTop = 8996
+        mmWidth = 196057
+        BandType = 4
+      end
+      object rpAlterFuncinalDBPerc: TppDBText
+        UserName = 'rpAlterFuncinalDBPerc'
+        DataField = 'PERC_REAJ'
+        DataPipeline = ppAlterFuncional
+        DisplayFormat = '#,0.00;-#,0.00'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 7
+        Font.Style = []
+        TextAlignment = taRightJustified
+        Transparent = True
+        mmHeight = 2910
+        mmLeft = 161396
+        mmTop = 794
+        mmWidth = 17198
+        BandType = 4
+      end
+      object rpAlterFuncionalSalario: TppDBText
+        UserName = 'rpAlterFuncionalSalario'
+        DataField = 'SALARIO'
+        DataPipeline = ppAlterFuncional
+        DisplayFormat = '#,0.00;-#,0.00'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 7
+        Font.Style = []
+        TextAlignment = taRightJustified
+        Transparent = True
+        mmHeight = 2910
+        mmLeft = 179388
+        mmTop = 794
+        mmWidth = 17198
+        BandType = 4
+      end
+      object rpAlterFuncinalDBCCusto: TppDBText
+        UserName = 'rpAlterFuncinalDBCCusto'
+        DataField = 'CODCENTROCUSTO'
+        DataPipeline = ppAlterFuncional
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 7
+        Font.Style = []
+        Transparent = True
+        mmHeight = 2910
+        mmLeft = 144992
+        mmTop = 794
+        mmWidth = 15081
+        BandType = 4
+      end
+      object rpAlterFuncinalDBFuncao: TppDBText
+        UserName = 'rpAlterFuncinalDBFuncao'
+        DataField = 'FUNCAO'
+        DataPipeline = ppAlterFuncional
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 7
+        Font.Style = []
+        ParentDataPipeline = False
+        Transparent = True
+        Visible = False
+        mmHeight = 3175
+        mmLeft = 98690
+        mmTop = 7500
+        mmWidth = 95250
+        BandType = 4
+      end
+      object rpAlterFuncionalLblAlteracao: TppLabel
+        UserName = 'rpAlterFuncionalLblAlteracao'
+        AutoSize = False
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 7
+        Font.Style = []
+        Transparent = True
+        mmHeight = 2910
+        mmLeft = 794
+        mmTop = 5292
+        mmWidth = 195000
+        BandType = 4
+      end
+    end
+    object AlterFuncionalppRodape: TppFooterBand
+      mmBottomOffset = 0
+      mmHeight = 1588
+      mmPrintPosition = 0
+    end
+    object DestacamentorpSummaryBand1: TppSummaryBand
+      AfterPrint = DestacamentorpSummaryBand1AfterPrint
+      mmBottomOffset = 0
+      mmHeight = 8731
+      mmPrintPosition = 0
+      object rpCadDependenteLabel3: TppLabel
+        UserName = 'rpCadDependenteLabel3'
+        AutoSize = False
+        Caption = 'Nº Total de Ocorrências:'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 3440
+        mmLeft = 1323
+        mmTop = 4498
+        mmWidth = 35719
+        BandType = 7
+      end
+      object rpCadDependenteDBCalc1: TppDBCalc
+        UserName = 'rpCadDependenteDBCalc1'
+        DataField = 'EMPREGADO'
+        DataPipeline = ppAlterFuncional
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        Transparent = True
+        DBCalcType = dcCount
+        mmHeight = 3440
+        mmLeft = 38100
+        mmTop = 4498
+        mmWidth = 37835
+        BandType = 7
+      end
+    end
+    object ppAlterFuncionalGroup: TppGroup
+      BreakName = 'CODCENTROCUSTO'
+      DataPipeline = ppAlterFuncional
+      NewPage = True
+      UserName = 'AlterFuncionalGroup'
+      mmNewColumnThreshold = 0
+      mmNewPageThreshold = 0
+      object ppGroupHeaderBand1: TppGroupHeaderBand
+        mmBottomOffset = 0
+        mmHeight = 0
+        mmPrintPosition = 0
+      end
+      object AlterFuncionalppFooterBand: TppGroupFooterBand
+        mmBottomOffset = 0
+        mmHeight = 5292
+        mmPrintPosition = 0
+        object ppLabel3: TppLabel
+          UserName = 'Label3'
+          AutoSize = False
+          Caption = 'Nº de Ocorrências:'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Name = 'Arial'
+          Font.Size = 8
+          Font.Style = [fsBold]
+          Transparent = True
+          mmHeight = 3440
+          mmLeft = 1323
+          mmTop = 1058
+          mmWidth = 33073
+          BandType = 5
+          GroupNo = 0
+        end
+        object ppDBCalc1: TppDBCalc
+          UserName = 'DBCalc1'
+          DataField = 'EMPREGADO'
+          DataPipeline = ppAlterFuncional
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Name = 'Arial'
+          Font.Size = 8
+          Font.Style = [fsBold]
+          ResetGroup = ppAlterFuncionalGroup
+          Transparent = True
+          DBCalcType = dcCount
+          mmHeight = 3440
+          mmLeft = 38100
+          mmTop = 1058
+          mmWidth = 37835
+          BandType = 5
+          GroupNo = 0
+        end
+      end
+    end
+  end
+  object ppAlterFuncional: TppBDEPipeline
+    DataSource = dsAlterFuncional
+    CloseDataSource = True
+    OpenDataSource = False
+    SkipWhenNoRecords = False
+    UserName = 'AlterFuncional'
+    Left = 126
+    Top = 89
+    object ppAlterFuncionalppField1: TppField
+      FieldAlias = 'IDPESSOA'
+      FieldName = 'IDPESSOA'
+      FieldLength = 0
+      DataType = dtNotKnown
+      DisplayWidth = 0
+      Position = 0
+      Searchable = False
+      Sortable = False
+    end
+    object ppAlterFuncionalppField2: TppField
+      FieldAlias = 'EMPRESA'
+      FieldName = 'EMPRESA'
+      FieldLength = 0
+      DataType = dtNotKnown
+      DisplayWidth = 0
+      Position = 1
+      Searchable = False
+      Sortable = False
+    end
+    object ppAlterFuncionalppField3: TppField
+      FieldAlias = 'CGC'
+      FieldName = 'CGC'
+      FieldLength = 0
+      DataType = dtNotKnown
+      DisplayWidth = 0
+      Position = 2
+      Searchable = False
+      Sortable = False
+    end
+    object ppAlterFuncionalppField4: TppField
+      FieldAlias = 'INSCRICAO'
+      FieldName = 'INSCRICAO'
+      FieldLength = 0
+      DataType = dtNotKnown
+      DisplayWidth = 0
+      Position = 3
+      Searchable = False
+      Sortable = False
+    end
+    object ppAlterFuncionalppField5: TppField
+      FieldAlias = 'ENDERECO'
+      FieldName = 'ENDERECO'
+      FieldLength = 0
+      DataType = dtNotKnown
+      DisplayWidth = 0
+      Position = 4
+      Searchable = False
+      Sortable = False
+    end
+    object ppAlterFuncionalppField6: TppField
+      FieldAlias = 'UF'
+      FieldName = 'UF'
+      FieldLength = 0
+      DataType = dtNotKnown
+      DisplayWidth = 0
+      Position = 5
+      Searchable = False
+      Sortable = False
+    end
+    object ppAlterFuncionalppField7: TppField
+      FieldAlias = 'MATRICULA'
+      FieldName = 'MATRICULA'
+      FieldLength = 0
+      DataType = dtNotKnown
+      DisplayWidth = 0
+      Position = 6
+      Searchable = False
+      Sortable = False
+    end
+    object ppAlterFuncionalppField8: TppField
+      FieldAlias = 'EMPREGADO'
+      FieldName = 'EMPREGADO'
+      FieldLength = 0
+      DataType = dtNotKnown
+      DisplayWidth = 0
+      Position = 7
+      Searchable = False
+      Sortable = False
+    end
+    object ppAlterFuncionalppField9: TppField
+      FieldAlias = 'REFERENCIA'
+      FieldName = 'REFERENCIA'
+      FieldLength = 0
+      DataType = dtNotKnown
+      DisplayWidth = 0
+      Position = 8
+      Searchable = False
+      Sortable = False
+    end
+    object ppAlterFuncionalppField10: TppField
+      FieldAlias = 'DATAALTERFUNC'
+      FieldName = 'DATAALTERFUNC'
+      FieldLength = 0
+      DataType = dtNotKnown
+      DisplayWidth = 0
+      Position = 9
+      Searchable = False
+      Sortable = False
+    end
+    object ppAlterFuncionalppField11: TppField
+      FieldAlias = 'CODCENTROCUSTO'
+      FieldName = 'CODCENTROCUSTO'
+      FieldLength = 0
+      DataType = dtNotKnown
+      DisplayWidth = 0
+      Position = 10
+      Searchable = False
+      Sortable = False
+    end
+    object ppAlterFuncionalppField12: TppField
+      FieldAlias = 'CARGO'
+      FieldName = 'CARGO'
+      FieldLength = 0
+      DataType = dtNotKnown
+      DisplayWidth = 0
+      Position = 11
+      Searchable = False
+      Sortable = False
+    end
+    object ppAlterFuncionalppField13: TppField
+      FieldAlias = 'FUNCAO'
+      FieldName = 'FUNCAO'
+      FieldLength = 0
+      DataType = dtNotKnown
+      DisplayWidth = 0
+      Position = 12
+      Searchable = False
+      Sortable = False
+    end
+    object ppAlterFuncionalppField14: TppField
+      FieldAlias = 'MOTIVO'
+      FieldName = 'MOTIVO'
+      FieldLength = 0
+      DataType = dtNotKnown
+      DisplayWidth = 0
+      Position = 13
+      Searchable = False
+      Sortable = False
+    end
+    object ppAlterFuncionalppField15: TppField
+      FieldAlias = 'TIPOPAGAMENTO'
+      FieldName = 'TIPOPAGAMENTO'
+      FieldLength = 0
+      DataType = dtNotKnown
+      DisplayWidth = 0
+      Position = 14
+      Searchable = False
+      Sortable = False
+    end
+    object ppAlterFuncionalppField16: TppField
+      FieldAlias = 'SALARIO'
+      FieldName = 'SALARIO'
+      FieldLength = 0
+      DataType = dtNotKnown
+      DisplayWidth = 0
+      Position = 15
+      Searchable = False
+      Sortable = False
+    end
+    object ppAlterFuncionalppField17: TppField
+      FieldAlias = 'PERC_REAJ'
+      FieldName = 'PERC_REAJ'
+      FieldLength = 0
+      DataType = dtNotKnown
+      DisplayWidth = 0
+      Position = 16
+      Searchable = False
+      Sortable = False
+    end
+  end
+  object dsAlterFuncional: TDataSource
+    DataSet = qryAlterFuncional
+    Left = 126
+    Top = 77
+  end
+  object qryAlterFuncional: TQuery
+    CachedUpdates = True
+    DatabaseName = 'BaseDados'
+    SQL.Strings = (
+      'SELECT DISTINCT'
+      '  '#39'1234567890'#39' AS IDPESSOA,'
+      
+        '  '#39'1234567890123456789012345678901234567890123456789012345678901' +
+        '234567890'#39' AS EMPRESA,'
+      '  '#39'12345678901234567890'#39' AS CGC,'
+      '  '#39'12345678901234567890'#39' AS INSCRICAO,'
+      
+        '  '#39'1234567890123456789012345678901234567890123456789012345678901' +
+        '234567890'#39' AS ENDERECO,'
+      '  '#39'1234'#39' AS UF,'
+      '  '#39'12345678901234567890'#39' AS MATRICULA,'
+      
+        '  '#39'1234567890123456789012345678901234567890123456789012345678901' +
+        '234567890'#39' AS EMPREGADO,'
+      '  '#39'1234567890123456789012345678'#39' AS REFERENCIA,'
+      '  '#39'1234567890'#39' AS DATAALTERFUNC,'
+      '  '#39'1234567890'#39' AS CODCENTROCUSTO,'
+      
+        '  '#39'1234567890123456789012345678901234567890123456789012345678901' +
+        '234567890'#39' AS CARGO,'
+      
+        '  '#39'1234567890123456789012345678901234567890123456789012345678901' +
+        '234567890'#39' AS FUNCAO,'
+      
+        '  '#39'1234567890123456789012345678901234567890123456789012345678901' +
+        '234567890'#39' AS MOTIVO,'
+      '  '#39'1'#39' AS TIPOPAGAMENTO,'
+      '  0 AS SALARIO,'
+      '  0 AS PERC_REAJ,'
+      '  0 AS IDCARGO,'
+      '  0 AS IDFUNCAO'
+      'FROM'
+      '  DUAL'
+      'WHERE'
+      '  (1 = 2)'
+      '')
+    Left = 126
+    Top = 64
+  end
+  object updSQL: TUpdateSQL
+    Left = 208
+    Top = 68
+  end
+end

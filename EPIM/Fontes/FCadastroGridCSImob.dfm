@@ -1,0 +1,231 @@
+inherited frmCadastroGridCSImob: TfrmCadastroGridCSImob
+  Left = 141
+  Top = 195
+  Caption = 'frmCadastroGridCSImob'
+  PixelsPerInch = 96
+  TextHeight = 13
+  inherited pnlFundo: TPanel
+    Top = 35
+    Height = 230
+    BevelInner = bvNone
+    BorderWidth = 1
+    inherited pnlControles: TPanel
+      Left = 2
+      Top = 2
+      Width = 548
+      Height = 226
+      BorderWidth = 1
+    end
+    inherited dbGrd: TwwDBGrid
+      Left = 2
+      Top = 2
+      Width = 548
+      Height = 226
+      OnCalcCellColors = dbGrdCalcCellColors
+      OnTopRowChanged = dbGrdTopRowChanged
+    end
+  end
+  inherited Dock972: TDock97
+    Height = 35
+    inherited Toolbar971: TToolbar97
+      inherited sbtnInserir: TToolbarButton97
+        Width = 85
+        Height = 29
+        Glyph.Data = {
+          76010000424D7601000000000000760000002800000020000000100000000100
+          0400000000000001000000000000000000001000000010000000000000000000
+          8000008000000080800080000000800080008080000080808000C0C0C0000000
+          FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF008888888B8888
+          8888888888888F8888888B8888BB778888B88888888F77F8888888BB8800F088
+          BB8888888F7787F8888888BB00FFF0BBBB88888F7788878F88888800FFFFFF0B
+          B888887788888F7F8888887FFFFFCF0B8888887F88FF7878F888887FFCCCFFF0
+          B8888878F77788F7F88888B7FFFFFCF0BB888887F88FF7878F88BBB7FFCCCFFF
+          0BBB88878F77788F78F888BB7FFFFFCFF08888887F88FF78878F888B7FFCCCFF
+          FF08888878F777888F78888BB7FFFFFF77888888878F888F778888BBBB7FFF77
+          BB8888888878FF77888888BB88B77788BB8888888887778888888B88888B8888
+          88B888888888888888888888888B888888888888888888888888}
+        Layout = blGlyphLeft
+        Spacing = 4
+      end
+      inherited sbtnAlterar: TToolbarButton97
+        Left = 85
+        Width = 85
+        Height = 29
+        Glyph.Data = {
+          76010000424D7601000000000000760000002800000020000000100000000100
+          0400000000000001000000000000000000001000000010000000000000000000
+          80000080000000808000800000008000800080800000C0C0C000808080000000
+          FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00777777770007
+          77777777777F8887F77777777788FF08777777777F887778F777777788FFFFF0
+          7777777788777FF8F7777778FFFF88F077777778F77F88F87F777778FF00F0FF
+          077777787F8878F78F77777700FFF0FF0777777F8877787F87F77700FFFFFF0F
+          F077778877777F8F787F778FFFFFCF0FFF07778F77FF8787F787778FFCCCFFF0
+          FFF07787F88877F8F7F87778FFFFFCF0F8877778F77FF87878877778FFCCCFFF
+          077777787F88877F87F777778FFFFFCFF07777778F77FF87787F77778FFCCCFF
+          FF07777787F888777F87777778FFFFFF88777777787F777F88777777778FFF88
+          777777777787FF88777777777778887777777777777888777777}
+        Layout = blGlyphLeft
+        Spacing = 4
+      end
+      inherited sbtnProcurar: TToolbarButton97
+        Left = 255
+        Width = 10
+        Height = 29
+        Enabled = False
+        Layout = blGlyphLeft
+        Spacing = 4
+        Visible = False
+      end
+      inherited sbtnApagar: TToolbarButton97
+        Left = 170
+        Width = 85
+        Height = 29
+        Layout = blGlyphLeft
+        Spacing = 4
+      end
+      object ToolbarSep972: TToolbarSep97
+        Left = 265
+        Top = 0
+      end
+      object btnRefresh: TToolbarButton97
+        Left = 271
+        Top = 0
+        Width = 85
+        Height = 29
+        AllowAllUp = True
+        GroupIndex = 2
+        Caption = 'A&tualizar'
+        Glyph.Data = {
+          DE010000424DDE01000000000000760000002800000024000000120000000100
+          0400000000006801000000000000000000001000000000000000000000000000
+          8000008000000080800080000000800080008080000080808000C0C0C0000000
+          FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00888888888888
+          888888888888FFFFFF88888800008888844444488888888F88F7777778F88888
+          000024884222222448888877FF788888877F888800002244222222222488887F
+          7788FFFFF887F8880000222222AAAAA22248887F888F77777F887F8800002222
+          2A88888A2224887F88F7888887F887F80000222228888888A224887F8878F888
+          887FF7F80000222222888888A444887FFFF78F88887777880000AAAAAAA88888
+          8888887777777888888888880000888888888888888888888888888888FFFFFF
+          00008888888888844444488FFFF888888777777F0000A444888888A222224877
+          77F888887F88887F0000A2248888888A2222487F878F888887F8887F00008A22
+          48888844222248878878FFFF7788887F00008A222444442222224887F8877777
+          888FF87F000088A2222222222AA248887FF888888FF77F780000888AA222222A
+          A88A8888877FFFFFF7788788000088888AAAAAA8888888888887777778888888
+          0000}
+        NumGlyphs = 2
+        Opaque = False
+        OnClick = btnRefreshClick
+      end
+      object btnTrazer: TToolbarButton97
+        Left = 356
+        Top = 0
+        Width = 85
+        Height = 29
+        AllowAllUp = True
+        GroupIndex = 3
+        Caption = 'Tra&zer'
+        Enabled = False
+        Glyph.Data = {
+          76010000424D7601000000000000760000002800000020000000100000000100
+          0400000000000001000000000000000000001000000010000000000000000000
+          8000008000000080800080000000800080008080000080808000C0C0C0000000
+          FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00888888888888
+          8888888888888F88888888888888778888888888888F77F8888888888800F088
+          888888888F7787F88888888800FFF0888888888F7788878F88888800FFFFFF08
+          8888887788888F7F8888887FFFFFCF088888887F88FF7878F888887FFFCCFFF0
+          8888887F877788F7F888888744FFFCF088888887778FF7878F888884CC4FCFFF
+          088888878878788F78F8884CCCC4FFCFF088887888878F78878F84CCCCCC4FFF
+          FF0887FF88887F888F788444CC444FFF77888777F877788F77888884CC4FFF77
+          88888887F87F8F7788888884CC47778888888887F877778888888884CC488888
+          88888887FF7F8888888888844448888888888887777888888888}
+        NumGlyphs = 2
+        Opaque = False
+        Visible = False
+        OnClick = btnTrazerClick
+      end
+    end
+  end
+  inherited Dock971: TDock97
+    Top = 265
+    Height = 33
+    inherited tb97Fundo: TToolbar97
+      Left = 380
+      DockPos = 459
+      inherited sep1: TToolbarSep97
+        Left = 83
+        SizeHorz = 2
+      end
+      inherited sep3: TToolbarSep97
+        Left = 166
+        SizeHorz = 2
+      end
+      object ToolbarSep973: TToolbarSep97 [2]
+        Left = 0
+        Top = 0
+        Blank = True
+        SizeHorz = 2
+      end
+      inherited bbtnSair: TBitBtn
+        Left = 2
+        Width = 81
+        Height = 27
+        Caption = 'Sair'
+      end
+      inherited bbtnAjuda: TmaHelpBitBtn
+        Left = 85
+        Width = 81
+        Height = 27
+      end
+    end
+    inherited TB97oKCancelar: TToolbar97
+      Left = 208
+      DockPos = 257
+      inherited ToolbarSep971: TToolbarSep97
+        Left = 83
+        SizeHorz = 2
+      end
+      object ToolbarSep974: TToolbarSep97 [1]
+        Left = 166
+        Top = 0
+        Blank = True
+        SizeHorz = 2
+      end
+      object ToolbarSep975: TToolbarSep97 [2]
+        Left = 0
+        Top = 0
+        Blank = True
+        SizeHorz = 2
+      end
+      inherited bbtnConfirmar: TBitBtn
+        Left = 2
+        Width = 81
+        Height = 27
+      end
+      inherited bbtnCancelar: TBitBtn
+        Left = 85
+        Width = 81
+        Height = 27
+      end
+    end
+  end
+  inherited qry: TwwQuery
+    Left = 416
+    Top = 96
+  end
+  inherited ivTradutor: TIvExtendedTranslator
+    Left = 65499
+    Top = 65499
+  end
+  inherited upd: TUpdateSQL
+    Left = 384
+    Top = 96
+  end
+  inherited MontaSelect: TMontaSelect
+    Left = 496
+    Top = 96
+  end
+  inherited ds: TwwDataSource
+    Left = 448
+    Top = 96
+  end
+end

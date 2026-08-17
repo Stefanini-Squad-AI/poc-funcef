@@ -1,0 +1,954 @@
+inherited rptMovimentaPorConta: TrptMovimentaPorConta
+  Left = 809
+  Top = 205
+  Width = 366
+  Height = 297
+  Caption = 'rptMovimentaPorConta'
+  OldCreateOrder = True
+  PixelsPerInch = 96
+  TextHeight = 13
+  inherited CmpRptCM: TCmParamReport
+    Caption = 'Movimentações por Conta'
+    Params = <
+      item
+        Caption = 'ATIVO'
+        Controle = tcEdit
+        TipodeDado = tdInteger
+        LookupSettings.SQL.Strings = ()
+        LookupSettings.Tamanho = '0'
+        CheckBoxSetings.ValueChecked = 'True'
+        CheckBoxSetings.ValueUnChecked = 'False'
+        CheckBoxSetings.Checked = True
+        RadioGroupSettings.Items.Strings = ()
+        RadioGroupSettings.Values.Strings = ()
+        RadioGroupSettings.Columns = 1
+        RadioGroupSettings.ItemIndex = -1
+        RadioGroupSettings.Height = 40
+        ComboBoxSettings.Sorted = False
+        ComboBoxSettings.Style = csDropDownList
+        ComboBoxSettings.Items.Strings = ()
+        ComboBoxSettings.DropDownCount = 8
+        ComboBoxSettings.ItemIndex = -1
+        ListBoxSettings.Items.Strings = ()
+        ListBoxSettings.MultiSelect = False
+        ListBoxSettings.ExtendedSelect = False
+        ListBoxSettings.Sorted = False
+        ListBoxSettings.Style = lbStandard
+        ListBoxSettings.height = 70
+        MostraComboCompara = True
+        Required = False
+        EditSettings.Color = clWindow
+        EditSettings.Readonly = False
+        EditSettings.Font.Charset = DEFAULT_CHARSET
+        EditSettings.Font.Color = clWindowText
+        EditSettings.Font.Height = -11
+        EditSettings.Font.Name = 'MS Sans Serif'
+        EditSettings.Font.Style = [fsBold]
+        SpinEditSettings.MaxValue = 0
+        SpinEditSettings.MinValue = 0
+        SpinEditSettings.Increment = 0
+        SpinEditSettings.Value = 0
+        MaskEditSettings.MaxLength = 0
+        ProcuraSTSettings.Subtipo = stFornecedor
+        ProcuraSTSettings.CampoEdit = ceRazaoSocial
+        ProcuraSTSettings.FiltraSubTipo = True
+        ProcuraFCSettings.Status = fcAll
+        ProcuraFCSettings.CampoEdit = ceRazaoSocial
+        ProcuraFCSettings.MostraEndereco = False
+        ProcuraFCSettings.ForCli = fcFornecedor
+        ProcuraCCSettings.Plano = 0
+        ProcuraCCSettings.Status = scSoAtiva
+        ProcuraCCSettings.AceitaTipoConta = Indiferente
+        Width = 0
+      end
+      item
+        Caption = 'CONTA'
+        Controle = tcLookupCombo
+        TipodeDado = tdInteger
+        LookupSettings.SQL.Strings = ()
+        LookupSettings.Tamanho = '0'
+        CheckBoxSetings.ValueChecked = 'True'
+        CheckBoxSetings.ValueUnChecked = 'False'
+        CheckBoxSetings.Checked = True
+        RadioGroupSettings.Items.Strings = ()
+        RadioGroupSettings.Values.Strings = ()
+        RadioGroupSettings.Columns = 1
+        RadioGroupSettings.ItemIndex = -1
+        RadioGroupSettings.Height = 40
+        ComboBoxSettings.Sorted = False
+        ComboBoxSettings.Style = csDropDownList
+        ComboBoxSettings.Items.Strings = ()
+        ComboBoxSettings.DropDownCount = 8
+        ComboBoxSettings.ItemIndex = -1
+        ListBoxSettings.Items.Strings = ()
+        ListBoxSettings.MultiSelect = False
+        ListBoxSettings.ExtendedSelect = False
+        ListBoxSettings.Sorted = False
+        ListBoxSettings.Style = lbStandard
+        ListBoxSettings.height = 70
+        MostraComboCompara = True
+        Required = False
+        EditSettings.Color = clWindow
+        EditSettings.Readonly = False
+        EditSettings.Font.Charset = DEFAULT_CHARSET
+        EditSettings.Font.Color = clWindowText
+        EditSettings.Font.Height = -11
+        EditSettings.Font.Name = 'MS Sans Serif'
+        EditSettings.Font.Style = [fsBold]
+        SpinEditSettings.MaxValue = 0
+        SpinEditSettings.MinValue = 0
+        SpinEditSettings.Increment = 0
+        SpinEditSettings.Value = 0
+        MaskEditSettings.MaxLength = 0
+        ProcuraSTSettings.Subtipo = stFornecedor
+        ProcuraSTSettings.CampoEdit = ceRazaoSocial
+        ProcuraSTSettings.FiltraSubTipo = True
+        ProcuraFCSettings.Status = fcAll
+        ProcuraFCSettings.CampoEdit = ceRazaoSocial
+        ProcuraFCSettings.MostraEndereco = False
+        ProcuraFCSettings.ForCli = fcFornecedor
+        ProcuraCCSettings.Plano = 0
+        ProcuraCCSettings.Status = scSoAtiva
+        ProcuraCCSettings.AceitaTipoConta = Indiferente
+        Width = 0
+      end
+      item
+        Caption = 'TIPOMOVIMENTACAO'
+        Controle = tcEdit
+        TipodeDado = tdInteger
+        LookupSettings.SQL.Strings = ()
+        LookupSettings.Tamanho = '0'
+        CheckBoxSetings.ValueChecked = 'True'
+        CheckBoxSetings.ValueUnChecked = 'False'
+        CheckBoxSetings.Checked = True
+        RadioGroupSettings.Items.Strings = ()
+        RadioGroupSettings.Values.Strings = ()
+        RadioGroupSettings.Columns = 1
+        RadioGroupSettings.ItemIndex = -1
+        RadioGroupSettings.Height = 40
+        ComboBoxSettings.Sorted = False
+        ComboBoxSettings.Style = csDropDownList
+        ComboBoxSettings.Items.Strings = ()
+        ComboBoxSettings.DropDownCount = 8
+        ComboBoxSettings.ItemIndex = -1
+        ListBoxSettings.Items.Strings = ()
+        ListBoxSettings.MultiSelect = False
+        ListBoxSettings.ExtendedSelect = False
+        ListBoxSettings.Sorted = False
+        ListBoxSettings.Style = lbStandard
+        ListBoxSettings.height = 70
+        MostraComboCompara = True
+        Required = False
+        EditSettings.Color = clWindow
+        EditSettings.Readonly = False
+        EditSettings.Font.Charset = DEFAULT_CHARSET
+        EditSettings.Font.Color = clWindowText
+        EditSettings.Font.Height = -11
+        EditSettings.Font.Name = 'MS Sans Serif'
+        EditSettings.Font.Style = [fsBold]
+        SpinEditSettings.MaxValue = 0
+        SpinEditSettings.MinValue = 0
+        SpinEditSettings.Increment = 0
+        SpinEditSettings.Value = 0
+        MaskEditSettings.MaxLength = 0
+        ProcuraSTSettings.Subtipo = stFornecedor
+        ProcuraSTSettings.CampoEdit = ceRazaoSocial
+        ProcuraSTSettings.FiltraSubTipo = True
+        ProcuraFCSettings.Status = fcAll
+        ProcuraFCSettings.CampoEdit = ceRazaoSocial
+        ProcuraFCSettings.MostraEndereco = False
+        ProcuraFCSettings.ForCli = fcFornecedor
+        ProcuraCCSettings.Plano = 0
+        ProcuraCCSettings.Status = scSoAtiva
+        ProcuraCCSettings.AceitaTipoConta = Indiferente
+        Width = 0
+      end
+      item
+        Caption = 'DATAINI'
+        Controle = tcEdit
+        TipodeDado = tdString
+        LookupSettings.SQL.Strings = ()
+        LookupSettings.Tamanho = '0'
+        CheckBoxSetings.ValueChecked = 'True'
+        CheckBoxSetings.ValueUnChecked = 'False'
+        CheckBoxSetings.Checked = True
+        RadioGroupSettings.Items.Strings = ()
+        RadioGroupSettings.Values.Strings = ()
+        RadioGroupSettings.Columns = 1
+        RadioGroupSettings.ItemIndex = -1
+        RadioGroupSettings.Height = 40
+        ComboBoxSettings.Sorted = False
+        ComboBoxSettings.Style = csDropDownList
+        ComboBoxSettings.Items.Strings = ()
+        ComboBoxSettings.DropDownCount = 8
+        ComboBoxSettings.ItemIndex = -1
+        ListBoxSettings.Items.Strings = ()
+        ListBoxSettings.MultiSelect = False
+        ListBoxSettings.ExtendedSelect = False
+        ListBoxSettings.Sorted = False
+        ListBoxSettings.Style = lbStandard
+        ListBoxSettings.height = 70
+        MostraComboCompara = True
+        Required = False
+        EditSettings.Color = clWindow
+        EditSettings.Readonly = False
+        EditSettings.Font.Charset = DEFAULT_CHARSET
+        EditSettings.Font.Color = clWindowText
+        EditSettings.Font.Height = -11
+        EditSettings.Font.Name = 'MS Sans Serif'
+        EditSettings.Font.Style = [fsBold]
+        SpinEditSettings.MaxValue = 0
+        SpinEditSettings.MinValue = 0
+        SpinEditSettings.Increment = 0
+        SpinEditSettings.Value = 0
+        MaskEditSettings.MaxLength = 0
+        ProcuraSTSettings.Subtipo = stFornecedor
+        ProcuraSTSettings.CampoEdit = ceRazaoSocial
+        ProcuraSTSettings.FiltraSubTipo = True
+        ProcuraFCSettings.Status = fcAll
+        ProcuraFCSettings.CampoEdit = ceRazaoSocial
+        ProcuraFCSettings.MostraEndereco = False
+        ProcuraFCSettings.ForCli = fcFornecedor
+        ProcuraCCSettings.Plano = 0
+        ProcuraCCSettings.Status = scSoAtiva
+        ProcuraCCSettings.AceitaTipoConta = Indiferente
+        Width = 0
+      end
+      item
+        Caption = 'DATAFINAL'
+        Controle = tcEdit
+        TipodeDado = tdString
+        LookupSettings.SQL.Strings = ()
+        LookupSettings.Tamanho = '0'
+        CheckBoxSetings.ValueChecked = 'True'
+        CheckBoxSetings.ValueUnChecked = 'False'
+        CheckBoxSetings.Checked = True
+        RadioGroupSettings.Items.Strings = ()
+        RadioGroupSettings.Values.Strings = ()
+        RadioGroupSettings.Columns = 1
+        RadioGroupSettings.ItemIndex = -1
+        RadioGroupSettings.Height = 40
+        ComboBoxSettings.Sorted = False
+        ComboBoxSettings.Style = csDropDownList
+        ComboBoxSettings.Items.Strings = ()
+        ComboBoxSettings.DropDownCount = 8
+        ComboBoxSettings.ItemIndex = -1
+        ListBoxSettings.Items.Strings = ()
+        ListBoxSettings.MultiSelect = False
+        ListBoxSettings.ExtendedSelect = False
+        ListBoxSettings.Sorted = False
+        ListBoxSettings.Style = lbStandard
+        ListBoxSettings.height = 70
+        MostraComboCompara = True
+        Required = False
+        EditSettings.Color = clWindow
+        EditSettings.Readonly = False
+        EditSettings.Font.Charset = DEFAULT_CHARSET
+        EditSettings.Font.Color = clWindowText
+        EditSettings.Font.Height = -11
+        EditSettings.Font.Name = 'MS Sans Serif'
+        EditSettings.Font.Style = [fsBold]
+        SpinEditSettings.MaxValue = 0
+        SpinEditSettings.MinValue = 0
+        SpinEditSettings.Increment = 0
+        SpinEditSettings.Value = 0
+        MaskEditSettings.MaxLength = 0
+        ProcuraSTSettings.Subtipo = stFornecedor
+        ProcuraSTSettings.CampoEdit = ceRazaoSocial
+        ProcuraSTSettings.FiltraSubTipo = True
+        ProcuraFCSettings.Status = fcAll
+        ProcuraFCSettings.CampoEdit = ceRazaoSocial
+        ProcuraFCSettings.MostraEndereco = False
+        ProcuraFCSettings.ForCli = fcFornecedor
+        ProcuraCCSettings.Plano = 0
+        ProcuraCCSettings.Status = scSoAtiva
+        ProcuraCCSettings.AceitaTipoConta = Indiferente
+        Width = 0
+      end>
+    Left = 164
+  end
+  inherited CrmRptCM: TCmRptManager
+    BeforePrint = CrmRptCMBeforePrint
+    Report = rptMovConta
+  end
+  object SqlMovConta: TCMSqlParams
+    SQL.Strings = (
+      'select ca.NOME AS ATIVO       ,'
+      '       cp.NOME AS CONTA       ,'
+      '       er.DTREF               ,       '
+      '       tm.NOME as NOMEMOVIM   ,'
+      '       rt.NOME as NOMEROTEIRO ,'
+      '       rm.VALOR as QTDECOTAS  ,'
+      '       vc.VALOR as VALORCOTA  ,'
+      '       ( rm.VALOR * vc.VALOR ) as VALORMOV'
+      'from   CPROTAPRMOV  rm ,'
+      '       CPROTAPURADO ra ,'
+      '       CPEXECROT    er ,'
+      '       CPVALORCOTA  vc ,'
+      '       CPROTEIRO    rt ,'
+      '       CPTIPOMOVIM  tm, '
+      '       CPCONTA      cp, '
+      '       CPATIVO      ca       '
+      'where  (1=2)')
+    ClientDataSet = cdsMovConta
+    Left = 64
+    Top = 192
+  end
+  object cdsMovConta: TCMClientDataSet
+    Aggregates = <>
+    Params = <>
+    Left = 64
+    Top = 136
+  end
+  object DsMovConta: TwwDataSource
+    DataSet = cdsMovConta
+    Left = 65
+    Top = 82
+  end
+  object ppBDEMovConta: TppBDEPipeline
+    DataSource = DsMovConta
+    UserName = 'BDEMovConta'
+    Left = 280
+    Top = 80
+    object ppBDEMovContappField1: TppField
+      FieldAlias = 'ATIVO'
+      FieldName = 'ATIVO'
+      FieldLength = 0
+      DataType = dtNotKnown
+      DisplayWidth = 0
+      Position = 0
+      Searchable = False
+      Sortable = False
+    end
+    object ppBDEMovContappField2: TppField
+      FieldAlias = 'CONTA'
+      FieldName = 'CONTA'
+      FieldLength = 0
+      DataType = dtNotKnown
+      DisplayWidth = 0
+      Position = 1
+      Searchable = False
+      Sortable = False
+    end
+    object ppBDEMovContappField3: TppField
+      FieldAlias = 'DTREF'
+      FieldName = 'DTREF'
+      FieldLength = 0
+      DataType = dtNotKnown
+      DisplayWidth = 0
+      Position = 2
+      Searchable = False
+      Sortable = False
+    end
+    object ppBDEMovContappField4: TppField
+      FieldAlias = 'NOMEMOVIM'
+      FieldName = 'NOMEMOVIM'
+      FieldLength = 0
+      DataType = dtNotKnown
+      DisplayWidth = 0
+      Position = 3
+      Searchable = False
+      Sortable = False
+    end
+    object ppBDEMovContappField5: TppField
+      FieldAlias = 'NOMEROTEIRO'
+      FieldName = 'NOMEROTEIRO'
+      FieldLength = 0
+      DataType = dtNotKnown
+      DisplayWidth = 0
+      Position = 4
+      Searchable = False
+      Sortable = False
+    end
+    object ppBDEMovContappField6: TppField
+      FieldAlias = 'QTDECOTAS'
+      FieldName = 'QTDECOTAS'
+      FieldLength = 0
+      DataType = dtNotKnown
+      DisplayWidth = 0
+      Position = 5
+      Searchable = False
+      Sortable = False
+    end
+    object ppBDEMovContappField7: TppField
+      FieldAlias = 'VALORCOTA'
+      FieldName = 'VALORCOTA'
+      FieldLength = 0
+      DataType = dtNotKnown
+      DisplayWidth = 0
+      Position = 6
+      Searchable = False
+      Sortable = False
+    end
+    object ppBDEMovContappField8: TppField
+      FieldAlias = 'VALORMOV'
+      FieldName = 'VALORMOV'
+      FieldLength = 0
+      DataType = dtNotKnown
+      DisplayWidth = 0
+      Position = 7
+      Searchable = False
+      Sortable = False
+    end
+  end
+  object rptMovConta: TppReport
+    AutoStop = False
+    DataPipeline = ppBDEMovConta
+    PassSetting = psTwoPass
+    PrinterSetup.BinName = 'Default'
+    PrinterSetup.DocumentName = 'Report'
+    PrinterSetup.Orientation = poLandscape
+    PrinterSetup.PaperName = 'A4'
+    PrinterSetup.PrinterName = 'Default'
+    PrinterSetup.mmMarginBottom = 6350
+    PrinterSetup.mmMarginLeft = 6350
+    PrinterSetup.mmMarginRight = 6350
+    PrinterSetup.mmMarginTop = 6350
+    PrinterSetup.mmPaperHeight = 210000
+    PrinterSetup.mmPaperWidth = 297000
+    PrinterSetup.PaperSize = 9
+    Template.SaveTo = stDatabase
+    Units = utMillimeters
+    DeviceType = 'Screen'
+    OutlineSettings.CreateNode = True
+    OutlineSettings.CreatePageNodes = True
+    OutlineSettings.Enabled = True
+    OutlineSettings.Visible = True
+    TextSearchSettings.DefaultString = '<FindText>'
+    TextSearchSettings.Enabled = True
+    Left = 280
+    Top = 16
+    Version = '7.04'
+    mmColumnWidth = 0
+    DataPipelineName = 'ppBDEMovConta'
+    object ppHeaderBand1: TppHeaderBand
+      mmBottomOffset = 0
+      mmHeight = 31485
+      mmPrintPosition = 0
+      object ppLabel1: TppLabel
+        UserName = 'Label1'
+        Caption = 'MOVIMENTAÇÕES POR CONTA'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 14
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 5821
+        mmLeft = 94192
+        mmTop = 1323
+        mmWidth = 80698
+        BandType = 0
+      end
+      object LblPosiForn: TppLabel
+        UserName = 'LblPosiForn'
+        Caption = 'Período do movimento: 01/06/1999 a 01/07/1999'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 9
+        Font.Style = [fsBold]
+        TextAlignment = taCentered
+        Transparent = True
+        mmHeight = 3810
+        mmLeft = 98028
+        mmTop = 10583
+        mmWidth = 71967
+        BandType = 0
+      end
+      object ppLabel2: TppLabel
+        UserName = 'Label2'
+        Caption = 'Tipo Movimentação:'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 10
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 4233
+        mmLeft = 7673
+        mmTop = 27252
+        mmWidth = 34131
+        BandType = 0
+      end
+      object ppLabel3: TppLabel
+        UserName = 'Label3'
+        Caption = 'Ativo:'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 10
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 4233
+        mmLeft = 5821
+        mmTop = 21167
+        mmWidth = 9790
+        BandType = 0
+      end
+      object ppDBText2: TppDBText
+        UserName = 'DBText2'
+        AutoSize = True
+        DataField = 'ATIVO'
+        DataPipeline = ppBDEMovConta
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 10
+        Font.Style = []
+        Transparent = True
+        DataPipelineName = 'ppBDEMovConta'
+        mmHeight = 4022
+        mmLeft = 18785
+        mmTop = 21696
+        mmWidth = 10583
+        BandType = 0
+      end
+      object ppDBText3: TppDBText
+        UserName = 'DBText3'
+        DataField = 'NOMEMOVIM'
+        DataPipeline = ppBDEMovConta
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 10
+        Font.Style = []
+        Transparent = True
+        DataPipelineName = 'ppBDEMovConta'
+        mmHeight = 3969
+        mmLeft = 44715
+        mmTop = 27252
+        mmWidth = 42863
+        BandType = 0
+      end
+      object ppLine3: TppLine
+        UserName = 'Line3'
+        Weight = 0.75
+        mmHeight = 3969
+        mmLeft = 5292
+        mmTop = 8467
+        mmWidth = 269346
+        BandType = 0
+      end
+    end
+    object ppDetailBand1: TppDetailBand
+      mmBottomOffset = 0
+      mmHeight = 4498
+      mmPrintPosition = 0
+      object ppDBText4: TppDBText
+        UserName = 'DBText4'
+        DataField = 'DTREF'
+        DataPipeline = ppBDEMovConta
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 9
+        Font.Style = []
+        TextAlignment = taCentered
+        Transparent = True
+        DataPipelineName = 'ppBDEMovConta'
+        mmHeight = 3704
+        mmLeft = 17992
+        mmTop = 794
+        mmWidth = 30956
+        BandType = 4
+      end
+      object ppDBText6: TppDBText
+        UserName = 'DBText6'
+        DataField = 'NOMEROTEIRO'
+        DataPipeline = ppBDEMovConta
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 9
+        Font.Style = []
+        Transparent = True
+        DataPipelineName = 'ppBDEMovConta'
+        mmHeight = 3704
+        mmLeft = 114300
+        mmTop = 529
+        mmWidth = 63500
+        BandType = 4
+      end
+      object ppDBText7: TppDBText
+        UserName = 'DBText7'
+        DataField = 'QTDECOTAS'
+        DataPipeline = ppBDEMovConta
+        DisplayFormat = '#,0.00;(#,0.00)'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 9
+        Font.Style = []
+        TextAlignment = taCentered
+        Transparent = True
+        DataPipelineName = 'ppBDEMovConta'
+        mmHeight = 3598
+        mmLeft = 179652
+        mmTop = 529
+        mmWidth = 49477
+        BandType = 4
+      end
+      object ppDBText8: TppDBText
+        UserName = 'DBText8'
+        DataField = 'VALORMOV'
+        DataPipeline = ppBDEMovConta
+        DisplayFormat = '#,0.00;(#,0.00)'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 9
+        Font.Style = []
+        TextAlignment = taCentered
+        Transparent = True
+        DataPipelineName = 'ppBDEMovConta'
+        mmHeight = 3598
+        mmLeft = 232834
+        mmTop = 0
+        mmWidth = 40746
+        BandType = 4
+      end
+      object ppDBText5: TppDBText
+        UserName = 'DBText5'
+        DataField = 'NOMEMOVIM'
+        DataPipeline = ppBDEMovConta
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 9
+        Font.Style = []
+        Transparent = True
+        DataPipelineName = 'ppBDEMovConta'
+        mmHeight = 3704
+        mmLeft = 51329
+        mmTop = 529
+        mmWidth = 60590
+        BandType = 4
+      end
+    end
+    object ppFooterBand1: TppFooterBand
+      mmBottomOffset = 0
+      mmHeight = 7938
+      mmPrintPosition = 0
+      object ppCalc4: TppSystemVariable
+        UserName = 'Calc4'
+        VarType = vtDateTime
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        TextAlignment = taRightJustified
+        Transparent = True
+        mmHeight = 3704
+        mmLeft = 248444
+        mmTop = 2646
+        mmWidth = 26194
+        BandType = 8
+      end
+      object ppSystemVariable1: TppSystemVariable
+        UserName = 'SystemVariable1'
+        VarType = vtPageSetDesc
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 3440
+        mmLeft = 130440
+        mmTop = 2117
+        mmWidth = 20108
+        BandType = 8
+      end
+      object ppLabel123: TppLabel
+        UserName = 'ppLabel123'
+        Caption = 'Acompanhamento de Cotas e Fundos Patrimoniais'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 3387
+        mmLeft = 5821
+        mmTop = 2646
+        mmWidth = 68622
+        BandType = 8
+      end
+    end
+    object ppSummaryBand1: TppSummaryBand
+      mmBottomOffset = 0
+      mmHeight = 9260
+      mmPrintPosition = 0
+      object ppLabel12: TppLabel
+        UserName = 'Label11'
+        Caption = 'Total'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 10
+        Font.Style = [fsBold]
+        TextAlignment = taCentered
+        Transparent = True
+        mmHeight = 4191
+        mmLeft = 164042
+        mmTop = 4498
+        mmWidth = 8467
+        BandType = 7
+      end
+      object ppDBCalc3: TppDBCalc
+        UserName = 'DBCalc3'
+        DataField = 'QTDECOTAS'
+        DataPipeline = ppBDEMovConta
+        DisplayFormat = '#,0.00;(#,0.00)'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 10
+        Font.Style = [fsBold]
+        TextAlignment = taCentered
+        Transparent = True
+        DataPipelineName = 'ppBDEMovConta'
+        mmHeight = 4233
+        mmLeft = 175684
+        mmTop = 4233
+        mmWidth = 50271
+        BandType = 7
+      end
+      object ppDBCalc4: TppDBCalc
+        UserName = 'DBCalc4'
+        DataField = 'VALORMOV'
+        DataPipeline = ppBDEMovConta
+        DisplayFormat = '#,0.00;(#,0.00)'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 10
+        Font.Style = [fsBold]
+        TextAlignment = taCentered
+        Transparent = True
+        DataPipelineName = 'ppBDEMovConta'
+        mmHeight = 4233
+        mmLeft = 234421
+        mmTop = 4498
+        mmWidth = 40481
+        BandType = 7
+      end
+    end
+    object ppGroup1: TppGroup
+      BreakName = 'CONTA'
+      DataPipeline = ppBDEMovConta
+      OutlineSettings.CreateNode = True
+      UserName = 'Group1'
+      mmNewColumnThreshold = 0
+      mmNewPageThreshold = 0
+      DataPipelineName = 'ppBDEMovConta'
+      object ppGroupHeaderBand1: TppGroupHeaderBand
+        mmBottomOffset = 0
+        mmHeight = 13758
+        mmPrintPosition = 0
+        object ppDBText1: TppDBText
+          UserName = 'DBText1'
+          DataField = 'CONTA'
+          DataPipeline = ppBDEMovConta
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Name = 'Arial'
+          Font.Size = 10
+          Font.Style = []
+          Transparent = True
+          DataPipelineName = 'ppBDEMovConta'
+          mmHeight = 3969
+          mmLeft = 25135
+          mmTop = 1852
+          mmWidth = 34131
+          BandType = 3
+          GroupNo = 0
+        end
+        object ppLabel4: TppLabel
+          UserName = 'Label4'
+          Caption = 'Conta:'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Name = 'Arial'
+          Font.Size = 10
+          Font.Style = [fsBold]
+          Transparent = True
+          mmHeight = 4233
+          mmLeft = 12965
+          mmTop = 1852
+          mmWidth = 11113
+          BandType = 3
+          GroupNo = 0
+        end
+        object ppLabel5: TppLabel
+          UserName = 'Label5'
+          Caption = 'Data Movimentação'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Name = 'Arial'
+          Font.Size = 9
+          Font.Style = [fsBold]
+          TextAlignment = taCentered
+          Transparent = True
+          mmHeight = 3810
+          mmLeft = 17992
+          mmTop = 8731
+          mmWidth = 29930
+          BandType = 3
+          GroupNo = 0
+        end
+        object ppLabel6: TppLabel
+          UserName = 'Label6'
+          Caption = 'Tipo Movimentação'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Name = 'Arial'
+          Font.Size = 9
+          Font.Style = [fsBold]
+          Transparent = True
+          mmHeight = 3704
+          mmLeft = 50800
+          mmTop = 8996
+          mmWidth = 60590
+          BandType = 3
+          GroupNo = 0
+        end
+        object ppLabel7: TppLabel
+          UserName = 'Label7'
+          Caption = 'Roteiro'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Name = 'Arial'
+          Font.Size = 9
+          Font.Style = [fsBold]
+          Transparent = True
+          mmHeight = 3704
+          mmLeft = 113771
+          mmTop = 8731
+          mmWidth = 11113
+          BandType = 3
+          GroupNo = 0
+        end
+        object ppLabel8: TppLabel
+          UserName = 'Label8'
+          Caption = 'Qtde Cotas'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Name = 'Arial'
+          Font.Size = 9
+          Font.Style = [fsBold]
+          TextAlignment = taCentered
+          Transparent = True
+          mmHeight = 3704
+          mmLeft = 179388
+          mmTop = 8731
+          mmWidth = 50006
+          BandType = 3
+          GroupNo = 0
+        end
+        object ppLabel10: TppLabel
+          UserName = 'Label10'
+          Caption = 'Valor Movimentado'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Name = 'Arial'
+          Font.Size = 9
+          Font.Style = [fsBold]
+          TextAlignment = taCentered
+          Transparent = True
+          mmHeight = 3704
+          mmLeft = 232305
+          mmTop = 8731
+          mmWidth = 41275
+          BandType = 3
+          GroupNo = 0
+        end
+        object ppLine1: TppLine
+          UserName = 'Line1'
+          Weight = 0.75
+          mmHeight = 265
+          mmLeft = 17727
+          mmTop = 13493
+          mmWidth = 255853
+          BandType = 3
+          GroupNo = 0
+        end
+      end
+      object ppGroupFooterBand1: TppGroupFooterBand
+        mmBottomOffset = 0
+        mmHeight = 7673
+        mmPrintPosition = 0
+        object ppLabel9: TppLabel
+          UserName = 'Label9'
+          Caption = 'SubTotal'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Name = 'Arial'
+          Font.Size = 9
+          Font.Style = [fsBold]
+          Transparent = True
+          mmHeight = 3810
+          mmLeft = 157163
+          mmTop = 2117
+          mmWidth = 13631
+          BandType = 5
+          GroupNo = 0
+        end
+        object ppDBCalc1: TppDBCalc
+          UserName = 'DBCalc1'
+          DataField = 'QTDECOTAS'
+          DataPipeline = ppBDEMovConta
+          DisplayFormat = '#,0.00;(#,0.00)'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Name = 'Arial'
+          Font.Size = 9
+          Font.Style = [fsBold]
+          ResetGroup = ppGroup1
+          TextAlignment = taCentered
+          Transparent = True
+          DataPipelineName = 'ppBDEMovConta'
+          mmHeight = 3810
+          mmLeft = 179388
+          mmTop = 1852
+          mmWidth = 50271
+          BandType = 5
+          GroupNo = 0
+        end
+        object ppDBCalc2: TppDBCalc
+          UserName = 'DBCalc2'
+          DataField = 'VALORMOV'
+          DataPipeline = ppBDEMovConta
+          DisplayFormat = '#,0.00;(#,0.00)'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Name = 'Arial'
+          Font.Size = 9
+          Font.Style = [fsBold]
+          ResetGroup = ppGroup1
+          TextAlignment = taCentered
+          Transparent = True
+          DataPipelineName = 'ppBDEMovConta'
+          mmHeight = 3810
+          mmLeft = 232569
+          mmTop = 1323
+          mmWidth = 41540
+          BandType = 5
+          GroupNo = 0
+        end
+        object ppLine2: TppLine
+          UserName = 'Line2'
+          Weight = 0.75
+          mmHeight = 1058
+          mmLeft = 17727
+          mmTop = 265
+          mmWidth = 255853
+          BandType = 5
+          GroupNo = 0
+        end
+      end
+    end
+  end
+end

@@ -1,0 +1,172 @@
+unit fCadTipoDocPessoaMT;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  FCadastroMT, StdCtrls, ExtCtrls, DBCtrls, wwdblook, Mask, wwdbedit,
+  MontaSelect, Db, DBClient, uCMClientDataSet, CmEventosCadastro, ImgList,
+  Wwdatsrc, IvDictio, IvMulti, IvEMulti, MAHlpBtn, Buttons, TB97Tlbr,
+  TB97Ctls, TB97, uCtrlTipoDocPessoa;
+
+type
+  TFrmCadTipoDocPessoaMT = class(TFrmCadastroMT)
+    Label3: TLabel;
+    Panel1: TPanel;
+    Label1: TLabel;
+    Label2: TLabel;
+    dbedNomeDoc: TwwDBEdit;
+    dbedMascara: TwwDBEdit;
+    Panel2: TPanel;
+    dbchkIdent: TDBCheckBox;
+    dbchkObUF: TDBCheckBox;
+    dbchkOrgao: TDBCheckBox;
+    dbchkdtemis: TDBCheckBox;
+    DBCheckBox1: TDBCheckBox;
+    wwDBLookupCombo1: TwwDBLookupCombo;
+    dbRdAplica: TDBRadioGroup;
+    CdsRegra: TCMClientDataSet;
+    procedure FormCreate(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure CmeCadastroFind(Sender: TObject);
+    procedure CmeCadastroApplyDelete(sender: TObject; var Accept: Boolean);
+    procedure CmeCadastroApplyEdit(sender: TObject; var Accept: Boolean);
+    procedure CmeCadastroApplyInsert(sender: TObject; var Accept: Boolean);
+    procedure CmeCadastroBeforeConfirma(sender: TObject;
+      var Accept: Boolean);
+    procedure CmeCadastroEdit(Sender: TObject);
+    procedure CmeCadastroInsert(Sender: TObject);
+    procedure dbedMascaraKeyPress(Sender: TObject; var Key: Char);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+    TipoDocPessoa: TCtrlTipoDocPessoa;
+    procedure Seleciona( IdTipoDocPessoa: Double = 0 );
+  end;
+
+var
+  FrmCadTipoDocPessoaMT: TFrmCadTipoDocPessoaMT;
+
+implementation
+
+{$R *.DFM}
+
+Uses uMensErro, dBasedados, uSistema, uMidasUtil;
+
+procedure TFrmCadTipoDocPessoaMT.Seleciona( IdTipoDocPessoa: Double );
+begin
+  cds.Data := TipoDocPessoa.ListaTipoDocPessoa( IdTipoDocPessoa );
+end;
+
+procedure TFrmCadTipoDocPessoaMT.FormCreate(Sender: TObject);
+begin
+  inherited;
+  TipoDocPessoa := TCtrlTipoDocPessoa.Create;
+  TipoDocPessoa.Initialize( DtmBaseDados.dbBaseDados, True, Sistema.ConnectionType,
+                            Sistema.ConnectionSide, Sistema.AppRemoteServer, True );
+  TipoDocPessoa.cds := cds;
+  Seleciona( -1 );
+  CdsRegra.Data := TipoDocPessoa.GetDataPacket( 'SELECT IDREGRA, NOMEREGRA FROM REGRA' );
+end;
+
+procedure TFrmCadTipoDocPessoaMT.FormClose(Sender: TObject;
+  var Action: TCloseAction);
+begin
+  inherited;
+  TipoDocPessoa.Free;
+end;
+
+procedure TFrmCadTipoDocPessoaMT.CmeCadastroFind(Sender: TObject);
+begin
+  inherited;
+  IF MontaSelect.RetornouValor Then
+     Seleciona( StrToFloat( MontaSelect.ValoresChave[ 0 ] ) );
+end;
+
+procedure TFrmCadTipoDocPessoaMT.CmeCadastroApplyDelete(sender: TObject;
+  var Accept: Boolean);
+begin
+  inherited;
+  cds.DisableControls;
+  Accept := TipoDocPessoa.Gravar;
+  cds.EnableControls;
+end;
+
+procedure TFrmCadTipoDocPessoaMT.CmeCadastroApplyEdit(sender: TObject;
+  var Accept: Boolean);
+begin
+  inherited;
+  cds.DisableControls;
+  Accept := TipoDocPessoa.Gravar;
+  cds.EnableControls;
+end;
+
+procedure TFrmCadTipoDocPessoaMT.CmeCadastroApplyInsert(sender: TObject;
+  var Accept: Boolean);
+begin
+  inherited;
+  cds.DisableControls;
+  Accept := TipoDocPessoa.Gravar;
+  cds.EnableControls;
+end;
+
+procedure TFrmCadTipoDocPessoaMT.CmeCadastroBeforeConfirma(sender: TObject;
+  var Accept: Boolean);
+begin
+  inherited;
+  Accept := ( dbedNomeDoc.text <> '' );
+
+  If Not Accept Then
+     MsgDlg( 'Preencha Nome do Documento', LerMensagem(2), mtWarning, [mbOk], 0 );
+end;
+
+procedure TFrmCadTipoDocPessoaMT.CmeCadastroEdit(Sender: TObject);
+begin
+  inherited;
+  dbedNomeDoc.SetFocus;
+
+  If cds.FieldByName( 'FLGOBRIGAVALIDADE' ).IsNull Then
+     cds.FieldByName( 'FLGOBRIGAVALIDADE' ).AsString  := 'N';
+end;
+
+procedure TFrmCadTipoDocPessoaMT.CmeCadastroInsert(Sender: TObject);
+begin
+  inherited;
+  With cds Do Begin
+       FieldByName( 'DOCCHAVE' ).AsString       := 'N';
+       FieldByName( 'OBRIGAUF' ).AsString       := 'N';
+       FieldByName( 'OBRIGAORGAO' ).AsString    := 'N';
+       FieldByName( 'OBRIGAEMISSAO' ).AsString  := 'N';
+       FieldByName( 'FISICAJURIDICA' ).AsString := 'F';
+       FieldByName( 'FLGOBRIGAVALIDADE' ).AsString  := 'N';
+  End;
+  
+  dbedNomeDoc.SetFocus;
+end;
+
+procedure TFrmCadTipoDocPessoaMT.dbedMascaraKeyPress(Sender: TObject;
+  var Key: Char);
+begin
+  inherited;
+  If  ( ( key = '.' ) and ( Copy( dbedMascara.Text, Length( dbedMascara.Text ), 1 ) = '.' ) ) Or
+          ( ( key = '-' ) and ( Copy( dbedMascara.Text, Length( dbedMascara.Text ), 1 ) = '-' ) ) Or
+          ( ( key = '/' ) and ( Copy( dbedMascara.Text, Length( dbedMascara.Text ), 1 ) = '/' ) ) Then Begin
+      MessageBeep(0);
+      ShowMessage('Máscara Inválida');
+      key := #0;
+  End Else
+  If Not ( key In [ ' ', '9', '.', '#', '-', '/', #8 ] ) Then Begin
+     MessageBeep(0);
+     ShowMessage('Máscara Inválida');
+     key := #0;
+     Exit;
+  End Else
+  If ( Not ( key In [ '9', '#' ] ) ) and ( Length( dbedMascara.Text ) = 0 ) Then Begin
+     MessageBeep(0);
+     ShowMessage('Máscara Inválida');
+     key := #0;
+  end;
+end;
+
+end.

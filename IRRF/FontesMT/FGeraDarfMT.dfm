@@ -1,0 +1,719 @@
+inherited frmGeraDarfMT: TfrmGeraDarfMT
+  Left = 263
+  Top = 181
+  HelpContext = 240013
+  Caption = 'Geração do Darf'
+  ClientHeight = 456
+  ClientWidth = 736
+  PixelsPerInch = 96
+  TextHeight = 13
+  inherited pnlFundo: TPanel
+    Width = 736
+    Height = 417
+    object pcDados: TPageControl
+      Left = 1
+      Top = 1
+      Width = 734
+      Height = 160
+      ActivePage = tbsDados1
+      Align = alTop
+      TabOrder = 0
+      object tbsDados1: TTabSheet
+        Caption = 'Dados para Geração'
+        object plnDados: TPanel
+          Left = 0
+          Top = 0
+          Width = 726
+          Height = 132
+          Align = alClient
+          BevelOuter = bvNone
+          TabOrder = 0
+          object lblNatureza: TLabel
+            Left = 456
+            Top = 2
+            Width = 141
+            Height = 13
+            Caption = 'Natureza do Rendimento'
+          end
+          object btnTodas: TSpeedButton
+            Left = 486
+            Top = 107
+            Width = 121
+            Height = 26
+            Hint = 'Marca todas as autorizações'
+            AllowAllUp = True
+            Caption = 'Marcar todas'
+            Glyph.Data = {
+              76010000424D7601000000000000760000002800000020000000100000000100
+              0400000000000001000000000000000000001000000010000000000000000000
+              80000080000000808000800000008000800080800000C0C0C000808080000000
+              FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00333333333333
+              3333333333333333333333333333333333333333333333333333333333300000
+              0003333333388888888333333330FF9FFF0333333338FF7FFF8333333000F999
+              FF0333333888F777FF83333330F099F99F03333338F877F77F83333000F09FFF
+              9903333888F87FFF77833330F090FFFFF9933338F878FFFFF7733000F0900000
+              00993888F8788888887730F090FFFFF9933338F878FFFFF7733330F090000000
+              993338F87888888877333090FFFFF99333333878FFFFF7733333309000000099
+              3333387888888877333330FFFFF99333333338FFFFF773333333300000009933
+              3333388888887733333333333333333333333333333333333333}
+            NumGlyphs = 2
+            ParentShowHint = False
+            ShowHint = True
+            OnClick = btnTodasClick
+          end
+          object btnInverter: TSpeedButton
+            Left = 606
+            Top = 107
+            Width = 121
+            Height = 26
+            Hint = 'Desmarca todas as autorizações'
+            AllowAllUp = True
+            Caption = 'Inverter seleção'
+            Glyph.Data = {
+              76010000424D7601000000000000760000002800000020000000100000000100
+              0400000000000001000000000000000000001000000010000000000000000000
+              80000080000000808000800000008000800080800000C0C0C000808080000000
+              FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00333333333333
+              3333333333333333333333333333000000003333333388888888333333330FFF
+              FFF0333333338FFFFFF8333000330FFFFFF0333788338FFFFFF8333033330FFF
+              FFF0333833338FFFFFF8330003330FFFFFF0337783338FFFFFF8333033330FFF
+              FFF0333833338FFFFFF833333333000000003333333388888888000000003333
+              333388888888333333330FF9FFF0333303338FF7FFF8333383330F999FF03330
+              00338F777FF833387733099F99F033330333877F77F83333833309FFF9903300
+              033387FFF778338873330FFFFF99333333338FFFFF7733333333000000099333
+              3333888888877333333333333333333333333333333333333333}
+            NumGlyphs = 2
+            ParentShowHint = False
+            ShowHint = True
+            OnClick = btnInverterClick
+          end
+          object Label1: TLabel
+            Left = 456
+            Top = 42
+            Width = 103
+            Height = 13
+            Caption = 'Módulo de Origem'
+          end
+          object gbPeriodoApu: TGroupBox
+            Left = 184
+            Top = 8
+            Width = 257
+            Height = 69
+            Caption = 'Período de Apuração'
+            TabOrder = 1
+            object lblDataIni: TLabel
+              Left = 16
+              Top = 22
+              Width = 66
+              Height = 13
+              Caption = 'Data Inicial'
+            end
+            object lblDataFim: TLabel
+              Left = 136
+              Top = 22
+              Width = 59
+              Height = 13
+              Caption = 'Data Final'
+            end
+            object deDataIni: TCMDateTimePicker
+              Left = 16
+              Top = 36
+              Width = 105
+              Height = 21
+              CalendarAttributes.Font.Charset = DEFAULT_CHARSET
+              CalendarAttributes.Font.Color = clWindowText
+              CalendarAttributes.Font.Height = -11
+              CalendarAttributes.Font.Name = 'MS Sans Serif'
+              CalendarAttributes.Font.Style = []
+              ButtonStyle = cbsCustom
+              Epoch = 1950
+              ButtonGlyph.Data = {
+                06050000424D06050000000000003604000028000000100000000D0000000100
+                080000000000D000000000000000000000000001000000000000000000000000
+                80000080000000808000800000008000800080800000C0C0C000C0DCC000F0CA
+                A6000020400000206000002080000020A0000020C0000020E000004000000040
+                20000040400000406000004080000040A0000040C0000040E000006000000060
+                20000060400000606000006080000060A0000060C0000060E000008000000080
+                20000080400000806000008080000080A0000080C0000080E00000A0000000A0
+                200000A0400000A0600000A0800000A0A00000A0C00000A0E00000C0000000C0
+                200000C0400000C0600000C0800000C0A00000C0C00000C0E00000E0000000E0
+                200000E0400000E0600000E0800000E0A00000E0C00000E0E000400000004000
+                20004000400040006000400080004000A0004000C0004000E000402000004020
+                20004020400040206000402080004020A0004020C0004020E000404000004040
+                20004040400040406000404080004040A0004040C0004040E000406000004060
+                20004060400040606000406080004060A0004060C0004060E000408000004080
+                20004080400040806000408080004080A0004080C0004080E00040A0000040A0
+                200040A0400040A0600040A0800040A0A00040A0C00040A0E00040C0000040C0
+                200040C0400040C0600040C0800040C0A00040C0C00040C0E00040E0000040E0
+                200040E0400040E0600040E0800040E0A00040E0C00040E0E000800000008000
+                20008000400080006000800080008000A0008000C0008000E000802000008020
+                20008020400080206000802080008020A0008020C0008020E000804000008040
+                20008040400080406000804080008040A0008040C0008040E000806000008060
+                20008060400080606000806080008060A0008060C0008060E000808000008080
+                20008080400080806000808080008080A0008080C0008080E00080A0000080A0
+                200080A0400080A0600080A0800080A0A00080A0C00080A0E00080C0000080C0
+                200080C0400080C0600080C0800080C0A00080C0C00080C0E00080E0000080E0
+                200080E0400080E0600080E0800080E0A00080E0C00080E0E000C0000000C000
+                2000C0004000C0006000C0008000C000A000C000C000C000E000C0200000C020
+                2000C0204000C0206000C0208000C020A000C020C000C020E000C0400000C040
+                2000C0404000C0406000C0408000C040A000C040C000C040E000C0600000C060
+                2000C0604000C0606000C0608000C060A000C060C000C060E000C0800000C080
+                2000C0804000C0806000C0808000C080A000C080C000C080E000C0A00000C0A0
+                2000C0A04000C0A06000C0A08000C0A0A000C0A0C000C0A0E000C0C00000C0C0
+                2000C0C04000C0C06000C0C08000C0C0A000F0FBFF00A4A0A000808080000000
+                FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00010000000000
+                000000000000000000FFFF00FFFFFFFFFFFFFFFFFFFFFFFF00FFFF00FF07A407
+                A407A4F9A407A4FF00FFFF00FFA407A407A4F9A4F9A407FF00FFFF00FF07A407
+                A407A4F9A407A4FF00FFFF00FFA407A407A407A407A407FF00FFFF00FF07A407
+                A407A407A407A4FF00FFFF00FFA407A407A407A407A407FF00FFFF00FFFFFFFF
+                FFFFFFFFFFFFFFFF00FFFF00FF04FC04FC04FCA4A4A4A4FF00FFFF00FFFC04FC
+                04FC04A4A4A4A4FF00FFFF00FFFFFFFFFFFFFFFFFFFFFFFF00FFFF0000000000
+                000000000000000000FF}
+              ShowButton = True
+              TabOrder = 0
+            end
+            object deDataFim: TCMDateTimePicker
+              Left = 136
+              Top = 36
+              Width = 105
+              Height = 21
+              CalendarAttributes.Font.Charset = DEFAULT_CHARSET
+              CalendarAttributes.Font.Color = clWindowText
+              CalendarAttributes.Font.Height = -11
+              CalendarAttributes.Font.Name = 'MS Sans Serif'
+              CalendarAttributes.Font.Style = []
+              ButtonStyle = cbsCustom
+              Epoch = 1950
+              ButtonGlyph.Data = {
+                06050000424D06050000000000003604000028000000100000000D0000000100
+                080000000000D000000000000000000000000001000000000000000000000000
+                80000080000000808000800000008000800080800000C0C0C000C0DCC000F0CA
+                A6000020400000206000002080000020A0000020C0000020E000004000000040
+                20000040400000406000004080000040A0000040C0000040E000006000000060
+                20000060400000606000006080000060A0000060C0000060E000008000000080
+                20000080400000806000008080000080A0000080C0000080E00000A0000000A0
+                200000A0400000A0600000A0800000A0A00000A0C00000A0E00000C0000000C0
+                200000C0400000C0600000C0800000C0A00000C0C00000C0E00000E0000000E0
+                200000E0400000E0600000E0800000E0A00000E0C00000E0E000400000004000
+                20004000400040006000400080004000A0004000C0004000E000402000004020
+                20004020400040206000402080004020A0004020C0004020E000404000004040
+                20004040400040406000404080004040A0004040C0004040E000406000004060
+                20004060400040606000406080004060A0004060C0004060E000408000004080
+                20004080400040806000408080004080A0004080C0004080E00040A0000040A0
+                200040A0400040A0600040A0800040A0A00040A0C00040A0E00040C0000040C0
+                200040C0400040C0600040C0800040C0A00040C0C00040C0E00040E0000040E0
+                200040E0400040E0600040E0800040E0A00040E0C00040E0E000800000008000
+                20008000400080006000800080008000A0008000C0008000E000802000008020
+                20008020400080206000802080008020A0008020C0008020E000804000008040
+                20008040400080406000804080008040A0008040C0008040E000806000008060
+                20008060400080606000806080008060A0008060C0008060E000808000008080
+                20008080400080806000808080008080A0008080C0008080E00080A0000080A0
+                200080A0400080A0600080A0800080A0A00080A0C00080A0E00080C0000080C0
+                200080C0400080C0600080C0800080C0A00080C0C00080C0E00080E0000080E0
+                200080E0400080E0600080E0800080E0A00080E0C00080E0E000C0000000C000
+                2000C0004000C0006000C0008000C000A000C000C000C000E000C0200000C020
+                2000C0204000C0206000C0208000C020A000C020C000C020E000C0400000C040
+                2000C0404000C0406000C0408000C040A000C040C000C040E000C0600000C060
+                2000C0604000C0606000C0608000C060A000C060C000C060E000C0800000C080
+                2000C0804000C0806000C0808000C080A000C080C000C080E000C0A00000C0A0
+                2000C0A04000C0A06000C0A08000C0A0A000C0A0C000C0A0E000C0C00000C0C0
+                2000C0C04000C0C06000C0C08000C0C0A000F0FBFF00A4A0A000808080000000
+                FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00010000000000
+                000000000000000000FFFF00FFFFFFFFFFFFFFFFFFFFFFFF00FFFF00FF07A407
+                A407A4F9A407A4FF00FFFF00FFA407A407A4F9A4F9A407FF00FFFF00FF07A407
+                A407A4F9A407A4FF00FFFF00FFA407A407A407A407A407FF00FFFF00FF07A407
+                A407A407A407A4FF00FFFF00FFA407A407A407A407A407FF00FFFF00FFFFFFFF
+                FFFFFFFFFFFFFFFF00FFFF00FF04FC04FC04FCA4A4A4A4FF00FFFF00FFFC04FC
+                04FC04A4A4A4A4FF00FFFF00FFFFFFFFFFFFFFFFFFFFFFFF00FFFF0000000000
+                000000000000000000FF}
+              ShowButton = True
+              TabOrder = 1
+            end
+          end
+          object dblcNatureza: TwwDBLookupCombo
+            Left = 456
+            Top = 16
+            Width = 249
+            Height = 21
+            DropDownAlignment = taLeftJustify
+            Selected.Strings = (
+              'DESCRICAO'#9'60'#9'Descrição'
+              'CODNATUREZA'#9'4'#9'Natureza')
+            LookupTable = dtmLookIRRF.cdsLookNatureza
+            LookupField = 'CODNATUREZA'
+            Options = [loTitles]
+            TabOrder = 2
+            AutoDropDown = True
+            ShowButton = True
+            AllowClearKey = True
+            ShowMatchText = True
+          end
+          object rgImposto: TRadioGroup
+            Left = 8
+            Top = 8
+            Width = 158
+            Height = 113
+            Caption = ' Imposto a buscar '
+            Font.Charset = DEFAULT_CHARSET
+            Font.Color = clWindowText
+            Font.Height = -8
+            Font.Name = 'MS Sans Serif'
+            Font.Style = [fsBold]
+            ItemIndex = 0
+            Items.Strings = (
+              'IRRF'
+              'CSLL/PIS/COFINS'
+              'IOF')
+            ParentFont = False
+            TabOrder = 0
+            OnClick = rgImpostoClick
+          end
+          object btnFiltra: TBitBtn
+            Left = 184
+            Top = 88
+            Width = 257
+            Height = 33
+            Caption = '&Seleciona'
+            TabOrder = 4
+            OnClick = btnFiltraClick
+            Glyph.Data = {
+              76010000424D7601000000000000760000002800000020000000100000000100
+              0400000000000001000000000000000000001000000010000000000000000000
+              800000800000008080008000000080008000808000007F7F7F00BFBFBF000000
+              FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00555555555555
+              55555555FFFFFFFF5555555000000005555555577777777FF555550999999900
+              55555575555555775F55509999999901055557F55555557F75F5001111111101
+              105577FFFFFFFF7FF75F00000000000011057777777777775F755070FFFFFF0F
+              01105777F555557F75F75500FFFFFF0FF0105577F555FF7F57575550FF700008
+              8F0055575FF7777555775555000888888F005555777FFFFFFF77555550000000
+              0F055555577777777F7F555550FFFFFF0F05555557F5FFF57F7F555550F000FF
+              0005555557F777557775555550FFFFFF0555555557F555FF7F55555550FF7000
+              05555555575FF777755555555500055555555555557775555555}
+            NumGlyphs = 2
+          end
+          object cmbModuloOrigem: TComboBox
+            Left = 456
+            Top = 56
+            Width = 249
+            Height = 21
+            ItemHeight = 13
+            TabOrder = 3
+            Items.Strings = (
+              'Contas a Pagar'
+              'Contas a Receber'
+              'Empréstimo'
+              'Folha de Benefícios'
+              'Folha de Pagamentos')
+          end
+        end
+      end
+      object tbsDados2: TTabSheet
+        Caption = 'Dados Adicionais para o Contas a Pagar'
+        ImageIndex = 1
+        object LblFormaPag: TLabel
+          Left = 8
+          Top = 50
+          Width = 73
+          Height = 13
+          Caption = 'Observação '
+        end
+        object Label17: TLabel
+          Left = 8
+          Top = 10
+          Width = 63
+          Height = 13
+          Caption = 'Referência'
+        end
+        object Label5: TLabel
+          Left = 368
+          Top = 10
+          Width = 237
+          Height = 13
+          Caption = 'Centro de Responsabilidade (opcional) (*)'
+        end
+        object fcLabel2: TfcLabel
+          Left = 16
+          Top = 115
+          Width = 665
+          Height = 14
+          AutoSize = False
+          Caption = 
+            '(*) Se for indicado Centro de Responsabilidade, o rateio origina' +
+            'l será sobrescrito com o mesmo.'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clNavy
+          Font.Height = -9
+          Font.Name = 'MS Sans Serif'
+          Font.Style = [fsBold]
+          ParentFont = False
+          TextOptions.Alignment = taLeftJustify
+          TextOptions.ExtrudeEffects.NearColor = clWhite
+          TextOptions.ExtrudeEffects.Orientation = fcBottomLeft
+          TextOptions.LineSpacing = 8
+          TextOptions.VAlignment = vaTop
+          TextOptions.WordWrap = True
+        end
+        object memObsCap: TMemo
+          Left = 8
+          Top = 64
+          Width = 705
+          Height = 49
+          MaxLength = 1000
+          ScrollBars = ssVertical
+          TabOrder = 2
+        end
+        object edRef: TEdit
+          Left = 8
+          Top = 24
+          Width = 169
+          Height = 21
+          MaxLength = 30
+          TabOrder = 0
+        end
+        object DBcboCentroRespon: TwwDBLookupCombo
+          Left = 368
+          Top = 24
+          Width = 345
+          Height = 21
+          DropDownAlignment = taLeftJustify
+          Selected.Strings = (
+            'NOME'#9'25'#9'Nome'#9'F'
+            'CODEXTERNO'#9'12'#9'Código'#9'F')
+          LookupTable = dtmLookIRRF.cdsLookCentroRespon
+          LookupField = 'CODCENTRORESPON'
+          TabOrder = 1
+          AutoDropDown = True
+          ShowButton = True
+          AllowClearKey = True
+          ShowMatchText = True
+        end
+      end
+    end
+    object dbgLancamentos: TwwDBGrid
+      Left = 1
+      Top = 161
+      Width = 734
+      Height = 177
+      Hint = 
+        'Duplo Click no campo Darf, indique que deseja-se gerar um darf c' +
+        'om os lançamentos marcados'
+      ControlType.Strings = (
+        'FLGDARF;CheckBox;S;N')
+      Selected.Strings = (
+        'FLGDARF'#9'1'#9'Darf ?'#9'F'
+        'RAZAOSOCIAL'#9'40'#9'Nome do Beneficiário'#9'T'
+        'CODNATUREZA'#9'4'#9'Natureza'#9'T'
+        'DATALANCAMENTO'#9'10'#9'Data'#9'T'
+        'VLRBASE'#9'10'#9'Base do Imposto'#9'T'
+        'VLRIRRF'#9'10'#9'Valor do IRRF/PIS/IOF'#9'T'
+        'VLRINSS'#9'10'#9'Valor do INSS'#9'T'
+        'DESCRICAO'#9'50'#9'Motivo'#9'T'
+        'HISTORICO'#9'50'#9'Versão da Folha'#9'T'
+        'NOMEMODULO'#9'50'#9'Módulo'#9'T'
+        'NOME'#9'50'#9'Plano Contábil'#9'T'
+        'PATRO'#9'60'#9'Patrocinadora'#9'T'
+        'TIPODESEMBOLSO'#9'35'#9'Tipo de Desembolso'#9'T')
+      MemoAttributes = []
+      IniAttributes.Delimiter = ';;'
+      TitleColor = clBtnFace
+      FixedCols = 0
+      ShowHorzScrollBar = True
+      Align = alClient
+      DataSource = dsLancamentos
+      KeyOptions = []
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 1
+      TitleAlignment = taLeftJustify
+      TitleFont.Charset = DEFAULT_CHARSET
+      TitleFont.Color = clWindowText
+      TitleFont.Height = -9
+      TitleFont.Name = 'MS Sans Serif'
+      TitleFont.Style = [fsBold]
+      TitleLines = 1
+      TitleButtons = False
+      UseTFields = False
+      OnExit = dbgLancamentosExit
+      IndicatorColor = icBlack
+    end
+    object pnlTotalDarf: TPanel
+      Left = 1
+      Top = 338
+      Width = 734
+      Height = 78
+      Align = alBottom
+      TabOrder = 2
+      object gbTotal: TGroupBox
+        Left = 176
+        Top = 4
+        Width = 545
+        Height = 65
+        Caption = ' Total a gerar '
+        Enabled = False
+        TabOrder = 1
+        object lblBase: TLabel
+          Left = 16
+          Top = 18
+          Width = 146
+          Height = 13
+          Caption = 'Total da Base do Imposto'
+        end
+        object lblValorIRRF: TLabel
+          Left = 200
+          Top = 18
+          Width = 85
+          Height = 13
+          Caption = 'Total do DARF'
+        end
+        object lblINSS: TLabel
+          Left = 384
+          Top = 18
+          Width = 81
+          Height = 13
+          Caption = 'Total do INSS'
+        end
+        object reBaseImposto: TRealEdit
+          Left = 16
+          Top = 32
+          Width = 145
+          Height = 21
+          Alignment = taRightJustify
+          Lines.Strings = (
+            '      0,00')
+          TabOrder = 0
+          WordWrap = False
+          IntDigits = 10
+          DecDigits = 2
+          NumberFormat = fNumber
+          Signal = False
+        end
+        object reValorIRRF: TRealEdit
+          Left = 200
+          Top = 32
+          Width = 145
+          Height = 21
+          Alignment = taRightJustify
+          Lines.Strings = (
+            '      0,00')
+          TabOrder = 1
+          WordWrap = False
+          IntDigits = 10
+          DecDigits = 2
+          NumberFormat = fNumber
+          Signal = False
+        end
+        object reValorINSS: TRealEdit
+          Left = 384
+          Top = 32
+          Width = 145
+          Height = 21
+          Alignment = taRightJustify
+          Lines.Strings = (
+            '      0,00')
+          TabOrder = 2
+          WordWrap = False
+          IntDigits = 10
+          DecDigits = 2
+          NumberFormat = fNumber
+          Signal = False
+        end
+      end
+      object gbDataVenc: TGroupBox
+        Left = 16
+        Top = 4
+        Width = 145
+        Height = 65
+        Caption = ' Data de Vencimento '
+        TabOrder = 0
+        object dedDataVenc: TCMDateTimePicker
+          Left = 16
+          Top = 32
+          Width = 113
+          Height = 21
+          CalendarAttributes.Font.Charset = DEFAULT_CHARSET
+          CalendarAttributes.Font.Color = clWindowText
+          CalendarAttributes.Font.Height = -11
+          CalendarAttributes.Font.Name = 'MS Sans Serif'
+          CalendarAttributes.Font.Style = []
+          ButtonStyle = cbsCustom
+          Epoch = 1950
+          ButtonGlyph.Data = {
+            06050000424D06050000000000003604000028000000100000000D0000000100
+            080000000000D000000000000000000000000001000000000000000000000000
+            80000080000000808000800000008000800080800000C0C0C000C0DCC000F0CA
+            A6000020400000206000002080000020A0000020C0000020E000004000000040
+            20000040400000406000004080000040A0000040C0000040E000006000000060
+            20000060400000606000006080000060A0000060C0000060E000008000000080
+            20000080400000806000008080000080A0000080C0000080E00000A0000000A0
+            200000A0400000A0600000A0800000A0A00000A0C00000A0E00000C0000000C0
+            200000C0400000C0600000C0800000C0A00000C0C00000C0E00000E0000000E0
+            200000E0400000E0600000E0800000E0A00000E0C00000E0E000400000004000
+            20004000400040006000400080004000A0004000C0004000E000402000004020
+            20004020400040206000402080004020A0004020C0004020E000404000004040
+            20004040400040406000404080004040A0004040C0004040E000406000004060
+            20004060400040606000406080004060A0004060C0004060E000408000004080
+            20004080400040806000408080004080A0004080C0004080E00040A0000040A0
+            200040A0400040A0600040A0800040A0A00040A0C00040A0E00040C0000040C0
+            200040C0400040C0600040C0800040C0A00040C0C00040C0E00040E0000040E0
+            200040E0400040E0600040E0800040E0A00040E0C00040E0E000800000008000
+            20008000400080006000800080008000A0008000C0008000E000802000008020
+            20008020400080206000802080008020A0008020C0008020E000804000008040
+            20008040400080406000804080008040A0008040C0008040E000806000008060
+            20008060400080606000806080008060A0008060C0008060E000808000008080
+            20008080400080806000808080008080A0008080C0008080E00080A0000080A0
+            200080A0400080A0600080A0800080A0A00080A0C00080A0E00080C0000080C0
+            200080C0400080C0600080C0800080C0A00080C0C00080C0E00080E0000080E0
+            200080E0400080E0600080E0800080E0A00080E0C00080E0E000C0000000C000
+            2000C0004000C0006000C0008000C000A000C000C000C000E000C0200000C020
+            2000C0204000C0206000C0208000C020A000C020C000C020E000C0400000C040
+            2000C0404000C0406000C0408000C040A000C040C000C040E000C0600000C060
+            2000C0604000C0606000C0608000C060A000C060C000C060E000C0800000C080
+            2000C0804000C0806000C0808000C080A000C080C000C080E000C0A00000C0A0
+            2000C0A04000C0A06000C0A08000C0A0A000C0A0C000C0A0E000C0C00000C0C0
+            2000C0C04000C0C06000C0C08000C0C0A000F0FBFF00A4A0A000808080000000
+            FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00010000000000
+            000000000000000000FFFF00FFFFFFFFFFFFFFFFFFFFFFFF00FFFF00FF07A407
+            A407A4F9A407A4FF00FFFF00FFA407A407A4F9A4F9A407FF00FFFF00FF07A407
+            A407A4F9A407A4FF00FFFF00FFA407A407A407A407A407FF00FFFF00FF07A407
+            A407A407A407A4FF00FFFF00FFA407A407A407A407A407FF00FFFF00FFFFFFFF
+            FFFFFFFFFFFFFFFF00FFFF00FF04FC04FC04FCA4A4A4A4FF00FFFF00FFFC04FC
+            04FC04A4A4A4A4FF00FFFF00FFFFFFFFFFFFFFFFFFFFFFFF00FFFF0000000000
+            000000000000000000FF}
+          ShowButton = True
+          TabOrder = 0
+        end
+      end
+    end
+  end
+  inherited Dock971: TDock97
+    Top = 417
+    Width = 736
+    inherited tb97Fundo: TToolbar97
+      Left = 421
+      inherited sep1: TToolbarSep97
+        Left = 162
+      end
+      inherited bbtnSair: TBitBtn
+        Left = 81
+        TabOrder = 1
+      end
+      inherited bbtnAjuda: TmaHelpBitBtn
+        Left = 164
+        HelpContext = 240010
+        TabOrder = 2
+      end
+      object bbtnGera: TBitBtn
+        Left = 0
+        Top = 0
+        Width = 81
+        Height = 33
+        Cancel = True
+        Caption = '&Gera'
+        TabOrder = 0
+        OnClick = bbtnGeraClick
+        Glyph.Data = {
+          BE060000424DBE06000000000000360400002800000024000000120000000100
+          0800000000008802000000000000000000000001000000010000000000000000
+          80000080000000808000800000008000800080800000C0C0C000C0DCC000F0C8
+          A400000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          000000000000000000000000000000000000F0FBFF00A4A0A000808080000000
+          FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00030303030303
+          0303030303030303030303030303030303030303030303030303030303030303
+          03030303030303030303030303030303030303030303FF030303030303030303
+          03030303030303040403030303030303030303030303030303F8F8FF03030303
+          03030303030303030303040202040303030303030303030303030303F80303F8
+          FF030303030303030303030303040202020204030303030303030303030303F8
+          03030303F8FF0303030303030303030304020202020202040303030303030303
+          0303F8030303030303F8FF030303030303030304020202FA0202020204030303
+          0303030303F8FF0303F8FF030303F8FF03030303030303020202FA03FA020202
+          040303030303030303F8FF03F803F8FF0303F8FF03030303030303FA02FA0303
+          03FA0202020403030303030303F8FFF8030303F8FF0303F8FF03030303030303
+          FA0303030303FA0202020403030303030303F80303030303F8FF0303F8FF0303
+          0303030303030303030303FA0202020403030303030303030303030303F8FF03
+          03F8FF03030303030303030303030303FA020202040303030303030303030303
+          0303F8FF0303F8FF03030303030303030303030303FA02020204030303030303
+          03030303030303F8FF0303F8FF03030303030303030303030303FA0202020403
+          030303030303030303030303F8FF0303F8FF03030303030303030303030303FA
+          0202040303030303030303030303030303F8FF03F8FF03030303030303030303
+          03030303FA0202030303030303030303030303030303F8FFF803030303030303
+          030303030303030303FA0303030303030303030303030303030303F803030303
+          0303030303030303030303030303030303030303030303030303030303030303
+          0303}
+        NumGlyphs = 2
+        Spacing = 2
+      end
+    end
+  end
+  inherited ivTradutor: TIvExtendedTranslator
+    Left = 27
+    Top = 723
+  end
+  object cdsLancamentos: TCMClientDataSet
+    Aggregates = <>
+    Params = <>
+    ProviderName = 'Dsp'
+    Left = 328
+    Top = 224
+  end
+  object cdsLancamentoAux: TCMClientDataSet
+    Aggregates = <>
+    Params = <>
+    ProviderName = 'Dsp'
+    Left = 424
+    Top = 224
+  end
+  object cdsCodigos: TCMClientDataSet
+    Aggregates = <>
+    Params = <>
+    ProviderName = 'Dsp'
+    Left = 256
+    Top = 272
+  end
+  object dsLancamentos: TwwDataSource
+    DataSet = cdsLancamentos
+    Left = 328
+    Top = 208
+  end
+  object cdsRateio: TCMClientDataSet
+    Aggregates = <>
+    Params = <>
+    ProviderName = 'Dsp'
+    Left = 336
+    Top = 272
+  end
+  object cdsCCBaixasxDocum: TCMClientDataSet
+    Aggregates = <>
+    Params = <>
+    ProviderName = 'Dsp'
+    Left = 424
+    Top = 272
+  end
+end

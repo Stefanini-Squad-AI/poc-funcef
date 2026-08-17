@@ -1,0 +1,344 @@
+{*******************************************************}
+{                                                       }
+{ CM Soluções Informática                               }
+{ ** Todos os Direitos Reservados                       }
+{ Analista Responsável: Marco Antonio Abreu             }
+{ Atualizado Em: 30/01/2002                             }
+{                                                       }
+{*******************************************************}
+
+unit FCotacaoMoedaMT;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  FCadastroMT, MontaSelect, Db, DBClient, uCMClientDataSet, ImgList, IvDictio,
+  CmEventosCadastro, Wwdatsrc, IvMulti, IvEMulti, MAHlpBtn, StdCtrls, Buttons,
+  TB97Tlbr, TB97Ctls, TB97, ExtCtrls, wwdblook, CMDBLookupCombo, wwdbedit,
+  wwdbdatetimepicker, CMDateTimePicker, TREdit, Mask, Grids, Wwdbigrd, Wwdbgrid,
+  UCtrlMoeda, uCtrlCotacaoMoeda
+{$IFNDEF VERSAO0505}
+  , uCmTypes
+{$ENDIF}
+;
+
+type
+  TFrmCotacaoMoedaMT = class(TFrmCadastroMT)
+    CdsMoeda: TCMClientDataSet;
+    CdsCotacao: TCMClientDataSet;
+    PnlMoeda: TPanel;
+    lblMoeda: TLabel;
+    dblkcmbMoeDesc: TCMDBLookupCombo;
+    lblDataCotacao: TLabel;
+    lblValorCotacao: TLabel;
+    lblRefer: TLabel;
+    LbldataFin: TLabel;
+    Label3: TLabel;
+    dbedCotValor: TDBRealEdit;
+    dtCotacao: TCMDateTimePicker;
+    DbDataFim: TCMDateTimePicker;
+    EdtPrazo: TDBRealEdit;
+    EdtRef: TwwDBEdit;
+    dbGrd: TwwDBGrid;
+    procedure PegaRegCotacao( State: TDataSetState; PegaFilhos: Boolean = False );
+    procedure CopiaRegCotacao( State: TDatasetState );
+    procedure Seleciona(IdMoeda: Double = 0);
+    procedure FormCreate(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure CmeCadastroApplyInsert(sender: TObject; var Accept: Boolean);
+    procedure CmeCadastroApplyEdit(sender: TObject; var Accept: Boolean);
+    procedure CmeCadastroApplyDelete(sender: TObject; var Accept: Boolean);
+    procedure CmeCadastroAbortConfirma(sender: TObject;
+      OrigemAbortConfirma: TOrigemAbortConfirma);
+    procedure CmeCadastroFind(Sender: TObject);
+    procedure CmeCadastroAfterConfirma(Sender: TObject);
+    procedure CmeCadastroInsert(Sender: TObject);
+    procedure CmeCadastroEdit(Sender: TObject);
+    procedure bbtnConfirmarClick(Sender: TObject);
+    procedure dblkcmbMoeDescCloseUp(Sender: TObject; LookupTable,
+      FillTable: TDataSet; modified: Boolean);
+    procedure CmeCadastroDelete(Sender: TObject);
+    procedure CmeCadastroAtualizaBotoes(Sender: TObject);
+    procedure sbtnInserirClick(Sender: TObject);
+    procedure bbtnCancelarClick(Sender: TObject);
+  private
+    { Private declarations }
+    EMoedaCorrente: boolean;
+    MoedaCorrente: Double;
+    CotacaoMoeda: TCtrlCotacaoMoeda;
+    Moeda: TCtrlMoeda;
+  public
+    { Public declarations }
+  end;
+
+var
+  FrmCotacaoMoedaMT: TFrmCotacaoMoedaMT;
+
+implementation
+
+{$R *.DFM}
+
+Uses uMensErro, dBasedados, uSistema, uMidasUtil;
+
+procedure TFrmCotacaoMoedaMt.PegaRegCotacao( State: TDataSetState; PegaFilhos: Boolean = False );
+begin
+  If State = DsInsert Then
+     cdsCotacao.Data := CotacaoMoeda.ListaCotacaoMoedasRef( -1 )
+  Else
+     cdsCotacao.Data := CotacaoMoeda.ListaCotacaoMoedasRef( Cds.FieldByName( 'IdCotacaoMoeda' ).AsFloat );
+end;
+
+procedure TFrmCotacaoMoedaMt.CopiaRegCotacao( State: TDatasetState );
+var
+  i: Integer;
+  snome: String;
+begin
+  If State = dsInsert Then
+     CdsCotacao.Append
+  Else
+     CdsCotacao.Edit;
+
+  For i := 0 To Cds.Fields.Count - 1 Do Begin
+      snome := Cds.Fields[ i ].FieldName;
+      CdsCotacao.FieldByName( snome ).Value := Cds.FieldByName( snome ).Value;
+  End;
+
+  CdsCotacao.Post;
+end;
+
+procedure TFrmCotacaoMoedaMt.Seleciona( IdMoeda: Double );
+begin
+  Cds.Data := CotacaoMoeda.ListaCotacaoMoeda( IdMoeda );
+  cds.FieldByName( 'COTMESREF' ).EditMask := '!99/9999;0; ';
+  dbGrd.Enabled := Not cds.IsEmpty;
+end;
+
+procedure TFrmCotacaoMoedaMT.FormCreate(Sender: TObject);
+begin
+  inherited;
+  Moeda := TCtrlMoeda.Create;
+  Moeda.Initialize( DtmBaseDados.dbBaseDados, False, Sistema.ConnectionType,
+                    Sistema.ConnectionSide, Sistema.AppRemoteServer, True );
+  CotacaoMoeda := TCtrlCotacaoMoeda.Create;
+  CotacaoMoeda.Initialize( DtmBaseDados.dbBaseDados, True, Sistema.ConnectionType,
+                           Sistema.ConnectionSide, Sistema.AppRemoteServer, True );
+  CotacaoMoeda.cds := cdsCotacao;
+  MoedaCorrente    := Moeda.MoedaCorrente( Sistema.IdEmpresa );
+//  CdsMoeda.Data    := Moeda.ListaMoeda( MoedaCorrente );  // Não inclui a moeda corrente
+  CdsMoeda.Data    := Moeda.ListaMoeda(); // Lista todas as moedas
+  Seleciona( -1 );
+  CdsCotacao.Data  := Cds.Data;
+  CdsCotacao.EmptyDataSet;
+end;
+
+procedure TFrmCotacaoMoedaMT.FormClose(Sender: TObject;
+  var Action: TCloseAction);
+begin
+  inherited;
+  CotacaoMoeda.Free;
+  Moeda.Free;
+end;
+
+procedure TFrmCotacaoMoedaMT.CmeCadastroApplyInsert(sender: TObject;
+  var Accept: Boolean);
+begin
+  inherited;
+  CopiaRegCotacao( DsInsert );
+  Accept := CotacaoMoeda.Gravar;
+end;
+
+procedure TFrmCotacaoMoedaMT.CmeCadastroApplyEdit(sender: TObject;
+  var Accept: Boolean);
+begin
+  inherited;
+  CopiaRegCotacao( DsEdit );
+  Accept := CotacaoMoeda.Gravar;
+end;
+
+procedure TFrmCotacaoMoedaMT.CmeCadastroApplyDelete(sender: TObject;
+  var Accept: Boolean);
+begin
+  inherited;
+  CdsCotacao.Delete;
+  Accept := CotacaoMoeda.Gravar;
+end;
+
+procedure TFrmCotacaoMoedaMT.CmeCadastroAbortConfirma(sender: TObject;
+  OrigemAbortConfirma: TOrigemAbortConfirma);
+begin
+  inherited;
+  MsgDlg( CotacaoMoeda.MessageInfo, 'Erro', mtError, [ mbOK ], 0 );
+  dblkcmbMoeDesc.Enabled := True;
+  DbGrd.Enabled := ( Not Cds.IsEmpty );
+end;
+
+procedure TFrmCotacaoMoedaMT.CmeCadastroInsert(Sender: TObject);
+begin
+  inherited;
+  Cds.Cancel;
+  Cds.Append;
+  PegaRegCotacao( DsInsert );
+  cds.FieldByName( 'COTMESREF' ).EditMask := '!99/9999;0; ';
+  Cds.FieldByName( 'MoeCodigo' ).AsFloat  := CdsMoeda.FieldByName( 'MoeCodigo' ).AsFloat;
+  Cds.FieldByName( 'IdUsuarioInclusao' ).AsFloat := Sistema.IdUsuario;
+  dblkcmbMoeDesc.Enabled := False;
+  DtCotacao.SetFocus;
+end;
+
+procedure TFrmCotacaoMoedaMT.CmeCadastroEdit(Sender: TObject);
+begin
+  inherited;
+  PegaRegCotacao( DsEdit );
+  dblkcmbMoeDesc.Enabled := False;
+  DbGrd.Enabled := False;
+  DtCotacao.SetFocus;
+end;
+
+procedure TFrmCotacaoMoedaMT.CmeCadastroFind(Sender: TObject);
+begin
+  inherited;
+  If MontaSelect.RetornouValor Then Begin
+     Seleciona( StrToFloat( MontaSelect.ValoresChave[ 1 ] ) );
+     Cds.Locate( 'IdCotacaoMoeda', StrToFloat( MontaSelect.ValoresChave[ 0 ] ), [] );
+     CdsMoeda.Locate( 'MoeCodigo', StrToFloat( MontaSelect.ValoresChave[ 1 ] ), [] );
+     dblkcmbMoeDesc.Value   := MontaSelect.ValoresChave[ 1 ];
+     dblkcmbMoeDesc.Enabled := True;
+  End;
+end;
+
+procedure TFrmCotacaoMoedaMT.CmeCadastroAfterConfirma(Sender: TObject);
+begin
+  inherited;
+  Seleciona( CdsMoeda.FieldByName( 'MoeCodigo' ).AsFloat );
+  Cds.Locate( 'IdCotacaoMoeda', CdsCotacao.FieldByName( 'IdCotacaoMoeda' ).AsFloat, [] );
+  dblkcmbMoeDesc.Enabled := True;
+end;
+
+procedure TFrmCotacaoMoedaMT.bbtnConfirmarClick(Sender: TObject);
+begin
+  If Cds.FieldByName( 'CotMesRef' ).IsNull Or ( Trim( Cds.FieldByName( 'CotMesRef' ).AsString ) = '' ) Then Begin
+     MsgDlg( 'O campo Referência deve ser preenchido.', 'Informação', mtInformation, [ mbOK ], 0 );
+     EdtRef.SetFocus;
+     Exit;
+  End;
+
+  If Cds.FieldByName( 'CotDataFim' ).AsDateTime < Cds.FieldByName( 'CotData' ).AsDateTime Then Begin
+     MsgDlg( 'A Data Final deve menor ou igual a Data Inicial.', 'Informação', mtInformation, [ mbOK ], 0 );
+     DtCotacao.SetFocus;
+     Exit;
+  End;
+
+  If CdsMoeda.FieldByName( 'FLGPERCVALOR' ).AsString = 'P' Then
+     If Cds.FieldByName( 'COTVALOR' ).AsFloat < 0.00 Then 
+        MsgDlg( 'O valor da cotação para esta moeda deve ser maior ou igual a zero.',
+                'Informação', mtInformation, [ mbOK ], 0 )
+     Else Begin
+        If ( Cds.FieldByName( 'COTVALOR' ).AsFloat = 0.00 ) Then
+           If MsgDlg( 'O valor da cotação está igual a zero. Confirma o valor?',
+                      'Cotação igual a zero', mtConfirmation, [ mbYes, MbNo ], 0 ) <> MrYes Then Begin
+              dbedCotValor.SetFocus;
+              Exit;
+           End;
+     End
+  Else
+     If Cds.FieldByName( 'COTVALOR' ).AsFloat <= 0.00 Then Begin
+        MsgDlg( 'O valor da cotação para esta moeda deve ser maior que zero.',
+                'Informação', mtInformation, [ mbOK ], 0 );
+        dbedCotValor.SetFocus;
+        Exit;
+     End;
+
+  If CmeCadastro.Operacao = OpInserir Then Begin
+     If Not CotacaoMoeda.ValidaPeriodo( Cds.FieldByName( 'MoeCodigo' ).AsFloat,
+                                        Cds.FieldByName( 'CotData' ).AsDateTime,
+                                        Cds.FieldByName( 'CotDataFim' ).AsDateTime ) Then Begin
+        MsgDlg( 'Já existe cotação para esta moeda no período informado.', 'Informação', mtInformation, [ mbOK ], 0 );
+        dtCotacao.SetFocus;
+        Exit;
+     End;
+  End Else
+  If CmeCadastro.Operacao = OpAlterar Then
+     If Not CotacaoMoeda.ValidaPeriodo( Cds.FieldByName( 'MoeCodigo' ).AsFloat,
+                                        Cds.FieldByName( 'CotData' ).AsDateTime,
+                                        Cds.FieldByName( 'CotDataFim' ).AsDateTime,
+                                        Cds.FieldByName( 'IdCotacaoMoeda' ).AsFloat ) Then Begin
+        MsgDlg( 'Já existe outra cotação para esta moeda no período informado.', 'Informação', mtInformation, [ mbOK ], 0 );
+        dtCotacao.SetFocus;
+        Exit;
+     End;
+
+{  // Verifica se já existe cotação cotação para a moeda especificada
+  // dentro do período especificado
+  dtmBaseDados.Sql.SQL.Clear;
+  dtmBaseDados.Sql.SQL.Text := 'Select IdCotacaoMoeda From CotacaoMoeda ' +
+                               'Where ( MoeCodigo = :codmoeda ) and ' +
+                               '( ( CotData <= :data1 and CotDataFim >= :data1 ) or ' +
+                                 '( CotData <= :data2 and CotDataFim >= :data2 ) )';
+  dtmBaseDados.Sql.Prepare;
+  dtmBaseDados.Sql.ParamByName( 'codmoeda' ).AsFloat := Cds.FieldByName( 'MoeCodigo' ).AsFloat;
+  dtmBaseDados.Sql.ParamByName( 'data1' ).AsDate     := Cds.FieldByName( 'CotData' ).AsDateTime;
+  dtmBaseDados.Sql.ParamByName( 'data2' ).AsDate     := Cds.FieldByName( 'CotDataFim' ).AsDateTime;
+  dtmBaseDados.Sql.Open;
+
+  If Not dtmBaseDados.Cds.IsEmpty Then Begin
+     dtmBaseDados.Cds.Close;
+     MsgDlg( 'Já existe cotação para esta moeda dentro deste período.', 'Informação', mtInformation, [ mbOK ], 0 );
+     dtCotacao.SetFocus;
+     Exit;
+  End;
+
+  dtmBaseDados.Cds.Close; }
+  inherited;
+end;
+
+procedure TFrmCotacaoMoedaMT.dblkcmbMoeDescCloseUp(Sender: TObject;
+  LookupTable, FillTable: TDataSet; modified: Boolean);
+begin
+  inherited;
+  Seleciona( CdsMoeda.FieldByName('MOECODIGO').AsFloat );
+  EMoedaCorrente := ( MoedaCorrente = CdsMoeda.FieldByName( 'MOECODIGO' ).AsFloat );
+  sbtnAlterar.Enabled := ( Not EMoedaCorrente );
+  sbtnApagar.Enabled  := ( Not EMoedaCorrente );
+
+  If Not Cds.IsEmpty Then
+     CmeCadastro.Operacao := OpIdle;
+end;
+
+procedure TFrmCotacaoMoedaMT.CmeCadastroDelete(Sender: TObject);
+begin
+  PegaRegCotacao( DsEdit );
+  inherited;
+end;
+
+procedure TFrmCotacaoMoedaMT.CmeCadastroAtualizaBotoes(Sender: TObject);
+begin
+  inherited;
+  If CmeCadastro.Operacao = OpInserir Then
+     sbtnAlterar.Enabled := False;
+
+  If CmeCadastro.Operacao = OpIdle Then
+     sbtnApagar.Enabled  := Not cds.IsEmpty;
+end;
+
+procedure TFrmCotacaoMoedaMT.sbtnInserirClick(Sender: TObject);
+begin
+  If dblkcmbMoeDesc.Value <> '' Then
+     inherited
+  Else Begin
+     MsgDlg( 'Primeiro selecione uma moeda.', 'Aviso', MtInformation, [MbOk], 0 );
+     dblkcmbMoeDesc.SetFocus;
+     sbtnInserir.Down := False;
+     CmeCadastro.Operacao := OpIdle;
+  End;
+end;
+
+procedure TFrmCotacaoMoedaMT.bbtnCancelarClick(Sender: TObject);
+begin
+  inherited;
+  DbGrd.Enabled := ( Not Cds.IsEmpty );
+  dblkcmbMoeDesc.Enabled := True;
+end;
+
+end.
+

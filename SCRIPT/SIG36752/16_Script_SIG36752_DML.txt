@@ -1,0 +1,158 @@
+ -- Declaração das Variaveis
+
+declare
+  -- Variaveis Sequenciais
+  vIdForm      Integer;
+  vIdFuncao    Integer;
+  vIdObjeto    Integer;
+  vIdOperFunc  Integer;
+
+  -- Variaveis definidas
+  vIdModulo    Integer;
+  vIdFormPai   Integer;
+  vIdFuncaoPai Integer;
+  vIdOperacao  Integer;
+
+begin
+  -- Variaveis definidas
+  vIdModulo    := 456;
+  vIdFormPai   := 13522;
+  vIdFuncaoPai := 25693;
+  vIdOperacao  := 1149;
+
+  -- Validação da Variavel Sequencial da Tabela Formularios
+  begin
+    -- Select
+    Select IdForm Into vIdFormPai from Form
+    where NomeForm = 'frmCadContribParticipante' 
+      and idmodulo = vIdModulo;
+    -- Exception
+    EXCEPTION WHEN OTHERS THEN vIdFormPai := -1;
+    If vIdFormPai = -1 then
+       Select Max(idform)+1 Into vIdFormPai From form;
+       insert into form (idform, nomeform, idmodulo, descform) 
+              values (vIdFormPai, 'frmCadContribParticipante', vIdModulo, 'Contribuição do Participante');
+    End If;
+  end;
+ 
+  -- Validação da Variavel Sequencial da Tabela Funcao
+  Begin
+    -- Select
+    Select Idfuncao Into vIdFuncaoPai From Funcao
+    where NomeFuncao = 'Contribuição do Participante'
+      and IdModulo = vIdModulo;
+    -- Exception
+    EXCEPTION WHEN OTHERS THEN vIdFuncao := -1;
+    -- Criação do Registro
+    If vIdFuncao = -1 then
+      Select Max(IdFuncao)+1 Into vIdFuncao From Funcao;
+      Insert Into Funcao(IdFuncao,NomeFuncao,IdModulo,IdFuncaoPai)
+                  values(vIdFuncao,'Contribuição do Participante', vIdModulo, 25860);
+    End If;
+  End;
+
+  -------------------------------------------------------------------------
+  -- IMPORTAR ARQUIVO
+  -------------------------------------------------------------------------
+  -- Validação da Variavel Sequencial da Tabela Funcao
+  Begin
+    -- Select
+    Select IdObjeto Into vIdObjeto from Objeto
+    where NomeObjeto = 'pnlImportaArq';
+    -- Exception
+    EXCEPTION WHEN OTHERS THEN vIdObjeto := -1;
+    -- Criação do Registro
+    If vIdObjeto = -1 then
+      Select Max(IdObjeto)+1 Into vIdObjeto From Objeto;
+      Insert Into Objeto(IdObjeto,NomeObjeto) Values( vIdObjeto, 'pnlImportaArq');
+    End If;
+  End;
+
+  -- INSERE OPERACAO: HABILITAR IMPORTAR ARQUIVO
+  Begin
+    -- Select
+    Select idoperacao Into vIdOperacao from operacao
+    where TRIM(nomeoperacao) = 'IMPORTAR ARQUIVO';
+    -- Exception
+    EXCEPTION WHEN OTHERS THEN vIdOperacao := -1;
+    -- Criação do Registro
+    If vIdOperacao = -1 then
+      Select Max(idoperacao)+1 Into vIdOperacao From operacao;
+      Insert Into Operacao(IdOperacao,NomeOperacao) Values( vIdOperacao, 'IMPORTAR ARQUIVO');
+    End If;
+  End;
+
+  -- Validação da Variavel Sequencial da Tabela OperFunc
+  Begin
+    -- Select
+    Select IdOperFunc into vIdOperFunc from OperFunc
+    where idModulo = vIdModulo
+      and idOperacao = vIdOperacao
+      and IdFuncao = vIdFuncaoPai;
+    -- Exception
+    EXCEPTION WHEN OTHERS THEN vIdOperFunc := -1;
+    -- Criação do Registro
+    If vIdOperFunc = -1 then
+      Select Max(IdOperFunc)+1 Into vIdOperFunc from OperFunc;
+      Insert Into Operfunc(idOperfunc,Idmodulo,Idoperacao,Idfuncao)
+                    Values(vIdOperFunc, vIdModulo, vIdOperacao, vIdFuncaoPai);
+      Insert into frobfnop(idOperfunc,idobjeto,idform)
+                    values(vIdOperFunc, vIdObjeto, vIdFormPai);
+    End If;
+  End;
+
+  
+  -------------------------------------------------------------------------
+  -- CADASTRAR AÇÃO JUDICIAL
+  -------------------------------------------------------------------------
+  -- Validação da Variavel Sequencial da Tabela Funcao
+  Begin
+    -- Select
+    Select IdObjeto Into vIdObjeto from Objeto
+    where NomeObjeto = 'sbtnAcaoJud';
+    -- Exception
+    EXCEPTION WHEN OTHERS THEN vIdObjeto := -1;
+    -- Criação do Registro
+    If vIdObjeto = -1 then
+      Select Max(IdObjeto)+1 Into vIdObjeto From Objeto;
+      Insert Into Objeto(IdObjeto,NomeObjeto) Values( vIdObjeto, 'sbtnAcaoJud');
+    End If;
+  End;  
+  
+  -- INSERE OPERACAO: INCLUSÃO
+  Begin
+    -- Select
+    Select idoperacao Into vIdOperacao from operacao
+    where TRIM(nomeoperacao) = 'CADASTRAR AÇÃO JUDICIAL';
+    -- Exception
+    EXCEPTION WHEN OTHERS THEN vIdOperacao := -1;
+    -- Criação do Registro
+    If vIdOperacao = -1 then
+      Select Max(idoperacao)+1 Into vIdOperacao From operacao;
+      Insert Into Operacao(IdOperacao,NomeOperacao) Values( vIdOperacao, 'CADASTRAR AÇÃO JUDICIAL');
+    End If;
+  End;
+
+  -- Validação da Variavel Sequencial da Tabela OperFunc
+  Begin
+    -- Select
+    Select IdOperFunc into vIdOperFunc from OperFunc
+    where idModulo = vIdModulo
+      and idOperacao = vIdOperacao
+      and IdFuncao = vIdFuncaoPai;
+    -- Exception
+    EXCEPTION WHEN OTHERS THEN vIdOperFunc := -1;
+    -- Criação do Registro
+    If vIdOperFunc = -1 then
+      Select Max(IdOperFunc)+1 Into vIdOperFunc from OperFunc;
+      Insert Into Operfunc(idOperfunc,Idmodulo,Idoperacao,Idfuncao)
+                    Values(vIdOperFunc, vIdModulo, vIdOperacao, vIdFuncaoPai);
+      Insert into frobfnop(idOperfunc,idobjeto,idform)
+                    values(vIdOperFunc, vIdObjeto, vIdFormPai);
+    End If;
+  End;
+  
+
+  -- Grava Todas Informações no Banco
+  Commit;
+end;

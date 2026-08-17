@@ -1,0 +1,40 @@
+
+// trecho para inserir impostos
+
+                  If ( OperacaoLanc = opldEfetivo ) And
+                     ( not bLancaEBaixa ) Then
+                  Begin
+                     InicializaImposto;
+
+                     If Operacao = opInserir Then
+                     begin
+                        _Imposto.Incluir;
+                     end
+                     Else
+                     begin
+                        _Imposto.NumLanctoOrigem := iNumLancto;
+                        _Imposto.Excluir;
+
+                        InicializaImposto;
+                        _Imposto.Incluir;
+                     end;
+                  End
+                  else
+                  begin
+                     // Lançar CPMF com lança e baixa simultânea
+                     if bLancaEBaixa then begin
+                        InicializaImposto;
+
+                        // modificar os parâmetros para CPMF
+                        _Imposto.MomentoLancamento := mlBaixa;
+                        _Imposto.CodPortForma      := _CdsDocumento.FieldByName('CODPORTFORMA').AsInteger;
+                        _Imposto.NumLote           := -1;
+                        _Imposto.NumLoteManual     := iNumLoteManual;
+                        _Imposto.Incluir;
+
+                        _Imposto.NumLote           := -1;
+                        _Imposto.NumLoteManual     := iNumLoteManual;
+                        _Imposto.CodPortForma      := _CdsDocumento.FieldByName('CODPORTFORMA').AsInteger;
+                        _Imposto.EfetivaNovoDocumento;
+                     end;
+                  end;

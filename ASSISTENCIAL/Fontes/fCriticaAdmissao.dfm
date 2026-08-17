@@ -1,0 +1,238 @@
+inherited frmCriticaAdmissao: TfrmCriticaAdmissao
+  Top = 47
+  Caption = 'Crítica de Admissão'
+  ClientHeight = 416
+  ClientWidth = 342
+  PixelsPerInch = 96
+  TextHeight = 13
+  inherited pnlFundo: TPanel
+    Width = 342
+    Height = 377
+    object lbProgresso: TLabel
+      Left = 219
+      Top = 74
+      Width = 113
+      Height = 17
+      Alignment = taRightJustify
+      AutoSize = False
+    end
+    object Label1: TLabel
+      Left = 11
+      Top = 74
+      Width = 58
+      Height = 13
+      Caption = 'Resultado'
+    end
+    object rgTipo: TRadioGroup
+      Left = 11
+      Top = 7
+      Width = 321
+      Height = 63
+      Caption = 'Criticar Admissão nos Planos Assistenciais'
+      ItemIndex = 0
+      Items.Strings = (
+        'de Titulares'
+        'de Beneficiários')
+      TabOrder = 0
+    end
+    object mResultado: TMemo
+      Left = 11
+      Top = 90
+      Width = 321
+      Height = 277
+      ScrollBars = ssVertical
+      TabOrder = 1
+    end
+  end
+  inherited Dock971: TDock97
+    Top = 377
+    Width = 342
+    inherited tb97Fundo: TToolbar97
+      Left = 172
+      DockPos = 172
+      inherited sep1: TToolbarSep97
+        Left = 160
+      end
+      inherited bbtnAjuda: TmaHelpBitBtn
+        Left = 80
+      end
+    end
+    inherited TB97oKCancelar: TToolbar97
+      Left = 0
+      DockPos = 0
+      inherited bbtnConfirmar: TBitBtn
+        OnClick = bbtnConfirmarClick
+      end
+      inherited bbtnCancelar: TBitBtn
+        OnClick = bbtnCancelarClick
+      end
+    end
+  end
+  inherited ivTradutor: TIvExtendedTranslator
+    Left = 501
+  end
+  object qryRegra1: TwwQuery
+    DatabaseName = 'BaseDados'
+    SQL.Strings = (
+      'SELECT'
+      ' DISTINCT DATANASC, P.IDPESSOA, PPP.*, SP.FLGINTERNO , '
+      ' SPP.FLGINTERNO, PF.*,'
+      ' SP.DESCRICAO, SPP.DESCRICAO, E.*,'
+      ' SF.FLGINTERNO, to_char(sysdate,'#39'DD/MM/YYYY'#39') as DATAREF,'
+      ' B.IDBENEFICIO, :FLGPARTBENEF as FLGPARTBENEF'
+      'FROM'
+      ' PESSOA P, PESSOAFISICA PF, PARTPREVPLAN PPP,'
+      ' SITPART SP, SITPLANOPREV SPP, ELEGPATRO E, SITFUNC SF,'
+      ' BENEFBFCIARIO B'
+      'WHERE'
+      ' (PPP.IDPLANOPREV = :IDPLANOPREV) AND'
+      ' (PPP.IDPESSJUR = :IDPESSJUR) AND'
+      ' (P.IDPESSOA =  :IDPESSOA) AND'
+      ' (P.IDPESSOA  = PF.IDPESSOA) AND'
+      ' (PPP.IDPESSOA = P.IDPESSOA) AND'
+      ' (PPP.IDSITPART = SP.IDSITPART) AND'
+      ' (PPP.IDSITPLANOPREV = SPP.IDSITPLANOPREV) AND'
+      ' (E.IDSITFUNC = SF.IDSITFUNC) AND'
+      ' (E.IDPESSOA = P.IDPESSOA) AND'
+      ' (E.IDPESSJUR = PPP.IDPESSJUR) AND'
+      ' (B.IDPLANOPREV(+) = PPP.IDSITPLANOPREV) AND'
+      ' (B.IDTITULAR(+) = PPP.IDPESSOA) AND'
+      ' (B.IDPESSJUR(+) = PPP.IDPESSJUR) AND'
+      ' (B.IDPESSOA(+) = PPP.IDPESSOA)')
+    Params.Data = {
+      010004000C464C475041525442454E4546000304000000000000000B4944504C
+      414E4F5052455600030400000000000000094944504553534A55520003040000
+      0000000000084944504553534F4100030400000000000000}
+    ValidateWithMask = True
+    Left = 132
+    Top = 181
+  end
+  object qryRegraTit: TwwQuery
+    DatabaseName = 'BaseDados'
+    SQL.Strings = (
+      'SELECT'
+      ' PA.IDPLANASS, PL.IDREGRAADMISSAO, PA.FLGPARTBENEF, PA.IDPESSOA,'
+      ' PA.IDPESSOA, PA.IDPLANOPREV, PA.IDPESSJUR,'
+      ' PT.NOME NOMEPATRO, PL.NOME NOMEPLANO, P.NOME NOMEPARTIC,'
+      ' PF.DATANASC, PPP.IDSITPLANOPREV, B.IDBENEFICIO'
+      'FROM'
+      ' PARTASS PA, PLANASS PL, PESSOA P, PESSOA PT, PESSOAFISICA PF,'
+      ' PARTPREVPLAN PPP, BENEFBFCIARIO B'
+      'WHERE'
+      ' (PA.IDPLANASS = PL.IDPLANASS) AND'
+      ' (PL.IDREGRAADMISSAO IS NOT NULL) AND'
+      ' (PA.IDPESSOA = P.IDPESSOA) AND'
+      ' (PA.IDPESSOA = PF.IDPESSOA) AND'
+      ' (PA.IDPESSJUR = PT.IDPESSOA) AND'
+      ' (PA.IDPESSJUR   = PPP.IDPESSJUR) AND'
+      ' (PA.IDPESSOA    = PPP.IDPESSOA) AND'
+      ' (PA.IDPLANOPREV = PPP.IDPLANOPREV) AND'
+      ' (PA.IDPESSJUR   = B.IDPESSJUR) AND'
+      ' (PA.IDPESSOA    = B.IDTITULAR) AND'
+      ' (PA.IDPESSOA    = B.IDPESSOA) AND'
+      ' (PA.IDPLANOPREV = B.IDPLANOPREV)'
+      'ORDER BY PA.IDPLANASS, P.NOME, PA.IDPESSJUR')
+    ValidateWithMask = True
+    Left = 129
+    Top = 123
+  end
+  object Regra: TRegra
+    DatabaseName = 'BaseDados'
+    IdCalculo = 0
+    IdEmpresa = 0
+    Left = 60
+    Top = 117
+  end
+  object qryRegraDep: TwwQuery
+    DatabaseName = 'BaseDados'
+    SQL.Strings = (
+      'SELECT'
+      ' BA.IDPLANASS, BA.DATAENTRADA, BA.IDDEPENDENTE, BA.IDTITULAR,'
+      ' BA.IDPLANOPREV, BA.IDPESSJUR, PL.IDREGRABENEFICIA,'
+      ' PT.NOME NOMEPATRO, PL.NOME NOMEPLANO, P.NOME NOMETIT,'
+      ' PD.NOME NOMEDEP, DEPEN.DESCRICAO DEPENDENCIA'
+      'FROM'
+      
+        ' BENEFASS BA, PLANASS PL, PESSOA P, PESSOA PD, PESSOA PT, DEPENT' +
+        'IT DT,'
+      ' DEPEN'
+      'WHERE'
+      ' (BA.IDPLANASS = PL.IDPLANASS) AND'
+      ' (PL.IDREGRABENEFICIA IS NOT NULL) AND'
+      ' (BA.IDTITULAR = P.IDPESSOA) AND'
+      ' (BA.IDDEPENDENTE = PD.IDPESSOA) AND'
+      ' (BA.IDPESSJUR = PT.IDPESSOA) AND'
+      ' (BA.IDTITULAR = DT.IDTITULAR) AND'
+      ' (BA.IDDEPENDENTE = DT.IDPESSOA) AND'
+      ' (DT.IDDEPENDENCIA = DEPEN.IDDEPENDENCIA)'
+      'ORDER BY BA.IDPLANASS, P.NOME, BA.IDPESSJUR')
+    ValidateWithMask = True
+    Left = 207
+    Top = 123
+  end
+  object qryRegra2: TwwQuery
+    DatabaseName = 'BaseDados'
+    SQL.Strings = (
+      'SELECT'
+      ' PESSOA.IDPESSOA,DEPEN.DESCRICAO,DEPEN.IDDEPENDENCIA,'
+      
+        ' PESSOAFISICA.CODESTADO,PESSOAFISICA.DATAMORTE,PESSOAFISICA.DATA' +
+        'NASC,'
+      
+        ' PESSOAFISICA.ESTCIVIL,PESSOAFISICA.FLGISENTOIRRF,PESSOAFISICA.I' +
+        'DFONTRECR,'
+      
+        ' PESSOAFISICA.IDGRINSTR,PESSOAFISICA.IDPAIS,PESSOAFISICA.IDPESSO' +
+        'A,'
+      
+        ' PESSOAFISICA.IDPROFISS,PESSOAFISICA.IDSINDICATO,PESSOAFISICA.NO' +
+        'MEMAE,'
+      
+        ' PESSOAFISICA.NOMEPAI,PESSOAFISICA.NUMDEPIRRF,PESSOAFISICA.NUMDE' +
+        'PSALF,'
+      ' PESSOAFISICA.NUMDEPTOT,PESSOAFISICA.SEXO,PESSOAFISICA.TIPOSANG,'
+      
+        ' ELEGPATRO.CODCENTROCUSTO,ELEGPATRO.DATAADMISSAO,ELEGPATRO.DATAD' +
+        'EMISSAO,'
+      ' ELEGPATRO.DATAFIMAFAST,ELEGPATRO.DATAINICIOAFAST,'
+      ' ELEGPATRO.IDCARGOEXT,ELEGPATRO.IDEMPRESAPROP,ELEGPATRO.IDESTAB,'
+      ' ELEGPATRO.IDPESSJUR,ELEGPATRO.IDPESSOA,ELEGPATRO.IDSITFUNC,'
+      ' ELEGPATRO.MATRICULA,ELEGPATRO.NIVEL,ELEGPATRO.PARTICIPASSIST,'
+      
+        ' ELEGPATRO.PARTICIPPREVID,ELEGPATRO.SALTOTAL,ELEGPATRO.TEMPONAOC' +
+        'REDITADO,'
+      ' ELEGPATRO.TEMPOSERVANTERIOR,ELEGPATRO.TEMPOSERVANTREAL,'
+      
+        ' ELEGPATRO.TEMPOSERVTOTAL,ELEGPATRO.TEMPOSITESPECIAL,ELEGPATRO.V' +
+        'ALORBASE1,'
+      ' ELEGPATRO.VALORBASE2,ELEGPATRO.VALORBASE3,'
+      ' SITFUNC.FLGINTERNO SITFUNC,SITPLANOASS.FLGINTERNO SITPART,'
+      ' :DTINSCRICAO AS DATAREF'
+      'FROM'
+      
+        ' PESSOA,PESSOAFISICA,DEPEN,DEPENTIT,ELEGPATRO,SITFUNC,PARTASS,SI' +
+        'TPLANOASS'
+      'WHERE'
+      ' (PESSOA.IDPESSOA = :IDDEPENDENTE) AND'
+      ' (PESSOAFISICA.IDPESSOA = PESSOA.IDPESSOA) AND'
+      ' (DEPENTIT.IDTITULAR = :IDTITULAR) AND'
+      ' (DEPENTIT.IDDEPENDENCIA = DEPEN.IDDEPENDENCIA) AND'
+      ' (DEPENTIT.IDPESSOA = PESSOA.IDPESSOA) AND'
+      ' (ELEGPATRO.IDPESSOA = DEPENTIT.IDTITULAR) AND'
+      ' (ELEGPATRO.IDSITFUNC = SITFUNC.IDSITFUNC) AND'
+      ' (PARTASS.IDPESSOA = DEPENTIT.IDTITULAR) AND'
+      ' (PARTASS.IDPESSJUR = :IDPESSJUR) AND'
+      ' (PARTASS.IDPLANOPREV = :IDPLANOPREV) AND'
+      ' (PARTASS.IDPLANASS = :IDPLANASS) AND'
+      ' (PARTASS.IDSITPART = SITPLANOASS.IDSITPLANOASS)')
+    Params.Data = {
+      010006000B4454494E5343524943414F00010200300000000C4944444550454E
+      44454E544500030400000000000000094944544954554C415200030400000000
+      000000094944504553534A5552000304000000000000000B4944504C414E4F50
+      52455600030400000000000000094944504C414E415353000304000000000000
+      00}
+    ValidateWithMask = True
+    Left = 210
+    Top = 181
+  end
+end

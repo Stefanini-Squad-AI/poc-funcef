@@ -1,0 +1,132 @@
+CREATE OR REPLACE PROCEDURE CM.pr_desfazerdochstcontribprev
+(
+  pcoddocumento IN INTEGER,
+  pouterro      OUT VARCHAR
+) IS
+  vsql   VARCHAR2(10000);
+  TYPE cregistros_type IS REF CURSOR;
+  cregistros cregistros_type;
+  TYPE rregistros_type IS RECORD(
+    plncodigo NUMBER(30));
+  rregistros rregistros_type;
+BEGIN
+  --INICIO
+  pouterro := 'OK';
+  FOR alterasitcontrib IN (SELECT DISTINCT h.idcontribuicao,
+                                           c.flgalterasitreceb
+                           FROM hstcontribprev h
+                           JOIN contribuicao c
+                           ON c.idcontribuicao = h.idcontribuicao
+                           WHERE h.coddocumentoprev = pcoddocumento)
+  LOOP
+    IF alterasitcontrib.flgalterasitreceb = 1 THEN
+			
+      SELECT COUNT(ha.numrecebimento)
+      INTO v_cont
+      FROM hstcontribprev h
+      JOIN hstatrasocontrib ha
+      ON ha.numrecebimento = h.numrecebimento
+      AND ha.idmotivo = h.idmotivo
+      AND ha.mesreferencia = h.mesreferencia
+      AND ha.mescobranca = h.mescobranca
+      WHERE h.coddocumentoprev = pcoddocumento
+      AND h.idcontribuicao = alterasitcontrib.idcontribuicao;
+			
+      IF v_cont > 0 THEN
+        UPDATE hstatrasocontrib ha
+        SET ha.valorrecebido   = NULL,
+            ha.datarecebimento = NULL
+        WHERE ha.numrecebimento IN
+              (SELECT ha.numrecebimento
+               FROM hstcontribprev h
+               JOIN hstatrasocontrib ha
+               ON ha.numrecebimento = h.numrecebimento
+               AND ha.idmotivo = h.idmotivo
+               AND ha.mesreferencia = h.mesreferencia
+               AND ha.mescobranca = h.mescobranca
+               WHERE h.coddocumentoprev = pcoddocumento
+               AND h.idcontribuicao = alterasitcontrib.idcontribuicao);
+      END IF;
+			
+      UPDATE hstcontribprev h
+      SET h.coddocumentoprev       = NULL,
+          h.coddocumentopgapagar   = NULL,
+          h.coddocumentopgareceber = NULL,
+          h.sitrecebimento         = 1,
+          h.datarecebimento        = NULL,
+          h.valorrecebido          = NULL,
+          h.dataemisscob           = NULL
+      WHERE h.coddocumentoprev = pcoddocumento
+      AND h.idcontribuicao = alterasitcontrib.idcontribuicao;
+			
+    ELSE
+			
+      SELECT COUNT(ha.numrecebimento)
+      INTO v_cont
+      FROM hstcontribprev h
+      JOIN hstatrasocontrib ha
+      ON ha.numrecebimento = h.numrecebimento
+      AND ha.idmotivo = h.idmotivo
+      AND ha.mesreferencia = h.mesreferencia
+      AND ha.mescobranca = h.mescobranca
+      WHERE h.coddocumentoprev = pcoddocumento
+      AND h.idcontribuicao = alterasitcontrib.idcontribuicao;
+			
+      IF v_cont > 0 THEN
+        UPDATE hstatrasocontrib ha
+        SET ha.valorrecebido   = NULL,
+            ha.datarecebimento = NULL
+        WHERE ha.numrecebimento IN
+              (SELECT ha.numrecebimento
+               FROM hstcontribprev h
+               JOIN hstatrasocontrib ha
+               ON ha.numrecebimento = h.numrecebimento
+               AND ha.idmotivo = h.idmotivo
+               AND ha.mesreferencia = h.mesreferencia
+               AND ha.mescobranca = h.mescobranca
+               WHERE h.coddocumentoprev = pcoddocumento
+               AND h.idcontribuicao = alterasitcontrib.idcontribuicao);
+      END IF;
+			
+      UPDATE hstcontribprev h
+      SET h.coddocumentoprev       = NULL,
+          h.coddocumentopgapagar   = NULL,
+          h.coddocumentopgareceber = NULL
+      WHERE coddocumentoprev = pcoddocumento
+      AND h.idcontribuicao = alterasitcontrib.idcontribuicao;
+    END IF;
+  END LOOP;
+  BEGIN
+    -- exception
+    BEGIN
+      vsql := vsql || ' SELECT DISTINCT L.PLNCODIGO ' ||
+                      ' FROM LANCTODOCUM L ' || 
+											' WHERE (L.CODDOCUMENTO = ' || pcoddocumento || ')' || 
+											' AND (L.PLNCODIGO IS NOT NULL) ';
+      OPEN cregistros FOR vsql;
+      LOOP
+        FETCH cregistros
+          INTO rregistros;
+        EXIT WHEN cregistros%NOTFOUND;
+        UPDATE cm.planilha
+        SET plntotdeb = 0,
+            plntotcre = 0
+        WHERE plncodigo = rregistros.plncodigo;
+      END LOOP;
+      CLOSE cregistros;
+    END;
+    DELETE FROM cm.lancamento WHERE coddocumento = pcoddocumento;
+    DELETE FROM cm.eventoxdocum WHERE coddocumento = pcoddocumento;
+    DELETE FROM cm.ccbaixasxdocum WHERE coddocumento = pcoddocumento;
+    DELETE FROM cm.rateiodocum WHERE coddocumento = pcoddocumento;
+    DELETE FROM cm.lanctodocum WHERE coddocumento = pcoddocumento;
+    DELETE FROM cm.documxdocum WHERE iddocumento = pcoddocumento;
+    DELETE FROM cm.documento WHERE coddocumento = pcoddocumento;
+  EXCEPTION
+    WHEN OTHERS THEN
+      BEGIN
+        pouterro := 'ERRO - SQLCODE: ' || to_char(SQLCODE) || ' - SQLERRO: ' || SQLERRM;
+      END;
+  END;
+END;
+/

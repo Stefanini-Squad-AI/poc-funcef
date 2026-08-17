@@ -1,0 +1,40 @@
+insert into CM.reports
+  (NAME,
+   IDREPORTS,
+   ORIGEMCM,
+   IDGRUPORELATORIO,
+   IDMODULO,
+   ORIGEMCMGR,
+   DESCRIPTION,
+   ORIGEMCMDV,
+   FLGFILTROMANUAL,
+   FORMEVENTOS,
+   FORMPARAMREL,
+   PPREPORT,
+   FLGEXIBENOPREVIEW,
+   FLGEXPORTADADOS,
+   FLGSUBREPORT,
+   FLGRELATATIVO)
+values
+  ('Relatório de Email pessoal e Corporativo', --NAME 
+   4642, --IDREPORTS 
+   1, --ORIGEMCM
+   1, --IDGRUPORELATORIO,  
+   21, -- IDMODULO,  
+   1, -- ORIGEMCMGR, 
+   'WO11539', --DESCRIPTION, 
+   0, --ORIGEMCMDV,  
+   'N', --FLGFILTROMANUAL,  
+   'RptEmail', --FORMEVENTOS,  
+   'frmParamEmail', --FORMPARAMREL,  
+   'rpEmail', --PPREPORT,  
+   'S', --FLGEXIBENOPREVIEW,
+   'S', --FLGEXPORTADADOS,
+   'N', --FLGSUBREPORT, 
+   'S'); --FLGRELATATIVO
+   
+   
+INSERT INTO CM.CONFIGREPORTSCM (idreports, origemcm, Idpessoa, descricao)
+SELECT IDREPORTS, ORIGEMCM, '1', NAME FROM CM.REPORTS
+WHERE IDREPORTS = 4642;   
+   

@@ -1,0 +1,80 @@
+inherited frmAvisoVencMT: TfrmAvisoVencMT
+  Left = 144
+  Top = 269
+  Caption = 'Aviso de Vencimento de Contratos'
+  ClientHeight = 375
+  ClientWidth = 755
+  PixelsPerInch = 96
+  TextHeight = 13
+  inherited pnlFundo: TPanel
+    Width = 755
+    Height = 336
+  end
+  inherited Dock971: TDock97
+    Top = 336
+    Width = 755
+    inherited tb97Fundo: TToolbar97
+      Left = 155
+      DockPos = 155
+      inherited sep1: TToolbarSep97
+        Left = 434
+      end
+      object ToolbarSep971: TToolbarSep97 [1]
+        Left = 352
+        Top = 0
+        Blank = True
+        SizeHorz = 2
+      end
+      object ToolbarSep972: TToolbarSep97 [2]
+        Left = 161
+        Top = 0
+        Blank = True
+        SizeHorz = 2
+      end
+      inherited bbtnSair: TBitBtn
+        Left = 354
+      end
+      inherited bbtnAjuda: TmaHelpBitBtn
+        Left = 436
+      end
+      object bbtnIniciarRenovacao: TBitBtn
+        Left = 0
+        Top = 0
+        Width = 161
+        Height = 33
+        Caption = '&Iniciar Renovação'
+        TabOrder = 2
+        Kind = bkRetry
+      end
+      object bbtnProcessoRenovacao: TmaHelpBitBtn
+        Left = 163
+        Top = 0
+        Width = 189
+        Height = 33
+        Caption = '&Processo de Renovação'
+        TabOrder = 3
+        Glyph.Data = {
+          42020000424D4202000000000000420000002800000010000000100000000100
+          1000030000000002000000000000000000000000000000000000007C0000E003
+          00001F0000001F7C1F7C1F7C1F7C1F7C1F7C1F7C1F7C1F7C104210421F7C1F7C
+          1F7C1F7C1F7C1F7C1F7C1F7C1F7C1F7C1F7C1F7C00000000FF7F00001F7C1F7C
+          1F7C1F7C1F7C1F7C1F7C1F7C1F7C1F7C00000000FF7FFF7FFF7F00001F7C1F7C
+          1F7C1F7C1F7C1F7C1F7C1F7C00000000FF7FFF7FFF7FFF7FFF7FFF7F00001F7C
+          1F7C1F7C1F7C1F7C1F7C1F7C1042FF7FFF7FFF7FFF7FFF7F1F00FF7F00001F7C
+          1F7C1F7C1F7C00401F7C1F7C1042FF7FFF7F1F001F001F00FF7FFF7FFF7F0000
+          1F7C1F7C1F7C004000401F7C1F7C1042FF7FFF7FFF7FFF7FFF7F1F00FF7F0000
+          1F7C1F7C1F7C0040004000401F7C1042FF7FFF7F1F001F001F00FF7FFF7FFF7F
+          00001F7C1F7C1F7C0040004000400000000000000000FF7FFF7FFF7F1F00FF7F
+          FF7F00001F7C1F7C1F7C00400000FF031F7CFF031F7C000010021F00FF7FFF7F
+          FF7FFF7F00001F7C1F7C0000FF031F7CFF031F7CFF031F7C0000FF7FFF7FFF7F
+          104210421F7C1F7C1F7C00001F7CFF031F7CFF031F7CFF030000FF7F10421042
+          1F7C1F7C1F7C1F7C1F7C0000FF031F7CFF031F7CFF031F7C000010421F7C1F7C
+          1F7C1F7C1F7C1F7C1F7C00001F7CFF031F7CFF031F7CFF0300001F7C1F7C1F7C
+          1F7C1F7C1F7C1F7C1F7C1F7C00001F7CFF031F7CFF0300001F7C1F7C1F7C1F7C
+          1F7C1F7C1F7C1F7C1F7C1F7C1F7C00000000000000001F7C1F7C1F7C1F7C1F7C
+          1F7C1F7C1F7C}
+        ClickHelpContext = 0
+      end
+    end
+  end
+end

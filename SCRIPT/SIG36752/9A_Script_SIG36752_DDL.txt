@@ -1,0 +1,27 @@
+DECLARE
+  v_column_exists number := 0;  
+BEGIN
+  -- TABELA CONTRIBUICAO
+  Select count(*) into v_column_exists
+    from all_tab_columns
+    where column_name = 'FLGALTERASITRECEB'
+      and table_name = 'CONTRIBUICAO'
+      and owner = 'CM';
+  if (v_column_exists = 0) then   
+     execute immediate 'ALTER TABLE CM.CONTRIBUICAO ADD FLGALTERASITRECEB NUMBER DEFAULT 0';
+     execute immediate 'comment on column cm.CONTRIBUICAO.FLGALTERASITRECEB  is ''Flag que identifica se a contribuição altera a situação ao desfazer recebimento.'' ';
+  end if;
+
+
+  -- TABELA LOGPLANUS
+  Select count(*) into v_column_exists
+    from all_tab_columns
+    where column_name = 'FLGALTERASITRECEB'
+      and table_name = 'LOG_PLANUS_CONTRIBUICAO'
+      and owner = 'LOGPLANUS';
+  if (v_column_exists = 0) then   
+     execute immediate 'ALTER TABLE LOGPLANUS.LOG_PLANUS_CONTRIBUICAO ADD FLGALTERASITRECEB NUMBER';
+  end if;
+end;
+
+

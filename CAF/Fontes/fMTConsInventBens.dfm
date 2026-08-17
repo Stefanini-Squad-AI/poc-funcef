@@ -1,0 +1,619 @@
+inherited frmMTConsInventBens: TfrmMTConsInventBens
+  Left = 8
+  Top = 83
+  HelpContext = 70055
+  BorderIcons = [biSystemMenu, biMinimize]
+  BorderStyle = bsSingle
+  Caption = 'Consulta a Levantamentos de Inventários'
+  ClientHeight = 430
+  ClientWidth = 772
+  PixelsPerInch = 96
+  TextHeight = 13
+  inherited pnlFundo: TPanel
+    Width = 772
+    Height = 391
+    object pnlDados: TPanel
+      Left = 5
+      Top = 5
+      Width = 762
+      Height = 110
+      Align = alTop
+      BevelOuter = bvNone
+      TabOrder = 0
+      object Label1: TLabel
+        Left = 13
+        Top = 6
+        Width = 99
+        Height = 13
+        Caption = 'Levantamento Nº'
+      end
+      object Label3: TLabel
+        Left = 145
+        Top = 5
+        Width = 65
+        Height = 13
+        Caption = 'Data Início'
+      end
+      object Label4: TLabel
+        Left = 268
+        Top = 6
+        Width = 74
+        Height = 13
+        Caption = 'Responsável'
+      end
+      object dbeIdInventario: TwwDBEdit
+        Left = 13
+        Top = 22
+        Width = 101
+        Height = 21
+        DataField = 'IDINVENTARIOBENS'
+        DataSource = dsInventBens
+        TabOrder = 0
+        UnboundDataType = wwDefault
+        WantReturns = False
+        WordWrap = False
+      end
+      object bbtnSelLevant: TBitBtn
+        Left = 113
+        Top = 22
+        Width = 21
+        Height = 21
+        TabOrder = 1
+        OnClick = bbtnSelLevantClick
+        OnEnter = bbtnSelLevantEnter
+        Glyph.Data = {
+          76010000424D7601000000000000760000002800000020000000100000000100
+          0400000000000001000000000000000000001000000010000000000000000000
+          80000080000000808000800000008000800080800000C0C0C000808080000000
+          FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00777777777887
+          777777777777F88F7777777777700F077777777777F8878F77777777700FFF07
+          77777777F8877787F77777700FFFFFF077777778877777F8F7777778FFFFFCF0
+          77777F78F77FF8787F771778FFCCCFFF07778FF87F88877F8F7711778FFFFFCF
+          077788FF8F77FF8787F711178FFCCCFFF077888F8FF88877F87F71110000FFFC
+          FF07788888887FF877877710E7E706CFFFF077887777888777F8770E7E7E70FF
+          F887778F777778F7F8877707E7E7E0F88777778F777778F88777770E7E7E7087
+          7777778F7777788777777707E7E7E07777777787F7777877777777707E7E0777
+          777777787FFF8777777777770000777777777777888877777777}
+        NumGlyphs = 2
+      end
+      object GroupBox1: TGroupBox
+        Left = 506
+        Top = 6
+        Width = 241
+        Height = 41
+        TabOrder = 3
+        object DBCheckBox1: TDBCheckBox
+          Left = 12
+          Top = 16
+          Width = 97
+          Height = 17
+          Caption = 'Encerrado em'
+          DataField = 'ENCERRADO'
+          DataSource = dsInventBens
+          TabOrder = 0
+          ValueChecked = '1'
+          ValueUnchecked = '0'
+        end
+        object Panel1: TPanel
+          Left = 116
+          Top = 11
+          Width = 121
+          Height = 23
+          BevelOuter = bvNone
+          Caption = 'Panel2'
+          Enabled = False
+          TabOrder = 1
+          object DBDateEdit1: TCMDateTimePicker
+            Left = 2
+            Top = 1
+            Width = 113
+            Height = 21
+            CalendarAttributes.Font.Charset = DEFAULT_CHARSET
+            CalendarAttributes.Font.Color = clWindowText
+            CalendarAttributes.Font.Height = -11
+            CalendarAttributes.Font.Name = 'MS Sans Serif'
+            CalendarAttributes.Font.Style = []
+            ButtonStyle = cbsCustom
+            DataField = 'DATAFIMLEVANT'
+            DataSource = dsInventBens
+            Epoch = 1950
+            ButtonGlyph.Data = {
+              06050000424D06050000000000003604000028000000100000000D0000000100
+              080000000000D000000000000000000000000001000000000000000000000000
+              80000080000000808000800000008000800080800000C0C0C000C0DCC000F0CA
+              A6000020400000206000002080000020A0000020C0000020E000004000000040
+              20000040400000406000004080000040A0000040C0000040E000006000000060
+              20000060400000606000006080000060A0000060C0000060E000008000000080
+              20000080400000806000008080000080A0000080C0000080E00000A0000000A0
+              200000A0400000A0600000A0800000A0A00000A0C00000A0E00000C0000000C0
+              200000C0400000C0600000C0800000C0A00000C0C00000C0E00000E0000000E0
+              200000E0400000E0600000E0800000E0A00000E0C00000E0E000400000004000
+              20004000400040006000400080004000A0004000C0004000E000402000004020
+              20004020400040206000402080004020A0004020C0004020E000404000004040
+              20004040400040406000404080004040A0004040C0004040E000406000004060
+              20004060400040606000406080004060A0004060C0004060E000408000004080
+              20004080400040806000408080004080A0004080C0004080E00040A0000040A0
+              200040A0400040A0600040A0800040A0A00040A0C00040A0E00040C0000040C0
+              200040C0400040C0600040C0800040C0A00040C0C00040C0E00040E0000040E0
+              200040E0400040E0600040E0800040E0A00040E0C00040E0E000800000008000
+              20008000400080006000800080008000A0008000C0008000E000802000008020
+              20008020400080206000802080008020A0008020C0008020E000804000008040
+              20008040400080406000804080008040A0008040C0008040E000806000008060
+              20008060400080606000806080008060A0008060C0008060E000808000008080
+              20008080400080806000808080008080A0008080C0008080E00080A0000080A0
+              200080A0400080A0600080A0800080A0A00080A0C00080A0E00080C0000080C0
+              200080C0400080C0600080C0800080C0A00080C0C00080C0E00080E0000080E0
+              200080E0400080E0600080E0800080E0A00080E0C00080E0E000C0000000C000
+              2000C0004000C0006000C0008000C000A000C000C000C000E000C0200000C020
+              2000C0204000C0206000C0208000C020A000C020C000C020E000C0400000C040
+              2000C0404000C0406000C0408000C040A000C040C000C040E000C0600000C060
+              2000C0604000C0606000C0608000C060A000C060C000C060E000C0800000C080
+              2000C0804000C0806000C0808000C080A000C080C000C080E000C0A00000C0A0
+              2000C0A04000C0A06000C0A08000C0A0A000C0A0C000C0A0E000C0C00000C0C0
+              2000C0C04000C0C06000C0C08000C0C0A000F0FBFF00A4A0A000808080000000
+              FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00010000000000
+              000000000000000000FFFF00FFFFFFFFFFFFFFFFFFFFFFFF00FFFF00FF07A407
+              A407A4F9A407A4FF00FFFF00FFA407A407A4F9A4F9A407FF00FFFF00FF07A407
+              A407A4F9A407A4FF00FFFF00FFA407A407A407A407A407FF00FFFF00FF07A407
+              A407A407A407A4FF00FFFF00FFA407A407A407A407A407FF00FFFF00FFFFFFFF
+              FFFFFFFFFFFFFFFF00FFFF00FF04FC04FC04FCA4A4A4A4FF00FFFF00FFFC04FC
+              04FC04A4A4A4A4FF00FFFF00FFFFFFFFFFFFFFFFFFFFFFFF00FFFF0000000000
+              000000000000000000FF}
+            ShowButton = True
+            TabOrder = 0
+          end
+        end
+      end
+      object Panel2: TPanel
+        Left = 143
+        Top = 21
+        Width = 121
+        Height = 23
+        BevelOuter = bvNone
+        Caption = 'Panel2'
+        Enabled = False
+        TabOrder = 4
+        object dbeDataInicio: TCMDateTimePicker
+          Left = 2
+          Top = 1
+          Width = 113
+          Height = 21
+          CalendarAttributes.Font.Charset = DEFAULT_CHARSET
+          CalendarAttributes.Font.Color = clWindowText
+          CalendarAttributes.Font.Height = -11
+          CalendarAttributes.Font.Name = 'MS Sans Serif'
+          CalendarAttributes.Font.Style = []
+          ButtonStyle = cbsCustom
+          DataField = 'DATAINILEVANT'
+          DataSource = dsInventBens
+          Epoch = 1950
+          ButtonGlyph.Data = {
+            06050000424D06050000000000003604000028000000100000000D0000000100
+            080000000000D000000000000000000000000001000000000000000000000000
+            80000080000000808000800000008000800080800000C0C0C000C0DCC000F0CA
+            A6000020400000206000002080000020A0000020C0000020E000004000000040
+            20000040400000406000004080000040A0000040C0000040E000006000000060
+            20000060400000606000006080000060A0000060C0000060E000008000000080
+            20000080400000806000008080000080A0000080C0000080E00000A0000000A0
+            200000A0400000A0600000A0800000A0A00000A0C00000A0E00000C0000000C0
+            200000C0400000C0600000C0800000C0A00000C0C00000C0E00000E0000000E0
+            200000E0400000E0600000E0800000E0A00000E0C00000E0E000400000004000
+            20004000400040006000400080004000A0004000C0004000E000402000004020
+            20004020400040206000402080004020A0004020C0004020E000404000004040
+            20004040400040406000404080004040A0004040C0004040E000406000004060
+            20004060400040606000406080004060A0004060C0004060E000408000004080
+            20004080400040806000408080004080A0004080C0004080E00040A0000040A0
+            200040A0400040A0600040A0800040A0A00040A0C00040A0E00040C0000040C0
+            200040C0400040C0600040C0800040C0A00040C0C00040C0E00040E0000040E0
+            200040E0400040E0600040E0800040E0A00040E0C00040E0E000800000008000
+            20008000400080006000800080008000A0008000C0008000E000802000008020
+            20008020400080206000802080008020A0008020C0008020E000804000008040
+            20008040400080406000804080008040A0008040C0008040E000806000008060
+            20008060400080606000806080008060A0008060C0008060E000808000008080
+            20008080400080806000808080008080A0008080C0008080E00080A0000080A0
+            200080A0400080A0600080A0800080A0A00080A0C00080A0E00080C0000080C0
+            200080C0400080C0600080C0800080C0A00080C0C00080C0E00080E0000080E0
+            200080E0400080E0600080E0800080E0A00080E0C00080E0E000C0000000C000
+            2000C0004000C0006000C0008000C000A000C000C000C000E000C0200000C020
+            2000C0204000C0206000C0208000C020A000C020C000C020E000C0400000C040
+            2000C0404000C0406000C0408000C040A000C040C000C040E000C0600000C060
+            2000C0604000C0606000C0608000C060A000C060C000C060E000C0800000C080
+            2000C0804000C0806000C0808000C080A000C080C000C080E000C0A00000C0A0
+            2000C0A04000C0A06000C0A08000C0A0A000C0A0C000C0A0E000C0C00000C0C0
+            2000C0C04000C0C06000C0C08000C0C0A000F0FBFF00A4A0A000808080000000
+            FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00010000000000
+            000000000000000000FFFF00FFFFFFFFFFFFFFFFFFFFFFFF00FFFF00FF07A407
+            A407A4F9A407A4FF00FFFF00FFA407A407A4F9A4F9A407FF00FFFF00FF07A407
+            A407A4F9A407A4FF00FFFF00FFA407A407A407A407A407FF00FFFF00FF07A407
+            A407A407A407A4FF00FFFF00FFA407A407A407A407A407FF00FFFF00FFFFFFFF
+            FFFFFFFFFFFFFFFF00FFFF00FF04FC04FC04FCA4A4A4A4FF00FFFF00FFFC04FC
+            04FC04A4A4A4A4FF00FFFF00FFFFFFFFFFFFFFFFFFFFFFFF00FFFF0000000000
+            000000000000000000FF}
+          ShowButton = True
+          TabOrder = 0
+        end
+      end
+      object rdgOpcoes: TRadioGroup
+        Left = 0
+        Top = 49
+        Width = 762
+        Height = 61
+        Align = alBottom
+        Caption = ' Opções '
+        Columns = 3
+        Font.Charset = ANSI_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Arial'
+        Font.Style = [fsBold]
+        ItemIndex = 0
+        Items.Strings = (
+          'Bens do levantamento'
+          'Bens da localização encontrados'
+          'Bens da localização não encontrados'
+          'Bens não cadastrados'
+          'Bens pertencentes a outras localizações'
+          'Bens encontrados em outras localizações')
+        ParentFont = False
+        TabOrder = 2
+        OnClick = rdgOpcoesClick
+      end
+      object dbeResponsavel: TwwDBEdit
+        Left = 268
+        Top = 22
+        Width = 229
+        Height = 21
+        DataField = 'NOMERESP'
+        DataSource = dsInventBens
+        TabOrder = 5
+        UnboundDataType = wwDefault
+        WantReturns = False
+        WordWrap = False
+      end
+    end
+    object pnlGrid: TPanel
+      Left = 5
+      Top = 116
+      Width = 762
+      Height = 179
+      BevelInner = bvLowered
+      BevelOuter = bvNone
+      TabOrder = 1
+      object dbGrd: TwwDBGrid
+        Left = 1
+        Top = 1
+        Width = 760
+        Height = 177
+        Selected.Strings = (
+          'IIBPLACA'#9'15'#9'Placa'#9'F'
+          'DESBEM'#9'60'#9'Descrição Bem'#9'F'
+          'DESCFLGPLACA'#9'20'#9'Resultado'#9'F'
+          'DESCCONJUNTO_DE'#9'40'#9'Conjunto Origem'#9'F'
+          'DESCLOCAL_DE'#9'40'#9'Local Origem'#9'F'
+          'NOMERESP_DE'#9'40'#9'Responsável Origem'#9'F'
+          'DESCCONJUNTO_PARA'#9'40'#9'Conjunto Destino'#9'F'
+          'DESCLOCAL_PARA'#9'40'#9'Local Destino'#9'F'
+          'NOMERESP_PARA'#9'40'#9'Responsável Destino'#9'F'
+          'DESCFLGSITFISICA'#9'9'#9'Situação Física'#9'F')
+        IniAttributes.Delimiter = ';;'
+        TitleColor = clBtnFace
+        FixedCols = 0
+        ShowHorzScrollBar = True
+        Align = alClient
+        DataSource = dsItensInvBens
+        Font.Charset = ANSI_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -9
+        Font.Name = 'MS Sans Serif'
+        Font.Style = [fsBold]
+        Options = [dgEditing, dgTitles, dgColumnResize, dgColLines, dgRowLines, dgTabs, dgRowSelect, dgConfirmDelete, dgCancelOnExit, dgWordWrap]
+        ParentFont = False
+        ReadOnly = True
+        TabOrder = 0
+        TitleAlignment = taCenter
+        TitleFont.Charset = DEFAULT_CHARSET
+        TitleFont.Color = clWindowText
+        TitleFont.Height = -9
+        TitleFont.Name = 'MS Sans Serif'
+        TitleFont.Style = [fsBold]
+        TitleLines = 1
+        TitleButtons = False
+        OnCalcCellColors = dbGrdCalcCellColors
+        IndicatorColor = icBlack
+        OnTopRowChanged = dbGrdTopRowChanged
+      end
+    end
+    object pnlDetalhe: TPanel
+      Left = 5
+      Top = 295
+      Width = 762
+      Height = 91
+      Align = alBottom
+      BevelInner = bvLowered
+      BevelOuter = bvNone
+      TabOrder = 2
+      object Label5: TLabel
+        Left = 16
+        Top = 5
+        Width = 90
+        Height = 13
+        Caption = 'DA Localização'
+      end
+      object Label6: TLabel
+        Left = 264
+        Top = 5
+        Width = 74
+        Height = 13
+        Caption = 'Responsável'
+      end
+      object Label7: TLabel
+        Left = 528
+        Top = 5
+        Width = 51
+        Height = 13
+        Caption = 'Conjunto'
+      end
+      object Label8: TLabel
+        Left = 16
+        Top = 45
+        Width = 106
+        Height = 13
+        Caption = 'PARA Localização'
+      end
+      object Label9: TLabel
+        Left = 264
+        Top = 45
+        Width = 74
+        Height = 13
+        Caption = 'Responsável'
+      end
+      object Label10: TLabel
+        Left = 528
+        Top = 45
+        Width = 51
+        Height = 13
+        Caption = 'Conjunto'
+      end
+      object wwDBEdit1: TwwDBEdit
+        Left = 16
+        Top = 21
+        Width = 249
+        Height = 21
+        DataField = 'DESCLOCAL_DE'
+        DataSource = dsItensInvBens
+        TabOrder = 0
+        UnboundDataType = wwDefault
+        WantReturns = False
+        WordWrap = False
+      end
+      object wwDBEdit2: TwwDBEdit
+        Left = 264
+        Top = 21
+        Width = 265
+        Height = 21
+        DataField = 'NOMERESP_DE'
+        DataSource = dsItensInvBens
+        TabOrder = 1
+        UnboundDataType = wwDefault
+        WantReturns = False
+        WordWrap = False
+      end
+      object wwDBEdit3: TwwDBEdit
+        Left = 528
+        Top = 21
+        Width = 217
+        Height = 21
+        DataField = 'DESCCONJUNTO_DE'
+        DataSource = dsItensInvBens
+        TabOrder = 2
+        UnboundDataType = wwDefault
+        WantReturns = False
+        WordWrap = False
+      end
+      object wwDBEdit4: TwwDBEdit
+        Left = 16
+        Top = 61
+        Width = 249
+        Height = 21
+        DataField = 'DESCLOCAL_PARA'
+        DataSource = dsItensInvBens
+        TabOrder = 3
+        UnboundDataType = wwDefault
+        WantReturns = False
+        WordWrap = False
+      end
+      object wwDBEdit5: TwwDBEdit
+        Left = 264
+        Top = 61
+        Width = 265
+        Height = 21
+        DataField = 'NOMERESP_PARA'
+        DataSource = dsItensInvBens
+        TabOrder = 4
+        UnboundDataType = wwDefault
+        WantReturns = False
+        WordWrap = False
+      end
+      object wwDBEdit6: TwwDBEdit
+        Left = 528
+        Top = 61
+        Width = 217
+        Height = 21
+        DataField = 'DESCCONJUNTO_PARA'
+        DataSource = dsItensInvBens
+        TabOrder = 5
+        UnboundDataType = wwDefault
+        WantReturns = False
+        WordWrap = False
+      end
+    end
+  end
+  inherited Dock971: TDock97
+    Top = 391
+    Width = 772
+    inherited tb97Fundo: TToolbar97
+      Left = 550
+      DockPos = 550
+      inherited bbtnAjuda: TmaHelpBitBtn
+        HelpContext = 70055
+      end
+    end
+  end
+  inherited ivTradutor: TIvExtendedTranslator
+    Left = 682
+    Top = 415
+  end
+  object MSInventBens: TMontaSelect
+    Template.IdConsulta = 0
+    Caption = 'Selecione o Levantamento'
+    Colunas.Strings = (
+      'INVENTARIOBENS.IDINVENTARIOBENS'
+      'PESSOA.NOME'
+      'INVENTARIOBENS.DATAINILEVANT'
+      'INVENTARIOBENS.DATAFIMLEVANT')
+    TipodeDado.Strings = (
+      'N'
+      'C'
+      'D'
+      'D')
+    Descricao.Strings = (
+      'Nº do Levantamento'
+      'Responsável'
+      'Data de Início'
+      'Data de Término')
+    SensivelACaixa.Strings = (
+      'N'
+      'N'
+      'N'
+      'N')
+    Tabelas.Strings = (
+      'INVENTARIOBENS'
+      'PESSOA')
+    CamposChave.Strings = (
+      'INVENTARIOBENS.IDINVENTARIOBENS'
+      'INVENTARIOBENS.IDEMPRESA')
+    Filtro.Strings = (
+      'INVENTARIOBENS.IDRESPONSAVEL=PESSOA.IDPESSOA')
+    Mascaras.Strings = (
+      ''
+      ''
+      ''
+      '')
+    Larguras.Strings = (
+      '10'
+      '60'
+      '10'
+      '10')
+    DataBaseName = 'BaseDados'
+    RepeteConsulta = False
+    UsaDistinct = False
+    SalvaConsulta = False
+    ExibePergunta = True
+    MultiSelect = False
+    Left = 254
+    Top = 144
+  end
+  object dsInventBens: TwwDataSource
+    AutoEdit = False
+    DataSet = cdsInventBens
+    Left = 337
+    Top = 173
+  end
+  object dsItensInvBens: TwwDataSource
+    AutoEdit = False
+    DataSet = cdsItensInvBens
+    Left = 424
+    Top = 172
+  end
+  object cdsInventBens: TCMClientDataSet
+    Aggregates = <>
+    Params = <>
+    Left = 336
+    Top = 158
+  end
+  object sqlInventBens: TCMSqlParams
+    SQL.Strings = (
+      'SELECT IB.IDINVENTARIOBENS,'
+      '       IB.IDEMPRESA,'
+      '       IB.IDRESPONSAVEL,'
+      '       IB.DATAINILEVANT,'
+      '       IB.DATAFIMLEVANT,'
+      '       IB.STATUS,'
+      '       DECODE(IB.STATUS,0,0,'
+      '              DECODE(IB.STATUS,1,1,'
+      '              DECODE(IB.STATUS,2,1,1))) AS ENCERRADO,'
+      '       P.NOME AS NOMERESP'
+      'FROM INVENTARIOBENS IB,'
+      '     PESSOA P'
+      'WHERE IB.IDINVENTARIOBENS = :IDINVENTARIOBENS'
+      '  AND IB.IDEMPRESA = :IDEMPRESA'
+      '  AND IB.IDRESPONSAVEL = P.IDPESSOA(+)'
+      '')
+    ClientDataSet = cdsInventBens
+    Left = 336
+    Top = 144
+  end
+  object cdsItensInvBens: TCMClientDataSet
+    Aggregates = <>
+    Params = <>
+    Left = 424
+    Top = 158
+  end
+  object sqlItensInvBens: TCMSqlParams
+    SQL.Strings = (
+      'SELECT I.IIBPLACA, I.IIBFLGPLACA,'
+      '       DECODE(I.IIBFLGPLACA,0,'#39'       ....         '#39','
+      '       DECODE(I.IIBFLGPLACA,1,'#39'        Ok          '#39','
+      '       DECODE(I.IIBFLGPLACA,2,'#39'Placa não encontrada'#39','
+      '       DECODE(I.IIBFLGPLACA,3,'#39'Placa EM outro Local'#39','
+      '       DECODE(I.IIBFLGPLACA,4,'#39'Placa DE outro Local'#39','
+      '       DECODE(I.IIBFLGPLACA,5,'#39'Placa não Cadastrada'#39','
+      
+        '                              '#39'       ....         '#39')))))) AS DE' +
+        'SCFLGPLACA,'
+      '       I.IIBCONJUNTOATUAL,'
+      '       CONJ_DE.DESCCONJUNTO AS DESCCONJUNTO_DE,'
+      '       I.IIBLOCALATUAL,'
+      '       LOCAL_DE.NOME AS DESCLOCAL_DE,'
+      '       RESP_DE.NOME AS NOMERESP_DE,'
+      '       I.IIBCONJUNTONOVO,'
+      '       CONJ_PARA.DESCCONJUNTO AS DESCCONJUNTO_PARA,'
+      '       I.IIBLOCALNOVO,'
+      '       LOCAL_PARA.NOME AS DESCLOCAL_PARA,'
+      '       RESP_PARA.NOME AS NOMERESP_PARA,'
+      '       DECODE(I.IIBFLGSITFISICA,0,'#39' Normal  '#39','
+      '       DECODE(I.IIBFLGSITFISICA,1,'#39'Avariado '#39','
+      
+        '       DECODE(I.IIBFLGSITFISICA,2,'#39'Destruido'#39', '#39' Normal  '#39'))) AS' +
+        ' DESCFLGSITFISICA,'
+      '       B.DESBEM'
+      'FROM ITENSINVBENS I,'
+      '     BEM B,'
+      '     CONJUNTO CONJ_DE,'
+      '     LOCALIZACAO LOCAL_DE,'
+      '     PESSOA RESP_DE,'
+      '     CONJUNTO CONJ_PARA,'
+      '     LOCALIZACAO LOCAL_PARA,'
+      '     PESSOA RESP_PARA'
+      'WHERE I.IDINVENTARIOBENS = :IDINVENTARIOBENS'
+      '  AND I.IDEMPRESA = :IDEMPRESA'
+      ''
+      '  AND I.IIBIDBEM = B.IDBEM(+)'
+      '  AND I.IDEMPRESA = B.IDPESSOA(+)'
+      '  AND I.IIBCONJUNTOATUAL = CONJ_DE.IDCONJUNTO(+)'
+      '  AND I.IDEMPRESA = CONJ_DE.IDPESSOA(+)'
+      '  AND CONJ_DE.IDRESPONSAVEL = RESP_DE.IDPESSOA(+)'
+      '  AND I.IIBLOCALATUAL = LOCAL_DE.IDLOCALIZACAO(+)'
+      '  AND I.IDEMPRESA = LOCAL_DE.IDPESSOA(+)'
+      '  AND I.IIBCONJUNTONOVO = CONJ_PARA.IDCONJUNTO(+)'
+      '  AND I.IDEMPRESA = CONJ_PARA.IDPESSOA(+)'
+      '  AND CONJ_PARA.IDRESPONSAVEL = RESP_PARA.IDPESSOA(+)'
+      '  AND I.IIBLOCALNOVO = LOCAL_PARA.IDLOCALIZACAO(+)'
+      '  AND I.IDEMPRESA = LOCAL_PARA.IDPESSOA(+)'
+      'ORDER BY I.IIBFLGPLACA DESC, I.IIBPLACA'
+      '')
+    ClientDataSet = cdsItensInvBens
+    Left = 424
+    Top = 144
+  end
+end

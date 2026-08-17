@@ -1,0 +1,359 @@
+﻿<html>
+<head>
+<title>Ajuda do Planejamento e Orçamento</title>
+
+<meta name="generator" content="Adobe RoboHelp - www.adobe.com">
+<meta name="description" content="WebHelp 5.50">
+<script language="javascript1.2" src="whutils.js"></script>
+</head>
+<body>
+<script language="JavaScript">
+<!--
+
+var gArrayCsh = new Array();
+
+var gstrWindowOption = "";
+var gstrURL = "";
+var gbWithNavPane = false;
+
+function CshEntityItem(strAliasId, nTopicNum, strUrl) 
+{
+    this.strAliasId = strAliasId;
+    this.nTopicNum = nTopicNum;
+    this.strUrl = strUrl;
+}
+
+
+//Try to get to topic number from hash string
+function GetTopicNumberAuto(strMayBeNumber)
+{
+   var nNum = -1;
+   if (strMayBeNumber.length >= 1)
+   {
+		var strTmp = strMayBeNumber;
+		var iEnd = strTmp.length;
+		for (var i=0; i<iEnd; i++)
+		{
+			  var ch = strTmp.charAt(i);
+			  if (!((ch == "0") || (ch == "1") ||
+			        (ch == "2") || (ch == "3") ||
+			        (ch == "4") || (ch == "5") ||
+			        (ch == "6") || (ch == "7") ||
+			        (ch == "8") || (ch == "9")))
+			      return GetTopicNumberById(strTmp);
+		}
+		nNum = parseInt(strTmp);
+   }
+   return nNum;
+}
+
+function GetTopicNumber(strHashString)
+{
+	var nTopicEndPos = strHashString.indexOf(',')
+	if (nTopicEndPos == -1) { // no window option.
+		return GetTopicNumberOnly(strHashString);
+	}
+	else {
+		var strWindowOption = strHashString.substring(nTopicEndPos + 1, strHashString.length);
+		var strWithNavPane = 'withnavpane=true';
+		if (strWindowOption.toLowerCase().indexOf(strWithNavPane) == 0)
+		{
+			if (strWindowOption.length > strWithNavPane.length)
+				gstrWindowOption = strWindowOption.substring(strWithNavPane.length + 1);
+			else
+				gstrWindowOption = "";
+			gbWithNavPane = true;
+		}
+		else
+			gstrWindowOption = strWindowOption;
+		return GetTopicNumberOnly(strHashString.substring(0, nTopicEndPos));		
+	}
+}
+
+function GetTopicNumberOnly(strTopicString)
+{
+	var nEqualPos = strTopicString.indexOf('=');
+	if (nEqualPos == -1) {
+		return GetTopicNumberAuto(strTopicString);
+	}
+	else {
+		var strValue=strTopicString.substring(nEqualPos + 1, strTopicString.length);
+		if (strTopicString.toLowerCase().indexOf("topicnumber") == 0) {
+			return parseInt(strValue);
+		} else if (strTopicString.toLowerCase().indexOf("context") == 0) {
+			return GetTopicNumberById(strValue);
+		} else if (strTopicString.toLowerCase().indexOf("remoteurl") == 0) {
+			if(IsInternal(strValue))
+				gstrURL = _textToHtml(strValue);
+			return -1;
+		}
+
+	}
+}
+
+//Find HomePage of the WebHelp system
+// we try to get the topic from remote project if it exists.
+function RedirectToHomePage()
+{
+	if (parent && parent != this && parent.goNext)
+	{
+		var sHome = parent.goNext();
+		if (sHome != "")
+			RedirectTo(sHome);
+	}
+}
+
+function getHomePage()
+{
+	if (parent && parent != this && parent.getRelHomePage)
+	{
+		return parent.getRelHomePage(document.location.href);
+	}
+	return "";
+}
+
+function addRemoteProject(strPath)
+{
+	if (parent && parent != this && parent.addProject)
+	{
+		parent.addProject(strPath);
+	}
+}
+
+//Redirect page to...
+function RedirectTo(strUrl)
+{
+   if (gstrWindowOption.length != 0) {
+		var wnd = window.open(strUrl, "HelpStub", gstrWindowOption);
+		// close current window and rename the stub window to current window.
+		if (wnd)
+			wnd.focus();
+		if (parent)
+			parent.close();
+   }
+   else {
+	parent.document.location.href = strUrl;
+	window.focus();
+  }
+}
+
+//Prompt the user that we can not find...
+function FailToFind(strMsg)
+{
+    RedirectToHomePage();
+}
+
+//Find topic by topic number (defined in h file)
+function FindTopicByTopicNum(nTopicNum)
+{
+	var i = 0;
+	var iEnd = gArrayCsh.length;
+	for (i=0; i<iEnd; i++)
+	{
+		if (gArrayCsh[i].nTopicNum == nTopicNum)
+		{
+			var strURL = gArrayCsh[i].strUrl;
+			if (gbWithNavPane)
+			{
+				var strHomePage = getHomePage();
+				if (strHomePage.length != 0)
+					strURL = strHomePage + strURL;
+			}	
+			RedirectTo(strURL);
+			return true;
+		}
+	}
+	FailToFind("Fail to find topic assocaite with topic number: " + nTopicNum);
+	return false;
+}
+
+var oldPrefix = "HelpIdFromHTMLHelp_"
+//Find topic by topic id (alias id defined in ali file)
+function GetTopicNumberById(strTopicId)
+{
+   if (strTopicId.indexOf(oldPrefix) == 0)
+   {
+		strTopicId = strTopicId.substring(oldPrefix.length);
+   }
+
+   var i = 0;
+   var iEnd = gArrayCsh.length;
+   for (i=0; i<iEnd; i++)
+   {
+	if (gArrayCsh[i].strAliasId.toLowerCase() == strTopicId.toLowerCase())
+	{
+	    return gArrayCsh[i].nTopicNum;
+	 }
+   }
+   gstrURL = "";
+   return -1;
+}
+
+//Set Context-sensitive help entity...
+function SetCsh(n, strAliasId, nTopicNum, strUrl)
+{
+   gArrayCsh[n] = new CshEntityItem(strAliasId,nTopicNum,strUrl);
+}
+
+
+function getHash()
+{
+	if (parent && parent != this)
+		return parent.location.hash;
+	else
+		return "";
+}
+//-->
+</script>
+<script language="javascript">
+<!--
+  SetCsh(0,"230017",0,"Orcamento/Sistema_Fluxo_de_Operacao.htm");
+  SetCsh(1,"230018",1,"Orcamento/Sistema_Fluxo_de_Operacao_Montar.htm");
+  SetCsh(2,"520008",2,"Orcamento/Entrada_de_Dados_Diaria.htm");
+  SetCsh(3,"520016",3,"Orcamento/Processos_Transferencia_Orcamentaria.htm");
+  SetCsh(4,"520019",4,"Orcamento/Processos_Encerramento_do_Exercicio.htm");
+  SetCsh(5,"520033",5,"Orcamento/Cadastros_Plano_de_Trabalho.htm");
+  SetCsh(6,"230001",6,"Orcamento/Sistema_Geral.htm");
+  SetCsh(7,"230007",7,"Orcamento/Sistema_Configuracao_Barra_de_Atalhos.htm");
+  SetCsh(8,"520009",8,"Orcamento/Entrada_de_Dados_Cenarios.htm");
+  SetCsh(9,"230028",9,"Orcamento/Editar_Desfazer.htm");
+  SetCsh(10,"520024",10,"Orcamento/Cadastros_Copia_Contas_Orcamentarias.htm");
+  SetCsh(11,"520029",11,"Orcamento/Cadastros_Cenarios.htm");
+  SetCsh(12,"230041",12,"Orcamento/Ajuda_Topicos_da_Ajuda.htm");
+  SetCsh(13,"520051",13,"Orcamento/Processos_Compromisso_Especial.htm");
+  SetCsh(14,"520030",14,"Orcamento/Cadastros_Criterios_de_Rateio.htm");
+  SetCsh(15,"230038",15,"Orcamento/Janela_Organizar_Icones.htm");
+  SetCsh(16,"230044",16,"Orcamento/Ajuda_Sobre.htm");
+  SetCsh(17,"520057",17,"Orcamento/Entrada_de_Dados_Execucao_de_Formulas_de_Apuracao.htm");
+  SetCsh(18,"520012",18,"Orcamento/Processos_Geral.htm");
+  SetCsh(19,"230024",19,"Orcamento/Editar_Copiar.htm");
+  SetCsh(20,"520021",20,"Orcamento/Cadastros_Plano_Orcamentario.htm");
+  SetCsh(21,"230052",21,"Orcamento/RAD_Consultar_Processo.htm");
+  SetCsh(22,"520090",22,"Orcamento/Consulta_Orcado_X_Realizado_por_Semestre.htm");
+  SetCsh(23,"230011",23,"Orcamento/Sistema_Utilitarios_Correio_CM_Envia_Mensagens.htm");
+  SetCsh(24,"520053",24,"Orcamento/Cadastros_Contas_Orcamentarias_por_Grupo.htm");
+  SetCsh(25,"230003",25,"Orcamento/Sistema_Mudar_Empresa.htm");
+  SetCsh(26,"230021",26,"Orcamento/Sistema_Fluxo_de_Operacao_Executar.htm");
+  SetCsh(27,"230035",27,"Orcamento/Janela_Lado_a_Lado_Horizontal.htm");
+  SetCsh(28,"520050",28,"Orcamento/Entrada_de_Dados_Especial_com_Cenario.htm");
+  SetCsh(29,"230029",29,"Orcamento/Editar_Selecionar_Todas.htm");
+  SetCsh(30,"520025",30,"Orcamento/Cadastros_Periodo_Orcamentario.htm");
+  SetCsh(31,"230048",31,"Orcamento/RAD_Executar_Etapa.htm");
+  SetCsh(32,"230062",32,"Orcamento/Sistema_Utilitarios_DataBase_Trace_Visualizar.htm");
+  SetCsh(33,"520004",33,"Orcamento/Sistema_Utilitarios_Cenarios_Manipula_Cenarios.htm");
+  SetCsh(34,"230030",34,"Orcamento/Consultas_Geral.htm");
+  SetCsh(35,"230040",35,"Orcamento/Ajuda_Geral.htm");
+  SetCsh(36,"230042",36,"Orcamento/Ajuda_Como_usar_a_Ajuda.htm");
+  SetCsh(37,"230043",37,"Orcamento/Ajuda_Historico_de_Alteracoes.htm");
+  SetCsh(38,"230063",38,"Orcamento/Sistema_Utilitarios_DataBase_Trace_Enviar_por_email.htm");
+  SetCsh(39,"230022",39,"Orcamento/Sistema_Sair.htm");
+  SetCsh(40,"520052",40,"Orcamento/Processos_Ajuste_Orcamentario.htm");
+  SetCsh(41,"230025",41,"Orcamento/Editar_Recortar.htm");
+  SetCsh(42,"520026",42,"Orcamento/Cadastros_Usuarios_x_Centro_de_Responsabilidade.htm");
+  SetCsh(43,"520028",43,"Orcamento/Cadastros_Layout_de_Relatorios.htm");
+  SetCsh(44,"230031",44,"Orcamento/Consultas_Relatorios.htm");
+  SetCsh(45,"230047",45,"Orcamento/RAD_Geral.htm");
+  SetCsh(46,"230037",46,"Orcamento/Janela_Em_Cascata.htm");
+  SetCsh(47,"520034",47,"Orcamento/Consultas_Log_de_Operacoes.htm");
+  SetCsh(48,"230005",48,"Orcamento/Sistema_Configuracao_Parametros_do_Sistema.htm");
+  SetCsh(49,"230004",49,"Orcamento/Sistema_Configuracao.htm");
+  SetCsh(50,"230012",50,"Orcamento/Sistema_Idiomas.htm");
+  SetCsh(51,"230023",51,"Orcamento/Editar_Geral.htm");
+  SetCsh(52,"520060",52,"Orcamento/Cadastros_Relatorio_Linhas_x_Colunas.htm");
+  SetCsh(53,"230008",53,"Orcamento/Sistema_Configuracao_Barra_de_Status.htm");
+  SetCsh(54,"230061",54,"Orcamento/Sistema_Utilitarios_DataBase_Trace.htm");
+  SetCsh(55,"520003",55,"Orcamento/Sistema_Utilitarios_Cenarios_Efetiva_Cenario.htm");
+  SetCsh(56,"520022",56,"Orcamento/Cadastros_Grupo_de_Contas_Orcamentarias.htm");
+  SetCsh(57,"230060",57,"Orcamento/Filtra_Consulta.htm");
+  SetCsh(58,"230009",58,"Orcamento/Sistema_Utilitarios.htm");
+  SetCsh(59,"520027",59,"Orcamento/Cadastros_Criacao_de_Relatorios_Configuraveis.htm");
+  SetCsh(60,"230051",60,"Orcamento/RAD_Gerar_Processo.htm");
+  SetCsh(61,"230034",61,"Orcamento/Janela_Geral.htm");
+  SetCsh(62,"230010",62,"Orcamento/Sistema_Utilitarios_Correio_CM_Lista_Mensagens.htm");
+  SetCsh(63,"230065",63,"Orcamento/Sistema_Utilitarios_Correio_CM_Opcoes.htm");
+  SetCsh(64,"230006",64,"Orcamento/Sistema_Configuracao_Relatorios.htm");
+  SetCsh(65,"520002",65,"Orcamento/Sistema_Utilitarios_Cenarios.htm");
+  SetCsh(66,"520006",66,"Orcamento/Entrada_de_Dados_Geral.htm");
+  SetCsh(67,"520014",67,"Orcamento/Processos_Reserva_Orcamentaria.htm");
+  SetCsh(68,"230026",68,"Orcamento/Editar_Colar.htm");
+  SetCsh(69,"230027",69,"Orcamento/Editar_Deletar.htm");
+  SetCsh(70,"520023",70,"Orcamento/Cadastros_Contas_Orcamentarias.htm");
+  SetCsh(71,"520031",71,"Orcamento/Cadastros_Criterios_de_Rateio_Tipos_de_Criterio.htm");
+  SetCsh(72,"230070",72,"Orcamento/Consultas_Variacao_de_Indices.htm");
+  SetCsh(73,"230014",73,"Orcamento/Sistema_Usuarios.htm");
+  SetCsh(74,"520013",74,"Orcamento/Processos_Compromisso_Orcamentario.htm");
+  SetCsh(75,"520020",75,"Orcamento/Cadastros_Geral.htm");
+  SetCsh(76,"520001",76,"Orcamento/Sistema_Utilitarios_Acerta_Saldo_da_Reserva_Compromisso.htm");
+  SetCsh(77,"520054",77,"Orcamento/Consultas_Log_de_Cenario.htm");
+  SetCsh(78,"230002",78,"Orcamento/Sistema_Login.htm");
+  SetCsh(79,"230015",79,"Orcamento/Sistema_Grupos.htm");
+  SetCsh(80,"520010",80,"Orcamento/Entrada_de_Dados_Especial.htm");
+  SetCsh(81,"230039",81,"Orcamento/Janela_Minimizar_Todas.htm");
+  SetCsh(82,"230046",82,"Orcamento/Consultas_Uso_Pessoal.htm");
+  SetCsh(83,"520061",83,"Orcamento/Cadastros_Criterios_de_Rateio_Por_Empresa.htm");
+  SetCsh(84,"520056",84,"Orcamento/Sistema_Utilitarios_Importacao_Hotal_DOS.htm");
+  SetCsh(85,"520078",85,"Orcamento/Geracao_dos_Dados_Da_Empresa.htm");
+  SetCsh(86,"230032",86,"Orcamento/Consultas_Graficos.htm");
+  SetCsh(87,"520005",87,"Orcamento/Sistema_Utilitarios_Busca_Dados_Contabeis_para_Orcamento.htm");
+  SetCsh(88,"520007",88,"Orcamento/Entrada_de_Dados_Por_Periodo.htm");
+  SetCsh(89,"520015",89,"Orcamento/Processos_Efetivacao_de_Reservas.htm");
+  SetCsh(90,"520017",90,"Orcamento/Processos_Ajuste_Orcamentario_Suplementacao.htm");
+  SetCsh(91,"520018",91,"Orcamento/Processos_Ajuste_Orcamentario_Retorno.htm");
+  SetCsh(92,"230033",92,"Orcamento/Consultas_Gerais.htm");
+  SetCsh(93,"230036",93,"Orcamento/Janela_Lado_a_Lado_Vertical.htm");
+  SetCsh(94,"520055",94,"Orcamento/Consultas_Informacoes_Gerenciais.htm");
+  SetCsh(95,"230016",95,"Orcamento/Sistema_Alterar_Senha.htm");
+  SetCsh(96,"520032",96,"Orcamento/Cadastros_Criterios_de_Rateio_Valores_Bases_para_Rateio.htm");
+  SetCsh(97,"520062",97,"Orcamento/Consultas_Business_Intelligence.htm");
+  SetCsh(98,"230068",98,"Orcamento/Sistema_Fluxo_de_Operacoes_Executar.htm");
+
+
+//-->
+</script>
+<script language="javascript">
+<!--
+//Find CSH according to hash string after this page
+if (getHash().length > 0)
+{
+   // VH 05/16/00 now support 
+   // TopicID=
+   // TopicNumber=
+   // RemoteURL=   
+   // and WindowsOptions
+   // with the format #a=xxx,b=xxx,c=xxx...
+   var strHashString = getHash().toString();
+   // change ? to : for remote URL. because java applet have some problem to pass a URL with two : inside the URL so we changed it. 
+   // so here need to change it back.
+   strHashString = strHashString.substring(1,strHashString.length);
+   strHashString = strHashString.replace("%072%057%057", "://");
+   var nTopicNum = GetTopicNumber(strHashString);
+
+   if (nTopicNum != -1)
+   {
+      FindTopicByTopicNum(nTopicNum);
+   }
+   else
+   {
+      if (gstrURL.length > 0) 
+	RedirectTo(gstrURL);
+      else
+      	RedirectToHomePage();
+   }
+}
+else
+{
+   RedirectToHomePage();
+}
+//-->
+</script>
+<noscript>
+ <p> Your browser does not support JavaScript. WebHelp Context-Sensitive Help requires JavaScript support to run.</p>
+</noscript>
+</body>
+</html>
+
+
+
+
+
+

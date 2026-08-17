@@ -1,0 +1,1284 @@
+inherited frmParamAlmox: TfrmParamAlmox
+  Left = 175
+  Top = 33
+  Caption = 'Parâmetros do Almoxarifado'
+  ClientHeight = 429
+  ClientWidth = 404
+  PixelsPerInch = 96
+  TextHeight = 13
+  inherited pnlFundo: TPanel
+    Width = 404
+    Height = 343
+    object Label7: TLabel
+      Left = 337
+      Top = 275
+      Width = 14
+      Height = 16
+      Caption = '%'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -13
+      Font.Name = 'MS Sans Serif'
+      Font.Style = [fsBold]
+      ParentFont = False
+    end
+    object PgcParam: TPageControl
+      Left = 5
+      Top = 5
+      Width = 394
+      Height = 333
+      ActivePage = TabGeral
+      Align = alClient
+      TabOrder = 0
+      object TabGeral: TTabSheet
+        Caption = 'Geral'
+        ImageIndex = 2
+        object Label6: TLabel
+          Left = 25
+          Top = 240
+          Width = 240
+          Height = 13
+          Caption = '. Percentual para acrescimo na requisição'
+        end
+        object Label8: TLabel
+          Left = 25
+          Top = 267
+          Width = 249
+          Height = 26
+          Caption = 
+            '. Percentual aceito para diferença de valor no Recebimento de Me' +
+            'rcadoria Com O.C.'
+          WordWrap = True
+        end
+        object Label9: TLabel
+          Left = 345
+          Top = 245
+          Width = 14
+          Height = 16
+          Caption = '%'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -13
+          Font.Name = 'MS Sans Serif'
+          Font.Style = [fsBold]
+          ParentFont = False
+        end
+        object Label2: TLabel
+          Left = 345
+          Top = 277
+          Width = 14
+          Height = 16
+          Caption = '%'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -13
+          Font.Name = 'MS Sans Serif'
+          Font.Style = [fsBold]
+          ParentFont = False
+        end
+        object grpGrupos: TGroupBox
+          Left = 24
+          Top = 2
+          Width = 328
+          Height = 103
+          Caption = ' Grupo de Produtos '
+          TabOrder = 0
+          object Label1: TLabel
+            Left = 8
+            Top = 16
+            Width = 55
+            Height = 13
+            Caption = 'Definição'
+          end
+          object Panel2: TPanel
+            Left = 163
+            Top = 19
+            Width = 143
+            Height = 70
+            BevelInner = bvLowered
+            TabOrder = 0
+            object Label3: TLabel
+              Left = 3
+              Top = 3
+              Width = 52
+              Height = 13
+              Caption = 'Exemplo:'
+              Font.Charset = DEFAULT_CHARSET
+              Font.Color = 8404992
+              Font.Height = -12
+              Font.Name = 'MS Sans Serif'
+              Font.Style = [fsBold]
+              ParentFont = False
+            end
+            object Edit1: TEdit
+              Left = 56
+              Top = 8
+              Width = 74
+              Height = 21
+              Font.Charset = DEFAULT_CHARSET
+              Font.Color = 8404992
+              Font.Height = -12
+              Font.Name = 'MS Sans Serif'
+              Font.Style = [fsBold]
+              ParentFont = False
+              ReadOnly = True
+              TabOrder = 0
+              Text = '99.999.999'
+            end
+            object Edit2: TEdit
+              Left = 56
+              Top = 32
+              Width = 74
+              Height = 21
+              Font.Charset = DEFAULT_CHARSET
+              Font.Color = 8404992
+              Font.Height = -12
+              Font.Name = 'MS Sans Serif'
+              Font.Style = [fsBold]
+              ParentFont = False
+              ReadOnly = True
+              TabOrder = 1
+              Text = '35.469.870'
+            end
+          end
+          object dbedInput: TDBEdit
+            Left = 8
+            Top = 32
+            Width = 136
+            Height = 21
+            DataField = 'MASCGRUPOPROD'
+            DataSource = ds
+            TabOrder = 1
+            OnExit = dbedInputExit
+          end
+          object mskedDisplay: TMaskEdit
+            Left = 8
+            Top = 72
+            Width = 136
+            Height = 21
+            EditMask = '99.999.999;0;_'
+            MaxLength = 10
+            ReadOnly = True
+            TabOrder = 2
+            Text = 'mskedDisplay'
+          end
+        end
+        object dbrgInfoValorUN: TDBRadioGroup
+          Left = 24
+          Top = 110
+          Width = 161
+          Height = 59
+          Caption = ' Entrada na Nota Fiscal '
+          DataField = 'FLGINFOVALORUN'
+          DataSource = ds
+          Items.Strings = (
+            'por valor unitário'
+            'por valor total')
+          TabOrder = 1
+          Values.Strings = (
+            'S'
+            'N')
+        end
+        object GroupBox2: TGroupBox
+          Left = 192
+          Top = 110
+          Width = 161
+          Height = 59
+          Caption = ' Data de Implantação '
+          TabOrder = 2
+          object edDataImplanta: TCMDateTimePicker
+            Left = 16
+            Top = 24
+            Width = 121
+            Height = 21
+            CalendarAttributes.Font.Charset = DEFAULT_CHARSET
+            CalendarAttributes.Font.Color = clWindowText
+            CalendarAttributes.Font.Height = -11
+            CalendarAttributes.Font.Name = 'MS Sans Serif'
+            CalendarAttributes.Font.Style = []
+            ButtonStyle = cbsCustom
+            DataField = 'DATAIMPLANTA'
+            DataSource = ds
+            Epoch = 1950
+            ButtonGlyph.Data = {
+              06050000424D06050000000000003604000028000000100000000D0000000100
+              080000000000D000000000000000000000000001000000000000000000000000
+              80000080000000808000800000008000800080800000C0C0C000C0DCC000F0CA
+              A6000020400000206000002080000020A0000020C0000020E000004000000040
+              20000040400000406000004080000040A0000040C0000040E000006000000060
+              20000060400000606000006080000060A0000060C0000060E000008000000080
+              20000080400000806000008080000080A0000080C0000080E00000A0000000A0
+              200000A0400000A0600000A0800000A0A00000A0C00000A0E00000C0000000C0
+              200000C0400000C0600000C0800000C0A00000C0C00000C0E00000E0000000E0
+              200000E0400000E0600000E0800000E0A00000E0C00000E0E000400000004000
+              20004000400040006000400080004000A0004000C0004000E000402000004020
+              20004020400040206000402080004020A0004020C0004020E000404000004040
+              20004040400040406000404080004040A0004040C0004040E000406000004060
+              20004060400040606000406080004060A0004060C0004060E000408000004080
+              20004080400040806000408080004080A0004080C0004080E00040A0000040A0
+              200040A0400040A0600040A0800040A0A00040A0C00040A0E00040C0000040C0
+              200040C0400040C0600040C0800040C0A00040C0C00040C0E00040E0000040E0
+              200040E0400040E0600040E0800040E0A00040E0C00040E0E000800000008000
+              20008000400080006000800080008000A0008000C0008000E000802000008020
+              20008020400080206000802080008020A0008020C0008020E000804000008040
+              20008040400080406000804080008040A0008040C0008040E000806000008060
+              20008060400080606000806080008060A0008060C0008060E000808000008080
+              20008080400080806000808080008080A0008080C0008080E00080A0000080A0
+              200080A0400080A0600080A0800080A0A00080A0C00080A0E00080C0000080C0
+              200080C0400080C0600080C0800080C0A00080C0C00080C0E00080E0000080E0
+              200080E0400080E0600080E0800080E0A00080E0C00080E0E000C0000000C000
+              2000C0004000C0006000C0008000C000A000C000C000C000E000C0200000C020
+              2000C0204000C0206000C0208000C020A000C020C000C020E000C0400000C040
+              2000C0404000C0406000C0408000C040A000C040C000C040E000C0600000C060
+              2000C0604000C0606000C0608000C060A000C060C000C060E000C0800000C080
+              2000C0804000C0806000C0808000C080A000C080C000C080E000C0A00000C0A0
+              2000C0A04000C0A06000C0A08000C0A0A000C0A0C000C0A0E000C0C00000C0C0
+              2000C0C04000C0C06000C0C08000C0C0A000F0FBFF00A4A0A000808080000000
+              FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00010000000000
+              000000000000000000FFFF00FFFFFFFFFFFFFFFFFFFFFFFF00FFFF00FF07A407
+              A407A4F9A407A4FF00FFFF00FFA407A407A4F9A4F9A407FF00FFFF00FF07A407
+              A407A4F9A407A4FF00FFFF00FFA407A407A407A407A407FF00FFFF00FF07A407
+              A407A407A407A4FF00FFFF00FFA407A407A407A407A407FF00FFFF00FFFFFFFF
+              FFFFFFFFFFFFFFFF00FFFF00FF04FC04FC04FCA4A4A4A4FF00FFFF00FFFC04FC
+              04FC04A4A4A4A4FF00FFFF00FFFFFFFFFFFFFFFFFFFFFFFF00FFFF0000000000
+              000000000000000000FF}
+            ShowButton = True
+            TabOrder = 0
+            OnEnter = edDataImplantaEnter
+            OnExit = edDataImplantaExit
+          end
+        end
+        object grpProdutos: TGroupBox
+          Left = 25
+          Top = 172
+          Width = 327
+          Height = 61
+          Caption = ' Produto '
+          TabOrder = 3
+          object chkbxDV: TDBCheckBox
+            Left = 12
+            Top = 18
+            Width = 261
+            Height = 17
+            Caption = 'Dígito Verificador para Código do Produto'
+            DataField = 'EXISTEDV'
+            DataSource = ds
+            TabOrder = 0
+            ValueChecked = 'S'
+            ValueUnchecked = 'N'
+          end
+          object chkContabGrupo: TDBCheckBox
+            Left = 12
+            Top = 39
+            Width = 301
+            Height = 17
+            Caption = 'Utiliza Conta Contábil para o Grupo de Produto'
+            DataField = 'FLGCONTABGRUPO'
+            DataSource = ds
+            TabOrder = 1
+            ValueChecked = 'S'
+            ValueUnchecked = 'N'
+          end
+        end
+        object edPercReqMat: TDBRealEdit
+          Left = 277
+          Top = 240
+          Width = 65
+          Height = 21
+          Alignment = taRightJustify
+          Lines.Strings = (
+            '      0,00')
+          MaxLength = 2
+          TabOrder = 4
+          WordWrap = False
+          IntDigits = 10
+          DecDigits = 0
+          NumberFormat = fNumber
+          Signal = False
+          DataField = 'PERCREQMAT'
+          DataSource = ds
+        end
+        object DBRealEdit1: TDBRealEdit
+          Left = 277
+          Top = 272
+          Width = 65
+          Height = 21
+          Alignment = taRightJustify
+          Lines.Strings = (
+            '      0,00')
+          MaxLength = 2
+          TabOrder = 5
+          WordWrap = False
+          IntDigits = 10
+          DecDigits = 0
+          NumberFormat = fNumber
+          Signal = False
+          DataField = 'PERCRECEBCOMOC'
+          DataSource = ds
+        end
+      end
+      object TbsIntegra: TTabSheet
+        Caption = 'Integração'
+        object Label4: TLabel
+          Left = 16
+          Top = 200
+          Width = 156
+          Height = 13
+          Caption = 'Tipo de Documento Padrão'
+        end
+        object Label5: TLabel
+          Left = 16
+          Top = 248
+          Width = 184
+          Height = 13
+          Caption = 'Alterador para NF de Devolução'
+        end
+        object DBCheckBox1: TDBCheckBox
+          Left = 16
+          Top = 8
+          Width = 178
+          Height = 17
+          Caption = 'Existe sistema de compras'
+          DataField = 'EXISTECOMPRA'
+          DataSource = ds
+          TabOrder = 0
+          ValueChecked = 'S'
+          ValueUnchecked = 'N'
+        end
+        object dbchbExisteCPag: TDBCheckBox
+          Left = 16
+          Top = 32
+          Width = 218
+          Height = 17
+          Caption = 'Existe sistema de contas a pagar'
+          DataField = 'EXISTECONTASPAGAR'
+          DataSource = ds
+          TabOrder = 1
+          ValueChecked = 'S'
+          ValueUnchecked = 'N'
+        end
+        object dbchbExisteContabilidade: TDBCheckBox
+          Left = 16
+          Top = 56
+          Width = 138
+          Height = 17
+          Caption = 'Existe Contabilidade'
+          DataField = 'EXISTECONTABIL'
+          DataSource = ds
+          TabOrder = 2
+          ValueChecked = 'S'
+          ValueUnchecked = 'N'
+        end
+        object dbclTipoDocumento: TwwDBLookupCombo
+          Left = 16
+          Top = 216
+          Width = 353
+          Height = 21
+          DropDownAlignment = taLeftJustify
+          Selected.Strings = (
+            'DESCRICAO'#9'35'#9'Descrição'
+            'CODTIPDOC'#9'10'#9'Código')
+          DataField = 'CODTIPDOC'
+          DataSource = ds
+          LookupTable = qryTipoDoc
+          LookupField = 'codtipdoc'
+          Options = [loColLines, loTitles]
+          Style = csDropDownList
+          TabOrder = 3
+          AutoDropDown = True
+          ShowButton = True
+          AllowClearKey = True
+          ShowMatchText = True
+        end
+        object dblcTipoAlterador: TwwDBLookupCombo
+          Left = 16
+          Top = 264
+          Width = 353
+          Height = 21
+          DropDownAlignment = taLeftJustify
+          Selected.Strings = (
+            'DESCRICAO'#9'35'#9'Descrição'
+            'CODALTERADOR'#9'10'#9'Código')
+          DataField = 'CODALTDEVOLUCAO'
+          DataSource = ds
+          LookupTable = qryAlterador
+          LookupField = 'CODALTERADOR'
+          Options = [loColLines, loTitles]
+          Style = csDropDownList
+          TabOrder = 4
+          AutoDropDown = True
+          ShowButton = True
+          AllowClearKey = True
+          ShowMatchText = True
+        end
+        object dbcbContabTransf: TDBCheckBox
+          Left = 16
+          Top = 104
+          Width = 249
+          Height = 17
+          Caption = 'Contabiliza Transferências'
+          DataField = 'FLGCONTABTRANSF'
+          DataSource = ds
+          TabOrder = 5
+          ValueChecked = 'S'
+          ValueUnchecked = 'N'
+        end
+        object chkLivro: TDBCheckBox
+          Left = 16
+          Top = 80
+          Width = 185
+          Height = 17
+          Caption = 'Integra com Livro Fiscal'
+          DataField = 'FLGINTEGRALIVRO'
+          DataSource = ds
+          TabOrder = 6
+          ValueChecked = 'S'
+          ValueUnchecked = 'N'
+        end
+        object DBCheckBox2: TDBCheckBox
+          Left = 16
+          Top = 128
+          Width = 249
+          Height = 17
+          Caption = 'Usar Controle de Grupo na Requisição'
+          DataField = 'FLGUSAGRUPOREQ'
+          DataSource = ds
+          TabOrder = 7
+          ValueChecked = 'S'
+          ValueUnchecked = 'N'
+        end
+        object DBCheckBox3: TDBCheckBox
+          Left = 16
+          Top = 152
+          Width = 345
+          Height = 17
+          Caption = 'Permitir o cadastro de requisicoes que nao possui saldo'
+          DataField = 'FLGREQSEMSALDO'
+          DataSource = ds
+          TabOrder = 8
+          ValueChecked = 'S'
+          ValueUnchecked = 'N'
+        end
+      end
+      object TbsRelat: TTabSheet
+        Caption = 'Relatório'
+        object Pnldocpendentes: TPanel
+          Left = 0
+          Top = 0
+          Width = 386
+          Height = 30
+          Align = alTop
+          BevelInner = bvLowered
+          Caption = 'Assinaturas e Vistos'
+          Color = clGray
+          Font.Charset = ANSI_CHARSET
+          Font.Color = clWhite
+          Font.Height = -16
+          Font.Name = 'Arial'
+          Font.Style = [fsBold, fsItalic]
+          ParentFont = False
+          TabOrder = 0
+        end
+        object TreeAssin: TTreeView
+          Left = 0
+          Top = 30
+          Width = 386
+          Height = 275
+          Align = alClient
+          Images = ImlReports
+          Indent = 23
+          TabOrder = 1
+          OnEdited = TreeAssinEdited
+          OnEditing = TreeAssinEditing
+        end
+      end
+      object TabPrev: TTabSheet
+        Caption = 'Previdenciário'
+        ImageIndex = 3
+        object lblPlanoPrevC: TLabel
+          Left = 16
+          Top = 8
+          Width = 33
+          Height = 13
+          Caption = 'Plano'
+        end
+        object lblPatroC: TLabel
+          Left = 16
+          Top = 64
+          Width = 80
+          Height = 13
+          Caption = 'Patrocinadora'
+        end
+        object Label10: TLabel
+          Left = 16
+          Top = 120
+          Width = 54
+          Height = 13
+          Caption = 'Programa'
+        end
+        object dblcPrograma: TCMDBLookupCombo
+          Left = 16
+          Top = 136
+          Width = 353
+          Height = 21
+          DropDownAlignment = taLeftJustify
+          Selected.Strings = (
+            'DESCPROGRAMA'#9'60'#9'Descrição'#9'F'
+            'CODPROGRAMA'#9'2'#9'Código'#9'F')
+          DataField = 'IDPROGRAMA'
+          DataSource = ds
+          LookupTable = qryPrograma
+          LookupField = 'IDPROGRAMA'
+          Options = [loTitles]
+          Style = csDropDownList
+          TabOrder = 0
+          AutoDropDown = True
+          ShowButton = True
+          UseTFields = False
+          AllowClearKey = True
+          ShowMatchText = True
+        end
+        object dblcPatroC: TwwDBLookupCombo
+          Left = 16
+          Top = 80
+          Width = 353
+          Height = 21
+          DropDownAlignment = taLeftJustify
+          Selected.Strings = (
+            'NOME'#9'30'#9'Nome')
+          DataField = 'IDPATRO'
+          DataSource = ds
+          LookupTable = qryPatro
+          LookupField = 'IDPESSOA'
+          Options = [loColLines]
+          DropDownCount = 5
+          TabOrder = 1
+          AutoDropDown = True
+          ShowButton = True
+          AllowClearKey = True
+          ShowMatchText = True
+        end
+        object dblcPlanoPrevC: TwwDBLookupCombo
+          Left = 16
+          Top = 24
+          Width = 353
+          Height = 21
+          DropDownAlignment = taLeftJustify
+          Selected.Strings = (
+            'NOME'#9'30'#9'Nome')
+          DataField = 'IDPLANOPREV'
+          DataSource = ds
+          LookupTable = qryPlanoPrev
+          LookupField = 'IDPLANOPREV'
+          Options = [loColLines]
+          DropDownCount = 5
+          TabOrder = 2
+          AutoDropDown = True
+          ShowButton = True
+          AllowClearKey = True
+          ShowMatchText = True
+        end
+      end
+    end
+  end
+  inherited Dock972: TDock97
+    Width = 404
+    inherited Toolbar971: TToolbar97
+      inherited sbtnInserir: TToolbarButton97
+        Visible = False
+      end
+      inherited sbtnProcurar: TToolbarButton97
+        Visible = False
+      end
+      inherited sbtnApagar: TToolbarButton97
+        Visible = False
+      end
+    end
+  end
+  inherited Dock971: TDock97
+    Top = 390
+    Width = 404
+    inherited tb97Fundo: TToolbar97
+      Left = 234
+      DockPos = 659
+    end
+    inherited TB97oKCancelar: TToolbar97
+      Left = 67
+      DockPos = 445
+    end
+  end
+  inherited qry: TwwQuery
+    SQL.Strings = (
+      'SELECT'
+      '     IDPESSOA,'
+      '     CODALTDEVOLUCAO,'
+      '     CODTIPDOC,'
+      '     MASCGRUPOPROD,'
+      '     EXISTEDV,'
+      '     EXISTECOMPRA,'
+      '     RECEBAUTOMATICO,'
+      '     CODTABPRODUTIL,'
+      '     EXISTECONTASPAGAR,'
+      '     EXISTECONTABIL,'
+      '     FLGINFOVALORUN,'
+      '     DATAIMPLANTA,'
+      '     FLGCONTABGRUPO,'
+      '     FLGCONTABTRANSF,'
+      '     PERCREQMAT,'
+      '     FLGINTEGRALIVRO,'
+      '     PERCRECEBCOMOC,'
+      '     IDPATRO,'
+      '     IDPLANOPREV,'
+      '     FLGUSAGRUPOREQ,'
+      '     FLGREQSEMSALDO,'
+      '     IDPROGRAMA    '
+      'FROM'
+      '     PARALMOX'
+      'WHERE'
+      '         (IDPESSOA = :pIDPESS)'
+      ' ')
+    Top = 2
+    ParamData = <
+      item
+        DataType = ftInteger
+        Name = 'pIDPESS'
+        ParamType = ptUnknown
+      end>
+    object qryIDPESSOA: TFloatField
+      FieldName = 'IDPESSOA'
+      Origin = 'PARALMOX.IDPESSOA'
+    end
+    object qryCODALTDEVOLUCAO: TFloatField
+      FieldName = 'CODALTDEVOLUCAO'
+      Origin = 'PARALMOX.CODALTDEVOLUCAO'
+    end
+    object qryCODTIPDOC: TFloatField
+      FieldName = 'CODTIPDOC'
+      Origin = 'PARALMOX.CODTIPDOC'
+    end
+    object qryMASCGRUPOPROD: TStringField
+      FieldName = 'MASCGRUPOPROD'
+      Origin = 'PARALMOX.MASCGRUPOPROD'
+      Size = 10
+    end
+    object qryEXISTEDV: TStringField
+      FieldName = 'EXISTEDV'
+      Origin = 'PARALMOX.EXISTEDV'
+      Size = 1
+    end
+    object qryEXISTECOMPRA: TStringField
+      FieldName = 'EXISTECOMPRA'
+      Origin = 'PARALMOX.EXISTECOMPRA'
+      Size = 1
+    end
+    object qryRECEBAUTOMATICO: TStringField
+      FieldName = 'RECEBAUTOMATICO'
+      Origin = 'PARALMOX.RECEBAUTOMATICO'
+      Size = 1
+    end
+    object qryCODTABPRODUTIL: TStringField
+      FieldName = 'CODTABPRODUTIL'
+      Origin = 'PARALMOX.CODTABPRODUTIL'
+      Size = 5
+    end
+    object qryEXISTECONTASPAGAR: TStringField
+      FieldName = 'EXISTECONTASPAGAR'
+      Origin = 'PARALMOX.EXISTECONTASPAGAR'
+      Size = 1
+    end
+    object qryEXISTECONTABIL: TStringField
+      FieldName = 'EXISTECONTABIL'
+      Origin = 'PARALMOX.EXISTECONTABIL'
+      Size = 1
+    end
+    object qryFLGINFOVALORUN: TStringField
+      FieldName = 'FLGINFOVALORUN'
+      Origin = 'PARALMOX.FLGINFOVALORUN'
+      Size = 1
+    end
+    object qryDATAIMPLANTA: TDateTimeField
+      FieldName = 'DATAIMPLANTA'
+      Origin = 'PARALMOX.DATAIMPLANTA'
+    end
+    object qryFLGCONTABGRUPO: TStringField
+      FieldName = 'FLGCONTABGRUPO'
+      Origin = 'PARALMOX.FLGCONTABGRUPO'
+      Size = 1
+    end
+    object qryFLGCONTABTRANSF: TStringField
+      FieldName = 'FLGCONTABTRANSF'
+      Origin = 'PARALMOX.FLGCONTABTRANSF'
+      Size = 1
+    end
+    object qryPERCREQMAT: TFloatField
+      FieldName = 'PERCREQMAT'
+    end
+    object qryFLGINTEGRALIVRO: TStringField
+      FieldName = 'FLGINTEGRALIVRO'
+      Size = 1
+    end
+    object qryPERCRECEBCOMOC: TFloatField
+      FieldName = 'PERCRECEBCOMOC'
+    end
+    object qryIDPATRO: TFloatField
+      FieldName = 'IDPATRO'
+      Origin = 'PARALMOX.IDPATRO'
+    end
+    object qryIDPLANOPREV: TFloatField
+      FieldName = 'IDPLANOPREV'
+      Origin = 'PARALMOX.IDPLANOPREV'
+    end
+    object qryFLGUSAGRUPOREQ: TStringField
+      FieldName = 'FLGUSAGRUPOREQ'
+      Origin = 'BASEDADOS.PARALMOX.FLGUSAGRUPOREQ'
+      FixedChar = True
+      Size = 1
+    end
+    object qryFLGREQSEMSALDO: TStringField
+      FieldName = 'FLGREQSEMSALDO'
+      Origin = 'BASEDADOS.PARALMOX.FLGREQSEMSALDO'
+      FixedChar = True
+      Size = 1
+    end
+    object qryIDPROGRAMA: TFloatField
+      FieldName = 'IDPROGRAMA'
+      Origin = 'BASEDADOS.PARALMOX.IDPROGRAMA'
+    end
+  end
+  inherited ivTradutor: TIvExtendedTranslator
+    Left = 780
+    TargetsData = (
+      1
+      1
+      (
+        ''
+        'Text'
+        0))
+  end
+  inherited upd: TUpdateSQL
+    ModifySQL.Strings = (
+      'update PARALMOX'
+      'set'
+      '  IDPESSOA = :IDPESSOA,'
+      '  CODALTDEVOLUCAO = :CODALTDEVOLUCAO,'
+      '  CODTIPDOC = :CODTIPDOC,'
+      '  MASCGRUPOPROD = :MASCGRUPOPROD,'
+      '  EXISTEDV = :EXISTEDV,'
+      '  EXISTECOMPRA = :EXISTECOMPRA,'
+      '  RECEBAUTOMATICO = :RECEBAUTOMATICO,'
+      '  CODTABPRODUTIL = :CODTABPRODUTIL,'
+      '  EXISTECONTASPAGAR = :EXISTECONTASPAGAR,'
+      '  EXISTECONTABIL = :EXISTECONTABIL,'
+      '  FLGINFOVALORUN = :FLGINFOVALORUN,'
+      '  FLGCONTABGRUPO = :FLGCONTABGRUPO,'
+      '  FLGCONTABTRANSF = :FLGCONTABTRANSF,'
+      '  PERCREQMAT = :PERCREQMAT,'
+      '  FLGINTEGRALIVRO = :FLGINTEGRALIVRO,'
+      '  PERCRECEBCOMOC = :PERCRECEBCOMOC,'
+      '  IDPATRO = :IDPATRO,'
+      '  IDPLANOPREV = :IDPLANOPREV,'
+      '  FLGUSAGRUPOREQ = :FLGUSAGRUPOREQ,'
+      '  FLGREQSEMSALDO = :FLGREQSEMSALDO,'
+      '  IDPROGRAMA = :IDPROGRAMA'
+      'where'
+      '  IDPESSOA = :OLD_IDPESSOA')
+    InsertSQL.Strings = (
+      'insert into PARALMOX'
+      '  (IDPESSOA, CODALTDEVOLUCAO, CODTIPDOC, MASCGRUPOPROD, '
+      'EXISTEDV, EXISTECOMPRA, '
+      '   RECEBAUTOMATICO, CODTABPRODUTIL, EXISTECONTASPAGAR, '
+      'EXISTECONTABIL, '
+      '   FLGINFOVALORUN, FLGCONTABGRUPO, FLGCONTABTRANSF, '
+      'PERCREQMAT, FLGINTEGRALIVRO, '
+      '   PERCRECEBCOMOC, IDPATRO, IDPLANOPREV, FLGUSAGRUPOREQ, '
+      'FLGREQSEMSALDO, '
+      '   IDPROGRAMA)'
+      'values'
+      '  (:IDPESSOA, :CODALTDEVOLUCAO, :CODTIPDOC, :MASCGRUPOPROD, '
+      ':EXISTEDV, '
+      '   :EXISTECOMPRA, :RECEBAUTOMATICO, :CODTABPRODUTIL, '
+      ':EXISTECONTASPAGAR, '
+      '   :EXISTECONTABIL, :FLGINFOVALORUN, :FLGCONTABGRUPO, '
+      ':FLGCONTABTRANSF, '
+      '   :PERCREQMAT, :FLGINTEGRALIVRO, :PERCRECEBCOMOC, :IDPATRO, '
+      ':IDPLANOPREV, '
+      '   :FLGUSAGRUPOREQ, :FLGREQSEMSALDO, :IDPROGRAMA)')
+    DeleteSQL.Strings = (
+      'delete from PARALMOX'
+      'where'
+      '  IDPESSOA = :OLD_IDPESSOA')
+    Left = 238
+    Top = 2
+  end
+  inherited MontaSelect: TMontaSelect
+    Left = 397
+    Top = 2
+  end
+  inherited ds: TwwDataSource
+    Left = 347
+    Top = 2
+  end
+  inherited ImlPadrao: TImageList
+    Left = 57
+    Top = 14
+  end
+  inherited CmeCadastro: TCmEventosCadastro
+    Left = 302
+    Top = 2
+  end
+  object qryTipoDoc: TwwQuery
+    Tag = 5
+    DatabaseName = 'BaseDados'
+    SQL.Strings = (
+      'Select'
+      '      CODTIPDOC,'
+      '      Descricao '
+      'From '
+      '    TipoDocRecPag '
+      'Where '
+      '           (RecPag = '#39'P'#39') '
+      '  AND (DEBCRE = '#39'C'#39')')
+    ControlType.Strings = (
+      'DEBCRE;CheckBox;Yes;No')
+    ValidateWithMask = True
+    Left = 467
+    Top = 2
+  end
+  object qryAlterador: TwwQuery
+    DatabaseName = 'BaseDados'
+    SQL.Strings = (
+      'Select '
+      '        codalterador,'
+      '        descricao '
+      'from '
+      '        TipoAlterador'
+      'Where '
+      '          (RecPag = '#39'P'#39') '
+      '  and  (acresdecres = '#39'D'#39')'
+      '   and (idpessoa = :pEmpresa)')
+    ControlType.Strings = (
+      'DEBCRE;CheckBox;Yes;No')
+    ValidateWithMask = True
+    Left = 540
+    Top = 2
+    ParamData = <
+      item
+        DataType = ftFloat
+        Name = 'pEmpresa'
+        ParamType = ptUnknown
+        Value = 0
+      end>
+  end
+  object ImlReports: TImageList
+    Left = 610
+    Top = 7
+    Bitmap = {
+      494C010103000500040010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      0000000000003600000028000000400000002000000001002000000000000020
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000008484840084848400FFFFFF00FFFFFF0000000000848484000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000008484840084848400000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000084848400848484000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000008484
+      840084848400FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      000000000000000000000000000000000000FFFFFF0000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      00000000000000000000FFFFFF00000000000000000000000000000000000000
+      0000000000008484840000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      000000000000000000000000000000000000000000000000000084848400FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF008484840084848400FFFFFF00000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      00000000000000000000FFFFFF00FFFFFF00FFFFFF0000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000FFFFFF00FFFFFF00FFFFFF00000000000000000000000000000000000000
+      000084848400FFFFFF0000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      000000000000000000000000000000000000000000000000000084848400FFFF
+      FF00FFFFFF000000000000000000FFFFFF0000000000FFFFFF00FFFFFF000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00000000000000
+      0000000000000000000000000000000000000000000000000000FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF008484840000000000000000000000
+      000000000000FFFFFF0000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      000000000000FFFFFF00FFFFFF00FFFFFF0000000000FFFFFF00FFFFFF000000
+      000000000000000000000000000000000000000000000000000084848400FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FF000000FFFFFF00000000000000
+      00000000000000000000000000000000000084848400FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FF00000000000000FFFFFF0000000000FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF0000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      000000000000000000000000000000000000000000000000000000000000FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF0000000000FFFFFF00FFFF
+      FF0000000000000000000000000000000000000000000000000084848400FFFF
+      FF00FFFFFF00FF000000FF000000FF000000FFFFFF00FFFFFF00FFFFFF000000
+      00000000000000000000000000000000000084848400FFFFFF00FFFFFF00FF00
+      0000FF000000FF00000000000000000000000000000000000000000000000000
+      0000FFFFFF000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000084848400FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FF000000FFFFFF0000000000FFFFFF00FFFF
+      FF00FFFFFF000000000000000000000000000000000000000000000000008484
+      8400FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FF000000FFFFFF000000
+      0000000000000000000000000000000000000000000084848400FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF0084848400848484008484840000000000FFFF
+      FF00000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000084848400FFFFFF00FFFF
+      FF00FF000000FF000000FF000000FFFFFF00FFFFFF00FFFFFF0000000000FFFF
+      FF00FFFFFF00FFFFFF0000000000000000000000000000000000000000008484
+      8400FFFFFF00FFFFFF00FF000000FF000000FF000000FFFFFF00FFFFFF00FFFF
+      FF00000000000000000000000000000000000000000084848400FFFFFF00FFFF
+      FF00FF000000FF000000FF000000FFFFFF0084848400FFFFFF00FFFFFF000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      000000000000000000000000000000000000000000000000000084848400FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FF000000FFFFFF0000000000FFFF
+      FF00848484008484840000000000000000000000000000000000000000000000
+      000084848400FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF000000FF00FFFF
+      FF00FFFFFF00000000000000000000000000000000000000000084848400FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FF00000084848400848484000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      000000000000000000000000000000000000000000000000000084848400FFFF
+      FF00FFFFFF00FF000000FF000000FF000000FFFFFF00FFFFFF00FFFFFF000000
+      00000000000000000000000000000000000000000000000000000000FF000000
+      FF000000FF000000FF000000FF00FFFFFF000000FF000000FF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF000000000000000000000000000000000084848400FFFF
+      FF00FFFFFF00FF000000FF000000FF000000FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000008484
+      8400FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FF000000FFFFFF00FFFF
+      FF00000000000000000000000000000000000000000000000000000000000000
+      00000000FF000000FF000000FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00848484008484840000000000000000000000000000000000000000008484
+      8400FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00848484008484
+      8400000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000008484
+      8400FFFFFF00FFFFFF00FF000000FF000000FF000000FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF000000000000000000000000000000000000000000000000000000
+      FF000000FF000000FF000000FF00FFFFFF00FFFFFF00FFFFFF00848484008484
+      8400000000000000000000000000000000000000000000000000000000000000
+      000084848400FFFFFF00FFFFFF00FFFFFF008484840084848400000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      000084848400FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF008484
+      84008484840000000000000000000000000000000000000000000000FF000000
+      FF000000FF00000000000000FF00848484008484840084848400000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000008484840084848400848484000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      00000000000084848400FFFFFF00FFFFFF00FFFFFF0084848400848484000000
+      0000000000000000000000000000000000000000FF000000FF000000FF000000
+      FF0000000000000000000000FF00000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000084848400848484008484840000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      000000000000000000000000000000000000424D3E000000000000003E000000
+      2800000040000000200000000100010000000000000100000000000000000000
+      000000000000000000000000FFFFFF0000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      00000000000000000000000000000000FE3FFFFFFFFF0000F81FFF3FFCFF0000
+      E01FFC3FF0F80000C01FF03FC0F00000C00FC01F00000000E00FC01F00400000
+      8007C00F000000008003E00F802700008001E007800F0000C003F003C00F0000
+      C00FC001C0070000E007F003E00F0000E003E00FF03F0000F007C43FF8FF0000
+      F81F0DFFFFFF0000FC7FFFFFFFFF000000000000000000000000000000000000
+      000000000000}
+  end
+  object QryParamRel: TwwQuery
+    CachedUpdates = True
+    DatabaseName = 'BaseDados'
+    SQL.Strings = (
+      'SELECT '
+      
+        ' IDPARAMRELATS,IDMODULO,IDPESSOA,NOMECOMPO,DESCRICAO,VALOR,NOMER' +
+        'ELATORIO'
+      'FROM'
+      ' PARAMRELATS'
+      'WHERE'
+      ' (IDMODULO = :PIDMODULO) AND'
+      ' (IDPESSOA = :PIDPESSOA)'
+      'ORDER BY NOMERELATORIO,DESCRICAO,VALOR'
+      '')
+    UpdateObject = UpdParamRel
+    ValidateWithMask = True
+    Left = 387
+    Top = 59
+    ParamData = <
+      item
+        DataType = ftInteger
+        Name = 'PIDMODULO'
+        ParamType = ptUnknown
+      end
+      item
+        DataType = ftInteger
+        Name = 'PIDPESSOA'
+        ParamType = ptUnknown
+      end>
+    object QryParamRelIDPARAMRELATS: TFloatField
+      FieldName = 'IDPARAMRELATS'
+      Origin = 'PARAMRELATS.IDPARAMRELATS'
+    end
+    object QryParamRelIDMODULO: TFloatField
+      FieldName = 'IDMODULO'
+      Origin = 'PARAMRELATS.IDMODULO'
+    end
+    object QryParamRelIDPESSOA: TFloatField
+      FieldName = 'IDPESSOA'
+      Origin = 'PARAMRELATS.IDPESSOA'
+    end
+    object QryParamRelNOMECOMPO: TStringField
+      FieldName = 'NOMECOMPO'
+      Origin = 'PARAMRELATS.NOMECOMPO'
+      Size = 100
+    end
+    object QryParamRelDESCRICAO: TStringField
+      FieldName = 'DESCRICAO'
+      Origin = 'PARAMRELATS.DESCRICAO'
+      Size = 100
+    end
+    object QryParamRelVALOR: TStringField
+      FieldName = 'VALOR'
+      Origin = 'PARAMRELATS.VALOR'
+      Size = 100
+    end
+    object QryParamRelNOMERELATORIO: TStringField
+      FieldName = 'NOMERELATORIO'
+      Origin = 'PARAMRELATS.NOMERELATORIO'
+      Size = 100
+    end
+  end
+  object UpdParamRel: TUpdateSQL
+    ModifySQL.Strings = (
+      'update PARAMRELATS'
+      'set'
+      '  IDPARAMRELATS = :IDPARAMRELATS,'
+      '  IDMODULO = :IDMODULO,'
+      '  IDPESSOA = :IDPESSOA,'
+      '  NOMECOMPO = :NOMECOMPO,'
+      '  DESCRICAO = :DESCRICAO,'
+      '  VALOR = :VALOR,'
+      '  NOMERELATORIO = :NOMERELATORIO'
+      'where'
+      '  IDPARAMRELATS = :OLD_IDPARAMRELATS')
+    InsertSQL.Strings = (
+      'insert into PARAMRELATS'
+      '  (IDPARAMRELATS, IDMODULO, IDPESSOA, NOMECOMPO, DESCRICAO, '
+      'VALOR, NOMERELATORIO)'
+      'values'
+      
+        '  (:IDPARAMRELATS, :IDMODULO, :IDPESSOA, :NOMECOMPO, :DESCRICAO,' +
+        ' '
+      ':VALOR, '
+      '   :NOMERELATORIO)')
+    DeleteSQL.Strings = (
+      'delete from PARAMRELATS'
+      'where'
+      '  IDPARAMRELATS = :OLD_IDPARAMRELATS')
+    Left = 219
+    Top = 257
+  end
+  object qryPlanoPrev: TwwQuery
+    Tag = 5
+    DatabaseName = 'BaseDados'
+    SQL.Strings = (
+      'SELECT'
+      '   IDPLANOPREV, NOME'
+      'FROM'
+      '   PLANPREVCONTABIL'
+      'ORDER BY NOME '
+      ' ')
+    ValidateWithMask = True
+    Left = 128
+    Top = 259
+  end
+  object qryPatro: TwwQuery
+    Tag = 5
+    DatabaseName = 'BaseDados'
+    SQL.Strings = (
+      'SELECT'
+      '   P.NOME, PT.IDPESSOA'
+      'FROM'
+      '   PESSOA P,'
+      '   PATRO PT'
+      'WHERE'
+      '   (P.IDPESSOA = PT.IDPESSOA)   ')
+    ValidateWithMask = True
+    Left = 56
+    Top = 256
+  end
+  object qryPrograma: TwwQuery
+    Tag = 5
+    DatabaseName = 'BaseDados'
+    SQL.Strings = (
+      'SELECT'
+      '     IDPROGRAMA,'
+      '     CODPROGRAMA,'
+      '     DESCPROGRAMA'
+      'FROM PROGRAMA'
+      'ORDER BY 3   '
+      ' ')
+    ValidateWithMask = True
+    Left = 56
+    Top = 312
+  end
+end

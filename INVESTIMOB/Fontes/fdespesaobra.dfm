@@ -1,0 +1,274 @@
+inherited frmDespesasObra: TfrmDespesasObra
+  Left = 97
+  Top = 158
+  Caption = 'Despesas de Obra'
+  ClientHeight = 355
+  ClientWidth = 529
+  PixelsPerInch = 96
+  TextHeight = 13
+  inherited pnlFundo: TPanel
+    Width = 529
+    Height = 269
+    object Label25: TLabel
+      Left = 24
+      Top = 208
+      Width = 53
+      Height = 13
+      Caption = 'Valor OM'
+    end
+    object Label26: TLabel
+      Left = 200
+      Top = 208
+      Width = 39
+      Height = 13
+      Caption = 'Moeda'
+    end
+    object Label15: TLabel
+      Left = 398
+      Top = 208
+      Width = 106
+      Height = 13
+      Caption = 'Data da Liberação'
+    end
+    object Label1: TLabel
+      Left = 24
+      Top = 16
+      Width = 28
+      Height = 13
+      Caption = 'Obra'
+    end
+    object Label2: TLabel
+      Left = 24
+      Top = 64
+      Width = 58
+      Height = 13
+      Caption = 'Descrição'
+    end
+    object Label3: TLabel
+      Left = 24
+      Top = 160
+      Width = 197
+      Height = 13
+      Caption = 'Tipo de Operação de Investimento'
+    end
+    object DBedtValorOM: TDBRealEdit
+      Left = 24
+      Top = 224
+      Width = 161
+      Height = 21
+      Alignment = taRightJustify
+      Lines.Strings = (
+        '       0,000000')
+      TabOrder = 0
+      WordWrap = False
+      IntDigits = 15
+      DecDigits = 6
+      NumberFormat = fNumber
+      Signal = False
+    end
+    object DBcboMoeda: TwwDBLookupCombo
+      Left = 200
+      Top = 224
+      Width = 129
+      Height = 21
+      DropDownAlignment = taLeftJustify
+      Selected.Strings = (
+        'MOESIGLA'#9'10'#9'Moeda')
+      Style = csDropDownList
+      DropDownWidth = 8
+      TabOrder = 1
+      AutoDropDown = True
+      ShowButton = True
+      AllowClearKey = False
+    end
+    object DBedtDataOper: TCMDateTimePicker
+      Left = 399
+      Top = 224
+      Width = 106
+      Height = 21
+      CalendarAttributes.Font.Charset = DEFAULT_CHARSET
+      CalendarAttributes.Font.Color = clWindowText
+      CalendarAttributes.Font.Height = -11
+      CalendarAttributes.Font.Name = 'MS Sans Serif'
+      CalendarAttributes.Font.Style = []
+      ButtonStyle = cbsCustom
+      Epoch = 1950
+      ButtonGlyph.Data = {
+        06050000424D06050000000000003604000028000000100000000D0000000100
+        080000000000D000000000000000000000000001000000000000000000000000
+        80000080000000808000800000008000800080800000C0C0C000C0DCC000F0CA
+        A6000020400000206000002080000020A0000020C0000020E000004000000040
+        20000040400000406000004080000040A0000040C0000040E000006000000060
+        20000060400000606000006080000060A0000060C0000060E000008000000080
+        20000080400000806000008080000080A0000080C0000080E00000A0000000A0
+        200000A0400000A0600000A0800000A0A00000A0C00000A0E00000C0000000C0
+        200000C0400000C0600000C0800000C0A00000C0C00000C0E00000E0000000E0
+        200000E0400000E0600000E0800000E0A00000E0C00000E0E000400000004000
+        20004000400040006000400080004000A0004000C0004000E000402000004020
+        20004020400040206000402080004020A0004020C0004020E000404000004040
+        20004040400040406000404080004040A0004040C0004040E000406000004060
+        20004060400040606000406080004060A0004060C0004060E000408000004080
+        20004080400040806000408080004080A0004080C0004080E00040A0000040A0
+        200040A0400040A0600040A0800040A0A00040A0C00040A0E00040C0000040C0
+        200040C0400040C0600040C0800040C0A00040C0C00040C0E00040E0000040E0
+        200040E0400040E0600040E0800040E0A00040E0C00040E0E000800000008000
+        20008000400080006000800080008000A0008000C0008000E000802000008020
+        20008020400080206000802080008020A0008020C0008020E000804000008040
+        20008040400080406000804080008040A0008040C0008040E000806000008060
+        20008060400080606000806080008060A0008060C0008060E000808000008080
+        20008080400080806000808080008080A0008080C0008080E00080A0000080A0
+        200080A0400080A0600080A0800080A0A00080A0C00080A0E00080C0000080C0
+        200080C0400080C0600080C0800080C0A00080C0C00080C0E00080E0000080E0
+        200080E0400080E0600080E0800080E0A00080E0C00080E0E000C0000000C000
+        2000C0004000C0006000C0008000C000A000C000C000C000E000C0200000C020
+        2000C0204000C0206000C0208000C020A000C020C000C020E000C0400000C040
+        2000C0404000C0406000C0408000C040A000C040C000C040E000C0600000C060
+        2000C0604000C0606000C0608000C060A000C060C000C060E000C0800000C080
+        2000C0804000C0806000C0808000C080A000C080C000C080E000C0A00000C0A0
+        2000C0A04000C0A06000C0A08000C0A0A000C0A0C000C0A0E000C0C00000C0C0
+        2000C0C04000C0C06000C0C08000C0C0A000F0FBFF00A4A0A000808080000000
+        FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00010000000000
+        000000000000000000FFFF00FFFFFFFFFFFFFFFFFFFFFFFF00FFFF00FF07A407
+        A407A4F9A407A4FF00FFFF00FFA407A407A4F9A4F9A407FF00FFFF00FF07A407
+        A407A4F9A407A4FF00FFFF00FFA407A407A407A407A407FF00FFFF00FF07A407
+        A407A407A407A4FF00FFFF00FFA407A407A407A407A407FF00FFFF00FFFFFFFF
+        FFFFFFFFFFFFFFFF00FFFF00FF04FC04FC04FCA4A4A4A4FF00FFFF00FFFC04FC
+        04FC04A4A4A4A4FF00FFFF00FFFFFFFFFFFFFFFFFFFFFFFF00FFFF0000000000
+        000000000000000000FF}
+      ShowButton = True
+      TabOrder = 2
+    end
+    object DBcboImovel: TwwDBLookupCombo
+      Left = 184
+      Top = 32
+      Width = 298
+      Height = 21
+      DropDownAlignment = taLeftJustify
+      Selected.Strings = (
+        'IMONOME'#9'60'#9'Nome do Imóvel')
+      DataField = 'IDINVESTIMENTO'
+      LookupField = 'IDIMOVEL'
+      Style = csDropDownList
+      DropDownWidth = 8
+      Enabled = False
+      TabOrder = 3
+      AutoDropDown = False
+      ShowButton = False
+      AllowClearKey = True
+    end
+    object btnBuscaImovel: TBitBtn
+      Left = 482
+      Top = 31
+      Width = 23
+      Height = 22
+      TabOrder = 4
+      Glyph.Data = {
+        76010000424D7601000000000000760000002800000020000000100000000100
+        0400000000000001000000000000000000001000000010000000000000000000
+        80000080000000808000800000008000800080800000C0C0C000808080000000
+        FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00777777777887
+        777777777777F88F7777777777700F077777777777F8878F77777777700FFF07
+        77777777F8877787F77777700FFFFFF077777778877777F8F7777778FFFFFCF0
+        77777F78F77FF8787F771778FFCCCFFF07778FF87F88877F8F7711778FFFFFCF
+        077788FF8F77FF8787F711178FFCCCFFF077888F8FF88877F87F71110000FFFC
+        FF07788888887FF877877710E7E706CFFFF077887777888777F8770E7E7E70FF
+        F887778F777778F7F8877707E7E7E0F88777778F777778F88777770E7E7E7087
+        7777778F7777788777777707E7E7E07777777787F7777877777777707E7E0777
+        777777787FFF8777777777770000777777777777888877777777}
+      NumGlyphs = 2
+    end
+    object wwDBLookupCombo1: TwwDBLookupCombo
+      Left = 24
+      Top = 32
+      Width = 161
+      Height = 21
+      DropDownAlignment = taLeftJustify
+      Selected.Strings = (
+        'IMONOME'#9'60'#9'Nome do Imóvel')
+      DataField = 'IDINVESTIMENTO'
+      LookupField = 'IDIMOVEL'
+      Style = csDropDownList
+      DropDownWidth = 8
+      Enabled = False
+      TabOrder = 5
+      AutoDropDown = False
+      ShowButton = False
+      AllowClearKey = True
+    end
+    object wwDBLookupCombo2: TwwDBLookupCombo
+      Left = 24
+      Top = 176
+      Width = 481
+      Height = 21
+      DropDownAlignment = taLeftJustify
+      Selected.Strings = (
+        'IMONOME'#9'60'#9'Nome do Imóvel')
+      DataField = 'IDINVESTIMENTO'
+      LookupField = 'IDIMOVEL'
+      Style = csDropDownList
+      DropDownWidth = 8
+      TabOrder = 6
+      AutoDropDown = True
+      ShowButton = False
+      AllowClearKey = False
+    end
+    object DBmemContrato: TwwDBRichEdit
+      Left = 24
+      Top = 80
+      Width = 481
+      Height = 65
+      AutoURLDetect = False
+      DataField = 'CONDESCRICAO'
+      DataSource = ds
+      MaxLength = 200
+      PrintJobName = 'Delphi 5'
+      TabOrder = 7
+      EditorCaption = 'Edit Rich Text'
+      EditorPosition.Left = 0
+      EditorPosition.Top = 0
+      EditorPosition.Width = 0
+      EditorPosition.Height = 0
+      MeasurementUnits = muCentimeters
+      PrintMargins.Top = 1
+      PrintMargins.Bottom = 1
+      PrintMargins.Left = 1
+      PrintMargins.Right = 1
+      RichEditVersion = 2
+      Data = {
+        120100007B5C727466315C616E73695C616E7369637067313235325C64656666
+        305C6465667461623732307B5C666F6E7474626C7B5C66305C66737769737320
+        4D532053616E732053657269663B7D7B5C66315C66726F6D616E5C6663686172
+        736574322053796D626F6C3B7D7B5C66325C6673776973735C66636861727365
+        7431204D532053616E732053657269663B7D7D0D0A7B5C636F6C6F7274626C5C
+        726564305C677265656E305C626C7565303B7D0D0A5C6465666C616E67313033
+        335C686F727A646F637B5C2A5C666368617273207D7B5C2A5C6C636861727320
+        7D5C706172645C706C61696E5C66325C667331345C622044426D656D436F6E74
+        7261746F0D0A5C706172200D0A5C706172207D0D0A00}
+    end
+  end
+  inherited Dock972: TDock97
+    Width = 529
+    inherited Toolbar971: TToolbar97
+      inherited sbtnAlterar: TToolbarButton97
+        Enabled = False
+        Visible = False
+      end
+      inherited sbtnProcurar: TToolbarButton97
+        Enabled = False
+        Visible = False
+      end
+      inherited sbtnApagar: TToolbarButton97
+        Enabled = False
+        Visible = False
+      end
+    end
+  end
+  inherited Dock971: TDock97
+    Top = 316
+    Width = 529
+  end
+  inherited ivTradutor: TIvExtendedTranslator
+    Left = 65515
+    Top = 65515
+  end
+end

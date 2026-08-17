@@ -1,0 +1,26 @@
+ -- Add columns 
+ ALTER TABLE CM.bfciariotitplan
+   ADD (
+	TIPOOPCAOIR NUMBER(1)
+  );  
+     
+ -- Add comments to the columns 
+COMMENT ON COLUMN CM.BFCIARIOTITPLAN.TIPOOPCAOIR 
+  IS 'Opção de Tributação de IR null - Sem Opção; 1 - Tabela Padrão; 2 - Tabela Regressiva'; 
+
+CREATE INDEX CM.IDX_BFCIARIOTITPLAN_TIPOOPCIR ON CM.BFCIARIOTITPLAN (
+	IDPESSOA ASC,
+	IDPESSJUR ASC,
+	IDPLANOPREV ASC,
+	TIPOOPCAOIR ASC
+)
+LOGGING
+TABLESPACE INDICES
+PCTFREE 10
+INITRANS 2;
+
+
+
+  
+
+

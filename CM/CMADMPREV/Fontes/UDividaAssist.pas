@@ -1,0 +1,221 @@
+// *****************************************************************************
+// ***************************** REGISTRO DE ALTERAÇÕES ************************
+// *****************************************************************************
+{-------------------------------------------------------------------------------
+ Nº SIG.....: SIG TIBERO
+ Data.......: 06/03/2018
+ Responsável: Everson Luiz Pereira da Cunha
+ Descrição..: Melhoria no Planus para adequação ao TIBERO.
+              Inclusão de alias nas tabelas e campos.
+              Retirar INDEX, +rule etc
+--------------------------------------------------------------------------------}
+
+
+unit UDividaAssist;
+
+interface
+   function ConsultaDividaAssist(idPessoa: integer; var dValor: extended;
+                                 var sSQL: string): integer;
+   function BaixaDividaAssist(mes, mescobranca: string;
+            idmotivo, idplanass, idplanoprev, idpessjur, idtitular, iddependente,
+            idcontass: integer): integer;
+
+implementation
+
+uses SysUtils, wwQuery, Forms, USistema, UDataBase;
+
+function ConsultaDividaAssist(idPessoa: integer; var dValor: extended;
+                              var sSQL: string): integer;
+var qry: TwwQuery;
+begin
+  sSQL := 'select h.idmotivo, h.idplanass, h.idplanoprev, h.idpessjur, h.idtitular, h.iddependente, h.idcontass,'+
+//                ' MES, m.descricao motivo, pa.nome planass, MESCOBRANCA, pp.nome planprev,'+   //Everson TIBERO
+                ' h.MES, m.descricao motivo, pa.nome planass, h.MESCOBRANCA, pp.nome planprev,'+ //Everson TIBERO
+                ' pj.nome patro, c.nome contribuicao, pt.nome titular, pd.nome dependente,'+
+//                ' VALORESPERADO, DATAPREVISAO, h.IDLOTE lote,'+    //Everson TIBERO
+                ' h.VALORESPERADO, h.DATAPREVISAO, h.IDLOTE lote,'+  //Everson TIBERO
+                ' decode(h.flgcobcarne,1,''BC'',''FL'') LOCAL'+
+           ' from hstcontribass h, motivo m, planass pa, planprev pp, pessoa pj,'+
+                ' contribuicao c, pessoa pt, pessoa pd'+
+          ' where (h.idtitular = '+IntToStr(idPessoa)+')'+
+            ' and (h.sitrecebimento = 1)'+
+            ' and (h.IDTIPO in (''C'',''A''))'+
+            ' and (h.idmotivo = m.idmotivo)'+
+            ' and (h.IDPLANASS = pa.idplanass)'+
+            ' and (h.IDPLANOPREV = pp.idplanoprev)'+
+            ' and (h.IDPESSJUR = pj.idpessoa)'+
+            ' and (h.IDCONTASS = c.idcontribuicao)'+
+            ' and (h.IDTITULAR = pt.idpessoa)'+
+            ' and (h.IDDEPENDENTE = pd.idpessoa)';
+  qry := TwwQuery.Create(Application);
+  qry.DataBaseName := 'basedados';
+  qry.SQL.Clear;
+  qry.SQL.Add
+    ('select sum(VALORESPERADO) valor'+
+       ' from hstcontribass h'+
+     ' WHERE (h.idtitular = '+IntToStr(idPessoa)+')'+
+       ' and (h.sitrecebimento = 1)'+
+       ' and (h.IDTIPO in (''C'',''A''))');
+  try
+     qry.open;
+  except
+     dValor := 0;
+     result := 1;
+     exit;
+  end;
+  result := 0;
+  dValor := qry.FieldbyName('valor').asFloat;
+end;
+
+function BaixaDividaAssist(mes, mescobranca: string;
+         idmotivo, idplanass, idplanoprev, idpessjur, idtitular, iddependente,
+         idcontass: integer): integer;
+var qry: TwwQuery;
+begin
+  result := 0;
+
+  qry := TwwQuery.Create(Application);
+  qry.DataBaseName := 'basedados';
+
+  qry.SQL.Clear;
+  qry.SQL.Add
+    ('select idtitular'+
+      ' from hstcontribass h'+
+     ' where (h.idtitular = '+IntToStr(idtitular)+')'+
+       ' and (h.sitrecebimento = 1)'+
+       ' and (h.IDTIPO in (''C'',''A''))'+
+       ' and (rownum = 1)');
+  try
+     qry.open;
+  except;
+     result := 2;
+     exit;
+  end;
+
+  if qry.IsEmpty then
+  begin
+     result := 1;
+     exit;
+  end;
+
+  qry.SQL.Clear;
+  qry.SQL.Add
+    ('UPDATE HSTCONTRIBASS'+
+       ' SET SITRECEBIMENTO = 2,'+
+           ' VALORRECEBIDO = VALORESPERADO,'+
+           ' DATA = SYSDATE,'+
+           ' CODREFERENCIA = ''BAIXA SIST: '+Sistema.NomeAplicativo+''''+
+     ' WHERE (IDPESSJUR = '+inttostr(idpessjur)+')'+
+       ' AND (IDTITULAR = '+inttostr(idtitular)+')'+
+       ' AND (IDDEPENDENTE ='+inttostr(iddependente)+')'+
+       ' AND (IDPLANASS = '+inttostr(idplanass)+')'+
+       ' AND (IDPLANOPREV = '+inttostr(idplanoprev)+')'+
+       ' AND (IDCONTASS = '+inttostr(idcontass)+')'+
+       ' AND (MESCOBRANCA = '''+mescobranca+''')'+
+       ' AND (IDMOTIVO = '+inttostr(idmotivo)+')'+
+       ' AND (MES = '''+mes+''')');
+  try
+     qry.ExecSQL;
+  except
+     result := 2;
+  end;
+
+  if result = 0 then
+  begin
+    //baixa eventuais pendências (SITRECEBIMENTO = 4)
+    qry.SQL.Clear;
+    qry.SQL.Add
+      ('UPDATE HSTCONTRIBASS'+
+         ' SET VALORRECEBIDO = VALORESPERADO,'+
+             ' DATA = SYSDATE,'+
+             ' SITRECEBIMENTO = ''2'','+
+             ' CODREFERENCIA = ''BAIXA SIST: '+Sistema.NomeAplicativo+''''+
+       ' WHERE (SITRECEBIMENTO  = 4)'+
+         ' AND (IDPESSJUR = '+inttostr(idpessjur)+')'+
+         ' AND (IDTITULAR = '+inttostr(idtitular)+')'+
+         ' AND (IDDEPENDENTE ='+inttostr(iddependente)+')'+
+         ' AND (IDPLANASS = '+inttostr(idplanass)+')'+
+         ' AND (IDPLANOPREV = '+inttostr(idplanoprev)+')'+
+         ' AND (IDCONTASS = '+inttostr(idcontass)+')'+
+         ' AND (MES = '''+mes+''')');
+    try
+       qry.ExecSQL;
+    except
+       result := 2;
+    end;
+  end;
+end;
+
+function PegaProxMes(idPatro: integer): string;
+var cTipoEnvPrev: char; 
+    sAnoMesCobranca: string;
+begin
+  result := sAnoMesCobranca;
+end;
+
+function MudaCobrancaDividaAssist(mes, mesCobranca : string;
+         idMotivo, idPlanAss, idPlanoPrev, idPessJur, idTitular, idDependente,
+         idContAss: integer): integer;
+var qry: TwwQuery;
+    sDataPrevisao,
+    novoMesCobranca, sFlgInterno: string;
+    sNumRecebimento: string;
+begin
+  if BaixaDividaAssist(mes, mesCobranca, idMotivo, idPlanAss, idPlanoPrev, idPessJur,
+                       idTitular, idDependente, idContAss) = 0 then
+  begin
+    result := 0;
+
+    qry := TwwQuery.Create(Application);
+    qry.DataBaseName := 'basedados';
+
+    //novos parâmetros
+    qry.SQL.Text :=
+       'SELECT FLGINTERNO'+
+        ' FROM PARTASS PA, SITPLANOASS SP'+
+       ' WHERE (PA.IDPESSJUR = '+inttoStr(idPessJur)+') AND'+
+             ' (PA.SEQPROPOSTA = 1) AND'+
+             ' (PA.IDPLANOPREV = '+intToStr(idPlanoPrev)+') AND'+
+             ' (PA.IDPLANASS = '+intToStr(idPlanAss)+') AND'+
+             ' (PA.IDPESSOA = '+intToStr(idTitular)+') AND'+
+             ' (PA.IDSITPART = SP.IDSITPLANOASS)';
+    qry.open;
+    sFlgInterno := qry.FieldByName('FLGINTERNO').AsString;
+    qry.close;
+    novoMesCobranca := PegaProxMes(idPessJur);
+    sNumRecebimento := intToStr(LeUltRegistro(qry, 'HSTCONTRIBASS'));
+    qry.SQL.Clear;
+    qry.SQL.Add
+      ('INSERT INTO HSTCONTRIBASS'+
+       ' (MES, SEQPROPOSTA, IDMOTIVO, IDPLANASS, MESCOBRANCA, IDPLANOPREV,'+
+        ' IDPESSJUR, IDCONTASS, IDTITULAR, IDDEPENDENTE,'+
+        ' VALORESPERADO, IDREGRA, PLNCODEFET, CODDOCEFET, VALORRECEBIDO, DATA,'+
+        ' CODPORTFORMA, CODDOCPREV, PLNCODPREV, DATAPREVISAO, SITRECEBIMENTO,'+
+        ' NUMRECEBIMENTO, FLGCOBCARNE, CODREFERENCIA, IDPAGADOR, IDTIPO, IDLOTE)'+
+      ' SELECT'+
+        ' MES, SEQPROPOSTA, IDMOTIVO, IDPLANASS,'''+novoMesCobranca+''', IDPLANOPREV,'+
+        ' IDPESSJUR, IDCONTASS, IDTITULAR, IDDEPENDENTE,'+
+        ' VALORESPERADO, IDREGRA, PLNCODEFET, CODDOCEFET, null, null,'+
+        ' CODPORTFORMA, CODDOCPREV, PLNCODPREV, '''+sDataPrevisao+''', 0,'+
+          sNumRecebimento+', 0, CODREFERENCIA, IDTITULAR, IDTIPO, null'+
+       ' FROM HSTCONTRIBASS'+
+      ' WHERE (MES = '''        +mes                   +''') AND'+
+            ' (MESCOBRANCA = '''+mesCobranca           +''') AND'+
+            ' (IDMOTIVO = '     +intToStr(idMotivo)    +') AND'+
+            ' (IDPLANASS = '    +intToStr(idPlanAss)   +') AND'+
+            ' (IDPLANOPREV = '  +intToStr(idPlanoPrev) +') AND'+
+            ' (IDPESSJUR = '    +intToStr(idPessJur)   +') AND'+
+            ' (IDTITULAR = '    +intToStr(idTitular)   +') AND'+
+            ' (IDDEPENDENTE = ' +intToStr(idDependente)+') AND'+
+            ' (IDCONTASS = '    +intToStr(idContAss)   +')');
+    try
+       qry.ExecSQL;
+    except;
+      raise;
+      exit;
+    end;
+  end;//if
+end;
+
+end.
+

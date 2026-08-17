@@ -1,0 +1,650 @@
+inherited FrmConsTransPlanosDireitosMT: TFrmConsTransPlanosDireitosMT
+  Left = 150
+  Top = 126
+  Caption = 'FrmConsTransPlanosDireitosMT'
+  ClientHeight = 463
+  ClientWidth = 1053
+  PixelsPerInch = 96
+  TextHeight = 13
+  inherited pnlFundo: TPanel
+    Width = 1053
+    Height = 424
+    inherited bvlSepTit: TBevel
+      Width = 1051
+      Height = 71
+    end
+    object Label8: TLabel [1]
+      Left = 14
+      Top = 64
+      Width = 66
+      Height = 13
+      Caption = 'Data Inicial'
+    end
+    object lblPlanoPatroOrigem: TLabel [2]
+      Left = 249
+      Top = 64
+      Width = 187
+      Height = 13
+      Caption = 'Plano / Patrocinadora de Origem'
+    end
+    object lblCarteira: TLabel [3]
+      Left = 511
+      Top = 64
+      Width = 45
+      Height = 13
+      Caption = 'Carteira'
+    end
+    object lblInvestimento: TLabel [4]
+      Left = 788
+      Top = 64
+      Width = 103
+      Height = 13
+      Caption = 'Tipo de Operação'
+    end
+    object Label1: TLabel [5]
+      Left = 135
+      Top = 64
+      Width = 59
+      Height = 13
+      Caption = 'Data Final'
+    end
+    object Label2: TLabel [6]
+      Left = 115
+      Top = 86
+      Width = 8
+      Height = 13
+      Caption = 'a'
+    end
+    inherited pnlTitulo: TPanel
+      Width = 1051
+      inherited lbNomDescricao: TfcLabel
+        Width = 370
+        Caption = 'Transferência Entre Planos - Direitos'
+      end
+    end
+    object grdConsulta: TwwDBGrid
+      Left = 1
+      Top = 113
+      Width = 1051
+      Height = 310
+      PictureMasks.Strings = (
+        'PU'#9'##0,000000'#9'T'#9'T'
+        'DATATRANSF'#9'##0.000000'#9'T'#9'T'
+        'VLRTRANSF'#9'##0,000000'#9'T'#9'T')
+      Selected.Strings = (
+        'DATATRANSF'#9'10'#9'Data da Transferência'
+        'PLANOORIGEMGRD'#9'30'#9'Plano de Origem'
+        'PLANODESTINOGRD'#9'50'#9'Plano de Destino'
+        'DESCCARTINVESTGRD'#9'60'#9'Carteira de Investimento'
+        'DESCINVESTIMENTO'#9'30'#9'Investimento'
+        'DESCTIPOOPERACAOGRD'#9'60'#9'Tipo de Operação'
+        'BOLETA'#9'15'#9'Boleta'
+        'PU'#9'15'#9'Preço Unitário'
+        'PERCENTUAL'#9'20'#9'Percentual'
+        'VLRTRANSF'#9'10'#9'Valor Transferido'
+        'VALORREMUNERACAO'#9'10'#9'Valor da Remuneração')
+      IniAttributes.Delimiter = ';;'
+      TitleColor = clBtnFace
+      FixedCols = 0
+      ShowHorzScrollBar = True
+      Align = alClient
+      DataSource = dsConsTransPlanosDireitosMT
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -9
+      Font.Name = 'MS Sans Serif'
+      Font.Style = [fsBold]
+      ParentFont = False
+      ReadOnly = True
+      TabOrder = 6
+      TitleAlignment = taLeftJustify
+      TitleFont.Charset = DEFAULT_CHARSET
+      TitleFont.Color = clMaroon
+      TitleFont.Height = -9
+      TitleFont.Name = 'MS Sans Serif'
+      TitleFont.Style = [fsBold]
+      TitleLines = 1
+      TitleButtons = False
+      OnCalcCellColors = grdConsultaCalcCellColors
+      IndicatorColor = icBlack
+      OnTopRowChanged = grdConsultaTopRowChanged
+    end
+    object edDataIni: TCMDateTimePicker
+      Tag = 1
+      Left = 14
+      Top = 79
+      Width = 93
+      Height = 21
+      CalendarAttributes.Font.Charset = DEFAULT_CHARSET
+      CalendarAttributes.Font.Color = clWindowText
+      CalendarAttributes.Font.Height = -11
+      CalendarAttributes.Font.Name = 'MS Sans Serif'
+      CalendarAttributes.Font.Style = []
+      ButtonStyle = cbsCustom
+      Epoch = 1950
+      ButtonGlyph.Data = {
+        06050000424D06050000000000003604000028000000100000000D0000000100
+        080000000000D000000000000000000000000001000000000000000000000000
+        80000080000000808000800000008000800080800000C0C0C000C0DCC000F0CA
+        A6000020400000206000002080000020A0000020C0000020E000004000000040
+        20000040400000406000004080000040A0000040C0000040E000006000000060
+        20000060400000606000006080000060A0000060C0000060E000008000000080
+        20000080400000806000008080000080A0000080C0000080E00000A0000000A0
+        200000A0400000A0600000A0800000A0A00000A0C00000A0E00000C0000000C0
+        200000C0400000C0600000C0800000C0A00000C0C00000C0E00000E0000000E0
+        200000E0400000E0600000E0800000E0A00000E0C00000E0E000400000004000
+        20004000400040006000400080004000A0004000C0004000E000402000004020
+        20004020400040206000402080004020A0004020C0004020E000404000004040
+        20004040400040406000404080004040A0004040C0004040E000406000004060
+        20004060400040606000406080004060A0004060C0004060E000408000004080
+        20004080400040806000408080004080A0004080C0004080E00040A0000040A0
+        200040A0400040A0600040A0800040A0A00040A0C00040A0E00040C0000040C0
+        200040C0400040C0600040C0800040C0A00040C0C00040C0E00040E0000040E0
+        200040E0400040E0600040E0800040E0A00040E0C00040E0E000800000008000
+        20008000400080006000800080008000A0008000C0008000E000802000008020
+        20008020400080206000802080008020A0008020C0008020E000804000008040
+        20008040400080406000804080008040A0008040C0008040E000806000008060
+        20008060400080606000806080008060A0008060C0008060E000808000008080
+        20008080400080806000808080008080A0008080C0008080E00080A0000080A0
+        200080A0400080A0600080A0800080A0A00080A0C00080A0E00080C0000080C0
+        200080C0400080C0600080C0800080C0A00080C0C00080C0E00080E0000080E0
+        200080E0400080E0600080E0800080E0A00080E0C00080E0E000C0000000C000
+        2000C0004000C0006000C0008000C000A000C000C000C000E000C0200000C020
+        2000C0204000C0206000C0208000C020A000C020C000C020E000C0400000C040
+        2000C0404000C0406000C0408000C040A000C040C000C040E000C0600000C060
+        2000C0604000C0606000C0608000C060A000C060C000C060E000C0800000C080
+        2000C0804000C0806000C0808000C080A000C080C000C080E000C0A00000C0A0
+        2000C0A04000C0A06000C0A08000C0A0A000C0A0C000C0A0E000C0C00000C0C0
+        2000C0C04000C0C06000C0C08000C0C0A000F0FBFF00A4A0A000808080000000
+        FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00010000000000
+        000000000000000000FFFF00FFFFFFFFFFFFFFFFFFFFFFFF00FFFF00FF07A407
+        A407A4F9A407A4FF00FFFF00FFA407A407A4F9A4F9A407FF00FFFF00FF07A407
+        A407A4F9A407A4FF00FFFF00FFA407A407A407A407A407FF00FFFF00FF07A407
+        A407A407A407A4FF00FFFF00FFA407A407A407A407A407FF00FFFF00FFFFFFFF
+        FFFFFFFFFFFFFFFF00FFFF00FF04FC04FC04FCA4A4A4A4FF00FFFF00FFFC04FC
+        04FC04A4A4A4A4FF00FFFF00FFFFFFFFFFFFFFFFFFFFFFFF00FFFF0000000000
+        000000000000000000FF}
+      ShowButton = True
+      TabOrder = 1
+    end
+    object dblkCarteira: TwwDBLookupCombo
+      Tag = 4
+      Left = 509
+      Top = 79
+      Width = 257
+      Height = 21
+      DropDownAlignment = taLeftJustify
+      Selected.Strings = (
+        'DESCCARTINVEST'#9'30'#9'Carteira'#9'F')
+      LookupTable = cdsCarteira
+      LookupField = 'IDCARTEIRAINVEST'
+      Options = [loColLines, loRowLines, loTitles]
+      TabOrder = 4
+      AutoDropDown = True
+      ShowButton = True
+      AllowClearKey = False
+      ShowMatchText = True
+    end
+    object dblkPlanPatroO: TwwDBLookupCombo
+      Tag = 3
+      Left = 249
+      Top = 79
+      Width = 240
+      Height = 21
+      DropDownAlignment = taLeftJustify
+      Selected.Strings = (
+        'PLANPRVCONTABPATRO'#9'30'#9'Descrição'#9'F')
+      LookupTable = cdsPlanoPatroO
+      LookupField = 'IDPLANPREVCTBPATR'
+      Options = [loColLines, loRowLines, loTitles]
+      TabOrder = 3
+      AutoDropDown = True
+      ShowButton = True
+      AllowClearKey = False
+      ShowMatchText = True
+    end
+    object dblkTipoOperacao: TwwDBLookupCombo
+      Tag = 5
+      Left = 787
+      Top = 79
+      Width = 240
+      Height = 21
+      DropDownAlignment = taLeftJustify
+      Selected.Strings = (
+        'DESCTIPOOPERACAO'#9'60'#9'Tipo de Operação'#9'F')
+      LookupTable = cdsTipoOperacao
+      LookupField = 'IDTIPOOPERACAO'
+      Options = [loColLines, loRowLines, loTitles]
+      TabOrder = 5
+      AutoDropDown = True
+      ShowButton = True
+      AllowClearKey = True
+      ShowMatchText = True
+    end
+    object edDataFim: TCMDateTimePicker
+      Tag = 2
+      Left = 134
+      Top = 79
+      Width = 93
+      Height = 21
+      CalendarAttributes.Font.Charset = DEFAULT_CHARSET
+      CalendarAttributes.Font.Color = clWindowText
+      CalendarAttributes.Font.Height = -11
+      CalendarAttributes.Font.Name = 'MS Sans Serif'
+      CalendarAttributes.Font.Style = []
+      ButtonStyle = cbsCustom
+      Epoch = 1950
+      ButtonGlyph.Data = {
+        06050000424D06050000000000003604000028000000100000000D0000000100
+        080000000000D000000000000000000000000001000000000000000000000000
+        80000080000000808000800000008000800080800000C0C0C000C0DCC000F0CA
+        A6000020400000206000002080000020A0000020C0000020E000004000000040
+        20000040400000406000004080000040A0000040C0000040E000006000000060
+        20000060400000606000006080000060A0000060C0000060E000008000000080
+        20000080400000806000008080000080A0000080C0000080E00000A0000000A0
+        200000A0400000A0600000A0800000A0A00000A0C00000A0E00000C0000000C0
+        200000C0400000C0600000C0800000C0A00000C0C00000C0E00000E0000000E0
+        200000E0400000E0600000E0800000E0A00000E0C00000E0E000400000004000
+        20004000400040006000400080004000A0004000C0004000E000402000004020
+        20004020400040206000402080004020A0004020C0004020E000404000004040
+        20004040400040406000404080004040A0004040C0004040E000406000004060
+        20004060400040606000406080004060A0004060C0004060E000408000004080
+        20004080400040806000408080004080A0004080C0004080E00040A0000040A0
+        200040A0400040A0600040A0800040A0A00040A0C00040A0E00040C0000040C0
+        200040C0400040C0600040C0800040C0A00040C0C00040C0E00040E0000040E0
+        200040E0400040E0600040E0800040E0A00040E0C00040E0E000800000008000
+        20008000400080006000800080008000A0008000C0008000E000802000008020
+        20008020400080206000802080008020A0008020C0008020E000804000008040
+        20008040400080406000804080008040A0008040C0008040E000806000008060
+        20008060400080606000806080008060A0008060C0008060E000808000008080
+        20008080400080806000808080008080A0008080C0008080E00080A0000080A0
+        200080A0400080A0600080A0800080A0A00080A0C00080A0E00080C0000080C0
+        200080C0400080C0600080C0800080C0A00080C0C00080C0E00080E0000080E0
+        200080E0400080E0600080E0800080E0A00080E0C00080E0E000C0000000C000
+        2000C0004000C0006000C0008000C000A000C000C000C000E000C0200000C020
+        2000C0204000C0206000C0208000C020A000C020C000C020E000C0400000C040
+        2000C0404000C0406000C0408000C040A000C040C000C040E000C0600000C060
+        2000C0604000C0606000C0608000C060A000C060C000C060E000C0800000C080
+        2000C0804000C0806000C0808000C080A000C080C000C080E000C0A00000C0A0
+        2000C0A04000C0A06000C0A08000C0A0A000C0A0C000C0A0E000C0C00000C0C0
+        2000C0C04000C0C06000C0C08000C0C0A000F0FBFF00A4A0A000808080000000
+        FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00010000000000
+        000000000000000000FFFF00FFFFFFFFFFFFFFFFFFFFFFFF00FFFF00FF07A407
+        A407A4F9A407A4FF00FFFF00FFA407A407A4F9A4F9A407FF00FFFF00FF07A407
+        A407A4F9A407A4FF00FFFF00FFA407A407A407A407A407FF00FFFF00FF07A407
+        A407A407A407A4FF00FFFF00FFA407A407A407A407A407FF00FFFF00FFFFFFFF
+        FFFFFFFFFFFFFFFF00FFFF00FF04FC04FC04FCA4A4A4A4FF00FFFF00FFFC04FC
+        04FC04A4A4A4A4FF00FFFF00FFFFFFFFFFFFFFFFFFFFFFFF00FFFF0000000000
+        000000000000000000FF}
+      ShowButton = True
+      TabOrder = 2
+    end
+  end
+  inherited Dock971: TDock97
+    Top = 424
+    Width = 1053
+    inherited tb97Fundo: TToolbar97
+      Left = 443
+    end
+    inherited TB97oKCancelar: TToolbar97
+      Left = 190
+      inherited bbtnCancelar: TBitBtn
+        OnClick = bbtnCancelarClick
+      end
+      inherited bt_Imprime: TBitBtn
+        OnClick = bt_ImprimeClick
+      end
+    end
+  end
+  inherited ivTradutor: TIvExtendedTranslator
+    Left = 1251
+    Top = 3
+  end
+  object CdsConsTransPlanosDireitosMT: TCMClientDataSet
+    Active = True
+    Aggregates = <>
+    Params = <>
+    Left = 472
+    Top = 376
+    Data = {
+      BA0200009619E0BD010000001800000019000000000003000000BA021149444F
+      5045524143414F4449524549544F08000400000000001044455343494E564553
+      54494D454E544F0100490000000100055749445448020002003C001A5155414E
+      544944414445414E544552494F5244414F524947454D08000400000000001556
+      414C4F52414E544552494F5244414F524947454D08000400000000000E444154
+      4144414F5045524143414F080008000000000006424F4C455441010049000000
+      0100055749445448020002001E00084944424F4C455441010049000000010005
+      5749445448020002001E000A444154415452414E534608000800000000000951
+      54445452414E534608000400000000001056414C4F5252454D554E4552414341
+      4F080004000000000009564C525452414E534608000400000000000C51544441
+      5455414C4F52494708000400000000000C564C52415455414C4F524947080004
+      00000000000751544444455354080004000000000007564C5244455354080004
+      00000000000B4441544144455354494E4F08000800000000001156414C4F5241
+      5455414C44455354494E4F08000400000000000C424F4C4554415452414E5346
+      0100490000000100055749445448020002001E00114445534343415254494E56
+      4553544752440100490000000100055749445448020002003C00134445534343
+      415254494E564553544752445F31010049000000010005574944544802000200
+      3C0013444553435449504F4F5045524143414F47524401004900000001000557
+      49445448020002003C000E504C414E4F4F524947454D47524401004900000001
+      0005574944544802000200710002505508000400000000000A50455243454E54
+      55414C08000400000000000F504C414E4F44455354494E4F4752440100490000
+      0001000557494454480200020071000100044C4349440400010009080000}
+    object CdsConsTransPlanosDireitosMTDATATRANSF: TDateTimeField
+      DisplayLabel = 'Data da Transferência'
+      DisplayWidth = 10
+      FieldName = 'DATATRANSF'
+    end
+    object CdsConsTransPlanosDireitosMTPLANOORIGEMGRD: TStringField
+      DisplayLabel = 'Plano de Origem'
+      DisplayWidth = 30
+      FieldName = 'PLANOORIGEMGRD'
+      Size = 113
+    end
+    object CdsConsTransPlanosDireitosMTPLANODESTINOGRD: TStringField
+      DisplayLabel = 'Plano de Destino'
+      DisplayWidth = 50
+      FieldName = 'PLANODESTINOGRD'
+      Size = 113
+    end
+    object CdsConsTransPlanosDireitosMTDESCCARTINVESTGRD: TStringField
+      DisplayLabel = 'Carteira de Investimento'
+      DisplayWidth = 60
+      FieldName = 'DESCCARTINVESTGRD'
+      Size = 60
+    end
+    object CdsConsTransPlanosDireitosMTDESCINVESTIMENTO: TStringField
+      DisplayLabel = 'Investimento'
+      DisplayWidth = 30
+      FieldName = 'DESCINVESTIMENTO'
+      Size = 60
+    end
+    object CdsConsTransPlanosDireitosMTDESCTIPOOPERACAOGRD: TStringField
+      DisplayLabel = 'Tipo de Operação'
+      DisplayWidth = 60
+      FieldName = 'DESCTIPOOPERACAOGRD'
+      Size = 60
+    end
+    object CdsConsTransPlanosDireitosMTBOLETA: TStringField
+      DisplayLabel = 'Boleta'
+      DisplayWidth = 15
+      FieldName = 'BOLETA'
+      Size = 30
+    end
+    object CdsConsTransPlanosDireitosMTPU: TFloatField
+      DisplayLabel = 'Preço Unitário'
+      DisplayWidth = 15
+      FieldName = 'PU'
+      DisplayFormat = '##0.000000'
+    end
+    object CdsConsTransPlanosDireitosMTPERCENTUAL: TFloatField
+      DisplayLabel = 'Percentual'
+      DisplayWidth = 20
+      FieldName = 'PERCENTUAL'
+    end
+    object CdsConsTransPlanosDireitosMTVLRTRANSF: TFloatField
+      DisplayLabel = 'Valor Transferido'
+      DisplayWidth = 10
+      FieldName = 'VLRTRANSF'
+    end
+    object CdsConsTransPlanosDireitosMTVALORREMUNERACAO: TFloatField
+      DisplayLabel = 'Valor da Remuneração'
+      DisplayWidth = 10
+      FieldName = 'VALORREMUNERACAO'
+    end
+    object CdsConsTransPlanosDireitosMTIDBOLETA: TStringField
+      DisplayWidth = 30
+      FieldName = 'IDBOLETA'
+      Visible = False
+      Size = 30
+    end
+    object CdsConsTransPlanosDireitosMTQTDTRANSF: TFloatField
+      DisplayWidth = 10
+      FieldName = 'QTDTRANSF'
+      Visible = False
+    end
+    object CdsConsTransPlanosDireitosMTQTDATUALORIG: TFloatField
+      DisplayWidth = 10
+      FieldName = 'QTDATUALORIG'
+      Visible = False
+    end
+    object CdsConsTransPlanosDireitosMTVLRATUALORIG: TFloatField
+      DisplayWidth = 10
+      FieldName = 'VLRATUALORIG'
+      Visible = False
+    end
+    object CdsConsTransPlanosDireitosMTQTDDEST: TFloatField
+      DisplayWidth = 10
+      FieldName = 'QTDDEST'
+      Visible = False
+    end
+    object CdsConsTransPlanosDireitosMTVLRDEST: TFloatField
+      DisplayWidth = 10
+      FieldName = 'VLRDEST'
+      Visible = False
+    end
+    object CdsConsTransPlanosDireitosMTDATADESTINO: TDateTimeField
+      DisplayWidth = 18
+      FieldName = 'DATADESTINO'
+      Visible = False
+    end
+    object CdsConsTransPlanosDireitosMTVALORATUALDESTINO: TFloatField
+      DisplayWidth = 10
+      FieldName = 'VALORATUALDESTINO'
+      Visible = False
+    end
+    object CdsConsTransPlanosDireitosMTBOLETATRANSF: TStringField
+      DisplayWidth = 30
+      FieldName = 'BOLETATRANSF'
+      Visible = False
+      Size = 30
+    end
+    object CdsConsTransPlanosDireitosMTDESCCARTINVESTGRD_1: TStringField
+      DisplayWidth = 60
+      FieldName = 'DESCCARTINVESTGRD_1'
+      Visible = False
+      Size = 60
+    end
+    object CdsConsTransPlanosDireitosMTIDOPERACAODIREITO: TFloatField
+      DisplayWidth = 10
+      FieldName = 'IDOPERACAODIREITO'
+      Visible = False
+    end
+    object CdsConsTransPlanosDireitosMTQUANTIDADEANTERIORDAORIGEM: TFloatField
+      DisplayWidth = 10
+      FieldName = 'QUANTIDADEANTERIORDAORIGEM'
+      Visible = False
+    end
+    object CdsConsTransPlanosDireitosMTVALORANTERIORDAORIGEM: TFloatField
+      DisplayWidth = 10
+      FieldName = 'VALORANTERIORDAORIGEM'
+      Visible = False
+    end
+    object CdsConsTransPlanosDireitosMTDATADAOPERACAO: TDateTimeField
+      DisplayWidth = 18
+      FieldName = 'DATADAOPERACAO'
+      Visible = False
+    end
+  end
+  object sprConsTransPlanosDireitosMT: TCMSqlParams
+    SQL.Strings = (
+      'SELECT DISTINCT OT.IDOPERACAODIREITO, IV.DESCINVESTIMENTO,'
+      '       '
+      
+        '       O.QTDEOPERACAO AS QUANTIDADEANTERIORDAORIGEM, --VALORES O' +
+        'RIGEM'
+      '       O.VLROPERACAO  AS VALORANTERIORDAORIGEM,'
+      '       O.DATAOPERACAO AS DATADAOPERACAO,'
+      '       O.NUMDOCUMENTO AS BOLETA, --VALORES ORIGEM'
+      '       '
+      '       OT.IDBOLETA, --VALORES DA TRANSFERENCIA'
+      '       OT.DATAOPERACAO AS DATATRANSF,'
+      '       OT.QTDEOPERACAO AS QTDTRANSF,'
+      '       OT.VLRREMUNERACAO AS VALORREMUNERACAO,'
+      '       OT.VLROPERACAO AS VLRTRANSF,--VALORES DA TRANSFERENCIA'
+      '       '
+      
+        '       OIATUALORIG.QTDEOPERACAO AS QTDATUALORIG, --VALORES ATUAL' +
+        'IZADOS ORIGEM'
+      '       OIATUALORIG.VLROPERACAO  VLRATUALORIG,'
+      '       '
+      '       DESTINO.QTDEOPERACAO AS QTDDEST, --VALORES DO DESTINO'
+      '       DESTINO.VLROPERACAO  AS VLRDEST,'
+      '       DESTINO.DATAOPERACAO AS DATADESTINO,'
+      '       OIATUALDEST.VLROPERACAO as VALORATUALDESTINO,'
+      '       DESTINO.NUMDOCUMENTO AS BOLETATRANSF,--VALORES DO DESTINO'
+      '       '
+      
+        '       CI.DESCCARTINVEST      AS DESCCARTINVESTGRD, --DADOS PARA' +
+        ' A GRID '
+      '       CI.DESCCARTINVEST      AS DESCCARTINVESTGRD,'
+      '       TP.DESCTIPOOPERACAO    AS DESCTIPOOPERACAOGRD,'
+      '       PLO.PLANPRVCONTABPATRO AS PLANOORIGEMGRD,'
+      '       OT.PUORIGEM AS PU,'
+      '       OT.PERCENTUAL AS PERCENTUAL,'
+      
+        '       PLD.PLANPRVCONTABPATRO AS PLANODESTINOGRD --DADOS PARA A ' +
+        'GRID '
+      ''
+      '  FROM OPERDIRTRANSF     OT,'
+      '       INVESTIMENTO      IV,'
+      '       OPERACAOINVEST    O,'
+      '       OPERACAODIREITO   OD,'
+      '       CARTEIRAINVEST    CI,'
+      '       VWPLANPREVCTBPATR PLO,'
+      '       VWPLANPREVCTBPATR PLD,'
+      '       TIPOOPERACAO      TP,'
+      '       '
+      '       (SELECT OT.IDOPERACAODIREITO, -- INCIO QRY DE DESTINO'
+      '               D.QTDEOPERACAO,'
+      '               D.VLROPERACAO,'
+      '               D.DATAOPERACAO,'
+      '               D.NUMDOCUMENTO,'
+      '               D.IDPLANPREVCTBPATR,'
+      '               D.IDMOTIVOBLOQUEIO,'
+      '               D.IDCARTEIRAINVEST,'
+      '               D.IDINVESTIMENTO,'
+      '               D.IDCUSTODIANTE'
+      '        '
+      '          FROM OPERDIRTRANSF OT, OPERACAOINVEST D'
+      '         WHERE OT.IDOPERACAODIREITO = D.IDOPERACAODIREITO'
+      '           AND OT.IDPLANPREVCTBPATRDEST = D.IDPLANPREVCTBPATR'
+      '           AND OT.IDCARTINVESTORIG = D.IDCARTEIRAINVEST'
+      '           AND OT.IDINVESTORIG = D.IDINVESTIMENTO'
+      '           AND OT.IDCUSTODIAORIG = D.IDCUSTODIANTE'
+      '           AND OT.IDMOTIVOBLOQORIG = D.IDMOTIVOBLOQUEIO'
+      
+        '           AND D.DATAOPERACAO < OT.DATAOPERACAO) DESTINO, --FIM ' +
+        'QRY DE DESTINO'
+      '       '
+      '       (SELECT  * --INCIO QRY VALORES ATUAIS DA ORIGEM'
+      '          FROM OPERACAOINVEST OI'
+      '         WHERE OI.IDOPERACAOINVEST IN'
+      
+        '               (SELECT DISTINCT MAX(OI1.IDOPERACAOINVEST) AS IDO' +
+        'PERACAOINVEST'
+      '                  FROM OPERACAOINVEST OI1'
+      '                 WHERE OI1.IDOPERACAODIREITO IS NOT NULL'
+      '                   AND OI1.IDTIPOOPERACAO IN (-70, -10070)'
+      '                 GROUP BY OI1.IDOPERACAODIREITO,'
+      '                          OI1.IDPLANPREVCTBPATR,'
+      
+        '                          OI1.IDCARTEIRAINVEST)) OIATUALORIG, --' +
+        'FIM QRY VALORES ATUAIS DA ORIGEM'
+      '       '
+      '       (SELECT  * --INCIO QRY VALORES ATUAIS DA DESTINO'
+      '          FROM OPERACAOINVEST OI'
+      '         WHERE OI.IDOPERACAOINVEST IN'
+      
+        '               (SELECT MAX(OI1.IDOPERACAOINVEST) AS IDOPERACAOIN' +
+        'VEST'
+      '                  FROM OPERACAOINVEST OI1'
+      '                 WHERE OI1.IDOPERACAODIREITO IS NOT NULL'
+      '                   AND OI1.IDTIPOOPERACAO IN (-70, -10070)'
+      '                 GROUP BY OI1.IDOPERACAODIREITO,'
+      '                          OI1.IDPLANPREVCTBPATR,'
+      
+        '                          OI1.IDCARTEIRAINVEST)) OIATUALDEST --F' +
+        'IM QRY VALORES ATUAIS DA DESTINO'
+      ''
+      
+        ' WHERE OT.IDOPERACAODIREITO = O.IDOPERACAODIREITO --JOINS OPERAC' +
+        'AO DE TRANSFERENCIA COM ORIGEM'
+      '   AND OT.IDPLANPREVCTBPATRORIG = O.IDPLANPREVCTBPATR'
+      '   AND OT.IDCARTINVESTORIG = O.IDCARTEIRAINVEST'
+      '   AND OT.IDINVESTORIG = O.IDINVESTIMENTO'
+      '   AND OT.IDCUSTODIAORIG = O.IDCUSTODIANTE'
+      '   AND OT.IDMOTIVOBLOQORIG = O.IDMOTIVOBLOQUEIO'
+      '   AND O.DATAOPERACAO < OT.DATAOPERACAO'
+      '      '
+      
+        '   AND OT.IDOPERACAODIREITO = DESTINO.IDOPERACAODIREITO --JOINS ' +
+        'OPERACAO TRANSFERENCIA COM DESTINO'
+      '   AND OT.IDPLANPREVCTBPATRDEST = DESTINO.IDPLANPREVCTBPATR'
+      '   AND OT.IDCARTINVESTORIG = DESTINO.IDCARTEIRAINVEST'
+      '   AND OT.IDINVESTORIG = DESTINO.IDINVESTIMENTO'
+      '   AND OT.IDCUSTODIAORIG = DESTINO.IDCUSTODIANTE'
+      '   AND OT.IDMOTIVOBLOQORIG = DESTINO.IDMOTIVOBLOQUEIO'
+      '      '
+      
+        '   AND OIATUALDEST.IDOPERACAODIREITO = O.IDOPERACAODIREITO --JOI' +
+        'NS SALDO ATUAL DESTINO'
+      '   AND OIATUALDEST.IDPLANPREVCTBPATR = O.IDPLANPREVCTBPATR'
+      '   AND OIATUALDEST.IDCARTEIRAINVEST = O.IDCARTEIRAINVEST'
+      '   AND OIATUALDEST.IDINVESTIMENTO = O.IDINVESTIMENTO'
+      '   AND OIATUALDEST.IDCUSTODIANTE = O.IDCUSTODIANTE'
+      '   AND OIATUALDEST.IDMOTIVOBLOQUEIO = O.IDMOTIVOBLOQUEIO'
+      '      '
+      
+        '   AND OIATUALORIG.IDOPERACAODIREITO = DESTINO.IDOPERACAODIREITO' +
+        ' --JOINS SALDO ATUAL ORIGEM'
+      '   AND OIATUALORIG.IDPLANPREVCTBPATR = DESTINO.IDPLANPREVCTBPATR'
+      '   AND OIATUALORIG.IDCARTEIRAINVEST = DESTINO.IDCARTEIRAINVEST'
+      '   AND OIATUALORIG.IDINVESTIMENTO = DESTINO.IDINVESTIMENTO'
+      '   AND OIATUALORIG.IDCUSTODIANTE = DESTINO.IDCUSTODIANTE'
+      '   AND OIATUALORIG.IDMOTIVOBLOQUEIO = DESTINO.IDMOTIVOBLOQUEIO'
+      '      '
+      
+        '   AND OD.IDOPERACAODIREITO = OT.IDOPERACAODIREITO --JOINS DA GR' +
+        'ID'
+      '   AND PLO.IDPLANPREVCTBPATR = OT.IDPLANPREVCTBPATRORIG'
+      '   AND PLD.IDPLANPREVCTBPATR = OT.IDPLANPREVCTBPATRDEST'
+      '   AND TP.IDTIPOINVEST = 2'
+      '   AND TP.IDTIPOOPERACAO = OD.IDTIPOOPERACAO'
+      '   AND CI.IDCARTEIRAINVEST = OT.IDCARTINVESTORIG'
+      '   AND IV.IDINVESTIMENTO = OT.IDINVESTORIG'
+      '   '
+      ''
+      ' '
+      ' '
+      ' '
+      ' '
+      ' '
+      ' ')
+    ClientDataSet = CdsConsTransPlanosDireitosMT
+    Left = 296
+    Top = 376
+  end
+  object dsConsTransPlanosDireitosMT: TDataSource
+    DataSet = CdsConsTransPlanosDireitosMT
+    Left = 632
+    Top = 376
+  end
+  object cdsCarteira: TCMClientDataSet
+    Aggregates = <>
+    Params = <>
+    Left = 265
+    Top = 285
+  end
+  object cdsTipoOperacao: TCMClientDataSet
+    Aggregates = <>
+    Params = <>
+    Left = 361
+    Top = 284
+  end
+  object cdsPlanoPatroO: TCMClientDataSet
+    Aggregates = <>
+    Params = <>
+    Left = 184
+    Top = 268
+  end
+end

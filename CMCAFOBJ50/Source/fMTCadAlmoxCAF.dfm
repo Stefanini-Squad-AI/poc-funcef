@@ -1,0 +1,524 @@
+inherited frmMTCadAlmoxCaf: TfrmMTCadAlmoxCaf
+  Left = 57
+  Top = 174
+  Caption = 'Cadastramento no Ativo Fixo'
+  ClientHeight = 293
+  ClientWidth = 709
+  FormStyle = fsNormal
+  Visible = False
+  PixelsPerInch = 96
+  TextHeight = 13
+  inherited pnlFundo: TPanel
+    Width = 709
+    Height = 254
+    object Label3: TLabel
+      Left = 16
+      Top = 104
+      Width = 51
+      Height = 13
+      Caption = 'Conjunto'
+    end
+    object Label4: TLabel
+      Left = 16
+      Top = 152
+      Width = 69
+      Height = 13
+      Caption = 'Localização'
+    end
+    object Label5: TLabel
+      Left = 352
+      Top = 152
+      Width = 74
+      Height = 13
+      Caption = 'Responsável'
+    end
+    object Label13: TLabel
+      Left = 16
+      Top = 200
+      Width = 96
+      Height = 13
+      Caption = 'Nº de Patrimônio'
+    end
+    object Label1: TLabel
+      Left = 352
+      Top = 56
+      Width = 38
+      Height = 13
+      Caption = 'Classe'
+    end
+    object Label27: TLabel
+      Left = 352
+      Top = 16
+      Width = 48
+      Height = 13
+      Caption = 'Controle'
+    end
+    object Label7: TLabel
+      Left = 16
+      Top = 16
+      Width = 104
+      Height = 13
+      Caption = 'Descrição do Bem'
+    end
+    object Label8: TLabel
+      Left = 180
+      Top = 200
+      Width = 85
+      Height = 13
+      Caption = 'Grupo Contábil'
+    end
+    object Label2: TLabel
+      Left = 560
+      Top = 200
+      Width = 73
+      Height = 13
+      Caption = 'Depreciação'
+    end
+    object Label11: TLabel
+      Left = 656
+      Top = 218
+      Width = 38
+      Height = 16
+      Caption = '% a.a.'
+      Font.Charset = ANSI_CHARSET
+      Font.Color = clBlue
+      Font.Height = -13
+      Font.Name = 'Arial'
+      Font.Style = [fsBold]
+      ParentFont = False
+    end
+    object dbeConjunto: TDBMemo
+      Left = 16
+      Top = 120
+      Width = 635
+      Height = 21
+      DataField = 'DESCCONJUNTO'
+      DataSource = dsConjunto
+      MaxLength = 200
+      TabOrder = 11
+    end
+    object bbtnGeraConjunto: TBitBtn
+      Left = 650
+      Top = 120
+      Width = 22
+      Height = 21
+      TabOrder = 3
+      OnClick = bbtnGeraConjuntoClick
+      Glyph.Data = {
+        76010000424D7601000000000000760000002800000020000000100000000100
+        0400000000000001000000000000000000001000000000000000000000000000
+        8000008000000080800080000000800080008080000080808000C0C0C0000000
+        FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF008888888B8888
+        8888888888888F8888888B8888BB778888B88888888F77F8888888BB8800F088
+        BB8888888F7787F8888888BB00FFF0BBBB88888F7788878F88888800FFFFFF0B
+        B888887788888F7F8888887FFFFFCF0B8888887F88FF7878F888887FFCCCFFF0
+        B8888878F77788F7F88888B7FFFFFCF0BB888887F88FF7878F88BBB7FFCCCFFF
+        0BBB88878F77788F78F888BB7FFFFFCFF08888887F88FF78878F888B7FFCCCFF
+        FF08888878F777888F78888BB7FFFFFF77888888878F888F778888BBBB7FFF77
+        BB8888888878FF77888888BB88B77788BB8888888887778888888B88888B8888
+        88B888888888888888888888888B888888888888888888888888}
+      NumGlyphs = 2
+    end
+    object bbtnSelConjunto: TBitBtn
+      Left = 671
+      Top = 120
+      Width = 22
+      Height = 21
+      TabOrder = 4
+      OnClick = bbtnSelConjuntoClick
+      Glyph.Data = {
+        76010000424D7601000000000000760000002800000020000000100000000100
+        0400000000000001000000000000000000001000000000000000000000000000
+        80000080000000808000800000008000800080800000C0C0C000808080000000
+        FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00777777777887
+        777777777777F88F7777777777700F077777777777F8878F77777777700FFF07
+        77777777F8877787F77777700FFFFFF077777778877777F8F7777778FFFFFCF0
+        77777F78F77FF8787F771778FFCCCFFF07778FF87F88877F8F7711778FFFFFCF
+        077788FF8F77FF8787F711178FFCCCFFF077888F8FF88877F87F71110000FFFC
+        FF07788888887FF877877710E7E706CFFFF077887777888777F8770E7E7E70FF
+        F887778F777778F7F8877707E7E7E0F88777778F777778F88777770E7E7E7087
+        7777778F7777788777777707E7E7E07777777787F7777877777777707E7E0777
+        777777787FFF8777777777770000777777777777888877777777}
+      NumGlyphs = 2
+    end
+    object dbeDescLocalizacao: TwwDBEdit
+      Left = 16
+      Top = 168
+      Width = 326
+      Height = 21
+      DataField = 'DESCLOCAL'
+      DataSource = dsConjunto
+      ReadOnly = True
+      TabOrder = 9
+      UnboundDataType = wwDefault
+      WantReturns = False
+      WordWrap = False
+    end
+    object dbeNomeResponsavel: TwwDBEdit
+      Left = 352
+      Top = 168
+      Width = 341
+      Height = 21
+      DataField = 'NOMERESP'
+      DataSource = dsConjunto
+      ReadOnly = True
+      TabOrder = 10
+      UnboundDataType = wwDefault
+      WantReturns = False
+      WordWrap = False
+    end
+    object dbeDescClasse: TwwDBEdit
+      Left = 352
+      Top = 72
+      Width = 318
+      Height = 21
+      DataField = 'DESCRICAO'
+      DataSource = dsClasse
+      TabOrder = 12
+      UnboundDataType = wwDefault
+      WantReturns = False
+      WordWrap = False
+    end
+    object bbtnSelClasse: TBitBtn
+      Left = 671
+      Top = 72
+      Width = 22
+      Height = 21
+      TabOrder = 2
+      OnClick = bbtnSelClasseClick
+      Glyph.Data = {
+        76010000424D7601000000000000760000002800000020000000100000000100
+        0400000000000001000000000000000000001000000010000000000000000000
+        80000080000000808000800000008000800080800000C0C0C000808080000000
+        FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00777777777887
+        777777777777F88F7777777777700F077777777777F8878F77777777700FFF07
+        77777777F8877787F77777700FFFFFF077777778877777F8F7777778FFFFFCF0
+        77777F78F77FF8787F771778FFCCCFFF07778FF87F88877F8F7711778FFFFFCF
+        077788FF8F77FF8787F711178FFCCCFFF077888F8FF88877F87F71110000FFFC
+        FF07788888887FF877877710E7E706CFFFF077887777888777F8770E7E7E70FF
+        F887778F777778F7F8877707E7E7E0F88777778F777778F88777770E7E7E7087
+        7777778F7777788777777707E7E7E07777777787F7777877777777707E7E0777
+        777777787FFF8777777777770000777777777777888877777777}
+      NumGlyphs = 2
+    end
+    object cmbControle: TComboBox
+      Left = 352
+      Top = 32
+      Width = 169
+      Height = 21
+      ItemHeight = 13
+      TabOrder = 1
+      Items.Strings = (
+        'Total'
+        'Físico')
+    end
+    object dbeDesBem: TDBMemo
+      Left = 16
+      Top = 32
+      Width = 327
+      Height = 61
+      DataField = 'DESBEM'
+      DataSource = dsAlmoxCAF
+      TabOrder = 0
+    end
+    object edDescGrupo: TwwDBEdit
+      Left = 180
+      Top = 216
+      Width = 371
+      Height = 21
+      DataField = 'NOME'
+      DataSource = dsGrupo
+      TabOrder = 7
+      UnboundDataType = wwDefault
+      WantReturns = False
+      WordWrap = False
+    end
+    object dbeTaxaDep: TwwDBEdit
+      Left = 560
+      Top = 216
+      Width = 89
+      Height = 21
+      DataField = 'DEPRECIACAO'
+      DataSource = dsGrupo
+      TabOrder = 8
+      UnboundDataType = wwDefault
+      WantReturns = False
+      WordWrap = False
+    end
+    object dbePlaca: TwwDBEdit
+      Left = 16
+      Top = 216
+      Width = 132
+      Height = 21
+      DataField = 'PLACA'
+      DataSource = dsAlmoxCAF
+      TabOrder = 5
+      UnboundDataType = wwDefault
+      WantReturns = False
+      WordWrap = False
+    end
+    object bbtnGeraPlaca: TBitBtn
+      Left = 148
+      Top = 216
+      Width = 20
+      Height = 20
+      Cursor = crHandPoint
+      Hint = 
+        'Gera um número de Patrimônio baseado nos parâmetros iniciais do ' +
+        'sistema'
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 6
+      OnClick = bbtnGeraPlacaClick
+      Glyph.Data = {
+        36060000424D3606000000000000360400002800000020000000100000000100
+        0800000000000002000000000000000000000001000000010000000000000000
+        80000080000000808000800000008000800080800000C0C0C000C0DCC000F0CA
+        A6000020400000206000002080000020A0000020C0000020E000004000000040
+        20000040400000406000004080000040A0000040C0000040E000006000000060
+        20000060400000606000006080000060A0000060C0000060E000008000000080
+        20000080400000806000008080000080A0000080C0000080E00000A0000000A0
+        200000A0400000A0600000A0800000A0A00000A0C00000A0E00000C0000000C0
+        200000C0400000C0600000C0800000C0A00000C0C00000C0E00000E0000000E0
+        200000E0400000E0600000E0800000E0A00000E0C00000E0E000400000004000
+        20004000400040006000400080004000A0004000C0004000E000402000004020
+        20004020400040206000402080004020A0004020C0004020E000404000004040
+        20004040400040406000404080004040A0004040C0004040E000406000004060
+        20004060400040606000406080004060A0004060C0004060E000408000004080
+        20004080400040806000408080004080A0004080C0004080E00040A0000040A0
+        200040A0400040A0600040A0800040A0A00040A0C00040A0E00040C0000040C0
+        200040C0400040C0600040C0800040C0A00040C0C00040C0E00040E0000040E0
+        200040E0400040E0600040E0800040E0A00040E0C00040E0E000800000008000
+        20008000400080006000800080008000A0008000C0008000E000802000008020
+        20008020400080206000802080008020A0008020C0008020E000804000008040
+        20008040400080406000804080008040A0008040C0008040E000806000008060
+        20008060400080606000806080008060A0008060C0008060E000808000008080
+        20008080400080806000808080008080A0008080C0008080E00080A0000080A0
+        200080A0400080A0600080A0800080A0A00080A0C00080A0E00080C0000080C0
+        200080C0400080C0600080C0800080C0A00080C0C00080C0E00080E0000080E0
+        200080E0400080E0600080E0800080E0A00080E0C00080E0E000C0000000C000
+        2000C0004000C0006000C0008000C000A000C000C000C000E000C0200000C020
+        2000C0204000C0206000C0208000C020A000C020C000C020E000C0400000C040
+        2000C0404000C0406000C0408000C040A000C040C000C040E000C0600000C060
+        2000C0604000C0606000C0608000C060A000C060C000C060E000C0800000C080
+        2000C0804000C0806000C0808000C080A000C080C000C080E000C0A00000C0A0
+        2000C0A04000C0A06000C0A08000C0A0A000C0A0C000C0A0E000C0C00000C0C0
+        2000C0C04000C0C06000C0C08000C0C0A000F0FBFF00A4A0A000808080000000
+        FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00F7A400A4A4A4
+        00F7F7F7F7F7F7F7F700F7F7A4FFF7FFA4FFF7F7F7F7F7FFF7A407A400A40000
+        00F7F7F7F7A400A4F700F7FFA4F7A4A4F6F7F7F7F7F7A4F7FFA40000A4A400F7
+        F7F7F7F7F700A4000000A4A4F7F7A4FFF7F7F7F7F7A4F7A4A4A40707A40000F7
+        F7F7F7F7F7A40000A4A4F7F7FFA4A4F7FFF7F7F7F7F7A4A4F7F7A4000000A400
+        F7F7F7F7F7F700A4A400F7A4A4A4F7A4F7F7F7F7F7FFA4FFF7A4A400F7A400A4
+        F7F7F7F70000000700A4F7A4FFF7A4F7F7F7F7F7A4A4A4F7A4FF0000F7F7F7F7
+        F7F7F7F700A4A4070007A4A4F7F7FFFFFFF7F7F7A4FFFFFFA4FFF7F7F7000000
+        F7F7F7F70000000700A4F7FFF7A4A4A4FFF7F7FFA4A4A4FFA4F700A4F700A400
+        F7A400A4F7F700A40700A4F7FFA4FFA4FFFFA4F7FFF7A4FFFFA4A4000000A400
+        0000A400F7A40000A407F7A4A4A4F7A4A4A4FFA4F7F7A4A4FFFF0000A4A4A4A4
+        A40000A4F700A4000000A4A4F7F7FFFFFFA4A4FFF7A4F7A4A4A400A4A4000000
+        A4A400F7F7A400A4F700A4FFF7A4A4A4F7FFA4FFFFFFA4F7F7A4000700A4A4A4
+        00A4000000F7F7F7F700A4F7A4FFF7FFA4FFA4A4A4FFF7F7F7A4A407000700A4
+        00A4A4A400F7F7F7F7F7F7FFA4FFA4F7A4FFF7FFA4FFF7F7F7F7000700A407A4
+        00A4000000F7F7F7F7F7A4FFA4F7FFFFA4F7F7A4A4F7F7F7F7F700A407000000
+        A4A400F7F7F7F7F7F7F7A4F7F7A4A4A4F7F7A4F7F7F7F7F7F7F7}
+      NumGlyphs = 2
+      Spacing = 0
+    end
+  end
+  inherited Dock971: TDock97
+    Top = 254
+    Width = 709
+    inherited tb97Fundo: TToolbar97
+      Left = 383
+      DockPos = 525
+      inherited sep1: TToolbarSep97
+        Left = 240
+      end
+      inherited bbtnSair: TBitBtn
+        Left = 160
+      end
+      inherited bbtnAjuda: TmaHelpBitBtn
+        Left = 242
+      end
+      object bbtnCancelar: TBitBtn
+        Left = 80
+        Top = 0
+        Width = 80
+        Height = 33
+        Cancel = True
+        Caption = '&Cancelar'
+        ModalResult = 2
+        TabOrder = 2
+        OnClick = bbtnCancelarClick
+        Glyph.Data = {
+          76010000424D7601000000000000760000002800000020000000100000000100
+          0400000000000001000000000000000000001000000000000000000000000000
+          8000008000000080800080000000800080008080000080808000C0C0C0000000
+          FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00888888888888
+          8888888888FFFFF8888888888000008888888888F777778FF888888009191900
+          88888887788888778F88887991919191088888788888888878F8879919191919
+          108887F888F888F887F887917F919F719088878887FF87FF878F7919FFF9FFF9
+          19087F88777F7778887F79919FFFFF9191087F8887777788887F791919FFF919
+          19087F8888777FF8887F79919FFFFF9191087F88877777FF887F7919FFF9FFF9
+          190878F877787778887887917F919F71908887F88788878887F8879919191919
+          1088878F88888888878888799191919108888878FF88888F7888888779999977
+          8888888778FFFF77888888888777778888888888877777888888}
+        NumGlyphs = 2
+      end
+      object bbtnConfirmar: TBitBtn
+        Left = 0
+        Top = 0
+        Width = 80
+        Height = 33
+        Caption = '&Ok'
+        Default = True
+        ModalResult = 1
+        TabOrder = 3
+        OnClick = bbtnConfirmarClick
+        Glyph.Data = {
+          76010000424D7601000000000000760000002800000020000000100000000100
+          0400000000000001000000000000000000001000000000000000000000000000
+          8000008000000080800080000000800080008080000080808000C0C0C0000000
+          FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00888888888888
+          8888888888FFFFF8888888888000008888888888F777778FF888888002222200
+          88888887788888778F88887222222222088888788888888878F887A228822222
+          208887F88FFF888887F887A2FFF8222220888788777FF888878F7A22FFFF8222
+          22087F887777FF88887F7A22FFFFF82222087F8877777FF8887F7A22FF8FFF82
+          22087F8877F777FF887F7A22FF82FFF822087F8877F8777F887F7A22FF222FF8
+          220878F87788877FF87887A2222222FF208887F88888887787F887A222222222
+          2088878F888888888788887AA222222208888878FF88888F788888877AAAAA77
+          8888888778FFFF77888888888777778888888888877777888888}
+        NumGlyphs = 2
+      end
+    end
+  end
+  inherited ivTradutor: TIvExtendedTranslator
+    Left = 370
+    Top = 447
+  end
+  object dsConjunto: TwwDataSource
+    AutoEdit = False
+    DataSet = cdsConjunto
+    Left = 200
+    Top = 108
+  end
+  object cdsConjunto: TCMClientDataSet
+    Aggregates = <>
+    Params = <>
+    ProviderName = 'Dsp'
+    Left = 200
+    Top = 96
+  end
+  object MSConjunto: TMontaSelect
+    Template.IdConsulta = 0
+    Caption = 'Selecione Conjunto'
+    Colunas.Strings = (
+      'CONJUNTO.DESCCONJUNTO'
+      'LOCALIZACAO.NOME'
+      'PESSOA.NOME')
+    TipodeDado.Strings = (
+      'C'
+      'C'
+      'C')
+    Descricao.Strings = (
+      'Conjunto'
+      'Localização'
+      'Responsável')
+    SensivelACaixa.Strings = (
+      'N'
+      'N'
+      'N')
+    Tabelas.Strings = (
+      'CONJUNTO'
+      'LOCALIZACAO'
+      'PESSOA')
+    CamposChave.Strings = (
+      'CONJUNTO.IDCONJUNTO')
+    Filtro.Strings = (
+      'CONJUNTO.IDLOCALIZACAO = LOCALIZACAO.IDLOCALIZACAO'
+      'CONJUNTO.IDPESSOA=LOCALIZACAO.IDPESSOA'
+      'CONJUNTO.IDRESPONSAVEL = PESSOA.IDPESSOA')
+    Mascaras.Strings = (
+      ''
+      ''
+      '')
+    Larguras.Strings = (
+      '200'
+      '60'
+      '60')
+    DataBaseName = 'BaseDados'
+    RepeteConsulta = False
+    UsaDistinct = False
+    SalvaConsulta = False
+    ExibePergunta = True
+    MultiSelect = False
+    Left = 264
+    Top = 96
+  end
+  object dsGrupo: TwwDataSource
+    AutoEdit = False
+    DataSet = cdsGrupo
+    Left = 360
+    Top = 205
+  end
+  object cdsGrupo: TCMClientDataSet
+    Aggregates = <>
+    Params = <>
+    Left = 360
+    Top = 192
+  end
+  object MSClasse: TMontaSelect
+    Template.IdConsulta = 0
+    Caption = 'Selecione Classe do Bem'
+    Colunas.Strings = (
+      'CLASSEDEBEM.CODHIERARQ'
+      'CLASSEDEBEM.DESCRICAO')
+    TipodeDado.Strings = (
+      'C'
+      'C')
+    Descricao.Strings = (
+      'Código'
+      'Nome')
+    SensivelACaixa.Strings = (
+      'N'
+      'N')
+    Tabelas.Strings = (
+      'CLASSEDEBEM')
+    CamposChave.Strings = (
+      'CLASSEDEBEM.IDCLASSEBEM')
+    Filtro.Strings = (
+      'CLASSEDEBEM.ANASINT = '#39'A'#39)
+    Mascaras.Strings = (
+      ''
+      '')
+    Larguras.Strings = (
+      '15'
+      '60')
+    DataBaseName = 'BaseDados'
+    RepeteConsulta = False
+    UsaDistinct = False
+    SalvaConsulta = False
+    ExibePergunta = True
+    MultiSelect = False
+    Left = 608
+    Top = 40
+  end
+  object dsClasse: TwwDataSource
+    AutoEdit = False
+    DataSet = cdsClasse
+    Left = 552
+    Top = 53
+  end
+  object cdsClasse: TCMClientDataSet
+    Aggregates = <>
+    Params = <>
+    ProviderName = 'Dsp'
+    Left = 552
+    Top = 40
+  end
+  object dsAlmoxCAF: TwwDataSource
+    AutoEdit = False
+    Left = 152
+    Top = 14
+  end
+end

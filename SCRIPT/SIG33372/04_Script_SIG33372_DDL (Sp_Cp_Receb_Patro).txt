@@ -1,0 +1,3942 @@
+CREATE OR REPLACE PROCEDURE CM.Sp_Cp_Receb_Patro
+(
+  Pmescobranca     IN VARCHAR2,
+  Pdatarecebimento IN DATE,
+  Pidpessjur       IN NUMBER,
+  Pidplanoprev     IN VARCHAR,
+  Pidcontribuicao  IN VARCHAR2,
+  Puser            IN NUMBER,
+  Pouterro         OUT VARCHAR2,
+  Poutdocumento    OUT NUMBER
+) IS
+
+  v_Datalim        DATE;
+  v_Perexercicio   NUMBER;
+  v_Pacdatabloq    DATE;
+  v_Plano          NUMBER;
+  v_Valor          NUMBER;
+  v_Recpag         CHAR(1);
+  v_Codtipdoc      NUMBER;
+  v_Debcre         CHAR(1);
+  v_Tipcodigo      CHAR(2);
+  v_Coddocumento   NUMBER;
+  v_Plncodigo      NUMBER;
+  v_Numlancto      NUMBER;
+  v_Plnplanil      NUMBER;
+  v_Pernumero      NUMBER;
+  v_Obs            CHAR(100);
+  v_Lachist1       CHAR(40);
+  v_Lachist1_Devol CHAR(40);
+  v_Lachist2       CHAR(40);
+  v_Lachist3       CHAR(40);
+  v_Lachist4       CHAR(40);
+  v_Lachist5       CHAR(40);
+  v_Cont           NUMBER;
+  v_Placonta       CHAR(18);
+  v_Lacnumlan      NUMBER;
+  v_Debcrecontra   CHAR(1);
+  v_Nome           VARCHAR(60);
+  v_Obs1           CHAR(40);
+  v_Obs2           CHAR(40);
+  v_Dataemissao    DATE;
+	v_Doc NUMBER;
+
+BEGIN
+
+  --VERIFICA SE O PERÍODO CONTÁBIL ESTÁ BLOQUEADO
+  BEGIN
+    SELECT Decode(Numdias, 0, Databloqueio, Trunc(SYSDATE) - Numdias) AS Datalim
+    INTO v_Datalim
+    FROM Diasbloqmod
+    WHERE Idpessoa = 1
+          AND Idmodulo = 456;
+    SELECT Perexercicio
+    INTO v_Perexercicio
+    FROM Periodo
+    WHERE Pdatarecebimento BETWEEN Perdatini AND Perdatfim
+          AND Idpessoa = 1
+          AND ((Perespecial = 'N') OR (Perespecial IS NULL))
+          AND Perbloque <> 'S';
+  EXCEPTION
+    WHEN No_Data_Found THEN
+      v_Perexercicio := NULL;
+  END;
+
+  BEGIN
+    SELECT Pacdatabloq
+    INTO v_Pacdatabloq
+    FROM Paramcontab
+    WHERE Idpessoa = 1
+          AND Pacdatabloq IS NOT NULL
+          AND Pacdatabloq >= Pdatarecebimento;
+  EXCEPTION
+    WHEN No_Data_Found THEN
+      v_Pacdatabloq := NULL;
+  END;
+  IF (v_Datalim > Pdatarecebimento) OR (v_Perexercicio IS NULL) OR (v_Pacdatabloq > Pdatarecebimento) THEN
+    Pouterro := 'PERÍODO BLOQUEADO';
+  ELSE
+    SELECT Plano
+    INTO v_Plano
+    FROM Paramcontab
+    WHERE (Idpessoa = 1);
+  
+    BEGIN
+      --VERIFICA SE EXISTEM VALORES A SEREM RECEBIDOS
+      SELECT SUM(Decode(Hst.Flgdevolucao, 0, Hst.Valoresperado, -hst.Valoresperado)) Valoresperado
+      INTO v_Valor
+      FROM Hstcontribprev Hst
+      JOIN Contprev c ON c.Idplanoprev = Hst.Idplanoprev
+                         AND c.Idcontribuicao = Hst.Idcontribuicao
+      JOIN Contplanpatro Cp ON Cp.Idcontribuicao = Hst.Idcontribuicao
+                               AND Cp.Idplanoprev = Hst.Idplanoprev
+                               AND Cp.Idpessjur = Hst.Idpessjur
+      WHERE Hst.Mescobranca = Pmescobranca
+            AND Hst.Idplanoprev IN (Pidplanoprev)
+            AND Hst.Idpessjur = Pidpessjur
+            AND Hst.Dataprevisaorece = Pdatarecebimento
+            AND Hst.Idcontribuicao IN (SELECT *
+                                       FROM TABLE(Fn_Geralista(Pidcontribuicao)))
+            AND
+            ((Hst.Sitrecebimento IN (1) AND Nvl(Hst.Valorrecebido, 0) = 0 AND Hst.Datarecebimento IS NULL AND Hst.Coddocumentoprev IS NULL AND c.Flgpagador = 'P') OR
+            (Hst.Sitrecebimento IN (2, 3) AND Hst.Datarecebimento IS NOT NULL AND Hst.Valorrecebido IS NOT NULL AND Hst.Coddocumentoprev IS NULL AND Hst.Folhaorigem <> 'B' AND Hst.Flgdescfolha = 1))
+            AND NOT EXISTS (SELECT 1
+             FROM Retornohstcontribpatro r
+             WHERE r.Numrecebimento = Hst.Numrecebimento);
+    EXCEPTION
+      WHEN No_Data_Found THEN
+        v_Valor := NULL;
+    END;
+  
+    --SE O VALOR ESTIVER ZERADO
+    IF v_Valor = 0 THEN
+      Pouterro := 'O SOMATÓRIO DAS CONTRIBUIÇÕES ESTÁ ZERADO';
+    
+    ELSIF v_Valor IS NULL THEN
+      Pouterro := 'NÃO EXISTEM CONTRIBUIÇÕES PARA PROCESSAMENTO';
+    
+    ELSE
+      --SE O VALOR NÃO ESTIVER ZERADO, INICIA O ENVIO
+      FOR Valores IN (SELECT SUM(Decode(Hst.Flgdevolucao, 0, Hst.Valoresperado, -hst.Valoresperado)) Valoresperado,
+                             SUM(Decode(Hst.Flgdevolucao, 0, Hst.Valorrecebido, -hst.Valorrecebido)) Valorrecebido,
+                             Hst.Idplanoprev,
+                             Hst.Idpessjur,
+                             Decode(Hst.Sitrecebimento, 3, 2, Hst.Sitrecebimento) Sitrecebimento,
+                             Decode(c.Flgpagador, 'C', 'PARTICIPANTE', 'P', 'PATROCINADOR') Pagador
+                      FROM Hstcontribprev Hst
+                      JOIN Contprev c ON c.Idplanoprev = Hst.Idplanoprev
+                                         AND c.Idcontribuicao = Hst.Idcontribuicao
+                      JOIN Contplanpatro Cp ON Cp.Idcontribuicao = Hst.Idcontribuicao
+                                               AND Cp.Idplanoprev = Hst.Idplanoprev
+                                               AND Cp.Idpessjur = Hst.Idpessjur
+                      WHERE Hst.Mescobranca = Pmescobranca
+                            AND Hst.Idplanoprev IN (Pidplanoprev)
+                            AND Hst.Idpessjur = Pidpessjur
+                            AND Hst.Dataprevisaorece = Pdatarecebimento
+                            AND Hst.Idcontribuicao IN (SELECT *
+                                                       FROM TABLE(Fn_Geralista(Pidcontribuicao)))
+                            AND ((Hst.Sitrecebimento IN (1) AND Nvl(Hst.Valorrecebido, 0) = 0 AND Hst.Datarecebimento IS NULL AND Hst.Coddocumentoprev IS NULL AND c.Flgpagador = 'P') OR
+                            (Hst.Sitrecebimento IN (2, 3) AND Hst.Datarecebimento IS NOT NULL AND Hst.Valorrecebido IS NOT NULL AND Hst.Coddocumentoprev IS NULL AND Hst.Folhaorigem <> 'B' AND
+                            Hst.Flgdescfolha = 1))
+                            AND NOT EXISTS (SELECT 1
+                             FROM Retornohstcontribpatro r
+                             WHERE r.Numrecebimento = Hst.Numrecebimento)
+                      GROUP BY Hst.Idplanoprev,
+                               Hst.Idpessjur,
+                               Decode(Hst.Sitrecebimento, 3, 2, Hst.Sitrecebimento),
+                               c.Flgpagador)
+      LOOP
+        IF Valores.Sitrecebimento = 1 AND Valores.Pagador = 'PATROCINADOR' THEN
+          IF Valores.Valoresperado < 0 THEN
+            Pouterro := 'NÃO EXISTEM CONTRIBUIÇÕES A SEREM RECEBIDAS';
+            GOTO Continue;
+          ELSE
+            SELECT t.Recpag,
+                   t.Codtipdoc,
+                   t.Debcre,
+                   p.Tipoperenvio
+            INTO v_Recpag,
+                 v_Codtipdoc,
+                 v_Debcre,
+                 v_Tipcodigo
+            FROM Tipodocrecpag t,
+                 Paramaprev    p
+            WHERE t.Codtipdoc = p.Tpdocrrecpatro;
+          END IF;
+          SELECT Seqdocumento.Nextval
+          INTO v_Coddocumento
+          FROM Dual;
+          SELECT Seqplanilha.Nextval
+          INTO v_Plncodigo
+          FROM Dual;
+          SELECT Cm.Seqlanctodocum.Nextval
+          INTO v_Numlancto
+          FROM Dual;
+          --ATRIBUIÇÃO DO NÚMERO DA PLANÍLHA:
+          --CASO JA EXISTA ALGUMA PLANILHA GERADA PARA O DIA, ADICIONAR 1 AO MAIOR NÚMERO
+          --CASO NÃO EXISTA, O NÚMERO SERÁ 1
+          BEGIN
+            SELECT MAX(Pl.Plnplanil) + 1,
+                   Substr(Trunc(SYSDATE), 4, 2)
+            INTO v_Plnplanil,
+                 v_Pernumero
+            FROM Planilha Pl
+            WHERE Pl.Plndatdia = Pdatarecebimento;
+            IF v_Plnplanil IS NULL THEN
+              v_Plnplanil := 1;
+            END IF;
+          END;
+          --CAMPO HISTÓRICO DO LANÇAMENTO DO DOCUMENTO
+          SELECT 'COBRANÇA DE CONTRIBUIÇÃO EXTRAORDINÁRIA DA PATROCINADORA ' || Pmescobranca,
+                 'A RECEBER-CONTRIB. EXTRAORD PATRO',
+                 'DEVOLUÇÃO-CONTRIB. EXTRAORD PATRO',
+                 'PATROCINADORA - CAIXA',
+                 'MÊS DE COBRANÇA: ' || Pmescobranca,
+                 'CONTRIBUIÇÃO: PATRO EXTRAORD',
+                 'DÉCIMO TERCEIRO'
+          INTO v_Obs,
+               v_Lachist1,
+               v_Lachist1_Devol,
+               v_Lachist2,
+               v_Lachist3,
+               v_Lachist4,
+               v_Lachist5
+          FROM Dual;
+          SELECT Least(Pdatarecebimento, To_Date(SYSDATE, 'DD/MM/YY'))
+          INTO v_Dataemissao
+          FROM Dual;
+          --GERANDO TABELA DOCUMENTO
+          INSERT INTO Documento
+            (Coddocumento,
+             Idpessoa,
+             Plano,
+             Idempresa,
+             Idforcli,
+             Idmodulo,
+             Codtipdoc,
+             Recpag,
+             Nodocumento,
+             Compldocumento,
+             Dataemissao,
+             Datavencto,
+             Dataprogramada,
+             Status,
+             Operacao,
+             Idusuarioinclusao,
+             Emisbloq,
+             Obs,
+             Flgnaoconciliado,
+             Datadisponib,
+             Qtdecotas,
+             Flgsimples,
+             Flgespecial)
+          VALUES
+            (v_Coddocumento,
+             1,
+             v_Plano,
+             1,
+             91008,
+             456,
+             v_Codtipdoc,
+             v_Recpag,
+             v_Coddocumento,
+             1,
+             v_Dataemissao,
+             Pdatarecebimento,
+             Pdatarecebimento,
+             '0',
+             '2',
+             Puser,
+             'N',
+             v_Obs,
+             1,
+             Pdatarecebimento,
+             0,
+             NULL,
+             NULL);
+          --GERANDO TABELA PLANILHA
+          INSERT INTO Planilha
+            (Plncodigo,
+             Idmodulo,
+             Pernumero,
+             Perexercicio,
+             Plndatdia,
+             Plnplanil,
+             Plnnumlan,
+             Plntotdeb,
+             Plntotcre,
+             Idusuarioinclusao,
+             Tipcodigo,
+             Idpessoa)
+          VALUES
+            (v_Plncodigo,
+             456,
+             v_Pernumero,
+             v_Perexercicio,
+             v_Dataemissao,
+             v_Plnplanil,
+             2,
+             Valores.Valoresperado,
+             Valores.Valoresperado,
+             Puser,
+             v_Tipcodigo,
+             1);
+          --GERANDO TABELA LANCTODOCUM
+          INSERT INTO Lanctodocum
+            (Coddocumento,
+             Numlancto,
+             Plncodigo,
+             Datalancto,
+             Valor,
+             Valoroutramoeda,
+             Debcre,
+             Operacao,
+             Historicocompl,
+             Idusuarioinclusao,
+             Codtipdoc,
+             Vlrliquido,
+             Unidnegoc,
+             Idpessoa,
+             Iddespesaorc)
+          VALUES
+            (v_Coddocumento,
+             v_Numlancto,
+             v_Plncodigo,
+             v_Dataemissao,
+             Valores.Valoresperado,
+             0,
+             v_Debcre,
+             2,
+             v_Obs,
+             Puser,
+             v_Codtipdoc,
+             Valores.Valoresperado,
+             -1,
+             1,
+             NULL);
+          --LOOP PARA OS RATEIOS
+          FOR Rateio IN (SELECT DISTINCT Cp.Codtiprecdes,
+                                         Cp.Codcentrorespon,
+                                         SUM(Decode(Hst.Flgdevolucao, 0, Hst.Valoresperado, -hst.Valoresperado)) Valor,
+                                         Cp.Codcentrocustod,
+                                         Hst.Idplanprevcontab
+                         FROM Hstcontribprev Hst
+                         JOIN Contprev c ON c.Idplanoprev = Hst.Idplanoprev
+                                            AND c.Idcontribuicao = Hst.Idcontribuicao
+                                            AND c.Flgpagador = 'P'
+                         JOIN Contplanpatro Cp ON Cp.Idcontribuicao = Hst.Idcontribuicao
+                                                  AND Cp.Idplanoprev = Hst.Idplanoprev
+                                                  AND Cp.Idpessjur = Hst.Idpessjur
+                         WHERE Hst.Mescobranca = Pmescobranca
+                               AND Hst.Sitrecebimento IN (1)
+                               AND Hst.Dataprevisaorece = Pdatarecebimento
+                               AND Hst.Idcontribuicao IN (SELECT *
+                                                          FROM TABLE(Fn_Geralista(Pidcontribuicao)))
+                               AND Nvl(Hst.Valorrecebido, 0) = 0
+                               AND Hst.Idplanoprev IN (Valores.Idplanoprev)
+                               AND Hst.Idpessjur = Valores.Idpessjur
+                               AND Hst.Datarecebimento IS NULL
+                               AND Hst.Coddocumentoprev IS NULL
+                               AND NOT EXISTS (SELECT 1
+                                FROM Retornohstcontribpatro r
+                                WHERE r.Numrecebimento = Hst.Numrecebimento)
+                         GROUP BY Cp.Codtiprecdes,
+                                  Cp.Codcentrorespon,
+                                  Cp.Codcentrocustod,
+                                  Hst.Idplanprevcontab)
+          LOOP
+						IF rateio.codtiprecdes IS NULL THEN
+							Pouterro := 'Tipo de desembolso não parametrizado';
+							GOTO Continue;
+						ELSIF rateio.codcentrorespon IS NULL THEN
+							Pouterro := 'Centro de Responsabilidade não parametrizado';	
+							GOTO Continue;	
+						ELSIF rateio.codcentrocustod IS NULL THEN
+							Pouterro := 'Centro de Custo não parametrizado';	
+							GOTO Continue;
+						ELSIF rateio.idplanprevcontab IS NULL THEN 
+							Pouterro := 'Plano contábil não preenchido';				
+							GOTO Continue;											
+						END IF;
+            --GERANDO RATEIODOCUM
+            INSERT INTO Rateiodocum
+              (Coddocumento,
+               Codtiprecdes,
+               Recpag,
+               Idpessoa,
+               Codcentrorespon,
+               Unidnegoc,
+               Valor,
+               Valoroutramoeda,
+               Idusuarioinclusao,
+               Idrateiodocum,
+               Idempresa,
+               Codcentrocusto,
+               Plano,
+               Idpatro,
+               Idprograma,
+               Idplanoprev,
+               Vlrresorcamen,
+               Idpatroorigem,
+               Idplanoorigem,
+               Iddespesaorc)
+            VALUES
+              (v_Coddocumento,
+               Rateio.Codtiprecdes,
+               v_Recpag,
+               1,
+               Rateio.Codcentrorespon,
+               -1,
+               Rateio.Valor,
+               0,
+               Puser,
+               Seqrateiodocum.Nextval,
+               1,
+               Rateio.Codcentrocustod,
+               v_Plano,
+               Pidpessjur,
+               1,
+               Rateio.Idplanprevcontab,
+               0,
+               Pidpessjur,
+               Rateio.Idplanprevcontab,
+               NULL);
+          END LOOP;
+          -- PARAMETRIZAÇÕES CONTÁBEIS PARA BAIXA
+          SELECT COUNT(Placontacredito)
+          INTO v_Cont
+          FROM Tiporecebdesemb
+          WHERE Idpessoa = 1
+                AND Recpag = 'R'
+                AND Codtiprecdes IN (SELECT r.Codtiprecdes
+                                     FROM Rateiodocum r
+                                     WHERE r.Coddocumento = v_Coddocumento);
+        
+          IF v_Cont = 0 THEN
+            Pouterro := 'CONTA CONTÁBIL NÃO PARAMETRIZADA NO CADASTRO DO TIPO DE RECEBIMENTO';
+            GOTO Continue;
+          ELSIF v_Cont = 1 THEN
+            SELECT DISTINCT Placontacredito
+            INTO v_Placonta
+            FROM Tiporecebdesemb
+            WHERE Idpessoa = 1
+                  AND Recpag = 'R'
+                  AND Codtiprecdes IN (SELECT r.Codtiprecdes
+                                       FROM Rateiodocum r
+                                       WHERE r.Coddocumento = v_Coddocumento);
+            UPDATE Documento d
+            SET d.Placonta = v_Placonta
+            WHERE d.Coddocumento = v_Coddocumento;
+          ELSE
+            --PARA AS INFORMAÇÕES DE BAIXA NA CCBAIXASXDOCUM
+            FOR Baixa IN (SELECT r.Idpatro,
+                                 r.Unidnegoc,
+                                 r.Idplanoprev,
+                                 r.Idpessoa,
+                                 t.Placontacredito,
+                                 SUM(r.Valor) Valor
+                          FROM Rateiodocum r
+                          JOIN Tiporecebdesemb t ON t.Codtiprecdes = r.Codtiprecdes
+                                                    AND t.Recpag = r.Recpag
+                                                    AND r.Coddocumento = v_Coddocumento
+                          GROUP BY r.Idpatro,
+                                   r.Unidnegoc,
+                                   r.Idplanoprev,
+                                   r.Idpessoa,
+                                   t.Placontacredito)
+            LOOP
+              INSERT INTO Ccbaixasxdocum
+                (Idccbaixasxdocum,
+                 Idpatro,
+                 Unidnegoc,
+                 Idplanoprev,
+                 Idpessoa,
+                 Coddocumento,
+                 Plano,
+                 Placonta,
+                 Valor,
+                 Trgdtinclusao,
+                 Trguserinclusao)
+              VALUES
+                (Seqccbaixasxdocum.Nextval,
+                 Baixa.Idpatro,
+                 Baixa.Unidnegoc,
+                 Baixa.Idplanoprev,
+                 Baixa.Idpessoa,
+                 v_Coddocumento,
+                 v_Plano,
+                 Baixa.Placontacredito,
+                 Baixa.Valor,
+                 SYSDATE,
+                 USER);
+            END LOOP;
+          END IF;
+          v_Lacnumlan := 0;
+          --PARA OS LAÇAMENTOS CONTÁBEIS
+          FOR Lancamento IN (SELECT DISTINCT Decode(Substr(Hst.Mesreferencia, 6, 2), '13', '13', 'MES') Referencia,
+                                             Hst.Flgdevolucao,
+                                             SUM(Hst.Valoresperado) Valor,
+                                             Hst.Idplanprevcontab,
+                                             Hst.Idpessjur,
+                                             Cp.Placontadbanco,
+                                             Cp.Placontac
+                             FROM Hstcontribprev Hst
+                             JOIN Contprev c ON c.Idplanoprev = Hst.Idplanoprev
+                                                AND c.Idcontribuicao = Hst.Idcontribuicao
+                                                AND c.Flgpagador = 'P'
+                             JOIN Contplanpatro Cp ON Cp.Idcontribuicao = Hst.Idcontribuicao
+                                                      AND Cp.Idplanoprev = Hst.Idplanoprev
+                                                      AND Cp.Idpessjur = Hst.Idpessjur
+                             WHERE Hst.Mescobranca = Pmescobranca
+                                   AND Hst.Sitrecebimento IN (1)
+                                   AND Nvl(Hst.Valorrecebido, 0) = 0
+                                   AND Hst.Dataprevisaorece = Pdatarecebimento
+                                   AND Hst.Idcontribuicao IN (SELECT *
+                                                              FROM TABLE(Fn_Geralista(Pidcontribuicao)))
+                                   AND Hst.Idplanoprev IN (Valores.Idplanoprev)
+                                   AND Hst.Idpessjur = Valores.Idpessjur
+                                   AND Hst.Datarecebimento IS NULL
+                                   AND Hst.Coddocumentoprev IS NULL
+                                   AND NOT EXISTS (SELECT 1
+                                    FROM Retornohstcontribpatro r
+                                    WHERE r.Numrecebimento = Hst.Numrecebimento)
+                             GROUP BY Hst.Flgdevolucao,
+                                      Hst.Idplanprevcontab,
+                                      Hst.Idpessjur,
+                                      Cp.Placontadbanco,
+                                      Cp.Placontac,
+                                      Decode(Substr(Hst.Mesreferencia, 6, 2), '13', '13', 'MES'))
+          LOOP
+            v_Lacnumlan := v_Lacnumlan + 1;
+            IF Lancamento.Flgdevolucao = 0 AND Lancamento.Referencia = '13' THEN
+              v_Debcre       := 'D';
+              v_Debcrecontra := 'C';
+              INSERT INTO Lancamento
+                (Plncodigo,
+                 Lacnumlan,
+                 Lacdebcre,
+                 Unidnegoc,
+                 Idpessoa,
+                 Idmodulo,
+                 Idusuarioinclusao,
+                 Placonta,
+                 Plano,
+                 Lactipo,
+                 Lacnumdoc,
+                 Lachist1,
+                 Lachist2,
+                 Lachist3,
+                 Lachist4,
+                 Lachist5,
+                 Lacvalor,
+                 Tipcodigo,
+                 Lacvalhist,
+                 Idplanoprev,
+                 Idpatro,
+                 Ordlancarateado)
+              VALUES
+                (v_Plncodigo,
+                 v_Lacnumlan,
+                 v_Debcre,
+                 -1,
+                 1,
+                 456,
+                 Puser,
+                 Lancamento.Placontadbanco,
+                 v_Plano,
+                 2,
+                 v_Coddocumento,
+                 v_Lachist1,
+                 v_Lachist2,
+                 v_Lachist3,
+                 v_Lachist4,
+                 v_Lachist5,
+                 Lancamento.Valor,
+                 v_Tipcodigo,
+                 0,
+                 Lancamento.Idplanprevcontab,
+                 Pidpessjur,
+                 -1);
+              INSERT INTO Lancamento
+                (Plncodigo,
+                 Lacnumlan,
+                 Lacdebcre,
+                 Unidnegoc,
+                 Idpessoa,
+                 Idmodulo,
+                 Idusuarioinclusao,
+                 Placonta,
+                 Plano,
+                 Lactipo,
+                 Lacnumdoc,
+                 Lachist1,
+                 Lachist2,
+                 Lachist3,
+                 Lachist4,
+                 Lachist5,
+                 Lacvalor,
+                 Tipcodigo,
+                 Lacvalhist,
+                 Idplanoprev,
+                 Idpatro,
+                 Ordlancarateado)
+              VALUES
+                (v_Plncodigo,
+                 v_Lacnumlan,
+                 v_Debcrecontra,
+                 -1,
+                 1,
+                 456,
+                 Puser,
+                 Lancamento.Placontac,
+                 v_Plano,
+                 2,
+                 v_Coddocumento,
+                 v_Lachist1,
+                 v_Lachist2,
+                 v_Lachist3,
+                 v_Lachist4,
+                 v_Lachist5,
+                 Lancamento.Valor,
+                 v_Tipcodigo,
+                 0,
+                 Lancamento.Idplanprevcontab,
+                 Pidpessjur,
+                 -1);
+            ELSIF Lancamento.Flgdevolucao = 0 AND Lancamento.Referencia <> '13' THEN
+              v_Debcre       := 'D';
+              v_Debcrecontra := 'C';
+              INSERT INTO Lancamento
+                (Plncodigo,
+                 Lacnumlan,
+                 Lacdebcre,
+                 Unidnegoc,
+                 Idpessoa,
+                 Idmodulo,
+                 Idusuarioinclusao,
+                 Placonta,
+                 Plano,
+                 Lactipo,
+                 Lacnumdoc,
+                 Lachist1,
+                 Lachist2,
+                 Lachist3,
+                 Lachist4,
+                 Lacvalor,
+                 Tipcodigo,
+                 Lacvalhist,
+                 Idplanoprev,
+                 Idpatro,
+                 Ordlancarateado)
+              VALUES
+                (v_Plncodigo,
+                 v_Lacnumlan,
+                 v_Debcre,
+                 -1,
+                 1,
+                 456,
+                 Puser,
+                 Lancamento.Placontadbanco,
+                 v_Plano,
+                 2,
+                 v_Coddocumento,
+                 v_Lachist1,
+                 v_Lachist2,
+                 v_Lachist3,
+                 v_Lachist4,
+                 Lancamento.Valor,
+                 v_Tipcodigo,
+                 0,
+                 Lancamento.Idplanprevcontab,
+                 Pidpessjur,
+                 -1);
+              INSERT INTO Lancamento
+                (Plncodigo,
+                 Lacnumlan,
+                 Lacdebcre,
+                 Unidnegoc,
+                 Idpessoa,
+                 Idmodulo,
+                 Idusuarioinclusao,
+                 Placonta,
+                 Plano,
+                 Lactipo,
+                 Lacnumdoc,
+                 Lachist1,
+                 Lachist2,
+                 Lachist3,
+                 Lachist4,
+                 Lacvalor,
+                 Tipcodigo,
+                 Lacvalhist,
+                 Idplanoprev,
+                 Idpatro,
+                 Ordlancarateado)
+              VALUES
+                (v_Plncodigo,
+                 v_Lacnumlan,
+                 v_Debcrecontra,
+                 -1,
+                 1,
+                 456,
+                 Puser,
+                 Lancamento.Placontac,
+                 v_Plano,
+                 2,
+                 v_Coddocumento,
+                 v_Lachist1,
+                 v_Lachist2,
+                 v_Lachist3,
+                 v_Lachist4,
+                 Lancamento.Valor,
+                 v_Tipcodigo,
+                 0,
+                 Lancamento.Idplanprevcontab,
+                 Pidpessjur,
+                 -1);
+            ELSIF Lancamento.Flgdevolucao = 1 AND Lancamento.Referencia = '13' THEN
+              v_Debcre       := 'D';
+              v_Debcrecontra := 'C';
+              INSERT INTO Lancamento
+                (Plncodigo,
+                 Lacnumlan,
+                 Lacdebcre,
+                 Unidnegoc,
+                 Idpessoa,
+                 Idmodulo,
+                 Idusuarioinclusao,
+                 Placonta,
+                 Plano,
+                 Lactipo,
+                 Lacnumdoc,
+                 Lachist1,
+                 Lachist2,
+                 Lachist3,
+                 Lachist4,
+                 Lachist5,
+                 Lacvalor,
+                 Tipcodigo,
+                 Lacvalhist,
+                 Idplanoprev,
+                 Idpatro,
+                 Ordlancarateado)
+              VALUES
+                (v_Plncodigo,
+                 v_Lacnumlan,
+                 v_Debcre,
+                 -1,
+                 1,
+                 456,
+                 Puser,
+                 Lancamento.Placontac,
+                 v_Plano,
+                 2,
+                 v_Coddocumento,
+                 v_Lachist1,
+                 v_Lachist2,
+                 v_Lachist3,
+                 v_Lachist4,
+                 v_Lachist5,
+                 Lancamento.Valor,
+                 v_Tipcodigo,
+                 0,
+                 Lancamento.Idplanprevcontab,
+                 Pidpessjur,
+                 -1);
+              INSERT INTO Lancamento
+                (Plncodigo,
+                 Lacnumlan,
+                 Lacdebcre,
+                 Unidnegoc,
+                 Idpessoa,
+                 Idmodulo,
+                 Idusuarioinclusao,
+                 Placonta,
+                 Plano,
+                 Lactipo,
+                 Lacnumdoc,
+                 Lachist1,
+                 Lachist2,
+                 Lachist3,
+                 Lachist4,
+                 Lachist5,
+                 Lacvalor,
+                 Tipcodigo,
+                 Lacvalhist,
+                 Idplanoprev,
+                 Idpatro,
+                 Ordlancarateado)
+              VALUES
+                (v_Plncodigo,
+                 v_Lacnumlan,
+                 v_Debcrecontra,
+                 -1,
+                 1,
+                 456,
+                 Puser,
+                 Lancamento.Placontadbanco,
+                 v_Plano,
+                 2,
+                 v_Coddocumento,
+                 v_Lachist1,
+                 v_Lachist2,
+                 v_Lachist3,
+                 v_Lachist4,
+                 v_Lachist5,
+                 Lancamento.Valor,
+                 v_Tipcodigo,
+                 0,
+                 Lancamento.Idplanprevcontab,
+                 Pidpessjur,
+                 -1);
+            ELSIF Lancamento.Flgdevolucao = 1 AND Lancamento.Referencia <> '13' THEN
+              v_Debcre       := 'D';
+              v_Debcrecontra := 'C';
+              INSERT INTO Lancamento
+                (Plncodigo,
+                 Lacnumlan,
+                 Lacdebcre,
+                 Unidnegoc,
+                 Idpessoa,
+                 Idmodulo,
+                 Idusuarioinclusao,
+                 Placonta,
+                 Plano,
+                 Lactipo,
+                 Lacnumdoc,
+                 Lachist1,
+                 Lachist2,
+                 Lachist3,
+                 Lachist4,
+                 Lacvalor,
+                 Tipcodigo,
+                 Lacvalhist,
+                 Idplanoprev,
+                 Idpatro,
+                 Ordlancarateado)
+              VALUES
+                (v_Plncodigo,
+                 v_Lacnumlan,
+                 v_Debcre,
+                 -1,
+                 1,
+                 456,
+                 Puser,
+                 Lancamento.Placontac,
+                 v_Plano,
+                 2,
+                 v_Coddocumento,
+                 v_Lachist1,
+                 v_Lachist2,
+                 v_Lachist3,
+                 v_Lachist4,
+                 Lancamento.Valor,
+                 v_Tipcodigo,
+                 0,
+                 Lancamento.Idplanprevcontab,
+                 Pidpessjur,
+                 -1);
+              INSERT INTO Lancamento
+                (Plncodigo,
+                 Lacnumlan,
+                 Lacdebcre,
+                 Unidnegoc,
+                 Idpessoa,
+                 Idmodulo,
+                 Idusuarioinclusao,
+                 Placonta,
+                 Plano,
+                 Lactipo,
+                 Lacnumdoc,
+                 Lachist1,
+                 Lachist2,
+                 Lachist3,
+                 Lachist4,
+                 Lacvalor,
+                 Tipcodigo,
+                 Lacvalhist,
+                 Idplanoprev,
+                 Idpatro,
+                 Ordlancarateado)
+              VALUES
+                (v_Plncodigo,
+                 v_Lacnumlan,
+                 v_Debcrecontra,
+                 -1,
+                 1,
+                 456,
+                 Puser,
+                 Lancamento.Placontadbanco,
+                 v_Plano,
+                 2,
+                 v_Coddocumento,
+                 v_Lachist1,
+                 v_Lachist2,
+                 v_Lachist3,
+                 v_Lachist4,
+                 Lancamento.Valor,
+                 v_Tipcodigo,
+                 0,
+                 Lancamento.Idplanprevcontab,
+                 Pidpessjur,
+                 -1);
+            END IF;
+          END LOOP;
+        
+          UPDATE Hstcontribprev h
+          SET h.Sitrecebimento   = 2,
+              h.Coddocumentoprev = v_Coddocumento,
+              h.Datarecebimento  = Pdatarecebimento,
+              h.Valorrecebido    = h.Valoresperado,
+              h.Dataemisscob     = SYSDATE
+          WHERE h.Numrecebimento IN (SELECT Hst.Numrecebimento
+                                     FROM Hstcontribprev Hst
+                                     JOIN Contprev c ON c.Idplanoprev = Hst.Idplanoprev
+                                                        AND c.Idcontribuicao = Hst.Idcontribuicao
+                                                        AND c.Flgpagador = 'P'
+                                     JOIN Contplanpatro Cp ON Cp.Idcontribuicao = Hst.Idcontribuicao
+                                                              AND Cp.Idplanoprev = Hst.Idplanoprev
+                                                              AND Cp.Idpessjur = Hst.Idpessjur
+                                     WHERE Hst.Mescobranca = Pmescobranca
+                                           AND Hst.Sitrecebimento IN (1)
+                                           AND Hst.Dataprevisaorece = Pdatarecebimento
+                                           AND Hst.Idcontribuicao IN (SELECT *
+                                                                      FROM TABLE(Fn_Geralista(Pidcontribuicao)))
+                                           AND Nvl(Hst.Valorrecebido, 0) = 0
+                                           AND Hst.Idplanoprev = Valores.Idplanoprev
+                                           AND Hst.Idpessjur = Valores.Idpessjur
+                                           AND Hst.Datarecebimento IS NULL
+                                           AND Hst.Coddocumentoprev IS NULL
+                                           AND NOT EXISTS (SELECT 1
+                                            FROM Retornohstcontribpatro r
+                                            WHERE r.Numrecebimento = Hst.Numrecebimento));
+          SELECT COUNT(Ha.Numrecebimento)
+          INTO v_Cont
+          FROM Hstcontribprev h
+          JOIN Hstatrasocontrib Ha ON Ha.Numrecebimento = h.Numrecebimento
+                                      AND Ha.Idmotivo = h.Idmotivo
+                                      AND Ha.Mesreferencia = h.Mesreferencia
+                                      AND Ha.Mescobranca = h.Mescobranca
+          JOIN Tipoalterador Ta ON Ta.Codalterador = Ha.Codalterador
+          WHERE h.Coddocumentoprev = v_Coddocumento
+                AND h.Mescobranca = Pmescobranca
+                AND Ha.Datarecebimento IS NULL
+                AND Nvl(Ha.Valorrecebido, 0) = 0;
+        
+          IF v_Cont > 0 THEN
+            -- INICIO LOOP ALTERADORES FLGDEVOLUÇÃO = 0
+            FOR Alteradores IN (SELECT SUM(Ha.Valor) Valor,
+                                       Ha.Flgtipo,
+                                       Ha.Codalterador,
+                                       Ta.Descricao,
+                                       Ta.Placonta
+                                FROM Hstcontribprev h
+                                JOIN Hstatrasocontrib Ha ON Ha.Numrecebimento = h.Numrecebimento
+                                                            AND Ha.Idmotivo = h.Idmotivo
+                                                            AND Ha.Mesreferencia = h.Mesreferencia
+                                                            AND Ha.Mescobranca = h.Mescobranca
+                                JOIN Tipoalterador Ta ON Ta.Codalterador = Ha.Codalterador
+                                WHERE h.Coddocumentoprev = v_Coddocumento
+                                      AND h.Mescobranca = Pmescobranca
+                                      AND Ha.Datarecebimento IS NULL
+                                      AND Nvl(Ha.Valorrecebido, 0) = 0
+                                GROUP BY Ha.Flgtipo,
+                                         Ha.Codalterador,
+                                         Ta.Descricao,
+                                         Ta.Placonta)
+            LOOP
+              --INICIO TIPO ALTERADORES
+              IF Alteradores.Valor > 0 AND Alteradores.Flgtipo = 'A' THEN
+                SELECT Cm.Seqlanctodocum.Nextval
+                INTO v_Numlancto
+                FROM Dual;
+                SELECT Seqplanilha.Nextval
+                INTO v_Plncodigo
+                FROM Dual;
+                SELECT Substr(p.Nome, 1, 15) Nome
+                INTO v_Nome
+                FROM Pessoa p
+                WHERE p.Idpessoa = 91008;
+                SELECT 'Doc. ' || v_Coddocumento || ' ' || v_Nome,
+                       'Cobrança de Contribuição ',
+                       'Mês de Cobrança: ' || Pmescobranca
+                INTO v_Lachist1,
+                     v_Lachist2,
+                     v_Lachist3
+                FROM Dual;
+                SELECT MIN(Tr.Placontacredito) Placontacredito
+                INTO v_Placonta
+                FROM Rateiodocum r
+                JOIN Tiporecebdesemb Tr ON Tr.Codtiprecdes = r.Codtiprecdes
+                                           AND Tr.Recpag = r.Recpag
+                                           AND r.Coddocumento = v_Coddocumento;
+                BEGIN
+                  SELECT MAX(Pl.Plnplanil) + 1,
+                         Extract(MONTH FROM SYSDATE)
+                  INTO v_Plnplanil,
+                       v_Pernumero
+                  FROM Planilha Pl
+                  WHERE Pl.Plndatdia = Pdatarecebimento;
+                  IF v_Plnplanil IS NULL THEN
+                    v_Plnplanil := 1;
+                  END IF;
+                END;
+                --GERANDO PLANILHA DOS ALTERADORES DO TIPO 'A'
+                INSERT INTO Planilha
+                  (Plncodigo,
+                   Idmodulo,
+                   Pernumero,
+                   Perexercicio,
+                   Plndatdia,
+                   Plnplanil,
+                   Plnnumlan,
+                   Plntotdeb,
+                   Plntotcre,
+                   Idusuarioinclusao,
+                   Tipcodigo,
+                   Idpessoa)
+                VALUES
+                  (v_Plncodigo,
+                   456,
+                   v_Pernumero,
+                   v_Perexercicio,
+                   v_Dataemissao,
+                   v_Plnplanil,
+                   2,
+                   Alteradores.Valor,
+                   Alteradores.Valor,
+                   Puser,
+                   v_Tipcodigo,
+                   1);
+                --GERANDO TABELA LANCTODOCUM ALTERADORES DO TIPO 'A'
+                INSERT INTO Lanctodocum
+                  (Coddocumento,
+                   Numlancto,
+                   Codalterador,
+                   Plncodigo,
+                   Datalancto,
+                   Valor,
+                   Valoroutramoeda,
+                   Debcre,
+                   Operacao,
+                   Historicocompl,
+                   Idusuarioinclusao,
+                   Codtipdoc,
+                   Vlrliquido,
+                   Unidnegoc,
+                   Idpessoa,
+                   Iddespesaorc)
+                VALUES
+                  (v_Coddocumento,
+                   v_Numlancto,
+                   Alteradores.Codalterador,
+                   v_Plncodigo,
+                   v_Dataemissao,
+                   Alteradores.Valor,
+                   0,
+                   'D',
+                   4,
+                   v_Obs1,
+                   Puser,
+                   v_Codtipdoc,
+                   Alteradores.Valor,
+                   -1,
+                   1,
+                   NULL);
+                --GERANDO A LANCAMENTO DE CRÉDITO ALTERADORES DO TIPO 'A'
+                INSERT INTO Lancamento
+                  (Plncodigo,
+                   Lacnumlan,
+                   Lacdebcre,
+                   Unidnegoc,
+                   Idpessoa,
+                   Idmodulo,
+                   Idusuarioinclusao,
+                   Placonta,
+                   Plano,
+                   Lactipo,
+                   Lacnumdoc,
+                   Lachist1,
+                   Lachist2,
+                   Lachist3,
+                   Lachist4,
+                   Lacvalor,
+                   Tipcodigo,
+                   Lacvalhist,
+                   Idplanoprev,
+                   Idpatro,
+                   Ordlancarateado,
+                   Lactipconvoficial,
+                   Lacvaloficial,
+                   Lactipconvger,
+                   Lacvalgerencial,
+                   Lactipconvgeren1,
+                   Lacvalgeren1,
+                   Lactipconvgeren2,
+                   Lacvalgeren2,
+                   Coddocumento)
+                VALUES
+                  (v_Plncodigo,
+                   1,
+                   'C',
+                   -1,
+                   1,
+                   456,
+                   Puser,
+                   Alteradores.Placonta,
+                   v_Plano,
+                   2,
+                   v_Coddocumento,
+                   Alteradores.Descricao,
+                   v_Lachist1,
+                   v_Lachist2,
+                   v_Lachist3,
+                   Alteradores.Valor,
+                   v_Tipcodigo,
+                   0,
+                   Pidplanoprev,
+                   Pidpessjur,
+                   -1,
+                   'D',
+                   0,
+                   'D',
+                   0,
+                   'D',
+                   0,
+                   'D',
+                   0,
+                   v_Coddocumento);
+                --GERANDO A LANCAMENTO DE DÉBITO ALTERADORES DO TIPO 'A'
+                INSERT INTO Lancamento
+                  (Plncodigo,
+                   Lacnumlan,
+                   Lacdebcre,
+                   Unidnegoc,
+                   Idpessoa,
+                   Idmodulo,
+                   Idusuarioinclusao,
+                   Placonta,
+                   Plano,
+                   Lactipo,
+                   Lacnumdoc,
+                   Lachist1,
+                   Lachist2,
+                   Lachist3,
+                   Lachist4,
+                   Lacvalor,
+                   Tipcodigo,
+                   Lacvalhist,
+                   Idplanoprev,
+                   Idpatro,
+                   Ordlancarateado,
+                   Lactipconvoficial,
+                   Lacvaloficial,
+                   Lactipconvger,
+                   Lacvalgerencial,
+                   Lactipconvgeren1,
+                   Lacvalgeren1,
+                   Lactipconvgeren2,
+                   Lacvalgeren2,
+                   Coddocumento)
+                VALUES
+                  (v_Plncodigo,
+                   1,
+                   'D',
+                   -1,
+                   1,
+                   456,
+                   Puser,
+                   v_Placonta,
+                   v_Plano,
+                   2,
+                   v_Coddocumento,
+                   Alteradores.Descricao,
+                   v_Lachist1,
+                   v_Lachist2,
+                   v_Lachist3,
+                   Alteradores.Valor,
+                   v_Tipcodigo,
+                   0,
+                   Pidplanoprev,
+                   Pidpessjur,
+                   -1,
+                   'D',
+                   0,
+                   'D',
+                   0,
+                   'D',
+                   0,
+                   'D',
+                   0,
+                   v_Coddocumento);
+              ELSIF Alteradores.Valor > 0 AND Alteradores.Flgtipo = 'D' THEN
+                SELECT Cm.Seqlanctodocum.Nextval
+                INTO v_Numlancto
+                FROM Dual;
+                SELECT Seqplanilha.Nextval
+                INTO v_Plncodigo
+                FROM Dual;
+                SELECT p.Nome
+                INTO v_Nome
+                FROM Pessoa p
+                WHERE p.Idpessoa = 91008;
+                SELECT 'Doc. ' || v_Coddocumento || ' ' || v_Nome,
+                       'Cobrança de Contribuição ',
+                       'Mês de Cobrança: ' || Pmescobranca
+                INTO v_Lachist1,
+                     v_Lachist2,
+                     v_Lachist3
+                FROM Dual;
+                SELECT MIN(Tr.Placontacredito) Placontacredito
+                INTO v_Placonta
+                FROM Rateiodocum r
+                JOIN Tiporecebdesemb Tr ON Tr.Codtiprecdes = r.Codtiprecdes
+                                           AND Tr.Recpag = r.Recpag
+                                           AND r.Coddocumento = v_Coddocumento;
+                BEGIN
+                  SELECT MAX(Pl.Plnplanil) + 1,
+                         Extract(MONTH FROM SYSDATE)
+                  INTO v_Plnplanil,
+                       v_Pernumero
+                  FROM Planilha Pl
+                  WHERE Pl.Plndatdia = Pdatarecebimento;
+                  IF v_Plnplanil IS NULL THEN
+                    v_Plnplanil := 1;
+                  END IF;
+                END;
+                --GERANDO PLANILHA DE ALTERADOES DP TIPO 'D'
+                INSERT INTO Planilha
+                  (Plncodigo,
+                   Idmodulo,
+                   Pernumero,
+                   Perexercicio,
+                   Plndatdia,
+                   Plnplanil,
+                   Plnnumlan,
+                   Plntotdeb,
+                   Plntotcre,
+                   Idusuarioinclusao,
+                   Tipcodigo,
+                   Idpessoa)
+                VALUES
+                  (v_Plncodigo,
+                   456,
+                   v_Pernumero,
+                   v_Perexercicio,
+                   v_Dataemissao,
+                   v_Plnplanil,
+                   2,
+                   Alteradores.Valor,
+                   Alteradores.Valor,
+                   Puser,
+                   v_Tipcodigo,
+                   1);
+                --GERANDO TABELA LANCTODOCUM DE ALTERADOES DO TIPO 'D'
+                INSERT INTO Lanctodocum
+                  (Coddocumento,
+                   Numlancto,
+                   Codalterador,
+                   Plncodigo,
+                   Datalancto,
+                   Valor,
+                   Valoroutramoeda,
+                   Debcre,
+                   Operacao,
+                   Historicocompl,
+                   Idusuarioinclusao,
+                   Codtipdoc,
+                   Vlrliquido,
+                   Unidnegoc,
+                   Idpessoa,
+                   Iddespesaorc)
+                VALUES
+                  (v_Coddocumento,
+                   v_Numlancto,
+                   Alteradores.Codalterador,
+                   v_Plncodigo,
+                   v_Dataemissao,
+                   Alteradores.Valor,
+                   0,
+                   'C',
+                   4,
+                   v_Obs1,
+                   Puser,
+                   v_Codtipdoc,
+                   Alteradores.Valor,
+                   -1,
+                   1,
+                   NULL);
+                --GERANDO A LANCAMENTO DE DÉBITO DE ALTERADORES DO TIPO 'D'
+                INSERT INTO Lancamento
+                  (Plncodigo,
+                   Lacnumlan,
+                   Lacdebcre,
+                   Unidnegoc,
+                   Idpessoa,
+                   Idmodulo,
+                   Idusuarioinclusao,
+                   Placonta,
+                   Plano,
+                   Lactipo,
+                   Lacnumdoc,
+                   Lachist1,
+                   Lachist2,
+                   Lachist3,
+                   Lachist4,
+                   Lacvalor,
+                   Tipcodigo,
+                   Lacvalhist,
+                   Idplanoprev,
+                   Idpatro,
+                   Ordlancarateado,
+                   Lactipconvoficial,
+                   Lacvaloficial,
+                   Lactipconvger,
+                   Lacvalgerencial,
+                   Lactipconvgeren1,
+                   Lacvalgeren1,
+                   Lactipconvgeren2,
+                   Lacvalgeren2,
+                   Coddocumento)
+                VALUES
+                  (v_Plncodigo,
+                   1,
+                   'D',
+                   -1,
+                   1,
+                   456,
+                   Puser,
+                   Alteradores.Placonta,
+                   v_Plano,
+                   2,
+                   v_Coddocumento,
+                   Alteradores.Descricao,
+                   v_Lachist1,
+                   v_Lachist2,
+                   v_Lachist3,
+                   Alteradores.Valor,
+                   v_Tipcodigo,
+                   0,
+                   Pidplanoprev,
+                   Pidpessjur,
+                   -1,
+                   'D',
+                   0,
+                   'D',
+                   0,
+                   'D',
+                   0,
+                   'D',
+                   0,
+                   v_Coddocumento);
+                --GERANDO A LANCAMENTO DE CRÉDITO DE ALTERADORES DO TIPO 'D'
+                INSERT INTO Lancamento
+                  (Plncodigo,
+                   Lacnumlan,
+                   Lacdebcre,
+                   Unidnegoc,
+                   Idpessoa,
+                   Idmodulo,
+                   Idusuarioinclusao,
+                   Placonta,
+                   Plano,
+                   Lactipo,
+                   Lacnumdoc,
+                   Lachist1,
+                   Lachist2,
+                   Lachist3,
+                   Lachist4,
+                   Lacvalor,
+                   Tipcodigo,
+                   Lacvalhist,
+                   Idplanoprev,
+                   Idpatro,
+                   Ordlancarateado,
+                   Lactipconvoficial,
+                   Lacvaloficial,
+                   Lactipconvger,
+                   Lacvalgerencial,
+                   Lactipconvgeren1,
+                   Lacvalgeren1,
+                   Lactipconvgeren2,
+                   Lacvalgeren2,
+                   Coddocumento)
+                VALUES
+                  (v_Plncodigo,
+                   1,
+                   'C',
+                   -1,
+                   1,
+                   456,
+                   Puser,
+                   v_Placonta,
+                   v_Plano,
+                   2,
+                   v_Coddocumento,
+                   Alteradores.Descricao,
+                   v_Lachist1,
+                   v_Lachist2,
+                   v_Lachist3,
+                   Alteradores.Valor,
+                   v_Tipcodigo,
+                   0,
+                   Pidplanoprev,
+                   Pidpessjur,
+                   -1,
+                   'D',
+                   0,
+                   'D',
+                   0,
+                   'D',
+                   0,
+                   'D',
+                   0,
+                   v_Coddocumento);
+                --FIM SE TIPO ALTERADORES
+              END IF;
+              --FIM LOOP ALTERADORES FLGDEVOLUÇÃO = 0
+            END LOOP;
+            --FIM SE GERAÇÃO DE ALTERADORES FLGDEVOLUÇÃO = 0
+          END IF;
+        
+        ELSIF Valores.Sitrecebimento = 2 AND Valores.Pagador = 'PATROCINADOR' THEN
+          IF Valores.Valoresperado < 0 THEN
+            Pouterro := 'NÃO EXISTEM CONTRIBUIÇÕES A SEREM RECEBIDAS';
+            GOTO Continue;
+          ELSE
+            SELECT t.Recpag,
+                   t.Codtipdoc,
+                   t.Debcre,
+                   p.Tipoperenvio
+            INTO v_Recpag,
+                 v_Codtipdoc,
+                 v_Debcre,
+                 v_Tipcodigo
+            FROM Tipodocrecpag t,
+                 Paramaprev    p
+            WHERE t.Codtipdoc = p.Tpdocrrecpatro;
+          END IF;
+          SELECT Seqdocumento.Nextval
+          INTO v_Coddocumento
+          FROM Dual;
+          SELECT Seqplanilha.Nextval
+          INTO v_Plncodigo
+          FROM Dual;
+          SELECT Cm.Seqlanctodocum.Nextval
+          INTO v_Numlancto
+          FROM Dual;
+          --ATRIBUIÇÃO DO NÚMERO DA PLANÍLHA:
+          --CASO JA EXISTA ALGUMA PLANILHA GERADA PARA O DIA, ADICIONAR 1 AO MAIOR NÚMERO
+          --CASO NÃO EXISTA, O NÚMERO SERÁ 1
+          BEGIN
+            SELECT MAX(Pl.Plnplanil) + 1,
+                   Substr(Trunc(SYSDATE), 4, 2)
+            INTO v_Plnplanil,
+                 v_Pernumero
+            FROM Planilha Pl
+            WHERE Pl.Plndatdia = Pdatarecebimento;
+            IF v_Plnplanil IS NULL THEN
+              v_Plnplanil := 1;
+            END IF;
+          END;
+          --CAMPO HISTÓRICO DO LANÇAMENTO DO DOCUMENTO
+          SELECT 'Contribuição parte Patrocinadora - Mês Cobrança: ' || Pmescobranca,
+                 'A Receber-Contrib. Patro p/ Participante',
+                 'Dev-Contrib. Patro p/ Participante',
+                 'PATROCINADORA - CAIXA',
+                 'MÊS DE COBRANÇA: ' || Pmescobranca,
+                 'Contribuição - PatrNormal',
+                 'DÉCIMO TERCEIRO'
+          INTO v_Obs,
+               v_Lachist1,
+               v_Lachist1_Devol,
+               v_Lachist2,
+               v_Lachist3,
+               v_Lachist4,
+               v_Lachist5
+          FROM Dual;
+          SELECT Least(Pdatarecebimento, To_Date(SYSDATE, 'DD/MM/YY'))
+          INTO v_Dataemissao
+          FROM Dual;
+          --GERANDO TABELA DOCUMENTO
+          INSERT INTO Documento
+            (Coddocumento,
+             Idpessoa,
+             Plano,
+             Idempresa,
+             Idforcli,
+             Idmodulo,
+             Codtipdoc,
+             Recpag,
+             Nodocumento,
+             Compldocumento,
+             Dataemissao,
+             Datavencto,
+             Dataprogramada,
+             Status,
+             Operacao,
+             Idusuarioinclusao,
+             Emisbloq,
+             Obs,
+             Flgnaoconciliado,
+             Datadisponib,
+             Qtdecotas,
+             Flgsimples,
+             Flgespecial)
+          VALUES
+            (v_Coddocumento,
+             1,
+             v_Plano,
+             1,
+             91008,
+             456,
+             v_Codtipdoc,
+             v_Recpag,
+             v_Coddocumento,
+             1,
+             v_Dataemissao,
+             Pdatarecebimento,
+             Pdatarecebimento,
+             '0',
+             '2',
+             Puser,
+             'N',
+             v_Obs,
+             1,
+             Pdatarecebimento,
+             0,
+             NULL,
+             NULL);
+          --GERANDO TABELA PLANILHA
+          INSERT INTO Planilha
+            (Plncodigo,
+             Idmodulo,
+             Pernumero,
+             Perexercicio,
+             Plndatdia,
+             Plnplanil,
+             Plnnumlan,
+             Plntotdeb,
+             Plntotcre,
+             Idusuarioinclusao,
+             Tipcodigo,
+             Idpessoa)
+          VALUES
+            (v_Plncodigo,
+             456,
+             v_Pernumero,
+             v_Perexercicio,
+             v_Dataemissao,
+             v_Plnplanil,
+             2,
+             Valores.Valorrecebido,
+             Valores.Valorrecebido,
+             Puser,
+             v_Tipcodigo,
+             1);
+          --GERANDO TABELA LANCTODOCUM
+          INSERT INTO Lanctodocum
+            (Coddocumento,
+             Numlancto,
+             Plncodigo,
+             Datalancto,
+             Valor,
+             Valoroutramoeda,
+             Debcre,
+             Operacao,
+             Historicocompl,
+             Idusuarioinclusao,
+             Codtipdoc,
+             Vlrliquido,
+             Unidnegoc,
+             Idpessoa,
+             Iddespesaorc)
+          VALUES
+            (v_Coddocumento,
+             v_Numlancto,
+             v_Plncodigo,
+             v_Dataemissao,
+             Valores.Valorrecebido,
+             0,
+             v_Debcre,
+             2,
+             v_Obs,
+             Puser,
+             v_Codtipdoc,
+             Valores.Valorrecebido,
+             -1,
+             1,
+             NULL);
+          --LOOP PARA OS RATEIOS
+          FOR Rateio IN (SELECT DISTINCT Cp.Codtiprecdes,
+                                         Cp.Codcentrorespon,
+                                         SUM(Decode(Hst.Flgdevolucao, 0, Hst.Valorrecebido, -hst.Valorrecebido)) Valor,
+                                         Cp.Codcentrocustod,
+                                         Hst.Idplanprevcontab
+                         FROM Hstcontribprev Hst
+                         JOIN Contprev c ON c.Idplanoprev = Hst.Idplanoprev
+                                            AND c.Idcontribuicao = Hst.Idcontribuicao
+                                            AND c.Flgpagador = 'P'
+                         JOIN Contplanpatro Cp ON Cp.Idcontribuicao = Hst.Idcontribuicao
+                                                  AND Cp.Idplanoprev = Hst.Idplanoprev
+                                                  AND Cp.Idpessjur = Hst.Idpessjur
+                         WHERE Hst.Mescobranca = Pmescobranca
+                               AND Hst.Sitrecebimento IN (2, 3)
+                               AND Hst.Dataprevisaorece = Pdatarecebimento
+                               AND Hst.Idcontribuicao IN (SELECT *
+                                                          FROM TABLE(Fn_Geralista(Pidcontribuicao)))
+                               AND Hst.Idplanoprev IN (Valores.Idplanoprev)
+                               AND Hst.Idpessjur = Valores.Idpessjur
+                               AND Hst.Datarecebimento IS NOT NULL
+                               AND Hst.Valorrecebido IS NOT NULL
+                               AND Hst.Folhaorigem <> 'B'
+                               AND Hst.Flgdescfolha = 1
+                               AND Hst.Coddocumentoprev IS NULL
+                               AND NOT EXISTS (SELECT 1
+                                FROM Retornohstcontribpatro r
+                                WHERE r.Numrecebimento = Hst.Numrecebimento)
+                         GROUP BY Cp.Codtiprecdes,
+                                  Cp.Codcentrorespon,
+                                  Cp.Codcentrocustod,
+                                  Hst.Idplanprevcontab)
+          LOOP
+						IF rateio.codtiprecdes IS NULL THEN
+							Pouterro := 'Tipo de desembolso não parametrizado';
+							GOTO Continue;
+						ELSIF rateio.codcentrorespon IS NULL THEN
+							Pouterro := 'Centro de Responsabilidade não parametrizado';	
+							GOTO Continue;	
+						ELSIF rateio.codcentrocustod IS NULL THEN
+							Pouterro := 'Centro de Custo não parametrizado';	
+							GOTO Continue;
+						ELSIF rateio.idplanprevcontab IS NULL THEN 
+							Pouterro := 'Plano contábil não preenchido';				
+							GOTO Continue;											
+						END IF;
+            --GERANDO RATEIODOCUM
+            INSERT INTO Rateiodocum
+              (Coddocumento,
+               Codtiprecdes,
+               Recpag,
+               Idpessoa,
+               Codcentrorespon,
+               Unidnegoc,
+               Valor,
+               Valoroutramoeda,
+               Idusuarioinclusao,
+               Idrateiodocum,
+               Idempresa,
+               Codcentrocusto,
+               Plano,
+               Idpatro,
+               Idprograma,
+               Idplanoprev,
+               Vlrresorcamen,
+               Idpatroorigem,
+               Idplanoorigem,
+               Iddespesaorc)
+            VALUES
+              (v_Coddocumento,
+               Rateio.Codtiprecdes,
+               v_Recpag,
+               1,
+               Rateio.Codcentrorespon,
+               -1,
+               Rateio.Valor,
+               0,
+               Puser,
+               Seqrateiodocum.Nextval,
+               1,
+               Rateio.Codcentrocustod,
+               v_Plano,
+               Pidpessjur,
+               1,
+               Rateio.Idplanprevcontab,
+               0,
+               Pidpessjur,
+               Rateio.Idplanprevcontab,
+               NULL);
+          END LOOP;
+          -- PARAMETRIZAÇÕES CONTÁBEIS PARA BAIXA
+          SELECT COUNT(Placontacredito)
+          INTO v_Cont
+          FROM Tiporecebdesemb
+          WHERE Idpessoa = 1
+                AND Recpag = 'R'
+                AND Codtiprecdes IN (SELECT r.Codtiprecdes
+                                     FROM Rateiodocum r
+                                     WHERE r.Coddocumento = v_Coddocumento);
+        
+          IF v_Cont = 0 THEN
+            Pouterro := 'CONTA CONTÁBIL NÃO PARAMETRIZADA NO CADASTRO DO TIPO DE RECEBIMENTO';
+            GOTO Continue;
+          ELSIF v_Cont = 1 THEN
+            SELECT DISTINCT Placontacredito
+            INTO v_Placonta
+            FROM Tiporecebdesemb
+            WHERE Idpessoa = 1
+                  AND Recpag = 'R'
+                  AND Codtiprecdes IN (SELECT r.Codtiprecdes
+                                       FROM Rateiodocum r
+                                       WHERE r.Coddocumento = v_Coddocumento);
+            UPDATE Documento d
+            SET d.Placonta = v_Placonta
+            WHERE d.Coddocumento = v_Coddocumento;
+          ELSE
+            --PARA AS INFORMAÇÕES DE BAIXA NA CCBAIXASXDOCUM
+            FOR Baixa IN (SELECT r.Idpatro,
+                                 r.Unidnegoc,
+                                 r.Idplanoprev,
+                                 r.Idpessoa,
+                                 t.Placontacredito,
+                                 SUM(r.Valor) Valor
+                          FROM Rateiodocum r
+                          JOIN Tiporecebdesemb t ON t.Codtiprecdes = r.Codtiprecdes
+                                                    AND t.Recpag = r.Recpag
+                                                    AND r.Coddocumento = v_Coddocumento
+                          GROUP BY r.Idpatro,
+                                   r.Unidnegoc,
+                                   r.Idplanoprev,
+                                   r.Idpessoa,
+                                   t.Placontacredito)
+            LOOP
+              INSERT INTO Ccbaixasxdocum
+                (Idccbaixasxdocum,
+                 Idpatro,
+                 Unidnegoc,
+                 Idplanoprev,
+                 Idpessoa,
+                 Coddocumento,
+                 Plano,
+                 Placonta,
+                 Valor,
+                 Trgdtinclusao,
+                 Trguserinclusao)
+              VALUES
+                (Seqccbaixasxdocum.Nextval,
+                 Baixa.Idpatro,
+                 Baixa.Unidnegoc,
+                 Baixa.Idplanoprev,
+                 Baixa.Idpessoa,
+                 v_Coddocumento,
+                 v_Plano,
+                 Baixa.Placontacredito,
+                 Baixa.Valor,
+                 SYSDATE,
+                 USER);
+            END LOOP;
+          END IF;
+          v_Lacnumlan := 0;
+          --PARA OS LAÇAMENTOS CONTÁBEIS
+          FOR Lancamento IN (SELECT DISTINCT Decode(Substr(Hst.Mesreferencia, 6, 2), '13', '13', 'MES') Referencia,
+                                             Hst.Flgdevolucao,
+                                             SUM(Hst.Valorrecebido) Valor,
+                                             Hst.Idplanprevcontab,
+                                             Hst.Idpessjur,
+                                             Cp.Placontadbanco,
+                                             Cp.Placontac
+                             FROM Hstcontribprev Hst
+                             JOIN Contprev c ON c.Idplanoprev = Hst.Idplanoprev
+                                                AND c.Idcontribuicao = Hst.Idcontribuicao
+                                                AND c.Flgpagador = 'P'
+                             JOIN Contplanpatro Cp ON Cp.Idcontribuicao = Hst.Idcontribuicao
+                                                      AND Cp.Idplanoprev = Hst.Idplanoprev
+                                                      AND Cp.Idpessjur = Hst.Idpessjur
+                             WHERE Hst.Mescobranca = Pmescobranca
+                                   AND Hst.Sitrecebimento IN (2, 3)
+                                   AND Hst.Dataprevisaorece = Pdatarecebimento
+                                   AND Hst.Idcontribuicao IN (SELECT *
+                                                              FROM TABLE(Fn_Geralista(Pidcontribuicao)))
+                                   AND Hst.Idplanoprev IN (Valores.Idplanoprev)
+                                   AND Hst.Idpessjur = Valores.Idpessjur
+                                   AND Hst.Datarecebimento IS NOT NULL
+                                   AND Hst.Valorrecebido IS NOT NULL
+                                   AND Hst.Folhaorigem <> 'B'
+                                   AND Hst.Flgdescfolha = 1
+                                   AND Hst.Coddocumentoprev IS NULL
+                                   AND NOT EXISTS (SELECT 1
+                                    FROM Retornohstcontribpatro r
+                                    WHERE r.Numrecebimento = Hst.Numrecebimento)
+                             GROUP BY Hst.Flgdevolucao,
+                                      Hst.Idplanprevcontab,
+                                      Hst.Idpessjur,
+                                      Cp.Placontadbanco,
+                                      Cp.Placontac,
+                                      Decode(Substr(Hst.Mesreferencia, 6, 2), '13', '13', 'MES'))
+          LOOP
+            v_Lacnumlan := v_Lacnumlan + 1;
+            IF Lancamento.Flgdevolucao = 0 AND Lancamento.Referencia = '13' THEN
+              v_Debcre       := 'D';
+              v_Debcrecontra := 'C';
+              INSERT INTO Lancamento
+                (Plncodigo,
+                 Lacnumlan,
+                 Lacdebcre,
+                 Unidnegoc,
+                 Idpessoa,
+                 Idmodulo,
+                 Idusuarioinclusao,
+                 Placonta,
+                 Plano,
+                 Lactipo,
+                 Lacnumdoc,
+                 Lachist1,
+                 Lachist2,
+                 Lachist3,
+                 Lachist4,
+                 Lachist5,
+                 Lacvalor,
+                 Tipcodigo,
+                 Lacvalhist,
+                 Idplanoprev,
+                 Idpatro,
+                 Ordlancarateado)
+              VALUES
+                (v_Plncodigo,
+                 v_Lacnumlan,
+                 v_Debcre,
+                 -1,
+                 1,
+                 456,
+                 Puser,
+                 Lancamento.Placontadbanco,
+                 v_Plano,
+                 2,
+                 v_Coddocumento,
+                 v_Lachist1,
+                 v_Lachist2,
+                 v_Lachist3,
+                 v_Lachist4,
+                 v_Lachist5,
+                 Lancamento.Valor,
+                 v_Tipcodigo,
+                 0,
+                 Lancamento.Idplanprevcontab,
+                 Pidpessjur,
+                 -1);
+              INSERT INTO Lancamento
+                (Plncodigo,
+                 Lacnumlan,
+                 Lacdebcre,
+                 Unidnegoc,
+                 Idpessoa,
+                 Idmodulo,
+                 Idusuarioinclusao,
+                 Placonta,
+                 Plano,
+                 Lactipo,
+                 Lacnumdoc,
+                 Lachist1,
+                 Lachist2,
+                 Lachist3,
+                 Lachist4,
+                 Lachist5,
+                 Lacvalor,
+                 Tipcodigo,
+                 Lacvalhist,
+                 Idplanoprev,
+                 Idpatro,
+                 Ordlancarateado)
+              VALUES
+                (v_Plncodigo,
+                 v_Lacnumlan,
+                 v_Debcrecontra,
+                 -1,
+                 1,
+                 456,
+                 Puser,
+                 Lancamento.Placontac,
+                 v_Plano,
+                 2,
+                 v_Coddocumento,
+                 v_Lachist1,
+                 v_Lachist2,
+                 v_Lachist3,
+                 v_Lachist4,
+                 v_Lachist5,
+                 Lancamento.Valor,
+                 v_Tipcodigo,
+                 0,
+                 Lancamento.Idplanprevcontab,
+                 Pidpessjur,
+                 -1);
+            ELSIF Lancamento.Flgdevolucao = 0 AND Lancamento.Referencia <> '13' THEN
+              v_Debcre       := 'D';
+              v_Debcrecontra := 'C';
+              INSERT INTO Lancamento
+                (Plncodigo,
+                 Lacnumlan,
+                 Lacdebcre,
+                 Unidnegoc,
+                 Idpessoa,
+                 Idmodulo,
+                 Idusuarioinclusao,
+                 Placonta,
+                 Plano,
+                 Lactipo,
+                 Lacnumdoc,
+                 Lachist1,
+                 Lachist2,
+                 Lachist3,
+                 Lachist4,
+                 Lacvalor,
+                 Tipcodigo,
+                 Lacvalhist,
+                 Idplanoprev,
+                 Idpatro,
+                 Ordlancarateado)
+              VALUES
+                (v_Plncodigo,
+                 v_Lacnumlan,
+                 v_Debcre,
+                 -1,
+                 1,
+                 456,
+                 Puser,
+                 Lancamento.Placontadbanco,
+                 v_Plano,
+                 2,
+                 v_Coddocumento,
+                 v_Lachist1,
+                 v_Lachist2,
+                 v_Lachist3,
+                 v_Lachist4,
+                 Lancamento.Valor,
+                 v_Tipcodigo,
+                 0,
+                 Lancamento.Idplanprevcontab,
+                 Pidpessjur,
+                 -1);
+              INSERT INTO Lancamento
+                (Plncodigo,
+                 Lacnumlan,
+                 Lacdebcre,
+                 Unidnegoc,
+                 Idpessoa,
+                 Idmodulo,
+                 Idusuarioinclusao,
+                 Placonta,
+                 Plano,
+                 Lactipo,
+                 Lacnumdoc,
+                 Lachist1,
+                 Lachist2,
+                 Lachist3,
+                 Lachist4,
+                 Lacvalor,
+                 Tipcodigo,
+                 Lacvalhist,
+                 Idplanoprev,
+                 Idpatro,
+                 Ordlancarateado)
+              VALUES
+                (v_Plncodigo,
+                 v_Lacnumlan,
+                 v_Debcrecontra,
+                 -1,
+                 1,
+                 456,
+                 Puser,
+                 Lancamento.Placontac,
+                 v_Plano,
+                 2,
+                 v_Coddocumento,
+                 v_Lachist1,
+                 v_Lachist2,
+                 v_Lachist3,
+                 v_Lachist4,
+                 Lancamento.Valor,
+                 v_Tipcodigo,
+                 0,
+                 Lancamento.Idplanprevcontab,
+                 Pidpessjur,
+                 -1);
+            ELSIF Lancamento.Flgdevolucao = 1 AND Lancamento.Referencia = '13' THEN
+              v_Debcre       := 'D';
+              v_Debcrecontra := 'C';
+              INSERT INTO Lancamento
+                (Plncodigo,
+                 Lacnumlan,
+                 Lacdebcre,
+                 Unidnegoc,
+                 Idpessoa,
+                 Idmodulo,
+                 Idusuarioinclusao,
+                 Placonta,
+                 Plano,
+                 Lactipo,
+                 Lacnumdoc,
+                 Lachist1,
+                 Lachist2,
+                 Lachist3,
+                 Lachist4,
+                 Lachist5,
+                 Lacvalor,
+                 Tipcodigo,
+                 Lacvalhist,
+                 Idplanoprev,
+                 Idpatro,
+                 Ordlancarateado)
+              VALUES
+                (v_Plncodigo,
+                 v_Lacnumlan,
+                 v_Debcre,
+                 -1,
+                 1,
+                 456,
+                 Puser,
+                 Lancamento.Placontac,
+                 v_Plano,
+                 2,
+                 v_Coddocumento,
+                 v_Lachist1,
+                 v_Lachist2,
+                 v_Lachist3,
+                 v_Lachist4,
+                 v_Lachist5,
+                 Lancamento.Valor,
+                 v_Tipcodigo,
+                 0,
+                 Lancamento.Idplanprevcontab,
+                 Pidpessjur,
+                 -1);
+              INSERT INTO Lancamento
+                (Plncodigo,
+                 Lacnumlan,
+                 Lacdebcre,
+                 Unidnegoc,
+                 Idpessoa,
+                 Idmodulo,
+                 Idusuarioinclusao,
+                 Placonta,
+                 Plano,
+                 Lactipo,
+                 Lacnumdoc,
+                 Lachist1,
+                 Lachist2,
+                 Lachist3,
+                 Lachist4,
+                 Lachist5,
+                 Lacvalor,
+                 Tipcodigo,
+                 Lacvalhist,
+                 Idplanoprev,
+                 Idpatro,
+                 Ordlancarateado)
+              VALUES
+                (v_Plncodigo,
+                 v_Lacnumlan,
+                 v_Debcrecontra,
+                 -1,
+                 1,
+                 456,
+                 Puser,
+                 Lancamento.Placontadbanco,
+                 v_Plano,
+                 2,
+                 v_Coddocumento,
+                 v_Lachist1,
+                 v_Lachist2,
+                 v_Lachist3,
+                 v_Lachist4,
+                 v_Lachist5,
+                 Lancamento.Valor,
+                 v_Tipcodigo,
+                 0,
+                 Lancamento.Idplanprevcontab,
+                 Pidpessjur,
+                 -1);
+            ELSIF Lancamento.Flgdevolucao = 1 AND Lancamento.Referencia <> '13' THEN
+              v_Debcre       := 'D';
+              v_Debcrecontra := 'C';
+              INSERT INTO Lancamento
+                (Plncodigo,
+                 Lacnumlan,
+                 Lacdebcre,
+                 Unidnegoc,
+                 Idpessoa,
+                 Idmodulo,
+                 Idusuarioinclusao,
+                 Placonta,
+                 Plano,
+                 Lactipo,
+                 Lacnumdoc,
+                 Lachist1,
+                 Lachist2,
+                 Lachist3,
+                 Lachist4,
+                 Lacvalor,
+                 Tipcodigo,
+                 Lacvalhist,
+                 Idplanoprev,
+                 Idpatro,
+                 Ordlancarateado)
+              VALUES
+                (v_Plncodigo,
+                 v_Lacnumlan,
+                 v_Debcre,
+                 -1,
+                 1,
+                 456,
+                 Puser,
+                 Lancamento.Placontac,
+                 v_Plano,
+                 2,
+                 v_Coddocumento,
+                 v_Lachist1,
+                 v_Lachist2,
+                 v_Lachist3,
+                 v_Lachist4,
+                 Lancamento.Valor,
+                 v_Tipcodigo,
+                 0,
+                 Lancamento.Idplanprevcontab,
+                 Pidpessjur,
+                 -1);
+              INSERT INTO Lancamento
+                (Plncodigo,
+                 Lacnumlan,
+                 Lacdebcre,
+                 Unidnegoc,
+                 Idpessoa,
+                 Idmodulo,
+                 Idusuarioinclusao,
+                 Placonta,
+                 Plano,
+                 Lactipo,
+                 Lacnumdoc,
+                 Lachist1,
+                 Lachist2,
+                 Lachist3,
+                 Lachist4,
+                 Lacvalor,
+                 Tipcodigo,
+                 Lacvalhist,
+                 Idplanoprev,
+                 Idpatro,
+                 Ordlancarateado)
+              VALUES
+                (v_Plncodigo,
+                 v_Lacnumlan,
+                 v_Debcrecontra,
+                 -1,
+                 1,
+                 456,
+                 Puser,
+                 Lancamento.Placontadbanco,
+                 v_Plano,
+                 2,
+                 v_Coddocumento,
+                 v_Lachist1,
+                 v_Lachist2,
+                 v_Lachist3,
+                 v_Lachist4,
+                 Lancamento.Valor,
+                 v_Tipcodigo,
+                 0,
+                 Lancamento.Idplanprevcontab,
+                 Pidpessjur,
+                 -1);
+            END IF;
+          END LOOP;
+        
+          UPDATE Hstcontribprev h
+          SET h.Coddocumentoprev = v_Coddocumento
+          WHERE h.Numrecebimento IN (SELECT Hst.Numrecebimento
+                                     FROM Hstcontribprev Hst
+                                     JOIN Contprev c ON c.Idplanoprev = Hst.Idplanoprev
+                                                        AND c.Idcontribuicao = Hst.Idcontribuicao
+                                                        AND c.Flgpagador = 'P'
+                                     JOIN Contplanpatro Cp ON Cp.Idcontribuicao = Hst.Idcontribuicao
+                                                              AND Cp.Idplanoprev = Hst.Idplanoprev
+                                                              AND Cp.Idpessjur = Hst.Idpessjur
+                                     WHERE Hst.Mescobranca = Pmescobranca
+                                           AND Hst.Sitrecebimento IN (2, 3)
+                                           AND Hst.Dataprevisaorece = Pdatarecebimento
+                                           AND Hst.Idcontribuicao IN (SELECT *
+                                                                      FROM TABLE(Fn_Geralista(Pidcontribuicao)))
+                                           AND Hst.Idplanoprev = Valores.Idplanoprev
+                                           AND Hst.Idpessjur = Valores.Idpessjur
+                                           AND Hst.Datarecebimento IS NOT NULL
+                                           AND Hst.Valorrecebido IS NOT NULL
+                                           AND Hst.Folhaorigem <> 'B'
+                                           AND Hst.Flgdescfolha = 1
+                                           AND Hst.Coddocumentoprev IS NULL
+                                           AND NOT EXISTS (SELECT 1
+                                            FROM Retornohstcontribpatro r
+                                            WHERE r.Numrecebimento = Hst.Numrecebimento));
+        
+          SELECT COUNT(Ha.Numrecebimento)
+          INTO v_Cont
+          FROM Hstcontribprev h
+          JOIN Hstatrasocontrib Ha ON Ha.Numrecebimento = h.Numrecebimento
+                                      AND Ha.Idmotivo = h.Idmotivo
+                                      AND Ha.Mesreferencia = h.Mesreferencia
+                                      AND Ha.Mescobranca = h.Mescobranca
+          JOIN Tipoalterador Ta ON Ta.Codalterador = Ha.Codalterador
+          WHERE h.Coddocumentoprev = v_Coddocumento
+                AND h.Mescobranca = Pmescobranca
+                AND Ha.Datarecebimento IS NULL
+                AND Nvl(Ha.Valorrecebido, 0) = 0;
+        
+          IF v_Cont > 0 THEN
+            -- INICIO LOOP ALTERADORES FLGDEVOLUÇÃO = 0
+            FOR Alteradores IN (SELECT SUM(Ha.Valor) Valor,
+                                       Ha.Flgtipo,
+                                       Ha.Codalterador,
+                                       Ta.Descricao,
+                                       Ta.Placonta
+                                FROM Hstcontribprev h
+                                JOIN Hstatrasocontrib Ha ON Ha.Numrecebimento = h.Numrecebimento
+                                                            AND Ha.Idmotivo = h.Idmotivo
+                                                            AND Ha.Mesreferencia = h.Mesreferencia
+                                                            AND Ha.Mescobranca = h.Mescobranca
+                                JOIN Tipoalterador Ta ON Ta.Codalterador = Ha.Codalterador
+                                WHERE h.Coddocumentoprev = v_Coddocumento
+                                      AND h.Mescobranca = Pmescobranca
+                                      AND Ha.Datarecebimento IS NULL
+                                      AND Nvl(Ha.Valorrecebido, 0) = 0
+                                GROUP BY Ha.Flgtipo,
+                                         Ha.Codalterador,
+                                         Ta.Descricao,
+                                         Ta.Placonta)
+            LOOP
+              --INICIO TIPO ALTERADORES
+              IF Alteradores.Valor > 0 AND Alteradores.Flgtipo = 'A' THEN
+                SELECT Cm.Seqlanctodocum.Nextval
+                INTO v_Numlancto
+                FROM Dual;
+                SELECT Seqplanilha.Nextval
+                INTO v_Plncodigo
+                FROM Dual;
+                SELECT p.Nome
+                INTO v_Nome
+                FROM Pessoa p
+                WHERE p.Idpessoa = 91008;
+                SELECT 'Doc. ' || v_Coddocumento || ' ' || v_Nome,
+                       'Cobrança de Contribuição ',
+                       'Mês de Cobrança: ' || Pmescobranca
+                INTO v_Lachist1,
+                     v_Lachist2,
+                     v_Lachist3
+                FROM Dual;
+                SELECT MIN(Tr.Placontacredito) Placontacredito
+                INTO v_Placonta
+                FROM Rateiodocum r
+                JOIN Tiporecebdesemb Tr ON Tr.Codtiprecdes = r.Codtiprecdes
+                                           AND Tr.Recpag = r.Recpag
+                                           AND r.Coddocumento = v_Coddocumento;
+                BEGIN
+                  SELECT MAX(Pl.Plnplanil) + 1,
+                         Extract(MONTH FROM SYSDATE)
+                  INTO v_Plnplanil,
+                       v_Pernumero
+                  FROM Planilha Pl
+                  WHERE Pl.Plndatdia = Pdatarecebimento;
+                  IF v_Plnplanil IS NULL THEN
+                    v_Plnplanil := 1;
+                  END IF;
+                END;
+                --GERANDO PLANILHA DOS ALTERADORES DO TIPO 'A'
+                INSERT INTO Planilha
+                  (Plncodigo,
+                   Idmodulo,
+                   Pernumero,
+                   Perexercicio,
+                   Plndatdia,
+                   Plnplanil,
+                   Plnnumlan,
+                   Plntotdeb,
+                   Plntotcre,
+                   Idusuarioinclusao,
+                   Tipcodigo,
+                   Idpessoa)
+                VALUES
+                  (v_Plncodigo,
+                   456,
+                   v_Pernumero,
+                   v_Perexercicio,
+                   v_Dataemissao,
+                   v_Plnplanil,
+                   2,
+                   Alteradores.Valor,
+                   Alteradores.Valor,
+                   Puser,
+                   v_Tipcodigo,
+                   1);
+                --GERANDO TABELA LANCTODOCUM ALTERADORES DO TIPO 'A'
+                INSERT INTO Lanctodocum
+                  (Coddocumento,
+                   Numlancto,
+                   Codalterador,
+                   Plncodigo,
+                   Datalancto,
+                   Valor,
+                   Valoroutramoeda,
+                   Debcre,
+                   Operacao,
+                   Historicocompl,
+                   Idusuarioinclusao,
+                   Codtipdoc,
+                   Vlrliquido,
+                   Unidnegoc,
+                   Idpessoa,
+                   Iddespesaorc)
+                VALUES
+                  (v_Coddocumento,
+                   v_Numlancto,
+                   Alteradores.Codalterador,
+                   v_Plncodigo,
+                   v_Dataemissao,
+                   Alteradores.Valor,
+                   0,
+                   'D',
+                   4,
+                   v_Obs1,
+                   Puser,
+                   v_Codtipdoc,
+                   Alteradores.Valor,
+                   -1,
+                   1,
+                   NULL);
+                --GERANDO A LANCAMENTO DE CRÉDITO ALTERADORES DO TIPO 'A'
+                INSERT INTO Lancamento
+                  (Plncodigo,
+                   Lacnumlan,
+                   Lacdebcre,
+                   Unidnegoc,
+                   Idpessoa,
+                   Idmodulo,
+                   Idusuarioinclusao,
+                   Placonta,
+                   Plano,
+                   Lactipo,
+                   Lacnumdoc,
+                   Lachist1,
+                   Lachist2,
+                   Lachist3,
+                   Lachist4,
+                   Lacvalor,
+                   Tipcodigo,
+                   Lacvalhist,
+                   Idplanoprev,
+                   Idpatro,
+                   Ordlancarateado,
+                   Lactipconvoficial,
+                   Lacvaloficial,
+                   Lactipconvger,
+                   Lacvalgerencial,
+                   Lactipconvgeren1,
+                   Lacvalgeren1,
+                   Lactipconvgeren2,
+                   Lacvalgeren2,
+                   Coddocumento)
+                VALUES
+                  (v_Plncodigo,
+                   1,
+                   'C',
+                   -1,
+                   1,
+                   456,
+                   Puser,
+                   Alteradores.Placonta,
+                   v_Plano,
+                   2,
+                   v_Coddocumento,
+                   Alteradores.Descricao,
+                   v_Lachist1,
+                   v_Lachist2,
+                   v_Lachist3,
+                   Alteradores.Valor,
+                   v_Tipcodigo,
+                   0,
+                   Pidplanoprev,
+                   Pidpessjur,
+                   -1,
+                   'D',
+                   0,
+                   'D',
+                   0,
+                   'D',
+                   0,
+                   'D',
+                   0,
+                   v_Coddocumento);
+                --GERANDO A LANCAMENTO DE DÉBITO ALTERADORES DO TIPO 'A'
+                INSERT INTO Lancamento
+                  (Plncodigo,
+                   Lacnumlan,
+                   Lacdebcre,
+                   Unidnegoc,
+                   Idpessoa,
+                   Idmodulo,
+                   Idusuarioinclusao,
+                   Placonta,
+                   Plano,
+                   Lactipo,
+                   Lacnumdoc,
+                   Lachist1,
+                   Lachist2,
+                   Lachist3,
+                   Lachist4,
+                   Lacvalor,
+                   Tipcodigo,
+                   Lacvalhist,
+                   Idplanoprev,
+                   Idpatro,
+                   Ordlancarateado,
+                   Lactipconvoficial,
+                   Lacvaloficial,
+                   Lactipconvger,
+                   Lacvalgerencial,
+                   Lactipconvgeren1,
+                   Lacvalgeren1,
+                   Lactipconvgeren2,
+                   Lacvalgeren2,
+                   Coddocumento)
+                VALUES
+                  (v_Plncodigo,
+                   1,
+                   'D',
+                   -1,
+                   1,
+                   456,
+                   Puser,
+                   v_Placonta,
+                   v_Plano,
+                   2,
+                   v_Coddocumento,
+                   Alteradores.Descricao,
+                   v_Lachist1,
+                   v_Lachist2,
+                   v_Lachist3,
+                   Alteradores.Valor,
+                   v_Tipcodigo,
+                   0,
+                   Pidplanoprev,
+                   Pidpessjur,
+                   -1,
+                   'D',
+                   0,
+                   'D',
+                   0,
+                   'D',
+                   0,
+                   'D',
+                   0,
+                   v_Coddocumento);
+              ELSIF Alteradores.Valor > 0 AND Alteradores.Flgtipo = 'D' THEN
+                SELECT Cm.Seqlanctodocum.Nextval
+                INTO v_Numlancto
+                FROM Dual;
+                SELECT Seqplanilha.Nextval
+                INTO v_Plncodigo
+                FROM Dual;
+                SELECT p.Nome
+                INTO v_Nome
+                FROM Pessoa p
+                WHERE p.Idpessoa = 91008;
+                SELECT 'Doc. ' || v_Coddocumento || ' ' || v_Nome,
+                       'Cobrança de Contribuição ',
+                       'Mês de Cobrança: ' || Pmescobranca
+                INTO v_Obs,
+                     v_Obs1,
+                     v_Obs2
+                FROM Dual;
+                SELECT MIN(Tr.Placontacredito) Placontacredito
+                INTO v_Placonta
+                FROM Rateiodocum r
+                JOIN Tiporecebdesemb Tr ON Tr.Codtiprecdes = r.Codtiprecdes
+                                           AND Tr.Recpag = r.Recpag
+                                           AND r.Coddocumento = v_Coddocumento;
+                BEGIN
+                  SELECT MAX(Pl.Plnplanil) + 1,
+                         Extract(MONTH FROM SYSDATE)
+                  INTO v_Plnplanil,
+                       v_Pernumero
+                  FROM Planilha Pl
+                  WHERE Pl.Plndatdia = Pdatarecebimento;
+                  IF v_Plnplanil IS NULL THEN
+                    v_Plnplanil := 1;
+                  END IF;
+                END;
+                --GERANDO PLANILHA DE ALTERADOES DP TIPO 'D'
+                INSERT INTO Planilha
+                  (Plncodigo,
+                   Idmodulo,
+                   Pernumero,
+                   Perexercicio,
+                   Plndatdia,
+                   Plnplanil,
+                   Plnnumlan,
+                   Plntotdeb,
+                   Plntotcre,
+                   Idusuarioinclusao,
+                   Tipcodigo,
+                   Idpessoa)
+                VALUES
+                  (v_Plncodigo,
+                   456,
+                   v_Pernumero,
+                   v_Perexercicio,
+                   v_Dataemissao,
+                   v_Plnplanil,
+                   2,
+                   Alteradores.Valor,
+                   Alteradores.Valor,
+                   Puser,
+                   v_Tipcodigo,
+                   1);
+                --GERANDO TABELA LANCTODOCUM DE ALTERADOES DO TIPO 'D'
+                INSERT INTO Lanctodocum
+                  (Coddocumento,
+                   Numlancto,
+                   Codalterador,
+                   Plncodigo,
+                   Datalancto,
+                   Valor,
+                   Valoroutramoeda,
+                   Debcre,
+                   Operacao,
+                   Historicocompl,
+                   Idusuarioinclusao,
+                   Codtipdoc,
+                   Vlrliquido,
+                   Unidnegoc,
+                   Idpessoa,
+                   Iddespesaorc)
+                VALUES
+                  (v_Coddocumento,
+                   v_Numlancto,
+                   Alteradores.Codalterador,
+                   v_Plncodigo,
+                   v_Dataemissao,
+                   Alteradores.Valor,
+                   0,
+                   'C',
+                   4,
+                   v_Obs1,
+                   Puser,
+                   v_Codtipdoc,
+                   Alteradores.Valor,
+                   -1,
+                   1,
+                   NULL);
+                --GERANDO A LANCAMENTO DE DÉBITO DE ALTERADORES DO TIPO 'D'
+                INSERT INTO Lancamento
+                  (Plncodigo,
+                   Lacnumlan,
+                   Lacdebcre,
+                   Unidnegoc,
+                   Idpessoa,
+                   Idmodulo,
+                   Idusuarioinclusao,
+                   Placonta,
+                   Plano,
+                   Lactipo,
+                   Lacnumdoc,
+                   Lachist1,
+                   Lachist2,
+                   Lachist3,
+                   Lachist4,
+                   Lacvalor,
+                   Tipcodigo,
+                   Lacvalhist,
+                   Idplanoprev,
+                   Idpatro,
+                   Ordlancarateado,
+                   Lactipconvoficial,
+                   Lacvaloficial,
+                   Lactipconvger,
+                   Lacvalgerencial,
+                   Lactipconvgeren1,
+                   Lacvalgeren1,
+                   Lactipconvgeren2,
+                   Lacvalgeren2,
+                   Coddocumento)
+                VALUES
+                  (v_Plncodigo,
+                   1,
+                   'D',
+                   -1,
+                   1,
+                   456,
+                   Puser,
+                   Alteradores.Placonta,
+                   v_Plano,
+                   2,
+                   v_Coddocumento,
+                   Alteradores.Descricao,
+                   v_Lachist1,
+                   v_Lachist2,
+                   v_Lachist3,
+                   Alteradores.Valor,
+                   v_Tipcodigo,
+                   0,
+                   Pidplanoprev,
+                   Pidpessjur,
+                   -1,
+                   'D',
+                   0,
+                   'D',
+                   0,
+                   'D',
+                   0,
+                   'D',
+                   0,
+                   v_Coddocumento);
+                --GERANDO A LANCAMENTO DE CRÉDITO DE ALTERADORES DO TIPO 'D'
+                INSERT INTO Lancamento
+                  (Plncodigo,
+                   Lacnumlan,
+                   Lacdebcre,
+                   Unidnegoc,
+                   Idpessoa,
+                   Idmodulo,
+                   Idusuarioinclusao,
+                   Placonta,
+                   Plano,
+                   Lactipo,
+                   Lacnumdoc,
+                   Lachist1,
+                   Lachist2,
+                   Lachist3,
+                   Lachist4,
+                   Lacvalor,
+                   Tipcodigo,
+                   Lacvalhist,
+                   Idplanoprev,
+                   Idpatro,
+                   Ordlancarateado,
+                   Lactipconvoficial,
+                   Lacvaloficial,
+                   Lactipconvger,
+                   Lacvalgerencial,
+                   Lactipconvgeren1,
+                   Lacvalgeren1,
+                   Lactipconvgeren2,
+                   Lacvalgeren2,
+                   Coddocumento)
+                VALUES
+                  (v_Plncodigo,
+                   1,
+                   'C',
+                   -1,
+                   1,
+                   456,
+                   Puser,
+                   v_Placonta,
+                   v_Plano,
+                   2,
+                   v_Coddocumento,
+                   Alteradores.Descricao,
+                   v_Lachist1,
+                   v_Lachist2,
+                   v_Lachist3,
+                   Alteradores.Valor,
+                   v_Tipcodigo,
+                   0,
+                   Pidplanoprev,
+                   Pidpessjur,
+                   -1,
+                   'D',
+                   0,
+                   'D',
+                   0,
+                   'D',
+                   0,
+                   'D',
+                   0,
+                   v_Coddocumento);
+                --FIM SE TIPO ALTERADORES
+              END IF;
+              --FIM LOOP ALTERADORES FLGDEVOLUÇÃO = 0
+            END LOOP;
+            --FIM SE GERAÇÃO DE ALTERADORES FLGDEVOLUÇÃO = 0
+          END IF;
+        ELSIF Valores.Sitrecebimento = 2 AND Valores.Pagador = 'PARTICIPANTE' THEN
+          IF Valores.Valoresperado < 0 THEN
+            Pouterro := 'NÃO EXISTEM CONTRIBUIÇÕES A SEREM RECEBIDAS';
+            GOTO Continue;
+          ELSE
+            SELECT t.Recpag,
+                   t.Codtipdoc,
+                   t.Debcre,
+                   p.Tipoperenvio
+            INTO v_Recpag,
+                 v_Codtipdoc,
+                 v_Debcre,
+                 v_Tipcodigo
+            FROM Tipodocrecpag t,
+                 Paramaprev    p
+            WHERE t.Codtipdoc = p.Tpdocrrecpatro;
+          END IF;
+          SELECT Seqdocumento.Nextval
+          INTO v_Coddocumento
+          FROM Dual;
+          SELECT Seqplanilha.Nextval
+          INTO v_Plncodigo
+          FROM Dual;
+          SELECT Cm.Seqlanctodocum.Nextval
+          INTO v_Numlancto
+          FROM Dual;
+          --ATRIBUIÇÃO DO NÚMERO DA PLANÍLHA:
+          --CASO JA EXISTA ALGUMA PLANILHA GERADA PARA O DIA, ADICIONAR 1 AO MAIOR NÚMERO
+          --CASO NÃO EXISTA, O NÚMERO SERÁ 1
+          BEGIN
+            SELECT MAX(Pl.Plnplanil) + 1,
+                   Substr(Trunc(SYSDATE), 4, 2)
+            INTO v_Plnplanil,
+                 v_Pernumero
+            FROM Planilha Pl
+            WHERE Pl.Plndatdia = Pdatarecebimento;
+            IF v_Plnplanil IS NULL THEN
+              v_Plnplanil := 1;
+            END IF;
+          END;
+          --CAMPO HISTÓRICO DO LANÇAMENTO DO DOCUMENTO
+          SELECT 'Contribuição parte Participante - Mês Cbrança: ' || Pmescobranca,
+                 'Receita-Contribuição de Participante',
+                 'Devolucao-Contribuição de Participante',
+                 'PATROCINADORA - CAIXA',
+                 'Mês de cobrança : ' || Pmescobranca,
+                 'Contribuição - ParticNormal',
+                 'DÉCIMO TERCEIRO'
+          INTO v_Obs,
+               v_Lachist1,
+               v_Lachist1_Devol,
+               v_Lachist2,
+               v_Lachist3,
+               v_Lachist4,
+               v_Lachist5
+          FROM Dual;
+          SELECT Least(Pdatarecebimento, To_Date(SYSDATE, 'DD/MM/YY'))
+          INTO v_Dataemissao
+          FROM Dual;
+          --GERANDO TABELA DOCUMENTO
+          INSERT INTO Documento
+            (Coddocumento,
+             Idpessoa,
+             Plano,
+             Idempresa,
+             Idforcli,
+             Idmodulo,
+             Codtipdoc,
+             Recpag,
+             Nodocumento,
+             Compldocumento,
+             Dataemissao,
+             Datavencto,
+             Dataprogramada,
+             Status,
+             Operacao,
+             Idusuarioinclusao,
+             Emisbloq,
+             Obs,
+             Flgnaoconciliado,
+             Datadisponib,
+             Qtdecotas,
+             Flgsimples,
+             Flgespecial)
+          VALUES
+            (v_Coddocumento,
+             1,
+             v_Plano,
+             1,
+             91008,
+             456,
+             v_Codtipdoc,
+             v_Recpag,
+             v_Coddocumento,
+             1,
+             v_Dataemissao,
+             Pdatarecebimento,
+             Pdatarecebimento,
+             '0',
+             '2',
+             Puser,
+             'N',
+             v_Obs,
+             1,
+             Pdatarecebimento,
+             0,
+             NULL,
+             NULL);
+          --GERANDO TABELA PLANILHA
+          INSERT INTO Planilha
+            (Plncodigo,
+             Idmodulo,
+             Pernumero,
+             Perexercicio,
+             Plndatdia,
+             Plnplanil,
+             Plnnumlan,
+             Plntotdeb,
+             Plntotcre,
+             Idusuarioinclusao,
+             Tipcodigo,
+             Idpessoa)
+          VALUES
+            (v_Plncodigo,
+             456,
+             v_Pernumero,
+             v_Perexercicio,
+             v_Dataemissao,
+             v_Plnplanil,
+             2,
+             Valores.Valorrecebido,
+             Valores.Valorrecebido,
+             Puser,
+             v_Tipcodigo,
+             1);
+          --GERANDO TABELA LANCTODOCUM
+          INSERT INTO Lanctodocum
+            (Coddocumento,
+             Numlancto,
+             Plncodigo,
+             Datalancto,
+             Valor,
+             Valoroutramoeda,
+             Debcre,
+             Operacao,
+             Historicocompl,
+             Idusuarioinclusao,
+             Codtipdoc,
+             Vlrliquido,
+             Unidnegoc,
+             Idpessoa,
+             Iddespesaorc)
+          VALUES
+            (v_Coddocumento,
+             v_Numlancto,
+             v_Plncodigo,
+             v_Dataemissao,
+             Valores.Valorrecebido,
+             0,
+             v_Debcre,
+             2,
+             v_Obs,
+             Puser,
+             v_Codtipdoc,
+             Valores.Valorrecebido,
+             -1,
+             1,
+             NULL);
+          --LOOP PARA OS RATEIOS
+          FOR Rateio IN (SELECT DISTINCT Cp.Codtiprecdes,
+                                         Cp.Codcentrorespon,
+                                         SUM(Decode(Hst.Flgdevolucao, 0, Hst.Valorrecebido, -hst.Valorrecebido)) Valor,
+                                         Cp.Codcentrocustod,
+                                         Hst.Idplanprevcontab
+                         FROM Hstcontribprev Hst
+                         JOIN Contprev c ON c.Idplanoprev = Hst.Idplanoprev
+                                            AND c.Idcontribuicao = Hst.Idcontribuicao
+                                            AND c.Flgpagador = 'C'
+                         JOIN Contplanpatro Cp ON Cp.Idcontribuicao = Hst.Idcontribuicao
+                                                  AND Cp.Idplanoprev = Hst.Idplanoprev
+                                                  AND Cp.Idpessjur = Hst.Idpessjur
+                         WHERE Hst.Mescobranca = Pmescobranca
+                               AND Hst.Sitrecebimento IN (2, 3)
+                               AND Hst.Dataprevisaorece = Pdatarecebimento
+                               AND Hst.Idcontribuicao IN (SELECT *
+                                                          FROM TABLE(Fn_Geralista(Pidcontribuicao)))
+                               AND Hst.Idplanoprev IN (Valores.Idplanoprev)
+                               AND Hst.Idpessjur = Valores.Idpessjur
+                               AND Hst.Datarecebimento IS NOT NULL
+                               AND Hst.Valorrecebido IS NOT NULL
+                               AND Hst.Folhaorigem <> 'B'
+                               AND Hst.Flgdescfolha = 1
+                               AND Hst.Coddocumentoprev IS NULL
+                               AND NOT EXISTS (SELECT 1
+                                FROM Retornohstcontribpatro r
+                                WHERE r.Numrecebimento = Hst.Numrecebimento)
+                         GROUP BY Cp.Codtiprecdes,
+                                  Cp.Codcentrorespon,
+                                  Cp.Codcentrocustod,
+                                  Hst.Idplanprevcontab)
+          LOOP
+						IF rateio.codtiprecdes IS NULL THEN
+							Pouterro := 'Tipo de desembolso não parametrizado';
+							GOTO Continue;
+						ELSIF rateio.codcentrorespon IS NULL THEN
+							Pouterro := 'Centro de Responsabilidade não parametrizado';	
+							GOTO Continue;	
+						ELSIF rateio.codcentrocustod IS NULL THEN
+							Pouterro := 'Centro de Custo não parametrizado';	
+							GOTO Continue;
+						ELSIF rateio.idplanprevcontab IS NULL THEN 
+							Pouterro := 'Plano contábil não preenchido';				
+							GOTO Continue;											
+						END IF;
+            --GERANDO RATEIODOCUM
+            INSERT INTO Rateiodocum
+              (Coddocumento,
+               Codtiprecdes,
+               Recpag,
+               Idpessoa,
+               Codcentrorespon,
+               Unidnegoc,
+               Valor,
+               Valoroutramoeda,
+               Idusuarioinclusao,
+               Idrateiodocum,
+               Idempresa,
+               Codcentrocusto,
+               Plano,
+               Idpatro,
+               Idprograma,
+               Idplanoprev,
+               Vlrresorcamen,
+               Idpatroorigem,
+               Idplanoorigem,
+               Iddespesaorc)
+            VALUES
+              (v_Coddocumento,
+               Rateio.Codtiprecdes,
+               v_Recpag,
+               1,
+               Rateio.Codcentrorespon,
+               -1,
+               Rateio.Valor,
+               0,
+               Puser,
+               Seqrateiodocum.Nextval,
+               1,
+               Rateio.Codcentrocustod,
+               v_Plano,
+               Pidpessjur,
+               1,
+               Rateio.Idplanprevcontab,
+               0,
+               Pidpessjur,
+               Rateio.Idplanprevcontab,
+               NULL);
+          END LOOP;
+          -- PARAMETRIZAÇÕES CONTÁBEIS PARA BAIXA
+          SELECT COUNT(Placontacredito)
+          INTO v_Cont
+          FROM Tiporecebdesemb
+          WHERE Idpessoa = 1
+                AND Recpag = 'R'
+                AND Codtiprecdes IN (SELECT r.Codtiprecdes
+                                     FROM Rateiodocum r
+                                     WHERE r.Coddocumento = v_Coddocumento);
+        
+          IF v_Cont = 0 THEN
+            Pouterro := 'CONTA CONTÁBIL NÃO PARAMETRIZADA NO CADASTRO DO TIPO DE RECEBIMENTO';
+            GOTO Continue;
+          ELSIF v_Cont = 1 THEN
+            SELECT DISTINCT Placontacredito
+            INTO v_Placonta
+            FROM Tiporecebdesemb
+            WHERE Idpessoa = 1
+                  AND Recpag = 'R'
+                  AND Codtiprecdes IN (SELECT r.Codtiprecdes
+                                       FROM Rateiodocum r
+                                       WHERE r.Coddocumento = v_Coddocumento);
+            UPDATE Documento d
+            SET d.Placonta = v_Placonta
+            WHERE d.Coddocumento = v_Coddocumento;
+          ELSE
+            --PARA AS INFORMAÇÕES DE BAIXA NA CCBAIXASXDOCUM
+            FOR Baixa IN (SELECT r.Idpatro,
+                                 r.Unidnegoc,
+                                 r.Idplanoprev,
+                                 r.Idpessoa,
+                                 t.Placontacredito,
+                                 SUM(r.Valor) Valor
+                          FROM Rateiodocum r
+                          JOIN Tiporecebdesemb t ON t.Codtiprecdes = r.Codtiprecdes
+                                                    AND t.Recpag = r.Recpag
+                                                    AND r.Coddocumento = v_Coddocumento
+                          GROUP BY r.Idpatro,
+                                   r.Unidnegoc,
+                                   r.Idplanoprev,
+                                   r.Idpessoa,
+                                   t.Placontacredito)
+            LOOP
+              INSERT INTO Ccbaixasxdocum
+                (Idccbaixasxdocum,
+                 Idpatro,
+                 Unidnegoc,
+                 Idplanoprev,
+                 Idpessoa,
+                 Coddocumento,
+                 Plano,
+                 Placonta,
+                 Valor,
+                 Trgdtinclusao,
+                 Trguserinclusao)
+              VALUES
+                (Seqccbaixasxdocum.Nextval,
+                 Baixa.Idpatro,
+                 Baixa.Unidnegoc,
+                 Baixa.Idplanoprev,
+                 Baixa.Idpessoa,
+                 v_Coddocumento,
+                 v_Plano,
+                 Baixa.Placontacredito,
+                 Baixa.Valor,
+                 SYSDATE,
+                 USER);
+            END LOOP;
+          END IF;
+          v_Lacnumlan := 0;
+          --PARA OS LAÇAMENTOS CONTÁBEIS
+          FOR Lancamento IN (SELECT DISTINCT Decode(Substr(Hst.Mesreferencia, 6, 2), '13', '13', 'MES') Referencia,
+                                             Hst.Flgdevolucao,
+                                             SUM(Hst.Valorrecebido) Valor,
+                                             Hst.Idplanprevcontab,
+                                             Hst.Idpessjur,
+                                             Cp.Placontadbanco,
+                                             Cp.Placontac
+                             FROM Hstcontribprev Hst
+                             JOIN Contprev c ON c.Idplanoprev = Hst.Idplanoprev
+                                                AND c.Idcontribuicao = Hst.Idcontribuicao
+                                                AND c.Flgpagador = 'C'
+                             JOIN Contplanpatro Cp ON Cp.Idcontribuicao = Hst.Idcontribuicao
+                                                      AND Cp.Idplanoprev = Hst.Idplanoprev
+                                                      AND Cp.Idpessjur = Hst.Idpessjur
+                             WHERE Hst.Mescobranca = Pmescobranca
+                                   AND Hst.Sitrecebimento IN (2, 3)
+                                   AND Hst.Dataprevisaorece = Pdatarecebimento
+                                   AND Hst.Idcontribuicao IN (SELECT *
+                                                              FROM TABLE(Fn_Geralista(Pidcontribuicao)))
+                                   AND Hst.Idplanoprev IN (Valores.Idplanoprev)
+                                   AND Hst.Idpessjur = Valores.Idpessjur
+                                   AND Hst.Datarecebimento IS NOT NULL
+                                   AND Hst.Valorrecebido IS NOT NULL
+                                   AND Hst.Folhaorigem <> 'B'
+                                   AND Hst.Flgdescfolha = 1
+                                   AND Hst.Coddocumentoprev IS NULL
+                                   AND NOT EXISTS (SELECT 1
+                                    FROM Retornohstcontribpatro r
+                                    WHERE r.Numrecebimento = Hst.Numrecebimento)
+                             GROUP BY Hst.Flgdevolucao,
+                                      Hst.Idplanprevcontab,
+                                      Hst.Idpessjur,
+                                      Cp.Placontadbanco,
+                                      Cp.Placontac,
+                                      Decode(Substr(Hst.Mesreferencia, 6, 2), '13', '13', 'MES'))
+          LOOP
+            v_Lacnumlan := v_Lacnumlan + 1;
+            IF Lancamento.Flgdevolucao = 0 AND Lancamento.Referencia = '13' THEN
+              v_Debcre       := 'D';
+              v_Debcrecontra := 'C';
+              INSERT INTO Lancamento
+                (Plncodigo,
+                 Lacnumlan,
+                 Lacdebcre,
+                 Unidnegoc,
+                 Idpessoa,
+                 Idmodulo,
+                 Idusuarioinclusao,
+                 Placonta,
+                 Plano,
+                 Lactipo,
+                 Lacnumdoc,
+                 Lachist1,
+                 Lachist2,
+                 Lachist3,
+                 Lachist4,
+                 Lachist5,
+                 Lacvalor,
+                 Tipcodigo,
+                 Lacvalhist,
+                 Idplanoprev,
+                 Idpatro,
+                 Ordlancarateado)
+              VALUES
+                (v_Plncodigo,
+                 v_Lacnumlan,
+                 v_Debcre,
+                 -1,
+                 1,
+                 456,
+                 Puser,
+                 Lancamento.Placontadbanco,
+                 v_Plano,
+                 2,
+                 v_Coddocumento,
+                 v_Lachist1,
+                 v_Lachist2,
+                 v_Lachist3,
+                 v_Lachist4,
+                 v_Lachist5,
+                 Lancamento.Valor,
+                 v_Tipcodigo,
+                 0,
+                 Lancamento.Idplanprevcontab,
+                 Pidpessjur,
+                 -1);
+              INSERT INTO Lancamento
+                (Plncodigo,
+                 Lacnumlan,
+                 Lacdebcre,
+                 Unidnegoc,
+                 Idpessoa,
+                 Idmodulo,
+                 Idusuarioinclusao,
+                 Placonta,
+                 Plano,
+                 Lactipo,
+                 Lacnumdoc,
+                 Lachist1,
+                 Lachist2,
+                 Lachist3,
+                 Lachist4,
+                 Lachist5,
+                 Lacvalor,
+                 Tipcodigo,
+                 Lacvalhist,
+                 Idplanoprev,
+                 Idpatro,
+                 Ordlancarateado)
+              VALUES
+                (v_Plncodigo,
+                 v_Lacnumlan,
+                 v_Debcrecontra,
+                 -1,
+                 1,
+                 456,
+                 Puser,
+                 Lancamento.Placontac,
+                 v_Plano,
+                 2,
+                 v_Coddocumento,
+                 v_Lachist1,
+                 v_Lachist2,
+                 v_Lachist3,
+                 v_Lachist4,
+                 v_Lachist5,
+                 Lancamento.Valor,
+                 v_Tipcodigo,
+                 0,
+                 Lancamento.Idplanprevcontab,
+                 Pidpessjur,
+                 -1);
+            ELSIF Lancamento.Flgdevolucao = 0 AND Lancamento.Referencia <> '13' THEN
+              v_Debcre       := 'D';
+              v_Debcrecontra := 'C';
+              INSERT INTO Lancamento
+                (Plncodigo,
+                 Lacnumlan,
+                 Lacdebcre,
+                 Unidnegoc,
+                 Idpessoa,
+                 Idmodulo,
+                 Idusuarioinclusao,
+                 Placonta,
+                 Plano,
+                 Lactipo,
+                 Lacnumdoc,
+                 Lachist1,
+                 Lachist2,
+                 Lachist3,
+                 Lachist4,
+                 Lacvalor,
+                 Tipcodigo,
+                 Lacvalhist,
+                 Idplanoprev,
+                 Idpatro,
+                 Ordlancarateado)
+              VALUES
+                (v_Plncodigo,
+                 v_Lacnumlan,
+                 v_Debcre,
+                 -1,
+                 1,
+                 456,
+                 Puser,
+                 Lancamento.Placontadbanco,
+                 v_Plano,
+                 2,
+                 v_Coddocumento,
+                 v_Lachist1,
+                 v_Lachist2,
+                 v_Lachist3,
+                 v_Lachist4,
+                 Lancamento.Valor,
+                 v_Tipcodigo,
+                 0,
+                 Lancamento.Idplanprevcontab,
+                 Pidpessjur,
+                 -1);
+              INSERT INTO Lancamento
+                (Plncodigo,
+                 Lacnumlan,
+                 Lacdebcre,
+                 Unidnegoc,
+                 Idpessoa,
+                 Idmodulo,
+                 Idusuarioinclusao,
+                 Placonta,
+                 Plano,
+                 Lactipo,
+                 Lacnumdoc,
+                 Lachist1,
+                 Lachist2,
+                 Lachist3,
+                 Lachist4,
+                 Lacvalor,
+                 Tipcodigo,
+                 Lacvalhist,
+                 Idplanoprev,
+                 Idpatro,
+                 Ordlancarateado)
+              VALUES
+                (v_Plncodigo,
+                 v_Lacnumlan,
+                 v_Debcrecontra,
+                 -1,
+                 1,
+                 456,
+                 Puser,
+                 Lancamento.Placontac,
+                 v_Plano,
+                 2,
+                 v_Coddocumento,
+                 v_Lachist1,
+                 v_Lachist2,
+                 v_Lachist3,
+                 v_Lachist4,
+                 Lancamento.Valor,
+                 v_Tipcodigo,
+                 0,
+                 Lancamento.Idplanprevcontab,
+                 Pidpessjur,
+                 -1);
+            ELSIF Lancamento.Flgdevolucao = 1 AND Lancamento.Referencia = '13' THEN
+              v_Debcre       := 'D';
+              v_Debcrecontra := 'C';
+              INSERT INTO Lancamento
+                (Plncodigo,
+                 Lacnumlan,
+                 Lacdebcre,
+                 Unidnegoc,
+                 Idpessoa,
+                 Idmodulo,
+                 Idusuarioinclusao,
+                 Placonta,
+                 Plano,
+                 Lactipo,
+                 Lacnumdoc,
+                 Lachist1,
+                 Lachist2,
+                 Lachist3,
+                 Lachist4,
+                 Lachist5,
+                 Lacvalor,
+                 Tipcodigo,
+                 Lacvalhist,
+                 Idplanoprev,
+                 Idpatro,
+                 Ordlancarateado)
+              VALUES
+                (v_Plncodigo,
+                 v_Lacnumlan,
+                 v_Debcre,
+                 -1,
+                 1,
+                 456,
+                 Puser,
+                 Lancamento.Placontac,
+                 v_Plano,
+                 2,
+                 v_Coddocumento,
+                 v_Lachist1,
+                 v_Lachist2,
+                 v_Lachist3,
+                 v_Lachist4,
+                 v_Lachist5,
+                 Lancamento.Valor,
+                 v_Tipcodigo,
+                 0,
+                 Lancamento.Idplanprevcontab,
+                 Pidpessjur,
+                 -1);
+              INSERT INTO Lancamento
+                (Plncodigo,
+                 Lacnumlan,
+                 Lacdebcre,
+                 Unidnegoc,
+                 Idpessoa,
+                 Idmodulo,
+                 Idusuarioinclusao,
+                 Placonta,
+                 Plano,
+                 Lactipo,
+                 Lacnumdoc,
+                 Lachist1,
+                 Lachist2,
+                 Lachist3,
+                 Lachist4,
+                 Lachist5,
+                 Lacvalor,
+                 Tipcodigo,
+                 Lacvalhist,
+                 Idplanoprev,
+                 Idpatro,
+                 Ordlancarateado)
+              VALUES
+                (v_Plncodigo,
+                 v_Lacnumlan,
+                 v_Debcrecontra,
+                 -1,
+                 1,
+                 456,
+                 Puser,
+                 Lancamento.Placontadbanco,
+                 v_Plano,
+                 2,
+                 v_Coddocumento,
+                 v_Lachist1,
+                 v_Lachist2,
+                 v_Lachist3,
+                 v_Lachist4,
+                 v_Lachist5,
+                 Lancamento.Valor,
+                 v_Tipcodigo,
+                 0,
+                 Lancamento.Idplanprevcontab,
+                 Pidpessjur,
+                 -1);
+            ELSIF Lancamento.Flgdevolucao = 1 AND Lancamento.Referencia <> '13' THEN
+              v_Debcre       := 'D';
+              v_Debcrecontra := 'C';
+              INSERT INTO Lancamento
+                (Plncodigo,
+                 Lacnumlan,
+                 Lacdebcre,
+                 Unidnegoc,
+                 Idpessoa,
+                 Idmodulo,
+                 Idusuarioinclusao,
+                 Placonta,
+                 Plano,
+                 Lactipo,
+                 Lacnumdoc,
+                 Lachist1,
+                 Lachist2,
+                 Lachist3,
+                 Lachist4,
+                 Lacvalor,
+                 Tipcodigo,
+                 Lacvalhist,
+                 Idplanoprev,
+                 Idpatro,
+                 Ordlancarateado)
+              VALUES
+                (v_Plncodigo,
+                 v_Lacnumlan,
+                 v_Debcre,
+                 -1,
+                 1,
+                 456,
+                 Puser,
+                 Lancamento.Placontac,
+                 v_Plano,
+                 2,
+                 v_Coddocumento,
+                 v_Lachist1,
+                 v_Lachist2,
+                 v_Lachist3,
+                 v_Lachist4,
+                 Lancamento.Valor,
+                 v_Tipcodigo,
+                 0,
+                 Lancamento.Idplanprevcontab,
+                 Pidpessjur,
+                 -1);
+              INSERT INTO Lancamento
+                (Plncodigo,
+                 Lacnumlan,
+                 Lacdebcre,
+                 Unidnegoc,
+                 Idpessoa,
+                 Idmodulo,
+                 Idusuarioinclusao,
+                 Placonta,
+                 Plano,
+                 Lactipo,
+                 Lacnumdoc,
+                 Lachist1,
+                 Lachist2,
+                 Lachist3,
+                 Lachist4,
+                 Lacvalor,
+                 Tipcodigo,
+                 Lacvalhist,
+                 Idplanoprev,
+                 Idpatro,
+                 Ordlancarateado)
+              VALUES
+                (v_Plncodigo,
+                 v_Lacnumlan,
+                 v_Debcrecontra,
+                 -1,
+                 1,
+                 456,
+                 Puser,
+                 Lancamento.Placontadbanco,
+                 v_Plano,
+                 2,
+                 v_Coddocumento,
+                 v_Lachist1,
+                 v_Lachist2,
+                 v_Lachist3,
+                 v_Lachist4,
+                 Lancamento.Valor,
+                 v_Tipcodigo,
+                 0,
+                 Lancamento.Idplanprevcontab,
+                 Pidpessjur,
+                 -1);
+            END IF;
+          END LOOP;
+        
+          UPDATE Hstcontribprev h
+          SET h.Coddocumentoprev = v_Coddocumento
+          WHERE h.Numrecebimento IN (SELECT Hst.Numrecebimento
+                                     FROM Hstcontribprev Hst
+                                     JOIN Contprev c ON c.Idplanoprev = Hst.Idplanoprev
+                                                        AND c.Idcontribuicao = Hst.Idcontribuicao
+                                                        AND c.Flgpagador = 'C'
+                                     JOIN Contplanpatro Cp ON Cp.Idcontribuicao = Hst.Idcontribuicao
+                                                              AND Cp.Idplanoprev = Hst.Idplanoprev
+                                                              AND Cp.Idpessjur = Hst.Idpessjur
+                                     WHERE Hst.Mescobranca = Pmescobranca
+                                           AND Hst.Sitrecebimento IN (2, 3)
+                                           AND Hst.Dataprevisaorece = Pdatarecebimento
+                                           AND Hst.Idcontribuicao IN (SELECT *
+                                                                      FROM TABLE(Fn_Geralista(Pidcontribuicao)))
+                                           AND Hst.Idplanoprev = Valores.Idplanoprev
+                                           AND Hst.Idpessjur = Valores.Idpessjur
+                                           AND Hst.Datarecebimento IS NOT NULL
+                                           AND Hst.Valorrecebido IS NOT NULL
+                                           AND Hst.Folhaorigem <> 'B'
+                                           AND Hst.Flgdescfolha = 1
+                                           AND Hst.Coddocumentoprev IS NULL
+                                           AND NOT EXISTS (SELECT 1
+                                            FROM Retornohstcontribpatro r
+                                            WHERE r.Numrecebimento = Hst.Numrecebimento));
+        
+          SELECT COUNT(Ha.Numrecebimento)
+          INTO v_Cont
+          FROM Hstcontribprev h
+          JOIN Hstatrasocontrib Ha ON Ha.Numrecebimento = h.Numrecebimento
+                                      AND Ha.Idmotivo = h.Idmotivo
+                                      AND Ha.Mesreferencia = h.Mesreferencia
+                                      AND Ha.Mescobranca = h.Mescobranca
+          JOIN Tipoalterador Ta ON Ta.Codalterador = Ha.Codalterador
+          WHERE h.Coddocumentoprev = v_Coddocumento
+                AND h.Mescobranca = Pmescobranca
+                AND Ha.Datarecebimento IS NULL
+                AND Nvl(Ha.Valorrecebido, 0) = 0;
+        
+          IF v_Cont > 0 THEN
+            -- INICIO LOOP ALTERADORES FLGDEVOLUÇÃO = 0
+            FOR Alteradores IN (SELECT SUM(Ha.Valor) Valor,
+                                       Ha.Flgtipo,
+                                       Ha.Codalterador,
+                                       Ta.Descricao,
+                                       Ta.Placonta
+                                FROM Hstcontribprev h
+                                JOIN Hstatrasocontrib Ha ON Ha.Numrecebimento = h.Numrecebimento
+                                                            AND Ha.Idmotivo = h.Idmotivo
+                                                            AND Ha.Mesreferencia = h.Mesreferencia
+                                                            AND Ha.Mescobranca = h.Mescobranca
+                                JOIN Tipoalterador Ta ON Ta.Codalterador = Ha.Codalterador
+                                WHERE h.Coddocumentoprev = v_Coddocumento
+                                      AND h.Mescobranca = Pmescobranca
+                                      AND Ha.Datarecebimento IS NULL
+                                      AND Nvl(Ha.Valorrecebido, 0) = 0
+                                GROUP BY Ha.Flgtipo,
+                                         Ha.Codalterador,
+                                         Ta.Descricao,
+                                         Ta.Placonta)
+            LOOP
+              --INICIO TIPO ALTERADORES
+              IF Alteradores.Valor > 0 AND Alteradores.Flgtipo = 'A' THEN
+                SELECT Cm.Seqlanctodocum.Nextval
+                INTO v_Numlancto
+                FROM Dual;
+                SELECT Seqplanilha.Nextval
+                INTO v_Plncodigo
+                FROM Dual;
+                SELECT p.Nome
+                INTO v_Nome
+                FROM Pessoa p
+                WHERE p.Idpessoa = 91008;
+                SELECT 'Doc. ' || v_Coddocumento || ' ' || v_Nome,
+                       'Cobrança de Contribuição ',
+                       'Mês de Cobrança: ' || Pmescobranca
+                INTO v_Lachist1,
+                     v_Lachist2,
+                     v_Lachist3
+                FROM Dual;
+                SELECT MIN(Tr.Placontacredito) Placontacredito
+                INTO v_Placonta
+                FROM Rateiodocum r
+                JOIN Tiporecebdesemb Tr ON Tr.Codtiprecdes = r.Codtiprecdes
+                                           AND Tr.Recpag = r.Recpag
+                                           AND r.Coddocumento = v_Coddocumento;
+                BEGIN
+                  SELECT MAX(Pl.Plnplanil) + 1,
+                         Extract(MONTH FROM SYSDATE)
+                  INTO v_Plnplanil,
+                       v_Pernumero
+                  FROM Planilha Pl
+                  WHERE Pl.Plndatdia = Pdatarecebimento;
+                  IF v_Plnplanil IS NULL THEN
+                    v_Plnplanil := 1;
+                  END IF;
+                END;
+                --GERANDO PLANILHA DOS ALTERADORES DO TIPO 'A'
+                INSERT INTO Planilha
+                  (Plncodigo,
+                   Idmodulo,
+                   Pernumero,
+                   Perexercicio,
+                   Plndatdia,
+                   Plnplanil,
+                   Plnnumlan,
+                   Plntotdeb,
+                   Plntotcre,
+                   Idusuarioinclusao,
+                   Tipcodigo,
+                   Idpessoa)
+                VALUES
+                  (v_Plncodigo,
+                   456,
+                   v_Pernumero,
+                   v_Perexercicio,
+                   v_Dataemissao,
+                   v_Plnplanil,
+                   2,
+                   Alteradores.Valor,
+                   Alteradores.Valor,
+                   Puser,
+                   v_Tipcodigo,
+                   1);
+                --GERANDO TABELA LANCTODOCUM ALTERADORES DO TIPO 'A'
+                INSERT INTO Lanctodocum
+                  (Coddocumento,
+                   Numlancto,
+                   Codalterador,
+                   Plncodigo,
+                   Datalancto,
+                   Valor,
+                   Valoroutramoeda,
+                   Debcre,
+                   Operacao,
+                   Historicocompl,
+                   Idusuarioinclusao,
+                   Codtipdoc,
+                   Vlrliquido,
+                   Unidnegoc,
+                   Idpessoa,
+                   Iddespesaorc)
+                VALUES
+                  (v_Coddocumento,
+                   v_Numlancto,
+                   Alteradores.Codalterador,
+                   v_Plncodigo,
+                   v_Dataemissao,
+                   Alteradores.Valor,
+                   0,
+                   'D',
+                   4,
+                   v_Obs1,
+                   Puser,
+                   v_Codtipdoc,
+                   Alteradores.Valor,
+                   -1,
+                   1,
+                   NULL);
+                --GERANDO A LANCAMENTO DE CRÉDITO ALTERADORES DO TIPO 'A'
+                INSERT INTO Lancamento
+                  (Plncodigo,
+                   Lacnumlan,
+                   Lacdebcre,
+                   Unidnegoc,
+                   Idpessoa,
+                   Idmodulo,
+                   Idusuarioinclusao,
+                   Placonta,
+                   Plano,
+                   Lactipo,
+                   Lacnumdoc,
+                   Lachist1,
+                   Lachist2,
+                   Lachist3,
+                   Lachist4,
+                   Lacvalor,
+                   Tipcodigo,
+                   Lacvalhist,
+                   Idplanoprev,
+                   Idpatro,
+                   Ordlancarateado,
+                   Lactipconvoficial,
+                   Lacvaloficial,
+                   Lactipconvger,
+                   Lacvalgerencial,
+                   Lactipconvgeren1,
+                   Lacvalgeren1,
+                   Lactipconvgeren2,
+                   Lacvalgeren2,
+                   Coddocumento)
+                VALUES
+                  (v_Plncodigo,
+                   1,
+                   'C',
+                   -1,
+                   1,
+                   456,
+                   Puser,
+                   Alteradores.Placonta,
+                   v_Plano,
+                   2,
+                   v_Coddocumento,
+                   Alteradores.Descricao,
+                   v_Lachist1,
+                   v_Lachist2,
+                   v_Lachist3,
+                   Alteradores.Valor,
+                   v_Tipcodigo,
+                   0,
+                   Pidplanoprev,
+                   Pidpessjur,
+                   -1,
+                   'D',
+                   0,
+                   'D',
+                   0,
+                   'D',
+                   0,
+                   'D',
+                   0,
+                   v_Coddocumento);
+                --GERANDO A LANCAMENTO DE DÉBITO ALTERADORES DO TIPO 'A'
+                INSERT INTO Lancamento
+                  (Plncodigo,
+                   Lacnumlan,
+                   Lacdebcre,
+                   Unidnegoc,
+                   Idpessoa,
+                   Idmodulo,
+                   Idusuarioinclusao,
+                   Placonta,
+                   Plano,
+                   Lactipo,
+                   Lacnumdoc,
+                   Lachist1,
+                   Lachist2,
+                   Lachist3,
+                   Lachist4,
+                   Lacvalor,
+                   Tipcodigo,
+                   Lacvalhist,
+                   Idplanoprev,
+                   Idpatro,
+                   Ordlancarateado,
+                   Lactipconvoficial,
+                   Lacvaloficial,
+                   Lactipconvger,
+                   Lacvalgerencial,
+                   Lactipconvgeren1,
+                   Lacvalgeren1,
+                   Lactipconvgeren2,
+                   Lacvalgeren2,
+                   Coddocumento)
+                VALUES
+                  (v_Plncodigo,
+                   1,
+                   'D',
+                   -1,
+                   1,
+                   456,
+                   Puser,
+                   v_Placonta,
+                   v_Plano,
+                   2,
+                   v_Coddocumento,
+                   Alteradores.Descricao,
+                   v_Lachist1,
+                   v_Lachist2,
+                   v_Lachist3,
+                   Alteradores.Valor,
+                   v_Tipcodigo,
+                   0,
+                   Pidplanoprev,
+                   Pidpessjur,
+                   -1,
+                   'D',
+                   0,
+                   'D',
+                   0,
+                   'D',
+                   0,
+                   'D',
+                   0,
+                   v_Coddocumento);
+              ELSIF Alteradores.Valor > 0 AND Alteradores.Flgtipo = 'D' THEN
+                SELECT Cm.Seqlanctodocum.Nextval
+                INTO v_Numlancto
+                FROM Dual;
+                SELECT Seqplanilha.Nextval
+                INTO v_Plncodigo
+                FROM Dual;
+                SELECT p.Nome
+                INTO v_Nome
+                FROM Pessoa p
+                WHERE p.Idpessoa = 91008;
+                SELECT 'Doc. ' || v_Coddocumento || ' ' || v_Nome,
+                       'Cobrança de Contribuição ',
+                       'Mês de Cobrança: ' || Pmescobranca
+                INTO v_Lachist1,
+                     v_Lachist2,
+                     v_Lachist3
+                FROM Dual;
+                SELECT MIN(Tr.Placontacredito) Placontacredito
+                INTO v_Placonta
+                FROM Rateiodocum r
+                JOIN Tiporecebdesemb Tr ON Tr.Codtiprecdes = r.Codtiprecdes
+                                           AND Tr.Recpag = r.Recpag
+                                           AND r.Coddocumento = v_Coddocumento;
+                BEGIN
+                  SELECT MAX(Pl.Plnplanil) + 1,
+                         Extract(MONTH FROM SYSDATE)
+                  INTO v_Plnplanil,
+                       v_Pernumero
+                  FROM Planilha Pl
+                  WHERE Pl.Plndatdia = Pdatarecebimento;
+                  IF v_Plnplanil IS NULL THEN
+                    v_Plnplanil := 1;
+                  END IF;
+                END;
+                --GERANDO PLANILHA DE ALTERADOES DP TIPO 'D'
+                INSERT INTO Planilha
+                  (Plncodigo,
+                   Idmodulo,
+                   Pernumero,
+                   Perexercicio,
+                   Plndatdia,
+                   Plnplanil,
+                   Plnnumlan,
+                   Plntotdeb,
+                   Plntotcre,
+                   Idusuarioinclusao,
+                   Tipcodigo,
+                   Idpessoa)
+                VALUES
+                  (v_Plncodigo,
+                   456,
+                   v_Pernumero,
+                   v_Perexercicio,
+                   v_Dataemissao,
+                   v_Plnplanil,
+                   2,
+                   Alteradores.Valor,
+                   Alteradores.Valor,
+                   Puser,
+                   v_Tipcodigo,
+                   1);
+                --GERANDO TABELA LANCTODOCUM DE ALTERADOES DO TIPO 'D'
+                INSERT INTO Lanctodocum
+                  (Coddocumento,
+                   Numlancto,
+                   Codalterador,
+                   Plncodigo,
+                   Datalancto,
+                   Valor,
+                   Valoroutramoeda,
+                   Debcre,
+                   Operacao,
+                   Historicocompl,
+                   Idusuarioinclusao,
+                   Codtipdoc,
+                   Vlrliquido,
+                   Unidnegoc,
+                   Idpessoa,
+                   Iddespesaorc)
+                VALUES
+                  (v_Coddocumento,
+                   v_Numlancto,
+                   Alteradores.Codalterador,
+                   v_Plncodigo,
+                   v_Dataemissao,
+                   Alteradores.Valor,
+                   0,
+                   'C',
+                   4,
+                   v_Obs1,
+                   Puser,
+                   v_Codtipdoc,
+                   Alteradores.Valor,
+                   -1,
+                   1,
+                   NULL);
+                --GERANDO A LANCAMENTO DE DÉBITO DE ALTERADORES DO TIPO 'D'
+                INSERT INTO Lancamento
+                  (Plncodigo,
+                   Lacnumlan,
+                   Lacdebcre,
+                   Unidnegoc,
+                   Idpessoa,
+                   Idmodulo,
+                   Idusuarioinclusao,
+                   Placonta,
+                   Plano,
+                   Lactipo,
+                   Lacnumdoc,
+                   Lachist1,
+                   Lachist2,
+                   Lachist3,
+                   Lachist4,
+                   Lacvalor,
+                   Tipcodigo,
+                   Lacvalhist,
+                   Idplanoprev,
+                   Idpatro,
+                   Ordlancarateado,
+                   Lactipconvoficial,
+                   Lacvaloficial,
+                   Lactipconvger,
+                   Lacvalgerencial,
+                   Lactipconvgeren1,
+                   Lacvalgeren1,
+                   Lactipconvgeren2,
+                   Lacvalgeren2,
+                   Coddocumento)
+                VALUES
+                  (v_Plncodigo,
+                   1,
+                   'D',
+                   -1,
+                   1,
+                   456,
+                   Puser,
+                   Alteradores.Placonta,
+                   v_Plano,
+                   2,
+                   v_Coddocumento,
+                   Alteradores.Descricao,
+                   v_Lachist1,
+                   v_Lachist2,
+                   v_Lachist3,
+                   Alteradores.Valor,
+                   v_Tipcodigo,
+                   0,
+                   Pidplanoprev,
+                   Pidpessjur,
+                   -1,
+                   'D',
+                   0,
+                   'D',
+                   0,
+                   'D',
+                   0,
+                   'D',
+                   0,
+                   v_Coddocumento);
+                --GERANDO A LANCAMENTO DE CRÉDITO DE ALTERADORES DO TIPO 'D'
+                INSERT INTO Lancamento
+                  (Plncodigo,
+                   Lacnumlan,
+                   Lacdebcre,
+                   Unidnegoc,
+                   Idpessoa,
+                   Idmodulo,
+                   Idusuarioinclusao,
+                   Placonta,
+                   Plano,
+                   Lactipo,
+                   Lacnumdoc,
+                   Lachist1,
+                   Lachist2,
+                   Lachist3,
+                   Lachist4,
+                   Lacvalor,
+                   Tipcodigo,
+                   Lacvalhist,
+                   Idplanoprev,
+                   Idpatro,
+                   Ordlancarateado,
+                   Lactipconvoficial,
+                   Lacvaloficial,
+                   Lactipconvger,
+                   Lacvalgerencial,
+                   Lactipconvgeren1,
+                   Lacvalgeren1,
+                   Lactipconvgeren2,
+                   Lacvalgeren2,
+                   Coddocumento)
+                VALUES
+                  (v_Plncodigo,
+                   1,
+                   'C',
+                   -1,
+                   1,
+                   456,
+                   Puser,
+                   v_Placonta,
+                   v_Plano,
+                   2,
+                   v_Coddocumento,
+                   Alteradores.Descricao,
+                   v_Lachist1,
+                   v_Lachist2,
+                   v_Lachist3,
+                   Alteradores.Valor,
+                   v_Tipcodigo,
+                   0,
+                   Pidplanoprev,
+                   Pidpessjur,
+                   -1,
+                   'D',
+                   0,
+                   'D',
+                   0,
+                   'D',
+                   0,
+                   'D',
+                   0,
+                   v_Coddocumento);
+                --FIM SE TIPO ALTERADORES
+              END IF;
+              --FIM LOOP ALTERADORES FLGDEVOLUÇÃO = 0
+            END LOOP;
+            --FIM SE GERAÇÃO DE ALTERADORES FLGDEVOLUÇÃO = 0
+          END IF;
+        END IF;
+        <<continue>>
+        NULL;
+			IF v_Doc IS NULL THEN
+    v_Doc := v_Coddocumento;
+	Poutdocumento:= v_Doc;
+  ELSE
+    v_Doc := v_Doc ||','|| v_Coddocumento;
+	Poutdocumento:= v_Doc;
+  END IF;
+        -- BLOQUEIO DA DISPONIBILIDADE
+      END LOOP;
+      -- VALOR ZERADO
+    
+    END IF;
+    -- BLOQUEIO CONTPABIL
+  
+  END IF;
+	
+  --Poutdocumento:= Poutdocumento ||','|| v_Coddocumento;
+  /*IF v_Doc IS NULL THEN
+    v_Doc := v_Coddocumento;
+	Poutdocumento:= v_Doc;
+  ELSE
+    v_Doc := v_Doc || v_Coddocumento;
+	Poutdocumento:= v_Doc;
+  END IF;*/
+
+  COMMIT;
+END Sp_Cp_Receb_Patro;
+/

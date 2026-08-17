@@ -1,0 +1,759 @@
+inherited frmQuadroAviso: TfrmQuadroAviso
+  Left = 59
+  Top = 55
+  HelpContext = 640084
+  Caption = 'Quadro de Avisos'
+  ClientHeight = 312
+  ClientWidth = 727
+  OnDestroy = FormDestroy
+  PixelsPerInch = 96
+  TextHeight = 13
+  inherited pnlFundo: TPanel
+    Width = 727
+    Height = 273
+    object dbgrdAviso: TwwDBGrid
+      Left = 1
+      Top = 1
+      Width = 725
+      Height = 271
+      ControlType.Strings = (
+        'FLGCORRIGE;CheckBox;S;N')
+      Selected.Strings = (
+        'DSC_TIPO'#9'20'#9'Tipo'
+        'NUMEROCONTRATO'#9'14'#9'Nr. Contrato'
+        'NOMECONTRATO'#9'50'#9'Contrato / Imóvel'#9'F'
+        'DATALIMITE'#9'11'#9'Dt. Limite'
+        'NOMERESPONSAVEL'#9'60'#9'Responsável')
+      IniAttributes.Delimiter = ';;'
+      TitleColor = clBtnFace
+      FixedCols = 0
+      ShowHorzScrollBar = True
+      Align = alClient
+      DataSource = dsAvisos
+      Options = [dgTitles, dgIndicator, dgColumnResize, dgColLines, dgRowLines, dgTabs, dgRowSelect, dgConfirmDelete, dgWordWrap]
+      TabOrder = 0
+      TitleAlignment = taLeftJustify
+      TitleFont.Charset = DEFAULT_CHARSET
+      TitleFont.Color = clWindowText
+      TitleFont.Height = -9
+      TitleFont.Name = 'MS Sans Serif'
+      TitleFont.Style = [fsBold]
+      TitleLines = 1
+      TitleButtons = True
+      OnCalcCellColors = dbgrdAvisoCalcCellColors
+      OnTitleButtonClick = dbgrdAvisoTitleButtonClick
+      OnDblClick = dbgrdAvisoDblClick
+      IndicatorColor = icBlack
+      OnTopRowChanged = dbgrdAvisoTopRowChanged
+      OnCalcTitleImage = dbgrdAvisoCalcTitleImage
+      TitleImageList = ImlTitle
+      FooterHeight = 30
+    end
+  end
+  inherited Dock971: TDock97
+    Top = 273
+    Width = 727
+    inherited tb97Fundo: TToolbar97
+      Left = 399
+      DockPos = 549
+      inherited sep1: TToolbarSep97
+        Left = 241
+      end
+      inherited bbtnSair: TBitBtn
+        Left = 160
+        TabOrder = 2
+      end
+      inherited bbtnAjuda: TmaHelpBitBtn
+        Left = 243
+        TabOrder = 3
+      end
+      object btnImprimir: TBitBtn
+        Left = 80
+        Top = 0
+        Width = 80
+        Height = 33
+        Caption = '&Imprimir'
+        TabOrder = 1
+        OnClick = btnImprimirClick
+        Glyph.Data = {
+          76010000424D7601000000000000760000002800000020000000100000000100
+          04000000000000010000130B0000130B00001000000000000000000000000000
+          800000800000008080008000000080008000808000007F7F7F00BFBFBF000000
+          FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00300000000000
+          00033FFFFFFFFFFFFFFF0888888888888880777777777777777F088888888888
+          8880777777777777777F0000000000000000FFFFFFFFFFFFFFFF0F8F8F8F8F8F
+          8F80777777777777777F08F8F8F8F8F8F9F0777777777777777F0F8F8F8F8F8F
+          8F807777777777777F7F0000000000000000777777777777777F3330FFFFFFFF
+          03333337F3FFFF3F7F333330F0000F0F03333337F77773737F333330FFFFFFFF
+          03333337F3FF3FFF7F333330F00F000003333337F773777773333330FFFF0FF0
+          33333337F3FF7F3733333330F08F0F0333333337F7737F7333333330FFFF0033
+          33333337FFFF7733333333300000033333333337777773333333}
+        NumGlyphs = 2
+      end
+      object btnCheck: TBitBtn
+        Left = 0
+        Top = 0
+        Width = 80
+        Height = 33
+        Hint = 'Verifica ausência de lançamento de cobrança'
+        Caption = '&Checar'
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 0
+        OnClick = btnCheckClick
+        Glyph.Data = {
+          6E020000424D6E02000000000000760000002800000036000000120000000100
+          040000000000F801000000000000000000001000000010000000000000000000
+          80000080000000808000800000008000800080800000C0C0C000808080000000
+          FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00777777777777
+          7777777777777FFFFFF777777777777777777777770077777770000007777777
+          777FF888888F7777777777777777777777007777700111111077017777F88777
+          77787F8777777700000077777700777701111111110011777F877FFFFF7788F8
+          7777004444440770470077701119999911111177F877F88888F777F877704444
+          4444400447007701119777779111117F877F8777778F77F8770444CCCCC44444
+          47007701197777777111117F87F87777777877F870444C77777C444447007700
+          0977777711111177888877777F8FFFF87044C777777744444700777777777779
+          99999977FFFFF777788888887000C77777744444470070000007777777777778
+          888887777777FFF77777777777CCCCCCC7007044444C777777000C787777F877
+          7777888800000077777777777700704444C7777777044C7877778777777F87F8
+          011111C77777700097007044440077777044C778777788FFFFF8778701111C77
+          7777701197007044444400000444C7787FF7778888877F870111100777770119
+          7700704CC4444444444C7778F88FF777777FF8770111111000001119770077C7
+          7CC444444CC7777787788FFFFFF88777019911111111119777007777777CCCCC
+          C777777777777888888777777977991111119977770077777777777777777777
+          777777777777777777777799999977777700}
+        NumGlyphs = 3
+      end
+    end
+  end
+  inherited ivTradutor: TIvExtendedTranslator
+    Left = 35
+    Top = 251
+  end
+  object dsAvisos: TDataSource
+    DataSet = cdsAvisos
+    Left = 448
+    Top = 96
+  end
+  object cdsAvisos: TCMClientDataSet
+    Aggregates = <>
+    FieldDefs = <
+      item
+        Name = 'IDCONTRATO'
+        DataType = ftFloat
+      end
+      item
+        Name = 'NUMEROCONTRATO'
+        DataType = ftString
+        Size = 25
+      end
+      item
+        Name = 'NOMECONTRATO'
+        DataType = ftString
+        Size = 123
+      end
+      item
+        Name = 'NOMERESPONSAVEL'
+        DataType = ftString
+        Size = 60
+      end
+      item
+        Name = 'TIPO'
+        DataType = ftFloat
+      end
+      item
+        Name = 'DSC_TIPO'
+        DataType = ftString
+        Size = 20
+      end
+      item
+        Name = 'DATALIMITE'
+        DataType = ftDateTime
+      end
+      item
+        Name = 'DATAAVISO'
+        DataType = ftDateTime
+      end>
+    IndexDefs = <>
+    Params = <>
+    StoreDefs = True
+    Left = 448
+    Top = 118
+  end
+  object sqlAvisos: TCMSqlParams
+    SQL.Strings = (
+      '/* Encerramento de contrato de Locação */'
+      'SELECT C.IDCONTRATOIMOVEL           AS IDCONTRATO,'
+      '       C.CONNUMERO                  AS NUMEROCONTRATO,'
+      '       C.CONNOME                    AS NOMECONTRATO,'
+      '       R.NOME                       AS NOMERESPONSAVEL,'
+      '       1                            AS TIPO,'
+      '       '#39'Encerramento Locação'#39'       AS DSC_TIPO,'
+      '       C.CONDATAFIM                 AS DATALIMITE,'
+      '       (C.CONDATAFIM - P.DIASAVISO) AS DATAAVISO'
+      '  FROM CONTRATOIMOVEL C, PESSOA R,'
+      '       PARAMIMOVEL P'
+      ' WHERE C.FLGTIPOCONTRATO = '#39'L'#39
+      '   AND C.IDPESSOA = P.IDPESSOA'
+      '   AND C.IDRESPONSAVEL = R.IDPESSOA(+)'
+      '   AND (  (P.FLGAVISORESPON = '#39'N'#39') OR'
+      
+        '         ((P.FLGAVISORESPON = '#39'S'#39') AND ( (C.IDRESPONSAVEL = null' +
+        ') OR (C.IDRESPONSAVEL IS NULL) ) ))'
+      '   AND ( (P.FLGAVISOENCALUG = '#39'S'#39') AND (C.FLGSTATUS = '#39'V'#39') AND'
+      '         ((C.CONDATAFIM - P.DIASAVISO) <= SYSDATE) )'
+      ''
+      'UNION'
+      '/* Aviso de Revisão do contrato de Locação */'
+      'SELECT C.IDCONTRATOIMOVEL               AS IDCONTRATO,'
+      '       C.CONNUMERO                      AS NUMEROCONTRATO,'
+      '       C.CONNOME                        AS NOMECONTRATO,'
+      '       R.NOME                           AS NOMERESPONSAVEL,'
+      '       2                                AS TIPO,'
+      '       '#39'Revisão de Contrato'#39'            AS DSC_TIPO,'
+      '       C.CONDATARENEGOC                 AS DATALIMITE,'
+      '       (C.CONDATARENEGOC - P.DIASAVISO) AS DATAAVISO'
+      '  FROM CONTRATOIMOVEL C, PESSOA R,'
+      '       PARAMIMOVEL P'
+      ' WHERE C.FLGTIPOCONTRATO = '#39'L'#39
+      '   AND C.IDPESSOA = P.IDPESSOA'
+      '   AND C.IDRESPONSAVEL = R.IDPESSOA(+)'
+      '   AND (  (P.FLGAVISORESPON = '#39'N'#39') OR'
+      
+        '         ((P.FLGAVISORESPON = '#39'S'#39') AND ( (C.IDRESPONSAVEL = null' +
+        ') OR (C.IDRESPONSAVEL IS NULL) ) ))'
+      '   AND ( (P.FLGAVISOREVALUG = '#39'S'#39') AND (C.FLGSTATUS = '#39'V'#39') AND'
+      '         ((C.CONDATARENEGOC - P.DIASAVISO) <= SYSDATE) )'
+      ''
+      'UNION'
+      '/* Aviso de Reajuste contrato de Locação */'
+      'SELECT C.IDCONTRATOIMOVEL                AS IDCONTRATO,'
+      '       C.CONNUMERO                       AS NUMEROCONTRATO,'
+      '       C.CONNOME                         AS NOMECONTRATO,'
+      '       R.NOME                            AS NOMERESPONSAVEL,'
+      '       3                                 AS TIPO,'
+      '       '#39'Reajuste de Contrato'#39'            AS DSC_TIPO,'
+      '       C.CONPROXREAJUSTE                 AS DATALIMITE,'
+      '       (C.CONPROXREAJUSTE - P.DIASAVISO) AS DATAAVISO'
+      '  FROM CONTRATOIMOVEL C, PESSOA R,'
+      '       PARAMIMOVEL P'
+      ' WHERE C.FLGTIPOCONTRATO = '#39'L'#39
+      '   AND C.IDPESSOA = P.IDPESSOA'
+      '   AND C.IDRESPONSAVEL = R.IDPESSOA(+)'
+      '   AND (  (P.FLGAVISORESPON = '#39'N'#39') OR'
+      
+        '         ((P.FLGAVISORESPON = '#39'S'#39') AND ( (C.IDRESPONSAVEL = null' +
+        ') OR (C.IDRESPONSAVEL IS NULL) ) ))'
+      '   AND ( (P.FLGAVISOREAALUG = '#39'S'#39') AND (C.FLGSTATUS = '#39'V'#39') AND'
+      '         ((C.CONPROXREAJUSTE - P.DIASAVISO) <= SYSDATE) )'
+      ''
+      'UNION'
+      '/* Aviso de Vencimento de Seguros */'
+      'SELECT S.IDSEGUROIMOVEL                   AS IDCONTRATO,'
+      '       S.SGIAPOLICE                       AS NUMEROCONTRATO,'
+      '       (IM.IMONOME || '#39' - '#39' || I.IMONOME) AS NOMECONTRATO,'
+      '       R.NOME                             AS NOMERESPONSAVEL,'
+      '       4                                  AS TIPO,'
+      '       '#39'Vencimento de Seguro'#39'             AS DSC_TIPO,'
+      '       S.SGIDATAFIM                       AS DATALIMITE,'
+      '       (S.SGIDATAFIM - P.DIASAVISO)       AS DATAAVISO'
+      '  FROM SEGUROIMOVEL S, PESSOA R,'
+      '       IMOVEL I,'
+      '       IMOVEL IM,'
+      '       PARAMIMOVEL P'
+      ' WHERE I.IDIMOVELMESTRE = IM.IDIMOVEL(+)'
+      '   AND S.IDIMOVEL = I.IDIMOVEL'
+      '   AND P.IDPESSOA = I.IDPESSOA'
+      '   AND S.IDRESPONSAVEL = R.IDPESSOA(+)'
+      '   AND ( (P.FLGAVISOENCSEGUR = '#39'S'#39') AND'
+      '         ((S.SGIDATAFIM - P.DIASAVISO) <= SYSDATE) )'
+      ''
+      'ORDER BY DATAAVISO, NOMECONTRATO'
+      '')
+    Left = 568
+    Top = 176
+  end
+  object rptAvisos: TppReport
+    AutoStop = False
+    DataPipeline = pplAvisos
+    PrinterSetup.BinName = 'Default'
+    PrinterSetup.DocumentName = 'Report'
+    PrinterSetup.PaperName = 'A4 210 x 297 mm'
+    PrinterSetup.PrinterName = 'Default'
+    PrinterSetup.mmMarginBottom = 6350
+    PrinterSetup.mmMarginLeft = 6350
+    PrinterSetup.mmMarginRight = 6350
+    PrinterSetup.mmMarginTop = 6350
+    PrinterSetup.mmPaperHeight = 297000
+    PrinterSetup.mmPaperWidth = 210000
+    PrinterSetup.PaperSize = 9
+    AllowPrintToFile = True
+    DeviceType = 'Screen'
+    ModalPreview = False
+    OutlineSettings.CreateNode = True
+    OutlineSettings.CreatePageNodes = True
+    OutlineSettings.Enabled = False
+    OutlineSettings.Visible = False
+    TextSearchSettings.DefaultString = '<FindText>'
+    TextSearchSettings.Enabled = False
+    Left = 520
+    Top = 88
+    Version = '7.04'
+    mmColumnWidth = 0
+    DataPipelineName = 'pplAvisos'
+    object ppHeaderBand1: TppHeaderBand
+      mmBottomOffset = 0
+      mmHeight = 26458
+      mmPrintPosition = 0
+      object lblEmpresa: TppLabel
+        UserName = 'lblEmpresa'
+        AutoSize = False
+        Caption = 'LblEmpresa'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 14
+        Font.Style = [fsBold]
+        TextAlignment = taCentered
+        Transparent = True
+        mmHeight = 5821
+        mmLeft = 0
+        mmTop = 1588
+        mmWidth = 197380
+        BandType = 0
+      end
+      object ppLabel148: TppLabel
+        UserName = 'ppLabel148'
+        AutoSize = False
+        Caption = 'Quadro de Avisos'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 12
+        Font.Style = [fsBold]
+        TextAlignment = taCentered
+        Transparent = True
+        mmHeight = 5027
+        mmLeft = 0
+        mmTop = 8731
+        mmWidth = 197380
+        BandType = 0
+      end
+      object ppLine1: TppLine
+        UserName = 'Line1'
+        ParentWidth = True
+        Weight = 0.75
+        mmHeight = 1852
+        mmLeft = 0
+        mmTop = 18521
+        mmWidth = 197300
+        BandType = 0
+      end
+      object ppLabel1: TppLabel
+        UserName = 'Label1'
+        AutoSize = False
+        Caption = 'Tipo de Aviso'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 3969
+        mmLeft = 0
+        mmTop = 19315
+        mmWidth = 20902
+        BandType = 0
+      end
+      object ppLabel2: TppLabel
+        UserName = 'Label2'
+        AutoSize = False
+        Caption = 'Nr. Contrato'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 3969
+        mmLeft = 32279
+        mmTop = 19315
+        mmWidth = 18521
+        BandType = 0
+      end
+      object ppLabel3: TppLabel
+        UserName = 'Label3'
+        AutoSize = False
+        Caption = 'Nome'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 3969
+        mmLeft = 52652
+        mmTop = 19315
+        mmWidth = 18521
+        BandType = 0
+      end
+      object ppLabel4: TppLabel
+        UserName = 'Label4'
+        AutoSize = False
+        Caption = 'Data Limite'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        TextAlignment = taRightJustified
+        Transparent = True
+        mmHeight = 3969
+        mmLeft = 178065
+        mmTop = 19315
+        mmWidth = 18521
+        BandType = 0
+      end
+      object ppLine2: TppLine
+        UserName = 'Line2'
+        ParentWidth = True
+        Weight = 0.75
+        mmHeight = 1852
+        mmLeft = 0
+        mmTop = 24077
+        mmWidth = 197300
+        BandType = 0
+      end
+      object ppLabel5: TppLabel
+        UserName = 'Label5'
+        AutoSize = False
+        Caption = 'Responsável'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 3969
+        mmLeft = 133086
+        mmTop = 19315
+        mmWidth = 18521
+        BandType = 0
+      end
+      object ppLogoQuadroAviso: TppImage
+        UserName = 'ppLogoQuadroAviso'
+        MaintainAspectRatio = False
+        Stretch = True
+        mmHeight = 15610
+        mmLeft = 265
+        mmTop = 0
+        mmWidth = 15611
+        BandType = 0
+      end
+    end
+    object ppDetailBand1: TppDetailBand
+      mmBottomOffset = 0
+      mmHeight = 4498
+      mmPrintPosition = 0
+      object ppDBText1: TppDBText
+        UserName = 'DBText1'
+        DataField = 'DSC_TIPO'
+        DataPipeline = pplAvisos
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        Transparent = True
+        DataPipelineName = 'pplAvisos'
+        mmHeight = 3175
+        mmLeft = 0
+        mmTop = 529
+        mmWidth = 31221
+        BandType = 4
+      end
+      object ppDBText2: TppDBText
+        UserName = 'DBText2'
+        DataField = 'NUMEROCONTRATO'
+        DataPipeline = pplAvisos
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        Transparent = True
+        DataPipelineName = 'pplAvisos'
+        mmHeight = 3175
+        mmLeft = 32279
+        mmTop = 529
+        mmWidth = 19579
+        BandType = 4
+      end
+      object ppDBText3: TppDBText
+        UserName = 'DBText3'
+        DataField = 'NOMECONTRATO'
+        DataPipeline = pplAvisos
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        Transparent = True
+        DataPipelineName = 'pplAvisos'
+        mmHeight = 3175
+        mmLeft = 52652
+        mmTop = 529
+        mmWidth = 79640
+        BandType = 4
+      end
+      object ppDBText4: TppDBText
+        UserName = 'DBText4'
+        DataField = 'DATALIMITE'
+        DataPipeline = pplAvisos
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        TextAlignment = taRightJustified
+        Transparent = True
+        DataPipelineName = 'pplAvisos'
+        mmHeight = 3175
+        mmLeft = 180446
+        mmTop = 529
+        mmWidth = 16140
+        BandType = 4
+      end
+      object ppDBText5: TppDBText
+        UserName = 'DBText5'
+        DataField = 'NOMERESPONSAVEL'
+        DataPipeline = pplAvisos
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        Transparent = True
+        DataPipelineName = 'pplAvisos'
+        mmHeight = 3175
+        mmLeft = 133086
+        mmTop = 529
+        mmWidth = 44450
+        BandType = 4
+      end
+    end
+    object ppFooterBand1: TppFooterBand
+      mmBottomOffset = 0
+      mmHeight = 7938
+      mmPrintPosition = 0
+      object lblSistema: TppLabel
+        UserName = 'lblSistema'
+        AutoSize = False
+        Caption = 'Nome do Sistema'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 3704
+        mmLeft = 529
+        mmTop = 3175
+        mmWidth = 65617
+        BandType = 8
+      end
+      object ppLine41: TppLine
+        UserName = 'ppLine41'
+        Pen.Width = 3
+        ParentWidth = True
+        Weight = 2.25
+        mmHeight = 794
+        mmLeft = 0
+        mmTop = 1852
+        mmWidth = 197300
+        BandType = 8
+      end
+      object ppCalc27: TppSystemVariable
+        UserName = 'Calc27'
+        VarType = vtPageSetDesc
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        TextAlignment = taCentered
+        Transparent = True
+        mmHeight = 3704
+        mmLeft = 88900
+        mmTop = 3175
+        mmWidth = 43392
+        BandType = 8
+      end
+      object ppCalc28: TppSystemVariable
+        UserName = 'Calc28'
+        VarType = vtDateTime
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        TextAlignment = taRightJustified
+        Transparent = True
+        mmHeight = 3704
+        mmLeft = 162190
+        mmTop = 3175
+        mmWidth = 35454
+        BandType = 8
+      end
+    end
+  end
+  object pplAvisos: TppBDEPipeline
+    DataSource = dsAvisos
+    UserName = 'lAvisos'
+    Left = 520
+    Top = 72
+  end
+  object ImlTitle: TImageList
+    Left = 572
+    Top = 64
+    Bitmap = {
+      494C010102000400040010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      0000000000003600000028000000400000001000000001002000000000000010
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      000000000000000000000000000000000000FFFFFF00FFFFFF00000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      00000000000000000000000000008484840084848400FFFFFF00FFFFFF000000
+      0000000000000000000000000000000000000000000000000000848484008484
+      8400848484008484840084848400848484008484840084848400848484008484
+      8400FFFFFF000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000084848400848484008484840084848400FFFFFF00FFFF
+      FF00000000000000000000000000000000000000000000000000000000008484
+      840084848400848484008484840084848400848484008484840084848400FFFF
+      FF00000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000008484840084848400848484008484840084848400848484000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000848484008484840084848400848484008484840084848400FFFFFF000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000848484008484840084848400848484008484840084848400848484008484
+      8400000000000000000000000000000000000000000000000000000000000000
+      00000000000084848400848484008484840084848400FFFFFF00000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000008484
+      8400848484008484840084848400848484008484840084848400848484008484
+      8400848484000000000000000000000000000000000000000000000000000000
+      000000000000000000008484840084848400FFFFFF0000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      000000000000000000000000000000000000424D3E000000000000003E000000
+      2800000040000000100000000100010000000000800000000000000000000000
+      000000000000000000000000FFFFFF00FFFFFFFF00000000FFFFFFFF00000000
+      FFFFFFFF00000000FFFFFFFF00000000FFFFFFFF00000000FF3FFFFF00000000
+      FE1FC00700000000FC0FE00F00000000F81FF01F00000000F00FF83F00000000
+      E007FC7F00000000FFFFFFFF00000000FFFFFFFF00000000FFFFFFFF00000000
+      FFFFFFFF00000000FFFFFFFF0000000000000000000000000000000000000000
+      000000000000}
+  end
+end

@@ -1,0 +1,1088 @@
+inherited frmOpcRescisao: TfrmOpcRescisao
+  Left = 162
+  Top = 162
+  BorderStyle = bsToolWindow
+  Caption = 'Opções para o Cálculo e Geração da Rescisão'
+  ClientHeight = 302
+  ClientWidth = 566
+  FormStyle = fsNormal
+  Visible = False
+  PixelsPerInch = 96
+  TextHeight = 13
+  inherited pnlFundo: TPanel
+    Width = 566
+    Height = 263
+    BorderWidth = 2
+    object rgProcesso: TRadioGroup
+      Left = 10
+      Top = 7
+      Width = 270
+      Height = 36
+      Caption = 'Processo'
+      Columns = 2
+      ItemIndex = 0
+      Items.Strings = (
+        'Prévia'
+        'Final')
+      TabOrder = 0
+      OnClick = rgProcessoClick
+    end
+    object rgMotivo: TRadioGroup
+      Left = 10
+      Top = 47
+      Width = 270
+      Height = 57
+      Caption = 'Tipo de Rescisão (Motivo) Normal'
+      Columns = 2
+      ItemIndex = 2
+      Items.Strings = (
+        'Oficial (RAIS)'
+        'Gerencial'
+        'A Especificar')
+      TabOrder = 1
+      OnClick = rgMotivoClick
+    end
+    object gbxPeriodo: TGroupBox
+      Left = 286
+      Top = 162
+      Width = 270
+      Height = 45
+      Caption = 'Período'
+      TabOrder = 2
+      object dtedIni: TCMDateTimePicker
+        Left = 10
+        Top = 15
+        Width = 121
+        Height = 21
+        CalendarAttributes.Font.Charset = DEFAULT_CHARSET
+        CalendarAttributes.Font.Color = clWindowText
+        CalendarAttributes.Font.Height = -11
+        CalendarAttributes.Font.Name = 'MS Sans Serif'
+        CalendarAttributes.Font.Style = []
+        ButtonStyle = cbsCustom
+        Epoch = 1950
+        ButtonGlyph.Data = {
+          06050000424D06050000000000003604000028000000100000000D0000000100
+          080000000000D000000000000000000000000001000000000000000000000000
+          80000080000000808000800000008000800080800000C0C0C000C0DCC000F0CA
+          A6000020400000206000002080000020A0000020C0000020E000004000000040
+          20000040400000406000004080000040A0000040C0000040E000006000000060
+          20000060400000606000006080000060A0000060C0000060E000008000000080
+          20000080400000806000008080000080A0000080C0000080E00000A0000000A0
+          200000A0400000A0600000A0800000A0A00000A0C00000A0E00000C0000000C0
+          200000C0400000C0600000C0800000C0A00000C0C00000C0E00000E0000000E0
+          200000E0400000E0600000E0800000E0A00000E0C00000E0E000400000004000
+          20004000400040006000400080004000A0004000C0004000E000402000004020
+          20004020400040206000402080004020A0004020C0004020E000404000004040
+          20004040400040406000404080004040A0004040C0004040E000406000004060
+          20004060400040606000406080004060A0004060C0004060E000408000004080
+          20004080400040806000408080004080A0004080C0004080E00040A0000040A0
+          200040A0400040A0600040A0800040A0A00040A0C00040A0E00040C0000040C0
+          200040C0400040C0600040C0800040C0A00040C0C00040C0E00040E0000040E0
+          200040E0400040E0600040E0800040E0A00040E0C00040E0E000800000008000
+          20008000400080006000800080008000A0008000C0008000E000802000008020
+          20008020400080206000802080008020A0008020C0008020E000804000008040
+          20008040400080406000804080008040A0008040C0008040E000806000008060
+          20008060400080606000806080008060A0008060C0008060E000808000008080
+          20008080400080806000808080008080A0008080C0008080E00080A0000080A0
+          200080A0400080A0600080A0800080A0A00080A0C00080A0E00080C0000080C0
+          200080C0400080C0600080C0800080C0A00080C0C00080C0E00080E0000080E0
+          200080E0400080E0600080E0800080E0A00080E0C00080E0E000C0000000C000
+          2000C0004000C0006000C0008000C000A000C000C000C000E000C0200000C020
+          2000C0204000C0206000C0208000C020A000C020C000C020E000C0400000C040
+          2000C0404000C0406000C0408000C040A000C040C000C040E000C0600000C060
+          2000C0604000C0606000C0608000C060A000C060C000C060E000C0800000C080
+          2000C0804000C0806000C0808000C080A000C080C000C080E000C0A00000C0A0
+          2000C0A04000C0A06000C0A08000C0A0A000C0A0C000C0A0E000C0C00000C0C0
+          2000C0C04000C0C06000C0C08000C0C0A000F0FBFF00A4A0A000808080000000
+          FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00010000000000
+          000000000000000000FFFF00FFFFFFFFFFFFFFFFFFFFFFFF00FFFF00FF07A407
+          A407A4F9A407A4FF00FFFF00FFA407A407A4F9A4F9A407FF00FFFF00FF07A407
+          A407A4F9A407A4FF00FFFF00FFA407A407A407A407A407FF00FFFF00FF07A407
+          A407A407A407A4FF00FFFF00FFA407A407A407A407A407FF00FFFF00FFFFFFFF
+          FFFFFFFFFFFFFFFF00FFFF00FF04FC04FC04FCA4A4A4A4FF00FFFF00FFFC04FC
+          04FC04A4A4A4A4FF00FFFF00FFFFFFFFFFFFFFFFFFFFFFFF00FFFF0000000000
+          000000000000000000FF}
+        ShowButton = True
+        TabOrder = 0
+      end
+      object dtedFim: TCMDateTimePicker
+        Left = 139
+        Top = 15
+        Width = 121
+        Height = 21
+        CalendarAttributes.Font.Charset = DEFAULT_CHARSET
+        CalendarAttributes.Font.Color = clWindowText
+        CalendarAttributes.Font.Height = -11
+        CalendarAttributes.Font.Name = 'MS Sans Serif'
+        CalendarAttributes.Font.Style = []
+        ButtonStyle = cbsCustom
+        Epoch = 1950
+        ButtonGlyph.Data = {
+          06050000424D06050000000000003604000028000000100000000D0000000100
+          080000000000D000000000000000000000000001000000000000000000000000
+          80000080000000808000800000008000800080800000C0C0C000C0DCC000F0CA
+          A6000020400000206000002080000020A0000020C0000020E000004000000040
+          20000040400000406000004080000040A0000040C0000040E000006000000060
+          20000060400000606000006080000060A0000060C0000060E000008000000080
+          20000080400000806000008080000080A0000080C0000080E00000A0000000A0
+          200000A0400000A0600000A0800000A0A00000A0C00000A0E00000C0000000C0
+          200000C0400000C0600000C0800000C0A00000C0C00000C0E00000E0000000E0
+          200000E0400000E0600000E0800000E0A00000E0C00000E0E000400000004000
+          20004000400040006000400080004000A0004000C0004000E000402000004020
+          20004020400040206000402080004020A0004020C0004020E000404000004040
+          20004040400040406000404080004040A0004040C0004040E000406000004060
+          20004060400040606000406080004060A0004060C0004060E000408000004080
+          20004080400040806000408080004080A0004080C0004080E00040A0000040A0
+          200040A0400040A0600040A0800040A0A00040A0C00040A0E00040C0000040C0
+          200040C0400040C0600040C0800040C0A00040C0C00040C0E00040E0000040E0
+          200040E0400040E0600040E0800040E0A00040E0C00040E0E000800000008000
+          20008000400080006000800080008000A0008000C0008000E000802000008020
+          20008020400080206000802080008020A0008020C0008020E000804000008040
+          20008040400080406000804080008040A0008040C0008040E000806000008060
+          20008060400080606000806080008060A0008060C0008060E000808000008080
+          20008080400080806000808080008080A0008080C0008080E00080A0000080A0
+          200080A0400080A0600080A0800080A0A00080A0C00080A0E00080C0000080C0
+          200080C0400080C0600080C0800080C0A00080C0C00080C0E00080E0000080E0
+          200080E0400080E0600080E0800080E0A00080E0C00080E0E000C0000000C000
+          2000C0004000C0006000C0008000C000A000C000C000C000E000C0200000C020
+          2000C0204000C0206000C0208000C020A000C020C000C020E000C0400000C040
+          2000C0404000C0406000C0408000C040A000C040C000C040E000C0600000C060
+          2000C0604000C0606000C0608000C060A000C060C000C060E000C0800000C080
+          2000C0804000C0806000C0808000C080A000C080C000C080E000C0A00000C0A0
+          2000C0A04000C0A06000C0A08000C0A0A000C0A0C000C0A0E000C0C00000C0C0
+          2000C0C04000C0C06000C0C08000C0C0A000F0FBFF00A4A0A000808080000000
+          FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00010000000000
+          000000000000000000FFFF00FFFFFFFFFFFFFFFFFFFFFFFF00FFFF00FF07A407
+          A407A4F9A407A4FF00FFFF00FFA407A407A4F9A4F9A407FF00FFFF00FF07A407
+          A407A4F9A407A4FF00FFFF00FFA407A407A407A407A407FF00FFFF00FF07A407
+          A407A407A407A4FF00FFFF00FFA407A407A407A407A407FF00FFFF00FFFFFFFF
+          FFFFFFFFFFFFFFFF00FFFF00FF04FC04FC04FCA4A4A4A4FF00FFFF00FFFC04FC
+          04FC04A4A4A4A4FF00FFFF00FFFFFFFFFFFFFFFFFFFFFFFF00FFFF0000000000
+          000000000000000000FF}
+        ShowButton = True
+        TabOrder = 1
+      end
+    end
+    object gbxFolhaResc: TGroupBox
+      Left = 10
+      Top = 107
+      Width = 270
+      Height = 47
+      Caption = 'Folha de Rescisão Normal'
+      TabOrder = 3
+      Visible = False
+      object dblcMotivo: TwwDBLookupCombo
+        Left = 8
+        Top = 16
+        Width = 254
+        Height = 21
+        DropDownAlignment = taRightJustify
+        Selected.Strings = (
+          'DESCRICAO'#9'50'#9'DESCRICAO')
+        LookupTable = qryMotivo
+        LookupField = 'IDMOTIVO'
+        TabOrder = 0
+        AutoDropDown = True
+        ShowButton = True
+        SeqSearchOptions = [ssoEnabled, ssoCaseSensitive]
+        AllowClearKey = True
+      end
+    end
+    object rgNormalCompl: TRadioGroup
+      Left = 286
+      Top = 7
+      Width = 270
+      Height = 36
+      Caption = 'Rescisão'
+      Columns = 2
+      ItemIndex = 0
+      Items.Strings = (
+        'Normal'
+        'Complementar')
+      TabOrder = 4
+      OnClick = rgNormalComplClick
+    end
+    object gbxFolhaRescCompl: TGroupBox
+      Left = 286
+      Top = 107
+      Width = 270
+      Height = 47
+      Caption = 'Folha de Rescisão Complementar'
+      TabOrder = 5
+      Visible = False
+      object dblcMotivoCompl: TwwDBLookupCombo
+        Left = 8
+        Top = 16
+        Width = 254
+        Height = 21
+        DropDownAlignment = taRightJustify
+        Selected.Strings = (
+          'DESCRICAO'#9'50'#9'DESCRICAO')
+        LookupTable = qryMotivo
+        LookupField = 'IDMOTIVO'
+        TabOrder = 0
+        AutoDropDown = True
+        ShowButton = True
+        SeqSearchOptions = [ssoEnabled, ssoCaseSensitive]
+        AllowClearKey = True
+      end
+    end
+    object rgMotivoCompl: TRadioGroup
+      Left = 299
+      Top = 300
+      Width = 270
+      Height = 53
+      Caption = 'Tipo de Rescisão (Motivo) Complementar'
+      Columns = 2
+      Enabled = False
+      ItemIndex = 2
+      Items.Strings = (
+        'Oficial (RAIS)'
+        'Gerencial'
+        'A Especificar')
+      TabOrder = 6
+      Visible = False
+    end
+    object rgOpcaoPrevia: TRadioGroup
+      Left = 286
+      Top = 47
+      Width = 270
+      Height = 57
+      Caption = 'Opção da Prévia'
+      Columns = 2
+      ItemIndex = 0
+      Items.Strings = (
+        'Apaga Tudo'
+        'Apaga Tipo Folha'
+        'Apaga Pessoas'
+        'Apaga Tipo+Pess'
+        'Deixa Tudo')
+      TabOrder = 7
+    end
+    object GroupBox4: TGroupBox
+      Left = 285
+      Top = 209
+      Width = 270
+      Height = 43
+      Caption = 'Tipo de Documento (Contas a Pagar)'
+      TabOrder = 8
+      object dblcTipoDoc: TwwDBLookupCombo
+        Left = 7
+        Top = 16
+        Width = 258
+        Height = 21
+        DropDownAlignment = taLeftJustify
+        Selected.Strings = (
+          'DESCRICAO'#9'35'#9'DESCRICAO')
+        LookupTable = qryTipoDoc
+        LookupField = 'CODTIPDOC'
+        TabOrder = 0
+        AutoDropDown = True
+        ShowButton = True
+        SeqSearchOptions = [ssoEnabled, ssoCaseSensitive]
+        AllowClearKey = True
+        OnCloseUp = dblcTipoDocCloseUp
+      end
+    end
+    object pnlDiretorio: TPanel
+      Left = 300
+      Top = 280
+      Width = 230
+      Height = 256
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -9
+      Font.Name = 'MS Sans Serif'
+      Font.Style = []
+      ParentFont = False
+      TabOrder = 9
+      Visible = False
+      object fcLabel2: TfcLabel
+        Left = 3
+        Top = 3
+        Width = 224
+        Height = 16
+        AutoSize = False
+        Caption = 'Selecione o Diretório'
+        Font.Charset = ANSI_CHARSET
+        Font.Color = clWhite
+        Font.Height = -13
+        Font.Name = 'Arial'
+        Font.Style = [fsBold]
+        ParentFont = False
+        TextOptions.Alignment = taCenter
+        TextOptions.LineSpacing = 1
+        TextOptions.Shadow.Enabled = True
+        TextOptions.Shadow.XOffset = 2
+        TextOptions.Shadow.YOffset = 2
+        TextOptions.VAlignment = vaTop
+        Transparent = True
+      end
+      object Bevel2: TBevel
+        Left = 3
+        Top = 212
+        Width = 224
+        Height = 39
+      end
+      object DriveComboBox1: TDriveComboBox
+        Left = 10
+        Top = 23
+        Width = 210
+        Height = 19
+        DirList = DirectoryListBox1
+        TabOrder = 0
+      end
+      object DirectoryListBox1: TDirectoryListBox
+        Left = 10
+        Top = 47
+        Width = 210
+        Height = 160
+        ItemHeight = 16
+        TabOrder = 1
+      end
+      object btnOkDir: TBitBtn
+        Left = 10
+        Top = 219
+        Width = 103
+        Height = 25
+        Caption = '&OK'
+        Default = True
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -9
+        Font.Name = 'MS Sans Serif'
+        Font.Style = [fsBold]
+        ParentFont = False
+        TabOrder = 2
+        OnClick = btnOkDirClick
+        Glyph.Data = {
+          DE010000424DDE01000000000000760000002800000024000000120000000100
+          0400000000006801000000000000000000001000000010000000000000000000
+          80000080000000808000800000008000800080800000C0C0C000808080000000
+          FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00333333333333
+          3333333333333333333333330000333333333333333333333333F33333333333
+          00003333344333333333333333388F3333333333000033334224333333333333
+          338338F3333333330000333422224333333333333833338F3333333300003342
+          222224333333333383333338F3333333000034222A22224333333338F338F333
+          8F33333300003222A3A2224333333338F3838F338F33333300003A2A333A2224
+          33333338F83338F338F33333000033A33333A222433333338333338F338F3333
+          0000333333333A222433333333333338F338F33300003333333333A222433333
+          333333338F338F33000033333333333A222433333333333338F338F300003333
+          33333333A222433333333333338F338F00003333333333333A22433333333333
+          3338F38F000033333333333333A223333333333333338F830000333333333333
+          333A333333333333333338330000333333333333333333333333333333333333
+          0000}
+        NumGlyphs = 2
+        Spacing = 2
+      end
+      object btnSairDiretorio: TBitBtn
+        Left = 117
+        Top = 219
+        Width = 103
+        Height = 25
+        Caption = '&Cancelar'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -9
+        Font.Name = 'MS Sans Serif'
+        Font.Style = [fsBold]
+        ModalResult = 2
+        ParentFont = False
+        TabOrder = 3
+        OnClick = btnSairDiretorioClick
+        Glyph.Data = {
+          DE010000424DDE01000000000000760000002800000024000000120000000100
+          0400000000006801000000000000000000001000000010000000000000000000
+          80000080000000808000800000008000800080800000C0C0C000808080000000
+          FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00333333333333
+          333333333333333333333333000033338833333333333333333F333333333333
+          0000333911833333983333333388F333333F3333000033391118333911833333
+          38F38F333F88F33300003339111183911118333338F338F3F8338F3300003333
+          911118111118333338F3338F833338F3000033333911111111833333338F3338
+          3333F8330000333333911111183333333338F333333F83330000333333311111
+          8333333333338F3333383333000033333339111183333333333338F333833333
+          00003333339111118333333333333833338F3333000033333911181118333333
+          33338333338F333300003333911183911183333333383338F338F33300003333
+          9118333911183333338F33838F338F33000033333913333391113333338FF833
+          38F338F300003333333333333919333333388333338FFF830000333333333333
+          3333333333333333333888330000333333333333333333333333333333333333
+          0000}
+        NumGlyphs = 2
+        Spacing = 2
+      end
+    end
+    object rgSelTudo: TRadioGroup
+      Left = 10
+      Top = 159
+      Width = 270
+      Height = 54
+      Caption = ' Cálculo Deve Ser Feito Para '
+      ItemIndex = 0
+      Items.Strings = (
+        'Apenas o da Tela'
+        'Todos do Período')
+      TabOrder = 10
+      OnClick = rgSelTudoClick
+    end
+    object rgSelRubricas: TRadioGroup
+      Left = 10
+      Top = 218
+      Width = 270
+      Height = 36
+      Caption = ' Seleciona Rubricas para o Cálculo? '
+      Columns = 2
+      ItemIndex = 1
+      Items.Strings = (
+        'Sim'
+        'Não')
+      TabOrder = 11
+      OnClick = rgSelRubricasClick
+    end
+  end
+  inherited Dock971: TDock97
+    Top = 263
+    Width = 566
+    inherited tb97Fundo: TToolbar97
+      Left = 397
+      DockPos = 404
+      inherited sep1: TToolbarSep97
+        SizeHorz = 2
+      end
+      inherited bbtnSair: TBitBtn
+        Visible = False
+      end
+    end
+    inherited TB97oKCancelar: TToolbar97
+      Left = 230
+      DockPos = 237
+      inherited bbtnConfirmar: TBitBtn
+        OnClick = bbtnConfirmarClick
+      end
+    end
+  end
+  object pnlCAP: TPanel [2]
+    Left = 8
+    Top = 272
+    Width = 230
+    Height = 282
+    BevelInner = bvRaised
+    BevelOuter = bvNone
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -9
+    Font.Name = 'MS Sans Serif'
+    Font.Style = []
+    ParentFont = False
+    TabOrder = 2
+    Visible = False
+    object Label11: TLabel
+      Left = 19
+      Top = 42
+      Width = 80
+      Height = 13
+      Caption = 'Data Pagamento'
+    end
+    object Bevel1: TBevel
+      Left = 5
+      Top = 246
+      Width = 220
+      Height = 32
+    end
+    object pnlPortForma: TPanel
+      Left = 4
+      Top = 71
+      Width = 221
+      Height = 44
+      BevelOuter = bvNone
+      TabOrder = 2
+      Visible = False
+      object Label9: TLabel
+        Left = 4
+        Top = 1
+        Width = 72
+        Height = 13
+        Caption = 'Portador Forma'
+      end
+      object dblkPortadorForma: TwwDBLookupCombo
+        Left = 2
+        Top = 17
+        Width = 218
+        Height = 21
+        DropDownAlignment = taLeftJustify
+        Selected.Strings = (
+          'DESCRICAO'#9'50'#9'DESCRICAO')
+        LookupTable = qryPortadorForma
+        LookupField = 'CODPORTFORMA'
+        TabOrder = 0
+        AutoDropDown = False
+        ShowButton = True
+        AllowClearKey = False
+        ShowMatchText = True
+      end
+    end
+    object pnlNomeArq: TPanel
+      Left = 4
+      Top = 69
+      Width = 221
+      Height = 44
+      BevelOuter = bvNone
+      Locked = True
+      ParentColor = True
+      TabOrder = 3
+      object Label7: TLabel
+        Left = -1
+        Top = -16
+        Width = 30
+        Height = 13
+        Caption = 'Pasta '
+      end
+      object Label8: TLabel
+        Left = 4
+        Top = 1
+        Width = 30
+        Height = 13
+        Caption = 'Pasta '
+      end
+      object bvLblDiretorio: TBevel
+        Left = 2
+        Top = 17
+        Width = 188
+        Height = 21
+      end
+      object lblDiretorio: TLabel
+        Left = 6
+        Top = 21
+        Width = 179
+        Height = 13
+        AutoSize = False
+        Caption = 'C:\'
+      end
+      object btnEscolheDir: TBitBtn
+        Left = 192
+        Top = 17
+        Width = 27
+        Height = 21
+        TabOrder = 0
+        OnClick = btnEscolheDirClick
+        Glyph.Data = {
+          76010000424D7601000000000000760000002800000020000000100000000100
+          0400000000000001000000000000000000001000000010000000000000000000
+          800000800000008080008000000080008000808000007F7F7F00BFBFBF000000
+          FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00303333333333
+          333337F3333333333333303333333333333337F33FFFFF3FF3FF303300000300
+          300337FF77777F77377330000BBB0333333337777F337F33333330330BB00333
+          333337F373F773333333303330033333333337F3377333333333303333333333
+          333337F33FFFFF3FF3FF303300000300300337FF77777F77377330000BBB0333
+          333337777F337F33333330330BB00333333337F373F773333333303330033333
+          333337F3377333333333303333333333333337FFFF3FF3FFF333000003003000
+          333377777F77377733330BBB0333333333337F337F33333333330BB003333333
+          333373F773333333333330033333333333333773333333333333}
+        NumGlyphs = 2
+      end
+    end
+    object chkPagEletronico: TCheckBox
+      Left = 27
+      Top = 8
+      Width = 177
+      Height = 17
+      Caption = 'Pagamento Eletrônico (Especial)'
+      Checked = True
+      State = cbChecked
+      TabOrder = 0
+      OnClick = chkPagEletronicoClick
+    end
+    object dtPagamento: TCMDateTimePicker
+      Left = 107
+      Top = 38
+      Width = 100
+      Height = 21
+      CalendarAttributes.Font.Charset = DEFAULT_CHARSET
+      CalendarAttributes.Font.Color = clWindowText
+      CalendarAttributes.Font.Height = -11
+      CalendarAttributes.Font.Name = 'MS Sans Serif'
+      CalendarAttributes.Font.Style = []
+      ButtonStyle = cbsCustom
+      Epoch = 1950
+      ButtonGlyph.Data = {
+        06050000424D06050000000000003604000028000000100000000D0000000100
+        080000000000D000000000000000000000000001000000000000000000000000
+        80000080000000808000800000008000800080800000C0C0C000C0DCC000F0CA
+        A6000020400000206000002080000020A0000020C0000020E000004000000040
+        20000040400000406000004080000040A0000040C0000040E000006000000060
+        20000060400000606000006080000060A0000060C0000060E000008000000080
+        20000080400000806000008080000080A0000080C0000080E00000A0000000A0
+        200000A0400000A0600000A0800000A0A00000A0C00000A0E00000C0000000C0
+        200000C0400000C0600000C0800000C0A00000C0C00000C0E00000E0000000E0
+        200000E0400000E0600000E0800000E0A00000E0C00000E0E000400000004000
+        20004000400040006000400080004000A0004000C0004000E000402000004020
+        20004020400040206000402080004020A0004020C0004020E000404000004040
+        20004040400040406000404080004040A0004040C0004040E000406000004060
+        20004060400040606000406080004060A0004060C0004060E000408000004080
+        20004080400040806000408080004080A0004080C0004080E00040A0000040A0
+        200040A0400040A0600040A0800040A0A00040A0C00040A0E00040C0000040C0
+        200040C0400040C0600040C0800040C0A00040C0C00040C0E00040E0000040E0
+        200040E0400040E0600040E0800040E0A00040E0C00040E0E000800000008000
+        20008000400080006000800080008000A0008000C0008000E000802000008020
+        20008020400080206000802080008020A0008020C0008020E000804000008040
+        20008040400080406000804080008040A0008040C0008040E000806000008060
+        20008060400080606000806080008060A0008060C0008060E000808000008080
+        20008080400080806000808080008080A0008080C0008080E00080A0000080A0
+        200080A0400080A0600080A0800080A0A00080A0C00080A0E00080C0000080C0
+        200080C0400080C0600080C0800080C0A00080C0C00080C0E00080E0000080E0
+        200080E0400080E0600080E0800080E0A00080E0C00080E0E000C0000000C000
+        2000C0004000C0006000C0008000C000A000C000C000C000E000C0200000C020
+        2000C0204000C0206000C0208000C020A000C020C000C020E000C0400000C040
+        2000C0404000C0406000C0408000C040A000C040C000C040E000C0600000C060
+        2000C0604000C0606000C0608000C060A000C060C000C060E000C0800000C080
+        2000C0804000C0806000C0808000C080A000C080C000C080E000C0A00000C0A0
+        2000C0A04000C0A06000C0A08000C0A0A000C0A0C000C0A0E000C0C00000C0C0
+        2000C0C04000C0C06000C0C08000C0C0A000F0FBFF00A4A0A000808080000000
+        FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00010000000000
+        000000000000000000FFFF00FFFFFFFFFFFFFFFFFFFFFFFF00FFFF00FF07A407
+        A407A4F9A407A4FF00FFFF00FFA407A407A4F9A4F9A407FF00FFFF00FF07A407
+        A407A4F9A407A4FF00FFFF00FFA407A407A407A407A407FF00FFFF00FF07A407
+        A407A407A407A4FF00FFFF00FFA407A407A407A407A407FF00FFFF00FFFFFFFF
+        FFFFFFFFFFFFFFFF00FFFF00FF04FC04FC04FCA4A4A4A4FF00FFFF00FFFC04FC
+        04FC04A4A4A4A4FF00FFFF00FFFFFFFFFFFFFFFFFFFFFFFF00FFFF0000000000
+        000000000000000000FF}
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'MS Sans Serif'
+      Font.Style = []
+      ParentFont = False
+      ShowButton = True
+      TabOrder = 1
+    end
+    object pnlIndiv: TPanel
+      Left = 4
+      Top = 112
+      Width = 221
+      Height = 49
+      BevelOuter = bvNone
+      Locked = True
+      ParentColor = True
+      TabOrder = 4
+      object lblIndiv1: TLabel
+        Left = 47
+        Top = 23
+        Width = 130
+        Height = 13
+        Caption = 'Criar Documento Individual '
+        Enabled = False
+      end
+      object lblIndiv2: TLabel
+        Left = 47
+        Top = 36
+        Width = 101
+        Height = 13
+        Caption = '     para cada Pessoa'
+        Enabled = False
+      end
+      object chkCriaIndividual: TCheckBox
+        Left = 21
+        Top = 27
+        Width = 15
+        Height = 17
+        Caption = 'chkCriaIndividual'
+        Enabled = False
+        TabOrder = 0
+      end
+      object chkRateioCC: TCheckBox
+        Left = 21
+        Top = 6
+        Width = 172
+        Height = 17
+        Caption = '   Ratear por Centro de Custo'
+        TabOrder = 1
+      end
+    end
+    object btnOKCap: TBitBtn
+      Left = 9
+      Top = 249
+      Width = 99
+      Height = 25
+      Caption = '&OK'
+      Default = True
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -9
+      Font.Name = 'MS Sans Serif'
+      Font.Style = [fsBold]
+      ParentFont = False
+      TabOrder = 5
+      OnClick = btnOKCapClick
+      Glyph.Data = {
+        DE010000424DDE01000000000000760000002800000024000000120000000100
+        0400000000006801000000000000000000001000000010000000000000000000
+        80000080000000808000800000008000800080800000C0C0C000808080000000
+        FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00333333333333
+        3333333333333333333333330000333333333333333333333333F33333333333
+        00003333344333333333333333388F3333333333000033334224333333333333
+        338338F3333333330000333422224333333333333833338F3333333300003342
+        222224333333333383333338F3333333000034222A22224333333338F338F333
+        8F33333300003222A3A2224333333338F3838F338F33333300003A2A333A2224
+        33333338F83338F338F33333000033A33333A222433333338333338F338F3333
+        0000333333333A222433333333333338F338F33300003333333333A222433333
+        333333338F338F33000033333333333A222433333333333338F338F300003333
+        33333333A222433333333333338F338F00003333333333333A22433333333333
+        3338F38F000033333333333333A223333333333333338F830000333333333333
+        333A333333333333333338330000333333333333333333333333333333333333
+        0000}
+      NumGlyphs = 2
+      Spacing = 2
+    end
+    object btnCancelarCAP: TBitBtn
+      Left = 122
+      Top = 249
+      Width = 99
+      Height = 25
+      Caption = '&Cancelar'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -9
+      Font.Name = 'MS Sans Serif'
+      Font.Style = [fsBold]
+      ModalResult = 2
+      ParentFont = False
+      TabOrder = 6
+      OnClick = btnCancelarCAPClick
+      Glyph.Data = {
+        DE010000424DDE01000000000000760000002800000024000000120000000100
+        0400000000006801000000000000000000001000000010000000000000000000
+        80000080000000808000800000008000800080800000C0C0C000808080000000
+        FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00333333333333
+        333333333333333333333333000033338833333333333333333F333333333333
+        0000333911833333983333333388F333333F3333000033391118333911833333
+        38F38F333F88F33300003339111183911118333338F338F3F8338F3300003333
+        911118111118333338F3338F833338F3000033333911111111833333338F3338
+        3333F8330000333333911111183333333338F333333F83330000333333311111
+        8333333333338F3333383333000033333339111183333333333338F333833333
+        00003333339111118333333333333833338F3333000033333911181118333333
+        33338333338F333300003333911183911183333333383338F338F33300003333
+        9118333911183333338F33838F338F33000033333913333391113333338FF833
+        38F338F300003333333333333919333333388333338FFF830000333333333333
+        3333333333333333333888330000333333333333333333333333333333333333
+        0000}
+      NumGlyphs = 2
+      Spacing = 2
+    end
+    object chkTipoDes: TCheckListBox
+      Left = 5
+      Top = 167
+      Width = 220
+      Height = 48
+      ItemHeight = 13
+      Style = lbOwnerDrawFixed
+      TabOrder = 7
+    end
+    object bbtnSelTipo: TBitBtn
+      Left = 5
+      Top = 218
+      Width = 100
+      Height = 25
+      Caption = '   Sel. Todos'
+      TabOrder = 8
+      TabStop = False
+      OnClick = bbtnSelTipoClick
+      Glyph.Data = {
+        76010000424D7601000000000000760000002800000020000000100000000100
+        0400000000000001000000000000000000001000000010000000000000000000
+        80000080000000808000800000008000800080800000C0C0C000808080000000
+        FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00333333333333
+        3333333333333333333333333333333333333333333333333333333333300000
+        0003333333388888888333333330FF9FFF0333333338FF7FFF8333333000F999
+        FF0333333888F777FF83333330F099F99F03333338F877F77F83333000F09FFF
+        9903333888F87FFF77833330F090FFFFF9933338F878FFFFF7733000F0900000
+        00993888F8788888887730F090FFFFF9933338F878FFFFF7733330F090000000
+        993338F87888888877333090FFFFF99333333878FFFFF7733333309000000099
+        3333387888888877333330FFFFF99333333338FFFFF773333333300000009933
+        3333388888887733333333333333333333333333333333333333}
+      NumGlyphs = 2
+      Spacing = 0
+    end
+    object bbtnInvTipo: TBitBtn
+      Left = 123
+      Top = 218
+      Width = 100
+      Height = 25
+      Caption = '   Inv. Seleção'
+      TabOrder = 9
+      TabStop = False
+      OnClick = bbtnInvTipoClick
+      Glyph.Data = {
+        76010000424D7601000000000000760000002800000020000000100000000100
+        0400000000000001000000000000000000001000000010000000000000000000
+        80000080000000808000800000008000800080800000C0C0C000808080000000
+        FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00333333333333
+        3333333333333333333333333333000000003333333388888888333333330FFF
+        FFF0333333338FFFFFF8333000330FFFFFF0333788338FFFFFF8333033330FFF
+        FFF0333833338FFFFFF8330003330FFFFFF0337783338FFFFFF8333033330FFF
+        FFF0333833338FFFFFF833333333000000003333333388888888000000003333
+        333388888888333333330FF9FFF0333303338FF7FFF8333383330F999FF03330
+        00338F777FF833387733099F99F033330333877F77F83333833309FFF9903300
+        033387FFF778338873330FFFFF99333333338FFFFF7733333333000000099333
+        3333888888877333333333333333333333333333333333333333}
+      NumGlyphs = 2
+      Spacing = 0
+    end
+  end
+  object townSelRub: TToolWindow97 [3]
+    Left = 75
+    Top = -250
+    Caption = 'Seleção de Rubricas para o Cálculo da Rescisão'
+    ClientAreaHeight = 246
+    ClientAreaWidth = 408
+    TabOrder = 3
+    Visible = False
+    object Bevel3: TBevel
+      Left = 2
+      Top = 2
+      Width = 404
+      Height = 210
+      Shape = bsFrame
+    end
+    object btnOkSelRub: TBitBtn
+      Left = 190
+      Top = 215
+      Width = 99
+      Height = 30
+      Caption = ' &OK'
+      Default = True
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -9
+      Font.Name = 'MS Sans Serif'
+      Font.Style = [fsBold]
+      ParentFont = False
+      TabOrder = 0
+      OnClick = btnOkSelRubClick
+      Glyph.Data = {
+        F6000000424DF600000000000000760000002800000010000000100000000100
+        0400000000008000000000000000000000001000000000000000000000000000
+        80000080000000808000800000008000800080800000C0C0C000808080000000
+        FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00777777000007
+        777777770022222007777778222222222077778A227722222207778A2FFF7222
+        220778A22FFFF722222078A22FFFFF72222078A22FF7FFF7222078A22FF72FFF
+        722078A22FF222FF7220778A2222222FF207778A2222222222077778AA222222
+        2077777788AAAAA8877777777788888777777777777777777777}
+      Spacing = 2
+    end
+    object btnCancelarSelRub: TBitBtn
+      Left = 303
+      Top = 215
+      Width = 99
+      Height = 30
+      Caption = ' &Cancelar'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -9
+      Font.Name = 'MS Sans Serif'
+      Font.Style = [fsBold]
+      ParentFont = False
+      TabOrder = 1
+      OnClick = btnCancelarSelRubClick
+      Glyph.Data = {
+        F6000000424DF600000000000000760000002800000010000000100000000100
+        0400000000008000000000000000000000001000000000000000000000000000
+        80000080000000808000800000008000800080800000C0C0C000808080000000
+        FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00777777000007
+        7777777700919190077777789919191910777789919191919107778918F919F8
+        190778919FFF9FFF9190789919FFFFF919107891919FFF919190789919FFFFF9
+        191078919FFF9FFF9190778918F919F819077789919191919107777899191919
+        1077777788999998877777777788888777777777777777777777}
+      Spacing = 2
+    end
+    object chklstRubrica: TCheckListBox
+      Left = 7
+      Top = 6
+      Width = 394
+      Height = 167
+      OnClickCheck = chklstRubricaClickCheck
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'MS Sans Serif'
+      Font.Style = []
+      ItemHeight = 13
+      ParentFont = False
+      Style = lbOwnerDrawFixed
+      TabOrder = 2
+      OnDrawItem = chklstRubricaDrawItem
+    end
+    object bbtnSelTudo: TBitBtn
+      Left = 7
+      Top = 177
+      Width = 148
+      Height = 30
+      Hint = 'Seleciona Todas as Rubricas'
+      Caption = '   Seleciona Tudo'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'MS Sans Serif'
+      Font.Style = [fsBold]
+      ParentFont = False
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 3
+      OnClick = bbtnSelTudoClick
+      Glyph.Data = {
+        76010000424D7601000000000000760000002800000020000000100000000100
+        0400000000000001000000000000000000001000000010000000000000000000
+        80000080000000808000800000008000800080800000C0C0C000808080000000
+        FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00333333333333
+        3333333333333333333333333333333333333333333333333333333333300000
+        0003333333388888888333333330FF9FFF0333333338FF7FFF8333333000F999
+        FF0333333888F777FF83333330F099F99F03333338F877F77F83333000F09FFF
+        9903333888F87FFF77833330F090FFFFF9933338F878FFFFF7733000F0900000
+        00993888F8788888887730F090FFFFF9933338F878FFFFF7733330F090000000
+        993338F87888888877333090FFFFF99333333878FFFFF7733333309000000099
+        3333387888888877333330FFFFF99333333338FFFFF773333333300000009933
+        3333388888887733333333333333333333333333333333333333}
+      NumGlyphs = 2
+      Spacing = 0
+    end
+    object bbtnInverte: TBitBtn
+      Left = 253
+      Top = 177
+      Width = 148
+      Height = 30
+      Hint = 'Inverte a Seleção das Rubricas'
+      Caption = '   Inverte Seleção'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'MS Sans Serif'
+      Font.Style = [fsBold]
+      ParentFont = False
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 4
+      OnClick = bbtnInverteClick
+      Glyph.Data = {
+        76010000424D7601000000000000760000002800000020000000100000000100
+        0400000000000001000000000000000000001000000010000000000000000000
+        80000080000000808000800000008000800080800000C0C0C000808080000000
+        FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00333333333333
+        3333333333333333333333333333000000003333333388888888333333330FFF
+        FFF0333333338FFFFFF8333000330FFFFFF0333788338FFFFFF8333033330FFF
+        FFF0333833338FFFFFF8330003330FFFFFF0337783338FFFFFF8333033330FFF
+        FFF0333833338FFFFFF833333333000000003333333388888888000000003333
+        333388888888333333330FF9FFF0333303338FF7FFF8333383330F999FF03330
+        00338F777FF833387733099F99F033330333877F77F83333833309FFF9903300
+        033387FFF778338873330FFFFF99333333338FFFFF7733333333000000099333
+        3333888888877333333333333333333333333333333333333333}
+      NumGlyphs = 2
+      Spacing = 0
+    end
+  end
+  inherited ivTradutor: TIvExtendedTranslator
+    Left = 19
+    Top = 11
+    TargetsData = (
+      1
+      1
+      (
+        ''
+        'Text'
+        0))
+  end
+  object qryMotivo: TwwQuery
+    DatabaseName = 'BaseDados'
+    SQL.Strings = (
+      'Select IDMOTIVO, DESCRICAO '
+      'from MOTIVO '
+      'where GRUPOMOTIVO = '#39'F'#39' '
+      'order by upper(DESCRICAO)')
+    ValidateWithMask = True
+    Left = 28
+    Top = 97
+  end
+  object qryTipoDoc: TwwQuery
+    DatabaseName = 'BASEDADOS'
+    SQL.Strings = (
+      'SELECT '
+      '  CODTIPDOC,'
+      '  DESCRICAO,'
+      '  DEBCRE'
+      'FROM TIPODOCRECPAG'
+      'WHERE  RECPAG = '#39'P'#39
+      'ORDER BY UPPER(DESCRICAO)')
+    ValidateWithMask = True
+    Left = 238
+    Top = 216
+  end
+  object qryPortadorForma: TwwQuery
+    DatabaseName = 'BaseDados'
+    SQL.Strings = (
+      
+        'select pfr.codportforma,pfr.codportador,pfr.descricao,pfr.codarq' +
+        'uivoremessa,'
+      '       pfr.controleremessa,pfr.codformapagto,PFR.FLGEMITEAVISO,'
+      '       pfr.CODTIPOPAGTO,pfr.NUMEMPRESABANCO,'
+      '       pct.IDBANCO,pct.NOCONTACORR'
+      'from PORTADORFORMA pfr,PORTADORCONTA pct'
+      'where  pct.codportador=pfr.codportador')
+    ValidateWithMask = True
+    Left = 184
+    Top = 215
+  end
+  object qryTipoDes: TwwQuery
+    DatabaseName = 'BaseDados'
+    SQL.Strings = (
+      'SELECT DISTINCT'
+      '  T.CODTIPRECDES,'
+      '  T.DESCRICAO'
+      'FROM tiporecebdesemb T, CONTABFOLHA C'
+      'WHERE'
+      '  C.CODTIPRECDES = T.CODTIPRECDES'
+      'ORDER BY UPPER(DESCRICAO)')
+    ValidateWithMask = True
+    Left = 201
+    Top = 170
+  end
+  object qryParamRH: TwwQuery
+    DatabaseName = 'BaseDados'
+    SQL.Strings = (
+      'SELECT'
+      '  IDMOTIVORESCISAO'
+      'FROM'
+      '  PARAMRH')
+    ValidateWithMask = True
+    Left = 257
+    Top = 154
+  end
+  object dsRubrica: TwwDataSource
+    DataSet = qryRubrica
+    Left = 221
+    Top = 247
+  end
+  object qryRubrica: TwwQuery
+    DatabaseName = 'BaseDados'
+    SQL.Strings = (
+      'SELECT'
+      
+        '  PD.IDPROVENTO, PD.IDREGRA, SUBSTR(RP.DESCRPROVDESC,1,40) AS DE' +
+        'SCRICAO'
+      'FROM'
+      '  RUBRICAXPESS RP, PROVDESC PD'
+      'WHERE'
+      '  (PD.FLGTPRUBRICA LIKE '#39'%F%'#39') AND'
+      '  (PD.IDPROVENTO = RP.IDRUBRICA) AND'
+      '  (RP.IDRUBRICA IS NULL OR RP.IDPESSOA = :IDEMPRESA)'
+      'ORDER BY'
+      '  UPPER(DESCRICAO)'
+      ' ')
+    ValidateWithMask = True
+    Left = 221
+    Top = 261
+    ParamData = <
+      item
+        DataType = ftInteger
+        Name = 'IDEMPRESA'
+        ParamType = ptUnknown
+      end>
+  end
+end

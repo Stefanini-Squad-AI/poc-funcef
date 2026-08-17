@@ -1,0 +1,1709 @@
+inherited RelMovOperVirtual: TRelMovOperVirtual
+  Top = 257
+  Width = 271
+  Height = 221
+  Caption = 'RelMovOperVirtual'
+  OldCreateOrder = True
+  OnClose = FormClose
+  OnCreate = FormCreate
+  PixelsPerInch = 96
+  TextHeight = 13
+  inherited CmpRptCM: TCmParamReport
+    DataBaseName = 'BaseDados'
+    Params = <
+      item
+        Caption = 'Data Inicial :'
+        Controle = tcEdit
+        TipodeDado = tdDate
+        LookupSettings.SQL.Strings = ()
+        LookupSettings.Tamanho = '0'
+        CheckBoxSetings.ValueChecked = 'True'
+        CheckBoxSetings.ValueUnChecked = 'False'
+        CheckBoxSetings.Checked = True
+        RadioGroupSettings.Items.Strings = ()
+        RadioGroupSettings.Values.Strings = ()
+        RadioGroupSettings.Columns = 1
+        RadioGroupSettings.ItemIndex = -1
+        RadioGroupSettings.Height = 40
+        ComboBoxSettings.Sorted = False
+        ComboBoxSettings.Style = csDropDownList
+        ComboBoxSettings.Items.Strings = ()
+        ComboBoxSettings.DropDownCount = 8
+        ComboBoxSettings.ItemIndex = -1
+        ListBoxSettings.Items.Strings = ()
+        ListBoxSettings.MultiSelect = False
+        ListBoxSettings.ExtendedSelect = False
+        ListBoxSettings.Sorted = False
+        ListBoxSettings.Style = lbStandard
+        ListBoxSettings.height = 70
+        MostraComboCompara = False
+        Required = False
+        EditSettings.Color = clWindow
+        EditSettings.Readonly = False
+        EditSettings.Font.Charset = DEFAULT_CHARSET
+        EditSettings.Font.Color = clWindowText
+        EditSettings.Font.Height = -11
+        EditSettings.Font.Name = 'MS Sans Serif'
+        EditSettings.Font.Style = [fsBold]
+        Name = 'DataIni'
+        SpinEditSettings.MaxValue = 0
+        SpinEditSettings.MinValue = 0
+        SpinEditSettings.Increment = 0
+        SpinEditSettings.Value = 0
+        MaskEditSettings.MaxLength = 0
+        ProcuraSTSettings.Subtipo = stFornecedor
+        ProcuraSTSettings.CampoEdit = ceRazaoSocial
+        ProcuraSTSettings.FiltraSubTipo = True
+        ProcuraFCSettings.Status = fcAll
+        ProcuraFCSettings.CampoEdit = ceRazaoSocial
+        ProcuraFCSettings.MostraEndereco = False
+        ProcuraFCSettings.ForCli = fcFornecedor
+        ProcuraCCSettings.Plano = 0
+        ProcuraCCSettings.Status = scSoAtiva
+        ProcuraCCSettings.AceitaTipoConta = Indiferente
+        Width = 0
+      end
+      item
+        Caption = 'Data Final :'
+        Controle = tcEdit
+        TipodeDado = tdDate
+        LookupSettings.SQL.Strings = ()
+        LookupSettings.Tamanho = '0'
+        CheckBoxSetings.ValueChecked = 'True'
+        CheckBoxSetings.ValueUnChecked = 'False'
+        CheckBoxSetings.Checked = True
+        RadioGroupSettings.Items.Strings = ()
+        RadioGroupSettings.Values.Strings = ()
+        RadioGroupSettings.Columns = 1
+        RadioGroupSettings.ItemIndex = -1
+        RadioGroupSettings.Height = 40
+        ComboBoxSettings.Sorted = False
+        ComboBoxSettings.Style = csDropDownList
+        ComboBoxSettings.Items.Strings = ()
+        ComboBoxSettings.DropDownCount = 8
+        ComboBoxSettings.ItemIndex = -1
+        ListBoxSettings.Items.Strings = ()
+        ListBoxSettings.MultiSelect = False
+        ListBoxSettings.ExtendedSelect = False
+        ListBoxSettings.Sorted = False
+        ListBoxSettings.Style = lbStandard
+        ListBoxSettings.height = 70
+        MostraComboCompara = False
+        Required = False
+        EditSettings.Color = clWindow
+        EditSettings.Readonly = False
+        EditSettings.Font.Charset = DEFAULT_CHARSET
+        EditSettings.Font.Color = clWindowText
+        EditSettings.Font.Height = -11
+        EditSettings.Font.Name = 'MS Sans Serif'
+        EditSettings.Font.Style = [fsBold]
+        Name = 'DataFim'
+        SpinEditSettings.MaxValue = 0
+        SpinEditSettings.MinValue = 0
+        SpinEditSettings.Increment = 0
+        SpinEditSettings.Value = 0
+        MaskEditSettings.MaxLength = 0
+        ProcuraSTSettings.Subtipo = stFornecedor
+        ProcuraSTSettings.CampoEdit = ceRazaoSocial
+        ProcuraSTSettings.FiltraSubTipo = True
+        ProcuraFCSettings.Status = fcAll
+        ProcuraFCSettings.CampoEdit = ceRazaoSocial
+        ProcuraFCSettings.MostraEndereco = False
+        ProcuraFCSettings.ForCli = fcFornecedor
+        ProcuraCCSettings.Plano = 0
+        ProcuraCCSettings.Status = scSoAtiva
+        ProcuraCCSettings.AceitaTipoConta = Indiferente
+        Width = 0
+      end
+      item
+        Caption = 'Carteira Gerencial :'
+        Controle = tcLookupCombo
+        CampoBanco = 'DESCCARTGERENC'
+        TipodeDado = tdInteger
+        LookupSettings.SQL.Strings = (
+          'SELECT IDCARTEIRAGERENC, '
+          '               SUBSTR(DESCCARTGERENC, 1,60)  AS DESCCARTGERENC'
+          'FROM CARTEIRAGERENC'
+          'ORDER BY DESCCARTGERENC')
+        LookupSettings.Chave = 'IDCARTEIRAGERENC'
+        LookupSettings.Display = 'DESCCARTGERENC'
+        LookupSettings.Descricao = 'Descrição'
+        LookupSettings.Tamanho = '0'
+        CheckBoxSetings.ValueChecked = 'True'
+        CheckBoxSetings.ValueUnChecked = 'False'
+        CheckBoxSetings.Checked = True
+        RadioGroupSettings.Items.Strings = ()
+        RadioGroupSettings.Values.Strings = ()
+        RadioGroupSettings.Columns = 1
+        RadioGroupSettings.ItemIndex = -1
+        RadioGroupSettings.Height = 40
+        ComboBoxSettings.Sorted = False
+        ComboBoxSettings.Style = csDropDownList
+        ComboBoxSettings.Items.Strings = ()
+        ComboBoxSettings.DropDownCount = 8
+        ComboBoxSettings.ItemIndex = -1
+        ListBoxSettings.Items.Strings = ()
+        ListBoxSettings.MultiSelect = False
+        ListBoxSettings.ExtendedSelect = False
+        ListBoxSettings.Sorted = False
+        ListBoxSettings.Style = lbStandard
+        ListBoxSettings.height = 70
+        MostraComboCompara = False
+        Required = False
+        EditSettings.Color = clWindow
+        EditSettings.Readonly = False
+        EditSettings.Font.Charset = DEFAULT_CHARSET
+        EditSettings.Font.Color = clWindowText
+        EditSettings.Font.Height = -11
+        EditSettings.Font.Name = 'MS Sans Serif'
+        EditSettings.Font.Style = [fsBold]
+        Name = 'CarteiraGerenc'
+        SpinEditSettings.MaxValue = 0
+        SpinEditSettings.MinValue = 0
+        SpinEditSettings.Increment = 0
+        SpinEditSettings.Value = 0
+        MaskEditSettings.MaxLength = 0
+        ProcuraSTSettings.Subtipo = stFornecedor
+        ProcuraSTSettings.CampoEdit = ceRazaoSocial
+        ProcuraSTSettings.FiltraSubTipo = True
+        ProcuraFCSettings.Status = fcAll
+        ProcuraFCSettings.CampoEdit = ceRazaoSocial
+        ProcuraFCSettings.MostraEndereco = False
+        ProcuraFCSettings.ForCli = fcFornecedor
+        ProcuraCCSettings.Plano = 0
+        ProcuraCCSettings.Status = scSoAtiva
+        ProcuraCCSettings.AceitaTipoConta = Indiferente
+        Width = 0
+      end
+      item
+        Caption = 'Evento :'
+        Controle = tcLookupCombo
+        CampoBanco = 'DESCCAIXACOTA'
+        TipodeDado = tdInteger
+        LookupSettings.SQL.Strings = (
+          'SELECT IDEVENTOCAIXACOTA, DESCCAIXACOTA '
+          'FROM EVENTOCAIXACOTA '
+          'ORDER BY DESCCAIXACOTA')
+        LookupSettings.Chave = 'IDEVENTOCAIXACOTA'
+        LookupSettings.Display = 'DESCCAIXACOTA'
+        LookupSettings.Descricao = 'Descrição'
+        LookupSettings.Tamanho = '0'
+        CheckBoxSetings.ValueChecked = 'True'
+        CheckBoxSetings.ValueUnChecked = 'False'
+        CheckBoxSetings.Checked = True
+        RadioGroupSettings.Items.Strings = ()
+        RadioGroupSettings.Values.Strings = ()
+        RadioGroupSettings.Columns = 1
+        RadioGroupSettings.ItemIndex = -1
+        RadioGroupSettings.Height = 40
+        ComboBoxSettings.Sorted = False
+        ComboBoxSettings.Style = csDropDownList
+        ComboBoxSettings.Items.Strings = ()
+        ComboBoxSettings.DropDownCount = 8
+        ComboBoxSettings.ItemIndex = -1
+        ListBoxSettings.Items.Strings = ()
+        ListBoxSettings.MultiSelect = False
+        ListBoxSettings.ExtendedSelect = False
+        ListBoxSettings.Sorted = False
+        ListBoxSettings.Style = lbStandard
+        ListBoxSettings.height = 70
+        MostraComboCompara = False
+        Required = False
+        EditSettings.Color = clWindow
+        EditSettings.Readonly = False
+        EditSettings.Font.Charset = DEFAULT_CHARSET
+        EditSettings.Font.Color = clWindowText
+        EditSettings.Font.Height = -11
+        EditSettings.Font.Name = 'MS Sans Serif'
+        EditSettings.Font.Style = [fsBold]
+        Name = 'Evento'
+        SpinEditSettings.MaxValue = 0
+        SpinEditSettings.MinValue = 0
+        SpinEditSettings.Increment = 0
+        SpinEditSettings.Value = 0
+        MaskEditSettings.MaxLength = 0
+        ProcuraSTSettings.Subtipo = stFornecedor
+        ProcuraSTSettings.CampoEdit = ceRazaoSocial
+        ProcuraSTSettings.FiltraSubTipo = True
+        ProcuraFCSettings.Status = fcAll
+        ProcuraFCSettings.CampoEdit = ceRazaoSocial
+        ProcuraFCSettings.MostraEndereco = False
+        ProcuraFCSettings.ForCli = fcFornecedor
+        ProcuraCCSettings.Plano = 0
+        ProcuraCCSettings.Status = scSoAtiva
+        ProcuraCCSettings.AceitaTipoConta = Indiferente
+        Width = 0
+      end
+      item
+        Caption = 'Investimento :'
+        Controle = tcLookupCombo
+        CampoBanco = 'DESCINVESTIMENTO'
+        TipodeDado = tdInteger
+        LookupSettings.SQL.Strings = (
+          'SELECT IDINVESTIMENTO, DESCINVESTIMENTO'
+          'FROM CM.INVESTIMENTO'
+          'WHERE IDTIPOINVEST = 2'
+          '  AND FLGATIVO = '#39'S'#39
+          'ORDER BY DESCINVESTIMENTO')
+        LookupSettings.Chave = 'IDINVESTIMENTO'
+        LookupSettings.Display = 'DESCINVESTIMENTO'
+        LookupSettings.Descricao = 'Descrição'
+        LookupSettings.Tamanho = '0'
+        CheckBoxSetings.ValueChecked = 'True'
+        CheckBoxSetings.ValueUnChecked = 'False'
+        CheckBoxSetings.Checked = True
+        RadioGroupSettings.Items.Strings = ()
+        RadioGroupSettings.Values.Strings = ()
+        RadioGroupSettings.Columns = 1
+        RadioGroupSettings.ItemIndex = -1
+        RadioGroupSettings.Height = 40
+        ComboBoxSettings.Sorted = False
+        ComboBoxSettings.Style = csDropDownList
+        ComboBoxSettings.Items.Strings = ()
+        ComboBoxSettings.DropDownCount = 8
+        ComboBoxSettings.ItemIndex = -1
+        ListBoxSettings.Items.Strings = ()
+        ListBoxSettings.MultiSelect = False
+        ListBoxSettings.ExtendedSelect = False
+        ListBoxSettings.Sorted = False
+        ListBoxSettings.Style = lbStandard
+        ListBoxSettings.height = 70
+        MostraComboCompara = False
+        Required = False
+        EditSettings.Color = clWindow
+        EditSettings.Readonly = False
+        EditSettings.Font.Charset = DEFAULT_CHARSET
+        EditSettings.Font.Color = clWindowText
+        EditSettings.Font.Height = -11
+        EditSettings.Font.Name = 'MS Sans Serif'
+        EditSettings.Font.Style = [fsBold]
+        Name = 'Investimento'
+        SpinEditSettings.MaxValue = 0
+        SpinEditSettings.MinValue = 0
+        SpinEditSettings.Increment = 0
+        SpinEditSettings.Value = 0
+        MaskEditSettings.MaxLength = 0
+        ProcuraSTSettings.Subtipo = stFornecedor
+        ProcuraSTSettings.CampoEdit = ceRazaoSocial
+        ProcuraSTSettings.FiltraSubTipo = True
+        ProcuraFCSettings.Status = fcAll
+        ProcuraFCSettings.CampoEdit = ceRazaoSocial
+        ProcuraFCSettings.MostraEndereco = False
+        ProcuraFCSettings.ForCli = fcFornecedor
+        ProcuraCCSettings.Plano = 0
+        ProcuraCCSettings.Status = scSoAtiva
+        ProcuraCCSettings.AceitaTipoConta = Indiferente
+        Width = 0
+      end
+      item
+        Caption = 'Tipo de Investimento :'
+        Controle = tcLookupCombo
+        CampoBanco = 'DESCTIPOINVEST'
+        TipodeDado = tdInteger
+        LookupSettings.SQL.Strings = (
+          'SELECT IDTIPOINVEST, DESCTIPOINVEST'
+          'FROM TIPOINVEST'
+          'WHERE IDTIPOINVEST = 2'
+          'ORDER BY DESCTIPOINVEST')
+        LookupSettings.Chave = 'IDTIPOINVEST'
+        LookupSettings.Display = 'DESCTIPOINVEST'
+        LookupSettings.Descricao = 'Descrição'
+        LookupSettings.Tamanho = '0'
+        CheckBoxSetings.ValueChecked = 'True'
+        CheckBoxSetings.ValueUnChecked = 'False'
+        CheckBoxSetings.Checked = True
+        RadioGroupSettings.Items.Strings = ()
+        RadioGroupSettings.Values.Strings = ()
+        RadioGroupSettings.Columns = 1
+        RadioGroupSettings.ItemIndex = -1
+        RadioGroupSettings.Height = 40
+        ComboBoxSettings.Sorted = False
+        ComboBoxSettings.Style = csDropDownList
+        ComboBoxSettings.Items.Strings = ()
+        ComboBoxSettings.DropDownCount = 8
+        ComboBoxSettings.ItemIndex = -1
+        ListBoxSettings.Items.Strings = ()
+        ListBoxSettings.MultiSelect = False
+        ListBoxSettings.ExtendedSelect = False
+        ListBoxSettings.Sorted = False
+        ListBoxSettings.Style = lbStandard
+        ListBoxSettings.height = 70
+        MostraComboCompara = False
+        Required = False
+        EditSettings.Color = clWindow
+        EditSettings.Readonly = False
+        EditSettings.Font.Charset = DEFAULT_CHARSET
+        EditSettings.Font.Color = clWindowText
+        EditSettings.Font.Height = -11
+        EditSettings.Font.Name = 'MS Sans Serif'
+        EditSettings.Font.Style = [fsBold]
+        Name = 'TipoInvest'
+        SpinEditSettings.MaxValue = 0
+        SpinEditSettings.MinValue = 0
+        SpinEditSettings.Increment = 0
+        SpinEditSettings.Value = 0
+        MaskEditSettings.MaxLength = 0
+        ProcuraSTSettings.Subtipo = stFornecedor
+        ProcuraSTSettings.CampoEdit = ceRazaoSocial
+        ProcuraSTSettings.FiltraSubTipo = True
+        ProcuraFCSettings.Status = fcAll
+        ProcuraFCSettings.CampoEdit = ceRazaoSocial
+        ProcuraFCSettings.MostraEndereco = False
+        ProcuraFCSettings.ForCli = fcFornecedor
+        ProcuraCCSettings.Plano = 0
+        ProcuraCCSettings.Status = scSoAtiva
+        ProcuraCCSettings.AceitaTipoConta = Indiferente
+        Width = 0
+      end
+      item
+        Caption = 'Tipo de Operação :'
+        Controle = tcLookupCombo
+        CampoBanco = 'DESCTIPOOPERACAO'
+        TipodeDado = tdInteger
+        LookupSettings.SQL.Strings = (
+          'SELECT IDTIPOOPERACAO, DESCTIPOOPERACAO'
+          'FROM TIPOOPERACAO'
+          'WHERE IDTIPOINVEST = 2'
+          'ORDER BY DESCTIPOOPERACAO')
+        LookupSettings.Chave = 'IDTIPOOPERACAO'
+        LookupSettings.Display = 'DESCTIPOOPERACAO'
+        LookupSettings.Descricao = 'Descrição'
+        LookupSettings.Tamanho = '0'
+        CheckBoxSetings.ValueChecked = 'True'
+        CheckBoxSetings.ValueUnChecked = 'False'
+        CheckBoxSetings.Checked = True
+        RadioGroupSettings.Items.Strings = ()
+        RadioGroupSettings.Values.Strings = ()
+        RadioGroupSettings.Columns = 1
+        RadioGroupSettings.ItemIndex = -1
+        RadioGroupSettings.Height = 40
+        ComboBoxSettings.Sorted = False
+        ComboBoxSettings.Style = csDropDownList
+        ComboBoxSettings.Items.Strings = ()
+        ComboBoxSettings.DropDownCount = 8
+        ComboBoxSettings.ItemIndex = -1
+        ListBoxSettings.Items.Strings = ()
+        ListBoxSettings.MultiSelect = False
+        ListBoxSettings.ExtendedSelect = False
+        ListBoxSettings.Sorted = False
+        ListBoxSettings.Style = lbStandard
+        ListBoxSettings.height = 70
+        MostraComboCompara = False
+        Required = False
+        EditSettings.Color = clWindow
+        EditSettings.Readonly = False
+        EditSettings.Font.Charset = DEFAULT_CHARSET
+        EditSettings.Font.Color = clWindowText
+        EditSettings.Font.Height = -11
+        EditSettings.Font.Name = 'MS Sans Serif'
+        EditSettings.Font.Style = [fsBold]
+        Name = 'TipoOper'
+        SpinEditSettings.MaxValue = 0
+        SpinEditSettings.MinValue = 0
+        SpinEditSettings.Increment = 0
+        SpinEditSettings.Value = 0
+        MaskEditSettings.MaxLength = 0
+        ProcuraSTSettings.Subtipo = stFornecedor
+        ProcuraSTSettings.CampoEdit = ceRazaoSocial
+        ProcuraSTSettings.FiltraSubTipo = True
+        ProcuraFCSettings.Status = fcAll
+        ProcuraFCSettings.CampoEdit = ceRazaoSocial
+        ProcuraFCSettings.MostraEndereco = False
+        ProcuraFCSettings.ForCli = fcFornecedor
+        ProcuraCCSettings.Plano = 0
+        ProcuraCCSettings.Status = scSoAtiva
+        ProcuraCCSettings.AceitaTipoConta = Indiferente
+        Width = 0
+      end
+      item
+        Caption = 'Tipo de Despesa :'
+        Controle = tcLookupCombo
+        CampoBanco = 'DESCTIPODESPINV'
+        TipodeDado = tdInteger
+        LookupSettings.SQL.Strings = (
+          'SELECT IDTIPODESPINVEST, DESCTIPODESPINV'
+          'FROM TIPODESPINVEST'
+          'ORDER BY DESCTIPODESPINV')
+        LookupSettings.Chave = 'IDTIPODESPINVEST'
+        LookupSettings.Display = 'DESCTIPODESPINV'
+        LookupSettings.Descricao = 'Descrição'
+        LookupSettings.Tamanho = '0'
+        CheckBoxSetings.ValueChecked = 'True'
+        CheckBoxSetings.ValueUnChecked = 'False'
+        CheckBoxSetings.Checked = True
+        RadioGroupSettings.Items.Strings = ()
+        RadioGroupSettings.Values.Strings = ()
+        RadioGroupSettings.Columns = 1
+        RadioGroupSettings.ItemIndex = -1
+        RadioGroupSettings.Height = 40
+        ComboBoxSettings.Sorted = False
+        ComboBoxSettings.Style = csDropDownList
+        ComboBoxSettings.Items.Strings = ()
+        ComboBoxSettings.DropDownCount = 8
+        ComboBoxSettings.ItemIndex = -1
+        ListBoxSettings.Items.Strings = ()
+        ListBoxSettings.MultiSelect = False
+        ListBoxSettings.ExtendedSelect = False
+        ListBoxSettings.Sorted = False
+        ListBoxSettings.Style = lbStandard
+        ListBoxSettings.height = 70
+        MostraComboCompara = False
+        Required = False
+        EditSettings.Color = clWindow
+        EditSettings.Readonly = False
+        EditSettings.Font.Charset = DEFAULT_CHARSET
+        EditSettings.Font.Color = clWindowText
+        EditSettings.Font.Height = -11
+        EditSettings.Font.Name = 'MS Sans Serif'
+        EditSettings.Font.Style = [fsBold]
+        Name = 'TipoDesp'
+        SpinEditSettings.MaxValue = 0
+        SpinEditSettings.MinValue = 0
+        SpinEditSettings.Increment = 0
+        SpinEditSettings.Value = 0
+        MaskEditSettings.MaxLength = 0
+        ProcuraSTSettings.Subtipo = stFornecedor
+        ProcuraSTSettings.CampoEdit = ceRazaoSocial
+        ProcuraSTSettings.FiltraSubTipo = True
+        ProcuraFCSettings.Status = fcAll
+        ProcuraFCSettings.CampoEdit = ceRazaoSocial
+        ProcuraFCSettings.MostraEndereco = False
+        ProcuraFCSettings.ForCli = fcFornecedor
+        ProcuraCCSettings.Plano = 0
+        ProcuraCCSettings.Status = scSoAtiva
+        ProcuraCCSettings.AceitaTipoConta = Indiferente
+        Width = 0
+      end
+      item
+        Caption = 'Plano/Patrocinadora :'
+        Controle = tcEdit
+        CampoBanco = 'PLANPRVCONTABPATRO'
+        TipodeDado = tdString
+        LookupSettings.SQL.Strings = ()
+        LookupSettings.Tamanho = '0'
+        CheckBoxSetings.ValueChecked = 'True'
+        CheckBoxSetings.ValueUnChecked = 'False'
+        CheckBoxSetings.Checked = True
+        RadioGroupSettings.Items.Strings = ()
+        RadioGroupSettings.Values.Strings = ()
+        RadioGroupSettings.Columns = 1
+        RadioGroupSettings.ItemIndex = -1
+        RadioGroupSettings.Height = 40
+        ComboBoxSettings.Sorted = False
+        ComboBoxSettings.Style = csDropDownList
+        ComboBoxSettings.Items.Strings = ()
+        ComboBoxSettings.DropDownCount = 8
+        ComboBoxSettings.ItemIndex = -1
+        ListBoxSettings.Items.Strings = ()
+        ListBoxSettings.MultiSelect = False
+        ListBoxSettings.ExtendedSelect = False
+        ListBoxSettings.Sorted = False
+        ListBoxSettings.Style = lbStandard
+        ListBoxSettings.height = 70
+        MostraComboCompara = True
+        Required = False
+        EditSettings.Color = clWindow
+        EditSettings.Readonly = False
+        EditSettings.Font.Charset = DEFAULT_CHARSET
+        EditSettings.Font.Color = clWindowText
+        EditSettings.Font.Height = -11
+        EditSettings.Font.Name = 'MS Sans Serif'
+        EditSettings.Font.Style = [fsBold]
+        Name = 'Plano'
+        SpinEditSettings.MaxValue = 0
+        SpinEditSettings.MinValue = 0
+        SpinEditSettings.Increment = 0
+        SpinEditSettings.Value = 0
+        MaskEditSettings.MaxLength = 0
+        ProcuraSTSettings.Subtipo = stFornecedor
+        ProcuraSTSettings.CampoEdit = ceRazaoSocial
+        ProcuraSTSettings.FiltraSubTipo = True
+        ProcuraFCSettings.Status = fcAll
+        ProcuraFCSettings.CampoEdit = ceRazaoSocial
+        ProcuraFCSettings.MostraEndereco = False
+        ProcuraFCSettings.ForCli = fcFornecedor
+        ProcuraCCSettings.Plano = 0
+        ProcuraCCSettings.Status = scSoAtiva
+        ProcuraCCSettings.AceitaTipoConta = Indiferente
+        Width = 0
+      end>
+    Formheight = 280
+    FormWidth = 425
+    Left = 192
+  end
+  inherited DevRptCM: TExtraOptions
+    Left = 32
+  end
+  inherited CrmRptCM: TCmRptManager
+    BeforePrint = CrmRptCMBeforePrint
+    DataBaseName = 'BaseDados'
+    Report = rptMovOperVirtual
+    LabelEmpresa = lblEmpresa
+    LabelSistema = lblSistema
+    Left = 113
+  end
+  object cdsMovOperVirtual: TCMClientDataSet
+    Active = True
+    Aggregates = <>
+    Params = <>
+    Left = 113
+    Top = 72
+    Data = {
+      AE3C00009619E0BD010000001800000009007D0000000300000055010D444154
+      41484953544341495841080008000000000010444553435449504F4F50455241
+      43414F0100490000000100055749445448020002003C000D4445534343414958
+      41434F544101004900000001000557494454480200020028000E444553434341
+      5254474552454E43010049000000010005574944544802000200280010444553
+      43494E56455354494D454E544F0100490000000100055749445448020002003C
+      000C515444454F5045524143414F080004000000000011505245434F554E4954
+      4F5045524143414F08000400000000000C564C52484953544341495841080004
+      000000000012504C414E505256434F4E544142504154524F0100490000000100
+      05574944544802000200710002000D44454641554C545F4F5244455202008200
+      040000000900010004000300044C43494404000100090800000000000000005A
+      3930C5CC4214414E554E43494F2044452050524F56454E544F5314416EFA6E63
+      696F2064652050726F76656E746F731D43617274656972612052656E64612056
+      617269E176656C2041746976611354454C454D4152204E204C4553544520504E
+      410000000080F3F54040A4DFBE0E9CD33FB81E85EB41E7DA40125245472F5245
+      504C414E202D2043414958410000000000005A3930C5CC4214414E554E43494F
+      2044452050524F56454E544F5314416EFA6E63696F2064652050726F76656E74
+      6F731D43617274656972612052656E64612056617269E176656C204174697661
+      0A54454C454D4152204F4E00000000A0DDF2407F6ABC749318B43F0000000000
+      B2B740125245472F5245504C414E202D2043414958410000000000005A3930C5
+      CC4214414E554E43494F2044452050524F56454E544F5314416EFA6E63696F20
+      64652050726F76656E746F731D43617274656972612052656E64612056617269
+      E176656C2041746976610A54454C454D415220504E00000000740132417F6ABC
+      749318B43FEC51B81E799DF640125245472F5245504C414E202D204341495841
+      0000000000005A3930C5CC42184A55202D204A55524F5320534F425245204341
+      504954414C054A75726F731D43617274656972612052656E64612056617269E1
+      76656C2041746976610B425241444553434F20504E00000000F0B30441228E75
+      711B0DB03FEC51B81EE5C4C440125245472F5245504C414E202D204341495841
+      0000000000005A3930C5CC422D4A55202D204A55524F5320534F425245204341
+      504954414C202D20434349202020202020202020202020202020094A75726F73
+      204343491D43617274656972612052656E64612056617269E176656C20417469
+      76610B425241444553434F20504E000000000077DF40F1A58D761E0DB03FCDCC
+      CCCCCC909F40125245472F5245504C414E202D2043414958410004000000005A
+      3930C5CC420B52656D756E65726163616F1D43617274656972612052656E6461
+      2056617269E176656C2041746976610120000000000000000000000000000000
+      00E17A14AEC7CFC640125245472F5245504C414E202D20434149584100040000
+      00005A3930C5CC420B52656D756E65726163616F1E4361727465697261205265
+      6E64612056617269E176656C204F7574726F7301200000000000000000000000
+      00000000008FC2F5285CD8A740125245472F5245504C414E202D204341495841
+      0010000000005A3930C5CC420A4349202D20434953414F254361727465697261
+      2052656E646120566172696176656C20506172746963697061636F6573142A42
+      524153494C20464552524F56494153204F4E000000803EED9341000000000000
+      00000000000000000000125245472F5245504C414E202D204341495841001000
+      0000005A3930C5CC420A4349202D20434953414F254361727465697261205265
+      6E646120566172696176656C20506172746963697061636F6573142A42524153
+      494C20464552524F5649415320504E000000507A0A7341000000000000000000
+      00000000000000125245472F5245504C414E202D204341495841001000000000
+      5A3930C5CC4213434953C34F2044452046494E414E434549524F254361727465
+      6972612052656E646120566172696176656C20506172746963697061636F6573
+      124E4F564F455354452042524153494C20504E00000000C49841410000000000
+      0000000000000000000000125245472F5245504C414E202D2043414958410010
+      000000005A3930C5CC4213434953C34F2044452046494E414E434549524F2543
+      617274656972612052656E646120566172696176656C20506172746963697061
+      636F6573124E4F564F455354452042524153494C204F4E00000020556A624100
+      000000000000000000000000000000125245472F5245504C414E202D20434149
+      58410000000000005A3930C5CC4214414E554E43494F2044452050524F56454E
+      544F5314416EFA6E63696F2064652050726F76656E746F731F43617274656972
+      612052656E64612056617269E176656C20506173736976610A422E2049544155
+      20504E00000000709E24411B2FDD240681953F1F85EB5138B6CB40125245472F
+      5245504C414E202D2043414958410000000000005A3930C5CC4214414E554E43
+      494F2044452050524F56454E544F5314416EFA6E63696F2064652050726F7665
+      6E746F731F43617274656972612052656E64612056617269E176656C20506173
+      736976611354454C454D4152204E204C4553544520504E4100000000901D0041
+      40A4DFBE0E9CD33FB81E85EB49C0E340125245472F5245504C414E202D204341
+      4958410000000000005A3930C5CC4214414E554E43494F2044452050524F5645
+      4E544F5314416EFA6E63696F2064652050726F76656E746F731F436172746569
+      72612052656E64612056617269E176656C20506173736976610A54454C454D41
+      5220504E0000000038A640417F6ABC749318B43F85EB51B858E9044112524547
+      2F5245504C414E202D2043414958410000000000005A3930C5CC42184A55202D
+      204A55524F5320534F425245204341504954414C054A75726F731F4361727465
+      6972612052656E64612056617269E176656C20506173736976610A422E204954
+      415520504E00000000709E24411B2FDD240681953F1F85EB5138B6CB40125245
+      472F5245504C414E202D2043414958410000000000005A3930C5CC42184A5520
+      2D204A55524F5320534F425245204341504954414C054A75726F731F43617274
+      656972612052656E64612056617269E176656C20506173736976610B42524144
+      4553434F20504E0000000026B43241228E75711B0DB03F1F85EB5178C3F24012
+      5245472F5245504C414E202D2043414958410004000000005A3930C5CC420B52
+      656D756E65726163616F1F43617274656972612052656E64612056617269E176
+      656C20506173736976610120000000000000000000000000000000005C8FC2F5
+      38F2DB40125245472F5245504C414E202D204341495841000000000000B65F35
+      C5CC4214414E554E43494F2044452050524F56454E544F5314416EFA6E63696F
+      2064652050726F76656E746F731D43617274656972612052656E646120566172
+      69E176656C2041746976610B425241444553434F20504E00000000F0B3044122
+      8E75711B0DB03FEC51B81EE5C4C440125245472F5245504C414E202D20434149
+      5841000000000000B65F35C5CC4230414E554E43494F2044452050524F56454E
+      544F53202D204E4F564F2020202020202020202020202020202020202020201A
+      416EFA6E63696F2064652050726F76656E746F73202D204343491D4361727465
+      6972612052656E64612056617269E176656C2041746976610B42524144455343
+      4F20504E000000000077DF40228E75711B0DB03FF6285C8FC2909F4012524547
+      2F5245504C414E202D204341495841000400000000B65F35C5CC420B52656D75
+      6E65726163616F1D43617274656972612052656E64612056617269E176656C20
+      41746976610120000000000000000000000000000000008FC2F528DC73C74012
+      5245472F5245504C414E202D204341495841000400000000B65F35C5CC420B52
+      656D756E65726163616F1E43617274656972612052656E64612056617269E176
+      656C204F7574726F7301200000000000000000000000000000000033333333B3
+      7EA840125245472F5245504C414E202D204341495841000000000000B65F35C5
+      CC4214414E554E43494F2044452050524F56454E544F5314416EFA6E63696F20
+      64652050726F76656E746F731F43617274656972612052656E64612056617269
+      E176656C20506173736976610B425241444553434F20504E0000000026B43241
+      228E75711B0DB03F1F85EB5178C3F240125245472F5245504C414E202D204341
+      495841000400000000B65F35C5CC420B52656D756E65726163616F1F43617274
+      656972612052656E64612056617269E176656C20506173736976610120000000
+      0000000000000000000000000052B81E85FBC6DC40125245472F5245504C414E
+      202D204341495841000400000000E4F237C5CC421043504D46202D2047455245
+      4E4349414C1D43617274656972612052656E64612056617269E176656C204174
+      6976610120000000000000000000000000000000007B14AE47E15C9540125245
+      472F5245504C414E202D204341495841000400000000E4F237C5CC420B52656D
+      756E65726163616F1D43617274656972612052656E64612056617269E176656C
+      204174697661012000000000000000000000000000000000295C8FC295A1C540
+      125245472F5245504C414E202D204341495841000400000000E4F237C5CC420B
+      52656D756E65726163616F1E43617274656972612052656E64612056617269E1
+      76656C204F7574726F7301200000000000000000000000000000000033333333
+      B397A640125245472F5245504C414E202D204341495841000000000000E4F237
+      C5CC4214414E554E43494F2044452050524F56454E544F5314416EFA6E63696F
+      2064652050726F76656E746F732543617274656972612052656E646120566172
+      696176656C20506172746963697061636F6573122A4C4954454C205041525420
+      532F41204F4E0000000000405240D7A3703D0AD7C33F1F85EB51B89E26401252
+      45472F5245504C414E202D204341495841000000000000E4F237C5CC4214414E
+      554E43494F2044452050524F56454E544F5314416EFA6E63696F206465205072
+      6F76656E746F732543617274656972612052656E646120566172696176656C20
+      506172746963697061636F6573122A4C4954454C205041525420532F41204F4E
+      00000000004052407D3F355EBA49E83F3333333333B34B40125245472F524550
+      4C414E202D204341495841000000000000E4F237C5CC4214414E554E43494F20
+      44452050524F56454E544F5314416EFA6E63696F2064652050726F76656E746F
+      732543617274656972612052656E646120566172696176656C20506172746963
+      697061636F6573132A4C4954454C205041525420532F4120504E410000000000
+      406240D7A3703D0AD7C33FE17A14AE47A13640125245472F5245504C414E202D
+      204341495841000000000000E4F237C5CC4214414E554E43494F204445205052
+      4F56454E544F5314416EFA6E63696F2064652050726F76656E746F7325436172
+      74656972612052656E646120566172696176656C20506172746963697061636F
+      6573132A4C4954454C205041525420532F4120504E4100000000004062407D3F
+      355EBA49E83FA4703D0AD7B35B40125245472F5245504C414E202D2043414958
+      41000400000000E4F237C5CC421043504D46202D20474552454E4349414C1F43
+      617274656972612052656E64612056617269E176656C20506173736976610120
+      000000000000000000000000000000007B14AE472134B240125245472F524550
+      4C414E202D204341495841000400000000E4F237C5CC420B52656D756E657261
+      63616F1F43617274656972612052656E64612056617269E176656C2050617373
+      6976610120000000000000000000000000000000001F85EB51D88ADA40125245
+      472F5245504C414E202D2043414958410004000000006EAC3FC5CC420B52656D
+      756E65726163616F1D43617274656972612052656E64612056617269E176656C
+      204174697661012000000000000000000000000000000000000000006099C540
+      125245472F5245504C414E202D2043414958410004000000006EAC3FC5CC420B
+      52656D756E65726163616F1E43617274656972612052656E64612056617269E1
+      76656C204F7574726F73012000000000000000000000000000000000713D0AD7
+      A38FA640125245472F5245504C414E202D2043414958410004000000006EAC3F
+      C5CC420B52656D756E65726163616F1F43617274656972612052656E64612056
+      617269E176656C20506173736976610120000000000000000000000000000000
+      005C8FC2F58880DA40125245472F5245504C414E202D20434149584100040000
+      00009C3F42C5CC420B52656D756E65726163616F1D4361727465697261205265
+      6E64612056617269E176656C2041746976610120000000000000000000000000
+      0000000067666666260CC540125245472F5245504C414E202D20434149584100
+      04000000009C3F42C5CC420B52656D756E65726163616F1E4361727465697261
+      2052656E64612056617269E176656C204F7574726F7301200000000000000000
+      0000000000000000713D0AD723FCA540125245472F5245504C414E202D204341
+      4958410004000000009C3F42C5CC420B52656D756E65726163616F1F43617274
+      656972612052656E64612056617269E176656C20506173736976610120000000
+      000000000000000000000000007B14AE4741D3D940125245472F5245504C414E
+      202D204341495841000000000000CAD244C5CC4214414E554E43494F20444520
+      50524F56454E544F5314416EFA6E63696F2064652050726F76656E746F731D43
+      617274656972612052656E64612056617269E176656C2041746976610843454D
+      494720504E000000A4940FA54132CB5151CB3FE33F6766666626F2F940125245
+      472F5245504C414E202D204341495841000000000000CAD244C5CC4214414E55
+      4E43494F2044452050524F56454E544F5314416EFA6E63696F2064652050726F
+      76656E746F731D43617274656972612052656E64612056617269E176656C2041
+      746976610843454D494720504E000000A4940FA541A2895F51CB3FE33F676666
+      6626F2F940125245472F5245504C414E202D204341495841000000000000CAD2
+      44C5CC4230414E554E43494F2044452050524F56454E544F53202D204E4F564F
+      2020202020202020202020202020202020202020201A416EFA6E63696F206465
+      2050726F76656E746F73202D204343491D43617274656972612052656E646120
+      56617269E176656C2041746976610843454D494720504E0000000062A7794132
+      CB5151CB3FE33FCDCCCCCCAC9ACF40125245472F5245504C414E202D20434149
+      5841000000000000CAD244C5CC4230414E554E43494F2044452050524F56454E
+      544F53202D204E4F564F2020202020202020202020202020202020202020201A
+      416EFA6E63696F2064652050726F76656E746F73202D204343491D4361727465
+      6972612052656E64612056617269E176656C2041746976610843454D49472050
+      4E0000000062A77941A2895F51CB3FE33FCDCCCCCCAC9ACF40125245472F5245
+      504C414E202D204341495841000400000000CAD244C5CC420B52656D756E6572
+      6163616F1D43617274656972612052656E64612056617269E176656C20417469
+      7661012000000000000000000000000000000000D7A3703DEAABC54012524547
+      2F5245504C414E202D204341495841000400000000CAD244C5CC420B52656D75
+      6E65726163616F1E43617274656972612052656E64612056617269E176656C20
+      4F7574726F73012000000000000000000000000000000000EC51B81E05A3A640
+      125245472F5245504C414E202D204341495841000000000000CAD244C5CC4214
+      414E554E43494F2044452050524F56454E544F5314416EFA6E63696F20646520
+      50726F76656E746F731F43617274656972612052656E64612056617269E17665
+      6C20506173736976610843454D494720504E000080AAA24CC44132CB5151CB3F
+      E33F295C8FC2FC011941125245472F5245504C414E202D204341495841000000
+      000000CAD244C5CC4214414E554E43494F2044452050524F56454E544F531441
+      6EFA6E63696F2064652050726F76656E746F731F43617274656972612052656E
+      64612056617269E176656C20506173736976610843454D494720504E000080AA
+      A24CC441A2895F51CB3FE33F295C8FC2FC011941125245472F5245504C414E20
+      2D204341495841000400000000CAD244C5CC420B52656D756E65726163616F1F
+      43617274656972612052656E64612056617269E176656C205061737369766101
+      20000000000000000000000000000000005C8FC2F54897DA40125245472F5245
+      504C414E202D204341495841000400000000F86547C5CC420B52656D756E6572
+      6163616F1D43617274656972612052656E64612056617269E176656C20417469
+      76610120000000000000000000000000000000003E0AD7A3F0D4C64012524547
+      2F5245504C414E202D204341495841000400000000F86547C5CC420B52656D75
+      6E65726163616F1E43617274656972612052656E64612056617269E176656C20
+      4F7574726F73012000000000000000000000000000000000F6285C8F42D9A740
+      125245472F5245504C414E202D204341495841000400000000F86547C5CC420B
+      52656D756E65726163616F1F43617274656972612052656E64612056617269E1
+      76656C205061737369766101200000000000000000000000000000000090C2F5
+      28BC03DC40125245472F5245504C414E202D20434149584100040000000026F9
+      49C5CC420B52656D756E65726163616F1D43617274656972612052656E646120
+      56617269E176656C204174697661012000000000000000000000000000000000
+      AE47E17AD411C640125245472F5245504C414E202D2043414958410004000000
+      0026F949C5CC420B52656D756E65726163616F1E43617274656972612052656E
+      64612056617269E176656C204F7574726F730120000000000000000000000000
+      00000000295C8FC2750DA740125245472F5245504C414E202D20434149584100
+      040000000026F949C5CC420B52656D756E65726163616F1F4361727465697261
+      2052656E64612056617269E176656C2050617373697661012000000000000000
+      000000000000000000295C8FC25514DB40125245472F5245504C414E202D2043
+      41495841000000000000B0B251C5CC4214414E554E43494F2044452050524F56
+      454E544F5314416EFA6E63696F2064652050726F76656E746F731D4361727465
+      6972612052656E64612056617269E176656C2041746976610B42524144455343
+      4F20504E00000000F0B304412A23AF80A2E7FE3FA4703D0A8DFE134112524547
+      2F5245504C414E202D204341495841000000000000B0B251C5CC4230414E554E
+      43494F2044452050524F56454E544F53202D204E4F564F202020202020202020
+      2020202020202020202020201A416EFA6E63696F2064652050726F76656E746F
+      73202D204343491D43617274656972612052656E64612056617269E176656C20
+      41746976610B425241444553434F20504E000000000077DF402A23AF80A2E7FE
+      3F15AE47E15263EE40125245472F5245504C414E202D20434149584100040000
+      0000B0B251C5CC420B52656D756E65726163616F1D4361727465697261205265
+      6E64612056617269E176656C2041746976610120000000000000000000000000
+      00000000C3F5285C6FC7C340125245472F5245504C414E202D20434149584100
+      0400000000B0B251C5CC420B52656D756E65726163616F1E4361727465697261
+      2052656E64612056617269E176656C204F7574726F7301200000000000000000
+      0000000000000000295C8FC2F5A8A440125245472F5245504C414E202D204341
+      495841000000000000B0B251C5CC4214414E554E43494F2044452050524F5645
+      4E544F5314416EFA6E63696F2064652050726F76656E746F731F436172746569
+      72612052656E64612056617269E176656C20506173736976610B425241444553
+      434F20504E0000000026B432412A23AF80A2E7FE3FCDCCCC0C47104241125245
+      472F5245504C414E202D204341495841000400000000B0B251C5CC420B52656D
+      756E65726163616F1F43617274656972612052656E64612056617269E176656C
+      2050617373697661012000000000000000000000000000000000AE47E17AD444
+      D840125245472F5245504C414E202D2043414958410004000000000CD956C5CC
+      420B52656D756E65726163616F1D43617274656972612052656E646120566172
+      69E176656C204174697661012000000000000000000000000000000000A4703D
+      0A77EBC240125245472F5245504C414E202D2043414958410004000000000CD9
+      56C5CC420B52656D756E65726163616F1E43617274656972612052656E646120
+      56617269E176656C204F7574726F730120000000000000000000000000000000
+      0048E17A142EC3A340125245472F5245504C414E202D20434149584100040000
+      00000CD956C5CC420B52656D756E65726163616F1F4361727465697261205265
+      6E64612056617269E176656C2050617373697661012000000000000000000000
+      000000000000CDCCCCCCEC36D740125245472F5245504C414E202D2043414958
+      410004000000003A6C59C5CC420B52656D756E65726163616F1D436172746569
+      72612052656E64612056617269E176656C204174697661012000000000000000
+      00000000000000000067666666E6C0C540125245472F5245504C414E202D2043
+      414958410004000000003A6C59C5CC420B52656D756E65726163616F1E436172
+      74656972612052656E64612056617269E176656C204F7574726F730120000000
+      000000000000000000000000003E0AD7A3F0B8A640125245472F5245504C414E
+      202D2043414958410004000000003A6C59C5CC420B52656D756E65726163616F
+      1F43617274656972612052656E64612056617269E176656C2050617373697661
+      0120000000000000000000000000000000009A99999909B1DA40125245472F52
+      45504C414E202D20434149584100040000000068FF5BC5CC420B52656D756E65
+      726163616F1D43617274656972612052656E64612056617269E176656C204174
+      697661012000000000000000000000000000000000E17A14AE677FC640125245
+      472F5245504C414E202D20434149584100040000000068FF5BC5CC420B52656D
+      756E65726163616F1E43617274656972612052656E64612056617269E176656C
+      204F7574726F7301200000000000000000000000000000000052B81E85EB7FA7
+      40125245472F5245504C414E202D20434149584100040000000068FF5BC5CC42
+      0B52656D756E65726163616F1F43617274656972612052656E64612056617269
+      E176656C20506173736976610120000000000000000000000000000000001F85
+      EB51C89ADB40125245472F5245504C414E202D204341495841000000000000F2
+      B863C5CC4230414E554E43494F2044452050524F56454E544F53202D204E4F56
+      4F2020202020202020202020202020202020202020201A416EFA6E63696F2064
+      652050726F76656E746F73202D204343491D43617274656972612052656E6461
+      2056617269E176656C2041746976610947455244415520504E00000000781F1D
+      41CDCCCCCCCCCCDC3F00000000EC350A41125245472F5245504C414E202D2043
+      41495841000400000000F2B863C5CC420B52656D756E65726163616F1D436172
+      74656972612052656E64612056617269E176656C204174697661012000000000
+      0000000000000000000000006766666686D9C640125245472F5245504C414E20
+      2D204341495841000400000000F2B863C5CC420B52656D756E65726163616F1E
+      43617274656972612052656E64612056617269E176656C204F7574726F730120
+      00000000000000000000000000000000C3F5285C0FDEA740125245472F524550
+      4C414E202D204341495841001000000000F2B863C5CC4216414C202D20414C54
+      45524143414F20444F205449504F2543617274656972612052656E6461205661
+      72696176656C20506172746963697061636F6573142A42524153494C20464552
+      524F56494153204F4E0000000000405F40000000000000000000000000000000
+      00125245472F5245504C414E202D204341495841001000000000F2B863C5CC42
+      2C43414E43454C414D454E544F2044452053554253435249C7C34F20434F4D20
+      41C7D54553202D2042414958412543617274656972612052656E646120566172
+      696176656C20506172746963697061636F657313425220464552524F56494153
+      20524543204F4E000000000000224045D8F0F44A59CE3F295C8FC2F528004012
+      5245472F5245504C414E202D204341495841001000000000F2B863C5CC422C43
+      414E43454C414D454E544F2044452053554253435249C7C34F20434F4D2041C7
+      D54553202D2042414958412543617274656972612052656E6461205661726961
+      76656C20506172746963697061636F657313425220464552524F564941532052
+      4543204F4E000000000080434045D8F0F44A59CE3FA4703D0AD7A32240125245
+      472F5245504C414E202D204341495841001000000000F2B863C5CC422C43414E
+      43454C414D454E544F2044452053554253435249C7C34F20434F4D2041C7D545
+      53202D2042414958412543617274656972612052656E64612056617269617665
+      6C20506172746963697061636F657313425220464552524F5649415320524543
+      204F4E000000000000494045D8F0F44A59CE3F713D0AD7A3F02740125245472F
+      5245504C414E202D204341495841001000000000F2B863C5CC422C43414E4345
+      4C414D454E544F2044452053554253435249C7C34F20434F4D2041C7D5455320
+      2D2042414958412543617274656972612052656E646120566172696176656C20
+      506172746963697061636F657313425220464552524F5649415320524543204F
+      4E0000000000003B4045D8F0F44A59CE3F52B81E85EB511940125245472F5245
+      504C414E202D204341495841001000000000F2B863C5CC422E43414E43454C41
+      4D454E544F2044452053554253435249C7C34F20434F4D2041C7D54553202D20
+      41554D454E544F2543617274656972612052656E646120566172696176656C20
+      506172746963697061636F6573104E4F564120464552524F42414E20504E0000
+      00D0A0609641766716363D071A3F0000000000000000125245472F5245504C41
+      4E202D204341495841001000000000F2B863C5CC422E43414E43454C414D454E
+      544F2044452053554253435249C7C34F20434F4D2041C7D54553202D2041554D
+      454E544F2543617274656972612052656E646120566172696176656C20506172
+      746963697061636F65730C2A464552524F42414E204F4E000000000E537341A1
+      123A5C69211A3F0000000000000000125245472F5245504C414E202D20434149
+      5841001000000000F2B863C5CC422E43414E43454C414D454E544F2044452053
+      554253435249C7C34F20434F4D2041C7D54553202D2041554D454E544F254361
+      7274656972612052656E646120566172696176656C2050617274696369706163
+      6F65730C2A464552524F42414E20504E000000E033AB9C41631DB72D04181A3F
+      0000000000000000125245472F5245504C414E202D2043414958410010000000
+      00F2B863C5CC422E43414E43454C414D454E544F2044452053554253435249C7
+      C34F20434F4D2041C7D54553202D2041554D454E544F25436172746569726120
+      52656E646120566172696176656C20506172746963697061636F6573104E4F56
+      4120464552524F42414E204F4E000000B8495D8E41262834FF9E0E1A3F000000
+      0000000000125245472F5245504C414E202D204341495841001000000000F2B8
+      63C5CC4216414C202D20414C5445524143414F20444F205449504F2543617274
+      656972612052656E646120566172696176656C20506172746963697061636F65
+      7313425220464552524F5649415320524543204F4E0000000000405F40000000
+      00000000000000000000000000125245472F5245504C414E202D204341495841
+      000400000000F2B863C5CC420B52656D756E65726163616F1F43617274656972
+      612052656E64612056617269E176656C20506173736976610120000000000000
+      00000000000000000000CDCCCCCC5C09DC40125245472F5245504C414E202D20
+      4341495841000400000000204C66C5CC420B52656D756E65726163616F1D4361
+      7274656972612052656E64612056617269E176656C2041746976610120000000
+      000000000000000000000000009A9999991997C540125245472F5245504C414E
+      202D204341495841000400000000204C66C5CC420B52656D756E65726163616F
+      1E43617274656972612052656E64612056617269E176656C204F7574726F7301
+      2000000000000000000000000000000000F6285C8F428DA640125245472F5245
+      504C414E202D204341495841000000000000204C66C5CC421B5656202D205645
+      4E44412044452041434F455320412056495354410E56656E64612064652041E7
+      F565732543617274656972612052656E646120566172696176656C2050617274
+      6963697061636F65730C2A464552524F42414E204F4E000000000E5373412D43
+      1CEBE2361A3F295C8FC2F5280040125245472F5245504C414E202D2043414958
+      41000000000000204C66C5CC421B5656202D2056454E44412044452041434F45
+      5320412056495354410E56656E64612064652041E7F565732543617274656972
+      612052656E646120566172696176656C20506172746963697061636F65730C2A
+      464552524F42414E20504E000000E033AB9C41E82E2EFAAF181A3F713D0AD7A3
+      F02740125245472F5245504C414E202D204341495841000000000000204C66C5
+      CC421B5656202D2056454E44412044452041434F455320412056495354410E56
+      656E64612064652041E7F565732543617274656972612052656E646120566172
+      696176656C20506172746963697061636F6573104E4F564120464552524F4241
+      4E204F4E000000B8495D8E41E82E2EFAAF181A3F52B81E85EB51194012524547
+      2F5245504C414E202D204341495841000000000000204C66C5CC421B5656202D
+      2056454E44412044452041434F455320412056495354410E56656E6461206465
+      2041E7F565732543617274656972612052656E646120566172696176656C2050
+      6172746963697061636F6573104E4F564120464552524F42414E20504E000000
+      D0A0609641262834FF9E0E1A3FA4703D0AD7A32240125245472F5245504C414E
+      202D204341495841000400000000204C66C5CC420B52656D756E65726163616F
+      1F43617274656972612052656E64612056617269E176656C2050617373697661
+      01200000000000000000000000000000000085EB51B8BE7DDA40125245472F52
+      45504C414E202D2043414958410010000000004EDF68C5CC4210424F202D2042
+      4F4E4946494341C7C34F1D43617274656972612052656E64612056617269E176
+      656C2041746976610B425241444553434F20504E00000000F0B30441AE47E17A
+      142660400000000000000000125245472F5245504C414E202D20434149584100
+      10000000004EDF68C5CC4231424F202D20424F4E4946494341C7C34F202D204E
+      4F564F20202020202020202020202020202020202020202020202020201D4361
+      7274656972612052656E64612056617269E176656C2041746976610B42524144
+      4553434F20504E000000000077DF40AE47E17A14266040000000000000000012
+      5245472F5245504C414E202D2043414958410004000000004EDF68C5CC420B52
+      656D756E65726163616F1D43617274656972612052656E64612056617269E176
+      656C20417469766101200000000000000000000000000000000015AE47E11AAE
+      C640125245472F5245504C414E202D2043414958410004000000004EDF68C5CC
+      420B52656D756E65726163616F1E43617274656972612052656E646120566172
+      69E176656C204F7574726F730120000000000000000000000000000000003333
+      3333B3B0A740125245472F5245504C414E202D2043414958410010000000004E
+      DF68C5CC4210424F202D20424F4E4946494341C7C34F1F436172746569726120
+      52656E64612056617269E176656C20506173736976610B425241444553434F20
+      504E0000000026B43241AE47E17A142660400000000000000000125245472F52
+      45504C414E202D2043414958410004000000004EDF68C5CC420B52656D756E65
+      726163616F1F43617274656972612052656E64612056617269E176656C205061
+      7373697661012000000000000000000000000000000000EC51B81E15D4DB4012
+      5245472F5245504C414E202D2043414958410004000000007C726BC5CC420B52
+      656D756E65726163616F1D43617274656972612052656E64612056617269E176
+      656C204174697661012000000000000000000000000000000000AE47E17A54C3
+      C540125245472F5245504C414E202D2043414958410004000000007C726BC5CC
+      420B52656D756E65726163616F1E43617274656972612052656E646120566172
+      69E176656C204F7574726F73012000000000000000000000000000000000295C
+      8FC275BBA640125245472F5245504C414E202D2043414958410010000000007C
+      726BC5CC421856454E43494D454E544F2044452053554253435249C7C34F2543
+      617274656972612052656E646120566172696176656C20506172746963697061
+      636F657310424C5545205452454520444952204F4E00000000E0691841000000
+      00000000000000000000000000125245472F5245504C414E202D204341495841
+      0004000000007C726BC5CC420B52656D756E65726163616F1F43617274656972
+      612052656E64612056617269E176656C20506173736976610120000000000000
+      00000000000000000000713D0AD703B4DA40125245472F5245504C414E202D20
+      4341495841000400000000AA056EC5CC420B52656D756E65726163616F1D4361
+      7274656972612052656E64612056617269E176656C2041746976610120000000
+      000000000000000000000000003E0AD7A3B049C540125245472F5245504C414E
+      202D204341495841000400000000AA056EC5CC420B52656D756E65726163616F
+      1E43617274656972612052656E64612056617269E176656C204F7574726F7301
+      200000000000000000000000000000000052B81E856B3CA640125245472F5245
+      504C414E202D204341495841000400000000AA056EC5CC420B52656D756E6572
+      6163616F1F43617274656972612052656E64612056617269E176656C20506173
+      73697661012000000000000000000000000000000000713D0AD7C31EDA401252
+      45472F5245504C414E202D20434149584100040000000034BF75C5CC420B5265
+      6D756E65726163616F1D43617274656972612052656E64612056617269E17665
+      6C204174697661012000000000000000000000000000000000EC51B81EA5C2C5
+      40125245472F5245504C414E202D20434149584100040000000034BF75C5CC42
+      0B52656D756E65726163616F1E43617274656972612052656E64612056617269
+      E176656C204F7574726F73012000000000000000000000000000000000F6285C
+      8FC2BAA640125245472F5245504C414E202D20434149584100040000000034BF
+      75C5CC420B52656D756E65726163616F1F43617274656972612052656E646120
+      56617269E176656C205061737369766101200000000000000000000000000000
+      0000CDCCCCCC2CB3DA40125245472F5245504C414E202D204341495841000400
+      000000625278C5CC420B52656D756E65726163616F1D43617274656972612052
+      656E64612056617269E176656C20417469766101200000000000000000000000
+      000000000052B81E852BF2C440125245472F5245504C414E202D204341495841
+      000400000000625278C5CC420B52656D756E65726163616F1E43617274656972
+      612052656E64612056617269E176656C204F7574726F73012000000000000000
+      0000000000000000000000000000E1A540125245472F5245504C414E202D2043
+      41495841000400000000625278C5CC420B52656D756E65726163616F1F436172
+      74656972612052656E64612056617269E176656C205061737369766101200000
+      00000000000000000000000000003E0AD7A360B3D940125245472F5245504C41
+      4E202D20434149584100000000000090E57AC5CC4230444920202D2044495649
+      44454E444F53202D204E4F564F20202020202020202020202020202020202020
+      2020202020200D4469766964656E646F204343491D4361727465697261205265
+      6E64612056617269E176656C2041746976610947455244415520504E00000000
+      781F1D41CDCCCCCCCCCCDC3F00000000EC350A41125245472F5245504C414E20
+      2D20434149584100040000000090E57AC5CC420B52656D756E65726163616F1D
+      43617274656972612052656E64612056617269E176656C204174697661012000
+      0000000000000000000000000000000AD7A370FDC9C640125245472F5245504C
+      414E202D20434149584100040000000090E57AC5CC420B52656D756E65726163
+      616F1E43617274656972612052656E64612056617269E176656C204F7574726F
+      73012000000000000000000000000000000000B81E85EBD1CDA740125245472F
+      5245504C414E202D20434149584100000000000090E57AC5CC42184A55202D20
+      4A55524F5320534F425245204341504954414C054A75726F7325436172746569
+      72612052656E646120566172696176656C20506172746963697061636F657306
+      434547204F4E0000C0C8F1C6DF414EEA4F0BF358123FB81E85EB51A862401252
+      45472F5245504C414E202D20434149584100000000000090E57AC5CC42184A55
+      202D204A55524F5320534F425245204341504954414C054A75726F7325436172
+      74656972612052656E646120566172696176656C20506172746963697061636F
+      657306434547204F4E0000C0C8F1C6DF413CDF4F8D976EE03FA4703D0AD84516
+      41125245472F5245504C414E202D20434149584100040000000090E57AC5CC42
+      0B52656D756E65726163616F1F43617274656972612052656E64612056617269
+      E176656C205061737369766101200000000000000000000000000000000052B8
+      1E854BF6DB40125245472F5245504C414E202D204341495841000000000000BE
+      787DC5CC42184A55202D204A55524F5320534F425245204341504954414C054A
+      75726F731D43617274656972612052656E64612056617269E176656C20417469
+      76610B425241444553434F20504E00000000F0B30441228E75711B0DB03FEC51
+      B81EE5C4C440125245472F5245504C414E202D204341495841000000000000BE
+      787DC5CC422D4A55202D204A55524F5320534F425245204341504954414C202D
+      20434349202020202020202020202020202020094A75726F73204343491D4361
+      7274656972612052656E64612056617269E176656C2041746976610B42524144
+      4553434F20504E000000000077DF40F1A58D761E0DB03FCDCCCCCCCC909F4012
+      5245472F5245504C414E202D204341495841000400000000BE787DC5CC420B52
+      656D756E65726163616F1D43617274656972612052656E64612056617269E176
+      656C20417469766101200000000000000000000000000000000052B81E858B9C
+      C640125245472F5245504C414E202D204341495841000000000000BE787DC5CC
+      4214414E554E43494F2044452050524F56454E544F5314416EFA6E63696F2064
+      652050726F76656E746F731E43617274656972612052656E64612056617269E1
+      76656C204F7574726F730F54454C4520435452204F455320504E000000000082
+      F640C5D48910C68BCB3FD7A3703D0AD73340125245472F5245504C414E202D20
+      4341495841000400000000BE787DC5CC420B52656D756E65726163616F1E4361
+      7274656972612052656E64612056617269E176656C204F7574726F7301200000
+      000000000000000000000000000000000000004CA740125245472F5245504C41
+      4E202D204341495841000000000000BE787DC5CC4214414E554E43494F204445
+      2050524F56454E544F5314416EFA6E63696F2064652050726F76656E746F7325
+      43617274656972612052656E646120566172696176656C205061727469636970
+      61636F6573122A4C4954454C205041525420532F41204F4E0000000000405240
+      0255922BAB9FAD3FE17A14AE47E11040125245472F5245504C414E202D204341
+      495841000000000000BE787DC5CC4214414E554E43494F2044452050524F5645
+      4E544F5314416EFA6E63696F2064652050726F76656E746F7325436172746569
+      72612052656E646120566172696176656C20506172746963697061636F657313
+      2A4C4954454C205041525420532F4120504E4100000000004062400255922BAB
+      9FAD3FE17A14AE47E12040125245472F5245504C414E202D2043414958410000
+      00000000BE787DC5CC4214414E554E43494F2044452050524F56454E544F5314
+      416EFA6E63696F2064652050726F76656E746F731F4361727465697261205265
+      6E64612056617269E176656C20506173736976610A422E204954415520504E00
+      000000709E24411B2FDD240681953F1F85EB5138B6CB40125245472F5245504C
+      414E202D204341495841000000000000BE787DC5CC42184A55202D204A55524F
+      5320534F425245204341504954414C054A75726F731F43617274656972612052
+      656E64612056617269E176656C20506173736976610A422E204954415520504E
+      00000000709E24411B2FDD240681953F1F85EB5138B6CB40125245472F524550
+      4C414E202D204341495841000000000000BE787DC5CC42184A55202D204A5552
+      4F5320534F425245204341504954414C054A75726F731F436172746569726120
+      52656E64612056617269E176656C20506173736976610B425241444553434F20
+      504E0000000026B43241228E75711B0DB03F1F85EB5178C3F240125245472F52
+      45504C414E202D204341495841000400000000BE787DC5CC420B52656D756E65
+      726163616F1F43617274656972612052656E64612056617269E176656C205061
+      73736976610120000000000000000000000000000000009A999999C95DDB4012
+      5245472F5245504C414E202D204341495841}
+  end
+  object sprMovOperVirtual: TCMSqlParams
+    SQL.Strings = (
+      
+        'SELECT OP.DATAHISTCAIXA, OP.DESCTIPOOPERACAO, OP.DESCCAIXACOTA, ' +
+        'OP.DESCCARTGERENC, OP.DESCINVESTIMENTO,'
+      
+        '       OP.QTDEOPERACAO, OP.PRECOUNITOPERACAO, OP.VLRHISTCAIXA, P' +
+        'L.PLANPRVCONTABPATRO'
+      
+        'FROM ( (SELECT OI.DATAOPERACAO AS DATAHISTCAIXA, TP.DESCTIPOOPER' +
+        'ACAO, EC.DESCCAIXACOTA,'
+      
+        '       CG.DESCCARTGERENC, IV.DESCINVESTIMENTO, OI.QTDEOPERACAO, ' +
+        'OI.PRECOUNITOPERACAO,'
+      '       OI.VLROPERACAO AS VLRHISTCAIXA, OI.IDPLANPREVCTBPATR'
+      
+        '       FROM OPERACAOINVEST OI, INVESTIMENTO IV, CARTEIRAGERENC C' +
+        'G, TIPOOPERACAO TP, EVENTOCAIXACOTA  EC'
+      
+        '       WHERE OI.DATAOPERACAO BETWEEN TO_DATE('#39'01/11/2005'#39', '#39'DD/M' +
+        'M/YYYY'#39') AND'
+      
+        '                                     TO_DATE('#39'01/12/2005'#39', '#39'DD/M' +
+        'M/YYYY'#39')'
+      '      AND OI.IDINVESTIMENTO    = IV.IDINVESTIMENTO'
+      '      AND OI.IDCARTEIRAGERENC  = CG.IDCARTEIRAGERENC'
+      '      AND OI.IDTIPOINVEST          = TP.IDTIPOINVEST'
+      '      AND OI.IDTIPOOPERACAO    = TP.IDTIPOOPERACAO'
+      '      AND OI.IDTIPOINVEST          = EC.IDTIPOINVEST(+)'
+      '      AND OI.IDTIPOOPERACAO    = EC.IDTIPOOPERACAO(+)'
+      '    )'
+      '    UNION'
+      
+        '    (SELECT HC.DATAHISTCAIXA, TP.DESCTIPOOPERACAO, EC.DESCCAIXAC' +
+        'OTA, CG.DESCCARTGERENC, '#39' '#39' AS DESCINVESTIMENTO,'
+      
+        '     0 AS QTDEOPERACAO, 0 AS PRECOUNITOPERACAO, HC.VLRHISTCAIXA,' +
+        ' HC.IDPLANPREVCTBPATR'
+      
+        '     FROM  HISTCAIXA HC, CARTEIRAGERENC CG, CARTEIRAXEVENTO CE, ' +
+        'TIPOOPERACAO TP, EVENTOCAIXACOTA EC'
+      
+        '     WHERE HC.DATAHISTCAIXA BETWEEN TO_DATE('#39'01/11/2005'#39', '#39'DD/MM' +
+        '/YYYY'#39') AND'
+      
+        '                                    TO_DATE('#39'01/12/2005'#39', '#39'DD/MM' +
+        '/YYYY'#39')'
+      '      AND HC.IDCARTEIRAGERENC  = CG.IDCARTEIRAGERENC'
+      '      AND HC.IDCARTEIRAXEVENTO = CE.IDCARTEIRAXEVENTO'
+      '      AND CE.IDEVENTOCAIXACOTA = EC.IDEVENTOCAIXACOTA'
+      '      AND EC.IDTIPOINVEST          = TP.IDTIPOINVEST(+)'
+      '      AND EC.IDTIPOOPERACAO    = TP.IDTIPOOPERACAO(+)'
+      '      AND HC.IDOPERACAOINVEST  NOT IN (SELECT IDOPERACAOINVEST'
+      '                                       FROM OPERACAOINVEST OI'
+      
+        '                                       WHERE OI.IDOPERACAOINVEST' +
+        ' = HC.IDOPERACAOINVEST)'
+      '    )'
+      ') OP,'
+      '('
+      'SELECT'
+      '   PA.IDPLANPREVCTBPATR,'
+      '   PA.IDPLANOPREV,'
+      '   PA.IDPATRO,'
+      '   (PL.NOME ||'#39' - '#39'|| PE.NOME) AS PLANPRVCONTABPATRO'
+      'FROM'
+      '   PESSOA PE,'
+      '   PLANPREVCONTABPATRO PA,'
+      '   PLANPREVCONTABIL PL'
+      'WHERE'
+      '   (PA.IDPATRO = PE.IDPESSOA(+))  AND'
+      '   (PA.IDPLANOPREV = PL.IDPLANOPREV)'
+      ') PL'
+      'WHERE'
+      '   PL.IDPLANPREVCTBPATR = OP.IDPLANPREVCTBPATR'
+      ''
+      
+        'ORDER BY PL.PLANPRVCONTABPATRO, DATAHISTCAIXA, DESCCARTGERENC, D' +
+        'ESCCAIXACOTA')
+    ClientDataSet = cdsMovOperVirtual
+    Left = 32
+    Top = 72
+  end
+  object dsMovOperVirtual: TDataSource
+    DataSet = cdsMovOperVirtual
+    Left = 192
+    Top = 72
+  end
+  object pplMovOperVirtual: TppBDEPipeline
+    DataSource = dsMovOperVirtual
+    UserName = 'pplMovOperVirtual'
+    Left = 32
+    Top = 136
+    object pplMovOperVirtualppField1: TppField
+      FieldAlias = 'DATAHISTCAIXA'
+      FieldName = 'DATAHISTCAIXA'
+      FieldLength = 0
+      DataType = dtDateTime
+      DisplayWidth = 18
+      Position = 0
+    end
+    object pplMovOperVirtualppField2: TppField
+      FieldAlias = 'DESCTIPOOPERACAO'
+      FieldName = 'DESCTIPOOPERACAO'
+      FieldLength = 60
+      DisplayWidth = 60
+      Position = 1
+    end
+    object pplMovOperVirtualppField3: TppField
+      FieldAlias = 'DESCCAIXACOTA'
+      FieldName = 'DESCCAIXACOTA'
+      FieldLength = 40
+      DisplayWidth = 40
+      Position = 2
+    end
+    object pplMovOperVirtualppField4: TppField
+      FieldAlias = 'DESCCARTGERENC'
+      FieldName = 'DESCCARTGERENC'
+      FieldLength = 40
+      DisplayWidth = 40
+      Position = 3
+    end
+    object pplMovOperVirtualppField5: TppField
+      FieldAlias = 'DESCINVESTIMENTO'
+      FieldName = 'DESCINVESTIMENTO'
+      FieldLength = 60
+      DisplayWidth = 60
+      Position = 4
+    end
+    object pplMovOperVirtualppField6: TppField
+      Alignment = taRightJustify
+      FieldAlias = 'QTDEOPERACAO'
+      FieldName = 'QTDEOPERACAO'
+      FieldLength = 0
+      DataType = dtDouble
+      DisplayWidth = 10
+      Position = 5
+    end
+    object pplMovOperVirtualppField7: TppField
+      Alignment = taRightJustify
+      FieldAlias = 'PRECOUNITOPERACAO'
+      FieldName = 'PRECOUNITOPERACAO'
+      FieldLength = 0
+      DataType = dtDouble
+      DisplayWidth = 10
+      Position = 6
+    end
+    object pplMovOperVirtualppField8: TppField
+      Alignment = taRightJustify
+      FieldAlias = 'VLRHISTCAIXA'
+      FieldName = 'VLRHISTCAIXA'
+      FieldLength = 0
+      DataType = dtDouble
+      DisplayWidth = 10
+      Position = 7
+    end
+    object pplMovOperVirtualppField9: TppField
+      FieldAlias = 'PLANPRVCONTABPATRO'
+      FieldName = 'PLANPRVCONTABPATRO'
+      FieldLength = 113
+      DisplayWidth = 113
+      Position = 8
+    end
+  end
+  object rptMovOperVirtual: TppReport
+    AutoStop = False
+    DataPipeline = pplMovOperVirtual
+    OnStartPage = rptMovOperVirtualStartPage
+    PassSetting = psTwoPass
+    PrinterSetup.BinName = 'Default'
+    PrinterSetup.DocumentName = 'Histórico de Movimentação de Custódia'
+    PrinterSetup.Orientation = poLandscape
+    PrinterSetup.PaperName = 'A4'
+    PrinterSetup.PrinterName = 'Default'
+    PrinterSetup.mmMarginBottom = 6350
+    PrinterSetup.mmMarginLeft = 6350
+    PrinterSetup.mmMarginRight = 6350
+    PrinterSetup.mmMarginTop = 6350
+    PrinterSetup.mmPaperHeight = 210000
+    PrinterSetup.mmPaperWidth = 297000
+    PrinterSetup.PaperSize = 9
+    Template.SaveTo = stDatabase
+    AllowPrintToArchive = True
+    AllowPrintToFile = True
+    BeforePrint = rptMovOperVirtualBeforePrint
+    DeviceType = 'Screen'
+    OutlineSettings.CreateNode = True
+    OutlineSettings.CreatePageNodes = True
+    OutlineSettings.Enabled = False
+    OutlineSettings.Visible = False
+    TextSearchSettings.DefaultString = '<FindText>'
+    TextSearchSettings.Enabled = False
+    Left = 192
+    Top = 136
+    Version = '7.04'
+    mmColumnWidth = 197300
+    DataPipelineName = 'pplMovOperVirtual'
+    object ppHeaderBand1: TppHeaderBand
+      mmBottomOffset = 0
+      mmHeight = 25929
+      mmPrintPosition = 0
+      object lblTituloRelatorio: TppLabel
+        UserName = 'lblTituloRelatorio'
+        Caption = 'Movimentação das Operações da Carteira Gerencial'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 10
+        Font.Style = [fsBold, fsItalic]
+        Transparent = True
+        mmHeight = 4233
+        mmLeft = 24871
+        mmTop = 8202
+        mmWidth = 86784
+        BandType = 0
+      end
+      object lblEmpresa: TppLabel
+        UserName = 'LblEmpresa'
+        Caption = 'LblEmpresa'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 12
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 5027
+        mmLeft = 24871
+        mmTop = 1058
+        mmWidth = 24342
+        BandType = 0
+      end
+      object ppDBImage1: TppDBImage
+        UserName = 'DbLogo'
+        MaintainAspectRatio = False
+        ShiftWithParent = True
+        Stretch = True
+        DataField = 'IMAGEM'
+        DataPipeline = dtmOperComum.pplEmpresa
+        GraphicType = 'Bitmap'
+        ParentDataPipeline = False
+        DataPipelineName = 'pplEmpresa'
+        mmHeight = 13229
+        mmLeft = 3175
+        mmTop = 265
+        mmWidth = 13229
+        BandType = 0
+      end
+      object lblPeriodo: TppLabel
+        UserName = 'lblPeriodo'
+        Caption = 'Periodo'
+        Font.Charset = ANSI_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 9
+        Font.Style = [fsItalic]
+        Transparent = True
+        mmHeight = 3704
+        mmLeft = 24871
+        mmTop = 14023
+        mmWidth = 11113
+        BandType = 0
+      end
+      object linCabecalho: TppLine
+        UserName = 'linCabecalho'
+        ParentWidth = True
+        Position = lpBottom
+        Weight = 0.75
+        mmHeight = 1852
+        mmLeft = 0
+        mmTop = 19315
+        mmWidth = 284300
+        BandType = 0
+      end
+      object shpCustodiante: TppShape
+        UserName = 'shpDetalhe1'
+        Brush.Color = clSilver
+        ParentWidth = True
+        Pen.Style = psClear
+        mmHeight = 4763
+        mmLeft = 0
+        mmTop = 21166
+        mmWidth = 284300
+        BandType = 0
+      end
+      object ppLabel2: TppLabel
+        UserName = 'Label2'
+        Caption = 'Carteira Gerencial'
+        Font.Charset = ANSI_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 7
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 2910
+        mmLeft = 3175
+        mmTop = 21960
+        mmWidth = 21167
+        BandType = 0
+      end
+      object ppLabel4: TppLabel
+        UserName = 'Label4'
+        Caption = 'Investimento'
+        Font.Charset = ANSI_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 7
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 2910
+        mmLeft = 142082
+        mmTop = 21960
+        mmWidth = 15081
+        BandType = 0
+      end
+      object ppLabel5: TppLabel
+        UserName = 'Label5'
+        Caption = 'Valor'
+        Font.Charset = ANSI_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 7
+        Font.Style = [fsBold]
+        TextAlignment = taRightJustified
+        Transparent = True
+        mmHeight = 2910
+        mmLeft = 277284
+        mmTop = 21960
+        mmWidth = 6085
+        BandType = 0
+      end
+      object ppLabel6: TppLabel
+        UserName = 'Label6'
+        Caption = 'Quatidade'
+        Font.Charset = ANSI_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 7
+        Font.Style = [fsBold]
+        TextAlignment = taRightJustified
+        Transparent = True
+        mmHeight = 2910
+        mmLeft = 211138
+        mmTop = 21960
+        mmWidth = 11906
+        BandType = 0
+      end
+      object ppLabel7: TppLabel
+        UserName = 'Label7'
+        Caption = 'PU'
+        Font.Charset = ANSI_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 7
+        Font.Style = [fsBold]
+        TextAlignment = taRightJustified
+        Transparent = True
+        mmHeight = 2910
+        mmLeft = 250032
+        mmTop = 21960
+        mmWidth = 3440
+        BandType = 0
+      end
+      object ppLabel1: TppLabel
+        UserName = 'Label1'
+        Caption = 'Tipo de Operação'
+        Font.Charset = ANSI_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 7
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 2910
+        mmLeft = 59796
+        mmTop = 21960
+        mmWidth = 20638
+        BandType = 0
+      end
+      object ppLine1: TppLine
+        UserName = 'linCabecalho1'
+        ParentWidth = True
+        Position = lpBottom
+        Weight = 0.75
+        mmHeight = 1852
+        mmLeft = 0
+        mmTop = 24077
+        mmWidth = 284300
+        BandType = 0
+      end
+      object ppDBText5: TppDBText
+        UserName = 'DBText5'
+        DataField = 'PLANPRVCONTABPATRO'
+        DataPipeline = pplMovOperVirtual
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 10
+        Font.Style = [fsBold, fsItalic]
+        TextAlignment = taRightJustified
+        Transparent = True
+        DataPipelineName = 'pplMovOperVirtual'
+        mmHeight = 4233
+        mmLeft = 184944
+        mmTop = 8731
+        mmWidth = 98425
+        BandType = 0
+      end
+    end
+    object ppDetailBand1: TppDetailBand
+      mmBottomOffset = 0
+      mmHeight = 3175
+      mmPrintPosition = 0
+      object shpDetalhe: TppShape
+        OnPrint = shpDetalhePrint
+        UserName = 'shpDetalhe'
+        ParentWidth = True
+        Pen.Style = psClear
+        mmHeight = 3175
+        mmLeft = 0
+        mmTop = 0
+        mmWidth = 284300
+        BandType = 4
+      end
+      object ppDBText4: TppDBText
+        UserName = 'DBText4'
+        DataField = 'DESCCARTGERENC'
+        DataPipeline = pplMovOperVirtual
+        Font.Charset = ANSI_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 7
+        Font.Style = []
+        Transparent = True
+        DataPipelineName = 'pplMovOperVirtual'
+        mmHeight = 2910
+        mmLeft = 3175
+        mmTop = 0
+        mmWidth = 55827
+        BandType = 4
+      end
+      object ppDBText7: TppDBText
+        UserName = 'DBText7'
+        DataField = 'DESCINVESTIMENTO'
+        DataPipeline = pplMovOperVirtual
+        Font.Charset = ANSI_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 7
+        Font.Style = []
+        Transparent = True
+        DataPipelineName = 'pplMovOperVirtual'
+        mmHeight = 2910
+        mmLeft = 142082
+        mmTop = 0
+        mmWidth = 50800
+        BandType = 4
+      end
+      object ppDBText8: TppDBText
+        UserName = 'DBText8'
+        DataField = 'VLRHISTCAIXA'
+        DataPipeline = pplMovOperVirtual
+        DisplayFormat = '###,###,###,##0.00'
+        Font.Charset = ANSI_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 7
+        Font.Style = []
+        TextAlignment = taRightJustified
+        Transparent = True
+        DataPipelineName = 'pplMovOperVirtual'
+        mmHeight = 2910
+        mmLeft = 254530
+        mmTop = 0
+        mmWidth = 28840
+        BandType = 4
+      end
+      object ppDBText1: TppDBText
+        UserName = 'DBText1'
+        DataField = 'QTDEOPERACAO'
+        DataPipeline = pplMovOperVirtual
+        DisplayFormat = '###,###,###,###'
+        Font.Charset = ANSI_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 7
+        Font.Style = []
+        TextAlignment = taRightJustified
+        Transparent = True
+        DataPipelineName = 'pplMovOperVirtual'
+        mmHeight = 2910
+        mmLeft = 193411
+        mmTop = 0
+        mmWidth = 29633
+        BandType = 4
+      end
+      object ppDBText2: TppDBText
+        UserName = 'DBText2'
+        DataField = 'PRECOUNITOPERACAO'
+        DataPipeline = pplMovOperVirtual
+        DisplayFormat = '###,###,###,#########0.000000000'
+        Font.Charset = ANSI_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 7
+        Font.Style = []
+        TextAlignment = taRightJustified
+        Transparent = True
+        DataPipelineName = 'pplMovOperVirtual'
+        mmHeight = 2910
+        mmLeft = 223573
+        mmTop = 0
+        mmWidth = 29898
+        BandType = 4
+      end
+      object ppDBText6: TppDBText
+        UserName = 'DBText6'
+        DataField = 'DESCTIPOOPERACAO'
+        DataPipeline = pplMovOperVirtual
+        Font.Charset = ANSI_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 7
+        Font.Style = []
+        Transparent = True
+        DataPipelineName = 'pplMovOperVirtual'
+        mmHeight = 2910
+        mmLeft = 59796
+        mmTop = 0
+        mmWidth = 81227
+        BandType = 4
+      end
+    end
+    object ppFooterBand1: TppFooterBand
+      mmBottomOffset = 0
+      mmHeight = 13229
+      mmPrintPosition = 0
+      object ppSystemVariable1: TppSystemVariable
+        UserName = 'Calc2'
+        VarType = vtPageSetDesc
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        TextAlignment = taCentered
+        Transparent = True
+        mmHeight = 3704
+        mmLeft = 265
+        mmTop = 3175
+        mmWidth = 283369
+        BandType = 8
+      end
+      object lblSistema: TppLabel
+        UserName = 'lblSistema'
+        AutoSize = False
+        Caption = 'Nome do Sistema'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 3704
+        mmLeft = 265
+        mmTop = 3175
+        mmWidth = 283369
+        BandType = 8
+      end
+      object ppLine2: TppLine
+        UserName = 'Line2'
+        ParentWidth = True
+        Weight = 0.75
+        mmHeight = 1588
+        mmLeft = 0
+        mmTop = 1852
+        mmWidth = 284300
+        BandType = 8
+      end
+    end
+    object ppGroup3: TppGroup
+      BreakName = 'PLANPRVCONTABPATRO'
+      DataPipeline = pplMovOperVirtual
+      OutlineSettings.CreateNode = True
+      NewPage = True
+      UserName = 'Group3'
+      mmNewColumnThreshold = 0
+      mmNewPageThreshold = 0
+      DataPipelineName = 'pplMovOperVirtual'
+      object ppGroupHeaderBand3: TppGroupHeaderBand
+        mmBottomOffset = 0
+        mmHeight = 0
+        mmPrintPosition = 0
+      end
+      object ppGroupFooterBand3: TppGroupFooterBand
+        mmBottomOffset = 0
+        mmHeight = 0
+        mmPrintPosition = 0
+      end
+    end
+    object ppGroup1: TppGroup
+      BreakName = 'DATAHISTCAIXA'
+      DataPipeline = pplMovOperVirtual
+      KeepTogether = True
+      OutlineSettings.CreateNode = True
+      UserName = 'Group1'
+      mmNewColumnThreshold = 0
+      mmNewPageThreshold = 0
+      DataPipelineName = 'pplMovOperVirtual'
+      object ppGroupHeaderBand1: TppGroupHeaderBand
+        mmBottomOffset = 0
+        mmHeight = 3969
+        mmPrintPosition = 0
+        object ppDBText3: TppDBText
+          UserName = 'DBText3'
+          DataField = 'DATAHISTCAIXA'
+          DataPipeline = pplMovOperVirtual
+          DisplayFormat = 'dd/mm/yyyy'
+          Font.Charset = ANSI_CHARSET
+          Font.Color = clBlack
+          Font.Name = 'Arial'
+          Font.Size = 7
+          Font.Style = [fsBold]
+          SuppressRepeatedValues = True
+          Transparent = True
+          DataPipelineName = 'pplMovOperVirtual'
+          mmHeight = 2910
+          mmLeft = 3175
+          mmTop = 529
+          mmWidth = 15875
+          BandType = 3
+          GroupNo = 0
+        end
+        object ppLine3: TppLine
+          UserName = 'Line3'
+          ParentWidth = True
+          Weight = 0.75
+          mmHeight = 1588
+          mmLeft = 0
+          mmTop = 0
+          mmWidth = 284300
+          BandType = 3
+          GroupNo = 0
+        end
+      end
+      object ppGroupFooterBand1: TppGroupFooterBand
+        mmBottomOffset = 0
+        mmHeight = 1058
+        mmPrintPosition = 0
+      end
+    end
+    object ppGroup2: TppGroup
+      BreakName = 'DESCCARTGERENC'
+      DataPipeline = pplMovOperVirtual
+      KeepTogether = True
+      OutlineSettings.CreateNode = True
+      UserName = 'Group2'
+      mmNewColumnThreshold = 0
+      mmNewPageThreshold = 0
+      DataPipelineName = 'pplMovOperVirtual'
+      object ppGroupHeaderBand2: TppGroupHeaderBand
+        mmBottomOffset = 0
+        mmHeight = 0
+        mmPrintPosition = 0
+      end
+      object ppGroupFooterBand2: TppGroupFooterBand
+        mmBottomOffset = 0
+        mmHeight = 2646
+        mmPrintPosition = 0
+      end
+    end
+  end
+end

@@ -1,0 +1,312 @@
+{*******************************************************}
+{                                                       }
+{ CM Soluções Informática                               }
+{ ** Todos os Direitos Reservados                       }
+{ Analista Responsável: Marco Antonio Abreu             }
+{ Atualizado Em: 01/03/2002                             }
+{                                                       }
+{*******************************************************}
+
+unit FCadCReponMT;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  FCadastroMT, StdCtrls, DBCtrls, wwdblook, wwdbedit, Buttons, Mask,
+  ComCtrls, CMTree, MontaSelect, Db, DBClient, uCMClientDataSet, uModulo, 
+  CmEventosCadastro, ImgList, Wwdatsrc, IvDictio, IvMulti, IvEMulti,
+  MAHlpBtn, TB97Tlbr, TB97Ctls, TB97, ExtCtrls, DBTables,
+  uCMTreeViewMT, uCtrlCentRespon, uCtrlCentroCusto, uCtrlParamGlobal
+{$IFNDEF VERSAO0505}
+  , uCmTypes
+{$ENDIF}
+;
+
+type
+  TFrmCadCResponMT = class(TFrmCadastroMT)
+    CdsCCusto: TCMClientDataSet;
+    CdsParamGlobal: TCMClientDataSet;
+    pnlArvore: TPanel;
+    TreeCRespon: TCMTreeViewMT;
+    Label2: TLabel;
+    Label3: TLabel;
+    Label4: TLabel;
+    Label5: TLabel;
+    dbedDescricao: TDBEdit;
+    pnAnaSint: TPanel;
+    sbtnAnalitico: TSpeedButton;
+    sbtnSintetico: TSpeedButton;
+    dbedCod: TwwDBEdit;
+    dbedResponsavel: TDBEdit;
+    DBCkbAtivo: TDBCheckBox;
+    dblkCCusto: TwwDBLookupCombo;
+    CdsCentRespon: TCMClientDataSet;
+    procedure FormCreate(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure CmeCadastroFind(Sender: TObject);
+    procedure CmeCadastroApplyInsert(sender: TObject; var Accept: Boolean);
+    procedure CmeCadastroApplyDelete(sender: TObject; var Accept: Boolean);
+    procedure CmeCadastroAbortConfirma(sender: TObject;
+      OrigemAbortConfirma: TOrigemAbortConfirma);
+    procedure CmeCadastroEdit(Sender: TObject);
+    procedure CmeCadastroInsert(Sender: TObject);
+    procedure TreeCResponChange(Sender: TObject);
+    procedure CdsAfterScroll(DataSet: TDataSet);
+    procedure CmeCadastroAtualizaBotoes(Sender: TObject);
+    procedure CmeCadastroAfterConfirma(Sender: TObject);
+    procedure CmeCadastroApplyEdit(sender: TObject; var Accept: Boolean);
+    procedure CmeCadastroDelete(Sender: TObject);
+  private
+    { Private declarations }
+    sMascCRespon: String;
+    sMascCCusto : String;
+    ind         : Integer;
+    lNivel      : Array[0..20] of Integer;
+    bMontandoArvore: Boolean;
+  public
+    { Public declarations }
+    CentRespon: TCtrlCentRespon;
+    CentroCusto: TCtrlCentroCusto;
+    ParamGlobal: TCtrlParamGlobal;
+    Modulo: TModulo;
+    procedure PegaRegCentRespon( State: TDataSetState );
+    procedure CopiaRegCentRespon( State: TDataSetState );
+    procedure Seleciona( IDPessoa: Double = 0; IdCentRespon: String = '' );
+  end;
+
+var
+  FrmCadCResponMT: TFrmCadCResponMT;
+
+implementation
+
+{$R *.DFM}
+
+Uses uMensErro, dBasedados, uSistema, uMidasUtil;
+
+procedure TFrmCadCResponMT.PegaRegCentRespon( State: TDataSetState );
+begin
+  If State = DsInsert Then
+     CdsCentRespon.Data := CentRespon.ListaCentRespon( -1 )
+  Else
+     CdsCentRespon.Data := CentRespon.ListaCentRespon( Sistema.IdEmpresa,
+                            Cds.FieldByName( 'CODCENTRORESPON' ).AsString );
+end;
+
+procedure TFrmCadCResponMT.CopiaRegCentRespon( State: TDatasetState );
+var
+  i: Integer;
+  snome: String;
+begin
+  If State = dsInsert Then
+     CdsCentRespon.Append
+  Else
+     CdsCentRespon.Edit;
+
+  For i := 0 To Cds.Fields.Count - 1 Do Begin
+      snome := Cds.Fields[ i ].FieldName;
+      CdsCentRespon.FieldByName( snome ).Value := Cds.FieldByName( snome ).Value;
+  End;
+
+  CdsCentRespon.Post;
+end;
+
+procedure TFrmCadCResponMT.Seleciona( IDPessoa: Double; IdCentRespon: String );
+begin
+  cds.Data := CentRespon.ListaCentRespon( IdPessoa, IdCentRespon, 1 );
+  Cds.FieldByName( 'CODCENTRORESPON' ).EditMask := sMascCRespon + ';0; ';
+end;
+
+procedure TFrmCadCResponMT.FormCreate(Sender: TObject);
+begin
+  Inherited;
+  bMontandoArvore := False;
+  sMascCRespon := '';
+  Modulo := TModulo.Create;
+  ParamGlobal := TCtrlParamGlobal.Create;
+  ParamGlobal.Initialize( DtmBaseDados.dbBaseDados, True, Sistema.ConnectionType,
+                          Sistema.ConnectionSide, Sistema.AppRemoteServer, True );
+
+  CentroCusto := TCtrlCentroCusto.Create;
+  CentroCusto.Initialize( DtmBaseDados.dbBaseDados, True, Sistema.ConnectionType,
+                          Sistema.ConnectionSide, Sistema.AppRemoteServer, True );
+
+  CentRespon := TCtrlCentRespon.Create;
+  CentRespon.Initialize( DtmBaseDados.dbBaseDados, True, Sistema.ConnectionType,
+                         Sistema.ConnectionSide, Sistema.AppRemoteServer, True );
+  CentRespon.cds := CdsCentRespon;
+
+  Seleciona( Sistema.IdEmpresa );
+  CdsCentRespon.Data := Cds.Data;
+  CdsCentRespon.EmptyDataSet;
+
+  Try
+     CdsParamGlobal.Data := ParamGlobal.ListaParamGlobal( Sistema.IdEmpresa );
+     sMascCRespon := CdsParamGlobal.FieldByName('MASCCENTRORESPON').AsString;
+     sMascCCusto  := CdsParamGlobal.FieldByName('MASCARACC').AsString;
+     CdsParamGlobal.Close;
+
+     If Not Modulo.VerificaMascara( sMascCCusto, lNivel, ind ) Then Begin
+        MessageBeep(0);
+        ShowMessage('Máscara do Centro de Custo Inválida');
+        Exit;
+     End;
+
+     ind := 0;
+
+     If Not Modulo.VerificaMascara( sMascCRespon, lNivel, ind ) Then Begin
+        MessageBeep(0);
+        ShowMessage('Máscara do Centro de Responsabilidade Inválida');
+        Exit;
+     End;
+
+     MontaSelect.Filtro.Add( 'IDPESSOA = ' + IntToStr( Sistema.IdEmpresa ) );
+     treeCRespon.mascara := sMascCRespon;
+     CdsCcusto.Data := CentroCusto.ListaCentroCusto( Sistema.IdEmpresa );
+
+     bMontandoArvore := True;
+     treeCRespon.MontaArvore;
+     bMontandoArvore := False;
+
+     Cds.FieldByName( 'CODCENTRORESPON' ).EditMask      := sMascCRespon + ';0; ';
+     Cds.FieldByName( 'CODCENTROCUSTO' ).EditMask       := sMascCCusto + ';1; ';
+     CdsCCusto.FieldByName( 'CODCENTROCUSTO' ).EditMask := sMascCCusto + ';0; ';
+
+     If Not Cds.IsEmpty Then
+        CmeCadastro.Operacao := OpIdle;
+  Except
+     Raise;
+  End;
+end;
+
+procedure TFrmCadCResponMT.FormClose(Sender: TObject;
+  var Action: TCloseAction);
+begin
+  inherited;
+  ParamGlobal.Free;
+  CentroCusto.Free;
+  CentRespon.Free;
+  Modulo.Free;
+end;
+
+procedure TFrmCadCResponMT.CmeCadastroFind(Sender: TObject);
+begin
+  inherited;
+  If MontaSelect.RetornouValor Then
+     cds.Locate( 'CodCentroRespon', MontaSelect.ValoresChave[0], [loPartialKey] );
+end;
+
+procedure TFrmCadCResponMT.CmeCadastroApplyInsert(sender: TObject;
+  var Accept: Boolean);
+begin
+  inherited;
+  If sbtnAnalitico.Down Then
+     Cds.FieldByName( 'ANALITICOSINTET').AsString := 'A'
+  Else
+     Cds.FieldByName( 'ANALITICOSINTET').AsString := 'S';
+
+  Cds.FieldByName( 'IdUsuarioInclusao' ).AsFloat := Sistema.IdUsuario;
+  CopiaRegCentRespon( DsInsert );
+  Accept := CentRespon.Gravar;
+end;
+
+procedure TFrmCadCResponMT.CmeCadastroApplyDelete(sender: TObject;
+  var Accept: Boolean);
+begin
+  inherited;
+  CdsCentRespon.Delete;
+  Accept := CentRespon.Gravar;
+end;
+
+procedure TFrmCadCResponMT.CmeCadastroAbortConfirma(sender: TObject;
+  OrigemAbortConfirma: TOrigemAbortConfirma);
+begin
+  inherited;
+  MsgDlg( CentRespon.MessageInfo, 'Erro', mtError, [ mbOK ], 0 );
+end;
+
+procedure TFrmCadCResponMT.CmeCadastroEdit(Sender: TObject);
+begin
+  inherited;
+  PegaRegCentRespon( DsEdit );
+  treeCRespon.Enabled := False;
+  dbedCod.Enabled := False;
+  dbedDescricao.SetFocus;
+end;
+
+procedure TFrmCadCResponMT.CmeCadastroInsert(Sender: TObject);
+begin
+  inherited;
+  PegaRegCentRespon( DsInsert );
+  treeCRespon.Enabled := False;
+  cds.FieldByName('IDPESSOA').AsFloat  := Sistema.IdEmpresa;
+  cds.FieldByName('IDEMPRESA').AsFloat := Sistema.IdEmpresa;
+  cds.FieldByName('Ativo').AsString    := 'S';
+  dbedCod.Enabled := True;
+  dbedCod.SetFocus;
+end;
+
+procedure TFrmCadCResponMT.TreeCResponChange(Sender: TObject);
+begin
+  inherited;
+  if Cds.FieldByName('ANALITICOSINTET').AsString = 'A' then
+     sbtnAnalitico.Down := True
+  else
+     if Cds.FieldByName('ANALITICOSINTET').AsString = 'S' then
+        sbtnSintetico.Down := True;
+end;
+
+procedure TFrmCadCResponMT.CdsAfterScroll(DataSet: TDataSet);
+begin
+  inherited;
+  If Not bMontandoArvore Then
+     If cds.FieldByName('ANALITICOSINTET').AsString = 'A' Then
+        sbtnAnalitico.Down := True
+     Else
+         If cds.FieldByName('ANALITICOSINTET').AsString = 'S' Then
+            sbtnSintetico.Down := True;
+end;
+
+procedure TFrmCadCResponMT.CmeCadastroAtualizaBotoes(Sender: TObject);
+begin
+  inherited;
+  TreeCRespon.Enabled := Not cds.IsEmpty;
+
+  If CmeCadastro.Operacao = OpInserir Then
+     sbtnAlterar.Enabled := False;
+
+  If CmeCadastro.Operacao = OpIdle Then
+     sbtnApagar.Enabled  := Not cds.IsEmpty;
+end;
+
+procedure TFrmCadCResponMT.CmeCadastroAfterConfirma(Sender: TObject);
+begin
+  inherited;
+  Seleciona( Sistema.IdEmpresa );
+end;
+
+procedure TFrmCadCResponMT.CmeCadastroApplyEdit(sender: TObject;
+  var Accept: Boolean);
+begin
+  inherited;
+  If sbtnAnalitico.Down Then
+     Cds.FieldByName( 'ANALITICOSINTET').AsString := 'A'
+  Else
+     Cds.FieldByName( 'ANALITICOSINTET').AsString := 'S';
+
+  CopiaRegCentRespon( DsEdit );
+  Accept := CentRespon.Gravar;
+end;
+
+procedure TFrmCadCResponMT.CmeCadastroDelete(Sender: TObject);
+begin
+  If treeCRespon.Selected.HasChildren then
+     MsgDlg('O Centro de Responsabilidade possui Filho(s)','Atenção',mtWarning,[mbok],0)
+  Else Begin
+     PegaRegCentRespon( DsEdit );
+     inherited;
+  End;
+end;
+
+end.
+

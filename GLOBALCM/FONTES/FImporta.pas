@@ -1,0 +1,113 @@
+unit FImporta;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  FSairAjuda, ExtCtrls, MAHlpBtn, StdCtrls, Buttons, ComCtrls,
+  TB97, wwdblook, Db, DBTables, wwQuery, Machklb, OpenArqText, FOkCancelar,
+  TB97Tlbr, IvDictio, IvMulti, IvEMulti;
+
+type
+  TfrmImporta = class(TfrmSairAjuda)
+    Panel1: TPanel;
+    spdSelec: TSpeedButton;
+    edNomeArqTxt: TEdit;
+    prgbrImportar: TProgressBar;
+    mmTxt: TRichEdit;
+    rdgrpContas: TRadioGroup;
+    Panel2: TPanel;
+    Label1: TLabel;
+    dblkinterface: TwwDBLookupCombo;
+    qryTXT: Twwquery;
+    qryArquivos: Twwquery;
+    Panel3: TPanel;
+    spdTodos: TSpeedButton;
+    spdInverte: TSpeedButton;
+    Panel4: TPanel;
+    lvCampos: TListView;
+    OpDlgTxt: TOpenArqText;
+    procedure FormActivate(Sender: TObject);
+    procedure spdSelecClick(Sender: TObject);
+    procedure dblkinterfaceChange(Sender: TObject);
+    procedure spdTodosClick(Sender: TObject);
+    procedure spdInverteClick(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    sEntidade : String;
+    { Public declarations }
+  end;
+
+var
+  frmImporta: TfrmImporta;
+
+implementation
+
+{$R *.DFM}
+
+Uses UMensErro,UAutorizacao;
+
+procedure TfrmImporta.FormActivate(Sender: TObject);
+begin
+  inherited;
+  OpDlgTxt.Filter := Translate('Text files (*.txt)|*.TXT');
+  qryArquivos.SQL.Clear;
+  qryArquivos.SQL.Text := 'SELECT NOMEARQ,IDARQ FROM ARQUIVO'{ivlm};
+  qryArquivos.Open;
+end;
+
+procedure TfrmImporta.spdSelecClick(Sender: TObject);
+begin
+  inherited;
+  OpDlgTxt.Execute;
+  edNomeArqTxt.Text := OpDlgTxt.FileName;
+  mmTxt.Lines.LoadFromFile(OpDlgTxt.FileName);
+  rdgrpContas.Enabled := true;
+end;
+
+procedure TfrmImporta.dblkinterfaceChange(Sender: TObject);
+Var
+  iContador : TListItem;
+begin
+  inherited;
+  qryTXT.SQL.text := 'SELECT CAMP.NOMECOLUNA,CAMP.IDCAMPO,TIPD.NOMETIPODADO,CMPBD.CAMPODOBANCO,CMPBD.NOMEDOCAMPO,CMPBD.CHAVE,CMPBD.ENTIDADE FROM CAMPOARQ CAMP,CMPBD CMPBD,TIPODADO TIPD WHERE CAMP.IDARQ = '{ivlm}+ dblkinterface.LookupValue + ' AND CAMP.IDCAMPO = CMPBD.IDCAMPO(+) AND TIPD.IDTIPODADO = CAMP.IDTIPOCOLUNA'{ivlm};
+  qryTXT.open;
+  while not qryTXT.EOF
+     do
+     begin
+        iContador := lvCampos.Items.add;
+        iContador.Caption := (qryTXT.fieldbyname('NOMECOLUNA'{ivlm}).AsString);
+        iContador.SubItems.add(qryTXT.fieldbyname('NOMEDOCAMPO'{ivlm}).AsString);
+        iContador.SubItems.add(qryTXT.fieldbyname('NOMETIPODADO'{ivlm}).AsString);
+        qryTXT.next;
+     end;
+  opDlgTxt.IdArq   := StrtoInt(dblkinterface.LookupValue);
+  sEntidade := qryTXT.FieldByName('ENTIDADE'{ivlm}).AsString;
+  spdSelec.Enabled := true;
+end;
+
+
+procedure TfrmImporta.spdTodosClick(Sender: TObject);
+Var
+  iMaxList : Integer;
+begin
+  inherited;
+  for iMaxList := 0 to lvCampos.Items.count - 1 Do Begin
+    lvCampos.Items[iMaxList].Checked  := true;
+  end;
+end;
+
+procedure TfrmImporta.spdInverteClick(Sender: TObject);
+Var
+  iMaxList : Integer;
+begin
+  inherited;
+  for iMaxList := 0 to lvCampos.Items.count - 1 Do Begin
+    lvCampos.Items[iMaxList].Checked  := not (lvCampos.Items[iMaxList].Checked);
+  end;
+end;
+
+
+
+end.

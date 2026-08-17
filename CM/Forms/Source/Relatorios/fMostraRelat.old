@@ -1,0 +1,585 @@
+unit fMostraRelat;
+
+interface
+
+uses
+  Windows, FSairAjuda, Messages, SysUtils, Classes, Graphics, Controls, Forms,
+  Dialogs, Wwquery, ppDBBDE, TB97, Buttons, Db, DBTables, ppReport, ExtCtrls,
+  StdCtrls, Wwdatsrc, ppBands, ppProd, ppComm, ppCache, ppDB, ComCtrls,
+  Spin, Grids, Wwdbigrd, Wwdbgrid, ppViewr, MAHlpBtn, dvDataVw, ppForms,
+  uSistema, ppTypes, ppFilDev, uMensErro, TB97Tlbr, TB97Ctls,
+  IvDictio, IvMulti, IvEMulti, FFiltraSql;
+
+type
+    TTipoReport = ( trGerador, trQryManual, trDataModulo);
+
+  TfrmMostraRelat = class(TfrmSairAjuda)
+    QryTreeReports: TwwQuery;
+    dpReport: TppBDEPipeline;
+    ToolbarSep971: TToolbarSep97;
+    BtnVisualizar: TBitBtn;
+    PpSql: TppBDEPipeline;
+    DsSql: TDataSource;
+    QrySql: TQuery;
+    PnlPreview: TPanel;
+    Dock973: TDock97;
+    Toolbar972: TToolbar97;
+    spbPreview100Percent: TToolbarButton97;
+    spbPreviewWhole: TToolbarButton97;
+    spbPreviewPrint: TToolbarButton97;
+    ToolbarSep973: TToolbarSep97;
+    ToolbarSep974: TToolbarSep97;
+    lblRelatPct: TLabel;
+    spbPreviewWidth: TToolbarButton97;
+    SpinEdit1: TSpinEdit;
+    ppViewer1: TppViewer;
+    PnlRel: TPanel;
+    MemHistorico: TMemo;
+    ToolbarSep975: TToolbarSep97;
+    SpBtnNextPage: TSpeedButton;
+    SpBtnLastPage: TSpeedButton;
+    LblPreviewPage: TLabel;
+    SpBtnPriorPage: TSpeedButton;
+    SpBrnFirstPage: TSpeedButton;
+    Splitter1: TSplitter;
+    Splitter2: TSplitter;
+    pnlTree: TPanel;
+    TreeReports: TTreeView;
+    qryReport: TwwQuery;
+    dsReport: TwwDataSource;
+    wwDBGrid1: TwwDBGrid;
+    dpDataView: TppBDEPipeline;
+    bbtnAbrir: TToolbarButton97;
+    bbtnSalvar: TToolbarButton97;
+    opnReport: TOpenDialog;
+    svReport: TSaveDialog;
+    btnTelaUnica: TBitBtn;
+    ImlReports: TImageList;
+    qryReportNAME: TStringField;
+    qryReportIDMODULO: TFloatField;
+    qryReportIDDATAVIEW: TFloatField;
+    qryReportDESCRIPTION: TMemoField;
+    qryReportREPORTTEMPLATE: TBlobField;
+    qryReportIDGRUPORELATORIO: TFloatField;
+    qryReportFLGFILTROMANUAL: TStringField;
+    qryReportFORMEVENTOS: TStringField;
+    qryReportFORMPARAMREL: TStringField;
+    qryReportPPREPORT: TStringField;
+    qryReportCLASSNAME: TStringField;
+    qryReportCLASSDESCRIPTION: TStringField;
+    qryReportDESCRIPTION_1: TMemoField;
+    qryReportDATAVIEWTEMPLATE: TBlobField;
+    procedure FormCreate(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure BtnVisualizarClick(Sender: TObject);
+    procedure TreeReportsDblClick(Sender: TObject);
+    procedure spbPreviewWidthClick(Sender: TObject);
+    procedure spbPreview100PercentClick(Sender: TObject);
+    procedure spbPreviewWholeClick(Sender: TObject);
+    procedure spbPreviewPrintClick(Sender: TObject);
+    procedure SpinEdit1Change(Sender: TObject);
+    procedure SpBrnFirstPageClick(Sender: TObject);
+    procedure SpBtnPriorPageClick(Sender: TObject);
+    procedure SpBtnNextPageClick(Sender: TObject);
+    procedure SpBtnLastPageClick(Sender: TObject);
+    procedure ppViewer1PageChange(Sender: TObject);
+    procedure ppViewer1PrintStateChange(Sender: TObject);
+    procedure TreeReportsChange(Sender: TObject; Node: TTreeNode);
+    procedure FormDestroy(Sender: TObject);
+    procedure bbtnAbrirClick(Sender: TObject);
+    procedure bbtnSalvarClick(Sender: TObject);
+    procedure btnTelaUnicaClick(Sender: TObject);
+  private
+    { Private declarations }
+    ChangeZoom, SemRelatorio: Boolean;
+    RelatManual, RelatGerador : TppReport;
+    ArquivoSaida : TppArchiveDevice ;
+
+    procedure MontaArvoreRelatorio;
+
+    Function  FiltraRegistrosManual: TFrResult;
+
+    Procedure VisualizaRelatorio;
+
+    Procedure PreviewRelatorio;
+    
+    Procedure MostraRelat;
+  public
+    { Public declarations }
+     LstTipoDeDado, ListaReports: Tstrings;
+     TipoReport : TTipoReport;
+  end;
+
+var
+  frmMostraRelat: TfrmMostraRelat;
+
+implementation
+
+uses FPreview, uString, dReports, uDataBase, DBaseDados;
+
+{$R *.DFM}
+
+procedure TfrmMostraRelat.MontaArvoreRelatorio;
+Var
+    SOldNome, SOldGrupo: String;
+    TreePai, TreeFilho, TreeGrupo: TTreeNode;
+Begin
+  FazQuery(DtmBaseDados.Qry,'Select R.IdReports, R.OrigemCm, M.NomeModulo, R.Name, G.Descricao ' +
+                 'From Reports R, Modulo M, GrupoRelatorio G ' +
+                 'Where '+
+                 ' ((R.IdModulo = ' + IntToStr(Sistema.IdModulo) + ') Or ' +
+                 '  ((R.IdModulo = 2) And (R.IdDataView Is Not Null))) And ' +
+                 ' (R.IdModulo = M.IdModulo) And ' +
+                 ' (R.IdGrupoRelatorio = G.IdGrupoRelatorio(+)) And ' +
+                 ' (R.OrigemCmGr = G.OrigemCmGr(+)) ' +
+                 'Order By M.NomeModulo, G.Descricao, R.Name');
+
+  sOldNome := '';
+  sOldGrupo := '';
+  TreePai := nil;
+  TreeGrupo := nil;
+
+  TreeReports.Items.Clear;
+  ListaReports.Clear;
+
+  While Not DtmBaseDados.Qry.Eof Do
+  Begin
+     If SoldNome <> DtmBaseDados.Qry.FieldByName('NOMEMODULO').AsString Then
+     Begin
+      TreePai := TreeReports.Items.Add(nil,DtmBaseDados.Qry.FieldByName('NOMEMODULO').AsString);
+      TreePai.ImageIndex := 0;
+      TreePai.SelectedIndex := 0;
+      ListaReports.Add('0/' + DtmBaseDados.Qry.FieldByName('IdReports').AsString + '-' +
+                       DtmBaseDados.Qry.FieldByName('OrigemCm').AsString);
+
+      sOldGrupo := '';
+     End;
+
+     If SoldGrupo <> DtmBaseDados.Qry.FieldByName('DESCRICAO').AsString Then
+     Begin
+      TreeGrupo := TreeReports.Items.AddChild(TreePai,DtmBaseDados.Qry.FieldByName('DESCRICAO').AsString);
+      TreeGrupo.ImageIndex := 3;
+      TreeGrupo.SelectedIndex := 3;
+      ListaReports.Add('3/' +DtmBaseDados.Qry.FieldByName('IdReports').AsString + '-' +
+                       DtmBaseDados.Qry.FieldByName('OrigemCm').AsString);
+     End;
+
+
+     TreeFilho := TreeReports.Items.AddChild(TreeGrupo,DtmBaseDados.Qry.FieldByName('NAME').AsString);
+     TreeFilho.ImageIndex := 1;
+     TreeFilho.SelectedIndex := 2;
+     ListaReports.Add('1/' + DtmBaseDados.Qry.FieldByName('IdReports').AsString + '-' +
+                       DtmBaseDados.Qry.FieldByName('OrigemCm').AsString);
+
+
+     SOldNome := DtmBaseDados.Qry.FieldByName('NOMEMODULO').AsString;
+     sOldGrupo := DtmBaseDados.Qry.FieldByName('DESCRICAO').AsString;
+     DtmBaseDados.Qry.Next;
+  End;
+  DtmBaseDados.Qry.Close;
+end;
+
+procedure TfrmMostraRelat.FormCreate(Sender: TObject);
+begin
+  inherited;
+  //Abre Tabelas e Inicializa Gerentes de Reports e Dataviews
+  SemRelatorio := True;
+  btnTelaUnica.Enabled := not SemRelatorio;
+  If Not qryReport.Prepared Then qryReport.Prepare;
+  LstTipoDeDado := TStringList.Create;
+  ListaReports  := TStringList.Create;
+  MontaArvoreRelatorio;
+  ArquivoSaida := TppArchiveDevice.Create(self);
+  ppRegisterForm(TppCustomPreviewer, TFrmPreview);
+  ppRegisterForm(TfrmSairAjuda, TFrmMostraRelat);
+  RelatManual := TppReport.Create(self);
+                 RelatManual.Device := dvScreen;
+                 RelatManual.Language := lgPortugueseBrazil;
+
+  RelatGerador := TppReport.Create(self);
+                 RelatGerador.Device := dvScreen;
+                 RelatGerador.Language := lgPortugueseBrazil;
+end;
+
+procedure TfrmMostraRelat.FormClose(Sender: TObject;
+  var Action: TCloseAction);
+begin
+  inherited;
+  qryReport.Close;
+  If qryReport.Prepared Then qryReport.UnPrepare;
+  QrySql.Close;
+end;
+
+Function TfrmMostraRelat.FiltraRegistrosManual: TFrResult;
+Begin
+     Result := FrFull;
+     if qryReport.FieldByName('flgFiltroManual').AsString = 'S' then
+       Try
+        QrySql.Filtered := False;
+        QrySql.FilterOptions := [];
+        QrySql.Filter := '';
+
+        Application.CreateForm(TFrmFiltraSql,FrmFiltraSql);
+        FrmFiltraSql.QryOrigem := QrySql;
+
+        Case FrmFiltraSql.ShowModal of
+          MrOk:    Result := FrFiltrado;
+          MrAbort: Result := FrError;
+        Else
+                   Result := FrFull;
+        End;
+
+        FrmFiltraSql.Free;
+
+       Except
+        Result := FrError;       
+        If QrySql.Active Then QrySql.Close;
+        QrySql.Filtered := False;
+        QrySql.FilterOptions := [];
+        QrySql.Filter := '';
+
+        FrmFiltraSql.Free;
+       End;
+end;
+
+Procedure TfrmMostraRelat.VisualizaRelatorio;
+Var
+  Mostra : boolean;
+//  qry : TwwQuery;
+  dtm : TdtmReports;
+begin
+    //Verifica Qual item da lista foi selecionado
+    with qryReport do
+    begin
+         If (TreeReports.Selected <> Nil) and (TreeReports.Selected.ImageIndex = 1) Then
+         begin
+              If (UPPERCASE(TRIM(FieldByName('CLASSNAME').AsString)) = 'TDVQRYMANUAL') Or
+                 (UPPERCASE(TRIM(FieldByName('CLASSNAME').AsString)) = 'TDVQUERYWZD') Then
+                 TipoReport := trQryManual
+              else if TRIM(FieldByName('CLASSNAME').AsString) = '' Then
+                 TipoReport := trDataModulo
+              else
+                 TipoReport := trGerador;
+
+              dtm := nil;
+//              qry := nil;
+
+              case TipoReport of
+                   trQryManual :
+                   begin
+                        with RelatManual do
+                        begin
+                             CloseDataPipelines;
+
+                             QrySql.Close;
+                             QrySql.Sql.Clear;
+                             QrySql.Sql.Text := (FieldByName('DATAVIEWTEMPLATE').AsString);
+
+                             Template.SaveTo := stDatabase;
+                             SaveAsTemplate := True;
+                             AllowPrintToArchive := True;
+                             AllowPrintToFile := True;
+                             Template.DatabaseSettings.Name := TreeReports.Selected.Text;
+                             Template.DatabaseSettings.DataPipeline := dpReport;
+                             Template.DatabaseSettings.NameField := 'NAME';
+                             Template.DatabaseSettings.TemplateField := 'REPORTTEMPLATE';
+                             Template.LoadFromDatabase;
+                             Datapipeline := PpSql;
+                        end;
+                   end;
+
+                   trDataModulo :
+                   begin
+                        try
+                           dtm := TdtmReports(Application.FindComponent(FieldByName('FORMEVENTOS').AsString));
+                           ppViewer1.Report := TppReport(dtm.FindComponent(FieldByName('ppReport').AsString));
+//                           qry := TwwQuery(TppBDEPipeline(TppReport(dtm.FindComponent(FieldByName('ppReport').AsString)).DataPipeline).DataSource.DataSet);
+                           ppViewer1.Report.Device := dvScreen;
+                           ppViewer1.Report.Language := lgPortugueseBrazil;
+                        except
+                              MsgDlg('Não encontrei o Report: '+
+                              UPPERCASE(FieldByName('ppReport').AsString)+
+                              ' em '+ UPPERCASE(FieldByName('FORMEVENTOS').AsString)+#10#13+
+                              'Possivelmente os dados cadastrados na tabela "REPORTS" estão desatualizados',
+                              'Relatorios com eventos', mtError, [mbOK],0);
+                              exit;
+                        end;
+                   end;
+              end;
+                 Caption := 'Visualizar Relatórios ' +  TreeReports.Selected.Text;
+                 Mostra := false;
+
+                 case TipoReport of
+                      trQryManual  :
+                           Mostra  := (FiltraRegistrosManual <> FrError);
+                      trDataModulo :
+                           begin
+                                Mostra := (FiltraRegistrosManual <> FrError) And
+                                          dtm.MostraParam(qryReport.FieldByName('FORMPARAMREL').AsString);
+                           end;
+                 end;
+
+                 if Mostra then  MostraRelat;
+
+                 SemRelatorio := (ppViewer1.Report = nil);
+                 btnTelaUnica.Enabled := not SemRelatorio;
+             end;
+    end;
+End;
+
+procedure TfrmMostraRelat.BtnVisualizarClick(Sender: TObject);
+begin
+  inherited;
+  PreviewRelatorio;
+end;
+
+procedure TfrmMostraRelat.TreeReportsDblClick(Sender: TObject);
+begin
+  inherited;
+  VisualizaRelatorio;
+end;
+
+procedure TfrmMostraRelat.spbPreviewWidthClick(Sender: TObject);
+begin
+  inherited;
+  ChangeZoom := False;
+  ppViewer1.ZoomSetting := zsPageWidth;
+  SpinEdit1.Text := IntToStr(ppViewer1.CalculatedZoom);
+  ChangeZoom := True;
+end;
+
+procedure TfrmMostraRelat.spbPreview100PercentClick(
+  Sender: TObject);
+begin
+  inherited;
+  ChangeZoom := False;
+  ppViewer1.ZoomSetting := zs100Percent;
+  SpinEdit1.Text := IntToStr(ppViewer1.CalculatedZoom);
+  ChangeZoom := True;
+end;
+
+procedure TfrmMostraRelat.spbPreviewWholeClick(Sender: TObject);
+begin
+  inherited;
+  ChangeZoom := False;
+  ppViewer1.ZoomSetting := zsWholePage;
+  SpinEdit1.Text := IntToStr(ppViewer1.CalculatedZoom);
+  ChangeZoom := True;
+end;
+
+procedure TfrmMostraRelat.spbPreviewPrintClick(Sender: TObject);
+begin
+  inherited;
+  ppViewer1.Print;
+end;
+
+procedure TfrmMostraRelat.SpinEdit1Change(Sender: TObject);
+begin
+  inherited;
+  If Not ChangeZoom Then Exit;
+  ppViewer1.ZoomPercentage := StrToINt(SpinEdit1.Text);
+end;
+
+procedure TfrmMostraRelat.SpBrnFirstPageClick(Sender: TObject);
+begin
+  inherited;
+  ppViewer1.FirstPage;
+end;
+
+procedure TfrmMostraRelat.SpBtnPriorPageClick(Sender: TObject);
+begin
+  inherited;
+  ppViewer1.PriorPage;
+end;
+
+procedure TfrmMostraRelat.SpBtnNextPageClick(Sender: TObject);
+begin
+  inherited;
+  ppViewer1.NextPage;
+end;
+
+procedure TfrmMostraRelat.SpBtnLastPageClick(Sender: TObject);
+begin
+  inherited;
+  ppViewer1.LastPage;
+end;
+
+procedure TfrmMostraRelat.ppViewer1PageChange(Sender: TObject);
+begin
+  inherited;
+  If not SemRelatorio Then
+  begin
+       LblPreviewPage.Caption := 'Pág. ' + IntToStr((ppViewer1.Report as TppReport).AbsolutePageNo) + ' de ' +
+       IntToStr((ppViewer1.Report as TppReport).AbsolutePageCount);
+       ChangeZoom := False;
+       SpinEdit1.Text := IntToStr(ppViewer1.CalculatedZoom);
+       ChangeZoom := True;
+  end;
+end;
+
+procedure TfrmMostraRelat.ppViewer1PrintStateChange(
+  Sender: TObject);
+var
+  lPosition: TPoint;
+begin
+  inherited;
+
+  if ppViewer1.Busy then
+     ppViewer1.Cursor := crHourGlass
+  else
+      ppViewer1.Cursor := crDefault;
+
+  GetCursorPos(lPosition);
+  SetCursorPos(lPosition.X, lPosition.Y);
+end;
+
+procedure TfrmMostraRelat.TreeReportsChange(Sender: TObject;
+  Node: TTreeNode);
+Var
+ sAux: String;
+ iIdReport, iOrigemCM: Integer;
+begin
+  inherited;
+  If (Node <> Nil) And (Node.ImageIndex = 1) Then
+  Begin
+       sAux := ListaReports[Node.AbsoluteIndex];
+       sAux := Copy(sAux,3,length(sAux));
+       iIdReport := StrToInt(Copy(sAux,1,Pos('-',sAux)-1));
+       iOrigemCM := StrToInt(Copy(sAux,Pos('-',sAux)+1,Length(sAux)));
+       With qryReport Do
+       Begin
+            If Not Prepared Then Prepare;
+            Close;
+            Params[0].AsInteger := iIdReport;
+            Params[1].AsInteger := iOrigemCM;
+            Open;
+            if IsEmpty then
+               MemHistorico.Lines.Clear
+            else
+               MemHistorico.Lines.Text := FieldByName('DESCRIPTION').AsString;
+            BtnVisualizar.Enabled := true;
+       End;
+  End
+  else
+      BtnVisualizar.Enabled := false;
+end;
+
+procedure TfrmMostraRelat.FormDestroy(Sender: TObject);
+begin
+     ArquivoSaida.Free;
+     LstTipoDeDado.Free;
+     ListaReports.Free;
+     ppUnRegisterForm(TppCustomPreviewer);
+     ppUnRegisterForm(TfrmSairAjuda);
+     RelatManual.free;
+     RelatGerador.free;
+     inherited;
+end;
+
+Procedure TfrmMostraRelat.PreviewRelatorio;
+var LastState : TWindowState ;
+begin
+     inherited;
+     try
+        Screen.Cursor := crHourGlass ;
+        LastState := WindowState ;
+        ArquivoSaida.FileName := NomeArqTemp;
+        ArquivoSaida.Publisher := ppViewer1.Report.Publisher ;
+        ppViewer1.Report.ResetDevices;
+        ppViewer1.Report.PrintToDevices;
+        TfrmPreview.CreatePreview(Self, ArquivoSaida.FileName, TreeReports.Selected.Text );
+        ArquivoSaida.Publisher := nil ;
+        WindowState := LastState;
+     finally
+            Screen.Cursor := crDefault ;
+     end;
+End;
+
+Procedure TfrmMostraRelat.MostraRelat;
+begin
+     case TipoReport of
+          trQryManual :
+                      ppViewer1.Report := RelatManual;
+          trGerador :
+                    ppViewer1.Report := RelatGerador;
+     end;
+     SemRelatorio := false;
+     btnTelaUnica.Enabled := not SemRelatorio;
+     ppViewer1.Report.ResetDevices;
+     ppViewer1.Report.PrintToDevices;
+     ppViewer1.LastPage;
+     ppViewer1.FirstPage;
+end;
+procedure TfrmMostraRelat.bbtnAbrirClick(Sender: TObject);
+begin
+  inherited;
+  if opnReport.Execute then
+     TfrmPreview.CreatePreview(Self, opnReport.FileName, opnReport.FileName );
+
+end;
+
+procedure TfrmMostraRelat.bbtnSalvarClick(Sender: TObject);
+Var
+   sExtencao, sDeviceTipe: string;
+begin
+     inherited;
+     if svReport.Execute then
+     begin
+          try
+            Screen.Cursor := crHourGlass ;
+
+            sExtencao := Copy(svReport.FileName,Length(svReport.FileName)-2,3);
+            sDeviceTipe := '';
+
+            If sExtencao = 'Css' Then
+               sDeviceTipe := 'CSSFile'
+            Else
+            If sExtencao = 'Htm' Then
+               sDeviceTipe := 'HTMLFile'
+            Else
+            If sExtencao = 'Rtf' Then
+               sDeviceTipe := 'RTFFile'
+            Else
+            If sExtencao = 'Xls' Then
+               sDeviceTipe := 'ExcelFile'
+            Else
+            If sExtencao = 'Wk1' Then
+               sDeviceTipe := 'LotusFile'
+            Else
+            If sExtencao = 'Wq1' Then
+               sDeviceTipe := 'QuattroFile'
+            Else
+            If (sExtencao = 'Jpg') Or (sExtencao = 'Bmp') Then
+                sDeviceTipe := 'GraphicFile';
+
+            If sDeviceTipe = '' Then
+            Begin
+               ArquivoSaida.FileName := svReport.FileName;
+               ArquivoSaida.Publisher := ppViewer1.Report.Publisher ;
+               ppViewer1.Report.ResetDevices;
+               ppViewer1.Report.PrintToDevices;
+               ArquivoSaida.Publisher := nil ;
+            End
+            Else
+            Begin
+              //ppViewer1.Report.DeviceType   := sDeviceTipe;
+              ppViewer1.Report.TextFileName := svReport.FileName;
+              ppViewer1.Report.ResetDevices;
+              ppViewer1.Report.PrintToDevices;
+            End;
+          finally
+             //ppViewer1.Report.DeviceType := 'Screen';
+             Screen.Cursor := crDefault ;
+          end;
+     end;
+end;
+
+procedure TfrmMostraRelat.btnTelaUnicaClick(Sender: TObject);
+begin
+  inherited;
+  PreviewRelatorio;
+end;
+
+End.
+
+

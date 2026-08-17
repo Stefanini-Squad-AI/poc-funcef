@@ -1,0 +1,637 @@
+{-------------------------------------------------------------------------------
+ALTERAÇÕES / IMPLEMENTAÇÕES ----------------------------------------------------
+Rotina...........: _
+Nº SOL...........: 125120 
+Data da Alteração: 10/02/2023
+Responsável......: Leandro Pocebon
+Descrição........: Cadastro de imagens.
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+Rotina...........: _
+Nº SOL...........: 198886.18334
+Data da Alteração: 10/01/2017
+Responsável......: Darivaldo Alencar
+Descrição........: Inclusão na tela Cadastro de Classe de Bens a opção para
+                   inclusão da taxa de depreciação.
+--------------------------------------------------------------------------------
+-------------------------------------------------------------------------------}
+
+package CMCAFObj50;
+
+{$R *.RES}
+{$R CMCAFOBJ50_RES.RES}
+
+{$ALIGN ON}
+{$ASSERTIONS ON}
+{$BOOLEVAL OFF}
+{$DEBUGINFO ON}
+{$EXTENDEDSYNTAX ON}
+{$IMPORTEDDATA ON}
+{$IOCHECKS ON}
+{$LOCALSYMBOLS ON}
+{$LONGSTRINGS ON}
+{$OPENSTRINGS ON}
+{$OPTIMIZATION ON}
+{$OVERFLOWCHECKS OFF}
+{$RANGECHECKS OFF}
+{$REFERENCEINFO ON}
+{$SAFEDIVIDE OFF}
+{$STACKFRAMES OFF}
+{$TYPEDADDRESS OFF}
+{$VARSTRINGCHECKS ON}
+{$WRITEABLECONST ON}
+{$MINENUMSIZE 1}
+{$IMAGEBASE $400000}
+{$DESCRIPTION 'FUNCEF - Objetos de Negócios do Controle do Ativo Fixo (Planus)'}
+{$IMPLICITBUILD OFF}
+
+requires
+  vcl50,
+  CMContabObj50;
+
+contains
+  uCtrlAlmoxCAF in '..\CtrlObjetos\uCtrlAlmoxCAF.pas',
+  uCtrlBem in '..\CtrlObjetos\uCtrlBem.pas',
+  uCtrlCafxContab in '..\CtrlObjetos\uCtrlCafxContab.pas',
+  uCtrlClassedeBem in '..\CtrlObjetos\uCtrlClassedeBem.pas',
+  uCtrlConjunto in '..\CtrlObjetos\uCtrlConjunto.pas',
+  uCtrlDomBem in '..\CtrlObjetos\uCtrlDomBem.pas',
+  uCtrlFechamento in '..\CtrlObjetos\uCtrlFechamento.pas',
+  uCtrlGrupoContab in '..\CtrlObjetos\uCtrlGrupoContab.pas',
+  uCtrlHistMovBem in '..\CtrlObjetos\uCtrlHistMovBem.pas',
+  uCtrlIniciaMultiTaxa in '..\CtrlObjetos\uCtrlIniciaMultiTaxa.pas',
+  uCtrlLocalizacoes in '..\CtrlObjetos\uCtrlLocalizacoes.pas',
+  uCtrlMotivoBaixa in '..\CtrlObjetos\uCtrlMotivoBaixa.pas',
+  uCtrlObraTipoEtapa in '..\CtrlObjetos\uCtrlObraTipoEtapa.pas',
+  uCtrlParamCAF in '..\CtrlObjetos\uCtrlParamCAF.pas',
+  uCtrlParamCAFxContab in '..\CtrlObjetos\uCtrlParamCAFxContab.pas',
+  uCtrlResponsavel in '..\CtrlObjetos\uCtrlResponsavel.pas',
+  uCtrlSituacao in '..\CtrlObjetos\uCtrlSituacao.pas',
+  uCtrlTerceiro in '..\CtrlObjetos\uCtrlTerceiro.pas',
+  uCtrlTipoArea in '..\CtrlObjetos\uCtrlTipoArea.pas',
+  uCtrlTipoDespesaAV in '..\CtrlObjetos\uCtrlTipoDespesaAV.pas',
+  uCtrlTipoMovimentacao in '..\CtrlObjetos\uCtrlTipoMovimentacao.pas',
+  uCtrlTipoSaidaTemp in '..\CtrlObjetos\uCtrlTipoSaidaTemp.pas',
+  uDBAcrescimoValor in '..\DbObjetos\uDBAcrescimoValor.pas',
+  uDBAcrescValorxDep in '..\DbObjetos\uDBAcrescValorxDep.pas',
+  uDBAcrescValorxMoeda in '..\DbObjetos\uDBAcrescValorxMoeda.pas',
+  uDBBem in '..\DbObjetos\uDBBem.pas',
+  uDBBemxDep in '..\DbObjetos\uDBBemxDep.pas',
+  uDBBemxMoeda in '..\DbObjetos\uDBBemxMoeda.pas',
+  uDBBensPendentes in '..\DbObjetos\uDBBensPendentes.pas',
+  uDBClassedeBem in '..\DbObjetos\uDBClassedeBem.pas',
+  uDBClassexGrupo in '..\DbObjetos\uDBClassexGrupo.pas',
+  uDBConjunto in '..\DbObjetos\uDBConjunto.pas',
+  uDBContasTiposMovimentoGrupos in '..\DbObjetos\uDBContasTiposMovimentoGrupos.pas',
+  uDBDesmembramento in '..\DbObjetos\uDbDesmembramento.pas',
+  uDBGrupoBemxCC in '..\DbObjetos\uDBGrupoBemxCC.pas',
+  uDBGrupoContab in '..\DbObjetos\uDBGrupoContab.pas',
+  uDBGrupoTaxaDep in '..\DbObjetos\uDBGrupoTaxaDep.pas',
+  uDBHistMovBem in '..\DbObjetos\uDBHistMovBem.pas',
+  uDBLocalizacao in '..\DbObjetos\uDBLocalizacao.pas',
+  uDBMotivoBaixa in '..\DbObjetos\uDBMotivoBaixa.pas',
+  uDBObraTipoEtapa in '..\DbObjetos\uDBObraTipoEtapa.pas',
+  uDBParamCAF in '..\DbObjetos\uDBParamCAF.pas',
+  uDBPlanoGrupo in '..\DbObjetos\uDBPlanoGrupo.pas',
+  uDBPlanoPatroxBem in '..\DbObjetos\uDBPlanoPatroxBem.pas',
+  uDBRateioCustos in '..\DbObjetos\uDBRateioCustos.pas',
+  uDBReavaliacao in '..\DbObjetos\uDBReavaliacao.pas',
+  uDBReavalxDep in '..\DbObjetos\uDBReavalxDep.pas',
+  uDBReavalxMoeda in '..\DbObjetos\uDBReavalxMoeda.pas',
+  uDBResponsavel in '..\DbObjetos\uDBResponsavel.pas',
+  uDBSaldoContabBem in '..\DbObjetos\uDbSaldoContabBem.pas',
+  uDbSituacao in '..\DbObjetos\uDbSituacao.pas',
+  uDbSldCtbBemxDep in '..\DbObjetos\uDBSldCtbBemxDep.pas',
+  uDBTerceiro in '..\DbObjetos\uDBTerceiro.pas',
+  uDBTipoArea in '..\DbObjetos\uDBTipoArea.pas',
+  uDBTipoDespesaAV in '..\DbObjetos\uDbTipoDespesaAV.pas',
+  uDBTipoMovimentacao in '..\DbObjetos\uDBTipoMovimentacao.pas',
+  uDBTipoSaidaTemp in '..\DbObjetos\uDBTipoSaidaTemp.pas',
+  uDBTiposMovimentoGrupos in '..\DbObjetos\uDBTiposMovimentoGrupos.pas',
+  uDBVlrHistMovBem in '..\DbObjetos\uDbVlrHistMovBem.pas',
+  uCtrlReconstroiSaldo in '..\CtrlObjetos\uCtrlReconstroiSaldo.pas',
+  uCtrlMovBensPendentes in '..\CtrlObjetos\uCtrlMovBensPendentes.pas',
+  uDBSelBaixa in '..\DbObjetos\uDBSelBaixa.pas',
+  uDBSelBaixaBens in '..\DbObjetos\uDBSelBaixaBens.pas',
+  uCtrlMovTransfBem in '..\CtrlObjetos\uCtrlMovTransfBem.pas',
+  uCtrlFechamentoProRata in '..\CtrlObjetos\uCtrlFechamentoProRata.pas',
+  uDBSaidaTempBens in '..\DbObjetos\uDBSaidaTempBens.pas',
+  uDBSaidaTemporaria in '..\DbObjetos\uDBSaidaTemporaria.pas',
+  uCtrlMovSaidaTemporaria in '..\CtrlObjetos\uCtrlMovSaidaTemporaria.pas',
+  uCtrlInventarioBens in '..\CtrlObjetos\uCtrlInventarioBens.pas',
+  uDBInventarioBens in '..\DbObjetos\uDBInventarioBens.pas',
+  uDBItensInvBens in '..\DbObjetos\uDBItensInvBens.pas',
+  fMTCadConjunto in '..\Source\fMTCadConjunto.pas' {frmMTCadConjunto},
+  fMTCadAlmoxCAF in '..\Source\fMTCadAlmoxCAF.pas' {frmMTCadAlmoxCaf},
+  uDBCafObraRateio in '..\DbObjetos\uDBCafObraRateio.pas',
+  uDBCafObraDesmemb in '..\DbObjetos\uDBCafObraDesmemb.pas',
+  uDBCafObraLanc in '..\DbObjetos\uDBCafObraLanc.pas',
+  uDBCafObra in '..\DbObjetos\uDBCafObra.pas',
+  uCtrlCafObra in '..\CtrlObjetos\uCtrlCafObra.pas',
+  uCtrlMovBaixa in '..\CtrlObjetos\uCtrlMovBaixa.pas',
+  uCtrlMovDesmembramento in '..\CtrlObjetos\uCtrlMovDesmembramento.pas',
+  uDBHMBReaval in '..\DbObjetos\uDBHMBReaval.pas',
+  uCtrlMovReavaliacao in '..\CtrlObjetos\uCtrlMovReavaliacao.pas',
+  uCtrlMovAcrescimoValor in '..\CtrlObjetos\uCtrlMovAcrescimoValor.pas',
+  uDBRemembramento in '..\DbObjetos\uDBRemembramento.pas',
+  uCtrlMovRemembramento in '..\CtrlObjetos\uCtrlMovRemembramento.pas',
+  fMTCadTipoArea in '..\Source\fMTCadTipoArea.pas' {frmMTCadTipoArea},
+  fMTCadClassedeBem in '..\Source\fMTCadClassedeBem.pas' {frmMTCadClassedeBem},
+  fMTCadLocalizacao in '..\Source\fMTCadLocalizacao.pas' {frmMTCadLocalizacao},
+  fMTCadResponsavel in '..\Source\fMTCadResponsavel.pas' {frmMTCadResponsavel},
+  fMTCadSituacoes in '..\Source\fMTCadSituacoes.pas' {frmMTCadSituacoes},
+  fMTCadTerceiro in '..\Source\fMTCadTerceiro.pas' {frmMTCadTerceiro},
+  fMTCadBem in '..\Source\fMTCadBem.pas' {frmMTCadBem},
+  fMTCadGrupoContab in '..\Source\fMTCadGrupoContab.pas' {frmMTCadGrupoContab},
+  uCtrlUtilImplantacao in '..\CtrlObjetos\uCtrlUtilImplantacao.pas',
+  uDBBemCotacao in '..\DbObjetos\uDBBemCotacao.pas',
+  uCtrlBemCotacao in '..\CtrlObjetos\uCtrlBemCotacao.pas',
+  uDBImagemBem in '..\DbObjetos\uDBImagemBem.pas',
+  uCtrlCAFMoedas in '..\CtrlObjetos\uCtrlCAFMoedas.pas',
+  uDBCAFMoedas in '..\DbObjetos\uDBCAFMoedas.pas',
+  uDBCAFPaises in '..\DbObjetos\uDBCAFPaises.pas',
+  uCtrlCafPaises in '..\CtrlObjetos\uCtrlCAFPaises.pas',
+  DCtrlObject_Padrao in '..\CtrlObjetos\DCtrlObject_Padrao.pas' {DtmCtrlObject_Padrao: TDataModule},
+  dMTBem in '..\CtrlObjetos\dMTBem.pas' {dtmMTBem: TDataModule},
+  dMTFechamento in '..\CtrlObjetos\dMTFechamento.pas' {dtmMTFechamento: TDataModule},
+  uCtrlClasseTaxaDep in '..\CtrlObjetos\uCtrlClasseTaxaDep.pas',
+  uDBClasseTaxaDep in '..\DbObjetos\uDBClasseTaxaDep.pas',
+  uCtrlImportAcreDecreValor in '..\CtrlObjetos\uCtrlImportAcreDecreValor.pas',
+  uCtrlImagemBem in '..\CtrlObjetos\uCtrlImagemBem.pas',
+  uDbImagensBem in '..\DbObjetos\uDbImagensBem.pas';
+
+end.
+{CM$ALT
+================================================================================
+Histórico de alterações efetuadas no módulo CMCAFOBJ50
+================================================================================
+CM$VER      3.09.18g    25/06/2008
+--------------------------------------------------------------------------------
+- Pendência 28252: Inventário - Processamento
+  Correção da geração do termo excluindo deste os bens escravos já baixados.
+================================================================================
+CM$VER      3.09.18f    18/04/2008
+--------------------------------------------------------------------------------
+- Ajuste no processo de desmembramento para não considerar obrigatoriedade de placa
+  para bens imóveis.
+================================================================================
+CM$VER      3.09.18e    27/03/2008
+--------------------------------------------------------------------------------
+- Pendencia 27639: Desmembramento e Remembramento
+  Ajuste na geração de placa nos processos de desmembramento e remembramento 
+  de imóveis, para contemplar, de forma correta, quando não for obrigatório sua numeração
+================================================================================
+CM$VER      3.09.18d    11/03/2008
+--------------------------------------------------------------------------------
+- Pendência 27465: Reavaliação de Imóveis
+  Correção do erro recorrente na hora de efetivar a reavaliação.
+================================================================================
+CM$VER      3.09.18c    25/01/2008
+--------------------------------------------------------------------------------
+Geração de Dados para Levantamento de Inventário
+  Pendência: 27279 - Inclusão do modelo de Coletor de Dados CMNet.
+  Pendência: 27238 - Ajuste na exportação dos bens para Coletor CMNet excluindo os
+                     caracteres de áspas. Inclusão de filtro para exportar apenas bens
+                     pertencentes ao Ativo Fixo.
+- Ajuste na geração do termo de transferência.
+================================================================================
+CM$VER      3.09.18b    03/01/2008
+--------------------------------------------------------------------------------
+Ajuste de reavaliação
+  Pendencia - 22757: Criadas rotinas para efetuar retificação de reavaliação e
+                     desfazer retificação de ravaliação.
+Geração de Inventário
+  Pendencia - 23809: Ajuste para considerar a movimentação histórica.
+Relatórios de bens customizáveis
+  Pendencia - 20707: Ajuste para evitar erro ao informar um número grande de
+                     bens.
+================================================================================
+CM$VER      3.09.18a    22/11/2007
+--------------------------------------------------------------------------------
+Desfazer Encerramento de Obra
+  Pendência: 26611 - Correção dos erros na tela para Desfazer Encerramento de
+                     Obra.
+================================================================================
+CM$VER      3.09.18     03/11/2007
+--------------------------------------------------------------------------------
+Liberação do padrão 18
+================================================================================
+CM$VER      3.09.17a    29/10/2007
+--------------------------------------------------------------------------------
+- Pendencia 26086: Na consulta de bens para um conjunto foi alterado para
+                     somente retornar, bens sem baixa total.
+================================================================================
+CM$VER      3.09.17     14/08/2007
+--------------------------------------------------------------------------------
+- Liberação do padrão 17
+================================================================================
+CM$VER      3.09.16c    29/10/2007
+--------------------------------------------------------------------------------
+- Pendencia 23854: Na consulta de bens para um conjunto foi alterado para
+                     somente retornar, bens sem baixa total.
+================================================================================
+CM$VER      3.09.16b    20/09/2007
+--------------------------------------------------------------------------------
+- Pendencia 26086: Na criação de um bem, se informado o rateio de plano e patro, o sistema
+  efetua a segregação, caso a Fundação trabalhe com segregação virtual.
+================================================================================
+CM$VER      3.09.16a    10/08/2007
+--------------------------------------------------------------------------------
+- Correção na verificação de classe já existente durante o primeiro registro.
+================================================================================
+CM$VER      3.09.16     18/06/2007
+--------------------------------------------------------------------------------
+Liberação do Padrão 16.
+================================================================================
+CM$VER      3.09.15a    18/06/2007
+--------------------------------------------------------------------------------
+- Pendencia 25113: Correção no processo de transferencia automatica de grupo quando
+  da transferencia de conjunto/localização pelo processo de inventário
+================================================================================
+CM$VER      3.09.15     04/04/2007
+--------------------------------------------------------------------------------
+Liberação do Padrão 15.
+================================================================================
+CM$VER      3.09.14     02/02/2007
+--------------------------------------------------------------------------------
+Cadastro de Localizações
+  Pendência: 24037 / 24038 - Substituição do campo CODCENTROCUSTO pelo campo
+                                           CODEXTERNO na exibição da tela.
+================================================================================
+CM$VER      3.09.13d    02/02/2007
+--------------------------------------------------------------------------------
+Pend 23877 - Acréscimo de Valores - Considerar laudo da última reavaliação para
+apuração da taxa de depreciação do acréscimo de valor.
+================================================================================
+CM$VER      3.09.13c    23/01/2007
+--------------------------------------------------------------------------------
+Cadastro de Localização
+ - Acerto das pendências 24037 / 24038 - Substituídos CODCENTROCUSTO por COEXTERNO.
+================================================================================
+CM$VER      3.09.13b    19/01/2007
+--------------------------------------------------------------------------------
+Pend 23919 - Integração Contábil - Busca do plano comum quando da inexistência do 
+                     plano administrativo.
+Pend 17582 - Considerar apenas planos previdenciários ativos no cadastro de parâmetros
+                     do Global.
+    
+================================================================================
+CM$VER      3.09.13     21/11/2006
+--------------------------------------------------------------------------------
+Liberação do padrão 13
+================================================================================
+CM$VER      3.09.12e    07/02/2007
+--------------------------------------------------------------------------------
+Pend 23877 - Acréscimo de Valores - Considerar laudo da última reavaliação para apuração
+    da taxa de depreciação do acréscimo de valor.
+================================================================================
+CM$VER      3.09.12d    23/01/2007
+--------------------------------------------------------------------------------
+Cadastro de Localização
+ - Acerto das pendências 24037 / 24038 - Substituídos CODCENTROCUSTO por COEXTERNO.
+================================================================================
+CM$VER      3.09.12c    19/01/2007
+--------------------------------------------------------------------------------
+Pend 17582 - Considerar apenas planos previdenciários ativos no cadastro de parâmetros
+                     do Global.
+Pend 23919 - Integração Contábil - Busca do plano comum quando da inexistência do
+                     plano administrativo.
+================================================================================
+CM$VER      3.09.12b    16/11/2006
+--------------------------------------------------------------------------------
+- Acerto na rotina de seleção de bem
+================================================================================
+CM$VER      3.09.12a    09/11/2006
+--------------------------------------------------------------------------------
+- Ajuste na query usada para atualizar saldo contábil
+================================================================================
+CM$VER      3.09.12     15/09/2006
+--------------------------------------------------------------------------------
+- Liberação do Padrão 12
+================================================================================
+CM$VER      3.09.11f    16/11/2006
+--------------------------------------------------------------------------------
+- Acerto na rotina de seleção de bem
+================================================================================
+CM$VER      3.09.11e    09/11/2006
+--------------------------------------------------------------------------------
+- Ajuste na query usada para atualizar saldo contábil
+================================================================================
+CM$VER      3.09.11d    03/11/2006
+--------------------------------------------------------------------------------
+- Pendencia 23651: Acerto no processo de Contabilização no processo de Transferência de Grupo
+================================================================================
+CM$VER      3.09.11c    23/10/2006
+--------------------------------------------------------------------------------
+- Acerto no lançamento contábil de valor negativo (ressarcimento) de obra
+================================================================================
+CM$VER      3.09.11b    10/10/2006
+--------------------------------------------------------------------------------
+- Pendencia 23502: Acerto no processo de contabilização de baixa para evitar erro de constraint
+================================================================================
+CM$VER      3.09.11a    21/08/2006
+--------------------------------------------------------------------------------
+- Pendencia 21139:
+   Criação de parâmetro para indicar se o histórico contábil deve ou não ser agrupado
+   Implementação de agrupamento de histórico na integração contábil, conforme parametrização
+================================================================================
+CM$VER      3.09.11     28/07/2006
+--------------------------------------------------------------------------------
+Liberação do padrão 11.
+================================================================================
+CM$VER      3.09.10     12/07/2006
+--------------------------------------------------------------------------------
+Solução de problema de arrendondamento no rateio de movimentações.
+================================================================================
+CM$VER      3.09.09     24/02/2006
+--------------------------------------------------------------------------------
+Implementação de utilitário que permitirá identificar os bens que sofreram alteração manual do grupo contábil.
+================================================================================
+CM$VER      3.09.08     22/02/2006
+--------------------------------------------------------------------------------
+Correção de problema ocorrido durante registro de planilha contábil do fechamento mensal.
+================================================================================
+CM$VER      3.09.07     26/09/2005
+--------------------------------------------------------------------------------
+Versão compatível com:
+Versão 3.09.07 do Cliente CAF
+Pendencia 30337
+Alterar as Heranças implementadas no PadrãoCM 
+5.10.06 do TotalPrev.
+Pendencia 21618
+Gerar a opção Seleção de Bens para Reavaliação, e nela 
+foi colocada a opção de importação dos dados de um arquivo texto.
+Pendencia 29807
+Ao tentar desfazer a transferência em 01/02, apesar 
+desta ter sido feita após o fechamento, a função está 
+testando o período contábil no dia anterior (janeiro) em 
+função da verificação de depreciação pro-rata em 31/01, 
+mesmo que esta não tenha ocorrido. Com isto não 
+conseguimos desfazer a transferência.
+Passos :
+1. Efetuamos o fechamento do período de 31/01/2005
+2. Fizemos a transferência de grupo em 01/02/2005 
+3. A Contabilidade fechou (bloqueou) o período de janeiro. 
+(Ver email Vinicius/Funcef em 12/08)
+Pendencia 29831
+Tratar o arredondamento do Rateio por Centro de
+Custo, jogando a diferença entre o valor original
+e a soma dos rateios no centro de custo com o 
+maior percentual. (email Vinícius 15/08)
+(TotalPrev 19970)
+Pendencia 28275
+Desenvolver um estorno para a Correção de Grupos
+Contábeis.
+Pendencia 30388
+Informar na tela, das consultas abaixo, quando o
+bem estiver em Saída Temporária.
+- Cadastro de bens
+- Saldo Contábil por Bem
+- Histórico de Movimentações.
+Pendencia 29542
+Verificar a discrepancia nos cálculos pró-rata do 
+fechamento realizado após reavaliação no 
+método 2. (email Vinícius)
+Pendencia 27736
+Alteração da descrição do check-box para: 
+"Conta padrão para o Critério de Segregação".
+e não permitir marcar mais de uma conta.
+Pendencia 26782
+Alterar o método que trata da segregação de 
+recursos, passando a usar a conta á débito qdo
+a contabilidade usar a segregação e o cliente 
+não definir na parametrização contábil a conta 
+que deverá ser usada.
+Pendencia 27824
+Registrar o valor da venda na tabela 
+HISTORICOMOVIMENTACAO.
+Pendencia 28647
+Solicito implementação no relatório balancete 
+patrimonial por bem no CAF os filtros para 
+escolher Bens Patrimoniais, imobiliário e todos
+Igual ao filtro do relatório Balancete Patrimonial
+por Grupo Contábil - Analítico.
+================================================================================
+CM$VER      3.09.05     20/05/2005
+--------------------------------------------------------------------------------
+Liberação do Padrão 5.10.06
+================================================================================
+CM$VER      3.09.04c    09/05/2005
+--------------------------------------------------------------------------------
+Cadastro de Conjuntos
+  - Possibilidade de alteração do Responsável
+================================================================================
+CM$VER      3.09.04a    19/04/2005
+--------------------------------------------------------------------------------
+Correção de Grupo Contábil
+  - Ajuste do processo - Campo IdBem não encontrado.
+Cadastro de Bens
+  - Correção no cadastro de bens, onde a depreciação somente era carregada após
+    selecionar novamente o Grupo Contábil.
+================================================================================
+CM$VER      3.09.04     07/04/2005
+--------------------------------------------------------------------------------
+Pendencia 26467
+  - Verificar se integração contábil da movimentação Reavaliação está realizando 
+    a baixa da depreciação acumulada e lançando-a a crédito na conta de custo. 
+ 
+Pendencia 26462 / TotalPrev 18877
+  - Levantamento de Inventário - O botão pesquisar item está removendo o item 
+    selecionado no grid no instante em que é acionado.
+    Incluir tambem os campos Localização, Grupo e Conjunto.  
+Pendencia 26521
+  - Implementar na uCtrlCafxContab a inclusão do código de imóvel gerado pelo 
+    InvestImob no histórico contábil. 
+Pendencia 26089
+  - Implementação do retorno dos IDs dos bens criados na função ExecutaEncerramentoObra 
+    para que eu possa ser associados ao imóvel criado no Investimob.
+Pendencia 26597
+  - Correção do lançamento dos valores acumulados das depreciações de reavaliações 
+    negativas no bem resultante do Remembramento.
+Pendencia 26375
+  - Correção do acesso ao botão de Exportar/Importar dados de coletores de dados nas
+    funções de geração e resultado de inventário.
+Pendencia 25727
+  - Verificar a causa das diferenças encontradas entre os lançamentos realizados no
+    CAF com os lançamentos realizados na Contabilidade, conforme documentos em anexo.
+Pendencia 25568
+  - Verificar e contornar a incompatibilidade da função CdsToDbObject no Delphi 5, 
+    usado na alteração restrita do Cadastro de Bens
+Pendencia 24608
+  - Liberar para preenchimento os campos ATIVIDADE/PROJETO e SUBCONTA na tela de 
+    cadastro de bens do movimento ENTRADA DE BENS PENDENTES.
+================================================================================
+CM$VER      3.09.02     28/12/2004
+--------------------------------------------------------------------------------
+Pendencia 24274
+Converter a função Correção de Grupo Contábil existente na versão do Totalprev para a 
+versão MT do CAF. (D5 e D7)
+================================================================================
+CM$VER      3.09.01     06/12/2004
+--------------------------------------------------------------------------------
+Pendencia 23420
+Implementação da Segregação de Recursos. As rotinas de integração contabil,
+o cadastro de parametrização contábil e o relatório de parametrização contábil
+foram modificados.
+================================================================================
+CM$VER      3.09.00     
+--------------------------------------------------------------------------------
+Versão compatível com:
+Versão 3.09.00 do Objeto Negocio CAF
+Pendencia 23446:
+Conversão do sistema para funcionamento em três camadas, com o downgrade de
+Delphi 7 para Delphi 5, unificando as versões do Hotal com o TotalPrev.
+================================================================================
+CM$ALT}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

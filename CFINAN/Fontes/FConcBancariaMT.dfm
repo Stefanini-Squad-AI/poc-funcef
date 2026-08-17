@@ -1,0 +1,753 @@
+inherited frmConcBancariaMT: TfrmConcBancariaMT
+  Left = 100
+  Top = 201
+  HelpContext = 90007
+  Caption = 'Conciliação Bancária'
+  ClientHeight = 409
+  ClientWidth = 772
+  PixelsPerInch = 96
+  TextHeight = 13
+  inherited pnlFundo: TPanel
+    Width = 772
+    Height = 370
+    object plnSaldos: TPanel
+      Left = 5
+      Top = 291
+      Width = 762
+      Height = 74
+      Align = alBottom
+      TabOrder = 0
+      object gbCorrente: TGroupBox
+        Left = 8
+        Top = 9
+        Width = 449
+        Height = 61
+        Caption = 'Saldo Conciliado em Moeda Corrente'
+        Enabled = False
+        TabOrder = 0
+        object lblSaldoConciliadoAn: TLabel
+          Left = 162
+          Top = 18
+          Width = 121
+          Height = 13
+          Caption = 'Antes da Conciliação'
+        end
+        object lblSaldoConciliadoAt: TLabel
+          Left = 310
+          Top = 18
+          Width = 110
+          Height = 13
+          Caption = 'Após a Conciliação'
+        end
+        object Label2: TLabel
+          Left = 9
+          Top = 18
+          Width = 68
+          Height = 13
+          Caption = 'Dia Anterior'
+        end
+        object edSaldoAntesConc: TRealEdit
+          Left = 159
+          Top = 32
+          Width = 131
+          Height = 21
+          Alignment = taRightJustify
+          Lines.Strings = (
+            '      0,00')
+          TabOrder = 1
+          WordWrap = False
+          IntDigits = 17
+          DecDigits = 2
+          NumberFormat = fNumber
+          Signal = True
+        end
+        object edSaldoConc: TRealEdit
+          Left = 310
+          Top = 32
+          Width = 131
+          Height = 21
+          Alignment = taRightJustify
+          Lines.Strings = (
+            '      0,00')
+          TabOrder = 2
+          WordWrap = False
+          IntDigits = 17
+          DecDigits = 2
+          NumberFormat = fNumber
+          Signal = True
+        end
+        object edSaldoConcDiaAnt: TRealEdit
+          Left = 9
+          Top = 32
+          Width = 131
+          Height = 21
+          Alignment = taRightJustify
+          Color = clBtnFace
+          Lines.Strings = (
+            '      0,00')
+          ReadOnly = True
+          TabOrder = 0
+          WordWrap = False
+          IntDigits = 17
+          DecDigits = 2
+          NumberFormat = fNumber
+          Signal = True
+        end
+      end
+      object gbOutraMoeda: TGroupBox
+        Left = 464
+        Top = 9
+        Width = 289
+        Height = 61
+        Caption = 'Saldo Conciliado em Outra Moeda'
+        Enabled = False
+        TabOrder = 1
+        object lblSaldoConciliaOMAt: TLabel
+          Left = 152
+          Top = 18
+          Width = 110
+          Height = 13
+          Caption = 'Após a Conciliação'
+        end
+        object lblSaldoConciliaOMAn: TLabel
+          Left = 16
+          Top = 18
+          Width = 121
+          Height = 13
+          Caption = 'Antes da Conciliação'
+        end
+        object edSaldoOMAntesConc: TRealEdit
+          Left = 14
+          Top = 34
+          Width = 131
+          Height = 21
+          Alignment = taRightJustify
+          Lines.Strings = (
+            '      0,00')
+          TabOrder = 0
+          WordWrap = False
+          IntDigits = 17
+          DecDigits = 2
+          NumberFormat = fNumber
+          Signal = True
+        end
+        object edSaldoOMConc: TRealEdit
+          Left = 150
+          Top = 34
+          Width = 131
+          Height = 21
+          Alignment = taRightJustify
+          Lines.Strings = (
+            '      0,00')
+          TabOrder = 1
+          WordWrap = False
+          IntDigits = 17
+          DecDigits = 2
+          NumberFormat = fNumber
+          Signal = True
+        end
+      end
+    end
+    object pnlDadosFiltro: TPanel
+      Left = 5
+      Top = 5
+      Width = 762
+      Height = 111
+      Align = alTop
+      BorderStyle = bsSingle
+      TabOrder = 1
+      object btnMarcaTodos: TSpeedButton
+        Left = 3
+        Top = 72
+        Width = 100
+        Height = 30
+        Caption = '&Todos'
+        Enabled = False
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clActiveCaption
+        Font.Height = -11
+        Font.Name = 'MS Sans Serif'
+        Font.Style = [fsBold]
+        Glyph.Data = {
+          76010000424D7601000000000000760000002800000020000000100000000100
+          0400000000000001000000000000000000001000000010000000000000000000
+          80000080000000808000800000008000800080800000C0C0C000808080000000
+          FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00FFFFFFFFFFFF
+          FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00000
+          000FFFFFFFF88888888FFFFFFFF07797770FFFFFFFF8FF7FFF8FFFFFF0007999
+          770FFFFFF888F777FF8FFFFFF0709979970FFFFFF8F877F77F8FFFF000709777
+          990FFFF888F87FFF778FFFF070907777799FFFF8F878FFFFF77FF00070900000
+          0099F888F87888888877F070907777799FFFF8F878FFFFF77FFFF07090000000
+          99FFF8F87888888877FFF0907777799FFFFFF878FFFFF77FFFFFF09000000099
+          FFFFF87888888877FFFFF07777799FFFFFFFF8FFFFF77FFFFFFFF000000099FF
+          FFFFF888888877FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF}
+        NumGlyphs = 2
+        ParentFont = False
+        OnClick = btnMarcaTodosClick
+      end
+      object btnInverteMarcacao: TSpeedButton
+        Left = 111
+        Top = 72
+        Width = 100
+        Height = 30
+        Caption = '&Inverter'
+        Enabled = False
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clActiveCaption
+        Font.Height = -11
+        Font.Name = 'MS Sans Serif'
+        Font.Style = [fsBold]
+        Glyph.Data = {
+          76010000424D7601000000000000760000002800000020000000100000000100
+          0400000000000001000000000000000000001000000010000000000000000000
+          80000080000000808000800000008000800080800000C0C0C000808080000000
+          FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00FFFFFFFFFFFF
+          FFFFFFFFFFFFFFFFFFFFFFFFFFFF00000000FFFFFFFF88888888FFFFFFFF0777
+          7770FFFFFFFF8FFFFFF8FFF000FF07777770FFF788FF8FFFFFF8FFF0FFFF0777
+          7770FFF8FFFF8FFFFFF8FF000FFF07777770FF778FFF8FFFFFF8FFF0FFFF0777
+          7770FFF8FFFF8FFFFFF8FFFFFFFF00000000FFFFFFFF8888888800000000FFFF
+          FFFF88888888FFFFFFFF07797770FFFF0FFF8FF7FFF8FFFF8FFF07999770FFF0
+          00FF8F777FF8FFF877FF09979970FFFF0FFF877F77F8FFFF8FFF09777990FF00
+          0FFF87FFF778FF887FFF07777799FFFFFFFF8FFFFF77FFFFFFFF000000099FFF
+          FFFF888888877FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF}
+        NumGlyphs = 2
+        ParentFont = False
+        OnClick = btnInverteMarcacaoClick
+      end
+      object btnSeleciona: TBitBtn
+        Left = 640
+        Top = 8
+        Width = 100
+        Height = 49
+        Caption = '&Seleciona'
+        TabOrder = 3
+        OnClick = btnSelecionaClick
+        Glyph.Data = {
+          76010000424D7601000000000000760000002800000020000000100000000100
+          0400000000000001000000000000000000001000000010000000000000000000
+          800000800000008080008000000080008000808000007F7F7F00BFBFBF000000
+          FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00555555555555
+          55555555FFFFFFFF5555555000000005555555577777777FF555550999999900
+          55555575555555775F55509999999901055557F55555557F75F5001111111101
+          105577FFFFFFFF7FF75F00000000000011057777777777775F755070FFFFFF0F
+          01105777F555557F75F75500FFFFFF0FF0105577F555FF7F57575550FF700008
+          8F0055575FF7777555775555000888888F005555777FFFFFFF77555550000000
+          0F055555577777777F7F555550FFFFFF0F05555557F5FFF57F7F555550F000FF
+          0005555557F777557775555550FFFFFF0555555557F555FF7F55555550FF7000
+          05555555575FF777755555555500055555555555557775555555}
+        NumGlyphs = 2
+      end
+      object gbSaldoExtrato: TGroupBox
+        Left = 351
+        Top = 6
+        Width = 262
+        Height = 55
+        Caption = 'Saldo do Extrato'
+        TabOrder = 2
+        object lblSaldo: TLabel
+          Left = 9
+          Top = 17
+          Width = 111
+          Height = 13
+          Caption = 'em Moeda Corrente'
+        end
+        object Label1: TLabel
+          Left = 138
+          Top = 17
+          Width = 94
+          Height = 13
+          Caption = 'em Outra Moeda'
+        end
+        object ednSaldoOMoeda: TRealEdit
+          Left = 135
+          Top = 30
+          Width = 121
+          Height = 21
+          Alignment = taRightJustify
+          Lines.Strings = (
+            '      0,00')
+          TabOrder = 0
+          WordWrap = False
+          IntDigits = 17
+          DecDigits = 2
+          NumberFormat = fNumber
+          Signal = True
+        end
+        object ednSaldoCorrente: TRealEdit
+          Left = 6
+          Top = 30
+          Width = 121
+          Height = 21
+          Alignment = taRightJustify
+          Lines.Strings = (
+            '      0,00')
+          TabOrder = 1
+          WordWrap = False
+          IntDigits = 17
+          DecDigits = 2
+          NumberFormat = fNumber
+          Signal = True
+        end
+      end
+      object gbData: TGroupBox
+        Left = 213
+        Top = 6
+        Width = 133
+        Height = 55
+        TabOrder = 1
+        object lblDataExtrato: TLabel
+          Left = 4
+          Top = 14
+          Width = 90
+          Height = 13
+          Caption = 'Data do Extrato'
+        end
+        object edDataExtrato: TCMDateTimePicker
+          Left = 4
+          Top = 27
+          Width = 121
+          Height = 21
+          CalendarAttributes.Font.Charset = DEFAULT_CHARSET
+          CalendarAttributes.Font.Color = clWindowText
+          CalendarAttributes.Font.Height = -11
+          CalendarAttributes.Font.Name = 'MS Sans Serif'
+          CalendarAttributes.Font.Style = []
+          ButtonStyle = cbsCustom
+          Epoch = 1950
+          ButtonGlyph.Data = {
+            06050000424D06050000000000003604000028000000100000000D0000000100
+            080000000000D000000000000000000000000001000000000000000000000000
+            80000080000000808000800000008000800080800000C0C0C000C0DCC000F0CA
+            A6000020400000206000002080000020A0000020C0000020E000004000000040
+            20000040400000406000004080000040A0000040C0000040E000006000000060
+            20000060400000606000006080000060A0000060C0000060E000008000000080
+            20000080400000806000008080000080A0000080C0000080E00000A0000000A0
+            200000A0400000A0600000A0800000A0A00000A0C00000A0E00000C0000000C0
+            200000C0400000C0600000C0800000C0A00000C0C00000C0E00000E0000000E0
+            200000E0400000E0600000E0800000E0A00000E0C00000E0E000400000004000
+            20004000400040006000400080004000A0004000C0004000E000402000004020
+            20004020400040206000402080004020A0004020C0004020E000404000004040
+            20004040400040406000404080004040A0004040C0004040E000406000004060
+            20004060400040606000406080004060A0004060C0004060E000408000004080
+            20004080400040806000408080004080A0004080C0004080E00040A0000040A0
+            200040A0400040A0600040A0800040A0A00040A0C00040A0E00040C0000040C0
+            200040C0400040C0600040C0800040C0A00040C0C00040C0E00040E0000040E0
+            200040E0400040E0600040E0800040E0A00040E0C00040E0E000800000008000
+            20008000400080006000800080008000A0008000C0008000E000802000008020
+            20008020400080206000802080008020A0008020C0008020E000804000008040
+            20008040400080406000804080008040A0008040C0008040E000806000008060
+            20008060400080606000806080008060A0008060C0008060E000808000008080
+            20008080400080806000808080008080A0008080C0008080E00080A0000080A0
+            200080A0400080A0600080A0800080A0A00080A0C00080A0E00080C0000080C0
+            200080C0400080C0600080C0800080C0A00080C0C00080C0E00080E0000080E0
+            200080E0400080E0600080E0800080E0A00080E0C00080E0E000C0000000C000
+            2000C0004000C0006000C0008000C000A000C000C000C000E000C0200000C020
+            2000C0204000C0206000C0208000C020A000C020C000C020E000C0400000C040
+            2000C0404000C0406000C0408000C040A000C040C000C040E000C0600000C060
+            2000C0604000C0606000C0608000C060A000C060C000C060E000C0800000C080
+            2000C0804000C0806000C0808000C080A000C080C000C080E000C0A00000C0A0
+            2000C0A04000C0A06000C0A08000C0A0A000C0A0C000C0A0E000C0C00000C0C0
+            2000C0C04000C0C06000C0C08000C0C0A000F0FBFF00A4A0A000808080000000
+            FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00010000000000
+            000000000000000000FFFF00FFFFFFFFFFFFFFFFFFFFFFFF00FFFF00FF07A407
+            A407A4F9A407A4FF00FFFF00FFA407A407A4F9A4F9A407FF00FFFF00FF07A407
+            A407A4F9A407A4FF00FFFF00FFA407A407A407A407A407FF00FFFF00FF07A407
+            A407A407A407A4FF00FFFF00FFA407A407A407A407A407FF00FFFF00FFFFFFFF
+            FFFFFFFFFFFFFFFF00FFFF00FF04FC04FC04FCA4A4A4A4FF00FFFF00FFFC04FC
+            04FC04A4A4A4A4FF00FFFF00FFFFFFFFFFFFFFFFFFFFFFFF00FFFF0000000000
+            000000000000000000FF}
+          ShowButton = True
+          TabOrder = 0
+        end
+      end
+      object gbBanco: TGroupBox
+        Left = 3
+        Top = 6
+        Width = 208
+        Height = 55
+        TabOrder = 0
+        object lblContaBanco: TLabel
+          Left = 6
+          Top = 15
+          Width = 125
+          Height = 13
+          Caption = 'Conta Bancária/Caixa'
+        end
+        object dblcPortador: TwwDBLookupCombo
+          Left = 6
+          Top = 27
+          Width = 196
+          Height = 21
+          DropDownAlignment = taLeftJustify
+          Selected.Strings = (
+            'DESCRICAO'#9'35'#9'Descrição'
+            'NOCONTACORR'#9'15'#9'Conta')
+          LookupTable = cdsPortador
+          LookupField = 'CODPORTADOR'
+          TabOrder = 0
+          AutoDropDown = True
+          ShowButton = True
+          AllowClearKey = False
+          OnExit = dblcPortadorExit
+        end
+      end
+    end
+    object dbgExtrato: TwwDBGrid
+      Left = 5
+      Top = 116
+      Width = 762
+      Height = 175
+      Hint = 
+        'Duplo Click no campo Status, troca o status de não conciliado pa' +
+        'ra conciliado e vice versa'
+      ControlType.Strings = (
+        'STATUSCONCILIA;CheckBox;P;N')
+      PictureMasks.Strings = (
+        'VALORLANCFINAN'#9'#,##0.00;(#,##0.00)'#9'T'#9'T'
+        'VALOROUTRAMOEDA'#9'#,##0.00;(#,##0.00)'#9'T'#9'T')
+      Selected.Strings = (
+        'STATUSCONCILIA'#9'1'#9'Status'#9'F'
+        'DATALANCFINAN'#9'10'#9'Data '#9'F'
+        'NUMCHQBORDERO'#9'15'#9'Documento'#9'F'
+        'ENTRADASAIDA'#9'1'#9'E/S'#9'F'
+        'VALORLANCFINAN'#9'10'#9'Valor Moeda Corrente'#9'F'
+        'VALOROUTRAMOEDA'#9'10'#9'Valor Outra Moeda'#9'F'
+        'HISTORICO'#9'60'#9'Histórico'#9'F')
+      IniAttributes.Delimiter = ';;'
+      TitleColor = clBtnFace
+      FixedCols = 0
+      ShowHorzScrollBar = True
+      Align = alClient
+      DataSource = dsExtrato
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 2
+      TitleAlignment = taLeftJustify
+      TitleFont.Charset = DEFAULT_CHARSET
+      TitleFont.Color = clWindowText
+      TitleFont.Height = -9
+      TitleFont.Name = 'MS Sans Serif'
+      TitleFont.Style = [fsBold]
+      TitleLines = 1
+      TitleButtons = True
+      UseTFields = False
+      OnTitleButtonClick = dbgExtratoTitleButtonClick
+      IndicatorColor = icBlack
+    end
+  end
+  inherited Dock971: TDock97
+    Top = 370
+    Width = 772
+    inherited tb97Fundo: TToolbar97
+      Left = 367
+      inherited bbtnAjuda: TmaHelpBitBtn
+        HelpContext = 90007
+      end
+    end
+    inherited TB97oKCancelar: TToolbar97
+      inherited bbtnConfirmar: TBitBtn
+        OnClick = bbtnConfirmarClick
+      end
+    end
+  end
+  inherited ivTradutor: TIvExtendedTranslator
+    Left = 691
+    Top = 363
+    TargetsData = (
+      1
+      1
+      (
+        'TRealEdit'
+        'Text'
+        0))
+  end
+  object cdsPortador: TCMClientDataSet
+    Aggregates = <>
+    FieldDefs = <
+      item
+        Name = 'IDPESSOA'
+        DataType = ftFloat
+      end
+      item
+        Name = 'CODLANCFINANC'
+        DataType = ftFloat
+      end
+      item
+        Name = 'UNIDNEGOC'
+        DataType = ftFloat
+      end
+      item
+        Name = 'CODTIPRECDES'
+        Attributes = [faFixed]
+        DataType = ftString
+        Size = 15
+      end
+      item
+        Name = 'RECPAG'
+        Attributes = [faFixed]
+        DataType = ftString
+        Size = 1
+      end
+      item
+        Name = 'CODCENTRORESPON'
+        Attributes = [faFixed]
+        DataType = ftString
+        Size = 10
+      end
+      item
+        Name = 'MOECODIGO'
+        DataType = ftFloat
+      end
+      item
+        Name = 'VALOR'
+        DataType = ftFloat
+      end
+      item
+        Name = 'VALOROUTRAMOEDA'
+        DataType = ftFloat
+      end
+      item
+        Name = 'LOTETRANSMISSAO'
+        DataType = ftFloat
+      end
+      item
+        Name = 'TRGDTINCLUSAO'
+        DataType = ftDateTime
+      end
+      item
+        Name = 'TRGUSERINCLUSAO'
+        DataType = ftString
+        Size = 30
+      end
+      item
+        Name = 'IDEMPRESA'
+        DataType = ftFloat
+      end
+      item
+        Name = 'CODCENTROCUSTO'
+        Attributes = [faFixed]
+        DataType = ftString
+        Size = 10
+      end
+      item
+        Name = 'IDRATEIOFINANC'
+        DataType = ftFloat
+      end
+      item
+        Name = 'IDPROGRAMA'
+        DataType = ftFloat
+      end
+      item
+        Name = 'IDPLANOPREV'
+        DataType = ftFloat
+      end
+      item
+        Name = 'IDPATRO'
+        DataType = ftFloat
+      end
+      item
+        Name = 'CODTIPDOC'
+        DataType = ftFloat
+      end
+      item
+        Name = 'DESCUNIDNEG'
+        DataType = ftString
+        Size = 25
+      end
+      item
+        Name = 'DESCCRESPON'
+        Attributes = [faFixed]
+        DataType = ftString
+        Size = 30
+      end
+      item
+        Name = 'DESCRICAO'
+        DataType = ftString
+        Size = 35
+      end
+      item
+        Name = 'MOESIGLA'
+        DataType = ftString
+        Size = 10
+      end>
+    IndexDefs = <
+      item
+        Name = 'cdsDetIndex1'
+      end>
+    Params = <>
+    StoreDefs = True
+    Left = 152
+    Top = 16
+  end
+  object cdsExtrato: TCMClientDataSet
+    Aggregates = <>
+    FieldDefs = <
+      item
+        Name = 'CODLANCFINANC'
+        DataType = ftFloat
+      end
+      item
+        Name = 'PLNCODIGO'
+        DataType = ftFloat
+      end
+      item
+        Name = 'IDMODULO'
+        DataType = ftFloat
+      end
+      item
+        Name = 'HISTPADFINAN'
+        DataType = ftFloat
+      end
+      item
+        Name = 'MOECODIGO'
+        DataType = ftFloat
+      end
+      item
+        Name = 'IDUSUARIOINCLUSAO'
+        DataType = ftFloat
+      end
+      item
+        Name = 'CODPORTADOR'
+        DataType = ftFloat
+      end
+      item
+        Name = 'VALORLANCFINAN'
+        DataType = ftFloat
+      end
+      item
+        Name = 'NUMCHQBORDERO'
+        Attributes = [faFixed]
+        DataType = ftString
+        Size = 15
+      end
+      item
+        Name = 'DATALANCFINAN'
+        DataType = ftDateTime
+      end
+      item
+        Name = 'DATACONCILIACAO'
+        DataType = ftDateTime
+      end
+      item
+        Name = 'ENTRADASAIDA'
+        Attributes = [faFixed]
+        DataType = ftString
+        Size = 1
+      end
+      item
+        Name = 'HISTORICO'
+        DataType = ftString
+        Size = 60
+      end
+      item
+        Name = 'STATUSCONCILIA'
+        Attributes = [faFixed]
+        DataType = ftString
+        Size = 1
+      end
+      item
+        Name = 'VALOROUTRAMOEDA'
+        DataType = ftFloat
+      end
+      item
+        Name = 'IDPESSOA'
+        DataType = ftFloat
+      end
+      item
+        Name = 'CODLANCTRANSF'
+        DataType = ftFloat
+      end
+      item
+        Name = 'LOTETRANSMISSAO'
+        DataType = ftFloat
+      end
+      item
+        Name = 'TRGDTINCLUSAO'
+        DataType = ftDateTime
+      end
+      item
+        Name = 'TRGUSERINCLUSAO'
+        DataType = ftString
+        Size = 30
+      end
+      item
+        Name = 'IDNFLIVRO'
+        DataType = ftFloat
+      end
+      item
+        Name = 'DATADISPFINANC'
+        DataType = ftDateTime
+      end>
+    IndexDefs = <
+      item
+        Name = 'AscDATALANCFINAN'
+        Fields = 'DATALANCFINAN; NUMCHQBORDERO'
+      end
+      item
+        Name = 'DescDATALANCFINAN'
+        Fields = 'DATALANCFINAN; NUMCHQBORDERO'
+        Options = [ixDescending]
+      end
+      item
+        Name = 'AscNUMCHQBORDERO'
+        Fields = 'NUMCHQBORDERO'
+      end
+      item
+        Name = 'DescNUMCHQBORDERO'
+        Fields = 'NUMCHQBORDERO'
+        Options = [ixDescending]
+      end
+      item
+        Name = 'AscENTRADASAIDA'
+        Fields = 'ENTRADASAIDA;NUMCHQBORDERO'
+      end
+      item
+        Name = 'DescENTRADASAIDA'
+        Fields = 'ENTRADASAIDA;NUMCHQBORDERO'
+        Options = [ixDescending]
+      end
+      item
+        Name = 'AscVALORLANCFINAN'
+        Fields = 'VALORLANCFINAN;NUMCHQBORDERO'
+      end
+      item
+        Name = 'DescVALORLANCFINAN'
+        Fields = 'VALORLANCFINAN;NUMCHQBORDERO'
+        Options = [ixDescending]
+      end
+      item
+        Name = 'AscVALOROUTRAMOEDA'
+        Fields = 'VALOROUTRAMOEDA;NUMCHQBORDERO'
+      end
+      item
+        Name = 'DescVALOROUTRAMOEDA'
+        Fields = 'VALOROUTRAMOEDA;NUMCHQBORDERO'
+        Options = [ixDescending]
+      end
+      item
+        Name = 'AscHISTORICO'
+        Fields = 'HISTORICO;NUMCHQBORDERO'
+      end
+      item
+        Name = 'DescHISTORICO'
+        Fields = 'HISTORICO;NUMCHQBORDERO'
+        Options = [ixDescending]
+      end>
+    Params = <>
+    StoreDefs = True
+    Left = 192
+    Top = 200
+  end
+  object dsExtrato: TwwDataSource
+    DataSet = cdsExtrato
+    Left = 248
+    Top = 200
+  end
+  object spTeste: TCMSqlParams
+    SQL.Strings = (
+      'select * from movimfinanc')
+    ClientDataSet = cdsExtrato
+    Left = 120
+    Top = 200
+  end
+end

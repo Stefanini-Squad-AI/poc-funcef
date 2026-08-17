@@ -1,0 +1,29 @@
+﻿--CRIAÇÃO DA TABELA.
+CREATE TABLE CM.TIPOMOVDIVIDA (
+    IDTIPOMOVDIVIDA   NUMBER,
+    DESCRICAO         VARCHAR2(50)
+);
+
+
+-- CRIAÇÃO DA CHAVE PRIMARIA DA TABELA 
+ALTER TABLE CM.TIPOMOVDIVIDA
+  ADD CONSTRAINT XPKTIPOMOVDIVIDA PRIMARY KEY (IDTIPOMOVDIVIDA)
+  USING INDEX 
+  TABLESPACE INDICES
+  PCTFREE 10
+  INITRANS 2
+  MAXTRANS 255
+  STORAGE
+  (
+    INITIAL 3208K
+    MINEXTENTS 1
+    MAXEXTENTS UNLIMITED
+  ); 
+  
+-- Add comments to table
+comment on table cm.TIPOMOVDIVIDA is 'Tipo de Movimentações da dívida de benefícios';
+
+-- Add comments to the columns 
+COMMENT ON COLUMN CM.TIPOMOVDIVIDA.IDTIPOMOVDIVIDA IS 'Sequencial identificador do tipo de movimentação da dívida' ;
+COMMENT ON COLUMN CM.TIPOMOVDIVIDA.DESCRICAO       IS 'Descrição do tipo de movimentação da dívida de benefício' ;
+  

@@ -1,0 +1,116 @@
+CREATE OR REPLACE VIEW CM.VWCONCILIACP_PLANUSXPORTALFIN AS
+---------------------------------------------------------------
+-- N. Chamado....: WO10944 
+-- Dt Alteração..: 04/07/2024
+-- Responsável...: Paulo Nobre
+-- Módulo........: Contas a Pagar
+-- Descrição.....: Relatório de Fechamento da Movimentação 
+--                 Financeira - Planus X Portal Financeiro
+---------------------------------------------------------------
+SELECT ORDEM, 
+       TITULOPORTFORMA,
+       IDSOLPAG, 
+       NUM_AP, 
+       FAVORECIDO, 
+       DATA_PROGRAMADA, 
+       VALOR, 
+       FORMA_PAGAMENTO_COBRANCA, 
+       USUARIO_INCLUSAO, 
+       HISTORICO, 
+       CHECK1, 
+       CHECK2, 
+       CHECK3  
+FROM (
+SELECT CASE
+       	WHEN D.CODPORTFORMA = 289 THEN 1
+    	WHEN D.CODPORTFORMA = 288 THEN 2
+    	WHEN D.CODPORTFORMA IN (307,327) THEN 3
+    	WHEN D.CODPORTFORMA = 285 THEN 4
+    	WHEN D.CODPORTFORMA IN (297,311,298,299,300,301,302,303) THEN 5
+    	WHEN D.CODPORTFORMA = 291 THEN 6    	
+    	WHEN D.CODPORTFORMA = 292 THEN 7    	    	
+    	WHEN D.CODPORTFORMA IN (286,266,305,310) THEN 8    	    	
+    	WHEN D.CODPORTFORMA IN (184,314,315,186,317,318,319,316) THEN 9
+    	ELSE 10
+       END AS ORDEM,        
+       CASE
+       	WHEN D.CODPORTFORMA = 289 THEN 'REMESSA ELETRÔNICA AUTO PAG 290521'
+    	WHEN D.CODPORTFORMA = 288 THEN 'REMESSA ELETRÔNICA PAG FOR 290520'
+    	WHEN D.CODPORTFORMA IN (307,327) THEN 'INTERNET BANKING'
+    	WHEN D.CODPORTFORMA = 285 THEN 'BORDERÔ 4255'
+    	WHEN D.CODPORTFORMA IN (297,311,298,299,300,301,302,303) THEN 'SIACC'
+    	WHEN D.CODPORTFORMA = 291 THEN 'ENCONTRO DE CONTAS'    	
+    	WHEN D.CODPORTFORMA = 292 THEN 'DÉBITO AUTOMÁTICO'    	    	
+    	WHEN D.CODPORTFORMA IN (286,266,305,310) THEN 'BANCO DO BRASIL'    	    	
+    	WHEN D.CODPORTFORMA IN (184,314,315,186,317,318,319,316) THEN 'BANCO BRADESCO'
+    	ELSE 'OUTROS'
+       END AS TITULOPORTFORMA,    
+       NVL(FP1.ID_SOLICITACAO_PAG, 0) AS IDSOLPAG,	    	
+       TO_CHAR(D.NUMAPGR) AS NUM_AP,
+       P.NOME AS FAVORECIDO,
+       D.DATAPROGRAMADA AS DATA_PROGRAMADA,
+       ROUND(L.VALOR,2) AS VALOR,
+       PF.DESCRICAO AS FORMA_PAGAMENTO_COBRANCA,
+       SUBSTR(U.NOMEUSUARIO,1,15) AS USUARIO_INCLUSAO,
+       SUBSTR(L.HISTORICOCOMPL,1,80) AS HISTORICO,
+       DECODE(NVL(FP1.CO_NUMERO_AP, 0),0,'PENDENTE', 'OK') AS CHECK1,
+       DECODE(NVL(FP2.CO_NUMERO_AP, 0),0,'PENDENTE', 'OK') AS CHECK2,
+       CASE
+       	WHEN tb1.ID_EST_FLUXO IN (15, -- Liberação do Pagamento
+       							  16, -- Processo liberado para pagamento
+                              	  18  -- Atualização do Aviso de Lançamento
+                             	 ) THEN 'OK'
+       	ELSE 'PENDENTE'
+       END AS CHECK3     
+FROM DOCUMENTO D
+     JOIN PESSOA P ON P.IDPESSOA = D.IDFORCLI
+     JOIN LANCTODOCUM L ON L.CODDOCUMENTO = D.CODDOCUMENTO AND L.OPERACAO = D.OPERACAO
+     LEFT JOIN PORTADORFORMA PF ON PF.CODPORTFORMA = D.CODPORTFORMA
+     LEFT JOIN USUARIOSISTEMA U ON U.IDUSUARIO = D.IDUSUARIOINCLUSAO 
+     -- Tabelas do Portal Financeiro ---------------------------------------------------------------     
+     LEFT JOIN CORE_PORTAL_FINANCEIRO.SOLICITACAO_PAGAMENTO FP1 ON FP1.CO_NUMERO_AP = D.NUMAPGR 
+     LEFT JOIN CORE_PORTAL_FINANCEIRO.SOLICITACAO_PAGAMENTO FP2 ON FP2.CO_NUMERO_AP = D.NUMAPGR AND FP2.CODPORTFORMA = D.CODPORTFORMA     
+     LEFT JOIN (SELECT FP3.CO_NUMERO_AP, AH1.ID_EST_FLUXO
+                FROM CORE_PORTAL_FINANCEIRO.SOLICITACAO_PAGAMENTO FP3
+                JOIN CORE_PORTAL_FINANCEIRO.AP_HISTORICO AH1 ON AH1.ID_SOLICITACAO_PAG = FP3.ID_SOLICITACAO_PAG
+                WHERE AH1.DT_ENCAMINHAMENTO = (SELECT MAX(AH2.DT_ENCAMINHAMENTO) 
+                                               FROM CORE_PORTAL_FINANCEIRO.AP_HISTORICO AH2 
+                                               WHERE AH2.ID_SOLICITACAO_PAG = AH1.ID_SOLICITACAO_PAG
+                                                     AND AH2.ID_EST_FLUXO IN (15, 16, 18))) TB1 ON TB1.CO_NUMERO_AP = D.NUMAPGR 
+     ----------------------------------------------------------------------------------------------     
+WHERE D.IDPESSOA = 1
+      AND D.RECPAG = 'P'
+      AND D.OPERACAO IN ('1','2','10') -- 1 e 10 ??? / 2 - Lançamento
+
+UNION
+
+SELECT 99 ORDEM,
+       'PAGAMENTOS EM OUTRAS ETAPAS' AS TITULOPORTFORMA,
+       FP.ID_SOLICITACAO_PAG AS IDSOLPAG,	    	
+       'S/N' AS NUM_AP,
+       FP.NO_FAVORECIDO AS FAVORECIDO,
+       FP.DT_VENCIMENTO AS DATA_PROGRAMADA,
+       ROUND(FP.NU_VALOR_BRUTO,2) AS VALOR,
+       PF.DESCRICAO AS FORMA_PAGAMENTO_COBRANCA,
+       SUBSTR(US.NOMEUSUARIO,1,15) AS USUARIO_INCLUSAO,
+       NULL  AS HISTORICO,
+       'PENDENTE' AS CHECK1,
+       'PENDENTE' AS CHECK2,
+       'PENDENTE' AS CHECK3
+FROM CORE_PORTAL_FINANCEIRO.SOLICITACAO_PAGAMENTO FP
+LEFT JOIN CORE_PORTAL_FINANCEIRO.AP_HISTORICO AH1 ON AH1.ID_SOLICITACAO_PAG = FP.ID_SOLICITACAO_PAG
+LEFT JOIN PORTADORFORMA PF ON PF.CODPORTFORMA = FP.CODPORTFORMA
+JOIN USERWEBADM.USUARIO US ON US.IDUSUARIO = FP.ID_USUARIO_CADASTRO
+WHERE AH1.DT_ENCAMINHAMENTO = (SELECT MAX(AH2.DT_ENCAMINHAMENTO) 
+                               FROM CORE_PORTAL_FINANCEIRO.AP_HISTORICO AH2 
+                               WHERE AH2.ID_SOLICITACAO_PAG = AH1.ID_SOLICITACAO_PAG
+                                     AND AH2.ID_EST_FLUXO IN (11, -- Cadastro da Solicitação de Pagamento
+                                                              12, -- Autorização do Gestor
+                                     						  13, -- Conferência da Solicitação e Elaboração do Processo de Pagamento
+                                                              14) -- Conferência do Processo de Pagamento
+                              )                                                
+      AND FP.CO_NUMERO_AP IS NULL                                       
+
+    )
+    
+ORDER BY ORDEM, NUM_AP;    

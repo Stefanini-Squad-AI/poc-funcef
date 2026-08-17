@@ -1,0 +1,223 @@
+{*******************************************************}
+{                                                       }
+{ CM Soluções Informática                               }
+{ ** Todos os Direitos Reservados                       }
+{ Analista Responsável: Marco Antonio Abreu             }
+{ Atualizado Em: 19/02/2002                             }
+{                                                       }
+{*******************************************************}
+
+unit uCtrlCentroCusto;
+
+interface
+
+Uses DB, sysUtils, dbclient, Provider, uDataBase, uCmDbObject, uCmControlObject,
+     uDbCentroCusto, uSistema;
+
+Type
+  TCtrlCentroCusto = class(TCmControlObject)
+  Protected
+    procedure DoChangeDataBase; Override;
+  private
+    //-------------------------------------------------------------------------
+    // Classes de Persistência
+    //-------------------------------------------------------------------------
+    _DbCentroCusto: TDbCentroCusto;
+    _dsp: TDataSetProvider;
+    Fcds: TClientDataSet;
+    procedure Setcds(const Value: TClientDataSet);
+
+  Public
+    Property cds: TClientDataSet read Fcds write Setcds;
+    Property dsp: TDataSetProvider read _dsp;
+    //-------------------------------------------------------------------------
+    // Métodos
+    //-------------------------------------------------------------------------
+    constructor Create;  Override;
+    Destructor  Destroy; Override;
+    //-------------------------------------------------------------------------
+    // Metodos da Regra de Negócio
+    //-------------------------------------------------------------------------
+    Procedure Procurar( IdEmpresa: Double = 0; IdCentroCusto: Double = 0 );
+    Function  ListaCentroCusto( IdEmpresa: Double = 0; IdCentroCusto: Double = 0;
+                                bativo: Boolean = True; iOrdem : Integer = 0 ): OleVariant;
+    Function  Inserir: Boolean;
+    Function  Alterar: Boolean;
+    Function  Excluir( IdEmpresa, IdCentroCusto: Double ): Boolean;
+  End;
+
+implementation
+
+function TCtrlCentroCusto.Alterar: Boolean;
+Var
+  Msg: String;
+begin
+  If ConnectionSide = cnsClient Then Begin
+     Result := Connection.AppServer.AlterarCentroCusto( Fcds.Data );
+
+     If Not Result Then
+        MessageInfo := Connection.AppServer.MessageInfo;
+  End Else Begin
+     Try
+        StartTransaction;
+        CdsToDbObject( Fcds, TCmDbObject( _DbCentroCusto ) );
+        Result := _DbCentroCusto.Update;
+        Msg    := _DbCentroCusto.MessageInfo;
+
+        If Not Result Then
+           Raise Exception.Create( Msg );
+
+        Commit;
+     Except
+        On E:Exception Do
+        Begin
+           Rollback;
+           Result := False;
+           MessageInfo := E.Message;
+        End;
+     End;
+  End;
+end;
+
+constructor TCtrlCentroCusto.Create;
+begin
+  inherited;
+  _DbCentroCusto := TDbCentroCusto.Create;
+  FCds    := TClientDataSet.Create( nil );
+  _dsp    := TDataSetProvider.Create( nil );
+  _dsp    := _DbCentroCusto.Dsp;
+end;
+
+destructor TCtrlCentroCusto.Destroy;
+begin
+  If Fcds.Active Then
+     Fcds.Close;
+
+  Fcds := nil;
+  Fcds.Free;
+
+  _dsp.DataSet := nil;
+  _dsp := nil;
+  _dsp.Free;
+  _DbCentroCusto.Free;
+
+  inherited;
+end;
+
+procedure TCtrlCentroCusto.DoChangeDataBase;
+begin
+  inherited;
+  _DbCentroCusto.DataBaseName := DatabaseName;
+end;
+
+function TCtrlCentroCusto.Excluir(IdEmpresa, IdCentroCusto: Double): Boolean;
+Var
+  Msg: String;
+begin
+  If ConnectionSide = cnsClient Then Begin
+     Result := Connection.AppServer.ExcluirCentroCusto( IdEmpresa, IdCentroCusto );
+
+     If Not Result Then
+        MessageInfo := Connection.AppServer.MessageInfo;
+  End Else Begin
+     Try
+        StartTransaction;
+        _DbCentroCusto.CodCentroCusto.AsFloat := IdCentroCusto;
+        _DbCentroCusto.IdEmpresa.AsFloat := IdEmpresa;
+        Result := _DbCentroCusto.Delete;
+        Msg    := _DbCentroCusto.MessageInfo;
+
+        If Not Result Then
+           Raise Exception.Create( Msg );
+
+        Commit;
+     Except
+        On E:Exception Do
+        Begin
+           Rollback;
+           Result := False;
+           MessageInfo := E.Message;
+        End;
+     End;
+  End;
+end;
+
+function TCtrlCentroCusto.Inserir: Boolean;
+Var
+  Msg: String;
+begin
+  If ConnectionSide = cnsClient Then Begin
+     Result := Connection.AppServer.InserirCentroCusto( Fcds.Data );
+
+     If Not Result Then
+        MessageInfo := Connection.AppServer.MessageInfo;
+  End Else Begin
+     Try
+        StartTransaction;
+        CdsToDbObject( Fcds, TCmDbObject( _DbCentroCusto ) );
+        Result := _DbCentroCusto.Insert;
+        Msg    := _DbCentroCusto.MessageInfo;
+
+        If Not Result Then
+           Raise Exception.Create( Msg );
+
+        Commit;
+     except
+        On E:Exception Do
+        Begin
+           Rollback;
+           Result := False;
+           MessageInfo := E.Message;
+        End;
+     End;
+  End;
+end;
+
+function TCtrlCentroCusto.ListaCentroCusto( IdEmpresa: Double; IdCentroCusto: Double; bativo: Boolean; iOrdem : Integer ): OleVariant;
+var
+  sql: String;
+begin
+  Sql := 'SELECT C.IDEMPRESA, C.CODCENTROCUSTO, C.NOME, C.RESPONSAVEL, ' +
+         'P.NOME AS NOMEEMPRESA, C.IDUSUARIOINCLUSAO, Q.NOME AS NOMEUSUARIOINCLUSAO, ' +
+         'C.IDUSUARIO, U.NOMEUSUARIO, C.CODREDUZIDO, C.CODCORRESP, C.ATIVO, ' +
+         'C.STATUSGRUPOCDC, C.IDPROGRAMA ' +
+         'FROM CENTCUST C, PESSOA P, PESSOA Q, PROGRAMA R, USUARIOSISTEMA U ' +
+         'WHERE P.IDPESSOA = C.IDEMPRESA ' +
+         '  AND Q.IDPESSOA = C.IDUSUARIOINCLUSAO ' +
+         '  AND U.IDUSUARIO(+) = C.IDUSUARIO ' +
+         '  AND R.IDPROGRAMA(+) = C.IDPROGRAMA ';
+
+  If IdEmpresa <> 0 Then
+     Sql := Sql + '  AND C.IDEMPRESA = ' + FloatToStr( IdEmpresa ) + ' ';
+
+  If idCentroCusto <> 0 Then
+     Sql := Sql + '  AND C.CODCENTROCUSTO = ' + FloatToStr( IdCentroCusto ) + ' ';
+
+  If bativo Then
+     Sql := Sql + '  AND ATIVO = ''S'' ';
+
+  If iOrdem = 0 then
+     Sql := Sql + ' ORDER BY C.NOME '
+  else
+     Sql := Sql + ' ORDER BY C.CODCENTROCUSTO ';
+
+  Result := GetDataPacket( Sql );
+end;
+
+procedure TCtrlCentroCusto.Procurar(IdEmpresa, IdCentroCusto: Double);
+begin
+  If ConnectionSide = cnsClient Then Begin
+     Connection.AppServer.ProcurarCentroCusto( IdEmpresa, IdCentroCusto );
+  End Else Begin
+     _dbCentroCusto.CodCentroCusto.AsFloat := IdCentroCusto;
+     _dbCentroCusto.IdEmpresa.AsFloat := IdEmpresa;
+  End;
+end;
+
+procedure TCtrlCentroCusto.Setcds(const Value: TClientDataSet);
+begin
+  Fcds := Value;
+end;
+
+end.
+

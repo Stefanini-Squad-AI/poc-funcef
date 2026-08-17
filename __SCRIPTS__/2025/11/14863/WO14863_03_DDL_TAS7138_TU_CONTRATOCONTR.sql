@@ -1,0 +1,69 @@
+CREATE OR REPLACE TRIGGER TU_CONTRATOCONTR
+BEFORE UPDATE
+ON CM.CONTRATOCONTR
+FOR EACH ROW
+BEGIN
+    /*
+    * Compara diretamente os valores ANTIGOS (:OLD) com os NOVOS (:NEW).
+    * O SELECT que causava o erro ORA-04091 foi removido, pois
+    * os valores :OLD já estão disponíveis na memória do trigger.
+    */
+    IF (:OLD.NOMECONTRATO <> :NEW.NOMECONTRATO OR
+        :OLD.DESCRICAOCONTRATO <> :NEW.DESCRICAOCONTRATO OR
+        :OLD.IDFORCLI <> :NEW.IDFORCLI OR
+        :OLD.IDRESPONSAVEL <> :NEW.IDRESPONSAVEL OR
+        :OLD.DATA_ULTIMA_COTACAO <> :NEW.DATA_ULTIMA_COTACAO OR
+        :OLD.DATAASSINATURA <> :NEW.DATAASSINATURA OR
+        :OLD.DATABASECONTRATO <> :NEW.DATABASECONTRATO OR
+        :OLD.DATAINICIO <> :NEW.DATAINICIO OR
+        :OLD.DATAPREVENCERRA <> :NEW.DATAPREVENCERRA OR
+        :OLD.DATAEFETENCERRA <> :NEW.DATAEFETENCERRA OR
+        :OLD.MOTIVOENCERRA <> :NEW.MOTIVOENCERRA OR
+        :OLD.VALORBASECONTRATO <> :NEW.VALORBASECONTRATO OR
+        :OLD.VALOR_ORCADO <> :NEW.VALOR_ORCADO OR
+        :OLD.CODCONTRATOEMPR <> :NEW.CODCONTRATOEMPR OR
+        :OLD.ID_TIPO_SERVICO <> :NEW.ID_TIPO_SERVICO)
+    THEN
+        /*
+        * Insere os valores ANTIGOS (:OLD) na tabela de histórico.
+        * O SELECT que causava o segundo erro ORA-04091 foi 
+        * substituído por um INSERT...VALUES direto.
+        */
+        INSERT INTO CM.CONTRATOCONTR_HIST (
+            IDCONTRATO_HIST,
+            IDCONTRATO,
+            NOMECONTRATO,
+            DESCRICAOCONTRATO,
+            IDFORCLI,
+            IDRESPONSAVEL,
+            DATA_ULTIMA_COTACAO,
+            DATAASSINATURA,
+            DATABASECONTRATO,
+            DATAINICIO,
+            DATAPREVENCERRA,
+            DATAEFETENCERRA,
+            MOTIVOENCERRA,
+            VALORBASECONTRATO,
+            VALOR_ORCADO,
+            CODCONTRATOEMPR,
+            ID_TIPO_SERVICO)
+        VALUES (
+            CM.SEQ_IDCONTRATO_HIST.NEXTVAL,
+            :OLD.IDCONTRATO,
+            :OLD.NOMECONTRATO,
+            :OLD.DESCRICAOCONTRATO,
+            :OLD.IDFORCLI,
+            :OLD.IDRESPONSAVEL,
+            :OLD.DATA_ULTIMA_COTACAO,
+            :OLD.DATAASSINATURA,
+            :OLD.DATABASECONTRATO,
+            :OLD.DATAINICIO,
+            :OLD.DATAPREVENCERRA,
+            :OLD.DATAEFETENCERRA,
+            :OLD.MOTIVOENCERRA,
+            :OLD.VALORBASECONTRATO,
+            :OLD.VALOR_ORCADO,
+            :OLD.CODCONTRATOEMPR,
+            :OLD.ID_TIPO_SERVICO);
+    END IF;
+END;

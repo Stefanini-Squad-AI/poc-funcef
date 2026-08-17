@@ -1,0 +1,1201 @@
+{-------------------------------------------------------------------------------
+ALTERAÇÕES / IMPLEMENTAÇÕES ----------------------------------------------------
+--------------------------------------------------------------------------------
+Nº SIG......: 113136
+Data........: 04/07/2022 
+Responsável.: Cássio Florencio Rovaroto
+Descrição...: Implementação da provisão de custos de imóveis.
+--------------------------------------------------------------------------------
+Nº SIG......: 26054
+Data........: 26/12/2016
+Responsável.: Michelle Suellyn Mota
+Descrição...: Criação da tela Gestão de Investimento - Imóvel.
+--------------------------------------------------------------------------------}
+
+package CMImobiliarioObj50;
+
+{$R *.RES}
+{$R CMIMOBILIARIOOBJ50_RES.RES}
+
+{$R '..\Fontes\WORD_TLB.dcr'}
+{$R '..\Fontes\OFFICE_TLB.dcr'}
+{$R '..\Fontes\VBIDE_TLB.dcr'}
+{$ALIGN ON}
+{$ASSERTIONS ON}
+{$BOOLEVAL OFF}
+{$DEBUGINFO ON}
+{$EXTENDEDSYNTAX ON}
+{$IMPORTEDDATA ON}
+{$IOCHECKS ON}
+{$LOCALSYMBOLS ON}
+{$LONGSTRINGS ON}
+{$OPENSTRINGS ON}
+{$OPTIMIZATION ON}
+{$OVERFLOWCHECKS OFF}
+{$RANGECHECKS OFF}
+{$REFERENCEINFO ON}
+{$SAFEDIVIDE OFF}
+{$STACKFRAMES OFF}
+{$TYPEDADDRESS OFF}
+{$VARSTRINGCHECKS ON}
+{$WRITEABLECONST ON}
+{$MINENUMSIZE 1}
+{$IMAGEBASE $400000}
+{$DESCRIPTION 'FUNCEF - Componentes de Investimentos Imobiliários'}
+{$IMPLICITBUILD OFF}
+
+requires
+  vcl50,
+  CmCompo50,
+  CmGlobalObj50,
+  CMContabObj50,
+  CMCapCarObj50,
+  CMRegra50MT,
+  CMCAFObj50;
+
+contains
+  uCtrlMsgBoleto in '..\CtrlObjects\uCtrlMsgBoleto.pas',
+  uCtrlMarcas in '..\CtrlObjects\uCtrlMarcas.pas',
+  uDbMarcas in '..\DbObjects\uDbMarcas.pas',
+  uDbAtividade in '..\DbObjects\uDbAtividade.pas',
+  UComunsImobiliario in '..\FontesMT\UComunsImobiliario.pas',
+  UComunsImobiliarioDB in '..\FontesMT\UComunsImobiliarioDB.pas',
+  uDbEventoImovel in '..\DbObjects\uDbEventoimovel.pas',
+  uCtrlEventoImovel in '..\CtrlObjects\uCtrlEventoImovel.pas',
+  uDbImovel in '..\DbObjects\uDbImovel.pas',
+  uCtrlImovel in '..\CtrlObjects\uCtrlImovel.pas',
+  UCtrlCadRegra in '..\Regra\CtrlObjects\UCtrlCadRegra.pas',
+  UCtrlGrpRegra in '..\Regra\CtrlObjects\UCtrlGrpRegra.pas',
+  uDbGrupoRegra in '..\Regra\dbObjects\uDbGrupoRegra.pas',
+  uDbRegra in '..\Regra\dbObjects\uDbRegra.pas',
+  uDbSitContImob in '..\DbObjects\uDbSitContImob.pas',
+  uCtrlSitContImob in '..\CtrlObjects\uCtrlSitContImob.pas',
+  uDbIndicadorXApur in '..\DbObjects\uDbIndicadorXApur.pas',
+  uDbOutrodadoximovel in '..\DbObjects\uDbOutrodadoximovel.pas',
+  uDbMsgBoleto in '..\DbObjects\uDbMsgBoleto.pas',
+  uCtrlAtividade in '..\CtrlObjects\uCtrlAtividade.pas',
+  uDbLinhaMsgBoleto in '..\DbObjects\uDbLinhaMsgBoleto.pas',
+  uCtrlOutroDado in '..\CtrlObjects\uCtrlOutroDado.pas',
+  uDbOutrodadoXUnidaut in '..\DbObjects\uDbOutrodadoXUnidaut.pas',
+  uDbOutrodadoXProp in '..\DbObjects\uDbOutrodadoXProp.pas',
+  uDbOutrodadoxTipoimo in '..\DbObjects\uDbOutrodadoxTipoimo.pas',
+  uDbOutroDado in '..\DbObjects\uDbOutrodado.pas',
+  uCtrlTipoImovel in '..\CtrlObjects\uCtrlTipoImovel.pas',
+  uDbTipoImovel in '..\DbObjects\uDbTipoImovel.pas',
+  uDbAlteradorXTipoimo in '..\DbObjects\uDbAlteradorXTipoimo.pas',
+  uCtrlPessoaProprietario in '..\CtrlObjects\uCtrlPessoaProprietario.pas',
+  uDbProprietariouh in '..\DbObjects\uDbProprietariouh.pas',
+  uCtrlReavaliacao in '..\CtrlObjects\uCtrlReavaliacao.pas',
+  uDbPlanoPatroxImovel in '..\DbObjects\uDbPlanoPatroxImovel.pas',
+  uDbLancOperImob in '..\DbObjects\uDbLancOperImob.pas',
+  uDbLancOperDiaImob in '..\DbObjects\uDbLancOperDiaImob.pas',
+  uDbLancOperContImob in '..\DbObjects\uDbLancOperContImob.pas',
+  uCtrlOperImob in '..\CtrlObjects\uCtrlOperImob.pas',
+  uCtrlRelComunsImobiliario in '..\CtrlObjects\uCtrlRelComunsImobiliario.pas',
+  uDbPadrLancImovel in '..\DbObjects\uDbPadrLancImovel.pas',
+  uCtrlPadrLancImovel in '..\ctrlobjects\uCtrlPadrLancImovel.pas',
+  uCtrlModuloImobiliario in '..\CtrlObjects\uCtrlModuloImobiliario.pas',
+  uCtrlLancamentosImovel in '..\ctrlobjects\uCtrlLancamentosImovel.pas',
+  uDbLancamentosImovel in '..\DbObjects\uDbLancamentosImovel.pas',
+  uCtrlParamAlienacao in '..\CtrlObjects\uCtrlParamAlienacao.pas',
+  uCtrlParamImovel in '..\CtrlObjects\uCtrlParamImovel.pas',
+  uCtrlParamInvestimob in '..\CtrlObjects\uCtrlParamInvestimob.pas',
+  uDbParamAlienacao in '..\DbObjects\uDbParamAlienacao.pas',
+  uDbParamImovel in '..\DbObjects\uDbParamImovel.pas',
+  uDbParamInvestimob in '..\DbObjects\uDbParamInvestimob.pas',
+  uDbAlteraLancImovel in '..\DbObjects\uDbAlteraLancImovel.pas',
+  uDbObsLancImovel in '..\DbObjects\uDbObsLancImovel.pas',
+  uCtrlContratoImovel in '..\CtrlObjects\uCtrlContratoImovel.pas',
+  uDbContratoImovel in '..\DbObjects\uDbContratoImovel.pas',
+  uDbContratoXImovel in '..\DbObjects\uDbContratoXImovel.pas',
+  uDbContratoXVlrAno in '..\DbObjects\uDbContratoXVlrAno.pas',
+  uDbAvalistaXContrato in '..\DbObjects\uDbAvalistaXContrato.pas',
+  uDbConciliaDoc in '..\DbObjects\uDbConciliaDoc.pas',
+  uCtrlIndicadorImovel in '..\CtrlObjects\uCtrlIndicadorImovel.pas',
+  uDbIndicadorImovel in '..\DbObjects\uDbIndicadorImovel.pas',
+  uDbIndicadorXTipoimo in '..\DbObjects\uDbIndicadorXTipoimo.pas',
+  uCtrlBack in '..\Back\uCtrlBack.pas',
+  uCtrlBanco in '..\Back\uCtrlBanco.pas',
+  uCtrlGrupoRateio in '..\CtrlObjects\uCtrlGrupoRateio.pas',
+  uDbGrupoxImovel in '..\DbObjects\uDbGrupoxImovel.pas',
+  uDbGrupoRateio in '..\DbObjects\uDbGrupoRateio.pas',
+  uCtrlTipoCustoRecImov in '..\CtrlObjects\uCtrlTipoCustoRecImov.pas',
+  uDbTipocustoRecImov in '..\DbObjects\uDbTipoCustoRecImov.pas',
+  Excel_OLE in '..\FontesMT\Excel_OLE.pas',
+  uDbImagensXImoveis in '..\DbObjects\uDbImagensXImoveis.pas',
+  uCtrlImovelXProp in '..\CtrlObjects\uCtrlImovelXProp.pas',
+  uDbImovelxprop in '..\DbObjects\uDbImovelxprop.pas',
+  uDbContratoxDesc in '..\DbObjects\uDbContratoxDesc.pas',
+  uCtrlAvisoImob in '..\CtrlObjects\uCtrlAvisoImob.pas',
+  uDbAvisoImob in '..\DbObjects\uDbAvisoImob.pas',
+  uDbAvisoImobxUsu in '..\DbObjects\uDbAvisoImobxUsu.pas',
+  uCtrlInadimplencia in '..\CtrlObjects\uCtrlInadimplencia.pas',
+  uCtrlParcFinancImov in '..\CtrlObjects\uCtrlParcFinancImov.pas',
+  uCtrlAgrupaDocumento in '..\CtrlObjects\uCtrlAgrupaDocumento.pas',
+  uCtrlConcilia in '..\CtrlObjects\uCtrlConcilia.pas',
+  uDbHistmovimob in '..\DbObjects\uDbHistmovimob.pas',
+  uDbConfdividaimob in '..\DbObjects\uDbConfdividaimob.pas',
+  uDbConfdividaimobxcontr in '..\DbObjects\uDbConfdividaimobxcontr.pas',
+  uDbConfdividaimobxdoc in '..\DbObjects\uDbConfdividaimobxdoc.pas',
+  uDbConfdividaimobxoper in '..\DbObjects\uDbConfdividaimobxoper.pas',
+  uDbFormacalcimob in '..\DbObjects\uDbFormacalcimob.pas',
+  uDbFormacalcimobxitem in '..\DbObjects\uDbFormacalcimobxitem.pas',
+  uCtrlHistMovImob in '..\CtrlObjects\uCtrlHistMovImob.pas',
+  uDbCondpagimovel in '..\DbObjects\uDbCondpagimovel.pas',
+  uCtrlConfissaoDivida in '..\CtrlObjects\uCtrlConfissaoDivida.pas',
+  uCtrlFormaCalcImob in '..\CtrlObjects\uCtrlFormaCalcImob.pas',
+  fAltCompl in '..\FontesMT\fAltCompl.pas' {frmAltCompl},
+  dImobiliario in '..\Fontes\dImobiliario.pas' {dtmImobiliario: TDataModule},
+  mUsuario in '..\FontesEpim\mUsuario.pas' {MolUsuario: TFrame},
+  mUnidAutonoma in '..\FontesMT\mUnidAutonoma.pas' {molUnidAutonoma: TFrame},
+  mImovelAtivo in '..\FontesMT\mImovelAtivo.pas' {molImovelAtivo: TFrame},
+  mImovelDesmembra in '..\FontesEpim\mImovelDesmembra.pas' {molImovelDesmembra: TFrame},
+  mResponsavel in '..\FontesEpim\mResponsavel.pas' {molResponsavel: TFrame},
+  mContrato in '..\FontesMT\mContrato.pas' {molContrato: TFrame},
+  FOkCancelarImob in '..\FontesEpim\FOkCancelarImob.pas' {FrmOkCancelarImob},
+  FCadastroMestreDetImob in '..\FontesEpim\FCadastroMestreDetImob.pas' {frmCadastroMestreDetImob},
+  FCadastroDetalhe in '..\FontesEpim\FCadastroDetalhe.pas' {frmCadastroDetalhe},
+  FCadastroGridCSImob in '..\FontesEpim\FCadastroGridCSImob.pas' {frmCadastroGridCSImob},
+  FCadastroCSImob in '..\FontesEpim\FCadastroCSImob.pas' {frmCadastroCSImob},
+  CRel in '..\FontesEpim\CRel.pas' {cfgRel},
+  dLancImovel in '..\Fontes\dLancImovel.pas' {dtmLancImovel: TDataModule},
+  dLookImobiliario in '..\Fontes\dLookImobiliario.pas' {dtmLookImobiliario: TDataModule},
+  dEventoImovel in '..\Fontes\dEventoImovel.pas' {dtmEventoImovel: TDataModule},
+  FDRel in '..\FontesEpim\FDRel.pas' {frmDesenhoRel},
+  FExecGeracaoGrupos in '..\Fontes\FExecGeracaoGrupos.pas' {frmExecGeracaoGrupos},
+  UDiasInUteis in '..\FontesEpim\UDiasInUteis.pas',
+  UEventoImovel in '..\Fontes\UEventoImovel.pas',
+  uMolduras in '..\FontesEpim\uMolduras.pas',
+  FEspera in '..\FontesEpim\FEspera.pas' {frmEspera},
+  FTesteGeral in '..\FontesEpim\ftestegeral.pas' {frmTesteGeral},
+  mOrigemLanc in '..\FontesEpim\mOrigemLanc.pas' {molOrigemLanc: TFrame},
+  mFornecedor in '..\FontesEpim\mFornecedor.pas' {molFornecedor: TFrame},
+  mCliente in '..\FontesEpim\mCliente.pas' {molCliente: TFrame},
+  FExecTranfTipoImovel in '..\Fontes\FExecTranfTipoImovel.pas' {frmExecTranfTipoImovel},
+  uAtivoFixo in '..\CAF\Fontes\UAtivoFixo.pas',
+  dAtivoFixo in '..\CAF\Fontes\dAtivoFixo.pas' {dtmAtivoFixo: TDataModule},
+  mImovelDB in '..\FontesEpim\mImovelDB.pas' {molImovelDB: TFrame},
+  mContratoDB in '..\FontesEpim\mContratoDB.pas' {molContratoDB: TFrame},
+  mImovelouMestreDB in '..\FontesEpim\mImovelouMestreDB.pas' {molImovelouMestreDB: TFrame},
+  mSeguradoraDB in '..\FontesEpim\mSeguradoraDB.pas' {molSeguradoraDB: TFrame},
+  FExecLancAlteradorNovo in '..\Fontes\FExecLancAlteradorNovo.pas' {frmExecLancAlteradorNovo},
+  uCalcDocumento in '..\Fontes\uCalcDocumento.pas',
+  WordOle in '..\FontesEpim\Wordole.pas',
+  FWizard in '..\FontesEpim\FWizard.pas' {frmWizard},
+  DCalcDocumento in '..\Fontes\DCalcDocumento.pas' {dtmCalcDocumento: TDataModule},
+  uCAF in '..\Fontes\uCAF.pas',
+  DCAF in '..\Fontes\DCAF.pas' {dtmCAF: TDataModule},
+  dRelLancamento in '..\FontesMT\dRelLancamento.pas' {dtmRelLancamento},
+  FCadastroGridMTImob in '..\FontesMT\FCadastroGridMTImob.pas' {frmCadastroGridMTImob},
+  fCadOutroDadoMT in '..\FontesMT\fCadOutroDadoMT.pas' {frmCadOutroDadoMT},
+  fCadastroMtImob in '..\FontesMT\fCadastroMtImob.pas' {frmCadastroMtImob},
+  fCadIndicadorXTipoImovelMT in '..\FontesMT\fCadIndicadorXTipoImovelMT.pas' {frmCadIndicadorXTipoImovelMT},
+  fCadOutroDadoXUnidautMT in '..\FontesMT\fCadOutroDadoXUnidautMT.pas' {frmCadOutroDadoXUnidautMT},
+  mPropostaNegocio in '..\FontesMT\mPropostaNegocio.pas' {molPropostaNegocio: TFrame},
+  fCadOutroDadoXPropMT in '..\FontesMT\fCadOutroDadoXPropMT.pas' {frmCadOutroDadoXPropMT},
+  mImovel in '..\FontesMT\mImovel.pas' {molImovel: TFrame},
+  fCadOutroDadoXImovelMT in '..\FontesMT\fCadOutroDadoXImovelMT.pas' {frmCadOutroDadoXImovelMT},
+  FCadastroMestreDetMTImob in '..\FontesMT\FCadastroMestreDetMTImob.pas' {FrmCadastroMestreDetMTImob},
+  fCadIndicadorMT in '..\FontesMT\fCadIndicadorMT.pas' {frmCadIndicadorMT},
+  fCadIndicadorXImovelMT in '..\FontesMT\fCadIndicadorXImovelMT.pas' {frmCadIndicadorXImovelMT},
+  fCadIndicadorXUnidAutMT in '..\FontesMT\fCadIndicadorXUnidAutMT.pas' {frmCadIndicadorXUnidAutMT},
+  FCadAtividadeMT in '..\FontesMT\FCadAtividadeMT.pas' {frmCadAtividadeMT},
+  FCadMarcasMT in '..\FontesMT\FCadMarcasMT.pas' {frmCadMarcasMT},
+  FCadSitContImobMT in '..\FontesMT\FCadSitContImobMT.pas' {frmCadSitContImobMT},
+  mImovelMestre in '..\FontesMT\mImovelMestre.pas' {molImovelMestre: TFrame},
+  dMS in '..\FontesMT\dMS.pas' {dtmMS: TDataModule},
+  fCadTipoImovelMT in '..\FontesMT\fCadTipoImovelMT.pas' {frmCadTipoImovelMT},
+  fCadAlteradorXTipoImovelMT in '..\FontesMT\fCadAlteradorXTipoImovelMT.pas' {frmCadAlteradorXTipoImovelMT},
+  fCadTipoCustoRecMT in '..\FontesMT\fCadTipoCustoRecMT.pas' {frmCadTipoCustoRecMT},
+  uModuloImobiliario in '..\FontesMT\uModuloImobiliario.pas',
+  mImovelouMestre in '..\FontesMT\mImovelouMestre.pas' {molImovelouMestre: TFrame},
+  fCadParamReceitaMT in '..\FontesMT\fCadParamReceitaMT.pas' {frmCadParamReceitaMT},
+  mAdministradora in '..\FontesMT\mAdministradora.pas' {molAdministradora: TFrame},
+  mCartorio in '..\FontesMT\mCartorio.pas' {molCartorio: TFrame},
+  fCMReportMTImob in '..\FontesMT\fCMReportMTImob.pas' {FrmCmReportImob},
+  dRelParamContab in '..\FontesMT\dRelParamContab.pas' {dtmRelParamContab},
+  cRelParamContab in '..\FontesMT\cRelParamContab.pas' {cfgRelParamContab},
+  fCadEventoImovelMT in '..\FontesMT\fCadEventoImovelMT.pas' {frmCadEventoImovelMT},
+  fCadEventoContratoMT in '..\FontesMT\fCadEventoContratoMT.pas' {frmCadEventoContratoMT},
+  mArvoreCompl in '..\FontesMT\mArvoreCompl.pas' {molArvoreCompl: TFrame},
+  fCadImovelMT in '..\FontesMT\fCadImovelMT.pas' {frmCadImovelMT},
+  fCadPrevisaoDiariaMT in '..\FontesMT\fCadPrevisaoDiariaMT.pas' {frmCadPrevisaoDiariaMT},
+  fExecCalculaPrevisaoDiariaMT in '..\FontesMT\fExecCalculaPrevisaoDiariaMT.pas' {frmExecCalculaPrevisaoDiariaMT},
+  fExecAjustePrevisaoDiariaMT in '..\FontesMT\fExecAjustePrevisaoDiariaMT.pas' {frmExecAjustePrevisaoDiariaMT},
+  fExecFechaDiarioMT in '..\FontesMT\fExecFechaDiarioMT.pas' {frmExecFechaDiarioMT},
+  fExecDesfazDiarioMT in '..\FontesMT\fExecDesfazDiarioMT.pas' {frmExecDesfazDiarioMT},
+  uDbPrevimob in '..\DbObjects\uDbPrevImob.pas',
+  uDbLancPrevImob in '..\DbObjects\uDbLancPrevimob.pas',
+  uDbLancPrevContimob in '..\DbObjects\uDbLancPrevContimob.pas',
+  uDbLancPrevDiaImob in '..\DbObjects\uDbLancPrevDiaImob.pas',
+  uCtrlPrevImob in '..\CtrlObjects\uCtrlPrevImob.pas',
+  uDbEstornoPrevImob in '..\DbObjects\uDbEstornoPrevImob.pas',
+  cRelPrevImob in '..\FontesMT\cRelPrevImob.pas' {cfgRelPrevImob},
+  mLocatario in '..\FontesMT\mLocatario.pas' {molLocatario: TFrame},
+  mFiador in '..\FontesMT\mFiador.pas' {molFiador: TFrame},
+  uCtrlPessoaAvalista in '..\CtrlObjects\uCtrlPessoaAvalista.pas',
+  uCtrlCategoriaImovel in '..\CtrlObjects\uCtrlCategoriaImovel.pas',
+  uCtrlPessoaAdministrador in '..\CtrlObjects\uCtrlPessoaAdministrador.pas',
+  uCtrlPessoaCartorio in '..\CtrlObjects\uCtrlPessoaCartorio.pas',
+  uCtrlPessoaLocatario in '..\CtrlObjects\uCtrlPessoaLocatario.pas',
+  uCtrlPessoaResponsavel in '..\CtrlObjects\uCtrlPessoaResponsavel.pas',
+  uCtrlPessoaSeguradora in '..\CtrlObjects\uCtrlPessoaSeguradora.pas',
+  uDbAdminImovel in '..\DbObjects\uDbAdminImovel.pas',
+  uDbAvalista in '..\DbObjects\uDbAvalista.pas',
+  uDbCartorio in '..\DbObjects\uDbCartorio.pas',
+  uDbCategoriaImovel in '..\DbObjects\uDbCategoriaImovel.pas',
+  uDbLancPrevPerImob in '..\DbObjects\uDbLancPrevPerImob.pas',
+  uDbLocatario in '..\DbObjects\uDbLocatario.pas',
+  uDbSeguradora in '..\DbObjects\uDbSeguradora.pas',
+  fPessoaAvalistaMT in '..\FontesMT\fPessoaAvalistaMT.pas' {frmPessoaAvalistaMT},
+  fPessoaLocatarioMT in '..\FontesMT\fPessoaLocatarioMT.pas' {frmPessoaLocatarioMT},
+  fPessoaAdministradorMT in '..\FontesMT\fPessoaAdministradorMT.pas' {frmPessoaAdministradorMT},
+  fPessoaCartorioMT in '..\FontesMT\fPessoaCartorioMT.pas' {frmPessoaCartorioMT},
+  fPessoaResponsavelMT in '..\FontesMT\fPessoaResponsavelMT.pas' {frmPessoaResponsavelMT},
+  fPessoaSeguradoraMT in '..\FontesMT\fPessoaSeguradoraMT.pas' {frmPessoaSeguradoraMT},
+  fPessoaProprietarioMT in '..\FontesMT\fPessoaProprietarioMT.pas' {frmPessoaProprietarioMT},
+  fCadGrupoRateioMT in '..\FontesMT\fCadGrupoRateioMT.pas' {frmCadGrupoRateioMT},
+  mSeguradora in '..\FontesMT\mSeguradora.pas' {molSeguradora: TFrame},
+  dRelPrevImob in '..\FontesMT\dRelPrevImob.pas' {dtmRelPrevImob},
+  dRelPerdas in '..\FontesMT\dRelPerdas.pas' {dtmRelPerdas},
+  mProposta in '..\FontesEpim\mProposta.pas' {molProposta: TFrame},
+  cRelPerdas in '..\FontesMT\cRelPerdas.pas' {cfgRelPerdas},
+  mOrcamento in '..\FontesMT\mOrcamento.pas' {molOrcamento: TFrame},
+  BPlanoConta in '..\FontesEpim\BPlanoConta.pas' {busPlanoconta},
+  fCadParamOperacaoMT in '..\FontesMT\fCadParamOperacaoMT.pas' {frmCadParamOperacaoMT},
+  dRelPerdasDiario in '..\FontesMT\dRelPerdasDiario.pas' {dtmRelPerdasDiario},
+  mRegraDB in '..\FontesMT\mRegraDB.pas' {molRegraDB: TFrame},
+  FExecAgrupaDocumentosMT in '..\FontesMT\FExecAgrupaDocumentosMT.pas' {frmAgrupaDocumentosMT},
+  FCadFormaCalcImob in '..\FontesMT\FCadFormaCalcImob.pas' {frmCadastroFormaCalcImob},
+  FCadItensXFormaCalculo in '..\FontesMT\FCadItensXFormaCalculo.pas' {frmCadItensXFormaCalculo},
+  FCadItemDetalhe in '..\FontesMT\FCadItemDetalhe.pas' {frmCadItemDetalhe},
+  fCadDadosComplMT in '..\FontesMT\fCadDadosComplMT.pas' {frmCadDadosComplMT},
+  fExecConfissaoDivida in '..\FontesMT\fExecConfissaoDivida.pas' {frmExecConfissaoDivida},
+  fCadParamItemCalculoMT in '..\FontesMT\fCadParamItemCalculoMT.pas' {frmCadParamItemCalculoMT},
+  FExecIntegracaoContabil in '..\FontesMT\FExecIntegracaoContabil.pas' {frmExecIntegracaoContabil},
+  UFuncoesImob in '..\Fontes\UFuncoesImob.pas',
+  UModuloAdminImob in '..\Fontes\UModuloAdminImob.pas',
+  UModuloAlienacao in '..\Fontes\UModuloAlienacao.pas',
+  UModuloInvestImob in '..\Fontes\UModuloInvestImob.pas',
+  mComprador in '..\FontesEpim\mComprador.pas' {molComprador: TFrame},
+  mTipoOperacao in '..\FontesMT\mTipoOperacao.pas' {molTipoOperacao: TFrame},
+  rCAFCadBem in '..\CAF\FontesMT\rCAFCadBem.pas' {RptCAFCadBem},
+  mImovelInativo in '..\FontesEpim\mImovelInativo.pas' {molImovelInativo: TFrame},
+  mLocalizacao in '..\FontesEpim\mLocalizacao.pas' {molLocalizacao: TFrame},
+  mClasseBem in '..\FontesEpim\mClasseBem.pas' {molClasseBem: TFrame},
+  fCadObraTipoEtapa in '..\CAF\Fontes\fCadObraTipoEtapa.pas' {frmCadObraTipoEtapa},
+  mImovelObra in '..\FontesEpim\mImovelObra.pas' {molImovelObra: TFrame},
+  fCadObra in '..\CAF\Fontes\fCadObra.pas' {frmCadObra},
+  mSubConta in '..\FontesMT\mSubConta.pas' {molSubConta: TFrame},
+  mObraDesmembra in '..\FontesMT\mObraDesmembra.pas' {molObraDesmembra: TFrame},
+  FCadMotivoAbono in '..\FontesMT\FCadMotivoAbono.pas' {frmCadMotivoAbono},
+  fCadCategoriaImovelMT in '..\FontesMT\fCadCategoriaImovelMT.pas' {frmCadCategoriaImovelMT},
+  fCadOutroDadoXTipoImovelMT in '..\FontesMT\fCadOutroDadoXTipoImovelMT.pas' {frmCadOutroDadoXTipoImovelMT},
+  fExecCalculoDivergencia in '..\FontesMT\fExecCalculoDivergencia.pas' {frmExecCalculoDivergencia},
+  mContratoLoja in '..\FontesMT\mContratoLoja.pas' {molContratoLoja: TFrame},
+  mGrpApuracao in '..\FontesMT\mGrpApuracao.pas' {molGrpApuracao: TFrame},
+  mIndicador in '..\FontesMT\mIndicador.pas' {molIndicador: TFrame},
+  mLoja in '..\FontesMT\mLoja.pas' {molLoja: TFrame},
+  mProponente in '..\FontesMT\mProponente.pas' {molProponente: TFrame},
+  Word_TLB in '..\Fontes\WORD_TLB.PAS',
+  mRepactuacao in '..\FontesEpim\mRepactuacao.pas' {molRepactuacao: TFrame},
+  fMTEstornaFechamento in '..\CAF\FontesMT\fMTEstornaFechamento.pas' {frmMTEstornaFechamento},
+  fMTCadParamCAFxContab in '..\CAF\FontesMT\fMTCadParamCAFxContab.pas' {frmMTCadParamCAFxContab},
+  fMTConsHistMovBem in '..\CAF\FontesMT\fMTConsHistMovBem.pas' {frmMTConsHistMovBem},
+  fMTConsSaldoContabBem in '..\CAF\FontesMT\fMTConsSaldoContabBem.pas' {frmMTConsSaldoContabBem},
+  fMTFechamento in '..\CAF\FontesMT\fMTFechamento.pas' {frmMTFechamento},
+  fMTReconstroiSaldo in '..\CAF\FontesMT\fMTReconstroiSaldo.pas' {frmMTReconstroiSaldo},
+  fMTUtilAjustaLancImplantacao in '..\CAF\FontesMT\fMTUtilAjustaLancImplantacao.pas' {frmMTUtilAjustaLancImplantacao},
+  fAcertaSaldo in '..\CAF\Fontes\fAcertaSaldo.pas' {frmAcertaSaldo},
+  fCadBens in '..\CAF\Fontes\fCadBens.pas' {frmCadBens},
+  fCadClasse in '..\CAF\Fontes\fCadClasse.pas' {frmCadClasse},
+  fCadConjunto in '..\CAF\Fontes\FCadConjunto.pas' {frmCadConjunto},
+  FCadContasMovGrupo in '..\CAF\Fontes\FCadContasMovGrupo.pas' {frmCadParamCAFxContab},
+  fCadGrupos in '..\CAF\Fontes\fCadGrupos.pas' {frmCadGrupos},
+  FCadLocali in '..\CAF\Fontes\FCadLocali.pas' {frmCadLocali},
+  fCadParamCaf in '..\CAF\Fontes\fCadParamCaf.pas' {frmCadParamCaf},
+  fConsultCafObra in '..\CAF\Fontes\fConsultCafObra.pas' {frmConsultCafObra},
+  fConsultMovim in '..\CAF\Fontes\FConsultMovim.pas' {frmConsultMovim},
+  fConsultSldContab in '..\CAF\Fontes\FConsultSldContab.pas' {frmConsultSldContab},
+  fEstornaDepreciacao in '..\CAF\Fontes\FEstornaDepreciacao.pas' {frmEstornaDepreciacao},
+  fEstornaDesmembObra in '..\CAF\Fontes\fEstornaDesmembObra.pas' {frmEstornaDesmembObra},
+  fEstornaObraLanc in '..\CAF\Fontes\fEstornaObraLanc.pas' {frmEstornaObraLanc},
+  fMovDepreciacao in '..\CAF\Fontes\fMovDepreciacao.pas' {frmMovDepreciacao},
+  fMovDesmembObra in '..\CAF\Fontes\fMovDesmembObra.pas' {frmMovDesmembObra},
+  fMovEncerrarObra in '..\CAF\Fontes\fMovEncerrarObra.pas' {frmMovEncerrarObra},
+  fMovObraLanc in '..\CAF\Fontes\fMovObraLanc.pas' {frmMovObraLanc},
+  Office_TLB in '..\Fontes\OFFICE_TLB.PAS',
+  VBIDE_TLB in '..\Fontes\VBIDE_TLB.PAS',
+  FDesfazIntegracaoContabil in '..\FontesMT\FDesfazIntegracaoContabil.pas' {frmDesfazIntegracaoContabil},
+  FExecIntegraLancNovo in '..\Fontes\FExecIntegraLancNovo.pas' {frmExecIntegraLancNovo},
+  fDesfazConfissaoDivida in '..\FontesMT\fDesfazConfissaoDivida.pas' {frmDesfazConfissaoDivida},
+  uDbContratoxmulta in '..\DbObjects\uDbContratoXMulta.pas',
+  FCadMotivoAbonoNovo in '..\FontesMT\FCadMotivoAbonoNovo.pas' {frmCadMotivoAbonoNovo},
+  fCadUnidadeMT in '..\FontesMT\fCadUnidadeMT.pas' {frmCadUnidadeMT},
+  uCtrlItemProcesso in '..\CtrlObjects\uCtrlItemProcesso.pas',
+  uDbItemXProcessoImob in '..\DbObjects\uDbItemXProcessoImob.pas',
+  fCadItemProcessoMT in '..\FontesMT\fCadItemProcessoMT.pas' {frmCadItemProcessoMT},
+  mContratoNumero in '..\FontesMT\mContratoNumero.pas' {molContratoNumero: TFrame},
+  FExecRecalculoDocumentoMT in '..\FontesMT\FExecRecalculoDocumentoMT.pas' {frmExecRecalculoDocumentoMT},
+  uCtrlLookRecalculo in '..\CTRLOBJECTS\uCtrlLookRecalculo.pas',
+  FExecRecalculoDocumentoAliena in '..\FontesMT\FExecRecalculoDocumentoAliena.pas' {frmExecRecalculoDocumentoAlienacao},
+  uCtrlParamMulta in '..\CtrlObjects\uCtrlParamMulta.pas',
+  uCtrlBloqueioImob in '..\CTRLOBJECTS\uCtrlBloqueioImob.pas',
+  uDbBloqueioimob in '..\DbObjects\uDbBloqueioimob.pas',
+  FExecLancamentosBloqueados in '..\FontesMT\FExecLancamentosBloqueados.pas' {frmLancamentosBloqueados},
+  uCtrlGeraRecLote in '..\CtrlObjects\uCtrlGeraRecLote.pas',
+  uCtrlMensagemBoleto in '..\CtrlObjects\uCtrlMensagemBoleto.pas',
+  FSairAjudaImob in '..\FontesEpim\FSairAjudaImob.pas' {frmSairAjudaImob},
+  uCtrlTipoEventoImovel in '..\CtrlObjects\uCtrlTipoEventoImovel.pas',
+  uDbTipoEventoImob in '..\DbObjects\uDbTipoEventoImob.pas',
+  FCadTipoEventoImovelMT in '..\FontesMT\FCadTipoEventoImovelMT.pas' {frmCadTipoEventoImovelMT},
+  cRelPerdasDiarias in '..\FontesMT\cRelPerdasDiarias.pas' {cfgRelPerdasDiarias},
+  uCtrlImobLancamento in '..\CtrlObjects\uCtrlImobLancamento.pas',
+  uCtrlImobSegregacao in '..\CtrlObjects\uCtrlImobSegregacao.pas',
+  uDbImobLancamento in '..\DbObjects\uDbImobLancamento.pas',
+  uDbImobSegregacao in '..\DbObjects\uDbImobSegregacao.pas',
+  uCtrlImobDocumento in '..\CtrlObjects\uCtrlImobDocumento.pas',
+  uCtrlImobCAF in '..\CtrlObjects\uCtrlImobCAF.pas',
+  uCtrlImobCAFxContab in '..\CtrlObjects\uCtrlImobCAFxContab.pas',
+  uDbImobObra in '..\DbObjects\uDbImobObra.pas',
+  uDbHstpercsegregaimob in '..\DbObjects\uDbHstpercsegregaimob.pas',
+  uDbHstpercsegregabem in '..\DbObjects\uDbHstpercsegregabem.pas',
+  uCtrlImobObra in '..\CtrlObjects\uCtrlImobObra.pas',
+  uCtrlImobMovBaixa in '..\CtrlObjects\uCtrlImobMovBaixa.pas',
+  uCtrlImobFechamentoProRata in '..\CtrlObjects\uCtrlImobFechamentoProRata.pas',
+  uCtrlImobFechamento in '..\CtrlObjects\uCtrlImobFechamento.pas',
+  fAcertaLanctoImovel in '..\Fontes\fAcertaLanctoImovel.pas' {frmAcertaLanctoImovel},
+  uCtrlAcertaLanctoImovel in '..\CtrlObjects\uCtrlAcertaLanctoImovel.pas',
+  fExecCadVigencia in '..\Fontes\fExecCadVigencia.pas' {frmExecCadVigencia},
+  uDbPlanoPatroxVigenciaImob in '..\DbObjects\uDbPlanoPatroxVigenciaImob.pas',
+  uDbPlanoPatroxVigenciaBem in '..\DbObjects\uDbPlanoPatroxVigenciaBem.pas',
+  fExecInversaoDoc in '..\Fontes\fExecInversaoDoc.pas',
+  uDbHistpagencimov in '..\DbObjects\uDbHistpagencimov.pas',
+  fCadParamDespesaMT in '..\FontesMT\fCadParamDespesaMT.pas' {frmCadParamDespesaMT},
+  fConsSaldoDivergContratos in '..\Fontes\fConsSaldoDivergContratos.pas' {frmConsSaldoDivergContratos},
+  uCtrlConsSaldoDiverg in '..\CtrlObjects\uCtrlConsSaldoDiverg.pas',
+  uDbBaixaContraAlterador in '..\DbObjects\uDbBaixaContraAlterador.pas',
+  uCtrlBaixaContraAlterador in '..\CtrlObjects\uCtrlBaixaContraAlterador.pas',
+  uDbETLImobAtualizacao in '..\DbObjects\uDbETLImobAtualizacao.pas',
+  fCadBaixaContraAlteradorMT in '..\FontesMT\fCadBaixaContraAlteradorMT.pas' {frmCadBaixaContraAlteradorMT},
+  uCtrlHistoricoVidaUtil in '..\CtrlObjects\uCtrlHistoricoVidaUtil.pas',
+  uCtrlGestInvestImovel in '..\CtrlObjects\uCtrlGestInvestImovel.pas',
+  uDbDocumentoXVoto in '..\DbObjects\uDbDocumentoXVoto.pas',
+  uCtrlDocumentoXVoto in '..\CtrlObjects\uCtrlDocumentoXVoto.pas',
+  uDbProvisaoImovel in '..\DbObjects\uDbProvisaoImovel.pas',
+  uDbSaldoProvisaoImovel in '..\DbObjects\uDbSaldoProvisaoImovel.pas',
+  uCtrlProvisaoImovel in '..\CtrlObjects\uCtrlProvisaoImovel.pas';
+
+//Darivaldo Alencar SIG26054
+  
+end.
+{CM$ALT
+================================================================================
+Histórico de alterações efetuadas no módulo CMImobiliarioObj50
+================================================================================
+CM$VER      3.02.18h    18/06/2008
+--------------------------------------------------------------------------------
+- Pendencia 28201: Extrato Contratual
+  Acerto na rotina de busca do saldo devedor no extrato contratual
+- Pendencia 28049: Relatorios de Provisão de Perda, Inadimplencia Analitica e Sintetica
+  Ajuste na query que busca os contratos para que os valores fiquem coerentes com o
+  Extrato Contratual
+================================================================================
+CM$VER      3.02.18g    10/04/2008
+--------------------------------------------------------------------------------
+- Pendência 26601: Conciliação
+  Ajuste na Conciliação para trazer corretamente os valores de Juros, Multas e Correção.
+================================================================================
+CM$VER      3.02.18f    01/04/2008
+--------------------------------------------------------------------------------
+- Pendência 27256: Agrupa Documentos
+  Correção no processo de agrupar boletos quando não existe mensagem padrão
+  associada no contrato.
+================================================================================
+CM$VER      3.02.18e    04/03/2008
+--------------------------------------------------------------------------------
+- Pendência 27513: Confissão de Dívidas
+  Ajuste no processo de gravação e geração dos contratos de Confissão de Dívidas.
+- Pendência 27508: Recálculo de Documentos do Alienação
+  Ajuste no Help Context.
+================================================================================
+CM$VER      3.02.18d    26/02/2008
+--------------------------------------------------------------------------------
+Cadastro de Imóveis
+  Pendência: 27480 - Passa a atualizar o status de ocupação do imóvel baseado em sua
+                     data de vigência inicial e final.
+                     Passa a exibir o histórico de contratos com as datas iniciais e finais de
+                     da vigência do imóvel.
+================================================================================
+CM$VER      3.02.18c    21/02/2008
+--------------------------------------------------------------------------------
+Lançamento Múltiplo
+  Pendência: 27143 - Passa a gravar a data de segregação.
+================================================================================
+CM$VER      3.02.18b    14/02/2008
+--------------------------------------------------------------------------------
+Pendência: 27394 - Acerto e atualização dos Helps do sistema.
+================================================================================
+CM$VER      3.02.18a    25/01/2008
+--------------------------------------------------------------------------------
+Busca Contratos
+  Pendência: 27172 - Ajuste no componente de busca para trazer contratos do tipo
+                     'L' ou 'D' quando for Administração Imobiliária e 'C' ou 'A' quando for
+                     Alienação...
+Cadastro de Dados Complementares - Ajuste na hora de incluir, alterar e excluir
+                                   registros no módulo de Indicadores.
+Pendência: 27007 - Cálculo e atualização da data limite quando da integração de
+                   documento a receber.
+Consulta Lançamentos
+  Pendência: 26763 - Correção do relatório impresso o qual não exibia todos os
+                     alteradores lançados quando da ocorrência de dois lançamentos do mesmo
+                     alterador com o mesmo valor.
+================================================================================
+CM$VER      3.02.18     13/12/2007
+--------------------------------------------------------------------------------
+Liberação do padrão 5.10.18
+Cadastro de Tipo de Evento
+  Pendência: 26794 - Implementação do cadastro de Tipo de Evento.
+Cadastro de Contrato
+  Pendência: 27053 - Correção para que no cadastro de contrato traga apenas eventos
+                                relacionados a contratos.
+Consulta Lançamentos
+  Pendência: 26763 - Correção do relatório impresso o qual não exibia todos os alteradores
+                               lançados quando da ocorrência de dois lançamentos do mesmo alterador
+                               com o mesmo valor.
+================================================================================
+CM$VER      3.02.17     16/08/2007
+--------------------------------------------------------------------------------
+  Pendência: 26104 - Ajustes no calculo da Data Limite no processo de integração para
+                     uso com a nova estrutura de Cálculo de Juros e Multas no Cadastro de
+                     Contratos de Locação.
+                     ps.: Complemento da pendência 22687
+================================================================================
+CM$VER      3.02.16     25/06/2007
+--------------------------------------------------------------------------------
+Liberação do Padrão 16.
+================================================================================
+CM$VER      3.02.15c    25/06/2007
+--------------------------------------------------------------------------------
+- Pendencia 25665:
+  Acerto na rotina de integração financeira/contábil quando da integração do AdminImob.
+  Estava dando erro quando o sistema fazia a comparação dos parametros contábeis, 
+  ocasionando um erro de Invalid Data packet
+================================================================================
+CM$VER      3.02.15b    21/05/2007
+--------------------------------------------------------------------------------
+Pendência: 24085 - Ajustes na bpl CMImobiliarioObj50 para carregar Imóveis ou
+                             Unidades pertencentes ao contrato.
+================================================================================
+CM$VER      3.02.15a    17/05/2007
+--------------------------------------------------------------------------------
+- Provisões Diárias / Ajusta Provisão
+  - Pendencia 25316: No processo de Atualização de Provisão de Receitas, passa a 
+    considerar a vigencia inicial e final do contrato ao invés do status
+  - Pendencia 25341: No processo de Atualização de Provisão de Receitas, somente
+    considera contratos que possuem receita com segunda operação contábil
+================================================================================
+CM$VER      3.02.15     10/04/2007
+--------------------------------------------------------------------------------
+- Liberação do padrão 15
+- Pendencia 19622: Reestruturação do cadastro de locatário
+================================================================================
+CM$VER      3.02.14h    17/05/2007
+--------------------------------------------------------------------------------
+- Provisões Diárias / Ajusta Provisão
+  - Pendencia 25316: No processo de Atualização de Provisão de Receitas, passa a
+    considerar a vigencia inicial e final do contrato ao invés do status
+  - Pendencia 25341: No processo de Atualização de Provisão de Receitas, somente
+    considera contratos que possuem receita com segunda operação contábil
+================================================================================
+CM$VER      3.02.14g    20/04/2007
+--------------------------------------------------------------------------------
+- Ajuste na tela de Geração de Confissão de Dívidas
+================================================================================
+CM$VER      3.02.14f    19/04/2007
+--------------------------------------------------------------------------------
+- Pendencia 24706: Criacao de novo tipo de evento: baixa de bem
+================================================================================
+CM$VER      3.02.14e    13/04/2007
+--------------------------------------------------------------------------------
+Confissão de Dívidas
+   - Ajuste do processo de geração do contrato
+================================================================================
+CM$VER      3.02.14d    11/04/2007
+--------------------------------------------------------------------------------
+- Pendencia 24986: Ajuste na tela de atualização diária
+================================================================================
+CM$VER      3.02.14c    03/04/2007
+--------------------------------------------------------------------------------
+Pend 25001 -Compatiblização com Oracle 10g
+     Ajuste do processo de folha de aluguel e consulta de documento para compatibilizar
+    com versão 10g do Oracle.
+================================================================================
+CM$VER      3.02.14a    07/03/2007
+--------------------------------------------------------------------------------
+- Acerto no processo de geração de parcelas quando condicao de pagamento termina
+   antes do ultimo dia do mes, ocasionando erro na geracao da ultima parcela.
+- Inclusão da data de lancamento no processo de integracao de parcelas (requer autorizacao)
+================================================================================
+CM$VER      3.02.14     22/02/2007
+--------------------------------------------------------------------------------
+- Pend 24354 - Transferência de Grupo
+        Implementação de critica impedindo a transferência quando o imóvel estiver locado
+ou possuir movimentação futura.
+- Pend 24000: Reestruturação interna dos módulos do Imobiliário
+================================================================================
+CM$VER      3.02.13f    08/02/2007
+--------------------------------------------------------------------------------
+Pendência 24328 - Conciliação
+   - Ajuste do processo de Atualização de Alteradores para o processo de abono.
+================================================================================
+CM$VER      3.02.13e    06/02/2007
+--------------------------------------------------------------------------------
+Pendência 24328 - Conciliação
+    Atualização dos alteradores no Contas a Receber de forma automática após a
+execução do abono de inadimplência.
+================================================================================
+CM$VER      3.02.13d    31/01/2007
+--------------------------------------------------------------------------------
+Reestruturação interna de bibliotecas para o padrão 5.10.14
+================================================================================
+CM$VER      3.02.13c    16/01/2007
+--------------------------------------------------------------------------------
+Pendência: 24159 - Implementação de crítica ao alterar/excluir imóvel caso exista
+                             lançamentos feito para o mesmo.
+================================================================================
+CM$VER      3.02.13b    29/12/2006
+--------------------------------------------------------------------------------
+- Pendencia 21542: Acerto na rotina que busca os valores para provisão de perdas
+================================================================================
+CM$VER      3.02.13a    21/12/2006
+--------------------------------------------------------------------------------
+Consulta Inadimplência, Cadastro de Imóvel, Cadastro de Eventos de Imóvel
+Cadastro de Eventos de Contrato
+  - Ajuste relacionado a pendência 21967
+================================================================================
+CM$VER      3.02.13     08/12/2006
+--------------------------------------------------------------------------------
+Liberação do padrão 13.
+================================================================================
+CM$VER      3.02.12m    16/01/2007
+--------------------------------------------------------------------------------
+Pendência: 24159 - Implementação de crítica ao alterar/excluir imóvel caso exista
+                             lançamentos feito para o mesmo.
+================================================================================
+CM$VER      3.02.12l    29/12/2006
+--------------------------------------------------------------------------------
+- Pendencia 21542: Acerto na rotina que busca os valores para provisão de perdas
+================================================================================
+CM$VER      3.02.12k    22/12/2006
+--------------------------------------------------------------------------------
+Atualização diária
+- Pendencia 23438: Correção do processo de atualização devido ao processo de Recálculo
+================================================================================
+CM$VER      3.02.12j    20/12/2006
+--------------------------------------------------------------------------------
+Consulta Inadimplência, Cadastro de Imóvel, Cadastro de Eventos de Imóvel
+Cadastro de Eventos de Contrato
+  - Ajuste relacionado a pendência 21967
+================================================================================
+CM$VER      3.02.12i    15/12/2006
+--------------------------------------------------------------------------------
+- Pendencia 23438: Criação de parâmetros que serão utilizados nas telas de recálculo de documentos
+================================================================================
+CM$VER      3.02.12h    14/12/2006
+--------------------------------------------------------------------------------
+- Acerto na atualização diária para correção de erro de conversão de valores.
+================================================================================
+CM$VER      3.02.12g    06/12/2006
+--------------------------------------------------------------------------------
+- Pendencia 23438: Criação de parâmetros que serão utilizados nas telas de recálculo de documentos
+================================================================================
+CM$VER      3.02.12f    05/12/2006
+--------------------------------------------------------------------------------
+- Acerto na busca de documentos em aberto
+================================================================================
+CM$VER      3.02.12e    23/11/2006
+--------------------------------------------------------------------------------
+- Pendencia 23828: Acerto na exclusão de planilha na tela de Exclusão de Lançamentos
+================================================================================
+CM$VER      3.02.12d    23/11/2006
+--------------------------------------------------------------------------------
+- Pendencia 23821: Ajuste na tela de Grupo de imóveis para acertar a crítica
+                             de percentuais quando da manutenção dos imóveis do grupo
+================================================================================
+CM$VER      3.02.12c    10/11/2006
+--------------------------------------------------------------------------------
+Processo de Conciliação e Rescisão.
+   - Exclusão de lançamentos estornados ou abonados com data anterior a data limite
+      do relatório.
+================================================================================
+CM$VER      3.02.12b    30/10/2006
+--------------------------------------------------------------------------------
+- Pendencia 23592: Criação de parâmetros específicos para parcelas, juros e correção para
+  contratos de Acordo
+================================================================================
+CM$VER      3.02.12a    25/10/2006
+--------------------------------------------------------------------------------
+- Acerto no processo de atualização de documentos (Ajusta Previsão) para considerar
+  apenas documentos com FLGNAOCONCILIADO = 1
+================================================================================
+CM$VER      3.02.12     10/11/2006
+--------------------------------------------------------------------------------
+- Liberacao do padrao 12
+================================================================================
+CM$VER      3.02.11l    09/11/2006
+--------------------------------------------------------------------------------
+- Acerto na query de entrada da regra de cálculo de multa para Alienação
+================================================================================
+CM$VER      3.02.11k    08/11/2006
+--------------------------------------------------------------------------------
+Processo de Conciliação e Rescisão.
+   - Exclusão de lançamentos estornados ou abonados com data anterior a data limite
+      do relatório.
+================================================================================
+CM$VER      3.02.11j    02/11/2006
+--------------------------------------------------------------------------------
+Provisão de Perdas
+   - Passa a desconsiderar lançamentos abonados e estornados
+================================================================================
+CM$VER      3.02.11i    27/10/2006
+--------------------------------------------------------------------------------
+- Pendencia 23592: Criação de parâmetros específicos para parcelas, juros e correção para
+  contratos de Acordo
+================================================================================
+CM$VER      3.02.11h    25/10/2006
+--------------------------------------------------------------------------------
+- Acerto no processo de atualização de documentos (Ajuste de Previsão) para considerar
+  somente documentos com FLGNAOCONCILIADO = 1
+================================================================================
+CM$VER      3.02.11g    10/10/2006
+--------------------------------------------------------------------------------
+Recisão Contratual
+  Pend.: 23530 - Alteração na query Conciliação para exibir o valor correto de acordo
+                        com a inadimplência.
+================================================================================
+CM$VER      3.02.11f    10/10/2006
+--------------------------------------------------------------------------------
+- Pendencia 23322: Ajuste no processo de atualização de documento
+- Pendencia 23373: ajuste no processo de cálculo de resíduos
+================================================================================
+CM$VER      3.02.11e    20/09/2006
+--------------------------------------------------------------------------------
+- Acerto na query que busca os valores de juros, multa e correção para lançamento de alteradores
+================================================================================
+CM$VER      3.02.11d    14/09/2006
+--------------------------------------------------------------------------------
+- Compilação para contemplar acerto no MontaSelect da Geração de Contrato
+================================================================================
+CM$VER      3.02.11c    12/09/2006
+--------------------------------------------------------------------------------
+- Pendencia 23163: Acerto no processo de provisão de perdas - Alienação
+- Pendencia 23164: Acerto no relatório de estoque financeiro
+================================================================================
+CM$VER      3.02.11b    01/09/2006
+--------------------------------------------------------------------------------
+Compilação para contemplar as pendencias abaixo liberadas no padrão 10
+  - Pendencia 23162: Acerto no Extrato Contratual com referencia a repactuação (saldos)
+  - Pendencia 23165: Acerto na rotina de Atualiação diária (Integra Atualizações Financeiro)
+                               para ajuste de alteradores lançados indevidamente
+  - Pendencia 23166: Acerto nao rotina de atualização diária para acerto no processo de atualização
+                               de documentos
+================================================================================
+CM$VER      3.02.11a    25/08/2006
+--------------------------------------------------------------------------------
+- Acerto na query que busca os documentos em aberto
+================================================================================
+CM$VER      3.02.11     28/07/2006
+--------------------------------------------------------------------------------
+Liberação do padrão 11.
+================================================================================
+CM$VER      3.02.10g    04/09/2006
+--------------------------------------------------------------------------------
+- Pendencia 23166: Acerto nao rotina de atualização diária para acerto no processo de atualização
+                             de documentos
+================================================================================
+CM$VER      3.02.10f    04/09/2006
+--------------------------------------------------------------------------------
+- Pendencia 23163: Acerto no processo de provisão de perdas - Alienação
+- Pendencia 23164: Acerto no relatório de estoque financeiro
+================================================================================
+CM$VER      3.02.10e    01/09/2006
+--------------------------------------------------------------------------------
+- Pendencia 23162: Acerto no Extrato Contratual com referencia a repactuação (saldos)
+- Pendencia 23165: Acerto na rotina de Atualiação diária (Integra Atualizações Financeiro)
+                             para ajuste de alteradores lançados indevidamente
+- Pendencia 23166: Acerto nao rotina de atualização diária para acerto no processo de atualização
+                             de documentos
+================================================================================
+CM$VER      3.02.10d    25/08/2006
+--------------------------------------------------------------------------------
+- Acerto para aumentar performance na busca de documentos para atualização de alteradores
+================================================================================
+CM$VER      3.02.10c    22/08/2006
+--------------------------------------------------------------------------------
+- Acerto na query que traz os documentos para atualização diária
+================================================================================
+CM$VER      3.02.10b    16/08/2006
+--------------------------------------------------------------------------------
+Liberação no padrão 10.
+================================================================================
+CM$VER      3.02.10     17/07/2006
+--------------------------------------------------------------------------------
+Liberação no padrão 10.
+================================================================================
+CM$VER      3.02.09n    11/08/2006
+--------------------------------------------------------------------------------
+- Pendencia 22814 - Permite lançar alterador com valor negativo
+================================================================================
+CM$VER      3.02.09m    09/08/2006
+--------------------------------------------------------------------------------
+- Acerto no processo de atualização de documentos quando os mesmos estão baixados com
+  pagamento posterior a data limite
+================================================================================
+CM$VER      3.02.09l    01/08/2006
+--------------------------------------------------------------------------------
+- Pendencia 22952: Acerto na contabilização do alterador quando existe segregação
+================================================================================
+CM$VER      3.02.09k    01/08/2006
+--------------------------------------------------------------------------------
+Atualização Diária
+   Pend 22840 - Recalculo da data limite de pagamento quando esta estiver registrada em um feriado.
+================================================================================
+CM$VER      3.02.09j    21/07/2006
+--------------------------------------------------------------------------------
+- Acerto na rotina de atualização de residuos para contemplar somente contratos vigentes
+================================================================================
+CM$VER      3.02.09i    10/07/2006
+--------------------------------------------------------------------------------
+- Acerto no processo de antecipação de parcelas para forma de cálculo 
+  "PRICE - Corrige Saldo Dev. mensal, Sem Recalculo, com Correção anual da Parcela"
+================================================================================
+CM$VER      3.02.09h    05/07/2006
+--------------------------------------------------------------------------------
+- Pendencia 22768: Acerto no calculo da data limite levando em consideração 
+                             o numero de dias de tolerancia
+================================================================================
+CM$VER      3.02.09g    27/06/2006
+--------------------------------------------------------------------------------
+- Ajustes no processo de anteciáção de Parcelas na Alienação
+================================================================================
+CM$VER      3.02.09f    16/06/2006
+--------------------------------------------------------------------------------
+- Acerto na query de atualização de alteradores
+================================================================================
+CM$VER      3.02.09e    08/06/2006
+--------------------------------------------------------------------------------
+- Ajuste na rotina de Atualização Diária de Alteradores quando os documentos 
+  possuirem baixas e abonos
+================================================================================
+CM$VER      3.02.09d    26/05/2006
+--------------------------------------------------------------------------------
+- Compilação para contemplar alterações efetuadas na versao 3.02.08o
+================================================================================
+CM$VER      3.02.09c    19/05/2006
+--------------------------------------------------------------------------------
+- Acerto nos filtros dos contratos de alienação para contemplar contratos de acordo de alienação
+================================================================================
+CM$VER      3.02.09b    18/05/2006
+--------------------------------------------------------------------------------
+Rescisão
+   Pendência 21437 - Correção da tela de recisão de contrato, ao checar debitos do contrato.
+================================================================================
+CM$VER      3.02.09a    17/05/2006
+--------------------------------------------------------------------------------
+Provisão de perda.
+   - Ajuste da consulta conforme inadimplência.
+================================================================================
+CM$VER      3.02.09     04/05/2006
+--------------------------------------------------------------------------------
+Liberação do Padrão 5.10.09
+Consulta Inadimplências
+   Pendência 21165 - Não exibir o contrato caso não tenha documentos inadimplentes.
+================================================================================
+CM$VER      3.02.08o    26/05/2006
+--------------------------------------------------------------------------------
+- Pendencia 22445: Ajuste dos filtros para contemplar acordo de Alienação 
+                             nos relatorios Listagem de Contrato e Folha de Alienação
+                             e nos processos de Geração e Integração de Parcelas
+- Pendencia 22452: No processo de atualização de Alteradores, passar a verificar também
+                             os abonos concedidos, de forma a manter o saldo do documento
+                             conforme o valor existente no alienação
+- Pendencia 22444: Geração de contratos: correção no processo de atualização do status
+                             do imóvel quando do contrato com baixa parcial do imóvel
+================================================================================
+CM$VER      3.02.08n    22/05/2006
+--------------------------------------------------------------------------------
+Calcula Saldo Devedor Alienação
+   - Ajuste do contrato 000454
+================================================================================
+CM$VER      3.02.08m    15/05/2006
+--------------------------------------------------------------------------------
+Provisão de perda.
+   - Ajuste da consulta conforme inadimplência.
+================================================================================
+CM$VER      3.02.08l    12/05/2006
+--------------------------------------------------------------------------------
+- Correção do processo de atualização do status de penhora.
+================================================================================
+CM$VER      3.02.08k    10/05/2006
+--------------------------------------------------------------------------------
+- Acerto no processo de Abono: Corrigido o processo de integração contábil
+================================================================================
+CM$VER      3.02.08j    20/04/2006
+--------------------------------------------------------------------------------
+- Acerto no processo de Calculo de Saldo Devedor
+================================================================================
+CM$VER      3.02.08i    12/04/2006
+--------------------------------------------------------------------------------
+Pendencia 22080: Verificação e correção do processo de atualização diária de 
+                           inadimplência para a CBS onde os documentos são atualizados 
+                           apenas no último dia do mês.
+================================================================================
+CM$VER      3.02.08h    11/04/2006
+--------------------------------------------------------------------------------
+Atualização Diária
+   - Correção do processo quando é lançado um alterador de desconto para um documento
+inadimplente sem nenhum lançamento de baixa.
+================================================================================
+CM$VER      3.02.08g    07/04/2006
+--------------------------------------------------------------------------------
+- Correção da situação do imovel quando alterada para penhora
+================================================================================
+CM$VER      3.02.08f    03/04/2006
+--------------------------------------------------------------------------------
+- Pendencias 21739 e 21417: Acerto no processo de abono de parcelas com baixa manual
+================================================================================
+CM$VER      3.02.08e    23/03/2006
+--------------------------------------------------------------------------------
+uCtrlLancamento
+   Inclusão da conta para receita antecipada
+================================================================================
+CM$VER      3.02.08d    15/03/2006
+--------------------------------------------------------------------------------
+CtrlOperImob - Atualizações Diárias
+   Incorporação do processo de simulação de atualização de inadimplência para o módulo
+   de Alienação.
+================================================================================
+CM$VER      3.02.08c    14/03/2006
+--------------------------------------------------------------------------------
+Pend 21711 - Cadastro de Contratos
+   Correção de erro ao alterar os dados do fiador.
+================================================================================
+CM$VER      3.02.08b    06/03/2006
+--------------------------------------------------------------------------------
+Operações Diárias
+  - Correção do processo de Atualização de Provisão de Receitas
+================================================================================
+CM$VER      3.02.08a    07/02/2006
+--------------------------------------------------------------------------------
+Integração Financeira
+   - Preenchimento da data limite quando da importação de registros de lançamento
+   - Atualização da data programada conforme a data limite ( parâmetro )
+================================================================================
+CM$VER      3.02.08     23/01/2006
+--------------------------------------------------------------------------------
+- Liberação de versão no padrão 8
+================================================================================
+CM$VER      3.02.07a    23/12/2005
+--------------------------------------------------------------------------------
+- Acerto e implementações em rotinas para o AdminImob e Alienacao
+================================================================================
+CM$VER      3.02.07     21/12/2005
+--------------------------------------------------------------------------------
+Correção da função de Atualização de documentos quando ocorrer abonos de Alienação
+================================================================================
+CM$VER      3.02.04f    06/12/2005
+--------------------------------------------------------------------------------
+- Pendencia 20713: Agrupamento de Documentos ->
+                             Discriminar no histórico (boleta) os valores separados quando os
+                             documentos estiverem agrupados. Débitos anteriores, serão consolidados
+                             em um unico item de Debitos Anteriores.
+================================================================================
+CM$VER      3.02.04e    05/12/2005
+--------------------------------------------------------------------------------
+- Acerto de várias rotinas comuns a AdminImob, Alienacao e InvestImob
+================================================================================
+CM$VER      3.02.04d    22/11/2005
+--------------------------------------------------------------------------------
+- Acerto de várias rotinas comuns a AdminImob, Alienacao e InvestImob
+================================================================================
+CM$VER      3.02.04c    18/11/2005
+--------------------------------------------------------------------------------
+- Pendencia 20749: Alteração na rotina de ajuste de saldo, permitindo alterar bens baixados com saldo diferente de zero
+================================================================================
+CM$VER      3.02.04b    14/11/2005
+--------------------------------------------------------------------------------
+- Pendencia 19325
+  - Parâmetros do Sistema - Criação de parâmetro de Operação de Atualização de Resíduo 
+  - Atualização Diária - Implementação do processo de atualização e contabilização diária do 
+     resíduo da alienação. 
+  - Provisão para Perdas - Inclusão do valor do resíduo atualizado na base para provisão de perdas 
+  - Extrato Contratual - Verificação histórica de cobrança de resíduo manual. 
+================================================================================
+CM$VER      3.02.04a    03/11/2005
+--------------------------------------------------------------------------------
+- Liberação de Pendências do AdminImob
+- Liberação de Pendências do Alienação
+- Liberação de Pendências do InvestImob
+- Liberação de Pendências do Indicadores
+================================================================================
+CM$VER      3.02.04     11/10/2005
+--------------------------------------------------------------------------------
+Liberação do padrão 5.10.07
+================================================================================
+CM$VER      3.02.03a    05/08/2005
+--------------------------------------------------------------------------------
+- Pendencia 19719:
+  Acerto nos cadastros de parametrização de Receitas/Despesas/Operações 
+  para que também possa ser informado o Imovel Mestre.
+  Acerto nas rotinas de busca dessa parametrização para integração
+================================================================================
+CM$VER      3.02.03     07/06/2005
+--------------------------------------------------------------------------------
+Liberação do padrão 5.10.06
+================================================================================
+CM$VER      3.02.01     15/12/2004
+--------------------------------------------------------------------------------
+Liberação do Padrão 5.10.05
+================================================================================
+CM$VER      3.02.00     22/06/2004
+--------------------------------------------------------------------------------
+CtrlImovel
+  - Alteração da tabela DAIEACARTEIRA parta CARTEIRASPC
+================================================================================
+CM$VER      3.00.12     27/05/2004
+--------------------------------------------------------------------------------
+CtrlContratoImovel
+  - Correção da função de verificação de percentual de locação do imóvel
+================================================================================
+CM$VER      3.00.11     14/05/2004
+--------------------------------------------------------------------------------
+CtrlImovel
+  - Inclusão do processo para gravação das imagens dos imóveis
+================================================================================
+CM$VER      3.00.09     16/04/2004
+--------------------------------------------------------------------------------
+CtrlLancamentoImovel
+  - Criação das funções públicas: Inserir e Integrar
+CtrlOperImob
+  - Criação da unit para contabilização de operações diárias
+Criação da classe para acesso ao Excel
+================================================================================
+CM$VER      3.00.08     23/12/2003
+--------------------------------------------------------------------------------
+Desvinculação da unit uVerificaPreenchimento
+================================================================================
+CM$VER      3.00.06     27/10/2003
+--------------------------------------------------------------------------------
+CtrlCadRegra
+  - Inclusão da descrição da regra na consulta
+================================================================================
+CM$VER      3.00.01     20/03/2003
+--------------------------------------------------------------------------------
+Implementações Diversas
+================================================================================
+CM$VER      3.00.00     24/06/2002
+--------------------------------------------------------------------------------
+Versão Inicial
+================================================================================
+CM$ALT}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,1087 @@
+{*******************************************************}
+{                                                       }
+{ Padrões de Desenvolvimento                            }
+{ Copyright © 1998,2002 - CM Soluções Informática       }
+{                                                       }
+{ - Atualização para o padrão MT (3 Camadas)            }
+{                                                       }
+{ Analista Responsável: Gustavo Viegas                  }
+{ Atualizado Em: 10/04/2002                             }
+{                                                       }
+{*******************************************************}
+unit uCmDbObject;
+
+interface
+
+Uses Classes, SysUtils, Db, uCmCustomCdbObject, uMensErro, uDataBase,
+     provider, DbClient, uCMTypes, uCMMath, uCMFileUtils, wwQuery;
+
+{$I CmMsgConst.Inc}
+
+Type
+  TDbOperacao = (dboInsert, dboUpdate, dboDelete);
+  
+  TCmDbObject = Class;
+
+  {Classe para implelemtação dos Objetos de persistências com as colunas dos TCmDbObject}
+  TCmDbField = Class
+  private
+    FIsNull: Boolean;
+    FRequired: Boolean;
+    FKey: Boolean;
+    FReadOnly: Boolean;
+    FAsFloat: Double;
+    FAsInteger: Integer;
+    FIndex: Integer;
+    FColumName: String;
+    FAsString: String;
+    FAsDateTime: TDateTime;
+    FDataType: TFieldType;
+    FValue: Variant;
+    FOwner: TCmDbObject;
+    FNullIfZero: Boolean;
+    FDisplayName: String;
+    FOldValue: Variant;
+    procedure SetAsDateTime(const Value: TDateTime);
+    procedure SetAsFloat(const Value: Double);
+    procedure SetAsInteger(const Value: Integer);
+    procedure SetAsString(const Value: String);
+    procedure SetColumName(const Value: String);
+    procedure SetDataType(const Value: TFieldType);
+    procedure SetIndex(const Value: Integer);
+    procedure SetKey(const Value: Boolean);
+    procedure SetReadOnly(const Value: Boolean);
+    procedure SetRequired(const Value: Boolean);
+    procedure SetValue(const Value: Variant);
+    function GetAsDateTime: TDateTime;
+    function GetAsFloat: Double;
+    function GetAsInteger: Integer;
+    function GetIsNull: Boolean;
+    function GetsString: String;
+    function GetValue: Variant;
+    procedure SetNullIfZero(const Value: Boolean);
+    procedure SetDisplayName(const Value: String);
+    procedure SetOldValue(const Value: Variant);
+  protected
+
+  public
+    Constructor Create(aOwner :TCmDbObject);
+    Destructor Destroy; Override;
+    procedure Clear;
+
+    {Descrição "amigável" da coluna a ser exibida em mensagens de erro}
+    property DisplayName: String read FDisplayName write SetDisplayName;
+    {Referencia o DbObject owner da coluna}
+    property Owner :TCmDbObject read FOwner;
+    {Indica se o valor será preenchido com null caso seja zero ou ''}
+    property NullIfZero :Boolean read FNullIfZero write SetNullIfZero;
+    {Nome da coluna no banco de dados}
+    property ColumName :String read FColumName write SetColumName;
+    {Indica se a coluna é chave da tabela}
+    property Key :Boolean read FKey write SetKey;
+    {Indica o tipo da coluna no banco de dados}
+    property DataType :TFieldType read FDataType write SetDataType;
+    {Indica se a coluna é not null}
+    property Required :Boolean read FRequired write SetRequired;
+    {Indica se a coluna é somente para leitura}
+    property ReadOnly :Boolean read FReadOnly write SetReadOnly;
+    {Indica da coluna}
+    property Index :Integer read FIndex write SetIndex;
+    {indica se a coluna esta vazia para strings, 0 para numero ou null para data e variant}
+    property IsNull: Boolean read GetIsNull;
+    {manipula o valor da coluna como uma string}
+    property AsString :String read GetsString write SetAsString;
+    {manipula o valor da coluna como um float}
+    property AsFloat :Double read GetAsFloat write SetAsFloat;
+    {manipula o valor da coluna como um inteiro}
+    property AsInteger :Integer read GetAsInteger write SetAsInteger;
+    {manipula o valor da coluna como um DateTime}
+    property AsDateTime :TDateTime read GetAsDateTime write SetAsDateTime;
+    {manipula o valor da coluna como um Variant}
+    property Value :Variant read GetValue write SetValue;
+    {manipula o valor da coluna como um Variant}
+    property OldValue: Variant read FOldValue write SetOldValue;
+  End;
+
+  {Classe para implementação dos Objetos de persistência com as tabelas do banco de dados.
+   A idéia é que para cada tabela do sistema tenhamos um DbObject que realiza as funçoes
+   básicas de persistência do Objeto bem como validações de negócio específicas do mesmo
+   ( Ex. Atribuição de sequences, controle de campos obrigatórios, etc).}
+  TCmDbObject = Class(TCmCustomCdbObject)
+  private
+    _DataBaseNameChanged: Boolean;
+    _iNumBlobFields: Integer;
+    FDataBaseName: String;
+    FErrorIfNoRowsAffected: Boolean;
+    FTableName: String;
+    fOwner: TCmCustomCdbObject;
+    procedure SetErrorIfNoRowsAffected(const Value: Boolean);
+    procedure SetTableName(const Value: String);
+    function GetFields(x: Integer): TCmDbField;
+    {Monta o array de valores e nomes das colunas para montagem dos SQL's de INSERT, DELETE, UPDATE}
+    Procedure BuildArray(Var CampoValores :Array of Const; Var CampoNome :Array of String; Var CampoNullIfZero :Array of Boolean);
+    {Libera o array de valores e nomes das colunas para montagem dos SQL's de INSERT, DELETE, UPDATE}
+    Procedure FreeArray(Var CampoValores :Array of Const);
+
+    Procedure SetDbFields;
+    {Método para gravação de colunas do tipo "Blob" ou LONGRAW no Oracle}
+    procedure ApplyLongRaw;
+
+  protected
+
+    fSqlInsert: String;
+    fSqlUpdate: String;
+    fSqlDelete: String;
+
+    _UpdateKeyFields: Boolean;
+    _DbOperacao: TDbOperacao;
+
+    _ListDbField :TList;
+    {Query ultilizada para execução dos comandos}
+    _CdsSelect, _CdsDb :TClientDataSet;
+    //_QryExecute, _QrySelect :TwwQuery;
+
+    procedure SetDbSessionName;
+
+    function GetSequence(Sufixo :string) :Cardinal; Override;
+
+    {Monta Where para frases de update e delete
+     Tal procedimento é interno da aplicação e considera os parâmetros de criação do TCmDbField}
+    function MontaWhere(OldValue: Boolean = False): String;
+    {Executa frase SQL validando preenchimento, erro de execução, erro se não afetar registros retornado
+    a string do erro para o MessageInfo
+    Tal procedimento é interno da aplicação e considera os parâmetros de criação do TCmDbField}
+    function ExecuteSql (Const sSql, MsgEmpty, MsgError :string; bErrorIfNoRowsAffected :boolean = false; MsgErrorRowsAffected :String = '') :Boolean;
+    {Cria as instâncias das propriedades de persistência com as colunas da tabelas}
+    function CreateCmDbField(ColumName: String; DataType: TFieldType; Required: Boolean = false; Key: Boolean = false; ReadOnly: Boolean = false; NullIfZero: Boolean = True; sDisplayName: String = '') :TCmDbField;
+    {Verifica antes de um Insert ou Update se os campos ditos com required estão preenchidos}
+    function  ValidateNullFields :Boolean;
+    {Retorna o nome dos fields do dbobject separados por vírgulas}
+    function GetFieldsForSelect: String;
+
+    procedure SetDataBaseName(const Value: String); Override;
+    {Monta a consulta a ser executada nos métodos LOADFROMDB e BEFOREOPEN do clientDataSet
+    associado a classe de persistência.
+    Esse método deve ser sobrescrito quando quisermos utilizar uma consulta diferente da
+    consulta padrão do Objeto}
+    function GetSqlSelect: String; Virtual;
+    {Evento before open da query associada ao CLientDataSet da classe}
+    { function ExecSql(sSql: String): Boolean; }
+  public
+    Constructor Create(Aowner: TCmCustomCdbObject); Reintroduce; Virtual;
+    Destructor Destroy; Override;
+
+    {"Limpa" todas os CMDBFields da Classe}
+    procedure Clear;  Virtual;
+    {Executa o SQL de Insert com os parâmetros passados nas propriedades}
+    function Insert :Boolean; virtual;
+    {Executa o SQL de Delete com os parâmetros passados nas propriedades}
+    function Delete :Boolean; virtual;
+    {Executa o SQL de Update com os parâmetros passados nas propriedades}
+    function Update :Boolean; virtual;
+    {Atribui para as propriedades os valores do registro no banco de dados de acordo como os campos chave}
+    function LoadFromDb :Boolean; virtual;
+    {Retorna o Número de CMDbField's do DbObject}
+    Function FieldCount : Integer;
+    {Acessa os CMDbField's do DbObject pelo nome}
+    function FieldByName(const Name: string): TCmDbField;
+
+    {Métodos utilizados para posicionamento do classe de persistência quando a query principal
+     da mesma retorna mais de um registro. Isso ocorre quando sobrescrevemos o método GetSQLSelect}
+    procedure First;
+    Procedure Prior;
+    Procedure Next;
+    Procedure Last;
+    function Eof: Boolean;
+    function Bof: Boolean;
+    function RecordCount: Integer;
+
+    {Comando SQL de Select com parâmetro de filtro pelo ID e/ou Foreign Key no caso de Master Detail}
+    property SSqlSelect :String read GetSqlSelect;
+    {Comando SQL de Insert}
+    property SSqlInsert :String read fSqlInsert;
+    {Comando SQL de Update}
+    property SSqlUpdate :String read fSqlUpdate;
+    {Comando SQL de Delete}
+    property SSqlDelete :String read fSqlDelete;
+    {Habilita a geração de exceção qdo os comando de Delete e Update não afetar nenhum registro}
+    property ErrorIfNoRowsAffected :Boolean read FErrorIfNoRowsAffected write SetErrorIfNoRowsAffected;
+    {Nome da tabela a ser persistida}
+    property TableName :String read FTableName write SetTableName;
+    {Acessa os CMDbField's do DbObject pelo índice}
+    property Fields[x:Integer]: TCmDbField Read GetFields;
+
+    property Owner:TCmCustomCdbObject read fOwner;
+  End;
+
+implementation
+
+Uses uCmControlObject;
+
+{ TCmDbObject }
+
+constructor TCmDbObject.Create(Aowner: TCmCustomCdbObject);
+begin
+  Inherited Create;
+  fOwner := Aowner;
+  
+  _DataBaseNameChanged := True;
+  _iNumBlobFields := 0;
+  
+  //_QryExecute := TwwQuery.Create(nil);
+  //_QrySelect := TwwQuery.Create(nil);
+  _CdsSelect := TClientDataSet.Create(nil);;
+  _CdsDb := TClientDataSet.Create(nil);;
+
+  fSqlInsert := '';
+  fSqlUpdate := '';
+  fSqlDelete := '';
+  fErrorIfNoRowsAffected := False;
+  
+  _ListDbField := TList.Create;
+
+  _UpdateKeyFields := False; 
+end;
+
+function TCmDbObject.MontaWhere(OldValue: Boolean = False): String;
+Var
+  sAuxDec: Char;
+  sWhere: String;
+  X: Integer;
+begin
+  sWhere := '';
+
+  For x := 0 To Pred(FieldCount) Do
+     Begin
+        Case TCmDbField(_ListDbField.Items[x]).DataType Of
+            ftString:
+               If TCmDbField(_ListDbField.Items[x]).Key Then
+               Begin
+                   If OldValue Then
+                      sWhere := sWhere + ' (' + TCmDbField(_ListDbField.Items[x]).ColumName + ' = ' + QuotedStr(TCmDbField(_ListDbField.Items[x]).OldValue) + ') AND'
+                   Else
+                      sWhere := sWhere + ' (' + TCmDbField(_ListDbField.Items[x]).ColumName + ' = ' + QuotedStr(TCmDbField(_ListDbField.Items[x]).AsString) + ') AND';
+               End;
+            ftSmallint, ftInteger, ftWord:
+                If TCmDbField(_ListDbField.Items[x]).Key Then
+                Begin
+                   If OldValue Then
+                      sWhere := sWhere + ' (' + TCmDbField(_ListDbField.Items[x]).ColumName + ' = ' + FloatToStr(TCmDbField(_ListDbField.Items[x]).OldValue) + ') AND'
+                   Else
+                      sWhere := sWhere + ' (' + TCmDbField(_ListDbField.Items[x]).ColumName + ' = ' + FloatToStr(TCmDbField(_ListDbField.Items[x]).AsFloat) + ') AND';
+                End;
+            ftFloat, ftCurrency, ftBCD:
+                Begin
+                  sAuxDec := DecimalSeparator;
+                  Try
+                    DecimalSeparator := '.';
+
+                  If TCmDbField(_ListDbField.Items[x]).Key Then
+                  Begin
+                     If OldValue Then
+                        sWhere := sWhere + ' (' + TCmDbField(_ListDbField.Items[x]).ColumName + ' = ' + FloatToStr(TCmDbField(_ListDbField.Items[x]).OldValue) + ') AND'
+                     Else
+                        sWhere := sWhere + ' (' + TCmDbField(_ListDbField.Items[x]).ColumName + ' = ' + FloatToStr(TCmDbField(_ListDbField.Items[x]).AsFloat) + ') AND';
+                  End;
+
+                  finally
+                    DecimalSeparator := sAuxDec;
+                  End;
+                End;
+            ftDate, ftDateTime:
+                If TCmDbField(_ListDbField.Items[x]).Key Then
+                Begin
+                   If OldValue Then
+                      sWhere := sWhere + ' (' + TCmDbField(_ListDbField.Items[x]).ColumName + ' = TO_DATE(' + QuotedStr(TCmDbField(_ListDbField.Items[x]).OldValue) + ',''DD/MM/YYYY'')) AND'
+                   Else
+                      sWhere := sWhere + ' (' + TCmDbField(_ListDbField.Items[x]).ColumName + ' = TO_DATE(' + QuotedStr(TCmDbField(_ListDbField.Items[x]).AsString) + ',''DD/MM/YYYY'')) AND';
+                End;
+        End;
+     End;
+
+  Result := Copy(sWhere,1,Length(sWhere) - 4);
+end;
+
+
+function TCmDbObject.Delete: Boolean;
+begin
+  //SetDbSessionName;
+
+  _DbOperacao := dboDelete;
+
+  fSqlDelete := 'DELETE FROM ' + TableName + ' WHERE ' + MontaWhere;
+
+  Result := ExecuteSql(fSqlDelete,CMsgDeleteEmpty,CMsgErrorDelete,FErrorIfNoRowsAffected, CMsgErrorRowsAffectedDelete);
+end;
+
+destructor TCmDbObject.Destroy;
+Var
+  X :Integer;
+begin
+  For X := (_ListDbField.Count - 1) To 0 Do
+    TCmDbField(_ListDbField.Items[x]).Free;
+
+  _ListDbField.Clear;
+  _ListDbField.Free;
+
+  //_QryExecute.Free;
+  //If _QrySelect.Active Then _QrySelect.Close;
+  //_QrySelect.Free;
+
+  If _CdsSelect.Active Then _CdsSelect.Close;
+  _CdsSelect.Free;
+
+  _CdsDb.Free;
+
+  inherited Destroy;
+end;
+
+function TCmDbObject.ExecuteSql (Const sSql, MsgEmpty,
+          MsgError :string; bErrorIfNoRowsAffected :boolean = false;
+          MsgErrorRowsAffected :String = '') :Boolean;
+begin
+  Try
+      MessageInfo := '';
+
+      If Trim(sSql) = '' Then Raise ECmDbObjectError.Create(MsgEmpty);
+      //If Trim(_QryExecute.DataBaseName) = ''Then Raise ECmDbObjectError.Create(CMsgDbnNotFound);
+
+      //With _QryExecute Do
+      //Begin
+         //If Active Then Close;
+         //Sql.Text := sSql;
+         //ExecSql;
+
+         if not uCmControlObject.TCmControlObject(Owner).ExecSQL(sSql, bErrorIfNoRowsAffected) then
+            ECmDbObjectError.Create(uCmControlObject.TCmControlObject(Owner).MessageInfo);
+
+         //If bErrorIfNoRowsAffected And (RowsAffected = 0) Then
+            //ECmDbObjectError.Create(MsgErrorRowsAffected);
+      //End;
+
+      Result := True;
+  Except
+      On E :Exception Do
+      Begin
+        Result := False;
+        MessageInfo := FormatErrorMessage(Self,E,MsgError);
+      End;
+  End;
+end;
+
+function TCmDbObject.Insert: Boolean;
+
+ Var
+   CampoNome    : Array Of String;
+   CampoValores : Array Of TVarRec;
+   CampoNullIfZero : array of boolean;
+begin
+  //SetDbSessionName;
+  
+  _DbOperacao := dboInsert;
+
+  SetLength(CampoNome,FieldCount);
+  SetLength(CampoValores,FieldCount);
+  SetLength(CampoNullIfZero,FieldCount);
+
+  BuildArray(CampoValores, CampoNome, CampoNullIfZero);
+
+  fSqlInsert := SqlInsert(CampoValores, FTableName, CampoNome, CampoNullIfZero);
+
+  Result := ValidateNullFields And
+            ExecuteSql(fSqlInsert,CMsgInsertEmpty,CMsgErrorInsert);
+
+  If Result Then ApplyLongRaw;
+
+  FreeArray(Campovalores);
+
+  SetLength(CampoNome,0);
+  SetLength(CampoValores,0);
+  SetLength(CampoNullIfZero,0);  
+end;
+
+procedure TCmDbObject.SetDataBaseName(const Value: String);
+begin
+  Inherited;
+  _DataBaseNameChanged := True;
+  FDataBaseName := Value;
+end;
+
+procedure TCmDbObject.SetErrorIfNoRowsAffected(const Value: Boolean);
+begin
+  FErrorIfNoRowsAffected := Value;
+end;
+
+function TCmDbObject.Update: Boolean;
+ Var
+   CampoNome    : Array Of String;
+   CampoValores : Array Of TVarRec;
+   CampoNullIfZero : Array Of Boolean;
+begin
+  //SetDbSessionName;
+
+  _DbOperacao := dboUpdate;
+
+  SetLength(CampoNome,FieldCount);
+  SetLength(CampoValores,FieldCount);
+  SetLength(CampoNullIfZero,FieldCount);
+
+  BuildArray(CampoValores, CampoNome, CampoNullIfZero);
+
+  fSqlUpdate := SqlUpdate(CampoValores, ftableName, CampoNome, MontaWhere(True), CampoNullIfZero);
+
+  Result := ValidateNullFields And
+            ExecuteSql(fSqlUpdate,CMsgUpdateEmpty,CMsgErrorUpdate,FErrorIfNoRowsAffected,CMsgErrorRowsAffectedUpdate);
+
+  If Result Then ApplyLongRaw;
+              
+  FreeArray(Campovalores);
+
+  SetLength(CampoNome,0);
+  SetLength(CampoValores,0);
+  SetLength(CampoNullIfZero,0);  
+end;
+
+function TCmDbObject.LoadFromDb: Boolean;
+begin
+  //SetDbSessionName;
+
+  //If _QrySelect.Active Then _QrySelect.Close;
+  //_QrySelect.Sql.Text := GetSqlSelect;
+  //_QrySelect.Open;
+
+  _CdsSelect.Data := uCmControlObject.TCmControlObject(Owner).GetDataPacket(GetSqlSelect);
+
+  SetDbFields;
+
+  Result := Not _CdsSelect.IsEmpty;  
+end;
+
+function TCmDbObject.CreateCmDbField(ColumName: String; DataType: TFieldType;
+          Required: Boolean = false; Key: Boolean = false; ReadOnly: Boolean = false; NullIfZero: Boolean = True; sDisplayName: String = '') :TCmDbField;
+Var
+  Indice :Integer;
+begin
+  Result := TCmDbField.Create(self);
+  Result.Required := Required;
+  Result.Key := Key;
+  Result.ReadOnly := ReadOnly;
+  Result.ColumName := ColumName;
+  Result.DataType := DataType;
+  Result.NullIfZero := NullIfZero;
+  Result.DisplayName := sDisplayName;
+
+  Indice := _ListDbField.Add(Result);
+
+  Result.Index := Indice;
+
+  If DataType = ftBlob Then Inc(_iNumBlobFields);
+end;
+
+function TCmDbObject.ValidateNullFields: Boolean;
+Var
+  X :Integer;
+begin
+  Result := True;
+  For X:=0 To _ListDbField.Count - 1 Do
+  Begin
+     If TCmDbField(_ListDbField.Items[x]).Required And
+        TCmDbField(_ListDbField.Items[x]).IsNull Then
+     Begin
+        MessageInfo := 'O Campo ' + TCmDbField(_ListDbField.Items[x]).DisplayName + ' não foi informado';
+        Result := False;
+        Break;
+     End;
+  End;
+end;
+
+procedure TCmDbObject.SetTableName(const Value: String);
+begin
+  FTableName := Value;
+end;
+
+function TCmDbObject.FieldCount: Integer;
+begin
+   Result := _ListDbField.Count;
+end;
+
+function TCmDbObject.GetFields(x: Integer): TCmDbField;
+begin
+   Result := TCmDbField(_ListDbField[x]);
+end;
+
+function TCmDbObject.FieldByName(const Name: string): TCmDbField;
+Var
+  X: Integer;
+  bAchou: Boolean;
+begin
+  bAchou := False;
+  
+  For X:= 0 To FieldCount - 1 Do
+     If UpperCase(TCmDbField(_ListDbField[x]).ColumName) = UpperCase(Name) Then
+     Begin
+        bAchou := True;
+        Break;
+     End;
+
+  If bAchou Then
+     Result := TCmDbField(_ListDbField[x])
+  Else
+     Raise Exception.Create('CMsgFieldNameNotFound');
+end;
+
+
+procedure TCmDbObject.FreeArray( var CampoValores: array of Const);
+Var
+   x : Integer;
+begin
+  For x := Pred(FieldCount) DownTo 0 Do
+  Begin
+     If (TCmDbField(_ListDbField.Items[x]).Key) And
+        (_DbOperacao = DboUpdate) And
+        (Not _UpdateKeyFields) Then
+        FreeMem(CampoValores[x].vString, (Length(CMInvalidField) + 1))
+     Else
+       Case TCmDbField(_ListDbField.Items[x]).DataType Of
+           ftBlob      :Begin
+                           FreeMem(CampoValores[x].vString,
+                           (Length(CMFieldBlob) + 1));
+                        End;
+           ftString    :Begin
+                           FreeMem(CampoValores[x].vString,
+                           (Length(TCmDbField(_ListDbField.Items[x]).AsString) + 1));
+                        End;
+           ftSmallint,
+           ftInteger,
+           ftWord      :;
+           ftFloat,
+           ftCurrency,
+           ftBCD       :Begin
+                           FreeMem(CampoValores[x].VExtended,SizeOf(TCmDbField(_ListDbField.Items[x]).AsFloat));
+                        End;
+       Else
+           FreeMem(CampoValores[x].vVariant,SizeOf(TCmDbField(_ListDbField.Items[x]).Value));
+       End;
+  End;
+end;
+
+procedure TCmDbObject.BuildArray(var CampoValores: array of Const;
+  var CampoNome: array of String; Var CampoNullIfZero :Array of Boolean);
+ Var
+   x            : Integer;
+   sValor       : String;
+   rValor       : Extended;
+   vValor       : Variant;
+begin
+  For x := 0 To Pred(FieldCount) Do
+     Begin
+        If TCmDbField(_ListDbField.Items[x]).DataType <> ftBlob Then
+        Begin
+          If (TCmDbField(_ListDbField.Items[x]).Key) And
+             (_DbOperacao = DboUpdate) And
+             (Not _UpdateKeyFields) Then
+          Begin
+             CampoNome[x] := CMInvalidField;
+             CampoNullIfZero[x] := False;
+             sValor := CMInvalidField;
+             CampoValores[x].VType   := vtString;
+             GetMem(CampoValores[x].vString,Length(sValor) + 1);
+             CampoValores[x].vString^ := sValor;
+          End
+          Else
+          Begin
+             {Alimenta o array com os nomes das colunas}
+             CampoNome[x] := TCmDbField(_ListDbField.Items[x]).ColumName;
+             CampoNullIfZero[x] := TCmDbField(_ListDbField.Items[x]).NullIfZero;
+
+             {limenta o array com os valores das colunas.
+              De acordo com o tipo de dado do field é alimentado o CONST da função de
+              Update/Insert. É ultilizado um Array of TVarRec pq este equivale ao Array of Const.
+              O GetMem aloca o espaço para o ponteiro de acordo com o tamanho do dado a ser endereçado para ele.
+              É nescessário desalocar o array com o FreeMem. Esse procedimento só é utilizado para os
+              Dados do tipo String, Extended e Variant.}
+             Case TCmDbField(_ListDbField.Items[x]).DataType Of
+                 ftString    :Begin
+                                 sValor := TCmDbField(_ListDbField.Items[x]).AsString;
+                                 CampoValores[x].VType   := vtString;
+                                 //GetMem(CampoValores[x].vString,SizeOf(sValor));
+                                 GetMem(CampoValores[x].vString,Length(sValor) + 1);
+                                 CampoValores[x].vString^ := sValor;
+                              End;
+                 ftSmallint,
+                 ftInteger,
+                 ftWord      :Begin
+                                 CampoValores[x].VType := vtInteger;
+                                 CampoValores[x].VInteger  := TCmDbField(_ListDbField.Items[x]).AsInteger;
+                              End;
+                 ftFloat,
+                 ftCurrency,
+                 ftBCD       :Begin
+                                 rValor := TCmDbField(_ListDbField.Items[x]).AsFloat;
+                                 CampoValores[x].VType := vtExtended;
+                                 GetMem(CampoValores[x].VExtended,SizeOf(rValor));
+                                 CampoValores[x].VExtended^ := rValor;
+                              End;
+
+             Else
+                 vValor := TCmDbField(_ListDbField.Items[x]).Value;
+                 CampoValores[x].VType := vtVariant;
+                 GetMem(CampoValores[x].vVariant,SizeOf(vValor));
+                 CampoValores[x].vVariant^ := vValor;
+             End;
+          End;
+        End
+        Else
+        Begin
+           CampoNome[x] := CMFieldBlob;
+           CampoNullIfZero[x] := False;
+           sValor := CMFieldBlob;
+           CampoValores[x].VType   := vtString;
+           GetMem(CampoValores[x].vString,Length(sValor) + 1);
+           CampoValores[x].vString^ := sValor;
+        End;
+     End;
+end;
+
+function TCmDbObject.GetFieldsForSelect: String;
+Var
+  X: Integer;
+  sAux: String;
+Begin
+  sAux := '';
+
+  For X := 0 To pred(_ListDbField.Count) Do
+     If Saux = '' Then
+       sAux := TCmDbField(_ListDbField.Items[x]).ColumName
+     Else
+       sAux := sAux + ', ' + TCmDbField(_ListDbField.Items[x]).ColumName;
+
+  Result := sAux;
+End;
+
+function TCmDbObject.GetSqlSelect: String;
+begin
+   Result := 'SELECT ' +
+                  GetFieldsForSelect +
+             ' FROM ' +
+                  fTableName +
+             ' WHERE ' + MontaWhere;
+end;
+
+procedure TCmDbObject.Clear;
+Var
+  X: Integer;
+begin
+  For X := (_ListDbField.Count - 1) DownTo 0 Do
+    TCmDbField(_ListDbField.Items[x]).clear;
+end;
+
+function TCmDbObject.Bof: Boolean;
+begin
+   Result := _CdsSelect.Bof;
+end;
+
+function TCmDbObject.Eof: Boolean;
+begin
+   Result := _CdsSelect.Eof;
+end;
+
+procedure TCmDbObject.First;
+begin
+   _CdsSelect.First;
+   SetDbFields;
+end;
+
+procedure TCmDbObject.Last;
+begin
+   _CdsSelect.Last;
+   SetDbFields;
+end;
+
+procedure TCmDbObject.Next;
+begin
+   _CdsSelect.Next;
+   SetDbFields;
+end;
+
+procedure TCmDbObject.Prior;
+begin
+   _CdsSelect.Prior;
+   SetDbFields;
+end;
+
+procedure TCmDbObject.SetDbFields;
+Var
+  x : Integer;
+Begin
+  If _CdsSelect.IsEmpty Then
+    Clear
+  Else
+    for x := 0  To Pred(_ListDbField.Count) Do
+       try
+          If TCmDbField(_ListDbField.Items[x]).DataType = FtDateTime Then
+             TCmDbField(_ListDbField.Items[x]).AsDateTime := _CdsSelect.Fields.FieldByName(TCmDbField(_ListDbField.Items[x]).ColumName).AsDateTime
+          Else
+             TCmDbField(_ListDbField.Items[x]).Value := _CdsSelect.Fields.FieldByName(TCmDbField(_ListDbField.Items[x]).ColumName).Value;
+
+          If (TCmDbField(_ListDbField.Items[x]).DataType = FtDateTime) And
+             (_CdsSelect.Fields.FieldByName(TCmDbField(_ListDbField.Items[x]).ColumName).IsNull) Then
+             TCmDbField(_ListDbField.Items[x]).OldValue := 0
+          ELse
+             TCmDbField(_ListDbField.Items[x]).OldValue := _CdsSelect.Fields.FieldByName(TCmDbField(_ListDbField.Items[x]).ColumName).Value;
+
+       Except
+          //Trata a Excessão para casos onde o field não existe no ClinetDataset
+       End;
+End;
+
+function TCmDbObject.RecordCount: Integer;
+begin
+   Result := _CdsSelect.RecordCount;
+end;
+
+procedure TCmDbObject.ApplyLongRaw;
+Var
+  QryImagem: TwwQuery;
+  x: Integer;
+  bAllBlobIsNull: Boolean;
+  sOldValue: String;
+begin
+
+  If _iNumBlobFields > 0 Then
+  Begin
+    SetDbSessionName;
+    
+    bAllBlobIsNull := True;
+    For X:=0 To Pred(FieldCount) Do
+    Begin
+      If (TCmDbField(_ListDbField.Items[x]).DataType = ftBlob) Then
+      Begin
+         sOldValue := TCmDbField(_ListDbField.Items[x]).OldValue;
+
+         bAllBlobIsNull := (TCmDbField(_ListDbField.Items[x]).IsNull) And
+                           ((TCmDbField(_ListDbField.Items[x]).OldValue = null) Or
+                            (sOldValue = ''));
+      End;
+
+      If Not bAllBlobIsNull Then Break;
+    End;
+
+    If Not bAllBlobIsNull Then
+    Begin
+       QryImagem := TwwQuery.Create(nil);
+       Try
+         QryImagem.DataBaseName := DataBaseName;
+         QryImagem.SessionName := _SessionName;
+                                  {** MB20 Padroes.DataBase.SessionName **};
+
+         QryImagem.SQL.Text := 'SELECT ' + GetFieldsForSelect + ' FROM ' + TableName + ' WHERE ' + MontaWhere;
+         QryImagem.RequestLive := True;
+         QryImagem.UpdateMode := upWhereKeyOnly;
+         QryImagem.Open;
+
+         If Not QryImagem.IsEmpty Then
+         Begin
+            QryImagem.Edit;
+
+            For X:=0 To Pred(FieldCount) Do
+              If (TCmDbField(_ListDbField.Items[x]).DataType = ftBlob) Then
+                 If (Not TCmDbField(_ListDbField.Items[x]).IsNull) Then
+                    TBlobField(QryImagem.FieldByName(TCmDbField(_ListDbField.Items[x]).ColumName)).AsVariant := TCmDbField(_ListDbField.Items[x]).Value
+                 Else
+                    TBlobField(QryImagem.FieldByName(TCmDbField(_ListDbField.Items[x]).ColumName)).Clear;
+
+            QryImagem.Post;
+         End;
+
+         QryImagem.Close;
+         QryImagem.Free;
+       Except
+         QryImagem.Free;
+         Raise;
+       end;
+    End;
+  End;
+end;
+
+function TCmDbObject.GetSequence(Sufixo: string): Cardinal;
+begin
+  //SetDbSessionName;
+  if uCmControlObject.TCmControlObject(Owner).DbConnectionType = cntADO then
+  begin
+     _CdsDb.Data := uCmControlObject.TCmControlObject(Owner).GetDataPacket('SELECT SEQ' + Sufixo + '.NEXTVAL FROM DUAL');
+     Result := _CdsDb.FieldS[0].AsInteger;
+     _CdsDb.Close;
+  end
+  else
+     Result := Inherited GetSequence(Sufixo);
+end;
+
+{ TCmDbField }
+
+procedure TCmDbField.Clear;
+begin
+  fAsString := '';
+
+  Case fDataType Of
+    ftSmallint, ftInteger, ftWord, ftFloat, ftCurrency, ftBCD:
+    Begin
+       fAsFloat := 0;
+       fAsInteger := 0;
+    End;
+    ftDate, ftDateTime: fAsDateTime := 0;
+  Else
+    fValue := null;
+  End;
+
+  fOldValue := null;
+end;
+
+constructor TCmDbField.Create(aOwner: TCmDbObject);
+begin
+   FOwner := aOwner;                                       
+   FIsNull := True;
+   FRequired := False;
+   FKey := False;
+   FReadOnly := False;
+   FIndex := 0;
+   FColumName := '';
+   FDataType := ftString;
+   FAsFloat :=0;
+   FAsInteger := 0;
+   FAsString := '';
+   FAsDateTime := 0;
+   FValue := null;
+   fOldValue := null;   
+   fNullIfZero := True;
+   FDisplayName := '';
+end;
+
+destructor TCmDbField.Destroy;
+begin
+  inherited;
+
+end;
+
+function TCmDbField.GetAsDateTime: TDateTime;
+begin
+  If fDataType = ftDateTime Then
+     Result := fAsDateTime
+  Else
+     Result := StrToDate(fAsString);
+end;
+
+function TCmDbField.GetAsFloat: Double;
+begin
+  Case fDataType Of
+   ftSmallint, ftInteger, ftWord, ftFloat, ftCurrency:  Result := fAsFloat
+   Else
+      Result := StrToFloatCM(fAsString);
+  End;
+end;
+
+function TCmDbField.GetAsInteger: Integer;
+begin
+  Case fDataType Of
+   ftSmallint, ftInteger, ftWord:  Result := fAsInteger
+   Else
+      Result := StrToIntDef(fAsString,0);
+  End;
+end;
+
+function TCmDbField.GetIsNull: Boolean;
+begin
+  Case fDataType Of
+    ftString: Result := (Trim(fAsString) = '');
+    ftSmallint, ftInteger, ftWord: Result := (fAsInteger = 0) And NullIfZero;
+    ftFloat, ftCurrency, ftBCD: Result := (fAsFloat = 0) And NullIfZero;
+    ftDate, ftDateTime: Result := (fAsDateTime = 0);
+  Else
+    Result := (fValue = null) Or (Trim(fAsString) = '');
+  End;
+end;
+
+function TCmDbField.GetsString: String;
+begin
+  Result := fAsString;
+end;
+
+function TCmDbField.GetValue: Variant;
+begin
+  Case fDataType Of
+    ftString: Result := fAsString;
+    ftSmallint, ftInteger, ftWord: Result := fAsInteger;
+    ftFloat, ftCurrency, ftBCD: Result := fAsFloat;
+    ftDate, ftDateTime: Result := fAsDateTime;
+  Else
+    Result := fValue;
+  End;
+end;
+
+procedure TCmDbField.SetAsDateTime(const Value: TDateTime);
+begin
+  FAsDateTime := Value;
+  fAsString := DateTimeToStr(FAsDateTime);
+  
+  If FOldValue = null Then FOldValue := Value;
+end;
+
+procedure TCmDbField.SetAsFloat(const Value: Double);
+begin
+  FAsFloat := Value;
+  FAsInteger := Trunc(Value);
+  fAsString := FloatToStr(FAsFloat);
+
+  If FOldValue = null Then FOldValue := Value;
+end;
+
+procedure TCmDbField.SetAsInteger(const Value: Integer);
+begin
+  FAsInteger := Value;
+  fAsString := FloatToStr(FAsInteger);
+  fAsFloat := Value;
+
+  If FOldValue = null Then FOldValue := Value;  
+end;
+
+procedure TCmDbField.SetAsString(const Value: String);
+begin
+  FAsString := Value;
+
+  Case fDataType Of
+    ftSmallint, ftInteger, ftWord: fAsInteger := StrToIntDef(FAsString,0);
+    ftFloat, ftCurrency, ftBCD:
+    Begin
+       if Trim(Value) = '' Then
+          fAsFloat := 0
+       Else
+          fAsFloat := StrToFloatCM(FAsString);
+    End;
+    ftDate, ftDateTime:
+     Begin
+        if Trim(Value) = '' Then
+           fAsDateTime := 0
+        Else
+           fAsDateTime := StrToDate(FAsString);
+     End
+  Else
+    fValue := fAsString;
+  End;
+
+  If FOldValue = null Then FOldValue := Value;
+end;
+
+procedure TCmDbField.SetColumName(const Value: String);
+begin
+  FColumName := Value;
+end;
+
+procedure TCmDbField.SetDataType(const Value: TFieldType);
+begin
+  FDataType := Value;
+end;
+
+procedure TCmDbObject.SetDbSessionName;
+begin
+  ////CMDebugToFile('Estou no DbSessionName: ' + TCmControlObject(fOwner).DataBase.DataBaseName + ' ' + TCmControlObject(fOwner).DataBase.SessionName);
+  If _DataBaseNameChanged Then
+  Begin
+     ////CMDebugToFile('Entrei no DbSessionName: ' + TCmControlObject(fOwner).DataBase.DataBaseName + ' ' + TCmControlObject(fOwner).DataBase.SessionName);
+     _SessionName := TCmControlObject(fOwner).DataBase.SessionName;
+     fDataBaseName := TCmControlObject(fOwner).DataBase.DataBaseName;
+     //ChangeDataBaseName([_QryExecute, _QrySelect], TCmControlObject(fOwner).DataBase.DataBaseName, _SessionName);
+     _DataBaseNameChanged := False;
+  End;
+end;
+
+procedure TCmDbField.SetDisplayName(const Value: String);
+begin
+  If Trim(Value) = '' Then
+    FDisplayName := Owner.TableName + '.' + fColumName
+  Else
+    FDisplayName := Value;
+end;
+
+procedure TCmDbField.SetIndex(const Value: Integer);
+begin
+  FIndex := Value;
+end;
+
+procedure TCmDbField.SetKey(const Value: Boolean);
+begin
+  FKey := Value;
+end;
+
+procedure TCmDbField.SetNullIfZero(const Value: Boolean);
+begin
+  FNullIfZero := Value;
+end;
+
+procedure TCmDbField.SetOldValue(const Value: Variant);
+begin
+  FOldValue := Value;
+end;
+
+procedure TCmDbField.SetReadOnly(const Value: Boolean);
+begin
+  FReadOnly := Value;
+end;
+
+procedure TCmDbField.SetRequired(const Value: Boolean);
+begin
+  FRequired := Value;
+end;
+
+procedure TCmDbField.SetValue(const Value: Variant);
+begin
+  FValue := Value;
+  If Value = Null Then
+     SetAsString('')
+  Else
+     SetAsString(Value);
+end;
+
+{
+function TCmDbObject.ExecSql(sSql: String): Boolean;
+begin
+  Case DbConnectionType of
+  cntBDE:
+     with TwwQuery.Create(nil) do
+        try
+           DataBaseName := Self.DataBaseName;
+           SessionName := _SessionName;
+           SQL.Add(sSql);
+           ExecSQL;
+           Result := true;
+           free;
+        except
+           On E: Exception Do
+           Begin
+             free;
+             MessageInfo := E.Message;
+             Result := false;
+           End;
+        end;
+  cntADO:
+     with TADOQuery.Create(nil) do
+        try
+           Connection := DbAdoConnection;
+           SQL.Add(sSql);
+           ExecSQL;
+           Result := true;
+           free;
+        except
+           On E: Exception Do
+           Begin
+             free;
+             MessageInfo := E.Message;
+             Result := false;
+           End;
+        end;
+  Else
+     Result := False;
+  End;
+end;
+}
+
+end.

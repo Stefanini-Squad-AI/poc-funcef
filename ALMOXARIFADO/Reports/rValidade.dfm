@@ -1,0 +1,692 @@
+inherited RptValidade: TRptValidade
+  Width = 273
+  Height = 148
+  Caption = 'Validade de Produtos'
+  OldCreateOrder = True
+  PixelsPerInch = 96
+  TextHeight = 13
+  inherited CmpRptCM: TCmParamReport
+    Caption = 'Validade de Produtos'
+    DataBaseName = 'BaseDados'
+    Params = <
+      item
+        Caption = 'Data Inicial'
+        Controle = tcEdit
+        TipodeDado = tdDate
+        LookupSettings.SQL.Strings = ()
+        LookupSettings.Tamanho = '0'
+        CheckBoxSetings.ValueChecked = 'True'
+        CheckBoxSetings.ValueUnChecked = 'False'
+        CheckBoxSetings.Checked = True
+        RadioGroupSettings.Items.Strings = ()
+        RadioGroupSettings.Values.Strings = ()
+        RadioGroupSettings.Columns = 1
+        RadioGroupSettings.ItemIndex = -1
+        RadioGroupSettings.Height = 40
+        ComboBoxSettings.Sorted = False
+        ComboBoxSettings.Style = csDropDownList
+        ComboBoxSettings.Items.Strings = ()
+        ComboBoxSettings.DropDownCount = 8
+        ComboBoxSettings.ItemIndex = -1
+        ListBoxSettings.Items.Strings = ()
+        ListBoxSettings.MultiSelect = False
+        ListBoxSettings.ExtendedSelect = False
+        ListBoxSettings.Sorted = False
+        ListBoxSettings.Style = lbStandard
+        ListBoxSettings.height = 70
+        MostraComboCompara = False
+        Required = True
+        EditSettings.Color = clWindow
+        EditSettings.Readonly = False
+        EditSettings.Font.Charset = DEFAULT_CHARSET
+        EditSettings.Font.Color = clWindowText
+        EditSettings.Font.Height = -11
+        EditSettings.Font.Name = 'MS Sans Serif'
+        EditSettings.Font.Style = [fsBold]
+        Name = 'DataInicial'
+        SpinEditSettings.MaxValue = 0
+        SpinEditSettings.MinValue = 0
+        SpinEditSettings.Increment = 0
+        SpinEditSettings.Value = 0
+        MaskEditSettings.MaxLength = 0
+        ProcuraSTSettings.Subtipo = stFornecedor
+        ProcuraSTSettings.CampoEdit = ceRazaoSocial
+        ProcuraSTSettings.FiltraSubTipo = True
+        ProcuraFCSettings.Status = fcAll
+        ProcuraFCSettings.CampoEdit = ceRazaoSocial
+        ProcuraFCSettings.MostraEndereco = False
+        ProcuraFCSettings.ForCli = fcFornecedor
+        ProcuraCCSettings.Plano = 0
+        ProcuraCCSettings.Status = scSoAtiva
+        ProcuraCCSettings.AceitaTipoConta = Indiferente
+        Width = 0
+      end
+      item
+        Caption = 'Data Final'
+        Controle = tcEdit
+        TipodeDado = tdDate
+        LookupSettings.SQL.Strings = ()
+        LookupSettings.Tamanho = '0'
+        CheckBoxSetings.ValueChecked = 'True'
+        CheckBoxSetings.ValueUnChecked = 'False'
+        CheckBoxSetings.Checked = True
+        RadioGroupSettings.Items.Strings = ()
+        RadioGroupSettings.Values.Strings = ()
+        RadioGroupSettings.Columns = 1
+        RadioGroupSettings.ItemIndex = -1
+        RadioGroupSettings.Height = 40
+        ComboBoxSettings.Sorted = False
+        ComboBoxSettings.Style = csDropDownList
+        ComboBoxSettings.Items.Strings = ()
+        ComboBoxSettings.DropDownCount = 8
+        ComboBoxSettings.ItemIndex = -1
+        ListBoxSettings.Items.Strings = ()
+        ListBoxSettings.MultiSelect = False
+        ListBoxSettings.ExtendedSelect = False
+        ListBoxSettings.Sorted = False
+        ListBoxSettings.Style = lbStandard
+        ListBoxSettings.height = 70
+        MostraComboCompara = False
+        Required = True
+        EditSettings.Color = clWindow
+        EditSettings.Readonly = False
+        EditSettings.Font.Charset = DEFAULT_CHARSET
+        EditSettings.Font.Color = clWindowText
+        EditSettings.Font.Height = -11
+        EditSettings.Font.Name = 'MS Sans Serif'
+        EditSettings.Font.Style = [fsBold]
+        Name = 'DataFinal'
+        SpinEditSettings.MaxValue = 0
+        SpinEditSettings.MinValue = 0
+        SpinEditSettings.Increment = 0
+        SpinEditSettings.Value = 0
+        MaskEditSettings.MaxLength = 0
+        ProcuraSTSettings.Subtipo = stFornecedor
+        ProcuraSTSettings.CampoEdit = ceRazaoSocial
+        ProcuraSTSettings.FiltraSubTipo = True
+        ProcuraFCSettings.Status = fcAll
+        ProcuraFCSettings.CampoEdit = ceRazaoSocial
+        ProcuraFCSettings.MostraEndereco = False
+        ProcuraFCSettings.ForCli = fcFornecedor
+        ProcuraCCSettings.Plano = 0
+        ProcuraCCSettings.Status = scSoAtiva
+        ProcuraCCSettings.AceitaTipoConta = Indiferente
+        Width = 0
+      end
+      item
+        Caption = 'Almoxarifado'
+        Controle = tcLookupCombo
+        TipodeDado = tdInteger
+        LookupSettings.SQL.Strings = (
+          'SELECT DISTINCT A.CODALMOXARIFADO, A.DESCALMOX'
+          'FROM ALMOX A, LOTEVALI L'
+          'WHERE (A.IDPESSOA = 1)'
+          '   AND (A.CODALMOXARIFADO = L.CODALMOXARIFADO)   '
+          'ORDER BY DESCALMOX')
+        LookupSettings.Chave = 'CODALMOXARIFADO'
+        LookupSettings.Display = 'DESCALMOX'
+        LookupSettings.Descricao = 'Almoxarifado'
+        LookupSettings.Tamanho = '0'
+        CheckBoxSetings.ValueChecked = 'True'
+        CheckBoxSetings.ValueUnChecked = 'False'
+        CheckBoxSetings.Checked = True
+        RadioGroupSettings.Items.Strings = ()
+        RadioGroupSettings.Values.Strings = ()
+        RadioGroupSettings.Columns = 1
+        RadioGroupSettings.ItemIndex = -1
+        RadioGroupSettings.Height = 40
+        ComboBoxSettings.Sorted = False
+        ComboBoxSettings.Style = csDropDownList
+        ComboBoxSettings.Items.Strings = ()
+        ComboBoxSettings.DropDownCount = 8
+        ComboBoxSettings.ItemIndex = -1
+        ListBoxSettings.Items.Strings = ()
+        ListBoxSettings.MultiSelect = False
+        ListBoxSettings.ExtendedSelect = False
+        ListBoxSettings.Sorted = False
+        ListBoxSettings.Style = lbStandard
+        ListBoxSettings.height = 70
+        MostraComboCompara = False
+        Required = False
+        EditSettings.Color = clWindow
+        EditSettings.Readonly = False
+        EditSettings.Font.Charset = DEFAULT_CHARSET
+        EditSettings.Font.Color = clWindowText
+        EditSettings.Font.Height = -11
+        EditSettings.Font.Name = 'MS Sans Serif'
+        EditSettings.Font.Style = [fsBold]
+        Name = 'Almoxarifado'
+        SpinEditSettings.MaxValue = 0
+        SpinEditSettings.MinValue = 0
+        SpinEditSettings.Increment = 0
+        SpinEditSettings.Value = 0
+        MaskEditSettings.MaxLength = 0
+        ProcuraSTSettings.Subtipo = stFornecedor
+        ProcuraSTSettings.CampoEdit = ceRazaoSocial
+        ProcuraSTSettings.FiltraSubTipo = True
+        ProcuraFCSettings.Status = fcAll
+        ProcuraFCSettings.CampoEdit = ceRazaoSocial
+        ProcuraFCSettings.MostraEndereco = False
+        ProcuraFCSettings.ForCli = fcFornecedor
+        ProcuraCCSettings.Plano = 0
+        ProcuraCCSettings.Status = scSoAtiva
+        ProcuraCCSettings.AceitaTipoConta = Indiferente
+        Width = 0
+      end
+      item
+        Caption = 'Ordenado por'
+        Controle = tcRadioGroup
+        TipodeDado = tdInteger
+        LookupSettings.SQL.Strings = ()
+        LookupSettings.Tamanho = '0'
+        CheckBoxSetings.ValueChecked = 'True'
+        CheckBoxSetings.ValueUnChecked = 'False'
+        CheckBoxSetings.Checked = True
+        RadioGroupSettings.Items.Strings = (
+          'Almoxarifado'
+          'Data de Validade')
+        RadioGroupSettings.Values.Strings = (
+          '0'
+          '1')
+        RadioGroupSettings.Columns = 2
+        RadioGroupSettings.ItemIndex = 0
+        RadioGroupSettings.Height = 40
+        ComboBoxSettings.Sorted = False
+        ComboBoxSettings.Style = csDropDownList
+        ComboBoxSettings.Items.Strings = ()
+        ComboBoxSettings.DropDownCount = 8
+        ComboBoxSettings.ItemIndex = -1
+        ListBoxSettings.Items.Strings = ()
+        ListBoxSettings.MultiSelect = False
+        ListBoxSettings.ExtendedSelect = False
+        ListBoxSettings.Sorted = False
+        ListBoxSettings.Style = lbStandard
+        ListBoxSettings.height = 70
+        MostraComboCompara = False
+        Required = False
+        EditSettings.Color = clWindow
+        EditSettings.Readonly = False
+        EditSettings.Font.Charset = DEFAULT_CHARSET
+        EditSettings.Font.Color = clWindowText
+        EditSettings.Font.Height = -11
+        EditSettings.Font.Name = 'MS Sans Serif'
+        EditSettings.Font.Style = [fsBold]
+        Name = 'Ordenado'
+        SpinEditSettings.MaxValue = 0
+        SpinEditSettings.MinValue = 0
+        SpinEditSettings.Increment = 0
+        SpinEditSettings.Value = 0
+        MaskEditSettings.MaxLength = 0
+        ProcuraSTSettings.Subtipo = stFornecedor
+        ProcuraSTSettings.CampoEdit = ceRazaoSocial
+        ProcuraSTSettings.FiltraSubTipo = True
+        ProcuraFCSettings.Status = fcAll
+        ProcuraFCSettings.CampoEdit = ceRazaoSocial
+        ProcuraFCSettings.MostraEndereco = False
+        ProcuraFCSettings.ForCli = fcFornecedor
+        ProcuraCCSettings.Plano = 0
+        ProcuraCCSettings.Status = scSoAtiva
+        ProcuraCCSettings.AceitaTipoConta = Indiferente
+        Width = 0
+      end>
+    BeforeExecute = CmpRptCMBeforeExecute
+    OnParamControlExit = CmpRptCMParamControlExit
+    Formheight = 200
+    FormWidth = 480
+  end
+  inherited CrmRptCM: TCmRptManager
+    BeforePrint = CrmRptCMBeforePrint
+    DataBaseName = 'BaseDados'
+    Report = rpValidade
+    LabelEmpresa = LblEmpresa
+    LabelSistema = lblOpcao
+    Left = 84
+  end
+  object dsValidade: TwwDataSource
+    DataSet = CdsValidade
+    Left = 140
+    Top = 60
+  end
+  object pplValidade: TppBDEPipeline
+    DataSource = dsValidade
+    SkipWhenNoRecords = False
+    UserName = 'lValidade'
+    Left = 84
+    Top = 60
+  end
+  object rpValidade: TppReport
+    AutoStop = False
+    DataPipeline = pplValidade
+    PassSetting = psTwoPass
+    PrinterSetup.BinName = 'Default'
+    PrinterSetup.DocumentName = 'PpModeloReport1'
+    PrinterSetup.PaperName = 'A4'
+    PrinterSetup.PrinterName = 'Default'
+    PrinterSetup.mmMarginBottom = 14000
+    PrinterSetup.mmMarginLeft = 6350
+    PrinterSetup.mmMarginRight = 6350
+    PrinterSetup.mmMarginTop = 6350
+    PrinterSetup.mmPaperHeight = 297000
+    PrinterSetup.mmPaperWidth = 210000
+    PrinterSetup.PaperSize = 9
+    Template.SaveTo = stDatabase
+    Units = utMillimeters
+    AllowPrintToArchive = True
+    AllowPrintToFile = True
+    DeviceType = 'Screen'
+    Left = 24
+    Top = 60
+    Version = '5.5'
+    mmColumnWidth = 197300
+    object ppHeaderBand4: TppHeaderBand
+      mmBottomOffset = 0
+      mmHeight = 20108
+      mmPrintPosition = 0
+      object ppLabel9: TppLabel
+        UserName = 'ppLabel9'
+        Caption = 'Validade dos Produtos'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 12
+        Font.Style = [fsBold]
+        TextAlignment = taCentered
+        Transparent = True
+        mmHeight = 5027
+        mmLeft = 76200
+        mmTop = 8731
+        mmWidth = 46038
+        BandType = 0
+      end
+      object LblEmpresa: TppLabel
+        UserName = 'LblEmpresa'
+        Caption = 'CM Soluções'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 14
+        Font.Style = [fsBold]
+        TextAlignment = taCentered
+        Transparent = True
+        mmHeight = 5821
+        mmLeft = 82550
+        mmTop = 1588
+        mmWidth = 30692
+        BandType = 0
+      end
+      object lblDataValidade: TppLabel
+        UserName = 'lblDataValidade'
+        Caption = 'lblDataValidade'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        Transparent = True
+        mmHeight = 3704
+        mmLeft = 162719
+        mmTop = 12171
+        mmWidth = 19579
+        BandType = 0
+      end
+      object ppLabel27: TppLabel
+        UserName = 'ppLabel27'
+        Caption = 'Período:'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        TextAlignment = taRightJustified
+        Transparent = True
+        mmHeight = 3704
+        mmLeft = 148961
+        mmTop = 12171
+        mmWidth = 12171
+        BandType = 0
+      end
+      object lblOpcao: TppLabel
+        UserName = 'lblOpcao'
+        Caption = 'lblOpcao'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        Transparent = True
+        mmHeight = 3704
+        mmLeft = 162719
+        mmTop = 16140
+        mmWidth = 11113
+        BandType = 0
+      end
+      object rpValidadeLabel1: TppLabel
+        UserName = 'rpValidadeLabel1'
+        Caption = 'Ordenado por:'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        TextAlignment = taRightJustified
+        Transparent = True
+        mmHeight = 3704
+        mmLeft = 140229
+        mmTop = 16140
+        mmWidth = 20902
+        BandType = 0
+      end
+    end
+    object ppDetailBand4: TppDetailBand
+      mmBottomOffset = 0
+      mmHeight = 3704
+      mmPrintPosition = 0
+      object ppDBText12: TppDBText
+        UserName = 'ppDBText12'
+        AutoSize = True
+        DataField = 'PRODUTO'
+        DataPipeline = pplValidade
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        Transparent = True
+        mmHeight = 3175
+        mmLeft = 58738
+        mmTop = 0
+        mmWidth = 14023
+        BandType = 4
+      end
+      object ppDBText13: TppDBText
+        UserName = 'ppDBText13'
+        AutoSize = True
+        DataField = 'CODARTIGO'
+        DataPipeline = pplValidade
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        TextAlignment = taRightJustified
+        Transparent = True
+        mmHeight = 3175
+        mmLeft = 18256
+        mmTop = 0
+        mmWidth = 17198
+        BandType = 4
+      end
+      object rpValidadeDBText7: TppDBText
+        UserName = 'rpValidadeDBText7'
+        AutoSize = True
+        DataField = 'SALDOLOTE'
+        DataPipeline = pplValidade
+        DisplayFormat = '#,0.00;-#,0.00'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        TextAlignment = taRightJustified
+        Transparent = True
+        mmHeight = 3175
+        mmLeft = 143140
+        mmTop = 0
+        mmWidth = 16933
+        BandType = 4
+      end
+    end
+    object ppFooterBand4: TppFooterBand
+      mmBottomOffset = 0
+      mmHeight = 13229
+      mmPrintPosition = 0
+      object rpValidadeCalc1: TppSystemVariable
+        UserName = 'rpValidadeCalc1'
+        VarType = vtPageSetDesc
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        TextAlignment = taCentered
+        Transparent = True
+        mmHeight = 3704
+        mmLeft = 265
+        mmTop = 3175
+        mmWidth = 197380
+        BandType = 8
+      end
+      object rpValidadeLine3: TppLine
+        UserName = 'rpValidadeLine3'
+        ParentWidth = True
+        Weight = 0.75
+        mmHeight = 1588
+        mmLeft = 0
+        mmTop = 1588
+        mmWidth = 197300
+        BandType = 8
+      end
+      object LblSistema: TppLabel
+        UserName = 'LblSistema'
+        AutoSize = False
+        Caption = 'Controle Financeiro - 02.00.06'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 3704
+        mmLeft = 0
+        mmTop = 3175
+        mmWidth = 197909
+        BandType = 8
+      end
+      object ppCalc7: TppSystemVariable
+        UserName = 'Calc7'
+        VarType = vtDateTime
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        TextAlignment = taRightJustified
+        Transparent = True
+        mmHeight = 3704
+        mmLeft = 197380
+        mmTop = 3175
+        mmWidth = 26194
+        BandType = 8
+      end
+      object rpValidadeCalc2: TppSystemVariable
+        UserName = 'rpValidadeCalc2'
+        VarType = vtDateTime
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        TextAlignment = taRightJustified
+        Transparent = True
+        mmHeight = 3704
+        mmLeft = 171450
+        mmTop = 3175
+        mmWidth = 26194
+        BandType = 8
+      end
+    end
+    object ppGroup4: TppGroup
+      BreakName = 'ALMOXARIFADO'
+      DataPipeline = pplValidade
+      UserName = 'Group4'
+      mmNewColumnThreshold = 0
+      mmNewPageThreshold = 0
+      object ppGroupHeaderBand4: TppGroupHeaderBand
+        mmBottomOffset = 0
+        mmHeight = 3704
+        mmPrintPosition = 0
+        object ppDBText14: TppDBText
+          UserName = 'ppDBText14'
+          AutoSize = True
+          DataField = 'ALMOXARIFADO'
+          DataPipeline = pplValidade
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Name = 'Arial'
+          Font.Size = 8
+          Font.Style = []
+          Transparent = True
+          mmHeight = 3175
+          mmLeft = 162719
+          mmTop = 0
+          mmWidth = 22225
+          BandType = 3
+          GroupNo = 0
+        end
+        object ppLabel28: TppLabel
+          UserName = 'ppLabel28'
+          Caption = 'Almoxarifado:'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Name = 'Arial'
+          Font.Size = 8
+          Font.Style = [fsBold]
+          TextAlignment = taRightJustified
+          Transparent = True
+          mmHeight = 3704
+          mmLeft = 141023
+          mmTop = 0
+          mmWidth = 20108
+          BandType = 3
+          GroupNo = 0
+        end
+      end
+      object ppGroupFooterBand4: TppGroupFooterBand
+        mmBottomOffset = 0
+        mmHeight = 0
+        mmPrintPosition = 0
+      end
+    end
+    object ppGroup5: TppGroup
+      BreakName = 'DATAVALIDADE'
+      DataPipeline = pplValidade
+      UserName = 'Group5'
+      mmNewColumnThreshold = 0
+      mmNewPageThreshold = 0
+      object ppGroupHeaderBand5: TppGroupHeaderBand
+        mmBottomOffset = 0
+        mmHeight = 11377
+        mmPrintPosition = 0
+        object rpValidadeShape1: TppShape
+          UserName = 'rpValidadeShape1'
+          mmHeight = 5556
+          mmLeft = 0
+          mmTop = 0
+          mmWidth = 197115
+          BandType = 3
+          GroupNo = 1
+        end
+        object ppLabel29: TppLabel
+          UserName = 'ppLabel29'
+          Caption = 'Data de Validade:'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Name = 'Arial'
+          Font.Size = 8
+          Font.Style = [fsBold]
+          Transparent = True
+          mmHeight = 3704
+          mmLeft = 2117
+          mmTop = 1058
+          mmWidth = 24606
+          BandType = 3
+          GroupNo = 1
+        end
+        object rpValidadeDBText9: TppDBText
+          UserName = 'rpValidadeDBText9'
+          AutoSize = True
+          DataField = 'DATAVALIDADE'
+          DataPipeline = pplValidade
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Name = 'Arial'
+          Font.Size = 8
+          Font.Style = []
+          Transparent = True
+          mmHeight = 3175
+          mmLeft = 28575
+          mmTop = 1058
+          mmWidth = 21431
+          BandType = 3
+          GroupNo = 1
+        end
+        object ppLabel30: TppLabel
+          UserName = 'ppLabel30'
+          Caption = 'Artigo'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Name = 'Arial'
+          Font.Size = 8
+          Font.Style = [fsBold]
+          TextAlignment = taRightJustified
+          Transparent = True
+          mmHeight = 3704
+          mmLeft = 26458
+          mmTop = 7673
+          mmWidth = 8996
+          BandType = 3
+          GroupNo = 1
+        end
+        object ppLabel31: TppLabel
+          UserName = 'ppLabel31'
+          Caption = 'Produto'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Name = 'Arial'
+          Font.Size = 8
+          Font.Style = [fsBold]
+          Transparent = True
+          mmHeight = 3704
+          mmLeft = 58738
+          mmTop = 7673
+          mmWidth = 11642
+          BandType = 3
+          GroupNo = 1
+        end
+        object rpValidadeLabel7: TppLabel
+          UserName = 'rpValidadeLabel7'
+          Caption = 'Saldo'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Name = 'Arial'
+          Font.Size = 8
+          Font.Style = [fsBold]
+          TextAlignment = taRightJustified
+          Transparent = True
+          mmHeight = 3175
+          mmLeft = 152665
+          mmTop = 7938
+          mmWidth = 7408
+          BandType = 3
+          GroupNo = 1
+        end
+      end
+      object ppGroupFooterBand5: TppGroupFooterBand
+        mmBottomOffset = 0
+        mmHeight = 0
+        mmPrintPosition = 0
+      end
+    end
+  end
+  object SqlValidade: TCMSqlParams
+    ClientDataSet = CdsValidade
+    Left = 200
+    Top = 8
+  end
+  object CdsValidade: TCMClientDataSet
+    Aggregates = <>
+    Params = <>
+    Left = 200
+    Top = 60
+  end
+end

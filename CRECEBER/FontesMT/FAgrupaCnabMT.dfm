@@ -1,0 +1,296 @@
+inherited frmAgrupaCnabMT: TfrmAgrupaCnabMT
+  Left = 13
+  Top = 92
+  Caption = ' Agrupar Bloquetos'
+  ClientHeight = 429
+  ClientWidth = 769
+  PixelsPerInch = 96
+  TextHeight = 13
+  inherited pnlFundo: TPanel
+    Width = 769
+    Height = 390
+    object GroupBox1: TGroupBox
+      Left = 1
+      Top = 1
+      Width = 767
+      Height = 121
+      Align = alTop
+      TabOrder = 0
+      object Label1: TLabel
+        Left = 460
+        Top = 16
+        Width = 99
+        Height = 13
+        Anchors = [akTop, akRight]
+        Caption = 'Data Programada'
+      end
+      object lblPortadorForma: TLabel
+        Left = 9
+        Top = 12
+        Width = 198
+        Height = 13
+        Caption = 'Contas/Caixas x Tipo de Cobrança'
+      end
+      object dtpData: TCMDateTimePicker
+        Left = 460
+        Top = 32
+        Width = 114
+        Height = 21
+        Anchors = [akTop, akRight]
+        CalendarAttributes.Font.Charset = DEFAULT_CHARSET
+        CalendarAttributes.Font.Color = clWindowText
+        CalendarAttributes.Font.Height = -11
+        CalendarAttributes.Font.Name = 'MS Sans Serif'
+        CalendarAttributes.Font.Style = []
+        ButtonStyle = cbsCustom
+        Epoch = 1950
+        ButtonGlyph.Data = {
+          06050000424D06050000000000003604000028000000100000000D0000000100
+          080000000000D000000000000000000000000001000000000000000000000000
+          80000080000000808000800000008000800080800000C0C0C000C0DCC000F0CA
+          A6000020400000206000002080000020A0000020C0000020E000004000000040
+          20000040400000406000004080000040A0000040C0000040E000006000000060
+          20000060400000606000006080000060A0000060C0000060E000008000000080
+          20000080400000806000008080000080A0000080C0000080E00000A0000000A0
+          200000A0400000A0600000A0800000A0A00000A0C00000A0E00000C0000000C0
+          200000C0400000C0600000C0800000C0A00000C0C00000C0E00000E0000000E0
+          200000E0400000E0600000E0800000E0A00000E0C00000E0E000400000004000
+          20004000400040006000400080004000A0004000C0004000E000402000004020
+          20004020400040206000402080004020A0004020C0004020E000404000004040
+          20004040400040406000404080004040A0004040C0004040E000406000004060
+          20004060400040606000406080004060A0004060C0004060E000408000004080
+          20004080400040806000408080004080A0004080C0004080E00040A0000040A0
+          200040A0400040A0600040A0800040A0A00040A0C00040A0E00040C0000040C0
+          200040C0400040C0600040C0800040C0A00040C0C00040C0E00040E0000040E0
+          200040E0400040E0600040E0800040E0A00040E0C00040E0E000800000008000
+          20008000400080006000800080008000A0008000C0008000E000802000008020
+          20008020400080206000802080008020A0008020C0008020E000804000008040
+          20008040400080406000804080008040A0008040C0008040E000806000008060
+          20008060400080606000806080008060A0008060C0008060E000808000008080
+          20008080400080806000808080008080A0008080C0008080E00080A0000080A0
+          200080A0400080A0600080A0800080A0A00080A0C00080A0E00080C0000080C0
+          200080C0400080C0600080C0800080C0A00080C0C00080C0E00080E0000080E0
+          200080E0400080E0600080E0800080E0A00080E0C00080E0E000C0000000C000
+          2000C0004000C0006000C0008000C000A000C000C000C000E000C0200000C020
+          2000C0204000C0206000C0208000C020A000C020C000C020E000C0400000C040
+          2000C0404000C0406000C0408000C040A000C040C000C040E000C0600000C060
+          2000C0604000C0606000C0608000C060A000C060C000C060E000C0800000C080
+          2000C0804000C0806000C0808000C080A000C080C000C080E000C0A00000C0A0
+          2000C0A04000C0A06000C0A08000C0A0A000C0A0C000C0A0E000C0C00000C0C0
+          2000C0C04000C0C06000C0C08000C0C0A000F0FBFF00A4A0A000808080000000
+          FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00010000000000
+          000000000000000000FFFF00FFFFFFFFFFFFFFFFFFFFFFFF00FFFF00FF07A407
+          A407A4F9A407A4FF00FFFF00FFA407A407A4F9A4F9A407FF00FFFF00FF07A407
+          A407A4F9A407A4FF00FFFF00FFA407A407A407A407A407FF00FFFF00FF07A407
+          A407A407A407A4FF00FFFF00FFA407A407A407A407A407FF00FFFF00FFFFFFFF
+          FFFFFFFFFFFFFFFF00FFFF00FF04FC04FC04FCA4A4A4A4FF00FFFF00FFFC04FC
+          04FC04A4A4A4A4FF00FFFF00FFFFFFFFFFFFFFFFFFFFFFFF00FFFF0000000000
+          000000000000000000FF}
+        ShowButton = True
+        TabOrder = 1
+        DisplayFormat = 'DD/MM/YYYY'
+      end
+      object CmpForCli: TCMProcuraForCli
+        Left = 10
+        Top = 57
+        Width = 391
+        Height = 50
+        Caption = ' Cliente '
+        TabOrder = 2
+        CampoEdit = ceRazaoSocial
+        MostraMensagens = True
+        DataField = 'IDFORCLI'
+        Mensagens.EmBranco = 'não pode estar em branco'
+        Mensagens.NaoExiste = 'não existe'
+        PermiteChaveInvalida = False
+        PermiteChaveEmBranco = False
+        ForCli = fcCliente
+        MostraEndereco = False
+        StatusForCli = fcAll
+        MostraStatusCredito = False
+      end
+      object btSeleciona: TBitBtn
+        Left = 460
+        Top = 60
+        Width = 114
+        Height = 51
+        Anchors = [akTop, akRight]
+        Caption = '&Selecionar'
+        TabOrder = 3
+        OnClick = btSelecionaClick
+        Glyph.Data = {
+          76010000424D7601000000000000760000002800000020000000100000000100
+          04000000000000010000130B0000130B00001000000000000000000000000000
+          800000800000008080008000000080008000808000007F7F7F00BFBFBF000000
+          FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00333333333333
+          333333333333333333FF33333333333330003FF3FFFFF3333777003000003333
+          300077F777773F333777E00BFBFB033333337773333F7F33333FE0BFBF000333
+          330077F3337773F33377E0FBFBFBF033330077F3333FF7FFF377E0BFBF000000
+          333377F3337777773F3FE0FBFBFBFBFB039977F33FFFFFFF7377E0BF00000000
+          339977FF777777773377000BFB03333333337773FF733333333F333000333333
+          3300333777333333337733333333333333003333333333333377333333333333
+          333333333333333333FF33333333333330003333333333333777333333333333
+          3000333333333333377733333333333333333333333333333333}
+        Layout = blGlyphTop
+        NumGlyphs = 2
+      end
+      object dblcPortadorForma: TwwDBLookupCombo
+        Left = 9
+        Top = 28
+        Width = 392
+        Height = 21
+        DropDownAlignment = taLeftJustify
+        Selected.Strings = (
+          'DESCRICAO'#9'35'#9'DESCRICAO')
+        LookupTable = cdsPortForma
+        LookupField = 'CODPORTFORMA'
+        Style = csDropDownList
+        DropDownWidth = 450
+        TabOrder = 0
+        AutoDropDown = True
+        ShowButton = True
+        OrderByDisplay = False
+        AllowClearKey = True
+        ShowMatchText = True
+      end
+    end
+    object Panel1: TPanel
+      Left = 1
+      Top = 122
+      Width = 767
+      Height = 267
+      Align = alClient
+      TabOrder = 1
+      object wwDBGrid1: TwwDBGrid
+        Left = 1
+        Top = 33
+        Width = 765
+        Height = 233
+        ControlType.Strings = (
+          'SELECIONAR;CheckBox;S;N')
+        Selected.Strings = (
+          'SELECIONAR'#9'9'#9'Selecionar'#9'F'
+          'RAZAOSOCIAL'#9'60'#9'Cliente'#9'T'
+          'NODOCUMENTO'#9'15'#9'Nº do Documento'#9'T'
+          'DATAPROGRAMADA'#9'18'#9'Data Programada'#9'T')
+        IniAttributes.Delimiter = ';;'
+        TitleColor = clBtnFace
+        FixedCols = 0
+        ShowHorzScrollBar = True
+        Align = alClient
+        DataSource = ds
+        Options = [dgEditing, dgTitles, dgIndicator, dgColumnResize, dgColLines, dgRowLines, dgTabs, dgRowSelect, dgConfirmDelete, dgCancelOnExit, dgWordWrap]
+        TabOrder = 0
+        TitleAlignment = taLeftJustify
+        TitleFont.Charset = DEFAULT_CHARSET
+        TitleFont.Color = clWindowText
+        TitleFont.Height = -9
+        TitleFont.Name = 'MS Sans Serif'
+        TitleFont.Style = [fsBold]
+        TitleLines = 1
+        TitleButtons = False
+        UseTFields = False
+        IndicatorColor = icBlack
+      end
+      object Panel2: TPanel
+        Left = 1
+        Top = 1
+        Width = 765
+        Height = 32
+        Align = alTop
+        BevelOuter = bvLowered
+        TabOrder = 1
+        object bBtnMarcaTodos: TBitBtn
+          Left = 4
+          Top = 4
+          Width = 72
+          Height = 25
+          Caption = '&Todos'
+          TabOrder = 0
+          OnClick = bBtnMarcaTodosClick
+          Glyph.Data = {
+            76010000424D7601000000000000760000002800000020000000100000000100
+            04000000000000010000120B0000120B00001000000000000000000000000000
+            800000800000008080008000000080008000808000007F7F7F00BFBFBF000000
+            FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00555555555555
+            555555555555555555555555555555555555555555FF55555555555559055555
+            55555555577FF5555555555599905555555555557777F5555555555599905555
+            555555557777FF5555555559999905555555555777777F555555559999990555
+            5555557777777FF5555557990599905555555777757777F55555790555599055
+            55557775555777FF5555555555599905555555555557777F5555555555559905
+            555555555555777FF5555555555559905555555555555777FF55555555555579
+            05555555555555777FF5555555555557905555555555555777FF555555555555
+            5990555555555555577755555555555555555555555555555555}
+          NumGlyphs = 2
+        end
+      end
+    end
+  end
+  inherited Dock971: TDock97
+    Top = 390
+    Width = 769
+    inherited tb97Fundo: TToolbar97
+      Left = 595
+      DockPos = 595
+    end
+    object TB97oKCancelar: TToolbar97
+      Left = 511
+      Top = 0
+      Caption = 'TB97oKCancelar'
+      DockPos = 511
+      TabOrder = 1
+      object bbtnConfirmar: TBitBtn
+        Left = 0
+        Top = 0
+        Width = 80
+        Height = 33
+        Caption = '&Ok'
+        Default = True
+        ModalResult = 1
+        TabOrder = 0
+        OnClick = bbtnConfirmarClick
+        Glyph.Data = {
+          76010000424D7601000000000000760000002800000020000000100000000100
+          0400000000000001000000000000000000001000000000000000000000000000
+          8000008000000080800080000000800080008080000080808000C0C0C0000000
+          FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00888888888888
+          8888888888FFFFF8888888888000008888888888F777778FF888888002222200
+          88888887788888778F88887222222222088888788888888878F887A228822222
+          208887F88FFF888887F887A2FFF8222220888788777FF888878F7A22FFFF8222
+          22087F887777FF88887F7A22FFFFF82222087F8877777FF8887F7A22FF8FFF82
+          22087F8877F777FF887F7A22FF82FFF822087F8877F8777F887F7A22FF222FF8
+          220878F87788877FF87887A2222222FF208887F88888887787F887A222222222
+          2088878F888888888788887AA222222208888878FF88888F788888877AAAAA77
+          8888888778FFFF77888888888777778888888888877777888888}
+        NumGlyphs = 2
+      end
+    end
+  end
+  inherited ivTradutor: TIvExtendedTranslator
+    Left = 197
+    Top = 206
+  end
+  object cds: TCMClientDataSet
+    Aggregates = <>
+    Params = <>
+    Left = 244
+    Top = 197
+  end
+  object ds: TwwDataSource
+    DataSet = cds
+    Left = 290
+    Top = 205
+  end
+  object cdsPortForma: TCMClientDataSet
+    Aggregates = <>
+    Params = <>
+    Left = 270
+    Top = 40
+  end
+  object cdsInput: TCMClientDataSet
+    Aggregates = <>
+    Params = <>
+    Left = 402
+    Top = 187
+  end
+end

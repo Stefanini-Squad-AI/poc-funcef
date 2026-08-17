@@ -1,0 +1,366 @@
+(*******************************************************************************
+ Analista Responsável: Gustavo Viegas
+ - Atualizado em 15/10/2000
+*******************************************************************************)
+
+unit datend;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  Db, DBTables, Wwquery, Wwdatsrc, wwidlg, cmseldlg, Menus;
+
+type
+  TdtmAtend = class(TDataModule)
+    qryscroll: TwwQuery;
+    qryparpont: TwwQuery;
+    qryplanass: TwwQuery;
+    qrycontrib: TwwQuery;
+    qrypart: TwwQuery;
+    qrybenef: TwwQuery;
+    qrypartgeral: TwwQuery;
+    qryprocesso: TwwQuery;
+    qryaux: TwwQuery;
+    qrycontribprev: TwwQuery;
+    qryusuario: TwwQuery;
+    qryoper: TwwQuery;
+    qrydepentit: TwwQuery;
+    qryevent: TwwQuery;
+    qryreserva: TwwQuery;
+    qryfilial: TwwQuery;
+    qryendereco: TwwQuery;
+    qryhistfunc: TwwQuery;
+    qryRubXBeneficio: TwwQuery;
+    qryTipoDocXRub: TwwQuery;
+    qryTipoDocRubPendentes: TwwQuery;
+    qryTipoDocRubPendentesNOMEDOCUMENTO: TStringField;
+    qryTipoDocRubPendentesIDDOCUMENTO: TFloatField;
+    qryUpdate: TwwQuery;
+    qryRUBpendentes: TwwQuery;
+    qryTpRecebimento: TwwQuery;
+    qryTpCancelamento: TwwQuery;
+    qryCancelamentoselecionado: TwwQuery;
+    dspartprev: TwwDataSource;
+    dsreserva: TwwDataSource;
+    dsevent: TwwDataSource;
+    dsendereco: TwwDataSource;
+    dshistfunc: TwwDataSource;
+    dsRubXBeneficio: TwwDataSource;
+    dsTipoDocXRub: TwwDataSource;
+    dsTipoDocRubPendentes: TwwDataSource;
+    dsRUBpendentes: TwwDataSource;
+    dsdepentit: TwwDataSource;
+    dspartgeral: TwwDataSource;
+    dsprocesso: TwwDataSource;
+    dsbenef: TwwDataSource;
+    dsscroll: TwwDataSource;
+    dsplanprev: TwwDataSource;
+    dstipoatend: TwwDataSource;
+    dsassunto: TwwDataSource;
+    dspart: TwwDataSource;
+    dsplanass: TwwDataSource;
+    dscontrib: TwwDataSource;
+    dsusuario: TwwDataSource;
+    dscontribprev: TwwDataSource;
+    dsprocuraatend: TwwDataSource;
+    qryplanprev: TwwQuery;
+    qryusuarioNOMEUSUARIO: TStringField;
+    qryeventIDTITULAR: TFloatField;
+    qryeventSEQPROPOSTA: TFloatField;
+    qryeventIDPLANASS: TFloatField;
+    qryeventDATAEVENT: TDateTimeField;
+    qryeventIDSERVASS: TFloatField;
+    qryeventIDPESSJUR: TFloatField;
+    qryeventIDPLANOPREV: TFloatField;
+    qryeventIDDEPENDENTE: TFloatField;
+    qryeventESTATISTICA: TStringField;
+    qryeventVALOREVENT: TFloatField;
+    qryeventVALORPAGO: TFloatField;
+    qryeventDATAPAG: TDateTimeField;
+    qryeventFLGREEMBOLSO: TFloatField;
+    qryeventVALORPAGAMENTO: TFloatField;
+    qryeventVALORRECEBIMENTO: TFloatField;
+    qryeventVALORREEMBOLSO: TFloatField;
+    qryeventFLGCOB: TFloatField;
+    qryeventTIT: TStringField;
+    qryeventDEP: TStringField;
+    qryeventMATRICULA: TStringField;
+    qryeventCPF: TStringField;
+    qryeventPREV: TStringField;
+    qryeventPLANASS: TStringField;
+    qryeventSERV: TStringField;
+    qryeventIDPESSOA: TFloatField;
+    qryeventDATAADMISSAO: TDateTimeField;
+    qryscrollIDPESSOA: TFloatField;
+    qryscrollMATRICULA: TStringField;
+    qryscrollNOME: TStringField;
+    qryscrollCPF: TStringField;
+    qryscrollINSCRICAONUMERO: TFloatField;
+    qryscrollIDPESSJUR: TFloatField;
+    qrycontribMES: TStringField;
+    qrycontribNOME: TStringField;
+    qrycontribMESCOBRANCA: TStringField;
+    qrycontribVALORESPERADO: TFloatField;
+    qrycontribVALORRECEBIDO: TFloatField;
+    qrycontribDATA: TDateTimeField;
+    qrycontribPLANASS: TStringField;
+    qrycontribPLANPREV: TStringField;
+    qrycontribNOME_1: TStringField;
+    qrycontribCONTRIB: TStringField;
+    qrycontribDESCRICAO: TStringField;
+    qrybenefMOTIVO: TStringField;
+    qrybenefNUMEROPROCESSO: TFloatField;
+    qrybenefMES: TStringField;
+    qrybenefVLBENEFPGTO: TFloatField;
+    qrybenefPLNCODIGOPREV: TFloatField;
+    qrybenefDTEFETPGTO: TDateTimeField;
+    qrybenefVALORPREV: TFloatField;
+    qrybenefDATAPAGAMENTO: TDateTimeField;
+    qrybenefVALORBASE1: TFloatField;
+    qrybenefVALORBASE2: TFloatField;
+    qrybenefVALORBASE3: TFloatField;
+    qrybenefVALORBASE4: TFloatField;
+    qrybenefVALORBASE5: TFloatField;
+    qrybenefVALORCALCULADO: TFloatField;
+    qrybenefMESREFERENCIA: TStringField;
+    qrybenefPATROCINADORA: TStringField;
+    qrybenefPLANO: TStringField;
+    qrybenefBENEFICIARIO: TStringField;
+    qrypartprev: TwwQuery;
+    qrypartprevNOME: TStringField;
+    qrypartprevPLANPREV: TStringField;
+    qrypartprevSEXO: TStringField;
+    qrypartprevNOMEPAI: TStringField;
+    qrypartprevNOMEMAE: TStringField;
+    qrypartprevDATAMORTE: TDateTimeField;
+    qryenderecoIDPESSOA: TFloatField;
+    qryenderecoIDENDERECO: TFloatField;
+    qryenderecoIDPAIS: TFloatField;
+    qryenderecoCODESTADO: TStringField;
+    qryenderecoLOGRADOURO: TStringField;
+    qryenderecoNUMERO: TStringField;
+    qryenderecoCOMPLEMENTO: TStringField;
+    qryenderecoTIPOENDERECO: TStringField;
+    qryenderecoBAIRRO: TStringField;
+    qryenderecoNOME: TStringField;
+    qryenderecoNOME_1: TStringField;
+    qryenderecoCEP: TStringField;
+    qryenderecoNOMEESTADO: TStringField;
+    qryenderecoNOMEPAIS: TStringField;
+    qrydepentitNOME: TStringField;
+    qrydepentitDESCRICAO: TStringField;
+    qrypartPLANASS: TStringField;
+    qrypartPLANPREV: TStringField;
+    qrypartPESSJUR: TStringField;
+    qrypartDEPEN: TStringField;
+    qrypartgeralNOMEPAI: TStringField;
+    qrypartgeralNOMEMAE: TStringField;
+    qrypartgeralDATANASC: TDateTimeField;
+    qrypartgeralSEXO: TStringField;
+    qrypartgeralESTCIVIL: TStringField;
+    qrypartgeralEND: TStringField;
+    qrypartgeralNUMERO: TStringField;
+    qrypartgeralCODESTADO: TStringField;
+    qrypartgeralCOMPLEMENTO: TStringField;
+    qrypartgeralBAIRRO: TStringField;
+    qrypartgeralCIDADE: TStringField;
+    qrypartgeralCEP: TStringField;
+    qrypartgeralEMAIL: TStringField;
+    qrypartgeralPATRO: TStringField;
+    qrypartgeralSALTOTAL: TFloatField;
+    qrypartgeralDATAADMISSAO: TDateTimeField;
+    qrypartgeralTITULO: TStringField;
+    qrypartgeralDATAMORTE: TDateTimeField;
+    qrypartgeralFILIAL: TStringField;
+    qrycontribprevMESREFERENCIA: TStringField;
+    qrycontribprevMESCOBRANCA: TStringField;
+    qrycontribprevVALORESPERADO: TFloatField;
+    qrycontribprevDATARECEBIMENTO: TDateTimeField;
+    qrycontribprevVALORRECEBIDO: TFloatField;
+    qrycontribprevQUANTCOTAS: TFloatField;
+    qrycontribprevNOME: TStringField;
+    qrycontribprevMATRICULA: TStringField;
+    qrycontribprevPLANPREV: TStringField;
+    qrycontribprevCONTRIB: TStringField;
+    qrycontribprevDATAFINAL: TDateTimeField;
+    qrycontribprevPARCELA: TFloatField;
+    qrycontribprevNOME_1: TStringField;
+    qryCancelamentoselecionadoSTATUSRECEBIMENTO: TFloatField;
+    qryRubXBeneficioIDPESSJUR: TFloatField;
+    qryRubXBeneficioIDPESSOA: TFloatField;
+    qryRubXBeneficioIDPLANOPREV: TFloatField;
+    qryRubXBeneficioIDBENEFICIO: TFloatField;
+    qryRubXBeneficioNOME: TStringField;
+    qryplanassIDPLANASS: TFloatField;
+    qryplanassNOME: TStringField;
+    qryplanassDESCRICAO: TStringField;
+    qryplanassNOME_1: TStringField;
+    qryplanassDATACANCELAMENTO: TDateTimeField;
+    qryTpCancelamentoDESCRICAO: TStringField;
+    qryTpCancelamentoSTATUSRECEBIMENTO: TFloatField;
+    qryTpRecebimentoDESCRICAO: TStringField;
+    qryTpRecebimentoSTATUSRECEBIMENTO: TFloatField;
+    QryDadosParticip: TwwQuery;
+    QryDadosParticipNOME: TStringField;
+    QryDadosParticipLOGRADOURO: TStringField;
+    QryDadosParticipNUMERO: TStringField;
+    QryDadosParticipCOMPLEMENTO: TStringField;
+    QryDadosParticipBAIRRO: TStringField;
+    QryDadosParticipCEP: TStringField;
+    QryDadosParticipCIDADE: TStringField;
+    QryDadosParticipCODESTADO: TStringField;
+    QryDadosParticipNOMEPAIS: TStringField;
+    QryDadosParticipNUMTEL: TStringField;
+    qryRubXBeneficioIDSITBENEF: TFloatField;
+    qryfilialNOME: TStringField;
+    qryfilialIDPESSOA: TFloatField;
+    qryTipoDocXRubIDDOCUMENTO: TFloatField;
+    QryCountAtend: TwwQuery;
+    QryCountAtendNUMATEND: TFloatField;
+    qrycontribprevDESCRICAO: TStringField;
+    qryhistfuncIDPESSOA: TFloatField;
+    qryhistfuncSEQHISTFUNC: TFloatField;
+    qryhistfuncIDDOCUMENTO: TFloatField;
+    qryhistfuncCODTPINSALUBRI: TStringField;
+    qryhistfuncDATAINICIO: TDateTimeField;
+    qryhistfuncDATAFINAL: TDateTimeField;
+    qryhistfuncEMPRESA: TStringField;
+    qryhistfuncFLGCONTATS: TFloatField;
+    qryhistfuncNUMDOCUMENTO: TStringField;
+    qryhistfuncTEMPOSERVANTERIOR: TFloatField;
+    qryhistfuncTEMPOSITESPECIAL: TFloatField;
+    qryhistfuncTEMPONAOCREDITADO: TFloatField;
+    qryhistfuncNOME: TStringField;
+    qryhistfuncCPF: TStringField;
+    qryhistfuncINSALUBRI: TStringField;
+    qryTipoDocXRubNOMEDOCUMENTO: TStringField;
+    qryprocessoIDPROCESSO: TFloatField;
+    qryprocessoDATAINIPROCESSO: TDateTimeField;
+    qryprocessoDATAFIMPROCESSO: TDateTimeField;
+    qryprocessoDATAFIMPREV: TDateTimeField;
+    qryprocessoTIPOPROCESSO: TStringField;
+    qryprocessoSTATUS: TStringField;
+    qryreservaDATAREFERENCIASA: TDateTimeField;
+    qryreservaVALORRESERVA: TFloatField;
+    qryreservaCOTVALOR: TFloatField;
+    qryreservaVLRATUAL: TFloatField;
+    qryreservaNOME: TStringField;
+    qryreservaFLGCOLETIVA: TFloatField;
+    qryreservaINDICEREAJUSTE: TFloatField;
+    qryreservaANALITICOSINTETI: TStringField;
+    qryreservaCODHIERARQUIA: TStringField;
+    qryreservaPREV: TStringField;
+    qryreservaTIT: TStringField;
+    qryreservaPATRO: TStringField;
+    qryreservaMOESIGLA: TStringField;
+    qryreservaCODIGO: TStringField;
+    qryRUBpendentesIDRUBS: TFloatField;
+    qryRUBpendentesSTATUS: TStringField;
+    qryRubXBeneficioIDRUBS: TFloatField;
+    qryRubXBeneficioIDRUBXBENEFICIO: TFloatField;
+    qryTipoDocRubPendentesFLGRECEBIDO: TStringField;
+    qryTipoDocRubPendentesDATARECEB: TDateTimeField;
+    qryRubXBeneficioSTATUS: TStringField;
+    qryTipoDocXRubFLGRECEBIDO: TStringField;
+    qryTipoDocXRubDATARECEB: TDateTimeField;
+    qryTipoDocXRubIDTIPODOCXRUB: TFloatField;
+    qryTipoDocRubPendentesIDTIPODOCXRUB: TFloatField;
+    UpdRUBpendentes: TUpdateSQL;
+    UpdTipoDocRubPendentes: TUpdateSQL;
+    qryTipoDocRubPendentesIDRUBS: TFloatField;
+    QryRubs: TwwQuery;
+    QryRubsIDRUBS: TFloatField;
+    QryRubsSTATUS: TStringField;
+    DsRubs: TwwDataSource;
+    QryHistRubs: TwwQuery;
+    QryHistRubsIDRUBS: TFloatField;
+    QryHistRubsHISTORICO: TMemoField;
+    DsHistRubs: TwwDataSource;
+    QryHistRubsTRGDTINCLUSAO: TDateTimeField;
+    QryHistRubsIDHISTMOVRUBS: TFloatField;
+    QryRubsDATALANCTO: TDateTimeField;
+    QryRubsDATABAIXA: TDateTimeField;
+    qryRUBpendentesIDCANCELAMENTO: TFloatField;
+    qryRUBpendentesIDHISTBAIXA: TFloatField;
+    qryRUBpendentesIDHISTLANCTO: TFloatField;
+    qryRUBpendentesDATAMOV: TDateTimeField;
+    qryRUBpendentesHistorico: TwwQuery;
+    UpdRUBpendentesHistorico: TUpdateSQL;
+    qryRUBpendentesHistoricoIDRUBS: TFloatField;
+    qryRUBpendentesHistoricoIDCANCELAMENTO: TFloatField;
+    qryRUBpendentesHistoricoIDHISTBAIXA: TFloatField;
+    qryRUBpendentesHistoricoIDHISTLANCTO: TFloatField;
+    QryRubsDESCRICAO: TStringField;
+    QryHistRubsSTATUS: TStringField;
+    qryRUBpendentesFLGSTATUS: TStringField;
+    qryRUBpendentesFLGOLDSTATUS: TStringField;
+    QryDadosParticipIDENDERECO: TFloatField;
+    QryBuscaCidade: TwwQuery;
+    QryInsereEndereco: TwwQuery;
+    QryInsereCidades: TwwQuery;
+    QryBuscaCidadeIDCIDADES: TFloatField;
+    QryDadosParticipIDESTADO: TFloatField;
+    QryAlteraEndereco: TwwQuery;
+    QryAlteraPessoa: TwwQuery;
+    qrypartgeralDESCRICAO: TStringField;
+    qrypartprevNUMBANCO: TStringField;
+    qrypartprevNOMEBANCO: TStringField;
+    qrypartprevNUMAGENCIA: TStringField;
+    qrypartprevNOMEAGENCIA: TStringField;
+    qrypartprevCONTACORRENTE: TStringField;
+    qryAlteratelefone: TwwQuery;
+    QryDadosParticipIDTELEFONE: TCurrencyField;
+    qryinserttelefone: TwwQuery;
+    QryDadosParticipDDI: TStringField;
+    QryDadosParticipDDD: TStringField;
+    QryDadosParticipTIPO: TStringField;
+    qryplanprevIDPLANOPREV: TFloatField;
+    qryplanprevNOME: TStringField;
+    qryplanprevDESCRICAO: TStringField;
+    qryplanprevSITPART: TStringField;
+    qryplanprevDATACANCELAMENTO: TDateTimeField;
+    qryplanprevINSCRICAODATA: TDateTimeField;
+    qrybenefNOME: TStringField;
+    PopupMenu1: TPopupMenu;
+    procedure qryRUBpendentesAfterScroll(DataSet: TDataSet);
+    procedure dtmAtendDestroy(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  dtmAtend: TdtmAtend;
+
+implementation
+
+uses FAtend, uFuncaOGeral;
+
+{$R *.DFM}
+
+procedure TdtmAtend.qryRUBpendentesAfterScroll(DataSet: TDataSet);
+begin
+  If Not qryRUBpendentes.IsEmpty Then
+     qryTipoDocRubPendentes.Filter := 'IDRUBS = ' +  qryRUBpendentesIDRUBS.AsString;
+end;
+
+procedure TdtmAtend.dtmAtendDestroy(Sender: TObject);
+Var
+   X:Integer;
+begin
+  For X:=0 To ComponentCount - 1 Do
+      If (Components[x] Is TwwQuery) Then
+         with (Components[x] As TwwQuery) Do
+         Begin
+            If Active Then
+            Begin
+               If UpdatesPending Then CancelUpdates;
+               Close;
+            End;
+            If Prepared Then Unprepare;
+         End;
+end;
+
+end.

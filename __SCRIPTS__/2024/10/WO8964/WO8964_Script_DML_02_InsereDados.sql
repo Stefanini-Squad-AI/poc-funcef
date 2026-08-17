@@ -1,0 +1,36 @@
+insert into cm.reports
+  (NAME,
+   IDREPORTS,
+   ORIGEMCM,
+   IDGRUPORELATORIO,
+   IDMODULO,
+   ORIGEMCMGR,
+   DESCRIPTION,
+   ORIGEMCMDV,
+   FLGFILTROMANUAL,
+   FORMEVENTOS,
+   FORMPARAMREL,
+   PPREPORT,
+   FLGEXIBENOPREVIEW,
+   FLGEXPORTADADOS,
+   FLGSUBREPORT,
+   FLGRELATATIVO,
+   FLGEXPORTAMANUAL)
+values
+  ('Comparação dos valores de Contribuição desc. Folha de Benef.', --NAME 
+   4645, --IDREPORTS 
+   1, --ORIGEMCM
+   24, --IDGRUPORELATORIO,  
+   456, -- IDMODULO,  
+   1, -- ORIGEMCMGR, 
+   'WO8964', --DESCRIPTION, 
+   0, --ORIGEMCMDV,  
+   'N', --FLGFILTROMANUAL,  
+   'dtmRelatorioGerencial', --FORMEVENTOS,  
+   'frmParamComparaTx', --FORMPARAMREL, 
+   'RpRelComparaTx', --PPREPORT,  
+   'S', --FLGEXIBENOPREVIEW,
+   'S', --FLGEXPORTADADOS,
+   'N', --FLGSUBREPORT, 
+   'S', --FLGRELATATIVO
+   'S'); --FLGEXPORTAMANUAL 

@@ -1,0 +1,309 @@
+=========================================================
+Debug nº 1 ==>[SELECT PF.IDPARCFINANCIMOV,                                                                                        
+       PF.IDCONDPAGIMOVEL,                                                                                         
+       CI.IDCONTRATOIMOVEL,                                                                                        
+       CI.CONNUMERO,                                                                                               
+       CI.CONNOME,                                                                                                 
+       CI.VLRPROPOSTA,                                                                                             
+       CI.CONDATAINICIO,                                                                                           
+       CI.IDCIDADES,                                                                                               
+       CI.IDPAIS,                                                                                                  
+       CI.CODESTADO,                                                                                               
+       P.RAZAOSOCIAL,                                                                                              
+       IM.NOMEMESTRE,                                                                                              
+       PF.CODDOCUMENTO,                                                                                            
+       PF.PLNCODIGO,                                                                                               
+       ALT.TOT_ALTERADOR,                                                                                          
+       CPMF.TOT_CPMF,                                                                                              
+       DECODE(NVL(PF.FLGTIPOLANC,1), 1, 0,                                                                         
+          DECODE(PF.CODDOCUMENTO, NULL, PF.IDPARCFINANCIMOV, PF.CODDOCUMENTO) ) AS NUMDOC,                         
+       PF.NUMPARCELA AS NUMPARC,                                                                                   
+       DECODE(PF.NUMPARCELA,0,NULL,TO_CHAR(PF.NUMPARCELA) || '/' || TO_CHAR(CPFINAL.NUMPARCELAS)) AS NUMPARCELA, 
+       DECODE(PF.DATAVENCIMENTO,NULL,CP.DATAINI,PF.DATAVENCIMENTO) AS DATAVENCIMENTO,                              
+       TO_CHAR(PF.DATAVENCIMENTO,'MMYYYY') AS MESANO_VENCIMENTO,                                                 
+'121899' AS MESANO_CALCULO,                                         
+       CPFINAL.INDCORRECAO    AS IDCORR_CONDPAG,                                                                   
+       CPFINAL.MESREFREAJUSTE AS MESREF_CONDPAG,                                                                   
+       CPFINAL.TIPOCONDPAG,                                                                                        
+       CPFINAL.NUMPARCELAS,                                                                                        
+       ROUND(PF.VLRPRESTACAO,2) AS VLRPRESTACAO,                                                                   
+       PF.VLRNOMINAL,                                                                                              
+       PF.VLRPRESTACAO + NVL(ALT.TOT_ALTERADOR,0) AS TOT_DEVIDO,                                                   
+       PF.VLRJUROS,                                                                                                
+       ROUND(PF.VLRAMORTIZACAO,2) AS VLRAMORTIZACAO,                                                               
+       PF.VLRSALDODEVEDOR,                                                                                         
+       PF.VLRSALDOATUAL,                                                                                           
+       PF.VLRPRESTATUALIZADA,                                                                                      
+       PF.VLRRESIDUO,                                                                                              
+       PF.VLRRESIDUOATUALI,                                                                                        
+       (NVL(PF.VLRRESIDUO,0) + NVL(AR.VLRRESIDUOCORRIG,0)) as VLRRESIDUOCORRIG,                                    
+       CR.DATACOBRES,                                                                                              
+       PF.IDINDCORRECAO,                                                                                           
+       PF.VLRCORRIGIDOATRASO,                                                                                      
+       PF.VLRMULTAATRASO,                                                                                          
+       PF.VLRMORAATRASO,                                                                                           
+       NVL(PF.FLGRESIDUOINCORP,'N') AS FLGRESIDUOINCORP,                                                         
+       PF.FLGTIPOLANC,                                                                                             
+       DECODE(PF.IDREPACTUA, NULL, PF.FLGLANCINTEGRA,                                                              
+              DECODE(CD2.FLGTIPO, NULL,                                                                            
+                     DECODE(PF.CODDOCUMENTO, NULL,                                                                 
+                            DECODE(NVL(PF.VLRPAGO,0), 0, 0, 3), 2), 5) ) AS FLGLANCINTEGRA,                        
+       PF.DATALIMITE,                                                                                              
+       PP.DATAPAGAMENTO,                                                                                           
+       ROUND(NVL(PP.VLRPAGO,0),2) AS VLRPAGO,                                                                      
+       NVL(CD2.CONCILIADOC, 'N') AS FLGCONCILIADO,                                                               
+       PF.IDREPACTUA,                                                                                              
+       CD.IDDOCDIVERGE,                                                                                            
+       '                    ' AS DESCLANC,                                                                       
+       '                    ' AS TIPOPARCELA,                                                                    
+       D.DATAEMISSAO,                                                                                              
+       D.DATAPROGRAMADA,                                                                                           
+       D.NOSSONUMERO,                                                                                              
+       D.TRGDTINCLUSAO AS DATA_INCLUSAO,                                                                           
+       L.DATALANCTO    AS DATA_LANCAMENTO,                                                                         
+       TO_CHAR (DECODE(PF.DATAVENCIMENTO,NULL,CP.DATAINI,PF.DATAVENCIMENTO),'MONTH') AS MESCOMPETENCIA,          
+       TO_CHAR (DECODE(PF.DATAVENCIMENTO,NULL,CP.DATAINI,PF.DATAVENCIMENTO),'YYYY') AS ANOCOMPETENCIA,           
+       D.IDUSUARIOINCLUSAO AS USUARIO_INCLUSAO,                                                                    
+       PU.NOME        AS DSC_USUARIO,                                                                              
+       US.NOMEUSUARIO AS NOME_USUARIO,                                                                             
+       PT.DESCRICAO AS DSC_FORMACOBRANCA,                                                                          
+       CI.CONDATAASSINATURA,                                                                                       
+       PA.NOME AS NOMADMINIMOVEL,                                                                                  
+ SYSDATE as DATA_BASE,                                                                            
+       CO2.DTAPUR AS DATA_CORRECAO,                                                                 
+       DECODE(NVL(CD2.CONCILIADOC, 'N'), 'S', 0, 'C', 0,                                                     
+          DECODE(NVL(PP.VLRPAGO,0), 0, 0,                                                                          
+                 NVL(PF.VLRPRESTACAO,0) + NVL(CO1.TOT_CORRECAO,0) + NVL(ALT.TOT_ALTERADOR,0) - NVL(PP.VLRPAGO,0) )) AS VLRDIF, 
+       DECODE(CD.IDDOCDIVERGE, NULL,                                                                               
+          DECODE(NVL(CD2.CONCILIADOC, 'N'), 'S', 0, 'C', 0,                                                  
+                 NVL(PF.VLRPRESTACAO,0)  + NVL(CO2.TOT_CORRECAO,0) + NVL(ALT.TOT_ALTERADOR,0) - NVL(PP.VLRPAGO,0) ), NULL) AS VLRCORRIG 
+  FROM                                                                                                             
+       PARCFINANCIMOV PF,                                                                                          
+       CONDPAGIMOVEL  CP,                                                                                          
+       CONTRATOIMOVEL CI,                                                                                          
+       PESSOA P,                                                                                                   
+       PORTADORFORMA PT,                                                                                           
+       PESSOA PU,                                                                                                  
+       PESSOA PA,                                                                                                  
+       USUARIOSISTEMA US,                                                                                          
+       DOCUMENTO D,                                                                                                
+       LANCTODOCUM L,                                                                                              
+       (                                                                                                           
+         SELECT /*+ INDEX(LD) INDEX(RP)*/                                                                          
+                IDPARCFINANCIMOV,                                                                                  
+                DECODE(P.CODDOCUMENTO, NULL, MAX(P.DATAPAGAMENTO), MAX(RP.DATABAIXA) ) AS DATAPAGAMENTO,           
+                DECODE(P.CODDOCUMENTO, NULL, MAX(P.VLRPAGO), SUM(LD.VALOR) ) AS VLRPAGO                            
+           FROM PARCFINANCIMOV P, LANCTODOCUM LD, RECBTOPAGTO RP                                                   
+          WHERE P.CODDOCUMENTO  = LD.CODDOCUMENTO(+)                                                               
+            AND LD.CODDOCUMENTO = RP.CODDOCUMENTO(+)                                                               
+            AND LD.NUMLANCTO    = RP.NUMLANCTO(+)                                                                  
+            AND ( (P.CODDOCUMENTO IS NULL) OR                                                                      
+                  (P.CODDOCUMENTO IS NOT NULL AND (RP.DATABAIXA IS NOT NULL OR LD.CODALTERADOR = 215) ) )          
+            AND ((P.CODDOCUMENTO IS NULL     AND DATAPAGAMENTO <= SYSDATE ) OR                               
+                 (P.CODDOCUMENTO IS NOT NULL AND ( RTRIM(LD.OPERACAO) = '5' OR LD.CODALTERADOR = 215 )           
+                                             AND LD.ESTORNO IS NULL                                                
+                                             AND LD.DATALANCTO <= SYSDATE ) )                                
+          GROUP BY IDPARCFINANCIMOV, P.CODDOCUMENTO                                                                
+       ) PP,                                                                                                       
+       ( SELECT DISTINCT                                                                                           
+                IDPARCFINANCIMOV,                                                                                  
+                DECODE(IDDOCDIVERGE, NULL, NULL, 1) AS IDDOCDIVERGE                                                
+           FROM CONCILIADOC                                                                                        
+          WHERE IDPARCFINANCIMOV IS NOT NULL                                                                       
+            AND DATA <= SYSDATE
+            AND (IDDOCDIVERGE IS NOT NULL OR                                                                       
+                 IDPARCFINANCIMOV NOT IN ( SELECT DISTINCT IDPARCFINANCIMOV                                        
+                                             FROM CONCILIADOC                                                      
+                                            WHERE IDPARCFINANCIMOV IS NOT NULL                                     
+                                              AND DATA <= SYSDATE
+                                              AND IDDOCDIVERGE IS NOT NULL ) )                                     
+       ) CD,                                                                                                       
+       (  SELECT IDPARCFINANCIMOV, DATA, FLGTIPO,                                                                  
+                 DECODE(FLGTIPO,'M', DECODE(QTDE,3,'S','P'),                                                 
+                                'J', DECODE(QTDE,3,'S','P'),                                                 
+                                'C', DECODE(QTDE,3,'S','P'),                                                 
+                                CONCILIADOC ) AS CONCILIADOC                                                       
+            FROM                                                                                                   
+                 ( SELECT C.IDPARCFINANCIMOV,                                                                      
+                          DECODE(C.FLGTIPO, NULL, NULL,                                                            
+                                 'R', 'S', 'T', 'S', 'M','P','J','P','C','P',                  
+                                 'A', 'C', P.FLGCONCILIADO ) AS CONCILIADOC,                                   
+                          MAX(C.DATA) AS DATA, MAX(C.FLGTIPO) AS FLGTIPO, COUNT(*) AS QTDE                         
+                     FROM CONCILIADOC C, PARCFINANCIMOV P                                                          
+                    WHERE C.IDPARCFINANCIMOV = P.IDPARCFINANCIMOV                                                  
+                      AND C.FLGTIPO IN('R','T', 'A','M','J','C')                                       
+                      AND C.DATA <= SYSDATE
+                      AND ( C.FLGTIPO = 'T' OR                                                                   
+                            NOT EXISTS ( SELECT 1 FROM CONCILIADOC                                                 
+                                          WHERE FLGTIPO = 'T'                                                    
+                                            AND IDPARCFINANCIMOV = C.IDPARCFINANCIMOV ) )                          
+                    GROUP BY C.IDPARCFINANCIMOV,                                                                   
+                             DECODE(C.FLGTIPO, NULL, NULL,                                                         
+                                 'R', 'S', 'T', 'S', 'M','P','J','P','C','P',                  
+                                 'A', 'C', P.FLGCONCILIADO ) ) ) CD2,                                          
+       ( SELECT A.IDCONDINICIAL  AS IDCONDINICIAL,                                                                 
+                A.NUMPARCELAS    AS NUMPARCELAS,                                                                   
+                A.DATAINI,                                                                                         
+                A.IDCONDPAGIMOVEL,                                                                                 
+                A.INDCORRECAO,                                                                                     
+                A.MESREFREAJUSTE,                                                                                  
+                DECODE(A.TIPOCONDPAG, 'V', 'A Vista',                                                          
+                                      'S', 'Sinal',                                                            
+                                      'C', 'Caução',                                                           
+                                      'P', 'Parcelamento' ) AS TIPOCONDPAG                                     
+         FROM   CONDPAGIMOVEL A,                                                                                   
+                (SELECT   IDCONDINICIAL,                                                                           
+                          MAX(DATAINI) AS DATAINI                                                                  
+                 FROM     CONDPAGIMOVEL                                                                            
+                 GROUP BY IDCONDINICIAL) B                                                                         
+         WHERE B.IDCONDINICIAL = A.IDCONDINICIAL                                                                   
+           AND B.DATAINI = A.DATAINI ) CPFINAL,                                                                    
+       ( SELECT DISTINCT                                                                                           
+                CXI.IDCONTRATOIMOVEL AS IDCONTRATOIMOVEL,                                                          
+                M.IMONOME            AS NOMEMESTRE,                                                                
+                M.IDIMOVEL           AS IDIMOVEL                                                                   
+           FROM CONTRATOXIMOVEL CXI,                                                                               
+                IMOVEL I,                                                                                          
+                IMOVEL M                                                                                           
+          WHERE CXI.IDIMOVEL = I.IDIMOVEL                                                                          
+            AND I.IDIMOVELMESTRE = M.IDIMOVEL ) IM,                                                                
+       ( SELECT /*+ INDEX(D) INDEX(LD)*/                                                                           
+                LD.CODDOCUMENTO, T.CODTIPIMOVEL,                                                                   
+                SUM( DECODE(LD.DEBCRE,'D', LD.VALOR, (LD.VALOR * -1)) ) AS TOT_ALTERADOR                         
+           FROM LANCTODOCUM LD, DOCUMENTO D, PARAMALIENACAO PA,                                                    
+                PARCFINANCIMOV P, CONDPAGIMOVEL C,  TIPOIMOVEL T,                                                  
+                ( SELECT DISTINCT C.IDCONTRATOIMOVEL, I.CODTIPIMOVEL                                               
+                    FROM CONTRATOIMOVEL C, CONTRATOXIMOVEL CXI, IMOVEL I                                           
+                   WHERE CXI.IDIMOVEL = I.IDIMOVEL                                                                 
+                     AND CXI.IDCONTRATOIMOVEL = C.IDCONTRATOIMOVEL                                                 
+                     AND C.FLGTIPOCONTRATO IN ('C','A') ) TC                                                   
+          WHERE RTRIM(LD.OPERACAO) = '4'                                                                         
+            AND LD.CODALTERADOR <> 215
+           AND LD.CODALTERADOR <> 216
+            AND PA.IDPESSOA        = 1
+            AND LD.CODDOCUMENTO    = D.CODDOCUMENTO                                                                
+            AND D.CODDOCUMENTO     = P.CODDOCUMENTO                                                                
+            AND P.IDCONDPAGIMOVEL  = C.IDCONDPAGIMOVEL                                                             
+            AND C.IDCONTRATOIMOVEL = TC.IDCONTRATOIMOVEL                                                           
+            AND TC.CODTIPIMOVEL    = T.CODTIPIMOVEL                                                                
+            AND LD.DATALANCTO     <= SYSDATE
+            AND ( PA.IDOPERATUALCM IS NULL OR                                                                      
+                  ( LD.CODALTERADOR <> T.CODALTCMAL AND                                                            
+                    LD.CODALTERADOR <> T.CODALTJRAL AND                                                            
+                    LD.CODALTERADOR <> T.CODALTMTAL ) )                                                            
+            AND D.IDMODULO =  135
+          GROUP BY LD.CODDOCUMENTO, T.CODTIPIMOVEL  )  ALT,                                                        
+       ( SELECT /*+ INDEX (D) INDEX(LD) */                                                                         
+                LD.CODDOCUMENTO,                                                                                   
+                SUM( DECODE(LD.DEBCRE,'D', LD.VALOR, (LD.VALOR * -1)) ) AS TOT_CPMF                              
+           FROM LANCTODOCUM LD,                                                                                    
+                DOCUMENTO D                                                                                        
+          WHERE RTRIM(LD.OPERACAO) = '4'                                                                         
+            AND CODALTERADOR    = 215
+            AND LD.CODDOCUMENTO = D.CODDOCUMENTO                                                                   
+            AND D.IDMODULO = 135
+          GROUP BY LD.CODDOCUMENTO  )  CPMF,                                                                       
+       ( SELECT D1.IDPARCFINANCIMOV, D1.DATAOPER, D1.VLRRESIDUOCORRIG                                              
+           FROM ( SELECT /*+ INDEX (L) */                                                                          
+                         L.IDPARCFINANCIMOV, L.DATAOPER, SUM(L.VLRACUM) AS VLRRESIDUOCORRIG                        
+                    FROM LANCOPERDIAIMOB L, PARAMALIENACAO P                                                       
+                   WHERE (FLGTIPO IS NULL OR FLGTIPO <> 'S')                                                                         
+                     AND P.IDPESSOA = 1
+                     AND L.IDMODULO = 135
+   AND L.IDCONTRATOIMOVEL = 1539
+                     AND ( L.IDOPERACAO = P.IDOPERATUALRES )                                                       
+                   GROUP BY L.IDPARCFINANCIMOV, L.DATAOPER ) D1,                                                   
+                ( SELECT /*+ INDEX (L2) */ L2.IDPARCFINANCIMOV, MAX(L2.DATAOPER) AS DTAPUR                         
+                    FROM LANCOPERDIAIMOB L2, PARAMALIENACAO P2                                                     
+                   WHERE (FLGTIPO IS NULL OR FLGTIPO <> 'S')                                                                        
+                     AND P2.IDPESSOA = 1
+                     AND L2.IDMODULO = 135
+   AND L2.IDCONTRATOIMOVEL = 1539
+                     AND ( L2.IDOPERACAO = P2.IDOPERATUALRES )                                                     
+                     AND ( DATAOPER <= SYSDATE)                                                              
+                   GROUP BY L2.IDPARCFINANCIMOV ) D2                                                               
+          WHERE D1.IDPARCFINANCIMOV = D2.IDPARCFINANCIMOV                                                          
+            AND D1.DATAOPER = D2.DTAPUR                                                                            
+        ) AR,                                                                                                      
+        ( SELECT IDPARCCOBRADA, DATACOBRANCA AS DATACOBRES                                                         
+            FROM PARCEXTRAIMOV                                                                                     
+           WHERE FLGTIPOCOBRANCA = 'R'                                                                           
+         ) CR,                                                                                                     
+       ( SELECT D1.IDPARCFINANCIMOV, D2.DTAPUR, D1.TOT_CORRECAO                                                    
+           FROM ( SELECT /*+ INDEX (L) */                                                                          
+                         L.IDPARCFINANCIMOV, L.DATAOPER, SUM(L.VLRACUM) AS TOT_CORRECAO                            
+                    FROM LANCOPERDIAIMOB L, PARAMALIENACAO P                                                       
+                   WHERE L.DATABAIXA IS NOT NULL                                                                   
+                     AND (FLGTIPO IS NULL OR FLGTIPO <> 'S')                                                                         
+                     AND L.IDMODULO = 135
+                     AND P.IDPESSOA = 1
+   AND L.IDCONTRATOIMOVEL = 1539
+                     AND ( L.IDOPERACAO = P.IDOPERATUALMULTA OR                                                    
+                           L.IDOPERACAO = P.IDOPERATUALJUROS OR                                                    
+                           L.IDOPERACAO = P.IDOPERATUALCM )                                                        
+                   GROUP BY L.IDPARCFINANCIMOV, L.DATAOPER ) D1,                                                   
+                ( SELECT /*+ INDEX (L2) */ L2.IDPARCFINANCIMOV,MAX(L2.DATAOPER) AS DTAPUR                          
+                    FROM LANCOPERDIAIMOB L2, PARAMALIENACAO P2                                                     
+                   WHERE (FLGTIPO IS NULL OR FLGTIPO <> 'S')                                                                        
+                     AND P2.IDPESSOA = 1
+                     AND L2.IDMODULO = 135
+   AND L2.IDCONTRATOIMOVEL = 1539
+                     AND ( L2.IDOPERACAO = P2.IDOPERATUALMULTA OR                                                  
+                           L2.IDOPERACAO = P2.IDOPERATUALJUROS OR                                                  
+                           L2.IDOPERACAO = P2.IDOPERATUALCM )                                                      
+                     AND ( DATAOPER <= SYSDATE)                                                              
+                   GROUP BY L2.IDPARCFINANCIMOV ) D2                                                               
+          WHERE D1.IDPARCFINANCIMOV = D2.IDPARCFINANCIMOV                                                          
+            AND D1.DATAOPER = D2.DTAPUR                                                                            
+       ) CO1,                                                                                                      
+       ( SELECT D1.IDPARCFINANCIMOV, D2.DTAPUR, D1.TOT_CORRECAO                                                    
+           FROM ( SELECT /*+ INDEX (L) */                                                                          
+                         L.IDPARCFINANCIMOV, L.DATAOPER, SUM(L.VLRACUM) AS TOT_CORRECAO                            
+                    FROM LANCOPERDIAIMOB L, PARAMALIENACAO P                                                       
+                   WHERE (FLGTIPO IS NULL OR FLGTIPO <> 'S')                                                                         
+                     AND L.IDMODULO = 135
+                     AND P.IDPESSOA = 1
+   AND L.IDCONTRATOIMOVEL = 1539
+                     AND ( L.IDOPERACAO = P.IDOPERATUALMULTA OR                                                    
+                           L.IDOPERACAO = P.IDOPERATUALJUROS OR                                                    
+                           L.IDOPERACAO = P.IDOPERATUALCM )                                                        
+                   GROUP BY L.IDPARCFINANCIMOV, L.DATAOPER ) D1,                                                   
+                ( SELECT /*+ INDEX (L2) */ L2.IDPARCFINANCIMOV,MAX(L2.DATAOPER) AS DTAPUR                          
+                    FROM LANCOPERDIAIMOB L2, PARAMALIENACAO P2                                                     
+                   WHERE (FLGTIPO IS NULL OR FLGTIPO <> 'S')                                                                        
+                     AND P2.IDPESSOA = 1
+                     AND L2.IDMODULO = 135
+   AND L2.IDCONTRATOIMOVEL = 1539
+                     AND ( L2.IDOPERACAO = P2.IDOPERATUALMULTA OR                                                  
+                           L2.IDOPERACAO = P2.IDOPERATUALJUROS OR                                                  
+                           L2.IDOPERACAO = P2.IDOPERATUALCM )                                                      
+                     AND ( DATAOPER <= SYSDATE)                                                              
+                   GROUP BY L2.IDPARCFINANCIMOV ) D2                                                               
+          WHERE D1.IDPARCFINANCIMOV = D2.IDPARCFINANCIMOV                                                          
+            AND D1.DATAOPER = D2.DTAPUR                                                                            
+        ) CO2                                                                                                      
+  WHERE (PF.FLGTIPOLANC IN (2,3,4,5,6,7,8,9))                                                              
+    AND (PF.IDCONDPAGIMOVEL      = CP.IDCONDPAGIMOVEL)                                                             
+    AND (CP.IDCONTRATOIMOVEL     = CI.IDCONTRATOIMOVEL)                                                            
+    AND (PF.IDCONDPAGIMOVEL      = CPFINAL.IDCONDINICIAL)                                                          
+    AND (P.IDPESSOA(+)           = CI.IDLOCATARIO)                                                                 
+    AND (PP.IDPARCFINANCIMOV(+)  = PF.IDPARCFINANCIMOV)                                                            
+    AND (CO1.IDPARCFINANCIMOV(+) = PF.IDPARCFINANCIMOV)                                                            
+    AND (CO2.IDPARCFINANCIMOV(+) = PF.IDPARCFINANCIMOV)                                                            
+    AND (AR.IDPARCFINANCIMOV(+)  = PF.IDPARCFINANCIMOV)                                                            
+    AND (CR.IDPARCCOBRADA(+)     = PF.IDPARCFINANCIMOV)                                                            
+    AND (CD.IDPARCFINANCIMOV(+)  = PF.IDPARCFINANCIMOV)                                                            
+    AND (CD2.IDPARCFINANCIMOV(+) = PF.IDPARCFINANCIMOV)                                                            
+    AND (IM.IDCONTRATOIMOVEL(+)  = CI.IDCONTRATOIMOVEL)                                                            
+    AND (ALT.CODDOCUMENTO(+)     = PF.CODDOCUMENTO)                                                                
+    AND (CPMF.CODDOCUMENTO(+)    = PF.CODDOCUMENTO)                                                                
+    AND (D.CODDOCUMENTO(+)       = PF.CODDOCUMENTO)                                                                
+    AND (D.CODPORTFORMA          = PT.CODPORTFORMA(+))                                                             
+    AND (D.IDUSUARIOINCLUSAO     = US.IDUSUARIO(+))                                                                
+    AND (D.IDUSUARIOINCLUSAO     = PU.IDPESSOA(+))                                                                 
+    AND (D.CODDOCUMENTO(+)       = PF.CODDOCUMENTO)                                                                
+    AND (L.CODDOCUMENTO(+)       = D.CODDOCUMENTO)                                                                 
+    AND ( (PF.CODDOCUMENTO IS NOT NULL AND TRIM(L.OPERACAO) = '2') OR PF.CODDOCUMENTO IS NULL )                  
+    AND (CI.IDADMINIMOVEL        = PA.IDPESSOA(+))                                                                 
+    AND CI.IDCONTRATOIMOVEL = 1539
+  ORDER BY CI.CONNUMERO, PF.IDCONDPAGIMOVEL, DATAVENCIMENTO, PF.FLGTIPOLANC, NUMPARCELA ]<== 11/06/2008 16:55:58

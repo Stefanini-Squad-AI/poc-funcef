@@ -1,0 +1,801 @@
+package CMContabObj50;
+
+{$R *.RES}
+{$R CMCONTABOBJ50_RES.RES}
+
+{$ALIGN ON}
+{$ASSERTIONS ON}
+{$BOOLEVAL OFF}
+{$DEBUGINFO ON}
+{$EXTENDEDSYNTAX ON}
+{$IMPORTEDDATA ON}
+{$IOCHECKS ON}
+{$LOCALSYMBOLS ON}
+{$LONGSTRINGS ON}
+{$OPENSTRINGS ON}
+{$OPTIMIZATION ON}
+{$OVERFLOWCHECKS OFF}
+{$RANGECHECKS OFF}
+{$REFERENCEINFO ON}
+{$SAFEDIVIDE OFF}
+{$STACKFRAMES OFF}
+{$TYPEDADDRESS OFF}
+{$VARSTRINGCHECKS ON}
+{$WRITEABLECONST ON}
+{$MINENUMSIZE 1}
+{$IMAGEBASE $400000}
+{$DESCRIPTION 'FUNCEF - Objetos de Negócio do Sistema de Contabilidade'}
+{$DESIGNONLY}
+{$IMPLICITBUILD OFF}
+
+requires
+  CmCompo50,
+  CmGlobalObj50,
+  CmBack50;
+
+contains
+  uCtrlContaContabil in '..\CtrlObjects\uCtrlContaContabil.pas',
+  uCtrlContab in '..\CtrlObjects\uCtrlContab.pas',
+  uCtrlHistoContab in '..\CtrlObjects\uCtrlHistoContab.pas',
+  uCtrlLancamento in '..\CtrlObjects\uCtrlLancamento.pas',
+  uCtrlPeriodo in '..\CtrlObjects\uCtrlPeriodo.pas',
+  uDbLancamento in '..\DbObjects\uDbLancamento.pas',
+  uDbPlanilha in '..\DbObjects\uDbPlanilha.pas',
+  uDbPlanosaldo in '..\DbObjects\uDbPlanoSaldo.pas',
+  uDbPeriodo in '..\DbObjects\uDbPeriodo.pas',
+  uDbPlanoConta in '..\DbObjects\uDbPlanoConta.pas',
+  uDbHistoContab in '..\DbObjects\uDbHistoContab.pas',
+  uCtrlSubConta in '..\CtrlObjects\uCtrlSubConta.pas',
+  uDbSubconta in '..\DbObjects\uDbSubconta.pas',
+  uDbParamcontab in '..\DbObjects\uDbParamcontab.pas',
+  uDbContasxsubc in '..\DbObjects\uDbContasxsubc.pas',
+  uCtrlPlanoConta in '..\CtrlObjects\uCtrlPlanoConta.pas',
+  uCtrlSegregacao in '..\CtrlObjects\uCtrlSegregacao.pas',
+  uDbSegregadata in '..\DbObjects\uDbSegregaData.pas',
+  uDbSegregaCriter in '..\DbObjects\uDbSegregaCriter.pas',
+  uDbSegregaCotacao in '..\DbObjects\uDbSegregaCotacao.pas',
+  uDbLoteexportactb in '..\DbObjects\uDbLoteexportactb.pas',
+  uCtrlLoteexportactb in '..\CtrlObjects\uCtrlLoteexportactb.pas';
+
+end.
+{CM$ALT
+================================================================================
+Histórico de alterações efetuadas no módulo CMContabObj50
+================================================================================
+CM$VER      3.04.14g    11/06/2008
+--------------------------------------------------------------------------------
+Pendência: 27793 (**** AJUSTE ****)
+Tela: Regularização de Lançamentos não identificados
+Descrição: Erro na rotina de Regularização de Lançamentos não identificados. Após a execução da rotina de desmenbramento de contas no módulo contábil, a rotina não mais aceita a regularização de documentos, pois aponta a conta sintética. 
+================================================================================
+CM$VER      3.04.14f    28/04/2008
+--------------------------------------------------------------------------------
+Pendência: 27793
+Tela: Regularização de Lançamentos não identificados
+Descrição: Erro na rotina de Regularização de Lançamentos não identificados. Após a execução da rotina de desmenbramento de contas no módulo contábil, a rotina não mais aceita a regularização de documentos, pois aponta a conta sintética. 
+================================================================================
+CM$VER      3.04.14e    21/02/2008
+--------------------------------------------------------------------------------
+Pendência: 27129
+Tela: Lançamento Contabil
+Descrição do problema: Quando é realizado lançamentos de baixas é gravado o código do documento na tabela LANCAMENTO,
+porém se, algum destes lançamentos sofrer algum tipo de alteração no módulo Contabilidade,
+o código do documento em questão é apagado da coluna CODDOCUMENTO.
+================================================================================
+CM$VER      3.04.14d    12/02/2008
+--------------------------------------------------------------------------------
+Pendência: 27219
+Tela: SISTEMA/CONFIGURAÇÃO/DIAS BLOQUEADOS POR SISTEMA
+Descrição do problema: O sistema não está respeitando a data cadastrada na tela acima. O bloqueio está sendo feito somente até o dia anterior ao cadastrado.
+================================================================================
+CM$VER      3.04.14c    11/02/2008
+--------------------------------------------------------------------------------
+Pendência: 25244
+Processo: atualização de saldos.
+Descrição: Pequeno ajuste da implementação da pendência 25244.
+================================================================================
+CM$VER      3.04.14b    22/01/2008
+--------------------------------------------------------------------------------
+Pendência: 27253
+Telas: Integraçaõ de planilhas.
+Descrição do problema: não está sendo possível fazer integração se planilhas, ocorre um erro de constraint.
+================================================================================
+CM$VER      3.04.14a    21/01/2008
+--------------------------------------------------------------------------------
+Pendência: 25244
+Descrição: Implementação da opção de atualizar os saldos das contas analíticas e sintéticas através de
+stored procedure disparadas por triggers. Esta opção de ligar e deslicar se localiza na tela de cadastro de 
+parâmetros do sistema.
+================================================================================
+CM$VER      3.04.14     03/01/2008
+--------------------------------------------------------------------------------
+Liberação padrão 5.10.18
+ Autor     : Augusto
+ pendência : -
+ Descriçao : Ordenar lista de periodos por ano crescente
+//--
+ pendência 24892
+ Descriçao: impedir lançamentos contábeis nas contas Estatísticas com Movimento.
+================================================================================
+CM$VER      3.04.13b    16/10/2007
+--------------------------------------------------------------------------------
+pendência: 26548
+Tela: Sistemas \ Configurações \ Parâmetros do sistema e Planilhas \ Lançamento
+Descrição: No Parâmetro do sistema, na aba Clientes "Lançamento Contabil" foi criado
+  uma opção para sugerir o Plano Previdenciário e a Patrocinadora no lançamento contabil.
+Pend
+Pendência 25052 (Desfazendo esta pendência)
+================================================================================
+CM$VER      3.04.13a    05/09/2007
+--------------------------------------------------------------------------------
+pendência: 26282
+Tela: Cadastros \ Plano de Contas
+Descrição: Na aba "Contas X Centro de Custos" estava trazendo os centro de custo inativo.
+================================================================================
+CM$VER      3.04.13     16/08/2007
+--------------------------------------------------------------------------------
+Liberação do padrão 5.10.17
+================================================================================
+CM$VER      3.04.12     21/06/2007
+--------------------------------------------------------------------------------
+Liberação do padrão 5.10.16
+================================================================================
+CM$VER      3.04.11a    28/05/2007
+--------------------------------------------------------------------------------
+pendência: 22712
+Tela: Processamentos\Depara de Plano de Contas\Agrupamento e desmembramento de contas
+Descrição: Acerto e otimização do processo de desmembramento e agrupamento de contas.
+================================================================================
+CM$VER      3.04.11     11/04/2007
+--------------------------------------------------------------------------------
+Liberação do padrão 5.10.15
+Pendência 23894 - Estorno de planilha
+- Implementar gravação na memória de cálculo de segregação no estorno de planilha.
+================================================================================
+CM$VER      3.04.10c    11/04/2007
+--------------------------------------------------------------------------------
+Pendência 25052 - Excluir o critério para segregação para lançamentos já segregados.
+Motivo: estava dando conflito com o bjunta, gerando problema de regra prova zero
+para as planilhas de baixa de documentos.
+Obs: esta informação é irrelevante para o processo de segregação
+================================================================================
+CM$VER      3.04.10b    29/03/2007
+--------------------------------------------------------------------------------
+Pendência 24924 - Alteração de lançamento
+- Apresentava erro ao alterar ou excluir lançamento.
+Pendência: 24800
+- Ajuste no bloqueio de dias por módulo, passando a bloquear lançamentos < ou = ao dia bloqueado.
+================================================================================
+CM$VER      3.04.10a    22/03/2007
+--------------------------------------------------------------------------------
+Pendência 24838 - Contabilidade
+- Não estava juntando contas do passivo no lançamento de documentos
+================================================================================
+CM$VER      3.04.10     01/02/2007
+--------------------------------------------------------------------------------
+Liberação do padrão 5.10.14
+Pendência 23894 - Contabilidade
+- Implementação da memória de cálculo de segregação.
+Pendência 23897 - Novo campo: LANCAMENTO.CODDOCUMENTO
+-Destina-se a executar o bjunta para os lançamentos contábeis das contas de baixa em um
+pagameto por lote. O banco não terá este campo atribuído, já que ele é o somatório do lote
+pago.
+- Segregação de Recursos: retirada a marcação do critério para segregação quando houver
+segregação na origem com carimbo de um determinado plano.
+================================================================================
+CM$VER      3.04.09d    28/05/2007
+--------------------------------------------------------------------------------
+pendência: 22712
+Tela: Processamentos\Depara de Plano de Contas\Agrupamento e desmembramento de contas
+Descrição: Acerto e otimização do processo de desmembramento e agrupamento de contas.
+================================================================================
+CM$VER      3.04.09c    28/05/2007
+--------------------------------------------------------------------------------
+Liberação para o padrão 5.10.13
+Pendência: 21604
+Processo: Contabilização de Lotes de Documento
+Descrição: Solicitação para que os lançamentos na conta contábil Banco sejam agrupadas 
+por sub-plano dentro do lote, e não por documento como é hoje. A razão pela qual é desejada tal 
+contabilização é para facilitar a conciliação da conta contábil banco.
+================================================================================
+CM$VER      3.04.09b    12/04/2007
+--------------------------------------------------------------------------------
+Pendência 25052 - Excluir o critério para segregação para lançamentos já segregados.
+Motivo: estava dando conflito com o bjunta, gerando problema de regra prova zero
+para as planilhas de baixa de documentos.
+Obs: esta informação é irrelevante para o processo de segregação
+================================================================================
+CM$VER      3.04.09a    29/03/2007
+--------------------------------------------------------------------------------
+Pendência: 24800
+Descrição: Ajuste no bloqueio de dias por módulo, passando a bloquear lançamentos
+                 < ou = ao dia bloqueado.
+================================================================================
+CM$VER      3.04.09     01/12/2006
+--------------------------------------------------------------------------------
+Liberação para o padrão 5.10.13
+Pendência: 21604
+Processo: Contabilização de Lotes de Documento
+Descrição: Solicitação para que os lançamentos na conta contábil Banco sejam agrupadas 
+por sub-plano dentro do lote, e não por documento como é hoje. A razão pela qual é desejada tal 
+contabilização é para facilitar a conciliação da conta contábil banco.
+================================================================================
+CM$VER      3.04.08     16/10/2006
+--------------------------------------------------------------------------------
+Pendência : 23500
+Descrição : Removido os campos "Histórico Padrão" e "Ordem de Calculo"
+================================================================================
+CM$VER      3.04.07     18/09/2006
+--------------------------------------------------------------------------------
+Liberação do padrão 5.10.12
+================================================================================
+CM$VER      3.04.06     21/08/2006
+--------------------------------------------------------------------------------
+Liberação do Padrão  5.10.10
+Pendência : 22278
+processo: Lançamento de documentos.
+Descrição : Não permitir lançamentos de documentos de contas a pagar para planos diferentes. Para se determinar o mesmo plano do documento:
+            Subplanos do mesmo plano possuim o campo PLANPREVCONTABIL.IDPLANOPREVPREV igual, ou
+            o campo PLANPREVCONTABIL.CODSPC igual. Caso esteja parametrizado.
+================================================================================
+CM$VER      3.04.05     20/01/2006
+--------------------------------------------------------------------------------
+Liberação do padrão 5.10.08
+Corrigindo o posicionamento do inherited no create do objeto
+motivo: vazamento de memória
+Pendência 19976
+Descrição: Implementação do parâmetro que enumera as planilhas por sequence 
+(tela Sistema\Utilitários\Ativar Numeração de Planilhas por Seqüence).
+================================================================================
+CM$VER      3.04.03c    13/12/2005
+--------------------------------------------------------------------------------
+Pendência : 17987 Sistema\Utilitários\Atualiza Saldos das Contas Analíticas
+Descrição : Corrigido o erro (Invalid Data Packet) do processamento
+================================================================================
+CM$VER      3.04.03b    02/12/2005
+--------------------------------------------------------------------------------
+Pendência : 17987 Processamentos\Integração\Por Planilha
+Descrição : Acrescentado colunas Plano x Patrocinadora no grid de Lançamentos
+================================================================================
+CM$VER      3.04.03a    04/11/2005
+--------------------------------------------------------------------------------
+Pendência : 20506 Planilhas\Lancamentos
+Descrição : Corrigido o erro em que o Centro de Custo aparecia diferente do cadastrado
+================================================================================
+CM$VER      3.04.03     26/08/2005
+--------------------------------------------------------------------------------
+  Pendências para o padrão 07
+================================================================================
+CM$VER      3.04.02b    26/08/2005
+--------------------------------------------------------------------------------
+Pendência: 20048 \ uCtrlPlanoConta\ListCCustoCadContas
+Descrição: Trocado o campo do SELECT da qry CODCENTROCUSTO para CODEXTERNO.
+================================================================================
+CM$VER      3.04.02a    12/07/2005
+--------------------------------------------------------------------------------
+Pendência: 18865 \ uCtrlHistoContab\ArrumaHistorico
+Descrição: Correção no método, pois estava tripilicando os valores dos campos
+           de histórico.
+================================================================================
+CM$VER      3.04.02     08/06/2005
+--------------------------------------------------------------------------------
+Pendência: 19332 \ uCtrlContab\TestaDataBloqueada
+Descrição: Implementado o campo DATABLOQUEIO na 
+Pendência : 15342
+Descrição : Filtrar os centros de custo pelo campo idplancentcust.
+Pendência : 18634
+Descrição : Inserir um novo campo (IDPROGRAMA) no cadastro do Plano de Contas
+Pendência : 18689
+Descrição : Utilizar o Plano de Operações Adminstrativas para segregar as despesas
+            Administrativas carimbadas na origem
+================================================================================
+CM$VER      3.04.01a    13/01/2005
+--------------------------------------------------------------------------------
+-Pendência 18405 - Médoto AlteraLancaContab
+ Travando alterações em planilhas segregadas na origem
+-Pendência 18474 - Metodo InsereLancaContab - passando a utilizar a data inicial para segregação
+================================================================================
+CM$VER      3.04.01     29/11/2004
+--------------------------------------------------------------------------------
+Pendência: 17623 - InsereLancaContab
+Travar relacionamentos inválidos entre Plano e Patro
+Pendência: 17193 - InsereLancaContab (Segregação de Recursos) / uCtrlSegregacao
+Implementar segregação de recursos na origem
+Implementar o conceito do Plano Administrativo
+================================================================================
+CM$VER      3.04.00d    16/08/2004
+--------------------------------------------------------------------------------
+Pendeência 16888
+================================================================================
+CM$VER      3.04.00b    18/05/2004
+--------------------------------------------------------------------------------
+Pendência: 16734
+Tela: Lançamento\Documentos\Registra
+Descrição: Implementar a possibilidade de exclusão de documentos cujos lançamentos
+                 contábeis foram excluídos.
+================================================================================
+CM$VER      3.04.00a    22/03/2004
+--------------------------------------------------------------------------------
+Pendência   : 14451 Nova Segregação de Recursos
+Objeto      : uCtrlLancamento
+Métodos     : InsereLancaContab / AlteraLancaContab / FazRateio / RetornaNumLanc
+Modificação : Inseridos os parâmetros: IDSEGREGACRITER e DATASEGREGACRITER
+Objeto      : uCtrlSegregacao (Novo)
+Propriedade : SegregacaoVirtual (true / false)
+Métodos     : RetornaSegregaCriter
+Descrição   : Este método retorna o critério de segregação a ser passado no
+              lançamento contábil.
+              O Total de Débitos por lançamentos deve ser igual ao total de
+              Créditos. A conta que definirá qual critério de segregação deverá
+              ser utiliado será a conta de Despesa ou Receita, as contas de
+              passagem acompanham o critério do resultado.
+              CONTA DE PASSAGEM = CONTA DO DOCUMENTO DO CAP/CAR
+================================================================================
+CM$VER      3.03.00a    27/12/2003
+--------------------------------------------------------------------------------
+Pendência 14451 - Nova Segregação
+  Criados métodos para retornar o critério de segregação a ser utilizado e validar o cadastro de contas contábeis.
+================================================================================
+CM$VER      3.03.00     12/12/2003
+--------------------------------------------------------------------------------
+Pendência 14451 - Nova Segregação
+Criado o campo PLANOCONTA.IDSEGREGACRITER.
+Este campo irá armazenar qual critério de rateio a conta irá calcular a segregação.
+Pendência: 15792
+Na exclusão de um lançamento contábil não excluir a tabela PLANILHA caso o
+campo PARAMCONTAB.PACNAOAPAGAPLANIL for = 1
+================================================================================
+CM$VER      3.02.09b    24/10/2003
+--------------------------------------------------------------------------------
+Pendência 15148 - Objeto: Lancamento Método: InsereLancaContab
+   ** Atribuindo o resultado da inserção a propriedade RetornoPlnPlanil
+================================================================================
+CM$VER      3.02.09a    20/10/2003
+--------------------------------------------------------------------------------
+Correção Pendência 14842 - Balancete Colunado
+   Retirado campo FLGCONTARETIF 
+================================================================================
+CM$VER      3.02.09     04/09/2003
+--------------------------------------------------------------------------------
+>Resolução da pendência 14842
+================================================================================
+CM$VER      3.02.07a    31/07/2003
+--------------------------------------------------------------------------------
+Pend. 14564
+  - Modificado o objeto CMContabObj50.uCtrlPeriodo.ListExercicios. Passando a
+    exportar o campo PERDATFIM.
+================================================================================
+CM$VER      3.02.07     18/06/2003
+--------------------------------------------------------------------------------
+- acerto na Ctrllancamento
+================================================================================
+CM$VER      3.02.06     08/04/2003
+--------------------------------------------------------------------------------
+- Implementação na CtrlLancamento na função selecionaLancamentos, trazendo
+o numero do documento (Cliente Marquise)
+================================================================================
+CM$VER      3.02.05     17/06/2003
+--------------------------------------------------------------------------------
+- Acerto de arredondamento para 2 casas
+================================================================================
+CM$VER      3.02.03     21/03/2003
+--------------------------------------------------------------------------------
+- Acerto nas dbs de lancamento e planilha, colocando parametro de arredondamento
+- Acerto na ctrlLancamento colocando a função de arredontamento para 2 casas.
+================================================================================
+CM$VER      3.02.02     12/03/2003
+--------------------------------------------------------------------------------
+- Unit CtrlContab na função SelecionaParametros, acrescentei campo de
+pesquisa planilha na tela de lancamento e na uDBParamContab tambem
+================================================================================
+CM$VER      3.02.01     21/02/2003
+--------------------------------------------------------------------------------
+- Acerto na CtrlLancamento ao selecionar lancamentos (trazendo o nome do plano e
+da patro)
+================================================================================
+CM$VER      3.02.00     27/01/2003
+--------------------------------------------------------------------------------
+Alteração da Função Testa Conta Contábil ( passar parametros :Empresa,Execicio,Periodo)
+================================================================================
+CM$VER      3.01.00     06/01/2003
+--------------------------------------------------------------------------------
+Alteração da CtrlContab ( Função TestaDataBloqueada/ e Proc - inclusão do parametro
+idmodulo e também do novo teste de bloqueia lancamento)
+Alteraçao da CtrlLancamento (Todas as funcoes que chamam a função BloqueiaData,
+foram alteradas para passar o modulo).
+================================================================================
+CM$VER      3.00.40     19/12/2002
+--------------------------------------------------------------------------------
+Alteraçao - colocar função GravaLog nas CtrlLançamento e CtrlPeríodo.
+================================================================================
+CM$VER      3.00.39     04/12/2002
+--------------------------------------------------------------------------------
+Esta versao esta sendo liberada apenas porque ela estava apontando para DCUs nos lugares
+indevidos. É importante saber que nenhuma alteração de código foi feita.
+================================================================================
+CM$VER      3.00.38     26/11/2002
+--------------------------------------------------------------------------------
+Alteração da função RetornaPeriodoExercicioData, para trazer também a data inicial
+e final do periodo na CtrlPeriodo
+================================================================================
+CM$VER      3.00.34     19/11/2002
+--------------------------------------------------------------------------------
+Alteração no atualiza saldocontas, testa obriga subconta e encerra periodo
+================================================================================
+CM$VER      3.00.32     07/11/2002
+--------------------------------------------------------------------------------
+Alteração da CtrlContab (Seleciona parametros), para trazer as contas do  cliente
+================================================================================
+CM$VER      3.00.31     06/11/2002
+--------------------------------------------------------------------------------
+Na função Seleciona LançamentosEsp, alteração para pegar o codigo correspondente
+da conta, para poder fazer os lançamentos por este codigo.(CtrlLancamento)
+================================================================================
+CM$VER      3.00.30     05/11/2002
+--------------------------------------------------------------------------------
+Alteração do FazRateio, que estava gerando duas planilhas ao inves de uma. Alteração
+do relatorio razao (titulo saindo certo), alteração do cadastro do percentual do rateio
+(agora limpando os campos), liberação do relatorio Realizado x Orçado por centro de custo,
+================================================================================
+CM$VER      3.00.27     25/10/2002
+--------------------------------------------------------------------------------
+Inclusão da classe de negócio CtrlPlanoConta, das classes de persistencias
+uDBParamContab, uDBSubcontasxSC, uDBPlanoConta para TotalPrev - Imobiliario
+================================================================================
+CM$VER      3.00.26     24/10/2002
+--------------------------------------------------------------------------------
+Alteração da função ImportaFidelio na CtrlProcessaContab e Lancamento
+================================================================================
+CM$VER      3.00.09     30/08/2002
+--------------------------------------------------------------------------------
+Criação de novas classes usadas para as rotinas De-Para Contas
+================================================================================
+CM$VER      3.00.06     29/07/2002
+--------------------------------------------------------------------------------
+* Implementações de Rotinas para o TotalPrev.
+================================================================================
+CM$VER      3.00.05     14/06/2002
+--------------------------------------------------------------------------------
+* Otimização de processamentos internos.
+================================================================================
+CM$VER      3.00.04     11/06/2002
+--------------------------------------------------------------------------------
+- Customizações com o Padrão 05.07.00
+================================================================================
+CM$VER      3.00.02     03/06/2002
+--------------------------------------------------------------------------------
+* Incluida a inicialização das Ctrl dentro das Ctrl
+================================================================================
+CM$VER      3.00.01     09/05/2002
+--------------------------------------------------------------------------------
+Foi removida a UCtrlGeral, colocado no cmGlobalObj50 
+================================================================================
+CM$ALT}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

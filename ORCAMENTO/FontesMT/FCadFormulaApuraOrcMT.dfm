@@ -1,0 +1,765 @@
+inherited FrmCadFormulaApuraOrcMT: TFrmCadFormulaApuraOrcMT
+  Left = 232
+  Top = 81
+  HelpContext = 520085
+  Caption = 'Cadastro de Fórmulas para apurar o Orçamento'
+  ClientHeight = 423
+  ClientWidth = 672
+  OnDestroy = FormDestroy
+  PixelsPerInch = 96
+  TextHeight = 13
+  inherited pnlFundo: TPanel
+    Width = 672
+    Height = 337
+    inherited pnlMestre: TPanel
+      Width = 670
+      Height = 47
+      object Label1: TLabel
+        Left = 8
+        Top = 3
+        Width = 99
+        Height = 13
+        Caption = 'Nome da Fórmula'
+      end
+      object dbEdtNome: TDBEdit
+        Left = 8
+        Top = 19
+        Width = 473
+        Height = 21
+        DataField = 'NOME'
+        DataSource = ds
+        TabOrder = 0
+      end
+    end
+    inherited tbcDetalhe: TTabControlDetalhe
+      Top = 48
+      Width = 670
+      Height = 288
+      Tabs.Strings = (
+        'Descrição'
+        'Fórmula')
+      detdbGrids.Strings = (
+        ''
+        'wwDbGridDetFormula'
+        '')
+      inherited pgctrlDetalhe: TPageControl
+        Width = 572
+        Height = 229
+        ActivePage = TabSheet1
+        inherited tbsDet: TTabSheet
+          Caption = 'Descrição'
+          inherited dbgrdDet: TwwDBGrid [0]
+            Width = 564
+            Height = 201
+            Selected.Strings = (
+              'DATA'#9'18'#9'Data'
+              'PERIODOINI'#9'13'#9'Período Inicial'
+              'PERIODOFIM'#9'12'#9'Período Final'
+              'PERCENTUAL'#9'10'#9'Percentual'
+              'FLGACUMPERC'#9'16'#9'Acumula Percentual'
+              'FLGACUMULAMOEDA'#9'12'#9'Acumula Moeda'
+              'MOESIGLA'#9'10'#9'Moeda'
+              'FORMAAPURACAO'#9'29'#9'Forma Apuração')
+          end
+          inherited pnlControlesDet: TPanel [1]
+            Width = 564
+            Height = 201
+            object Label2: TLabel
+              Left = 6
+              Top = 4
+              Width = 58
+              Height = 13
+              Caption = 'Descrição'
+            end
+            object dbrdgBaseCalculo: TDBRadioGroup
+              Left = 8
+              Top = 113
+              Width = 133
+              Height = 76
+              Caption = 'Baseado no'
+              DataField = 'BASECALCULO'
+              DataSource = ds
+              Items.Strings = (
+                'Orçado'
+                'Realizado')
+              TabOrder = 0
+              Values.Strings = (
+                'O'
+                'R')
+            end
+            object dbrdgBaseArredondamento: TDBRadioGroup
+              Left = 150
+              Top = 113
+              Width = 408
+              Height = 76
+              Caption = 'Arredondamento de Resultado - Base: 10.845,55'
+              Columns = 2
+              DataField = 'BASEARREDONDAMENTO'
+              DataSource = ds
+              Items.Strings = (
+                '2 Casas Decimais = 10.845,55'
+                'Centavo = 10.846,00'
+                'Dezena = 10.850,00'
+                'Centena = 10.900,00'
+                'Milhar = 11.000,00')
+              TabOrder = 1
+              Values.Strings = (
+                '1'
+                '2'
+                '3'
+                '4'
+                '5')
+            end
+            object DBMemo1: TDBMemo
+              Left = 8
+              Top = 18
+              Width = 547
+              Height = 81
+              DataField = 'DESCRICAO'
+              DataSource = ds
+              TabOrder = 2
+            end
+          end
+        end
+        object TabSheet1: TTabSheet
+          Caption = 'Fórmula'
+          ImageIndex = 1
+          object wwDbGridDetFormula: TwwDBGrid
+            Left = 0
+            Top = 0
+            Width = 564
+            Height = 201
+            ControlType.Strings = (
+              'FLGACUMULAMOEDA;CheckBox;T;F'
+              'FLGACUMPERC;CheckBox;T;F')
+            Selected.Strings = (
+              'DATA'#9'18'#9'Data'
+              'PERIODOINI'#9'13'#9'Período Inicial'
+              'PERIODOFIM'#9'12'#9'Período Final'
+              'PERCENTUAL'#9'10'#9'Percentual'
+              'FLGACUMPERC'#9'16'#9'Acumula Percentual'
+              'FLGACUMULAMOEDA'#9'12'#9'Acumula Moeda'
+              'MOESIGLA'#9'10'#9'Moeda'
+              'FORMAAPURACAO'#9'29'#9'Forma Apuração')
+            IniAttributes.Delimiter = ';;'
+            TitleColor = clBtnFace
+            FixedCols = 0
+            ShowHorzScrollBar = True
+            Align = alClient
+            DataSource = dsDet
+            Options = [dgEditing, dgTitles, dgIndicator, dgColumnResize, dgColLines, dgRowLines, dgTabs, dgRowSelect, dgConfirmDelete, dgCancelOnExit, dgWordWrap]
+            TabOrder = 1
+            TitleAlignment = taCenter
+            TitleFont.Charset = DEFAULT_CHARSET
+            TitleFont.Color = clWindowText
+            TitleFont.Height = -9
+            TitleFont.Name = 'MS Sans Serif'
+            TitleFont.Style = [fsBold]
+            TitleLines = 1
+            TitleButtons = True
+            IndicatorColor = icBlack
+          end
+          object Panel1: TPanel
+            Left = 0
+            Top = 0
+            Width = 564
+            Height = 201
+            Align = alClient
+            BevelOuter = bvNone
+            TabOrder = 0
+            object Label6: TLabel
+              Left = 17
+              Top = 8
+              Width = 116
+              Height = 13
+              Caption = 'Data Cadastramento'
+            end
+            object Label5: TLabel
+              Left = 193
+              Top = 8
+              Width = 111
+              Height = 13
+              Caption = 'Forma de Apuração'
+            end
+            object dtpDataCadastro: TCMDateTimePicker
+              Left = 17
+              Top = 24
+              Width = 121
+              Height = 21
+              CalendarAttributes.Font.Charset = DEFAULT_CHARSET
+              CalendarAttributes.Font.Color = clWindowText
+              CalendarAttributes.Font.Height = -11
+              CalendarAttributes.Font.Name = 'MS Sans Serif'
+              CalendarAttributes.Font.Style = []
+              ButtonStyle = cbsCustom
+              DataField = 'DATA'
+              DataSource = dsDet
+              Epoch = 1950
+              ButtonGlyph.Data = {
+                06050000424D06050000000000003604000028000000100000000D0000000100
+                080000000000D000000000000000000000000001000000000000000000000000
+                80000080000000808000800000008000800080800000C0C0C000C0DCC000F0CA
+                A6000020400000206000002080000020A0000020C0000020E000004000000040
+                20000040400000406000004080000040A0000040C0000040E000006000000060
+                20000060400000606000006080000060A0000060C0000060E000008000000080
+                20000080400000806000008080000080A0000080C0000080E00000A0000000A0
+                200000A0400000A0600000A0800000A0A00000A0C00000A0E00000C0000000C0
+                200000C0400000C0600000C0800000C0A00000C0C00000C0E00000E0000000E0
+                200000E0400000E0600000E0800000E0A00000E0C00000E0E000400000004000
+                20004000400040006000400080004000A0004000C0004000E000402000004020
+                20004020400040206000402080004020A0004020C0004020E000404000004040
+                20004040400040406000404080004040A0004040C0004040E000406000004060
+                20004060400040606000406080004060A0004060C0004060E000408000004080
+                20004080400040806000408080004080A0004080C0004080E00040A0000040A0
+                200040A0400040A0600040A0800040A0A00040A0C00040A0E00040C0000040C0
+                200040C0400040C0600040C0800040C0A00040C0C00040C0E00040E0000040E0
+                200040E0400040E0600040E0800040E0A00040E0C00040E0E000800000008000
+                20008000400080006000800080008000A0008000C0008000E000802000008020
+                20008020400080206000802080008020A0008020C0008020E000804000008040
+                20008040400080406000804080008040A0008040C0008040E000806000008060
+                20008060400080606000806080008060A0008060C0008060E000808000008080
+                20008080400080806000808080008080A0008080C0008080E00080A0000080A0
+                200080A0400080A0600080A0800080A0A00080A0C00080A0E00080C0000080C0
+                200080C0400080C0600080C0800080C0A00080C0C00080C0E00080E0000080E0
+                200080E0400080E0600080E0800080E0A00080E0C00080E0E000C0000000C000
+                2000C0004000C0006000C0008000C000A000C000C000C000E000C0200000C020
+                2000C0204000C0206000C0208000C020A000C020C000C020E000C0400000C040
+                2000C0404000C0406000C0408000C040A000C040C000C040E000C0600000C060
+                2000C0604000C0606000C0608000C060A000C060C000C060E000C0800000C080
+                2000C0804000C0806000C0808000C080A000C080C000C080E000C0A00000C0A0
+                2000C0A04000C0A06000C0A08000C0A0A000C0A0C000C0A0E000C0C00000C0C0
+                2000C0C04000C0C06000C0C08000C0C0A000F0FBFF00A4A0A000808080000000
+                FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00010000000000
+                000000000000000000FFFF00FFFFFFFFFFFFFFFFFFFFFFFF00FFFF00FF07A407
+                A407A4F9A407A4FF00FFFF00FFA407A407A4F9A4F9A407FF00FFFF00FF07A407
+                A407A4F9A407A4FF00FFFF00FFA407A407A407A407A407FF00FFFF00FF07A407
+                A407A407A407A4FF00FFFF00FFA407A407A407A407A407FF00FFFF00FFFFFFFF
+                FFFFFFFFFFFFFFFF00FFFF00FF04FC04FC04FCA4A4A4A4FF00FFFF00FFFC04FC
+                04FC04A4A4A4A4FF00FFFF00FFFFFFFFFFFFFFFFFFFFFFFF00FFFF0000000000
+                000000000000000000FF}
+              ShowButton = True
+              TabOrder = 0
+            end
+            object GrpPeriodos: TGroupBox
+              Left = 17
+              Top = 53
+              Width = 144
+              Height = 68
+              Caption = 'Período Destino'
+              TabOrder = 1
+              object Label3: TLabel
+                Left = 7
+                Top = 17
+                Width = 35
+                Height = 13
+                Caption = 'Inicial'
+              end
+              object Label4: TLabel
+                Left = 81
+                Top = 17
+                Width = 28
+                Height = 13
+                Caption = 'Final'
+              end
+              object dbspePeriodoIni: TwwDBSpinEdit
+                Left = 8
+                Top = 32
+                Width = 57
+                Height = 21
+                Increment = 1
+                MaxValue = 12
+                MinValue = 1
+                Value = 1
+                DataField = 'PERIODOINI'
+                DataSource = dsDet
+                TabOrder = 0
+                UnboundDataType = wwDefault
+              end
+              object dbspePeriodoFim: TwwDBSpinEdit
+                Left = 80
+                Top = 32
+                Width = 57
+                Height = 21
+                Increment = 1
+                MaxValue = 12
+                MinValue = 1
+                Value = 1
+                DataField = 'PERIODOFIM'
+                DataSource = dsDet
+                TabOrder = 1
+                UnboundDataType = wwDefault
+              end
+            end
+            object dbcboFormaApuracao: TwwDBComboBox
+              Left = 193
+              Top = 24
+              Width = 255
+              Height = 21
+              ShowButton = True
+              Style = csDropDown
+              MapList = True
+              AllowClearKey = False
+              DataField = 'IDFORMAAPURACAO'
+              DataSource = dsDet
+              DropDownCount = 8
+              ItemHeight = 0
+              Items.Strings = (
+                'Movimentação do último mês apurado'#9'1'
+                'Média da movimentação dos meses'#9'2'
+                'Somatório da movimentação dos meses'#9'3'
+                'Período a Período'#9'4'
+                'Orçado do Mês anterior'#9'5')
+              Sorted = False
+              TabOrder = 2
+              UnboundDataType = wwDefault
+            end
+            object GrpPercentual: TGroupBox
+              Left = 193
+              Top = 53
+              Width = 255
+              Height = 68
+              Caption = '    Percentual a aplicar s/ Forma Apuração'
+              TabOrder = 3
+              object Label7: TLabel
+                Left = 139
+                Top = 23
+                Width = 10
+                Height = 13
+                Caption = '%'
+              end
+              object dbrePercentual: TDBRealEdit
+                Left = 16
+                Top = 20
+                Width = 119
+                Height = 21
+                Alignment = taRightJustify
+                Lines.Strings = (
+                  '0,00')
+                TabOrder = 0
+                WordWrap = False
+                IntDigits = 10
+                DecDigits = 4
+                NumberFormat = fNumber
+                Signal = True
+                DataField = 'PERCENTUAL'
+                DataSource = dsDet
+              end
+              object dbckbAcumPercentual: TDBCheckBox
+                Left = 16
+                Top = 45
+                Width = 140
+                Height = 17
+                Caption = 'Acumula Percentual'
+                DataField = 'FLGACUMPERC'
+                DataSource = dsDet
+                TabOrder = 1
+                ValueChecked = 'T'
+                ValueUnchecked = 'F'
+              end
+            end
+            object grpMoeda: TGroupBox
+              Left = 192
+              Top = 130
+              Width = 257
+              Height = 68
+              Caption = '    Moeda'
+              TabOrder = 4
+              object dbckbAcumMoeda: TDBCheckBox
+                Left = 16
+                Top = 46
+                Width = 140
+                Height = 17
+                Caption = 'Acumula Moeda'
+                DataField = 'FLGACUMULAMOEDA'
+                DataSource = dsDet
+                TabOrder = 0
+                ValueChecked = 'T'
+                ValueUnchecked = 'F'
+              end
+              object dbLkcboMoeda: TCMDBLookupCombo
+                Left = 16
+                Top = 20
+                Width = 225
+                Height = 21
+                DropDownAlignment = taLeftJustify
+                Selected.Strings = (
+                  'MOESIGLA'#9'10'#9'MOESIGLA'#9'F'
+                  'MOEDESC'#9'20'#9'MOEDESC'#9'F')
+                DataField = 'MOECODIGO'
+                DataSource = dsDet
+                LookupTable = CdsMoeda
+                LookupField = 'MOECODIGO'
+                Options = [loTitles]
+                Style = csDropDownList
+                TabOrder = 1
+                AutoDropDown = True
+                ShowButton = True
+                AllowClearKey = True
+                ShowMatchText = True
+                OnChange = dbLkcboMoedaChange
+              end
+            end
+            object RdbPercentual: TRadioButton
+              Left = 202
+              Top = 52
+              Width = 14
+              Height = 15
+              Checked = True
+              TabOrder = 5
+              TabStop = True
+              OnClick = RdbPercentualClick
+            end
+            object RdbMoeda: TRadioButton
+              Left = 201
+              Top = 130
+              Width = 14
+              Height = 15
+              TabOrder = 6
+              OnClick = RdbMoedaClick
+            end
+          end
+        end
+      end
+      inherited Dock973: TDock97
+        Width = 662
+      end
+      inherited Dock974: TDock97
+        Left = 576
+        Height = 229
+      end
+    end
+  end
+  inherited Dock972: TDock97
+    Width = 672
+  end
+  inherited Dock971: TDock97
+    Top = 384
+    Width = 672
+    inherited tb97Fundo: TToolbar97
+      Left = 367
+      inherited bbtnAjuda: TmaHelpBitBtn
+        HelpContext = 520085
+      end
+    end
+    inherited TB97oKCancelar: TToolbar97
+      Left = 190
+    end
+  end
+  inherited ivTradutor: TIvExtendedTranslator
+    Left = 298
+    Top = 7
+    TargetsData = (
+      1
+      5
+      (
+        'TMemo'
+        'Text'
+        0)
+      (
+        'TDBRealEdit'
+        'Text'
+        0)
+      (
+        'TwwDBRichEdit'
+        'Text'
+        0)
+      (
+        'TRealEdit'
+        'Text'
+        0)
+      (
+        'TDBMemo'
+        'Text'
+        0))
+  end
+  inherited ds: TwwDataSource
+    Left = 444
+    Top = 103
+  end
+  inherited ImlPadrao: TImageList
+    Left = 264
+    Top = 7
+  end
+  inherited CmeCadastro: TCmEventosCadastro
+    OnFind = CmeCadastroFind
+    ApplyInsert = CmeCadastroApplyInsert
+    ApplyEdit = CmeCadastroApplyInsert
+    ApplyDelete = CmeCadastroApplyDelete
+    Left = 444
+    Top = 7
+  end
+  inherited Cds: TCMClientDataSet
+    Left = 444
+    Top = 55
+  end
+  inherited MontaSelect: TMontaSelect
+    Colunas.Strings = (
+      'FORMORCADO.IDFORMORCADO'
+      'FORMORCADO.NOME'
+      'FORMORCADO.DESCRICAO')
+    TipodeDado.Strings = (
+      'N'
+      'C'
+      'C')
+    Descricao.Strings = (
+      'Código'
+      'Nome da Fórmula'
+      'Descrição')
+    SensivelACaixa.Strings = (
+      'N'
+      'N'
+      'N')
+    Tabelas.Strings = (
+      'FORMORCADO')
+    CamposChave.Strings = (
+      'FORMORCADO.IDFORMORCADO')
+    Mascaras.Strings = (
+      ''
+      ''
+      '')
+    Larguras.Strings = (
+      '10'
+      '60'
+      '10')
+    Left = 368
+    Top = 7
+  end
+  inherited CmeDetalhe: TCmEventosCadastro
+    BeforeConfirma = CmeDetalheBeforeConfirma
+    ApplyInsert = CmeDetalheApplyInsert
+    ApplyEdit = CmeDetalheApplyInsert
+    Left = 518
+    Top = 7
+  end
+  inherited dsDet: TwwDataSource
+    DataSet = CdsFormasApuraOrc
+    Left = 518
+    Top = 103
+  end
+  object CdsFormasApuraOrc: TCMClientDataSet
+    Aggregates = <>
+    Params = <>
+    BeforePost = CdsFormasApuraOrcBeforePost
+    Left = 518
+    Top = 55
+  end
+  object CMSqlParam: TCMSqlParams
+    SQL.Strings = (
+      'SELECT FD.IDFORMORCADODET,'
+      '       FD.IDFORMAAPURACAO,'
+      '       FD.IDFORMORCADO,'
+      '       FD.MOECODIGO,'
+      '       FD.DATA,'
+      '       FD.PERIODOINI,'
+      '       FD.PERIODOFIM,'
+      '       FD.PERCENTUAL,'
+      '       FD.FLGACUMPERC,'
+      '       FD.FLGACUMULAMOEDA,'
+      '       MO.MOEDESC,'
+      '       MO.MOESIGLA,'
+      
+        '       DECODE(FD.IDFORMAAPURACAO, 1, '#39'Moviment. Último Mês Apura' +
+        'do'#39','
+      
+        '                                  2, '#39'Média Moviment. dos Meses'#39 +
+        ','
+      
+        '                                  3, '#39'Somatório Moviment. dos Me' +
+        'ses'#39','
+      '                                  4, '#39'Período a Período'#39','
+      
+        '                                     '#39'Não Definida'#39') AS FORMAAPU' +
+        'RACAO'
+      ''
+      '  FROM FORMORCADODET FD,'
+      '       MOEDA MO'
+      ''
+      ' WHERE IDFORMORCADO = -1'
+      '   AND MO.MOECODIGO = FD.MOECODIGO'
+      ''
+      ' ')
+    Left = 545
+    Top = 184
+  end
+  object CdsMoeda: TCMClientDataSet
+    Active = True
+    Aggregates = <>
+    Params = <>
+    Left = 380
+    Top = 56
+    Data = {
+      151400009619E0BD010000001800000011003C000000030000009602094D4F45
+      434F4449474F08000400000000001149445553554152494F494E434C5553414F
+      0800040000000000074D4F454445534301004900000001000557494454480200
+      02001400084D4F455349474C410100490000000100055749445448020002000A
+      00104D4F45504552494F44494349444144450100490000000200075355425459
+      5045020049000A00466978656443686172000557494454480200020001000A4D
+      4F45494E415449564F01004900000002000753554254595045020049000A0046
+      6978656443686172000557494454480200020001000C464C475045524356414C
+      4F5201004900000002000753554254595045020049000A004669786564436861
+      72000557494454480200020001000E4641544F52434F4E56455253414F080004
+      00000000000A44415441494E4943494F0800080000000000074441544146494D
+      08000800000000000F4D4F4544415245464552454E4349410800040000000000
+      0D5452474454494E434C5553414F08000800000000000F54524755534552494E
+      434C5553414F0100490000000100055749445448020002001E000C464C475449
+      504F5052415A4F01004900000002000753554254595045020049000A00466978
+      656443686172000557494454480200020001000A464C47504552494F444F0100
+      4900000002000753554254595045020049000A00466978656443686172000557
+      494454480200020001000F44455343554E494441444554415841010049000000
+      0100055749445448020002001E0010464C4754455354414441544153434F5401
+      004900000002000753554254595045020049000A004669786564436861720005
+      57494454480200020001000100044C4349440400010009080000000040145400
+      0000000000806240000000000061C44013444542454E54555245204E2E434F4E
+      5645525308494E565F56414C450144014101560000AC50CFBCCC42004CAD7939
+      BECC4207434D31303433340153000000155400000000000000F03F0000000000
+      80564013556E69642E205265662E204D455452612D524A05544255524D014101
+      410156000000000000000000404B900EAFCC4202434D01530000401554000000
+      00000000004000000000008056401454782E20436F6E742E2045737065632166
+      69636105544254434501410141015600404B900EAFCC4202434D015300004015
+      540000000000000008400000000000805640145465746F20646520436F6E7472
+      69627569E7E36F085445544F494E535301410141015600404B900EAFCC420243
+      4D015300000015540000000000000022400000000000805640134641542E2043
+      4F52524543414F2052454645520754425245464552014D014101500000000000
+      00000000404B900EAFCC4202434D015300004015540000000000000018400000
+      000000805640045265616C02522401410141015600404B900EAFCC4202434D01
+      530000001554000000000000004140000000000080564012446F6C6172205553
+      20436F6D65726369616C06555324434F4D014401410156000000000000000000
+      5CBB220BADCC4204434D39300153000000155400000000000000204000000000
+      00805640124641542E20434F52524543414F20494E5353065442494E5353014D
+      01410150000000000000000000404B900EAFCC4202434D015300000015540000
+      0000000000244000000000008056400E73616C6172696F206D696E696D6F0673
+      616C6D696E014101410156000000000000000000404B900EAFCC4202434D0153
+      00000015540000000000000026400000000000805640135465746F20436F6E74
+      7269622E205265666572085445545245464552014D0141015600000000000000
+      0000404B900EAFCC4202434D0153000000155400000000000000144000000000
+      0080564010436F746173206465205265736572766107434F5441524553014D01
+      410156000000000000000000104AA6AAABCC4204434D39300153000000155400
+      00000000000028400000000000805640115265746F726E6F20476172616E7469
+      646F08524554474552414E014D0141015600000000000000000000C20BB5ABCC
+      4204434D393001530000001554000000000000002C4000000000008056400847
+      6172616E74696108474152414E544941014D01410156000000000000000000F0
+      170CB5ABCC4204434D393001530000001554000000000000002E400000000000
+      80564014566172696163616F2050617472696D6F6E69616C0856415250415452
+      49014D0141015600000000000000000070560CB5ABCC4204434D393001530000
+      001554000000000000003940000000000080564004554649520455464952014D
+      014101560000000000000000005C6A4157ACCC4204434D393001530000001554
+      00000000000000374000000000008056400B496E64696365205A65726F07494E
+      444943455A01410141015000000000000000000000D8CCB0ABCC4204434D3930
+      01530000001554000000000000003B40000000000080564004494E504304494E
+      5043014D01410150000000000000000000803CA06BACCC4204434D3930015300
+      000015540000000000000040400000000000805640044E554C4F0654425A4552
+      4F014D0141015600000000000000000010379C80ACCC4204434D393001530000
+      00155400000000000000424000000000008056401149424F5645535041202D20
+      4D454E53414C0849424F5645535041014D01410150000000000000000000004E
+      961FADCC4204434D393001530000001554000000000000004440000000000080
+      5640054947502D4D054947502D4D014D01410150000000000000000000B0D664
+      2CADCC4204434D39300153000000155400000000000080454000000000008056
+      4008434442204242534106434442204242014401410150000000000000000000
+      881E682CADCC4204434D39300153000000155400000000000080474000000000
+      008056401449475044492028496E76657374696D656E746F2905494750444901
+      4D014101560000000000000000004C22692CADCC4204434D3930015300000015
+      54000000000000004B4000000000008056400C53454C49432D44494152494F09
+      53454C49432D4449410144014101500000000000000000008C93852CADCC4204
+      434D393001530000001054000000000000004C40000000000080564007435255
+      5A41444F0443525A240144014901560000000000408F4000004C6BEB7CCC4200
+      00346FA987CC420068AB847FADCC4204434D3930015300000000540000000000
+      00804C4000000000008056400C4352555A41444F204E4F564F0443525A240144
+      014901560000000000408F4000006202AC87CC4200009E20B78BCC4200000000
+      00004C40004C03857FADCC4204434D393001530000000054000000000000004D
+      4000000000008056400D4352555A4549524F205245414C034352240144014901
+      560000000000408F40000040742D98CC4200002AC34C9ACC420000000000804C
+      4000E091857FADCC4204434D393001530000401554000000000000804E400000
+      00000080564002545202545201440141015000C89905B0ADCC4204434D393001
+      4E0000000054000000000000804F400000000000805640035552560355525601
+      440149015600000000007CA540000058564F9ACC42000016E7869BCC42000000
+      0000004D4000945A0AB0ADCC4204434D39300153000000155400000000000040
+      5040000000000080564004495043520449504352014D01410150000000000000
+      00000040E50AB0ADCC4204434D39300153000000155400000000000000514000
+      000000008056400342544E0342544E014D014101500000000000000000006465
+      48B0ADCC4204434D393001530000001554000000000000005240000000000080
+      5640145553202D20556E6964616465205365727669636F025553014101410156
+      000000000000000000182058E6ADCC4204434D39300153000000155400000000
+      00008052400000000000805640125465746F20646520486F7261204578747261
+      085445544F484F5241014D01410156000000000000000000041F8F69AECC4204
+      434D39300153000000155400000000000040534000000000847D32410F494E44
+      49434520415455415249414C03415455014401410156000000000000000000BC
+      94E61AAFCC4209434D3132313137383001530000001554000000000000005540
+      0000000000E07F400F5452204143554D2032394F55543939075452204143554D
+      0144014101560000000000000000008CAF4A2AB0CC4205434D35313001530000
+      001554000000000000C0564000000000847D32410C434449202D204449415249
+      4F074344492D444941014401410150000000000000000000D8783598B0CC4209
+      434D313231313738300153000000155400000000000000574000000000847D32
+      410A4C46542044494152494F074C465420444941014401410150000000000000
+      000000B0AE3B98B0CC4209434D31323131373830015300000015540000000000
+      008059400000000000E07F400E53616C6172696F204D696E696D6F04532E4D2E
+      014101410156000000000000000000B8003FD6B0CC4205434D35313001530000
+      001554000000000000C05A4000000000725B374112432E4D2E2050415452494D
+      2E20524546455208434D205245464552014D014101560000000000000000007C
+      7BD73AB1CC4203434D3001530000001544000000000000405B400000000000E0
+      7F40064947502D4449064947502D4449014D01410150000000000000000000F4
+      E3BAE9B1CC4205434D353130014E01530000001544000000000000005C400000
+      000000E07F4013434654202D20412044494152494F204F56455207434654202D
+      20410144014101560000000000000000002479AE0DB2CC4205434D353130014E
+      01530000001544000000000000405C400000000000E07F401252454445393920
+      44494152494F204F564552085245444539393131014401410156000000000000
+      00000044C7AE0DB2CC4205434D353130014E0153000000154400000000000040
+      5E400000000000E07F4011554E49442E205245462E2052454645522004555252
+      4501440141015600000000000000000084C382EBB4CC4205434D353130014E01
+      530000001544000000000000C05E400000000000E07F4010554E49442E205245
+      462E205246465341045552524601440141015600000000000000000040BC8CEB
+      B4CC4205434D353130014E01530000001544000000000000405F400000000000
+      E07F400F554E49442E205245462E204342545504555243420144014101560000
+      00000000000000B89C8EEBB4CC4205434D353130014E01530000001544000000
+      000000805F400000000000E07F4010554E49442E205245462E20464C554D4904
+      5552464C0144014101560000000000000000009CF48EEBB4CC4205434D353130
+      014E01530000001544000000000000A060400000000000E07F40145661726961
+      63616F20506174722E2052464653410756505246465341014D01410156000000
+      00000000000084A6C745B5CC4205434D353130014E0153000000154400000000
+      0000C060400000000000E07F4012566172696163616F20506174722E43425455
+      06565043425455014D01410156000000000000000000E0EAC745B5CC4205434D
+      353130014E01530000001544000000000000E060400000000000E07F40135661
+      72696163616F20506174722E464C554D49075650464C554D49014D0141015600
+      00000000000000003C2FC845B5CC4205434D353130014E015300000015440000
+      000000000061400000000000E07F4013566172696163616F20506174722E5245
+      4645520756505245464552014D014101560000000000000000004C56C845B5CC
+      4205434D353130014E015300000015440000000000004061400000000000E07F
+      40135265742E20476172616E20434420546F64617308524744454D414953014D
+      014101560000000000000000009015CA45B5CC4205434D353130014E01530000
+      0015440000000000008061400000000000E07F401343742E20476172616E7469
+      612044656D616973084354474152414E54014D01410156000000000000000000
+      40C9CA45B5CC4205434D353130014E01530000401554000000000000C0614000
+      000000AB5A37410A434F54412052454645520A434F5441205245464552014D01
+      4101560038878800B9CC4209434D313533303533390153000040145400000000
+      0000E0614000000000AB5A3741134947502D4D20496E76657374696D656E746F
+      73044947504D014401410156000088AA6240CB4200A4172345BACC4209434D31
+      353330353339015300004014540000000000000062400000000080D2C3400E51
+      554F544120434F4E544142494C0851554F544142494C0141014101560000CA55
+      1BB7CC42003C8EE94CBACC4207434D3130313439015300004015540000000000
+      00406240000000000005C4400F4947502D4D2070726F6A657461646F09494750
+      4D2D50524F4A014D0141015000B40B11BCBACC4207434D313032353001530000
+      401454000000000000006340000000000061C44010434F544120424220415455
+      415249414C0A494E565F4242415455410144014101560000D261D3BDCC420040
+      3E9619BFCC4207434D3130343334015300004015540000000000006062400000
+      000000F7C340125661726920506174722E4D4554524F464F520A56504D455452
+      4F464F52014D014101500088E739A9BDCC4207434D3130323232015300004014
+      54000000000000A06240000000000061C4400954522044494120303108494E56
+      5F545230310144014101560000DA3815ACCC4200008F6ABCBECC4207434D3130
+      34333401530000401454000000000000C06240000000000061C4400954522044
+      494120313308494E565F545231330144014101560000DA3815ACCC420034B06A
+      BCBECC4207434D313034333401530000401454000000000000E0624000000000
+      0061C44009505520494445524F4C0A494E565F494445524F4C01440141015600
+      00DA3815ACCC420008E16ABCBECC4207434D31303433340153}
+  end
+  object dsMoeda: TwwDataSource
+    DataSet = CdsMoeda
+    Left = 380
+    Top = 103
+  end
+  object CMSqlParams1: TCMSqlParams
+    SQL.Strings = (
+      'SELECT * FROM MOEDA')
+    ClientDataSet = CdsMoeda
+    Left = 553
+    Top = 278
+  end
+end

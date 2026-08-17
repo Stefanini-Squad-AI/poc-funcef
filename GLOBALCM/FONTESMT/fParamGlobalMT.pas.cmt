@@ -1,0 +1,562 @@
+unit fParamGlobalMT;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  FCadastroMT, MontaSelect, Db, DBClient, uCMClientDataSet,
+  CmEventosCadastro, ImgList, Wwdatsrc, IvDictio, IvMulti, IvEMulti,
+  MAHlpBtn, StdCtrls, Buttons, TB97Tlbr, TB97Ctls, TB97, ExtCtrls,
+  Wwdbspin, CMDBLookupCombo, Mask, wwdbedit, DBCtrls, wwdblook, ComCtrls,
+  uModulo, uCripto, uCtrlParamGlobal, uCtrlTipoDocPessoa, uCtrlSeguranca,
+  uCtrlMoeda, uCtrlCentroCusto, uCtrlCentRespon, uCtrlUnidNegocio;
+
+type
+  TFrmParamGlobalMT = class(TFrmCadastroMT)
+    PageGlobal: TPageControl;
+    TbsGeral: TTabSheet;
+    lblMoedaCorrente: TLabel;
+    grpIntegracao: TGroupBox;
+    sbtnSim: TSpeedButton;
+    sbtnNao: TSpeedButton;
+    CkbCriaAgencia: TDBCheckBox;
+    DBCbMaiuscula: TDBCheckBox;
+    DBCbPesquisa: TDBCheckBox;
+    CkbObrigaDocPessoa: TDBCheckBox;
+    DBCbDuplicidade: TDBCheckBox;
+    dblkcmbMoeda: TwwDBLookupCombo;
+    DBCbModuloCadastro: TDBCheckBox;
+    TbsMascara: TTabSheet;
+    Label6: TLabel;
+    Label5: TLabel;
+    GbCentroRespon: TGroupBox;
+    Label3: TLabel;
+    dbedMascaraCR: TwwDBEdit;
+    DBCbObrigaCentroRespon: TDBCheckBox;
+    GbAtividadeProjeto: TGroupBox;
+    Label4: TLabel;
+    dbedMascaraAP: TwwDBEdit;
+    DBCbObrigaAtividade: TDBCheckBox;
+    DbEdMascAgencia: TwwDBEdit;
+    GbCentroCusto: TGroupBox;
+    Label7: TLabel;
+    DBCbObrigaCentroCusto: TDBCheckBox;
+    dbedMascaraCC: TwwDBEdit;
+    DbEdMascCliente: TwwDBEdit;
+    TbsPrevidencia: TTabSheet;
+    Label11: TLabel;
+    Label12: TLabel;
+    CmbPlano: TCMDBLookupCombo;
+    CmbPatro: TCMDBLookupCombo;
+    TbsSenha: TTabSheet;
+    CdsSeguranca: TCMClientDataSet;
+    CdsAux: TCMClientDataSet;
+    CdsMoeda: TCMClientDataSet;
+    CdsTipoDocPF: TCMClientDataSet;
+    CdsTipoDocPJ: TCMClientDataSet;
+    CdsPatroPrev: TCMClientDataSet;
+    CdsPlanoPrev: TCMClientDataSet;
+    DsSeguranca: TwwDataSource;
+    DBCbPartidaDobrada: TDBCheckBox;
+    TbsDocumento: TTabSheet;
+    GbDocumentos: TGroupBox;
+    Label1: TLabel;
+    Label2: TLabel;
+    dblkPesJuridica: TwwDBLookupCombo;
+    dblkPesFisica: TwwDBLookupCombo;
+    GbInscricao: TGroupBox;
+    Label10: TLabel;
+    Label16: TLabel;
+    DbLcbInscrMun: TwwDBLookupCombo;
+    DbLcbInscrEst: TwwDBLookupCombo;
+    Label8: TLabel;
+    Label9: TLabel;
+    GbTempo: TGroupBox;
+    Label13: TLabel;
+    DbSelTempo: TwwDBSpinEdit;
+    DbSeTamMinimo: TwwDBSpinEdit;
+    GbObrigatorio: TGroupBox;
+    DbCkbLetras: TDBCheckBox;
+    DbCkbNumeros: TDBCheckBox;
+    DbSeHisorico: TwwDBSpinEdit;
+    GbAlteraSuper: TGroupBox;
+    Label14: TLabel;
+    Label15: TLabel;
+    DbCkbSuper: TDBCheckBox;
+    EdSenhaSuper: TEdit;
+    EdSenhaSuper2: TEdit;
+    GbRepetirSenha: TGroupBox;
+    DbCkbRepete: TDBCheckBox;
+    GbNomenaSenha: TGroupBox;
+    DBCbNomeSenha: TDBCheckBox;
+    GbPrazoTroca: TGroupBox;
+    DbSelDias: TwwDBSpinEdit;
+    Label17: TLabel;
+    DbCkbSubContaClie: TDBCheckBox;
+    DbCkbSubContaForn: TDBCheckBox;
+    procedure HabilitaPaginas( bStatus: Boolean );
+    procedure FormCreate(Sender: TObject);
+    procedure FormShow(Sender: TObject);
+    procedure dbedMascaraCCKeyPress(Sender: TObject; var Key: Char);
+    procedure dbedMascaraCCExit(Sender: TObject);
+    procedure DbEdMascAgenciaKeyPress(Sender: TObject; var Key: Char);
+    procedure DbCkbSuperClick(Sender: TObject);
+    procedure CmeCadastroAtualizaBotoes(Sender: TObject);
+    procedure CmeCadastroBeforeConfirma(sender: TObject;
+      var Accept: Boolean);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure CmeCadastroConfirma(Sender: TObject);
+    procedure CmeCadastroEdit(Sender: TObject);
+    procedure DbSelTempoAfterUpClick(Sender: TObject);
+    procedure DbSelTempoAfterDownClick(Sender: TObject);
+    procedure CmeCadastroApplyEdit(sender: TObject; var Accept: Boolean);
+    procedure CmeCadastroAfterConfirma(Sender: TObject);
+    procedure CmeCadastroCancel(Sender: TObject);
+    procedure CdsBeforePost(DataSet: TDataSet);
+  private
+    { Private declarations }
+    procedure mensagem( msg: String );
+  public
+    { Public declarations }
+    Modulo: TModulo;
+    TipoDoc: TCtrlTipoDocPessoa;
+    CentroCusto: TCtrlCentroCusto;
+    CentroRespon: TCtrlCentRespon;
+    UnidNegocio: TCtrlUnidNegocio;
+    Moeda: TCtrlMoeda;
+    Seguranca: TCtrlSeguranca;
+    ParamGlobal: TCtrlParamGlobal;
+  end;
+
+var
+  FrmParamGlobalMT: TFrmParamGlobalMT;
+
+implementation
+
+{$R *.DFM}
+
+Uses uMensErro, dBasedados, uSistema, uMidasUtil, uAutorizacao;
+
+procedure TFrmParamGlobalMT.HabilitaPaginas( bStatus: Boolean );
+var
+  i: Integer;
+begin
+  For i := 0 To PageGlobal.PageCount - 1 Do
+      PageGlobal.Pages[ i ].Enabled := bStatus;
+end;
+
+procedure TFrmParamGlobalMT.FormCreate(Sender: TObject);
+begin
+  inherited;
+  TbsPrevidencia.TabVisible := Sistema.UsaPlanoPatro;
+  PageGlobal.ActivePage     := TbsGeral;
+
+  Modulo := TModulo.Create;
+  ParamGlobal := TCtrlParamGlobal.Create;
+  ParamGlobal.Initialize( DtmBaseDados.dbBaseDados, True, Sistema.ConnectionType,
+                          Sistema.ConnectionSide, Sistema.AppRemoteServer, True, Mensagem );
+
+  Seguranca := TCtrlSeguranca.Create;
+  Seguranca.Initialize( DtmBaseDados.dbBaseDados, True, Sistema.ConnectionType,
+                        Sistema.ConnectionSide, Sistema.AppRemoteServer, True, Mensagem );
+
+  CentroCusto := TCtrlCentroCusto.Create;
+  CentroCusto.Initialize( DtmBaseDados.dbBaseDados, False, Sistema.ConnectionType,
+                          Sistema.ConnectionSide, Sistema.AppRemoteServer, True );
+
+  CentroRespon := TCtrlCentRespon.Create;
+  CentroRespon.Initialize( DtmBaseDados.dbBaseDados, False, Sistema.ConnectionType,
+                           Sistema.ConnectionSide, Sistema.AppRemoteServer, True );
+
+  UnidNegocio := TCtrlUnidNegocio.Create;
+  UnidNegocio.Initialize( DtmBaseDados.dbBaseDados, False, Sistema.ConnectionType,
+                          Sistema.ConnectionSide, Sistema.AppRemoteServer, True );
+
+  Moeda := TCtrlMoeda.Create;
+  Moeda.Initialize( DtmBaseDados.dbBaseDados, False, Sistema.ConnectionType,
+                    Sistema.ConnectionSide, Sistema.AppRemoteServer, True );
+
+  TipoDoc := TCtrlTipoDocPessoa.Create;
+  TipoDoc.Initialize( DtmBaseDados.dbBaseDados, False, Sistema.ConnectionType,
+                        Sistema.ConnectionSide, Sistema.AppRemoteServer, True );
+
+  ParamGlobal.cds := Cds;
+  Seguranca.cds   := CdsSeguranca;
+
+  CdsMoeda.Data     := Moeda.ListaMoeda();
+  CdsTipoDocPF.Data := TipoDoc.ListaTipoDocPessoa( 0, 'F' );
+  CdsTipoDocPJ.Data := TipoDoc.ListaTipoDocPessoa( 0, 'J' );
+  CdsPatroPrev.Data := ParamGlobal.ListaPatro();
+  CdsPlanoPrev.Data := ParamGlobal.ListaPlanoPrevContabil();
+  cds.Data          := ParamGlobal.ListaParamGlobal( Sistema.IdEmpresa );
+  CdsSeguranca.Data := Seguranca.ListaSeguranca();
+
+  If Not cds.IsEmpty Then Begin
+     sbtnSim.Down := ( cds.FieldByName( 'FLGINTEGRAORC' ).AsString = 'S' );
+     sbtnNao.Down := ( ( cds.FieldByName( 'FLGINTEGRAORC' ).AsString = 'N' ) Or
+                       ( cds.FieldByName( 'FLGINTEGRAORC' ).IsNull ) );
+  End;
+
+  CdsAux.Data := CentroCusto.ListaCentroCusto( Sistema.IdEmpresa );
+  dbedMascaraCC.Enabled := ( cdsAux.IsEmpty );
+
+  CdsAux.Data := CentroRespon.ListaCentRespon( Sistema.IdEmpresa );
+  dbedMascaraCR.Enabled := ( cdsAux.IsEmpty );
+
+  CdsAux.Data := UnidNegocio.ListaUnidNegocio( Sistema.IdEmpresa );
+  dbedMascaraAP.Enabled := ( cdsAux.IsEmpty );
+  CdsAux.Close;
+end;
+
+procedure TFrmParamGlobalMT.FormShow(Sender: TObject);
+begin
+  inherited;
+  AutorizarForm( afSoDesabilitar );
+end;
+
+procedure TFrmParamGlobalMT.dbedMascaraCCKeyPress(Sender: TObject;
+  var Key: Char);
+begin
+  inherited;
+  If  ( key = '.' ) and ( Copy( ( Sender as TwwDbEdit ).Text, Length( ( Sender as TwwDbEdit ).Text ), 1 ) = '.' ) Then Begin
+      MessageBeep( 0 );
+      ShowMessage( 'Máscara Inválida' );
+      key := #0;
+  End Else
+  If ( key <> '9' ) and ( key <> '.' ) and ( key <> #8 ) Then Begin
+      MessageBeep( 0 );
+      ShowMessage( 'Máscara Inválida' );
+      key := #0;
+  End Else
+  If ( key <> '9' ) and ( Length( ( Sender as TwwDbEdit ).Text ) = 0 ) Then Begin
+      MessageBeep( 0 );
+      ShowMessage( 'Máscara Inválida' );
+      key := #0;
+  End;
+end;
+
+procedure TFrmParamGlobalMT.dbedMascaraCCExit(Sender: TObject);
+Var
+  x, iNum9: Integer;
+  sAux: String;
+begin
+  inherited;
+  sAux  := dbedMascaraCC.Text;
+  iNum9 := 0;
+
+  For x := 1 To Length( sAux ) Do
+      If sAux[ x ] = '9' Then
+         Inc( iNum9 );
+
+  If iNum9 > 10 Then Begin
+     MsgDlg( 'O Número de dígitos da Mascara de Centro de Custo excedeu o limite máximo de 10 Dígitos.',
+             'Atenção', mtError, [mbOk], 0 );
+
+     If dbedMascaraCC.CanFocus Then
+        dbedMascaraCC.SetFocus;
+  End;
+end;
+
+procedure TFrmParamGlobalMT.DbEdMascAgenciaKeyPress(Sender: TObject;
+  var Key: Char);
+begin
+  inherited;
+  If ( key = '.' ) and ( Copy( ( Sender as TwwDbEdit ).Text, Length( ( Sender as TwwDbEdit ).Text ), 1 ) = '.' ) then begin
+     MessageBeep( 0 );
+     ShowMessage( 'Máscara Inválida' );
+     key := #0;
+  End Else
+  If ( key <> '9' ) and ( key <> '.' ) and ( key <> '-' ) and ( key <> #8 ) then begin
+     MessageBeep( 0 );
+     ShowMessage( 'Máscara Inválida' );
+     key := #0;
+  End Else
+  If ( key <> '9' ) and ( Length( ( Sender as TwwDbEdit ).Text ) = 0 ) then begin
+     MessageBeep( 0 );
+     ShowMessage( 'Máscara Inválida' );
+     key := #0;
+  End;
+end;
+
+procedure TFrmParamGlobalMT.DbCkbSuperClick(Sender: TObject);
+begin
+  inherited;
+  If DbCkbSuper.Checked Then Begin
+     EdSenhaSuper.Enabled  := True;
+     EdSenhaSuper2.Enabled := True;
+  End Else Begin
+     EdSenhaSuper.Enabled  := False;
+     EdSenhaSuper2.Enabled := False;
+     EdSenhaSuper.Clear;
+     EdSenhaSuper2.Clear;
+  End;
+end;
+
+procedure TFrmParamGlobalMT.CmeCadastroAtualizaBotoes(Sender: TObject);
+begin
+  inherited;
+  sbtnInserir.Enabled  := False;
+  sbtnApagar.enabled   := False;
+  sbtnprocurar.enabled := False;
+  sbtnAlterar.enabled  := Not bbtnConfirmar.Enabled;
+  pnlFundo.Enabled     := True;
+end;
+
+procedure TFrmParamGlobalMT.CmeCadastroBeforeConfirma(sender: TObject;
+  var Accept: Boolean);
+begin
+  inherited;
+  if dblkcmbMoeda.Text = ''  then begin
+     MsgDlg( 'Obrigatório preenchimento da Moeda', LerMensagem( 2 ), mtError, [mbOk], 0 );
+
+     If dblkcmbMoeda.Canfocus Then
+        dblkcmbMoeda.SetFocus;
+
+     Accept := false;
+  End Else
+  If CdsSeguranca.FieldByName( 'FlgAltSenhaSuper' ).AsString <> 'S' Then Begin
+     CdsSeguranca.FieldByName( 'SenhaSuper' ).Clear;
+     Sistema.SenhaSuper := '';
+  End Else
+  If ( CdsSeguranca.FieldByName( 'FlgAltSenhaSuper' ).OldValue = 'S' ) and
+         ( EdSenhaSuper.Text = '' ) and ( EdSenhaSuper2.Text = '' ) Then Begin
+     Accept := True;
+  End Else
+  // verifica se a senha foi digitada
+  If ( EdSenhaSuper.Text <> EdSenhaSuper2.Text ) or ( EdSenhaSuper.Text = '' ) Then Begin
+     MsgDlg('Redigite a nova senha corretamente', 'Parametros Globais', mtWarning, [mbOk, mbHelp], 0);
+     edSenhaSuper.Clear;
+     edSenhaSuper2.Clear;
+     PageGlobal.ActivePage := TbsSenha;
+     edSenhaSuper.SetFocus;
+     Accept := false;
+  End Else
+  // se nao pode permanecer a mesma senha, testar se a nova e' diferente da atual
+  If ( Not ( CdsSeguranca.FieldByName( 'FlgRepeteSenha' ).AsString = 'S' ) ) and
+         ( CriptografarHash( EdSenhaSuper.Text, 0, 15 ) = CdsSeguranca.FieldByName( 'SenhaSuper' ).AsString  ) Then Begin
+     MsgDlg( 'A nova senha deve ser diferente da antiga', 'Parametros Globais',
+             mtError, [mbOk, mbHelp], 0 );
+     edSenhaSuper.Clear;
+     edSenhaSuper2.Clear;
+     PageGlobal.ActivePage := TbsSenha;
+     edSenhaSuper.SetFocus;
+     Accept := false;
+  End Else
+  // compara com o tamanho padrão
+  If Length( edSenhaSuper.Text ) < CdsSeguranca.FieldByName( 'TamMinSenha' ).AsInteger  then begin
+     MsgDlg( 'Senha deve ter pelo menos ' + IntToStr( CdsSeguranca.FieldByName( 'TamMinSenha' ).AsInteger ) +
+             ' caracteres', 'Parametros Globais', mtError, [mbOk, mbHelp], 0 );
+     edSenhaSuper.Clear;
+     edSenhaSuper2.Clear;
+     PageGlobal.ActivePage := TbsSenha;
+     edSenhaSuper.SetFocus;
+     Accept := false;
+  End Else
+  // verifica se tem os caracteres obrigatórios (numeros e/ou letras)
+  If Not Modulo.StrIsAlphaNum( edSenhaSuper.Text, CdsSeguranca.FieldByName( 'FlgSenhaLetras' ).AsString,
+                               CdsSeguranca.FieldByName( 'FlgSenhaNumeros' ).AsString ) Then Begin
+     If CdsSeguranca.FieldByName( 'FlgSenhaLetras' ).AsString = 'S' Then
+        If CdsSeguranca.FieldByName( 'FlgSenhaNumeros' ).AsString = 'S' Then
+           MsgDlg( 'Senha deve possuir números e letras', 'Parametros Globais',
+                   mtError, [mbOk, mbHelp], 0 )
+        Else
+           MsgDlg( 'Senha deve possuir pelo menos uma letra', 'Parametros Globais',
+                   mtError, [mbOk, mbHelp], 0 )
+     Else
+        If CdsSeguranca.FieldByName( 'FlgSenhaNumeros' ).AsString = 'S' Then
+           MsgDlg( 'Senha deve possuir pelo menos um número', 'Parametros Globais',
+                   mtError, [mbOk, mbHelp], 0 )
+        Else
+           MsgDlg( 'Senha inválida', 'Parametros Globais', mtError, [mbOk, mbHelp], 0 );
+
+     edSenhaSuper.Clear;
+     edSenhaSuper2.Clear;
+     PageGlobal.ActivePage := TbsSenha;
+     edSenhaSuper.SetFocus;
+     Accept := false;
+  End Else
+  // verifica se tem caracters seguidos repetidos
+  If Modulo.ExistsMultChar( edSenhaSuper.Text ) Then Begin
+     MsgDlg( 'Senha não pode ter caracteres repetidos consecutivos',
+             'Parametros Globais', mtError, [ mbOk, mbHelp ], 0 );
+     edSenhaSuper.Clear;
+     edSenhaSuper2.Clear;
+     PageGlobal.ActivePage := TbsSenha;
+     edSenhaSuper.SetFocus;
+     Accept := false;
+  End;
+
+  If Accept Then Begin
+     If sbtnSim.Down Then
+        cds.FieldByName( 'FLGINTEGRAORC' ).AsString := 'S'
+     Else
+        cds.FieldByName( 'FLGINTEGRAORC' ).AsString := 'N';
+
+     If CdsSeguranca.FieldByName( 'TempoTrava' ).AsInteger < 60 Then
+        CdsSeguranca.FieldByName( 'TempoTrava' ).AsInteger := 0;
+
+     CdsSeguranca.FieldByName( 'SenhaSuper' ).AsString := CriptografarHash( EdSenhaSuper.Text, 0, 15 );
+     Sistema.SenhaSuper := CdsSeguranca.FieldByName( 'SenhaSuper' ).AsString;
+  End;
+end;
+
+procedure TFrmParamGlobalMT.FormClose(Sender: TObject;
+  var Action: TCloseAction);
+begin
+  inherited;
+  Modulo.Free;
+  Moeda.Free;
+  TipoDoc.Free;
+  CentroCusto.Free;
+  CentroRespon.Free;
+  UnidNegocio.Free;
+  Seguranca.Free;
+  ParamGlobal.Free;
+end;
+
+procedure TFrmParamGlobalMT.CmeCadastroConfirma(Sender: TObject);
+begin
+  inherited;
+  Sistema.SetParametrosSeguranca;
+end;
+
+procedure TFrmParamGlobalMT.CmeCadastroEdit(Sender: TObject);
+begin
+  With Cds Do Begin
+       If IsEmpty Then Begin
+          Append;
+          FieldByName( 'FLGOBRIGACC' ).AsString := 'N';
+          FieldByName( 'USACRESPON' ).AsString  := 'N';
+          FieldByName( 'USAABC' ).AsString      := 'N';
+          FieldByName( 'FLGINTEGRAORC' ).AsString  := 'N';
+          FieldByName( 'FLGCRIAAGENCIA' ).AsString := 'N';
+          FieldByName( 'FLGUSAUPPERPESSOA' ).AsString := 'N';
+          FieldByName( 'FLGUSAENDPESSOA' ).AsString   := 'N';
+          FieldByName( 'FLGOBRIDOCPESSOA' ).AsString  := 'N';
+          FieldByName( 'FLGDUPLDOCPESSOA' ).AsString  := 'N';
+          FieldByName( 'FLGUSAMODRESPON' ).AsString   := 'N';
+          FieldByName( 'FLGCONTABPARTDOB' ).AsString  := 'N';
+          FieldByName( 'FLGSUBCONTAFORN' ).AsString   := 'N';
+          FieldByName( 'FLGSUBCONTACLIE' ).AsString   := 'N';
+          sbtnNao.Down := True;
+       End;
+  End;
+
+  With CdsSeguranca Do Begin
+       If IsEmpty Then Begin
+          Append;
+          FieldByname( 'IDEMPRESA' ).AsFloat           := 1;
+          FieldByname( 'FLGSENHALETRAS' ).AsString     := 'S';
+          FieldByname( 'FLGSENHANUMEROS' ).AsString    := 'N';
+          FieldByname( 'FLGREPETESENHA' ).AsString     := 'S';
+          FieldByname( 'FLGALTSENHASUPER' ).AsString   := 'N';
+          FieldByname( 'FLGVALSENHANOME' ).AsString    := 'N';
+          FieldByname( 'TAMMINSENHA' ).AsInteger       := 6;
+          FieldByname( 'TAMHISTORICOSENHA' ).AsInteger := 5;
+          FieldByname( 'TEMPOTRAVA' ).AsInteger        := 0;
+          FieldByname( 'DIASTROCASENHA' ).AsInteger    := 0;
+       End Else Begin
+          Edit;
+
+          If FieldByName( 'IDEMPRESA' ).IsNull Then
+             FieldByName( 'IDEMPRESA' ).AsFloat := 1;
+
+          If FieldByName( 'FLGSENHALETRAS' ).IsNull Then
+             FieldByName( 'FLGSENHALETRAS' ).AsString := 'S';
+
+          If FieldByName( 'FLGSENHANUMEROS' ).IsNull Then
+             FieldByName( 'FLGSENHANUMEROS' ).AsString := 'N';
+
+          If FieldByName( 'FLGREPETESENHA' ).IsNull Then
+             FieldByName( 'FLGREPETESENHA' ).AsString := 'S';
+
+          If FieldByName( 'FLGALTSENHASUPER' ).IsNull Then
+             FieldByName( 'FLGALTSENHASUPER' ).AsString := 'N';
+
+          If FieldByName( 'TAMMINSENHA' ).IsNull Then
+             FieldByName( 'TAMMINSENHA' ).AsInteger := 6;
+
+          If FieldByName( 'TAMHISTORICOSENHA' ).IsNull Then
+             FieldByName( 'TAMHISTORICOSENHA' ).AsInteger := 5;
+
+          If FieldByName( 'TEMPOTRAVA' ).IsNull Then
+             FieldByName( 'TEMPOTRAVA' ).AsInteger := 0;
+
+          If FieldByName( 'DIASTROCASENHA' ).IsNull Then
+             FieldByName( 'DIASTROCASENHA' ).AsInteger := 0;
+
+          If FieldByName( 'FLGVALSENHANOME' ).IsNull Then
+             FieldByName( 'FLGVALSENHANOME' ).AsString := 'N';
+       End;
+  End;
+
+  inherited;
+
+  HabilitaPaginas( True );
+  PageGlobal.ActivePage := tbsGeral;
+
+  If dbedMascaraCC.Enabled = True Then Begin
+     If dbedMascaraCC.CanFocus Then
+        dbedMascaraCC.SetFocus
+  End Else Begin
+     If dbedMascaraCR.CanFocus Then
+        dbedMascaraCR.SetFocus;
+  End;
+
+  If cds.FieldByName( 'FLGUSAMODRESPON' ).IsNull Then
+     cds.FieldByname( 'FLGUSAMODRESPON' ).AsString := 'N';
+end;
+
+procedure TFrmParamGlobalMT.DbSelTempoAfterUpClick(Sender: TObject);
+begin
+  inherited;
+  If DbSelTempo.Value < 60 Then
+     DbSelTempo.Value := 60;
+end;
+
+procedure TFrmParamGlobalMT.DbSelTempoAfterDownClick(Sender: TObject);
+begin
+  inherited;
+  If DbSelTempo.Value < 60 Then
+     DbSelTempo.Value := 0;
+end;
+
+procedure TFrmParamGlobalMT.CmeCadastroApplyEdit(sender: TObject;
+  var Accept: Boolean);
+begin
+  inherited;
+  Seguranca.Gravar;
+  ParamGlobal.Gravar;
+  Sistema.GravaLogOperacoes( 'Atualização de Parâmetros do Sistema' );
+  cds.Data          := ParamGlobal.ListaParamGlobal( Sistema.IdEmpresa );
+  CdsSeguranca.Data := Seguranca.ListaSeguranca();
+end;
+
+procedure TFrmParamGlobalMT.CmeCadastroAfterConfirma(Sender: TObject);
+begin
+  inherited;
+  HabilitaPaginas( False );
+end;
+
+procedure TFrmParamGlobalMT.CmeCadastroCancel(Sender: TObject);
+begin
+  inherited;
+  HabilitaPaginas( False );
+end;
+
+procedure TFrmParamGlobalMT.mensagem(msg: String);
+begin
+  MsgDlg( msg, 'Atenção', MtWarning, [MbOk], 0 );
+end;
+
+procedure TFrmParamGlobalMT.CdsBeforePost(DataSet: TDataSet);
+begin
+  inherited;
+  With Cds Do Begin
+       FieldByName( 'IDPESSOA' ).AsInteger  := Sistema.IdEmpresa;
+       FieldByName( 'IDUSUARIO' ).AsInteger := Sistema.IdEmpresa;
+  End;
+end;
+
+end.
+

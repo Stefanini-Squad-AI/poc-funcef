@@ -1,0 +1,1716 @@
+unit ULancFinancX;
+
+interface
+
+uses
+ Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  StdCtrls, wwdblook, ComCtrls, ExtCtrls, MAHlpBtn, Buttons,
+  ToolWin, Grids, Wwdbigrd, Wwdbgrid, Db, DBTables, wwQuery,
+  Wwdatsrc, DBCtrls,ULancContab,uFuncaoGeral,uIntegraBack;
+
+type TLancFinanc = Class(TObject)
+
+private
+
+public
+
+procedure LancaFinanceiro(qryContabilidade:TwwQuery;
+                         iModulo,iHistPad,iMoeCodigo,iUsuario,iCodPortador,iEmpresaProp:LongInt;
+                         rValorCorrente,rValorOutraMoeda:Real;
+                         sNumDocum,sDataLanc,sDataConcilia,sEntradaSaida,sHistorico,sStatusConcilia:string;
+                         var iCodLancFinan,iPlnCodigo:LongInt);
+
+procedure GravaTransFundos(iCodLancDe,iCodLancPara:LongInt);
+
+procedure AlteraFinanceiro(qryContabilidade:TwwQuery;
+                           iHistPad,iMoeCodigo,iUsuario,iCodPortador,iEmpresaProp:LongInt;
+                           rValorCorrente,rValorOutraMoeda:Real;
+                           sNumDocum,sDataLanc,sDataConcilia,sEntradaSaida,sHistorico,sStatusConcilia:string;
+                           var iPlnCodigo,iCodLancFinan:LongInt);
+
+procedure LancaRateioFinanc(iUnidNegoc,iMoeCodigo,iEmpresaProp,iCodPortador:LongInt;
+                            rValorCorrente,rValorOutraMoeda:Real;
+                            sCodTipRecDes,sRecPag,sCodCentroRespon,sDataLanc:string;
+                            var iCodLancFinan:LongInt;sCodCentroCusto:string;
+                            rIDPrograma, rIDPatro, rIDPlanoPrev, rCodTipDoc : Real);
+
+Procedure ExcluiFinanceiro(var iCodLancFinan:Longint);
+
+Procedure ExcluiRateioFinanc(var iCodLancFinan:LongInt);
+
+Procedure CalculaSaldoFinanc(iCodPortador:LongInt;sDataLimite,sStatusConcilia,sTipoData:string;
+                             var rValorCorrente,rValorOutraMoeda:Real);
+
+Procedure ConciliaConta(iCodPortador:LongInt;sDataExtrato:String);
+
+procedure FazerRateioCAPCAR(qryDocPagRec:TwwQuery;
+                            sLugarBaixa,sNumChqBor,sDataFloat,sRecPag:String;
+                            iNumLote,iCodPortForma:LongInt;
+                            var iCodLancFinan:LongInt);
+
+procedure FazerAcumulaRateio(qryRateioDocum:TwwQuery;
+                             sCodDocSaldo:String;
+                             var rTotalDocumento,rTotalDocOM :Real);
+
+procedure FazerRateioDocum(qryRateioDocum,qryAux,qryFluxoPrev:TwwQuery;
+                           iCodPortConta:LongInt;
+                           sCodDocumento,sOperacao,sData:String;
+                           rTotalDocGeral,rTotalDocOMGeral,rSaldoCorrente,rSaldoMoeda,rValorCotacao:Real;
+                           var iCodLancFinan:LongInt; sEntradaSaida,sRecPag:String);
+
+procedure GravaFluxoPrev(qryAux,qryFluxoPrev:TwwQuery;
+                         sCRespon,sData,sTipoRD,sRecPag,sPrev:String;
+                         iABC:LongInt;
+                         rValorCorrente:Real;
+                         sCodCentroCusto:String;
+                         rIDPrograma, rIDPatro, rIDPlanoPrev, rCodTipDoc : Real);
+
+procedure GravaFluxoReal(qryAux,qryFluxoReal:TwwQuery;
+                         sCRespon,sData,sTipoRD,sRecPag:String;
+                         iMoeCodigo,iABC:LongInt;
+                         rValor:Real;
+                         sCodCentroCusto:String;
+                         rIDPrograma, rIDPatro, rIDPlanoPrev, rCodTipDoc : Real);
+
+procedure MudaStatusConcilia(sStatus,sDataConcilia:String;iCodLancFinan:LongInt);
+
+Procedure EstornoFinanceiro(sDataEstorno,sNaoIdentif:String;var iCodLancFinan:LongInt);
+
+procedure IncluiContabilidade(qryContabilidade:TwwQuery;
+                              sDataLanc:String;
+                              iModulo,iEmpresaProp,iUsuario:LongInt;
+                              var iPlnCodigo:LongInt);
+
+Function FazRateioAdm(qry:TwwQuery;sTipoRecDesemb,sRecPag,sUnidNegoc,sIdPessoa: String):Boolean;
+
+procedure LancaRatFinRateio(qry,qry3:TwwQuery;
+                            iUnidNegoc,iMoeCodigo,iEmpresaProp,iCodPortador:LongInt;
+                            rValorCorrente,rValorOutraMoeda:Real;
+                            sCodTipRecDes,sRecPag,sCodCentroRespon,sDataLanc:string;
+                            var iCodLancFinan:LongInt;sCodCentroCusto:String;
+                            rIDPrograma, rIDPatro, rIDPlanoPrev, rCodTipDoc : Real);
+
+procedure GravaRelacNI(AOwner: TComponent);
+
+procedure IncluiRelacionado(AOwner: TComponent; rCodLancFinanc: Real;
+      sFlgNI: String);
+procedure PreparaQueryRelac(AOwner: TComponent);
+
+end;
+
+var LancFinanc : TLancFinanc;
+    liPeriodo,liExercicio,liRetFuncao : LongInt;
+    qryRelacionados : TwwQuery;
+    updRelacionados : TUpdateSQL;
+
+implementation
+
+uses uMensErro,uDataBase, DBaseDados, uSistema;
+
+// ************* Parametros ************************
+// icoddoc = CODDOCUMENTO da Tabela DOCUMENTO
+// sRecPag = passar  SisrecPag na Unit USistema
+//           ('P'- Contas a Pagar,'R'-Contas a Receber)
+// rSaldo  = Saldo que retornara Calculado do registro em questao
+// rSaldoOutraMoeda = Saldo referente a outra moeda que retornara calculado
+
+procedure TLancFinanc.LancaFinanceiro(qryContabilidade:TwwQuery;iModulo,iHistPad,iMoeCodigo,iUsuario,iCodPortador,iEmpresaProp:LongInt;
+                          rValorCorrente,rValorOutraMoeda:Real;sNumDocum,sDataLanc,sDataConcilia,sEntradaSaida,sHistorico,sStatusConcilia:string;
+                          var iCodLancFinan,iPlnCodigo:LongInt);
+var
+  qry,qry1,qry2:TwwQuery;
+  sMens,scSql,sSql,sValorCorrente,sValorOutraMoeda: String;
+  rValorCotacao : Real;
+Begin
+  qry :=TwwQuery.Create(Application);
+  qry1:=TwwQuery.Create(Application);
+  qry2:=TwwQuery.Create(Application);
+  qry.DatabaseName  := 'BASEDADOS';
+  qry1.DatabaseName := 'BASEDADOS';
+  qry2.DatabaseName := 'BASEDADOS';
+  Try
+  scSql:='';
+  if Integraback.Contabilidade = 'S' then
+  Begin
+     if (not qryContabilidade.IsEmpty) then
+     Begin
+        qryContabilidade.First;
+        liRetFuncao:=TestaPeriodo(True,'BaseDados',sDataLanc,IntToStr(Sistema.IdModulo),liExercicio,
+                               liPeriodo,iEmpresaProp,sMens);
+        if liRetFuncao <> 0 then
+        Begin
+           iCodLancFinan:=-1;
+           exit;
+        end;
+     end;
+  end;
+
+  qry1.Close;
+  qry1.SQL.Clear;
+  qry1.SQL.text := 'SELECT CODPORTADOR, MOECODIGO, DESCRICAO, NOCONTACORR, FLGSTATUS FROM '+Sistema.PrefixoServidor+'PORTADORCONTA WHERE IDPESSOA = '+InttoStr(iEmpresaProp)+' AND CODPORTADOR = '+InttoStr(iCodPortador);
+  qry1.Open;
+
+  //Verifica se Portador Conta Está Inativo
+  If qry1.FieldByName('FLGSTATUS').AsString = 'I' Then
+  Begin
+     iCodLancFinan:=-1;
+     exit;
+  End;
+
+  if trim(Format('%17.0f',[rValorOutraMoeda])) = '0' then
+  Begin
+     if qry1.FieldByName('MOECODIGO').AsInteger <> 0 then
+     Begin
+        rValorCotacao:=FuncaoGeral.TestaCotacaoMoeda(qry1.FieldByName('MOECODIGO').AsInteger,sDataLanc,'S');
+        iMoeCodigo:=qry1.FieldByName('MOECODIGO').AsInteger;
+        If rValorCotacao <> 0 then
+           rValorOutraMoeda:=rValorCorrente/rValorCotacao
+        else
+        Begin
+           iCodLancFinan:=-1;
+           exit;
+        end;
+     end;
+  end;
+
+  IncluiContabilidade(qryContabilidade,sDataLanc,iModulo,iEmpresaProp,iUsuario,iPlnCodigo);
+  if iPlnCodigo = -1 then
+  Begin
+     iCodLancFinan:=-1;
+     exit
+  end;
+  if length(Trim(sHistorico)) > 60 then
+     sHistorico :=Copy(sHistorico,1,60);
+  sValorCorrente:=FuncaoGeral.OraNumero(rValorCorrente);
+  sValorOutraMoeda:=FuncaoGeral.OraNumero(rValorOutraMoeda);
+  if iMoeCodigo <> 0 then
+     scSql:=scSql +','+IntToStr(iMoeCodigo)
+  else
+     scSql:=scSql +',NULL';
+  if iPlnCodigo <> 0 then
+     scSql:=scSql +','+IntToStr(iPlnCodigo)
+  else
+     scSql:=scSql +',NULL';
+  scSql:=scSql +','+IntToStr(iUsuario);
+  scSql:=scSql +','+IntToStr(iCodPortador);
+  scSql:=scSql +','+InttoStr(iEmpresaProp);
+  scSql:=scSql +','+sValorCorrente;
+  scSql:=scSql +','+sValorOutraMoeda;
+  scSql:=scSql +','''+Trim(sNumDocum)+'''';
+  scSql:=scSql +',TO_DATE('''+sDataLanc+''',''dd/MM/yyyy'')';
+  if sDataConcilia <> '' then
+     scSql:=scSql +',TO_DATE('''+sDataConcilia+''',''dd/MM/yyyy'')'
+  else
+     scSql:=scSql +',NULL';
+  scSql:=scSql+','''+sEntradaSaida+'''';
+  scSql:=scSql+','''+sHistorico+'''';
+  scSql:=scSql+','''+sStatusConcilia+'''';
+  iCodLancFinan := LeUltRegistro(nil,'MOVIMFINANC');
+  sSql :='INSERT INTO MOVIMFINANC(CODLANCFINANC,IDMODULO,HISTPADFINAN,'+
+         'MOECODIGO,PLNCODIGO,IDUSUARIOINCLUSAO,CODPORTADOR,IDPESSOA,'+
+         'VALORLANCFINAN,VALOROUTRAMOEDA,NUMCHQBORDERO,DATALANCFINAN,'+
+         'DATACONCILIACAO,ENTRADASAIDA,HISTORICO,STATUSCONCILIA) VALUES(';
+  sSql :=sSql+InttoStr(iCodLancFinan)+','+InttoStr(iModulo)+','+IntToStr(iHistPad)+scSql+')';
+  if not ExecutarQuery(qry,sSql) then
+  Begin
+     iCodLancFinan := -1;
+     exit;
+  end;
+  Finally
+     qry.Free;
+     qry1.Free;
+     qry2.Free;
+  end;
+End;
+
+procedure TLancFinanc.GravaTransFundos(iCodLancDe,iCodLancPara:LongInt);
+var
+  qry:TwwQuery;
+  sSql: String;
+Begin
+  qry :=TwwQuery.Create(Application);
+  qry.DatabaseName  := 'BASEDADOS';
+  Try
+      sSql :='UPDATE MOVIMFINANC SET CODLANCTRANSF = '+IntToStr(iCodLancDe)+
+             ' WHERE CODLANCFINANC = '+InttoStr(iCodLancPara);
+      if not ExecutarQuery(qry,sSql) then
+      Begin
+         Abort;
+      end;
+      sSql :='UPDATE MOVIMFINANC SET CODLANCTRANSF = '+IntToStr(iCodLancPara)+
+             ' WHERE CODLANCFINANC = '+IntToStr(iCodLancDe);
+      if not ExecutarQuery(qry,sSql) then
+      Begin
+         Abort;
+      end;
+  Finally
+     qry.Free;
+  end;
+end;
+
+procedure TLancFinanc.AlteraFinanceiro(qryContabilidade:TwwQuery;iHistPad,iMoeCodigo,iUsuario,
+                                       iCodPortador,iEmpresaProp:LongInt;rValorCorrente,
+                                       rValorOutraMoeda:Real;sNumDocum,sDataLanc,sDataConcilia,
+                                       sEntradaSaida,sHistorico,sStatusConcilia:string;
+                                       var iPlnCodigo,iCodLancFinan:LongInt);
+var
+  qry,qry1,qry2:TwwQuery;
+  sMens, sValorCorrente,sValorOutraMoeda,scSql,sSql: String;
+  rValorCotacao : Real;
+  iPlnCodigoOriginal: Integer;
+
+Begin
+  qry :=TwwQuery.Create(Application);
+  qry1:=TwwQuery.Create(Application);
+  qry2:=TwwQuery.Create(Application);
+  qry.DatabaseName  := 'BASEDADOS';
+  qry1.DatabaseName := 'BASEDADOS';
+  qry2.DatabaseName := 'BASEDADOS';
+  try
+  scSql:='';
+
+  // Guarda Valor do Código da Planilha
+  iPlnCodigoOriginal:=iPlnCodigo;
+
+  if IntegraBack.Contabilidade = 'S' then
+  Begin
+     if (not qryContabilidade.IsEmpty) then
+     Begin
+        qryContabilidade.First;
+        liRetFuncao:=TestaPeriodo(True,'BaseDados',sDataLanc,IntToStr(Sistema.IdModulo),liExercicio,
+                               liPeriodo,iEmpresaProp,sMens);
+        if liRetFuncao <> 0 then
+        Begin
+           iCodLancFinan:=-1;
+           exit;
+        end;
+     end;
+  end;
+
+  qry1.Close;
+  qry1.SQL.Clear;
+  qry1.SQL.text := 'SELECT CODPORTADOR, MOECODIGO, DESCRICAO, NOCONTACORR, FLGSTATUS  FROM ' +
+                   Sistema.PrefixoServidor + ' PORTADORCONTA ' +
+                   ' WHERE IDPESSOA = '+InttoStr(iEmpresaProp)+' AND CODPORTADOR = '+
+                   InttoStr(iCodPortador);
+  qry1.Open;
+
+  //Verifica se Portador Conta Está Inativo
+  If qry1.FieldByName('FLGSTATUS').AsString = 'I' Then
+  Begin
+     iCodLancFinan:=-1;
+     exit;
+  End;
+
+  if trim(Format('%17.0f',[rValorOutraMoeda])) = '0' then
+  Begin
+     if qry1.FieldByName('MOECODIGO').AsInteger <> 0 then
+     Begin
+        rValorCotacao:=FuncaoGeral.TestaCotacaoMoeda(qry1.FieldByName('MOECODIGO').AsInteger,sDataLanc,'S');
+        iMoeCodigo:=qry1.FieldByName('MOECODIGO').AsInteger;
+        If rValorCotacao <> 0 then
+           rValorOutraMoeda:=rValorCorrente/rValorCotacao
+        else
+        Begin
+           iCodLancFinan:=-1;
+           exit;
+        end;
+     end;
+  end;
+  iPlnCodigo := 0;
+  IncluiContabilidade(qryContabilidade,sDataLanc,Sistema.IdModulo,iEmpresaProp,iUsuario,iPlnCodigo);
+  if iPlnCodigo = -1 then
+  Begin
+     iCodLancFinan:=-1;
+     exit
+  end;
+  if length(Trim(sHistorico)) > 60 then
+     sHistorico :=Copy(sHistorico,1,60);
+  sValorCorrente  :=FuncaoGeral.OraNumero(rValorCorrente);
+  sValorOutraMoeda:=FuncaoGeral.OraNumero(rValorOutraMoeda);
+  sSql :='UPDATE MOVIMFINANC SET ';
+  sSql := sSql + 'HISTPADFINAN = '+IntToStr(iHistPad);
+
+  if iMoeCodigo <> 0 then
+     sSql := sSql + ',MOECODIGO = '+IntToStr(iMoeCodigo)
+  else
+     sSql := sSql +',MOECODIGO = NULL';
+
+  if iPlnCodigo <> 0 then
+     sSql:=sSql +',PLNCODIGO = '+IntToStr(iPlnCodigo)
+  else
+     sSql:=sSql +',PLNCODIGO = NULL';
+
+  sSql:=sSql +',IDUSUARIOINCLUSAO = '+IntToStr(iUsuario);
+  sSql:=sSql +',CODPORTADOR = '+IntToStr(iCodPortador);
+  sSql:=sSql +',IDPESSOA = '+InttoStr(iEmpresaProp);
+  sSql:=sSql +',VALORLANCFINAN = '+sValorCorrente;
+  sSql:=sSql +',VALOROUTRAMOEDA = '+sValorOutraMoeda;
+  sSql:=sSql +',NUMCHQBORDERO = '''+Trim(sNumDocum)+'''';
+  sSql:=sSql +',DATALANCFINAN = TO_DATE('''+sDataLanc+''',''dd/MM/yyyy'')';
+
+  if sDataConcilia <> '' then
+     sSql:=sSql +',DATACONCILIACAO = TO_DATE('''+sDataConcilia+''',''dd/MM/yyyy'')'
+  else
+     sSql:=sSql +',DATACONCILIACAO = NULL';
+
+  sSql:=sSql+',ENTRADASAIDA = '''+sEntradaSaida+'''';
+  sSql:=sSql+',HISTORICO = '''+sHistorico+'''';
+  sSql:=sSql+',STATUSCONCILIA = '''+sStatusConcilia+'''';
+  sSql:=sSql+' WHERE CODLANCFINANC = '+InttoStr(iCodLancFinan);
+  if not ExecutarQuery(qry,sSql) then
+  Begin
+     iCodLancFinan := -1;
+     exit;
+  end;
+
+  if iPlnCodigoOriginal <> 0 then
+  Begin
+     Try
+       if ExcluiLanc(True,iPlnCodigoOriginal,'BASEDADOS', IntToStr(Sistema.idModulo),
+                     IntegraBack.Plano, iEmpresaProp, iUsuario, True,0,
+                     IntegraBack.MascaraPlano) <> 0 then
+          Abort;
+     except
+       iCodLancFinan := -1;
+       raise;
+     end;
+  End;
+
+  Finally
+     qry.Free;
+     qry1.Free;
+     qry2.Free;
+  end;
+End;
+
+procedure TLancFinanc.LancaRateioFinanc(iUnidNegoc,iMoeCodigo,iEmpresaProp,iCodPortador:LongInt;
+                                        rValorCorrente,rValorOutraMoeda:Real;
+                                        sCodTipRecDes,sRecPag,sCodCentroRespon,sDataLanc:string;
+                                        var iCodLancFinan:LongInt;
+                                        sCodCentroCusto:string;
+                                        rIDPrograma, rIDPatro, rIDPlanoPrev, rCodTipDoc : Real);
+var
+  qry,qry1,qry3:TwwQuery;
+  rValorCotacao,rTotGer,rTotOMGer,rValorRat,rValorOMRat : Real;
+  scSql: String;
+Begin
+  qry :=TwwQuery.Create(Application);
+  qry1:=TwwQuery.Create(Application);
+  qry3:=TwwQuery.Create(Application);
+  qry.DatabaseName  := 'BASEDADOS';
+  qry1.DatabaseName := 'BASEDADOS';
+  qry3.DatabaseName := 'BASEDADOS';
+  Try
+     scSql:='';
+
+     qry1.Close;
+     qry1.SQL.Clear;
+     qry1.SQL.text := 'SELECT CODPORTADOR, MOECODIGO, DESCRICAO, NOCONTACORR, FLGSTATUS  FROM '+Sistema.PrefixoServidor+'PORTADORCONTA WHERE IDPESSOA = '+InttoStr(iEmpresaProp)+' AND CODPORTADOR = '+InttoStr(iCodPortador);
+     qry1.Open;
+
+     //Verifica se Portador Conta Está Inativo
+     If qry1.FieldByName('FLGSTATUS').AsString = 'I' Then
+     Begin
+        iCodLancFinan:=-1;
+        exit;
+     End;
+
+     if trim(Format('%17.0f',[rValorOutraMoeda])) = '0' then
+     Begin
+        if qry1.FieldByName('MOECODIGO').AsInteger <> 0 then
+        Begin
+           rValorCotacao:=FuncaoGeral.TestaCotacaoMoeda(qry1.FieldByName('MOECODIGO').AsInteger,sDataLanc,'S');
+           iMoeCodigo:=qry1.FieldByName('MOECODIGO').AsInteger;
+           If rValorCotacao <> 0 then
+              rValorOutraMoeda:=rValorCorrente/rValorCotacao
+           else
+           Begin
+              iCodLancFinan:=-1;
+              exit;
+           end;
+        end;
+     end;
+     //
+     if FazRateioAdm(qry1,sCodTipRecDes,sRecPag,IntToStr(iUnidNegoc),IntToStr(iEmpresaProp)) Then begin
+        rTotGer  :=0;
+        rTotOMGer:=0;
+        qry1.First;
+        While not qry1.EOF do begin
+           rValorRat:=rValorCorrente*(qry1.FieldByName('PERCRATEIO').AsFloat/100);
+           rValorRat:=StrToFloat(FormatFloat('#0.00',rValorRat));
+           rTotGer:=rTotGer+rValorRat;
+           //
+           rValorOMRat:=rValorOutraMoeda*(qry1.FieldByName('PERCRATEIO').AsFloat/100);
+           rValorOMRat:=StrToFloat(FormatFloat('#0.00',rValorOMRat));
+           rTotOMGer  :=rTotOMGer+rValorOMRat;
+           //
+           LancaRatFinRateio(qry,qry3,qry1.FieldByName('UNIDNEGOC').AsInteger,iMoeCodigo,iEmpresaProp,iCodPortador,
+                             rValorRat,rValorOMRat,sCodTipRecDes,
+                             sRecPag,sCodCentroRespon,
+                             sDataLanc,iCodLancFinan,sCodCentroCusto,
+                             rIDPrograma,rIDPatro,rIDPlanoPrev, rCodTipDoc);
+           if iCodLancFinan = -1 then exit;
+           qry1.Next;
+        end;
+        if (rTotGer <> rValorCorrente) or (rTotOMGer <> rValorOutraMoeda) then begin
+           rValorRat:=rValorCorrente-rTotGer;
+           rValorRat:=StrToFloat(FormatFloat('#0.00',rValorRat));
+           //
+           rValorOMRat:=rValorOutraMoeda-rTotOMGer;
+           rValorOMRat:=StrToFloat(FormatFloat('#0.00',rValorOMRat));
+           //
+           qry1.First;
+           LancaRatFinRateio(qry,qry3,qry1.FieldByName('UNIDNEGOC').AsInteger,iMoeCodigo,iEmpresaProp,iCodPortador,
+                             rValorRat,rValorOMRat,sCodTipRecDes,
+                             sRecPag,sCodCentroRespon,
+                             sDataLanc,iCodLancFinan,sCodCentroCusto,
+                             rIDPrograma,rIDPatro,rIDPlanoPrev, rCodTipDoc);
+           if iCodLancFinan = -1 then exit;
+        end;
+     end else begin
+        LancaRatFinRateio(qry,qry3,iUnidNegoc,iMoeCodigo,iEmpresaProp,iCodPortador,
+                          rValorCorrente,rValorOutraMoeda,sCodTipRecDes,
+                          sRecPag,sCodCentroRespon,
+                          sDataLanc,iCodLancFinan,sCodCentroCusto,
+                          rIDPrograma,rIDPatro,rIDPlanoPrev, rCodTipDoc);
+        if iCodLancFinan = -1 then exit;
+     end;
+  finally
+    Funcaogeral.FechaQry([qry,qry1,qry3],True,True)
+  End;
+end;
+
+procedure TLancFinanc.LancaRatFinRateio(qry,qry3:TwwQuery;
+                                        iUnidNegoc,iMoeCodigo,iEmpresaProp,iCodPortador:LongInt;
+                                        rValorCorrente,rValorOutraMoeda:Real;
+                                        sCodTipRecDes,sRecPag,sCodCentroRespon,sDataLanc:string;
+                                        var iCodLancFinan:LongInt;sCodCentroCusto:String;
+                                        rIDPrograma, rIDPatro, rIDPlanoPrev, rCodTipDoc : Real);
+var
+  sValorCorrente,sValorOutraMoeda,scSql,sSql: String;
+  iCodRateioFinan : Double;
+Begin
+  Try
+    qry3.Close;
+    qry3.SQL.text := 'SELECT IDRATEIOFINANC,VALOR,VALOROUTRAMOEDA '+
+                     'FROM RATEIOFINANC '+
+                     'WHERE IDPESSOA = '+InttoStr(iEmpresaProp)+
+                     '      AND CODLANCFINANC = '+IntToStr(iCodLancFinan)+' AND CODCENTRORESPON = '''+sCodCentroRespon+''''+
+                     '      AND UNIDNEGOC = '+InttoStr(iUnidNegoc)+' AND CODTIPRECDES = '''+sCodTipRecDes+''''+
+                     '      AND RECPAG = '''+sRecPag+'''';
+
+    if sCodCentroCusto = '' then
+       qry3.SQL.text := qry3.SQL.Text + ' AND CODCENTROCUSTO IS NULL '
+    else
+       qry3.SQL.text := qry3.SQL.Text + ' AND CODCENTROCUSTO = '''+sCodCentroCusto+'''';
+
+    if (Sistema.UsaPlanoPatro) then
+    Begin
+       If (rIDPatro > 0) And (rIDPlanoPrev > 0) Then
+       Begin
+          qry3.SQL.text := qry3.SQL.Text + ' AND IDPATRO = '+FloatToStr(rIDPatro)+
+                                           ' AND IDPLANOPREV = '+FloatToStr(rIDPlanoPrev);
+
+          If (rIDPrograma > 0) Then
+             qry3.SQL.text := qry3.SQL.Text + ' AND IDPROGRAMA = '+FloatToStr(rIDPrograma)
+          Else
+             qry3.SQL.text := qry3.SQL.Text + ' AND IDPROGRAMA IS NULL ';
+       End;
+    End;
+
+    qry3.Open;
+    //
+    if qry3.IsEmpty then begin
+       iCodRateioFinan :=LeUltRegistro(nil,'RATEIOFINANC');
+       sValorCorrente  :=FuncaoGeral.OraNumero(StrToFloat(FormatFloat('#0.00',rValorCorrente)));
+       sValorOutraMoeda:=FuncaoGeral.OraNumero(StrToFloat(FormatFloat('#0.00',rValorOutraMoeda)));
+       scSql:=scSql +FloatToStr(iCodRateioFinan);
+       scSql:=scSql +','+InttoStr(iCodLancFinan);
+
+       if iMoeCodigo <> 0 then
+          scSql:=scSql +','+IntToStr(iMoeCodigo)
+       else
+          scSql:=scSql +',NULL';
+
+       scSql:=scSql +','+InttoStr(iEmpresaProp);
+       scSql:=scSql +','+sValorCorrente;
+       scSql:=scSql +','+sValorOutraMoeda;
+       scSql:=scSql +','+InttoStr(iUnidNegoc);
+       scSql:=scSql +','''+sCodTipRecDes+'''';
+       scSql:=scSql +','''+sRecPag+'''';
+       scSql:=scSql +','''+sCodCentroRespon+'''';
+
+       if sCodCentroCusto <> '' then begin
+          scSql:=scSql +','+InttoStr(iEmpresaProp);
+          scSql:=scSql +','''+sCodCentroCusto+'''';
+       end else
+          scSql:=scSql +',NULL,NULL';
+
+       if Sistema.UsaPlanoPatro then
+        begin
+           If rIDPrograma > 0 Then
+             scSql:=scSql +','+FloatToStr(rIDPrograma)
+           Else
+             scSql:=scSql +',NULL';
+
+           If rIDPatro > 0 Then
+             scSql:=scSql +','+FloatToStr(rIDPatro)
+           Else
+             scSql:=scSql +',NULL';
+
+           If rIDPlanoPrev > 0 Then
+             scSql:=scSql +','+FloatToStr(rIDPlanoPrev)
+           Else
+             scSql:=scSql +',NULL';
+
+        end
+       else
+        scSql:=scSql +',NULL,NULL,NULL';
+
+       if rCodTipDoc>0 then
+          scSql:=scSql +','+FloatToStr(rCodTipDoc)
+       else
+          scSql:=scSql +',NULL';       
+
+       sSql :='INSERT INTO RATEIOFINANC(IDRATEIOFINANC,CODLANCFINANC,MOECODIGO,IDPESSOA,'+
+              'VALOR,VALOROUTRAMOEDA,UNIDNEGOC,CODTIPRECDES,'+
+              'RECPAG,CODCENTRORESPON,IDEMPRESA,CODCENTROCUSTO,IDPROGRAMA,IDPATRO,IDPLANOPREV,CODTIPDOC) VALUES(';
+       sSql :=sSql+scSql+')';
+       if not ExecutarQuery(qry,sSql) then begin
+          iCodLancFinan := -1;
+          exit;
+       end;
+    end else begin
+       sValorCorrente:=FuncaoGeral.OraNumero(((rValorCorrente+qry3.FieldByName('VALOR').AsFloat)));
+       sValorOutraMoeda:=FuncaoGeral.OraNumero(((rValorOutraMoeda+qry3.FieldByName('VALOROUTRAMOEDA').AsFloat)));
+       sSql :='UPDATE RATEIOFINANC SET VALOR = '+sValorCorrente+', VALOROUTRAMOEDA = '+sValorOutraMoeda+
+              ' WHERE IDRATEIOFINANC = '+FloatToStr(qry3.FieldByName('IDRATEIOFINANC').AsFloat);
+       if not ExecutarQuery(qry,sSql) then
+       Begin
+          iCodLancFinan := -1;
+          exit;
+       end;
+    end;
+  Finally
+    Funcaogeral.FechaQry([qry,qry3],False,True)
+  end;
+End;
+
+procedure TLancFinanc.ExcluiFinanceiro(var iCodLancFinan:LongInt);
+var
+  qry:TwwQuery;
+  sMens, sDataLanc,sSql: String;
+  iRetorno,iCodLancTransf,iPlnCodigoOri: LongInt;
+  liExercicio,liPeriodo, iEmpresaProp,liRetFuncao:LongInt;
+Begin
+  qry :=TwwQuery.Create(Application);
+  qry.DatabaseName  := 'BASEDADOS';
+  Try
+     qry.Close;
+     qry.SQL.Clear;
+     qry.SQL.text :='SELECT PLNCODIGO,CODLANCTRANSF,DATALANCFINAN FROM '+Sistema.PrefixoServidor+
+                    'MOVIMFINANC WHERE CODLANCFINANC = '+InttoStr(iCodLancFinan);
+     qry.Open;
+     iPlnCodigoOri :=qry.FieldByName('PLNCODIGO').AsInteger;
+     iCodLancTransf:=qry.FieldByName('CODLANCTRANSF').AsInteger;
+     iEmpresaProp:=Sistema.IdEmpresa;
+     sDataLanc:=qry.FieldByName('DATALANCFINAN').AsString;
+     sSql :='DELETE FROM RATEIOFINANC WHERE CODLANCFINANC = '+InttoStr(iCodLancFinan);
+     if not ExecutarQuery(qry,sSql) then
+     Begin
+        iCodLancFinan := -1;
+        exit;
+     end;
+
+     if iCodLancTransf <> 0 then
+     Begin
+        sSql :='DELETE FROM '+Sistema.PrefixoServidor+'MOVIMFINANC WHERE CODLANCFINANC = '+
+               InttoStr(iCodLancTransf)+' OR CODLANCFINANC = '+InttoStr(iCodLancFinan);
+        if not ExecutarQuery(qry,sSql) then
+        Begin
+           iCodLancFinan := -1;
+           exit;
+        end;
+     end
+     else
+     Begin
+        sSql :='DELETE FROM '+Sistema.PrefixoServidor+'MOVIMFINANC WHERE CODLANCFINANC = '+
+               InttoStr(iCodLancFinan);
+        if not ExecutarQuery(qry,sSql) then
+        Begin
+           iCodLancFinan := -1;
+           exit;
+        end;
+     end;
+
+     if iPlnCodigoOri <> 0 then
+     Begin
+        //Exclui/Estorno contab
+        liRetFuncao:=TestaPeriodo(True,'BaseDados',sDataLanc,IntToStr(Sistema.IdModulo),liExercicio,
+                                  liPeriodo,iEmpresaProp, sMens);
+        if liRetFuncao <> 0 then
+        Begin
+           iCodLancFinan:=-1;
+           exit;
+        end;
+        iRetorno := ExcluiLanc(True,iPlncodigoOri,'BASEDADOS',IntToStr(Sistema.IdModulo),
+                               IntegraBack.Plano,iEmpresaProp,Sistema.IdUsuario,True,0,
+                               Integraback.MascaraPlano);
+        if iRetorno < 0 then
+        Begin
+           iCodLancFinan:=-1;
+           exit;
+        end;
+     end;
+  Finally
+     qry.Free;
+  end;
+end;
+
+procedure TLancFinanc.ExcluiRateioFinanc(var iCodLancFinan:LongInt);
+var
+  qry:TwwQuery;
+  sSql: String;
+Begin
+  qry :=TwwQuery.Create(Application);
+  qry.DatabaseName  := 'BASEDADOS';
+  Try
+     sSql :='DELETE FROM RATEIOFINANC WHERE CODLANCFINANC = '+InttoStr(iCodLancFinan);
+     if not ExecutarQuery(qry,sSql) then
+     Begin
+        iCodLancFinan := -1;
+        exit;
+     end;
+  Finally
+     qry.Free;
+  end;
+end;
+
+procedure TLancFinanc.CalculaSaldoFinanc(iCodPortador:LongInt;sDataLimite,sStatusConcilia,sTipoData:string;var rValorCorrente,rValorOutraMoeda:Real);
+var
+  qry:TwwQuery;
+  sSql: String;
+Begin
+  {TipoData => 'L' = Data de lançamento ou 'C' = Data da conciliação}
+  {Status   => 'N' = Não bateu no banco
+               'C' = Cheque na Casa
+               'X' = Bateu no banco
+               'I' = Não identificado
+               'P' = Conciliação provisória}
+  qry :=TwwQuery.Create(Application);
+  qry.DatabaseName  := 'BASEDADOS';
+  Try
+  with qry do begin
+      Close;
+      if sTipoData = 'L' then
+         sSql :='SELECT ENTRADASAIDA, SUM(VALORLANCFINAN) AS VALOR, SUM(VALOROUTRAMOEDA) AS VALOROM FROM '+Sistema.PrefixoServidor+'MOVIMFINANC WHERE CODPORTADOR = '+InttoStr(iCodPortador)+
+                ' AND DATALANCFINAN <= TO_DATE('''+sDataLimite+''',''dd/MM/yyyy'') AND STATUSCONCILIA IN ('''+sStatusConcilia+''') GROUP BY ENTRADASAIDA'
+      else
+         sSql :='SELECT ENTRADASAIDA, SUM(VALORLANCFINAN) AS VALOR, SUM(VALOROUTRAMOEDA) AS VALOROM FROM '+Sistema.PrefixoServidor+'MOVIMFINANC WHERE CODPORTADOR = '+InttoStr(iCodPortador)+
+                ' AND DATACONCILIACAO <= TO_DATE('''+sDataLimite+''',''dd/MM/yyyy'') AND STATUSCONCILIA IN ('''+sStatusConcilia+''') GROUP BY ENTRADASAIDA';
+      Sql.Clear;
+      Sql.Text:=sSql;
+      Open;
+  end;
+  qry.First;
+  While (not qry.EOF) do
+  Begin
+     if qry.FieldByName('ENTRADASAIDA').AsString = 'E' then
+     Begin
+        rValorCorrente   := rValorCorrente   + qry.FieldByName('VALOR').AsFloat;
+        rValorOutraMoeda := rValorOutraMoeda + qry.FieldByName('VALOROM').AsFloat;
+     end
+     else
+     Begin
+        rValorCorrente   := rValorCorrente   - qry.FieldByName('VALOR').AsFloat;
+        rValorOutraMoeda := rValorOutraMoeda - qry.FieldByName('VALOROM').AsFloat;
+     end;
+     qry.Next;
+  end;
+  Finally
+     qry.Free;
+  end;
+end;
+
+procedure TLancFinanc.ConciliaConta(iCodPortador:LongInt;sDataExtrato:String);
+var
+  qry:TwwQuery;
+  sSql: String;
+Begin
+  qry :=TwwQuery.Create(Application);
+  qry.DatabaseName  := 'BASEDADOS';
+  Try
+     sSql :='UPDATE MOVIMFINANC SET STATUSCONCILIA = ''X'', DATACONCILIACAO = TO_DATE('''+sDataExtrato+''',''dd/mm/YYYY'')'+
+            ' WHERE STATUSCONCILIA = ''P'' AND CODPORTADOR = '+InttoStr(iCodPortador);
+     if not ExecutarQuery(qry,sSql) then
+     Begin
+        Abort;
+     end;
+  Finally
+     qry.Free;
+  end;
+end;
+
+procedure TLancFinanc.FazerRateioCAPCAR(qryDocPagRec:TwwQuery;sLugarBaixa,sNumChqBor,sDataFloat,sRecPag:String;iNumLote,iCodPortForma:LongInt;var iCodLancFinan:LongInt);
+var
+   qryLote,qryPortadorForma,qryParamCap,qryDocumento,qryFatura,qryRateioDocum,qryAux,qryFluxoPrev,qryContabil:TwwQuery;
+   rTotalDocGeral,rTotalDocumento,rTotalDocOMGeral,rTotalDocOM :Real;
+   rSaldoDoc,rSaldoOM,rTotalCorrenteGeral,rTotalMoedaGeral:Real;
+   rDifer, rSaldoDoc1, rSaldoOM1, rSaldoTot, rSaldoTotOM : Real;
+   sHistorico,sEntradaSaida:String;
+   iPlnCodigo:LongInt;
+   dData : TDateTime;
+Begin
+   {sLugarBaixa =>C = quando a baixa é feita pela emissão do cheque
+                  N = quando a baixa é feita pela baixa do documento}
+   qryDocumento :=TwwQuery.Create(Application);
+   qryLote:=TwwQuery.Create(Application);
+   qryParamCap :=TwwQuery.Create(Application);
+   qryFatura :=TwwQuery.Create(Application);
+   qryRateioDocum:=TwwQuery.Create(Application);
+   qryAux:=TwwQuery.Create(Application);
+   qryFluxoPrev:=TwwQuery.Create(Application);
+   qryContabil:=TwwQuery.Create(Application);
+   qryPortadorForma:=TwwQuery.Create(Application);
+   qryDocumento.DatabaseName  := 'BASEDADOS';
+   qryLote.DatabaseName  := 'BASEDADOS';
+   qryAux.DatabaseName  := 'BASEDADOS';
+   qryParamCap.DatabaseName  := 'BASEDADOS';
+   qryFatura.DatabaseName  := 'BASEDADOS';
+   qryRateioDocum.DatabaseName := 'BASEDADOS';
+   qryAux.DatabaseName := 'BASEDADOS';
+   qryFluxoPrev.DatabaseName := 'BASEDADOS';
+   qryContabil.DatabaseName := 'BASEDADOS';
+   qryPortadorForma.DatabaseName := 'BASEDADOS';
+   Try
+   //
+   rTotalCorrenteGeral:=0;
+   rTotalMoedaGeral:=0;
+   iPlnCodigo:=0;
+   qryDocPagRec.First;
+
+   dData:=StrToDate(sDataFloat);
+
+   If sRecPag = 'R' Then
+   Begin
+      if DayOfWeek(dData) = 1 then
+         dData:=dData+1;
+
+      if DayOfWeek(dData) = 7 then
+         dData:=dData+2;
+   End
+   Else
+   Begin
+      if DayOfWeek(dData) = 1 then
+         dData:=dData-2;
+
+      if DayOfWeek(dData) = 7 then
+         dData:=dData-1;
+   End;
+
+   sDataFloat := DateToStr(dData);
+   if (sLugarBaixa = 'N') and (iNumLote <> 0) then
+   Begin
+      qryLote.Close;
+      qryLote.SQL.Clear;
+      qryLote.SQL.text := 'SELECT CODLANCFINANC FROM '+Sistema.PrefixoServidor+'LOTEPAGTO WHERE NUMLOTE = '+IntToStr(iNumLote);
+      qryLote.Open;
+      if qryLote.FieldByName('CODLANCFINANC').asInteger <> 0 then
+      Begin
+         qryAux.Close;
+         qryAux.SQL.Clear;
+         qryAux.SQL.text := 'SELECT STATUSCONCILIA FROM MOVIMFINANC WHERE CODLANCFINANC = '+qryLote.FieldByName('CODLANCFINANC').asString;
+         qryAux.Open;
+         if qryAux.FieldByName('STATUSCONCILIA').asString = 'C' then begin
+            MudaStatusConcilia(sLugarBaixa,'',qryLote.FieldByName('CODLANCFINANC').asInteger);
+         end;
+         iCodLancFinan := -1;
+         exit;
+      end;
+   end;
+   qryParamCap.Close;
+   qryParamCap.SQL.Clear;
+   qryParamCap.SQL.text := 'SELECT HISTPADFINAN FROM '+Sistema.PrefixoServidor+'PARAMCAP WHERE IDPESSOA = '+InttoStr(Sistema.IdEmpresa)+' AND RECPAG = '''+sRecPag+'''';
+   qryParamCap.Open;
+   //
+   qryPortadorForma.Close;
+   qryPortadorForma.SQL.Clear;
+   qryPortadorForma.SQL.text := 'SELECT P.CODPORTADOR,F.DESCRICAO, P.DESCFINAN FROM '+Sistema.PrefixoServidor+'PORTADORFORMA P, FORMARECPAG F WHERE P.CODPORTFORMA = '+IntToStr(iCodPortForma)+
+                                ' AND P.CODFORMA = F.CODFORMA';
+   qryPortadorForma.Open;
+   //
+   while (not qryDocPagRec.Eof) do
+   Begin
+      if qryDocPagRec.FieldByName('DEBCRE').asString = 'D' then
+      Begin
+         rTotalCorrenteGeral:=rTotalCorrenteGeral+qryDocPagRec.FieldByName('VALOR').asFloat;
+         rTotalMoedaGeral   :=rTotalMoedaGeral+0;
+      end
+      else
+      Begin
+         rTotalCorrenteGeral:=rTotalCorrenteGeral-qryDocPagRec.FieldByName('VALOR').asFloat;
+         rTotalMoedaGeral   :=rTotalMoedaGeral-0;
+      end;
+      qryDocPagRec.Next;
+   end;
+   qryDocPagRec.First;
+   sEntradaSaida:='S';
+   //
+   If qryPortadorForma.FieldByName('DESCFINAN').IsNull Then
+      sHistorico:=trim(qryPortadorForma.FieldByName('DESCRICAO').asString)+' N. '+trim(sNumChqBor)
+   Else
+      sHistorico:=trim(qryPortadorForma.FieldByName('DESCFINAN').asString)+' N. '+trim(sNumChqBor);
+
+   If IntegraBack.EstornaDocumento Then
+      sHistorico := 'Estorno '+sHistorico;
+
+   If qryDocPagRec.RecordCount = 1 then
+      sHistorico:=sHistorico + ' ref. doc. '+trim(qryDocPagRec.FieldByName('NODOCUMENTO').asString)+trim(qryDocPagRec.FieldByName('COMPLDOCUMENTO').asString)+' '+trim(qryDocPagRec.FieldByName('NOME').asString);
+
+   If rTotalCorrenteGeral < 0 then
+   Begin
+      rTotalCorrenteGeral := abs(rTotalCorrenteGeral);
+      sEntradaSaida:='E';
+   end;
+
+   LancaFinanceiro(qryContabil,Sistema.IdModulo,qryParamCap.FieldByName('HISTPADFINAN').Value,0,
+                  Sistema.IdUsuario,qryPortadorForma.FieldByName('CODPORTADOR').Value,Sistema.IdEmpresa,
+                  rTotalCorrenteGeral,0,sNumChqBor,sDataFloat,'',sEntradaSaida,
+                  sHistorico,sLugarBaixa,iCodLancFinan,iPlnCodigo);
+   if iCodLancFinan = -1 then
+   Begin
+      exit;
+   end;
+
+   while (not qryDocPagRec.Eof) do
+   Begin
+      rSaldoDoc:=qryDocPagRec.FieldByName('VALOR').asFloat;
+      rSaldoOM :=0;
+      qryDocumento.Close;
+      qryDocumento.SQL.Clear;
+      qryDocumento.SQL.text := 'SELECT RECPAG,CODDOCUMENTO,OPERACAO,NUMFATURA FROM '+Sistema.PrefixoServidor+'DOCUMENTO WHERE CODDOCUMENTO = '+qryDocPagRec.FieldByName('CODDOCUMENTO').AsString;
+      qryDocumento.Open;
+      if (qryDocumento.FieldByName('OPERACAO').asInteger) in ([1,2,10,11,12,14,15,16]) then
+      Begin
+         FazerAcumulaRateio(qryRateioDocum,qryDocumento.FieldByName('CODDOCUMENTO').asString,rTotalDocumento,rTotalDocOM);
+         rTotalDocGeral  :=rTotalDocumento;
+         rTotalDocOMGeral:=rTotalDocOM;
+         FazerRateioDocum(qryRateioDocum,qryAux,qryFluxoPrev,qryPortadorForma.FieldByName('CODPORTADOR').Value,qryDocumento.FieldByName('CODDOCUMENTO').asString,'MF',sDataFloat,rTotalDocGeral,rTotalDocOMGeral,rSaldoDoc,rSaldoOM,0,iCodLancFinan,sEntradaSaida,sRecPag);
+      end
+      else
+      Begin
+         qryFatura.close;
+         qryFatura.SQL.Clear;
+         qryFatura.SQL.Text := 'SELECT D.CODDOCUMENTO, L.VALOR, L.VALOROUTRAMOEDA FROM DOCUMENTO D, LANCTODOCUM L WHERE (D.NUMFATURA = '+qrydocumento.fieldbyname('NUMFATURA').asString+')'+
+                               ' AND (RTRIM(D.OPERACAO) = ''1'' OR RTRIM(D.OPERACAO) = ''11'') AND (D.CODDOCUMENTO = L.CODDOCUMENTO) AND '+
+                               ' (D.OPERACAO = L.OPERACAO)';
+         qryFatura.open;
+         rTotalDocGeral  :=0;
+         rTotalDocOMGeral:=0;
+         //
+         qryFatura.First;
+         While (not qryFatura.eof) do
+         begin
+            FazerAcumulaRateio(qryRateioDocum,qryFatura.FieldByName('CODDOCUMENTO').asString,rTotalDocumento,rTotalDocOM);
+            rTotalDocGeral  :=rTotalDocGeral  + rTotalDocumento;
+            rTotalDocOMGeral:=rTotalDocOMGeral+ rTotalDocOM;
+            qryFatura.Next;
+         end;
+         rSaldoTot  :=0;
+         rSaldoTotOM:=0;
+         qryFatura.First;
+         While (not qryFatura.eof) do
+         begin
+            if rTotalDocGeral <> 0 then
+               rSaldoDoc1 :=qryFatura.FieldByName('VALOR').asFloat*rSaldoDoc/rTotalDocGeral
+            else
+               rSaldoDoc1 :=rSaldoDoc;
+            if rTotalDocOMGeral <> 0 then
+               rSaldoOM1  :=qryFatura.FieldByName('VALOROUTRAMOEDA').asFloat*rSaldoOM/rTotalDocOMGeral
+            else
+               rSaldoOM1  :=rSaldoOM;
+            rSaldoDoc1 :=StrToFloat(Format('%17.2f',[rSaldoDoc1]));
+            rSaldoOM1  :=StrToFloat(Format('%17.2f',[rSaldoOM1]));
+            rSaldoTot  :=rSaldoTot   + rSaldoDoc1;
+            rSaldoTotOM:=rSaldoTotOM + rSaldoOM1;
+            FazerRateioDocum(qryRateioDocum,qryAux,qryFluxoPrev,qryPortadorForma.FieldByName('CODPORTADOR').Value,
+                             qryFatura.FieldByName('CODDOCUMENTO').asString,'MF',sDataFloat,rTotalDocGeral,rTotalDocOMGeral,
+                             rSaldoDoc1,rSaldoOM1,0,iCodLancFinan,sEntradaSaida,sRecPag);
+            qryFatura.Next;
+         end;
+      end;
+      qryDocPagRec.Next;
+   end;
+   Finally
+      qryLote.Free;
+      qryPortadorForma.Free;
+      qryParamCap.Free;
+      qryDocumento.Free;
+      qryFatura.Free;
+      qryRateioDocum.Free;
+      qryAux.Free;
+      qryFluxoPrev.Free;
+      qryContabil.Free;
+   end;
+end;
+
+procedure TLancFinanc.FazerAcumulaRateio(qryRateioDocum:TwwQuery;sCodDocSaldo:String;var rTotalDocumento,rTotalDocOM :Real);
+Begin
+   rTotalDocumento:=0;
+   rTotalDocOM:=0;
+   qryRateioDocum.Close;
+   qryRateioDocum.SQL.Clear;
+   {qryRateioDocum.SQL.Text := 'SELECT VALOR, VALOROUTRAMOEDA '+
+                              'FROM RATEIODOCUM WHERE CODDOCUMENTO = '+sCodDocSaldo;}
+   qryRateioDocum.SQL.Text := 'SELECT SUM(VALOR) AS SomaValor, SUM(VALOROUTRAMOEDA) AS SomaOutra '+
+                              'FROM RATEIODOCUM WHERE CODDOCUMENTO = '+sCodDocSaldo;
+   qryRateioDocum.open;
+   qryRateioDocum.First;
+
+   rTotalDocumento:=qryRateioDocum.FieldByName('SomaValor').asfloat;
+   rTotalDocOM:=qryRateioDocum.FieldByName('SomaOutra').asfloat;
+   {While (not qryRateioDocum.Eof) do
+   Begin
+      rTotalDocumento := rTotalDocumento + qryRateioDocum.fieldbyname('VALOR').asfloat;
+      rTotalDocOM     := rTotalDocOM     + qryRateioDocum.fieldbyname('VALOROUTRAMOEDA').asfloat;
+      qryRateioDocum.next;
+   end;}
+end;
+
+procedure TLancFinanc.FazerRateioDocum(qryRateioDocum,qryAux,qryFluxoPrev:TwwQuery;iCodPortConta:LongInt;sCodDocumento,sOperacao,sData:String;rTotalDocGeral,rTotalDocOMGeral,rSaldoCorrente,rSaldoMoeda,rValorCotacao:Real;var iCodLancFinan:LongInt;sEntradaSaida,sRecPag:String);
+var
+   qryParamFinanc,qryAux1,qryAux2:TwwQuery;
+   acmr,acm,rTotGer:Real;
+   iUnidNegoc : LongInt;
+   iDigCAR,iDigCAP,iNumDig,iNumRef : Integer;
+   sPrev, sCodTipRecDes :String;
+Begin
+   iDigCAR := 0;
+   iDigCAP := 0;
+
+   {sOPERACAO => 'FP' = Fluxo Previsto, 'MF' = Movimento Financeiro}
+   qryParamFinanc:=TwwQuery.Create(Application);
+   qryParamFinanc.DatabaseName := 'BASEDADOS';
+   qryAux1:=TwwQuery.Create(Application);
+   qryAux1.DatabaseName  := 'BASEDADOS';
+   qryAux2:=TwwQuery.Create(Application);
+   qryAux2.DatabaseName  := 'BASEDADOS';
+   Try
+      //
+      qryParamFinanc.Close;
+      qryParamFinanc.SQL.Clear;
+      qryParamFinanc.SQL.text := 'SELECT FLGSEPARADATA, TRDFINALCAR, TRDFINALCAP '+
+                                 'FROM PARAMFINANC WHERE IDPESSOA = '+IntToStr(Sistema.IdEmpresa);
+      qryParamFinanc.Open;
+      //
+      sPrev:='N';
+      if sOperacao = 'FP' then
+      Begin
+         //
+         qryAux1.Close;
+         qryAux1.SQL.Clear;
+         qryAux1.SQL.Text := 'SELECT OPERACAO FROM DOCUMENTO WHERE CODDOCUMENTO = '+sCodDocumento;
+         qryAux1.open;
+         qryAux1.First;
+         if (qryAux1.FieldByName('OPERACAO').AsInteger >= 11) and (qryAux1.FieldByName('OPERACAO').AsInteger <= 13) then
+            sPrev:='S';
+         //
+      end;
+
+      qryRateioDocum.Close;
+      qryRateioDocum.SQL.Clear;
+      if qryParamFinanc.FieldByName('FLGSEPARADATA').AsString = 'S' then
+       begin
+          qryRateioDocum.SQL.Text := 'SELECT ' +
+                                     '   R.CODDOCUMENTO, R.CODTIPRECDES, R.RECPAG, R.IDPESSOA, '+
+                                     '   R.CODCENTRORESPON, R.UNIDNEGOC, R.MOECODIGO, R.VALOR, '+
+                                     '   R.VALOROUTRAMOEDA, R.IDRATEIODOCUM, R.IDEMPRESA, '+
+                                     '   R.CODCENTROCUSTO, R.IDPLANOPREV, R.IDPATRO, R.IDPROGRAMA, ' +
+                                     '   L.DATALANCTO,D.CodTipDoc '+
+                                     'FROM '+
+                                     '   RATEIODOCUM R, DOCUMENTO D, LANCTODOCUM L '+
+                                     'WHERE (D.CODDOCUMENTO = '+sCodDocumento+') AND '+
+                                     '      (D.CODDOCUMENTO = L.CODDOCUMENTO) AND '+
+                                     '      (D.CODDOCUMENTO = R.CODDOCUMENTO) AND '+
+                                     '      (D.OPERACAO = L.OPERACAO) ';
+       end
+      else
+       begin
+          qryRateioDocum.SQL.Text := 'SELECT '+
+                                     '   R.CODDOCUMENTO,R.CODTIPRECDES,R.RECPAG,R.IDPESSOA, '+
+                                     '   R.CODCENTRORESPON,R.UNIDNEGOC,R.MOECODIGO,R.VALOR, '+
+                                     '   R.VALOROUTRAMOEDA,R.IDRATEIODOCUM,R.IDEMPRESA, '+
+                                     '   R.CODCENTROCUSTO,R.IDPLANOPREV,R.IDPATRO,R.IDPROGRAMA, ' +
+                                     '   D.CodTipDoc '+
+                                     'FROM '+
+                                     '   RATEIODOCUM R, DOCUMENTO D '+
+                                     'WHERE (R.CODDOCUMENTO = '+sCodDocumento+') AND '+
+                                     '      (D.CODDOCUMENTO = R.CODDOCUMENTO) ';
+       end;
+      qryRateioDocum.open;
+      //
+      rTotGer   := 0;
+      iUnidNegoc:= 0;
+      if (((sEntradaSaida = 'E') and (sRecPag = 'P')) or
+          ((sEntradaSaida = 'S') and (sRecPag = 'R'))) and
+          (sOperacao <> 'MF') then begin
+         rSaldoCorrente:=rSaldoCorrente*(-1);
+         rSaldoMoeda   :=rSaldoMoeda*(-1);
+      end;
+
+      if qryParamFinanc.FieldByName('FLGSEPARADATA').AsString = 'S' then begin
+         iDigCAR:=length(trim(qryParamFinanc.FieldByName('TRDFINALCAR').AsString));
+         iDigCAP:=length(trim(qryParamFinanc.FieldByName('TRDFINALCAP').AsString));
+      end;
+      qryRateioDocum.First;
+      sCodTipRecDes:=qryRateioDocum.fieldbyname('CODTIPRECDES').asString;
+      //
+      While (not qryRateioDocum.Eof) do
+      Begin
+         sCodTipRecDes:=qryRateioDocum.fieldbyname('CODTIPRECDES').asString;
+         iNumDig:=length(trim(sCodTipRecDes));
+         if (qryParamFinanc.FieldByName('FLGSEPARADATA').AsString = 'S') and
+            (copy(qryRateioDocum.FieldByName('DATALANCTO').AsString,4,7) <> copy(sData,4,7)) then begin
+            if (qryRateioDocum.fieldbyname('RECPAG').asString = 'R') and
+               (not qryParamFinanc.FieldByName('TRDFINALCAR').isNull) then begin
+               iNumRef:=iNumDig-iDigCAR;
+               sCodTipRecDes:=trim(copy(sCodTipRecDes,1,iNumRef)+qryParamFinanc.FieldByName('TRDFINALCAR').AsString);
+            end;
+            if (qryRateioDocum.fieldbyname('RECPAG').asString = 'P') and
+               (not qryParamFinanc.FieldByName('TRDFINALCAP').isNull) then begin
+               iNumRef:=iNumDig-iDigCAP;
+               sCodTipRecDes:=trim(copy(sCodTipRecDes,1,iNumRef)+qryParamFinanc.FieldByName('TRDFINALCAP').AsString);
+            end;
+            qryAux2.Close;
+            qryAux2.SQL.Clear;
+            qryAux2.SQL.Text := 'SELECT CODTIPRECDES FROM TIPORECEBDESEMB '+
+                                'WHERE (RTRIM(CODTIPRECDES) = '''+sCodTipRecDes+''') AND '+
+                                '      (RECPAG = '''+qryRateioDocum.fieldbyname('RECPAG').asString+''') AND '+
+                                '      (IDPESSOA = '+IntToStr(Sistema.idEmpresa)+') AND '+
+                                '      (ANASINT = ''A'')';
+            qryAux2.open;
+            if qryAux2.IsEmpty then begin
+               sCodTipRecDes:=qryRateioDocum.fieldbyname('CODTIPRECDES').asString;
+            end;
+         end;
+         acm:=0;
+         if (rValorCotacao <> 0) and (rTotalDocOMGeral <> 0) and (rSaldoMoeda <> 0) then begin
+            acm:=(qryRateioDocum.fieldbyname('VALOROUTRAMOEDA').asfloat/rTotalDocOMGeral*rSaldoMoeda)*rValorCotacao
+         end else begin
+            if rTotalDocGeral <> 0 then
+               acm:=qryRateioDocum.fieldbyname('VALOR').asfloat/rTotalDocGeral*rSaldoCorrente;
+         end;
+         if sOperacao = 'FP' then begin
+            if FazRateioAdm(qryAux1,sCodTipRecDes,qryRateioDocum.fieldbyname('RECPAG').asString,
+                            qryRateioDocum.fieldbyname('UNIDNEGOC').asString,qryRateioDocum.fieldbyname('IDPESSOA').asString) Then begin
+               qryAux1.First;
+               While not qryAux1.EOF do begin
+                  acmr:=acm*(qryAux1.FieldByName('PERCRATEIO').AsFloat/100);
+                  acmr:=StrToFloat(FormatFloat('#0.00',acmr));
+                  rTotGer:=rTotGer+acmr;
+                  //
+                  if iUnidNegoc = 0 then iUnidNegoc :=qryRateioDocum.FieldByName('UNIDNEGOC').AsInteger;
+                  //
+                  GravaFluxoPrev(qryAux,qryFluxoPrev,
+                                 qryRateioDocum.fieldbyname('CODCENTRORESPON').asString, sData,
+                                 sCodTipRecDes, qryRateioDocum.fieldbyname('RECPAG').asString, sPrev,
+                                 qryAux1.FieldByName('UNIDNEGOC').AsInteger, acmr,
+                                 qryRateioDocum.fieldbyname('CODCENTROCUSTO').asString,
+                                 qryRateioDocum.fieldbyname('IDPROGRAMA').asFloat,
+                                 qryRateioDocum.fieldbyname('IDPATRO').asFloat,
+                                 qryRateioDocum.fieldbyname('IDPLANOPREV').asFloat,
+                                 qryRateioDocum.fieldbyname('CODTIPDOC').asFloat);
+                  qryAux1.Next;
+               end;
+            end else begin
+               acm:=StrToFloat(FormatFloat('#0.00',acm));
+               rTotGer:=rTotGer+acm;
+               //
+               if iUnidNegoc = 0 then iUnidNegoc :=qryRateioDocum.FieldByName('UNIDNEGOC').AsInteger;
+               //
+               GravaFluxoPrev(qryAux,qryFluxoPrev,qryRateioDocum.fieldbyname('CODCENTRORESPON').asString,sData,
+                              sCodTipRecDes,qryRateioDocum.fieldbyname('RECPAG').asString,
+                              sPrev,qryRateioDocum.FieldByName('UNIDNEGOC').AsInteger,acm,qryRateioDocum.fieldbyname('CODCENTROCUSTO').asString,
+                              qryRateioDocum.fieldbyname('IDPROGRAMA').asFloat,qryRateioDocum.fieldbyname('IDPATRO').asFloat,
+                              qryRateioDocum.fieldbyname('IDPLANOPREV').asFloat,
+                              qryRateioDocum.fieldbyname('CODTIPDOC').asFloat);
+            end;
+         end else begin
+            acm:=StrToFloat(FormatFloat('#0.00',acm));
+            rTotGer:=rTotGer+acm;
+            //
+            if iUnidNegoc = 0 then iUnidNegoc :=qryRateioDocum.FieldByName('UNIDNEGOC').AsInteger;
+            //
+            LancaRateioFinanc(qryRateioDocum.FieldByName('UNIDNEGOC').AsInteger,
+                              0,
+                              Sistema.IdEmpresa,iCodPortConta,
+                              acm,
+                              0,
+                              sCodTipRecDes,
+                              qryRateioDocum.FieldByName('RECPAG').AsString,
+                              qryRateioDocum.FieldByName('CODCENTRORESPON').AsString,
+                              sData,
+                              iCodLancFinan,
+                              qryRateioDocum.FieldByName('CODCENTROCUSTO').AsString,
+                              qryRateioDocum.FieldByName('IDPROGRAMA').AsFloat,
+                              qryRateioDocum.FieldByName('IDPATRO').AsFloat,
+                              qryRateioDocum.FieldByName('IDPLANOPREV').AsFloat,
+                              qryRateioDocum.FieldByName('CODTIPDOC').AsFloat);
+
+            if iCodLancFinan = -1 then exit;
+         end;
+         qryRateioDocum.next;
+      end;
+      acm:=0;
+      if (rValorCotacao <> 0) and (rTotalDocOMGeral <> 0) and (rSaldoMoeda <> 0) then begin
+         if rTotGer <> rSaldoMoeda then begin
+            acm:=rSaldoMoeda-rTotGer;
+         end;
+      end else begin
+         if rTotGer <> rSaldoCorrente then begin
+            acm:=rSaldoCorrente-rTotGer;
+         end;
+      end;
+
+      if acm <> 0 then begin
+         qryRateioDocum.First;
+         if sOperacao = 'FP' then
+            GravaFluxoPrev(qryAux,qryFluxoPrev,qryRateioDocum.fieldbyname('CODCENTRORESPON').asString,sData,
+                           sCodTipRecDes,qryRateioDocum.fieldbyname('RECPAG').asString,sPrev,
+                           iUnidNegoc,acm,qryRateioDocum.fieldbyname('CODCENTROCUSTO').asString,
+                           qryRateioDocum.fieldbyname('IDPROGRAMA').asFloat,
+                           qryRateioDocum.fieldbyname('IDPATRO').asFloat,
+                           qryRateioDocum.fieldbyname('IDPLANOPREV').asFloat,
+                           qryRateioDocum.fieldbyname('CODTIPDOC').asFloat)
+         else
+         Begin
+            LancaRateioFinanc(iUnidNegoc,
+                              0,
+                              Sistema.IdEmpresa,
+                              iCodPortConta,
+                              acm,
+                              0,
+                              sCodTipRecDes,
+                              qryRateioDocum.FieldByName('RECPAG').AsString,
+                              qryRateioDocum.FieldByName('CODCENTRORESPON').AsString,
+                              sData,
+                              iCodLancFinan,
+                              qryRateioDocum.FieldByName('CODCENTROCUSTO').AsString,
+                              qryRateioDocum.FieldByName('IDPROGRAMA').AsFloat,
+                              qryRateioDocum.FieldByName('IDPATRO').AsFloat,
+                              qryRateioDocum.FieldByName('IDPLANOPREV').AsFloat,
+                              qryRateioDocum.fieldbyname('CODTIPDOC').asFloat);
+            if iCodLancFinan = -1 then
+            Begin
+               exit;
+            end;
+         end;
+      end;
+   Finally
+      qryAux1.Free;
+      qryAux2.Free;
+      qryParamFinanc.Free;
+   end;
+end;
+
+procedure TLancFinanc.GravaFluxoPrev(qryAux,qryFluxoPrev:TwwQuery;
+                                     sCRespon,sData,sTipoRD,sRecPag,sPrev:String;
+                                     iABC:LongInt;rValorCorrente:Real;sCodCentroCusto:String;
+                                     rIDPrograma, rIDPatro, rIDPlanoPrev, rCodTipDoc : Real);
+Var
+   sValorCorrente,sSQL : String;
+   rValorAtual,iCodFluxoPrev:Real;
+Begin
+  //
+  qryFluxoPrev.Close;
+  qryFluxoPrev.SQL.Clear;
+  //
+  qryAux.Close;
+  qryAux.SQL.Clear;
+  if sCodCentroCusto = '' then begin
+     qryAux.SQL.Text :=  'SELECT * FROM '+Sistema.PrefixoServidor+'FLUXOPREVISTO WHERE IDPESSOA = '+ IntToStr(Sistema.IdEmpresa) +
+                         ' AND DATAPROGRAMADA = TO_DATE('''+sData+''',''dd/MM/yyyy'') AND '+
+                         ' CODTIPRECDES = '''+sTipoRD+''' AND RECPAG = '''+sRecPag+''' AND UNIDNEGOC = '+InttoStr(iABC)+
+                         ' AND CODCENTRORESPON = '''+ sCRespon + ''''+
+                         ' AND CODCENTROCUSTO IS NULL';
+  end else begin
+     qryAux.SQL.Text :=  'SELECT * FROM '+Sistema.PrefixoServidor+'FLUXOPREVISTO WHERE IDPESSOA = '+ IntToStr(Sistema.IdEmpresa) +
+                         ' AND DATAPROGRAMADA = TO_DATE('''+sData+''',''dd/MM/yyyy'') AND '+
+                         ' CODTIPRECDES = '''+sTipoRD+''' AND RECPAG = '''+sRecPag+''' AND UNIDNEGOC = '+InttoStr(iABC)+
+                         ' AND CODCENTRORESPON = '''+ sCRespon + ''''+
+                         ' AND CODCENTROCUSTO = '''+ sCodCentroCusto + '''';
+  end;
+  if rIDPrograma <=0 then
+     qryAux.SQL.Add(' AND (IDPROGRAMA IS NULL) ')
+  else
+     qryAux.SQL.Add(' AND (IDPROGRAMA = '+FloatToStr(rIDPrograma)+')');
+  if rIDPatro <=0 then
+     qryAux.SQL.Add(' AND (IDPATRO IS NULL) ')
+  else
+     qryAux.SQL.Add(' AND (IDPATRO = '+FloatToStr(rIDPatro)+')');
+  if rIDPlanoPrev <=0 then
+     qryAux.SQL.Add(' AND (IDPLANOPREV IS NULL) ')
+  else
+     qryAux.SQL.Add(' AND (IDPLANOPREV = '+FloatToStr(rIDPlanoPrev)+')');
+  qryAux.open;
+  if qryAux.IsEmpty then
+   begin
+      sValorCorrente:=FuncaoGeral.OraNumero(rValorCorrente);
+      iCodFluxoPrev := LeUltRegistro(nil,'FLUXOPREVISTO');
+      sSQL :=  'INSERT INTO FLUXOPREVISTO (IDFLUXOPREVISTO,IDPESSOA,DATAPROGRAMADA,CODTIPRECDES,'+
+               'RECPAG,VALOR,UNIDNEGOC,CODCENTRORESPON,IDEMPRESA,CODCENTROCUSTO,IDPLANOPREV,'+
+               'IDPATRO,IDPROGRAMA,CODTIPDOC) ';
+      sSQL := sSQL + 'VALUES(' + FloattoStr(iCodFluxoPrev) + ',' + FloattoStr(Sistema.IdEmpresa) + ',';
+      sSQL := sSQL + 'TO_DATE (''' + sData + ''',''dd/mm/yyyy''),'''+sTipoRD + ''',''' + sRecPag + '''';
+      sSQL := sSQL + ','+ sValorCorrente + ',' + InttoStr(iABC) + ','''+ sCRespon + '''';
+      if sCodCentroCusto <> '' then
+       begin
+          sSQL := sSQL +','+ FloattoStr(Sistema.IdEmpresa) + ','''+ sCodCentroCusto + '''';
+       end
+      else
+       begin
+          sSQL := sSQL + ',NULL,NULL';
+       end;
+
+       if rIDPlanoPrev <=0 then
+          sSQL := sSQL +',NULL'
+       else
+          sSQL := sSQL +','+ FloattoStr(rIDPlanoPrev);
+
+       if rIDPatro <=0 then
+          sSQL := sSQL +',NULL'
+       else
+          sSQL := sSQL +','+ FloattoStr(rIDPatro);
+
+       if rIDPrograma <=0 then
+          sSQL := sSQL +',NULL'
+       else
+          sSQL := sSQL +','+ FloattoStr(rIDPrograma);
+
+       if rCodTipDoc<=0 then
+          sSQL := sSQL +',NULL)'
+       else
+          sSQL := sSQL +','+FloatToStr(rCodTipDoc)+')';
+   end
+  else
+   begin
+      rValorAtual   :=qryAux.FieldByName('VALOR').Value +rValorCorrente ;
+      sValorCorrente:=FuncaoGeral.OraNumero(rValorAtual);
+      iCodFluxoPrev :=qryAux.FieldByName('IDFLUXOPREVISTO').AsFloat;
+      sSQL := 'UPDATE FLUXOPREVISTO SET VALOR = '+sValorCorrente+' WHERE IDFLUXOPREVISTO = '+ FloattoStr(iCodFluxoPrev);
+   end;
+   
+  if not ExecutarQuery(qryFluxoPrev,sSql) then begin
+     Abort;
+  end;
+  if sPrev = 'S' then begin
+    sSQL := 'UPDATE FLUXOPREVISTO SET FLGPREVISAO = ''S'' WHERE IDFLUXOPREVISTO = '+ FloattoStr(iCodFluxoPrev);
+    if not ExecutarQuery(qryFluxoPrev,sSql) then begin
+       Abort;
+    end;
+  end;
+end;
+
+procedure TLancFinanc.GravaFluxoReal(qryAux,qryFluxoReal:TwwQuery;
+                                     sCRespon,sData,sTipoRD,sRecPag:String;
+                                     iMoeCodigo,iABC:LongInt;rValor:Real;sCodCentroCusto:String;
+                                     rIDPrograma, rIDPatro, rIDPlanoPrev, rCodTipDoc : Real);
+
+Var
+   sValor,sSQL : String;
+   rValorAtual,iCodFluxoReal : Real;
+Begin
+  //
+  qryFluxoReal.Close;
+  qryFluxoReal.SQL.Clear;
+  qryAux.Close;
+  qryAux.SQL.Clear;
+  if sCodCentroCusto = '' then begin
+     qryAux.SQL.Text :=  'SELECT * FROM '+Sistema.PrefixoServidor+'FLUXOREAL WHERE IDPESSOA = '+ IntToStr(Sistema.IdEmpresa) +
+                         ' AND DATACFLOAT = TO_DATE('''+sData+''',''dd/MM/yyyy'') AND '+
+                         ' CODTIPRECDES = '''+sTipoRD+''' AND RECPAG = '''+sRecPag+''' AND UNIDNEGOC = '+InttoStr(iABC)+
+                         ' AND CODCENTRORESPON = '''+ sCRespon + ''' AND MOECODIGO = '+IntToStr(iMoeCodigo)+
+                         ' AND CODCENTROCUSTO IS NULL';
+  end else begin
+     qryAux.SQL.Text :=  'SELECT * FROM '+Sistema.PrefixoServidor+'FLUXOREAL WHERE IDPESSOA = '+ IntToStr(Sistema.IdEmpresa) +
+                         ' AND DATACFLOAT = TO_DATE('''+sData+''',''dd/MM/yyyy'') AND '+
+                         ' CODTIPRECDES = '''+sTipoRD+''' AND RECPAG = '''+sRecPag+''' AND UNIDNEGOC = '+InttoStr(iABC)+
+                         ' AND CODCENTRORESPON = '''+ sCRespon + ''' AND MOECODIGO = '+IntToStr(iMoeCodigo)+
+                         ' AND CODCENTROCUSTO = '''+ sCodCentroCusto + '''';
+  end;
+  if rIDPrograma <=0 then
+     qryAux.SQL.Add(' AND (IDPROGRAMA IS NULL) ')
+  else
+     qryAux.SQL.Add(' AND (IDPROGRAMA = '+FloatToStr(rIDPrograma)+')');
+  if rIDPatro <=0 then
+     qryAux.SQL.Add(' AND (IDPATRO IS NULL) ')
+  else
+     qryAux.SQL.Add(' AND (IDPATRO = '+FloatToStr(rIDPatro)+')');
+  if rIDPlanoPrev <=0 then
+     qryAux.SQL.Add(' AND (IDPLANOPREV IS NULL) ')
+  else
+     qryAux.SQL.Add(' AND (IDPLANOPREV = '+FloatToStr(rIDPlanoPrev)+')');
+  qryAux.open;
+  qryAux.First;
+  if qryAux.IsEmpty then
+  Begin
+    iCodFluxoReal := LeUltRegistro(nil,'FLUXOREAL');
+    sValor:=FuncaoGeral.OraNumero(rValor);
+    sSQL :=  'INSERT INTO FLUXOREAL (IDFLUXOREAL,IDPESSOA,DATACFLOAT,CODTIPRECDES,RECPAG,VALOR,'+
+                                    'UNIDNEGOC,CODCENTRORESPON,MOECODIGO,IDEMPRESA,CODCENTROCUSTO,'+
+                                    'IDPLANOPREV, IDPATRO, IDPROGRAMA, CODTIPDOC) ';
+    sSQL := sSQL + 'VALUES(' + FloattoStr(iCodFluxoReal) + ','+ FloattoStr(Sistema.IdEmpresa) + ',';
+    sSQL := sSQL + 'TO_DATE (''' + sData + ''',''dd/mm/yyyy''),'''+sTipoRD + ''',''' + sRecPag + '''';
+    sSQL := sSQL + ','+ sValor + ',' + InttoStr(iABC) + ','''+ sCRespon + ''','+IntToStr(iMoeCodigo);
+    if sCodCentroCusto <> '' then begin
+       sSQL := sSQL +','+ FloattoStr(Sistema.IdEmpresa) + ','''+ sCodCentroCusto + '''';
+    end else begin
+       sSQL := sSQL + ',NULL,NULL';
+    end;
+
+    if rIDPlanoPrev <=0 then
+       sSQL := sSQL +',NULL'
+    else
+       sSQL := sSQL +','+ FloattoStr(rIDPlanoPrev);
+       
+    if rIDPatro <=0 then
+       sSQL := sSQL +',NULL'
+    else
+       sSQL := sSQL +','+ FloattoStr(rIDPatro);
+
+    if rIDPrograma <=0 then
+       sSQL := sSQL +',NULL'
+    else
+       sSQL := sSQL +','+ FloattoStr(rIDPrograma);
+
+    if rCodTipDoc<=0 then
+       sSQL := sSQL +',NULL)'
+    else
+       sSQL := sSQL +','+FloatToStr(rCodTipDoc)+')';
+  end
+  else
+  Begin
+    iCodFluxoReal :=qryAux.FieldByName('IDFLUXOREAL').AsFloat;
+    rValorAtual:=qryAux.FieldByName('VALOR').Value +rValor ;
+    sValor:=FuncaoGeral.OraNumero(rValorAtual);
+    sSQL := 'UPDATE FLUXOREAL SET VALOR = '+sValor+' WHERE IDFLUXOREAL = '+ FloattoStr(iCodFluxoReal);
+  end;
+  if not ExecutarQuery(qryFluxoReal,sSql) then
+  Begin
+     Abort;
+  end;
+end;
+
+procedure TLancFinanc.MudaStatusConcilia(sStatus,sDataConcilia:String;iCodLancFinan:LongInt);
+var
+  qry:TwwQuery;
+  sSql: String;
+Begin
+  qry :=TwwQuery.Create(Application);
+  qry.DatabaseName  := 'BASEDADOS';
+  try
+      sSql :='UPDATE MOVIMFINANC SET STATUSCONCILIA = '''+sStatus+'''';
+      if sDataConcilia <> '' then
+         sSql:=sSql +',DATACONCILIACAO = TO_DATE('''+sDataConcilia+''',''dd/MM/yyyy'')'
+      else
+         sSql:=sSql +',DATACONCILIACAO = NULL';
+      sSql:=sSql + ' WHERE CODLANCFINANC = '+InttoStr(iCodLancFinan)+' AND STATUSCONCILIA <> ''X''';
+      if not ExecutarQuery(qry,sSql) then
+      Begin
+         Abort;
+      end;
+  Finally
+     qry.Free;
+  end;
+end;
+
+procedure TLancFinanc.EstornoFinanceiro(sDataEstorno,sNaoIdentif:String;var iCodLancFinan:LongInt);
+var
+  qry,qry1,qryContabil:TwwQuery;
+  sMens, sEntradaSaida: String;
+  iCodLancTransf,iPlnCodigoOri: LongInt;
+  liExercicio,liPeriodo, iEmpresaProp,liRetFuncao:LongInt;
+  iCodLancFinanc,iPlnCodigo:LongInt;
+  iCodLancFinan1,iCodLancFinan2:LongInt;
+Begin
+  qry :=TwwQuery.Create(Application);
+  qry.DatabaseName  := 'BASEDADOS';
+  qry1 :=TwwQuery.Create(Application);
+  qry1.DatabaseName  := 'BASEDADOS';
+  qryContabil :=TwwQuery.Create(Application);
+  qryContabil.DatabaseName  := 'BASEDADOS';
+  Try
+  //
+  iCodLancFinanc:=0;
+  iPlnCodigo:=0;
+  //
+  qry.Close;
+  qry.SQL.Clear;
+  qry.SQL.text :='SELECT * FROM MOVIMFINANC WHERE CODLANCFINANC = '+InttoStr(iCodLancFinan);
+  qry.Open;
+  //
+  qry1.Close;
+  qry1.SQL.Clear;
+  qry1.SQL.text :='SELECT * FROM RATEIOFINANC WHERE CODLANCFINANC = '+InttoStr(iCodLancFinan);
+  qry1.Open;
+  //
+  if sNaoIdentif = 'S' then
+     iPlnCodigoOri :=0
+  else
+     iPlnCodigoOri :=qry.FieldByName('PLNCODIGO').AsInteger;
+  //
+  iCodLancTransf:=qry.FieldByName('CODLANCTRANSF').AsInteger;
+  iEmpresaProp:=Sistema.IdEmpresa;
+  if iPlnCodigoOri <> 0 then
+  Begin
+     //Exclui/Estorno contab
+     liRetFuncao:=TestaPeriodo(True,'BaseDados',sDataEstorno,IntToStr(Sistema.IdModulo),liExercicio,
+                               liPeriodo,iEmpresaProp,sMens);
+     if liRetFuncao <> 0 then
+     Begin
+        iCodLancFinan:=-1;
+        exit;
+     end;
+     iPlnCodigo := EstornaLanc(True,iPlncodigoOri,'BASEDADOS',sDataEstorno,liExercicio,liPeriodo, iEmpresaProp,IntegraBack.MascaraPlano);
+     if iPlnCodigo = -1 then
+     Begin
+        iCodLancFinan:=-1;
+        exit;
+     end;
+  end;
+
+  If qry.FieldByName('ENTRADASAIDA').AsString = 'E' then
+     sEntradaSaida:='S'
+  else
+     sEntradaSaida:='E';
+  LancaFinanceiro(qryContabil,Sistema.IdModulo,qry.FieldByName('HISTPADFINAN').Value,qry.FieldByName('MOECODIGO').AsInteger,
+                  Sistema.IdUsuario,qry.FieldByName('CODPORTADOR').Value,Sistema.IdEmpresa,
+                  qry.FieldByName('VALORLANCFINAN').AsFloat,qry.FieldByName('VALOROUTRAMOEDA').AsFloat,qry.FieldByName('NUMCHQBORDERO').AsString,
+                  sDataEstorno,qry.FieldByName('DATACONCILIACAO').AsString,sEntradaSaida,
+                  'ESTORNO '+qry.FieldByName('HISTORICO').AsString,qry.FieldByName('STATUSCONCILIA').AsString,iCodLancFinanc,iPlnCodigo);
+  if iCodLancFinanc = -1 then
+  Begin
+     iCodLancFinan:=-1;
+     exit;
+  end;
+  qry1.First;
+  While (not qry1.EOF) do
+  Begin
+     LancFinanc.LancaRateioFinanc(qry1.FieldByName('UNIDNEGOC').AsInteger,
+                                  qry1.FieldByName('MOECODIGO').AsInteger,
+                                  Sistema.IdEmpresa,
+                                  qry.FieldByName('CODPORTADOR').Value,
+                                  (qry1.FieldByName('VALOR').AsFloat*(-1)),
+                                  (qry1.FieldByName('VALOROUTRAMOEDA').AsFloat*(-1)),
+                                  qry1.FieldByName('CODTIPRECDES').AsString,
+                                  qry1.FieldByName('RECPAG').AsString,
+                                  qry1.FieldByName('CODCENTRORESPON').AsString,
+                                  sDataEstorno,
+                                  iCodLancFinanc,
+                                  qry1.FieldByName('CODCENTROCUSTO').AsString,
+                                  qry1.FieldByName('IDPROGRAMA').AsFloat,
+                                  qry1.FieldByName('IDPATRO').AsFloat,
+                                  qry1.FieldByName('IDPLANOPREV').AsFloat,
+                                  qry1.FieldByName('CODTIPDOC').AsFloat);
+     if iCodLancFinanc = -1 then
+     Begin
+        iCodLancFinan:=-1;
+        exit;
+     end;
+     qry1.Next;
+  end;
+
+  if iCodLancTransf <> 0 then
+  Begin
+     iCodLancFinan1:=iCodLancFinanc;
+     iCodLancFinanc:=0;
+     //
+     qry.Close;
+     qry.SQL.Clear;
+     qry.SQL.text :='SELECT * FROM '+Sistema.PrefixoServidor+'MOVIMFINANC WHERE CODLANCFINANC = '+InttoStr(iCodLancTransf);
+     qry.Open;
+
+     If qry.FieldByName('ENTRADASAIDA').AsString = 'E' then
+        sEntradaSaida:='S'
+     else
+        sEntradaSaida:='E';
+     LancaFinanceiro(qryContabil,Sistema.IdModulo,qry.FieldByName('HISTPADFINAN').Value,qry.FieldByName('MOECODIGO').AsInteger,
+                     Sistema.IdUsuario,qry.FieldByName('CODPORTADOR').Value,Sistema.IdEmpresa,
+                     qry.FieldByName('VALORLANCFINAN').AsFloat,qry.FieldByName('VALOROUTRAMOEDA').AsFloat,qry.FieldByName('NUMCHQBORDERO').AsString,
+                     sDataEstorno,qry.FieldByName('DATACONCILIACAO').AsString,sEntradaSaida,
+                     'ESTORNO '+qry.FieldByName('HISTORICO').AsString,qry.FieldByName('STATUSCONCILIA').AsString,iCodLancFinanc,iPlnCodigo);
+
+     if iCodLancFinanc = -1 then
+     Begin
+        iCodLancFinan:=-1;
+        exit;
+     end;
+     iCodLancFinan2:=iCodLancFinanc;
+     GravaTransFundos(iCodLancFinan1,iCodLancFinan2);
+  end;
+  Finally
+     qry.Free;
+     qry1.Free;
+     qryContabil.Free;
+  end;
+end;
+
+procedure TLancFinanc.IncluiContabilidade(qryContabilidade:TwwQuery;sDataLanc:String;iModulo,iEmpresaProp,iUsuario:LongInt;var iPlnCodigo:LongInt);
+var
+  qryParamGlobal:TwwQuery;
+  sMens,cCCustd,cContad,ssubconta,cCCustc,cContac,ssubcontacre,sUnidNegoc : String;
+  rValHistDed,rValHistCre: Real;
+Begin
+  qryParamGlobal:=TwwQuery.Create(Application);
+  qryParamGlobal.DatabaseName := 'BASEDADOS';
+  Try
+  if (IntegraBack.Contabilidade = 'S') and (not qryContabilidade.IsEmpty) then
+  Begin
+     qryParamGlobal.Close;
+     qryParamGlobal.SQL.Clear;
+     qryParamGlobal.SQL.Text := 'SELECT USAABC,UNIDNEGOC,CODCENTRORESPON FROM '+Sistema.PrefixoServidor+'PARAMGLOBAL WHERE IDPESSOA = ' + InttoStr(Sistema.IdEmpresa);
+     qryParamGlobal.Open;
+     //
+     qryContabilidade.First;
+     While (not qryContabilidade.EOF) do
+     Begin
+
+        if trim(qryContabilidade.FieldByName('UNIDNEGOC').AsString) = '' then
+           sUnidNegoc:=qryParamGlobal.FieldByName('UNIDNEGOC').AsString
+        else
+           sUnidNegoc:=qryContabilidade.FieldByName('UNIDNEGOC').AsString;
+        if qryContabilidade.FieldByName('LACDEBCRE').AsString = 'D' then
+        Begin
+           cCCustd     :=qryContabilidade.FieldByName('CODCENTROCUSTO').AsString;
+           cContad     :=qryContabilidade.FieldByName('PLACONTA').AsString;
+           rValHistDed :=qryContabilidade.FieldByName('LACVALHIST').AsFloat;
+           ssubconta   :=qryContabilidade.FieldByName('CODSUBCONTA').AsString;
+           cCCustc     :='';
+           cContac     :='';
+           rValHistCre :=0;
+           ssubcontacre:='';
+        end
+        else
+        Begin
+           cCCustd     :='';
+           cContad     :='';
+           rValHistDed :=0;
+           ssubconta   :='';
+           cCCustc     :=qryContabilidade.FieldByName('CODCENTROCUSTO').AsString;
+           cContac     :=qryContabilidade.FieldByName('PLACONTA').AsString;
+           rValHistCre :=qryContabilidade.FieldByName('LACVALHIST').AsFloat;
+           ssubcontacre:=qryContabilidade.FieldByName('CODSUBCONTA').AsString;
+        end;
+
+        iPlnCodigo:=LANCACONTAB(True,'BASEDADOS', sDataLanc, InttoStr(iModulo), qryContabilidade.FieldByName('LACTIPO').AsString,
+                     qryContabilidade.FieldByName('LACDEBCRE').AsString,'','','','','','','','','','',
+                     qryContabilidade.FieldByName('LACNUMDOC').AsString,qryContabilidade.FieldByName('LACHIST1').AsString,
+                     qryContabilidade.FieldByName('LACHIST2').AsString,qryContabilidade.FieldByName('LACHIST3').AsString,
+                     qryContabilidade.FieldByName('LACHIST4').AsString,qryContabilidade.FieldByName('LACHIST5').AsString,
+                     '03', cCCustD, cContaD, cCCustC, cContaC, liExercicio, liPeriodo,iEmpresaProp,iUsuario,
+                     IntegraBack.Plano,qryContabilidade.FieldByName('LACVALOR').AsFloat,
+                     0,0,0,0,0,0,0,0,sUnidNegoc,False, rValHistDed, rValHistCre,
+                     ssubconta, ssubcontacre,'','', iPlnCodigo,sMens,IntegraBack.MascaraPlano,True,0,
+                     qryContabilidade.FieldByName('IDPLANOPREV').AsInteger ,
+                     qryContabilidade.FieldByName('IDPATRO').AsInteger,
+                     Sistema.UsaPlanoPatro);
+
+        if iPlnCodigo < 0 then
+           exit;
+        qryContabilidade.Next;
+     end;
+  end;
+  Finally
+     qryParamGlobal.Free;
+  end;
+end;
+
+Function TLancFinanc.FazRateioAdm(qry:TwwQuery;sTipoRecDesemb,sRecPag,sUnidNegoc,sIdPessoa: String):Boolean;
+Begin
+   If FazQuery(Qry,'SELECT ' +
+               ' CR.UNIDNEGOC, CR.PERCRATEIO,  U.UNECODIGO, U.NOME, RE.UNIDNEGOC  AS UNIDARAT ' +
+               'FROM  ' +
+               ' PLANOCONTA P,  COMPORATEIOAP CR, UNIDNEGOCIO U, RATEIOAPEXTRA RE, TIPORECEBDESEMB T ' +
+               'WHERE ' +
+               ' (CR.IDPESSOA = ' + IntToStr(Sistema.IdEmpresa) + ') AND ' +
+               ' (P.PLANO = ' + IntToStr(IntegraBack.Plano) + ') AND ' +
+               ' (RTRIM(T.CODTIPRECDES) = ''' + sTipoRecDesemb + ''') AND ' +
+               ' (RTRIM(T.RECPAG) = ''' + sRecPag + ''') AND ' +
+               ' (RTRIM(T.IDPESSOA) = ' + sIdPessoa + ') AND ' +
+               ' (RE.UNIDNEGOC  = ' + sUnidNegoc + ')  AND ' +
+               ' (P.IDRATEIOAPEXTRA=CR.IDRATEIOAPEXTRA) AND ' +
+               ' (P.IDRATEIOAPEXTRA=RE.IDRATEIOAPEXTRA) AND ' +
+               ' (P.PLACONTA = T.PLACONTA) AND '+
+               ' (P.PLANO = T.PLANO) AND '+
+               ' (CR.UNIDNEGOC = U.UNIDNEGOC) AND ' +
+               ' (CR.IDPESSOA = U.IDPESSOA) AND ' +
+               ' (CR.IDPESSOA = RE.IDPESSOA) ') then begin
+      Result := True;
+   end else begin
+      Result := False;
+   end;
+End;
+
+procedure TLancFinanc.PreparaQueryRelac(AOwner: TComponent);
+begin
+   updRelacionados:=TUpdateSQL.Create(AOwner);
+   qryRelacionados:=TwwQuery.Create(AOwner);
+   qryRelacionados.DatabaseName:='BaseDados';
+   qryRelacionados.UpdateObject:=updRelacionados;
+   qryRelacionados.CachedUpdates:=True;
+   qryRelacionados.Active:=False;
+   qryRelacionados.SQL.Text:='SELECT IDRELACIONANI,CODLANCFINANC,FLGNI '+
+                             'FROM RELACIONANI '+
+                             'WHERE (1=2)';
+   qryRelacionados.Open;
+end;
+
+procedure TLancFinanc.IncluiRelacionado(AOwner: TComponent; rCodLancFinanc: Real; sFlgNI: String);
+begin
+   if (qryRelacionados=nil) then PreparaQueryRelac(AOwner);
+   qryRelacionados.Append;
+   qryRelacionados.FieldByName('CODLANCFINANC').AsFloat:=rCodLancFinanc;
+   qryRelacionados.FieldByName('FLGNI').AsString:=sFlgNI;
+   qryRelacionados.Post;
+end;
+
+procedure TLancFinanc.GravaRelacNI(AOwner: TComponent);
+var
+   rIDRelacionaNI : Real;
+   qryAux         : TwwQuery;
+begin
+   if (qryRelacionados=nil) then Exit;
+   if (qryRelacionados.RecordCount<1) then Exit;
+
+   try
+      qryAux:=TwwQuery.Create(AOwner);
+      qryAux.DatabaseName:='BaseDados';
+
+      rIDRelacionaNI:=LeUltRegistro(nil,'RELACIONANI');
+
+      qryRelacionados.First;
+      while not(qryRelacionados.Eof) do
+      begin
+         qryAux.Close;
+         qryAux.SQL.Clear;
+         qryAux.SQL.Add('INSERT INTO RELACIONANI (IDRELACIONANI,CODLANCFINANC,FLGNI) ');
+         qryAux.SQL.Add('       VALUES ('+FloatToStr(rIDRelacionaNI)+','+
+                                          FloatToStr(qryRelacionados.FieldByName('CODLANCFINANC').AsFloat)+','+
+                                          #39+qryRelacionados.FieldByName('FLGNI').AsString+#39+')');
+         qryAux.ExecSQL;
+         qryRelacionados.Next;
+      end;
+   finally
+      qryAux.Free;
+      qryRelacionados.Close;
+      FreeAndNil(qryRelacionados);
+   end;
+end;
+
+end.
+
+
+
+
+

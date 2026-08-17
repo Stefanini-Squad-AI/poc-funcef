@@ -1,0 +1,517 @@
+unit fFiltraSql;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  StdCtrls, IvDictio, IvMulti, IvEMulti, MAHlpBtn, Buttons,
+  TB97Tlbr, TB97, ExtCtrls, Db, DBTables, wwQuery, Mask, uMensErro,
+  ComCtrls, TREdit, UDataBase, Grids, DBGrids, wwdbdatetimepicker, CMDateTimePicker,
+  fPai;
+
+Type
+  TFrResult = (FrError, FrFull, FrFiltrado);
+
+Type
+  TFrmFiltraSql = class(TFrmPai)
+    QryAux: TwwQuery;
+    MemTrocaSql: TRichEdit;
+    pnlFundo: TPanel;
+    Panel1: TPanel;
+    Label1: TLabel;
+    Label2: TLabel;
+    Label3: TLabel;
+    Bevel1: TBevel;
+    Bevel2: TBevel;
+    EdtNum: TRealEdit;
+    EdtValoresCondicao: TMaskEdit;
+    EdtDate: TCMDateTimePicker;
+    BtnInclui: TBitBtn;
+    BtnExclui: TBitBtn;
+    RgJuncoes: TRadioGroup;
+    RgParentesis: TRadioGroup;
+    Cmbcampos: TComboBox;
+    CmbComparadores: TComboBox;
+    CkbCaixa: TCheckBox;
+    Panel2: TPanel;
+    Panel3: TPanel;
+    LstCondicoes: TListBox;
+    Panel4: TPanel;
+    BtnUp: TBitBtn;
+    BtnDow: TBitBtn;
+    Dock971: TDock97;
+    TB97oKCancelar: TToolbar97;
+    ToolbarSep971: TToolbarSep97;
+    bbtnConfirmar: TBitBtn;
+    bbtnCancelar: TBitBtn;
+    CkbPrinter: TCheckBox;
+    Bevel3: TBevel;
+    QryVersion: TwwQuery;
+    procedure BtnExcluiClick(Sender: TObject);
+    procedure BtnUpClick(Sender: TObject);
+    procedure BtnIncluiClick(Sender: TObject);
+    procedure FormShow(Sender: TObject);
+    procedure bbtnConfirmarClick(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
+    procedure CmbcamposChange(Sender: TObject);
+    procedure bbtnCancelarClick(Sender: TObject);
+    procedure bbtnSairClick(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
+  private
+    { Private declarations }
+    bOracle81, bMontaTela: Boolean;
+    sCampos :String;
+    {sNomeView,} sSqlOrigem  :String;
+    Function BuscaTipoDado(iIndiceCampo: Integer):String;
+    Function CorrigeDecimaSeparator(sNum,sTipo:String):String;
+    Procedure AchaeTroca(MemoBusca:TRichEdit;TextoBusca,TextoTroca:String;bAdicionaCasoNaoExista:Boolean);
+  public
+    { Public declarations }
+    QryOrigem: TwwQuery;
+    iIdReports, iOrigemCM :Integer;
+  end;
+
+
+implementation
+
+Uses uCMOracleInt;
+
+{$R *.DFM}
+
+Function TFrmFiltraSql.BuscaTipoDado(iIndiceCampo: Integer):String;
+Begin
+ If iIndiceCampo > -1 Then
+ Begin
+    If Not QryOrigem.Active Then QryOrigem.Open;
+
+    Case QryOrigem.Fields[Cmbcampos.ItemIndex].DataType of
+      ftString: Result := 'S';
+      ftBytes, ftSmallint, ftInteger, ftWord: Result := 'I';
+      ftFloat, ftCurrency: Result := 'N';
+      ftBoolean: Result := 'B';
+      ftDate, ftDateTime: Result := 'D';
+      ftTime: Result := 'T';
+      ftBlob, ftMemo,ftGraphic,ftFmtMemo: Result := 'BL';
+    End;
+ End
+ Else
+    Result := '';
+End;
+
+procedure TFrmFiltraSql.BtnExcluiClick(Sender: TObject);
+begin
+  inherited;
+  If LstCondicoes.ItemIndex > -1 Then
+     LstCondicoes.Items.Delete(LstCondicoes.ItemIndex);
+end;
+
+procedure TFrmFiltraSql.BtnUpClick(Sender: TObject);
+Var
+   iMax, iMin, iIndiceLista, iProximo: Integer;
+   sAnterior: String;
+begin
+   inherited;
+   iMax := LstCondicoes.Items.Count - 1;
+   iMin := 0;
+   iIndiceLista := LstCondicoes.ItemIndex;
+   If (iMax = -1) Or (iIndiceLista = -1) Then Exit;
+
+   If (Sender as TBitBtn).Tag = 1 Then
+       iProximo := iIndiceLista - 1
+   Else
+       iProximo := iIndiceLista + 1;
+
+   If iProximo < iMin Then
+      iProximo := iMax
+   Else
+      If iProximo > iMax Then
+         iProximo := iMin;
+
+   sAnterior                        := LstCondicoes.Items[iIndiceLista];
+   LstCondicoes.Items[iIndiceLista] := LstCondicoes.Items[iProximo];
+   LstCondicoes.Items[iProximo]     := sAnterior;
+   LstCondicoes.SetFocus;
+   LstCondicoes.ItemIndex := iProximo;
+end;
+
+procedure TFrmFiltraSql.BtnIncluiClick(Sender: TObject);
+Var
+  sAux, sFrase, sJuncao, sCompara, sValor: String;
+begin
+  inherited;
+  If (Cmbcampos.ItemIndex > -1) And
+     (CmbComparadores.ItemIndex > -1) Then
+     Begin
+       Case CmbComparadores.ItemIndex of
+            0: sCompara := ' = ';
+            1: sCompara := ' <> ';
+            2: sCompara := ' < ';
+            3: sCompara := ' <= ';
+            4: sCompara := ' > ';
+            5: sCompara := ' >= ';
+            6:
+            Begin
+              If bOracle81 Then
+                 sCompara := ' LIKE '
+              Else
+                 sCompara := ' = ';
+            End;
+            7:
+            Begin
+              If bOracle81 Then
+                 sCompara := ' LIKE '
+              Else
+                 sCompara := ' = ';
+            End;
+       End;
+
+       Case RgJuncoes.ItemIndex of
+            0: sJuncao := ' AND ';
+            1: sJuncao := ' OR ';
+       End;
+
+       sFrase := '';
+
+       sAux := BuscaTipoDado(Cmbcampos.ItemIndex);
+
+
+       If bOracle81 Then
+       Begin
+          Case sAux[1] of
+          'S','B':
+            Begin
+                Case CmbComparadores.ItemIndex Of
+                  6: sValor := EdtValoresCondicao.Text + '%';
+                  7: sValor := '%' + EdtValoresCondicao.Text + '%';
+                  Else
+                     sValor := EdtValoresCondicao.Text;
+                End;
+
+                If CkbCaixa.Checked Then
+                   sFrase := '(' + QryOrigem.Fields[Cmbcampos.ItemIndex].FieldName +
+                             sCompara + '''' + sValor + ''')'
+                Else
+                   sFrase := '(UPPER(' + QryOrigem.Fields[Cmbcampos.ItemIndex].FieldName + ')' +
+                             sCompara + 'UPPER(''' + sValor + '''))'
+
+            End;
+          'N','I':  sFrase := '(' + QryOrigem.Fields[Cmbcampos.ItemIndex].FieldName +
+                              sCompara + CorrigeDecimaSeparator(EdtNum.Text,sAux[1]) + ')';
+          'D': sFrase := '(' + QryOrigem.Fields[Cmbcampos.ItemIndex].FieldName +
+                         sCompara + 'TO_DATE(''' + EdtDate.Text  + ''',''DD/MM/YYYY''))';
+          'T': sFrase := '(' + QryOrigem.Fields[Cmbcampos.ItemIndex].FieldName +
+                         sCompara + 'TO_DATE(''' + EdtValoresCondicao.Text  + ''',''HH/MI''))';
+          End;
+       End
+       Else
+       Begin
+          Case sAux[1] of
+          'S','B':
+            Begin
+                Case CmbComparadores.ItemIndex Of
+                  6: sValor := EdtValoresCondicao.Text + '*';
+                  7: sValor := EdtValoresCondicao.Text + '*';
+                  Else
+                     sValor := EdtValoresCondicao.Text;
+                End;
+
+                sFrase := '(' + QryOrigem.Fields[Cmbcampos.ItemIndex].FieldName +
+                          sCompara + '''' + sValor + ''')'
+
+            End;
+          'N','I':  sFrase := '(' + QryOrigem.Fields[Cmbcampos.ItemIndex].FieldName +
+                              sCompara + CorrigeDecimaSeparator(EdtNum.Text,sAux[1]) + ')';
+          'D': sFrase := '(' + QryOrigem.Fields[Cmbcampos.ItemIndex].FieldName +
+                         sCompara + '''' + EdtDate.Text  + ''')';
+          'T': sFrase := '(' + QryOrigem.Fields[Cmbcampos.ItemIndex].FieldName +
+                         sCompara + '''' + EdtValoresCondicao.Text  + ''')';
+          End;
+       End;
+
+       If sFrase <> '' Then
+       Begin
+         Case RgParentesis.ItemIndex of
+            1: sFrase := '(' + sFrase;
+            2: sFrase := sFrase + ')';
+         End;
+
+         If LstCondicoes.Items.Count > 0 Then
+            sFrase := sJuncao + sFrase;
+
+         LstCondicoes.Items.Add(sFrase);
+
+         RgJuncoes.ItemIndex := 0;
+         RgParentesis.ItemIndex := 0;
+         EdtValoresCondicao.Text := '';
+       End;
+     End;
+end;
+
+procedure TFrmFiltraSql.FormShow(Sender: TObject);
+Var
+  X:Integer;
+begin
+  inherited;
+  If QryOrigem.Active Then QryOrigem.Close;
+
+  {Try
+    bOracle81 := (TCMOracleInt.GetOCIVersion >= 810);
+  Except
+    bOracle81 := False;
+  End;}
+
+  Try
+     If QryVersion.Active Then QryVersion.Close;
+     QryVersion.Open;
+     bOracle81 := (Pos('8.1',QryVersion.Fields[0].AsString) <> 0);
+     Close;
+  Except
+     bOracle81 := False;
+  End;
+
+  sSqlOrigem := QryOrigem.Sql.Text;
+
+  If bOracle81 Then
+  Begin
+     {sNomeView := 'VWCMTMP' + IntToStr(iOrigemCM) + IntToStr(iIdReports);
+
+     With QryAux Do
+     Begin
+        If Active Then Close;
+        Sql.Text := 'DROP TABLE ' + sNomeView;
+        Try
+          ExecSql;
+        Except
+
+        End;
+
+        If Active Then Close;
+        Sql.Text := 'CREATE TABLE ' + sNomeView + ' AS ' + sSqlOrigem + '';
+        Try
+          ExecSql;
+        Except
+
+        End;
+     End;}
+
+     QryOrigem.Sql.Clear;
+     QryOrigem.Sql.Add('SELECT * FROM (' + sSqlOrigem + ') WHERE 1=2');
+  End
+  Else
+  Begin
+     //Acha e troca com where 1=2
+     MemTrocaSql.Lines.Assign(QryOrigem.Sql);
+     AchaeTroca(MemTrocaSql,'WHERE','WHERE 1=2 AND',False);
+     QryOrigem.Sql.Assign(MemTrocaSql.Lines);
+
+     QryOrigem.Filtered := False;
+     QryOrigem.Filter := '';
+     QryOrigem.FilterOptions := QryOrigem.FilterOptions - [foCaseInsensitive, foNoPartialCompare];
+     CmbComparadores.Items.Delete(7);
+  End;
+
+  QryOrigem.GetFieldNames(Cmbcampos.Items);
+  sCampos := '';
+  For X:=0 To Cmbcampos.Items.Count - 1 Do
+      If sCampos = '' Then
+         sCampos := Cmbcampos.Items[x]
+      Else
+         sCampos := sCampos + ', ' + Cmbcampos.Items[x];
+
+  {If bOracle81 Then
+  Begin
+     If QryOrigem.Active Then QryOrigem.Close;
+     QryOrigem.Sql.Clear;
+     QryOrigem.Sql.Add('SELECT ' + sCampos + ' FROM (' + sSqlOrigem + ') WHERE 1=2');
+  End;}
+
+  bMontaTela := False;
+end;
+
+procedure TFrmFiltraSql.bbtnConfirmarClick(Sender: TObject);
+Var
+  sCondicoes: String;
+  X: Integer;
+begin
+  inherited;
+  sCondicoes := '';
+
+  If QryOrigem.Active Then QryOrigem.Close;
+  QryOrigem.Sql.Clear;
+
+  For X:=0 To LstCondicoes.Items.Count - 1 Do
+      sCondicoes := sCondicoes + ' ' + LstCondicoes.Items[X];
+
+  If Trim(sCondicoes) <> '' Then
+  Begin
+     If bOracle81 Then
+        QryOrigem.Sql.Add('SELECT ' + sCampos + ' FROM (' + sSqlOrigem + ') WHERE ' + sCondicoes)
+     Else
+     Begin
+        QryOrigem.Sql.Add(sSqlOrigem);
+
+        If Not CkbCaixa.Checked Then
+           QryOrigem.FilterOptions := QryOrigem.FilterOptions + [foCaseInsensitive];
+
+        QryOrigem.Filter := sCondicoes;
+        QryOrigem.Filtered := True;
+     End;
+  End
+  Else
+    QryOrigem.Sql.Add(sSqlOrigem);
+
+  Try
+    QryOrigem.Open;
+  Except
+    On E :Exception Do
+    Begin
+      MsgDlg('Filtro Incorreto' + (#13+#10) + E.Message,'Atenção',MtInformation,[MbOk],0);
+      ModalResult := MrAbort;
+    End;
+  End;
+end;
+
+procedure TFrmFiltraSql.FormCreate(Sender: TObject);
+begin
+  inherited;
+  bMontaTela := True;  
+  bOracle81 := False;
+  CmbComparadores.ItemIndex := 0;
+  CmbComparadores.ItemIndex := 0;
+end;
+
+procedure TFrmFiltraSql.CmbcamposChange(Sender: TObject);
+Var
+  sAux: String;
+begin
+  inherited;
+  If bMontaTela Then Exit;
+
+  sAux := BuscaTipoDado(Cmbcampos.ItemIndex);
+
+  CmbComparadores.Items.Clear;
+  CmbComparadores.Items.Add('Igual a');
+  CmbComparadores.Items.Add('Diferente de');
+  CmbComparadores.Items.Add('Menor Que');
+  CmbComparadores.Items.Add('Menor Ou Igual a');
+  CmbComparadores.Items.Add('Maior Que');
+  CmbComparadores.Items.Add('Maoir Ou Igual a');
+
+  If sAux <> ''  Then
+  Begin
+    EdtNum.Visible :=  ((sAux = 'N') OR (sAux = 'I'));
+    EdtDate.Visible := (sAux = 'D');
+    EdtValoresCondicao.Visible := ((sAux = 'S') OR (sAux = 'B') OR (sAux = 'BL'));
+
+    Case sAux[1] of
+      'T': EdtValoresCondicao.EditMask := '!90:00;1; ';
+      'N':
+         Begin
+           EdtNum.DecDigits := 2;
+           EdtNum.NumberFormat := fNumber;
+         End;
+      'I':
+         Begin
+           EdtNum.DecDigits := 0;
+           EdtNum.NumberFormat := iNumber;
+         End;
+      'S','B':
+         Begin
+           CmbComparadores.Items.Add('Começando Com');
+
+           If bOracle81 Then
+              CmbComparadores.Items.Add('Possui o Texto');
+         End;
+      Else
+        EdtValoresCondicao.EditMask := '';
+     End;
+  End;
+  CmbComparadores.ItemIndex := 0;
+end;
+
+Function TFrmFiltraSql.CorrigeDecimaSeparator(sNum,sTipo:String):String;
+Var
+   sAuxNum, sMilselparador, sDecSaparador: String;
+Begin
+   If bOracle81 Then
+   Begin
+     If sTipo = 'I' Then
+        Result := sNum
+     Else
+     Begin
+        sAuxNum := Trim(sNum);
+        sDecSaparador := Copy(sNum,Length(sNum)-2,1);
+
+        If sDecSaparador = '.' Then
+           sMilselparador := ','
+        Else
+           sMilselparador := '.';
+
+        While Pos(sMilselparador,sAuxNum) <> 0 Do
+              Delete(sAuxNum,Pos(sMilselparador,sAuxNum),1);
+
+        sAuxNum[Length(Trim(sAuxNum))-2] := '.';
+
+        Result := sAuxNum;
+     End;
+   End
+   Else
+   Begin
+     sAuxNum := Trim(sNum);
+
+     While Pos('.',sAuxNum) <> 0 Do
+           Delete(sAuxNum,Pos('.',sAuxNum),1);
+
+     Result := sAuxNum;
+   End;
+End;
+
+procedure TFrmFiltraSql.bbtnCancelarClick(Sender: TObject);
+begin
+  inherited;
+  LstCondicoes.Clear;
+end;
+
+procedure TFrmFiltraSql.AchaeTroca(MemoBusca: TRichEdit; TextoBusca,
+  TextoTroca: String; bAdicionaCasoNaoExista: Boolean);
+var
+  TamText, iAchou, ilinha :Integer;
+  sFrase :String;
+Begin
+  TamText := Length(MemoBusca.Text);
+  iAchou := MemoBusca.FindText(TextoBusca, 0, TamText,[stWholeWord]);
+
+  If (iAchou < 0) And bAdicionaCasoNaoExista Then
+     MemoBusca.Lines.text := MemoBusca.Lines.text + ' ' + TextoTroca
+  Else
+    while (iAchou >= 0) do
+    begin
+         MemoBusca.SetFocus;
+         MemoBusca.SelStart := iAchou;
+         MemoBusca.SelLength := Length(TextoBusca);
+         MemoBusca.SelText := TextoTroca ;
+
+         iAchou := iAchou+Length(TextoTroca);
+         iAchou := MemoBusca.FindText(TextoBusca, iAchou, TamText,[stWholeWord]);
+    end;
+
+  ilinha := MemoBusca.Lines.Count - 1;
+  sFrase := MemoBusca.lines[iLinha];
+  If Copy(sFrase,Length(sFrase) - 2,3) = ' AND' Then
+     MemoBusca.lines[iLinha] := Copy(sFrase,1, Length(sFrase) - 3);
+end;
+
+procedure TFrmFiltraSql.bbtnSairClick(Sender: TObject);
+begin
+   Close;
+end;
+
+procedure TFrmFiltraSql.FormClose(Sender: TObject;
+  var Action: TCloseAction);
+begin
+  inherited;
+  QryOrigem := nil;
+end;
+
+End.
+
