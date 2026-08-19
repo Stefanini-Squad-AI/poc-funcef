@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CM Contabilidade — Documentação Funcional</title>
+<style>
+
+:root {
+  --bg: #0f1419; --bg2: #1a2332; --bg3: #243044; --card: #1e2a3a;
+  --text: #e7ecf3; --muted: #9aa8bc; --accent: #3d9cf0; --accent2: #2dd4bf;
+  --ok: #34d399; --warn: #fbbf24; --bad: #f87171; --border: #2d3a4d;
+  --tag-alta: #065f46; --tag-media: #92400e; --tag-baixa: #7f1d1d;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0; font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(160deg, #0f1419 0%, #152033 50%, #0f1419 100%);
+  color: var(--text); line-height: 1.55; min-height: 100vh;
+}
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+header {
+  background: linear-gradient(135deg, #152033 0%, #1a3a5c 100%);
+  border-bottom: 1px solid var(--border); padding: 2rem 1.5rem 1.5rem;
+}
+header .badge {
+  display: inline-block; background: #1e3a5f; color: var(--accent2);
+  padding: .25rem .75rem; border-radius: 999px; font-size: .8rem;
+  border: 1px solid #2a5080; margin-bottom: .75rem;
+}
+header h1 { margin: 0 0 .5rem; font-size: clamp(1.5rem, 3vw, 2.2rem); }
+header p { margin: 0; color: var(--muted); max-width: 70ch; }
+nav {
+  display: flex; flex-wrap: wrap; gap: .5rem; padding: .75rem 1.5rem;
+  background: rgba(15,20,25,.85); border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 20; backdrop-filter: blur(8px);
+}
+nav a {
+  color: var(--text); background: var(--bg2); padding: .4rem .75rem;
+  border-radius: 6px; border: 1px solid var(--border); font-size: .85rem;
+}
+nav a:hover { background: var(--bg3); text-decoration: none; }
+main { padding: 1.5rem; max-width: 1200px; margin: 0 auto; }
+section {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1.25rem;
+}
+.section-title {
+  font-size: 1.15rem; font-weight: 700; margin-bottom: 1rem;
+  padding-bottom: .5rem; border-bottom: 1px solid var(--border);
+}
+.cards-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1rem;
+}
+.card {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 10px;
+  padding: 1rem; transition: border-color .2s, transform .2s;
+}
+.card:hover { border-color: var(--accent); transform: translateY(-2px); }
+.card h3 { margin: 0 0 .5rem; font-size: 1rem; }
+.card p { margin: 0; color: var(--muted); font-size: .9rem; }
+.stats {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: .75rem;
+}
+.stat {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 8px;
+  padding: .85rem; text-align: center;
+}
+.stat .n { font-size: 1.6rem; font-weight: 700; color: var(--accent2); }
+.stat .l { font-size: .75rem; color: var(--muted); }
+table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+th, td {
+  border: 1px solid var(--border); padding: .5rem .65rem; text-align: left;
+  vertical-align: top;
+}
+th { background: var(--bg3); }
+tbody tr:nth-child(even) { background: rgba(255,255,255,.02); }
+.table-wrap { overflow-x: auto; }
+code {
+  font-family: Consolas, "Courier New", monospace; font-size: .85em;
+  background: var(--bg); padding: .1rem .35rem; border-radius: 4px;
+}
+.tag {
+  display: inline-block; padding: .15rem .45rem; border-radius: 4px;
+  font-size: .75rem; font-weight: 600;
+}
+.tag-alta { background: var(--tag-alta); color: #a7f3d0; }
+.tag-media { background: var(--tag-media); color: #fde68a; }
+.tag-baixa { background: var(--tag-baixa); color: #fecaca; }
+.story-card {
+  background: var(--bg2); border-left: 4px solid var(--accent);
+  padding: .85rem 1rem; margin-bottom: .75rem; border-radius: 0 8px 8px 0;
+}
+.criteria-block, .rule-block {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 8px; padding: .85rem 1rem; margin-bottom: .75rem;
+}
+.rule-id { font-weight: 700; color: var(--accent2); margin-bottom: .35rem; }
+.rule-origin { font-size: .85rem; color: var(--muted); margin-top: .5rem; }
+.complexity-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: .75rem;
+}
+.complexity-item {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; text-align: center;
+}
+.level { font-weight: 700; margin-bottom: .35rem; }
+.level-simples { color: var(--ok); }
+.level-media { color: var(--warn); }
+.level-complexa { color: var(--bad); }
+.points { font-size: 1.4rem; font-weight: 700; }
+.desc { color: var(--muted); font-size: .85rem; margin-top: .35rem; }
+footer {
+  text-align: center; padding: 2rem 1rem; color: var(--muted);
+  border-top: 1px solid var(--border); margin-top: 2rem; font-size: .85rem;
+}
+.back-btn {
+  display: inline-block; margin-bottom: 1rem; background: var(--bg2);
+  border: 1px solid var(--border); padding: .4rem .8rem; border-radius: 6px;
+  color: var(--text);
+}
+.back-btn:hover { background: var(--bg3); text-decoration: none; }
+.layout-2 {
+  display: grid; grid-template-columns: 1fr 300px; gap: 1.25rem; padding: 1.5rem; max-width: 1200px; margin: 0 auto;
+}
+@media (max-width: 900px) { .layout-2 { grid-template-columns: 1fr; } }
+.info-list, .dep-list { list-style: none; padding: 0; margin: 0; }
+.info-list li, .dep-list li {
+  display: flex; justify-content: space-between; gap: .5rem;
+  padding: .45rem 0; border-bottom: 1px solid var(--border); font-size: .9rem;
+}
+.info-list .key { color: var(--muted); }
+.mermaid {
+  background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+  padding: 1rem; overflow-x: auto; font-family: monospace; font-size: .8rem;
+  white-space: pre-wrap; color: var(--muted);
+}
+.note {
+  background: #1a2740; border-left: 3px solid var(--warn);
+  padding: .75rem 1rem; margin: .75rem 0; border-radius: 0 6px 6px 0; font-size: .9rem;
+}
+.doc-links { display: flex; flex-wrap: wrap; gap: .5rem; margin: 1rem 0; }
+.doc-links a {
+  background: var(--bg3); border: 1px solid var(--border); padding: .5rem .85rem;
+  border-radius: 6px; color: var(--text);
+}
+.given,.when,.then { margin: .25rem 0; }
+.role,.want,.why { margin: .2rem 0; }
+ul.check { list-style: none; padding-left: 0; }
+ul.check li::before { content: "☐ "; }
+
+
+</style>
+</head>
+<body>
+
+<header>
+  <div class="badge">Delphi 5 — Documentação Funcional</div>
+  <h1>🏛️ CM Contabilidade</h1>
+  <p>Documentação funcional e técnica orientada à criação de User Stories</p>
+  <div class="doc-links">
+    <a href="../system-overview.html">Visão Geral</a>
+    <a href="../module-file-map.html">Mapa de Arquivos</a>
+    <a href="../business-rules-catalog.html">Regras</a>
+    <a href="../database-model.html">Modelo de Dados</a>
+    <a href="../api-catalog.html">APIs</a>
+    <a href="../migration-contabil.html">Migração Contábil</a>
+  </div>
+</header>
+<nav>
+  <a href="#visao-geral">📋 Visão Geral</a>
+  <a href="#modulos">📦 Módulos</a>
+  <a href="#banco">🗄️ Banco de Dados</a>
+  <a href="#regras">📏 Regras de Negócio</a>
+  <a href="#user-stories">📝 User Stories</a>
+</nav>
+<main>
+  <section id="visao-geral">
+    <div class="section-title">📊 Estatísticas da Plataforma</div>
+    <div class="stats">
+      <div class="stat"><div class="n">25</div><div class="l">Módulos</div></div>
+      <div class="stat"><div class="n">11164</div><div class="l">Units (.pas)</div></div>
+      <div class="stat"><div class="n">6993</div><div class="l">Forms (.dfm)</div></div>
+      <div class="stat"><div class="n">127</div><div class="l">Projects (.dpr)</div></div>
+      <div class="stat"><div class="n">46</div><div class="l">Tabelas Contábil</div></div>
+      <div class="stat"><div class="n">15</div><div class="l">Regras catalogadas</div></div>
+    </div>
+    <p style="margin-top:1rem">Suíte <strong>CM Contabilidade</strong> (CM Soluções Informática) em Delphi 5, com executáveis em <code>3-Sistemas.bpg</code>, framework <code>CM/</code> e pacotes <code>CM*OBJ50</code>.</p>
+  </section>
+  <section id="modulos">
+    <div class="section-title">📦 Módulos do Sistema</div>
+    <div class="cards-grid"><a class="card" href="modules/contab/index.html" style="display:block;color:inherit"><h3>Contabilidade</h3><p>Gestão contábil completa: plano de contas, períodos, planilhas, lançamentos, saldos, demonstrativos, rateios, segregação por plano/patrocinadora, encerramentos …</p><p style="margin-top:.5rem"><code>contab</code> · Confiança Alta</p></a><a class="card" href="modules/global-cm/index.html" style="display:block;color:inherit"><h3>Cadastros Globais e Framework CM</h3><p>Cadastros corporativos compartilhados (pessoas, empresas, planos, centros de custo, parâmetros) e infraestrutura comum da suíte CM.…</p><p style="margin-top:.5rem"><code>global-cm</code> · Confiança Média</p></a><a class="card" href="modules/contas-a-pagar/index.html" style="display:block;color:inherit"><h3>Contas a Pagar</h3><p>Gestão de obrigações a pagar, com integração contábil para geração de planilhas/lançamentos.…</p><p style="margin-top:.5rem"><code>contas-a-pagar</code> · Confiança Média</p></a><a class="card" href="modules/contas-a-receber/index.html" style="display:block;color:inherit"><h3>Contas a Receber</h3><p>Gestão de créditos a receber e emissão/controle financeiro relacionado.…</p><p style="margin-top:.5rem"><code>contas-a-receber</code> · Confiança Média</p></a><a class="card" href="modules/orcamento/index.html" style="display:block;color:inherit"><h3>Orçamento</h3><p>Planejamento orçamentário com vínculo a contas contábeis e importação de dados da Contabilidade.…</p><p style="margin-top:.5rem"><code>orcamento</code> · Confiança Alta</p></a><a class="card" href="modules/folha/index.html" style="display:block;color:inherit"><h3>Folha de Pagamento</h3><p>Processamento de folha com possibilidade de gerar lançamentos contábeis (RM/Dinâmica/SRH).…</p><p style="margin-top:.5rem"><code>folha</code> · Confiança Média</p></a><a class="card" href="modules/contribuicao-prev/index.html" style="display:block;color:inherit"><h3>Contribuição Previdenciária</h3><p>Gestão de contribuições de participantes de planos previdenciários.…</p><p style="margin-top:.5rem"><code>contribuicao-prev</code> · Confiança Alta</p></a><a class="card" href="modules/beneficio-prev/index.html" style="display:block;color:inherit"><h3>Benefício Previdenciário</h3><p>Gestão de benefícios previdenciários concedidos a participantes e beneficiários.…</p><p style="margin-top:.5rem"><code>beneficio-prev</code> · Confiança Média</p></a><a class="card" href="modules/cadastro-prev/index.html" style="display:block;color:inherit"><h3>Cadastro Previdenciário</h3><p>Cadastro de participantes, beneficiários e dados cadastrais do ambiente previdenciário.…</p><p style="margin-top:.5rem"><code>cadastro-prev</code> · Confiança Média</p></a><a class="card" href="modules/investimentos/index.html" style="display:block;color:inherit"><h3>Investimentos</h3><p>Gestão de carteira de investimentos com reflexos contábeis.…</p><p style="margin-top:.5rem"><code>investimentos</code> · Confiança Média</p></a><a class="card" href="modules/emprestimo/index.html" style="display:block;color:inherit"><h3>Empréstimo</h3><p>Gestão de empréstimos a participantes, com forte acoplamento a plano contábil.…</p><p style="margin-top:.5rem"><code>emprestimo</code> · Confiança Alta</p></a><a class="card" href="modules/caf/index.html" style="display:block;color:inherit"><h3>Controle de Ativo Fixo (CAF)</h3><p>Controle patrimonial de ativos fixos com parâmetros e exportação contábil.…</p><p style="margin-top:.5rem"><code>caf</code> · Confiança Alta</p></a><a class="card" href="modules/irrf/index.html" style="display:block;color:inherit"><h3>Impostos (IRRF)</h3><p>Apuração e controle de impostos (IRRF/REINF) com vínculo a contas contábeis.…</p><p style="margin-top:.5rem"><code>irrf</code> · Confiança Alta</p></a><a class="card" href="modules/regra/index.html" style="display:block;color:inherit"><h3>Motor de Regras</h3><p>Cadastro e execução de regras/fórmulas de negócio parametrizáveis utilizadas por diversos módulos.…</p><p style="margin-top:.5rem"><code>regra</code> · Confiança Alta</p></a><a class="card" href="modules/almoxarifado/index.html" style="display:block;color:inherit"><h3>Almoxarifado</h3><p>Controle de estoque e movimentações de almoxarifado.…</p><p style="margin-top:.5rem"><code>almoxarifado</code> · Confiança Média</p></a><a class="card" href="modules/compras/index.html" style="display:block;color:inherit"><h3>Compras</h3><p>Processo de compras e requisições.…</p><p style="margin-top:.5rem"><code>compras</code> · Confiança Média</p></a><a class="card" href="modules/imobiliario/index.html" style="display:block;color:inherit"><h3>Imobiliário</h3><p>Administração imobiliária, investimentos imobiliários e alienação, com padrões contábeis.…</p><p style="margin-top:.5rem"><code>imobiliario</code> · Confiança Média</p></a><a class="card" href="modules/juridico/index.html" style="display:block;color:inherit"><h3>Jurídico e Processos</h3><p>Gestão jurídica consultiva e processos judiciais, incluindo rateio contábil.…</p><p style="margin-top:.5rem"><code>juridico</code> · Confiança Média</p></a><a class="card" href="modules/cfinan/index.html" style="display:block;color:inherit"><h3>Controle Financeiro (CFINAN)</h3><p>Controles financeiros operacionais com integração à contabilidade.…</p><p style="margin-top:.5rem"><code>cfinan</code> · Confiança Média</p></a><a class="card" href="modules/indicadores/index.html" style="display:block;color:inherit"><h3>Indicadores</h3><p>Acompanhamento de indicadores gerenciais da organização.…</p><p style="margin-top:.5rem"><code>indicadores</code> · Confiança Média</p></a><a class="card" href="modules/contrato/index.html" style="display:block;color:inherit"><h3>Contratos</h3><p>Gestão de contratos administrativos e correlatos.…</p><p style="margin-top:.5rem"><code>contrato</code> · Confiança Média</p></a><a class="card" href="modules/param-prev/index.html" style="display:block;color:inherit"><h3>Parâmetros Previdenciários</h3><p>Parametrização dos módulos previdenciários.…</p><p style="margin-top:.5rem"><code>param-prev</code> · Confiança Média</p></a><a class="card" href="modules/modulos-previdenciarios/index.html" style="display:block;color:inherit"><h3>Módulos Previdenciários Especializados</h3><p>Conjunto de módulos previdenciários especializados (ModAsm, ModAuto, ModAva, ModBen, ModCes, ModCon, ModFol, ModRes, ModTrn).…</p><p style="margin-top:.5rem"><code>modulos-previdenciarios</code> · Confiança Média</p></a><a class="card" href="modules/relatorios-cm/index.html" style="display:block;color:inherit"><h3>Relatórios CM</h3><p>Central de relatórios transversais da suíte CM.…</p><p style="margin-top:.5rem"><code>relatorios-cm</code> · Confiança Média</p></a><a class="card" href="modules/central-ap/index.html" style="display:block;color:inherit"><h3>Central AP</h3><p>Centralização de operações de contas a pagar / AP.…</p><p style="margin-top:.5rem"><code>central-ap</code> · Confiança Baixa</p></a></div>
+  </section>
+  <section id="banco">
+    <div class="section-title">🗄️ Banco de Dados</div>
+    <ul>
+      <li><strong>SGBD:</strong> Oracle (Confiança: Média)</li>
+      <li><strong>Acesso:</strong> TCmDbObject, ClientDataSet, DBTables/BDE, TwwQuery</li>
+      <li><strong>Núcleo Contábil:</strong> 46 tabelas mapeadas</li>
+      <li><strong>Scripts:</strong> SCRIPT/ e __SCRIPTS__/</li>
+    </ul>
+    <p><a href="../database-model.html">Ver modelo de dados →</a></p>
+  </section>
+  <section id="regras">
+    <div class="section-title">📏 Catálogo de Regras de Negócio</div>
+    <ul><li><a href="../business-rules-catalog.html#RN001"><strong>RN001</strong></a> — Lançamentos contábeis devem respeitar a natureza Débito/Crédito e atualizar saldos das contas analít…</li><li><a href="../business-rules-catalog.html#RN002"><strong>RN002</strong></a> — É possível atualizar saldos de contas sintéticas a partir dos lançamentos das analíticas.…</li><li><a href="../business-rules-catalog.html#RN003"><strong>RN003</strong></a> — Planilhas podem ser estornadas ou excluídas, com atualização consistente dos lançamentos associados.…</li><li><a href="../business-rules-catalog.html#RN004"><strong>RN004</strong></a> — Parâmetros contábeis (PARAMCONTAB) definem faixas de contas (ativo, passivo, despesa, receita, custo…</li><li><a href="../business-rules-catalog.html#RN005"><strong>RN005</strong></a> — Períodos contábeis possuem bloqueio (PERBLOQUE/PERBLOINT) que impede ou restringe lançamentos em per…</li><li><a href="../business-rules-catalog.html#RN006"><strong>RN006</strong></a> — Contas do plano podem ser bloqueadas (PLABLOQUE/PLABLOQUEDATA) e inativadas (PLAINATIVA).…</li><li><a href="../business-rules-catalog.html#RN007"><strong>RN007</strong></a> — Teste de natureza de demonstrativo valida combinação natureza do demonstrativo × flag × sinal do val…</li><li><a href="../business-rules-catalog.html#RN008"><strong>RN008</strong></a> — Segregação por plano e patrocinadora gera lançamentos e cotas conforme critérios (SEGREGACRITER, SEG…</li></ul>
+    <p><a href="../business-rules-catalog.html">Catálogo completo →</a></p>
+  </section>
+  <section id="user-stories">
+    <div class="section-title">📝 Guia para User Stories</div>
+    <ul>
+      <li><strong>Operador / Contador</strong> — lançamentos, consultas, importações</li>
+      <li><strong>Supervisor</strong> — encerramentos, segregação, consistência</li>
+      <li><strong>Administrador</strong> — parâmetros, dias bloqueados, de-para</li>
+      <li><strong>Consultor</strong> — relatórios (somente leitura quando aplicável)</li>
+    </ul>
+    <div class="story-card">
+      <div class="role">👤 Como contador</div>
+      <div class="want">🎯 Quero lançar e integrar planilhas contábeis</div>
+      <div class="why">💡 Para registrar a movimentação do período com saldo atualizado</div>
+    </div>
+    <div class="story-card">
+      <div class="role">👤 Como supervisor contábil</div>
+      <div class="want">🎯 Quero encerrar o período e gerar o arquivo SIPC-CAP</div>
+      <div class="why">💡 Para fechar a contabilidade e atender ao órgão regulador</div>
+    </div>
+    <p>Migração: <a href="../migration-contabil.html">migration-contabil.html</a></p>
+  </section>
+</main>
+
+<footer>
+<p>CM Contabilidade — Documentação gerada em 2026-08-19 | Tecnologia: Delphi 5 | pt-BR</p>
+</footer>
+</body>
+</html>
