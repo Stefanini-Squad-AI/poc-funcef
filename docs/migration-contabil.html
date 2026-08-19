@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contabilidade — Migração do Módulo Contábil</title>
+  <style>
+    :root{color-scheme:dark;}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#0f172a;color:#e5e7eb;line-height:1.5}
+    a{color:#93c5fd;text-decoration:none}
+    a:hover{text-decoration:underline}
+    header,footer,nav,main{width:100%}
+    header{padding:28px 20px 18px;border-bottom:1px solid #1f2937;background:#111827}
+    .wrap{max-width:1200px;margin:0 auto;padding:0 20px}
+    h1,h2,h3{margin:0 0 12px}
+    h1{font-size:clamp(28px,4vw,42px);letter-spacing:0}
+    h2{font-size:22px}
+    .badge,.tag{display:inline-block;padding:4px 10px;border:1px solid #334155;border-radius:999px;background:#0b1220;color:#cbd5e1;font-size:12px}
+    .sub{color:#94a3b8;max-width:900px}
+    nav{position:sticky;top:0;z-index:5;background:#0b1220;border-bottom:1px solid #1f2937}
+    nav .wrap{display:flex;gap:10px;flex-wrap:wrap;padding:12px 20px}
+    nav a{padding:8px 12px;background:#111827;border:1px solid #243041;border-radius:8px;color:#dbeafe}
+    main{padding:24px 0 48px}
+    section{margin:0 0 26px}
+    .panel,.card,.story-card,.rule,.criteria,.complexity,.info,.metric,.doc-card{background:#111827;border:1px solid #243041;border-radius:10px;padding:16px}
+    .grid{display:grid;gap:14px}
+    .grid.metrics{grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}
+    .grid.cards{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+    .grid.two{grid-template-columns:repeat(auto-fit,minmax(330px,1fr))}
+    .metric .value{font-size:30px;font-weight:700;margin-top:4px;color:#f8fafc}
+    .metric .label,.small,.muted{color:#94a3b8}
+    .doc-card h3,.card h3,.story-card h3,.rule h3{font-size:18px}
+    .story-card{display:grid;gap:8px}
+    .criteria{display:grid;gap:8px}
+    .rule{display:grid;gap:8px}
+    .rule .id{font-weight:700;color:#93c5fd}
+    table{width:100%;border-collapse:collapse;background:#0f172a;border:1px solid #243041;border-radius:10px;overflow:hidden}
+    th,td{padding:10px 12px;border-bottom:1px solid #243041;vertical-align:top}
+    th{background:#111827;text-align:left;color:#cbd5e1;font-weight:700}
+    tr:last-child td{border-bottom:none}
+    code{background:#0b1220;border:1px solid #243041;padding:2px 5px;border-radius:6px}
+    ul{margin:8px 0 0 18px}
+    .section-title{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 10px}
+    .section-title h2{margin:0}
+    .anchor{display:block;position:relative;top:-86px;visibility:hidden}
+    .foot{padding:20px 0;color:#94a3b8;border-top:1px solid #1f2937;background:#111827}
+    .pill{display:inline-block;padding:3px 8px;border-radius:8px;background:#0f172a;border:1px solid #243041;color:#dbeafe;font-size:12px}
+    .warning{color:#fbbf24}
+    .ok{color:#86efac}
+    .story-role{color:#f9fafb;font-weight:700}
+    .story-want,.story-why{color:#dbeafe}
+    .criteria strong,.rule strong{color:#fff}
+    .cols{display:grid;grid-template-columns:2fr 1fr;gap:14px}
+    .sidebar{display:grid;gap:14px}
+    .info-list{list-style:none;padding:0;margin:0;display:grid;gap:8px}
+    .info-list li{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px dashed #243041}
+    .info-list li:last-child{border-bottom:none}
+    .k{color:#94a3b8}
+    .v{color:#fff}
+    .summary{display:grid;gap:10px}
+    .diagram{overflow:auto;background:#0b1220;border:1px solid #243041;border-radius:10px;padding:12px}
+    .module-card{display:grid;gap:10px}
+    .module-card .title{font-weight:700;font-size:18px}
+    .module-card .meta{display:flex;gap:8px;flex-wrap:wrap}
+    .module-card .meta a{background:#0b1220;border:1px solid #243041;padding:6px 10px;border-radius:8px}
+    .header-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+    .back{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;background:#0b1220;border:1px solid #243041;border-radius:8px}
+    .compact li{margin-bottom:6px}
+    .danger{color:#fca5a5}
+    .source{color:#9ca3af}
+    .legend{display:flex;gap:10px;flex-wrap:wrap}
+    .legend span{display:inline-flex;align-items:center;gap:6px}
+    .legend i{width:10px;height:10px;border-radius:50%;display:inline-block}
+    .i1{background:#60a5fa}.i2{background:#34d399}.i3{background:#f59e0b}
+    @media (max-width:900px){.cols{grid-template-columns:1fr}}
+    </style>
+</head>
+<body>
+
+<header><div class="wrap"><div class="badge">Migração Delphi 5 -> C# / Angular</div><h1>Migração do Módulo Contábil</h1><p class="sub">Documento de leitura para modernização sem perda de regra, integração, saldo ou rastreabilidade.</p><div class="header-actions"><a class="back" href="site/index.html">← Portal</a><a class="back" href="system-overview.html">Visão geral</a><a class="back" href="api-catalog.html">APIs</a></div></div></header>
+<main class="wrap">
+  <section>
+    <div class="section-title"><h2>Resumo Executivo</h2></div>
+    <div class="panel">
+      <p><strong>Objetivo:</strong> preservar as funcionalidades contábeis existentes ao substituir o cliente Delphi 5 e, quando aplicável, os componentes remotos por uma arquitetura moderna com backend C# e frontend Angular.</p>
+      <p><strong>Situação atual:</strong> cliente VCL Delphi 5 com processamento local, COM/DCOM remoto e banco Oracle.</p>
+      <p><strong>Tecnologia alvo:</strong> C# / ASP.NET Core para backend, Angular para interface e banco preservado onde a regra estiver fortemente acoplada ao legado.</p>
+      <p><strong>Principais riscos:</strong> regras escondidas em forms, SQL embutido, integrações com Excel e sistemas legados, fechamento contábil e dependências compartilhadas.</p>
+    </div>
+  </section>
+  <section>
+    <div class="section-title"><h2>Escopo do Módulo Contábil</h2></div>
+    <table><thead><tr><th>Artefato</th><th>Tipo</th><th>Responsabilidade</th><th>Evidência</th><th>Confiança</th><th>Destino sugerido</th></tr></thead><tbody>
+      <tr><td>Contab.dpr</td><td>Projeto</td><td>Inicializa a aplicação e registra todas as rotinas do módulo.</td><td>Fontes/Contab.dpr</td><td>Alta</td><td>Revisar</td></tr>
+      <tr><td>FPrincipal.pas/.dfm</td><td>Form principal</td><td>Governo funcional, menus, atalhos e permissões.</td><td>Fontes/FPrincipal.pas 817-1259</td><td>Alta</td><td>Angular + Backend</td></tr>
+      <tr><td>dContab.pas/.dfm</td><td>Data Module</td><td>Parâmetros auxiliares de moeda e bloqueio.</td><td>Fontes/dContab.pas</td><td>Alta</td><td>C# Service</td></tr>
+      <tr><td>uCtrlProcessaContab.pas</td><td>Unit de negócio</td><td>Processamento, importação, encerramento, geração e validação.</td><td>CtrlObjects/uCtrlProcessaContab.pas</td><td>Alta</td><td>C# Domain/Service</td></tr>
+      <tr><td>uDb*.pas</td><td>Objetos de banco</td><td>Mapeiam tabelas contábeis e regras de persistência.</td><td>DbObjects/uDb*.pas</td><td>Alta</td><td>Banco / Entity</td></tr>
+      <tr><td>FImporta*.pas/.dfm</td><td>Forms</td><td>Importação e exportação legadas.</td><td>FontesMT/FImporta*.pas</td><td>Alta</td><td>Angular + C# + Integração</td></tr>
+      <tr><td>FEncerra*.pas/.dfm</td><td>Forms</td><td>Fechamento e apuração.</td><td>FontesMT/FEncerra*.pas</td><td>Alta</td><td>C# Service</td></tr>
+      <tr><td>R*.pas/.dfm</td><td>Relatórios</td><td>Emissão analítica e sintética.</td><td>Reports/Source/R*.pas</td><td>Alta</td><td>Ferramenta moderna de relatório</td></tr>
+    </tbody></table>
+  </section>
+  <section>
+    <div class="section-title"><h2>Funcionalidades do Contábil</h2></div>
+    <div class="grid two">
+      <div class="panel"><strong>Lançamentos</strong><p>Inclusão, consulta, importação e ajustes de lançamentos contábeis com validação de conta, centro de custo, subconta, histórico e segregação.</p></div>
+      <div class="panel"><strong>Encerramento</strong><p>Fechamento de período e exercício com validações de saldo, integração e consistência.</p></div>
+      <div class="panel"><strong>Importações</strong><p>Recebe arquivos Excel, SAF, RM, SRH e Fidelio, além de plano de contas, saldo anterior e correspondências.</p></div>
+      <div class="panel"><strong>Relatórios</strong><p>Balancete, razão, diário, balanço, demonstrativos, saldos atuais e fluxos derivados do legado.</p></div>
+    </div>
+  </section>
+  <section>
+    <div class="section-title"><h2>Mapeamento Delphi 5 → C# / Angular</h2></div>
+    <table><thead><tr><th>Origem Delphi 5</th><th>Destino</th><th>Estratégia</th></tr></thead><tbody>
+      <tr><td>Form</td><td>Angular Component</td><td>Recriar comportamento.</td></tr>
+      <tr><td>DFM</td><td>Angular Template</td><td>Recriar interface e navegação.</td></tr>
+      <tr><td>Unit de negócio</td><td>C# Service / Domain</td><td>Migrar regra e validação.</td></tr>
+      <tr><td>Data Module</td><td>C# Repository / Service</td><td>Centralizar acesso a dados.</td></tr>
+      <tr><td>TQuery / SQL</td><td>EF Core / SQL</td><td>Preservar consulta e semântica.</td></tr>
+      <tr><td>Stored Procedure</td><td>Banco ou C#</td><td>Avaliar caso a caso.</td></tr>
+      <tr><td>Trigger</td><td>Banco</td><td>Preservar regra quando necessário.</td></tr>
+      <tr><td>Relatório</td><td>Solução de relatório moderna</td><td>Preservar saída funcional.</td></tr>
+    </tbody></table>
+  </section>
+  <section>
+    <div class="section-title"><h2>Modelo de Domínio</h2></div>
+    <div class="diagram"><pre>Plano -> Conta -> Lançamento -> Saldo
+          -> Período -> Bloqueio
+          -> Demonstrativo -> Linha/Coluna/Elemento
+          -> Rateio / Segregação / Rentabilidade</pre></div>
+  </section>
+  <section>
+    <div class="section-title"><h2>APIs Necessárias</h2></div>
+    <div class="panel">
+      <ul>
+        <li><strong>Necessária:</strong> lançamentos, encerramento, parametrização, importação/exportação e saldos.</li>
+        <li><strong>Provavelmente necessária:</strong> consultas de apoio e validações prévias.</li>
+        <li><strong>Dependente de decisão arquitetural:</strong> geração de arquivos legados e relatórios regulatórios específicos.</li>
+      </ul>
+    </div>
+  </section>
+  <section>
+    <div class="section-title"><h2>Componentes Angular</h2></div>
+    <div class="panel">
+      <ul>
+        <li>Componentes para cadastros mestre/detalhe do plano de contas, parâmetros e demonstrativos.</li>
+        <li>Telas para lançamentos, filtros, grids e validações.</li>
+        <li>Páginas de encerramento com feedback de consistência e bloqueio.</li>
+        <li>Integrações de upload para Excel e arquivos texto.</li>
+      </ul>
+    </div>
+  </section>
+  <section>
+    <div class="section-title"><h2>Dependências Internas e Externas</h2></div>
+    <div class="grid two">
+      <div class="panel">
+        <strong>Internas</strong>
+        <ul>
+          <li>Units: `uCtrlContab`, `uCtrlProcessaContab`, `uCtrlPlanoConta`, `uCtrlPlanoSaldo`, `uCtrlDemonstrativo`.</li>
+          <li>Tabelas: `PLANOCONTA`, `LANCAMENTO`, `PLANOSALDO`, `PARAMCONTAB`, `PERIODO`.</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <strong>Externas</strong>
+        <ul>
+          <li>Oracle via `sqlnet.log` e conexão `BaseDados`.</li>
+          <li>Excel via COM/OLE.</li>
+          <li>Arquivos legados SAF, RM, SRH, Fidelio e SIPC-CAP XML.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+  <section>
+    <div class="section-title"><h2>Riscos</h2></div>
+    <table><thead><tr><th>Risco</th><th>Probabilidade</th><th>Impacto</th><th>Mitigação</th></tr></thead><tbody>
+      <tr><td>Regras escondidas em Forms e comentários históricos.</td><td>Alta</td><td>Alto</td><td>Reexecutar casos de uso críticos e comparar saídas.</td></tr>
+      <tr><td>SQL embutido em units de negócio.</td><td>Alta</td><td>Alto</td><td>Extrair consultas para repositórios e testes automatizados.</td></tr>
+      <tr><td>Integrações com Excel e arquivos legados.</td><td>Alta</td><td>Alto</td><td>Formalizar contratos de importação/exportação.</td></tr>
+      <tr><td>Fechamento contábil inconsistente.</td><td>Média</td><td>Alto</td><td>Validar períodos, saldos e bloqueios antes da virada.</td></tr>
+    </tbody></table>
+  </section>
+  <section>
+    <div class="section-title"><h2>Estratégia de Migração</h2></div>
+    <div class="grid two">
+      <div class="panel"><strong>Fase 1 - Descoberta</strong><p>Inventário de telas, regras, integrações e tabelas. Esta documentação cobre essa etapa.</p></div>
+      <div class="panel"><strong>Fase 2 - Fundação</strong><p>Estrutura C#, autenticação, persistência e Angular base.</p></div>
+      <div class="panel"><strong>Fase 3 - Migração funcional</strong><p>Mover cadastros, lançamentos, relatórios e encerramento em ondas curtas.</p></div>
+      <div class="panel"><strong>Fase 4 - Integrações</strong><p>Portar Excel, arquivos legados e contratos externos.</p></div>
+      <div class="panel"><strong>Fase 5 - Validação</strong><p>Testes funcionais, regressão e comparação contábil.</p></div>
+      <div class="panel"><strong>Fase 6 - Transição</strong><p>Coexistência com o legado até o desligamento gradual.</p></div>
+    </div>
+  </section>
+  <section>
+    <div class="section-title"><h2>Backlog Inicial</h2></div>
+    <table><thead><tr><th>ID</th><th>User Story</th><th>Origem</th><th>Destino</th><th>Prioridade</th><th>Complexidade</th></tr></thead><tbody>
+      <tr><td>MG-001</td><td>Recriar consulta e manutenção do plano de contas.</td><td>FCadContasContabMT / uCtrlPlanoConta</td><td>C# + Angular</td><td>Alta</td><td>Média</td></tr>
+      <tr><td>MG-002</td><td>Recriar tela de lançamentos e validações.</td><td>fLancaContabMT / uCtrlProcessaContab</td><td>C# + Angular</td><td>Alta</td><td>Complexa</td></tr>
+      <tr><td>MG-003</td><td>Portar encerramento de período.</td><td>FEncerraPeriodoMT / uCtrlProcessaContab</td><td>C# Service</td><td>Alta</td><td>Complexa</td></tr>
+      <tr><td>MG-004</td><td>Portar importação Excel e arquivos legados.</td><td>FImportaExcelMT, FImportaSAFMT, FImportaRMMT, FImpFidelioMT</td><td>C# + integração</td><td>Alta</td><td>Complexa</td></tr>
+      <tr><td>MG-005</td><td>Recriar relatórios de balancete e razão.</td><td>RBalancete, RRazaoAnalitico, RRazaoSintetico</td><td>Ferramenta moderna de relatório</td><td>Média</td><td>Média</td></tr>
+    </tbody></table>
+  </section>
+  <section>
+    <div class="section-title"><h2>Lacunas</h2></div>
+    <div class="panel">
+      <ul>
+        <li>Repositório não contém o banco completo nem a execução do appserver em ambiente real.</li>
+        <li>Alguns contratos externos aparecem apenas por nome ou comentário histórico.</li>
+        <li>Parte das regras históricas está nos comentários de mudança e precisa de validação funcional adicional.</li>
+      </ul>
+    </div>
+  </section>
+  <section>
+    <div class="section-title"><h2>Checklist de Prontidão</h2></div>
+    <div class="panel">
+      <p>Com base no código disponível, as funcionalidades e integrações principais foram rastreadas. A validação final ainda depende de testes de execução do legado e do banco completo.</p>
+    </div>
+  </section>
+</main>
+<footer class="foot"><div class="wrap">Contabilidade — Migração Contábil em 19/08/2026 | Delphi 5 | pt-BR</div></footer>
+
+</body>
+</html>
