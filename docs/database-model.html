@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CM Contabilidade — Modelo de Dados</title>
+<style>
+
+:root {
+  --bg: #0f1419; --bg2: #1a2332; --bg3: #243044; --card: #1e2a3a;
+  --text: #e7ecf3; --muted: #9aa8bc; --accent: #3d9cf0; --accent2: #2dd4bf;
+  --ok: #34d399; --warn: #fbbf24; --bad: #f87171; --border: #2d3a4d;
+  --tag-alta: #065f46; --tag-media: #92400e; --tag-baixa: #7f1d1d;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0; font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(160deg, #0f1419 0%, #152033 50%, #0f1419 100%);
+  color: var(--text); line-height: 1.55; min-height: 100vh;
+}
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+header {
+  background: linear-gradient(135deg, #152033 0%, #1a3a5c 100%);
+  border-bottom: 1px solid var(--border); padding: 2rem 1.5rem 1.5rem;
+}
+header .badge {
+  display: inline-block; background: #1e3a5f; color: var(--accent2);
+  padding: .25rem .75rem; border-radius: 999px; font-size: .8rem;
+  border: 1px solid #2a5080; margin-bottom: .75rem;
+}
+header h1 { margin: 0 0 .5rem; font-size: clamp(1.5rem, 3vw, 2.2rem); }
+header p { margin: 0; color: var(--muted); max-width: 70ch; }
+nav {
+  display: flex; flex-wrap: wrap; gap: .5rem; padding: .75rem 1.5rem;
+  background: rgba(15,20,25,.85); border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 20; backdrop-filter: blur(8px);
+}
+nav a {
+  color: var(--text); background: var(--bg2); padding: .4rem .75rem;
+  border-radius: 6px; border: 1px solid var(--border); font-size: .85rem;
+}
+nav a:hover { background: var(--bg3); text-decoration: none; }
+main { padding: 1.5rem; max-width: 1200px; margin: 0 auto; }
+section {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1.25rem;
+}
+.section-title {
+  font-size: 1.15rem; font-weight: 700; margin-bottom: 1rem;
+  padding-bottom: .5rem; border-bottom: 1px solid var(--border);
+}
+.cards-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1rem;
+}
+.card {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 10px;
+  padding: 1rem; transition: border-color .2s, transform .2s;
+}
+.card:hover { border-color: var(--accent); transform: translateY(-2px); }
+.card h3 { margin: 0 0 .5rem; font-size: 1rem; }
+.card p { margin: 0; color: var(--muted); font-size: .9rem; }
+.stats {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: .75rem;
+}
+.stat {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 8px;
+  padding: .85rem; text-align: center;
+}
+.stat .n { font-size: 1.6rem; font-weight: 700; color: var(--accent2); }
+.stat .l { font-size: .75rem; color: var(--muted); }
+table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+th, td {
+  border: 1px solid var(--border); padding: .5rem .65rem; text-align: left;
+  vertical-align: top;
+}
+th { background: var(--bg3); }
+tbody tr:nth-child(even) { background: rgba(255,255,255,.02); }
+.table-wrap { overflow-x: auto; }
+code {
+  font-family: Consolas, "Courier New", monospace; font-size: .85em;
+  background: var(--bg); padding: .1rem .35rem; border-radius: 4px;
+}
+.tag {
+  display: inline-block; padding: .15rem .45rem; border-radius: 4px;
+  font-size: .75rem; font-weight: 600;
+}
+.tag-alta { background: var(--tag-alta); color: #a7f3d0; }
+.tag-media { background: var(--tag-media); color: #fde68a; }
+.tag-baixa { background: var(--tag-baixa); color: #fecaca; }
+.story-card {
+  background: var(--bg2); border-left: 4px solid var(--accent);
+  padding: .85rem 1rem; margin-bottom: .75rem; border-radius: 0 8px 8px 0;
+}
+.criteria-block, .rule-block {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 8px; padding: .85rem 1rem; margin-bottom: .75rem;
+}
+.rule-id { font-weight: 700; color: var(--accent2); margin-bottom: .35rem; }
+.rule-origin { font-size: .85rem; color: var(--muted); margin-top: .5rem; }
+.complexity-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: .75rem;
+}
+.complexity-item {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; text-align: center;
+}
+.level { font-weight: 700; margin-bottom: .35rem; }
+.level-simples { color: var(--ok); }
+.level-media { color: var(--warn); }
+.level-complexa { color: var(--bad); }
+.points { font-size: 1.4rem; font-weight: 700; }
+.desc { color: var(--muted); font-size: .85rem; margin-top: .35rem; }
+footer {
+  text-align: center; padding: 2rem 1rem; color: var(--muted);
+  border-top: 1px solid var(--border); margin-top: 2rem; font-size: .85rem;
+}
+.back-btn {
+  display: inline-block; margin-bottom: 1rem; background: var(--bg2);
+  border: 1px solid var(--border); padding: .4rem .8rem; border-radius: 6px;
+  color: var(--text);
+}
+.back-btn:hover { background: var(--bg3); text-decoration: none; }
+.layout-2 {
+  display: grid; grid-template-columns: 1fr 300px; gap: 1.25rem; padding: 1.5rem; max-width: 1200px; margin: 0 auto;
+}
+@media (max-width: 900px) { .layout-2 { grid-template-columns: 1fr; } }
+.info-list, .dep-list { list-style: none; padding: 0; margin: 0; }
+.info-list li, .dep-list li {
+  display: flex; justify-content: space-between; gap: .5rem;
+  padding: .45rem 0; border-bottom: 1px solid var(--border); font-size: .9rem;
+}
+.info-list .key { color: var(--muted); }
+.mermaid {
+  background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+  padding: 1rem; overflow-x: auto; font-family: monospace; font-size: .8rem;
+  white-space: pre-wrap; color: var(--muted);
+}
+.note {
+  background: #1a2740; border-left: 3px solid var(--warn);
+  padding: .75rem 1rem; margin: .75rem 0; border-radius: 0 6px 6px 0; font-size: .9rem;
+}
+.doc-links { display: flex; flex-wrap: wrap; gap: .5rem; margin: 1rem 0; }
+.doc-links a {
+  background: var(--bg3); border: 1px solid var(--border); padding: .5rem .85rem;
+  border-radius: 6px; color: var(--text);
+}
+.given,.when,.then { margin: .25rem 0; }
+.role,.want,.why { margin: .2rem 0; }
+ul.check { list-style: none; padding-left: 0; }
+ul.check li::before { content: "☐ "; }
+
+
+</style>
+</head>
+<body>
+
+<header>
+  <div class="badge">Modelo de Dados</div>
+  <h1>🗄️ Modelo de Dados</h1>
+  <p>Entidades identificadas no Contábil (DbObjects). DDL completo Oracle não centralizado no repositório. <a href="site/index.html">Portal</a></p>
+</header>
+<main>
+<section>
+  <div class="section-title">Visão Geral</div>
+  <ul>
+    <li>Tabelas Contábil mapeadas: <strong>46</strong></li>
+    <li>Acesso: TCmDbObject com TableName</li>
+    <li>Scripts pontuais em SCRIPT/ e __SCRIPTS__/</li>
+  </ul>
+  <div class="mermaid">erDiagram
+    PLANO ||--o{ PLANOCONTA : contem
+    PLANOCONTA ||--o{ PLANOSALDO : saldo
+    PLANILHA ||--o{ LANCAMENTO : possui
+    PLANOCONTA ||--o{ LANCAMENTO : movimenta
+    PERIODO ||--o{ PLANILHA : referencia
+    PARAMCONTAB ||--|| PLANO : configura
+    DEMONSTRATIVO ||--o{ ELEMDEMONSTRATIVO : elementos
+  </div>
+</section>
+
+<section id="APURRESULTADO">
+  <div class="section-title">Entidade APURRESULTADO</div>
+  <p><strong>Tabela:</strong> <code>APURRESULTADO</code><br>
+  <strong>Finalidade:</strong> Entidade contábil mapeada via TCmDbObject.<br>
+  <strong>Origem:</strong> <code>CONTAB/DbObjects/uDbApurresultado.pas</code> | Confiança: <span class="tag tag-alta">Alta</span></p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Campo</th><th>Tipo</th><th>Obrigatório</th><th>Descrição</th></tr></thead>
+    <tbody><tr><td><code>Plndatdia</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Plncodigo</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Pernumero</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Perexercicio</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idplanoprev</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idpatro</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idapurresultado</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr></tbody>
+  </table></div>
+</section>
+
+<section id="CADEVENTOSRH">
+  <div class="section-title">Entidade CADEVENTOSRH</div>
+  <p><strong>Tabela:</strong> <code>CADEVENTOSRH</code><br>
+  <strong>Finalidade:</strong> Entidade contábil mapeada via TCmDbObject.<br>
+  <strong>Origem:</strong> <code>CONTAB/DbObjects/uDbEventoSRH.pas</code> | Confiança: <span class="tag tag-alta">Alta</span></p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Campo</th><th>Tipo</th><th>Obrigatório</th><th>Descrição</th></tr></thead>
+    <tbody><tr><td><code>SubcontaDeb</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Subcontacre</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr></tbody>
+  </table></div>
+</section>
+
+<section id="CAMPODEPARA">
+  <div class="section-title">Entidade CAMPODEPARA</div>
+  <p><strong>Tabela:</strong> <code>CAMPODEPARA</code><br>
+  <strong>Finalidade:</strong> Entidade contábil mapeada via TCmDbObject.<br>
+  <strong>Origem:</strong> <code>CONTAB/DbObjects/uDbCampodepara.pas</code> | Confiança: <span class="tag tag-alta">Alta</span></p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Campo</th><th>Tipo</th><th>Obrigatório</th><th>Descrição</th></tr></thead>
+    <tbody><tr><td><code>Nomecampoconta</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idtabeladepara</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idcampodepara</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr></tbody>
+  </table></div>
+</section>
+
+<section id="COMPOELEMDEM">
+  <div class="section-title">Entidade COMPOELEMDEM</div>
+  <p><strong>Tabela:</strong> <code>COMPOELEMDEM</code><br>
+  <strong>Finalidade:</strong> Entidade contábil mapeada via TCmDbObject.<br>
+  <strong>Origem:</strong> <code>CONTAB/DbObjects/uDbCompoelemdem.pas</code> | Confiança: <span class="tag tag-alta">Alta</span></p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Campo</th><th>Tipo</th><th>Obrigatório</th><th>Descrição</th></tr></thead>
+    <tbody><tr><td><code>Unidnegoc</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Plano</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Placonta</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idplanoprev</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idpessoa</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idpatro</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idempresa</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idelemdemonstrat</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idcompoelemdem</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Flgoperacao</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Elevalorcond</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Eletipocond</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Elementodem</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Eledemcond</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Elecondicao</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Codsubconta</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Codcentrocusto</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr></tbody>
+  </table></div>
+</section>
+
+<section id="COMPORATEIOAP">
+  <div class="section-title">Entidade COMPORATEIOAP</div>
+  <p><strong>Tabela:</strong> <code>COMPORATEIOAP</code><br>
+  <strong>Finalidade:</strong> Entidade contábil mapeada via TCmDbObject.<br>
+  <strong>Origem:</strong> <code>CONTAB/DbObjects/uDbComporateioap.pas</code> | Confiança: <span class="tag tag-alta">Alta</span></p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Campo</th><th>Tipo</th><th>Obrigatório</th><th>Descrição</th></tr></thead>
+    <tbody><tr><td><code>Unidnegoc</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Percrateio</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idrateioapextra</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idpessoa</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr></tbody>
+  </table></div>
+</section>
+
+<section id="CONTASXCC">
+  <div class="section-title">Entidade CONTASXCC</div>
+  <p><strong>Tabela:</strong> <code>CONTASXCC</code><br>
+  <strong>Finalidade:</strong> Entidade contábil mapeada via TCmDbObject.<br>
+  <strong>Origem:</strong> <code>CONTAB/DbObjects/uDbContasxcc.pas</code> | Confiança: <span class="tag tag-alta">Alta</span></p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Campo</th><th>Tipo</th><th>Obrigatório</th><th>Descrição</th></tr></thead>
+    <tbody><tr><td><code>Plano</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Placonta</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idusuarioinclusao</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idempresa</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Codcentrocusto</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr></tbody>
+  </table></div>
+</section>
+
+<section id="CONTASXSUBC">
+  <div class="section-title">Entidade CONTASXSUBC</div>
+  <p><strong>Tabela:</strong> <code>CONTASXSUBC</code><br>
+  <strong>Finalidade:</strong> Entidade contábil mapeada via TCmDbObject.<br>
+  <strong>Origem:</strong> <code>CONTAB/DbObjects/uDbContasxsubc.pas</code> | Confiança: <span class="tag tag-alta">Alta</span></p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Campo</th><th>Tipo</th><th>Obrigatório</th><th>Descrição</th></tr></thead>
+    <tbody><tr><td><code>Plano</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Placonta</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idusuario</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idpessoa</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Codsubconta</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr></tbody>
+  </table></div>
+</section>
+
+<section id="DEMCOLUNAS">
+  <div class="section-title">Entidade DEMCOLUNAS</div>
+  <p><strong>Tabela:</strong> <code>DEMCOLUNAS</code><br>
+  <strong>Finalidade:</strong> Entidade contábil mapeada via TCmDbObject.<br>
+  <strong>Origem:</strong> <code>CONTAB/DbObjects/uDbDemcolunas.pas</code> | Confiança: <span class="tag tag-alta">Alta</span></p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Campo</th><th>Tipo</th><th>Obrigatório</th><th>Descrição</th></tr></thead>
+    <tbody><tr><td><code>Iddemonstrativo</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr></tbody>
+  </table></div>
+</section>
+
+<section id="DEMCOLXLIN">
+  <div class="section-title">Entidade DEMCOLXLIN</div>
+  <p><strong>Tabela:</strong> <code>DEMCOLXLIN</code><br>
+  <strong>Finalidade:</strong> Entidade contábil mapeada via TCmDbObject.<br>
+  <strong>Origem:</strong> <code>CONTAB/DbObjects/uDbDemcolxlin.pas</code> | Confiança: <span class="tag tag-alta">Alta</span></p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Campo</th><th>Tipo</th><th>Obrigatório</th><th>Descrição</th></tr></thead>
+    <tbody><tr><td><code>Numcoluna</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idlinha</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idelemdemonstrat</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Iddemonstrativo</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr></tbody>
+  </table></div>
+</section>
+
+<section id="DEMLINHA">
+  <div class="section-title">Entidade DEMLINHA</div>
+  <p><strong>Tabela:</strong> <code>DEMLINHA</code><br>
+  <strong>Finalidade:</strong> Entidade contábil mapeada via TCmDbObject.<br>
+  <strong>Origem:</strong> <code>CONTAB/DbObjects/uDbDemlinha.pas</code> | Confiança: <span class="tag tag-alta">Alta</span></p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Campo</th><th>Tipo</th><th>Obrigatório</th><th>Descrição</th></tr></thead>
+    <tbody><tr><td><code>Iddemonstrativo</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr></tbody>
+  </table></div>
+</section>
+
+<section id="DEMONSTRATIVO">
+  <div class="section-title">Entidade DEMONSTRATIVO</div>
+  <p><strong>Tabela:</strong> <code>DEMONSTRATIVO</code><br>
+  <strong>Finalidade:</strong> Cadastro de demonstrativos contábeis.<br>
+  <strong>Origem:</strong> <code>CONTAB/DbObjects/uDbDemonstrativo.pas</code> | Confiança: <span class="tag tag-alta">Alta</span></p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Campo</th><th>Tipo</th><th>Obrigatório</th><th>Descrição</th></tr></thead>
+    <tbody><tr><td colspan='4'><em>Propriedades não enumeradas automaticamente (ver arquivo DbObject)</em></td></tr></tbody>
+  </table></div>
+</section>
+
+<section id="DESENHODEMO">
+  <div class="section-title">Entidade DESENHODEMO</div>
+  <p><strong>Tabela:</strong> <code>DESENHODEMO</code><br>
+  <strong>Finalidade:</strong> Entidade contábil mapeada via TCmDbObject.<br>
+  <strong>Origem:</strong> <code>CONTAB/DbObjects/uDbDesenhodemo.pas</code> | Confiança: <span class="tag tag-alta">Alta</span></p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Campo</th><th>Tipo</th><th>Obrigatório</th><th>Descrição</th></tr></thead>
+    <tbody><tr><td><code>Origemcm</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Nomelayout</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idreports</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Iddesenhodemo</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Iddemonstrativo</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Flgtipolayout</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr></tbody>
+  </table></div>
+</section>
+
+<section id="DIASBLOQMOD">
+  <div class="section-title">Entidade DIASBLOQMOD</div>
+  <p><strong>Tabela:</strong> <code>DIASBLOQMOD</code><br>
+  <strong>Finalidade:</strong> Entidade contábil mapeada via TCmDbObject.<br>
+  <strong>Origem:</strong> <code>CONTAB/DbObjects/uDbDiasbloqmod.pas</code> | Confiança: <span class="tag tag-alta">Alta</span></p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Campo</th><th>Tipo</th><th>Obrigatório</th><th>Descrição</th></tr></thead>
+    <tbody><tr><td><code>Numdias</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idpessoa</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idmodulo</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>DataBloqueio</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr></tbody>
+  </table></div>
+</section>
+
+<section id="ELEMBALPATR">
+  <div class="section-title">Entidade ELEMBALPATR</div>
+  <p><strong>Tabela:</strong> <code>ELEMBALPATR</code><br>
+  <strong>Finalidade:</strong> Entidade contábil mapeada via TCmDbObject.<br>
+  <strong>Origem:</strong> <code>CONTAB/DbObjects/uDbElembalpatr.pas</code> | Confiança: <span class="tag tag-alta">Alta</span></p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Campo</th><th>Tipo</th><th>Obrigatório</th><th>Descrição</th></tr></thead>
+    <tbody><tr><td><code>Idelemdemonstrat</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr></tbody>
+  </table></div>
+</section>
+
+<section id="ELEMDEMONSTRATIVO">
+  <div class="section-title">Entidade ELEMDEMONSTRATIVO</div>
+  <p><strong>Tabela:</strong> <code>ELEMDEMONSTRATIVO</code><br>
+  <strong>Finalidade:</strong> Entidade contábil mapeada via TCmDbObject.<br>
+  <strong>Origem:</strong> <code>CONTAB/DbObjects/uDbElemdemonstrativo.pas</code> | Confiança: <span class="tag tag-alta">Alta</span></p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Campo</th><th>Tipo</th><th>Obrigatório</th><th>Descrição</th></tr></thead>
+    <tbody><tr><td><code>Idelemdemonstrat</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idelemanavert1</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idelemanavertical</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Iddemonstrativo</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Flgtraco</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Flgtiponegativo</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Flgtipolinha</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Flgsaltapagina</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Flgnegrito</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Flgnatureza</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Flgmonetaria</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Flgindentacao</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Flgdecimais</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Flgacumulado</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Eletipoelem</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Eleordemlinha</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Eleordem</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Eledescelem</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Elecodigo</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr></tbody>
+  </table></div>
+</section>
+
+<section id="ENVIODOCUMENTO">
+  <div class="section-title">Entidade ENVIODOCUMENTO</div>
+  <p><strong>Tabela:</strong> <code>ENVIODOCUMENTO</code><br>
+  <strong>Finalidade:</strong> Entidade contábil mapeada via TCmDbObject.<br>
+  <strong>Origem:</strong> <code>CONTAB/DbObjects/uDbEnviodocumento.pas</code> | Confiança: <span class="tag tag-alta">Alta</span></p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Campo</th><th>Tipo</th><th>Obrigatório</th><th>Descrição</th></tr></thead>
+    <tbody><tr><td><code>Usuarioenvio</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idenviodocumento</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr></tbody>
+  </table></div>
+</section>
+
+<section id="HISTOPADRAO">
+  <div class="section-title">Entidade HISTOPADRAO</div>
+  <p><strong>Tabela:</strong> <code>HISTOPADRAO</code><br>
+  <strong>Finalidade:</strong> Entidade contábil mapeada via TCmDbObject.<br>
+  <strong>Origem:</strong> <code>CONTAB/DbObjects/uDbHistoContab.pas</code> | Confiança: <span class="tag tag-alta">Alta</span></p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Campo</th><th>Tipo</th><th>Obrigatório</th><th>Descrição</th></tr></thead>
+    <tbody><tr><td colspan='4'><em>Propriedades não enumeradas automaticamente (ver arquivo DbObject)</em></td></tr></tbody>
+  </table></div>
+</section>
+
+<section id="ITEMSPCCONSISTE">
+  <div class="section-title">Entidade ITEMSPCCONSISTE</div>
+  <p><strong>Tabela:</strong> <code>ITEMSPCCONSISTE</code><br>
+  <strong>Finalidade:</strong> Entidade contábil mapeada via TCmDbObject.<br>
+  <strong>Origem:</strong> <code>CONTAB/DbObjects/uDbItemSPCConsiste.pas</code> | Confiança: <span class="tag tag-alta">Alta</span></p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Campo</th><th>Tipo</th><th>Obrigatório</th><th>Descrição</th></tr></thead>
+    <tbody><tr><td><code>Plano</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Placonta</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idspcconsiste</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Iditemspcconsiste</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Flgsaldooumovim</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Dtspcconsiste</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr></tbody>
+  </table></div>
+</section>
+
+<section id="LANCAMENTO">
+  <div class="section-title">Entidade LANCAMENTO</div>
+  <p><strong>Tabela:</strong> <code>LANCAMENTO</code><br>
+  <strong>Finalidade:</strong> Lançamentos contábeis (débito/crédito) vinculados a planilha, conta, centro de custo, subconta, histórico e segregação.<br>
+  <strong>Origem:</strong> <code>CONTAB/DbObjects/uDbLancamento.pas</code> | Confiança: <span class="tag tag-alta">Alta</span></p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Campo</th><th>Tipo</th><th>Obrigatório</th><th>Descrição</th></tr></thead>
+    <tbody><tr><td><code>Idsegregacriter</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Datasegregacriter</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Unidnegoc</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Tipcodigo</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Plncodigo</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Plano</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Placonta</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Lotetransmissao</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Lacvalor</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Lacvaloficial</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Lacvalhist</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Lacvalgeren2</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Lacvalgeren1</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Lacvalgerencial</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Lactipo</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Lactipconvoficial</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Lactipconvgeren2</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Lactipconvgeren1</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Lactipconvger</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Lacorigemaplic</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Lacnumlan</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Lacnumdoc</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Lachist5</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Lachist4</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Lachist3</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Lachist2</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Lachist1</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Lacdebcre</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Lacatoutmoeda</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idusuarioinclusao</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idplanoprev</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idpessoa</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idpatro</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idmodulo</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idempresa</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idelemdemonstrat</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Hitcodhist</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Codsubconta</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Codcentrocusto</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr></tbody>
+  </table></div>
+</section>
+
+<section id="PARAMCONTAB">
+  <div class="section-title">Entidade PARAMCONTAB</div>
+  <p><strong>Tabela:</strong> <code>PARAMCONTAB</code><br>
+  <strong>Finalidade:</strong> Parâmetros globais da contabilidade (moedas, faixas, fechamento, caminhos de integração).<br>
+  <strong>Origem:</strong> <code>CONTAB/DbObjects/uDbParamcontab.pas</code> | Confiança: <span class="tag tag-alta">Alta</span></p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Campo</th><th>Tipo</th><th>Obrigatório</th><th>Descrição</th></tr></thead>
+    <tbody><tr><td><code>Plano</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>PlanoContabCli</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>PlanoCredCli</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>PacPlnCodigo</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>PacPesqplalanc</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>ContaContabCli</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>ContaCredcli</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Pacvalidaproc</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Pacultdat</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Pactotplanerro</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Pactotais</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Pactipoperresult</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Pactipopermoeda</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Pactipoperlanc</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Pactipoperimptxt</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Pactipooper</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Pacsubgrp4</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Pacsubgrp3</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Pacsubgrp2</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Pacsubgrp1</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Pacrevesupetecn</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Pacrevedefitecn</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Pacresemat</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Pacreseconta</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Pacresecont</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Pacreduzr</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Pacreduzp</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Pacreduzo</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Pacreduze</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Pacreduzd</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Pacreduzc</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Pacreduza</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Pacreduri</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Pacredurf</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Pacredupi</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Pacredupf</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Pacreduoi</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Pacreduof</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Pacreduei</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Pacreduef</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr></tbody>
+  </table></div>
+</section>
+
+<section id="PERIODO">
+  <div class="section-title">Entidade PERIODO</div>
+  <p><strong>Tabela:</strong> <code>PERIODO</code><br>
+  <strong>Finalidade:</strong> Períodos contábeis e flags de bloqueio/integração.<br>
+  <strong>Origem:</strong> <code>CONTAB/DbObjects/uDbPeriodo.pas</code> | Confiança: <span class="tag tag-alta">Alta</span></p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Campo</th><th>Tipo</th><th>Obrigatório</th><th>Descrição</th></tr></thead>
+    <tbody><tr><td><code>Perplanil</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Peroutmoeda</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Pernumero</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Pernomeoutling</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Pernome</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Perexercicio</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Perdatini</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Perdatfim</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Perbloque</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Perbloint</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Perespecial</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Peratuali</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idusuarioinclusao</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idpessoa</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr></tbody>
+  </table></div>
+</section>
+
+<section id="PLANILHA">
+  <div class="section-title">Entidade PLANILHA</div>
+  <p><strong>Tabela:</strong> <code>PLANILHA</code><br>
+  <strong>Finalidade:</strong> Cabeçalho da planilha contábil (data, período, exercício, lote, módulo origem).<br>
+  <strong>Origem:</strong> <code>CONTAB/DbObjects/uDbPlanilha.pas</code> | Confiança: <span class="tag tag-alta">Alta</span></p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Campo</th><th>Tipo</th><th>Obrigatório</th><th>Descrição</th></tr></thead>
+    <tbody><tr><td><code>Tipcodigo</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Plntotdeboficial</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Plntotdebhist</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Plntotdebgeren2</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Plntotdebgeren1</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Plntotdebger</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Plntotdeb</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Plntotcreoficial</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Plntotcrehist</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Plntotcregeren2</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Plntotcregeren1</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Plntotcreger</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Plntotcre</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Plnreferencia</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Plnplanil</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Plnplanestorno</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Plnnumlan</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Plnemuso</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Plnefetivado</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Plndatdia</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Plncodigo</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Pernumero</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Perexercicio</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Pancodigo</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Lotetransmissao</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idusuarioinclusao</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idpessoa</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idmodulo</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr></tbody>
+  </table></div>
+</section>
+
+<section id="PLANO">
+  <div class="section-title">Entidade PLANO</div>
+  <p><strong>Tabela:</strong> <code>PLANO</code><br>
+  <strong>Finalidade:</strong> Entidade contábil mapeada via TCmDbObject.<br>
+  <strong>Origem:</strong> <code>CONTAB/DbObjects/uDbPlano.pas</code> | Confiança: <span class="tag tag-alta">Alta</span></p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Campo</th><th>Tipo</th><th>Obrigatório</th><th>Descrição</th></tr></thead>
+    <tbody><tr><td colspan='4'><em>Propriedades não enumeradas automaticamente (ver arquivo DbObject)</em></td></tr></tbody>
+  </table></div>
+</section>
+
+<section id="PLANOCONTA">
+  <div class="section-title">Entidade PLANOCONTA</div>
+  <p><strong>Tabela:</strong> <code>PLANOCONTA</code><br>
+  <strong>Finalidade:</strong> Contas do plano contábil (grau, natureza, bloqueio, rateio, segregação, contrapartida).<br>
+  <strong>Origem:</strong> <code>CONTAB/DbObjects/uDbPlanoConta.pas</code> | Confiança: <span class="tag tag-alta">Alta</span></p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Campo</th><th>Tipo</th><th>Obrigatório</th><th>Descrição</th></tr></thead>
+    <tbody><tr><td><code>IdSegregaCriter</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Observacao</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Platxjuros</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Platipo</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Platipconvoficial</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Platipconvgeren2</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Platipconvgeren1</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Platipconvger</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Plasumariza</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Plasubgr4</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Plasubgr3</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Plasubgr2</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Plasubgr1</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Placontasegreg</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Plasubconta</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Plasecretaria</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Plareduz</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Plarateioap</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Plaordalf</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Planomeoutling</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Planome</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Plano</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Planatureza</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Plamutacoes</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Plamoedahistorica</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Plainativa</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Plaimprelatevol</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Plagrupo</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Plagrau</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Placontraptxjuros</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Placontrapartida</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Placonta</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Placoncorresp</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Placoncilia</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Placcust</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Plabloquedata</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Plabloque</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Plaaltera</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idusuarioinclusao</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idrateioapextra</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr></tbody>
+  </table></div>
+</section>
+
+<section id="PLANOCONTAPER">
+  <div class="section-title">Entidade PLANOCONTAPER</div>
+  <p><strong>Tabela:</strong> <code>PLANOCONTAPER</code><br>
+  <strong>Finalidade:</strong> Entidade contábil mapeada via TCmDbObject.<br>
+  <strong>Origem:</strong> <code>CONTAB/DbObjects/uDbPlanocontaper.pas</code> | Confiança: <span class="tag tag-alta">Alta</span></p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Campo</th><th>Tipo</th><th>Obrigatório</th><th>Descrição</th></tr></thead>
+    <tbody><tr><td><code>Platipo</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>PlaInativa</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Planome</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Plano</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Placonta</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Pernumero</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Perexercicio</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idplanocontaper</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idpessoa</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>flgdesmagrup</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>PlaContaOri</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr></tbody>
+  </table></div>
+</section>
+
+<section id="PLANODATA">
+  <div class="section-title">Entidade PLANODATA</div>
+  <p><strong>Tabela:</strong> <code>PLANODATA</code><br>
+  <strong>Finalidade:</strong> Entidade contábil mapeada via TCmDbObject.<br>
+  <strong>Origem:</strong> <code>CONTAB/DbObjects/uDbPlanodata.pas</code> | Confiança: <span class="tag tag-alta">Alta</span></p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Campo</th><th>Tipo</th><th>Obrigatório</th><th>Descrição</th></tr></thead>
+    <tbody><tr><td><code>Planoanterior</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Plano</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idplanodata</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idpessoa</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Datainicio</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Datafim</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr></tbody>
+  </table></div>
+</section>
+
+<section id="PLANODEPARA">
+  <div class="section-title">Entidade PLANODEPARA</div>
+  <p><strong>Tabela:</strong> <code>PLANODEPARA</code><br>
+  <strong>Finalidade:</strong> Entidade contábil mapeada via TCmDbObject.<br>
+  <strong>Origem:</strong> <code>CONTAB/DbObjects/uDbPlanodepara.pas</code> | Confiança: <span class="tag tag-alta">Alta</span></p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Campo</th><th>Tipo</th><th>Obrigatório</th><th>Descrição</th></tr></thead>
+    <tbody><tr><td><code>Plano2</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Plano1</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idplanodepara</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idempresa2</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idempresa1</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Conta2</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Conta1</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Centrocusto2</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Centrocusto1</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr></tbody>
+  </table></div>
+</section>
+
+<section id="PLANOSALDO">
+  <div class="section-title">Entidade PLANOSALDO</div>
+  <p><strong>Tabela:</strong> <code>PLANOSALDO</code><br>
+  <strong>Finalidade:</strong> Saldos por conta/período/moeda.<br>
+  <strong>Origem:</strong> <code>CONTAB/DbObjects/uDbPlanoSaldo.pas</code> | Confiança: <span class="tag tag-alta">Alta</span></p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Campo</th><th>Tipo</th><th>Obrigatório</th><th>Descrição</th></tr></thead>
+    <tbody><tr><td><code>Unidnegoc</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Plstipo</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Plsorcadodebito</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Plsorcadocredito</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Plsdebitooficial</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Plsdebitohist</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Plsdebitogeren2</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Plsdebitogeren1</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Plsdebitoger</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Plsdebitocorrente</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Plscreditooficial</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Plscreditohist</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Plscreditogeren2</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Plscreditogeren1</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Plscreditoger</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Plscreditocor</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Plano</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Placonta</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Pernumero</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Perexercicio</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idusuarioinclusao</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idplanosaldo</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idplanoprev</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idpessoa</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idpatro</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idempresa</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Codsubconta</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Codcentrocusto</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr></tbody>
+  </table></div>
+</section>
+
+<section id="PREDETALHE">
+  <div class="section-title">Entidade PREDETALHE</div>
+  <p><strong>Tabela:</strong> <code>PREDETALHE</code><br>
+  <strong>Finalidade:</strong> Entidade contábil mapeada via TCmDbObject.<br>
+  <strong>Origem:</strong> <code>CONTAB/DbObjects/uDbPredetalhe.pas</code> | Confiança: <span class="tag tag-alta">Alta</span></p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Campo</th><th>Tipo</th><th>Obrigatório</th><th>Descrição</th></tr></thead>
+    <tbody><tr><td><code>Unidnegoc</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Tipcodigo</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Plano</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Placonta</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Pantipobase</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Pantipo</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Panperc</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Panorigem</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Pannumlanc</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Pancontabase</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Pancodigo</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Panccustobase</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Panbase</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Numdoc</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idusuarioinclusao</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idplanoprev</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idpessoa</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idpatro</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idempresa</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Hitcodhist</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Codsubconta</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Codcentrocusto</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>IdSegregaCriter</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>NumOrdem</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr></tbody>
+  </table></div>
+</section>
+
+<section id="PREPLANILHA">
+  <div class="section-title">Entidade PREPLANILHA</div>
+  <p><strong>Tabela:</strong> <code>PREPLANILHA</code><br>
+  <strong>Finalidade:</strong> Planilhas pré-prontas / templates de lançamento.<br>
+  <strong>Origem:</strong> <code>CONTAB/DbObjects/uDbPreplanilha.pas</code> | Confiança: <span class="tag tag-alta">Alta</span></p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Campo</th><th>Tipo</th><th>Obrigatório</th><th>Descrição</th></tr></thead>
+    <tbody><tr><td><code>Panvalorfixo</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Panprocessada</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Panperiodogera</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Panparcatual</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Panok100</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Pannumparc</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Paninativo</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Panidentificacao</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Panfase</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Pandescricao</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Pancontaperc</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Pancodigo</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idpessoa</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Flgperiodogera</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Flgsegregacriter</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr></tbody>
+  </table></div>
+</section>
+
+<section id="RATADDETPLANPATRO">
+  <div class="section-title">Entidade RATADDETPLANPATRO</div>
+  <p><strong>Tabela:</strong> <code>RATADDETPLANPATRO</code><br>
+  <strong>Finalidade:</strong> Entidade contábil mapeada via TCmDbObject.<br>
+  <strong>Origem:</strong> <code>CONTAB/DbObjects/uDbRataddetplanpatro.pas</code> | Confiança: <span class="tag tag-alta">Alta</span></p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Campo</th><th>Tipo</th><th>Obrigatório</th><th>Descrição</th></tr></thead>
+    <tbody><tr><td><code>Percrateio</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idratadmplanprev</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idplanoprev</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idpatro</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr></tbody>
+  </table></div>
+</section>
+
+<section id="RATADMPLANPATRO">
+  <div class="section-title">Entidade RATADMPLANPATRO</div>
+  <p><strong>Tabela:</strong> <code>RATADMPLANPATRO</code><br>
+  <strong>Finalidade:</strong> Entidade contábil mapeada via TCmDbObject.<br>
+  <strong>Origem:</strong> <code>CONTAB/DbObjects/uDbRatadmplanpatro.pas</code> | Confiança: <span class="tag tag-alta">Alta</span></p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Campo</th><th>Tipo</th><th>Obrigatório</th><th>Descrição</th></tr></thead>
+    <tbody><tr><td><code>Idratadmplanpatro</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idplanoprev</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idpatro</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Descricao</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr></tbody>
+  </table></div>
+</section>
+
+<section id="RATEIOAPEXTRA">
+  <div class="section-title">Entidade RATEIOAPEXTRA</div>
+  <p><strong>Tabela:</strong> <code>RATEIOAPEXTRA</code><br>
+  <strong>Finalidade:</strong> Entidade contábil mapeada via TCmDbObject.<br>
+  <strong>Origem:</strong> <code>CONTAB/DbObjects/uDbRateioapextra.pas</code> | Confiança: <span class="tag tag-alta">Alta</span></p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Campo</th><th>Tipo</th><th>Obrigatório</th><th>Descrição</th></tr></thead>
+    <tbody><tr><td><code>Unidnegoc</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Nomerateio</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idrateioapextra</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idpessoa</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr></tbody>
+  </table></div>
+</section>
+
+<section id="RATEIOATIVPROJ">
+  <div class="section-title">Entidade RATEIOATIVPROJ</div>
+  <p><strong>Tabela:</strong> <code>RATEIOATIVPROJ</code><br>
+  <strong>Finalidade:</strong> Entidade contábil mapeada via TCmDbObject.<br>
+  <strong>Origem:</strong> <code>CONTAB/DbObjects/uDbRateioativproj.pas</code> | Confiança: <span class="tag tag-alta">Alta</span></p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Campo</th><th>Tipo</th><th>Obrigatório</th><th>Descrição</th></tr></thead>
+    <tbody><tr><td><code>Vlrrateio</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Unidnegoc</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Pernumero</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Perexercicio</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idrateioativproj</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idpessoa</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr></tbody>
+  </table></div>
+</section>
+
+<section id="RATEIOPLANPATRO">
+  <div class="section-title">Entidade RATEIOPLANPATRO</div>
+  <p><strong>Tabela:</strong> <code>RATEIOPLANPATRO</code><br>
+  <strong>Finalidade:</strong> Entidade contábil mapeada via TCmDbObject.<br>
+  <strong>Origem:</strong> <code>CONTAB/DbObjects/uDbRateioplanpatro.pas</code> | Confiança: <span class="tag tag-alta">Alta</span></p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Campo</th><th>Tipo</th><th>Obrigatório</th><th>Descrição</th></tr></thead>
+    <tbody><tr><td><code>Qtdecotas</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Pernumero</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Perexercicio</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idrateioplanpatro</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idplanoprev</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idpessoa</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idpatro</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr></tbody>
+  </table></div>
+</section>
+
+<section id="RECBTOPAGTO">
+  <div class="section-title">Entidade RECBTOPAGTO</div>
+  <p><strong>Tabela:</strong> <code>RECBTOPAGTO</code><br>
+  <strong>Finalidade:</strong> Entidade contábil mapeada via TCmDbObject.<br>
+  <strong>Origem:</strong> <code>CONTAB/DbObjects/uDbRecbtopagto.pas</code> | Confiança: <span class="tag tag-alta">Alta</span></p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Campo</th><th>Tipo</th><th>Obrigatório</th><th>Descrição</th></tr></thead>
+    <tbody><tr><td><code>Numlote</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Numlancto</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Numchqbordero</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Numbaixa</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Lotetransmissao</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idusuarioinclusao</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Datacfloat</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Databaixa</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Codportforma</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Codlancnaoident</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Codlancfinanc</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Coddocumento</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr></tbody>
+  </table></div>
+</section>
+
+<section id="REGRASCONTAB">
+  <div class="section-title">Entidade REGRASCONTAB</div>
+  <p><strong>Tabela:</strong> <code>REGRASCONTAB</code><br>
+  <strong>Finalidade:</strong> Regras de consistência contábil.<br>
+  <strong>Origem:</strong> <code>CONTAB/DbObjects/uDbRegrasContab.pas</code> | Confiança: <span class="tag tag-alta">Alta</span></p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Campo</th><th>Tipo</th><th>Obrigatório</th><th>Descrição</th></tr></thead>
+    <tbody><tr><td colspan='4'><em>Propriedades não enumeradas automaticamente (ver arquivo DbObject)</em></td></tr></tbody>
+  </table></div>
+</section>
+
+<section id="SEGREGACAO">
+  <div class="section-title">Entidade SEGREGACAO</div>
+  <p><strong>Tabela:</strong> <code>SEGREGACAO</code><br>
+  <strong>Finalidade:</strong> Processos de segregação de recursos.<br>
+  <strong>Origem:</strong> <code>CONTAB/DbObjects/uDbSegregacao.pas</code> | Confiança: <span class="tag tag-alta">Alta</span></p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Campo</th><th>Tipo</th><th>Obrigatório</th><th>Descrição</th></tr></thead>
+    <tbody><tr><td><code>Plncodigo</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Pernumero</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Perexercicio</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idsegregacriter</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idsegregacao</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idpessoa</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idplanoprev</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr></tbody>
+  </table></div>
+</section>
+
+<section id="SEGREGACOTACAO">
+  <div class="section-title">Entidade SEGREGACOTACAO</div>
+  <p><strong>Tabela:</strong> <code>SEGREGACOTACAO</code><br>
+  <strong>Finalidade:</strong> Entidade contábil mapeada via TCmDbObject.<br>
+  <strong>Origem:</strong> <code>CONTAB/DbObjects/uDbSegregaCotacao.pas</code> | Confiança: <span class="tag tag-alta">Alta</span></p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Campo</th><th>Tipo</th><th>Obrigatório</th><th>Descrição</th></tr></thead>
+    <tbody><tr><td><code>Idsegregadata</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idsegregacriter</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idsegregacotacao</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idplanoprev</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idpatro</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Cotacao</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr></tbody>
+  </table></div>
+</section>
+
+<section id="SEGREGACRITER">
+  <div class="section-title">Entidade SEGREGACRITER</div>
+  <p><strong>Tabela:</strong> <code>SEGREGACRITER</code><br>
+  <strong>Finalidade:</strong> Entidade contábil mapeada via TCmDbObject.<br>
+  <strong>Origem:</strong> <code>CONTAB/DbObjects/uDbSegregaCriter.pas</code> | Confiança: <span class="tag tag-alta">Alta</span></p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Campo</th><th>Tipo</th><th>Obrigatório</th><th>Descrição</th></tr></thead>
+    <tbody><tr><td><code>Tipcodigo</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Ordem</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idsegregacriter</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idpessoa</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Hitcodhist</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Flgtiposegrega</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Flgtipocotacao</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Descricao</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr></tbody>
+  </table></div>
+</section>
+
+<section id="SEGREGADATA">
+  <div class="section-title">Entidade SEGREGADATA</div>
+  <p><strong>Tabela:</strong> <code>SEGREGADATA</code><br>
+  <strong>Finalidade:</strong> Entidade contábil mapeada via TCmDbObject.<br>
+  <strong>Origem:</strong> <code>CONTAB/DbObjects/uDbSegregaData.pas</code> | Confiança: <span class="tag tag-alta">Alta</span></p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Campo</th><th>Tipo</th><th>Obrigatório</th><th>Descrição</th></tr></thead>
+    <tbody><tr><td><code>Idsegregadata</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idsegregacriter</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Dataini</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Datafim</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr></tbody>
+  </table></div>
+</section>
+
+<section id="SPCCONSISTE">
+  <div class="section-title">Entidade SPCCONSISTE</div>
+  <p><strong>Tabela:</strong> <code>SPCCONSISTE</code><br>
+  <strong>Finalidade:</strong> Entidade contábil mapeada via TCmDbObject.<br>
+  <strong>Origem:</strong> <code>CONTAB/DbObjects/uDbSPCConsiste.pas</code> | Confiança: <span class="tag tag-alta">Alta</span></p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Campo</th><th>Tipo</th><th>Obrigatório</th><th>Descrição</th></tr></thead>
+    <tbody><tr><td><code>Idspcconsiste</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Descricao</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>TipoConsiste</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr></tbody>
+  </table></div>
+</section>
+
+<section id="SUBCONTA">
+  <div class="section-title">Entidade SUBCONTA</div>
+  <p><strong>Tabela:</strong> <code>SUBCONTA</code><br>
+  <strong>Finalidade:</strong> Entidade contábil mapeada via TCmDbObject.<br>
+  <strong>Origem:</strong> <code>CONTAB/DbObjects/uDbSubconta.pas</code> | Confiança: <span class="tag tag-alta">Alta</span></p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Campo</th><th>Tipo</th><th>Obrigatório</th><th>Descrição</th></tr></thead>
+    <tbody><tr><td colspan='4'><em>Propriedades não enumeradas automaticamente (ver arquivo DbObject)</em></td></tr></tbody>
+  </table></div>
+</section>
+
+<section id="SUBGRUPO">
+  <div class="section-title">Entidade SUBGRUPO</div>
+  <p><strong>Tabela:</strong> <code>SUBGRUPO</code><br>
+  <strong>Finalidade:</strong> Entidade contábil mapeada via TCmDbObject.<br>
+  <strong>Origem:</strong> <code>CONTAB/DbObjects/uDbSubgrupo.pas</code> | Confiança: <span class="tag tag-alta">Alta</span></p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Campo</th><th>Tipo</th><th>Obrigatório</th><th>Descrição</th></tr></thead>
+    <tbody><tr><td colspan='4'><em>Propriedades não enumeradas automaticamente (ver arquivo DbObject)</em></td></tr></tbody>
+  </table></div>
+</section>
+
+<section id="TABELADEPARA">
+  <div class="section-title">Entidade TABELADEPARA</div>
+  <p><strong>Tabela:</strong> <code>TABELADEPARA</code><br>
+  <strong>Finalidade:</strong> Entidade contábil mapeada via TCmDbObject.<br>
+  <strong>Origem:</strong> <code>CONTAB/DbObjects/uDbTabeladepara.pas</code> | Confiança: <span class="tag tag-alta">Alta</span></p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Campo</th><th>Tipo</th><th>Obrigatório</th><th>Descrição</th></tr></thead>
+    <tbody><tr><td><code>Nometabela</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Nomecampoplano</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idtabelaref</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>Idtabeladepara</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>AnoDePara</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>MesDePara</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr><tr><td><code>DataDePara</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr></tbody>
+  </table></div>
+</section>
+
+<section id="TERMODIARIO">
+  <div class="section-title">Entidade TERMODIARIO</div>
+  <p><strong>Tabela:</strong> <code>TERMODIARIO</code><br>
+  <strong>Finalidade:</strong> Entidade contábil mapeada via TCmDbObject.<br>
+  <strong>Origem:</strong> <code>CONTAB/DbObjects/uDbTermoDiario.pas</code> | Confiança: <span class="tag tag-alta">Alta</span></p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Campo</th><th>Tipo</th><th>Obrigatório</th><th>Descrição</th></tr></thead>
+    <tbody><tr><td><code>Idusuarioinclusao</code></td><td>TCmDbField</td><td>—</td><td>Campo mapeado no DbObject</td></tr></tbody>
+  </table></div>
+</section>
+<section>
+  <div class="section-title">Lacunas</div>
+  <ul>
+    <li>DDL completo do banco Oracle não encontrado como artefato único.</li>
+    <li>Triggers/procedures contábeis podem existir apenas no banco.</li>
+    <li>Tabelas de outros módulos não foram todas enumeradas nesta versão.</li>
+  </ul>
+</section>
+</main>
+
+<footer>
+<p>CM Contabilidade — Documentação gerada em 2026-08-19 | Tecnologia: Delphi 5 | pt-BR</p>
+</footer>
+</body>
+</html>

@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contabilidade — CM Contabilidade</title>
+<style>
+
+:root {
+  --bg: #0f1419; --bg2: #1a2332; --bg3: #243044; --card: #1e2a3a;
+  --text: #e7ecf3; --muted: #9aa8bc; --accent: #3d9cf0; --accent2: #2dd4bf;
+  --ok: #34d399; --warn: #fbbf24; --bad: #f87171; --border: #2d3a4d;
+  --tag-alta: #065f46; --tag-media: #92400e; --tag-baixa: #7f1d1d;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0; font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(160deg, #0f1419 0%, #152033 50%, #0f1419 100%);
+  color: var(--text); line-height: 1.55; min-height: 100vh;
+}
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+header {
+  background: linear-gradient(135deg, #152033 0%, #1a3a5c 100%);
+  border-bottom: 1px solid var(--border); padding: 2rem 1.5rem 1.5rem;
+}
+header .badge {
+  display: inline-block; background: #1e3a5f; color: var(--accent2);
+  padding: .25rem .75rem; border-radius: 999px; font-size: .8rem;
+  border: 1px solid #2a5080; margin-bottom: .75rem;
+}
+header h1 { margin: 0 0 .5rem; font-size: clamp(1.5rem, 3vw, 2.2rem); }
+header p { margin: 0; color: var(--muted); max-width: 70ch; }
+nav {
+  display: flex; flex-wrap: wrap; gap: .5rem; padding: .75rem 1.5rem;
+  background: rgba(15,20,25,.85); border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 20; backdrop-filter: blur(8px);
+}
+nav a {
+  color: var(--text); background: var(--bg2); padding: .4rem .75rem;
+  border-radius: 6px; border: 1px solid var(--border); font-size: .85rem;
+}
+nav a:hover { background: var(--bg3); text-decoration: none; }
+main { padding: 1.5rem; max-width: 1200px; margin: 0 auto; }
+section {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1.25rem;
+}
+.section-title {
+  font-size: 1.15rem; font-weight: 700; margin-bottom: 1rem;
+  padding-bottom: .5rem; border-bottom: 1px solid var(--border);
+}
+.cards-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1rem;
+}
+.card {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 10px;
+  padding: 1rem; transition: border-color .2s, transform .2s;
+}
+.card:hover { border-color: var(--accent); transform: translateY(-2px); }
+.card h3 { margin: 0 0 .5rem; font-size: 1rem; }
+.card p { margin: 0; color: var(--muted); font-size: .9rem; }
+.stats {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: .75rem;
+}
+.stat {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 8px;
+  padding: .85rem; text-align: center;
+}
+.stat .n { font-size: 1.6rem; font-weight: 700; color: var(--accent2); }
+.stat .l { font-size: .75rem; color: var(--muted); }
+table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+th, td {
+  border: 1px solid var(--border); padding: .5rem .65rem; text-align: left;
+  vertical-align: top;
+}
+th { background: var(--bg3); }
+tbody tr:nth-child(even) { background: rgba(255,255,255,.02); }
+.table-wrap { overflow-x: auto; }
+code {
+  font-family: Consolas, "Courier New", monospace; font-size: .85em;
+  background: var(--bg); padding: .1rem .35rem; border-radius: 4px;
+}
+.tag {
+  display: inline-block; padding: .15rem .45rem; border-radius: 4px;
+  font-size: .75rem; font-weight: 600;
+}
+.tag-alta { background: var(--tag-alta); color: #a7f3d0; }
+.tag-media { background: var(--tag-media); color: #fde68a; }
+.tag-baixa { background: var(--tag-baixa); color: #fecaca; }
+.story-card {
+  background: var(--bg2); border-left: 4px solid var(--accent);
+  padding: .85rem 1rem; margin-bottom: .75rem; border-radius: 0 8px 8px 0;
+}
+.criteria-block, .rule-block {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 8px; padding: .85rem 1rem; margin-bottom: .75rem;
+}
+.rule-id { font-weight: 700; color: var(--accent2); margin-bottom: .35rem; }
+.rule-origin { font-size: .85rem; color: var(--muted); margin-top: .5rem; }
+.complexity-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: .75rem;
+}
+.complexity-item {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; text-align: center;
+}
+.level { font-weight: 700; margin-bottom: .35rem; }
+.level-simples { color: var(--ok); }
+.level-media { color: var(--warn); }
+.level-complexa { color: var(--bad); }
+.points { font-size: 1.4rem; font-weight: 700; }
+.desc { color: var(--muted); font-size: .85rem; margin-top: .35rem; }
+footer {
+  text-align: center; padding: 2rem 1rem; color: var(--muted);
+  border-top: 1px solid var(--border); margin-top: 2rem; font-size: .85rem;
+}
+.back-btn {
+  display: inline-block; margin-bottom: 1rem; background: var(--bg2);
+  border: 1px solid var(--border); padding: .4rem .8rem; border-radius: 6px;
+  color: var(--text);
+}
+.back-btn:hover { background: var(--bg3); text-decoration: none; }
+.layout-2 {
+  display: grid; grid-template-columns: 1fr 300px; gap: 1.25rem; padding: 1.5rem; max-width: 1200px; margin: 0 auto;
+}
+@media (max-width: 900px) { .layout-2 { grid-template-columns: 1fr; } }
+.info-list, .dep-list { list-style: none; padding: 0; margin: 0; }
+.info-list li, .dep-list li {
+  display: flex; justify-content: space-between; gap: .5rem;
+  padding: .45rem 0; border-bottom: 1px solid var(--border); font-size: .9rem;
+}
+.info-list .key { color: var(--muted); }
+.mermaid {
+  background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+  padding: 1rem; overflow-x: auto; font-family: monospace; font-size: .8rem;
+  white-space: pre-wrap; color: var(--muted);
+}
+.note {
+  background: #1a2740; border-left: 3px solid var(--warn);
+  padding: .75rem 1rem; margin: .75rem 0; border-radius: 0 6px 6px 0; font-size: .9rem;
+}
+.doc-links { display: flex; flex-wrap: wrap; gap: .5rem; margin: 1rem 0; }
+.doc-links a {
+  background: var(--bg3); border: 1px solid var(--border); padding: .5rem .85rem;
+  border-radius: 6px; color: var(--text);
+}
+.given,.when,.then { margin: .25rem 0; }
+.role,.want,.why { margin: .2rem 0; }
+ul.check { list-style: none; padding-left: 0; }
+ul.check li::before { content: "☐ "; }
+
+
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner" style="max-width:1200px;margin:0 auto">
+    <a class="back-btn" href="../../index.html">← Voltar ao Portal</a>
+    <div class="header-text">
+      <div class="badge">Módulo — Delphi 5</div>
+      <h1>Contabilidade</h1>
+      <p>Gestão contábil completa: plano de contas, períodos, planilhas, lançamentos, saldos, demonstrativos, rateios, segregação por plano/patrocinadora, encerramentos e exportações regulatórias (SIPC-CAP/SICADI).</p>
+    </div>
+  </div>
+</header>
+<nav>
+  <a href="#visao-geral">📋 Visão Geral</a>
+  <a href="#user-stories">📝 User Stories</a>
+  <a href="#criterios">✅ Critérios</a>
+  <a href="#regras">📏 Regras</a>
+  <a href="#tecnico">⚙️ Técnico</a>
+  <a href="#dados">🗄️ Dados</a>
+  <a href="#complexidade">📊 Complexidade</a>
+</nav>
+<main class="layout-2">
+  <div class="main-col">
+    <section id="visao-geral">
+      <div class="section-title">📋 Visão Geral do Módulo</div>
+      <p>Gestão contábil completa: plano de contas, períodos, planilhas, lançamentos, saldos, demonstrativos, rateios, segregação por plano/patrocinadora, encerramentos e exportações regulatórias (SIPC-CAP/SICADI).</p>
+      <br>
+      <p><strong>Contexto de Negócio:</strong> Este módulo integra a suíte CM Contabilidade e apoia processos operacionais/financeiros/previdenciários conforme o domínio <em>Contabilidade</em>.</p>
+      <p><strong>Responsabilidades:</strong></p>
+      <ul><li>Cadastro de plano de contas, históricos, subcontas e parâmetros contábeis</li><li>Lançamentos manuais e automáticos via planilhas</li><li>Atualização de saldos analíticos e sintéticos</li><li>Encerramento de período, contas de resultado e exercício</li><li>Demonstrativos, balancetes, diário, razão e balanço</li><li>Importações (Excel, SAF, Fidélio, Folha RM/Dinâmica/SRH) e exportações (SPC/SIPC-CAP, Posadas)</li><li>Rateios (atividade/projeto, programa, administrativo, plano/patrocinadora) e segregação de recursos</li></ul>
+    </section>
+    <section id="user-stories">
+      <div class="section-title">📝 Guia para User Stories</div>
+      
+<div class="story-card"><div class="role">👤 Como contador</div>
+<div class="want">🎯 Quero cadastrar e consultar o plano de contas</div>
+<div class="why">💡 Para estruturar a classificação contábil do exercício</div></div>
+<div class="story-card"><div class="role">👤 Como contador</div>
+<div class="want">🎯 Quero lançar planilhas e atualizar saldos analíticos/sintéticos</div>
+<div class="why">💡 Para manter a escrituração e os saldos coerentes</div></div>
+<div class="story-card"><div class="role">👤 Como supervisor</div>
+<div class="want">🎯 Quero encerrar período, contas de resultado e exercício</div>
+<div class="why">💡 Para fechar a contabilidade com apuração correta</div></div>
+<div class="story-card"><div class="role">👤 Como analista</div>
+<div class="want">🎯 Quero emitir balancetes, diário, razão e demonstrativos</div>
+<div class="why">💡 Para analisar e reportar a posição contábil</div></div>
+<div class="story-card"><div class="role">👤 Como operador de integração</div>
+<div class="want">🎯 Quero importar lançamentos de Excel/SAF/Folha/SRH e exportar SIPC-CAP</div>
+<div class="why">💡 Para integrar sistemas externos e atender obrigações regulatórias</div></div>
+
+    </section>
+    <section id="criterios">
+      <div class="section-title">✅ Critérios de Aceitação</div>
+      
+<div class="criteria-block"><div class="given"><strong>Dado que</strong> existe um período contábil aberto e contas ativas</div>
+<div class="when"><strong>Quando</strong> o usuário confirma uma planilha balanceada (débitos = créditos)</div>
+<div class="then"><strong>Então</strong> os lançamentos são persistidos em LANCAMENTO e os saldos em PLANOSALDO são atualizados</div></div>
+<div class="criteria-block"><div class="given"><strong>Dado que</strong> o período está bloqueado (PERBLOQUE)</div>
+<div class="when"><strong>Quando</strong> o usuário tenta integrar/lançar naquele período</div>
+<div class="then"><strong>Então</strong> a operação é impedida ou tratada conforme regra de bloqueio/dias bloqueados</div></div>
+<div class="criteria-block"><div class="given"><strong>Dado que</strong> há percentuais de rateio cadastrados</div>
+<div class="when"><strong>Quando</strong> o processo de geração de rateio é executado</div>
+<div class="then"><strong>Então</strong> lançamentos de rateio são gerados preservando totais e contas de destino</div></div>
+
+    </section>
+    <section id="regras">
+      <div class="section-title">📏 Regras de Negócio</div>
+      <div class="rule-block"><div class="rule-id">RN001</div><div class="rule-desc">Lançamentos contábeis devem respeitar a natureza Débito/Crédito e atualizar saldos das contas analíticas.</div><div class="rule-origin">📂 Origem: <code>CONTAB/CtrlObjects/uCtrlLancamento.pas — AtuSaldoContas / InsereLancaContab</code> | Confiança: <span class="tag tag-alta">Alta</span></div></div><div class="rule-block"><div class="rule-id">RN002</div><div class="rule-desc">É possível atualizar saldos de contas sintéticas a partir dos lançamentos das analíticas.</div><div class="rule-origin">📂 Origem: <code>CONTAB/CtrlObjects/uCtrlLancamento.pas — AtuSaldoSintetica</code> | Confiança: <span class="tag tag-alta">Alta</span></div></div><div class="rule-block"><div class="rule-id">RN003</div><div class="rule-desc">Planilhas podem ser estornadas ou excluídas, com atualização consistente dos lançamentos associados.</div><div class="rule-origin">📂 Origem: <code>CONTAB/CtrlObjects/uCtrlLancamento.pas — EstornaLancaContab / ExcluiLancaContab</code> | Confiança: <span class="tag tag-alta">Alta</span></div></div><div class="rule-block"><div class="rule-id">RN004</div><div class="rule-desc">Parâmetros contábeis (PARAMCONTAB) definem faixas de contas (ativo, passivo, despesa, receita, custo, estatística), moedas, fechamento e validações de planilha.</div><div class="rule-origin">📂 Origem: <code>CONTAB/DbObjects/uDbParamcontab.pas; CONTAB/FontesMT/FCadParamContabMT.pas</code> | Confiança: <span class="tag tag-alta">Alta</span></div></div><div class="rule-block"><div class="rule-id">RN005</div><div class="rule-desc">Períodos contábeis possuem bloqueio (PERBLOQUE/PERBLOINT) que impede ou restringe lançamentos em períodos fechados.</div><div class="rule-origin">📂 Origem: <code>CONTAB/DbObjects/uDbPeriodo.pas; CONTAB/FontesMT/FEncerraPeriodoMT.pas</code> | Confiança: <span class="tag tag-alta">Alta</span></div></div><div class="rule-block"><div class="rule-id">RN006</div><div class="rule-desc">Contas do plano podem ser bloqueadas (PLABLOQUE/PLABLOQUEDATA) e inativadas (PLAINATIVA).</div><div class="rule-origin">📂 Origem: <code>CONTAB/DbObjects/uDbPlanoConta.pas</code> | Confiança: <span class="tag tag-alta">Alta</span></div></div><div class="rule-block"><div class="rule-id">RN007</div><div class="rule-desc">Teste de natureza de demonstrativo valida combinação natureza do demonstrativo × flag × sinal do valor.</div><div class="rule-origin">📂 Origem: <code>CONTAB/Fontes/UModulo.pas — TestaNatureza</code> | Confiança: <span class="tag tag-alta">Alta</span></div></div><div class="rule-block"><div class="rule-id">RN008</div><div class="rule-desc">Segregação por plano e patrocinadora gera lançamentos e cotas conforme critérios (SEGREGACRITER, SEGREGACAO).</div><div class="rule-origin">📂 Origem: <code>CONTAB/FontesMT/fProcessaSegregacao.pas; CONTAB/DbObjects/uDbSegregacao.pas</code> | Confiança: <span class="tag tag-alta">Alta</span></div></div><div class="rule-block"><div class="rule-id">RN009</div><div class="rule-desc">Rateios (atividade/projeto, programa, administrativo, plano/patrocinadora) geram lançamentos a partir de percentuais cadastrados.</div><div class="rule-origin">📂 Origem: <code>CONTAB/CtrlObjects/uCtrlLancamento.pas — FazRateio; Forms FGera*Rateio*</code> | Confiança: <span class="tag tag-alta">Alta</span></div></div><div class="rule-block"><div class="rule-id">RN010</div><div class="rule-desc">Exportação regulatória SIPC-CAP/SICADI gera arquivos de saldos/balancete (FGeraSalCont*).</div><div class="rule-origin">📂 Origem: <code>CONTAB/FontesMT/FGeraSalContMT.pas / FGeraSalCont2004MT.pas / FGeraSalCont2010MT.pas</code> | Confiança: <span class="tag tag-alta">Alta</span></div></div><div class="rule-block"><div class="rule-id">RN011</div><div class="rule-desc">Importação de lançamentos a partir de Excel, SAF, Fidélio, Folha RM, Folha Dinâmica e SRH Plus.</div><div class="rule-origin">📂 Origem: <code>CONTAB/Fontes/FPrincipal.pas (menus Importações); FImporta*MT.pas</code> | Confiança: <span class="tag tag-alta">Alta</span></div></div><div class="rule-block"><div class="rule-id">RN012</div><div class="rule-desc">Dias bloqueados por módulo/sistema (DIASBLOQMOD) restringem operação contábil por origem.</div><div class="rule-origin">📂 Origem: <code>CONTAB/DbObjects/uDbDiasbloqmod.pas; FCadDiasBloqModMT</code> | Confiança: <span class="tag tag-alta">Alta</span></div></div><div class="rule-block"><div class="rule-id">RN013</div><div class="rule-desc">Consistência de regras contábeis (REGRASCONTAB / Consiste Regras) valida lançamentos conforme regras cadastradas.</div><div class="rule-origin">📂 Origem: <code>CONTAB/FontesMT/fConfereRegraMT.pas; uDbRegrasContab.pas</code> | Confiança: <span class="tag tag-alta">Alta</span></div></div><div class="rule-block"><div class="rule-id">RN014</div><div class="rule-desc">Encerramento de contas de resultado e exercício (incluindo apuração meia-noite) gera lançamentos de apuração.</div><div class="rule-origin">📂 Origem: <code>CONTAB/FontesMT/FEncerraResultadosMT.pas; FEncerraExercicioMT.pas; FLancMeiaNoiteMT.pas</code> | Confiança: <span class="tag tag-alta">Alta</span></div></div><div class="rule-block"><div class="rule-id">RN015</div><div class="rule-desc">Demonstrativos são compostos por elementos, linhas, colunas e layouts (ReportBuilder) parametrizáveis.</div><div class="rule-origin">📂 Origem: <code>CONTAB/DbObjects/uDbDemonstrativo.pas; FCadDemonstrativoMT</code> | Confiança: <span class="tag tag-alta">Alta</span></div></div>
+    </section>
+    <section id="tecnico">
+      <div class="section-title">⚙️ Fundação Técnica — Delphi 5</div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Tipo</th><th>Arquivo</th><th>Responsabilidade</th></tr></thead>
+        <tbody><tr><td>Form</td><td><code>CONTAB/FontesMT/Cópia de FRentabilidadeContabilMT.dfm</code></td><td>Rentabilidade Contábil</td></tr>
+<tr><td>Form</td><td><code>CONTAB/FontesMT/FAcertaCodRedMT.dfm</code></td><td>Atualiza Códigos Reduzidos</td></tr>
+<tr><td>Form</td><td><code>CONTAB/FontesMT/FAcertaNumPlanilhaMT.dfm</code></td><td>Atualiza Numeração das Planilhas</td></tr>
+<tr><td>Form</td><td><code>CONTAB/FontesMT/FAlteraDataMT.dfm</code></td><td>Alteração de Datas de Planilha</td></tr>
+<tr><td>Form</td><td><code>CONTAB/FontesMT/FAlteraPlanoContabilMT.dfm</code></td><td>Alteração do Plano Contábil</td></tr>
+<tr><td>Form</td><td><code>CONTAB/FontesMT/FAtuIntegraDiasMT.dfm</code></td><td>Atualiza Saldo das Contas Analíticas</td></tr>
+<tr><td>Form</td><td><code>CONTAB/FontesMT/FAtuSaldoAnaMT.dfm</code></td><td>Atualiza Saldo das Contas Analíticas</td></tr>
+<tr><td>Form</td><td><code>CONTAB/FontesMT/FAtuSaldoEncerramentoMT.dfm</code></td><td>Atualiza Saldo de Encerramento das Contas</td></tr>
+<tr><td>Form</td><td><code>CONTAB/FontesMT/FAtualizaMoedaMT.dfm</code></td><td>Atualização de Moeda</td></tr>
+<tr><td>Form</td><td><code>CONTAB/FontesMT/FAtualizaSinMT.dfm</code></td><td>Atualiza Sintéticas</td></tr>
+<tr><td>Form</td><td><code>CONTAB/FontesMT/FCadColunasDemoMT.dfm</code></td><td>Colunas do Demonstrativo de Resultados</td></tr>
+<tr><td>Form</td><td><code>CONTAB/FontesMT/FCadContasContabMT.dfm</code></td><td>Cadastro de Contas Contábeis</td></tr>
+<tr><td>Form</td><td><code>CONTAB/FontesMT/FCadContasporPeriodoMT.dfm</code></td><td>Agrupamento e Desmembramento de Contas</td></tr>
+<tr><td>Form</td><td><code>CONTAB/FontesMT/FCadDeParaContasMT.dfm</code></td><td>De/Para de Contas Contábeis</td></tr>
+<tr><td>Form</td><td><code>CONTAB/FontesMT/FCadDem2ColunasMT.dfm</code></td><td>Cadastro dos Elementos do Balanço Patrimonial</td></tr>
+<tr><td>Form</td><td><code>CONTAB/FontesMT/FCadDemo2ColunasMT.dfm</code></td><td>Cadastro dos Elementos do Balanço Patrimonial</td></tr>
+<tr><td>Form</td><td><code>CONTAB/FontesMT/FCadDemonstrativoMT.dfm</code></td><td>Cadastro de Demonstrativos</td></tr>
+<tr><td>Form</td><td><code>CONTAB/FontesMT/FCadDiasBloqMod.dfm</code></td><td>Cadastro de Dias Bloqueados por Módulo</td></tr>
+<tr><td>Form</td><td><code>CONTAB/FontesMT/FCadDiasBloqModMT.dfm</code></td><td>Cadastro de Dias Bloqueados por Sistema</td></tr>
+<tr><td>Form</td><td><code>CONTAB/FontesMT/FCadElemDemoMT.dfm</code></td><td>Cadastro de Elementos do Demonstrativo</td></tr>
+<tr><td>Form</td><td><code>CONTAB/FontesMT/FCadFaixaDatasMT.dfm</code></td><td>Faixa de Datas do Plano de Contas</td></tr>
+<tr><td>Form</td><td><code>CONTAB/FontesMT/FCadHistoricoMT.dfm</code></td><td>Cadastro de Históricos Padrão</td></tr>
+<tr><td>Form</td><td><code>CONTAB/FontesMT/FCadLancPreProntaMT.dfm</code></td><td>Lançamentos - Planilhas Pré-Prontas</td></tr>
+<tr><td>Form</td><td><code>CONTAB/FontesMT/FCadLancRateioMT.dfm</code></td><td>Lançamento de Planilha de Rateio</td></tr>
+<tr><td>Form</td><td><code>CONTAB/FontesMT/FCadLancamAutomMT.dfm</code></td><td>Lançamentos automáticos</td></tr>
+<tr><td>Form</td><td><code>CONTAB/FontesMT/FCadLayoutDemoMT.dfm</code></td><td>Cadastro de Layouts dos Demonstrativos de Resultados</td></tr>
+<tr><td>Form</td><td><code>CONTAB/FontesMT/FCadLinhasDemoMT.dfm</code></td><td>Cadastro de Linhas do Demonstrativo Colunado</td></tr>
+<tr><td>Form</td><td><code>CONTAB/FontesMT/FCadMovAnteriorMT.dfm</code></td><td>Cadastro do Movimento de Exercícios Anteriores e Contas Estatíst</td></tr>
+<tr><td>Form</td><td><code>CONTAB/FontesMT/FCadOrcamentoContabilMT.dfm</code></td><td>Cadastro do Orçamento Contábil</td></tr>
+<tr><td>Form</td><td><code>CONTAB/FontesMT/FCadParamContabMT.dfm</code></td><td>Parâmetros da Contabilidade</td></tr>
+<tr><td>Form</td><td><code>CONTAB/FontesMT/FCadPercentRateioAPMT.dfm</code></td><td>Percentuais de Rateio por Atividade/Projeto</td></tr>
+<tr><td>Form</td><td><code>CONTAB/FontesMT/FCadPeriodoContabilMT.dfm</code></td><td>Cadastro de Períodos Contábeis</td></tr>
+<tr><td>Form</td><td><code>CONTAB/FontesMT/FCadPlanilPreProntaMT.dfm</code></td><td>Cadastro de Planilhas Pré-Prontas</td></tr>
+<tr><td>Form</td><td><code>CONTAB/FontesMT/FCadPlanilRateioMT.dfm</code></td><td>Cadastro de Planilhas de Rateio</td></tr>
+<tr><td>Form</td><td><code>CONTAB/FontesMT/FCadPlanoContasMT.dfm</code></td><td>Cadastro de Plano de Contas</td></tr>
+<tr><td>Form</td><td><code>CONTAB/FontesMT/FCadRatAdmPlanoPatroMT.dfm</code></td><td>Cadastro do Rateio Administrativo por Plano e Patrocinadora</td></tr>
+<tr><td>Form</td><td><code>CONTAB/FontesMT/FCadRateioPlanPrevMT.dfm</code></td><td>Cadastro do Rateio por Plano e Patrocinadora</td></tr>
+<tr><td>Form</td><td><code>CONTAB/FontesMT/FCadRateioProgMT.dfm</code></td><td>Cadastro do Rateio por Programa</td></tr>
+<tr><td>Form</td><td><code>CONTAB/FontesMT/FCadRegrasContabMT.dfm</code></td><td>Cadastro de Regras Contábeis</td></tr>
+<tr><td>Form</td><td><code>CONTAB/FontesMT/FCadSaldoAntAtivProjMT.dfm</code></td><td>Saldo Anterior por Atividade/Projeto</td></tr>
+<tr><td>Form</td><td><code>CONTAB/FontesMT/FCadSaldoAnterioMT.dfm</code></td><td>frmCadSaldoAnteriorMT</td></tr>
+<tr><td>Form</td><td><code>CONTAB/FontesMT/FCadSaldoAnteriorMT.dfm</code></td><td>Cadastro de Saldos Anteriores</td></tr>
+<tr><td>Form</td><td><code>CONTAB/FontesMT/FCadSaldoCotasPlanPatroMT.dfm</code></td><td>Cadastro dos Saldos de Cotas por Plano e Patrocinadora</td></tr>
+<tr><td>Form</td><td><code>CONTAB/FontesMT/FCadSubContaMT.dfm</code></td><td>Cadastro de Sub-Contas</td></tr>
+<tr><td>Form</td><td><code>CONTAB/FontesMT/FCadSubGrupoMT.dfm</code></td><td>Cadastro de Sub-Grupos</td></tr>
+<tr><td>Form</td><td><code>CONTAB/FontesMT/FCadTabelasContabMT.dfm</code></td><td>Cadastro de Tabelas da Contabilidade</td></tr>
+<tr><td>Form</td><td><code>CONTAB/FontesMT/FCadTermoDiarioMT.dfm</code></td><td>Termos do Diário</td></tr>
+<tr><td>Form</td><td><code>CONTAB/FontesMT/FCadTipoRentabilidade.dfm</code></td><td>Cadastro de Tipo de Rentabilidade</td></tr>
+<tr><td>Form</td><td><code>CONTAB/FontesMT/FCadastroGridMTImob.dfm</code></td><td>frmCadastroGridMTImob</td></tr>
+<tr><td>Form</td><td><code>CONTAB/FontesMT/FCadastroMestreDetMTImob.dfm</code></td><td>FrmCadastroMestreDetMTImob</td></tr><tr><td>Data Module</td><td><code>CONTAB/Fontes/dContab.pas</code></td><td>Queries auxiliares (moeda, bloqueados)</td></tr><tr><td>Unit</td><td><code>CONTAB/Fontes/UModulo.pas</code></td><td>Contexto do módulo e TestaNatureza</td></tr><tr><td>Ctrl</td><td><code>CONTAB/CtrlObjects/uCtrlLancamento.pas</code></td><td>Inclusão/estorno/exclusão/saldos/rateio</td></tr><tr><td>Package</td><td><code>CMCONTABOBJ50/Package/CMContabObj50.dpk</code></td><td>Objetos de negócio compartilhados</td></tr></tbody>
+      </table></div>
+    </section>
+    <section id="dados">
+      <div class="section-title">🗄️ Modelo de Dados</div>
+      <div class='table-wrap'><table><thead><tr><th>Campo/Tabela</th><th>Tipo</th><th>Obrigatório</th><th>Descrição</th></tr></thead><tbody><tr><td><code>APURRESULTADO</code></td><td>TCmDbField×7</td><td>—</td><td>Ver CONTAB/DbObjects/uDbApurresultado.pas</td></tr>
+<tr><td><code>CADEVENTOSRH</code></td><td>TCmDbField×2</td><td>—</td><td>Ver CONTAB/DbObjects/uDbEventoSRH.pas</td></tr>
+<tr><td><code>CAMPODEPARA</code></td><td>TCmDbField×3</td><td>—</td><td>Ver CONTAB/DbObjects/uDbCampodepara.pas</td></tr>
+<tr><td><code>COMPOELEMDEM</code></td><td>TCmDbField×17</td><td>—</td><td>Ver CONTAB/DbObjects/uDbCompoelemdem.pas</td></tr>
+<tr><td><code>COMPORATEIOAP</code></td><td>TCmDbField×4</td><td>—</td><td>Ver CONTAB/DbObjects/uDbComporateioap.pas</td></tr>
+<tr><td><code>CONTASXCC</code></td><td>TCmDbField×5</td><td>—</td><td>Ver CONTAB/DbObjects/uDbContasxcc.pas</td></tr>
+<tr><td><code>CONTASXSUBC</code></td><td>TCmDbField×5</td><td>—</td><td>Ver CONTAB/DbObjects/uDbContasxsubc.pas</td></tr>
+<tr><td><code>DEMCOLUNAS</code></td><td>TCmDbField×1</td><td>—</td><td>Ver CONTAB/DbObjects/uDbDemcolunas.pas</td></tr>
+<tr><td><code>DEMCOLXLIN</code></td><td>TCmDbField×4</td><td>—</td><td>Ver CONTAB/DbObjects/uDbDemcolxlin.pas</td></tr>
+<tr><td><code>DEMLINHA</code></td><td>TCmDbField×1</td><td>—</td><td>Ver CONTAB/DbObjects/uDbDemlinha.pas</td></tr>
+<tr><td><code>DEMONSTRATIVO</code></td><td>TCmDbField×0</td><td>—</td><td>Ver CONTAB/DbObjects/uDbDemonstrativo.pas</td></tr>
+<tr><td><code>DESENHODEMO</code></td><td>TCmDbField×6</td><td>—</td><td>Ver CONTAB/DbObjects/uDbDesenhodemo.pas</td></tr>
+<tr><td><code>DIASBLOQMOD</code></td><td>TCmDbField×4</td><td>—</td><td>Ver CONTAB/DbObjects/uDbDiasbloqmod.pas</td></tr>
+<tr><td><code>ELEMBALPATR</code></td><td>TCmDbField×1</td><td>—</td><td>Ver CONTAB/DbObjects/uDbElembalpatr.pas</td></tr>
+<tr><td><code>ELEMDEMONSTRATIVO</code></td><td>TCmDbField×19</td><td>—</td><td>Ver CONTAB/DbObjects/uDbElemdemonstrativo.pas</td></tr>
+<tr><td><code>ENVIODOCUMENTO</code></td><td>TCmDbField×2</td><td>—</td><td>Ver CONTAB/DbObjects/uDbEnviodocumento.pas</td></tr>
+<tr><td><code>HISTOPADRAO</code></td><td>TCmDbField×0</td><td>—</td><td>Ver CONTAB/DbObjects/uDbHistoContab.pas</td></tr>
+<tr><td><code>ITEMSPCCONSISTE</code></td><td>TCmDbField×6</td><td>—</td><td>Ver CONTAB/DbObjects/uDbItemSPCConsiste.pas</td></tr>
+<tr><td><code>LANCAMENTO</code></td><td>TCmDbField×39</td><td>—</td><td>Ver CONTAB/DbObjects/uDbLancamento.pas</td></tr>
+<tr><td><code>PARAMCONTAB</code></td><td>TCmDbField×92</td><td>—</td><td>Ver CONTAB/DbObjects/uDbParamcontab.pas</td></tr>
+<tr><td><code>PERIODO</code></td><td>TCmDbField×14</td><td>—</td><td>Ver CONTAB/DbObjects/uDbPeriodo.pas</td></tr>
+<tr><td><code>PLANILHA</code></td><td>TCmDbField×28</td><td>—</td><td>Ver CONTAB/DbObjects/uDbPlanilha.pas</td></tr>
+<tr><td><code>PLANO</code></td><td>TCmDbField×0</td><td>—</td><td>Ver CONTAB/DbObjects/uDbPlano.pas</td></tr>
+<tr><td><code>PLANOCONTA</code></td><td>TCmDbField×41</td><td>—</td><td>Ver CONTAB/DbObjects/uDbPlanoConta.pas</td></tr>
+<tr><td><code>PLANOCONTAPER</code></td><td>TCmDbField×11</td><td>—</td><td>Ver CONTAB/DbObjects/uDbPlanocontaper.pas</td></tr>
+<tr><td><code>PLANODATA</code></td><td>TCmDbField×6</td><td>—</td><td>Ver CONTAB/DbObjects/uDbPlanodata.pas</td></tr>
+<tr><td><code>PLANODEPARA</code></td><td>TCmDbField×9</td><td>—</td><td>Ver CONTAB/DbObjects/uDbPlanodepara.pas</td></tr>
+<tr><td><code>PLANOSALDO</code></td><td>TCmDbField×28</td><td>—</td><td>Ver CONTAB/DbObjects/uDbPlanoSaldo.pas</td></tr>
+<tr><td><code>PREDETALHE</code></td><td>TCmDbField×24</td><td>—</td><td>Ver CONTAB/DbObjects/uDbPredetalhe.pas</td></tr>
+<tr><td><code>PREPLANILHA</code></td><td>TCmDbField×15</td><td>—</td><td>Ver CONTAB/DbObjects/uDbPreplanilha.pas</td></tr>
+<tr><td><code>RATADDETPLANPATRO</code></td><td>TCmDbField×4</td><td>—</td><td>Ver CONTAB/DbObjects/uDbRataddetplanpatro.pas</td></tr>
+<tr><td><code>RATADMPLANPATRO</code></td><td>TCmDbField×4</td><td>—</td><td>Ver CONTAB/DbObjects/uDbRatadmplanpatro.pas</td></tr>
+<tr><td><code>RATEIOAPEXTRA</code></td><td>TCmDbField×4</td><td>—</td><td>Ver CONTAB/DbObjects/uDbRateioapextra.pas</td></tr>
+<tr><td><code>RATEIOATIVPROJ</code></td><td>TCmDbField×6</td><td>—</td><td>Ver CONTAB/DbObjects/uDbRateioativproj.pas</td></tr>
+<tr><td><code>RATEIOPLANPATRO</code></td><td>TCmDbField×7</td><td>—</td><td>Ver CONTAB/DbObjects/uDbRateioplanpatro.pas</td></tr>
+<tr><td><code>RECBTOPAGTO</code></td><td>TCmDbField×12</td><td>—</td><td>Ver CONTAB/DbObjects/uDbRecbtopagto.pas</td></tr>
+<tr><td><code>REGRASCONTAB</code></td><td>TCmDbField×0</td><td>—</td><td>Ver CONTAB/DbObjects/uDbRegrasContab.pas</td></tr>
+<tr><td><code>SEGREGACAO</code></td><td>TCmDbField×7</td><td>—</td><td>Ver CONTAB/DbObjects/uDbSegregacao.pas</td></tr>
+<tr><td><code>SEGREGACOTACAO</code></td><td>TCmDbField×6</td><td>—</td><td>Ver CONTAB/DbObjects/uDbSegregaCotacao.pas</td></tr>
+<tr><td><code>SEGREGACRITER</code></td><td>TCmDbField×8</td><td>—</td><td>Ver CONTAB/DbObjects/uDbSegregaCriter.pas</td></tr>
+<tr><td><code>SEGREGADATA</code></td><td>TCmDbField×4</td><td>—</td><td>Ver CONTAB/DbObjects/uDbSegregaData.pas</td></tr>
+<tr><td><code>SPCCONSISTE</code></td><td>TCmDbField×3</td><td>—</td><td>Ver CONTAB/DbObjects/uDbSPCConsiste.pas</td></tr>
+<tr><td><code>SUBCONTA</code></td><td>TCmDbField×0</td><td>—</td><td>Ver CONTAB/DbObjects/uDbSubconta.pas</td></tr>
+<tr><td><code>SUBGRUPO</code></td><td>TCmDbField×0</td><td>—</td><td>Ver CONTAB/DbObjects/uDbSubgrupo.pas</td></tr>
+<tr><td><code>TABELADEPARA</code></td><td>TCmDbField×7</td><td>—</td><td>Ver CONTAB/DbObjects/uDbTabeladepara.pas</td></tr>
+<tr><td><code>TERMODIARIO</code></td><td>TCmDbField×1</td><td>—</td><td>Ver CONTAB/DbObjects/uDbTermoDiario.pas</td></tr></tbody></table></div>
+    </section>
+    <section id="complexidade">
+      <div class="section-title">📊 Estimativa de Complexidade</div>
+      <div class="complexity-grid"><div class="complexity-item"><div class="level level-simples">Simples</div><div class="points">1–2</div><div class="desc">Consulta de histórico padrão ou subconta</div></div><div class="complexity-item"><div class="level level-média">Média</div><div class="points">3–5</div><div class="desc">Cadastro de conta com validações de bloqueio</div></div><div class="complexity-item"><div class="level level-complexa">Complexa</div><div class="points">5–8</div><div class="desc">Lançamento com atualização de saldo, rateio ou encerramento</div></div></div>
+    </section>
+  </div>
+  <div class="sidebar">
+    <section>
+      <div class="section-title">ℹ️ Informações</div>
+      <ul class="info-list">
+        <li><span class="key">ID do Módulo</span><span class="val"><code>contab</code></span></li>
+        <li><span class="key">Tecnologia</span><span class="val">Delphi 5 / VCL</span></li>
+        <li><span class="key">Banco de Dados</span><span class="val">Oracle (evidência de AppRemoteServer/MIDAS + DBTables/BDE em relatórios)</span></li>
+        <li><span class="key">Acesso a Dados</span><span class="val">MIDAS/ClientDataSet + DBTables/BDE + InfoPower (TwwQuery)</span></li>
+        <li><span class="key">Cobertura Funcional</span><span class="val">95%+</span></li>
+        <li><span class="key">Última Atualização</span><span class="val">2026-08-19</span></li>
+        <li><span class="key">Confiança</span><span class="val"><span class="tag tag-alta">Alta</span></span></li>
+      </ul>
+    </section>
+    <section>
+      <div class="section-title">📂 Artefatos Delphi 5</div>
+      <ul class="info-list">
+        <li><span class="key">Forms/DFM</span><span class="val">~113</span></li>
+        <li><span class="key">Data Modules</span><span class="val">~2</span></li>
+        <li><span class="key">Units</span><span class="val">~95</span></li>
+        <li><span class="key">Tabelas</span><span class="val">46</span></li>
+      </ul>
+    </section>
+    <section>
+      <div class="section-title">🔗 Dependências</div>
+      <ul class="dep-list">
+<li><span class="key">GLOBALCM / CM</span><span class="val">Framework, login, forms base</span></li>
+<li><span class="key">CPAGAR / CRECEBER</span><span class="val">Integração CapCar → contábil</span></li>
+<li><span class="key">ORCAMENTO</span><span class="val">Vínculo orçado × contábil</span></li>
+<li><span class="key">CAF / FOLHA / EMPRESTIMO</span><span class="val">Geração/consulta contábil</span></li>
+<li><span class="key">Excel / SAF / Fidélio / SRH / Posadas / SIPC</span><span class="val">Integrações externas</span></li>
+</ul>
+    </section>
+    <section>
+      <div class="section-title">♻️ Padrões Reutilizáveis</div>
+      <ul class="dep-list">
+<li>Cadastro MT (FCadastroMT)</li>
+<li>CtrlObject + DbObject</li>
+<li>MIDAS AppRemoteServer</li>
+<li>ReportBuilder</li>
+<li>Planilha → Lançamentos → Saldos</li>
+</ul>
+    </section>
+  </div>
+</main>
+
+<footer>
+<p>CM Contabilidade — Módulo Contabilidade | Delphi 5 | Documentação gerada em 2026-08-19 | pt-BR</p>
+</footer>
+</body>
+</html>

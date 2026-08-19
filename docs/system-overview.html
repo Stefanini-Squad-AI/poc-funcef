@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CM Contabilidade — Visão Geral</title>
+<style>
+
+:root {
+  --bg: #0f1419; --bg2: #1a2332; --bg3: #243044; --card: #1e2a3a;
+  --text: #e7ecf3; --muted: #9aa8bc; --accent: #3d9cf0; --accent2: #2dd4bf;
+  --ok: #34d399; --warn: #fbbf24; --bad: #f87171; --border: #2d3a4d;
+  --tag-alta: #065f46; --tag-media: #92400e; --tag-baixa: #7f1d1d;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0; font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(160deg, #0f1419 0%, #152033 50%, #0f1419 100%);
+  color: var(--text); line-height: 1.55; min-height: 100vh;
+}
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+header {
+  background: linear-gradient(135deg, #152033 0%, #1a3a5c 100%);
+  border-bottom: 1px solid var(--border); padding: 2rem 1.5rem 1.5rem;
+}
+header .badge {
+  display: inline-block; background: #1e3a5f; color: var(--accent2);
+  padding: .25rem .75rem; border-radius: 999px; font-size: .8rem;
+  border: 1px solid #2a5080; margin-bottom: .75rem;
+}
+header h1 { margin: 0 0 .5rem; font-size: clamp(1.5rem, 3vw, 2.2rem); }
+header p { margin: 0; color: var(--muted); max-width: 70ch; }
+nav {
+  display: flex; flex-wrap: wrap; gap: .5rem; padding: .75rem 1.5rem;
+  background: rgba(15,20,25,.85); border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 20; backdrop-filter: blur(8px);
+}
+nav a {
+  color: var(--text); background: var(--bg2); padding: .4rem .75rem;
+  border-radius: 6px; border: 1px solid var(--border); font-size: .85rem;
+}
+nav a:hover { background: var(--bg3); text-decoration: none; }
+main { padding: 1.5rem; max-width: 1200px; margin: 0 auto; }
+section {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1.25rem;
+}
+.section-title {
+  font-size: 1.15rem; font-weight: 700; margin-bottom: 1rem;
+  padding-bottom: .5rem; border-bottom: 1px solid var(--border);
+}
+.cards-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1rem;
+}
+.card {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 10px;
+  padding: 1rem; transition: border-color .2s, transform .2s;
+}
+.card:hover { border-color: var(--accent); transform: translateY(-2px); }
+.card h3 { margin: 0 0 .5rem; font-size: 1rem; }
+.card p { margin: 0; color: var(--muted); font-size: .9rem; }
+.stats {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: .75rem;
+}
+.stat {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 8px;
+  padding: .85rem; text-align: center;
+}
+.stat .n { font-size: 1.6rem; font-weight: 700; color: var(--accent2); }
+.stat .l { font-size: .75rem; color: var(--muted); }
+table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+th, td {
+  border: 1px solid var(--border); padding: .5rem .65rem; text-align: left;
+  vertical-align: top;
+}
+th { background: var(--bg3); }
+tbody tr:nth-child(even) { background: rgba(255,255,255,.02); }
+.table-wrap { overflow-x: auto; }
+code {
+  font-family: Consolas, "Courier New", monospace; font-size: .85em;
+  background: var(--bg); padding: .1rem .35rem; border-radius: 4px;
+}
+.tag {
+  display: inline-block; padding: .15rem .45rem; border-radius: 4px;
+  font-size: .75rem; font-weight: 600;
+}
+.tag-alta { background: var(--tag-alta); color: #a7f3d0; }
+.tag-media { background: var(--tag-media); color: #fde68a; }
+.tag-baixa { background: var(--tag-baixa); color: #fecaca; }
+.story-card {
+  background: var(--bg2); border-left: 4px solid var(--accent);
+  padding: .85rem 1rem; margin-bottom: .75rem; border-radius: 0 8px 8px 0;
+}
+.criteria-block, .rule-block {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 8px; padding: .85rem 1rem; margin-bottom: .75rem;
+}
+.rule-id { font-weight: 700; color: var(--accent2); margin-bottom: .35rem; }
+.rule-origin { font-size: .85rem; color: var(--muted); margin-top: .5rem; }
+.complexity-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: .75rem;
+}
+.complexity-item {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; text-align: center;
+}
+.level { font-weight: 700; margin-bottom: .35rem; }
+.level-simples { color: var(--ok); }
+.level-media { color: var(--warn); }
+.level-complexa { color: var(--bad); }
+.points { font-size: 1.4rem; font-weight: 700; }
+.desc { color: var(--muted); font-size: .85rem; margin-top: .35rem; }
+footer {
+  text-align: center; padding: 2rem 1rem; color: var(--muted);
+  border-top: 1px solid var(--border); margin-top: 2rem; font-size: .85rem;
+}
+.back-btn {
+  display: inline-block; margin-bottom: 1rem; background: var(--bg2);
+  border: 1px solid var(--border); padding: .4rem .8rem; border-radius: 6px;
+  color: var(--text);
+}
+.back-btn:hover { background: var(--bg3); text-decoration: none; }
+.layout-2 {
+  display: grid; grid-template-columns: 1fr 300px; gap: 1.25rem; padding: 1.5rem; max-width: 1200px; margin: 0 auto;
+}
+@media (max-width: 900px) { .layout-2 { grid-template-columns: 1fr; } }
+.info-list, .dep-list { list-style: none; padding: 0; margin: 0; }
+.info-list li, .dep-list li {
+  display: flex; justify-content: space-between; gap: .5rem;
+  padding: .45rem 0; border-bottom: 1px solid var(--border); font-size: .9rem;
+}
+.info-list .key { color: var(--muted); }
+.mermaid {
+  background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+  padding: 1rem; overflow-x: auto; font-family: monospace; font-size: .8rem;
+  white-space: pre-wrap; color: var(--muted);
+}
+.note {
+  background: #1a2740; border-left: 3px solid var(--warn);
+  padding: .75rem 1rem; margin: .75rem 0; border-radius: 0 6px 6px 0; font-size: .9rem;
+}
+.doc-links { display: flex; flex-wrap: wrap; gap: .5rem; margin: 1rem 0; }
+.doc-links a {
+  background: var(--bg3); border: 1px solid var(--border); padding: .5rem .85rem;
+  border-radius: 6px; color: var(--text);
+}
+.given,.when,.then { margin: .25rem 0; }
+.role,.want,.why { margin: .2rem 0; }
+ul.check { list-style: none; padding-left: 0; }
+ul.check li::before { content: "☐ "; }
+
+
+</style>
+</head>
+<body>
+
+<header>
+  <div class="badge">Delphi 5 — Documentação Funcional</div>
+  <h1>🏛️ CM Contabilidade — Visão Geral para User Stories</h1>
+  <p>Fonte única da verdade para criação de User Stories, análise funcional e entendimento técnico do sistema. Versão: 2026-08-19</p>
+  <div class="doc-links">
+    <a href="site/index.html">Portal</a>
+    <a href="module-file-map.html">Mapa de Arquivos</a>
+    <a href="business-rules-catalog.html">Regras de Negócio</a>
+    <a href="database-model.html">Modelo de Dados</a>
+    <a href="api-catalog.html">Catálogo de APIs</a>
+    <a href="migration-contabil.html">Migração Contábil</a>
+  </div>
+</header>
+<nav>
+  <a href="#estatisticas">📊 Estatísticas</a>
+  <a href="#arquitetura">🏗️ Arquitetura</a>
+  <a href="#modulos">📦 Módulos</a>
+  <a href="#dados">🗄️ Dados</a>
+  <a href="#regras">📏 Regras</a>
+</nav>
+<main>
+<section id="estatisticas">
+  <div class="section-title">📊 Estatísticas da Plataforma</div>
+  <h3>Tecnologia</h3>
+  <ul>
+    <li>Linguagem: Object Pascal (Delphi 5)</li>
+    <li>IDE: Delphi 5</li>
+    <li>Acesso a Dados: MIDAS (ClientDataSet / AppRemoteServer) + DBTables/BDE + InfoPower (TwwQuery) — evidência em CONTAB e relatórios ReportBuilder</li>
+    <li>Banco de Dados: Oracle (evidências de SQL Oracle e AppServer; Confiança: Média quanto ao produto exato de servidor)</li>
+    <li>Interface: VCL (Visual Component Library)</li>
+    <li>Relatórios: ReportBuilder (ppReport / ppBDEPipeline)</li>
+  </ul>
+  <div class="stats">
+    <div class="stat"><div class="n">25</div><div class="l">Módulos documentados</div></div>
+    <div class="stat"><div class="n">127</div><div class="l">Arquivos .dpr (repo)</div></div>
+    <div class="stat"><div class="n">11164</div><div class="l">Units .pas (repo)</div></div>
+    <div class="stat"><div class="n">6993</div><div class="l">Forms .dfm (repo)</div></div>
+    <div class="stat"><div class="n">113</div><div class="l">Forms Contábil</div></div>
+    <div class="stat"><div class="n">46</div><div class="l">Tabelas Contábil</div></div>
+    <div class="stat"><div class="n">15</div><div class="l">Regras documentadas</div></div>
+    <div class="stat"><div class="n">55</div><div class="l">Relatórios Contábil</div></div>
+  </div>
+  <div class="note">Métricas do repositório completo (~11164 units). A documentação funcional agrupa os executáveis de <code>3-Sistemas.bpg</code> em módulos. Cobertura aprofundada prioriza o Contábil.</div>
+</section>
+
+<section id="arquitetura">
+  <div class="section-title">🏗️ Arquitetura de Alto Nível</div>
+  <h3>Stack Tecnológica</h3>
+  <ul>
+    <li>Frontend/Interface: VCL Forms (Delphi 5), padrão Mestre-Detalhe MT</li>
+    <li>Lógica de Negócio: CtrlObjects (controllers) + Units Pascal</li>
+    <li>Acesso a Dados: DbObjects (TCmDbObject) + DataModules + MIDAS remoto</li>
+    <li>Banco de Dados: Oracle (compartilhado entre módulos)</li>
+    <li>Framework: pasta <code>CM/</code> (forms base, autorização, report manager)</li>
+  </ul>
+  <h3>Padrões Arquiteturais Identificados</h3>
+  <ul>
+    <li>Separação Form / CtrlObject / DbObject (evidência em CONTAB e CMCONTABOBJ50)</li>
+    <li>Forms herdam de <code>FCadastroMT</code>, <code>FCMPrincipal</code> (framework CM)</li>
+    <li>Pacotes BPL de negócio (<code>CMCONTABOBJ50</code>, etc.)</li>
+    <li>Acesso remoto via <code>Sistema.AppRemoteServer</code> (MIDAS)</li>
+    <li>Relatórios ReportBuilder com pipelines BDE</li>
+  </ul>
+  <h3>Diagrama de Arquitetura</h3>
+  <div class="mermaid">flowchart LR
+    Usuario["Usuário"]
+    VCL["Interface VCL\n(Forms Delphi 5)"]
+    CTRL["CtrlObjects\n(Lógica de Negócio)"]
+    DBOBJ["DbObjects\n(TCmDbObject)"]
+    MIDAS["AppServer MIDAS"]
+    BD["Banco Oracle"]
+
+    Usuario --> VCL
+    VCL --> CTRL
+    CTRL --> DBOBJ
+    CTRL --> MIDAS
+    DBOBJ --> MIDAS
+    MIDAS --> BD
+  </div>
+  <p>Fluxo textual: Usuário → Forms VCL → CtrlObjects → DbObjects/MIDAS → Banco Oracle.</p>
+</section>
+
+<section id="modulos">
+  <div class="section-title">📚 Catálogo de Módulos</div>
+  <!-- MODULE_LIST_START -->
+  <p><strong>Modules:</strong> contab, global-cm, contas-a-pagar, contas-a-receber, orcamento, folha, contribuicao-prev, beneficio-prev, cadastro-prev, investimentos, emprestimo, caf, irrf, regra, almoxarifado, compras, imobiliario, juridico, cfinan, indicadores, contrato, param-prev, modulos-previdenciarios, relatorios-cm, central-ap</p>
+  <!-- MODULE_LIST_END -->
+</section>
+
+<section id="contab">
+  <div class="section-title">Contabilidade</div>
+  <p><strong>ID:</strong> <code>contab</code> | <strong>Confiança:</strong> <span class="tag tag-alta">Alta</span></p>
+  <p><strong>Propósito:</strong> Gestão contábil completa: plano de contas, períodos, planilhas, lançamentos, saldos, demonstrativos, rateios, segregação por plano/patrocinadora, encerramentos e exportações regulatórias (SIPC-CAP/SICADI).</p>
+  <p><strong>Responsabilidades:</strong></p>
+  <ul><li>Cadastro de plano de contas, históricos, subcontas e parâmetros contábeis</li><li>Lançamentos manuais e automáticos via planilhas</li><li>Atualização de saldos analíticos e sintéticos</li><li>Encerramento de período, contas de resultado e exercício</li><li>Demonstrativos, balancetes, diário, razão e balanço</li><li>Importações (Excel, SAF, Fidélio, Folha RM/Dinâmica/SRH) e exportações (SPC/SIPC-CAP, Posadas)</li><li>Rateios (atividade/projeto, programa, administrativo, plano/patrocinadora) e segregação de recursos</li></ul>
+  <p><strong>Artefatos:</strong> Pasta <code>CONTAB</code> | DPR <code>CONTAB/Fontes/Contab.dpr</code> | Forms/DFM ≈ 113 | Units ≈ 95</p>
+  <p><strong>Tabelas (evidência):</strong> <code>COMPOELEMDEM</code>, <code>SEGREGACRITER</code>, <code>SUBCONTA</code>, <code>SEGREGACAO</code>, <code>DESENHODEMO</code>, <code>SEGREGACOTACAO</code>, <code>RATEIOATIVPROJ</code>, <code>PLANILHA</code>, <code>RATADDETPLANPATRO</code>, <code>PLANOCONTAPER</code>, <code>TERMODIARIO</code>, <code>RATADMPLANPATRO</code></p>
+  <p><a href="site/modules/contab/index.html">Abrir documentação do módulo →</a></p>
+  <p><strong>Exemplos de User Stories:</strong></p>
+  
+<div class="story-card">
+  <div class="role">👤 Como contador</div>
+  <div class="want">🎯 Quero lançar planilhas contábeis e atualizar saldos</div>
+  <div class="why">💡 Para manter a escrituração correta do exercício</div>
+</div>
+<div class="story-card">
+  <div class="role">👤 Como supervisor contábil</div>
+  <div class="want">🎯 Quero encerrar período e gerar SIPC-CAP</div>
+  <div class="why">💡 Para cumprir obrigações regulatórias e fechar a contabilidade</div>
+</div>
+<div class="story-card">
+  <div class="role">👤 Como analista</div>
+  <div class="want">🎯 Quero emitir balancetes e demonstrativos</div>
+  <div class="why">💡 Para analisar a posição patrimonial e financeira</div>
+</div>
+</section>
+<section id="global-cm">
+  <div class="section-title">Cadastros Globais e Framework CM</div>
+  <p><strong>ID:</strong> <code>global-cm</code> | <strong>Confiança:</strong> <span class="tag tag-média">Média</span></p>
+  <p><strong>Propósito:</strong> Cadastros corporativos compartilhados (pessoas, empresas, planos, centros de custo, parâmetros) e infraestrutura comum da suíte CM.</p>
+  <p><strong>Responsabilidades:</strong></p>
+  <ul><li>Cadastros mestres compartilhados entre módulos</li><li>Parâmetros de integração e de-para</li><li>Base de autenticação e contexto do sistema</li></ul>
+  <p><strong>Artefatos:</strong> Pasta <code>GLOBALCM</code> | DPR <code>GLOBALCM/FONTES/GlobalCM.dpr</code> | Forms/DFM ≈ 81 | Units ≈ 129</p>
+  <p><strong>Tabelas (evidência):</strong> <code>PESSOA</code>, <code>EMPRESA</code>, <code>PLANO (compartilhado)</code>, <code>CENTROCUSTO (compartilhado)</code></p>
+  <p><a href="site/modules/global-cm/index.html">Abrir documentação do módulo →</a></p>
+  <p><strong>Exemplos de User Stories:</strong></p>
+  
+<div class="story-card">
+  <div class="role">👤 Como operador do módulo Cadastros Globais e Framework CM</div>
+  <div class="want">🎯 Quero executar as funções principais deste módulo</div>
+  <div class="why">💡 Para manter os processos de negócio sob controle no sistema CM</div>
+</div>
+</section>
+<section id="contas-a-pagar">
+  <div class="section-title">Contas a Pagar</div>
+  <p><strong>ID:</strong> <code>contas-a-pagar</code> | <strong>Confiança:</strong> <span class="tag tag-média">Média</span></p>
+  <p><strong>Propósito:</strong> Gestão de obrigações a pagar, com integração contábil para geração de planilhas/lançamentos.</p>
+  <p><strong>Responsabilidades:</strong></p>
+  <ul><li>Cadastro e liquidação de títulos a pagar</li><li>Integração com Contabilidade</li></ul>
+  <p><strong>Artefatos:</strong> Pasta <code>CPAGAR</code> | DPR <code>CPAGAR/FontesMT/ContasaPagar.dpr</code> | Forms/DFM ≈ 48 | Units ≈ 63</p>
+  <p><strong>Tabelas (evidência):</strong> <em>Não enumeradas neste inventário (ver pasta do módulo)</em></p>
+  <p><a href="site/modules/contas-a-pagar/index.html">Abrir documentação do módulo →</a></p>
+  <p><strong>Exemplos de User Stories:</strong></p>
+  
+<div class="story-card">
+  <div class="role">👤 Como operador do módulo Contas a Pagar</div>
+  <div class="want">🎯 Quero executar as funções principais deste módulo</div>
+  <div class="why">💡 Para manter os processos de negócio sob controle no sistema CM</div>
+</div>
+</section>
+<section id="contas-a-receber">
+  <div class="section-title">Contas a Receber</div>
+  <p><strong>ID:</strong> <code>contas-a-receber</code> | <strong>Confiança:</strong> <span class="tag tag-média">Média</span></p>
+  <p><strong>Propósito:</strong> Gestão de créditos a receber e emissão/controle financeiro relacionado.</p>
+  <p><strong>Responsabilidades:</strong></p>
+  <ul><li>Cadastro e recebimento de títulos</li><li>Integração com Contabilidade</li></ul>
+  <p><strong>Artefatos:</strong> Pasta <code>CRECEBER</code> | DPR <code>CRECEBER/FontesMT/ContasaReceber.dpr</code> | Forms/DFM ≈ 29 | Units ≈ 39</p>
+  <p><strong>Tabelas (evidência):</strong> <em>Não enumeradas neste inventário (ver pasta do módulo)</em></p>
+  <p><a href="site/modules/contas-a-receber/index.html">Abrir documentação do módulo →</a></p>
+  <p><strong>Exemplos de User Stories:</strong></p>
+  
+<div class="story-card">
+  <div class="role">👤 Como operador do módulo Contas a Receber</div>
+  <div class="want">🎯 Quero executar as funções principais deste módulo</div>
+  <div class="why">💡 Para manter os processos de negócio sob controle no sistema CM</div>
+</div>
+</section>
+<section id="orcamento">
+  <div class="section-title">Orçamento</div>
+  <p><strong>ID:</strong> <code>orcamento</code> | <strong>Confiança:</strong> <span class="tag tag-alta">Alta</span></p>
+  <p><strong>Propósito:</strong> Planejamento orçamentário com vínculo a contas contábeis e importação de dados da Contabilidade.</p>
+  <p><strong>Responsabilidades:</strong></p>
+  <ul><li>Cadastro orçamentário</li><li>Vínculo orçado x contábil</li><li>Relatórios real x orçado</li></ul>
+  <p><strong>Artefatos:</strong> Pasta <code>ORCAMENTO</code> | DPR <code>ORCAMENTO/FontesMT/Orcamento.dpr</code> | Forms/DFM ≈ 155 | Units ≈ 222</p>
+  <p><strong>Tabelas (evidência):</strong> <em>Não enumeradas neste inventário (ver pasta do módulo)</em></p>
+  <p><a href="site/modules/orcamento/index.html">Abrir documentação do módulo →</a></p>
+  <p><strong>Exemplos de User Stories:</strong></p>
+  
+<div class="story-card">
+  <div class="role">👤 Como operador do módulo Orçamento</div>
+  <div class="want">🎯 Quero executar as funções principais deste módulo</div>
+  <div class="why">💡 Para manter os processos de negócio sob controle no sistema CM</div>
+</div>
+</section>
+<section id="folha">
+  <div class="section-title">Folha de Pagamento</div>
+  <p><strong>ID:</strong> <code>folha</code> | <strong>Confiança:</strong> <span class="tag tag-média">Média</span></p>
+  <p><strong>Propósito:</strong> Processamento de folha com possibilidade de gerar lançamentos contábeis (RM/Dinâmica/SRH).</p>
+  <p><strong>Responsabilidades:</strong></p>
+  <ul><li>Processamento de folha</li><li>Exportação/integração contábil</li></ul>
+  <p><strong>Artefatos:</strong> Pasta <code>FOLHA</code> | DPR <code>FOLHA/Fontes/Folha.dpr</code> | Forms/DFM ≈ 219 | Units ≈ 300</p>
+  <p><strong>Tabelas (evidência):</strong> <em>Não enumeradas neste inventário (ver pasta do módulo)</em></p>
+  <p><a href="site/modules/folha/index.html">Abrir documentação do módulo →</a></p>
+  <p><strong>Exemplos de User Stories:</strong></p>
+  
+<div class="story-card">
+  <div class="role">👤 Como operador do módulo Folha de Pagamento</div>
+  <div class="want">🎯 Quero executar as funções principais deste módulo</div>
+  <div class="why">💡 Para manter os processos de negócio sob controle no sistema CM</div>
+</div>
+</section>
+<section id="contribuicao-prev">
+  <div class="section-title">Contribuição Previdenciária</div>
+  <p><strong>ID:</strong> <code>contribuicao-prev</code> | <strong>Confiança:</strong> <span class="tag tag-alta">Alta</span></p>
+  <p><strong>Propósito:</strong> Gestão de contribuições de participantes de planos previdenciários.</p>
+  <p><strong>Responsabilidades:</strong></p>
+  <ul><li>Cadastro e recebimento de contribuições</li><li>Simulações e revisões de índices</li><li>Reservas e saldos</li></ul>
+  <p><strong>Artefatos:</strong> Pasta <code>CONTRIBUICAOPREV</code> | DPR <code>CONTRIBUICAOPREV/Fontes/ContribuicaoPREV.dpr</code> | Forms/DFM ≈ 75 | Units ≈ 80</p>
+  <p><strong>Tabelas (evidência):</strong> <em>Não enumeradas neste inventário (ver pasta do módulo)</em></p>
+  <p><a href="site/modules/contribuicao-prev/index.html">Abrir documentação do módulo →</a></p>
+  <p><strong>Exemplos de User Stories:</strong></p>
+  
+<div class="story-card">
+  <div class="role">👤 Como operador do módulo Contribuição Previdenciária</div>
+  <div class="want">🎯 Quero executar as funções principais deste módulo</div>
+  <div class="why">💡 Para manter os processos de negócio sob controle no sistema CM</div>
+</div>
+</section>
+<section id="beneficio-prev">
+  <div class="section-title">Benefício Previdenciário</div>
+  <p><strong>ID:</strong> <code>beneficio-prev</code> | <strong>Confiança:</strong> <span class="tag tag-média">Média</span></p>
+  <p><strong>Propósito:</strong> Gestão de benefícios previdenciários concedidos a participantes e beneficiários.</p>
+  <p><strong>Responsabilidades:</strong></p>
+  <ul><li>Concessão e manutenção de benefícios</li><li>Cálculos e pagamentos</li></ul>
+  <p><strong>Artefatos:</strong> Pasta <code>BENEFICIOPREV</code> | DPR <code>BENEFICIOPREV/Fontes/BeneficioPrev.dpr</code> | Forms/DFM ≈ 68 | Units ≈ 73</p>
+  <p><strong>Tabelas (evidência):</strong> <em>Não enumeradas neste inventário (ver pasta do módulo)</em></p>
+  <p><a href="site/modules/beneficio-prev/index.html">Abrir documentação do módulo →</a></p>
+  <p><strong>Exemplos de User Stories:</strong></p>
+  
+<div class="story-card">
+  <div class="role">👤 Como operador do módulo Benefício Previdenciário</div>
+  <div class="want">🎯 Quero executar as funções principais deste módulo</div>
+  <div class="why">💡 Para manter os processos de negócio sob controle no sistema CM</div>
+</div>
+</section>
+<section id="cadastro-prev">
+  <div class="section-title">Cadastro Previdenciário</div>
+  <p><strong>ID:</strong> <code>cadastro-prev</code> | <strong>Confiança:</strong> <span class="tag tag-média">Média</span></p>
+  <p><strong>Propósito:</strong> Cadastro de participantes, beneficiários e dados cadastrais do ambiente previdenciário.</p>
+  <p><strong>Responsabilidades:</strong></p>
+  <ul><li>Manutenção cadastral de participantes</li><li>Documentos e vínculos</li></ul>
+  <p><strong>Artefatos:</strong> Pasta <code>CADASTROPREV</code> | DPR <code>CADASTROPREV/Fontes/CadastroPrev.dpr</code> | Forms/DFM ≈ 65 | Units ≈ 77</p>
+  <p><strong>Tabelas (evidência):</strong> <em>Não enumeradas neste inventário (ver pasta do módulo)</em></p>
+  <p><a href="site/modules/cadastro-prev/index.html">Abrir documentação do módulo →</a></p>
+  <p><strong>Exemplos de User Stories:</strong></p>
+  
+<div class="story-card">
+  <div class="role">👤 Como operador do módulo Cadastro Previdenciário</div>
+  <div class="want">🎯 Quero executar as funções principais deste módulo</div>
+  <div class="why">💡 Para manter os processos de negócio sob controle no sistema CM</div>
+</div>
+</section>
+<section id="investimentos">
+  <div class="section-title">Investimentos</div>
+  <p><strong>ID:</strong> <code>investimentos</code> | <strong>Confiança:</strong> <span class="tag tag-média">Média</span></p>
+  <p><strong>Propósito:</strong> Gestão de carteira de investimentos com reflexos contábeis.</p>
+  <p><strong>Responsabilidades:</strong></p>
+  <ul><li>Cadastro e movimentação de investimentos</li><li>Integração contábil</li></ul>
+  <p><strong>Artefatos:</strong> Pasta <code>INVESTIMENTOS</code> | DPR <code>INVESTIMENTOS/FontesProducao/Investimentos.dpr</code> | Forms/DFM ≈ 579 | Units ≈ 681</p>
+  <p><strong>Tabelas (evidência):</strong> <em>Não enumeradas neste inventário (ver pasta do módulo)</em></p>
+  <p><a href="site/modules/investimentos/index.html">Abrir documentação do módulo →</a></p>
+  <p><strong>Exemplos de User Stories:</strong></p>
+  
+<div class="story-card">
+  <div class="role">👤 Como operador do módulo Investimentos</div>
+  <div class="want">🎯 Quero executar as funções principais deste módulo</div>
+  <div class="why">💡 Para manter os processos de negócio sob controle no sistema CM</div>
+</div>
+</section>
+<section id="emprestimo">
+  <div class="section-title">Empréstimo</div>
+  <p><strong>ID:</strong> <code>emprestimo</code> | <strong>Confiança:</strong> <span class="tag tag-alta">Alta</span></p>
+  <p><strong>Propósito:</strong> Gestão de empréstimos a participantes, com forte acoplamento a plano contábil.</p>
+  <p><strong>Responsabilidades:</strong></p>
+  <ul><li>Contratos de empréstimo</li><li>Inadimplência e cobrança</li><li>Integração contábil</li></ul>
+  <p><strong>Artefatos:</strong> Pasta <code>EMPRESTIMO</code> | DPR <code>EMPRESTIMO/Fontes/emprestimo.dpr</code> | Forms/DFM ≈ 344 | Units ≈ 355</p>
+  <p><strong>Tabelas (evidência):</strong> <em>Não enumeradas neste inventário (ver pasta do módulo)</em></p>
+  <p><a href="site/modules/emprestimo/index.html">Abrir documentação do módulo →</a></p>
+  <p><strong>Exemplos de User Stories:</strong></p>
+  
+<div class="story-card">
+  <div class="role">👤 Como operador do módulo Empréstimo</div>
+  <div class="want">🎯 Quero executar as funções principais deste módulo</div>
+  <div class="why">💡 Para manter os processos de negócio sob controle no sistema CM</div>
+</div>
+</section>
+<section id="caf">
+  <div class="section-title">Controle de Ativo Fixo (CAF)</div>
+  <p><strong>ID:</strong> <code>caf</code> | <strong>Confiança:</strong> <span class="tag tag-alta">Alta</span></p>
+  <p><strong>Propósito:</strong> Controle patrimonial de ativos fixos com parâmetros e exportação contábil.</p>
+  <p><strong>Responsabilidades:</strong></p>
+  <ul><li>Cadastro de bens</li><li>Depreciação</li><li>Exportação/consulta contábil</li></ul>
+  <p><strong>Artefatos:</strong> Pasta <code>CAF</code> | DPR <code>CAF/Fontes/Caf.dpr</code> | Forms/DFM ≈ 126 | Units ≈ 127</p>
+  <p><strong>Tabelas (evidência):</strong> <em>Não enumeradas neste inventário (ver pasta do módulo)</em></p>
+  <p><a href="site/modules/caf/index.html">Abrir documentação do módulo →</a></p>
+  <p><strong>Exemplos de User Stories:</strong></p>
+  
+<div class="story-card">
+  <div class="role">👤 Como operador do módulo Controle de Ativo Fixo (CAF)</div>
+  <div class="want">🎯 Quero executar as funções principais deste módulo</div>
+  <div class="why">💡 Para manter os processos de negócio sob controle no sistema CM</div>
+</div>
+</section>
+<section id="irrf">
+  <div class="section-title">Impostos (IRRF)</div>
+  <p><strong>ID:</strong> <code>irrf</code> | <strong>Confiança:</strong> <span class="tag tag-alta">Alta</span></p>
+  <p><strong>Propósito:</strong> Apuração e controle de impostos (IRRF/REINF) com vínculo a contas contábeis.</p>
+  <p><strong>Responsabilidades:</strong></p>
+  <ul><li>Cadastro de naturezas e bases</li><li>Apuração e informes</li><li>Vínculo conta contábil</li></ul>
+  <p><strong>Artefatos:</strong> Pasta <code>IRRF</code> | DPR <code>IRRF/Fontes/Impostos.dpr</code> | Forms/DFM ≈ 124 | Units ≈ 233</p>
+  <p><strong>Tabelas (evidência):</strong> <em>Não enumeradas neste inventário (ver pasta do módulo)</em></p>
+  <p><a href="site/modules/irrf/index.html">Abrir documentação do módulo →</a></p>
+  <p><strong>Exemplos de User Stories:</strong></p>
+  
+<div class="story-card">
+  <div class="role">👤 Como operador do módulo Impostos (IRRF)</div>
+  <div class="want">🎯 Quero executar as funções principais deste módulo</div>
+  <div class="why">💡 Para manter os processos de negócio sob controle no sistema CM</div>
+</div>
+</section>
+<section id="regra">
+  <div class="section-title">Motor de Regras</div>
+  <p><strong>ID:</strong> <code>regra</code> | <strong>Confiança:</strong> <span class="tag tag-alta">Alta</span></p>
+  <p><strong>Propósito:</strong> Cadastro e execução de regras/fórmulas de negócio parametrizáveis utilizadas por diversos módulos.</p>
+  <p><strong>Responsabilidades:</strong></p>
+  <ul><li>Cadastro de regras, fórmulas e variáveis</li><li>Execução e testes</li><li>Permissões e dicionário de dados</li></ul>
+  <p><strong>Artefatos:</strong> Pasta <code>REGRA</code> | DPR <code>REGRA/Fontes/Regra.dpr</code> | Forms/DFM ≈ 50 | Units ≈ 72</p>
+  <p><strong>Tabelas (evidência):</strong> <em>Não enumeradas neste inventário (ver pasta do módulo)</em></p>
+  <p><a href="site/modules/regra/index.html">Abrir documentação do módulo →</a></p>
+  <p><strong>Exemplos de User Stories:</strong></p>
+  
+<div class="story-card">
+  <div class="role">👤 Como operador do módulo Motor de Regras</div>
+  <div class="want">🎯 Quero executar as funções principais deste módulo</div>
+  <div class="why">💡 Para manter os processos de negócio sob controle no sistema CM</div>
+</div>
+</section>
+<section id="almoxarifado">
+  <div class="section-title">Almoxarifado</div>
+  <p><strong>ID:</strong> <code>almoxarifado</code> | <strong>Confiança:</strong> <span class="tag tag-média">Média</span></p>
+  <p><strong>Propósito:</strong> Controle de estoque e movimentações de almoxarifado.</p>
+  <p><strong>Responsabilidades:</strong></p>
+  <ul><li>Entradas e saídas</li><li>Inventário</li></ul>
+  <p><strong>Artefatos:</strong> Pasta <code>ALMOXARIFADO</code> | DPR <code>Almoxarifado/Fontes/Almoxarifado.dpr</code> | Forms/DFM ≈ 190 | Units ≈ 196</p>
+  <p><strong>Tabelas (evidência):</strong> <em>Não enumeradas neste inventário (ver pasta do módulo)</em></p>
+  <p><a href="site/modules/almoxarifado/index.html">Abrir documentação do módulo →</a></p>
+  <p><strong>Exemplos de User Stories:</strong></p>
+  
+<div class="story-card">
+  <div class="role">👤 Como operador do módulo Almoxarifado</div>
+  <div class="want">🎯 Quero executar as funções principais deste módulo</div>
+  <div class="why">💡 Para manter os processos de negócio sob controle no sistema CM</div>
+</div>
+</section>
+<section id="compras">
+  <div class="section-title">Compras</div>
+  <p><strong>ID:</strong> <code>compras</code> | <strong>Confiança:</strong> <span class="tag tag-média">Média</span></p>
+  <p><strong>Propósito:</strong> Processo de compras e requisições.</p>
+  <p><strong>Responsabilidades:</strong></p>
+  <ul><li>Requisições e pedidos</li><li>Fornecedores</li></ul>
+  <p><strong>Artefatos:</strong> Pasta <code>COMPRAS2000</code> | DPR <code>Compras2000/Fontes/Compras.dpr</code> | Forms/DFM ≈ 60 | Units ≈ 61</p>
+  <p><strong>Tabelas (evidência):</strong> <em>Não enumeradas neste inventário (ver pasta do módulo)</em></p>
+  <p><a href="site/modules/compras/index.html">Abrir documentação do módulo →</a></p>
+  <p><strong>Exemplos de User Stories:</strong></p>
+  
+<div class="story-card">
+  <div class="role">👤 Como operador do módulo Compras</div>
+  <div class="want">🎯 Quero executar as funções principais deste módulo</div>
+  <div class="why">💡 Para manter os processos de negócio sob controle no sistema CM</div>
+</div>
+</section>
+<section id="imobiliario">
+  <div class="section-title">Imobiliário</div>
+  <p><strong>ID:</strong> <code>imobiliario</code> | <strong>Confiança:</strong> <span class="tag tag-média">Média</span></p>
+  <p><strong>Propósito:</strong> Administração imobiliária, investimentos imobiliários e alienação, com padrões contábeis.</p>
+  <p><strong>Responsabilidades:</strong></p>
+  <ul><li>Administração de imóveis</li><li>Movimentação contábil imobiliária</li><li>Alienação</li></ul>
+  <p><strong>Artefatos:</strong> Pasta <code>ADMINIMOB</code> | DPR <code>ADMINIMOB/Fontes/AdminImob.dpr</code> | Forms/DFM ≈ 115 | Units ≈ 128</p>
+  <p><strong>Tabelas (evidência):</strong> <em>Não enumeradas neste inventário (ver pasta do módulo)</em></p>
+  <p><a href="site/modules/imobiliario/index.html">Abrir documentação do módulo →</a></p>
+  <p><strong>Exemplos de User Stories:</strong></p>
+  
+<div class="story-card">
+  <div class="role">👤 Como operador do módulo Imobiliário</div>
+  <div class="want">🎯 Quero executar as funções principais deste módulo</div>
+  <div class="why">💡 Para manter os processos de negócio sob controle no sistema CM</div>
+</div>
+</section>
+<section id="juridico">
+  <div class="section-title">Jurídico e Processos</div>
+  <p><strong>ID:</strong> <code>juridico</code> | <strong>Confiança:</strong> <span class="tag tag-média">Média</span></p>
+  <p><strong>Propósito:</strong> Gestão jurídica consultiva e processos judiciais, incluindo rateio contábil.</p>
+  <p><strong>Responsabilidades:</strong></p>
+  <ul><li>Processos e depósitos judiciais</li><li>Rateio contábil</li></ul>
+  <p><strong>Artefatos:</strong> Pasta <code>SISTJURCONS</code> | DPR <code>SISTJURCONS/Fontes/SistJurCons.dpr</code> | Forms/DFM ≈ 40 | Units ≈ 42</p>
+  <p><strong>Tabelas (evidência):</strong> <em>Não enumeradas neste inventário (ver pasta do módulo)</em></p>
+  <p><a href="site/modules/juridico/index.html">Abrir documentação do módulo →</a></p>
+  <p><strong>Exemplos de User Stories:</strong></p>
+  
+<div class="story-card">
+  <div class="role">👤 Como operador do módulo Jurídico e Processos</div>
+  <div class="want">🎯 Quero executar as funções principais deste módulo</div>
+  <div class="why">💡 Para manter os processos de negócio sob controle no sistema CM</div>
+</div>
+</section>
+<section id="cfinan">
+  <div class="section-title">Controle Financeiro (CFINAN)</div>
+  <p><strong>ID:</strong> <code>cfinan</code> | <strong>Confiança:</strong> <span class="tag tag-média">Média</span></p>
+  <p><strong>Propósito:</strong> Controles financeiros operacionais com integração à contabilidade.</p>
+  <p><strong>Responsabilidades:</strong></p>
+  <ul><li>Operações financeiras</li><li>Integração contábil</li></ul>
+  <p><strong>Artefatos:</strong> Pasta <code>CFINAN</code> | DPR <code>CFinan/Fontes/CFINAN.dpr</code> | Forms/DFM ≈ 247 | Units ≈ 299</p>
+  <p><strong>Tabelas (evidência):</strong> <em>Não enumeradas neste inventário (ver pasta do módulo)</em></p>
+  <p><a href="site/modules/cfinan/index.html">Abrir documentação do módulo →</a></p>
+  <p><strong>Exemplos de User Stories:</strong></p>
+  
+<div class="story-card">
+  <div class="role">👤 Como operador do módulo Controle Financeiro (CFINAN)</div>
+  <div class="want">🎯 Quero executar as funções principais deste módulo</div>
+  <div class="why">💡 Para manter os processos de negócio sob controle no sistema CM</div>
+</div>
+</section>
+<section id="indicadores">
+  <div class="section-title">Indicadores</div>
+  <p><strong>ID:</strong> <code>indicadores</code> | <strong>Confiança:</strong> <span class="tag tag-média">Média</span></p>
+  <p><strong>Propósito:</strong> Acompanhamento de indicadores gerenciais da organização.</p>
+  <p><strong>Responsabilidades:</strong></p>
+  <ul><li>Cadastro e consulta de indicadores</li></ul>
+  <p><strong>Artefatos:</strong> Pasta <code>INDICADORES</code> | DPR <code>Indicadores/Fontes/Indicadores.dpr</code> | Forms/DFM ≈ 86 | Units ≈ 104</p>
+  <p><strong>Tabelas (evidência):</strong> <em>Não enumeradas neste inventário (ver pasta do módulo)</em></p>
+  <p><a href="site/modules/indicadores/index.html">Abrir documentação do módulo →</a></p>
+  <p><strong>Exemplos de User Stories:</strong></p>
+  
+<div class="story-card">
+  <div class="role">👤 Como operador do módulo Indicadores</div>
+  <div class="want">🎯 Quero executar as funções principais deste módulo</div>
+  <div class="why">💡 Para manter os processos de negócio sob controle no sistema CM</div>
+</div>
+</section>
+<section id="contrato">
+  <div class="section-title">Contratos</div>
+  <p><strong>ID:</strong> <code>contrato</code> | <strong>Confiança:</strong> <span class="tag tag-média">Média</span></p>
+  <p><strong>Propósito:</strong> Gestão de contratos administrativos e correlatos.</p>
+  <p><strong>Responsabilidades:</strong></p>
+  <ul><li>Cadastro e acompanhamento de contratos</li></ul>
+  <p><strong>Artefatos:</strong> Pasta <code>CONTRATO</code> | DPR <code>Contrato/Fontes/contrato.dpr</code> | Forms/DFM ≈ 116 | Units ≈ 249</p>
+  <p><strong>Tabelas (evidência):</strong> <em>Não enumeradas neste inventário (ver pasta do módulo)</em></p>
+  <p><a href="site/modules/contrato/index.html">Abrir documentação do módulo →</a></p>
+  <p><strong>Exemplos de User Stories:</strong></p>
+  
+<div class="story-card">
+  <div class="role">👤 Como operador do módulo Contratos</div>
+  <div class="want">🎯 Quero executar as funções principais deste módulo</div>
+  <div class="why">💡 Para manter os processos de negócio sob controle no sistema CM</div>
+</div>
+</section>
+<section id="param-prev">
+  <div class="section-title">Parâmetros Previdenciários</div>
+  <p><strong>ID:</strong> <code>param-prev</code> | <strong>Confiança:</strong> <span class="tag tag-média">Média</span></p>
+  <p><strong>Propósito:</strong> Parametrização dos módulos previdenciários.</p>
+  <p><strong>Responsabilidades:</strong></p>
+  <ul><li>Parâmetros de planos e regras previdenciárias</li></ul>
+  <p><strong>Artefatos:</strong> Pasta <code>PARAMPREV</code> | DPR <code>ParamPrev/Fontes/ParamPrev.dpr</code> | Forms/DFM ≈ 97 | Units ≈ 105</p>
+  <p><strong>Tabelas (evidência):</strong> <em>Não enumeradas neste inventário (ver pasta do módulo)</em></p>
+  <p><a href="site/modules/param-prev/index.html">Abrir documentação do módulo →</a></p>
+  <p><strong>Exemplos de User Stories:</strong></p>
+  
+<div class="story-card">
+  <div class="role">👤 Como operador do módulo Parâmetros Previdenciários</div>
+  <div class="want">🎯 Quero executar as funções principais deste módulo</div>
+  <div class="why">💡 Para manter os processos de negócio sob controle no sistema CM</div>
+</div>
+</section>
+<section id="modulos-previdenciarios">
+  <div class="section-title">Módulos Previdenciários Especializados</div>
+  <p><strong>ID:</strong> <code>modulos-previdenciarios</code> | <strong>Confiança:</strong> <span class="tag tag-média">Média</span></p>
+  <p><strong>Propósito:</strong> Conjunto de módulos previdenciários especializados (ModAsm, ModAuto, ModAva, ModBen, ModCes, ModCon, ModFol, ModRes, ModTrn).</p>
+  <p><strong>Responsabilidades:</strong></p>
+  <ul><li>Processos previdenciários específicos por domínio</li><li>Cálculos e rotinas auxiliares</li></ul>
+  <p><strong>Artefatos:</strong> Pasta <code>MODASM</code> | DPR <code>ModAsm/Fontes/ModAsm.dpr</code> | Forms/DFM ≈ 73 | Units ≈ 84</p>
+  <p><strong>Tabelas (evidência):</strong> <em>Não enumeradas neste inventário (ver pasta do módulo)</em></p>
+  <p><a href="site/modules/modulos-previdenciarios/index.html">Abrir documentação do módulo →</a></p>
+  <p><strong>Exemplos de User Stories:</strong></p>
+  
+<div class="story-card">
+  <div class="role">👤 Como operador do módulo Módulos Previdenciários Especializados</div>
+  <div class="want">🎯 Quero executar as funções principais deste módulo</div>
+  <div class="why">💡 Para manter os processos de negócio sob controle no sistema CM</div>
+</div>
+</section>
+<section id="relatorios-cm">
+  <div class="section-title">Relatórios CM</div>
+  <p><strong>ID:</strong> <code>relatorios-cm</code> | <strong>Confiança:</strong> <span class="tag tag-média">Média</span></p>
+  <p><strong>Propósito:</strong> Central de relatórios transversais da suíte CM.</p>
+  <p><strong>Responsabilidades:</strong></p>
+  <ul><li>Emissão de relatórios corporativos</li></ul>
+  <p><strong>Artefatos:</strong> Pasta <code>RELATORIOSCM</code> | DPR <code>RelatoriosCm/Fontes/RelatoriosCm.dpr</code> | Forms/DFM ≈ 26 | Units ≈ 32</p>
+  <p><strong>Tabelas (evidência):</strong> <em>Não enumeradas neste inventário (ver pasta do módulo)</em></p>
+  <p><a href="site/modules/relatorios-cm/index.html">Abrir documentação do módulo →</a></p>
+  <p><strong>Exemplos de User Stories:</strong></p>
+  
+<div class="story-card">
+  <div class="role">👤 Como operador do módulo Relatórios CM</div>
+  <div class="want">🎯 Quero executar as funções principais deste módulo</div>
+  <div class="why">💡 Para manter os processos de negócio sob controle no sistema CM</div>
+</div>
+</section>
+<section id="central-ap">
+  <div class="section-title">Central AP</div>
+  <p><strong>ID:</strong> <code>central-ap</code> | <strong>Confiança:</strong> <span class="tag tag-baixa">Baixa</span></p>
+  <p><strong>Propósito:</strong> Centralização de operações de contas a pagar / AP.</p>
+  <p><strong>Responsabilidades:</strong></p>
+  <ul><li>Operações centralizadas de AP</li></ul>
+  <p><strong>Artefatos:</strong> Pasta <code>CENTRALAP</code> | DPR <code>CentralAp/Fontes/CentralAP.dpr</code> | Forms/DFM ≈ 112 | Units ≈ 139</p>
+  <p><strong>Tabelas (evidência):</strong> <em>Não enumeradas neste inventário (ver pasta do módulo)</em></p>
+  <p><a href="site/modules/central-ap/index.html">Abrir documentação do módulo →</a></p>
+  <p><strong>Exemplos de User Stories:</strong></p>
+  
+<div class="story-card">
+  <div class="role">👤 Como operador do módulo Central AP</div>
+  <div class="want">🎯 Quero executar as funções principais deste módulo</div>
+  <div class="why">💡 Para manter os processos de negócio sob controle no sistema CM</div>
+</div>
+</section>
+
+<section id="dados">
+  <div class="section-title">📊 Modelos de Dados (Contábil — evidência direta)</div>
+  <p>Principais entidades mapeadas em <code>CONTAB/DbObjects</code>:</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Entidade</th><th>Tabela</th><th>Campos (qtd)</th><th>Arquivo</th></tr></thead>
+    <tbody>
+    <tr><td>APURRESULTADO</td><td><code>APURRESULTADO</code></td><td>7</td><td><code>CONTAB/DbObjects/uDbApurresultado.pas</code></td></tr><tr><td>CADEVENTOSRH</td><td><code>CADEVENTOSRH</code></td><td>2</td><td><code>CONTAB/DbObjects/uDbEventoSRH.pas</code></td></tr><tr><td>CAMPODEPARA</td><td><code>CAMPODEPARA</code></td><td>3</td><td><code>CONTAB/DbObjects/uDbCampodepara.pas</code></td></tr><tr><td>COMPOELEMDEM</td><td><code>COMPOELEMDEM</code></td><td>17</td><td><code>CONTAB/DbObjects/uDbCompoelemdem.pas</code></td></tr><tr><td>COMPORATEIOAP</td><td><code>COMPORATEIOAP</code></td><td>4</td><td><code>CONTAB/DbObjects/uDbComporateioap.pas</code></td></tr><tr><td>CONTASXCC</td><td><code>CONTASXCC</code></td><td>5</td><td><code>CONTAB/DbObjects/uDbContasxcc.pas</code></td></tr><tr><td>CONTASXSUBC</td><td><code>CONTASXSUBC</code></td><td>5</td><td><code>CONTAB/DbObjects/uDbContasxsubc.pas</code></td></tr><tr><td>DEMCOLUNAS</td><td><code>DEMCOLUNAS</code></td><td>1</td><td><code>CONTAB/DbObjects/uDbDemcolunas.pas</code></td></tr><tr><td>DEMCOLXLIN</td><td><code>DEMCOLXLIN</code></td><td>4</td><td><code>CONTAB/DbObjects/uDbDemcolxlin.pas</code></td></tr><tr><td>DEMLINHA</td><td><code>DEMLINHA</code></td><td>1</td><td><code>CONTAB/DbObjects/uDbDemlinha.pas</code></td></tr><tr><td>DEMONSTRATIVO</td><td><code>DEMONSTRATIVO</code></td><td>0</td><td><code>CONTAB/DbObjects/uDbDemonstrativo.pas</code></td></tr><tr><td>DESENHODEMO</td><td><code>DESENHODEMO</code></td><td>6</td><td><code>CONTAB/DbObjects/uDbDesenhodemo.pas</code></td></tr><tr><td>DIASBLOQMOD</td><td><code>DIASBLOQMOD</code></td><td>4</td><td><code>CONTAB/DbObjects/uDbDiasbloqmod.pas</code></td></tr><tr><td>ELEMBALPATR</td><td><code>ELEMBALPATR</code></td><td>1</td><td><code>CONTAB/DbObjects/uDbElembalpatr.pas</code></td></tr><tr><td>ELEMDEMONSTRATIVO</td><td><code>ELEMDEMONSTRATIVO</code></td><td>19</td><td><code>CONTAB/DbObjects/uDbElemdemonstrativo.pas</code></td></tr><tr><td>ENVIODOCUMENTO</td><td><code>ENVIODOCUMENTO</code></td><td>2</td><td><code>CONTAB/DbObjects/uDbEnviodocumento.pas</code></td></tr><tr><td>HISTOPADRAO</td><td><code>HISTOPADRAO</code></td><td>0</td><td><code>CONTAB/DbObjects/uDbHistoContab.pas</code></td></tr><tr><td>ITEMSPCCONSISTE</td><td><code>ITEMSPCCONSISTE</code></td><td>6</td><td><code>CONTAB/DbObjects/uDbItemSPCConsiste.pas</code></td></tr><tr><td>LANCAMENTO</td><td><code>LANCAMENTO</code></td><td>39</td><td><code>CONTAB/DbObjects/uDbLancamento.pas</code></td></tr><tr><td>PARAMCONTAB</td><td><code>PARAMCONTAB</code></td><td>92</td><td><code>CONTAB/DbObjects/uDbParamcontab.pas</code></td></tr><tr><td>PERIODO</td><td><code>PERIODO</code></td><td>14</td><td><code>CONTAB/DbObjects/uDbPeriodo.pas</code></td></tr><tr><td>PLANILHA</td><td><code>PLANILHA</code></td><td>28</td><td><code>CONTAB/DbObjects/uDbPlanilha.pas</code></td></tr><tr><td>PLANO</td><td><code>PLANO</code></td><td>0</td><td><code>CONTAB/DbObjects/uDbPlano.pas</code></td></tr><tr><td>PLANOCONTA</td><td><code>PLANOCONTA</code></td><td>41</td><td><code>CONTAB/DbObjects/uDbPlanoConta.pas</code></td></tr><tr><td>PLANOCONTAPER</td><td><code>PLANOCONTAPER</code></td><td>11</td><td><code>CONTAB/DbObjects/uDbPlanocontaper.pas</code></td></tr><tr><td>PLANODATA</td><td><code>PLANODATA</code></td><td>6</td><td><code>CONTAB/DbObjects/uDbPlanodata.pas</code></td></tr><tr><td>PLANODEPARA</td><td><code>PLANODEPARA</code></td><td>9</td><td><code>CONTAB/DbObjects/uDbPlanodepara.pas</code></td></tr><tr><td>PLANOSALDO</td><td><code>PLANOSALDO</code></td><td>28</td><td><code>CONTAB/DbObjects/uDbPlanoSaldo.pas</code></td></tr><tr><td>PREDETALHE</td><td><code>PREDETALHE</code></td><td>24</td><td><code>CONTAB/DbObjects/uDbPredetalhe.pas</code></td></tr><tr><td>PREPLANILHA</td><td><code>PREPLANILHA</code></td><td>15</td><td><code>CONTAB/DbObjects/uDbPreplanilha.pas</code></td></tr><tr><td>RATADDETPLANPATRO</td><td><code>RATADDETPLANPATRO</code></td><td>4</td><td><code>CONTAB/DbObjects/uDbRataddetplanpatro.pas</code></td></tr><tr><td>RATADMPLANPATRO</td><td><code>RATADMPLANPATRO</code></td><td>4</td><td><code>CONTAB/DbObjects/uDbRatadmplanpatro.pas</code></td></tr><tr><td>RATEIOAPEXTRA</td><td><code>RATEIOAPEXTRA</code></td><td>4</td><td><code>CONTAB/DbObjects/uDbRateioapextra.pas</code></td></tr><tr><td>RATEIOATIVPROJ</td><td><code>RATEIOATIVPROJ</code></td><td>6</td><td><code>CONTAB/DbObjects/uDbRateioativproj.pas</code></td></tr><tr><td>RATEIOPLANPATRO</td><td><code>RATEIOPLANPATRO</code></td><td>7</td><td><code>CONTAB/DbObjects/uDbRateioplanpatro.pas</code></td></tr><tr><td>RECBTOPAGTO</td><td><code>RECBTOPAGTO</code></td><td>12</td><td><code>CONTAB/DbObjects/uDbRecbtopagto.pas</code></td></tr><tr><td>REGRASCONTAB</td><td><code>REGRASCONTAB</code></td><td>0</td><td><code>CONTAB/DbObjects/uDbRegrasContab.pas</code></td></tr><tr><td>SEGREGACAO</td><td><code>SEGREGACAO</code></td><td>7</td><td><code>CONTAB/DbObjects/uDbSegregacao.pas</code></td></tr><tr><td>SEGREGACOTACAO</td><td><code>SEGREGACOTACAO</code></td><td>6</td><td><code>CONTAB/DbObjects/uDbSegregaCotacao.pas</code></td></tr><tr><td>SEGREGACRITER</td><td><code>SEGREGACRITER</code></td><td>8</td><td><code>CONTAB/DbObjects/uDbSegregaCriter.pas</code></td></tr><tr><td>SEGREGADATA</td><td><code>SEGREGADATA</code></td><td>4</td><td><code>CONTAB/DbObjects/uDbSegregaData.pas</code></td></tr><tr><td>SPCCONSISTE</td><td><code>SPCCONSISTE</code></td><td>3</td><td><code>CONTAB/DbObjects/uDbSPCConsiste.pas</code></td></tr><tr><td>SUBCONTA</td><td><code>SUBCONTA</code></td><td>0</td><td><code>CONTAB/DbObjects/uDbSubconta.pas</code></td></tr><tr><td>SUBGRUPO</td><td><code>SUBGRUPO</code></td><td>0</td><td><code>CONTAB/DbObjects/uDbSubgrupo.pas</code></td></tr><tr><td>TABELADEPARA</td><td><code>TABELADEPARA</code></td><td>7</td><td><code>CONTAB/DbObjects/uDbTabeladepara.pas</code></td></tr><tr><td>TERMODIARIO</td><td><code>TERMODIARIO</code></td><td>1</td><td><code>CONTAB/DbObjects/uDbTermoDiario.pas</code></td></tr>
+    </tbody>
+  </table></div>
+  <p>Detalhamento completo em <a href="database-model.html">database-model.html</a>.</p>
+</section>
+
+<section id="regras">
+  <div class="section-title">📋 Regras de Negócio</div>
+  
+<div class="rule-block">
+  <div class="rule-id">RN001 — contab</div>
+  <div class="rule-desc">Lançamentos contábeis devem respeitar a natureza Débito/Crédito e atualizar saldos das contas analíticas.</div>
+  <div class="rule-origin">📂 Origem: <code>CONTAB/CtrlObjects/uCtrlLancamento.pas — AtuSaldoContas / InsereLancaContab</code> | Tela: fLancaContabMT | Confiança: <span class="tag tag-alta">Alta</span></div>
+</div>
+<div class="rule-block">
+  <div class="rule-id">RN002 — contab</div>
+  <div class="rule-desc">É possível atualizar saldos de contas sintéticas a partir dos lançamentos das analíticas.</div>
+  <div class="rule-origin">📂 Origem: <code>CONTAB/CtrlObjects/uCtrlLancamento.pas — AtuSaldoSintetica</code> | Tela: FAtualizaSinMT | Confiança: <span class="tag tag-alta">Alta</span></div>
+</div>
+<div class="rule-block">
+  <div class="rule-id">RN003 — contab</div>
+  <div class="rule-desc">Planilhas podem ser estornadas ou excluídas, com atualização consistente dos lançamentos associados.</div>
+  <div class="rule-origin">📂 Origem: <code>CONTAB/CtrlObjects/uCtrlLancamento.pas — EstornaLancaContab / ExcluiLancaContab</code> | Tela: fLancaContabMT | Confiança: <span class="tag tag-alta">Alta</span></div>
+</div>
+<div class="rule-block">
+  <div class="rule-id">RN004 — contab</div>
+  <div class="rule-desc">Parâmetros contábeis (PARAMCONTAB) definem faixas de contas (ativo, passivo, despesa, receita, custo, estatística), moedas, fechamento e validações de planilha.</div>
+  <div class="rule-origin">📂 Origem: <code>CONTAB/DbObjects/uDbParamcontab.pas; CONTAB/FontesMT/FCadParamContabMT.pas</code> | Tela: FCadParamContabMT | Confiança: <span class="tag tag-alta">Alta</span></div>
+</div>
+<div class="rule-block">
+  <div class="rule-id">RN005 — contab</div>
+  <div class="rule-desc">Períodos contábeis possuem bloqueio (PERBLOQUE/PERBLOINT) que impede ou restringe lançamentos em períodos fechados.</div>
+  <div class="rule-origin">📂 Origem: <code>CONTAB/DbObjects/uDbPeriodo.pas; CONTAB/FontesMT/FEncerraPeriodoMT.pas</code> | Tela: FCadPeriodoContabilMT / FEncerraPeriodoMT | Confiança: <span class="tag tag-alta">Alta</span></div>
+</div>
+<div class="rule-block">
+  <div class="rule-id">RN006 — contab</div>
+  <div class="rule-desc">Contas do plano podem ser bloqueadas (PLABLOQUE/PLABLOQUEDATA) e inativadas (PLAINATIVA).</div>
+  <div class="rule-origin">📂 Origem: <code>CONTAB/DbObjects/uDbPlanoConta.pas</code> | Tela: FCadPlanoContasMT | Confiança: <span class="tag tag-alta">Alta</span></div>
+</div>
+<div class="rule-block">
+  <div class="rule-id">RN007 — contab</div>
+  <div class="rule-desc">Teste de natureza de demonstrativo valida combinação natureza do demonstrativo × flag × sinal do valor.</div>
+  <div class="rule-origin">📂 Origem: <code>CONTAB/Fontes/UModulo.pas — TestaNatureza</code> | Tela: Demonstrativos | Confiança: <span class="tag tag-alta">Alta</span></div>
+</div>
+<div class="rule-block">
+  <div class="rule-id">RN008 — contab</div>
+  <div class="rule-desc">Segregação por plano e patrocinadora gera lançamentos e cotas conforme critérios (SEGREGACRITER, SEGREGACAO).</div>
+  <div class="rule-origin">📂 Origem: <code>CONTAB/FontesMT/fProcessaSegregacao.pas; CONTAB/DbObjects/uDbSegregacao.pas</code> | Tela: fProcessaSegregacao | Confiança: <span class="tag tag-alta">Alta</span></div>
+</div>
+<div class="rule-block">
+  <div class="rule-id">RN009 — contab</div>
+  <div class="rule-desc">Rateios (atividade/projeto, programa, administrativo, plano/patrocinadora) geram lançamentos a partir de percentuais cadastrados.</div>
+  <div class="rule-origin">📂 Origem: <code>CONTAB/CtrlObjects/uCtrlLancamento.pas — FazRateio; Forms FGera*Rateio*</code> | Tela: FGeraLancRateioMT | Confiança: <span class="tag tag-alta">Alta</span></div>
+</div>
+<div class="rule-block">
+  <div class="rule-id">RN010 — contab</div>
+  <div class="rule-desc">Exportação regulatória SIPC-CAP/SICADI gera arquivos de saldos/balancete (FGeraSalCont*).</div>
+  <div class="rule-origin">📂 Origem: <code>CONTAB/FontesMT/FGeraSalContMT.pas / FGeraSalCont2004MT.pas / FGeraSalCont2010MT.pas</code> | Tela: FGeraSalCont* | Confiança: <span class="tag tag-alta">Alta</span></div>
+</div>
+<div class="rule-block">
+  <div class="rule-id">RN011 — contab</div>
+  <div class="rule-desc">Importação de lançamentos a partir de Excel, SAF, Fidélio, Folha RM, Folha Dinâmica e SRH Plus.</div>
+  <div class="rule-origin">📂 Origem: <code>CONTAB/Fontes/FPrincipal.pas (menus Importações); FImporta*MT.pas</code> | Tela: FImportaExcelMT / FImportaSAFMT / etc. | Confiança: <span class="tag tag-alta">Alta</span></div>
+</div>
+<div class="rule-block">
+  <div class="rule-id">RN012 — contab</div>
+  <div class="rule-desc">Dias bloqueados por módulo/sistema (DIASBLOQMOD) restringem operação contábil por origem.</div>
+  <div class="rule-origin">📂 Origem: <code>CONTAB/DbObjects/uDbDiasbloqmod.pas; FCadDiasBloqModMT</code> | Tela: FCadDiasBloqModMT | Confiança: <span class="tag tag-alta">Alta</span></div>
+</div>
+<div class="rule-block">
+  <div class="rule-id">RN013 — contab</div>
+  <div class="rule-desc">Consistência de regras contábeis (REGRASCONTAB / Consiste Regras) valida lançamentos conforme regras cadastradas.</div>
+  <div class="rule-origin">📂 Origem: <code>CONTAB/FontesMT/fConfereRegraMT.pas; uDbRegrasContab.pas</code> | Tela: fConfereRegraMT | Confiança: <span class="tag tag-alta">Alta</span></div>
+</div>
+<div class="rule-block">
+  <div class="rule-id">RN014 — contab</div>
+  <div class="rule-desc">Encerramento de contas de resultado e exercício (incluindo apuração meia-noite) gera lançamentos de apuração.</div>
+  <div class="rule-origin">📂 Origem: <code>CONTAB/FontesMT/FEncerraResultadosMT.pas; FEncerraExercicioMT.pas; FLancMeiaNoiteMT.pas</code> | Tela: FEncerra* | Confiança: <span class="tag tag-alta">Alta</span></div>
+</div>
+<div class="rule-block">
+  <div class="rule-id">RN015 — contab</div>
+  <div class="rule-desc">Demonstrativos são compostos por elementos, linhas, colunas e layouts (ReportBuilder) parametrizáveis.</div>
+  <div class="rule-origin">📂 Origem: <code>CONTAB/DbObjects/uDbDemonstrativo.pas; FCadDemonstrativoMT</code> | Tela: FCadDemonstrativoMT | Confiança: <span class="tag tag-alta">Alta</span></div>
+</div>
+</section>
+</main>
+
+<footer>
+<p>CM Contabilidade — Documentação gerada em 2026-08-19 | Tecnologia: Delphi 5 | pt-BR</p>
+</footer>
+</body>
+</html>
