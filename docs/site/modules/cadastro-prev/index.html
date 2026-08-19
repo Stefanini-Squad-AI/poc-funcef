@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cadastro Previdenciário — CM Contabilidade</title>
+<style>
+
+:root {
+  --bg: #0f1419; --bg2: #1a2332; --bg3: #243044; --card: #1e2a3a;
+  --text: #e7ecf3; --muted: #9aa8bc; --accent: #3d9cf0; --accent2: #2dd4bf;
+  --ok: #34d399; --warn: #fbbf24; --bad: #f87171; --border: #2d3a4d;
+  --tag-alta: #065f46; --tag-media: #92400e; --tag-baixa: #7f1d1d;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0; font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(160deg, #0f1419 0%, #152033 50%, #0f1419 100%);
+  color: var(--text); line-height: 1.55; min-height: 100vh;
+}
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+header {
+  background: linear-gradient(135deg, #152033 0%, #1a3a5c 100%);
+  border-bottom: 1px solid var(--border); padding: 2rem 1.5rem 1.5rem;
+}
+header .badge {
+  display: inline-block; background: #1e3a5f; color: var(--accent2);
+  padding: .25rem .75rem; border-radius: 999px; font-size: .8rem;
+  border: 1px solid #2a5080; margin-bottom: .75rem;
+}
+header h1 { margin: 0 0 .5rem; font-size: clamp(1.5rem, 3vw, 2.2rem); }
+header p { margin: 0; color: var(--muted); max-width: 70ch; }
+nav {
+  display: flex; flex-wrap: wrap; gap: .5rem; padding: .75rem 1.5rem;
+  background: rgba(15,20,25,.85); border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 20; backdrop-filter: blur(8px);
+}
+nav a {
+  color: var(--text); background: var(--bg2); padding: .4rem .75rem;
+  border-radius: 6px; border: 1px solid var(--border); font-size: .85rem;
+}
+nav a:hover { background: var(--bg3); text-decoration: none; }
+main { padding: 1.5rem; max-width: 1200px; margin: 0 auto; }
+section {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1.25rem;
+}
+.section-title {
+  font-size: 1.15rem; font-weight: 700; margin-bottom: 1rem;
+  padding-bottom: .5rem; border-bottom: 1px solid var(--border);
+}
+.cards-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1rem;
+}
+.card {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 10px;
+  padding: 1rem; transition: border-color .2s, transform .2s;
+}
+.card:hover { border-color: var(--accent); transform: translateY(-2px); }
+.card h3 { margin: 0 0 .5rem; font-size: 1rem; }
+.card p { margin: 0; color: var(--muted); font-size: .9rem; }
+.stats {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: .75rem;
+}
+.stat {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 8px;
+  padding: .85rem; text-align: center;
+}
+.stat .n { font-size: 1.6rem; font-weight: 700; color: var(--accent2); }
+.stat .l { font-size: .75rem; color: var(--muted); }
+table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+th, td {
+  border: 1px solid var(--border); padding: .5rem .65rem; text-align: left;
+  vertical-align: top;
+}
+th { background: var(--bg3); }
+tbody tr:nth-child(even) { background: rgba(255,255,255,.02); }
+.table-wrap { overflow-x: auto; }
+code {
+  font-family: Consolas, "Courier New", monospace; font-size: .85em;
+  background: var(--bg); padding: .1rem .35rem; border-radius: 4px;
+}
+.tag {
+  display: inline-block; padding: .15rem .45rem; border-radius: 4px;
+  font-size: .75rem; font-weight: 600;
+}
+.tag-alta { background: var(--tag-alta); color: #a7f3d0; }
+.tag-media { background: var(--tag-media); color: #fde68a; }
+.tag-baixa { background: var(--tag-baixa); color: #fecaca; }
+.story-card {
+  background: var(--bg2); border-left: 4px solid var(--accent);
+  padding: .85rem 1rem; margin-bottom: .75rem; border-radius: 0 8px 8px 0;
+}
+.criteria-block, .rule-block {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 8px; padding: .85rem 1rem; margin-bottom: .75rem;
+}
+.rule-id { font-weight: 700; color: var(--accent2); margin-bottom: .35rem; }
+.rule-origin { font-size: .85rem; color: var(--muted); margin-top: .5rem; }
+.complexity-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: .75rem;
+}
+.complexity-item {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; text-align: center;
+}
+.level { font-weight: 700; margin-bottom: .35rem; }
+.level-simples { color: var(--ok); }
+.level-media { color: var(--warn); }
+.level-complexa { color: var(--bad); }
+.points { font-size: 1.4rem; font-weight: 700; }
+.desc { color: var(--muted); font-size: .85rem; margin-top: .35rem; }
+footer {
+  text-align: center; padding: 2rem 1rem; color: var(--muted);
+  border-top: 1px solid var(--border); margin-top: 2rem; font-size: .85rem;
+}
+.back-btn {
+  display: inline-block; margin-bottom: 1rem; background: var(--bg2);
+  border: 1px solid var(--border); padding: .4rem .8rem; border-radius: 6px;
+  color: var(--text);
+}
+.back-btn:hover { background: var(--bg3); text-decoration: none; }
+.layout-2 {
+  display: grid; grid-template-columns: 1fr 300px; gap: 1.25rem; padding: 1.5rem; max-width: 1200px; margin: 0 auto;
+}
+@media (max-width: 900px) { .layout-2 { grid-template-columns: 1fr; } }
+.info-list, .dep-list { list-style: none; padding: 0; margin: 0; }
+.info-list li, .dep-list li {
+  display: flex; justify-content: space-between; gap: .5rem;
+  padding: .45rem 0; border-bottom: 1px solid var(--border); font-size: .9rem;
+}
+.info-list .key { color: var(--muted); }
+.mermaid {
+  background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+  padding: 1rem; overflow-x: auto; font-family: monospace; font-size: .8rem;
+  white-space: pre-wrap; color: var(--muted);
+}
+.note {
+  background: #1a2740; border-left: 3px solid var(--warn);
+  padding: .75rem 1rem; margin: .75rem 0; border-radius: 0 6px 6px 0; font-size: .9rem;
+}
+.doc-links { display: flex; flex-wrap: wrap; gap: .5rem; margin: 1rem 0; }
+.doc-links a {
+  background: var(--bg3); border: 1px solid var(--border); padding: .5rem .85rem;
+  border-radius: 6px; color: var(--text);
+}
+.given,.when,.then { margin: .25rem 0; }
+.role,.want,.why { margin: .2rem 0; }
+ul.check { list-style: none; padding-left: 0; }
+ul.check li::before { content: "☐ "; }
+
+
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner" style="max-width:1200px;margin:0 auto">
+    <a class="back-btn" href="../../index.html">← Voltar ao Portal</a>
+    <div class="header-text">
+      <div class="badge">Módulo — Delphi 5</div>
+      <h1>Cadastro Previdenciário</h1>
+      <p>Cadastro de participantes, beneficiários e dados cadastrais do ambiente previdenciário.</p>
+    </div>
+  </div>
+</header>
+<nav>
+  <a href="#visao-geral">📋 Visão Geral</a>
+  <a href="#user-stories">📝 User Stories</a>
+  <a href="#criterios">✅ Critérios</a>
+  <a href="#regras">📏 Regras</a>
+  <a href="#tecnico">⚙️ Técnico</a>
+  <a href="#dados">🗄️ Dados</a>
+  <a href="#complexidade">📊 Complexidade</a>
+</nav>
+<main class="layout-2">
+  <div class="main-col">
+    <section id="visao-geral">
+      <div class="section-title">📋 Visão Geral do Módulo</div>
+      <p>Cadastro de participantes, beneficiários e dados cadastrais do ambiente previdenciário.</p>
+      <br>
+      <p><strong>Contexto de Negócio:</strong> Este módulo integra a suíte CM Contabilidade e apoia processos operacionais/financeiros/previdenciários conforme o domínio <em>Cadastro Previdenciário</em>.</p>
+      <p><strong>Responsabilidades:</strong></p>
+      <ul><li>Manutenção cadastral de participantes</li><li>Documentos e vínculos</li></ul>
+    </section>
+    <section id="user-stories">
+      <div class="section-title">📝 Guia para User Stories</div>
+      
+<div class="story-card"><div class="role">👤 Como operador</div>
+<div class="want">🎯 Quero utilizar as funções principais do módulo Cadastro Previdenciário</div>
+<div class="why">💡 Para executar o processo de negócio suportado por este módulo</div></div>
+<div class="story-card"><div class="role">👤 Como supervisor</div>
+<div class="want">🎯 Quero consultar e validar os resultados gerados</div>
+<div class="why">💡 Para garantir conformidade operacional</div></div>
+
+    </section>
+    <section id="criterios">
+      <div class="section-title">✅ Critérios de Aceitação</div>
+      
+<div class="criteria-block"><div class="given"><strong>Dado que</strong> o usuário possui permissão no módulo</div>
+<div class="when"><strong>Quando</strong> acessa as telas principais do executável</div>
+<div class="then"><strong>Então</strong> consegue executar as operações de cadastro/consulta previstas no código da pasta <code>CADASTROPREV</code></div></div>
+<div class="note">Critérios detalhados dependem de análise aprofundada das forms do módulo. Confiança: Média</div>
+
+    </section>
+    <section id="regras">
+      <div class="section-title">📏 Regras de Negócio</div>
+      <p>Nenhuma regra específica catalogada com evidência linha a linha neste módulo nesta entrega. Consulte o código em <code>CADASTROPREV</code>.</p>
+    </section>
+    <section id="tecnico">
+      <div class="section-title">⚙️ Fundação Técnica — Delphi 5</div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Tipo</th><th>Arquivo</th><th>Responsabilidade</th></tr></thead>
+        <tbody><tr><td>Projeto</td><td><code>CADASTROPREV/Fontes/CadastroPrev.dpr</code></td><td>Executável do módulo</td></tr><tr><td>Pasta</td><td><code>CADASTROPREV/**</code></td><td>~77 units / ~65 forms</td></tr></tbody>
+      </table></div>
+    </section>
+    <section id="dados">
+      <div class="section-title">🗄️ Modelo de Dados</div>
+      <p>Nenhuma tabela foi inventariada exaustivamente para este módulo nesta entrega. Ver DbObjects da pasta quando existirem. <strong>Lacuna parcial.</strong></p>
+    </section>
+    <section id="complexidade">
+      <div class="section-title">📊 Estimativa de Complexidade</div>
+      <div class="complexity-grid"><div class="complexity-item"><div class="level level-simples">Simples</div><div class="points">1–2</div><div class="desc">Consulta cadastral simples</div></div><div class="complexity-item"><div class="level level-média">Média</div><div class="points">3–5</div><div class="desc">Manutenção com validações</div></div><div class="complexity-item"><div class="level level-complexa">Complexa</div><div class="points">5–8</div><div class="desc">Processamento batch / integração</div></div></div>
+    </section>
+  </div>
+  <div class="sidebar">
+    <section>
+      <div class="section-title">ℹ️ Informações</div>
+      <ul class="info-list">
+        <li><span class="key">ID do Módulo</span><span class="val"><code>cadastro-prev</code></span></li>
+        <li><span class="key">Tecnologia</span><span class="val">Delphi 5 / VCL</span></li>
+        <li><span class="key">Banco de Dados</span><span class="val">Oracle</span></li>
+        <li><span class="key">Acesso a Dados</span><span class="val">MIDAS/ClientDataSet</span></li>
+        <li><span class="key">Cobertura Funcional</span><span class="val">40–60%</span></li>
+        <li><span class="key">Última Atualização</span><span class="val">2026-08-19</span></li>
+        <li><span class="key">Confiança</span><span class="val"><span class="tag tag-média">Média</span></span></li>
+      </ul>
+    </section>
+    <section>
+      <div class="section-title">📂 Artefatos Delphi 5</div>
+      <ul class="info-list">
+        <li><span class="key">Forms/DFM</span><span class="val">~65</span></li>
+        <li><span class="key">Data Modules</span><span class="val">~0</span></li>
+        <li><span class="key">Units</span><span class="val">~77</span></li>
+        <li><span class="key">Tabelas</span><span class="val">—</span></li>
+      </ul>
+    </section>
+    <section>
+      <div class="section-title">🔗 Dependências</div>
+      <ul class="dep-list"><li><span class='key'>global-cm</span><span class='val'>Cadastros e framework CM</span></li></ul>
+    </section>
+    <section>
+      <div class="section-title">♻️ Padrões Reutilizáveis</div>
+      <ul class="dep-list"><li>Padrão CM (Forms MT + CtrlObjects + DbObjects)</li><li>Autorização via framework CM</li></ul>
+    </section>
+  </div>
+</main>
+
+<footer>
+<p>CM Contabilidade — Módulo Cadastro Previdenciário | Delphi 5 | Documentação gerada em 2026-08-19 | pt-BR</p>
+</footer>
+</body>
+</html>
