@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CM Contabilidade — Mapa de Arquivos</title>
+<style>
+
+:root {
+  --bg: #0f1419; --bg2: #1a2332; --bg3: #243044; --card: #1e2a3a;
+  --text: #e7ecf3; --muted: #9aa8bc; --accent: #3d9cf0; --accent2: #2dd4bf;
+  --ok: #34d399; --warn: #fbbf24; --bad: #f87171; --border: #2d3a4d;
+  --tag-alta: #065f46; --tag-media: #92400e; --tag-baixa: #7f1d1d;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0; font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(160deg, #0f1419 0%, #152033 50%, #0f1419 100%);
+  color: var(--text); line-height: 1.55; min-height: 100vh;
+}
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+header {
+  background: linear-gradient(135deg, #152033 0%, #1a3a5c 100%);
+  border-bottom: 1px solid var(--border); padding: 2rem 1.5rem 1.5rem;
+}
+header .badge {
+  display: inline-block; background: #1e3a5f; color: var(--accent2);
+  padding: .25rem .75rem; border-radius: 999px; font-size: .8rem;
+  border: 1px solid #2a5080; margin-bottom: .75rem;
+}
+header h1 { margin: 0 0 .5rem; font-size: clamp(1.5rem, 3vw, 2.2rem); }
+header p { margin: 0; color: var(--muted); max-width: 70ch; }
+nav {
+  display: flex; flex-wrap: wrap; gap: .5rem; padding: .75rem 1.5rem;
+  background: rgba(15,20,25,.85); border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 20; backdrop-filter: blur(8px);
+}
+nav a {
+  color: var(--text); background: var(--bg2); padding: .4rem .75rem;
+  border-radius: 6px; border: 1px solid var(--border); font-size: .85rem;
+}
+nav a:hover { background: var(--bg3); text-decoration: none; }
+main { padding: 1.5rem; max-width: 1200px; margin: 0 auto; }
+section {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1.25rem;
+}
+.section-title {
+  font-size: 1.15rem; font-weight: 700; margin-bottom: 1rem;
+  padding-bottom: .5rem; border-bottom: 1px solid var(--border);
+}
+.cards-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1rem;
+}
+.card {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 10px;
+  padding: 1rem; transition: border-color .2s, transform .2s;
+}
+.card:hover { border-color: var(--accent); transform: translateY(-2px); }
+.card h3 { margin: 0 0 .5rem; font-size: 1rem; }
+.card p { margin: 0; color: var(--muted); font-size: .9rem; }
+.stats {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: .75rem;
+}
+.stat {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 8px;
+  padding: .85rem; text-align: center;
+}
+.stat .n { font-size: 1.6rem; font-weight: 700; color: var(--accent2); }
+.stat .l { font-size: .75rem; color: var(--muted); }
+table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+th, td {
+  border: 1px solid var(--border); padding: .5rem .65rem; text-align: left;
+  vertical-align: top;
+}
+th { background: var(--bg3); }
+tbody tr:nth-child(even) { background: rgba(255,255,255,.02); }
+.table-wrap { overflow-x: auto; }
+code {
+  font-family: Consolas, "Courier New", monospace; font-size: .85em;
+  background: var(--bg); padding: .1rem .35rem; border-radius: 4px;
+}
+.tag {
+  display: inline-block; padding: .15rem .45rem; border-radius: 4px;
+  font-size: .75rem; font-weight: 600;
+}
+.tag-alta { background: var(--tag-alta); color: #a7f3d0; }
+.tag-media { background: var(--tag-media); color: #fde68a; }
+.tag-baixa { background: var(--tag-baixa); color: #fecaca; }
+.story-card {
+  background: var(--bg2); border-left: 4px solid var(--accent);
+  padding: .85rem 1rem; margin-bottom: .75rem; border-radius: 0 8px 8px 0;
+}
+.criteria-block, .rule-block {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 8px; padding: .85rem 1rem; margin-bottom: .75rem;
+}
+.rule-id { font-weight: 700; color: var(--accent2); margin-bottom: .35rem; }
+.rule-origin { font-size: .85rem; color: var(--muted); margin-top: .5rem; }
+.complexity-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: .75rem;
+}
+.complexity-item {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; text-align: center;
+}
+.level { font-weight: 700; margin-bottom: .35rem; }
+.level-simples { color: var(--ok); }
+.level-media { color: var(--warn); }
+.level-complexa { color: var(--bad); }
+.points { font-size: 1.4rem; font-weight: 700; }
+.desc { color: var(--muted); font-size: .85rem; margin-top: .35rem; }
+footer {
+  text-align: center; padding: 2rem 1rem; color: var(--muted);
+  border-top: 1px solid var(--border); margin-top: 2rem; font-size: .85rem;
+}
+.back-btn {
+  display: inline-block; margin-bottom: 1rem; background: var(--bg2);
+  border: 1px solid var(--border); padding: .4rem .8rem; border-radius: 6px;
+  color: var(--text);
+}
+.back-btn:hover { background: var(--bg3); text-decoration: none; }
+.layout-2 {
+  display: grid; grid-template-columns: 1fr 300px; gap: 1.25rem; padding: 1.5rem; max-width: 1200px; margin: 0 auto;
+}
+@media (max-width: 900px) { .layout-2 { grid-template-columns: 1fr; } }
+.info-list, .dep-list { list-style: none; padding: 0; margin: 0; }
+.info-list li, .dep-list li {
+  display: flex; justify-content: space-between; gap: .5rem;
+  padding: .45rem 0; border-bottom: 1px solid var(--border); font-size: .9rem;
+}
+.info-list .key { color: var(--muted); }
+.mermaid {
+  background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+  padding: 1rem; overflow-x: auto; font-family: monospace; font-size: .8rem;
+  white-space: pre-wrap; color: var(--muted);
+}
+.note {
+  background: #1a2740; border-left: 3px solid var(--warn);
+  padding: .75rem 1rem; margin: .75rem 0; border-radius: 0 6px 6px 0; font-size: .9rem;
+}
+.doc-links { display: flex; flex-wrap: wrap; gap: .5rem; margin: 1rem 0; }
+.doc-links a {
+  background: var(--bg3); border: 1px solid var(--border); padding: .5rem .85rem;
+  border-radius: 6px; color: var(--text);
+}
+.given,.when,.then { margin: .25rem 0; }
+.role,.want,.why { margin: .2rem 0; }
+ul.check { list-style: none; padding-left: 0; }
+ul.check li::before { content: "☐ "; }
+
+
+</style>
+</head>
+<body>
+
+<header>
+  <div class="badge">Delphi 5 — Mapa de Arquivos</div>
+  <h1>Mapa Arquivo → Módulo</h1>
+  <p>Associação de artefatos do repositório aos módulos funcionais. <a href="site/index.html">Portal</a> | <a href="system-overview.html">Visão Geral</a></p>
+</header>
+<main>
+<section>
+  <div class="section-title">Tabela de Mapeamento</div>
+  <div class="note">Caminhos relativos à raiz do repositório. Um arquivo pode pertencer a vários módulos. Globs <code>**</code> usados para pastas amplas.</div>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Arquivo / Glob</th><th>Módulo(s)</th></tr></thead>
+    <tbody>
+    <!-- MODULE_FILE_MAP_START -->
+    <tr><td>CONTAB/FontesMT/Cópia de FRentabilidadeContabilMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/Cópia de FRentabilidadeContabilMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FAcertaCodRedMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FAcertaCodRedMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FAcertaNumPlanilhaMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FAcertaNumPlanilhaMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FAlteraDataMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FAlteraDataMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FAlteraPlanoContabilMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FAlteraPlanoContabilMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FAtuIntegraDiasMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FAtuIntegraDiasMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FAtuSaldoAnaMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FAtuSaldoAnaMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FAtuSaldoEncerramentoMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FAtuSaldoEncerramentoMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FAtualizaMoedaMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FAtualizaMoedaMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FAtualizaSinMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FAtualizaSinMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FCadColunasDemoMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FCadColunasDemoMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FCadContasContabMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FCadContasContabMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FCadContasporPeriodoMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FCadContasporPeriodoMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FCadDeParaContasMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FCadDeParaContasMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FCadDem2ColunasMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FCadDemo2ColunasMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FCadDemo2ColunasMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FCadDemonstrativoMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FCadDemonstrativoMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FCadDiasBloqMod.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FCadDiasBloqModMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FCadDiasBloqModMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FCadElemDemoMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FCadElemDemoMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FCadFaixaDatasMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FCadFaixaDatasMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FCadHistoricoMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FCadHistoricoMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FCadLancPreProntaMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FCadLancPreProntaMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FCadLancRateioMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FCadLancRateioMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FCadLancamAutomMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FCadLancamAutomMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FCadLayoutDemoMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FCadLayoutDemoMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FCadLinhasDemoMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FCadLinhasDemoMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FCadMovAnteriorMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FCadMovAnteriorMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FCadOrcamentoContabilMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FCadOrcamentoContabilMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FCadParamContabMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FCadParamContabMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FCadPercentRateioAPMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FCadPercentRateioAPMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FCadPeriodoContabilMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FCadPeriodoContabilMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FCadPlanilPreProntaMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FCadPlanilPreProntaMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FCadPlanilRateioMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FCadPlanilRateioMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FCadPlanoContasMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FCadPlanoContasMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FCadRatAdmPlanoPatroMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FCadRatAdmPlanoPatroMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FCadRateioPlanPrevMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FCadRateioPlanPrevMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FCadRateioProgMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FCadRateioProgMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FCadRegrasContabMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FCadRegrasContabMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FCadSaldoAntAtivProjMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FCadSaldoAntAtivProjMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FCadSaldoAnterioMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FCadSaldoAnterioMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FCadSaldoAnteriorMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FCadSaldoAnteriorMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FCadSaldoCotasPlanPatroMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FCadSaldoCotasPlanPatroMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FCadSubContaMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FCadSubContaMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FCadSubGrupoMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FCadSubGrupoMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FCadTabelasContabMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FCadTabelasContabMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FCadTermoDiarioMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FCadTermoDiarioMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FCadTipoRentabilidade.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FCadTipoRentabilidade.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FCadastroGridMTImob.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FCadastroGridMTImob.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FCadastroMestreDetMTImob.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FCadastroMestreDetMTImob.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FConfigRelatorioMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FConfigRelatorioMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FCopiaDemonstrativoMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FCopiaDemonstrativoMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FDataMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FDataMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FDeficitSuperavitMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FDeficitSuperavitMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FEncerraExercicioMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FEncerraExercicioMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FEncerraPeriodoMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FEncerraPeriodoMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FEncerraResultadosMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FEncerraResultadosMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FExcluiApuracao.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FExcluiApuracao.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FExcluiExportContab.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FExcluiExportContab.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FExcluiExportContabMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FExcluiExportContabMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FExcluiPlanilhaFaixaMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FExcluiPlanilhaFaixaMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FExpPosadasMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FExpPosadasMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FExportaContabMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FExportaContabMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FGeraConsolidadoMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FGeraConsolidadoMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FGeraCotaPlanPatroMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FGeraCotaPlanPatroMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FGeraLancRateioAdminMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FGeraLancRateioAdminMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FGeraLancRateioMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FGeraLancRateioMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FGeraRatAdmPlanPatroMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FGeraRatAdmPlanPatroMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FGeraRateioAtivProjMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FGeraRateioAtivProjMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FGeraSalCont2004MT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FGeraSalCont2004MT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FGeraSalCont2010MT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FGeraSalCont2010MT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FGeraSalContMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FGeraSalContMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FGeraSaldoCalcMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FGeraSaldoCalcMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FImpFidelioMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FImpFidelioMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FImportaCorrespMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FImportaCorrespMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FImportaDinamicaMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FImportaDinamicaMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FImportaExcelMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FImportaExcelMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FImportaLancamentosMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FImportaLancamentosMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FImportaOrcadoExcelMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FImportaOrcadoExcelMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FImportaPlanoContasMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FImportaPlanoContasMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FImportaPlanoSaldosMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FImportaPlanoSaldosMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FImportaRMMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FImportaRMMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FImportaSAFMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FImportaSAFMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FImportaSRHMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FImportaSRHMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FIntegraDiasMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FIntegraDiasMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FIntegraPlanilhasMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FIntegraPlanilhasMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FLancCadAutomMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FLancCadAutomMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FLancMeiaNoiteMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FLancMeiaNoiteMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FLancPesqMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FLancPesqMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FLancSaldosMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FLancSaldosMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FRateioPlanoPrevMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FRateioPlanoPrevMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FRegDepositoVHFMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FRegDepositoVHFMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FRentabilidadeContabilMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FRentabilidadeContabilMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FSaldosPesqMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FSaldosPesqMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FSegregaPlanPatroMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FSegregaPlanPatroMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FVerifLancMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FVerifLancMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FVerificaBloqueadosMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FVerificaBloqueadosMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FWizDesmembraAgrupa.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FWizDesmembraAgrupa.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FWizPlanilhaSPC.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FWizPlanilhaSPC.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FWizRenumPlanil.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FWizRenumPlanil.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FWizardMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FWizardMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FrmWizRenumPlanil.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/FrmWizRenumPlanil.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/dTermoDiario.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/dTermoDiario.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/fAjustaSegregacaoMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/fAjustaSegregacaoMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/fCadCriterioSegregacao.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/fCadCriterioSegregacao.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/fCadEventoSrhMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/fCadEventoSrhMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/fCadSPCConsiste.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/fCadSPCConsiste.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/fCadSegregaCotacao.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/fCadSegregaCotacao.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/fConfereRegraMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/fConfereRegraMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/fLancPlanAutomMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/fLancPlanAutomMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/fLancaContabMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/fLancaContabMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/fProcessaSegregacao.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/fProcessaSegregacao.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/fRateioProgMT.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/FontesMT/fRateioProgMT.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/DbObjects/uDbCompoelemdem.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/DbObjects/uDbSegregaCriter.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/DbObjects/uDbSubconta.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/DbObjects/uDbSegregacao.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/DbObjects/uDbDesenhodemo.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/DbObjects/uDbSegregaCotacao.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/DbObjects/uDbRateioativproj.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/DbObjects/uDbPlanilha.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/DbObjects/uDbRataddetplanpatro.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/DbObjects/uDbPlanocontaper.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/DbObjects/uDbTermoDiario.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/DbObjects/uDbRatadmplanpatro.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/DbObjects/uDbEnviodocumento.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/DbObjects/uDbRateioapextra.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/DbObjects/uDbPlanoSaldo.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/DbObjects/uDbComporateioap.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/DbObjects/uDbApurresultado.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/DbObjects/uDbPredetalhe.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/DbObjects/uDbPlanoConta.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/DbObjects/uDbElemdemonstrativo.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/DbObjects/uDbTabeladepara.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/DbObjects/uDbSPCConsiste.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/DbObjects/uDbDemonstrativo.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/DbObjects/uDbParamcontab.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/DbObjects/uDbDemlinha.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/DbObjects/uDbRecbtopagto.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/DbObjects/uDbDemcolunas.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/DbObjects/uDbElembalpatr.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/DbObjects/uDbContasxcc.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/DbObjects/uDbRateioplanpatro.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/DbObjects/uDbPeriodo.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/DbObjects/uDbDemcolxlin.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/DbObjects/uDbPlanodepara.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/DbObjects/uDbItemSPCConsiste.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/DbObjects/uDbContasxsubc.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/DbObjects/uDbSegregaData.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/DbObjects/uDbHistoContab.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/DbObjects/uDbSubgrupo.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/DbObjects/uDbPreplanilha.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/DbObjects/uDbRegrasContab.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/DbObjects/uDbLancamento.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/DbObjects/uDbPlano.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/DbObjects/uDbDiasbloqmod.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/DbObjects/uDbCampodepara.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/DbObjects/uDbPlanodata.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/DbObjects/uDbEventoSRH.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/CtrlObjects/FPrincipal.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/CtrlObjects/uCtrlCampoDePara.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/CtrlObjects/uCtrlContaContabil.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/CtrlObjects/uCtrlContab.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/CtrlObjects/uCtrlDemColuna.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/CtrlObjects/uCtrlDemLinha.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/CtrlObjects/uCtrlDemonstrativo.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/CtrlObjects/uCtrlDesenhoDemo.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/CtrlObjects/uCtrlDiasBloqMod.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/CtrlObjects/uCtrlElemBalPatr.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/CtrlObjects/uCtrlElemDemonstrativo.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/CtrlObjects/uCtrlEventoSRH.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/CtrlObjects/uCtrlHistoContab.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/CtrlObjects/uCtrlHistoContab_Old.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/CtrlObjects/uCtrlImportaContab.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/CtrlObjects/uCtrlLancamento.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/CtrlObjects/uCtrlLancamentoold.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/CtrlObjects/uCtrlListTerceiros.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/CtrlObjects/uCtrlParamContab.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/CtrlObjects/uCtrlPeriodo.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/CtrlObjects/uCtrlPlanilha.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/CtrlObjects/uCtrlPlano.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/CtrlObjects/uCtrlPlanoConta.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/CtrlObjects/uCtrlPlanoContaPer.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/CtrlObjects/uCtrlPlanoData.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/CtrlObjects/uCtrlPlanoDePara.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/CtrlObjects/uCtrlPlanoSaldo.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/CtrlObjects/uCtrlPosadasExpBalancete.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/CtrlObjects/uCtrlPrePlanilha.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/CtrlObjects/uCtrlPrePlanilhaLA.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/CtrlObjects/uCtrlPrePlanilhaPP.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/CtrlObjects/uCtrlPrePlanilhaRA.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/CtrlObjects/uCtrlPrePlanilhaRP.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/CtrlObjects/uCtrlPrePlanilhaRPP.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/CtrlObjects/uCtrlProcessaContab.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/CtrlObjects/uCtrlProcessaContabOld.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/CtrlObjects/uCtrlProcessaTotalPrev.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/CtrlObjects/uCtrlRateioApExtra.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/CtrlObjects/uCtrlRateioAtivProj.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/CtrlObjects/uCtrlRegrasContab.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/CtrlObjects/uCtrlRptAvisoLan.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/CtrlObjects/uCtrlSPCConsiste.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/CtrlObjects/uCtrlSegregacao.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/CtrlObjects/uCtrlSegregacaoProc.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/CtrlObjects/uCtrlSubConta.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/CtrlObjects/uCtrlSubGrupo.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/CtrlObjects/uCtrlTabelaDePara.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/CtrlObjects/uCtrlTermoDiario.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/Cópia (2) de uCtrlRptBalanceteAnalPP.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/Cópia de RRazaoAnalSimples.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/Cópia de RRazaoAnalitico.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/FBalPatr.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/FBalPatrSPC.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/FParamAvisoLan.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/FParamBalConsolidado.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/FParamBalancete.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/FParamBalanceteAPCC.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/FParamBalanceteAnalAPSC.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/FParamBalanceteAnalPP.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/FParamBalanceteAnalPPX.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/FParamBalanceteAnalSubConta.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/FParamBalanceteCCxC.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/FParamBalanceteCad.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/FParamBalanceteCol.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/FParamBalanceteColMesCC.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/FParamBalanceteCxAP.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/FParamBalanceteCxCC.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/FParamBalanceteCxSC.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/FParamBalanco.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/FParamCCConta.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/FParamConfSubConta.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/FParamContaCC.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/FParamDemo2_Anal.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/FParamDemoLayout.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/FParamDemoSPC.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/FParamDemonstrativo1.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/FParamDemonstrativo2.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/FParamDemonstrativo3.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/FParamDemonstrativo4.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/FParamDemonstrativo5.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/FParamDemonstrativo6.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/FParamDemonstrativo7.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/FParamDiario.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/FParamDiarioResumido.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/FParamHistorico.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/FParamListaDemonst.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/FParamMapaEvolu.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/FParamOrcamento.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/FParamOrcamentoCC.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/FParamPeriodo.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/FParamPlanilhas.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/FParamPlanoContas.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/FParamRazaoAnalSimples.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/FParamRazaoCCusto.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/FParamRazaoSint.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/FParamSaldoInicial.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/FParamSaldosAtuais.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/FParamSubConta.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/FRelFluxoFinanceiro.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/RAvisoLan.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/RBalPatr.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/RBalPatrSPC.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/RBalancete.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/RBalanceteAnalPP.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/RBalanceteAnalPPX.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/RBalanceteAnalSubConta.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/RBalanceteCad.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/RBalanceteColunado.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/RDiario.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/ROrcadoRealizado.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/RPeriodos.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/RPlanilhas.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/RPlanoContas.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/RRazaoAnalSimples.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/RRazaoAnalitico.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/RRazaoCCusto.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/RRazaoSintetico.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/RRelatWeb.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/RRentabilidadeContabil.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/RSubContas.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/RTipoRentabilidade.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/fParamCGPC28.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/fParamConfCotas.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/fParamRazaoAnal.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/rBalConsolidado.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/rBalanceteAnalAPCC.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/rBalanceteAnalAPSC.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/rBalanceteCCusto.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/rBalanceteColMesCC.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/rBalanceteCxAP.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/rBalanceteCxCC.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/rBalanceteCxSC.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/rBalanco.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/rCGPC28.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/rCentroCustoxContas.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/rConfCotas.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/rConfSubConta.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/rContasxCentroCusto.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/rDemoLayout.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/rDemoSPC.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/rDemonstrativo1.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/rDemonstrativo2.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/rDemonstrativo3.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/rDemonstrativo4.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/rDemonstrativo5.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/rDemonstrativo6.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/rDemonstrativo7.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/rDemonstrativoModelo6.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/rDiarioResumido.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/rHistoricoPadrao.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/rListaDemonst.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/rMapaEvolu.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/rOrcadoRealizadoNew.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/rOrcamento.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/rOrcamentoCC.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/rSaldoInicial.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/rSaldosAtuais.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/uCtrlRptBalancete.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/uCtrlRptBalanceteAnalPP.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/uCtrlRptBalanceteAnalPPX.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/uCtrlRptBalanceteAnalSubconta.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/uCtrlRptCGPC28.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/uCtrlRptContab.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Reports/Source/uCtrlRptDemonstrativo.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Fontes/Contab.dpr</td><td>contab</td></tr>
+<tr><td>CONTAB/Fontes/FPrincipal.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Fontes/FPrincipal.dfm</td><td>contab</td></tr>
+<tr><td>CONTAB/Fontes/dContab.pas</td><td>contab</td></tr>
+<tr><td>CONTAB/Fontes/UModulo.pas</td><td>contab</td></tr>
+<tr><td>CMCONTABOBJ50/**/*.pas</td><td>contab</td></tr>
+<tr><td>GLOBALCM/**</td><td>global-cm</td></tr>
+<tr><td>CM/Forms/**</td><td>global-cm</td></tr>
+<tr><td>CMGLOBALOBJ50/**</td><td>global-cm</td></tr>
+<tr><td>CPAGAR/**</td><td>contas-a-pagar</td></tr>
+<tr><td>CMCAPCAROBJ50/**</td><td>contas-a-pagar</td></tr>
+<tr><td>CRECEBER/**</td><td>contas-a-receber</td></tr>
+<tr><td>CMCAPCAROBJ50/**</td><td>contas-a-receber</td></tr>
+<tr><td>ORCAMENTO/**</td><td>orcamento</td></tr>
+<tr><td>CMPLANEORCOBJ50/**</td><td>orcamento</td></tr>
+<tr><td>FOLHA/**</td><td>folha</td></tr>
+<tr><td>CMRHOBJ50/**</td><td>folha</td></tr>
+<tr><td>MODFOL/**</td><td>folha</td></tr>
+<tr><td>CONTRIBUICAOPREV/**</td><td>contribuicao-prev</td></tr>
+<tr><td>BENEFICIOPREV/**</td><td>beneficio-prev</td></tr>
+<tr><td>CMMODBENSVR50/**</td><td>beneficio-prev</td></tr>
+<tr><td>CADASTROPREV/**</td><td>cadastro-prev</td></tr>
+<tr><td>INVESTIMENTOS/**</td><td>investimentos</td></tr>
+<tr><td>INVESTCOTAS/**</td><td>investimentos</td></tr>
+<tr><td>INVESTFDO/**</td><td>investimentos</td></tr>
+<tr><td>EMPRESTIMO/**</td><td>emprestimo</td></tr>
+<tr><td>EMPRESTIMOBPL/**</td><td>emprestimo</td></tr>
+<tr><td>CAF/**</td><td>caf</td></tr>
+<tr><td>CAFMT/**</td><td>caf</td></tr>
+<tr><td>CMCAFOBJ50/**</td><td>caf</td></tr>
+<tr><td>IRRF/**</td><td>irrf</td></tr>
+<tr><td>CMIRRFOBJ50/**</td><td>irrf</td></tr>
+<tr><td>REGRA/**</td><td>regra</td></tr>
+<tr><td>EXECUTAREGRA/**</td><td>regra</td></tr>
+<tr><td>ALMOXARIFADO/**</td><td>almoxarifado</td></tr>
+<tr><td>ALMOX&amp;COMPRAS/**</td><td>almoxarifado</td></tr>
+<tr><td>CMALMOXCOMPRAOBJ50/**</td><td>almoxarifado</td></tr>
+<tr><td>COMPRAS2000/**</td><td>compras</td></tr>
+<tr><td>ADMINIMOB/**</td><td>imobiliario</td></tr>
+<tr><td>INVESTIMOB/**</td><td>imobiliario</td></tr>
+<tr><td>ALIENACAO/**</td><td>imobiliario</td></tr>
+<tr><td>CMIMOBILIARIOOBJ50/**</td><td>imobiliario</td></tr>
+<tr><td>SISTJURCONS/**</td><td>juridico</td></tr>
+<tr><td>SISTJUR/**</td><td>juridico</td></tr>
+<tr><td>PROCJUD/**</td><td>juridico</td></tr>
+<tr><td>CFINAN/**</td><td>cfinan</td></tr>
+<tr><td>CMCFINANOBJ50/**</td><td>cfinan</td></tr>
+<tr><td>INDICADORES/**</td><td>indicadores</td></tr>
+<tr><td>CMINDICADORESOBJ50/**</td><td>indicadores</td></tr>
+<tr><td>CONTRATO/**</td><td>contrato</td></tr>
+<tr><td>PARAMPREV/**</td><td>param-prev</td></tr>
+<tr><td>MODASM/**</td><td>modulos-previdenciarios</td></tr>
+<tr><td>MODAUTO/**</td><td>modulos-previdenciarios</td></tr>
+<tr><td>MODAVA/**</td><td>modulos-previdenciarios</td></tr>
+<tr><td>MODBEN/**</td><td>modulos-previdenciarios</td></tr>
+<tr><td>MODCES/**</td><td>modulos-previdenciarios</td></tr>
+<tr><td>MODCON/**</td><td>modulos-previdenciarios</td></tr>
+<tr><td>MODFOL/**</td><td>modulos-previdenciarios</td></tr>
+<tr><td>MODRES/**</td><td>modulos-previdenciarios</td></tr>
+<tr><td>MODTRN/**</td><td>modulos-previdenciarios</td></tr>
+<tr><td>MODACESSO/**</td><td>modulos-previdenciarios</td></tr>
+<tr><td>MODBAS/**</td><td>modulos-previdenciarios</td></tr>
+<tr><td>RELATORIOSCM/**</td><td>relatorios-cm</td></tr>
+<tr><td>CMRELATORIOOBJ50/**</td><td>relatorios-cm</td></tr>
+<tr><td>FLASHRPT/**</td><td>relatorios-cm</td></tr>
+<tr><td>CENTRALAP/**</td><td>central-ap</td></tr>
+<tr><td>3-Sistemas.bpg</td><td>global-cm, contab, c, o, n, t, a</td></tr>
+<tr><td>SCRIPT/**</td><td>global-cm</td></tr>
+<tr><td>__SCRIPTS__/**</td><td>global-cm, irrf, emprestimo</td></tr>
+    <!-- MODULE_FILE_MAP_END -->
+    </tbody>
+  </table></div>
+</section>
+</main>
+
+<footer>
+<p>CM Contabilidade — Documentação gerada em 2026-08-19 | Tecnologia: Delphi 5 | pt-BR</p>
+</footer>
+</body>
+</html>

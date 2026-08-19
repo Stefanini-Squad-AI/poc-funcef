@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Migração Contábil — CM Contabilidade</title>
+<style>
+
+:root {
+  --bg: #0f1419; --bg2: #1a2332; --bg3: #243044; --card: #1e2a3a;
+  --text: #e7ecf3; --muted: #9aa8bc; --accent: #3d9cf0; --accent2: #2dd4bf;
+  --ok: #34d399; --warn: #fbbf24; --bad: #f87171; --border: #2d3a4d;
+  --tag-alta: #065f46; --tag-media: #92400e; --tag-baixa: #7f1d1d;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0; font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(160deg, #0f1419 0%, #152033 50%, #0f1419 100%);
+  color: var(--text); line-height: 1.55; min-height: 100vh;
+}
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+header {
+  background: linear-gradient(135deg, #152033 0%, #1a3a5c 100%);
+  border-bottom: 1px solid var(--border); padding: 2rem 1.5rem 1.5rem;
+}
+header .badge {
+  display: inline-block; background: #1e3a5f; color: var(--accent2);
+  padding: .25rem .75rem; border-radius: 999px; font-size: .8rem;
+  border: 1px solid #2a5080; margin-bottom: .75rem;
+}
+header h1 { margin: 0 0 .5rem; font-size: clamp(1.5rem, 3vw, 2.2rem); }
+header p { margin: 0; color: var(--muted); max-width: 70ch; }
+nav {
+  display: flex; flex-wrap: wrap; gap: .5rem; padding: .75rem 1.5rem;
+  background: rgba(15,20,25,.85); border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 20; backdrop-filter: blur(8px);
+}
+nav a {
+  color: var(--text); background: var(--bg2); padding: .4rem .75rem;
+  border-radius: 6px; border: 1px solid var(--border); font-size: .85rem;
+}
+nav a:hover { background: var(--bg3); text-decoration: none; }
+main { padding: 1.5rem; max-width: 1200px; margin: 0 auto; }
+section {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1.25rem;
+}
+.section-title {
+  font-size: 1.15rem; font-weight: 700; margin-bottom: 1rem;
+  padding-bottom: .5rem; border-bottom: 1px solid var(--border);
+}
+.cards-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1rem;
+}
+.card {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 10px;
+  padding: 1rem; transition: border-color .2s, transform .2s;
+}
+.card:hover { border-color: var(--accent); transform: translateY(-2px); }
+.card h3 { margin: 0 0 .5rem; font-size: 1rem; }
+.card p { margin: 0; color: var(--muted); font-size: .9rem; }
+.stats {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: .75rem;
+}
+.stat {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 8px;
+  padding: .85rem; text-align: center;
+}
+.stat .n { font-size: 1.6rem; font-weight: 700; color: var(--accent2); }
+.stat .l { font-size: .75rem; color: var(--muted); }
+table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+th, td {
+  border: 1px solid var(--border); padding: .5rem .65rem; text-align: left;
+  vertical-align: top;
+}
+th { background: var(--bg3); }
+tbody tr:nth-child(even) { background: rgba(255,255,255,.02); }
+.table-wrap { overflow-x: auto; }
+code {
+  font-family: Consolas, "Courier New", monospace; font-size: .85em;
+  background: var(--bg); padding: .1rem .35rem; border-radius: 4px;
+}
+.tag {
+  display: inline-block; padding: .15rem .45rem; border-radius: 4px;
+  font-size: .75rem; font-weight: 600;
+}
+.tag-alta { background: var(--tag-alta); color: #a7f3d0; }
+.tag-media { background: var(--tag-media); color: #fde68a; }
+.tag-baixa { background: var(--tag-baixa); color: #fecaca; }
+.story-card {
+  background: var(--bg2); border-left: 4px solid var(--accent);
+  padding: .85rem 1rem; margin-bottom: .75rem; border-radius: 0 8px 8px 0;
+}
+.criteria-block, .rule-block {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 8px; padding: .85rem 1rem; margin-bottom: .75rem;
+}
+.rule-id { font-weight: 700; color: var(--accent2); margin-bottom: .35rem; }
+.rule-origin { font-size: .85rem; color: var(--muted); margin-top: .5rem; }
+.complexity-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: .75rem;
+}
+.complexity-item {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; text-align: center;
+}
+.level { font-weight: 700; margin-bottom: .35rem; }
+.level-simples { color: var(--ok); }
+.level-media { color: var(--warn); }
+.level-complexa { color: var(--bad); }
+.points { font-size: 1.4rem; font-weight: 700; }
+.desc { color: var(--muted); font-size: .85rem; margin-top: .35rem; }
+footer {
+  text-align: center; padding: 2rem 1rem; color: var(--muted);
+  border-top: 1px solid var(--border); margin-top: 2rem; font-size: .85rem;
+}
+.back-btn {
+  display: inline-block; margin-bottom: 1rem; background: var(--bg2);
+  border: 1px solid var(--border); padding: .4rem .8rem; border-radius: 6px;
+  color: var(--text);
+}
+.back-btn:hover { background: var(--bg3); text-decoration: none; }
+.layout-2 {
+  display: grid; grid-template-columns: 1fr 300px; gap: 1.25rem; padding: 1.5rem; max-width: 1200px; margin: 0 auto;
+}
+@media (max-width: 900px) { .layout-2 { grid-template-columns: 1fr; } }
+.info-list, .dep-list { list-style: none; padding: 0; margin: 0; }
+.info-list li, .dep-list li {
+  display: flex; justify-content: space-between; gap: .5rem;
+  padding: .45rem 0; border-bottom: 1px solid var(--border); font-size: .9rem;
+}
+.info-list .key { color: var(--muted); }
+.mermaid {
+  background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+  padding: 1rem; overflow-x: auto; font-family: monospace; font-size: .8rem;
+  white-space: pre-wrap; color: var(--muted);
+}
+.note {
+  background: #1a2740; border-left: 3px solid var(--warn);
+  padding: .75rem 1rem; margin: .75rem 0; border-radius: 0 6px 6px 0; font-size: .9rem;
+}
+.doc-links { display: flex; flex-wrap: wrap; gap: .5rem; margin: 1rem 0; }
+.doc-links a {
+  background: var(--bg3); border: 1px solid var(--border); padding: .5rem .85rem;
+  border-radius: 6px; color: var(--text);
+}
+.given,.when,.then { margin: .25rem 0; }
+.role,.want,.why { margin: .2rem 0; }
+ul.check { list-style: none; padding-left: 0; }
+ul.check li::before { content: "☐ "; }
+
+
+</style>
+</head>
+<body>
+
+<header>
+  <div class="badge">Migração Contábil — Delphi 5 → C# / Angular</div>
+  <h1>🚨 Migração do Módulo Contábil</h1>
+  <p>Análise para modernização do Contábil preservando funcionalidades, regras, integrações e dependências. Gerado em 2026-08-19.</p>
+  <div class="doc-links">
+    <a href="site/index.html">Portal</a>
+    <a href="site/modules/contab/index.html">Módulo Contábil</a>
+    <a href="system-overview.html">Visão Geral</a>
+    <a href="api-catalog.html">APIs</a>
+    <a href="database-model.html">Modelo de Dados</a>
+  </div>
+</header>
+<nav>
+  <a href="#resumo">1 Resumo</a>
+  <a href="#escopo">2 Escopo</a>
+  <a href="#funcs">3 Funções</a>
+  <a href="#us">4 User Stories</a>
+  <a href="#aceite">5 Aceite</a>
+  <a href="#mapa">6 Mapeamento</a>
+  <a href="#dominio">7 Domínio</a>
+  <a href="#apis">8 APIs</a>
+  <a href="#angular">9 Angular</a>
+  <a href="#deps">10 Deps</a>
+  <a href="#externos">11 Externos</a>
+  <a href="#matriz">12 Matriz</a>
+  <a href="#banco">13 Banco</a>
+  <a href="#regras">14 Regras</a>
+  <a href="#riscos">15 Riscos</a>
+  <a href="#estrategia">16 Estratégia</a>
+  <a href="#backlog">17 Backlog</a>
+  <a href="#lacunas">18 Lacunas</a>
+  <a href="#checklist">19 Checklist</a>
+</nav>
+<main>
+
+<section id="resumo">
+  <div class="section-title">1. Resumo Executivo</div>
+  <ul>
+    <li><strong>Objetivo:</strong> migrar o módulo Contábil (Contab.exe) de Delphi 5 para backend C# (ASP.NET Core / API REST) e frontend Angular, preservando comportamento.</li>
+    <li><strong>Escopo:</strong> CONTAB (+ CMCONTABOBJ50), reports, integrações de entrada/saída e dependências com CapCar, Orçamento, CAF, Folha e demais módulos que geram/consultam contabilidade.</li>
+    <li><strong>Situação atual:</strong> aplicativo VCL maduro, ~113 forms MT, 46 tabelas DbObject, 55 units de relatório, arquitetura Ctrl/DbObject + MIDAS.</li>
+    <li><strong>Tecnologia atual:</strong> Delphi 5 / VCL / MIDAS / DBTables-BDE / ReportBuilder / Oracle.</li>
+    <li><strong>Tecnologia alvo:</strong> C# + ASP.NET Core (API REST, serviços de domínio, EF Core quando aplicável) + Angular (telas equivalentes).</li>
+    <li><strong>Principais riscos:</strong> regras em Controllers extensos (uCtrlLancamento), SQL embutido, layouts regulatórios SIPC, integrações por arquivo sem especificação externa no repo, saldos/fechamento.</li>
+    <li><strong>Principais dependências:</strong> GLOBALCM/CM framework, tabelas compartilhadas, CapCar, Orçamento, CAF, Folha/SRH, Excel/SAF/Fidélio/Posadas.</li>
+    <li><strong>Pontos de atenção:</strong> preservação de partidas dobradas, bloqueio de período, segregação previdenciária, multi-moeda (PARAMCONTAB).</li>
+  </ul>
+</section>
+
+<section id="escopo">
+  <div class="section-title">2. Escopo do Módulo Contábil — Inventário de Artefatos</div>
+  <p>Total listado abaixo (amostra completa de forms/tabelas/ctrls + amostra de reports): 244 itens.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Artefato</th><th>Tipo</th><th>Responsabilidade</th><th>Evidência</th><th>Confiança</th><th>Destino sugerido</th></tr></thead>
+    <tbody>
+    <tr><td><code>CONTAB/FontesMT/Cópia de FRentabilidadeContabilMT.dfm</code></td><td>Form/DFM</td><td>Rentabilidade Contábil</td><td>CONTAB/FontesMT/Cópia de FRentabilidadeContabilMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular</td></tr>
+<tr><td><code>CONTAB/FontesMT/FAcertaCodRedMT.dfm</code></td><td>Form/DFM</td><td>Atualiza Códigos Reduzidos</td><td>CONTAB/FontesMT/FAcertaCodRedMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular</td></tr>
+<tr><td><code>CONTAB/FontesMT/FAcertaNumPlanilhaMT.dfm</code></td><td>Form/DFM</td><td>Atualiza Numeração das Planilhas</td><td>CONTAB/FontesMT/FAcertaNumPlanilhaMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular</td></tr>
+<tr><td><code>CONTAB/FontesMT/FAlteraDataMT.dfm</code></td><td>Form/DFM</td><td>Alteração de Datas de Planilha</td><td>CONTAB/FontesMT/FAlteraDataMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular</td></tr>
+<tr><td><code>CONTAB/FontesMT/FAlteraPlanoContabilMT.dfm</code></td><td>Form/DFM</td><td>Alteração do Plano Contábil</td><td>CONTAB/FontesMT/FAlteraPlanoContabilMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular</td></tr>
+<tr><td><code>CONTAB/FontesMT/FAtuIntegraDiasMT.dfm</code></td><td>Form/DFM</td><td>Atualiza Saldo das Contas Analíticas</td><td>CONTAB/FontesMT/FAtuIntegraDiasMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular + C#</td></tr>
+<tr><td><code>CONTAB/FontesMT/FAtuSaldoAnaMT.dfm</code></td><td>Form/DFM</td><td>Atualiza Saldo das Contas Analíticas</td><td>CONTAB/FontesMT/FAtuSaldoAnaMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular + C#</td></tr>
+<tr><td><code>CONTAB/FontesMT/FAtuSaldoEncerramentoMT.dfm</code></td><td>Form/DFM</td><td>Atualiza Saldo de Encerramento das Contas</td><td>CONTAB/FontesMT/FAtuSaldoEncerramentoMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular + C#</td></tr>
+<tr><td><code>CONTAB/FontesMT/FAtualizaMoedaMT.dfm</code></td><td>Form/DFM</td><td>Atualização de Moeda</td><td>CONTAB/FontesMT/FAtualizaMoedaMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular + C#</td></tr>
+<tr><td><code>CONTAB/FontesMT/FAtualizaSinMT.dfm</code></td><td>Form/DFM</td><td>Atualiza Sintéticas</td><td>CONTAB/FontesMT/FAtualizaSinMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular + C#</td></tr>
+<tr><td><code>CONTAB/FontesMT/FCadColunasDemoMT.dfm</code></td><td>Form/DFM</td><td>Colunas do Demonstrativo de Resultados</td><td>CONTAB/FontesMT/FCadColunasDemoMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular</td></tr>
+<tr><td><code>CONTAB/FontesMT/FCadContasContabMT.dfm</code></td><td>Form/DFM</td><td>Cadastro de Contas Contábeis</td><td>CONTAB/FontesMT/FCadContasContabMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular</td></tr>
+<tr><td><code>CONTAB/FontesMT/FCadContasporPeriodoMT.dfm</code></td><td>Form/DFM</td><td>Agrupamento e Desmembramento de Contas</td><td>CONTAB/FontesMT/FCadContasporPeriodoMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular</td></tr>
+<tr><td><code>CONTAB/FontesMT/FCadDeParaContasMT.dfm</code></td><td>Form/DFM</td><td>De/Para de Contas Contábeis</td><td>CONTAB/FontesMT/FCadDeParaContasMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular</td></tr>
+<tr><td><code>CONTAB/FontesMT/FCadDem2ColunasMT.dfm</code></td><td>Form/DFM</td><td>Cadastro dos Elementos do Balanço Patrimonial</td><td>CONTAB/FontesMT/FCadDem2ColunasMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular</td></tr>
+<tr><td><code>CONTAB/FontesMT/FCadDemo2ColunasMT.dfm</code></td><td>Form/DFM</td><td>Cadastro dos Elementos do Balanço Patrimonial</td><td>CONTAB/FontesMT/FCadDemo2ColunasMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular</td></tr>
+<tr><td><code>CONTAB/FontesMT/FCadDemonstrativoMT.dfm</code></td><td>Form/DFM</td><td>Cadastro de Demonstrativos</td><td>CONTAB/FontesMT/FCadDemonstrativoMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular</td></tr>
+<tr><td><code>CONTAB/FontesMT/FCadDiasBloqMod.dfm</code></td><td>Form/DFM</td><td>Cadastro de Dias Bloqueados por Módulo</td><td>CONTAB/FontesMT/FCadDiasBloqMod.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular</td></tr>
+<tr><td><code>CONTAB/FontesMT/FCadDiasBloqModMT.dfm</code></td><td>Form/DFM</td><td>Cadastro de Dias Bloqueados por Sistema</td><td>CONTAB/FontesMT/FCadDiasBloqModMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular</td></tr>
+<tr><td><code>CONTAB/FontesMT/FCadElemDemoMT.dfm</code></td><td>Form/DFM</td><td>Cadastro de Elementos do Demonstrativo</td><td>CONTAB/FontesMT/FCadElemDemoMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular</td></tr>
+<tr><td><code>CONTAB/FontesMT/FCadFaixaDatasMT.dfm</code></td><td>Form/DFM</td><td>Faixa de Datas do Plano de Contas</td><td>CONTAB/FontesMT/FCadFaixaDatasMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular</td></tr>
+<tr><td><code>CONTAB/FontesMT/FCadHistoricoMT.dfm</code></td><td>Form/DFM</td><td>Cadastro de Históricos Padrão</td><td>CONTAB/FontesMT/FCadHistoricoMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular</td></tr>
+<tr><td><code>CONTAB/FontesMT/FCadLancPreProntaMT.dfm</code></td><td>Form/DFM</td><td>Lançamentos - Planilhas Pré-Prontas</td><td>CONTAB/FontesMT/FCadLancPreProntaMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular</td></tr>
+<tr><td><code>CONTAB/FontesMT/FCadLancRateioMT.dfm</code></td><td>Form/DFM</td><td>Lançamento de Planilha de Rateio</td><td>CONTAB/FontesMT/FCadLancRateioMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular + C#</td></tr>
+<tr><td><code>CONTAB/FontesMT/FCadLancamAutomMT.dfm</code></td><td>Form/DFM</td><td>Lançamentos automáticos</td><td>CONTAB/FontesMT/FCadLancamAutomMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular</td></tr>
+<tr><td><code>CONTAB/FontesMT/FCadLayoutDemoMT.dfm</code></td><td>Form/DFM</td><td>Cadastro de Layouts dos Demonstrativos de Resultados</td><td>CONTAB/FontesMT/FCadLayoutDemoMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular</td></tr>
+<tr><td><code>CONTAB/FontesMT/FCadLinhasDemoMT.dfm</code></td><td>Form/DFM</td><td>Cadastro de Linhas do Demonstrativo Colunado</td><td>CONTAB/FontesMT/FCadLinhasDemoMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular</td></tr>
+<tr><td><code>CONTAB/FontesMT/FCadMovAnteriorMT.dfm</code></td><td>Form/DFM</td><td>Cadastro do Movimento de Exercícios Anteriores e Contas Estatíst</td><td>CONTAB/FontesMT/FCadMovAnteriorMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular</td></tr>
+<tr><td><code>CONTAB/FontesMT/FCadOrcamentoContabilMT.dfm</code></td><td>Form/DFM</td><td>Cadastro do Orçamento Contábil</td><td>CONTAB/FontesMT/FCadOrcamentoContabilMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular</td></tr>
+<tr><td><code>CONTAB/FontesMT/FCadParamContabMT.dfm</code></td><td>Form/DFM</td><td>Parâmetros da Contabilidade</td><td>CONTAB/FontesMT/FCadParamContabMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular</td></tr>
+<tr><td><code>CONTAB/FontesMT/FCadPercentRateioAPMT.dfm</code></td><td>Form/DFM</td><td>Percentuais de Rateio por Atividade/Projeto</td><td>CONTAB/FontesMT/FCadPercentRateioAPMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular + C#</td></tr>
+<tr><td><code>CONTAB/FontesMT/FCadPeriodoContabilMT.dfm</code></td><td>Form/DFM</td><td>Cadastro de Períodos Contábeis</td><td>CONTAB/FontesMT/FCadPeriodoContabilMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular</td></tr>
+<tr><td><code>CONTAB/FontesMT/FCadPlanilPreProntaMT.dfm</code></td><td>Form/DFM</td><td>Cadastro de Planilhas Pré-Prontas</td><td>CONTAB/FontesMT/FCadPlanilPreProntaMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular</td></tr>
+<tr><td><code>CONTAB/FontesMT/FCadPlanilRateioMT.dfm</code></td><td>Form/DFM</td><td>Cadastro de Planilhas de Rateio</td><td>CONTAB/FontesMT/FCadPlanilRateioMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular + C#</td></tr>
+<tr><td><code>CONTAB/FontesMT/FCadPlanoContasMT.dfm</code></td><td>Form/DFM</td><td>Cadastro de Plano de Contas</td><td>CONTAB/FontesMT/FCadPlanoContasMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular</td></tr>
+<tr><td><code>CONTAB/FontesMT/FCadRatAdmPlanoPatroMT.dfm</code></td><td>Form/DFM</td><td>Cadastro do Rateio Administrativo por Plano e Patrocinadora</td><td>CONTAB/FontesMT/FCadRatAdmPlanoPatroMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular</td></tr>
+<tr><td><code>CONTAB/FontesMT/FCadRateioPlanPrevMT.dfm</code></td><td>Form/DFM</td><td>Cadastro do Rateio por Plano e Patrocinadora</td><td>CONTAB/FontesMT/FCadRateioPlanPrevMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular + C#</td></tr>
+<tr><td><code>CONTAB/FontesMT/FCadRateioProgMT.dfm</code></td><td>Form/DFM</td><td>Cadastro do Rateio por Programa</td><td>CONTAB/FontesMT/FCadRateioProgMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular + C#</td></tr>
+<tr><td><code>CONTAB/FontesMT/FCadRegrasContabMT.dfm</code></td><td>Form/DFM</td><td>Cadastro de Regras Contábeis</td><td>CONTAB/FontesMT/FCadRegrasContabMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular</td></tr>
+<tr><td><code>CONTAB/FontesMT/FCadSaldoAntAtivProjMT.dfm</code></td><td>Form/DFM</td><td>Saldo Anterior por Atividade/Projeto</td><td>CONTAB/FontesMT/FCadSaldoAntAtivProjMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular</td></tr>
+<tr><td><code>CONTAB/FontesMT/FCadSaldoAnterioMT.dfm</code></td><td>Form/DFM</td><td>frmCadSaldoAnteriorMT</td><td>CONTAB/FontesMT/FCadSaldoAnterioMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular</td></tr>
+<tr><td><code>CONTAB/FontesMT/FCadSaldoAnteriorMT.dfm</code></td><td>Form/DFM</td><td>Cadastro de Saldos Anteriores</td><td>CONTAB/FontesMT/FCadSaldoAnteriorMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular</td></tr>
+<tr><td><code>CONTAB/FontesMT/FCadSaldoCotasPlanPatroMT.dfm</code></td><td>Form/DFM</td><td>Cadastro dos Saldos de Cotas por Plano e Patrocinadora</td><td>CONTAB/FontesMT/FCadSaldoCotasPlanPatroMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular</td></tr>
+<tr><td><code>CONTAB/FontesMT/FCadSubContaMT.dfm</code></td><td>Form/DFM</td><td>Cadastro de Sub-Contas</td><td>CONTAB/FontesMT/FCadSubContaMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular</td></tr>
+<tr><td><code>CONTAB/FontesMT/FCadSubGrupoMT.dfm</code></td><td>Form/DFM</td><td>Cadastro de Sub-Grupos</td><td>CONTAB/FontesMT/FCadSubGrupoMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular</td></tr>
+<tr><td><code>CONTAB/FontesMT/FCadTabelasContabMT.dfm</code></td><td>Form/DFM</td><td>Cadastro de Tabelas da Contabilidade</td><td>CONTAB/FontesMT/FCadTabelasContabMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular</td></tr>
+<tr><td><code>CONTAB/FontesMT/FCadTermoDiarioMT.dfm</code></td><td>Form/DFM</td><td>Termos do Diário</td><td>CONTAB/FontesMT/FCadTermoDiarioMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular</td></tr>
+<tr><td><code>CONTAB/FontesMT/FCadTipoRentabilidade.dfm</code></td><td>Form/DFM</td><td>Cadastro de Tipo de Rentabilidade</td><td>CONTAB/FontesMT/FCadTipoRentabilidade.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular</td></tr>
+<tr><td><code>CONTAB/FontesMT/FCadastroGridMTImob.dfm</code></td><td>Form/DFM</td><td>frmCadastroGridMTImob</td><td>CONTAB/FontesMT/FCadastroGridMTImob.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular</td></tr>
+<tr><td><code>CONTAB/FontesMT/FCadastroMestreDetMTImob.dfm</code></td><td>Form/DFM</td><td>FrmCadastroMestreDetMTImob</td><td>CONTAB/FontesMT/FCadastroMestreDetMTImob.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular</td></tr>
+<tr><td><code>CONTAB/FontesMT/FConfigRelatorioMT.dfm</code></td><td>Form/DFM</td><td>Configuração de Relatórios MT</td><td>CONTAB/FontesMT/FConfigRelatorioMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular</td></tr>
+<tr><td><code>CONTAB/FontesMT/FCopiaDemonstrativoMT.dfm</code></td><td>Form/DFM</td><td>Copiar Demonstrativos</td><td>CONTAB/FontesMT/FCopiaDemonstrativoMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular</td></tr>
+<tr><td><code>CONTAB/FontesMT/FDataMT.dfm</code></td><td>Form/DFM</td><td>Data do Estorno</td><td>CONTAB/FontesMT/FDataMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular</td></tr>
+<tr><td><code>CONTAB/FontesMT/FDeficitSuperavitMT.dfm</code></td><td>Form/DFM</td><td>Apuração de Resultado</td><td>CONTAB/FontesMT/FDeficitSuperavitMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular + C#</td></tr>
+<tr><td><code>CONTAB/FontesMT/FEncerraExercicioMT.dfm</code></td><td>Form/DFM</td><td>Encerramento do Exercício</td><td>CONTAB/FontesMT/FEncerraExercicioMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular + C#</td></tr>
+<tr><td><code>CONTAB/FontesMT/FEncerraPeriodoMT.dfm</code></td><td>Form/DFM</td><td>Encerra Período</td><td>CONTAB/FontesMT/FEncerraPeriodoMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular + C#</td></tr>
+<tr><td><code>CONTAB/FontesMT/FEncerraResultadosMT.dfm</code></td><td>Form/DFM</td><td>Encerra Contas de Resultado</td><td>CONTAB/FontesMT/FEncerraResultadosMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular + C#</td></tr>
+<tr><td><code>CONTAB/FontesMT/FExcluiApuracao.dfm</code></td><td>Form/DFM</td><td>Exclusão de Apuração de Resultados</td><td>CONTAB/FontesMT/FExcluiApuracao.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular</td></tr>
+<tr><td><code>CONTAB/FontesMT/FExcluiExportContab.dfm</code></td><td>Form/DFM</td><td>Exclusão de Exportação Contábil</td><td>CONTAB/FontesMT/FExcluiExportContab.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular</td></tr>
+<tr><td><code>CONTAB/FontesMT/FExcluiExportContabMT.dfm</code></td><td>Form/DFM</td><td>Exclusão de Exportação Contábil</td><td>CONTAB/FontesMT/FExcluiExportContabMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular</td></tr>
+<tr><td><code>CONTAB/FontesMT/FExcluiPlanilhaFaixaMT.dfm</code></td><td>Form/DFM</td><td>Exclui Planilha por Faixa</td><td>CONTAB/FontesMT/FExcluiPlanilhaFaixaMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular</td></tr>
+<tr><td><code>CONTAB/FontesMT/FExpPosadasMT.dfm</code></td><td>Form/DFM</td><td>Exporta Arquivos para Posadas</td><td>CONTAB/FontesMT/FExpPosadasMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular</td></tr>
+<tr><td><code>CONTAB/FontesMT/FExportaContabMT.dfm</code></td><td>Form/DFM</td><td>Exportação Contábil</td><td>CONTAB/FontesMT/FExportaContabMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular + C#</td></tr>
+<tr><td><code>CONTAB/FontesMT/FGeraConsolidadoMT.dfm</code></td><td>Form/DFM</td><td>Geração de Lançamentos Consolidados</td><td>CONTAB/FontesMT/FGeraConsolidadoMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular + C#</td></tr>
+<tr><td><code>CONTAB/FontesMT/FGeraCotaPlanPatroMT.dfm</code></td><td>Form/DFM</td><td>Geração da Quantidade de Cotas para a Segregação por Plano e Pat</td><td>CONTAB/FontesMT/FGeraCotaPlanPatroMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular + C#</td></tr>
+<tr><td><code>CONTAB/FontesMT/FGeraLancRateioAdminMT.dfm</code></td><td>Form/DFM</td><td>Geração dos Lançamentos do Rateio Administrativo</td><td>CONTAB/FontesMT/FGeraLancRateioAdminMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular + C#</td></tr>
+<tr><td><code>CONTAB/FontesMT/FGeraLancRateioMT.dfm</code></td><td>Form/DFM</td><td>Geração dos Lançamentos do Rateio por Ativ./Proj.</td><td>CONTAB/FontesMT/FGeraLancRateioMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular + C#</td></tr>
+<tr><td><code>CONTAB/FontesMT/FGeraRatAdmPlanPatroMT.dfm</code></td><td>Form/DFM</td><td>Geração dos Lançamentos de Rateio Administrativo por Plano e Pat</td><td>CONTAB/FontesMT/FGeraRatAdmPlanPatroMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular + C#</td></tr>
+<tr><td><code>CONTAB/FontesMT/FGeraRateioAtivProjMT.dfm</code></td><td>Form/DFM</td><td>Geração dos Dados do Rateio por Ativ./Proj.</td><td>CONTAB/FontesMT/FGeraRateioAtivProjMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular + C#</td></tr>
+<tr><td><code>CONTAB/FontesMT/FGeraSalCont2004MT.dfm</code></td><td>Form/DFM</td><td>Geração do Arquivo SIPC-CAP</td><td>CONTAB/FontesMT/FGeraSalCont2004MT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular + C#</td></tr>
+<tr><td><code>CONTAB/FontesMT/FGeraSalCont2010MT.dfm</code></td><td>Form/DFM</td><td>SICADI</td><td>CONTAB/FontesMT/FGeraSalCont2010MT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular + C#</td></tr>
+<tr><td><code>CONTAB/FontesMT/FGeraSalContMT.dfm</code></td><td>Form/DFM</td><td>Geração do Arquivo SIPC-CAP</td><td>CONTAB/FontesMT/FGeraSalContMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular + C#</td></tr>
+<tr><td><code>CONTAB/FontesMT/FGeraSaldoCalcMT.dfm</code></td><td>Form/DFM</td><td>Geração de Saldos Calculados</td><td>CONTAB/FontesMT/FGeraSaldoCalcMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular + C#</td></tr>
+<tr><td><code>CONTAB/FontesMT/FImpFidelioMT.dfm</code></td><td>Form/DFM</td><td>Contabilização da Receita do Front-Office Fidélio</td><td>CONTAB/FontesMT/FImpFidelioMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular</td></tr>
+<tr><td><code>CONTAB/FontesMT/FImportaCorrespMT.dfm</code></td><td>Form/DFM</td><td>Importação das Contas Correspondentes</td><td>CONTAB/FontesMT/FImportaCorrespMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular + C#</td></tr>
+<tr><td><code>CONTAB/FontesMT/FImportaDinamicaMT.dfm</code></td><td>Form/DFM</td><td>Importação da Folha da Dinâmica</td><td>CONTAB/FontesMT/FImportaDinamicaMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular + C#</td></tr>
+<tr><td><code>CONTAB/FontesMT/FImportaExcelMT.dfm</code></td><td>Form/DFM</td><td>Importação de Lançamentos Externos - Planilhas Excel</td><td>CONTAB/FontesMT/FImportaExcelMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular + C#</td></tr>
+<tr><td><code>CONTAB/FontesMT/FImportaLancamentosMT.dfm</code></td><td>Form/DFM</td><td>Importação de Lançamentos Externos</td><td>CONTAB/FontesMT/FImportaLancamentosMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular + C#</td></tr>
+<tr><td><code>CONTAB/FontesMT/FImportaOrcadoExcelMT.dfm</code></td><td>Form/DFM</td><td>Importação de Valores Orçados - Planilhas Excel</td><td>CONTAB/FontesMT/FImportaOrcadoExcelMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular + C#</td></tr>
+<tr><td><code>CONTAB/FontesMT/FImportaPlanoContasMT.dfm</code></td><td>Form/DFM</td><td>Importação dos dados do Plano de Contas</td><td>CONTAB/FontesMT/FImportaPlanoContasMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular + C#</td></tr>
+<tr><td><code>CONTAB/FontesMT/FImportaPlanoSaldosMT.dfm</code></td><td>Form/DFM</td><td>Importação dos dados dos Saldos Anteriores</td><td>CONTAB/FontesMT/FImportaPlanoSaldosMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular + C#</td></tr>
+<tr><td><code>CONTAB/FontesMT/FImportaRMMT.dfm</code></td><td>Form/DFM</td><td>Importação dos dados da RM</td><td>CONTAB/FontesMT/FImportaRMMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular + C#</td></tr>
+<tr><td><code>CONTAB/FontesMT/FImportaSAFMT.dfm</code></td><td>Form/DFM</td><td>Importação de Lançamentos do SAF</td><td>CONTAB/FontesMT/FImportaSAFMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular + C#</td></tr>
+<tr><td><code>CONTAB/FontesMT/FImportaSRHMT.dfm</code></td><td>Form/DFM</td><td>Importação dos dados da SRH Plus</td><td>CONTAB/FontesMT/FImportaSRHMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular + C#</td></tr>
+<tr><td><code>CONTAB/FontesMT/FIntegraDiasMT.dfm</code></td><td>Form/DFM</td><td>Integração por Data</td><td>CONTAB/FontesMT/FIntegraDiasMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular + C#</td></tr>
+<tr><td><code>CONTAB/FontesMT/FIntegraPlanilhasMT.dfm</code></td><td>Form/DFM</td><td>Integração por Planilhas</td><td>CONTAB/FontesMT/FIntegraPlanilhasMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular + C#</td></tr>
+<tr><td><code>CONTAB/FontesMT/FLancCadAutomMT.dfm</code></td><td>Form/DFM</td><td>Lançamento Automático</td><td>CONTAB/FontesMT/FLancCadAutomMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular</td></tr>
+<tr><td><code>CONTAB/FontesMT/FLancMeiaNoiteMT.dfm</code></td><td>Form/DFM</td><td>Apuração de Resultado do Exercício (Lançamento da Meia Noite)</td><td>CONTAB/FontesMT/FLancMeiaNoiteMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular</td></tr>
+<tr><td><code>CONTAB/FontesMT/FLancPesqMT.dfm</code></td><td>Form/DFM</td><td>Pesquisa de Lançamentos</td><td>CONTAB/FontesMT/FLancPesqMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular</td></tr>
+<tr><td><code>CONTAB/FontesMT/FLancSaldosMT.dfm</code></td><td>Form/DFM</td><td>Exibição de Lançamentos</td><td>CONTAB/FontesMT/FLancSaldosMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular</td></tr>
+<tr><td><code>CONTAB/FontesMT/FRateioPlanoPrevMT.dfm</code></td><td>Form/DFM</td><td>Rateio por Plano e Patrocinadora</td><td>CONTAB/FontesMT/FRateioPlanoPrevMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular + C#</td></tr>
+<tr><td><code>CONTAB/FontesMT/FRegDepositoVHFMT.dfm</code></td><td>Form/DFM</td><td>Regularização de Depósito do VHL</td><td>CONTAB/FontesMT/FRegDepositoVHFMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular</td></tr>
+<tr><td><code>CONTAB/FontesMT/FRentabilidadeContabilMT.dfm</code></td><td>Form/DFM</td><td>Rentabilidade Contábil</td><td>CONTAB/FontesMT/FRentabilidadeContabilMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular</td></tr>
+<tr><td><code>CONTAB/FontesMT/FSaldosPesqMT.dfm</code></td><td>Form/DFM</td><td>Pesquisa de Saldos Contábeis</td><td>CONTAB/FontesMT/FSaldosPesqMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular</td></tr>
+<tr><td><code>CONTAB/FontesMT/FSegregaPlanPatroMT.dfm</code></td><td>Form/DFM</td><td>Geração dos Lançamentos de Segregação por Plano e Patrocinadora</td><td>CONTAB/FontesMT/FSegregaPlanPatroMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular + C#</td></tr>
+<tr><td><code>CONTAB/FontesMT/FVerifLancMT.dfm</code></td><td>Form/DFM</td><td>Verifica Lançamentos</td><td>CONTAB/FontesMT/FVerifLancMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular</td></tr>
+<tr><td><code>CONTAB/FontesMT/FVerificaBloqueadosMT.dfm</code></td><td>Form/DFM</td><td>Planilhas não Integradas em Períodos Bloqueados</td><td>CONTAB/FontesMT/FVerificaBloqueadosMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular</td></tr>
+<tr><td><code>CONTAB/FontesMT/FWizDesmembraAgrupa.dfm</code></td><td>Form/DFM</td><td>Desmembramento/Agrupamento de Contas</td><td>CONTAB/FontesMT/FWizDesmembraAgrupa.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular + C#</td></tr>
+<tr><td><code>CONTAB/FontesMT/FWizPlanilhaSPC.dfm</code></td><td>Form/DFM</td><td>Gera Planilha Contábil - SPC  (Formato Excel)</td><td>CONTAB/FontesMT/FWizPlanilhaSPC.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular + C#</td></tr>
+<tr><td><code>CONTAB/FontesMT/FWizRenumPlanil.dfm</code></td><td>Form/DFM</td><td>Ativação da numeração de planilhas por SEQUENCE</td><td>CONTAB/FontesMT/FWizRenumPlanil.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular + C#</td></tr>
+<tr><td><code>CONTAB/FontesMT/FWizardMT.dfm</code></td><td>Form/DFM</td><td>frmWizardMT</td><td>CONTAB/FontesMT/FWizardMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular + C#</td></tr>
+<tr><td><code>CONTAB/FontesMT/FrmWizRenumPlanil.dfm</code></td><td>Form/DFM</td><td>frmWizardMT1</td><td>CONTAB/FontesMT/FrmWizRenumPlanil.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular + C#</td></tr>
+<tr><td><code>CONTAB/FontesMT/dTermoDiario.dfm</code></td><td>Form/DFM</td><td>dtmTermoDiario</td><td>CONTAB/FontesMT/dTermoDiario.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular</td></tr>
+<tr><td><code>CONTAB/FontesMT/fAjustaSegregacaoMT.dfm</code></td><td>Form/DFM</td><td>Ajuste de planilhas divergentes</td><td>CONTAB/FontesMT/fAjustaSegregacaoMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular + C#</td></tr>
+<tr><td><code>CONTAB/FontesMT/fCadCriterioSegregacao.dfm</code></td><td>Form/DFM</td><td>Cadastro de Critérios para Segregação</td><td>CONTAB/FontesMT/fCadCriterioSegregacao.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular + C#</td></tr>
+<tr><td><code>CONTAB/FontesMT/fCadEventoSrhMT.dfm</code></td><td>Form/DFM</td><td>Evento SRH</td><td>CONTAB/FontesMT/fCadEventoSrhMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular</td></tr>
+<tr><td><code>CONTAB/FontesMT/fCadSPCConsiste.dfm</code></td><td>Form/DFM</td><td>Cadastro de Regras de Consistência de Balancetes</td><td>CONTAB/FontesMT/fCadSPCConsiste.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular</td></tr>
+<tr><td><code>CONTAB/FontesMT/fCadSegregaCotacao.dfm</code></td><td>Form/DFM</td><td>Cotação de Critérios para Segregação</td><td>CONTAB/FontesMT/fCadSegregaCotacao.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular + C#</td></tr>
+<tr><td><code>CONTAB/FontesMT/fConfereRegraMT.dfm</code></td><td>Form/DFM</td><td>Consistência de Regras</td><td>CONTAB/FontesMT/fConfereRegraMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular</td></tr>
+<tr><td><code>CONTAB/FontesMT/fLancPlanAutomMT.dfm</code></td><td>Form/DFM</td><td>Lançamento Automático</td><td>CONTAB/FontesMT/fLancPlanAutomMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular</td></tr>
+<tr><td><code>CONTAB/FontesMT/fLancaContabMT.dfm</code></td><td>Form/DFM</td><td>Planilhas &amp; Lançamentos</td><td>CONTAB/FontesMT/fLancaContabMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular</td></tr>
+<tr><td><code>CONTAB/FontesMT/fProcessaSegregacao.dfm</code></td><td>Form/DFM</td><td>Processa Segregação de Recursos</td><td>CONTAB/FontesMT/fProcessaSegregacao.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular + C#</td></tr>
+<tr><td><code>CONTAB/FontesMT/fRateioProgMT.dfm</code></td><td>Form/DFM</td><td>Rateio por Programa</td><td>CONTAB/FontesMT/fRateioProgMT.dfm</td><td><span class='tag tag-alta'>Alta</span></td><td>Angular + C#</td></tr>
+<tr><td><code>CONTAB/DbObjects/uDbApurresultado.pas</code></td><td>DbObject/Tabela</td><td>Mapeia tabela APURRESULTADO</td><td>CONTAB/DbObjects/uDbApurresultado.pas TableName</td><td><span class='tag tag-alta'>Alta</span></td><td>C# / Banco</td></tr>
+<tr><td><code>CONTAB/DbObjects/uDbEventoSRH.pas</code></td><td>DbObject/Tabela</td><td>Mapeia tabela CADEVENTOSRH</td><td>CONTAB/DbObjects/uDbEventoSRH.pas TableName</td><td><span class='tag tag-alta'>Alta</span></td><td>C# / Banco</td></tr>
+<tr><td><code>CONTAB/DbObjects/uDbCampodepara.pas</code></td><td>DbObject/Tabela</td><td>Mapeia tabela CAMPODEPARA</td><td>CONTAB/DbObjects/uDbCampodepara.pas TableName</td><td><span class='tag tag-alta'>Alta</span></td><td>C# / Banco</td></tr>
+<tr><td><code>CONTAB/DbObjects/uDbCompoelemdem.pas</code></td><td>DbObject/Tabela</td><td>Mapeia tabela COMPOELEMDEM</td><td>CONTAB/DbObjects/uDbCompoelemdem.pas TableName</td><td><span class='tag tag-alta'>Alta</span></td><td>C# / Banco</td></tr>
+<tr><td><code>CONTAB/DbObjects/uDbComporateioap.pas</code></td><td>DbObject/Tabela</td><td>Mapeia tabela COMPORATEIOAP</td><td>CONTAB/DbObjects/uDbComporateioap.pas TableName</td><td><span class='tag tag-alta'>Alta</span></td><td>C# / Banco</td></tr>
+<tr><td><code>CONTAB/DbObjects/uDbContasxcc.pas</code></td><td>DbObject/Tabela</td><td>Mapeia tabela CONTASXCC</td><td>CONTAB/DbObjects/uDbContasxcc.pas TableName</td><td><span class='tag tag-alta'>Alta</span></td><td>C# / Banco</td></tr>
+<tr><td><code>CONTAB/DbObjects/uDbContasxsubc.pas</code></td><td>DbObject/Tabela</td><td>Mapeia tabela CONTASXSUBC</td><td>CONTAB/DbObjects/uDbContasxsubc.pas TableName</td><td><span class='tag tag-alta'>Alta</span></td><td>C# / Banco</td></tr>
+<tr><td><code>CONTAB/DbObjects/uDbDemcolunas.pas</code></td><td>DbObject/Tabela</td><td>Mapeia tabela DEMCOLUNAS</td><td>CONTAB/DbObjects/uDbDemcolunas.pas TableName</td><td><span class='tag tag-alta'>Alta</span></td><td>C# / Banco</td></tr>
+<tr><td><code>CONTAB/DbObjects/uDbDemcolxlin.pas</code></td><td>DbObject/Tabela</td><td>Mapeia tabela DEMCOLXLIN</td><td>CONTAB/DbObjects/uDbDemcolxlin.pas TableName</td><td><span class='tag tag-alta'>Alta</span></td><td>C# / Banco</td></tr>
+<tr><td><code>CONTAB/DbObjects/uDbDemlinha.pas</code></td><td>DbObject/Tabela</td><td>Mapeia tabela DEMLINHA</td><td>CONTAB/DbObjects/uDbDemlinha.pas TableName</td><td><span class='tag tag-alta'>Alta</span></td><td>C# / Banco</td></tr>
+<tr><td><code>CONTAB/DbObjects/uDbDemonstrativo.pas</code></td><td>DbObject/Tabela</td><td>Mapeia tabela DEMONSTRATIVO</td><td>CONTAB/DbObjects/uDbDemonstrativo.pas TableName</td><td><span class='tag tag-alta'>Alta</span></td><td>C# / Banco</td></tr>
+<tr><td><code>CONTAB/DbObjects/uDbDesenhodemo.pas</code></td><td>DbObject/Tabela</td><td>Mapeia tabela DESENHODEMO</td><td>CONTAB/DbObjects/uDbDesenhodemo.pas TableName</td><td><span class='tag tag-alta'>Alta</span></td><td>C# / Banco</td></tr>
+<tr><td><code>CONTAB/DbObjects/uDbDiasbloqmod.pas</code></td><td>DbObject/Tabela</td><td>Mapeia tabela DIASBLOQMOD</td><td>CONTAB/DbObjects/uDbDiasbloqmod.pas TableName</td><td><span class='tag tag-alta'>Alta</span></td><td>C# / Banco</td></tr>
+<tr><td><code>CONTAB/DbObjects/uDbElembalpatr.pas</code></td><td>DbObject/Tabela</td><td>Mapeia tabela ELEMBALPATR</td><td>CONTAB/DbObjects/uDbElembalpatr.pas TableName</td><td><span class='tag tag-alta'>Alta</span></td><td>C# / Banco</td></tr>
+<tr><td><code>CONTAB/DbObjects/uDbElemdemonstrativo.pas</code></td><td>DbObject/Tabela</td><td>Mapeia tabela ELEMDEMONSTRATIVO</td><td>CONTAB/DbObjects/uDbElemdemonstrativo.pas TableName</td><td><span class='tag tag-alta'>Alta</span></td><td>C# / Banco</td></tr>
+<tr><td><code>CONTAB/DbObjects/uDbEnviodocumento.pas</code></td><td>DbObject/Tabela</td><td>Mapeia tabela ENVIODOCUMENTO</td><td>CONTAB/DbObjects/uDbEnviodocumento.pas TableName</td><td><span class='tag tag-alta'>Alta</span></td><td>C# / Banco</td></tr>
+<tr><td><code>CONTAB/DbObjects/uDbHistoContab.pas</code></td><td>DbObject/Tabela</td><td>Mapeia tabela HISTOPADRAO</td><td>CONTAB/DbObjects/uDbHistoContab.pas TableName</td><td><span class='tag tag-alta'>Alta</span></td><td>C# / Banco</td></tr>
+<tr><td><code>CONTAB/DbObjects/uDbItemSPCConsiste.pas</code></td><td>DbObject/Tabela</td><td>Mapeia tabela ITEMSPCCONSISTE</td><td>CONTAB/DbObjects/uDbItemSPCConsiste.pas TableName</td><td><span class='tag tag-alta'>Alta</span></td><td>C# / Banco</td></tr>
+<tr><td><code>CONTAB/DbObjects/uDbLancamento.pas</code></td><td>DbObject/Tabela</td><td>Mapeia tabela LANCAMENTO</td><td>CONTAB/DbObjects/uDbLancamento.pas TableName</td><td><span class='tag tag-alta'>Alta</span></td><td>C# / Banco</td></tr>
+<tr><td><code>CONTAB/DbObjects/uDbParamcontab.pas</code></td><td>DbObject/Tabela</td><td>Mapeia tabela PARAMCONTAB</td><td>CONTAB/DbObjects/uDbParamcontab.pas TableName</td><td><span class='tag tag-alta'>Alta</span></td><td>C# / Banco</td></tr>
+<tr><td><code>CONTAB/DbObjects/uDbPeriodo.pas</code></td><td>DbObject/Tabela</td><td>Mapeia tabela PERIODO</td><td>CONTAB/DbObjects/uDbPeriodo.pas TableName</td><td><span class='tag tag-alta'>Alta</span></td><td>C# / Banco</td></tr>
+<tr><td><code>CONTAB/DbObjects/uDbPlanilha.pas</code></td><td>DbObject/Tabela</td><td>Mapeia tabela PLANILHA</td><td>CONTAB/DbObjects/uDbPlanilha.pas TableName</td><td><span class='tag tag-alta'>Alta</span></td><td>C# / Banco</td></tr>
+<tr><td><code>CONTAB/DbObjects/uDbPlano.pas</code></td><td>DbObject/Tabela</td><td>Mapeia tabela PLANO</td><td>CONTAB/DbObjects/uDbPlano.pas TableName</td><td><span class='tag tag-alta'>Alta</span></td><td>C# / Banco</td></tr>
+<tr><td><code>CONTAB/DbObjects/uDbPlanoConta.pas</code></td><td>DbObject/Tabela</td><td>Mapeia tabela PLANOCONTA</td><td>CONTAB/DbObjects/uDbPlanoConta.pas TableName</td><td><span class='tag tag-alta'>Alta</span></td><td>C# / Banco</td></tr>
+<tr><td><code>CONTAB/DbObjects/uDbPlanocontaper.pas</code></td><td>DbObject/Tabela</td><td>Mapeia tabela PLANOCONTAPER</td><td>CONTAB/DbObjects/uDbPlanocontaper.pas TableName</td><td><span class='tag tag-alta'>Alta</span></td><td>C# / Banco</td></tr>
+<tr><td><code>CONTAB/DbObjects/uDbPlanodata.pas</code></td><td>DbObject/Tabela</td><td>Mapeia tabela PLANODATA</td><td>CONTAB/DbObjects/uDbPlanodata.pas TableName</td><td><span class='tag tag-alta'>Alta</span></td><td>C# / Banco</td></tr>
+<tr><td><code>CONTAB/DbObjects/uDbPlanodepara.pas</code></td><td>DbObject/Tabela</td><td>Mapeia tabela PLANODEPARA</td><td>CONTAB/DbObjects/uDbPlanodepara.pas TableName</td><td><span class='tag tag-alta'>Alta</span></td><td>C# / Banco</td></tr>
+<tr><td><code>CONTAB/DbObjects/uDbPlanoSaldo.pas</code></td><td>DbObject/Tabela</td><td>Mapeia tabela PLANOSALDO</td><td>CONTAB/DbObjects/uDbPlanoSaldo.pas TableName</td><td><span class='tag tag-alta'>Alta</span></td><td>C# / Banco</td></tr>
+<tr><td><code>CONTAB/DbObjects/uDbPredetalhe.pas</code></td><td>DbObject/Tabela</td><td>Mapeia tabela PREDETALHE</td><td>CONTAB/DbObjects/uDbPredetalhe.pas TableName</td><td><span class='tag tag-alta'>Alta</span></td><td>C# / Banco</td></tr>
+<tr><td><code>CONTAB/DbObjects/uDbPreplanilha.pas</code></td><td>DbObject/Tabela</td><td>Mapeia tabela PREPLANILHA</td><td>CONTAB/DbObjects/uDbPreplanilha.pas TableName</td><td><span class='tag tag-alta'>Alta</span></td><td>C# / Banco</td></tr>
+<tr><td><code>CONTAB/DbObjects/uDbRataddetplanpatro.pas</code></td><td>DbObject/Tabela</td><td>Mapeia tabela RATADDETPLANPATRO</td><td>CONTAB/DbObjects/uDbRataddetplanpatro.pas TableName</td><td><span class='tag tag-alta'>Alta</span></td><td>C# / Banco</td></tr>
+<tr><td><code>CONTAB/DbObjects/uDbRatadmplanpatro.pas</code></td><td>DbObject/Tabela</td><td>Mapeia tabela RATADMPLANPATRO</td><td>CONTAB/DbObjects/uDbRatadmplanpatro.pas TableName</td><td><span class='tag tag-alta'>Alta</span></td><td>C# / Banco</td></tr>
+<tr><td><code>CONTAB/DbObjects/uDbRateioapextra.pas</code></td><td>DbObject/Tabela</td><td>Mapeia tabela RATEIOAPEXTRA</td><td>CONTAB/DbObjects/uDbRateioapextra.pas TableName</td><td><span class='tag tag-alta'>Alta</span></td><td>C# / Banco</td></tr>
+<tr><td><code>CONTAB/DbObjects/uDbRateioativproj.pas</code></td><td>DbObject/Tabela</td><td>Mapeia tabela RATEIOATIVPROJ</td><td>CONTAB/DbObjects/uDbRateioativproj.pas TableName</td><td><span class='tag tag-alta'>Alta</span></td><td>C# / Banco</td></tr>
+<tr><td><code>CONTAB/DbObjects/uDbRateioplanpatro.pas</code></td><td>DbObject/Tabela</td><td>Mapeia tabela RATEIOPLANPATRO</td><td>CONTAB/DbObjects/uDbRateioplanpatro.pas TableName</td><td><span class='tag tag-alta'>Alta</span></td><td>C# / Banco</td></tr>
+<tr><td><code>CONTAB/DbObjects/uDbRecbtopagto.pas</code></td><td>DbObject/Tabela</td><td>Mapeia tabela RECBTOPAGTO</td><td>CONTAB/DbObjects/uDbRecbtopagto.pas TableName</td><td><span class='tag tag-alta'>Alta</span></td><td>C# / Banco</td></tr>
+<tr><td><code>CONTAB/DbObjects/uDbRegrasContab.pas</code></td><td>DbObject/Tabela</td><td>Mapeia tabela REGRASCONTAB</td><td>CONTAB/DbObjects/uDbRegrasContab.pas TableName</td><td><span class='tag tag-alta'>Alta</span></td><td>C# / Banco</td></tr>
+<tr><td><code>CONTAB/DbObjects/uDbSegregacao.pas</code></td><td>DbObject/Tabela</td><td>Mapeia tabela SEGREGACAO</td><td>CONTAB/DbObjects/uDbSegregacao.pas TableName</td><td><span class='tag tag-alta'>Alta</span></td><td>C# / Banco</td></tr>
+<tr><td><code>CONTAB/DbObjects/uDbSegregaCotacao.pas</code></td><td>DbObject/Tabela</td><td>Mapeia tabela SEGREGACOTACAO</td><td>CONTAB/DbObjects/uDbSegregaCotacao.pas TableName</td><td><span class='tag tag-alta'>Alta</span></td><td>C# / Banco</td></tr>
+<tr><td><code>CONTAB/DbObjects/uDbSegregaCriter.pas</code></td><td>DbObject/Tabela</td><td>Mapeia tabela SEGREGACRITER</td><td>CONTAB/DbObjects/uDbSegregaCriter.pas TableName</td><td><span class='tag tag-alta'>Alta</span></td><td>C# / Banco</td></tr>
+<tr><td><code>CONTAB/DbObjects/uDbSegregaData.pas</code></td><td>DbObject/Tabela</td><td>Mapeia tabela SEGREGADATA</td><td>CONTAB/DbObjects/uDbSegregaData.pas TableName</td><td><span class='tag tag-alta'>Alta</span></td><td>C# / Banco</td></tr>
+<tr><td><code>CONTAB/DbObjects/uDbSPCConsiste.pas</code></td><td>DbObject/Tabela</td><td>Mapeia tabela SPCCONSISTE</td><td>CONTAB/DbObjects/uDbSPCConsiste.pas TableName</td><td><span class='tag tag-alta'>Alta</span></td><td>C# / Banco</td></tr>
+<tr><td><code>CONTAB/DbObjects/uDbSubconta.pas</code></td><td>DbObject/Tabela</td><td>Mapeia tabela SUBCONTA</td><td>CONTAB/DbObjects/uDbSubconta.pas TableName</td><td><span class='tag tag-alta'>Alta</span></td><td>C# / Banco</td></tr>
+<tr><td><code>CONTAB/DbObjects/uDbSubgrupo.pas</code></td><td>DbObject/Tabela</td><td>Mapeia tabela SUBGRUPO</td><td>CONTAB/DbObjects/uDbSubgrupo.pas TableName</td><td><span class='tag tag-alta'>Alta</span></td><td>C# / Banco</td></tr>
+<tr><td><code>CONTAB/DbObjects/uDbTabeladepara.pas</code></td><td>DbObject/Tabela</td><td>Mapeia tabela TABELADEPARA</td><td>CONTAB/DbObjects/uDbTabeladepara.pas TableName</td><td><span class='tag tag-alta'>Alta</span></td><td>C# / Banco</td></tr>
+<tr><td><code>CONTAB/DbObjects/uDbTermoDiario.pas</code></td><td>DbObject/Tabela</td><td>Mapeia tabela TERMODIARIO</td><td>CONTAB/DbObjects/uDbTermoDiario.pas TableName</td><td><span class='tag tag-alta'>Alta</span></td><td>C# / Banco</td></tr>
+<tr><td><code>CONTAB/CtrlObjects/FPrincipal.pas</code></td><td>CtrlObject</td><td>Regra/controle de negócio</td><td>CONTAB/CtrlObjects/FPrincipal.pas</td><td><span class='tag tag-alta'>Alta</span></td><td>C# Service</td></tr>
+<tr><td><code>CONTAB/CtrlObjects/uCtrlCampoDePara.pas</code></td><td>CtrlObject</td><td>Regra/controle de negócio</td><td>CONTAB/CtrlObjects/uCtrlCampoDePara.pas</td><td><span class='tag tag-alta'>Alta</span></td><td>C# Service</td></tr>
+<tr><td><code>CONTAB/CtrlObjects/uCtrlContaContabil.pas</code></td><td>CtrlObject</td><td>Regra/controle de negócio</td><td>CONTAB/CtrlObjects/uCtrlContaContabil.pas</td><td><span class='tag tag-alta'>Alta</span></td><td>C# Service</td></tr>
+<tr><td><code>CONTAB/CtrlObjects/uCtrlContab.pas</code></td><td>CtrlObject</td><td>Regra/controle de negócio</td><td>CONTAB/CtrlObjects/uCtrlContab.pas</td><td><span class='tag tag-alta'>Alta</span></td><td>C# Service</td></tr>
+<tr><td><code>CONTAB/CtrlObjects/uCtrlDemColuna.pas</code></td><td>CtrlObject</td><td>Regra/controle de negócio</td><td>CONTAB/CtrlObjects/uCtrlDemColuna.pas</td><td><span class='tag tag-alta'>Alta</span></td><td>C# Service</td></tr>
+<tr><td><code>CONTAB/CtrlObjects/uCtrlDemLinha.pas</code></td><td>CtrlObject</td><td>Regra/controle de negócio</td><td>CONTAB/CtrlObjects/uCtrlDemLinha.pas</td><td><span class='tag tag-alta'>Alta</span></td><td>C# Service</td></tr>
+<tr><td><code>CONTAB/CtrlObjects/uCtrlDemonstrativo.pas</code></td><td>CtrlObject</td><td>Regra/controle de negócio</td><td>CONTAB/CtrlObjects/uCtrlDemonstrativo.pas</td><td><span class='tag tag-alta'>Alta</span></td><td>C# Service</td></tr>
+<tr><td><code>CONTAB/CtrlObjects/uCtrlDesenhoDemo.pas</code></td><td>CtrlObject</td><td>Regra/controle de negócio</td><td>CONTAB/CtrlObjects/uCtrlDesenhoDemo.pas</td><td><span class='tag tag-alta'>Alta</span></td><td>C# Service</td></tr>
+<tr><td><code>CONTAB/CtrlObjects/uCtrlDiasBloqMod.pas</code></td><td>CtrlObject</td><td>Regra/controle de negócio</td><td>CONTAB/CtrlObjects/uCtrlDiasBloqMod.pas</td><td><span class='tag tag-alta'>Alta</span></td><td>C# Service</td></tr>
+<tr><td><code>CONTAB/CtrlObjects/uCtrlElemBalPatr.pas</code></td><td>CtrlObject</td><td>Regra/controle de negócio</td><td>CONTAB/CtrlObjects/uCtrlElemBalPatr.pas</td><td><span class='tag tag-alta'>Alta</span></td><td>C# Service</td></tr>
+<tr><td><code>CONTAB/CtrlObjects/uCtrlElemDemonstrativo.pas</code></td><td>CtrlObject</td><td>Regra/controle de negócio</td><td>CONTAB/CtrlObjects/uCtrlElemDemonstrativo.pas</td><td><span class='tag tag-alta'>Alta</span></td><td>C# Service</td></tr>
+<tr><td><code>CONTAB/CtrlObjects/uCtrlEventoSRH.pas</code></td><td>CtrlObject</td><td>Regra/controle de negócio</td><td>CONTAB/CtrlObjects/uCtrlEventoSRH.pas</td><td><span class='tag tag-alta'>Alta</span></td><td>C# Service</td></tr>
+<tr><td><code>CONTAB/CtrlObjects/uCtrlHistoContab.pas</code></td><td>CtrlObject</td><td>Regra/controle de negócio</td><td>CONTAB/CtrlObjects/uCtrlHistoContab.pas</td><td><span class='tag tag-alta'>Alta</span></td><td>C# Service</td></tr>
+<tr><td><code>CONTAB/CtrlObjects/uCtrlHistoContab_Old.pas</code></td><td>CtrlObject</td><td>Regra/controle de negócio</td><td>CONTAB/CtrlObjects/uCtrlHistoContab_Old.pas</td><td><span class='tag tag-alta'>Alta</span></td><td>C# Service</td></tr>
+<tr><td><code>CONTAB/CtrlObjects/uCtrlImportaContab.pas</code></td><td>CtrlObject</td><td>Regra/controle de negócio</td><td>CONTAB/CtrlObjects/uCtrlImportaContab.pas</td><td><span class='tag tag-alta'>Alta</span></td><td>C# Service</td></tr>
+<tr><td><code>CONTAB/CtrlObjects/uCtrlLancamento.pas</code></td><td>CtrlObject</td><td>Regra/controle de negócio</td><td>CONTAB/CtrlObjects/uCtrlLancamento.pas</td><td><span class='tag tag-alta'>Alta</span></td><td>C# Service</td></tr>
+<tr><td><code>CONTAB/CtrlObjects/uCtrlLancamentoold.pas</code></td><td>CtrlObject</td><td>Regra/controle de negócio</td><td>CONTAB/CtrlObjects/uCtrlLancamentoold.pas</td><td><span class='tag tag-alta'>Alta</span></td><td>C# Service</td></tr>
+<tr><td><code>CONTAB/CtrlObjects/uCtrlListTerceiros.pas</code></td><td>CtrlObject</td><td>Regra/controle de negócio</td><td>CONTAB/CtrlObjects/uCtrlListTerceiros.pas</td><td><span class='tag tag-alta'>Alta</span></td><td>C# Service</td></tr>
+<tr><td><code>CONTAB/CtrlObjects/uCtrlParamContab.pas</code></td><td>CtrlObject</td><td>Regra/controle de negócio</td><td>CONTAB/CtrlObjects/uCtrlParamContab.pas</td><td><span class='tag tag-alta'>Alta</span></td><td>C# Service</td></tr>
+<tr><td><code>CONTAB/CtrlObjects/uCtrlPeriodo.pas</code></td><td>CtrlObject</td><td>Regra/controle de negócio</td><td>CONTAB/CtrlObjects/uCtrlPeriodo.pas</td><td><span class='tag tag-alta'>Alta</span></td><td>C# Service</td></tr>
+<tr><td><code>CONTAB/CtrlObjects/uCtrlPlanilha.pas</code></td><td>CtrlObject</td><td>Regra/controle de negócio</td><td>CONTAB/CtrlObjects/uCtrlPlanilha.pas</td><td><span class='tag tag-alta'>Alta</span></td><td>C# Service</td></tr>
+<tr><td><code>CONTAB/CtrlObjects/uCtrlPlano.pas</code></td><td>CtrlObject</td><td>Regra/controle de negócio</td><td>CONTAB/CtrlObjects/uCtrlPlano.pas</td><td><span class='tag tag-alta'>Alta</span></td><td>C# Service</td></tr>
+<tr><td><code>CONTAB/CtrlObjects/uCtrlPlanoConta.pas</code></td><td>CtrlObject</td><td>Regra/controle de negócio</td><td>CONTAB/CtrlObjects/uCtrlPlanoConta.pas</td><td><span class='tag tag-alta'>Alta</span></td><td>C# Service</td></tr>
+<tr><td><code>CONTAB/CtrlObjects/uCtrlPlanoContaPer.pas</code></td><td>CtrlObject</td><td>Regra/controle de negócio</td><td>CONTAB/CtrlObjects/uCtrlPlanoContaPer.pas</td><td><span class='tag tag-alta'>Alta</span></td><td>C# Service</td></tr>
+<tr><td><code>CONTAB/CtrlObjects/uCtrlPlanoData.pas</code></td><td>CtrlObject</td><td>Regra/controle de negócio</td><td>CONTAB/CtrlObjects/uCtrlPlanoData.pas</td><td><span class='tag tag-alta'>Alta</span></td><td>C# Service</td></tr>
+<tr><td><code>CONTAB/CtrlObjects/uCtrlPlanoDePara.pas</code></td><td>CtrlObject</td><td>Regra/controle de negócio</td><td>CONTAB/CtrlObjects/uCtrlPlanoDePara.pas</td><td><span class='tag tag-alta'>Alta</span></td><td>C# Service</td></tr>
+<tr><td><code>CONTAB/CtrlObjects/uCtrlPlanoSaldo.pas</code></td><td>CtrlObject</td><td>Regra/controle de negócio</td><td>CONTAB/CtrlObjects/uCtrlPlanoSaldo.pas</td><td><span class='tag tag-alta'>Alta</span></td><td>C# Service</td></tr>
+<tr><td><code>CONTAB/CtrlObjects/uCtrlPosadasExpBalancete.pas</code></td><td>CtrlObject</td><td>Regra/controle de negócio</td><td>CONTAB/CtrlObjects/uCtrlPosadasExpBalancete.pas</td><td><span class='tag tag-alta'>Alta</span></td><td>C# Service</td></tr>
+<tr><td><code>CONTAB/CtrlObjects/uCtrlPrePlanilha.pas</code></td><td>CtrlObject</td><td>Regra/controle de negócio</td><td>CONTAB/CtrlObjects/uCtrlPrePlanilha.pas</td><td><span class='tag tag-alta'>Alta</span></td><td>C# Service</td></tr>
+<tr><td><code>CONTAB/CtrlObjects/uCtrlPrePlanilhaLA.pas</code></td><td>CtrlObject</td><td>Regra/controle de negócio</td><td>CONTAB/CtrlObjects/uCtrlPrePlanilhaLA.pas</td><td><span class='tag tag-alta'>Alta</span></td><td>C# Service</td></tr>
+<tr><td><code>CONTAB/CtrlObjects/uCtrlPrePlanilhaPP.pas</code></td><td>CtrlObject</td><td>Regra/controle de negócio</td><td>CONTAB/CtrlObjects/uCtrlPrePlanilhaPP.pas</td><td><span class='tag tag-alta'>Alta</span></td><td>C# Service</td></tr>
+<tr><td><code>CONTAB/CtrlObjects/uCtrlPrePlanilhaRA.pas</code></td><td>CtrlObject</td><td>Regra/controle de negócio</td><td>CONTAB/CtrlObjects/uCtrlPrePlanilhaRA.pas</td><td><span class='tag tag-alta'>Alta</span></td><td>C# Service</td></tr>
+<tr><td><code>CONTAB/CtrlObjects/uCtrlPrePlanilhaRP.pas</code></td><td>CtrlObject</td><td>Regra/controle de negócio</td><td>CONTAB/CtrlObjects/uCtrlPrePlanilhaRP.pas</td><td><span class='tag tag-alta'>Alta</span></td><td>C# Service</td></tr>
+<tr><td><code>CONTAB/CtrlObjects/uCtrlPrePlanilhaRPP.pas</code></td><td>CtrlObject</td><td>Regra/controle de negócio</td><td>CONTAB/CtrlObjects/uCtrlPrePlanilhaRPP.pas</td><td><span class='tag tag-alta'>Alta</span></td><td>C# Service</td></tr>
+<tr><td><code>CONTAB/CtrlObjects/uCtrlProcessaContab.pas</code></td><td>CtrlObject</td><td>Regra/controle de negócio</td><td>CONTAB/CtrlObjects/uCtrlProcessaContab.pas</td><td><span class='tag tag-alta'>Alta</span></td><td>C# Service</td></tr>
+<tr><td><code>CONTAB/CtrlObjects/uCtrlProcessaContabOld.pas</code></td><td>CtrlObject</td><td>Regra/controle de negócio</td><td>CONTAB/CtrlObjects/uCtrlProcessaContabOld.pas</td><td><span class='tag tag-alta'>Alta</span></td><td>C# Service</td></tr>
+<tr><td><code>CONTAB/CtrlObjects/uCtrlProcessaTotalPrev.pas</code></td><td>CtrlObject</td><td>Regra/controle de negócio</td><td>CONTAB/CtrlObjects/uCtrlProcessaTotalPrev.pas</td><td><span class='tag tag-alta'>Alta</span></td><td>C# Service</td></tr>
+<tr><td><code>CONTAB/CtrlObjects/uCtrlRateioApExtra.pas</code></td><td>CtrlObject</td><td>Regra/controle de negócio</td><td>CONTAB/CtrlObjects/uCtrlRateioApExtra.pas</td><td><span class='tag tag-alta'>Alta</span></td><td>C# Service</td></tr>
+<tr><td><code>CONTAB/CtrlObjects/uCtrlRateioAtivProj.pas</code></td><td>CtrlObject</td><td>Regra/controle de negócio</td><td>CONTAB/CtrlObjects/uCtrlRateioAtivProj.pas</td><td><span class='tag tag-alta'>Alta</span></td><td>C# Service</td></tr>
+<tr><td><code>CONTAB/CtrlObjects/uCtrlRegrasContab.pas</code></td><td>CtrlObject</td><td>Regra/controle de negócio</td><td>CONTAB/CtrlObjects/uCtrlRegrasContab.pas</td><td><span class='tag tag-alta'>Alta</span></td><td>C# Service</td></tr>
+<tr><td><code>CONTAB/CtrlObjects/uCtrlRptAvisoLan.pas</code></td><td>CtrlObject</td><td>Regra/controle de negócio</td><td>CONTAB/CtrlObjects/uCtrlRptAvisoLan.pas</td><td><span class='tag tag-alta'>Alta</span></td><td>C# Service</td></tr>
+<tr><td><code>CONTAB/CtrlObjects/uCtrlSPCConsiste.pas</code></td><td>CtrlObject</td><td>Regra/controle de negócio</td><td>CONTAB/CtrlObjects/uCtrlSPCConsiste.pas</td><td><span class='tag tag-alta'>Alta</span></td><td>C# Service</td></tr>
+<tr><td><code>CONTAB/CtrlObjects/uCtrlSegregacao.pas</code></td><td>CtrlObject</td><td>Regra/controle de negócio</td><td>CONTAB/CtrlObjects/uCtrlSegregacao.pas</td><td><span class='tag tag-alta'>Alta</span></td><td>C# Service</td></tr>
+<tr><td><code>CONTAB/CtrlObjects/uCtrlSegregacaoProc.pas</code></td><td>CtrlObject</td><td>Regra/controle de negócio</td><td>CONTAB/CtrlObjects/uCtrlSegregacaoProc.pas</td><td><span class='tag tag-alta'>Alta</span></td><td>C# Service</td></tr>
+<tr><td><code>CONTAB/CtrlObjects/uCtrlSubConta.pas</code></td><td>CtrlObject</td><td>Regra/controle de negócio</td><td>CONTAB/CtrlObjects/uCtrlSubConta.pas</td><td><span class='tag tag-alta'>Alta</span></td><td>C# Service</td></tr>
+<tr><td><code>CONTAB/CtrlObjects/uCtrlSubGrupo.pas</code></td><td>CtrlObject</td><td>Regra/controle de negócio</td><td>CONTAB/CtrlObjects/uCtrlSubGrupo.pas</td><td><span class='tag tag-alta'>Alta</span></td><td>C# Service</td></tr>
+<tr><td><code>CONTAB/CtrlObjects/uCtrlTabelaDePara.pas</code></td><td>CtrlObject</td><td>Regra/controle de negócio</td><td>CONTAB/CtrlObjects/uCtrlTabelaDePara.pas</td><td><span class='tag tag-alta'>Alta</span></td><td>C# Service</td></tr>
+<tr><td><code>CONTAB/CtrlObjects/uCtrlTermoDiario.pas</code></td><td>CtrlObject</td><td>Regra/controle de negócio</td><td>CONTAB/CtrlObjects/uCtrlTermoDiario.pas</td><td><span class='tag tag-alta'>Alta</span></td><td>C# Service</td></tr>
+<tr><td><code>CONTAB/Reports/Source/rBalConsolidado.pas</code></td><td>Relatório</td><td>Relatório ReportBuilder</td><td>CONTAB/Reports/Source/rBalConsolidado.pas</td><td><span class='tag tag-alta'>Alta</span></td><td>Solução de relatório / Angular</td></tr>
+<tr><td><code>CONTAB/Reports/Source/rBalanceteAnalAPCC.pas</code></td><td>Relatório</td><td>Relatório ReportBuilder</td><td>CONTAB/Reports/Source/rBalanceteAnalAPCC.pas</td><td><span class='tag tag-alta'>Alta</span></td><td>Solução de relatório / Angular</td></tr>
+<tr><td><code>CONTAB/Reports/Source/rBalanceteAnalAPSC.pas</code></td><td>Relatório</td><td>Relatório ReportBuilder</td><td>CONTAB/Reports/Source/rBalanceteAnalAPSC.pas</td><td><span class='tag tag-alta'>Alta</span></td><td>Solução de relatório / Angular</td></tr>
+<tr><td><code>CONTAB/Reports/Source/rBalanceteCCusto.pas</code></td><td>Relatório</td><td>Relatório ReportBuilder</td><td>CONTAB/Reports/Source/rBalanceteCCusto.pas</td><td><span class='tag tag-alta'>Alta</span></td><td>Solução de relatório / Angular</td></tr>
+<tr><td><code>CONTAB/Reports/Source/rBalanceteColMesCC.pas</code></td><td>Relatório</td><td>Relatório ReportBuilder</td><td>CONTAB/Reports/Source/rBalanceteColMesCC.pas</td><td><span class='tag tag-alta'>Alta</span></td><td>Solução de relatório / Angular</td></tr>
+<tr><td><code>CONTAB/Reports/Source/rBalanceteCxAP.pas</code></td><td>Relatório</td><td>Relatório ReportBuilder</td><td>CONTAB/Reports/Source/rBalanceteCxAP.pas</td><td><span class='tag tag-alta'>Alta</span></td><td>Solução de relatório / Angular</td></tr>
+<tr><td><code>CONTAB/Reports/Source/rBalanceteCxCC.pas</code></td><td>Relatório</td><td>Relatório ReportBuilder</td><td>CONTAB/Reports/Source/rBalanceteCxCC.pas</td><td><span class='tag tag-alta'>Alta</span></td><td>Solução de relatório / Angular</td></tr>
+<tr><td><code>CONTAB/Reports/Source/rBalanceteCxSC.pas</code></td><td>Relatório</td><td>Relatório ReportBuilder</td><td>CONTAB/Reports/Source/rBalanceteCxSC.pas</td><td><span class='tag tag-alta'>Alta</span></td><td>Solução de relatório / Angular</td></tr>
+<tr><td><code>CONTAB/Reports/Source/rBalanco.pas</code></td><td>Relatório</td><td>Relatório ReportBuilder</td><td>CONTAB/Reports/Source/rBalanco.pas</td><td><span class='tag tag-alta'>Alta</span></td><td>Solução de relatório / Angular</td></tr>
+<tr><td><code>CONTAB/Reports/Source/rCGPC28.pas</code></td><td>Relatório</td><td>Relatório ReportBuilder</td><td>CONTAB/Reports/Source/rCGPC28.pas</td><td><span class='tag tag-alta'>Alta</span></td><td>Solução de relatório / Angular</td></tr>
+<tr><td><code>CONTAB/Reports/Source/rCentroCustoxContas.pas</code></td><td>Relatório</td><td>Relatório ReportBuilder</td><td>CONTAB/Reports/Source/rCentroCustoxContas.pas</td><td><span class='tag tag-alta'>Alta</span></td><td>Solução de relatório / Angular</td></tr>
+<tr><td><code>CONTAB/Reports/Source/rConfCotas.pas</code></td><td>Relatório</td><td>Relatório ReportBuilder</td><td>CONTAB/Reports/Source/rConfCotas.pas</td><td><span class='tag tag-alta'>Alta</span></td><td>Solução de relatório / Angular</td></tr>
+<tr><td><code>CONTAB/Reports/Source/rConfSubConta.pas</code></td><td>Relatório</td><td>Relatório ReportBuilder</td><td>CONTAB/Reports/Source/rConfSubConta.pas</td><td><span class='tag tag-alta'>Alta</span></td><td>Solução de relatório / Angular</td></tr>
+<tr><td><code>CONTAB/Reports/Source/rContasxCentroCusto.pas</code></td><td>Relatório</td><td>Relatório ReportBuilder</td><td>CONTAB/Reports/Source/rContasxCentroCusto.pas</td><td><span class='tag tag-alta'>Alta</span></td><td>Solução de relatório / Angular</td></tr>
+<tr><td><code>CONTAB/Reports/Source/rDemoLayout.pas</code></td><td>Relatório</td><td>Relatório ReportBuilder</td><td>CONTAB/Reports/Source/rDemoLayout.pas</td><td><span class='tag tag-alta'>Alta</span></td><td>Solução de relatório / Angular</td></tr>
+<tr><td><code>CONTAB/Reports/Source/rDemoSPC.pas</code></td><td>Relatório</td><td>Relatório ReportBuilder</td><td>CONTAB/Reports/Source/rDemoSPC.pas</td><td><span class='tag tag-alta'>Alta</span></td><td>Solução de relatório / Angular</td></tr>
+<tr><td><code>CONTAB/Reports/Source/rDemonstrativo1.pas</code></td><td>Relatório</td><td>Relatório ReportBuilder</td><td>CONTAB/Reports/Source/rDemonstrativo1.pas</td><td><span class='tag tag-alta'>Alta</span></td><td>Solução de relatório / Angular</td></tr>
+<tr><td><code>CONTAB/Reports/Source/rDemonstrativo2.pas</code></td><td>Relatório</td><td>Relatório ReportBuilder</td><td>CONTAB/Reports/Source/rDemonstrativo2.pas</td><td><span class='tag tag-alta'>Alta</span></td><td>Solução de relatório / Angular</td></tr>
+<tr><td><code>CONTAB/Reports/Source/rDemonstrativo3.pas</code></td><td>Relatório</td><td>Relatório ReportBuilder</td><td>CONTAB/Reports/Source/rDemonstrativo3.pas</td><td><span class='tag tag-alta'>Alta</span></td><td>Solução de relatório / Angular</td></tr>
+<tr><td><code>CONTAB/Reports/Source/rDemonstrativo4.pas</code></td><td>Relatório</td><td>Relatório ReportBuilder</td><td>CONTAB/Reports/Source/rDemonstrativo4.pas</td><td><span class='tag tag-alta'>Alta</span></td><td>Solução de relatório / Angular</td></tr>
+<tr><td><code>CONTAB/Reports/Source/rDemonstrativo5.pas</code></td><td>Relatório</td><td>Relatório ReportBuilder</td><td>CONTAB/Reports/Source/rDemonstrativo5.pas</td><td><span class='tag tag-alta'>Alta</span></td><td>Solução de relatório / Angular</td></tr>
+<tr><td><code>CONTAB/Reports/Source/rDemonstrativo6.pas</code></td><td>Relatório</td><td>Relatório ReportBuilder</td><td>CONTAB/Reports/Source/rDemonstrativo6.pas</td><td><span class='tag tag-alta'>Alta</span></td><td>Solução de relatório / Angular</td></tr>
+<tr><td><code>CONTAB/Reports/Source/rDemonstrativo7.pas</code></td><td>Relatório</td><td>Relatório ReportBuilder</td><td>CONTAB/Reports/Source/rDemonstrativo7.pas</td><td><span class='tag tag-alta'>Alta</span></td><td>Solução de relatório / Angular</td></tr>
+<tr><td><code>CONTAB/Reports/Source/rDemonstrativoModelo6.pas</code></td><td>Relatório</td><td>Relatório ReportBuilder</td><td>CONTAB/Reports/Source/rDemonstrativoModelo6.pas</td><td><span class='tag tag-alta'>Alta</span></td><td>Solução de relatório / Angular</td></tr>
+<tr><td><code>CONTAB/Reports/Source/rDiarioResumido.pas</code></td><td>Relatório</td><td>Relatório ReportBuilder</td><td>CONTAB/Reports/Source/rDiarioResumido.pas</td><td><span class='tag tag-alta'>Alta</span></td><td>Solução de relatório / Angular</td></tr>
+<tr><td><code>CONTAB/Reports/Source/rHistoricoPadrao.pas</code></td><td>Relatório</td><td>Relatório ReportBuilder</td><td>CONTAB/Reports/Source/rHistoricoPadrao.pas</td><td><span class='tag tag-alta'>Alta</span></td><td>Solução de relatório / Angular</td></tr>
+<tr><td><code>CONTAB/Reports/Source/rListaDemonst.pas</code></td><td>Relatório</td><td>Relatório ReportBuilder</td><td>CONTAB/Reports/Source/rListaDemonst.pas</td><td><span class='tag tag-alta'>Alta</span></td><td>Solução de relatório / Angular</td></tr>
+<tr><td><code>CONTAB/Reports/Source/rMapaEvolu.pas</code></td><td>Relatório</td><td>Relatório ReportBuilder</td><td>CONTAB/Reports/Source/rMapaEvolu.pas</td><td><span class='tag tag-alta'>Alta</span></td><td>Solução de relatório / Angular</td></tr>
+<tr><td><code>CONTAB/Reports/Source/rOrcadoRealizadoNew.pas</code></td><td>Relatório</td><td>Relatório ReportBuilder</td><td>CONTAB/Reports/Source/rOrcadoRealizadoNew.pas</td><td><span class='tag tag-alta'>Alta</span></td><td>Solução de relatório / Angular</td></tr>
+<tr><td><code>CONTAB/Reports/Source/rOrcamento.pas</code></td><td>Relatório</td><td>Relatório ReportBuilder</td><td>CONTAB/Reports/Source/rOrcamento.pas</td><td><span class='tag tag-alta'>Alta</span></td><td>Solução de relatório / Angular</td></tr>
+<tr><td><code>CONTAB/Reports/Source/rOrcamentoCC.pas</code></td><td>Relatório</td><td>Relatório ReportBuilder</td><td>CONTAB/Reports/Source/rOrcamentoCC.pas</td><td><span class='tag tag-alta'>Alta</span></td><td>Solução de relatório / Angular</td></tr>
+<tr><td><code>CONTAB/Reports/Source/rSaldoInicial.pas</code></td><td>Relatório</td><td>Relatório ReportBuilder</td><td>CONTAB/Reports/Source/rSaldoInicial.pas</td><td><span class='tag tag-alta'>Alta</span></td><td>Solução de relatório / Angular</td></tr>
+<tr><td><code>CONTAB/Reports/Source/rSaldosAtuais.pas</code></td><td>Relatório</td><td>Relatório ReportBuilder</td><td>CONTAB/Reports/Source/rSaldosAtuais.pas</td><td><span class='tag tag-alta'>Alta</span></td><td>Solução de relatório / Angular</td></tr>
+<tr><td><code>CONTAB/Fontes/Contab.dpr</code></td><td>Project</td><td>Executável Contab.exe</td><td>CONTAB/Fontes/Contab.dpr</td><td><span class='tag tag-alta'>Alta</span></td><td>Revisar</td></tr>
+<tr><td><code>CONTAB/Fontes/dContab.pas</code></td><td>Data Module</td><td>Queries auxiliares</td><td>CONTAB/Fontes/dContab.pas</td><td><span class='tag tag-alta'>Alta</span></td><td>C# Repository</td></tr>
+<tr><td><code>CONTAB/Fontes/UModulo.pas</code></td><td>Unit</td><td>Contexto e TestaNatureza</td><td>CONTAB/Fontes/UModulo.pas</td><td><span class='tag tag-alta'>Alta</span></td><td>C# Domain</td></tr>
+<tr><td><code>CMCONTABOBJ50/**</code></td><td>Package BPL</td><td>Objetos compartilhados Contábil</td><td>CMCONTABOBJ50/Package/CMContabObj50.dpk</td><td><span class='tag tag-alta'>Alta</span></td><td>C# library</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="funcs">
+  <div class="section-title">3. Funcionalidades do Contábil</div>
+  
+<div class="rule-block">
+  <div class="rule-id">Cadastro de Plano de Contas</div>
+  <div class="rule-desc">Manutenção da estrutura de contas contábeis</div>
+  <p><strong>Forms:</strong> <code>FCadPlanoContasMT</code><br>
+  <strong>Units/Ctrl:</strong> <code>uCtrlPlanoConta</code><br>
+  <strong>Tabelas:</strong> <code>PLANOCONTA, PLANO</code><br>
+  <strong>Regras:</strong> RN006<br>
+  <strong>Entradas:</strong> dados de tela / arquivos / outros módulos<br>
+  <strong>Saídas:</strong> persistência Oracle / relatórios / arquivos de exportação<br>
+  <strong>Confiança:</strong> <span class="tag tag-alta">Alta</span></p>
+</div>
+<div class="rule-block">
+  <div class="rule-id">Parâmetros Contábeis</div>
+  <div class="rule-desc">Configuração de moedas, faixas, fechamento e integrações</div>
+  <p><strong>Forms:</strong> <code>FCadParamContabMT</code><br>
+  <strong>Units/Ctrl:</strong> <code>uCtrlParamContab</code><br>
+  <strong>Tabelas:</strong> <code>PARAMCONTAB</code><br>
+  <strong>Regras:</strong> RN004<br>
+  <strong>Entradas:</strong> dados de tela / arquivos / outros módulos<br>
+  <strong>Saídas:</strong> persistência Oracle / relatórios / arquivos de exportação<br>
+  <strong>Confiança:</strong> <span class="tag tag-alta">Alta</span></p>
+</div>
+<div class="rule-block">
+  <div class="rule-id">Períodos Contábeis</div>
+  <div class="rule-desc">Cadastro e controle de períodos/bloqueios</div>
+  <p><strong>Forms:</strong> <code>FCadPeriodoContabilMT</code><br>
+  <strong>Units/Ctrl:</strong> <code>uCtrlPeriodo</code><br>
+  <strong>Tabelas:</strong> <code>PERIODO</code><br>
+  <strong>Regras:</strong> RN005<br>
+  <strong>Entradas:</strong> dados de tela / arquivos / outros módulos<br>
+  <strong>Saídas:</strong> persistência Oracle / relatórios / arquivos de exportação<br>
+  <strong>Confiança:</strong> <span class="tag tag-alta">Alta</span></p>
+</div>
+<div class="rule-block">
+  <div class="rule-id">Lançamentos / Planilhas</div>
+  <div class="rule-desc">Inclusão, estorno, exclusão e consulta de lançamentos</div>
+  <p><strong>Forms:</strong> <code>fLancaContabMT, FLancPesqMT</code><br>
+  <strong>Units/Ctrl:</strong> <code>uCtrlLancamento</code><br>
+  <strong>Tabelas:</strong> <code>LANCAMENTO, PLANILHA, PLANOSALDO</code><br>
+  <strong>Regras:</strong> RN001,RN003<br>
+  <strong>Entradas:</strong> dados de tela / arquivos / outros módulos<br>
+  <strong>Saídas:</strong> persistência Oracle / relatórios / arquivos de exportação<br>
+  <strong>Confiança:</strong> <span class="tag tag-alta">Alta</span></p>
+</div>
+<div class="rule-block">
+  <div class="rule-id">Atualização de Saldos</div>
+  <div class="rule-desc">Atualiza saldos analíticos e sintéticos</div>
+  <p><strong>Forms:</strong> <code>FAtuSaldoAnaMT, FAtualizaSinMT</code><br>
+  <strong>Units/Ctrl:</strong> <code>AtuSaldoContas/AtuSaldoSintetica</code><br>
+  <strong>Tabelas:</strong> <code>PLANOSALDO</code><br>
+  <strong>Regras:</strong> RN001,RN002<br>
+  <strong>Entradas:</strong> dados de tela / arquivos / outros módulos<br>
+  <strong>Saídas:</strong> persistência Oracle / relatórios / arquivos de exportação<br>
+  <strong>Confiança:</strong> <span class="tag tag-alta">Alta</span></p>
+</div>
+<div class="rule-block">
+  <div class="rule-id">Integração de Planilhas/Dias</div>
+  <div class="rule-desc">Integra planilhas e verifica períodos bloqueados</div>
+  <p><strong>Forms:</strong> <code>FIntegraPlanilhasMT, FIntegraDiasMT</code><br>
+  <strong>Units/Ctrl:</strong> <code>uCtrlProcessaContab</code><br>
+  <strong>Tabelas:</strong> <code>PLANILHA, PERIODO</code><br>
+  <strong>Regras:</strong> RN005<br>
+  <strong>Entradas:</strong> dados de tela / arquivos / outros módulos<br>
+  <strong>Saídas:</strong> persistência Oracle / relatórios / arquivos de exportação<br>
+  <strong>Confiança:</strong> <span class="tag tag-alta">Alta</span></p>
+</div>
+<div class="rule-block">
+  <div class="rule-id">Encerramentos</div>
+  <div class="rule-desc">Encerrar período, resultado e exercício (meia-noite)</div>
+  <p><strong>Forms:</strong> <code>FEncerraPeriodoMT, FEncerraResultadosMT, FEncerraExercicioMT, FLancMeiaNoiteMT</code><br>
+  <strong>Units/Ctrl:</strong> <code>uCtrlProcessaContab</code><br>
+  <strong>Tabelas:</strong> <code>PERIODO, APURRESULTADO</code><br>
+  <strong>Regras:</strong> RN014<br>
+  <strong>Entradas:</strong> dados de tela / arquivos / outros módulos<br>
+  <strong>Saídas:</strong> persistência Oracle / relatórios / arquivos de exportação<br>
+  <strong>Confiança:</strong> <span class="tag tag-alta">Alta</span></p>
+</div>
+<div class="rule-block">
+  <div class="rule-id">Rateios</div>
+  <div class="rule-desc">Rateio por atividade/projeto, programa, administrativo e plano/patrocinadora</div>
+  <p><strong>Forms:</strong> <code>FGeraLancRateioMT, FCadRateio*</code><br>
+  <strong>Units/Ctrl:</strong> <code>FazRateio</code><br>
+  <strong>Tabelas:</strong> <code>RATEIO*</code><br>
+  <strong>Regras:</strong> RN009<br>
+  <strong>Entradas:</strong> dados de tela / arquivos / outros módulos<br>
+  <strong>Saídas:</strong> persistência Oracle / relatórios / arquivos de exportação<br>
+  <strong>Confiança:</strong> <span class="tag tag-alta">Alta</span></p>
+</div>
+<div class="rule-block">
+  <div class="rule-id">Segregação</div>
+  <div class="rule-desc">Segregação de recursos por plano e patrocinadora</div>
+  <p><strong>Forms:</strong> <code>fProcessaSegregacao, FSegregaPlanPatroMT</code><br>
+  <strong>Units/Ctrl:</strong> <code>uCtrlSegregacao*</code><br>
+  <strong>Tabelas:</strong> <code>SEGREGACAO, SEGREGACRITER</code><br>
+  <strong>Regras:</strong> RN008<br>
+  <strong>Entradas:</strong> dados de tela / arquivos / outros módulos<br>
+  <strong>Saídas:</strong> persistência Oracle / relatórios / arquivos de exportação<br>
+  <strong>Confiança:</strong> <span class="tag tag-alta">Alta</span></p>
+</div>
+<div class="rule-block">
+  <div class="rule-id">Demonstrativos</div>
+  <div class="rule-desc">Cadastro e emissão de demonstrativos/layouts</div>
+  <p><strong>Forms:</strong> <code>FCadDemonstrativoMT, rDemonstrativo*</code><br>
+  <strong>Units/Ctrl:</strong> <code>uCtrlDemonstrativo, uCtrlRptDemonstrativo</code><br>
+  <strong>Tabelas:</strong> <code>DEMONSTRATIVO, ELEM*</code><br>
+  <strong>Regras:</strong> RN015<br>
+  <strong>Entradas:</strong> dados de tela / arquivos / outros módulos<br>
+  <strong>Saídas:</strong> persistência Oracle / relatórios / arquivos de exportação<br>
+  <strong>Confiança:</strong> <span class="tag tag-alta">Alta</span></p>
+</div>
+<div class="rule-block">
+  <div class="rule-id">Relatórios Contábeis</div>
+  <div class="rule-desc">Balancete, diário, razão, balanço, orçamento</div>
+  <p><strong>Forms:</strong> <code>RBalancete, RDiario, RRazao*, rBalanco</code><br>
+  <strong>Units/Ctrl:</strong> <code>uCtrlRpt*</code><br>
+  <strong>Tabelas:</strong> <code>PLANOSALDO, PLANOCONTA</code><br>
+  <strong>Regras:</strong> —<br>
+  <strong>Entradas:</strong> dados de tela / arquivos / outros módulos<br>
+  <strong>Saídas:</strong> persistência Oracle / relatórios / arquivos de exportação<br>
+  <strong>Confiança:</strong> <span class="tag tag-alta">Alta</span></p>
+</div>
+<div class="rule-block">
+  <div class="rule-id">Importações</div>
+  <div class="rule-desc">Excel, SAF, Fidélio, Folha RM/Dinâmica, SRH</div>
+  <p><strong>Forms:</strong> <code>FImporta*MT, FImpFidelioMT</code><br>
+  <strong>Units/Ctrl:</strong> <code>uCtrlImportaContab (quando aplicável)</code><br>
+  <strong>Tabelas:</strong> <code>LANCAMENTO</code><br>
+  <strong>Regras:</strong> RN011<br>
+  <strong>Entradas:</strong> dados de tela / arquivos / outros módulos<br>
+  <strong>Saídas:</strong> persistência Oracle / relatórios / arquivos de exportação<br>
+  <strong>Confiança:</strong> <span class="tag tag-alta">Alta</span></p>
+</div>
+<div class="rule-block">
+  <div class="rule-id">Exportações regulatórias</div>
+  <div class="rule-desc">SIPC-CAP / SICADI / Posadas / exclusão de exportação</div>
+  <p><strong>Forms:</strong> <code>FGeraSalCont*, FExpPosadasMT, FExportaContabMT</code><br>
+  <strong>Units/Ctrl:</strong> <code>uCtrlPosadasExpBalancete</code><br>
+  <strong>Tabelas:</strong> <code>PLANOSALDO</code><br>
+  <strong>Regras:</strong> RN010<br>
+  <strong>Entradas:</strong> dados de tela / arquivos / outros módulos<br>
+  <strong>Saídas:</strong> persistência Oracle / relatórios / arquivos de exportação<br>
+  <strong>Confiança:</strong> <span class="tag tag-alta">Alta</span></p>
+</div>
+<div class="rule-block">
+  <div class="rule-id">Regras Contábeis</div>
+  <div class="rule-desc">Cadastro e consistência de regras</div>
+  <p><strong>Forms:</strong> <code>FCadRegrasContabMT, fConfereRegraMT</code><br>
+  <strong>Units/Ctrl:</strong> <code>uCtrlRegrasContab</code><br>
+  <strong>Tabelas:</strong> <code>REGRASCONTAB</code><br>
+  <strong>Regras:</strong> RN013<br>
+  <strong>Entradas:</strong> dados de tela / arquivos / outros módulos<br>
+  <strong>Saídas:</strong> persistência Oracle / relatórios / arquivos de exportação<br>
+  <strong>Confiança:</strong> <span class="tag tag-alta">Alta</span></p>
+</div>
+<div class="rule-block">
+  <div class="rule-id">Históricos / Subcontas / Subgrupos</div>
+  <div class="rule-desc">Cadastros auxiliares</div>
+  <p><strong>Forms:</strong> <code>FCadHistoricoMT, FCadSubContaMT, FCadSubGrupoMT</code><br>
+  <strong>Units/Ctrl:</strong> <code>uCtrlHistoContab, uCtrlSubConta</code><br>
+  <strong>Tabelas:</strong> <code>HISTOPADRAO, SUBCONTA, SUBGRUPO</code><br>
+  <strong>Regras:</strong> —<br>
+  <strong>Entradas:</strong> dados de tela / arquivos / outros módulos<br>
+  <strong>Saídas:</strong> persistência Oracle / relatórios / arquivos de exportação<br>
+  <strong>Confiança:</strong> <span class="tag tag-alta">Alta</span></p>
+</div>
+</section>
+
+<section id="us">
+  <div class="section-title">4. User Stories para Migração</div>
+  
+<div class="story-card">
+  <div class="rule-id">US-CTB-01 · Prioridade Alta · Complexidade 3–5</div>
+  <div class="role">👤 Como contador</div>
+  <div class="want">🎯 Quero manter o plano de contas com bloqueio e natureza</div>
+  <div class="why">💡 Para classificar corretamente os lançamentos</div>
+  <div class="rule-origin">Origem: <code>FCadPlanoContasMT</code> | Critérios: preservar validações, mensagens e efeitos em saldo/período do legado | Destino: Angular (UI) + C# (serviço)</div>
+</div>
+<div class="story-card">
+  <div class="rule-id">US-CTB-02 · Prioridade Alta · Complexidade 5–8</div>
+  <div class="role">👤 Como contador</div>
+  <div class="want">🎯 Quero lançar e consultar planilhas contábeis</div>
+  <div class="why">💡 Para registrar a movimentação do período</div>
+  <div class="rule-origin">Origem: <code>fLancaContabMT / uCtrlLancamento</code> | Critérios: preservar validações, mensagens e efeitos em saldo/período do legado | Destino: Angular (UI) + C# (serviço)</div>
+</div>
+<div class="story-card">
+  <div class="rule-id">US-CTB-03 · Prioridade Alta · Complexidade 5–8</div>
+  <div class="role">👤 Como contador</div>
+  <div class="want">🎯 Quero atualizar saldos analíticos e sintéticos</div>
+  <div class="why">💡 Para garantir coerência dos saldos</div>
+  <div class="rule-origin">Origem: <code>FAtuSaldoAnaMT / FAtualizaSinMT</code> | Critérios: preservar validações, mensagens e efeitos em saldo/período do legado | Destino: Angular (UI) + C# (serviço)</div>
+</div>
+<div class="story-card">
+  <div class="rule-id">US-CTB-04 · Prioridade Alta · Complexidade 5–8</div>
+  <div class="role">👤 Como supervisor</div>
+  <div class="want">🎯 Quero encerrar período e exercício</div>
+  <div class="why">💡 Para fechar a contabilidade</div>
+  <div class="rule-origin">Origem: <code>FEncerra*</code> | Critérios: preservar validações, mensagens e efeitos em saldo/período do legado | Destino: Angular (UI) + C# (serviço)</div>
+</div>
+<div class="story-card">
+  <div class="rule-id">US-CTB-05 · Prioridade Alta · Complexidade 3–5</div>
+  <div class="role">👤 Como analista</div>
+  <div class="want">🎯 Quero emitir balancete e demonstrativos</div>
+  <div class="why">💡 Para reportar posição patrimonial</div>
+  <div class="rule-origin">Origem: <code>RBalancete / rDemonstrativo*</code> | Critérios: preservar validações, mensagens e efeitos em saldo/período do legado | Destino: Angular (UI) + C# (serviço)</div>
+</div>
+<div class="story-card">
+  <div class="rule-id">US-CTB-06 · Prioridade Alta · Complexidade 5–8</div>
+  <div class="role">👤 Como operador de integração</div>
+  <div class="want">🎯 Quero importar lançamentos de Excel/SAF/Folha</div>
+  <div class="why">💡 Para evitar digitação manual em massa</div>
+  <div class="rule-origin">Origem: <code>FImporta*MT</code> | Critérios: preservar validações, mensagens e efeitos em saldo/período do legado | Destino: Angular (UI) + C# (serviço)</div>
+</div>
+<div class="story-card">
+  <div class="rule-id">US-CTB-07 · Prioridade Alta · Complexidade 5–8</div>
+  <div class="role">👤 Como supervisor</div>
+  <div class="want">🎯 Quero gerar arquivo SIPC-CAP/SICADI</div>
+  <div class="why">💡 Para cumprir obrigação regulatória</div>
+  <div class="rule-origin">Origem: <code>FGeraSalCont*</code> | Critérios: preservar validações, mensagens e efeitos em saldo/período do legado | Destino: Angular (UI) + C# (serviço)</div>
+</div>
+<div class="story-card">
+  <div class="rule-id">US-CTB-08 · Prioridade Alta · Complexidade 3–5</div>
+  <div class="role">👤 Como administrador</div>
+  <div class="want">🎯 Quero configurar parâmetros contábeis</div>
+  <div class="why">💡 Para padronizar comportamento do módulo</div>
+  <div class="rule-origin">Origem: <code>FCadParamContabMT</code> | Critérios: preservar validações, mensagens e efeitos em saldo/período do legado | Destino: Angular (UI) + C# (serviço)</div>
+</div>
+<div class="story-card">
+  <div class="rule-id">US-CTB-09 · Prioridade Alta · Complexidade 5–8</div>
+  <div class="role">👤 Como supervisor</div>
+  <div class="want">🎯 Quero processar rateios e segregação</div>
+  <div class="why">💡 Para alocar custos/recursos corretamente</div>
+  <div class="rule-origin">Origem: <code>FGera*Rateio* / fProcessaSegregacao</code> | Critérios: preservar validações, mensagens e efeitos em saldo/período do legado | Destino: Angular (UI) + C# (serviço)</div>
+</div>
+<div class="story-card">
+  <div class="rule-id">US-CTB-10 · Prioridade Média · Complexidade 3–5</div>
+  <div class="role">👤 Como supervisor</div>
+  <div class="want">🎯 Quero consistir regras contábeis</div>
+  <div class="why">💡 Para detectar inconsistências antes do fechamento</div>
+  <div class="rule-origin">Origem: <code>fConfereRegraMT</code> | Critérios: preservar validações, mensagens e efeitos em saldo/período do legado | Destino: Angular (UI) + C# (serviço)</div>
+</div>
+</section>
+
+<section id="aceite">
+  <div class="section-title">5. Critérios de Aceite (preservação de comportamento)</div>
+  <div class="criteria-block"><div class="given"><strong>Dado que</strong> uma planilha legada balanceada é reprocessada na nova stack</div>
+  <div class="when"><strong>Quando</strong> os lançamentos são gravados via API</div>
+  <div class="then"><strong>Então</strong> totais a débito/crédito, saldos por conta/moeda e vínculo de período coincidem com o legado (tolerância zero monetária)</div></div>
+  <div class="criteria-block"><div class="given"><strong>Dado que</strong> o período está bloqueado</div>
+  <div class="when"><strong>Quando</strong> uma integração tenta lançar</div>
+  <div class="then"><strong>Então</strong> a API rejeita com mensagem equivalente à regra de bloqueio/dias bloqueados</div></div>
+  <div class="criteria-block"><div class="given"><strong>Dado que</strong> um arquivo SIPC-CAP é gerado</div>
+  <div class="when"><strong>Quando</strong> comparado ao arquivo do legado para a mesma base</div>
+  <div class="then"><strong>Então</strong> layout e valores críticos são idênticos (após validação do layout vigente)</div></div>
+  <ul>
+    <li>Validações de conta inativa/bloqueada preservadas</li>
+    <li>Permissões equivalentes ao controle de acesso CM</li>
+    <li>Transações atômicas em inclusão/estorno/exclusão de planilha</li>
+    <li>Mensagens de erro de negócio mapeadas (não engolir exceções técnicas)</li>
+  </ul>
+</section>
+
+<section id="mapa">
+  <div class="section-title">6. Mapeamento Delphi 5 → C# / Angular</div>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Origem Delphi 5</th><th>Destino</th><th>Estratégia</th></tr></thead>
+    <tbody>
+      <tr><td>Form (.pas)</td><td>Angular Component</td><td>Recriar comportamento</td></tr>
+      <tr><td>DFM</td><td>Angular Template</td><td>Recriar interface (não clonar visual legado)</td></tr>
+      <tr><td>CtrlObject</td><td>C# Application/Domain Service</td><td>Migrar regra</td></tr>
+      <tr><td>DbObject / TCmDbObject</td><td>EF Core Entity + Repository</td><td>Mapear entidade</td></tr>
+      <tr><td>Data Module / TCMSqlParams</td><td>C# Query/Repository</td><td>Centralizar acesso</td></tr>
+      <tr><td>TQuery / SQL embutido</td><td>EF Core / SQL parametrizado</td><td>Preservar semântica</td></tr>
+      <tr><td>Stored Procedure (se houver no BD)</td><td>Database ou C#</td><td>Avaliar caso a caso</td></tr>
+      <tr><td>Trigger (se houver no BD)</td><td>Database</td><td>Preservar quando regra crítica</td></tr>
+      <tr><td>ReportBuilder</td><td>Solução de relatório moderna</td><td>Preservar saída funcional</td></tr>
+      <tr><td>Import/Export arquivo</td><td>C# Integration Service</td><td>Preservar layout</td></tr>
+      <tr><td>MIDAS AppServer</td><td>API REST ASP.NET Core</td><td>Substituir transporte</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="dominio">
+  <div class="section-title">7. Modelo de Domínio</div>
+  <div class="mermaid">flowchart TB
+    ParamContab --> Plano
+    Plano --> PlanoConta
+    Periodo --> Planilha
+    Planilha --> Lancamento
+    PlanoConta --> Lancamento
+    Lancamento --> PlanoSaldo
+    PlanoConta --> PlanoSaldo
+    Demonstrativo --> ElemDemonstrativo
+    Segregacao --> Lancamento
+    Rateio --> Lancamento
+    PrePlanilha --> Lancamento
+  </div>
+  <ul>
+    <li><strong>Agregado Planilha:</strong> Planilha + Lançamentos (partida dobrada)</li>
+    <li><strong>Agregado PlanoConta:</strong> conta, bloqueios, natureza, vínculos de rateio/segregação</li>
+    <li><strong>Agregado Periodo:</strong> abertura/bloqueio/encerramento</li>
+    <li><strong>Serviços:</strong> AtualizaçãoSaldo, Rateio, Segregacao, Encerramento, Importacao, ExportacaoRegulatoria</li>
+  </ul>
+</section>
+
+<section id="apis">
+  <div class="section-title">8. APIs Necessárias</div>
+  <p>Ver catálogo detalhado em <a href="api-catalog.html">api-catalog.html</a>. Resumo: lançamentos, saldos, plano, períodos, parâmetros, rateio, segregação, encerramentos, relatórios, importações e exportações.</p>
+</section>
+
+<section id="angular">
+  <div class="section-title">9. Componentes Angular</div>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Form original</th><th>Componente sugerido</th><th>Rota</th><th>Funcionalidades</th><th>APIs</th></tr></thead>
+    <tbody><tr><td><code>FCadPlanoContasMT</code></td><td><code>PlanoContasComponent</code></td><td><code>/contab/plano-contas</code></td><td>CRUD contas</td><td><code>GET/PUT /api/contab/plano-contas</code></td></tr>
+<tr><td><code>FCadParamContabMT</code></td><td><code>ParamContabComponent</code></td><td><code>/contab/parametros</code></td><td>Parâmetros</td><td><code>GET/PUT /api/contab/parametros</code></td></tr>
+<tr><td><code>FCadPeriodoContabilMT</code></td><td><code>PeriodoContabilComponent</code></td><td><code>/contab/periodos</code></td><td>Períodos</td><td><code>GET/POST períodos</code></td></tr>
+<tr><td><code>fLancaContabMT</code></td><td><code>LancamentoPlanilhaComponent</code></td><td><code>/contab/lancamentos</code></td><td>Lançamentos grid + validações</td><td><code>POST/DELETE/estorno</code></td></tr>
+<tr><td><code>FLancPesqMT</code></td><td><code>ConsultaLancamentoComponent</code></td><td><code>/contab/lancamentos/consulta</code></td><td>Pesquisa</td><td><code>GET lançamentos</code></td></tr>
+<tr><td><code>FAtuSaldoAnaMT</code></td><td><code>AtualizaSaldoComponent</code></td><td><code>/contab/saldos/atualizar</code></td><td>Processamento</td><td><code>POST saldos</code></td></tr>
+<tr><td><code>FEncerraPeriodoMT</code></td><td><code>EncerramentoComponent</code></td><td><code>/contab/encerramento</code></td><td>Wizard encerramento</td><td><code>POST encerramento</code></td></tr>
+<tr><td><code>FCadDemonstrativoMT</code></td><td><code>DemonstrativoCadComponent</code></td><td><code>/contab/demonstrativos</code></td><td>Cadastro demo</td><td><code>CRUD demo</code></td></tr>
+<tr><td><code>FParamBalancete</code></td><td><code>BalanceteReportComponent</code></td><td><code>/contab/relatorios/balancete</code></td><td>Filtros + emissão</td><td><code>GET balancete</code></td></tr>
+<tr><td><code>FImportaExcelMT</code></td><td><code>ImportacaoExcelComponent</code></td><td><code>/contab/importacoes/excel</code></td><td>Upload/mapeamento</td><td><code>POST import excel</code></td></tr>
+<tr><td><code>FGeraSalCont2010MT</code></td><td><code>ExportacaoSipcComponent</code></td><td><code>/contab/exportacoes/sipc</code></td><td>Geração arquivo</td><td><code>POST sipc-cap</code></td></tr>
+<tr><td><code>fProcessaSegregacao</code></td><td><code>SegregacaoComponent</code></td><td><code>/contab/segregacao</code></td><td>Processamento</td><td><code>POST segregacao</code></td></tr></tbody>
+  </table></div>
+  <p>Grids, filtros, mensagens e validações devem espelhar as rules dos events OnValidate/BeforePost e dos CtrlObjects. Permissões: integrar com o modelo de autorização CM equivalente.</p>
+</section>
+
+<section id="deps">
+  <div class="section-title">10. Dependências Internas</div>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Artefato</th><th>Direção</th><th>Impacto</th><th>Evidência</th></tr></thead>
+    <tbody>
+      <tr><td>CM / GLOBALCM (forms base, login, report manager)</td><td>Contábil → Framework</td><td>Alto</td><td>Contab.dpr uses FCMPrincipal, FCadastroMT…</td></tr>
+      <tr><td>CMCONTABOBJ50</td><td>Bidirecional</td><td>Alto</td><td>Package de objetos Contábil</td></tr>
+      <tr><td>CPAGAR / CRECEBER / CMCAPCAROBJ50</td><td>CapCar → Contábil</td><td>Alto</td><td>uCtrlPlanilhaContabil, FCadHistoContabilMT</td></tr>
+      <tr><td>ORCAMENTO</td><td>Bidirecional</td><td>Alto</td><td>FVinculaOrcadoContabil*, FBuscaContabilMT</td></tr>
+      <tr><td>CAF / CAFMT / CMCAFOBJ50</td><td>Bidirecional</td><td>Alto</td><td>fExpContab, Param CAFxContab</td></tr>
+      <tr><td>FOLHA / EMPRESTIMO / INVESTIMENTOS / ALIENACAO / IRRF / CFINAN</td><td>Outros → Contábil</td><td>Alto/Médio</td><td>Referências a plano/conta/lançamento</td></tr>
+      <tr><td>REGRA (motor)</td><td>Possível</td><td>Médio</td><td>Consiste regras / CMContabRegra — validar profundidade</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="externos">
+  <div class="section-title">11. Dependências com Outros Sistemas</div>
+  <div class="note">Classificação: Confirmada (evidência direta) / Provável / Possível / Não identificada.</div>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Sistema</th><th>Tipo</th><th>Direção</th><th>Origem evidência</th><th>Dados</th><th>Frequência</th><th>Protocolo/Formato</th><th>Criticidade</th><th>Confiança</th><th>Impacto migração</th></tr></thead>
+    <tbody><tr><td>Excel</td><td>Arquivo</td><td>Entrada/Saída</td><td>FImportaExcelMT, uExcel, exportações de razão</td><td>Planilhas de lançamentos/relatórios</td><td>Sob demanda</td><td>Arquivo XLS</td><td>Alta</td><td><span class='tag tag-alta'>Alta</span></td><td>Recriar import/export</td></tr>
+<tr><td>SAF</td><td>Arquivo/Sistema</td><td>Entrada</td><td>FImportaSAFMT; menu SAF em FPrincipal</td><td>Lançamentos</td><td>Sob demanda</td><td>Arquivo (formato legado)</td><td>Alta</td><td><span class='tag tag-alta'>Alta</span></td><td>Preservar contrato de layout</td></tr>
+<tr><td>Fidélio</td><td>Arquivo/Diretório</td><td>Entrada</td><td>FImpFidelioMT; CAMINHOFIDELIO em PARAMCONTAB</td><td>Lançamentos hotelaria</td><td>Sob demanda</td><td>Arquivo via caminho configurado</td><td>Média</td><td><span class='tag tag-alta'>Alta</span></td><td>Validar se ainda em uso</td></tr>
+<tr><td>Folha RM / Dinâmica / SRH Plus</td><td>Arquivo/Sistema</td><td>Entrada</td><td>FImportaRMMT, FImportaDinamicaMT, FImportaSRHMT, CADEVENTOSRH</td><td>Lançamentos de folha</td><td>Mensal</td><td>Arquivo/eventos</td><td>Alta</td><td><span class='tag tag-alta'>Alta</span></td><td>Alinhar com módulo Folha</td></tr>
+<tr><td>SIPC-CAP / SICADI</td><td>Arquivo regulatório</td><td>Saída</td><td>FGeraSalContMT/2004/2010; menus SIPC</td><td>Saldos/balancete regulatório</td><td>Periódico</td><td>Arquivo texto/layout SPC</td><td>Alta</td><td><span class='tag tag-alta'>Alta</span></td><td>Validar layout vigente com negócio</td></tr>
+<tr><td>Posadas</td><td>Arquivo/Exportação</td><td>Saída</td><td>FExpPosadasMT, uCtrlPosadasExpBalancete</td><td>Balancete</td><td>Sob demanda</td><td>Arquivo</td><td>Média</td><td><span class='tag tag-alta'>Alta</span></td><td>Confirmar destinatário</td></tr>
+<tr><td>Exportação Contábil genérica</td><td>Arquivo</td><td>Saída</td><td>FExportaContabMT, FExcluiExportContabMT</td><td>Exportação/exclusão</td><td>Sob demanda</td><td>Arquivo</td><td>Média</td><td><span class='tag tag-alta'>Alta</span></td><td>Mapear layout</td></tr>
+<tr><td>CapCar (CPAGAR/CRECEBER)</td><td>Módulo interno</td><td>Entrada</td><td>CMCAPCAROBJ50 uCtrlPlanilhaContabil / referências cruzadas</td><td>Planilhas/lançamentos</td><td>Contínuo</td><td>BD compartilhado</td><td>Alta</td><td><span class='tag tag-alta'>Alta</span></td><td>API/eventos internos</td></tr>
+<tr><td>Orçamento</td><td>Módulo interno</td><td>Bidirecional</td><td>ORCAMENTO FVinculaOrcadoContabil*, FBuscaContabilMT</td><td>Contas/saldos</td><td>Contínuo</td><td>BD</td><td>Alta</td><td><span class='tag tag-alta'>Alta</span></td><td>Contrato de leitura contábil</td></tr>
+<tr><td>CAF</td><td>Módulo interno</td><td>Bidirecional</td><td>CAFMT fExpContab, fParamContab, CMCAFOBJ50</td><td>Grupos/saldos contábeis</td><td>Contínuo</td><td>BD</td><td>Alta</td><td><span class='tag tag-alta'>Alta</span></td><td>Manter de-para</td></tr>
+<tr><td>Empréstimo / Investimentos / Alienação / IRRF / CFINAN</td><td>Módulos internos</td><td>Entrada/consulta</td><td>Referências a plano/conta contábil nos respectivos fontes</td><td>Contas/lançamentos</td><td>Contínuo</td><td>BD</td><td>Alta</td><td><span class='tag tag-média'>Média</span></td><td>Inventariar pontos de chamada</td></tr>
+<tr><td>HTTP/SOAP REST externo genérico</td><td>API</td><td>—</td><td>Poucos hits genéricos sem endpoint claro</td><td>—</td><td>—</td><td>—</td><td>Baixa</td><td><span class='tag tag-baixa'>Baixa</span></td><td>Não confirmado — lacuna</td></tr></tbody>
+  </table></div>
+  <p><strong>Não identificada com evidência suficiente:</strong> filas, serviços Windows dedicados, SOAP/REST externos com endpoint configurado, FTP explícito de produção. Lacunas registradas na seção 18.</p>
+</section>
+
+<section id="matriz">
+  <div class="section-title">12. Matriz de Integrações</div>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Origem</th><th>Contábil</th><th>Destino</th><th>Tipo</th><th>Direção</th><th>Criticidade</th><th>Evidência</th></tr></thead>
+    <tbody>
+<tr><td>Excel</td><td>Importação/exportação</td><td>Arquivo local</td><td>Arquivo</td><td>Bidirecional</td><td>Alta</td><td>FImportaExcelMT / uExcel</td></tr>
+<tr><td>SAF</td><td>Importação SAF</td><td>Sistema SAF</td><td>Arquivo</td><td>Entrada</td><td>Alta</td><td>FImportaSAFMT</td></tr>
+<tr><td>Fidélio</td><td>Importação Fidélio</td><td>Fidélio</td><td>Arquivo</td><td>Entrada</td><td>Média</td><td>FImpFidelioMT / CAMINHOFIDELIO</td></tr>
+<tr><td>Folha</td><td>Importação lançamentos</td><td>RM/Dinâmica/SRH</td><td>Arquivo</td><td>Entrada</td><td>Alta</td><td>FImportaRMMT etc.</td></tr>
+<tr><td>Contábil</td><td>SIPC-CAP</td><td>Órgão/regulador</td><td>Arquivo</td><td>Saída</td><td>Alta</td><td>FGeraSalCont*</td></tr>
+<tr><td>Contábil</td><td>Posadas</td><td>Posadas</td><td>Arquivo</td><td>Saída</td><td>Média</td><td>FExpPosadasMT</td></tr>
+<tr><td>CPAGAR/CRECEBER</td><td>Planilha contábil</td><td>Contábil</td><td>Banco</td><td>Entrada</td><td>Alta</td><td>CMCAPCAROBJ50</td></tr>
+<tr><td>ORCAMENTO</td><td>Busca contábil</td><td>Contábil</td><td>Banco</td><td>Bidirecional</td><td>Alta</td><td>FBuscaContabilMT</td></tr>
+<tr><td>CAF</td><td>Exportação/consulta</td><td>Contábil</td><td>Banco/Arquivo</td><td>Bidirecional</td><td>Alta</td><td>CAFMT fExpContab</td></tr>
+</tbody>
+  </table></div>
+</section>
+
+<section id="banco">
+  <div class="section-title">13. Dependências de Banco</div>
+  <ul>
+    <li><strong>Exclusivas/núcleo Contábil:</strong> LANCAMENTO, PLANILHA, PLANOCONTA, PLANOSALDO, PERIODO, PARAMCONTAB, PREPLANILHA, DEMONSTRATIVO*, SEGREGACAO*, RATEIO*, REGRASCONTAB, HISTOPADRAO, SUBCONTA, SUBGRUPO, TERMODIARIO, APURRESULTADO, SPCCONSISTE* — Confiança Alta quanto ao mapeamento; exclusividade absoluta no schema não comprovada sem DDL global.</li>
+    <li><strong>Compartilhadas internamente:</strong> PLANO, PESSOA/EMPRESA (cadastros globais), centros de custo, unidades de negócio, planos previdenciários (IDPLANOPREV, IDPATRO).</li>
+    <li><strong>Compartilhadas com outros sistemas:</strong> possíveis sinônimos/schemas externos — <em>Dependência desconhecida</em> (lacuna).</li>
+    <li><strong>Views/procedures/triggers:</strong> não inventariadas integralmente no repositório; scripts pontuais em SCRIPT/__SCRIPTS__.</li>
+  </ul>
+</section>
+
+<section id="regras">
+  <div class="section-title">14. Regras de Negócio Críticas</div>
+  <div class="rule-block"><div class="rule-id">RN001</div><div class="rule-desc">Lançamentos contábeis devem respeitar a natureza Débito/Crédito e atualizar saldos das contas analíticas.</div>
+    <div class="rule-origin">Evidência: <code>CONTAB/CtrlObjects/uCtrlLancamento.pas — AtuSaldoContas / InsereLancaContab</code> | Estratégia: migrar para C# Domain/Service preservando critério de aceite | Confiança: <span class="tag tag-alta">Alta</span></div></div><div class="rule-block"><div class="rule-id">RN002</div><div class="rule-desc">É possível atualizar saldos de contas sintéticas a partir dos lançamentos das analíticas.</div>
+    <div class="rule-origin">Evidência: <code>CONTAB/CtrlObjects/uCtrlLancamento.pas — AtuSaldoSintetica</code> | Estratégia: migrar para C# Domain/Service preservando critério de aceite | Confiança: <span class="tag tag-alta">Alta</span></div></div><div class="rule-block"><div class="rule-id">RN003</div><div class="rule-desc">Planilhas podem ser estornadas ou excluídas, com atualização consistente dos lançamentos associados.</div>
+    <div class="rule-origin">Evidência: <code>CONTAB/CtrlObjects/uCtrlLancamento.pas — EstornaLancaContab / ExcluiLancaContab</code> | Estratégia: migrar para C# Domain/Service preservando critério de aceite | Confiança: <span class="tag tag-alta">Alta</span></div></div><div class="rule-block"><div class="rule-id">RN004</div><div class="rule-desc">Parâmetros contábeis (PARAMCONTAB) definem faixas de contas (ativo, passivo, despesa, receita, custo, estatística), moedas, fechamento e validações de planilha.</div>
+    <div class="rule-origin">Evidência: <code>CONTAB/DbObjects/uDbParamcontab.pas; CONTAB/FontesMT/FCadParamContabMT.pas</code> | Estratégia: migrar para C# Domain/Service preservando critério de aceite | Confiança: <span class="tag tag-alta">Alta</span></div></div><div class="rule-block"><div class="rule-id">RN005</div><div class="rule-desc">Períodos contábeis possuem bloqueio (PERBLOQUE/PERBLOINT) que impede ou restringe lançamentos em períodos fechados.</div>
+    <div class="rule-origin">Evidência: <code>CONTAB/DbObjects/uDbPeriodo.pas; CONTAB/FontesMT/FEncerraPeriodoMT.pas</code> | Estratégia: migrar para C# Domain/Service preservando critério de aceite | Confiança: <span class="tag tag-alta">Alta</span></div></div><div class="rule-block"><div class="rule-id">RN006</div><div class="rule-desc">Contas do plano podem ser bloqueadas (PLABLOQUE/PLABLOQUEDATA) e inativadas (PLAINATIVA).</div>
+    <div class="rule-origin">Evidência: <code>CONTAB/DbObjects/uDbPlanoConta.pas</code> | Estratégia: migrar para C# Domain/Service preservando critério de aceite | Confiança: <span class="tag tag-alta">Alta</span></div></div><div class="rule-block"><div class="rule-id">RN007</div><div class="rule-desc">Teste de natureza de demonstrativo valida combinação natureza do demonstrativo × flag × sinal do valor.</div>
+    <div class="rule-origin">Evidência: <code>CONTAB/Fontes/UModulo.pas — TestaNatureza</code> | Estratégia: migrar para C# Domain/Service preservando critério de aceite | Confiança: <span class="tag tag-alta">Alta</span></div></div><div class="rule-block"><div class="rule-id">RN008</div><div class="rule-desc">Segregação por plano e patrocinadora gera lançamentos e cotas conforme critérios (SEGREGACRITER, SEGREGACAO).</div>
+    <div class="rule-origin">Evidência: <code>CONTAB/FontesMT/fProcessaSegregacao.pas; CONTAB/DbObjects/uDbSegregacao.pas</code> | Estratégia: migrar para C# Domain/Service preservando critério de aceite | Confiança: <span class="tag tag-alta">Alta</span></div></div><div class="rule-block"><div class="rule-id">RN009</div><div class="rule-desc">Rateios (atividade/projeto, programa, administrativo, plano/patrocinadora) geram lançamentos a partir de percentuais cadastrados.</div>
+    <div class="rule-origin">Evidência: <code>CONTAB/CtrlObjects/uCtrlLancamento.pas — FazRateio; Forms FGera*Rateio*</code> | Estratégia: migrar para C# Domain/Service preservando critério de aceite | Confiança: <span class="tag tag-alta">Alta</span></div></div><div class="rule-block"><div class="rule-id">RN010</div><div class="rule-desc">Exportação regulatória SIPC-CAP/SICADI gera arquivos de saldos/balancete (FGeraSalCont*).</div>
+    <div class="rule-origin">Evidência: <code>CONTAB/FontesMT/FGeraSalContMT.pas / FGeraSalCont2004MT.pas / FGeraSalCont2010MT.pas</code> | Estratégia: migrar para C# Domain/Service preservando critério de aceite | Confiança: <span class="tag tag-alta">Alta</span></div></div><div class="rule-block"><div class="rule-id">RN011</div><div class="rule-desc">Importação de lançamentos a partir de Excel, SAF, Fidélio, Folha RM, Folha Dinâmica e SRH Plus.</div>
+    <div class="rule-origin">Evidência: <code>CONTAB/Fontes/FPrincipal.pas (menus Importações); FImporta*MT.pas</code> | Estratégia: migrar para C# Domain/Service preservando critério de aceite | Confiança: <span class="tag tag-alta">Alta</span></div></div><div class="rule-block"><div class="rule-id">RN012</div><div class="rule-desc">Dias bloqueados por módulo/sistema (DIASBLOQMOD) restringem operação contábil por origem.</div>
+    <div class="rule-origin">Evidência: <code>CONTAB/DbObjects/uDbDiasbloqmod.pas; FCadDiasBloqModMT</code> | Estratégia: migrar para C# Domain/Service preservando critério de aceite | Confiança: <span class="tag tag-alta">Alta</span></div></div><div class="rule-block"><div class="rule-id">RN013</div><div class="rule-desc">Consistência de regras contábeis (REGRASCONTAB / Consiste Regras) valida lançamentos conforme regras cadastradas.</div>
+    <div class="rule-origin">Evidência: <code>CONTAB/FontesMT/fConfereRegraMT.pas; uDbRegrasContab.pas</code> | Estratégia: migrar para C# Domain/Service preservando critério de aceite | Confiança: <span class="tag tag-alta">Alta</span></div></div><div class="rule-block"><div class="rule-id">RN014</div><div class="rule-desc">Encerramento de contas de resultado e exercício (incluindo apuração meia-noite) gera lançamentos de apuração.</div>
+    <div class="rule-origin">Evidência: <code>CONTAB/FontesMT/FEncerraResultadosMT.pas; FEncerraExercicioMT.pas; FLancMeiaNoiteMT.pas</code> | Estratégia: migrar para C# Domain/Service preservando critério de aceite | Confiança: <span class="tag tag-alta">Alta</span></div></div><div class="rule-block"><div class="rule-id">RN015</div><div class="rule-desc">Demonstrativos são compostos por elementos, linhas, colunas e layouts (ReportBuilder) parametrizáveis.</div>
+    <div class="rule-origin">Evidência: <code>CONTAB/DbObjects/uDbDemonstrativo.pas; FCadDemonstrativoMT</code> | Estratégia: migrar para C# Domain/Service preservando critério de aceite | Confiança: <span class="tag tag-alta">Alta</span></div></div>
+</section>
+
+<section id="riscos">
+  <div class="section-title">15. Riscos</div>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Risco</th><th>Probabilidade</th><th>Impacto</th><th>Mitigação</th></tr></thead>
+    <tbody>
+      <tr><td>Regras escondidas em Forms/eventos UI</td><td>Alta</td><td>Alto</td><td>Extrair testes de caracterização por tela crítica</td></tr>
+      <tr><td>uCtrlLancamento monolítico (milhares de linhas)</td><td>Alta</td><td>Alto</td><td>Migrar por fatias (incluir/estornar/saldo/rateio) com golden files</td></tr>
+      <tr><td>SQL embutido e dependência MIDAS</td><td>Alta</td><td>Alto</td><td>Catalogar queries; repositórios com testes de paridade</td></tr>
+      <tr><td>Layouts SIPC/SICADI desatualizados vs órgão</td><td>Média</td><td>Alto</td><td>Validar layout vigente com negócio antes de codificar</td></tr>
+      <tr><td>Integrações por arquivo sem especificação</td><td>Alta</td><td>Alto</td><td>Coletar amostras reais; documentar contratos</td></tr>
+      <tr><td>Triggers/procedures só no banco</td><td>Média</td><td>Alto</td><td>Extrair DDL do ambiente Oracle de homologação</td></tr>
+      <tr><td>Cálculos multi-moeda / cotação</td><td>Média</td><td>Alto</td><td>Casos de teste financeiros com precisão decimal</td></tr>
+      <tr><td>Tabelas compartilhadas com CapCar/Orçamento/CAF</td><td>Alta</td><td>Alto</td><td>Migração coordenada; feature flags / coexistência</td></tr>
+      <tr><td>Ausência de testes automatizados legados</td><td>Alta</td><td>Alto</td><td>Criar suíte de regressão contábil na Fase 5</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="estrategia">
+  <div class="section-title">16. Estratégia de Migração</div>
+  <ol>
+    <li><strong>Fase 1 — Descoberta:</strong> inventário (este documento), extração DDL Oracle, amostras de arquivos de integração. ✅ em andamento no repo</li>
+    <li><strong>Fase 2 — Fundação:</strong> solução C# (API, auth, persistência), skeleton Angular, CI, ambientes</li>
+    <li><strong>Fase 3 — Migração funcional:</strong> cadastros → lançamentos/saldos → processamentos → relatórios</li>
+    <li><strong>Fase 4 — Integrações:</strong> Excel/SAF/Folha/SIPC/Posadas + contratos com CapCar/Orçamento/CAF</li>
+    <li><strong>Fase 5 — Validação:</strong> paralelismo legado×novo, conciliação de saldos, auditoria contábil</li>
+    <li><strong>Fase 6 — Transição:</strong> coexistência, cutover, desligamento Contab.exe</li>
+  </ol>
+</section>
+
+<section id="backlog">
+  <div class="section-title">17. Backlog Inicial</div>
+  <div class="table-wrap"><table>
+    <thead><tr><th>ID</th><th>User Story</th><th>Origem Delphi</th><th>Destino</th><th>Complexidade</th><th>Prioridade</th><th>Risco</th></tr></thead>
+    <tbody><tr><td>MIG-01</td><td>US-CTB-08</td><td><code>FCadParamContabMT</code></td><td>API+Angular parâmetros</td><td>2</td><td>Alta</td><td>Baixo</td></tr>
+<tr><td>MIG-02</td><td>US-CTB-01</td><td><code>FCadPlanoContasMT</code></td><td>API+Angular plano contas</td><td>4</td><td>Alta</td><td>Médio</td></tr>
+<tr><td>MIG-03</td><td>US-CTB-02</td><td><code>fLancaContabMT / uCtrlLancamento</code></td><td>API lançamentos + UI</td><td>8</td><td>Alta</td><td>Alto</td></tr>
+<tr><td>MIG-04</td><td>US-CTB-03</td><td><code>AtuSaldo*</code></td><td>Serviço de saldos</td><td>5</td><td>Alta</td><td>Alto</td></tr>
+<tr><td>MIG-05</td><td>US-CTB-04</td><td><code>FEncerra*</code></td><td>Serviços de encerramento</td><td>8</td><td>Alta</td><td>Alto</td></tr>
+<tr><td>MIG-06</td><td>US-CTB-05</td><td><code>Reports Contábil</code></td><td>Relatórios modernos</td><td>5</td><td>Alta</td><td>Médio</td></tr>
+<tr><td>MIG-07</td><td>US-CTB-06</td><td><code>FImporta*</code></td><td>Conectores de importação</td><td>8</td><td>Alta</td><td>Alto</td></tr>
+<tr><td>MIG-08</td><td>US-CTB-07</td><td><code>FGeraSalCont*</code></td><td>Exportação regulatória</td><td>8</td><td>Alta</td><td>Alto</td></tr>
+<tr><td>MIG-09</td><td>US-CTB-09</td><td><code>Rateio/Segregação</code></td><td>Serviços de alocação</td><td>8</td><td>Alta</td><td>Alto</td></tr>
+<tr><td>MIG-10</td><td>US-CTB-10</td><td><code>fConfereRegraMT</code></td><td>Motor de consistência</td><td>5</td><td>Média</td><td>Médio</td></tr></tbody>
+  </table></div>
+  <p>Critérios de aceite: ver seção 5 e páginas do módulo. Dependências: framework auth + PARAMCONTAB + PLANO/PERIODO antes de lançamentos.</p>
+</section>
+
+<section id="lacunas">
+  <div class="section-title">18. Lacunas</div>
+  <ul>
+    <li>DDL completo Oracle (PKs/FKs/triggers/procedures contábeis) não disponível como dump no repositório.</li>
+    <li>Especificação oficial dos layouts SAF, Fidélio, SIPC-CAP vigente e Posadas não anexada ao código.</li>
+    <li>Configuração de aliases BDE / connection strings de produção (provavelmente fora do repo).</li>
+    <li>Jobs/agendadores Windows que disparem Contábil: não evidenciados no código analisado.</li>
+    <li>Endpoints HTTP/SOAP externos concretos: não confirmados.</li>
+    <li>Matriz completa de permissões por perfil/tela: depende de cadastro de autorização CM em banco.</li>
+    <li>Profundidade de uso atual de cada importação (Fidélio etc.): requer validação com negócio.</li>
+  </ul>
+</section>
+
+<section id="checklist">
+  <div class="section-title">19. Checklist de Prontidão</div>
+  <ul class="check">
+    <li>☑ Funcionalidades identificadas</li>
+    <li>☑ Forms identificados</li>
+    <li>☑ Units/CtrlObjects identificadas</li>
+    <li>☑ Data Modules identificados</li>
+    <li>☑ Tabelas identificadas (DbObjects)</li>
+    <li>☐ Views identificadas (lacuna — extrair do BD)</li>
+    <li>☐ Procedures identificadas (lacuna — extrair do BD)</li>
+    <li>☐ Triggers identificadas (lacuna — extrair do BD)</li>
+    <li>☑ Regras identificadas (núcleo)</li>
+    <li>☑ User Stories geradas</li>
+    <li>☑ Critérios de aceite gerados</li>
+    <li>☑ APIs identificadas (sugeridas)</li>
+    <li>☑ Componentes Angular identificados</li>
+    <li>☑ Dependências internas identificadas</li>
+    <li>☑ Dependências externas investigadas</li>
+    <li>☑ Matriz de integrações gerada</li>
+    <li>☐ Configurações de runtime analisadas (lacuna)</li>
+    <li>☑ Riscos identificados</li>
+    <li>☑ Lacunas registradas</li>
+    <li>☑ Estratégia de migração definida</li>
+    <li>☑ Backlog inicial gerado</li>
+    <li>☑ Cobertura funcional do Contábil ≥ 95% (forms/menus/tabelas/processos principais)</li>
+  </ul>
+</section>
+
+</main>
+
+<footer>
+<p>CM Contabilidade — Migração Contábil | Delphi 5 → C# / Angular | 2026-08-19 | pt-BR</p>
+</footer>
+</body>
+</html>
