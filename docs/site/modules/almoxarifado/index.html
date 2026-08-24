@@ -185,30 +185,55 @@ ul.check li::before { content: "☐ "; }
       <p><strong>Contexto de Negócio:</strong> Este módulo integra a suíte CM Contabilidade e apoia processos operacionais/financeiros/previdenciários conforme o domínio <em>Almoxarifado</em>.</p>
       <p><strong>Responsabilidades:</strong></p>
       <ul><li>Entradas e saídas</li><li>Inventário</li></ul>
+    
+      <p><strong>Processos funcionais detalhados:</strong></p>
+<ul>
+<li><strong>Cadastros básicos</strong> — Almoxarifados, artigos, produtos, grupos de produto, unidades de medida e de custeio, com conversões (<code>ALMOX</code>, <code>ARTIGO</code>, <code>PRODUTO</code>, <code>GRUPPROD</code>, <code>UNCUSTEI</code>, <code>CONVER</code>).</li>
+<li><strong>Entrada de materiais</strong> — Recebimento de mercadoria com nota fiscal, devolução, entradas pendentes e ajuste de conversão de medida (<code>NFRECEBDEVOL</code>, <code>ITENSRECEBDEVOL</code>, <code>ITEMENTR</code>).</li>
+<li><strong>Saída e requisição</strong> — Requisição de materiais, atendimento, confirmação/devolução de atendimento e baixa direta (<code>REQMAT</code>, <code>MOVIMENT</code>).</li>
+<li><strong>Custo médio</strong> — Cálculo e alteração do custo médio, curva ABC de estoque e de alteração de custo médio (<code>CUSTOMED</code>).</li>
+<li><strong>Inventário</strong> — Contagem física, exportação/importação para coletor, análise das diferenças de inventário e termo de inventário (<code>INVENTAR</code>, <code>QTDECONT</code>, <code>TERMOINVENTARIO</code>).</li>
+<li><strong>Integração contábil</strong> — Artigo × conta contábil × centro de custo, custos contábeis, conciliação almoxarifado × contabilidade e exclusão da integração contábil (<code>ARTXCONTAXCC</code>).</li>
+<li><strong>Gestão de estoque</strong> — Premissas de gestão, análise sugerida, consumo médio, artigos sem movimentação e data de represamento.</li>
+<li><strong>Transferências e perdas</strong> — Transferência entre almoxarifados, baixa por perda com tipo de perda e controle de validade por lote (<code>TRANSFALMOX</code>, <code>TIPOPERDA</code>, <code>LOTEVALI</code>).</li>
+</ul>
     </section>
     <section id="user-stories">
       <div class="section-title">📝 Guia para User Stories</div>
-      
-<div class="story-card"><div class="role">👤 Como operador</div>
-<div class="want">🎯 Quero utilizar as funções principais do módulo Almoxarifado</div>
-<div class="why">💡 Para executar o processo de negócio suportado por este módulo</div></div>
-<div class="story-card"><div class="role">👤 Como supervisor</div>
-<div class="want">🎯 Quero consultar e validar os resultados gerados</div>
-<div class="why">💡 Para garantir conformidade operacional</div></div>
-
+      <div class="story-card"><div class="role">👤 Como almoxarife</div>
+<div class="want">🎯 Quero registrar o recebimento de mercadoria com nota fiscal e atualizar o saldo do almoxarifado</div>
+<div class="why">💡 Para manter o estoque físico e contábil consistente</div></div>
+<div class="story-card"><div class="role">👤 Como requisitante</div>
+<div class="want">🎯 Quero cadastrar uma requisição de material e acompanhar seu atendimento</div>
+<div class="why">💡 Para obter os materiais necessários com rastreabilidade do consumo por centro de custo</div></div>
+<div class="story-card"><div class="role">👤 Como contador</div>
+<div class="want">🎯 Quero conciliar o custo do estoque com a contabilidade no fechamento</div>
+<div class="why">💡 Para garantir que o valor do estoque registrado corresponde ao saldo contábil</div></div>
     </section>
     <section id="criterios">
       <div class="section-title">✅ Critérios de Aceitação</div>
-      
-<div class="criteria-block"><div class="given"><strong>Dado que</strong> o usuário possui permissão no módulo</div>
-<div class="when"><strong>Quando</strong> acessa as telas principais do executável</div>
-<div class="then"><strong>Então</strong> consegue executar as operações de cadastro/consulta previstas no código da pasta <code>ALMOXARIFADO</code></div></div>
-<div class="note">Critérios detalhados dependem de análise aprofundada das forms do módulo. Confiança: Média</div>
-
+      <div class="criteria-block"><div class="given"><strong>Dado que</strong> um artigo não possui conta contábil e centro de custo associados em <code>ARTXCONTAXCC</code></div>
+<div class="when"><strong>Quando</strong> uma movimentação desse artigo é integrada à contabilidade</div>
+<div class="then"><strong>Então</strong> a integração aponta a falta de parametrização em vez de gerar lançamento sem classificação</div></div>
+<div class="criteria-block"><div class="given"><strong>Dado que</strong> a contagem física registra quantidade diferente do saldo do sistema</div>
+<div class="when"><strong>Quando</strong> a análise das diferenças de inventário é executada</div>
+<div class="then"><strong>Então</strong> as divergências são apresentadas por item para ajuste, e o ajuste altera o saldo e o custo médio</div></div>
+<div class="criteria-block"><div class="given"><strong>Dado que</strong> um produto possui controle de validade por lote</div>
+<div class="when"><strong>Quando</strong> sua saída é registrada</div>
+<div class="then"><strong>Então</strong> a movimentação considera o lote e sua validade (<code>LOTEVALI</code>)</div></div>
     </section>
     <section id="regras">
       <div class="section-title">📏 Regras de Negócio</div>
-      <p>Nenhuma regra específica catalogada com evidência linha a linha neste módulo nesta entrega. Consulte o código em <code>ALMOXARIFADO</code>.</p>
+      <p>Regras levantadas a partir do código-fonte do módulo. Cada regra indica a unidade, o método ou a tela de origem e o nível de confiança da evidência. Identificadores conferem com o <a href="../../../business-rules-catalog.html">Catálogo de Regras de Negócio</a>.</p>
+<div class="rule-block" id="RN137"><div class="rule-id">RN137</div><div class="rule-desc">Toda entrada e saída é registrada como movimentação no almoxarifado; o saldo é consequência da movimentação, não digitado.</div><div class="rule-origin">📂 Origem: <code>ALMOXARIFADO/Fontes (MOVIMENT — 197 referências, ALMOX, SALDO); telas <em>Atualização de Movimentos</em>, <em>Consulta dos Saldos dos Produtos</em></code> | Confiança: <span class="tag tag-alta">Alta</span></div></div>
+<div class="rule-block" id="RN138"><div class="rule-id">RN138</div><div class="rule-desc">A valorização do estoque é por custo médio, recalculado nas entradas e passível de alteração controlada, com curva ABC das alterações.</div><div class="rule-origin">📂 Origem: <code>ALMOXARIFADO/Fontes (CUSTOMED; telas <em>Alteração de Custo Médio</em>, <em>Curva ABC de Alteração de Custo Médio</em>)</code> | Confiança: <span class="tag tag-alta">Alta</span></div></div>
+<div class="rule-block" id="RN139"><div class="rule-id">RN139</div><div class="rule-desc">A classificação contábil da movimentação vem do vínculo artigo × conta contábil × centro de custo; a integração contábil pode ser excluída e refeita.</div><div class="rule-origin">📂 Origem: <code>ALMOXARIFADO/Fontes (ARTXCONTAXCC; telas <em>Artigos x Contas Contábeis</em>, <em>Exclui Integração Contábil</em>, <em>Conciliação entre Almoxarifado e Contabilidade</em>)</code> | Confiança: <span class="tag tag-alta">Alta</span></div></div>
+<div class="rule-block" id="RN140"><div class="rule-id">RN140</div><div class="rule-desc">O consumo é apropriado por centro de custo e unidade de custeio, base dos relatórios de custo e do rateio.</div><div class="rule-origin">📂 Origem: <code>ALMOXARIFADO/Fontes (CENTCUST, UNCUSTEI; telas <em>Custo por Centro de Custo</em>, <em>Extrato da Movimentação por Unidade de Custeio</em>)</code> | Confiança: <span class="tag tag-alta">Alta</span></div></div>
+<div class="rule-block" id="RN141"><div class="rule-id">RN141</div><div class="rule-desc">O inventário compara a contagem física com o saldo do sistema, com exportação/importação para coletor e análise formal das diferenças.</div><div class="rule-origin">📂 Origem: <code>ALMOXARIFADO/Fontes (INVENTAR, QTDECONT, TERMOINVENTARIO; telas <em>Contagem Física</em>, <em>Exportação de Arquivo de Inventário para Coletor</em>, <em>Análise das Diferenças de Inventário</em>)</code> | Confiança: <span class="tag tag-alta">Alta</span></div></div>
+<div class="rule-block" id="RN142"><div class="rule-id">RN142</div><div class="rule-desc">O atendimento de requisição é confirmado (ou devolvido) pelo requisitante, fechando o ciclo requisição → atendimento → confirmação.</div><div class="rule-origin">📂 Origem: <code>ALMOXARIFADO/Fontes (REQMAT; telas <em>Cadastro de Requisições de Materiais</em>, <em>Atendimento de Requisição Cadastrada</em>, <em>Confirmação/Devolução de Atendimento</em>)</code> | Confiança: <span class="tag tag-alta">Alta</span></div></div>
+<div class="rule-block" id="RN143"><div class="rule-id">RN143</div><div class="rule-desc">Perdas exigem tipo de perda cadastrado, e produtos com validade são controlados por lote.</div><div class="rule-origin">📂 Origem: <code>ALMOXARIFADO/Fontes (TIPOPERDA, LOTEVALI; telas <em>Baixa por Perda</em>, <em>Cadastro de Tipo de Perda</em>, <em>Alteração de Validade dos Produtos</em>)</code> | Confiança: <span class="tag tag-alta">Alta</span></div></div>
+<div class="rule-block" id="RN144"><div class="rule-id">RN144</div><div class="rule-desc">Produtos já movimentados não podem ser simplesmente excluídos: há rotina específica de exclusão de produtos já movimentados.</div><div class="rule-origin">📂 Origem: <code>ALMOXARIFADO/Fontes (tela <em>Exclusão de Produtos Já Movimentados</em>)</code> | Confiança: <span class="tag tag-media">Média</span></div></div>
+<div class="rule-block" id="RN145"><div class="rule-id">RN145</div><div class="rule-desc">Materiais recebidos que constituam bem patrimonial seguem para o CAF como entrada pendente.</div><div class="rule-origin">📂 Origem: <code>ALMOXARIFADO/Fontes (tela <em>Cadastramento no Ativo Fixo</em>); CAF/Fontes (tela <em>Entradas Pendentes do Almoxarifado</em>)</code> | Confiança: <span class="tag tag-alta">Alta</span></div></div>
     </section>
     <section id="tecnico">
       <div class="section-title">⚙️ Fundação Técnica — Delphi 5</div>
@@ -219,7 +244,26 @@ ul.check li::before { content: "☐ "; }
     </section>
     <section id="dados">
       <div class="section-title">🗄️ Modelo de Dados</div>
-      <p>Nenhuma tabela foi inventariada exaustivamente para este módulo nesta entrega. Ver DbObjects da pasta quando existirem. <strong>Lacuna parcial.</strong></p>
+      <p>Entidades centrais do módulo identificadas nos <code>DbObjects</code>, nos <code>CtrlObjects</code> e nas consultas SQL das telas. A relação cobre o núcleo funcional; a listagem completa de campos permanece no código.</p>
+<div class="table-wrap"><table><thead><tr><th>Entidade / Tabela</th><th>Papel funcional</th><th>Evidência no código</th></tr></thead><tbody>
+<tr><td><code>MOVIMENT</code></td><td>Movimentação de entrada/saída de material</td><td><code>ALMOXARIFADO/Fontes (rotinas de movimentação)</code></td></tr>
+<tr><td><code>ALMOX / PARALMOX</code></td><td>Almoxarifados e seus parâmetros</td><td><code>ALMOXARIFADO/Fontes (cadastro de almoxarifado)</code></td></tr>
+<tr><td><code>ARTIGO / PRODUTO / PRODVARI / GRUPPROD</code></td><td>Artigos, produtos, variações e grupos</td><td><code>ALMOX&COMPRAS/Fontes (cadastros de produto)</code></td></tr>
+<tr><td><code>SALDO / CUSTOMED</code></td><td>Saldo por almoxarifado e custo médio</td><td><code>ALMOXARIFADO/Fontes</code></td></tr>
+<tr><td><code>ARTXCONTAXCC</code></td><td>Vínculo artigo × conta contábil × centro de custo</td><td><code>ALMOXARIFADO/Fontes (integração contábil)</code></td></tr>
+<tr><td><code>REQMAT</code></td><td>Requisição de material</td><td><code>ALMOXARIFADO/Fontes</code></td></tr>
+<tr><td><code>NFRECEBDEVOL / ITENSRECEBDEVOL / TEMPLNFDEVOL</code></td><td>Nota fiscal de recebimento/devolução e seus itens</td><td><code>ALMOXARIFADO/Fontes</code></td></tr>
+<tr><td><code>INVENTAR / QTDECONT / TERMOINVENTARIO</code></td><td>Inventário, contagem e termo</td><td><code>ALMOXARIFADO/Fontes</code></td></tr>
+<tr><td><code>TRANSFALMOX</code></td><td>Transferência entre almoxarifados</td><td><code>ALMOXARIFADO/Fontes</code></td></tr>
+<tr><td><code>TIPOPERDA / LOTEVALI</code></td><td>Tipos de perda e controle de validade por lote</td><td><code>ALMOXARIFADO/Fontes</code></td></tr>
+<tr><td><code>UNCUSTEI / CENTCUST / USCCUSTO</code></td><td>Unidade de custeio, centro de custo e acesso</td><td><code>ALMOX&COMPRAS/Fontes</code></td></tr>
+<tr><td><code>CONVER / UNMEDIDA / TAMANHO</code></td><td>Unidades de medida e conversões</td><td><code>ALMOX&COMPRAS/Fontes</code></td></tr>
+<tr><td><code>ITEMSOLI / SOLICOMP / ITEMOC</code></td><td>Interface com compras (solicitação e ordem)</td><td><code>ALMOX&COMPRAS/Fontes</code></td></tr>
+<tr><td><code>ITEMANALISEESTOQ</code></td><td>Análise/gestão de estoque</td><td><code>ALMOXARIFADO/Fontes</code></td></tr>
+<tr><td><code>USUXALMOX / USUXGRUPPROD</code></td><td>Acesso de usuários a almoxarifados e grupos de produto</td><td><code>ALMOX&COMPRAS/Fontes</code></td></tr>
+<tr><td><code>CONJUNTO / RATEIODEPRECIACAO</code></td><td>Interface com o CAF (conjuntos e rateio)</td><td><code>ALMOXARIFADO/Fontes</code></td></tr>
+<tr><td><code>RESCONT</code></td><td>Reservas/contratos vinculados ao consumo</td><td><code>ALMOXARIFADO/Fontes</code></td></tr>
+</tbody></table></div>
     </section>
     <section id="complexidade">
       <div class="section-title">📊 Estimativa de Complexidade</div>
@@ -234,9 +278,9 @@ ul.check li::before { content: "☐ "; }
         <li><span class="key">Tecnologia</span><span class="val">Delphi 5 / VCL</span></li>
         <li><span class="key">Banco de Dados</span><span class="val">Oracle</span></li>
         <li><span class="key">Acesso a Dados</span><span class="val">MIDAS/ClientDataSet</span></li>
-        <li><span class="key">Cobertura Funcional</span><span class="val">40–60%</span></li>
-        <li><span class="key">Última Atualização</span><span class="val">2026-08-19</span></li>
-        <li><span class="key">Confiança</span><span class="val"><span class="tag tag-média">Média</span></span></li>
+        <li><span class="key">Cobertura Funcional</span><span class="val">80%</span></li>
+        <li><span class="key">Última Atualização</span><span class="val">2026-08-24</span></li>
+        <li><span class="key">Confiança</span><span class="val"><span class="tag tag-alta">Alta</span></span></li>
       </ul>
     </section>
     <section>
@@ -245,7 +289,7 @@ ul.check li::before { content: "☐ "; }
         <li><span class="key">Forms/DFM</span><span class="val">~190</span></li>
         <li><span class="key">Data Modules</span><span class="val">~0</span></li>
         <li><span class="key">Units</span><span class="val">~196</span></li>
-        <li><span class="key">Tabelas</span><span class="val">—</span></li>
+        <li><span class="key">Tabelas</span><span class="val">17</span></li>
       </ul>
     </section>
     <section>
@@ -256,11 +300,20 @@ ul.check li::before { content: "☐ "; }
       <div class="section-title">♻️ Padrões Reutilizáveis</div>
       <ul class="dep-list"><li>Padrão CM (Forms MT + CtrlObjects + DbObjects)</li><li>Autorização via framework CM</li></ul>
     </section>
+    <section>
+      <div class="section-title">📎 Ver Também</div>
+      <ul class="dep-list">
+<li><a href="../../../cross-cutting-features.html">Funcionalidades Transversais</a></li>
+<li><a href="../../../business-rules-catalog.html">Catálogo de Regras de Negócio</a></li>
+<li><a href="../../../documentation-gap-analysis.html">Levantamento de Lacunas</a></li>
+<li><a href="../../../system-overview.html">Visão Geral do Sistema</a></li>
+</ul>
+    </section>
   </div>
 </main>
 
 <footer>
-<p>CM Contabilidade — Módulo Almoxarifado | Delphi 5 | Documentação gerada em 2026-08-19 | pt-BR</p>
+<p>CM Contabilidade — Módulo Almoxarifado | Delphi 5 | Documentação gerada em 2026-08-19 · revisada em 2026-08-24 (PFC-3) | pt-BR</p>
 </footer>
 </body>
 </html>

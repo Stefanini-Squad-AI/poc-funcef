@@ -160,7 +160,7 @@ ul.check li::before { content: "☐ "; }
 <header>
   <div class="badge">APIs para Modernização</div>
   <h1>🔌 Catálogo de APIs (sugerido C# / ASP.NET Core)</h1>
-  <p>APIs propostas a partir de operações Delphi do Contábil. Não existem APIs REST nativas no legado. <a href="site/index.html">Portal</a> | <a href="migration-contabil.html">Migração</a></p>
+  <p>APIs propostas a partir de operações Delphi do Contábil. Não existem APIs REST nativas no legado. <a href="site/index.html">Portal</a> | <a href="migration-contabil.html">Migração</a> | <a href="cross-cutting-features.html">Funcionalidades Transversais</a></p>
 </header>
 <main>
 <section>
@@ -197,13 +197,82 @@ ul.check li::before { content: "☐ "; }
   </table></div>
 </section>
 <section>
-  <div class="section-title">Outros módulos</div>
-  <p>Nenhuma evidência de API REST legada. Lacuna registrada para inventário API dos demais módulos.</p>
+  <div class="section-title">Operações candidatas a API nos demais módulos (PFC-3)</div>
+  <div class="note">Continua não havendo API REST nativa no legado. As operações abaixo foram derivadas dos métodos
+  públicos dos <code>CtrlObjects</code> e das telas identificadas no levantamento de PFC-3, e servem de ponto de partida
+  para o desenho de serviços. A profundidade é menor do que a do Contábil — ver
+  <a href="documentation-gap-analysis.html#remanescentes">Levantamento de Lacunas</a>.</div>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Módulo</th><th>Método</th><th>Rota sugerida</th><th>Objetivo</th><th>Origem Delphi</th><th>Tabelas</th></tr></thead>
+    <tbody>
+<tr><td><code>global-cm</code></td><td>GET/PUT</td><td><code>/api/global/centros-custo</code></td><td>Manter planos de centro de custo e responsabilidade</td><td><code>uCtrlCadPlanCentCust.pas / uCtrlCentroCusto.pas</code></td><td>PLANCENTCUST, CENTCUST</td></tr>
+<tr><td><code>global-cm</code></td><td>POST</td><td><code>/api/global/de-para/centro-custo/executar</code></td><td>Executar de/para de centro de custo</td><td><code>uCtrlDeParaCC.pas / uCtrlTabelaDeParaCC.pas</code></td><td>DEPARACC, TABELADEPARACC</td></tr>
+<tr><td><code>global-cm</code></td><td>GET</td><td><code>/api/global/cotacoes</code></td><td>Consultar cotação de moeda por data</td><td><code>uCtrlCotacaoMoeda.pas</code></td><td>COTACAOMOEDA, MOEDA</td></tr>
+<tr><td><code>global-cm</code></td><td>GET</td><td><code>/api/global/log-tabelas</code></td><td>Consultar log de alterações e exclusões</td><td><code>uCtrlLogTabelas.pas — ListaAltExcLogTabelas</code></td><td>LOGTABELAS</td></tr>
+<tr><td><code>contas-a-pagar</code></td><td>POST</td><td><code>/api/cap/lotes-pagamento</code></td><td>Gerar lote de pagamento</td><td><code>uCtrlGeraLotePgto.pas — CalculaSaldos / Verifica_Adianto</code></td><td>LOTEPAGTO, LOTEXDOCUM</td></tr>
+<tr><td><code>contas-a-pagar</code></td><td>POST</td><td><code>/api/cap/documentos/baixa</code></td><td>Processar baixa manual ou automática</td><td><code>uCtrlBaixaDocumentos.pas — ProcessaBaixaManual / ProcessaBaixaAutomatica</code></td><td>DOCUMENTO, LANCTODOCUM</td></tr>
+<tr><td><code>contas-a-pagar</code></td><td>POST</td><td><code>/api/cap/pagamento-eletronico/remessa</code></td><td>Gerar arquivo de remessa CNAB</td><td><code>uCtrlPagEletronico.pas</code></td><td>ARQUIVOPAGTO, CODIGOSCNAB</td></tr>
+<tr><td><code>contas-a-receber</code></td><td>POST</td><td><code>/api/car/bloquetos/emitir</code></td><td>Emitir bloquetos de cobrança</td><td><code>uCtrlConfigbloquete.pas / UCtrlConfigbarras.pas</code></td><td>CONFIGBLOQUETE, CONFIGBARRAS</td></tr>
+<tr><td><code>contas-a-receber</code></td><td>POST</td><td><code>/api/car/baixa-eletronica</code></td><td>Baixar títulos por arquivo de retorno</td><td><code>uCtrlBaixaIntBanco.Pas</code></td><td>DOCUMENTO, CODLIQBAIXACNAB</td></tr>
+<tr><td><code>contas-a-receber</code></td><td>POST</td><td><code>/api/car/documentos/corrigir</code></td><td>Aplicar juros e correção aos documentos</td><td><code>uCtrlJurosCorrecao.pas / uCtrlCadJurosAtuaria.pas</code></td><td>DOCUMENTO</td></tr>
+<tr><td><code>orcamento</code></td><td>POST</td><td><code>/api/orcamento/reservas/efetivar</code></td><td>Efetivar reserva/compromisso contra documento</td><td><code>uCtrlEfetivacao.pas — Reservas / DocRec / TestaDocxComp</code></td><td>RESERVAORCAMEN, RESXCOMP</td></tr>
+<tr><td><code>orcamento</code></td><td>GET</td><td><code>/api/orcamento/saldos</code></td><td>Consultar saldo orçado por conta e período</td><td><code>uCtrlSaldoorcado.pas</code></td><td>SALDOORCADO, SALDOORCADOANT</td></tr>
+<tr><td><code>orcamento</code></td><td>POST</td><td><code>/api/orcamento/apuracao/executar</code></td><td>Gerar orçado pelas fórmulas cadastradas</td><td><code>uCtrlExecApuraOrcMT.pas / uCtrlCadFormulaApuraOrc.pas</code></td><td>FORMASAPURAORC</td></tr>
+<tr><td><code>folha</code></td><td>POST</td><td><code>/api/folha/previa/gerar</code></td><td>Gerar e conferir a prévia da folha</td><td><code>FOLHA/DBObjects/uDbPrevia.pas</code></td><td>PREVIA</td></tr>
+<tr><td><code>folha</code></td><td>POST</td><td><code>/api/folha/apropriacao-contabil</code></td><td>Executar a apropriação contábil da folha</td><td><code>FOLHA/Fontes — tela Apropriação Contábil</code></td><td>CONTABFOLHA, PLANILHA</td></tr>
+<tr><td><code>folha</code></td><td>GET</td><td><code>/api/folha/rubricas</code></td><td>Consultar rubricas por plano e pessoa</td><td><code>uCtrlParamRubrica.pas / uDbRubricaxplano.pas</code></td><td>PROVDESC, RUBRICAXPLANO</td></tr>
+<tr><td><code>contribuicao-prev</code></td><td>POST</td><td><code>/api/contribuicao/receber</code></td><td>Registrar recebimento de contribuição</td><td><code>CM/CMPrevMT50/CtrlObjects/UCtrlContribuicao.pas / uCtrlContribPrevPartP.pas</code></td><td>HSTCONTRIBPREV, CONTRIBPREVPARTP</td></tr>
+<tr><td><code>contribuicao-prev</code></td><td>POST</td><td><code>/api/contribuicao/reservas/alimentar</code></td><td>Alimentar reservas do participante</td><td><code>CM/CMPrevMT50/CtrlObjects/UCtrlHistMovReserva.pas / UCtrlReservaPart.pas</code></td><td>HISTMOVRESERVA, RESERVAPART</td></tr>
+<tr><td><code>beneficio-prev</code></td><td>POST</td><td><code>/api/beneficio/conceder</code></td><td>Conceder/liberar benefício</td><td><code>CM/CMPrevMT50/CtrlObjects/UCtrlBenefBfciario.pas / UCtrlBeneficio.pas</code></td><td>BENEFBFCIARIO, PROCESSOBENEF</td></tr>
+<tr><td><code>beneficio-prev</code></td><td>POST</td><td><code>/api/beneficio/reajuste</code></td><td>Aplicar reajuste por regra cadastrada</td><td><code>BENEFICIOPREV/Fontes — telas de reajuste</code></td><td>REAJBENEFICIO, BENEFBFCIARIO</td></tr>
+<tr><td><code>cadastro-prev</code></td><td>POST</td><td><code>/api/cadastro-prev/participantes/inscrever</code></td><td>Inscrever participante no plano</td><td><code>CM/CMPrevMT50/CtrlObjects/UCtrlParticipante.pas</code></td><td>PARTPREVPLAN, ELEGPATRO</td></tr>
+<tr><td><code>cadastro-prev</code></td><td>POST</td><td><code>/api/cadastro-prev/eventos</code></td><td>Registrar evento previdenciário</td><td><code>CADASTROPREV/Fontes — telas de evento</code></td><td>EVENTOSPREV, EVENTOGERADOR</td></tr>
+<tr><td><code>investimentos</code></td><td>GET</td><td><code>/api/investimentos/carteiras/{id}/posicao</code></td><td>Consultar posição diária da carteira</td><td><code>uCtrlCarteiraGerenc.pas</code></td><td>HISTCARTINV, CARTEIRAINVEST</td></tr>
+<tr><td><code>investimentos</code></td><td>POST</td><td><code>/api/investimentos/ordens/autorizar</code></td><td>Autorizar ordem de movimentação</td><td><code>INVESTIMENTOS/FontesProducao — telas de autorização</code></td><td>ORDMOVINV</td></tr>
+<tr><td><code>investimentos</code></td><td>POST</td><td><code>/api/investimentos/marcacao-mercado</code></td><td>Calcular marcação a mercado</td><td><code>uCtrlCalculoMKT.pas</code></td><td>HISTRENFIX, CURVASRENFIX</td></tr>
+<tr><td><code>investimentos</code></td><td>POST</td><td><code>/api/investimentos/contabilizacao</code></td><td>Gerar reflexo contábil dos investimentos</td><td><code>uCtrlInvContab.pas</code></td><td>LANCAMENTO, PLANILHA</td></tr>
+<tr><td><code>emprestimo</code></td><td>POST</td><td><code>/api/emprestimo/saldo-devedor/atualizar</code></td><td>Atualizar saldo devedor diário</td><td><code>EMPRESTIMO/Fontes — tela Atualização Diária de Saldo Devedor</code></td><td>HISTMOVEMPTMO</td></tr>
+<tr><td><code>emprestimo</code></td><td>POST</td><td><code>/api/emprestimo/contabilizacao/lote</code></td><td>Contabilizar atualização diária por lote</td><td><code>EMPRESTIMO/Fontes — tela Contabilização da Atualização Diária por Lote</code></td><td>HMECONTABILIZACAO</td></tr>
+<tr><td><code>caf</code></td><td>POST</td><td><code>/api/caf/periodo/fechar</code></td><td>Fechar ou estornar período do ativo fixo</td><td><code>CAFMT/Fontes — telas Fechamento/Estorna Fechamento de Periodo</code></td><td>SALDOCONTABBEM</td></tr>
+<tr><td><code>caf</code></td><td>POST</td><td><code>/api/caf/depreciacao/processar</code></td><td>Processar depreciação e rateio</td><td><code>CMCAFOBJ50 — SELDEPRECIACAO / RATEIODEPRECIACAO</code></td><td>BEMXDEP, RATEIODEPRECIACAO</td></tr>
+<tr><td><code>caf</code></td><td>GET</td><td><code>/api/caf/conciliacao-contabil</code></td><td>Conciliar ativo fixo × contabilidade</td><td><code>CAF/Fontes — tela Conciliação entre Ativo Fixo e Contabilidade</code></td><td>SALDOCONTABBEM, PLANOSALDO</td></tr>
+<tr><td><code>irrf</code></td><td>POST</td><td><code>/api/irrf/buscas/contas-a-pagar</code></td><td>Buscar IRRF nos documentos do contas a pagar</td><td><code>uCtrlBuscaCaP.pas (reversão: uCtrlDeletaCARCAR.pas)</code></td><td>LANCIRRF, DOCUMENTO</td></tr>
+<tr><td><code>irrf</code></td><td>POST</td><td><code>/api/irrf/darf</code></td><td>Gerar DARF do período</td><td><code>uCtrlGeraDarf.pas / uCtrlGeraDARF_Novo.pas</code></td><td>DARF, LANCIRRF</td></tr>
+<tr><td><code>irrf</code></td><td>POST</td><td><code>/api/irrf/dirf</code></td><td>Gerar arquivo da DIRF</td><td><code>uCtrlGeraDirf.pas / uCtrlGeraDirf2011.pas</code></td><td>DIRF, DIRF_MOVANALITICO</td></tr>
+<tr><td><code>regra</code></td><td>POST</td><td><code>/api/regra/formulas/publicar</code></td><td>Publicar fórmula para uso pelos módulos</td><td><code>UCtrlFormula.pas — GravaFormula / Publicada</code></td><td>FORMULA, GRPFORMULA</td></tr>
+<tr><td><code>regra</code></td><td>POST</td><td><code>/api/regra/executar</code></td><td>Executar regra parametrizada</td><td><code>UCtrlCadRegra.pas; EXECUTAREGRA/Fontes</code></td><td>REGRA, ALGREGRA, PARAMREGRA</td></tr>
+<tr><td><code>almoxarifado</code></td><td>POST</td><td><code>/api/almoxarifado/movimentacoes</code></td><td>Registrar entrada/saída de material</td><td><code>ALMOXARIFADO/Fontes — rotinas de movimentação</code></td><td>MOVIMENT, SALDO, CUSTOMED</td></tr>
+<tr><td><code>almoxarifado</code></td><td>POST</td><td><code>/api/almoxarifado/integracao-contabil</code></td><td>Gerar/excluir integração contábil do estoque</td><td><code>ALMOXARIFADO/Fontes — tela Exclui Integração Contábil</code></td><td>ARTXCONTAXCC, PLANILHA</td></tr>
+<tr><td><code>compras</code></td><td>POST</td><td><code>/api/compras/solicitacoes</code></td><td>Registrar solicitação de compra</td><td><code>COMPRAS2000/Fontes — tela Solicitação de Compra</code></td><td>SOLICOMP, ITEMSOLI</td></tr>
+<tr><td><code>compras</code></td><td>POST</td><td><code>/api/compras/ordens</code></td><td>Emitir/cancelar ordem de compra</td><td><code>COMPRAS2000/Fontes — telas de O.C.</code></td><td>ITEMOC, SCITEMOC</td></tr>
+<tr><td><code>imobiliario</code></td><td>POST</td><td><code>/api/imobiliario/lancamentos</code></td><td>Registrar/estornar lançamento do imóvel</td><td><code>uCtrlLancamentosImovel.pas / uCtrlAcertaLanctoImovel.pas</code></td><td>LANCAMENTOSIMOVEL, ALTERALANCIMOVEL</td></tr>
+<tr><td><code>imobiliario</code></td><td>POST</td><td><code>/api/imobiliario/folha-alugueis</code></td><td>Gerar folha de aluguéis do período</td><td><code>ADMINIMOB/Fontes — tela Folha de Aluguéis</code></td><td>CONTRATOIMOVEL, LANCAMENTOSIMOVEL</td></tr>
+<tr><td><code>imobiliario</code></td><td>POST</td><td><code>/api/imobiliario/exportacoes/spc-xml</code></td><td>Gerar arquivo XML para o SPC</td><td><code>uCtrlGeraXML.pas</code></td><td>IMOVEL, CARTEIRASPC</td></tr>
+<tr><td><code>juridico</code></td><td>POST</td><td><code>/api/juridico/processos/{id}/etapas</code></td><td>Registrar etapa/andamento do processo</td><td><code>PROCJUD/Fontes — tela Registro das Etapas do Processo</code></td><td>ETAPAPROCTRAB</td></tr>
+<tr><td><code>juridico</code></td><td>POST</td><td><code>/api/juridico/contabilizacao</code></td><td>Contabilizar processos por rateio parametrizado</td><td><code>SISTJURCONS/Fontes — tela Cadastro dos Rateios Contábeis</code></td><td>JURIDICORATEIOCONTABIL</td></tr>
+<tr><td><code>cfinan</code></td><td>POST</td><td><code>/api/cfinan/conciliacao-bancaria</code></td><td>Conciliar extrato bancário</td><td><code>uCtrlConcBancaria.pas — Concilia / CalculaSaldos</code></td><td>MOVEXTRATOBANCARIO, MOVIMFINANC</td></tr>
+<tr><td><code>cfinan</code></td><td>GET</td><td><code>/api/cfinan/fluxo-caixa</code></td><td>Consultar fluxo previsto/orçado/real</td><td><code>uCtrlMontaFluxo.pas — GetSqlFluxoPrevisto / GetSqlFluxoReal</code></td><td>FLUXOPREVISTO, FLUXOREAL</td></tr>
+<tr><td><code>cfinan</code></td><td>GET</td><td><code>/api/cfinan/disponibilidade</code></td><td>Consultar disponibilidade financeira por plano</td><td><code>uCtrlDispFinanc.pas / uCtrlConsSaldoFinanc.pas</code></td><td>DISPFINANC</td></tr>
+<tr><td><code>indicadores</code></td><td>POST</td><td><code>/api/indicadores/apuracao</code></td><td>Apurar indicadores do período</td><td><code>uCtrlApuracao.pas</code></td><td>INDAPURACAO</td></tr>
+<tr><td><code>indicadores</code></td><td>POST</td><td><code>/api/indicadores/importacao</code></td><td>Importar indicadores por layout de planilha</td><td><code>uCtrlLayOutImp.pas</code></td><td>INDLAYOUTIMP, INDAPURACAO</td></tr>
+<tr><td><code>contrato</code></td><td>POST</td><td><code>/api/contratos/{id}/aditamentos</code></td><td>Registrar aditamento contratual</td><td><code>uCtrlAditamento.pas / uCtrlAlcadas.pas</code></td><td>ADITAMENTO, ALCADAS</td></tr>
+<tr><td><code>contrato</code></td><td>POST</td><td><code>/api/contratos/{id}/medicoes</code></td><td>Registrar medição e liberar parcela</td><td><code>uCtrlCtrlParcelaMedicao.pas</code></td><td>MEDICAO, PARCELAMEDICAO</td></tr>
+<tr><td><code>param-prev</code></td><td>GET/PUT</td><td><code>/api/param-prev/planos</code></td><td>Manter plano previdenciário e suas opções</td><td><code>PARAMPREV/Fontes — telas de plano</code></td><td>PLANPREV, PLANPREVPATRO</td></tr>
+<tr><td><code>param-prev</code></td><td>GET/PUT</td><td><code>/api/param-prev/eventos-geradores</code></td><td>Manter evento gerador e suas associações</td><td><code>PARAMPREV/Fontes — tela Cadastro de Evento Gerador</code></td><td>EVENTOGERADOR, EVENTOSPREV</td></tr>
+<tr><td><code>modulos-previdenciarios</code></td><td>POST</td><td><code>/api/rh/ocorrencias-medicas</code></td><td>Registrar ocorrência ou exame médico</td><td><code>MODASM/Fontes — tela Registro de Ocorrências, Testes e Exames</code></td><td>HSTASMED, TIPOCMED</td></tr>
+<tr><td><code>modulos-previdenciarios</code></td><td>POST</td><td><code>/api/rh/ponto/lancamentos</code></td><td>Lançar ponto individual ou coletivo</td><td><code>MODACESSO/Fontes — telas de lançamento do ponto</code></td><td>ACESSOFUNC, DIAEXTRATRAB</td></tr>
+<tr><td><code>relatorios-cm</code></td><td>GET</td><td><code>/api/relatorios</code></td><td>Listar relatórios por grupo e permissão</td><td><code>uCtrlRelatorio.pas — ListaReports</code></td><td>REPORTS, GRUPORELATORIO</td></tr>
+<tr><td><code>relatorios-cm</code></td><td>GET</td><td><code>/api/relatorios/dicionario</code></td><td>Consultar dicionário de dados e DataViews</td><td><code>uCtrlDataview.pas / uCtrlDdTable.pas</code></td><td>DDTABLE, DDFIELD, DATAVIEW</td></tr>
+<tr><td><code>central-ap</code></td><td>POST</td><td><code>/api/central-ap/atendimentos</code></td><td>Registrar atendimento e gerar protocolo</td><td><code>CENTRALAP/Fontes — tela Registro de Atendimento</code></td><td>ATEND, ASSUNTO</td></tr>
+<tr><td><code>central-ap</code></td><td>POST</td><td><code>/api/central-ap/rubs</code></td><td>Abrir e manter RUB do participante</td><td><code>CENTRALAP/Fontes — telas de RUBS</code></td><td>RUBS, HISTMOVRUBS</td></tr>
+    </tbody>
+  </table></div>
 </section>
+
 </main>
 
 <footer>
-<p>CM Contabilidade — Documentação gerada em 2026-08-19 | Tecnologia: Delphi 5 | pt-BR</p>
+<p>CM Contabilidade — Documentação gerada em 2026-08-19 · revisada em 2026-08-24 (PFC-3) | Tecnologia: Delphi 5 | pt-BR</p>
 </footer>
 </body>
 </html>

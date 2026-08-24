@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CM Contabilidade — Levantamento de Lacunas da Documentação</title>
+<style>
+
+:root {
+  --bg: #0f1419; --bg2: #1a2332; --bg3: #243044; --card: #1e2a3a;
+  --text: #e7ecf3; --muted: #9aa8bc; --accent: #3d9cf0; --accent2: #2dd4bf;
+  --ok: #34d399; --warn: #fbbf24; --bad: #f87171; --border: #2d3a4d;
+  --tag-alta: #065f46; --tag-media: #92400e; --tag-baixa: #7f1d1d;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0; font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(160deg, #0f1419 0%, #152033 50%, #0f1419 100%);
+  color: var(--text); line-height: 1.55; min-height: 100vh;
+}
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+header {
+  background: linear-gradient(135deg, #152033 0%, #1a3a5c 100%);
+  border-bottom: 1px solid var(--border); padding: 2rem 1.5rem 1.5rem;
+}
+header .badge {
+  display: inline-block; background: #1e3a5f; color: var(--accent2);
+  padding: .25rem .75rem; border-radius: 999px; font-size: .8rem;
+  border: 1px solid #2a5080; margin-bottom: .75rem;
+}
+header h1 { margin: 0 0 .5rem; font-size: clamp(1.5rem, 3vw, 2.2rem); }
+header p { margin: 0; color: var(--muted); max-width: 70ch; }
+nav {
+  display: flex; flex-wrap: wrap; gap: .5rem; padding: .75rem 1.5rem;
+  background: rgba(15,20,25,.85); border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 20; backdrop-filter: blur(8px);
+}
+nav a {
+  color: var(--text); background: var(--bg2); padding: .4rem .75rem;
+  border-radius: 6px; border: 1px solid var(--border); font-size: .85rem;
+}
+nav a:hover { background: var(--bg3); text-decoration: none; }
+main { padding: 1.5rem; max-width: 1200px; margin: 0 auto; }
+section {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1.25rem;
+}
+.section-title {
+  font-size: 1.15rem; font-weight: 700; margin-bottom: 1rem;
+  padding-bottom: .5rem; border-bottom: 1px solid var(--border);
+}
+.cards-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1rem;
+}
+.card {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 10px;
+  padding: 1rem; transition: border-color .2s, transform .2s;
+}
+.card:hover { border-color: var(--accent); transform: translateY(-2px); }
+.card h3 { margin: 0 0 .5rem; font-size: 1rem; }
+.card p { margin: 0; color: var(--muted); font-size: .9rem; }
+.stats {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: .75rem;
+}
+.stat {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 8px;
+  padding: .85rem; text-align: center;
+}
+.stat .n { font-size: 1.6rem; font-weight: 700; color: var(--accent2); }
+.stat .l { font-size: .75rem; color: var(--muted); }
+table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+th, td {
+  border: 1px solid var(--border); padding: .5rem .65rem; text-align: left;
+  vertical-align: top;
+}
+th { background: var(--bg3); }
+tbody tr:nth-child(even) { background: rgba(255,255,255,.02); }
+.table-wrap { overflow-x: auto; }
+code {
+  font-family: Consolas, "Courier New", monospace; font-size: .85em;
+  background: var(--bg); padding: .1rem .35rem; border-radius: 4px;
+}
+.tag {
+  display: inline-block; padding: .15rem .45rem; border-radius: 4px;
+  font-size: .75rem; font-weight: 600;
+}
+.tag-alta { background: var(--tag-alta); color: #a7f3d0; }
+.tag-media { background: var(--tag-media); color: #fde68a; }
+.tag-baixa { background: var(--tag-baixa); color: #fecaca; }
+.story-card {
+  background: var(--bg2); border-left: 4px solid var(--accent);
+  padding: .85rem 1rem; margin-bottom: .75rem; border-radius: 0 8px 8px 0;
+}
+.criteria-block, .rule-block {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 8px; padding: .85rem 1rem; margin-bottom: .75rem;
+}
+.rule-id { font-weight: 700; color: var(--accent2); margin-bottom: .35rem; }
+.rule-origin { font-size: .85rem; color: var(--muted); margin-top: .5rem; }
+.complexity-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: .75rem;
+}
+.complexity-item {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; text-align: center;
+}
+.level { font-weight: 700; margin-bottom: .35rem; }
+.level-simples { color: var(--ok); }
+.level-media { color: var(--warn); }
+.level-complexa { color: var(--bad); }
+.points { font-size: 1.4rem; font-weight: 700; }
+.desc { color: var(--muted); font-size: .85rem; margin-top: .35rem; }
+footer {
+  text-align: center; padding: 2rem 1rem; color: var(--muted);
+  border-top: 1px solid var(--border); margin-top: 2rem; font-size: .85rem;
+}
+.back-btn {
+  display: inline-block; margin-bottom: 1rem; background: var(--bg2);
+  border: 1px solid var(--border); padding: .4rem .8rem; border-radius: 6px;
+  color: var(--text);
+}
+.back-btn:hover { background: var(--bg3); text-decoration: none; }
+.layout-2 {
+  display: grid; grid-template-columns: 1fr 300px; gap: 1.25rem; padding: 1.5rem; max-width: 1200px; margin: 0 auto;
+}
+@media (max-width: 900px) { .layout-2 { grid-template-columns: 1fr; } }
+.info-list, .dep-list { list-style: none; padding: 0; margin: 0; }
+.info-list li, .dep-list li {
+  display: flex; justify-content: space-between; gap: .5rem;
+  padding: .45rem 0; border-bottom: 1px solid var(--border); font-size: .9rem;
+}
+.info-list .key { color: var(--muted); }
+.mermaid {
+  background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+  padding: 1rem; overflow-x: auto; font-family: monospace; font-size: .8rem;
+  white-space: pre-wrap; color: var(--muted);
+}
+.note {
+  background: #1a2740; border-left: 3px solid var(--warn);
+  padding: .75rem 1rem; margin: .75rem 0; border-radius: 0 6px 6px 0; font-size: .9rem;
+}
+.doc-links { display: flex; flex-wrap: wrap; gap: .5rem; margin: 1rem 0; }
+.doc-links a {
+  background: var(--bg3); border: 1px solid var(--border); padding: .5rem .85rem;
+  border-radius: 6px; color: var(--text);
+}
+.given,.when,.then { margin: .25rem 0; }
+.role,.want,.why { margin: .2rem 0; }
+ul.check { list-style: none; padding-left: 0; }
+ul.check li::before { content: "☐ "; }
+
+
+</style>
+</head>
+<body>
+
+<header>
+  <div class="badge">PFC-3 — Levantamento de Lacunas</div>
+  <h1>🔍 Levantamento de Lacunas da Documentação</h1>
+  <p>Análise de 100%% dos artefatos publicados em <code>docs</code> (portal, 6 catálogos e 25 páginas de módulo), com a lacuna identificada em cada um, a ação executada e as lacunas que permanecem abertas.</p>
+  <div class="doc-links">
+    <a href="site/index.html">Portal</a>
+    <a href="system-overview.html">Visão Geral</a>
+    <a href="business-rules-catalog.html">Regras de Negócio</a>
+    <a href="database-model.html">Modelo de Dados</a>
+    <a href="api-catalog.html">Catálogo de APIs</a>
+    <a href="module-file-map.html">Mapa de Arquivos</a>
+    <a href="migration-contabil.html">Migração Contábil</a>
+  </div>
+</header>
+<nav>
+  <a href="#metodo">🧪 Método</a>
+  <a href="#situacao">📉 Situação encontrada</a>
+  <a href="#catalogos">📚 Catálogos</a>
+  <a href="#modulos">📦 Módulos</a>
+  <a href="#resultado">📈 Resultado</a>
+  <a href="#remanescentes">⚠️ Lacunas remanescentes</a>
+</nav>
+<main>
+<section id="metodo">
+  <div class="section-title">1. Objetivo e método</div>
+  <p>Este artefato registra o <strong>levantamento das lacunas da documentação funcional</strong> existente na pasta
+  <code>docs</code> antes da entrega de PFC-3, conforme exigido pelo critério de aceitação AC1 da história. Ele cobre
+  <strong>100% dos artefatos publicados</strong>: o portal, as 6 páginas de catálogo e as 25 páginas de módulo.</p>
+  <p><strong>Método aplicado:</strong></p>
+  <ol>
+    <li>Leitura integral dos 32 arquivos HTML publicados em <code>docs</code> e extração dos indicadores declarados
+        (cobertura funcional, confiança, contagem de tabelas e de regras).</li>
+    <li>Identificação, artefato a artefato, do conteúdo ausente ou genérico — em especial os avisos explícitos de
+        “nenhuma regra catalogada” e “nenhuma tabela inventariada”.</li>
+    <li>Inventário do código legado por módulo (projetos <code>.dpr</code>, <code>CtrlObjects</code>,
+        <code>DbObjects</code>, títulos das telas nos <code>.dfm</code> e tabelas referenciadas em SQL) para sustentar
+        o enriquecimento com evidência rastreável.</li>
+    <li>Publicação do conteúdo novo e recálculo dos indicadores.</li>
+  </ol>
+  <div class="note"><strong>Limite do método:</strong> a evidência foi obtida por análise estática do código-fonte
+  (nomes de units, métodos públicos, títulos de telas e tabelas referenciadas em SQL). Não houve execução do sistema
+  nem acesso à base Oracle, de modo que regras cuja lógica esteja embutida em <em>triggers</em>, <em>procedures</em>
+  do banco ou em parametrização de produção podem não estar refletidas. Cada regra publicada declara seu nível de
+  confiança.</div>
+</section>
+
+<section id="situacao">
+  <div class="section-title">2. Situação encontrada (linha de base)</div>
+  <div class="stats">
+    <div class="stat"><div class="n">32</div><div class="l">Artefatos HTML analisados</div></div>
+    <div class="stat"><div class="n">15</div><div class="l">Regras catalogadas (só Contábil)</div></div>
+    <div class="stat"><div class="n">24</div><div class="l">Módulos sem regras</div></div>
+    <div class="stat"><div class="n">24</div><div class="l">Módulos sem tabelas</div></div>
+    <div class="stat"><div class="n">18</div><div class="l">Módulos com cobertura 40–60%</div></div>
+    <div class="stat"><div class="n">46</div><div class="l">Tabelas inventariadas (só Contábil)</div></div>
+  </div>
+  <p style="margin-top:1rem">Distribuição da cobertura funcional declarada antes de PFC-3: 18 páginas com
+  <code>40–60%</code>, 6 páginas com <code>70%</code> (caf, contribuicao-prev, emprestimo, irrf, orcamento, regra) e
+  1 página com <code>95%+</code> (contab). Confiança declarada: 1 página Baixa (central-ap), 17 Média e 7 Alta.</p>
+  <p><strong>Padrões de lacuna identificados</strong> (recorrentes nas 24 páginas de módulo):</p>
+  <ul>
+    <li><strong>L1 — Regras ausentes:</strong> texto padrão “Nenhuma regra específica catalogada com evidência linha a
+        linha neste módulo nesta entrega”.</li>
+    <li><strong>L2 — Modelo de dados ausente:</strong> texto padrão “Nenhuma tabela foi inventariada exaustivamente
+        para este módulo nesta entrega… <em>Lacuna parcial</em>”.</li>
+    <li><strong>L3 — User stories genéricas:</strong> duas histórias sem conteúdo de domínio (“Quero utilizar as funções
+        principais do módulo”).</li>
+    <li><strong>L4 — Critérios genéricos:</strong> um único critério, seguido da nota “Critérios detalhados dependem de
+        análise aprofundada das forms do módulo”.</li>
+    <li><strong>L5 — Processos não descritos:</strong> a seção Visão Geral trazia de 2 a 7 responsabilidades em lista,
+        sem descrição dos processos de negócio.</li>
+    <li><strong>L6 — Indicadores desatualizados:</strong> cobertura e confiança não refletiam o conteúdo publicado; a
+        contagem de tabelas aparecia como “—”.</li>
+    <li><strong>L7 — Transversais dispersas:</strong> autorização, relatórios, importações/exportações, integrações e
+        lotes apareciam como menções soltas dentro das páginas de módulo, sem página própria.</li>
+  </ul>
+</section>
+
+<section id="catalogos">
+  <div class="section-title">3. Lacunas do portal e das páginas de catálogo (7 artefatos)</div>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Artefato</th><th>Papel</th><th>Lacuna identificada</th><th>Ação executada em PFC-3</th><th>Situação</th></tr></thead>
+    <tbody>
+<tr><td><code>docs/site/index.html</code></td><td>Portal de documentação</td><td>Estatísticas declaravam 15 regras catalogadas (todas do Contábil); não havia entrada para funcionalidades transversais nem para o levantamento de lacunas; cartões de módulo exibiam confiança desatualizada.</td><td>Estatísticas recalculadas (230 regras, 397 entidades fora do Contábil), nova seção <em>Funcionalidades Transversais</em>, links para as duas páginas novas e confiança dos cartões sincronizada com as páginas de módulo.</td><td><span class="tag tag-alta">Corrigido</span></td></tr>
+<tr><td><code>docs/system-overview.html</code></td><td>Visão Geral do Sistema</td><td>Para 24 dos 25 módulos, o campo <em>Tabelas (evidência)</em> trazia “Não enumeradas neste inventário” e os exemplos de user story eram genéricos (“executar as funções principais deste módulo”).</td><td>Campo de tabelas substituído pela contagem de entidades documentadas com link para a página do módulo; confiança sincronizada; nota de revisão PFC-3 acrescentada.</td><td><span class="tag tag-alta">Corrigido</span></td></tr>
+<tr><td><code>docs/business-rules-catalog.html</code></td><td>Catálogo de Regras de Negócio</td><td>Continha apenas RN001–RN015, todas do Contábil, e a seção “Outros módulos” declarava explicitamente que nenhuma regra fora inventariada fora do Contábil (confiança Baixa).</td><td>Catálogo ampliado para 230 regras: 18 novas no Contábil (RN016–RN033) e regras para os 24 demais módulos, cada uma com origem no código e confiança declarada.</td><td><span class="tag tag-alta">Corrigido</span></td></tr>
+<tr><td><code>docs/database-model.html</code></td><td>Modelo de Dados</td><td>Detalhava as 46 tabelas do Contábil (campos e tipos) e nenhuma tabela dos demais módulos.</td><td>Acrescentada seção <em>Entidades por módulo</em> com as 397 entidades documentadas nos 24 módulos, com papel funcional e link para a página do módulo. O detalhamento campo a campo permanece restrito ao Contábil.</td><td><span class="tag tag-alta">Corrigido — detalhamento de campos fora do Contábil segue como lacuna conhecida</span></td></tr>
+<tr><td><code>docs/api-catalog.html</code></td><td>Catálogo de APIs</td><td>Propunha 24 rotas apenas para o Contábil; a seção “Outros módulos” registrava explicitamente a lacuna (“Nenhuma evidência de API REST legada”).</td><td>Acrescentada tabela de operações candidatas a API para os demais módulos, derivadas dos métodos públicos dos <code>CtrlObjects</code> identificados no levantamento.</td><td><span class="tag tag-alta">Corrigido</span></td></tr>
+<tr><td><code>docs/module-file-map.html</code></td><td>Mapa de Arquivos</td><td>Mapeamento arquivo → módulo completo, porém sem ligação com o conteúdo funcional; não indicava onde estão as regras de cada módulo.</td><td>Nota de navegação acrescentada, remetendo às páginas de módulo enriquecidas, ao catálogo de regras e às funcionalidades transversais.</td><td><span class="tag tag-alta">Corrigido</span></td></tr>
+<tr><td><code>docs/migration-contabil.html</code></td><td>Migração Contábil</td><td>Documento profundo do Contábil, porém referenciando apenas as 15 regras então catalogadas e sem menção às funcionalidades transversais que a migração precisa reproduzir.</td><td>Nota de revisão acrescentada, apontando as 18 novas regras do Contábil e a página de funcionalidades transversais como insumo do escopo de migração.</td><td><span class="tag tag-alta">Corrigido</span></td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="modulos">
+  <div class="section-title">4. Lacunas das 25 páginas de módulo</div>
+  <div class="table-wrap"><table>
+    <thead><tr><th>ID</th><th>Módulo</th><th>Lacuna identificada</th><th>Ação executada em PFC-3</th><th>Situação</th></tr></thead>
+    <tbody>
+<tr><td><code>contab</code></td><td>Contabilidade</td><td>Página já profunda (15 regras, 46 tabelas, cobertura 95%+), mas sem descrição funcional dos grandes processos e sem evidência dos métodos dos <code>CtrlObjects</code> além do <code>uCtrlLancamento</code>.</td><td>Nova seção <em>Processos Funcionais</em> com 10 processos descritos; 18 novas regras (RN016–RN033); 3 user stories e 3 critérios adicionais; cobertura revisada para 97%.</td><td><span class="tag tag-alta">Corrigido</span></td></tr>
+<tr><td><code>global-cm</code></td><td>Cadastros Globais e Framework CM</td><td>Exibia os avisos “Nenhuma regra específica catalogada com evidência linha a linha” e “Nenhuma tabela foi inventariada exaustivamente”; user stories genéricas (2), critério único e genérico com nota de que dependia de análise aprofundada; cobertura declarada de 40–60%.</td><td>7 regras com origem no código, 20 entidades de dados, 3 user stories específicas, 3 critérios de aceitação e descrição dos processos funcionais. Cobertura revisada para 80% (confiança Alta).</td><td><span class="tag tag-alta">Corrigido</span></td></tr>
+<tr><td><code>contas-a-pagar</code></td><td>Contas a Pagar</td><td>Exibia os avisos “Nenhuma regra específica catalogada com evidência linha a linha” e “Nenhuma tabela foi inventariada exaustivamente”; user stories genéricas (2), critério único e genérico com nota de que dependia de análise aprofundada; cobertura declarada de 40–60%.</td><td>7 regras com origem no código, 16 entidades de dados, 3 user stories específicas, 3 critérios de aceitação e descrição dos processos funcionais. Cobertura revisada para 82% (confiança Alta).</td><td><span class="tag tag-alta">Corrigido</span></td></tr>
+<tr><td><code>contas-a-receber</code></td><td>Contas a Receber</td><td>Exibia os avisos “Nenhuma regra específica catalogada com evidência linha a linha” e “Nenhuma tabela foi inventariada exaustivamente”; user stories genéricas (2), critério único e genérico com nota de que dependia de análise aprofundada; cobertura declarada de 40–60%.</td><td>7 regras com origem no código, 15 entidades de dados, 3 user stories específicas, 3 critérios de aceitação e descrição dos processos funcionais. Cobertura revisada para 78% (confiança Alta).</td><td><span class="tag tag-alta">Corrigido</span></td></tr>
+<tr><td><code>orcamento</code></td><td>Orçamento</td><td>Exibia os avisos “Nenhuma regra específica catalogada com evidência linha a linha” e “Nenhuma tabela foi inventariada exaustivamente”; user stories genéricas (2), critério único e genérico com nota de que dependia de análise aprofundada; cobertura declarada de 70%.</td><td>8 regras com origem no código, 18 entidades de dados, 3 user stories específicas, 3 critérios de aceitação e descrição dos processos funcionais. Cobertura revisada para 85% (confiança Alta).</td><td><span class="tag tag-alta">Corrigido</span></td></tr>
+<tr><td><code>folha</code></td><td>Folha de Pagamento</td><td>Exibia os avisos “Nenhuma regra específica catalogada com evidência linha a linha” e “Nenhuma tabela foi inventariada exaustivamente”; user stories genéricas (2), critério único e genérico com nota de que dependia de análise aprofundada; cobertura declarada de 40–60%.</td><td>8 regras com origem no código, 18 entidades de dados, 3 user stories específicas, 3 critérios de aceitação e descrição dos processos funcionais. Cobertura revisada para 76% (confiança Média).</td><td><span class="tag tag-alta">Corrigido</span></td></tr>
+<tr><td><code>contribuicao-prev</code></td><td>Contribuição Previdenciária</td><td>Exibia os avisos “Nenhuma regra específica catalogada com evidência linha a linha” e “Nenhuma tabela foi inventariada exaustivamente”; user stories genéricas (2), critério único e genérico com nota de que dependia de análise aprofundada; cobertura declarada de 70%.</td><td>8 regras com origem no código, 16 entidades de dados, 3 user stories específicas, 3 critérios de aceitação e descrição dos processos funcionais. Cobertura revisada para 80% (confiança Alta).</td><td><span class="tag tag-alta">Corrigido</span></td></tr>
+<tr><td><code>beneficio-prev</code></td><td>Benefício Previdenciário</td><td>Exibia os avisos “Nenhuma regra específica catalogada com evidência linha a linha” e “Nenhuma tabela foi inventariada exaustivamente”; user stories genéricas (2), critério único e genérico com nota de que dependia de análise aprofundada; cobertura declarada de 40–60%.</td><td>8 regras com origem no código, 16 entidades de dados, 3 user stories específicas, 3 critérios de aceitação e descrição dos processos funcionais. Cobertura revisada para 78% (confiança Média).</td><td><span class="tag tag-alta">Corrigido</span></td></tr>
+<tr><td><code>cadastro-prev</code></td><td>Cadastro Previdenciário</td><td>Exibia os avisos “Nenhuma regra específica catalogada com evidência linha a linha” e “Nenhuma tabela foi inventariada exaustivamente”; user stories genéricas (2), critério único e genérico com nota de que dependia de análise aprofundada; cobertura declarada de 40–60%.</td><td>7 regras com origem no código, 15 entidades de dados, 3 user stories específicas, 3 critérios de aceitação e descrição dos processos funcionais. Cobertura revisada para 76% (confiança Média).</td><td><span class="tag tag-alta">Corrigido</span></td></tr>
+<tr><td><code>investimentos</code></td><td>Investimentos</td><td>Exibia os avisos “Nenhuma regra específica catalogada com evidência linha a linha” e “Nenhuma tabela foi inventariada exaustivamente”; user stories genéricas (2), critério único e genérico com nota de que dependia de análise aprofundada; cobertura declarada de 40–60%.</td><td>9 regras com origem no código, 19 entidades de dados, 3 user stories específicas, 3 critérios de aceitação e descrição dos processos funcionais. Cobertura revisada para 74% (confiança Média). Justificativa de cobertura registrada na própria página.</td><td><span class="tag tag-alta">Corrigido</span></td></tr>
+<tr><td><code>emprestimo</code></td><td>Empréstimo</td><td>Exibia os avisos “Nenhuma regra específica catalogada com evidência linha a linha” e “Nenhuma tabela foi inventariada exaustivamente”; user stories genéricas (2), critério único e genérico com nota de que dependia de análise aprofundada; cobertura declarada de 70%.</td><td>8 regras com origem no código, 16 entidades de dados, 3 user stories específicas, 3 critérios de aceitação e descrição dos processos funcionais. Cobertura revisada para 80% (confiança Alta).</td><td><span class="tag tag-alta">Corrigido</span></td></tr>
+<tr><td><code>caf</code></td><td>Controle de Ativo Fixo (CAF)</td><td>Exibia os avisos “Nenhuma regra específica catalogada com evidência linha a linha” e “Nenhuma tabela foi inventariada exaustivamente”; user stories genéricas (2), critério único e genérico com nota de que dependia de análise aprofundada; cobertura declarada de 70%.</td><td>9 regras com origem no código, 20 entidades de dados, 3 user stories específicas, 3 critérios de aceitação e descrição dos processos funcionais. Cobertura revisada para 84% (confiança Alta).</td><td><span class="tag tag-alta">Corrigido</span></td></tr>
+<tr><td><code>irrf</code></td><td>Impostos (IRRF)</td><td>Exibia os avisos “Nenhuma regra específica catalogada com evidência linha a linha” e “Nenhuma tabela foi inventariada exaustivamente”; user stories genéricas (2), critério único e genérico com nota de que dependia de análise aprofundada; cobertura declarada de 70%.</td><td>9 regras com origem no código, 17 entidades de dados, 3 user stories específicas, 3 critérios de aceitação e descrição dos processos funcionais. Cobertura revisada para 82% (confiança Alta).</td><td><span class="tag tag-alta">Corrigido</span></td></tr>
+<tr><td><code>regra</code></td><td>Motor de Regras</td><td>Exibia os avisos “Nenhuma regra específica catalogada com evidência linha a linha” e “Nenhuma tabela foi inventariada exaustivamente”; user stories genéricas (2), critério único e genérico com nota de que dependia de análise aprofundada; cobertura declarada de 70%.</td><td>8 regras com origem no código, 14 entidades de dados, 3 user stories específicas, 3 critérios de aceitação e descrição dos processos funcionais. Cobertura revisada para 85% (confiança Alta).</td><td><span class="tag tag-alta">Corrigido</span></td></tr>
+<tr><td><code>almoxarifado</code></td><td>Almoxarifado</td><td>Exibia os avisos “Nenhuma regra específica catalogada com evidência linha a linha” e “Nenhuma tabela foi inventariada exaustivamente”; user stories genéricas (2), critério único e genérico com nota de que dependia de análise aprofundada; cobertura declarada de 40–60%.</td><td>9 regras com origem no código, 17 entidades de dados, 3 user stories específicas, 3 critérios de aceitação e descrição dos processos funcionais. Cobertura revisada para 80% (confiança Alta).</td><td><span class="tag tag-alta">Corrigido</span></td></tr>
+<tr><td><code>compras</code></td><td>Compras</td><td>Exibia os avisos “Nenhuma regra específica catalogada com evidência linha a linha” e “Nenhuma tabela foi inventariada exaustivamente”; user stories genéricas (2), critério único e genérico com nota de que dependia de análise aprofundada; cobertura declarada de 40–60%.</td><td>8 regras com origem no código, 15 entidades de dados, 3 user stories específicas, 3 critérios de aceitação e descrição dos processos funcionais. Cobertura revisada para 78% (confiança Média).</td><td><span class="tag tag-alta">Corrigido</span></td></tr>
+<tr><td><code>imobiliario</code></td><td>Imobiliário</td><td>Exibia os avisos “Nenhuma regra específica catalogada com evidência linha a linha” e “Nenhuma tabela foi inventariada exaustivamente”; user stories genéricas (2), critério único e genérico com nota de que dependia de análise aprofundada; cobertura declarada de 40–60%.</td><td>10 regras com origem no código, 20 entidades de dados, 3 user stories específicas, 3 critérios de aceitação e descrição dos processos funcionais. Cobertura revisada para 74% (confiança Média). Justificativa de cobertura registrada na própria página.</td><td><span class="tag tag-alta">Corrigido</span></td></tr>
+<tr><td><code>juridico</code></td><td>Jurídico e Processos</td><td>Exibia os avisos “Nenhuma regra específica catalogada com evidência linha a linha” e “Nenhuma tabela foi inventariada exaustivamente”; user stories genéricas (2), critério único e genérico com nota de que dependia de análise aprofundada; cobertura declarada de 40–60%.</td><td>9 regras com origem no código, 16 entidades de dados, 3 user stories específicas, 3 critérios de aceitação e descrição dos processos funcionais. Cobertura revisada para 76% (confiança Média).</td><td><span class="tag tag-alta">Corrigido</span></td></tr>
+<tr><td><code>cfinan</code></td><td>Controle Financeiro (CFINAN)</td><td>Exibia os avisos “Nenhuma regra específica catalogada com evidência linha a linha” e “Nenhuma tabela foi inventariada exaustivamente”; user stories genéricas (2), critério único e genérico com nota de que dependia de análise aprofundada; cobertura declarada de 40–60%.</td><td>9 regras com origem no código, 18 entidades de dados, 3 user stories específicas, 3 critérios de aceitação e descrição dos processos funcionais. Cobertura revisada para 82% (confiança Alta).</td><td><span class="tag tag-alta">Corrigido</span></td></tr>
+<tr><td><code>indicadores</code></td><td>Indicadores</td><td>Exibia os avisos “Nenhuma regra específica catalogada com evidência linha a linha” e “Nenhuma tabela foi inventariada exaustivamente”; user stories genéricas (2), critério único e genérico com nota de que dependia de análise aprofundada; cobertura declarada de 40–60%.</td><td>8 regras com origem no código, 14 entidades de dados, 3 user stories específicas, 3 critérios de aceitação e descrição dos processos funcionais. Cobertura revisada para 78% (confiança Média).</td><td><span class="tag tag-alta">Corrigido</span></td></tr>
+<tr><td><code>contrato</code></td><td>Contratos</td><td>Exibia os avisos “Nenhuma regra específica catalogada com evidência linha a linha” e “Nenhuma tabela foi inventariada exaustivamente”; user stories genéricas (2), critério único e genérico com nota de que dependia de análise aprofundada; cobertura declarada de 40–60%.</td><td>9 regras com origem no código, 17 entidades de dados, 3 user stories específicas, 3 critérios de aceitação e descrição dos processos funcionais. Cobertura revisada para 80% (confiança Alta).</td><td><span class="tag tag-alta">Corrigido</span></td></tr>
+<tr><td><code>param-prev</code></td><td>Parâmetros Previdenciários</td><td>Exibia os avisos “Nenhuma regra específica catalogada com evidência linha a linha” e “Nenhuma tabela foi inventariada exaustivamente”; user stories genéricas (2), critério único e genérico com nota de que dependia de análise aprofundada; cobertura declarada de 40–60%.</td><td>8 regras com origem no código, 16 entidades de dados, 3 user stories específicas, 3 critérios de aceitação e descrição dos processos funcionais. Cobertura revisada para 78% (confiança Média).</td><td><span class="tag tag-alta">Corrigido</span></td></tr>
+<tr><td><code>modulos-previdenciarios</code></td><td>Módulos Previdenciários Especializados</td><td>Exibia os avisos “Nenhuma regra específica catalogada com evidência linha a linha” e “Nenhuma tabela foi inventariada exaustivamente”; user stories genéricas (2), critério único e genérico com nota de que dependia de análise aprofundada; cobertura declarada de 40–60%.</td><td>9 regras com origem no código, 16 entidades de dados, 3 user stories específicas, 3 critérios de aceitação e descrição dos processos funcionais. Cobertura revisada para 72% (confiança Média). Justificativa de cobertura registrada na própria página.</td><td><span class="tag tag-alta">Corrigido</span></td></tr>
+<tr><td><code>relatorios-cm</code></td><td>Relatórios CM</td><td>Exibia os avisos “Nenhuma regra específica catalogada com evidência linha a linha” e “Nenhuma tabela foi inventariada exaustivamente”; user stories genéricas (2), critério único e genérico com nota de que dependia de análise aprofundada; cobertura declarada de 40–60%.</td><td>7 regras com origem no código, 12 entidades de dados, 3 user stories específicas, 3 critérios de aceitação e descrição dos processos funcionais. Cobertura revisada para 80% (confiança Alta).</td><td><span class="tag tag-alta">Corrigido</span></td></tr>
+<tr><td><code>central-ap</code></td><td>Central AP</td><td>Exibia os avisos “Nenhuma regra específica catalogada com evidência linha a linha” e “Nenhuma tabela foi inventariada exaustivamente”; user stories genéricas (2), critério único e genérico com nota de que dependia de análise aprofundada; cobertura declarada de 40–60% e confiança Baixa.</td><td>8 regras com origem no código, 16 entidades de dados, 3 user stories específicas, 3 critérios de aceitação e descrição dos processos funcionais. Cobertura revisada para 74% (confiança Média). Justificativa de cobertura registrada na própria página.</td><td><span class="tag tag-alta">Corrigido</span></td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="resultado">
+  <div class="section-title">5. Resultado após o enriquecimento</div>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Indicador</th><th>Antes de PFC-3</th><th>Depois de PFC-3</th></tr></thead>
+    <tbody>
+      <tr><td>Regras de negócio catalogadas</td><td>15</td><td>230</td></tr>
+      <tr><td>Módulos com regras catalogadas</td><td>1 de 25</td><td>25 de 25</td></tr>
+      <tr><td>Módulos com entidades de dados relacionadas</td><td>1 de 25</td><td>25 de 25</td></tr>
+      <tr><td>Entidades documentadas fora do Contábil</td><td>0</td><td>397</td></tr>
+      <tr><td>Páginas com aviso “nenhuma regra catalogada”</td><td>24</td><td>0</td></tr>
+      <tr><td>Páginas com aviso “nenhuma tabela inventariada”</td><td>24</td><td>0</td></tr>
+      <tr><td>Páginas com cobertura declarada abaixo de 70%</td><td>18</td><td>0</td></tr>
+      <tr><td>User stories por página de módulo</td><td>2 genéricas (5 no Contábil)</td><td>3 específicas (8 no Contábil)</td></tr>
+      <tr><td>Critérios de aceitação por página de módulo</td><td>1 genérico (3 no Contábil)</td><td>3 específicos (6 no Contábil)</td></tr>
+      <tr><td>Regras do módulo Contábil</td><td>15</td><td>33</td></tr>
+      <tr><td>Página de funcionalidades transversais</td><td>Inexistente</td><td><a href="cross-cutting-features.html">Publicada</a></td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="remanescentes">
+  <div class="section-title">6. Lacunas remanescentes (registradas, não fechadas)</div>
+  <p>As lacunas abaixo permanecem abertas e estão registradas deliberadamente, para que o leitor saiba o que a
+  documentação ainda não cobre:</p>
+  <ul>
+    <li><strong>Detalhamento campo a campo fora do Contábil</strong> — o <a href="database-model.html">Modelo de
+        Dados</a> descreve campos e tipos apenas das 46 tabelas do Contábil. Para os demais módulos há a relação de
+        entidades com papel funcional, mas não o dicionário de campos.</li>
+    <li><strong>Submódulos previdenciários especializados</strong> — os onze executáveis agregados em
+        <code>modulos-previdenciarios</code> estão documentados no nível de propósito, regras e entidades centrais,
+        sem detalhamento tela a tela.</li>
+    <li><strong>Módulos de grande volume</strong> — Investimentos (~579 forms) e Imobiliário (4 subsistemas) têm
+        relatórios gerenciais e telas de parametrização de menor uso ainda não inventariados item a item; a
+        justificativa está registrada na própria página de cada módulo.</li>
+    <li><strong>Lógica residente no banco</strong> — <em>triggers</em>, <em>procedures</em> e <em>views</em> Oracle não
+        foram analisados; os scripts em <code>SCRIPT/</code> e <code>__SCRIPTS__/</code> são candidatos naturais a um
+        próximo levantamento.</li>
+    <li><strong>Parametrização de produção</strong> — o comportamento efetivo depende fortemente das tabelas de
+        parâmetros (por exemplo, <code>PARAMCONTAB</code> com 92 campos), cujos valores em produção não foram
+        observados.</li>
+  </ul>
+  <div class="note">Recomendação para as próximas iterações: abrir páginas próprias para os submódulos previdenciários,
+  estender o dicionário de campos aos módulos com maior acoplamento contábil (Contas a Pagar, Contas a Receber,
+  Orçamento, Folha e Investimentos) e inventariar os objetos de banco.</div>
+</section>
+
+</main>
+
+<footer>
+<p>CM Contabilidade — Documentação gerada em 2026-08-19 · revisada em 2026-08-24 (PFC-3) | Tecnologia: Delphi 5 | pt-BR</p>
+</footer>
+</body>
+</html>

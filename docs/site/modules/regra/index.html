@@ -185,30 +185,54 @@ ul.check li::before { content: "☐ "; }
       <p><strong>Contexto de Negócio:</strong> Este módulo integra a suíte CM Contabilidade e apoia processos operacionais/financeiros/previdenciários conforme o domínio <em>Motor de Regras</em>.</p>
       <p><strong>Responsabilidades:</strong></p>
       <ul><li>Cadastro de regras, fórmulas e variáveis</li><li>Execução e testes</li><li>Permissões e dicionário de dados</li></ul>
+    
+      <p><strong>Processos funcionais detalhados:</strong></p>
+<ul>
+<li><strong>Dicionário de dados</strong> — Cadastro de tabelas, campos e grupos de campos que ficam disponíveis para as fórmulas, com migração do dicionário para Oracle (<code>DDTABLE</code>, <code>DDFIELD</code>, <code>CMPBD</code>, <code>CMPBDGRP</code>).</li>
+<li><strong>Fórmulas</strong> — Cadastro, cópia e publicação de fórmulas, agrupadas por grupo de fórmula (<code>FORMULA</code>, <code>GRPFORMULA</code>).</li>
+<li><strong>Regras</strong> — Cadastro de regras por tipo e grupo, com parametrização e detalhamento do algoritmo (<code>REGRA</code>, <code>TIPOREGRA</code>, <code>GRUPOREGRA</code>, <code>PARAMREGRA</code>, <code>ALGREGRA</code>).</li>
+<li><strong>Tabelas genéricas</strong> — Tabelas genéricas e longas com seus campos e valores, usadas como parâmetro das regras (<code>TABGENER</code>, <code>VALTABGENER</code>, <code>LONGTABGENER</code>, <code>LONGVALTABGENER</code>).</li>
+<li><strong>Execução</strong> — Execução de regras a partir dos módulos e pelo executável dedicado, com criação da estrutura do arquivo de saída.</li>
+<li><strong>Controle de acesso</strong> — Permissão de acesso por grupo de regra, tipo de regra e tabela genérica (<code>GRUPOREGRAUSUARIO</code>, <code>TABGENERUSUARIO</code>).</li>
+<li><strong>Portabilidade</strong> — Importação e exportação de regras e de tabelas genéricas/longas entre ambientes.</li>
+<li><strong>Tábuas atuariais</strong> — Carga das tábuas de serviço/comutação usadas pelos cálculos previdenciários (<code>FI_TABUA_COMUTACAO</code>).</li>
+</ul>
     </section>
     <section id="user-stories">
       <div class="section-title">📝 Guia para User Stories</div>
-      
-<div class="story-card"><div class="role">👤 Como operador</div>
-<div class="want">🎯 Quero utilizar as funções principais do módulo Motor de Regras</div>
-<div class="why">💡 Para executar o processo de negócio suportado por este módulo</div></div>
-<div class="story-card"><div class="role">👤 Como supervisor</div>
-<div class="want">🎯 Quero consultar e validar os resultados gerados</div>
-<div class="why">💡 Para garantir conformidade operacional</div></div>
-
+      <div class="story-card"><div class="role">👤 Como analista de negócio</div>
+<div class="want">🎯 Quero cadastrar uma fórmula de cálculo e publicá-la para os módulos que a utilizam</div>
+<div class="why">💡 Para alterar regra de cálculo sem recompilar o sistema</div></div>
+<div class="story-card"><div class="role">👤 Como administrador</div>
+<div class="want">🎯 Quero controlar quais usuários acessam cada grupo e tipo de regra</div>
+<div class="why">💡 Para impedir alteração indevida de regras críticas de cálculo</div></div>
+<div class="story-card"><div class="role">👤 Como analista de implantação</div>
+<div class="want">🎯 Quero exportar as regras e tabelas genéricas de um ambiente e importá-las em outro</div>
+<div class="why">💡 Para propagar a parametrização entre homologação e produção com segurança</div></div>
     </section>
     <section id="criterios">
       <div class="section-title">✅ Critérios de Aceitação</div>
-      
-<div class="criteria-block"><div class="given"><strong>Dado que</strong> o usuário possui permissão no módulo</div>
-<div class="when"><strong>Quando</strong> acessa as telas principais do executável</div>
-<div class="then"><strong>Então</strong> consegue executar as operações de cadastro/consulta previstas no código da pasta <code>REGRA</code></div></div>
-<div class="note">Critérios detalhados dependem de análise aprofundada das forms do módulo. Confiança: Alta</div>
-
+      <div class="criteria-block"><div class="given"><strong>Dado que</strong> uma fórmula foi cadastrada mas ainda não publicada</div>
+<div class="when"><strong>Quando</strong> um módulo tenta utilizá-la no cálculo</div>
+<div class="then"><strong>Então</strong> a fórmula não é aplicada até que seja publicada pela rotina própria</div></div>
+<div class="criteria-block"><div class="given"><strong>Dado que</strong> o usuário não possui permissão no grupo de regra</div>
+<div class="when"><strong>Quando</strong> ele tenta abrir ou alterar uma regra desse grupo</div>
+<div class="then"><strong>Então</strong> o acesso é negado pelo controle de acesso a grupos de regra</div></div>
+<div class="criteria-block"><div class="given"><strong>Dado que</strong> uma regra referencia um campo do dicionário de dados que foi removido</div>
+<div class="when"><strong>Quando</strong> a regra é executada</div>
+<div class="then"><strong>Então</strong> a execução acusa a inconsistência em vez de produzir resultado silenciosamente incorreto</div></div>
     </section>
     <section id="regras">
       <div class="section-title">📏 Regras de Negócio</div>
-      <p>Nenhuma regra específica catalogada com evidência linha a linha neste módulo nesta entrega. Consulte o código em <code>REGRA</code>.</p>
+      <p>Regras levantadas a partir do código-fonte do módulo. Cada regra indica a unidade, o método ou a tela de origem e o nível de confiança da evidência. Identificadores conferem com o <a href="../../../business-rules-catalog.html">Catálogo de Regras de Negócio</a>.</p>
+<div class="rule-block" id="RN129"><div class="rule-id">RN129</div><div class="rule-desc">Fórmulas possuem estado de publicação: só a fórmula publicada é utilizada pelos módulos consumidores.</div><div class="rule-origin">📂 Origem: <code>REGRA/CtrlObjects/UCtrlFormula.pas — Publicada / GravaFormula / CopiaFormula / ExisteFormula</code> | Confiança: <span class="tag tag-alta">Alta</span></div></div>
+<div class="rule-block" id="RN130"><div class="rule-id">RN130</div><div class="rule-desc">Regras são classificadas por tipo e agrupadas, e o acesso é controlado por usuário tanto no grupo quanto no tipo de regra e nas tabelas genéricas.</div><div class="rule-origin">📂 Origem: <code>REGRA/CtrlObjects/UCtrlTipoRegra.pas, UCtrlGrpRegra.pas, UCtrlGrpRegraUsuario.pas, UCtrlTabgenerUsuario.pas; DbObjects/uDbGrupoRegra.pas, uDbGrpRegraUsuario.pas, uDbTabgenerUsuario.pas</code> | Confiança: <span class="tag tag-alta">Alta</span></div></div>
+<div class="rule-block" id="RN131"><div class="rule-id">RN131</div><div class="rule-desc">As fórmulas operam sobre um dicionário de dados cadastrado (tabelas, campos e grupos de campos), que delimita o que pode ser referenciado.</div><div class="rule-origin">📂 Origem: <code>REGRA/DbObjects/uDbCmpbd.pas; CtrlObjects/UCtrlVariavel.pas (CMPBD, CMPBDGRP, DDTABLE, DDFIELD); tela <em>Dicionário de Dados</em></code> | Confiança: <span class="tag tag-alta">Alta</span></div></div>
+<div class="rule-block" id="RN132"><div class="rule-id">RN132</div><div class="rule-desc">Parâmetros das regras são mantidos em tabelas genéricas (e longas) versionáveis, permitindo alterar valores sem alterar a fórmula.</div><div class="rule-origin">📂 Origem: <code>REGRA/DbObjects/uDbTabgenerUsuario.pas; Fontes (telas <em>Cadastro de Tabelas Genericas</em>, <em>Cadastro de Tabela Longa</em>); TABGENER, VALTABGENER, LONGTABGENER, LONGVALTABGENER, CAMPOTABGENER</code> | Confiança: <span class="tag tag-alta">Alta</span></div></div>
+<div class="rule-block" id="RN133"><div class="rule-id">RN133</div><div class="rule-desc">Regras e tabelas genéricas podem ser exportadas e importadas entre ambientes, sustentando a promoção de parametrização.</div><div class="rule-origin">📂 Origem: <code>REGRA/Fontes (telas <em>Exportação de Regras</em>, <em>Importação de Regras</em>, <em>Importação de Tabelas Genericas</em>, <em>Importação de Tabelas Longas</em>)</code> | Confiança: <span class="tag tag-alta">Alta</span></div></div>
+<div class="rule-block" id="RN134"><div class="rule-id">RN134</div><div class="rule-desc">A execução da regra pode gerar arquivo de saída cuja estrutura é criada/alterada pela própria parametrização.</div><div class="rule-origin">📂 Origem: <code>REGRA/Fontes (telas <em>Execução de Regras</em>, <em>Cria / Altera estrutura para arquivo de saida da regra</em>); EXECUTAREGRA/Fontes/ExecutaRegra.dpr</code> | Confiança: <span class="tag tag-alta">Alta</span></div></div>
+<div class="rule-block" id="RN135"><div class="rule-id">RN135</div><div class="rule-desc">O motor de regras é consumido por outros módulos — notadamente Folha, Parâmetros Previdenciários e Investimentos/Cotas — que referenciam a tabela <code>REGRA</code> diretamente em seus cálculos.</div><div class="rule-origin">📂 Origem: <code>FOLHA (32 referências a REGRA), PARAMPREV (29), INVESTCOTAS/DbObjects/uDbRegra.pas</code> | Confiança: <span class="tag tag-alta">Alta</span></div></div>
+<div class="rule-block" id="RN136"><div class="rule-id">RN136</div><div class="rule-desc">Tábuas atuariais de serviço/comutação são carregadas pelo módulo e ficam disponíveis para os cálculos previdenciários.</div><div class="rule-origin">📂 Origem: <code>REGRA/Fontes (tela <em>Carrega as tábuas de serviço</em>); FI_TABUA_COMUTACAO</code> | Confiança: <span class="tag tag-media">Média</span></div></div>
     </section>
     <section id="tecnico">
       <div class="section-title">⚙️ Fundação Técnica — Delphi 5</div>
@@ -219,7 +243,23 @@ ul.check li::before { content: "☐ "; }
     </section>
     <section id="dados">
       <div class="section-title">🗄️ Modelo de Dados</div>
-      <p>Nenhuma tabela foi inventariada exaustivamente para este módulo nesta entrega. Ver DbObjects da pasta quando existirem. <strong>Lacuna parcial.</strong></p>
+      <p>Entidades centrais do módulo identificadas nos <code>DbObjects</code>, nos <code>CtrlObjects</code> e nas consultas SQL das telas. A relação cobre o núcleo funcional; a listagem completa de campos permanece no código.</p>
+<div class="table-wrap"><table><thead><tr><th>Entidade / Tabela</th><th>Papel funcional</th><th>Evidência no código</th></tr></thead><tbody>
+<tr><td><code>REGRA</code></td><td>Regra de negócio parametrizável</td><td><code>REGRA/DbObjects/uDbRegra.pas</code></td></tr>
+<tr><td><code>TIPOREGRA / GRUPOREGRA / GRUPOREGRAUSUARIO</code></td><td>Classificação das regras e controle de acesso</td><td><code>REGRA/DbObjects/uDbTipoRegra.pas; uDbGrupoRegra.pas; uDbGrpRegraUsuario.pas</code></td></tr>
+<tr><td><code>FORMULA / GRPFORMULA</code></td><td>Fórmulas e seus grupos</td><td><code>REGRA/DbObjects/uDbFormula.pas; uDbGrpFormula.pas</code></td></tr>
+<tr><td><code>ALGREGRA / CMPALG</code></td><td>Algoritmo da regra e seus componentes</td><td><code>REGRA/Fontes (detalhes de regra)</code></td></tr>
+<tr><td><code>CMPBD / CMPBDGRP</code></td><td>Campos do dicionário e grupos de campos</td><td><code>REGRA/DbObjects/uDbCmpbd.pas</code></td></tr>
+<tr><td><code>DDTABLE / DDFIELD</code></td><td>Dicionário de dados (tabelas e campos)</td><td><code>REGRA/Fontes (tela Dicionário de Dados)</code></td></tr>
+<tr><td><code>TABGENER / VALTABGENER / CAMPOTABGENER</code></td><td>Tabelas genéricas, valores e campos</td><td><code>REGRA/Fontes (cadastro de tabelas genéricas)</code></td></tr>
+<tr><td><code>LONGTABGENER / LONGVALTABGENER / LONGCMPTABGENER</code></td><td>Tabelas longas, valores e campos</td><td><code>REGRA/Fontes (cadastro de tabela longa)</code></td></tr>
+<tr><td><code>TABGENERUSUARIO / REGRATABGENER</code></td><td>Acesso a tabelas genéricas e vínculo com a regra</td><td><code>REGRA/DbObjects/uDbTabgenerUsuario.pas</code></td></tr>
+<tr><td><code>PARAMREGRA</code></td><td>Parametrização da regra</td><td><code>REGRA/DbObjects/uDbParamRegra.pas</code></td></tr>
+<tr><td><code>GRPARQUIVO</code></td><td>Grupos de arquivos usados pela regra</td><td><code>REGRA/Fontes (grupo de arquivos)</code></td></tr>
+<tr><td><code>FI_TABUA_COMUTACAO</code></td><td>Tábuas atuariais de comutação</td><td><code>REGRA/Fontes (carga de tábuas)</code></td></tr>
+<tr><td><code>LISTA_REGRA_EXECUCAO</code></td><td>Fila/lista de regras a executar</td><td><code>EXECUTAREGRA/Fontes</code></td></tr>
+<tr><td><code>PLANASS / SERVPLANASS / PARCASS</code></td><td>Estruturas assistenciais parametrizadas por regra</td><td><code>REGRA/Fontes (consultas de regra)</code></td></tr>
+</tbody></table></div>
     </section>
     <section id="complexidade">
       <div class="section-title">📊 Estimativa de Complexidade</div>
@@ -234,8 +274,8 @@ ul.check li::before { content: "☐ "; }
         <li><span class="key">Tecnologia</span><span class="val">Delphi 5 / VCL</span></li>
         <li><span class="key">Banco de Dados</span><span class="val">Oracle</span></li>
         <li><span class="key">Acesso a Dados</span><span class="val">MIDAS/ClientDataSet</span></li>
-        <li><span class="key">Cobertura Funcional</span><span class="val">70%</span></li>
-        <li><span class="key">Última Atualização</span><span class="val">2026-08-19</span></li>
+        <li><span class="key">Cobertura Funcional</span><span class="val">85%</span></li>
+        <li><span class="key">Última Atualização</span><span class="val">2026-08-24</span></li>
         <li><span class="key">Confiança</span><span class="val"><span class="tag tag-alta">Alta</span></span></li>
       </ul>
     </section>
@@ -245,7 +285,7 @@ ul.check li::before { content: "☐ "; }
         <li><span class="key">Forms/DFM</span><span class="val">~50</span></li>
         <li><span class="key">Data Modules</span><span class="val">~0</span></li>
         <li><span class="key">Units</span><span class="val">~72</span></li>
-        <li><span class="key">Tabelas</span><span class="val">—</span></li>
+        <li><span class="key">Tabelas</span><span class="val">14</span></li>
       </ul>
     </section>
     <section>
@@ -256,11 +296,20 @@ ul.check li::before { content: "☐ "; }
       <div class="section-title">♻️ Padrões Reutilizáveis</div>
       <ul class="dep-list"><li>Padrão CM (Forms MT + CtrlObjects + DbObjects)</li><li>Autorização via framework CM</li></ul>
     </section>
+    <section>
+      <div class="section-title">📎 Ver Também</div>
+      <ul class="dep-list">
+<li><a href="../../../cross-cutting-features.html">Funcionalidades Transversais</a></li>
+<li><a href="../../../business-rules-catalog.html">Catálogo de Regras de Negócio</a></li>
+<li><a href="../../../documentation-gap-analysis.html">Levantamento de Lacunas</a></li>
+<li><a href="../../../system-overview.html">Visão Geral do Sistema</a></li>
+</ul>
+    </section>
   </div>
 </main>
 
 <footer>
-<p>CM Contabilidade — Módulo Motor de Regras | Delphi 5 | Documentação gerada em 2026-08-19 | pt-BR</p>
+<p>CM Contabilidade — Módulo Motor de Regras | Delphi 5 | Documentação gerada em 2026-08-19 · revisada em 2026-08-24 (PFC-3) | pt-BR</p>
 </footer>
 </body>
 </html>

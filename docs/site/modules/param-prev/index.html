@@ -185,30 +185,55 @@ ul.check li::before { content: "☐ "; }
       <p><strong>Contexto de Negócio:</strong> Este módulo integra a suíte CM Contabilidade e apoia processos operacionais/financeiros/previdenciários conforme o domínio <em>Parâmetros Previdenciários</em>.</p>
       <p><strong>Responsabilidades:</strong></p>
       <ul><li>Parâmetros de planos e regras previdenciárias</li></ul>
+    
+      <p><strong>Processos funcionais detalhados:</strong></p>
+<ul>
+<li><strong>Planos e patrocinadoras</strong> — Cadastro do plano previdenciário, das opções por patrocinadora e da elegibilidade (<code>PLANPREV</code>, <code>PLANPREVPATRO</code>, <code>PATRO</code>, <code>ELEGPATRO</code>).</li>
+<li><strong>Benefícios</strong> — Cadastro de benefícios, grupos, associação por plano e patrocinadora, alteradores e motivos de retenção/encerramento (<code>BENEFICIO</code>, <code>BENEFPLANPREV</code>, <code>BENEFPLANPATRO</code>).</li>
+<li><strong>Contribuições</strong> — Tipos de contribuição, contribuição por plano/patrocinadora, faixas e percentuais (<code>CONTRIBUICAO</code>, <code>CONTPREV</code>, <code>CONTPLANPATRO</code>, <code>TPCONTRIBUICAO</code>).</li>
+<li><strong>Eventos geradores</strong> — Cadastro do evento gerador, associação de situações e de rubricas ao evento (<code>EVENTOGERADOR</code>, <code>EVENTOSPREV</code>, <code>RUBRICAINDIVEVENTO</code>).</li>
+<li><strong>Reservas</strong> — Reservas por plano, padrões de movimentação de reserva e associação de contribuições/benefícios a reservas (<code>RESERVAXPLANO</code>, <code>HISTMOVRESERVA</code>).</li>
+<li><strong>Situações</strong> — Situação do participante na fundação, no plano e do empregado na patrocinadora, além de situação de dependentes (<code>SITPART</code>, <code>SITPLANOPREV</code>, <code>SITFUNC</code>).</li>
+<li><strong>Reajustes</strong> — Regras de reajuste dos benefícios da fundação e do INSS, apoiadas no motor de Regras (<code>REAJBENEFICIO</code>, <code>REGRA</code>).</li>
+<li><strong>Cargos e carreira</strong> — Planos de cargos e salários, carreira, níveis, faixas e grupos de função (<code>CARGOEXT</code>, <code>GRUPOCARGOEXT</code>, <code>NIVEL</code>, <code>FAIXANIVEL</code>).</li>
+<li><strong>Calendário e periodicidade</strong> — Calendário previdenciário e periodicidades usados nos processamentos (<code>CALENDPREV</code>, <code>CALENDDATAS</code>, <code>TPPERIODICIDADE</code>).</li>
+</ul>
     </section>
     <section id="user-stories">
       <div class="section-title">📝 Guia para User Stories</div>
-      
-<div class="story-card"><div class="role">👤 Como operador</div>
-<div class="want">🎯 Quero utilizar as funções principais do módulo Parâmetros Previdenciários</div>
-<div class="why">💡 Para executar o processo de negócio suportado por este módulo</div></div>
-<div class="story-card"><div class="role">👤 Como supervisor</div>
-<div class="want">🎯 Quero consultar e validar os resultados gerados</div>
-<div class="why">💡 Para garantir conformidade operacional</div></div>
-
+      <div class="story-card"><div class="role">👤 Como gestor previdenciário</div>
+<div class="want">🎯 Quero parametrizar um novo plano previdenciário com seus benefícios e contribuições</div>
+<div class="why">💡 Para operar o plano sem desenvolvimento de software</div></div>
+<div class="story-card"><div class="role">👤 Como analista previdenciário</div>
+<div class="want">🎯 Quero associar rubricas e situações a um evento gerador</div>
+<div class="why">💡 Para que o evento produza automaticamente os efeitos previstos no regulamento</div></div>
+<div class="story-card"><div class="role">👤 Como atuário</div>
+<div class="want">🎯 Quero cadastrar as regras de reajuste dos benefícios da fundação e do INSS</div>
+<div class="why">💡 Para aplicar o reajuste conforme o regulamento e a legislação vigente</div></div>
     </section>
     <section id="criterios">
       <div class="section-title">✅ Critérios de Aceitação</div>
-      
-<div class="criteria-block"><div class="given"><strong>Dado que</strong> o usuário possui permissão no módulo</div>
-<div class="when"><strong>Quando</strong> acessa as telas principais do executável</div>
-<div class="then"><strong>Então</strong> consegue executar as operações de cadastro/consulta previstas no código da pasta <code>PARAMPREV</code></div></div>
-<div class="note">Critérios detalhados dependem de análise aprofundada das forms do módulo. Confiança: Média</div>
-
+      <div class="criteria-block"><div class="given"><strong>Dado que</strong> um benefício não está associado ao plano do participante</div>
+<div class="when"><strong>Quando</strong> a concessão desse benefício é solicitada</div>
+<div class="then"><strong>Então</strong> a concessão é impedida pela parametrização plano × benefício</div></div>
+<div class="criteria-block"><div class="given"><strong>Dado que</strong> uma situação do participante está associada a um evento gerador</div>
+<div class="when"><strong>Quando</strong> o evento é registrado no cadastro previdenciário</div>
+<div class="then"><strong>Então</strong> a situação do participante é atualizada e os efeitos parametrizados (contribuição, benefício, reserva) são disparados</div></div>
+<div class="criteria-block"><div class="given"><strong>Dado que</strong> o percentual de contribuição está fora das faixas cadastradas</div>
+<div class="when"><strong>Quando</strong> o valor é informado para o participante</div>
+<div class="then"><strong>Então</strong> o sistema recusa o percentual conforme <code>FAIXANIVEL</code>/faixas e percentuais do plano</div></div>
     </section>
     <section id="regras">
       <div class="section-title">📏 Regras de Negócio</div>
-      <p>Nenhuma regra específica catalogada com evidência linha a linha neste módulo nesta entrega. Consulte o código em <code>PARAMPREV</code>.</p>
+      <p>Regras levantadas a partir do código-fonte do módulo. Cada regra indica a unidade, o método ou a tela de origem e o nível de confiança da evidência. Identificadores conferem com o <a href="../../../business-rules-catalog.html">Catálogo de Regras de Negócio</a>.</p>
+<div class="rule-block" id="RN199"><div class="rule-id">RN199</div><div class="rule-desc">Benefícios e contribuições só existem para o participante se estiverem associados ao seu plano e à sua patrocinadora.</div><div class="rule-origin">📂 Origem: <code>PARAMPREV/Fontes (telas <em>Cadastro de Benefício</em>, <em>Cadastro de Grupos de Benefício</em>, <em>Cadastro de Contribuições da Patrocinadora</em>); BENEFPLANPREV, BENEFPLANPATRO, CONTPLANPATRO</code> | Confiança: <span class="tag tag-alta">Alta</span></div></div>
+<div class="rule-block" id="RN200"><div class="rule-id">RN200</div><div class="rule-desc">O evento gerador é o ponto central da parametrização: define quais situações mudam e quais rubricas são geradas.</div><div class="rule-origin">📂 Origem: <code>PARAMPREV/Fontes (telas <em>Cadastro de Evento Gerador</em>, <em>Associação de Situações / Evento Gerador</em>, <em>Associar Rubricas ao Evento Gerador</em>); EVENTOGERADOR, EVENTOSPREV, RUBRICAINDIVEVENTO</code> | Confiança: <span class="tag tag-alta">Alta</span></div></div>
+<div class="rule-block" id="RN201"><div class="rule-id">RN201</div><div class="rule-desc">As situações são mantidas em três dimensões independentes — fundação, plano e patrocinadora — e combinadas na avaliação de elegibilidade.</div><div class="rule-origin">📂 Origem: <code>PARAMPREV/Fontes (telas <em>Cadastro da Situação do Participante na Fundação</em>, <em>no Plano</em>, <em>Cadastro da Situação do Empregado na Patrocinadora</em>); SITPART, SITPLANOPREV, SITFUNC</code> | Confiança: <span class="tag tag-alta">Alta</span></div></div>
+<div class="rule-block" id="RN202"><div class="rule-id">RN202</div><div class="rule-desc">Reservas são parametrizadas por plano, com padrão de movimentação que determina como contribuições e benefícios as afetam.</div><div class="rule-origin">📂 Origem: <code>PARAMPREV/Fontes (telas <em>Cadastro de Reservas por Plano</em>, <em>Cadastro de Padrão de Movimentação de Reservas</em>, <em>Associação de Contribuições por Reserva</em>); RESERVAXPLANO, HISTMOVRESERVA</code> | Confiança: <span class="tag tag-alta">Alta</span></div></div>
+<div class="rule-block" id="RN203"><div class="rule-id">RN203</div><div class="rule-desc">As regras de reajuste de benefícios (fundação e INSS) são cadastradas como parametrização e executadas pelo motor de Regras.</div><div class="rule-origin">📂 Origem: <code>PARAMPREV/Fontes (telas <em>Cadastro de Regras de Reajuste dos Benefícios da Fundação</em>, <em>do INSS</em>); REAJBENEFICIO, REGRA (29 referências)</code> | Confiança: <span class="tag tag-alta">Alta</span></div></div>
+<div class="rule-block" id="RN204"><div class="rule-id">RN204</div><div class="rule-desc">O calendário previdenciário define as datas válidas de processamento dos eventos e da folha.</div><div class="rule-origin">📂 Origem: <code>PARAMPREV/Fontes (telas <em>Cadastro de Calendários Previdenciários</em>, <em>Calendário Previdenciário</em>); CALENDPREV, CALENDDATAS</code> | Confiança: <span class="tag tag-alta">Alta</span></div></div>
+<div class="rule-block" id="RN205"><div class="rule-id">RN205</div><div class="rule-desc">Perfis de investimento e opções de transferência de plano são parametrizados aqui e consumidos por Empréstimo e Cadastro Previdenciário.</div><div class="rule-origin">📂 Origem: <code>PARAMPREV/Fontes (telas <em>Cadastro de Perfil de Investimento</em>, <em>Configuração das Opções de Transferência de Plano</em>); PERFILINVEST, TIPOSTRANSFPLANO</code> | Confiança: <span class="tag tag-alta">Alta</span></div></div>
+<div class="rule-block" id="RN206"><div class="rule-id">RN206</div><div class="rule-desc">A estrutura de cargos, carreira, níveis e faixas sustenta o cálculo do salário de participação e a evolução funcional.</div><div class="rule-origin">📂 Origem: <code>PARAMPREV/Fontes (telas <em>Cadastramento de Planos de Cargos e Salários</em>, <em>Cadastro de Carreira</em>, <em>Cadastro de Níveis de Cargo</em>, <em>Cadastro de Faixas e Percentuais</em>); CARGOEXT, NIVEL, FAIXANIVEL</code> | Confiança: <span class="tag tag-media">Média</span></div></div>
     </section>
     <section id="tecnico">
       <div class="section-title">⚙️ Fundação Técnica — Delphi 5</div>
@@ -219,7 +244,25 @@ ul.check li::before { content: "☐ "; }
     </section>
     <section id="dados">
       <div class="section-title">🗄️ Modelo de Dados</div>
-      <p>Nenhuma tabela foi inventariada exaustivamente para este módulo nesta entrega. Ver DbObjects da pasta quando existirem. <strong>Lacuna parcial.</strong></p>
+      <p>Entidades centrais do módulo identificadas nos <code>DbObjects</code>, nos <code>CtrlObjects</code> e nas consultas SQL das telas. A relação cobre o núcleo funcional; a listagem completa de campos permanece no código.</p>
+<div class="table-wrap"><table><thead><tr><th>Entidade / Tabela</th><th>Papel funcional</th><th>Evidência no código</th></tr></thead><tbody>
+<tr><td><code>PLANPREV / PLANPREVPATRO</code></td><td>Plano previdenciário e opções por patrocinadora</td><td><code>CMGLOBALOBJ50/DbObjects/uDbPlanPrevidencia.pas</code></td></tr>
+<tr><td><code>PATRO / ELEGPATRO</code></td><td>Patrocinadora e elegibilidade</td><td><code>CMGLOBALOBJ50/DbObjects/uDbPatro.pas</code></td></tr>
+<tr><td><code>BENEFICIO / BENEFPLANPREV / BENEFPLANPATRO</code></td><td>Benefícios e sua associação a plano/patrocinadora</td><td><code>CM/CMPrevMT50/DBObjects/uDbBeneficio.pas; uDbBenefplanopart.pas</code></td></tr>
+<tr><td><code>CONTRIBUICAO / CONTPREV / CONTPLANPATRO / TPCONTRIBUICAO</code></td><td>Contribuições, tipos e associação</td><td><code>CM/CMPrevMT50/DBObjects/uDBContribuicao.pas; uDBContPrev.pas</code></td></tr>
+<tr><td><code>EVENTOGERADOR / EVENTOSPREV / RUBRICAINDIVEVENTO</code></td><td>Eventos geradores e rubricas associadas</td><td><code>PARAMPREV/Fontes</code></td></tr>
+<tr><td><code>SITPART / SITPLANOPREV / SITFUNC</code></td><td>Situações do participante e do empregado</td><td><code>PARAMPREV/Fontes</code></td></tr>
+<tr><td><code>RESERVAXPLANO / HISTMOVRESERVA / RESERVAPART</code></td><td>Reservas por plano e sua movimentação</td><td><code>PARAMPREV/DBObjects/uDbReservapart.pas</code></td></tr>
+<tr><td><code>REAJBENEFICIO / REGRA</code></td><td>Regras de reajuste de benefícios</td><td><code>PARAMPREV/Fontes; REGRA/DbObjects/uDbRegra.pas</code></td></tr>
+<tr><td><code>CALENDPREV / CALENDDATAS / TPPERIODICIDADE</code></td><td>Calendário previdenciário e periodicidades</td><td><code>FOLHA/DBObjects/uDbCalendprev.pas; uDbCalenddatas.pas</code></td></tr>
+<tr><td><code>CARGOEXT / GRUPOCARGOEXT / NIVEL / FAIXANIVEL</code></td><td>Cargos, grupos, níveis e faixas</td><td><code>PARAMPREV/Fontes</code></td></tr>
+<tr><td><code>PROVDESC / HISTRUBSAL</code></td><td>Rubricas de provento/desconto parametrizadas</td><td><code>PARAMPREV/DBObjects/uDbHistrubsal.pas</code></td></tr>
+<tr><td><code>PARAMAPREV</code></td><td>Parâmetros gerais do AdmPREV</td><td><code>PARAMPREV/Fontes</code></td></tr>
+<tr><td><code>PERFILINVEST / TIPOSTRANSFPLANO</code></td><td>Perfis de investimento e transferência de plano</td><td><code>PARAMPREV/Fontes</code></td></tr>
+<tr><td><code>FAIXASPROVISAOPERDACONTRIB</code></td><td>Faixas de provisão para perdas de contribuições</td><td><code>PARAMPREV/Fontes</code></td></tr>
+<tr><td><code>TPPAGTOBENEFICIO / TPPERIODICIDADE</code></td><td>Formas de pagamento e periodicidade do benefício</td><td><code>CM/CMPrevMT50/DBObjects/uDbTpPagtoBeneficio.pas; uDbTpPeriodicidade.pas</code></td></tr>
+<tr><td><code>USERCALCULOSJUDICIAIS / CALCULO</code></td><td>Configuração de cálculos judiciais e memória de cálculo</td><td><code>PARAMPREV/Fontes</code></td></tr>
+</tbody></table></div>
     </section>
     <section id="complexidade">
       <div class="section-title">📊 Estimativa de Complexidade</div>
@@ -234,9 +277,9 @@ ul.check li::before { content: "☐ "; }
         <li><span class="key">Tecnologia</span><span class="val">Delphi 5 / VCL</span></li>
         <li><span class="key">Banco de Dados</span><span class="val">Oracle</span></li>
         <li><span class="key">Acesso a Dados</span><span class="val">MIDAS/ClientDataSet</span></li>
-        <li><span class="key">Cobertura Funcional</span><span class="val">40–60%</span></li>
-        <li><span class="key">Última Atualização</span><span class="val">2026-08-19</span></li>
-        <li><span class="key">Confiança</span><span class="val"><span class="tag tag-média">Média</span></span></li>
+        <li><span class="key">Cobertura Funcional</span><span class="val">78%</span></li>
+        <li><span class="key">Última Atualização</span><span class="val">2026-08-24</span></li>
+        <li><span class="key">Confiança</span><span class="val"><span class="tag tag-media">Média</span></span></li>
       </ul>
     </section>
     <section>
@@ -245,7 +288,7 @@ ul.check li::before { content: "☐ "; }
         <li><span class="key">Forms/DFM</span><span class="val">~97</span></li>
         <li><span class="key">Data Modules</span><span class="val">~0</span></li>
         <li><span class="key">Units</span><span class="val">~105</span></li>
-        <li><span class="key">Tabelas</span><span class="val">—</span></li>
+        <li><span class="key">Tabelas</span><span class="val">16</span></li>
       </ul>
     </section>
     <section>
@@ -256,11 +299,20 @@ ul.check li::before { content: "☐ "; }
       <div class="section-title">♻️ Padrões Reutilizáveis</div>
       <ul class="dep-list"><li>Padrão CM (Forms MT + CtrlObjects + DbObjects)</li><li>Autorização via framework CM</li></ul>
     </section>
+    <section>
+      <div class="section-title">📎 Ver Também</div>
+      <ul class="dep-list">
+<li><a href="../../../cross-cutting-features.html">Funcionalidades Transversais</a></li>
+<li><a href="../../../business-rules-catalog.html">Catálogo de Regras de Negócio</a></li>
+<li><a href="../../../documentation-gap-analysis.html">Levantamento de Lacunas</a></li>
+<li><a href="../../../system-overview.html">Visão Geral do Sistema</a></li>
+</ul>
+    </section>
   </div>
 </main>
 
 <footer>
-<p>CM Contabilidade — Módulo Parâmetros Previdenciários | Delphi 5 | Documentação gerada em 2026-08-19 | pt-BR</p>
+<p>CM Contabilidade — Módulo Parâmetros Previdenciários | Delphi 5 | Documentação gerada em 2026-08-19 · revisada em 2026-08-24 (PFC-3) | pt-BR</p>
 </footer>
 </body>
 </html>

@@ -185,30 +185,51 @@ ul.check li::before { content: "☐ "; }
       <p><strong>Contexto de Negócio:</strong> Este módulo integra a suíte CM Contabilidade e apoia processos operacionais/financeiros/previdenciários conforme o domínio <em>Contas a Pagar</em>.</p>
       <p><strong>Responsabilidades:</strong></p>
       <ul><li>Cadastro e liquidação de títulos a pagar</li><li>Integração com Contabilidade</li></ul>
+    
+      <p><strong>Processos funcionais detalhados:</strong></p>
+<ul>
+<li><strong>Lançamento de documentos</strong> — Registro do documento a pagar com tipo, fornecedor, parcelas, rateio e impostos retidos (<code>DOCUMENTO</code>, <code>LANCTODOCUM</code>, <code>RATEIODOCUM</code>, <code>IMPOSTORETIDO</code>).</li>
+<li><strong>Autorização de pagamento</strong> — Fluxo de autorização e aprovação do documento, inclusive via processos RAD (<code>Autorização de Pagamento</code>, <code>fNovoAutorizaRad</code>).</li>
+<li><strong>Geração de lote de pagamento</strong> — Seleção de documentos pendentes, verificação de adiantamentos e criação do lote com cálculo de saldos (<code>LOTEPAGTO</code>, <code>LOTEXDOCUM</code>).</li>
+<li><strong>Baixa de documentos</strong> — Baixa manual, automática e mista, com validação de data e contabilização da planilha sintética (<code>uCtrlBaixaDocumentos</code>).</li>
+<li><strong>Pagamento eletrônico e cheques</strong> — Geração de remessa CNAB, retorno bancário, emissão e controle de talões de cheque (<code>ARQUIVOPAGTO</code>, <code>CODIGOSCNAB</code>, <code>CHEQUES</code>).</li>
+<li><strong>Integração contábil</strong> — Geração de planilha e lançamentos contábeis a partir dos documentos, com teste de débito × crédito e verificação de período bloqueado.</li>
+</ul>
     </section>
     <section id="user-stories">
       <div class="section-title">📝 Guia para User Stories</div>
-      
-<div class="story-card"><div class="role">👤 Como operador</div>
-<div class="want">🎯 Quero utilizar as funções principais do módulo Contas a Pagar</div>
-<div class="why">💡 Para executar o processo de negócio suportado por este módulo</div></div>
-<div class="story-card"><div class="role">👤 Como supervisor</div>
-<div class="want">🎯 Quero consultar e validar os resultados gerados</div>
-<div class="why">💡 Para garantir conformidade operacional</div></div>
-
+      <div class="story-card"><div class="role">👤 Como operador do contas a pagar</div>
+<div class="want">🎯 Quero lançar um documento a pagar com rateio por centro de custo e impostos retidos</div>
+<div class="why">💡 Para que a obrigação fique registrada com a classificação contábil e fiscal correta</div></div>
+<div class="story-card"><div class="role">👤 Como tesoureiro</div>
+<div class="want">🎯 Quero gerar um lote de pagamento a partir dos documentos autorizados e emitir a remessa eletrônica</div>
+<div class="why">💡 Para pagar os fornecedores no vencimento sem digitação manual no banco</div></div>
+<div class="story-card"><div class="role">👤 Como contador</div>
+<div class="want">🎯 Quero integrar as baixas do contas a pagar para a contabilidade</div>
+<div class="why">💡 Para refletir os pagamentos nos saldos contábeis do período</div></div>
     </section>
     <section id="criterios">
       <div class="section-title">✅ Critérios de Aceitação</div>
-      
-<div class="criteria-block"><div class="given"><strong>Dado que</strong> o usuário possui permissão no módulo</div>
-<div class="when"><strong>Quando</strong> acessa as telas principais do executável</div>
-<div class="then"><strong>Então</strong> consegue executar as operações de cadastro/consulta previstas no código da pasta <code>CPAGAR</code></div></div>
-<div class="note">Critérios detalhados dependem de análise aprofundada das forms do módulo. Confiança: Média</div>
-
+      <div class="criteria-block"><div class="given"><strong>Dado que</strong> o usuário não possui o tipo de documento liberado em <code>USUARIOXTPDOCTO</code></div>
+<div class="when"><strong>Quando</strong> ele tenta lançar ou consultar um documento desse tipo</div>
+<div class="then"><strong>Então</strong> o documento não é apresentado nem aceito, preservando a segregação por tipo de despesa</div></div>
+<div class="criteria-block"><div class="given"><strong>Dado que</strong> existe um lote de pagamento já emitido</div>
+<div class="when"><strong>Quando</strong> o usuário solicita o cancelamento do lote</div>
+<div class="then"><strong>Então</strong> os documentos retornam à condição de pendentes e o lote é cancelado de forma rastreável (<code>uCtrlCancelaLote</code>)</div></div>
+<div class="criteria-block"><div class="given"><strong>Dado que</strong> a planilha gerada pela integração contábil está desbalanceada</div>
+<div class="when"><strong>Quando</strong> o processo de integração é executado</div>
+<div class="then"><strong>Então</strong> a integração é recusada pelo teste de débito × crédito antes de gravar qualquer lançamento</div></div>
     </section>
     <section id="regras">
       <div class="section-title">📏 Regras de Negócio</div>
-      <p>Nenhuma regra específica catalogada com evidência linha a linha neste módulo nesta entrega. Consulte o código em <code>CPAGAR</code>.</p>
+      <p>Regras levantadas a partir do código-fonte do módulo. Cada regra indica a unidade, o método ou a tela de origem e o nível de confiança da evidência. Identificadores conferem com o <a href="../../../business-rules-catalog.html">Catálogo de Regras de Negócio</a>.</p>
+<div class="rule-block" id="RN041"><div class="rule-id">RN041</div><div class="rule-desc">O acesso a documentos é segregado por tipo de documento: cada usuário só opera os tipos liberados para ele.</div><div class="rule-origin">📂 Origem: <code>CMCAPCARUTILOBJ50/DbObjects/uDbUsuarioxtpdocto.pas; uDbTipodocrecpag.pas — consultas USUARIOXTPDOCTO/TIPODOCRECPAG presentes em praticamente toda seleção de documentos do módulo</code> | Confiança: <span class="tag tag-alta">Alta</span></div></div>
+<div class="rule-block" id="RN042"><div class="rule-id">RN042</div><div class="rule-desc">Documentos a pagar são agrupados em lotes de pagamento; a criação do lote calcula saldos e verifica adiantamentos pendentes antes de consolidar.</div><div class="rule-origin">📂 Origem: <code>CPAGAR/CtrlObjects/uCtrlGeraLotePgto.pas — CalculaSaldos / Verifica_Adianto / bbtnCriaLoteClick (LOTEPAGTO, LOTEXDOCUM)</code> | Confiança: <span class="tag tag-alta">Alta</span></div></div>
+<div class="rule-block" id="RN043"><div class="rule-id">RN043</div><div class="rule-desc">A baixa de documentos pode ser manual, automática ou mista, exige validação da data de baixa e contabiliza planilha sintética ao final.</div><div class="rule-origin">📂 Origem: <code>CMCAPCARUTILOBJ50/CtrlObjects/uCtrlBaixaDocumentos.pas — ProcessaBaixaManual / ProcessaBaixaAutomatica / ValidaDataBaixa / ContabilizaPlanilhaSintetica / DocumentoComBaixaMista</code> | Confiança: <span class="tag tag-alta">Alta</span></div></div>
+<div class="rule-block" id="RN044"><div class="rule-id">RN044</div><div class="rule-desc">A integração contábil dos documentos testa o equilíbrio débito × crédito da planilha e verifica períodos/dias bloqueados antes de gravar lançamentos.</div><div class="rule-origin">📂 Origem: <code>CPAGAR/CtrlObjects/uCtrlProcessaContab.pas — ProcessaIntegraPlanilha / TestaDebCrePlanilha / TestaIntegraPlanilha / VerificaBloqueados</code> | Confiança: <span class="tag tag-alta">Alta</span></div></div>
+<div class="rule-block" id="RN045"><div class="rule-id">RN045</div><div class="rule-desc">Cada documento pode ter rateio por centro de custo/responsabilidade e impostos retidos calculados por classificação fiscal do fornecedor.</div><div class="rule-origin">📂 Origem: <code>CMCAPCARUTILOBJ50/DbObjects/uDbRateiodocum.pas; uDbClasfisclifor.pas; CtrlObjects/uCtrlImpostoRetido.pas (RATEIODOCUM, IMPOSTORETIDO, CLASFISCLIFOR)</code> | Confiança: <span class="tag tag-alta">Alta</span></div></div>
+<div class="rule-block" id="RN046"><div class="rule-id">RN046</div><div class="rule-desc">O pagamento eletrônico gera arquivo de remessa conforme modelo CNAB do convênio bancário e vincula o arquivo aos documentos pagos.</div><div class="rule-origin">📂 Origem: <code>CPAGAR/CtrlObjects/uCtrlPagEletronico.pas; uDtmPagEletronico.pas; CMCAPCARUTILOBJ50/DbObjects/uDbCodigoscnab.pas, uDbModeloscnab.pas (ARQUIVOPAGTO, ARQUIVOXDOCUM)</code> | Confiança: <span class="tag tag-alta">Alta</span></div></div>
+<div class="rule-block" id="RN047"><div class="rule-id">RN047</div><div class="rule-desc">A emissão de cheques é controlada por talão, com configuração de layout e mensagens de verso, e grava o registro da emissão.</div><div class="rule-origin">📂 Origem: <code>CPAGAR/CtrlObjects/uCtrlEmissCheque.pas — GravaEmissao; CMCAPCARUTILOBJ50/DbObjects/uDbTemplcheque.pas, uDbConfigcheque.pas (telas <em>Controle de Talões de Cheque</em>, <em>Configuração de Cheque</em>)</code> | Confiança: <span class="tag tag-alta">Alta</span></div></div>
     </section>
     <section id="tecnico">
       <div class="section-title">⚙️ Fundação Técnica — Delphi 5</div>
@@ -219,7 +240,25 @@ ul.check li::before { content: "☐ "; }
     </section>
     <section id="dados">
       <div class="section-title">🗄️ Modelo de Dados</div>
-      <p>Nenhuma tabela foi inventariada exaustivamente para este módulo nesta entrega. Ver DbObjects da pasta quando existirem. <strong>Lacuna parcial.</strong></p>
+      <p>Entidades centrais do módulo identificadas nos <code>DbObjects</code>, nos <code>CtrlObjects</code> e nas consultas SQL das telas. A relação cobre o núcleo funcional; a listagem completa de campos permanece no código.</p>
+<div class="table-wrap"><table><thead><tr><th>Entidade / Tabela</th><th>Papel funcional</th><th>Evidência no código</th></tr></thead><tbody>
+<tr><td><code>DOCUMENTO</code></td><td>Documento a pagar, com fornecedor, vencimento e situação</td><td><code>CMCAPCARUTILOBJ50/DbObjects/uDbDocumento.pas</code></td></tr>
+<tr><td><code>LANCTODOCUM</code></td><td>Lançamentos/parcelas do documento</td><td><code>CMCAPCARUTILOBJ50/DbObjects/uDbLanctodocum.pas</code></td></tr>
+<tr><td><code>TIPODOCRECPAG / USUARIOXTPDOCTO</code></td><td>Tipos de documento e liberação por usuário</td><td><code>CMCAPCARUTILOBJ50/DbObjects/uDbTipodocrecpag.pas; uDbUsuarioxtpdocto.pas</code></td></tr>
+<tr><td><code>LOTEPAGTO / LOTEXDOCUM</code></td><td>Lote de pagamento e documentos que o compõem</td><td><code>CPAGAR/DbObjects/uDbLotePagto.pas; CMCAPCARUTILOBJ50/DbObjects/uDbLotexdocum.pas</code></td></tr>
+<tr><td><code>RATEIODOCUM / GRUPORATEIO</code></td><td>Rateio do documento e grupos de rateio</td><td><code>CMCAPCARUTILOBJ50/DbObjects/uDbRateiodocum.pas; uDbGrupoRateio.pas</code></td></tr>
+<tr><td><code>IMPOSTORETIDO / RETINSSOUTROS</code></td><td>Impostos retidos por documento</td><td><code>CMCAPCARUTILOBJ50/DbObjects/uDbRetInssOutros.pas</code></td></tr>
+<tr><td><code>ARQUIVOPAGTO / ARQUIVOXDOCUM</code></td><td>Arquivos de remessa/retorno e vínculo com documentos</td><td><code>CPAGAR/CtrlObjects/uCtrlPagEletronico.pas</code></td></tr>
+<tr><td><code>CODIGOSCNAB / MODELOSCNAB</code></td><td>Códigos e modelos de layout CNAB</td><td><code>CMCAPCARUTILOBJ50/DbObjects/uDbCodigoscnab.pas; uDbModeloscnab.pas</code></td></tr>
+<tr><td><code>CHEQUES / TEMPLCHEQUE / CONFIGCHEQUE</code></td><td>Talões, layout e configuração de cheques</td><td><code>CMCAPCARUTILOBJ50/DbObjects/uDbCheques.pas; uDbTemplcheque.pas</code></td></tr>
+<tr><td><code>PORTADORFORMA / FORMARECPAG</code></td><td>Portador × forma de pagamento</td><td><code>CMCAPCARUTILOBJ50/DbObjects/uDbPortadorforma.pas; uDbFormarecpag.pas</code></td></tr>
+<tr><td><code>CONTABANCARIA / BANCO / AGENCIABANCARIA</code></td><td>Contas e instituições bancárias</td><td><code>CM/Forms/DbObjects/uDbContabancaria.pas</code></td></tr>
+<tr><td><code>PARAMCAP</code></td><td>Parâmetros do contas a pagar/receber</td><td><code>CMCAPCARUTILOBJ50/DbObjects/uDbParamCAP.pas</code></td></tr>
+<tr><td><code>RECBTOPAGTO</code></td><td>Recebimentos/pagamentos efetivados</td><td><code>CMCAPCARUTILOBJ50/DbObjects/uDbRecbtopagto.pas</code></td></tr>
+<tr><td><code>PLANILHA / LANCAMENTO / PLANOSALDO</code></td><td>Artefatos contábeis gerados pela integração</td><td><code>CONTAB/DbObjects/uDbPlanilha.pas; uDbLancamento.pas; uDbPlanoSaldo.pas</code></td></tr>
+<tr><td><code>DOCUMENTOXPESSOAS / DOCUMENTOXCODBARRAS</code></td><td>Pessoas vinculadas ao documento e códigos de barras</td><td><code>CMCAPCARUTILOBJ50/CtrlObjects (consultas do módulo)</code></td></tr>
+<tr><td><code>TIPORECEBDESEMB / CENTRESPON</code></td><td>Tipo de desembolso e centro de responsabilidade</td><td><code>CMCAPCARUTILOBJ50/DbObjects/uDbTiporecebdesemb.pas</code></td></tr>
+</tbody></table></div>
     </section>
     <section id="complexidade">
       <div class="section-title">📊 Estimativa de Complexidade</div>
@@ -234,9 +273,9 @@ ul.check li::before { content: "☐ "; }
         <li><span class="key">Tecnologia</span><span class="val">Delphi 5 / VCL</span></li>
         <li><span class="key">Banco de Dados</span><span class="val">Oracle</span></li>
         <li><span class="key">Acesso a Dados</span><span class="val">MIDAS/ClientDataSet</span></li>
-        <li><span class="key">Cobertura Funcional</span><span class="val">40–60%</span></li>
-        <li><span class="key">Última Atualização</span><span class="val">2026-08-19</span></li>
-        <li><span class="key">Confiança</span><span class="val"><span class="tag tag-média">Média</span></span></li>
+        <li><span class="key">Cobertura Funcional</span><span class="val">82%</span></li>
+        <li><span class="key">Última Atualização</span><span class="val">2026-08-24</span></li>
+        <li><span class="key">Confiança</span><span class="val"><span class="tag tag-alta">Alta</span></span></li>
       </ul>
     </section>
     <section>
@@ -245,7 +284,7 @@ ul.check li::before { content: "☐ "; }
         <li><span class="key">Forms/DFM</span><span class="val">~48</span></li>
         <li><span class="key">Data Modules</span><span class="val">~0</span></li>
         <li><span class="key">Units</span><span class="val">~63</span></li>
-        <li><span class="key">Tabelas</span><span class="val">—</span></li>
+        <li><span class="key">Tabelas</span><span class="val">16</span></li>
       </ul>
     </section>
     <section>
@@ -256,11 +295,20 @@ ul.check li::before { content: "☐ "; }
       <div class="section-title">♻️ Padrões Reutilizáveis</div>
       <ul class="dep-list"><li>Padrão CM (Forms MT + CtrlObjects + DbObjects)</li><li>Autorização via framework CM</li></ul>
     </section>
+    <section>
+      <div class="section-title">📎 Ver Também</div>
+      <ul class="dep-list">
+<li><a href="../../../cross-cutting-features.html">Funcionalidades Transversais</a></li>
+<li><a href="../../../business-rules-catalog.html">Catálogo de Regras de Negócio</a></li>
+<li><a href="../../../documentation-gap-analysis.html">Levantamento de Lacunas</a></li>
+<li><a href="../../../system-overview.html">Visão Geral do Sistema</a></li>
+</ul>
+    </section>
   </div>
 </main>
 
 <footer>
-<p>CM Contabilidade — Módulo Contas a Pagar | Delphi 5 | Documentação gerada em 2026-08-19 | pt-BR</p>
+<p>CM Contabilidade — Módulo Contas a Pagar | Delphi 5 | Documentação gerada em 2026-08-19 · revisada em 2026-08-24 (PFC-3) | pt-BR</p>
 </footer>
 </body>
 </html>
