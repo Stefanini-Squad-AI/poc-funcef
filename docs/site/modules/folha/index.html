@@ -185,30 +185,53 @@ ul.check li::before { content: "☐ "; }
       <p><strong>Contexto de Negócio:</strong> Este módulo integra a suíte CM Contabilidade e apoia processos operacionais/financeiros/previdenciários conforme o domínio <em>Folha de Pagamento</em>.</p>
       <p><strong>Responsabilidades:</strong></p>
       <ul><li>Processamento de folha</li><li>Exportação/integração contábil</li></ul>
+    
+      <p><strong>Processos funcionais detalhados:</strong></p>
+<ul>
+<li><strong>Preparo da folha</strong> — Geração da prévia da folha de benefícios, conferência e possibilidade de desfazer o preparo antes da efetivação (<code>PREVIA</code>).</li>
+<li><strong>Rubricas e cálculo</strong> — Cadastro de rubricas de provento/desconto, associação por plano, por regra e por pessoa, e estruturas de cálculo (<code>PROVDESC</code>, <code>RUBRICAXPLANO</code>, <code>RUBRICAXPESS</code>, <code>ESTRUTURAXRUBRICA</code>).</li>
+<li><strong>Efetivação e histórico</strong> — Efetivação da versão de pagamento e gravação do histórico da folha (<code>HSTFOLHABENEF</code>, <code>HISTRUBSAL</code>).</li>
+<li><strong>Pagamento</strong> — Abertura da fita de crédito por plano, geração de arquivos bancários, conciliação do crédito efetuado e demonstrativo de pagamento (<code>ARQUIVOPAGTO</code>, <code>ARQUIVODERETORNOCAIXA</code>).</li>
+<li><strong>Apropriação contábil</strong> — Apropriação contábil da folha e conferência da parametrização contábil/financeira da prévia.</li>
+<li><strong>Tratamentos especiais</strong> — Pensão alimentícia, compensação e ação judicial de IRRF, regularização de pagamentos, benefícios retidos/pendentes e retroativos.</li>
+<li><strong>Conciliação INSS</strong> — Conciliação do reembolso do INSS e tratamento das rubricas correspondentes (<code>DETCONCINSS</code>).</li>
+</ul>
     </section>
     <section id="user-stories">
       <div class="section-title">📝 Guia para User Stories</div>
-      
-<div class="story-card"><div class="role">👤 Como operador</div>
-<div class="want">🎯 Quero utilizar as funções principais do módulo Folha de Pagamento</div>
-<div class="why">💡 Para executar o processo de negócio suportado por este módulo</div></div>
-<div class="story-card"><div class="role">👤 Como supervisor</div>
-<div class="want">🎯 Quero consultar e validar os resultados gerados</div>
-<div class="why">💡 Para garantir conformidade operacional</div></div>
-
+      <div class="story-card"><div class="role">👤 Como analista de folha</div>
+<div class="want">🎯 Quero gerar e conferir a prévia da folha de benefícios antes de efetivá-la</div>
+<div class="why">💡 Para corrigir divergências sem impactar o pagamento</div></div>
+<div class="story-card"><div class="role">👤 Como contador</div>
+<div class="want">🎯 Quero executar a apropriação contábil da folha do mês</div>
+<div class="why">💡 Para que a despesa de benefícios seja refletida na contabilidade do período</div></div>
+<div class="story-card"><div class="role">👤 Como tesoureiro</div>
+<div class="want">🎯 Quero abrir a fita de crédito por plano e conciliar o crédito efetuado</div>
+<div class="why">💡 Para confirmar que todos os beneficiários receberam o valor devido</div></div>
     </section>
     <section id="criterios">
       <div class="section-title">✅ Critérios de Aceitação</div>
-      
-<div class="criteria-block"><div class="given"><strong>Dado que</strong> o usuário possui permissão no módulo</div>
-<div class="when"><strong>Quando</strong> acessa as telas principais do executável</div>
-<div class="then"><strong>Então</strong> consegue executar as operações de cadastro/consulta previstas no código da pasta <code>FOLHA</code></div></div>
-<div class="note">Critérios detalhados dependem de análise aprofundada das forms do módulo. Confiança: Média</div>
-
+      <div class="criteria-block"><div class="given"><strong>Dado que</strong> a prévia da folha foi gerada e apresenta divergência de líquido</div>
+<div class="when"><strong>Quando</strong> o usuário executa o batimento de líquido da folha</div>
+<div class="then"><strong>Então</strong> as diferenças são apontadas por beneficiário e a folha só é efetivada após o ajuste</div></div>
+<div class="criteria-block"><div class="given"><strong>Dado que</strong> a folha foi efetivada</div>
+<div class="when"><strong>Quando</strong> o usuário solicita desfazer o preparo</div>
+<div class="then"><strong>Então</strong> a operação é recusada ou exige rotina própria de estorno, preservando o histórico já gravado</div></div>
+<div class="criteria-block"><div class="given"><strong>Dado que</strong> existem rubricas incidentes sobre pensão alimentícia cadastradas</div>
+<div class="when"><strong>Quando</strong> a folha de um beneficiário com pensão é processada</div>
+<div class="then"><strong>Então</strong> o desconto da pensão é calculado apenas sobre as rubricas cadastradas como incidentes</div></div>
     </section>
     <section id="regras">
       <div class="section-title">📏 Regras de Negócio</div>
-      <p>Nenhuma regra específica catalogada com evidência linha a linha neste módulo nesta entrega. Consulte o código em <code>FOLHA</code>.</p>
+      <p>Regras levantadas a partir do código-fonte do módulo. Cada regra indica a unidade, o método ou a tela de origem e o nível de confiança da evidência. Identificadores conferem com o <a href="../../../business-rules-catalog.html">Catálogo de Regras de Negócio</a>.</p>
+<div class="rule-block" id="RN063"><div class="rule-id">RN063</div><div class="rule-desc">A folha de benefícios é processada em prévia antes da efetivação; a prévia pode ser conferida, comparada e desfeita.</div><div class="rule-origin">📂 Origem: <code>FOLHA/DBObjects/uDbPrevia.pas; FOLHA/Fontes (telas <em>Consulta Prévia da Folha de Benefícios</em>, <em>Conferência da Prévia</em>, <em>Dados para Desfazer o Preparo</em>)</code> | Confiança: <span class="tag tag-alta">Alta</span></div></div>
+<div class="rule-block" id="RN064"><div class="rule-id">RN064</div><div class="rule-desc">Proventos e descontos são definidos por rubricas, associadas a plano, a regra de cálculo e a pessoa; o histórico salarial fica em <code>HISTRUBSAL</code>.</div><div class="rule-origin">📂 Origem: <code>FOLHA/DBObjects/uDbProvdesc.pas, uDbRubricaxplano.pas, uDbRubricaxpess.pas, uDbHistrubsal.pas, uDbAlgregra.pas (telas <em>Cadastro de Rubrica</em>, <em>Associação de Rubricas por Regra/por Plano</em>)</code> | Confiança: <span class="tag tag-alta">Alta</span></div></div>
+<div class="rule-block" id="RN065"><div class="rule-id">RN065</div><div class="rule-desc">A folha efetivada gera apropriação contábil, cuja parametrização contábil/financeira pode ser conferida ainda na prévia.</div><div class="rule-origin">📂 Origem: <code>FOLHA/Fontes (telas <em>Apropriação Contábil</em> e <em>Consulta Parametrização Contábil/Financeira da Prévia</em>); tabela CONTABFOLHA</code> | Confiança: <span class="tag tag-alta">Alta</span></div></div>
+<div class="rule-block" id="RN066"><div class="rule-id">RN066</div><div class="rule-desc">O pagamento é feito por versão de pagamento efetivada, com abertura de fita de crédito por plano e conciliação do crédito realizado.</div><div class="rule-origin">📂 Origem: <code>FOLHA/Fontes (telas <em>Efetivação de Versão de Pagamento</em>, <em>Abertura da Fita de Crédito por Plano</em>, <em>Conciliação de Crédito Efetuado</em>); ARQUIVOPAGTO, ARQUIVODERETORNOCAIXA</code> | Confiança: <span class="tag tag-alta">Alta</span></div></div>
+<div class="rule-block" id="RN067"><div class="rule-id">RN067</div><div class="rule-desc">A pensão alimentícia incide apenas sobre as rubricas cadastradas como incidentes, e os alimentados são mantidos em cadastro próprio.</div><div class="rule-origin">📂 Origem: <code>FOLHA/DBObjects/uDbAlimentados.pas (telas <em>Cadastro de Rubricas Incidentes na Pensão Alimentícia</em>, <em>Cadastro de Alimentados</em>)</code> | Confiança: <span class="tag tag-alta">Alta</span></div></div>
+<div class="rule-block" id="RN068"><div class="rule-id">RN068</div><div class="rule-desc">O IRRF da folha admite compensação e tratamento por ação judicial, com histórico de compensação consultável.</div><div class="rule-origin">📂 Origem: <code>FOLHA/Fontes (telas <em>Compensação de IRRF</em>, <em>Ação Judicial de Imposto de Renda</em>, <em>Consulta do Histórico de Compensação IRRF</em>); integra PROCJUD e o módulo IRRF</code> | Confiança: <span class="tag tag-alta">Alta</span></div></div>
+<div class="rule-block" id="RN069"><div class="rule-id">RN069</div><div class="rule-desc">Portador e forma de pagamento do beneficiário são resolvidos pela combinação banco × conta/caixa × forma de pagamento.</div><div class="rule-origin">📂 Origem: <code>FOLHA/CtrlObjects/uCtrlBancoPortForma.pas; DbObjects/uDbBancoportforma.pas (tela <em>Banco x Contas/Caixas x Forma de Pagamento</em>)</code> | Confiança: <span class="tag tag-alta">Alta</span></div></div>
+<div class="rule-block" id="RN070"><div class="rule-id">RN070</div><div class="rule-desc">O reembolso do INSS é conciliado a partir de arquivos importados, com resultado de importação e resumo de reembolso/desembolso.</div><div class="rule-origin">📂 Origem: <code>FOLHA/Fontes (telas <em>Conciliação do Reembolso do INSS</em>, <em>Resultado de Importação dos Arquivos do Reembolso do INSS</em>); DETCONCINSS</code> | Confiança: <span class="tag tag-media">Média</span></div></div>
     </section>
     <section id="tecnico">
       <div class="section-title">⚙️ Fundação Técnica — Delphi 5</div>
@@ -219,7 +242,27 @@ ul.check li::before { content: "☐ "; }
     </section>
     <section id="dados">
       <div class="section-title">🗄️ Modelo de Dados</div>
-      <p>Nenhuma tabela foi inventariada exaustivamente para este módulo nesta entrega. Ver DbObjects da pasta quando existirem. <strong>Lacuna parcial.</strong></p>
+      <p>Entidades centrais do módulo identificadas nos <code>DbObjects</code>, nos <code>CtrlObjects</code> e nas consultas SQL das telas. A relação cobre o núcleo funcional; a listagem completa de campos permanece no código.</p>
+<div class="table-wrap"><table><thead><tr><th>Entidade / Tabela</th><th>Papel funcional</th><th>Evidência no código</th></tr></thead><tbody>
+<tr><td><code>PREVIA</code></td><td>Prévia da folha antes da efetivação</td><td><code>FOLHA/DBObjects/uDbPrevia.pas</code></td></tr>
+<tr><td><code>HSTFOLHABENEF / LISTAFOLHABENEF / LISTAFOLHABENEFDET</code></td><td>Histórico e listagem da folha de benefícios</td><td><code>FOLHA/Fontes (consultas de histórico da folha)</code></td></tr>
+<tr><td><code>PROVDESC</code></td><td>Rubricas de provento e desconto</td><td><code>FOLHA/DBObjects/uDbProvdesc.pas</code></td></tr>
+<tr><td><code>HISTRUBSAL</code></td><td>Histórico de rubricas salariais por pessoa</td><td><code>FOLHA/DBObjects/uDbHistrubsal.pas</code></td></tr>
+<tr><td><code>RUBRICAXPLANO / RUBRICAXPESS / RUBRICAINDIV</code></td><td>Associação de rubricas a plano, pessoa e lançamento individual</td><td><code>FOLHA/DBObjects/uDbRubricaxplano.pas; uDbRubricaxpess.pas</code></td></tr>
+<tr><td><code>ALGREGRA / ESTRUTURAXRUBRICA</code></td><td>Algoritmo/regra de cálculo associado à rubrica</td><td><code>FOLHA/DBObjects/uDbAlgregra.pas</code></td></tr>
+<tr><td><code>BENEFBFCIARIO / HSTBENEFBFCIARIO</code></td><td>Benefício do beneficiário e seu histórico</td><td><code>FOLHA/DBObjects/uDbBenefbfciario.pas; uDbHstbenefbfciario.pas</code></td></tr>
+<tr><td><code>BENEFPLANPREV / BENEFPLANPATRO / BENEFPLANOPART</code></td><td>Benefício por plano, patrocinadora e participante</td><td><code>FOLHA/DBObjects/uDbBenefplanprev.pas; uDbBenefplanpatro.pas</code></td></tr>
+<tr><td><code>CONTPREV / HSTCONTRIBPREV</code></td><td>Contribuições previdenciárias que afetam a folha</td><td><code>FOLHA/DBObjects/uDbContprev.pas; uDbHstcontribprev.pas</code></td></tr>
+<tr><td><code>ALIMENTADOS</code></td><td>Alimentados para pensão alimentícia</td><td><code>FOLHA/DBObjects/uDbAlimentados.pas</code></td></tr>
+<tr><td><code>DETCONCINSS</code></td><td>Detalhe da conciliação do reembolso do INSS</td><td><code>FOLHA/Fontes (rotinas de conciliação INSS)</code></td></tr>
+<tr><td><code>CONTABANCARIA / BANCOPORTFORMA / PORTADORFORMA</code></td><td>Dados bancários e formas de pagamento</td><td><code>FOLHA/DBObjects/uDbContabancaria.pas; uDbBancoportforma.pas</code></td></tr>
+<tr><td><code>ARQUIVOPAGTO / ARQUIVODERETORNOCAIXA</code></td><td>Arquivos de crédito enviados e retorno bancário</td><td><code>FOLHA/Fontes (rotinas de crédito e conciliação)</code></td></tr>
+<tr><td><code>CTRLINTERFACE</code></td><td>Controle das interfaces/lotes processados</td><td><code>FOLHA/DBObjects/uDbCtrlinterface.pas</code></td></tr>
+<tr><td><code>COLMAPAFOLHA</code></td><td>Colunas do mapa da folha</td><td><code>FOLHA/DBObjects/uDbColMapaFolha.pas</code></td></tr>
+<tr><td><code>PARAMFOLHA / PARAMRUBRICA</code></td><td>Parâmetros da folha e das rubricas</td><td><code>FOLHA/DBObjects/uDbParamRubrica.pas</code></td></tr>
+<tr><td><code>HSTREGULARIZACAOFOLHA / CADASTROEVENTOSDEREGULARIZACAO</code></td><td>Regularização de pagamentos e seus eventos</td><td><code>FOLHA/Fontes (telas de regularização)</code></td></tr>
+<tr><td><code>BENEFRETROATIVO / BENEFRETROXPESS</code></td><td>Benefícios retroativos e vínculo com pessoa</td><td><code>FOLHA/DBObjects/uDbBenefretroativo.pas; uDbBenefretroxpess.pas</code></td></tr>
+</tbody></table></div>
     </section>
     <section id="complexidade">
       <div class="section-title">📊 Estimativa de Complexidade</div>
@@ -234,9 +277,9 @@ ul.check li::before { content: "☐ "; }
         <li><span class="key">Tecnologia</span><span class="val">Delphi 5 / VCL</span></li>
         <li><span class="key">Banco de Dados</span><span class="val">Oracle</span></li>
         <li><span class="key">Acesso a Dados</span><span class="val">MIDAS/ClientDataSet</span></li>
-        <li><span class="key">Cobertura Funcional</span><span class="val">40–60%</span></li>
-        <li><span class="key">Última Atualização</span><span class="val">2026-08-19</span></li>
-        <li><span class="key">Confiança</span><span class="val"><span class="tag tag-média">Média</span></span></li>
+        <li><span class="key">Cobertura Funcional</span><span class="val">76%</span></li>
+        <li><span class="key">Última Atualização</span><span class="val">2026-08-24</span></li>
+        <li><span class="key">Confiança</span><span class="val"><span class="tag tag-media">Média</span></span></li>
       </ul>
     </section>
     <section>
@@ -245,7 +288,7 @@ ul.check li::before { content: "☐ "; }
         <li><span class="key">Forms/DFM</span><span class="val">~219</span></li>
         <li><span class="key">Data Modules</span><span class="val">~0</span></li>
         <li><span class="key">Units</span><span class="val">~300</span></li>
-        <li><span class="key">Tabelas</span><span class="val">—</span></li>
+        <li><span class="key">Tabelas</span><span class="val">18</span></li>
       </ul>
     </section>
     <section>
@@ -256,11 +299,20 @@ ul.check li::before { content: "☐ "; }
       <div class="section-title">♻️ Padrões Reutilizáveis</div>
       <ul class="dep-list"><li>Padrão CM (Forms MT + CtrlObjects + DbObjects)</li><li>Autorização via framework CM</li></ul>
     </section>
+    <section>
+      <div class="section-title">📎 Ver Também</div>
+      <ul class="dep-list">
+<li><a href="../../../cross-cutting-features.html">Funcionalidades Transversais</a></li>
+<li><a href="../../../business-rules-catalog.html">Catálogo de Regras de Negócio</a></li>
+<li><a href="../../../documentation-gap-analysis.html">Levantamento de Lacunas</a></li>
+<li><a href="../../../system-overview.html">Visão Geral do Sistema</a></li>
+</ul>
+    </section>
   </div>
 </main>
 
 <footer>
-<p>CM Contabilidade — Módulo Folha de Pagamento | Delphi 5 | Documentação gerada em 2026-08-19 | pt-BR</p>
+<p>CM Contabilidade — Módulo Folha de Pagamento | Delphi 5 | Documentação gerada em 2026-08-19 · revisada em 2026-08-24 (PFC-3) | pt-BR</p>
 </footer>
 </body>
 </html>

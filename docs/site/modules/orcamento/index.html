@@ -185,30 +185,53 @@ ul.check li::before { content: "☐ "; }
       <p><strong>Contexto de Negócio:</strong> Este módulo integra a suíte CM Contabilidade e apoia processos operacionais/financeiros/previdenciários conforme o domínio <em>Orçamento</em>.</p>
       <p><strong>Responsabilidades:</strong></p>
       <ul><li>Cadastro orçamentário</li><li>Vínculo orçado x contábil</li><li>Relatórios real x orçado</li></ul>
+    
+      <p><strong>Processos funcionais detalhados:</strong></p>
+<ul>
+<li><strong>Estrutura orçamentária</strong> — Plano orçamentário, períodos, grupos e contas orçamentárias, com cópia entre exercícios (<code>PLANOORCAMENTARIO</code>, <code>PERIODOORCAMEN</code>, <code>GRUPOORCAMEN</code>, <code>CONTASORCAMEN</code>).</li>
+<li><strong>Vínculo orçado × contábil</strong> — Amarração da conta orçamentária ao plano de contas vigente, por plano, patrocinadora, centro de custo, programa e atividade/projeto.</li>
+<li><strong>Entrada de dados e cenários</strong> — Entrada de dados diária, por período, especial e por cenário, com bloqueio de entrada por período (<code>BLQENTDADOS</code>, <code>CENARIOORCAMEN</code>, <code>VALORESCENARIO</code>).</li>
+<li><strong>Reserva, compromisso e efetivação</strong> — Reserva orçamentária, transformação em compromisso e efetivação contra documentos recebidos (<code>RESERVAORCAMEN</code>, <code>RESXCOMP</code>, <code>DOCRECXCOMP</code>).</li>
+<li><strong>Apuração e demonstrativos</strong> — Fórmulas de apuração, demonstrativos orçamentários por layout e comparativos orçado × realizado (<code>FORMASAPURAORC</code>, <code>DESENHOORC</code>, <code>LINHASRELATORC</code>).</li>
+<li><strong>Importações</strong> — Importação do orçamento e de entrada de dados especial via planilhas Excel e importação de grupos orçamentários (<code>PARAMIMPORTORC</code>).</li>
+<li><strong>Encerramento do exercício</strong> — Encerramento do exercício orçamentário e transporte de saldo anterior (<code>SALDOORCADOANT</code>).</li>
+</ul>
     </section>
     <section id="user-stories">
       <div class="section-title">📝 Guia para User Stories</div>
-      
-<div class="story-card"><div class="role">👤 Como operador</div>
-<div class="want">🎯 Quero utilizar as funções principais do módulo Orçamento</div>
-<div class="why">💡 Para executar o processo de negócio suportado por este módulo</div></div>
-<div class="story-card"><div class="role">👤 Como supervisor</div>
-<div class="want">🎯 Quero consultar e validar os resultados gerados</div>
-<div class="why">💡 Para garantir conformidade operacional</div></div>
-
+      <div class="story-card"><div class="role">👤 Como analista de orçamento</div>
+<div class="want">🎯 Quero cadastrar contas orçamentárias por grupo e vinculá-las às contas contábeis vigentes</div>
+<div class="why">💡 Para comparar orçado e realizado sem conciliação manual</div></div>
+<div class="story-card"><div class="role">👤 Como gestor de centro de responsabilidade</div>
+<div class="want">🎯 Quero registrar uma reserva orçamentária e transformá-la em compromisso quando o documento chegar</div>
+<div class="why">💡 Para controlar o consumo do orçamento antes da despesa se efetivar</div></div>
+<div class="story-card"><div class="role">👤 Como controller</div>
+<div class="want">🎯 Quero simular cenários orçamentários e efetivar o cenário aprovado</div>
+<div class="why">💡 Para avaliar alternativas antes de fixar o orçamento do exercício</div></div>
     </section>
     <section id="criterios">
       <div class="section-title">✅ Critérios de Aceitação</div>
-      
-<div class="criteria-block"><div class="given"><strong>Dado que</strong> o usuário possui permissão no módulo</div>
-<div class="when"><strong>Quando</strong> acessa as telas principais do executável</div>
-<div class="then"><strong>Então</strong> consegue executar as operações de cadastro/consulta previstas no código da pasta <code>ORCAMENTO</code></div></div>
-<div class="note">Critérios detalhados dependem de análise aprofundada das forms do módulo. Confiança: Alta</div>
-
+      <div class="criteria-block"><div class="given"><strong>Dado que</strong> o período orçamentário está com bloqueio de entrada de dados</div>
+<div class="when"><strong>Quando</strong> o usuário tenta lançar ou alterar valores nesse período</div>
+<div class="then"><strong>Então</strong> a entrada é recusada conforme o bloqueio cadastrado (<code>BLQENTDADOS</code>/<code>DETBLQENTDADOS</code>)</div></div>
+<div class="criteria-block"><div class="given"><strong>Dado que</strong> existe reserva orçamentária vinculada a um compromisso</div>
+<div class="when"><strong>Quando</strong> o documento recebido é efetivado contra esse compromisso</div>
+<div class="then"><strong>Então</strong> o saldo orçado da conta é consumido e o vínculo reserva → compromisso → documento fica registrado</div></div>
+<div class="criteria-block"><div class="given"><strong>Dado que</strong> um cenário orçamentário foi aprovado</div>
+<div class="when"><strong>Quando</strong> o usuário executa a efetivação do cenário</div>
+<div class="then"><strong>Então</strong> os valores do cenário passam a compor o orçado oficial e a operação é registrada no log de cenário</div></div>
     </section>
     <section id="regras">
       <div class="section-title">📏 Regras de Negócio</div>
-      <p>Nenhuma regra específica catalogada com evidência linha a linha neste módulo nesta entrega. Consulte o código em <code>ORCAMENTO</code>.</p>
+      <p>Regras levantadas a partir do código-fonte do módulo. Cada regra indica a unidade, o método ou a tela de origem e o nível de confiança da evidência. Identificadores conferem com o <a href="../../../business-rules-catalog.html">Catálogo de Regras de Negócio</a>.</p>
+<div class="rule-block" id="RN055"><div class="rule-id">RN055</div><div class="rule-desc">Toda conta orçamentária é amarrada ao plano de contas contábil vigente, com desdobramento por plano, patrocinadora, centro de custo, programa e atividade/projeto.</div><div class="rule-origin">📂 Origem: <code>ORCAMENTO/CtrlObjects/uCtrlVinculaOrcadoContabil.pas — RetornarPlanoContabilVigente / ListarContaContabilGruposOrcamen / ListarContabCentroCusto / ListarContabPrograma / ListarContabAtividadeProjeto</code> | Confiança: <span class="tag tag-alta">Alta</span></div></div>
+<div class="rule-block" id="RN056"><div class="rule-id">RN056</div><div class="rule-desc">O consumo do orçamento segue o ciclo reserva → compromisso → efetivação, com validação do vínculo documento × compromisso.</div><div class="rule-origin">📂 Origem: <code>ORCAMENTO/CtrlObjects/uCtrlEfetivacao.pas — Reservas / DocRec / TestaDocxComp / AltReservas; CMPLANEORCOBJ50/DbObjects/uDbReservaorcamen.pas, uDbResxcomp.pas, uDbDocrecxcomp.pas</code> | Confiança: <span class="tag tag-alta">Alta</span></div></div>
+<div class="rule-block" id="RN057"><div class="rule-id">RN057</div><div class="rule-desc">O saldo orçado é mantido por conta e período, com saldo anterior próprio, e pode ser acertado por rotina específica de reserva/compromisso.</div><div class="rule-origin">📂 Origem: <code>CMPLANEORCOBJ50/CtrlObjects/uCtrlSaldoorcado.pas, uCtrlSaldoorcadoant.pas; uDtmAcertaSaldo.pas (SALDOORCADO, SALDOORCADOANT — tela <em>Acerta Saldo da Reserva/Compromisso</em>)</code> | Confiança: <span class="tag tag-alta">Alta</span></div></div>
+<div class="rule-block" id="RN058"><div class="rule-id">RN058</div><div class="rule-desc">A entrada de dados orçamentários pode ser bloqueada por período e detalhe, impedindo alterações após o fechamento do ciclo de planejamento.</div><div class="rule-origin">📂 Origem: <code>ORCAMENTO/CtrlObjects/uCtrlBlqEntDados.pas; DBObjects/uDbBlqentdados.pas, uDbDetblqentdados.pas (tela <em>Bloqueio da entrada de dados</em>)</code> | Confiança: <span class="tag tag-alta">Alta</span></div></div>
+<div class="rule-block" id="RN059"><div class="rule-id">RN059</div><div class="rule-desc">Cenários orçamentários mantêm valores próprios e só passam a compor o orçado após efetivação, que é registrada em log.</div><div class="rule-origin">📂 Origem: <code>ORCAMENTO/CtrlObjects/uCtrlEfetivaCenario.pas, uCtrlCadCenario.pas; CMPLANEORCOBJ50/DbObjects/uDbValorescenario.pas, uDbLogCenario.pas</code> | Confiança: <span class="tag tag-alta">Alta</span></div></div>
+<div class="rule-block" id="RN060"><div class="rule-id">RN060</div><div class="rule-desc">O orçado pode ser gerado por fórmulas de apuração cadastradas, em vez de digitado conta a conta.</div><div class="rule-origin">📂 Origem: <code>ORCAMENTO/CtrlObjects/uCtrlCadFormulaApuraOrc.pas, uCtrlExecApuraOrcMT.pas; DBObjects/uDbFormasApuraOrc.pas (tela <em>Gerar Orçado baseado nas Fórmulas cadastradas</em>)</code> | Confiança: <span class="tag tag-alta">Alta</span></div></div>
+<div class="rule-block" id="RN061"><div class="rule-id">RN061</div><div class="rule-desc">A importação de orçamento e de entrada de dados especial via Excel é dirigida por parâmetros de importação cadastrados.</div><div class="rule-origin">📂 Origem: <code>ORCAMENTO/CtrlObjects/UCtrlImportaEntDados.pas, uCtrlParamImportOrc.pas; DBObjects/uDbParamimportorc.pas (telas <em>Importação do orçamento via planilhas Excel</em>)</code> | Confiança: <span class="tag tag-alta">Alta</span></div></div>
+<div class="rule-block" id="RN062"><div class="rule-id">RN062</div><div class="rule-desc">Divergências entre saldo orçado e realizado podem ser justificadas e ficam registradas junto ao período.</div><div class="rule-origin">📂 Origem: <code>ORCAMENTO/DBObjects/uDbDescdivergorc.pas (tela <em>Justificativa de divergências entre saldos Orçados x Realizados</em>)</code> | Confiança: <span class="tag tag-alta">Alta</span></div></div>
     </section>
     <section id="tecnico">
       <div class="section-title">⚙️ Fundação Técnica — Delphi 5</div>
@@ -219,7 +242,27 @@ ul.check li::before { content: "☐ "; }
     </section>
     <section id="dados">
       <div class="section-title">🗄️ Modelo de Dados</div>
-      <p>Nenhuma tabela foi inventariada exaustivamente para este módulo nesta entrega. Ver DbObjects da pasta quando existirem. <strong>Lacuna parcial.</strong></p>
+      <p>Entidades centrais do módulo identificadas nos <code>DbObjects</code>, nos <code>CtrlObjects</code> e nas consultas SQL das telas. A relação cobre o núcleo funcional; a listagem completa de campos permanece no código.</p>
+<div class="table-wrap"><table><thead><tr><th>Entidade / Tabela</th><th>Papel funcional</th><th>Evidência no código</th></tr></thead><tbody>
+<tr><td><code>PLANOORCAMENTARIO / PLANOORCAMEN</code></td><td>Plano orçamentário</td><td><code>ORCAMENTO/DBObjects/uDbPlanoOrcamen.pas</code></td></tr>
+<tr><td><code>PERIODOORCAMEN</code></td><td>Períodos orçamentários</td><td><code>ORCAMENTO/DBObjects/uDbPeriodoOrcamen.pas</code></td></tr>
+<tr><td><code>GRUPOORCAMEN / COMPCONTASORCAMEN</code></td><td>Grupos de contas orçamentárias e sua composição</td><td><code>ORCAMENTO/DBObjects/uDbGrupoorcamen.pas; uDbCompContasOrcamen.pas</code></td></tr>
+<tr><td><code>CONTASORCAMEN</code></td><td>Contas orçamentárias e vínculo contábil</td><td><code>ORCAMENTO/DBObjects/uDbContasOrcamen.pas</code></td></tr>
+<tr><td><code>SALDOORCADO / SALDOORCADOANT</code></td><td>Saldo orçado do período e saldo anterior</td><td><code>CMPLANEORCOBJ50/DbObjects/uDbSaldoorcado.pas; uDbSaldoorcadoant.pas</code></td></tr>
+<tr><td><code>RESERVAORCAMEN / RESXCOMP / DOCRECXCOMP</code></td><td>Reserva, vínculo reserva × compromisso e documento × compromisso</td><td><code>CMPLANEORCOBJ50/DbObjects/uDbReservaorcamen.pas; uDbResxcomp.pas; uDbDocrecxcomp.pas</code></td></tr>
+<tr><td><code>CENARIOORCAMEN / VALORESCENARIO / LOGCENARIO</code></td><td>Cenários, seus valores e log de efetivação</td><td><code>ORCAMENTO/DBObjects/uDbCenarioorcamen.pas; CMPLANEORCOBJ50/DbObjects/uDbValorescenario.pas; uDbLogCenario.pas</code></td></tr>
+<tr><td><code>BLQENTDADOS / DETBLQENTDADOS</code></td><td>Bloqueio de entrada de dados e seu detalhamento</td><td><code>ORCAMENTO/DBObjects/uDbBlqentdados.pas; uDbDetblqentdados.pas</code></td></tr>
+<tr><td><code>ALTERORCAMENTO</code></td><td>Alterações orçamentárias (suplementação/dedução)</td><td><code>ORCAMENTO/DBObjects/uDbAlterorcamento.pas</code></td></tr>
+<tr><td><code>DESPESAORCAMENTARIA / DESPESAORCXCCUSTO</code></td><td>Despesas orçamentárias e rateio por centro de custo</td><td><code>ORCAMENTO/DBObjects/uDbDespesaOrcamentaria.pas; uDbDespesaOrcxCCusto.pas</code></td></tr>
+<tr><td><code>CRITERIORATORC / VALORCRIRATORC</code></td><td>Critérios de rateio orçamentário e seus valores</td><td><code>ORCAMENTO/DBObjects/uDbCriterioRatOrc.pas; uDbValorCriRatOrc.pas</code></td></tr>
+<tr><td><code>FORMASAPURAORC / FORMORCADO</code></td><td>Fórmulas de apuração e forma de geração do orçado</td><td><code>ORCAMENTO/DBObjects/uDbFormasApuraOrc.pas; uDbFormOrcado.pas</code></td></tr>
+<tr><td><code>LANCAMENTOORC</code></td><td>Lançamentos orçamentários</td><td><code>ORCAMENTO/DBObjects/uDbLancamentoorc.pas</code></td></tr>
+<tr><td><code>PLANOTRABALHOORC</code></td><td>Planos de trabalho vinculados ao orçamento</td><td><code>ORCAMENTO/DBObjects/uDbPlanotrabalhoorc.pas</code></td></tr>
+<tr><td><code>DESENHOORC / LINHASRELATORC / RELATORC</code></td><td>Layout dos demonstrativos orçamentários</td><td><code>ORCAMENTO/DBObjects/uDbDesenhoOrc.pas; uDbLinhasrelatorc.pas; uDbRelatorc.pas</code></td></tr>
+<tr><td><code>PARAMORCAMENTO / PARAMIMPORTORC</code></td><td>Parâmetros do módulo e da importação</td><td><code>CMPLANEORCOBJ50/DbObjects/uDbParamorcamento.pas; uDbParamimportorc.pas</code></td></tr>
+<tr><td><code>DESCDIVERGORC</code></td><td>Justificativas de divergência orçado × realizado</td><td><code>ORCAMENTO/DBObjects/uDbDescdivergorc.pas</code></td></tr>
+<tr><td><code>PESSOAXCRESP</code></td><td>Usuário × centro de responsabilidade (escopo de acesso)</td><td><code>ORCAMENTO/DBObjects/uDbPessoaXCresp.pas</code></td></tr>
+</tbody></table></div>
     </section>
     <section id="complexidade">
       <div class="section-title">📊 Estimativa de Complexidade</div>
@@ -234,8 +277,8 @@ ul.check li::before { content: "☐ "; }
         <li><span class="key">Tecnologia</span><span class="val">Delphi 5 / VCL</span></li>
         <li><span class="key">Banco de Dados</span><span class="val">Oracle</span></li>
         <li><span class="key">Acesso a Dados</span><span class="val">MIDAS/ClientDataSet</span></li>
-        <li><span class="key">Cobertura Funcional</span><span class="val">70%</span></li>
-        <li><span class="key">Última Atualização</span><span class="val">2026-08-19</span></li>
+        <li><span class="key">Cobertura Funcional</span><span class="val">85%</span></li>
+        <li><span class="key">Última Atualização</span><span class="val">2026-08-24</span></li>
         <li><span class="key">Confiança</span><span class="val"><span class="tag tag-alta">Alta</span></span></li>
       </ul>
     </section>
@@ -245,7 +288,7 @@ ul.check li::before { content: "☐ "; }
         <li><span class="key">Forms/DFM</span><span class="val">~155</span></li>
         <li><span class="key">Data Modules</span><span class="val">~0</span></li>
         <li><span class="key">Units</span><span class="val">~222</span></li>
-        <li><span class="key">Tabelas</span><span class="val">—</span></li>
+        <li><span class="key">Tabelas</span><span class="val">18</span></li>
       </ul>
     </section>
     <section>
@@ -256,11 +299,20 @@ ul.check li::before { content: "☐ "; }
       <div class="section-title">♻️ Padrões Reutilizáveis</div>
       <ul class="dep-list"><li>Padrão CM (Forms MT + CtrlObjects + DbObjects)</li><li>Autorização via framework CM</li></ul>
     </section>
+    <section>
+      <div class="section-title">📎 Ver Também</div>
+      <ul class="dep-list">
+<li><a href="../../../cross-cutting-features.html">Funcionalidades Transversais</a></li>
+<li><a href="../../../business-rules-catalog.html">Catálogo de Regras de Negócio</a></li>
+<li><a href="../../../documentation-gap-analysis.html">Levantamento de Lacunas</a></li>
+<li><a href="../../../system-overview.html">Visão Geral do Sistema</a></li>
+</ul>
+    </section>
   </div>
 </main>
 
 <footer>
-<p>CM Contabilidade — Módulo Orçamento | Delphi 5 | Documentação gerada em 2026-08-19 | pt-BR</p>
+<p>CM Contabilidade — Módulo Orçamento | Delphi 5 | Documentação gerada em 2026-08-19 · revisada em 2026-08-24 (PFC-3) | pt-BR</p>
 </footer>
 </body>
 </html>

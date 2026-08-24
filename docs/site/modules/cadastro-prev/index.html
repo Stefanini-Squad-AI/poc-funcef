@@ -185,30 +185,53 @@ ul.check li::before { content: "☐ "; }
       <p><strong>Contexto de Negócio:</strong> Este módulo integra a suíte CM Contabilidade e apoia processos operacionais/financeiros/previdenciários conforme o domínio <em>Cadastro Previdenciário</em>.</p>
       <p><strong>Responsabilidades:</strong></p>
       <ul><li>Manutenção cadastral de participantes</li><li>Documentos e vínculos</li></ul>
+    
+      <p><strong>Processos funcionais detalhados:</strong></p>
+<ul>
+<li><strong>Inscrição e vínculo</strong> — Inscrição do participante no plano, individual e em lote, com elegibilidade por patrocinadora e situação no plano (<code>PARTPREVPLAN</code>, <code>ELEGPATRO</code>, <code>SITPART</code>, <code>SITPLANOPREV</code>).</li>
+<li><strong>Eventos cadastrais</strong> — Afastamento, afastamento sem remuneração, demissão da patrocinadora, falecimento, reclusão, reinscrição, retorno de mantido e manutenção parcial (<code>EVENTOSPREV</code>, <code>EVENTOGERADOR</code>).</li>
+<li><strong>Dependentes</strong> — Movimentação e cancelamento de dependentes e vínculo com o plano (<code>DEPENTIT</code>, <code>PLANODEPENDENTE</code>).</li>
+<li><strong>Tempo de serviço e histórico funcional</strong> — Movimentação de tempo de serviço, cálculo em lote e histórico funcional/anterior à patrocinadora (<code>HISTFUNCPREV</code>, <code>EVOLFUNCPREV</code>).</li>
+<li><strong>Recadastramento</strong> — Emissão e recebimento de cartas de recadastramento, recebimento via TXT e envio de periódicos (<code>LOGENVIOPERIODICO</code>).</li>
+<li><strong>Saldamento e transferência</strong> — Preparo e execução do saldamento, inscrição em novo plano e transferência entre planos e patrocinadoras.</li>
+<li><strong>Reservas do participante</strong> — Associação de reservas ao participante e importação de reservas de origem externa (<code>RESERVAPART</code>).</li>
+<li><strong>Obrigações regulatórias</strong> — Geração do Mapa PREVIC a partir dos dados cadastrais (<code>MPREVICDEMONEST</code>).</li>
+</ul>
     </section>
     <section id="user-stories">
       <div class="section-title">📝 Guia para User Stories</div>
-      
-<div class="story-card"><div class="role">👤 Como operador</div>
-<div class="want">🎯 Quero utilizar as funções principais do módulo Cadastro Previdenciário</div>
-<div class="why">💡 Para executar o processo de negócio suportado por este módulo</div></div>
-<div class="story-card"><div class="role">👤 Como supervisor</div>
-<div class="want">🎯 Quero consultar e validar os resultados gerados</div>
-<div class="why">💡 Para garantir conformidade operacional</div></div>
-
+      <div class="story-card"><div class="role">👤 Como analista de cadastro</div>
+<div class="want">🎯 Quero inscrever participantes no plano em lote a partir da relação enviada pela patrocinadora</div>
+<div class="why">💡 Para reduzir o esforço de digitação e evitar divergência cadastral</div></div>
+<div class="story-card"><div class="role">👤 Como analista previdenciário</div>
+<div class="want">🎯 Quero registrar o evento de demissão da patrocinadora de um participante</div>
+<div class="why">💡 Para que a situação no plano e os cálculos decorrentes sejam atualizados automaticamente</div></div>
+<div class="story-card"><div class="role">👤 Como responsável pelo recadastramento</div>
+<div class="want">🎯 Quero emitir e receber as cartas de recadastramento, inclusive via arquivo TXT</div>
+<div class="why">💡 Para manter os dados dos assistidos atualizados e comprovar a prova de vida</div></div>
     </section>
     <section id="criterios">
       <div class="section-title">✅ Critérios de Aceitação</div>
-      
-<div class="criteria-block"><div class="given"><strong>Dado que</strong> o usuário possui permissão no módulo</div>
-<div class="when"><strong>Quando</strong> acessa as telas principais do executável</div>
-<div class="then"><strong>Então</strong> consegue executar as operações de cadastro/consulta previstas no código da pasta <code>CADASTROPREV</code></div></div>
-<div class="note">Critérios detalhados dependem de análise aprofundada das forms do módulo. Confiança: Média</div>
-
+      <div class="criteria-block"><div class="given"><strong>Dado que</strong> um participante possui evento de falecimento registrado</div>
+<div class="when"><strong>Quando</strong> o cadastro é consultado pelos módulos de benefício e folha</div>
+<div class="then"><strong>Então</strong> a situação do participante impede novas contribuições e habilita o processo de pensão para os dependentes</div></div>
+<div class="criteria-block"><div class="given"><strong>Dado que</strong> uma carta de recadastramento foi emitida e não retornou no prazo</div>
+<div class="when"><strong>Quando</strong> o controle de recadastramento é consultado</div>
+<div class="then"><strong>Então</strong> o participante é listado como pendente, permitindo a ação de cobrança prevista</div></div>
+<div class="criteria-block"><div class="given"><strong>Dado que</strong> o participante solicita transferência de plano</div>
+<div class="when"><strong>Quando</strong> a transferência é executada</div>
+<div class="then"><strong>Então</strong> o vínculo anterior é encerrado, o novo vínculo é criado e as reservas são transportadas conforme a configuração de transferência</div></div>
     </section>
     <section id="regras">
       <div class="section-title">📏 Regras de Negócio</div>
-      <p>Nenhuma regra específica catalogada com evidência linha a linha neste módulo nesta entrega. Consulte o código em <code>CADASTROPREV</code>.</p>
+      <p>Regras levantadas a partir do código-fonte do módulo. Cada regra indica a unidade, o método ou a tela de origem e o nível de confiança da evidência. Identificadores conferem com o <a href="../../../business-rules-catalog.html">Catálogo de Regras de Negócio</a>.</p>
+<div class="rule-block" id="RN087"><div class="rule-id">RN087</div><div class="rule-desc">O vínculo do participante é sempre participante × plano × patrocinadora, com situação própria em cada dimensão (fundação, plano e empregado na patrocinadora).</div><div class="rule-origin">📂 Origem: <code>CM/CMPrevMT50/DBObjects/uDBPartPrevPlan.pas; PARAMPREV/Fontes (telas <em>Cadastro da Situação do Participante no Plano/na Fundação</em>, <em>Cadastro da Situação do Empregado na Patrocinadora</em>); PARTPREVPLAN, ELEGPATRO, SITPART, SITPLANOPREV, SITFUNC</code> | Confiança: <span class="tag tag-alta">Alta</span></div></div>
+<div class="rule-block" id="RN088"><div class="rule-id">RN088</div><div class="rule-desc">Alterações da vida do participante são registradas como eventos previdenciários; cada evento tem tela própria e produz efeitos em contribuição, benefício e reserva.</div><div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes (telas <em>Evento Afastamento</em>, <em>Evento Demissão da Patrocinadora</em>, <em>Evento Falecimento</em>, <em>Evento Reclusão</em>, <em>Evento Reinscrição de Participante</em>); EVENTOSPREV, EVENTOGERADOR</code> | Confiança: <span class="tag tag-alta">Alta</span></div></div>
+<div class="rule-block" id="RN089"><div class="rule-id">RN089</div><div class="rule-desc">A inscrição pode ser feita em lote, e o cancelamento/movimentação de dependentes é operação controlada e registrada.</div><div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes (telas <em>Inscrição do Participante em Lote</em>, <em>Movimentação de Dependentes</em>, <em>Cancelamento de Dependentes</em>); DEPENTIT, PLANODEPENDENTE</code> | Confiança: <span class="tag tag-alta">Alta</span></div></div>
+<div class="rule-block" id="RN090"><div class="rule-id">RN090</div><div class="rule-desc">O tempo de serviço é mantido como histórico movimentável e pode ser recalculado em lote, servindo de base para elegibilidade a benefícios.</div><div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes (telas <em>Movimentação de Tempo de Serviço</em>, <em>Cálculo de Tempo de Serviço em Lote</em>, <em>Histórico Funcional</em>); HISTFUNCPREV, EVOLFUNCPREV</code> | Confiança: <span class="tag tag-alta">Alta</span></div></div>
+<div class="rule-block" id="RN091"><div class="rule-id">RN091</div><div class="rule-desc">O recadastramento é um ciclo controlado: emissão da carta, recebimento (manual ou por arquivo TXT) e registro do retorno.</div><div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes (telas <em>Emissão de Cartas de Recadastramento</em>, <em>Recebimento de Cartas de Recadastramento</em>, <em>Recebimento de Recadastramento via TXT</em>); LOGENVIOPERIODICO</code> | Confiança: <span class="tag tag-alta">Alta</span></div></div>
+<div class="rule-block" id="RN092"><div class="rule-id">RN092</div><div class="rule-desc">O saldamento tem etapa de preparo antes da efetivação e pode ser desfeito por rotina própria.</div><div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes (telas <em>Preparo para saldamento</em>, <em>Desfazer saldamento</em>, <em>Formulário de Saldamento</em>, <em>Saldamento e Inscrição Novo Plano</em>)</code> | Confiança: <span class="tag tag-alta">Alta</span></div></div>
+<div class="rule-block" id="RN093"><div class="rule-id">RN093</div><div class="rule-desc">Os dados cadastrais alimentam o Mapa PREVIC, obrigação regulatória gerada a partir do próprio cadastro.</div><div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes (tela <em>Mapa PREVIC</em>); MPREVICDEMONEST, MPREVICDEMONESTIDSEX</code> | Confiança: <span class="tag tag-alta">Alta</span></div></div>
     </section>
     <section id="tecnico">
       <div class="section-title">⚙️ Fundação Técnica — Delphi 5</div>
@@ -219,7 +242,24 @@ ul.check li::before { content: "☐ "; }
     </section>
     <section id="dados">
       <div class="section-title">🗄️ Modelo de Dados</div>
-      <p>Nenhuma tabela foi inventariada exaustivamente para este módulo nesta entrega. Ver DbObjects da pasta quando existirem. <strong>Lacuna parcial.</strong></p>
+      <p>Entidades centrais do módulo identificadas nos <code>DbObjects</code>, nos <code>CtrlObjects</code> e nas consultas SQL das telas. A relação cobre o núcleo funcional; a listagem completa de campos permanece no código.</p>
+<div class="table-wrap"><table><thead><tr><th>Entidade / Tabela</th><th>Papel funcional</th><th>Evidência no código</th></tr></thead><tbody>
+<tr><td><code>PARTPREVPLAN</code></td><td>Vínculo participante × plano previdenciário</td><td><code>CM/CMPrevMT50/DBObjects/uDBPartPrevPlan.pas</code></td></tr>
+<tr><td><code>ELEGPATRO</code></td><td>Elegibilidade do participante por patrocinadora</td><td><code>CM/DbObjects (consultas previdenciárias)</code></td></tr>
+<tr><td><code>PESSOA / PESSOAFISICA / ENDPESS / DOCPESSOA</code></td><td>Dados pessoais, endereço e documentos</td><td><code>CM/Forms/DbObjects/uDbPessoa.pas; uDbEndpess.pas; uDbDocpessoa.pas</code></td></tr>
+<tr><td><code>DEPENTIT / PLANODEPENDENTE</code></td><td>Dependentes do titular e vínculo com o plano</td><td><code>CADASTROPREV/Fontes (movimentação de dependentes)</code></td></tr>
+<tr><td><code>EVENTOSPREV / EVENTOGERADOR / HSTCONTEVENTOSPR</code></td><td>Eventos previdenciários e histórico</td><td><code>PARAMPREV/Fontes (cadastro de evento gerador)</code></td></tr>
+<tr><td><code>SITPART / SITPLANOPREV / SITFUNC</code></td><td>Situações do participante, do plano e funcional</td><td><code>PARAMPREV/Fontes (cadastros de situação)</code></td></tr>
+<tr><td><code>HISTFUNCPREV / EVOLFUNCPREV</code></td><td>Histórico e evolução funcional previdenciária</td><td><code>CADASTROPREV/DBObjects/uDbEvolfuncprev.pas</code></td></tr>
+<tr><td><code>RESERVAPART / RESERVAXPLANO / MOVRESERVATEMP</code></td><td>Reservas do participante e movimentação temporária</td><td><code>CADASTROPREV/DBObjects/uDbReservapart.pas</code></td></tr>
+<tr><td><code>HISTMOVRESERVA</code></td><td>Histórico de movimentação de reservas</td><td><code>CM/CMPrevMT50/DBObjects/uDBHistMovReserva.pas</code></td></tr>
+<tr><td><code>HSTCONTRIBPREV / CONTRIBPREVPARTP</code></td><td>Contribuições vinculadas ao cadastro</td><td><code>CM/CMPrevMT50/DBObjects/uDBHstContribprev.pas</code></td></tr>
+<tr><td><code>BENEFBFCIARIO / PROCESSOBENEF</code></td><td>Benefícios associados ao participante</td><td><code>CM/CMPrevMT50/DBObjects/uDbBenefbfciario.pas</code></td></tr>
+<tr><td><code>MPREVICDEMONEST / MPREVICDEMONESTIDSEX</code></td><td>Demonstrativos estatísticos do Mapa PREVIC</td><td><code>CADASTROPREV/Fontes (tela Mapa PREVIC)</code></td></tr>
+<tr><td><code>LOGENVIOPERIODICO</code></td><td>Envio de periódicos e cartas ao participante</td><td><code>CADASTROPREV/Fontes (envio de periódicos)</code></td></tr>
+<tr><td><code>CONTRATOEMPTMO</code></td><td>Contratos de empréstimo do participante (consulta)</td><td><code>EMPRESTIMO/Fontes</code></td></tr>
+<tr><td><code>FILIALPESSOA / HSTPERCONTRIBPREV</code></td><td>Filial de vínculo e percentual de contribuição</td><td><code>CADASTROPREV/Fontes</code></td></tr>
+</tbody></table></div>
     </section>
     <section id="complexidade">
       <div class="section-title">📊 Estimativa de Complexidade</div>
@@ -234,9 +274,9 @@ ul.check li::before { content: "☐ "; }
         <li><span class="key">Tecnologia</span><span class="val">Delphi 5 / VCL</span></li>
         <li><span class="key">Banco de Dados</span><span class="val">Oracle</span></li>
         <li><span class="key">Acesso a Dados</span><span class="val">MIDAS/ClientDataSet</span></li>
-        <li><span class="key">Cobertura Funcional</span><span class="val">40–60%</span></li>
-        <li><span class="key">Última Atualização</span><span class="val">2026-08-19</span></li>
-        <li><span class="key">Confiança</span><span class="val"><span class="tag tag-média">Média</span></span></li>
+        <li><span class="key">Cobertura Funcional</span><span class="val">76%</span></li>
+        <li><span class="key">Última Atualização</span><span class="val">2026-08-24</span></li>
+        <li><span class="key">Confiança</span><span class="val"><span class="tag tag-media">Média</span></span></li>
       </ul>
     </section>
     <section>
@@ -245,7 +285,7 @@ ul.check li::before { content: "☐ "; }
         <li><span class="key">Forms/DFM</span><span class="val">~65</span></li>
         <li><span class="key">Data Modules</span><span class="val">~0</span></li>
         <li><span class="key">Units</span><span class="val">~77</span></li>
-        <li><span class="key">Tabelas</span><span class="val">—</span></li>
+        <li><span class="key">Tabelas</span><span class="val">15</span></li>
       </ul>
     </section>
     <section>
@@ -256,11 +296,20 @@ ul.check li::before { content: "☐ "; }
       <div class="section-title">♻️ Padrões Reutilizáveis</div>
       <ul class="dep-list"><li>Padrão CM (Forms MT + CtrlObjects + DbObjects)</li><li>Autorização via framework CM</li></ul>
     </section>
+    <section>
+      <div class="section-title">📎 Ver Também</div>
+      <ul class="dep-list">
+<li><a href="../../../cross-cutting-features.html">Funcionalidades Transversais</a></li>
+<li><a href="../../../business-rules-catalog.html">Catálogo de Regras de Negócio</a></li>
+<li><a href="../../../documentation-gap-analysis.html">Levantamento de Lacunas</a></li>
+<li><a href="../../../system-overview.html">Visão Geral do Sistema</a></li>
+</ul>
+    </section>
   </div>
 </main>
 
 <footer>
-<p>CM Contabilidade — Módulo Cadastro Previdenciário | Delphi 5 | Documentação gerada em 2026-08-19 | pt-BR</p>
+<p>CM Contabilidade — Módulo Cadastro Previdenciário | Delphi 5 | Documentação gerada em 2026-08-19 · revisada em 2026-08-24 (PFC-3) | pt-BR</p>
 </footer>
 </body>
 </html>

@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CM Contabilidade — Funcionalidades Transversais</title>
+<style>
+
+:root {
+  --bg: #0f1419; --bg2: #1a2332; --bg3: #243044; --card: #1e2a3a;
+  --text: #e7ecf3; --muted: #9aa8bc; --accent: #3d9cf0; --accent2: #2dd4bf;
+  --ok: #34d399; --warn: #fbbf24; --bad: #f87171; --border: #2d3a4d;
+  --tag-alta: #065f46; --tag-media: #92400e; --tag-baixa: #7f1d1d;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0; font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(160deg, #0f1419 0%, #152033 50%, #0f1419 100%);
+  color: var(--text); line-height: 1.55; min-height: 100vh;
+}
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+header {
+  background: linear-gradient(135deg, #152033 0%, #1a3a5c 100%);
+  border-bottom: 1px solid var(--border); padding: 2rem 1.5rem 1.5rem;
+}
+header .badge {
+  display: inline-block; background: #1e3a5f; color: var(--accent2);
+  padding: .25rem .75rem; border-radius: 999px; font-size: .8rem;
+  border: 1px solid #2a5080; margin-bottom: .75rem;
+}
+header h1 { margin: 0 0 .5rem; font-size: clamp(1.5rem, 3vw, 2.2rem); }
+header p { margin: 0; color: var(--muted); max-width: 70ch; }
+nav {
+  display: flex; flex-wrap: wrap; gap: .5rem; padding: .75rem 1.5rem;
+  background: rgba(15,20,25,.85); border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 20; backdrop-filter: blur(8px);
+}
+nav a {
+  color: var(--text); background: var(--bg2); padding: .4rem .75rem;
+  border-radius: 6px; border: 1px solid var(--border); font-size: .85rem;
+}
+nav a:hover { background: var(--bg3); text-decoration: none; }
+main { padding: 1.5rem; max-width: 1200px; margin: 0 auto; }
+section {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1.25rem;
+}
+.section-title {
+  font-size: 1.15rem; font-weight: 700; margin-bottom: 1rem;
+  padding-bottom: .5rem; border-bottom: 1px solid var(--border);
+}
+.cards-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1rem;
+}
+.card {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 10px;
+  padding: 1rem; transition: border-color .2s, transform .2s;
+}
+.card:hover { border-color: var(--accent); transform: translateY(-2px); }
+.card h3 { margin: 0 0 .5rem; font-size: 1rem; }
+.card p { margin: 0; color: var(--muted); font-size: .9rem; }
+.stats {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: .75rem;
+}
+.stat {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 8px;
+  padding: .85rem; text-align: center;
+}
+.stat .n { font-size: 1.6rem; font-weight: 700; color: var(--accent2); }
+.stat .l { font-size: .75rem; color: var(--muted); }
+table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+th, td {
+  border: 1px solid var(--border); padding: .5rem .65rem; text-align: left;
+  vertical-align: top;
+}
+th { background: var(--bg3); }
+tbody tr:nth-child(even) { background: rgba(255,255,255,.02); }
+.table-wrap { overflow-x: auto; }
+code {
+  font-family: Consolas, "Courier New", monospace; font-size: .85em;
+  background: var(--bg); padding: .1rem .35rem; border-radius: 4px;
+}
+.tag {
+  display: inline-block; padding: .15rem .45rem; border-radius: 4px;
+  font-size: .75rem; font-weight: 600;
+}
+.tag-alta { background: var(--tag-alta); color: #a7f3d0; }
+.tag-media { background: var(--tag-media); color: #fde68a; }
+.tag-baixa { background: var(--tag-baixa); color: #fecaca; }
+.story-card {
+  background: var(--bg2); border-left: 4px solid var(--accent);
+  padding: .85rem 1rem; margin-bottom: .75rem; border-radius: 0 8px 8px 0;
+}
+.criteria-block, .rule-block {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 8px; padding: .85rem 1rem; margin-bottom: .75rem;
+}
+.rule-id { font-weight: 700; color: var(--accent2); margin-bottom: .35rem; }
+.rule-origin { font-size: .85rem; color: var(--muted); margin-top: .5rem; }
+.complexity-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: .75rem;
+}
+.complexity-item {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; text-align: center;
+}
+.level { font-weight: 700; margin-bottom: .35rem; }
+.level-simples { color: var(--ok); }
+.level-media { color: var(--warn); }
+.level-complexa { color: var(--bad); }
+.points { font-size: 1.4rem; font-weight: 700; }
+.desc { color: var(--muted); font-size: .85rem; margin-top: .35rem; }
+footer {
+  text-align: center; padding: 2rem 1rem; color: var(--muted);
+  border-top: 1px solid var(--border); margin-top: 2rem; font-size: .85rem;
+}
+.back-btn {
+  display: inline-block; margin-bottom: 1rem; background: var(--bg2);
+  border: 1px solid var(--border); padding: .4rem .8rem; border-radius: 6px;
+  color: var(--text);
+}
+.back-btn:hover { background: var(--bg3); text-decoration: none; }
+.layout-2 {
+  display: grid; grid-template-columns: 1fr 300px; gap: 1.25rem; padding: 1.5rem; max-width: 1200px; margin: 0 auto;
+}
+@media (max-width: 900px) { .layout-2 { grid-template-columns: 1fr; } }
+.info-list, .dep-list { list-style: none; padding: 0; margin: 0; }
+.info-list li, .dep-list li {
+  display: flex; justify-content: space-between; gap: .5rem;
+  padding: .45rem 0; border-bottom: 1px solid var(--border); font-size: .9rem;
+}
+.info-list .key { color: var(--muted); }
+.mermaid {
+  background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+  padding: 1rem; overflow-x: auto; font-family: monospace; font-size: .8rem;
+  white-space: pre-wrap; color: var(--muted);
+}
+.note {
+  background: #1a2740; border-left: 3px solid var(--warn);
+  padding: .75rem 1rem; margin: .75rem 0; border-radius: 0 6px 6px 0; font-size: .9rem;
+}
+.doc-links { display: flex; flex-wrap: wrap; gap: .5rem; margin: 1rem 0; }
+.doc-links a {
+  background: var(--bg3); border: 1px solid var(--border); padding: .5rem .85rem;
+  border-radius: 6px; color: var(--text);
+}
+.given,.when,.then { margin: .25rem 0; }
+.role,.want,.why { margin: .2rem 0; }
+ul.check { list-style: none; padding-left: 0; }
+ul.check li::before { content: "☐ "; }
+
+
+</style>
+</head>
+<body>
+
+<header>
+  <div class="badge">Funcionalidades Transversais</div>
+  <h1>🔗 Funcionalidades Transversais da Suíte CM</h1>
+  <p>Autorização, relatórios, importações/exportações, integrações entre módulos e processamentos em lote — descritos uma única vez, com os módulos impactados.</p>
+  <div class="doc-links">
+    <a href="site/index.html">Portal</a>
+    <a href="system-overview.html">Visão Geral</a>
+    <a href="business-rules-catalog.html">Regras de Negócio</a>
+    <a href="database-model.html">Modelo de Dados</a>
+    <a href="api-catalog.html">Catálogo de APIs</a>
+    <a href="module-file-map.html">Mapa de Arquivos</a>
+    <a href="migration-contabil.html">Migração Contábil</a>
+  </div>
+</header>
+<nav>
+  <a href="#autorizacao">🔐 Autorização</a>
+  <a href="#relatorios">📊 Relatórios</a>
+  <a href="#importacoes">📥 Importações/Exportações</a>
+  <a href="#integracoes">🔗 Integrações</a>
+  <a href="#lote">⚙️ Processamentos em Lote</a>
+  <a href="#parametrizacao">🎛️ Parametrização e Auditoria</a>
+</nav>
+<main>
+<section>
+  <div class="section-title">Sobre esta página</div>
+  <p>Esta página documenta as funcionalidades que <strong>não pertencem a um único módulo</strong> e são exercidas por
+  toda a suíte CM. Elas aparecem de forma dispersa nas páginas de módulo; aqui estão descritas uma única vez, com os
+  módulos impactados por cada uma. Criada em <strong>PFC-3</strong> a partir da análise do framework
+  <code>CM/Forms</code>, dos pacotes <code>CM*OBJ50</code> e das telas dos módulos.</p>
+  <div class="stats">
+    <div class="stat"><div class="n">5</div><div class="l">Funcionalidades transversais principais</div></div>
+    <div class="stat"><div class="n">25</div><div class="l">Módulos impactados</div></div>
+    <div class="stat"><div class="n">6</div><div class="l">AppServers MIDAS</div></div>
+  </div>
+</section>
+<section id="autorizacao">
+  <div class="section-title">🔐 Autorização e Perfis de Acesso</div>
+  <p>A suíte CM não implementa autorização módulo a módulo: o controle é exercido pelo framework
+  compartilhado <code>CM/Forms</code>, que decide, a cada tela e a cada operação, o que o usuário pode fazer.
+  O modelo tem quatro camadas complementares.</p>
+  <ol>
+    <li><strong>Autenticação</strong> — login com escolha de empresa/fundação, troca e recuperação de senha,
+        senha aleatória e histórico de senhas (<code>UAutorizacao.pas</code> — <code>Login</code>,
+        <code>MudarSenha</code>, <code>RecuperarSenha</code>, <code>SenhaAleatoria</code>; <code>HISTSENHA</code>).</li>
+    <li><strong>Autorização funcional</strong> — cada objeto de autorização é combinado a uma operação
+        (<code>OPERFUNC</code>) e liberado por pessoa (<code>AUTORIZA</code>); o framework habilita ou desabilita
+        os componentes da tela conforme essa liberação (<code>AutorizarForm</code>, <code>HabilitarComponente</code>,
+        <code>LigaCompo</code>).</li>
+    <li><strong>Autorização de dados</strong> — restrição por tabela (<code>TABELAACESSO</code>), por coluna
+        (<code>COLUNAACESSO</code>) e por DataView (<code>DATAVIEWACESSO</code>), aplicada inclusive aos relatórios
+        <em>ad hoc</em> do gerador Relatórios CM.</li>
+    <li><strong>Escopo organizacional</strong> — o que o usuário enxerga é ainda limitado por centro de custo
+        (<code>USCCUSTO</code>), centro de responsabilidade (<code>PESSOAXCRESP</code>), tipo de documento
+        (<code>USUARIOXTPDOCTO</code>), carteira de investimento (<code>GRUPOACESSOXCART</code>), contrato
+        (<code>CONTRATOUSUARIO</code>), almoxarifado (<code>USUXALMOX</code>) e grupo de regra
+        (<code>GRUPOREGRAUSUARIO</code>).</li>
+  </ol>
+  <p>Complementam o modelo o log de acessos ao sistema (<code>LOGACESSOSIS</code>, <code>LOGOPCAO</code>) e o log de
+  alterações e exclusões por tabela (<code>LOGTABELAS</code>/<code>LOGTABELASINDX</code>), com rotina de expurgo.
+  Há ainda um fluxo de autorização de processos (RAD) usado por Compras, Contratos e Contas a Pagar
+  (<code>RADINSTPROCESSO</code>, <code>OBJRAD/DBObjetos/uDbRADAutorizacao.pas</code>).</p>
+  <p><strong>Módulos impactados</strong></p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Módulo / relação</th><th>Como a funcionalidade se manifesta</th></tr></thead>
+    <tbody>
+<tr><td><code>Todos os 25 módulos</code></td><td>Habilitação de telas e operações pelo framework CM</td></tr>
+<tr><td><code>global-cm</code></td><td>Cadastro de objetos, operações, funções, grupos de acesso e autorizações</td></tr>
+<tr><td><code>relatorios-cm</code></td><td>Permissão de acesso a tabelas, colunas e DataViews</td></tr>
+<tr><td><code>contas-a-pagar / contas-a-receber</code></td><td>Segregação por tipo de documento (USUARIOXTPDOCTO)</td></tr>
+<tr><td><code>investimentos</code></td><td>Acesso por carteira e por tipo de investimento</td></tr>
+<tr><td><code>contrato</code></td><td>Acesso por contrato (CONTRATOUSUARIO)</td></tr>
+<tr><td><code>regra</code></td><td>Acesso por grupo e tipo de regra e por tabela genérica</td></tr>
+<tr><td><code>orcamento / cfinan</code></td><td>Escopo por centro de responsabilidade e disponibilidade por usuário</td></tr>
+<tr><td><code>compras / contrato</code></td><td>Autorização de processos por instâncias RAD</td></tr>
+    </tbody>
+  </table></div>
+</section>
+<section id="relatorios">
+  <div class="section-title">📊 Emissão de Relatórios</div>
+  <p>A emissão de relatórios ocorre em duas vias que coexistem em toda a suíte.</p>
+  <ul>
+    <li><strong>Relatórios de produto</strong> — construídos em <em>ReportBuilder</em> e distribuídos com cada módulo,
+        na pasta <code>Reports</code> (por exemplo <code>CONTAB/Reports</code>, <code>CPAGAR/Reports</code>).
+        São os balancetes, diários, razões, demonstrativos, balancetes patrimoniais, extratos e demonstrativos de
+        pagamento citados nas páginas de módulo.</li>
+    <li><strong>Relatórios do usuário</strong> — criados no gerador <em>Relatórios CM</em> sobre um dicionário de dados
+        cadastrado (<code>DDTABLE</code>, <code>DDFIELD</code>, <code>DATAVIEW</code>), com assistentes de consulta,
+        relatório, gráfico e exportação, agrupados por grupo de relatório e transferíveis entre ambientes.</li>
+  </ul>
+  <p>Em ambos os casos o acesso aos dados é filtrado pela camada de autorização de dados, e parâmetros de emissão são
+  mantidos em <code>PARAMRELATS</code> e <code>CONFIGREPORTSCM</code>. O Flash Report (hotelaria) é um caso especial:
+  monta o relatório a partir de elementos do demonstrativo contábil (<code>LRELATXELEMDEMO</code>).</p>
+  <p><strong>Módulos impactados</strong></p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Módulo / relação</th><th>Como a funcionalidade se manifesta</th></tr></thead>
+    <tbody>
+<tr><td><code>relatorios-cm</code></td><td>Gerador de relatórios, consultas e gráficos; dicionário de dados; transferência entre ambientes</td></tr>
+<tr><td><code>contab</code></td><td>Balancetes, diário, razão, demonstrativos e termos do diário</td></tr>
+<tr><td><code>caf</code></td><td>Balancetes patrimoniais por bem, grupo, classe e centro de custo</td></tr>
+<tr><td><code>cfinan</code></td><td>Demonstrativo da posição financeira e fluxo de caixa</td></tr>
+<tr><td><code>folha / beneficio-prev</code></td><td>Demonstrativos de pagamento e extratos individuais</td></tr>
+<tr><td><code>emprestimo</code></td><td>Conciliações contábeis analítica/sintética e extratos de contrato</td></tr>
+<tr><td><code>juridico</code></td><td>Fichas, follow-up e estatísticas de processos</td></tr>
+<tr><td><code>indicadores</code></td><td>Relatórios gerenciais parametrizados por tema</td></tr>
+<tr><td><code>Todos os módulos</code></td><td>Motor ReportBuilder e parâmetros de relatório (PARAMRELATS)</td></tr>
+    </tbody>
+  </table></div>
+</section>
+<section id="importacoes">
+  <div class="section-title">📥 Importações e Exportações</div>
+  <p>As trocas de arquivo são estruturais no sistema e seguem três padrões.</p>
+  <ul>
+    <li><strong>Layout parametrizado</strong> — <code>LAYOUTIMPORT</code>/<code>COLLAYOUTIMPORT</code> (framework) e
+        layouts próprios por módulo (<code>INDLAYOUTIMP</code> nos Indicadores, <code>PARAMIMPORTORC</code> no Orçamento,
+        layouts de entrada e saída na Folha). O layout define colunas e destino, evitando programa por arquivo.</li>
+    <li><strong>Planilhas Excel</strong> — importação de lançamentos, plano de contas, saldos, orçamento, indicadores e
+        cotação de moeda.</li>
+    <li><strong>Arquivos bancários e regulatórios</strong> — CNAB de remessa e retorno (Contas a Pagar/Receber, Folha,
+        Empréstimo, CFINAN), SIPC-CAP/SICADI e Posadas (Contábil), Mapa PREVIC (Cadastro Previdenciário), XML SPC
+        (Imobiliário), DIRF/DCTF/DACON/DPREV/GFIP/SPED (IRRF) e arquivos do reembolso do INSS (Folha/Benefício).</li>
+  </ul>
+  <p>O padrão recorrente é que toda importação relevante possui rotina de <em>desfazimento</em> — apagar geração,
+  estornar baixa automática, excluir integração contábil — para permitir reprocessamento sem intervenção no banco.</p>
+  <p><strong>Módulos impactados</strong></p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Módulo / relação</th><th>Como a funcionalidade se manifesta</th></tr></thead>
+    <tbody>
+<tr><td><code>contab</code></td><td>Excel, SAF, Fidélio, Folha RM/Dinâmica, SRH Plus; exportação SIPC-CAP/SICADI e Posadas</td></tr>
+<tr><td><code>global-cm</code></td><td>Layouts de importação, importação de plano de contas, subcontas, saldos e cotação de moeda</td></tr>
+<tr><td><code>contas-a-pagar / contas-a-receber</code></td><td>Remessa e retorno CNAB, bloquetos e pagamento eletrônico</td></tr>
+<tr><td><code>irrf</code></td><td>DIRF, DCTF, DACON, DPREV, GFIP, SPED/EFD e comprovantes anuais</td></tr>
+<tr><td><code>cadastro-prev</code></td><td>Mapa PREVIC e recadastramento via TXT</td></tr>
+<tr><td><code>imobiliario</code></td><td>Geração de XML para o SPC e importação de baixas</td></tr>
+<tr><td><code>orcamento</code></td><td>Importação de orçamento, grupos e entrada de dados via Excel</td></tr>
+<tr><td><code>indicadores</code></td><td>Importação de indicadores por layout de planilha</td></tr>
+<tr><td><code>caf / almoxarifado</code></td><td>Exportação/importação de inventário para coletores de dados</td></tr>
+<tr><td><code>folha / beneficio-prev</code></td><td>Fita de crédito, retorno bancário e arquivos de reembolso do INSS</td></tr>
+    </tbody>
+  </table></div>
+</section>
+<section id="integracoes">
+  <div class="section-title">🔗 Integrações entre Módulos</div>
+  <p>A Contabilidade é o ponto de convergência da suíte: os módulos operacionais produzem planilhas e lançamentos
+  contábeis, e não registram lançamentos manualmente no Contábil. O padrão comum é
+  <em>parametrização contábil no módulo de origem → geração de planilha → teste de débito × crédito → verificação de
+  período/dias bloqueados → gravação do lançamento e atualização de saldo</em>, implementado em
+  <code>uCtrlProcessaContab.pas</code>.</p>
+  <p>Além do eixo contábil, existem integrações horizontais relevantes: o motor de <strong>Regras</strong> é consumido
+  por Folha, Parâmetros Previdenciários e Cotas; o <strong>Orçamento</strong> recebe reserva/compromisso de Compras e
+  Contratos e busca dados contábeis; o <strong>IRRF</strong> captura impostos do Contas a Pagar, do CapCar, da Folha e do
+  Empréstimo; o <strong>CAF</strong> recebe bens do Almoxarifado e compartilha bens com o Imobiliário; a
+  <strong>Central AP</strong> consulta Cadastro, Benefício e Folha em modo leitura.</p>
+  <p><strong>Módulos impactados</strong></p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Módulo / relação</th><th>Como a funcionalidade se manifesta</th></tr></thead>
+    <tbody>
+<tr><td><code>contab ← contas-a-pagar / contas-a-receber</code></td><td>Integração de documentos e baixas em planilha contábil</td></tr>
+<tr><td><code>contab ← cfinan</code></td><td>Movimento financeiro e lançamentos correlatos</td></tr>
+<tr><td><code>contab ← caf</code></td><td>Saldo contábil dos bens, depreciação e conciliação ativo fixo × contabilidade</td></tr>
+<tr><td><code>contab ← almoxarifado</code></td><td>Custos contábeis do estoque e conciliação</td></tr>
+<tr><td><code>contab ← emprestimo</code></td><td>Contabilização da atualização diária e conciliações por conta e por plano</td></tr>
+<tr><td><code>contab ← folha / beneficio-prev</code></td><td>Apropriação contábil da folha e contabilização de dívidas de benefício</td></tr>
+<tr><td><code>contab ← imobiliario</code></td><td>Padrões de lançamento, segregação por plano/patrocinadora e obras</td></tr>
+<tr><td><code>contab ← investimentos</code></td><td>Reflexo contábil das operações e cotas</td></tr>
+<tr><td><code>contab ← juridico</code></td><td>Rateio contábil e critérios de contabilização do jurídico</td></tr>
+<tr><td><code>contab ↔ orcamento</code></td><td>Vínculo conta orçamentária × conta contábil e busca de dados contábeis</td></tr>
+<tr><td><code>irrf ← contas-a-pagar / folha / emprestimo</code></td><td>Busca de IRRF, INSS, ISS, IOF, PIS/COFINS/CSLL</td></tr>
+<tr><td><code>regra → folha / param-prev / investimentos</code></td><td>Execução de fórmulas e regras parametrizadas</td></tr>
+<tr><td><code>orcamento ← compras / contrato</code></td><td>Reserva, compromisso e efetivação orçamentária</td></tr>
+<tr><td><code>caf ← almoxarifado</code></td><td>Entradas pendentes de bens patrimoniais</td></tr>
+<tr><td><code>central-ap → cadastro-prev / beneficio-prev / folha</code></td><td>Consulta do participante no atendimento</td></tr>
+    </tbody>
+  </table></div>
+</section>
+<section id="lote">
+  <div class="section-title">⚙️ Processamentos em Lote</div>
+  <p>Boa parte do valor do sistema está em rotinas de lote executadas por tela dedicada, com seleção de escopo,
+  barra de progresso e, quase sempre, uma rotina inversa. Os grupos recorrentes são:</p>
+  <ul>
+    <li><strong>Fechamentos</strong> — encerramento de período, de contas de resultado e de exercício (Contábil),
+        fechamento e estorno de período (CAF), encerramento do exercício orçamentário, encerramento de conciliação
+        (Benefício) e encerramento de contratos/obras.</li>
+    <li><strong>Atualizações de saldo</strong> — saldos analíticos e sintéticos e saldos de encerramento (Contábil),
+        atualização diária de saldo devedor (Empréstimo), custo médio (Almoxarifado), histórico diário de carteira
+        (Investimentos) e apuração de cota/caixa (Cotas).</li>
+    <li><strong>Rateios e segregação</strong> — rateio por atividade/projeto, programa, administrativo e por
+        plano/patrocinadora; segregação de recursos com prova zero; rateio de depreciação (CAF) e rateio financeiro
+        (CFINAN).</li>
+    <li><strong>Processamentos de massa</strong> — prévia e efetivação da folha, geração de lotes de pagamento,
+        emissão de bloquetos e remessas, cobranças em lote, alteração de contribuições/benefícios em lote,
+        inscrição de participantes em lote e cargas de contratos.</li>
+    <li><strong>Reprocessamento</strong> — praticamente todo lote possui inverso: desfazer preparo, apagar geração,
+        estornar baixa, excluir integração contábil, desfazer segregação, cancelar lote, estornar fechamento.</li>
+  </ul>
+  <p>Do ponto de vista técnico, os lotes pesados são executados por <em>CtrlObjects</em> publicados em
+  <em>AppServers</em> MIDAS (<code>APPSERVERDLL</code>, <code>APPSERVERCFINAN</code>, <code>APPSERVERORCAMENTO</code>,
+  <code>APPSERVERIRRFDLL</code>, <code>APPSERVERLIVRODLL</code>, <code>APPSRVCAPCAR</code>), e não no cliente.</p>
+  <p><strong>Módulos impactados</strong></p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Módulo / relação</th><th>Como a funcionalidade se manifesta</th></tr></thead>
+    <tbody>
+<tr><td><code>contab</code></td><td>Encerramentos, atualização de saldos, rateios, segregação e integrações</td></tr>
+<tr><td><code>caf</code></td><td>Depreciação, reavaliação, fechamento de período e inventário</td></tr>
+<tr><td><code>folha</code></td><td>Prévia, preparo, efetivação, crédito bancário e conciliação INSS</td></tr>
+<tr><td><code>emprestimo</code></td><td>Atualização diária de saldo devedor e contabilização por lote</td></tr>
+<tr><td><code>contribuicao-prev / beneficio-prev</code></td><td>Cobrança, alimentação de reservas, reajustes e alterações em lote</td></tr>
+<tr><td><code>cadastro-prev</code></td><td>Inscrição em lote, cálculo de tempo de serviço e recadastramento</td></tr>
+<tr><td><code>investimentos</code></td><td>Fechamento de posição, marcação a mercado e apuração de cotas</td></tr>
+<tr><td><code>contas-a-pagar / contas-a-receber / cfinan</code></td><td>Lotes de pagamento, baixas automáticas e conciliação bancária</td></tr>
+<tr><td><code>orcamento</code></td><td>Efetivação de cenário, apuração por fórmulas e encerramento do exercício</td></tr>
+<tr><td><code>almoxarifado</code></td><td>Atualização de movimentos, custo médio e integração contábil</td></tr>
+    </tbody>
+  </table></div>
+</section>
+<section id="parametrizacao">
+  <div class="section-title">🎛️ Parametrização e Auditoria</div>
+  <p>Duas funcionalidades transversais menores, porém presentes em todos os módulos, completam o quadro:</p>
+  <ul>
+    <li><strong>Parametrização</strong> — cada módulo tem sua tabela de parâmetros (<code>PARAMGLOBAL</code>,
+        <code>PARAMCONTAB</code> com 92 campos, <code>PARAMCAP</code>, <code>PARAMFINANC</code>,
+        <code>PARAMORCAMENTO</code>, <code>PARAMINVEST</code>, <code>PARAMETROSCAFMANUT</code>, <code>PARAMIRRF</code>,
+        <code>PARAMAPREV</code>, <code>PARALMOX</code>, <code>PARAMCOMPRAS</code>, <code>PARAMIMOVEL</code>,
+        <code>PARAMINDICADORES</code>, <code>PARAMCONTRATO</code>, <code>PARAMCENTRALAP</code>), o que significa que
+        boa parte do comportamento é configuração e não código.</li>
+    <li><strong>Auditoria</strong> — log de acesso ao sistema, log de alterações/exclusões por tabela, logs específicos
+        (<code>LOGTOTALPREV</code>, <code>LOGADITAMENTO</code>, <code>LOGCENARIO</code>,
+        <code>LOGDISPONIBILIDADE</code>) e o registro de operações desfeitas, que preserva o rastro das correções.</li>
+  </ul>
+  <p><strong>Módulos impactados</strong></p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Módulo / relação</th><th>Como a funcionalidade se manifesta</th></tr></thead>
+    <tbody>
+<tr><td><code>Todos os módulos</code></td><td>Tabela de parâmetros própria e telas de <em>Parâmetros do Sistema</em></td></tr>
+<tr><td><code>global-cm</code></td><td>Parâmetros globais, log de tabelas e expurgo do log</td></tr>
+<tr><td><code>contab</code></td><td>PARAMCONTAB define faixas de contas, moedas, fechamento e validações de planilha</td></tr>
+<tr><td><code>contribuicao-prev / beneficio-prev / cadastro-prev</code></td><td>LOGTOTALPREV para operações em lote</td></tr>
+<tr><td><code>contrato / orcamento / cfinan</code></td><td>Logs específicos de aditamento, cenário e disponibilidade</td></tr>
+    </tbody>
+  </table></div>
+</section>
+</main>
+
+<footer>
+<p>CM Contabilidade — Documentação gerada em 2026-08-19 · revisada em 2026-08-24 (PFC-3) | Tecnologia: Delphi 5 | pt-BR</p>
+</footer>
+</body>
+</html>

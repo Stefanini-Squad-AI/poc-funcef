@@ -185,30 +185,58 @@ ul.check li::before { content: "☐ "; }
       <p><strong>Contexto de Negócio:</strong> Este módulo integra a suíte CM Contabilidade e apoia processos operacionais/financeiros/previdenciários conforme o domínio <em>Investimentos</em>.</p>
       <p><strong>Responsabilidades:</strong></p>
       <ul><li>Cadastro e movimentação de investimentos</li><li>Integração contábil</li></ul>
+    
+      <p><strong>Processos funcionais detalhados:</strong></p>
+<ul>
+<li><strong>Carteira e histórico</strong> — Carteiras de investimento por tipo/plano, com histórico diário de posição e caixa (<code>CARTEIRAINVEST</code>, <code>HISTCARTINV</code>, <code>HISTCAIXA</code>).</li>
+<li><strong>Ordens e operações</strong> — Cadastro, conferência e autorização de ordens de movimentação, e registro das operações por tipo (<code>ORDMOVINV</code>, <code>OPERACAOINVEST</code>, <code>TIPOOPERACAO</code>).</li>
+<li><strong>Renda fixa</strong> — Títulos, itens por curva, operações e marcação a mercado (<code>OPERRENFIX</code>, <code>ITEMRENFIX</code>, <code>CURVASRENFIX</code>, <code>HISTRENFIX</code>, <code>PARAMCALCMKT</code>).</li>
+<li><strong>Renda variável</strong> — Ações por bolsa, cotações, direitos, empréstimo de ações e provisão para perdas (<code>ACOESXBOLSA</code>, <code>COTACAOACAO</code>, <code>OPERACAODIREITO</code>, <code>OPEREMPACOES</code>, <code>PROVPERDARV</code>).</li>
+<li><strong>Fundos de investimento</strong> — Fundos, pedidos, operações, cotas e histórico (<code>FUNDOINVEST</code>, <code>PEDIDOFUNDO</code>, <code>OPERACAOFUNDO</code>, <code>COTAFUNDO</code>, <code>HISTFUNDOINVEST</code>).</li>
+<li><strong>Custódia</strong> — Operações e histórico de custódia com conciliação contra o custodiante (<code>OPERCUSTODIA</code>, <code>HISTCUSTODIA</code>, <code>CUSTODIANTE</code>).</li>
+<li><strong>Risco e limites</strong> — Emissores, setores, agências de risco, classificação e limites por classificação (<code>PARAMXEMISSOR</code>, <code>AGENCIARISCO</code>, <code>CLASSRISCORENFIX</code>).</li>
+<li><strong>Cotas</strong> — Apuração de cotas e caixa por carteira, eventos de caixa/cota e cálculo da primeira cota (<code>HISTCOTA</code>, <code>EVENTOCAIXACOTA</code>, <code>PARAMCOTAINVEST</code>).</li>
+<li><strong>Reflexo contábil</strong> — Geração e conferência dos lançamentos contábeis dos investimentos (<code>uCtrlInvContab</code>).</li>
+</ul>
+    
+      <div class="note"><strong>Justificativa da cobertura declarada:</strong> Módulo com o maior volume de artefatos da suíte (~579 forms / ~681 units, somando INVESTIMENTOS, INVESTCOTAS, INVESTFDO e COTAS). A cobertura declarada refere-se aos processos e entidades centrais (carteira, operações, renda fixa/variável, fundos, custódia e cotas); telas de relatório gerencial e integrações de mercado específicas ainda não foram inventariadas item a item.</div>
     </section>
     <section id="user-stories">
       <div class="section-title">📝 Guia para User Stories</div>
-      
-<div class="story-card"><div class="role">👤 Como operador</div>
-<div class="want">🎯 Quero utilizar as funções principais do módulo Investimentos</div>
-<div class="why">💡 Para executar o processo de negócio suportado por este módulo</div></div>
-<div class="story-card"><div class="role">👤 Como supervisor</div>
-<div class="want">🎯 Quero consultar e validar os resultados gerados</div>
-<div class="why">💡 Para garantir conformidade operacional</div></div>
-
+      <div class="story-card"><div class="role">👤 Como gestor de investimentos</div>
+<div class="want">🎯 Quero cadastrar uma ordem de movimentação e submetê-la à conferência e autorização</div>
+<div class="why">💡 Para garantir segregação de funções entre quem opera e quem autoriza</div></div>
+<div class="story-card"><div class="role">👤 Como analista de renda fixa</div>
+<div class="want">🎯 Quero registrar operações de títulos e acompanhar a marcação a mercado pela curva cadastrada</div>
+<div class="why">💡 Para avaliar a carteira a preço de mercado na data de referência</div></div>
+<div class="story-card"><div class="role">👤 Como controller de investimentos</div>
+<div class="want">🎯 Quero apurar a cota e o caixa da carteira no fechamento</div>
+<div class="why">💡 Para publicar a rentabilidade do plano no período</div></div>
     </section>
     <section id="criterios">
       <div class="section-title">✅ Critérios de Aceitação</div>
-      
-<div class="criteria-block"><div class="given"><strong>Dado que</strong> o usuário possui permissão no módulo</div>
-<div class="when"><strong>Quando</strong> acessa as telas principais do executável</div>
-<div class="then"><strong>Então</strong> consegue executar as operações de cadastro/consulta previstas no código da pasta <code>INVESTIMENTOS</code></div></div>
-<div class="note">Critérios detalhados dependem de análise aprofundada das forms do módulo. Confiança: Média</div>
-
+      <div class="criteria-block"><div class="given"><strong>Dado que</strong> uma ordem de movimentação foi cadastrada e ainda não autorizada</div>
+<div class="when"><strong>Quando</strong> o operador tenta efetivar a operação</div>
+<div class="then"><strong>Então</strong> a efetivação é impedida até que a ordem passe pela conferência e pela autorização previstas</div></div>
+<div class="criteria-block"><div class="given"><strong>Dado que</strong> o usuário não pertence ao grupo de acesso da carteira</div>
+<div class="when"><strong>Quando</strong> ele consulta a posição dessa carteira</div>
+<div class="then"><strong>Então</strong> os dados não são exibidos, conforme o controle de acesso por carteira (<code>GRUPOACESSOXCART</code>)</div></div>
+<div class="criteria-block"><div class="given"><strong>Dado que</strong> existe limite cadastrado por classificação de risco do emissor</div>
+<div class="when"><strong>Quando</strong> uma operação ultrapassaria esse limite</div>
+<div class="then"><strong>Então</strong> o sistema sinaliza o enquadramento com base nos parâmetros por emissor</div></div>
     </section>
     <section id="regras">
       <div class="section-title">📏 Regras de Negócio</div>
-      <p>Nenhuma regra específica catalogada com evidência linha a linha neste módulo nesta entrega. Consulte o código em <code>INVESTIMENTOS</code>.</p>
+      <p>Regras levantadas a partir do código-fonte do módulo. Cada regra indica a unidade, o método ou a tela de origem e o nível de confiança da evidência. Identificadores conferem com o <a href="../../../business-rules-catalog.html">Catálogo de Regras de Negócio</a>.</p>
+<div class="rule-block" id="RN094"><div class="rule-id">RN094</div><div class="rule-desc">A posição da carteira é mantida como histórico diário; consultas e relatórios partem de <code>HISTCARTINV</code> e não do recálculo das operações.</div><div class="rule-origin">📂 Origem: <code>INVESTIMENTOS/FontesProducao (814 referências a HISTCARTINV); CtrlObjects/uCtrlCarteiraGerenc.pas, uCtrlBuscaSaldoRV.pas</code> | Confiança: <span class="tag tag-alta">Alta</span></div></div>
+<div class="rule-block" id="RN095"><div class="rule-id">RN095</div><div class="rule-desc">Toda movimentação passa por ordem de movimentação, com etapas distintas de conferência e autorização antes da efetivação.</div><div class="rule-origin">📂 Origem: <code>INVESTIMENTOS/FontesProducao (telas <em>Cadastro de Ordens de Movimentação</em>, <em>Conferência das Ordens de Movimentação</em>, <em>Autorização das Ordens de Movimentação</em>, <em>Autorização de Ordem de Movimentação de BM&amp;F</em>); ORDMOVINV</code> | Confiança: <span class="tag tag-alta">Alta</span></div></div>
+<div class="rule-block" id="RN096"><div class="rule-id">RN096</div><div class="rule-desc">O acesso às carteiras é restrito por grupo de acesso, e o tipo de investimento visível é controlado por usuário.</div><div class="rule-origin">📂 Origem: <code>INVESTIMENTOS/FontesProducao/CtrlObjectsRV/uCtrlAcessoCarteira.pas; DbObjects/uDbGrupoAcessoXCart.pas, uDbUsuarioTipoMenu.pas (tela <em>Cadastro de Tipo de Investimento por Usuário</em>)</code> | Confiança: <span class="tag tag-alta">Alta</span></div></div>
+<div class="rule-block" id="RN097"><div class="rule-id">RN097</div><div class="rule-desc">Títulos de renda fixa são avaliados por curva e parâmetros de marcação a mercado, com histórico próprio por item.</div><div class="rule-origin">📂 Origem: <code>INVESTIMENTOS/FontesProducao/CtrlObjectsRF/uCtrlCalculoMKT.pas, uCtrlRendaFixa.pas; DbObjects/uDbCurvasrenfix.pas, uDbItemRenfix.pas, uDbHistrenfixxitens.pas, uDbParamCalcMKT.pas</code> | Confiança: <span class="tag tag-alta">Alta</span></div></div>
+<div class="rule-block" id="RN098"><div class="rule-id">RN098</div><div class="rule-desc">A exposição por emissor é controlada por parâmetros e limites vinculados à classificação de risco atribuída por agência.</div><div class="rule-origin">📂 Origem: <code>INVESTIMENTOS/FontesProducao/DbObjects/uDbParamEmissor.pas, uDbParamXEmissor.pas, uDbValParamXEmissor.pas, uDbAgenciaRisco.pas, uDbClassriscorenfix.pas (tela <em>Cadastro de Limites por Classificação</em>)</code> | Confiança: <span class="tag tag-alta">Alta</span></div></div>
+<div class="rule-block" id="RN099"><div class="rule-id">RN099</div><div class="rule-desc">A cota e o caixa da carteira são apurados por evento de caixa/cota parametrizado, com histórico diário e cálculo específico da primeira cota.</div><div class="rule-origin">📂 Origem: <code>INVESTCOTAS/CtrlObjects/uCtrlHistCota.pas, uCtrlHistCaixa.pas, uCtrlEventoCaixaCota.pas, uCtrlParamCotaInvest.pas; COTAS/Fontes (telas <em>Cálculo da 1ª Cota</em>, <em>Cálculo de Cotas</em>)</code> | Confiança: <span class="tag tag-alta">Alta</span></div></div>
+<div class="rule-block" id="RN100"><div class="rule-id">RN100</div><div class="rule-desc">A custódia é conciliada contra o custodiante, com operações e histórico próprios, independentes do registro gerencial da carteira.</div><div class="rule-origin">📂 Origem: <code>INVESTIMENTOS/FontesProducao/CtrlObjectsRV/uCtrlCustodia.pas; DbObjects/uDbOperCustodia.pas, uDbHistcustodia.pas, uDbCustodiante.pas (tela <em>Conciliação da Custódia</em>)</code> | Confiança: <span class="tag tag-alta">Alta</span></div></div>
+<div class="rule-block" id="RN101"><div class="rule-id">RN101</div><div class="rule-desc">Investimentos bloqueados exigem motivo cadastrado, o que sustenta o controle de disponibilidade financeira.</div><div class="rule-origin">📂 Origem: <code>INVESTIMENTOS/FontesProducao/DbObjects/uDbMotivobloqueio.pas (MOTIVOBLOQUEIO, 82 referências)</code> | Confiança: <span class="tag tag-media">Média</span></div></div>
+<div class="rule-block" id="RN102"><div class="rule-id">RN102</div><div class="rule-desc">O reflexo contábil dos investimentos é gerado por rotina própria do módulo, e não por lançamento manual na contabilidade.</div><div class="rule-origin">📂 Origem: <code>INVESTIMENTOS/FontesProducao/CtrlObjects/uCtrlInvContab.pas</code> | Confiança: <span class="tag tag-alta">Alta</span></div></div>
     </section>
     <section id="tecnico">
       <div class="section-title">⚙️ Fundação Técnica — Delphi 5</div>
@@ -219,7 +247,28 @@ ul.check li::before { content: "☐ "; }
     </section>
     <section id="dados">
       <div class="section-title">🗄️ Modelo de Dados</div>
-      <p>Nenhuma tabela foi inventariada exaustivamente para este módulo nesta entrega. Ver DbObjects da pasta quando existirem. <strong>Lacuna parcial.</strong></p>
+      <p>Entidades centrais do módulo identificadas nos <code>DbObjects</code>, nos <code>CtrlObjects</code> e nas consultas SQL das telas. A relação cobre o núcleo funcional; a listagem completa de campos permanece no código.</p>
+<div class="table-wrap"><table><thead><tr><th>Entidade / Tabela</th><th>Papel funcional</th><th>Evidência no código</th></tr></thead><tbody>
+<tr><td><code>CARTEIRAINVEST / HISTCARTINV</code></td><td>Carteira de investimento e histórico diário de posição</td><td><code>INVESTIMENTOS/FontesProducao/DbObjects/uDbCarteiraInvest.pas; uDbHistcartinv.pas</code></td></tr>
+<tr><td><code>INVESTIMENTO / TIPOINVEST</code></td><td>Ativo de investimento e sua classificação</td><td><code>INVESTIMENTOS/FontesProducao/DbObjects/uDbInvestimento.pas; uDbTipoinvest.pas</code></td></tr>
+<tr><td><code>OPERACAOINVEST / TIPOOPERACAO</code></td><td>Operações da carteira e seus tipos</td><td><code>INVESTIMENTOS/FontesProducao/DbObjectsRV/uDbOperacaoinvest.pas; uDbTipoOperacao.pas</code></td></tr>
+<tr><td><code>ORDMOVINV / BOLETA</code></td><td>Ordem de movimentação e boleta da operação</td><td><code>INVESTIMENTOS/FontesProducao/DbObjectsRV/uDbBoleta.pas</code></td></tr>
+<tr><td><code>OPERRENFIX / ITEMRENFIX / CURVASRENFIX / HISTRENFIX</code></td><td>Renda fixa: operações, itens, curvas e histórico</td><td><code>INVESTIMENTOS/FontesProducao/DbObjectsRF/uDbOperrenfix.pas; uDbItemRenfix.pas; uDbCurvasrenfix.pas; uDbHistrenfix.pas</code></td></tr>
+<tr><td><code>ACOESXBOLSA / COTACAOACAO / BOLSAVALORES</code></td><td>Renda variável: papéis, cotações e bolsas</td><td><code>INVESTIMENTOS/FontesProducao/DbObjectsRV/uDbCotacaoacao.pas; uDbBolsavalores.pas</code></td></tr>
+<tr><td><code>OPEREMPACOES / HISTEMPACOES</code></td><td>Empréstimo de ações e histórico</td><td><code>INVESTIMENTOS/FontesProducao/DbObjectsRV/uDbOperEmpAcoes.pas; uDbHistEmpAcoes.pas</code></td></tr>
+<tr><td><code>OPERACAODIREITO / OPERDIRTRANSF</code></td><td>Direitos e transferências</td><td><code>INVESTIMENTOS/FontesProducao/DbObjectsRV/uDbOperDirTransf.pas</code></td></tr>
+<tr><td><code>FUNDOINVEST / TIPOFUNDOINVEST / HISTFUNDOINVEST</code></td><td>Fundos de investimento, tipo e histórico</td><td><code>INVESTIMENTOS/FontesProducao/DbObjectsFDO/uDbFundoinvest.pas; uDbTipofundoinvest.pas; uDbHistfundoinvest.pas</code></td></tr>
+<tr><td><code>OPERACAOFUNDO / PEDIDOFUNDO / COTAFUNDO</code></td><td>Operações, pedidos e cotas de fundos</td><td><code>INVESTIMENTOS/FontesProducao/DbObjectsFDO/uDbOperacaofundo.pas; uDbPedidofundo.pas</code></td></tr>
+<tr><td><code>OPERCUSTODIA / HISTCUSTODIA / CUSTODIANTE</code></td><td>Custódia dos ativos</td><td><code>INVESTIMENTOS/FontesProducao/DbObjectsRV/uDbOperCustodia.pas; uDbHistcustodia.pas; uDbCustodiante.pas</code></td></tr>
+<tr><td><code>EMISSOR / SETOREMISSOR / PARAMXEMISSOR / VALPARAMXEMISSOR</code></td><td>Emissores, setores e limites parametrizados</td><td><code>INVESTIMENTOS/FontesProducao/DbObjects/uDbSetorEmissor.pas; uDbParamXEmissor.pas</code></td></tr>
+<tr><td><code>AGENCIARISCO / CLASSRISCORENFIX / CLASSIFANBID</code></td><td>Classificação de risco e ANBID</td><td><code>INVESTIMENTOS/FontesProducao/DbObjects/uDbAgenciaRisco.pas; uDbClassriscorenfix.pas; uDbClassifanbid.pas</code></td></tr>
+<tr><td><code>HISTCOTA / HISTCAIXA / EVENTOCAIXACOTA</code></td><td>Apuração de cota e caixa por carteira</td><td><code>INVESTCOTAS/DbObjects/uDbHistCota.pas; uDbHistCaixa.pas; uDbEventoCaixaCota.pas</code></td></tr>
+<tr><td><code>PARAMINVEST / PARAMCOTAINVEST / PARAMCALCMKT</code></td><td>Parâmetros do módulo, de cotas e de marcação a mercado</td><td><code>INVESTIMENTOS/FontesProducao/DbObjects/uDbParamInvest.pas; INVESTCOTAS/DbObjects/uDbParamCotaInvest.pas</code></td></tr>
+<tr><td><code>GRUPOACESSOXCART / USUARIOTIPOMENU</code></td><td>Controle de acesso por carteira e tipo de investimento</td><td><code>INVESTIMENTOS/FontesProducao/DbObjectsRV/uDbGrupoAcessoXCart.pas; uDbUsuarioTipoMenu.pas</code></td></tr>
+<tr><td><code>MOTIVOBLOQUEIO / PROVPERDARV</code></td><td>Bloqueio de ativos e provisão para perdas em renda variável</td><td><code>INVESTIMENTOS/FontesProducao/DbObjects/uDbMotivobloqueio.pas; uDbProvPerdaRV.pas</code></td></tr>
+<tr><td><code>DESPOPERINVEST / TIPODESPINVEST</code></td><td>Despesas das operações de investimento</td><td><code>INVESTIMENTOS/FontesProducao/DbObjects/uDbTipoDespInvest.pas</code></td></tr>
+<tr><td><code>CARTEIRASPC / SEGMENTOSPC</code></td><td>Carteira e segmentos para reporte ao órgão regulador</td><td><code>COTAS/DbObjects/uDbCarteiraSpc.pas</code></td></tr>
+</tbody></table></div>
     </section>
     <section id="complexidade">
       <div class="section-title">📊 Estimativa de Complexidade</div>
@@ -234,9 +283,9 @@ ul.check li::before { content: "☐ "; }
         <li><span class="key">Tecnologia</span><span class="val">Delphi 5 / VCL</span></li>
         <li><span class="key">Banco de Dados</span><span class="val">Oracle</span></li>
         <li><span class="key">Acesso a Dados</span><span class="val">MIDAS/ClientDataSet</span></li>
-        <li><span class="key">Cobertura Funcional</span><span class="val">40–60%</span></li>
-        <li><span class="key">Última Atualização</span><span class="val">2026-08-19</span></li>
-        <li><span class="key">Confiança</span><span class="val"><span class="tag tag-média">Média</span></span></li>
+        <li><span class="key">Cobertura Funcional</span><span class="val">74%</span></li>
+        <li><span class="key">Última Atualização</span><span class="val">2026-08-24</span></li>
+        <li><span class="key">Confiança</span><span class="val"><span class="tag tag-media">Média</span></span></li>
       </ul>
     </section>
     <section>
@@ -245,7 +294,7 @@ ul.check li::before { content: "☐ "; }
         <li><span class="key">Forms/DFM</span><span class="val">~579</span></li>
         <li><span class="key">Data Modules</span><span class="val">~0</span></li>
         <li><span class="key">Units</span><span class="val">~681</span></li>
-        <li><span class="key">Tabelas</span><span class="val">—</span></li>
+        <li><span class="key">Tabelas</span><span class="val">19</span></li>
       </ul>
     </section>
     <section>
@@ -256,11 +305,20 @@ ul.check li::before { content: "☐ "; }
       <div class="section-title">♻️ Padrões Reutilizáveis</div>
       <ul class="dep-list"><li>Padrão CM (Forms MT + CtrlObjects + DbObjects)</li><li>Autorização via framework CM</li></ul>
     </section>
+    <section>
+      <div class="section-title">📎 Ver Também</div>
+      <ul class="dep-list">
+<li><a href="../../../cross-cutting-features.html">Funcionalidades Transversais</a></li>
+<li><a href="../../../business-rules-catalog.html">Catálogo de Regras de Negócio</a></li>
+<li><a href="../../../documentation-gap-analysis.html">Levantamento de Lacunas</a></li>
+<li><a href="../../../system-overview.html">Visão Geral do Sistema</a></li>
+</ul>
+    </section>
   </div>
 </main>
 
 <footer>
-<p>CM Contabilidade — Módulo Investimentos | Delphi 5 | Documentação gerada em 2026-08-19 | pt-BR</p>
+<p>CM Contabilidade — Módulo Investimentos | Delphi 5 | Documentação gerada em 2026-08-19 · revisada em 2026-08-24 (PFC-3) | pt-BR</p>
 </footer>
 </body>
 </html>

@@ -185,30 +185,52 @@ ul.check li::before { content: "☐ "; }
       <p><strong>Contexto de Negócio:</strong> Este módulo integra a suíte CM Contabilidade e apoia processos operacionais/financeiros/previdenciários conforme o domínio <em>Cadastros Globais e Framework CM</em>.</p>
       <p><strong>Responsabilidades:</strong></p>
       <ul><li>Cadastros mestres compartilhados entre módulos</li><li>Parâmetros de integração e de-para</li><li>Base de autenticação e contexto do sistema</li></ul>
+    
+      <p><strong>Processos funcionais detalhados:</strong></p>
+<ul>
+<li><strong>Cadastros corporativos</strong> — Pessoa física/jurídica, patrocinadoras, planos previdenciários, unidades de negócio, moedas, países/estados/cidades e feriados, compartilhados por toda a suíte (<code>PESSOA</code>, <code>PATRO</code>, <code>PLANPREV</code>, <code>UNIDNEGOCIO</code>, <code>MOEDA</code>, <code>FERIADO</code>).</li>
+<li><strong>Estruturas de custo e responsabilidade</strong> — Planos de centro de custo e de centro de responsabilidade, associação a usuários e vínculo com contas contábeis (<code>PLANCENTCUST</code>, <code>PLANCENTRESPON</code>, <code>USCCUSTO</code>, <code>CONTASXCC</code>).</li>
+<li><strong>Autorização e perfis de acesso</strong> — Objetos, operações, funções, grupos de acesso e autorizações por pessoa, aplicados pelo framework a cada tela e operação (<code>AUTORIZA</code>, <code>OPERFUNC</code>, <code>GRUPOACESSO</code>, <code>TABELAACESSO</code>).</li>
+<li><strong>De/Para de estruturas</strong> — Conversão em massa de centros de custo e de responsabilidade a partir de tabelas e campos de/para, com execução controlada (<code>TABELADEPARACC</code>, <code>CAMPODEPARACC</code>, <code>DEPARACC</code>, <code>DEPARACR</code>).</li>
+<li><strong>Auditoria e log do sistema</strong> — Registro de alterações e exclusões por tabela, com consulta, retenção e expurgo (<code>LOGTABELAS</code>, <code>LOGTABELASINDX</code>, <code>RETLOGTABELAS</code>).</li>
+<li><strong>Cotação de moedas</strong> — Manutenção de cotações por moeda e data, com importação de planilha Excel, consumida por Contabilidade, Investimentos e CAF (<code>COTACAOMOEDA</code>).</li>
+<li><strong>Integração orçamentária e contábil</strong> — Plano previdenciário contábil por patrocinadora e integração orçamentária FDO (<code>PLANPREVCONTABIL</code>, <code>PLANPREVCONTABPATRO</code>, <code>CTRLSALDOFDO</code>).</li>
+</ul>
     </section>
     <section id="user-stories">
       <div class="section-title">📝 Guia para User Stories</div>
-      
-<div class="story-card"><div class="role">👤 Como operador</div>
-<div class="want">🎯 Quero utilizar as funções principais do módulo Cadastros Globais e Framework CM</div>
-<div class="why">💡 Para executar o processo de negócio suportado por este módulo</div></div>
-<div class="story-card"><div class="role">👤 Como supervisor</div>
-<div class="want">🎯 Quero consultar e validar os resultados gerados</div>
-<div class="why">💡 Para garantir conformidade operacional</div></div>
-
+      <div class="story-card"><div class="role">👤 Como administrador do sistema</div>
+<div class="want">🎯 Quero conceder e revogar autorizações por objeto e operação para cada pessoa</div>
+<div class="why">💡 Para garantir que cada usuário só execute as funções compatíveis com seu papel</div></div>
+<div class="story-card"><div class="role">👤 Como analista de estrutura organizacional</div>
+<div class="want">🎯 Quero cadastrar planos de centro de custo/responsabilidade e executar um de/para em lote</div>
+<div class="why">💡 Para reorganizar a estrutura sem retrabalho manual nos módulos que a consomem</div></div>
+<div class="story-card"><div class="role">👤 Como auditor interno</div>
+<div class="want">🎯 Quero consultar o log de alterações e exclusões de uma tabela por período</div>
+<div class="why">💡 Para rastrear quem alterou informações sensíveis e quando</div></div>
     </section>
     <section id="criterios">
       <div class="section-title">✅ Critérios de Aceitação</div>
-      
-<div class="criteria-block"><div class="given"><strong>Dado que</strong> o usuário possui permissão no módulo</div>
-<div class="when"><strong>Quando</strong> acessa as telas principais do executável</div>
-<div class="then"><strong>Então</strong> consegue executar as operações de cadastro/consulta previstas no código da pasta <code>GLOBALCM</code></div></div>
-<div class="note">Critérios detalhados dependem de análise aprofundada das forms do módulo. Confiança: Média</div>
-
+      <div class="criteria-block"><div class="given"><strong>Dado que</strong> existe uma operação cadastrada em <code>OPERFUNC</code> e o usuário não possui registro correspondente em <code>AUTORIZA</code></div>
+<div class="when"><strong>Quando</strong> o usuário tenta acionar essa operação na tela</div>
+<div class="then"><strong>Então</strong> o framework CM impede a execução e o componente permanece desabilitado</div></div>
+<div class="criteria-block"><div class="given"><strong>Dado que</strong> existe um de/para de centro de custo cadastrado e válido</div>
+<div class="when"><strong>Quando</strong> o usuário executa a rotina <em>Executa De/Para Centro de Custo</em></div>
+<div class="then"><strong>Então</strong> os registros dos módulos vinculados passam a apontar para o centro de custo destino e a operação fica registrada no log</div></div>
+<div class="criteria-block"><div class="given"><strong>Dado que</strong> uma cotação de moeda não está cadastrada para a data solicitada</div>
+<div class="when"><strong>Quando</strong> um módulo consumidor requisita a conversão de valores nessa data</div>
+<div class="then"><strong>Então</strong> a operação é recusada até que a cotação seja informada ou importada da planilha Excel</div></div>
     </section>
     <section id="regras">
       <div class="section-title">📏 Regras de Negócio</div>
-      <p>Nenhuma regra específica catalogada com evidência linha a linha neste módulo nesta entrega. Consulte o código em <code>GLOBALCM</code>.</p>
+      <p>Regras levantadas a partir do código-fonte do módulo. Cada regra indica a unidade, o método ou a tela de origem e o nível de confiança da evidência. Identificadores conferem com o <a href="../../../business-rules-catalog.html">Catálogo de Regras de Negócio</a>.</p>
+<div class="rule-block" id="RN034"><div class="rule-id">RN034</div><div class="rule-desc">O acesso a telas e operações é concedido por pessoa, combinando objeto de autorização, operação e espaço de acesso; sem registro em <code>AUTORIZA</code> a operação não é habilitada.</div><div class="rule-origin">📂 Origem: <code>CM/Forms/DbObjects/uDbAutoriza.pas (Idoperfunc, Idpessoa, Idespacesso); CM/Forms/DbObjects/uDbOperfunc.pas; CM/Forms/Source/UAutorizacao.pas — AutorizarForm/HabilitarComponente</code> | Confiança: <span class="tag tag-alta">Alta</span></div></div>
+<div class="rule-block" id="RN035"><div class="rule-id">RN035</div><div class="rule-desc">O acesso a dados também é restringido por tabela, coluna e DataView, permitindo esconder colunas e registros conforme o grupo de acesso do usuário.</div><div class="rule-origin">📂 Origem: <code>CM/Forms/DbObjects/uDbTabelaacesso.pas; uDbColunaacesso.pas; uDbGrupoacesso.pas (TABELAACESSO, COLUNAACESSO, DATAVIEWACESSO)</code> | Confiança: <span class="tag tag-alta">Alta</span></div></div>
+<div class="rule-block" id="RN036"><div class="rule-id">RN036</div><div class="rule-desc">Alterações e exclusões em tabelas monitoradas são registradas em log, consultáveis por período e expurgáveis por rotina própria.</div><div class="rule-origin">📂 Origem: <code>CMGLOBALOBJ50/CtrlObjects/uCtrlLogTabelas.pas — ListaAltExcLogTabelas / ApagarLogTabelas; GLOBALCM/FONTESMT (telas <em>Consulta LOG de Alterações/Exclusões</em> e <em>Exclusão de Dados da Tabela LOG</em>)</code> | Confiança: <span class="tag tag-alta">Alta</span></div></div>
+<div class="rule-block" id="RN037"><div class="rule-id">RN037</div><div class="rule-desc">A troca de estruturas de centro de custo/responsabilidade é feita por de/para parametrizado (tabela + campos), executado em lote e não registro a registro.</div><div class="rule-origin">📂 Origem: <code>CMGLOBALOBJ50/CtrlObjects/uCtrlDeParaCC.pas, uCtrlTabelaDeParaCC.pas, uCtrlCampoDeParaCC.pas; GLOBALCM/FONTES (telas <em>Executa De/Para</em>)</code> | Confiança: <span class="tag tag-alta">Alta</span></div></div>
+<div class="rule-block" id="RN038"><div class="rule-id">RN038</div><div class="rule-desc">Cotações de moeda são mantidas por moeda e data e podem ser carregadas de planilha Excel; os módulos convertem valores sempre pela cotação da data de referência.</div><div class="rule-origin">📂 Origem: <code>CMGLOBALOBJ50/CtrlObjects/uCtrlCotacaoMoeda.pas; uDbCotacaomoeda.pas; GLOBALCM (tela <em>Importação de dados de cotação de moeda de planilha excel</em>)</code> | Confiança: <span class="tag tag-alta">Alta</span></div></div>
+<div class="rule-block" id="RN039"><div class="rule-id">RN039</div><div class="rule-desc">O vínculo entre plano previdenciário e plano de contas é mantido por patrocinadora, servindo de base para segregação e rateio contábil.</div><div class="rule-origin">📂 Origem: <code>CMGLOBALOBJ50/CtrlObjects/uCtrlPlanPrevContabil.pas, uCtrlPlanPrevContabPatro.pas (PLANPREVCONTABIL, PLANPREVCONTABPATRO)</code> | Confiança: <span class="tag tag-alta">Alta</span></div></div>
+<div class="rule-block" id="RN040"><div class="rule-id">RN040</div><div class="rule-desc">Parâmetros globais (<code>PARAMGLOBAL</code>) definem comportamentos válidos para toda a suíte, isolando configuração de código.</div><div class="rule-origin">📂 Origem: <code>CMGLOBALOBJ50/DbObjects/uDbParamGlobal.pas; GLOBALCM/FONTES (tela <em>Parâmetros Globais</em>)</code> | Confiança: <span class="tag tag-alta">Alta</span></div></div>
     </section>
     <section id="tecnico">
       <div class="section-title">⚙️ Fundação Técnica — Delphi 5</div>
@@ -219,7 +241,29 @@ ul.check li::before { content: "☐ "; }
     </section>
     <section id="dados">
       <div class="section-title">🗄️ Modelo de Dados</div>
-      <p>Nenhuma tabela foi inventariada exaustivamente para este módulo nesta entrega. Ver DbObjects da pasta quando existirem. <strong>Lacuna parcial.</strong></p>
+      <p>Entidades centrais do módulo identificadas nos <code>DbObjects</code>, nos <code>CtrlObjects</code> e nas consultas SQL das telas. A relação cobre o núcleo funcional; a listagem completa de campos permanece no código.</p>
+<div class="table-wrap"><table><thead><tr><th>Entidade / Tabela</th><th>Papel funcional</th><th>Evidência no código</th></tr></thead><tbody>
+<tr><td><code>PESSOA / PESSOAFISICA</code></td><td>Cadastro único de pessoas usado por todos os módulos</td><td><code>CM/Forms/DbObjects/uDbPessoa.pas</code></td></tr>
+<tr><td><code>PATRO</code></td><td>Patrocinadoras do plano previdenciário</td><td><code>CMGLOBALOBJ50/DbObjects/uDbPatro.pas</code></td></tr>
+<tr><td><code>PLANPREV / PLANPREVPATRO</code></td><td>Planos previdenciários e vínculo com patrocinadora</td><td><code>CMGLOBALOBJ50/DbObjects/uDbPlanPrevidencia.pas</code></td></tr>
+<tr><td><code>PLANPREVCONTABIL</code></td><td>De/para entre plano previdenciário e plano de contas</td><td><code>CMGLOBALOBJ50/DbObjects/uDbPlanPrevContabil.pas</code></td></tr>
+<tr><td><code>CENTCUST / PLANCENTCUST</code></td><td>Centros de custo e seus planos</td><td><code>CMGLOBALOBJ50/DbObjects/uDbCentroCusto.pas; uDbPlancentcust.pas</code></td></tr>
+<tr><td><code>CENTRESPON / PLANCENTRESPON</code></td><td>Centros de responsabilidade e seus planos</td><td><code>CMGLOBALOBJ50/DbObjects/uDbCentRespon.pas; uDbPlancentrespon.pas</code></td></tr>
+<tr><td><code>CONTASXCC</code></td><td>Vínculo conta contábil × centro de custo</td><td><code>CMGLOBALOBJ50/DbObjects/uDbContasxcc.pas</code></td></tr>
+<tr><td><code>MOEDA / COTACAOMOEDA</code></td><td>Moedas e cotações por data</td><td><code>CMGLOBALOBJ50/DbObjects/uDbMoeda.pas; uDbCotacaomoeda.pas</code></td></tr>
+<tr><td><code>AUTORIZA / OPERFUNC</code></td><td>Autorizações por pessoa e pares função × operação</td><td><code>CM/Forms/DbObjects/uDbAutoriza.pas; uDbOperfunc.pas</code></td></tr>
+<tr><td><code>GRUPOACESSO / GRUPOUSU</code></td><td>Grupos de acesso e vínculo de usuários</td><td><code>CM/Forms/DbObjects/uDbGrupoacesso.pas; uDbGrupousu.pas</code></td></tr>
+<tr><td><code>TABELAACESSO / COLUNAACESSO</code></td><td>Restrição de acesso por tabela e por coluna</td><td><code>CM/Forms/DbObjects/uDbTabelaacesso.pas; uDbColunaacesso.pas</code></td></tr>
+<tr><td><code>LOGTABELAS / LOGTABELASINDX / RETLOGTABELAS</code></td><td>Log de alterações e exclusões e sua indexação/retenção</td><td><code>CMGLOBALOBJ50/DbObjects/uDbLogTabelas.pas</code></td></tr>
+<tr><td><code>LOGACESSOSIS / HISTSENHA</code></td><td>Log de acessos ao sistema e histórico de senhas</td><td><code>CM/Forms/DbObjects/uDbLogacessosis.pas; uDbHistsenha.pas</code></td></tr>
+<tr><td><code>PARAMGLOBAL</code></td><td>Parâmetros globais da suíte</td><td><code>CMGLOBALOBJ50/DbObjects/uDbParamGlobal.pas</code></td></tr>
+<tr><td><code>MODULO / UNIDNEGOCIO</code></td><td>Catálogo de módulos e unidades de negócio</td><td><code>CMGLOBALOBJ50/DbObjects/uDbModulo.pas; uDbUnidNegocio.pas</code></td></tr>
+<tr><td><code>TABELADEPARACC / CAMPODEPARACC / DEPARACC</code></td><td>Configuração e execução de de/para de centro de custo</td><td><code>CMGLOBALOBJ50/DbObjects/uDbTabeladeparacc.pas; uDbCampodeparacc.pas; uDbDeparacc.pas</code></td></tr>
+<tr><td><code>LAYOUTIMPORT / COLLAYOUTIMPORT</code></td><td>Layouts de importação de arquivos e suas colunas</td><td><code>CMGLOBALOBJ50/DbObjects/uDbLayoutimport.pas; uDbCollayoutimport.pas</code></td></tr>
+<tr><td><code>FERIADO / ESTADO / PAIS / CIDADE</code></td><td>Tabelas de apoio de calendário e localização</td><td><code>CMGLOBALOBJ50/DbObjects/uDbFeriado.pas; uDbEstado.pas; uDbPais.pas; uDbCidade.pas</code></td></tr>
+<tr><td><code>PROGRAMA</code></td><td>Programas previdenciários usados em rateio e orçamento</td><td><code>CMGLOBALOBJ50/DbObjects/uDbPrograma.pas</code></td></tr>
+<tr><td><code>USUARIOSISTEMA</code></td><td>Usuários do sistema e vínculo com pessoa</td><td><code>GLOBALCM/FONTES (consultas de acesso)</code></td></tr>
+</tbody></table></div>
     </section>
     <section id="complexidade">
       <div class="section-title">📊 Estimativa de Complexidade</div>
@@ -234,9 +278,9 @@ ul.check li::before { content: "☐ "; }
         <li><span class="key">Tecnologia</span><span class="val">Delphi 5 / VCL</span></li>
         <li><span class="key">Banco de Dados</span><span class="val">Oracle</span></li>
         <li><span class="key">Acesso a Dados</span><span class="val">MIDAS/ClientDataSet + DBTables</span></li>
-        <li><span class="key">Cobertura Funcional</span><span class="val">40–60%</span></li>
-        <li><span class="key">Última Atualização</span><span class="val">2026-08-19</span></li>
-        <li><span class="key">Confiança</span><span class="val"><span class="tag tag-média">Média</span></span></li>
+        <li><span class="key">Cobertura Funcional</span><span class="val">80%</span></li>
+        <li><span class="key">Última Atualização</span><span class="val">2026-08-24</span></li>
+        <li><span class="key">Confiança</span><span class="val"><span class="tag tag-alta">Alta</span></span></li>
       </ul>
     </section>
     <section>
@@ -245,7 +289,7 @@ ul.check li::before { content: "☐ "; }
         <li><span class="key">Forms/DFM</span><span class="val">~81</span></li>
         <li><span class="key">Data Modules</span><span class="val">~0</span></li>
         <li><span class="key">Units</span><span class="val">~129</span></li>
-        <li><span class="key">Tabelas</span><span class="val">4</span></li>
+        <li><span class="key">Tabelas</span><span class="val">20</span></li>
       </ul>
     </section>
     <section>
@@ -256,11 +300,20 @@ ul.check li::before { content: "☐ "; }
       <div class="section-title">♻️ Padrões Reutilizáveis</div>
       <ul class="dep-list"><li>Padrão CM (Forms MT + CtrlObjects + DbObjects)</li><li>Autorização via framework CM</li></ul>
     </section>
+    <section>
+      <div class="section-title">📎 Ver Também</div>
+      <ul class="dep-list">
+<li><a href="../../../cross-cutting-features.html">Funcionalidades Transversais</a></li>
+<li><a href="../../../business-rules-catalog.html">Catálogo de Regras de Negócio</a></li>
+<li><a href="../../../documentation-gap-analysis.html">Levantamento de Lacunas</a></li>
+<li><a href="../../../system-overview.html">Visão Geral do Sistema</a></li>
+</ul>
+    </section>
   </div>
 </main>
 
 <footer>
-<p>CM Contabilidade — Módulo Cadastros Globais e Framework CM | Delphi 5 | Documentação gerada em 2026-08-19 | pt-BR</p>
+<p>CM Contabilidade — Módulo Cadastros Globais e Framework CM | Delphi 5 | Documentação gerada em 2026-08-19 · revisada em 2026-08-24 (PFC-3) | pt-BR</p>
 </footer>
 </body>
 </html>
