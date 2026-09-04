@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FUNCEF Kit Offline — Manual do Fornecedor</title>
+  <style>
+    :root {
+      --bg: #0f1419;
+      --panel: #1a2332;
+      --text: #e7ecf3;
+      --muted: #9aa8bc;
+      --accent: #3d8bfd;
+      --border: #2a3548;
+      --ok: #3ecf8e;
+      --warn: #f0b429;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.55;
+    }
+    .layout { display: grid; grid-template-columns: 280px 1fr; min-height: 100vh; }
+    nav {
+      background: var(--panel);
+      border-right: 1px solid var(--border);
+      padding: 1.5rem 1rem;
+      position: sticky; top: 0; height: 100vh; overflow: auto;
+    }
+    nav h1 { font-size: 1rem; margin: 0 0 1rem; color: var(--accent); }
+    nav a {
+      display: block; color: var(--muted); text-decoration: none;
+      padding: 0.35rem 0.5rem; border-radius: 6px; font-size: 0.92rem;
+    }
+    nav a:hover { background: #243044; color: var(--text); }
+    main { padding: 2rem 2.5rem 4rem; max-width: 860px; }
+    h2 { margin-top: 2.5rem; border-bottom: 1px solid var(--border); padding-bottom: 0.4rem; }
+    h3 { margin-top: 1.6rem; color: #c5d4ea; }
+    code, pre {
+      font-family: ui-monospace, Consolas, monospace;
+      background: #121a24;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+    }
+    code { padding: 0.1rem 0.35rem; font-size: 0.88em; }
+    pre { padding: 1rem; overflow: auto; font-size: 0.85rem; }
+    table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.92rem; }
+    th, td { border: 1px solid var(--border); padding: 0.55rem 0.7rem; text-align: left; vertical-align: top; }
+    th { background: var(--panel); }
+    .callout {
+      border-left: 4px solid var(--accent);
+      background: var(--panel);
+      padding: 0.85rem 1rem;
+      margin: 1rem 0;
+      border-radius: 0 8px 8px 0;
+    }
+    .callout.warn { border-left-color: var(--warn); }
+    .callout.ok { border-left-color: var(--ok); }
+    ul { padding-left: 1.2rem; }
+    @media (max-width: 900px) {
+      .layout { grid-template-columns: 1fr; }
+      nav { position: relative; height: auto; }
+    }
+  </style>
+</head>
+<body>
+<div class="layout">
+  <nav>
+    <h1>FUNCEF Kit Offline</h1>
+    <a href="#comece">1. Comece aqui</a>
+    <a href="#arquitetura">2. Arquitetura (15 min)</a>
+    <a href="#backend">3. Backend FUNCEF.*</a>
+    <a href="#frontend">4. Frontend</a>
+    <a href="#templates">5. Usando os templates</a>
+    <a href="#config">6. Configuração</a>
+    <a href="#troubleshoot">7. Troubleshooting</a>
+    <a href="#anexos">8. Anexos</a>
+  </nav>
+  <main>
+    <h2 id="comece">1. Comece aqui</h2>
+    <p>Este kit permite desenvolver e entregar sistemas na arquitetura FUNCEF <strong>sem acesso</strong> ao Git interno nem aos feeds privados (GitHub Packages / npm privado).</p>
+    <div class="callout ok">
+      <strong>O que você tem:</strong> templates em código-fonte, pacotes NuGet <code>FUNCEF.*</code> (.NET 10), pacotes npm <code>@funcef-componentes/*</code>, e este manual.
+    </div>
+    <h3>Pré-requisitos</h3>
+    <ul>
+      <li>.NET SDK <strong>10</strong></li>
+      <li>Node.js <strong>≥ 22</strong> e <strong>pnpm</strong></li>
+      <li>Rede para <strong>nuget.org</strong> e <strong>registry.npmjs.org</strong> (dependências públicas)</li>
+    </ul>
+    <h3>Feeds locais</h3>
+    <pre>feeds/
+  nuget.config          # funcef-local + nuget.org
+  nuget-local/*.nupkg   # FUNCEF.*
+  npm-local/*.tgz       # @funcef-componentes/*
+  .npmrc.example</pre>
+    <p>Backend: copie <code>feeds/nuget.config</code> para a raiz de <code>templates/api-template-base</code> e ajuste o caminho <code>./nuget-local</code> se necessário (relativo à pasta do config).</p>
+    <pre>cd templates/api-template-base
+# exemplo: nuget.config apontando para ../../feeds/nuget-local
+dotnet restore
+dotnet build</pre>
+
+    <h2 id="arquitetura">2. Arquitetura FUNCEF em 15 minutos</h2>
+    <ul>
+      <li><strong>Backend:</strong> .NET 10, Clean Architecture (API / Application / Domain / Infrastructure), CQRS via Mediator (<code>FUNCEF.Essenciais</code>), Oracle via <code>FUNCEF.ORM</code>, autenticação Entra + autorização PDP via <code>FUNCEF.Autenticacao</code>.</li>
+      <li><strong>Frontend:</strong> Next.js + React, 4 camadas (app / features / core / shared), Design System <code>@funcef-componentes/react</code>, auth <code>@funcef-componentes/auth</code>, dados via BFF <code>/api/bff</code> (não chamar a API direto do browser no padrão Full BA).</li>
+      <li><strong>Dados:</strong> Oracle 19c+, PadraoBD v2.2; cache Redis; Mongo opcional só como document store (não auditoria).</li>
+      <li><strong>Segredos:</strong> Azure Key Vault; forma canônica <code>*FromKeyVault: { Enabled, SecretName }</code>. Nunca versionar segredos.</li>
+    </ul>
+
+    <h2 id="backend">3. Backend — componentes FUNCEF.*</h2>
+    <p>Pacotes neste kit (NuGet):</p>
+    <table>
+      <thead><tr><th>Pacote</th><th>Papel</th><th>Registro típico</th></tr></thead>
+      <tbody>
+        <tr><td><code>FUNCEF.Abstractions</code> 3.1.0</td><td>Contratos (<code>ICacheStore</code>, <code>ISecretReader</code>, <code>SecretRef</code>, paginação)</td><td>—</td></tr>
+        <tr><td><code>FUNCEF.Build</code> 3.0.0</td><td>Analisadores / build-time</td><td>PrivateAssets</td></tr>
+        <tr><td><code>FUNCEF.Essenciais</code></td><td>Mediator, BaseController, validações BR, telemetria</td><td><code>AddMediatorWithDefaults</code></td></tr>
+        <tr><td><code>FUNCEF.ORM</code></td><td>EF + Dapper, UoW, auditoria Oracle</td><td><code>AddFuncefORM*</code></td></tr>
+        <tr><td><code>FUNCEF.Autenticacao</code></td><td>Entra + <code>[FuncefAuthorize]</code> + refresh</td><td><code>AddFUNCEFAuthentication</code></td></tr>
+        <tr><td><code>FUNCEF.NoSql</code></td><td>Redis cache + Mongo documentos</td><td><code>AddRedisCache</code> / <code>AddMongoDocuments</code></td></tr>
+        <tr><td><code>FUNCEF.Cofre</code></td><td>Key Vault</td><td><code>AddVaultComplete</code></td></tr>
+        <tr><td><code>FUNCEF.Armazenamentos</code></td><td>Blob / Service Bus</td><td><code>AddStorageServices</code></td></tr>
+      </tbody>
+    </table>
+    <div class="callout warn">
+      <strong>Breaking / canônico Redis:</strong> seção de configuração = <code>NoSql:RedisCache</code> (default da lib e dos templates deste kit).
+      Não use <code>NoSql:Redis</code>. Variáveis de ambiente: <code>NoSql__RedisCache__...</code>.
+      <code>Auth:RefreshToken:StorageType = "Redis"</code> é o <em>tipo</em> de store, não o nome da seção.
+    </div>
+    <h3>SecretRef</h3>
+    <pre>{
+  "ConnectionStringFromKeyVault": {
+    "Enabled": true,
+    "SecretName": "nome-do-segredo-no-cofre"
+  }
+}</pre>
+    <p>URL do Key Vault (curto prazo nos templates): chave <code>KeyVault:Url</code> = <code>https://kv-&lt;sistema&gt;-&lt;env&gt;-001.vault.azure.net/</code> (placeholder).</p>
+
+    <h2 id="frontend">4. Frontend</h2>
+    <p>Pacotes neste kit (npm tarball):</p>
+    <ul>
+      <li><code>@funcef-componentes/react</code></li>
+      <li><code>@funcef-componentes/auth</code></li>
+      <li><code>@funcef-componentes/tailwind</code></li>
+      <li><code>@funcef-componentes/observability</code></li>
+      <li><code>@funcef-componentes/cli</code></li>
+    </ul>
+    <p>O <code>package.json</code> deste kit já aponta <code>file:../../feeds/npm-local/...</code> (auth 1.0.0, react 2.3.0, tailwind 1.0.4):</p>
+    <pre>cd templates/web-template
+pnpm install
+pnpm dev</pre>
+    <div class="callout ok">
+      Versões exatas em <code>VERSIONS.md</code> e <code>feeds/npm-local/</code>. Não use ranges ^3.x do registry privado neste kit offline.
+    </div>
+    <p>Padrão Full BA: login no Next; API chamada via BFF server-side. CORS browser→API não é o caminho principal.</p>
+
+    <h2 id="templates">5. Usando os templates</h2>
+    <h3>api-template-base</h3>
+    <ol>
+      <li>Copie a pasta, configure <code>nuget.config</code> → feed local.</li>
+      <li><code>dotnet restore &amp;&amp; dotnet build</code>.</li>
+      <li>Substitua o domínio didático (Cliente/Ordem) pelo domínio real (PK <code>long</code> IDENTITY).</li>
+      <li>Preencha Entra / Key Vault com valores do <em>kickoff</em> (nunca commitados).</li>
+    </ol>
+    <h3>lib-api-template (funcef-api)</h3>
+    <p>Scaffold CLI. Com o template instalado a partir desta fonte, gere novos microsserviços. Mesma stack e seções de config do <code>api-template-base</code>.</p>
+    <h3>web-template</h3>
+    <ol>
+      <li>Instale os <code>.tgz</code> do kit.</li>
+      <li>Configure env do kickoff (<code>TENANT_ID</code>, <code>CLIENT_ID</code>, <code>API_URL</code>, etc. como placeholders).</li>
+      <li>Use <code>features/</code> como contrato de domínio; HTTP só via <code>@/core/api</code> → BFF.</li>
+    </ol>
+
+    <h2 id="config">6. Configuração e ambientes</h2>
+    <table>
+      <thead><tr><th>Ambiente</th><th>Notas</th></tr></thead>
+      <tbody>
+        <tr><td>Development</td><td>user-secrets / connection strings locais aceitáveis; Swagger ON; refresh <code>InMemory</code> ok</td></tr>
+        <tr><td>Homologation / Production</td><td>Key Vault obrigatório; refresh Redis; CORS com origens explícitas (<code>Politica</code> / <code>OriginsPermitidas</code>)</td></tr>
+      </tbody>
+    </table>
+    <p><strong>Proibido no Git:</strong> ClientSecret, connection strings, signing keys. Use placeholders <code>&lt;TENANT_ID&gt;</code>, <code>&lt;CLIENT_ID&gt;</code>, <code>&lt;KEY_VAULT_URL&gt;</code>, <code>&lt;SENHA&gt;</code>.</p>
+
+    <h2 id="troubleshoot">7. Troubleshooting</h2>
+    <table>
+      <thead><tr><th>Sintoma</th><th>Causa provável</th><th>Ação</th></tr></thead>
+      <tbody>
+        <tr><td>Restore não acha FUNCEF.*</td><td>nuget.config sem funcef-local</td><td>Verificar path e <code>packageSourceMapping</code></td></tr>
+        <tr><td>NU1603 / NU1109 em Abstractions</td><td>Range CPM sem o lower-bound no feed</td><td>Usar pins exatos do kit (<code>Directory.Packages.props</code>)</td></tr>
+        <tr><td>Cache Redis “não liga”</td><td>Seção <code>NoSql:Redis</code> antiga</td><td>Usar <code>NoSql:RedisCache</code></td></tr>
+        <tr><td>401 Entra (audience)</td><td><code>aud</code> vs ClientId / api://</td><td>Alinhar ao token v2 (GUID) conforme kickoff</td></tr>
+        <tr><td>Refresh token não compartilha entre réplicas</td><td>Redis depois do auth / StorageType errado</td><td>Registrar <code>AddRedisCache</code> <em>antes</em> de auth; <code>StorageType=Redis</code></td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="anexos">8. Anexos</h2>
+    <ul>
+      <li><code>VERSIONS.md</code> — commits das fontes usadas para gerar este kit</li>
+      <li><code>feeds/nuget-local/</code> — lista de <code>.nupkg</code></li>
+      <li><code>feeds/npm-local/</code> — lista de <code>.tgz</code></li>
+    </ul>
+    <p>Operador de exemplo em documentação: <code>operador@exemplo.local</code>.</p>
+    <div class="callout">
+      Este handbook resume a DoutrinaFUNCEF para uso do fornecedor. Não inclui runbooks de produção, repositórios internos de Design/Figma, nem credenciais.
+    </div>
+  </main>
+</div>
+</body>
+</html>

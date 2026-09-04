@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - TemplateBase</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
+    <style>
+        .dashboard-page {
+            min-height: 100vh;
+            padding: var(--space-xl);
+        }
+
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-2xl);
+            padding-bottom: var(--space-lg);
+            border-bottom: 1px solid var(--nord-polar-2);
+        }
+
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+        }
+
+        .header-brand-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--coral) 0%, var(--coral-dark) 100%);
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .header-brand-icon svg { width: 24px; height: 24px; fill: white; }
+        .header-brand h1 { font-size: 1.5rem; }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            padding: var(--space-sm) var(--space-md);
+            background: var(--bg-secondary);
+            border-radius: var(--radius-full);
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--nord-frost-1) 0%, var(--nord-frost-3) 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+
+        .user-info { display: flex; flex-direction: column; }
+        .user-name { font-weight: 600; font-size: 0.875rem; }
+        .user-email { font-size: 0.75rem; color: var(--text-secondary); }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-xl);
+            border-bottom: 1px solid var(--nord-polar-2);
+            padding-bottom: 0;
+        }
+
+        .tab-btn {
+            padding: var(--space-md) var(--space-lg);
+            background: none;
+            border: none;
+            border-bottom: 2px solid transparent;
+            color: var(--text-muted);
+            font-family: var(--font-body);
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            margin-bottom: -1px;
+        }
+
+        .tab-btn:hover { color: var(--text-secondary); }
+
+        .tab-btn.active {
+            color: var(--coral);
+            border-bottom-color: var(--coral);
+        }
+
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; animation: fadeIn 0.3s ease-out; }
+
+        /* Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: var(--space-lg);
+        }
+
+        .dashboard-grid .card {
+            opacity: 0;
+            animation: slideUp 0.5s ease-out forwards;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-lg);
+            padding-bottom: var(--space-md);
+            border-bottom: 1px solid var(--nord-polar-2);
+        }
+
+        .card-icon {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-sm);
+        }
+
+        .card-icon svg { width: 18px; height: 18px; fill: var(--coral); }
+        .card-title { font-size: 1rem; font-weight: 600; }
+
+        /* Info Items */
+        .info-list { display: flex; flex-direction: column; gap: var(--space-md); }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-xs);
+            padding: var(--space-md);
+            background: var(--bg-primary);
+            border-radius: var(--radius-sm);
+            border-left: 3px solid var(--nord-frost-1);
+        }
+
+        .info-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+        }
+
+        .info-value { font-size: 0.9rem; word-break: break-all; }
+
+        /* Roles */
+        .roles-list { display: flex; flex-wrap: wrap; gap: var(--space-sm); }
+
+        .role-badge {
+            padding: var(--space-xs) var(--space-md);
+            background: linear-gradient(135deg, var(--coral) 0%, var(--coral-dark) 100%);
+            color: white;
+            border-radius: var(--radius-full);
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        /* Token Section */
+        .token-container { position: relative; }
+
+        .token-display {
+            background: var(--bg-primary);
+            border: 1px solid var(--nord-polar-2);
+            border-radius: var(--radius-sm);
+            padding: var(--space-md);
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--nord-frost-1);
+            max-height: 150px;
+            overflow-y: auto;
+            word-break: break-all;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: var(--space-sm);
+            right: var(--space-sm);
+            padding: var(--space-xs) var(--space-sm);
+            background: var(--coral);
+            color: white;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 0.7rem;
+            cursor: pointer;
+            transition: background var(--transition-fast);
+        }
+
+        .copy-btn:hover { background: var(--coral-light); }
+
+        /* JWT Decoded section */
+        .jwt-sections {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-lg);
+            margin-top: var(--space-lg);
+        }
+
+        .jwt-section-title {
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: var(--space-sm);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .jwt-section-title .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .dot-header { background: var(--coral); }
+        .dot-payload { background: var(--nord-frost-1); }
+
+        .jwt-json {
+            background: var(--bg-primary);
+            border: 1px solid var(--nord-polar-2);
+            border-radius: var(--radius-sm);
+            padding: var(--space-md);
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            overflow-x: auto;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        /* Claims */
+        .claims-list {
+            max-height: 400px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-sm);
+        }
+
+        .claim-item {
+            padding: var(--space-sm) var(--space-md);
+            background: var(--bg-primary);
+            border-radius: var(--radius-sm);
+            border-left: 2px solid var(--nord-frost-2);
+        }
+
+        .claim-type {
+            font-size: 0.7rem;
+            color: var(--coral);
+            font-family: var(--font-mono);
+        }
+
+        .claim-value {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            word-break: break-all;
+        }
+
+        /* Loading */
+        .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 60vh;
+            gap: var(--space-lg);
+        }
+
+        /* Error */
+        .error-container { text-align: center; padding: var(--space-2xl); }
+
+        .error-icon {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto var(--space-lg);
+            background: rgba(191, 97, 106, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .error-icon svg { width: 32px; height: 32px; fill: var(--aurora-red); }
+
+        /* Full width card */
+        .card-full { grid-column: 1 / -1; }
+
+        /* Status indicator */
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: var(--space-xs);
+        }
+
+        .status-dot.online { background: var(--aurora-green); }
+        .status-dot.offline { background: var(--aurora-red); }
+
+        /* Search */
+        .claims-search {
+            width: 100%;
+            padding: var(--space-sm) var(--space-md);
+            background: var(--bg-primary);
+            border: 1px solid var(--nord-polar-3);
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+            font-family: var(--font-body);
+            font-size: 0.85rem;
+            margin-bottom: var(--space-md);
+            transition: border-color var(--transition-fast);
+        }
+
+        .claims-search:focus {
+            outline: none;
+            border-color: var(--nord-frost-1);
+            box-shadow: 0 0 0 3px rgba(136, 192, 208, 0.2);
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-header {
+                flex-direction: column;
+                gap: var(--space-md);
+                text-align: center;
+            }
+            .header-actions { width: 100%; flex-direction: column; }
+            .user-menu { width: 100%; justify-content: center; }
+            .dashboard-grid { grid-template-columns: 1fr; }
+            .tabs { overflow-x: auto; white-space: nowrap; }
+        }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body class="bg-mesh">
+    <div class="dashboard-page">
+        <div class="dashboard-container">
+            <!-- Loading State -->
+            <div id="loadingState" class="loading-container">
+                <div class="spinner"></div>
+                <span style="color: var(--text-secondary);">Carregando informacoes do usuario...</span>
+            </div>
+
+            <!-- Error State -->
+            <div id="errorState" style="display: none;">
+                <div class="card error-container">
+                    <div class="error-icon">
+                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                        </svg>
+                    </div>
+                    <h2 style="color: var(--aurora-red); margin-bottom: var(--space-md);">Nao autenticado</h2>
+                    <p style="color: var(--text-secondary); margin-bottom: var(--space-xl);" id="errorMessage">
+                        Voce precisa fazer login para acessar o dashboard.
+                    </p>
+                    <a href="/login.html" class="btn btn-primary">Fazer Login</a>
+                </div>
+            </div>
+
+            <!-- Dashboard Content -->
+            <div id="dashboardContent" style="display: none;">
+                <!-- Header -->
+                <header class="dashboard-header animate-slide-down">
+                    <div class="header-brand">
+                        <div class="header-brand-icon">
+                            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M4 8h4V4H4v4zm6 12h4v-4h-4v4zm-6 0h4v-4H4v4zm0-6h4v-4H4v4zm6 0h4v-4h-4v4zm6-10v4h4V4h-4zm-6 4h4V4h-4v4zm6 6h4v-4h-4v4zm0 6h4v-4h-4v4z"/>
+                            </svg>
+                        </div>
+                        <h1 class="text-gradient">TemplateBase</h1>
+                    </div>
+
+                    <div class="header-actions">
+                        <div class="user-menu">
+                            <div class="user-avatar" id="userAvatar">?</div>
+                            <div class="user-info">
+                                <span class="user-name" id="userName">Carregando...</span>
+                                <span class="user-email" id="userEmail">...</span>
+                            </div>
+                        </div>
+                        <a href="/swagger" class="btn btn-secondary" style="font-size: 0.85rem;">Swagger</a>
+                        <button class="btn btn-secondary" onclick="handleLogout()">Sair</button>
+                    </div>
+                </header>
+
+                <!-- Tabs -->
+                <div class="tabs">
+                    <button class="tab-btn active" onclick="switchTab('overview')">Visao Geral</button>
+                    <button class="tab-btn" onclick="switchTab('jwt')">JWT Configuracoes</button>
+                    <button class="tab-btn" onclick="switchTab('claims')">Claims</button>
+                    <button class="tab-btn" onclick="switchTab('refresh')">Refresh Token</button>
+                </div>
+
+                <!-- Tab: Overview -->
+                <div id="tab-overview" class="tab-panel active">
+                    <div class="dashboard-grid">
+                        <!-- User Info Card -->
+                        <div class="card stagger-1">
+                            <div class="card-header">
+                                <div class="card-icon">
+                                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                                    </svg>
+                                </div>
+                                <h3 class="card-title">Informacoes do Usuario</h3>
+                            </div>
+                            <div class="info-list" id="userInfoList"></div>
+                        </div>
+
+                        <!-- Authentication Info Card -->
+                        <div class="card stagger-2">
+                            <div class="card-header">
+                                <div class="card-icon">
+                                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
+                                    </svg>
+                                </div>
+                                <h3 class="card-title">Autenticacao</h3>
+                            </div>
+                            <div class="info-list" id="authInfoList"></div>
+                        </div>
+
+                        <!-- Roles Card -->
+                        <div class="card stagger-3">
+                            <div class="card-header">
+                                <div class="card-icon">
+                                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/>
+                                    </svg>
+                                </div>
+                                <h3 class="card-title">Roles / Permissoes</h3>
+                            </div>
+                            <div class="roles-list" id="rolesList"></div>
+                        </div>
+
+                        <!-- Quick Token Card -->
+                        <div class="card stagger-4">
+                            <div class="card-header">
+                                <div class="card-icon">
+                                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M21 5V3H3v2l8 9v5H6v2h12v-2h-5v-5l8-9zM7.43 7L5.66 5h12.69l-1.78 2H7.43z"/>
+                                    </svg>
+                                </div>
+                                <h3 class="card-title">Access Token</h3>
+                            </div>
+                            <div class="token-container">
+                                <button class="copy-btn" onclick="copyToken()">Copiar</button>
+                                <div class="token-display" id="tokenDisplayOverview"></div>
+                            </div>
+                            <div class="info-list mt-lg" id="tokenInfoList"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab: JWT Settings -->
+                <div id="tab-jwt" class="tab-panel">
+                    <div class="dashboard-grid">
+                        <!-- Full Token Card -->
+                        <div class="card card-full stagger-1">
+                            <div class="card-header">
+                                <div class="card-icon">
+                                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M21 5V3H3v2l8 9v5H6v2h12v-2h-5v-5l8-9zM7.43 7L5.66 5h12.69l-1.78 2H7.43z"/>
+                                    </svg>
+                                </div>
+                                <h3 class="card-title">Access Token JWT (Completo)</h3>
+                            </div>
+                            <div class="token-container">
+                                <button class="copy-btn" onclick="copyToken()">Copiar Token</button>
+                                <div class="token-display" id="tokenDisplayFull" style="max-height: 200px;"></div>
+                            </div>
+                        </div>
+
+                        <!-- JWT Header Card -->
+                        <div class="card stagger-2">
+                            <div class="card-header">
+                                <div class="card-icon" style="background: rgba(255, 107, 107, 0.15);">
+                                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="fill: var(--coral);">
+                                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                                    </svg>
+                                </div>
+                                <h3 class="card-title">Header</h3>
+                                <span class="badge badge-error">JOSE</span>
+                            </div>
+                            <div class="jwt-json" id="jwtHeader"></div>
+                        </div>
+
+                        <!-- JWT Payload Card -->
+                        <div class="card stagger-3">
+                            <div class="card-header">
+                                <div class="card-icon" style="background: rgba(136, 192, 208, 0.15);">
+                                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="fill: var(--nord-frost-1);">
+                                        <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
+                                    </svg>
+                                </div>
+                                <h3 class="card-title">Payload</h3>
+                                <span class="badge badge-info" id="payloadClaimsCount">0 campos</span>
+                            </div>
+                            <div class="jwt-json" id="jwtPayload" style="max-height: 400px;"></div>
+                        </div>
+
+                        <!-- Token Metadata Card -->
+                        <div class="card card-full stagger-4">
+                            <div class="card-header">
+                                <div class="card-icon">
+                                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>
+                                    </svg>
+                                </div>
+                                <h3 class="card-title">Metadados do Token</h3>
+                            </div>
+                            <div class="info-list" id="jwtMetadata"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab: Claims -->
+                <div id="tab-claims" class="tab-panel">
+                    <div class="card card-full">
+                        <div class="card-header">
+                            <div class="card-icon">
+                                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
+                                </svg>
+                            </div>
+                            <h3 class="card-title">Claims do Token</h3>
+                            <span class="badge badge-info" id="claimsCount">0 claims</span>
+                        </div>
+                        <input type="text" class="claims-search" id="claimsSearch" placeholder="Buscar claims por tipo ou valor..." oninput="filterClaims()">
+                        <div class="claims-list" id="claimsList"></div>
+                    </div>
+                </div>
+
+                <!-- Tab: Refresh Token -->
+                <div id="tab-refresh" class="tab-panel">
+                    <div class="dashboard-grid">
+                        <div class="card card-full stagger-1" id="refreshTokenCard">
+                            <div class="card-header">
+                                <div class="card-icon" style="background: rgba(163, 190, 140, 0.15);">
+                                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="fill: var(--aurora-green);">
+                                        <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
+                                    </svg>
+                                </div>
+                                <h3 class="card-title">Refresh Token</h3>
+                                <span class="badge badge-success" id="refreshStatus">Verificando...</span>
+                            </div>
+
+                            <div id="refreshContent">
+                                <div class="token-container">
+                                    <button class="copy-btn" onclick="copyRefreshToken()">Copiar</button>
+                                    <div class="token-display" id="refreshTokenDisplay" style="color: var(--aurora-green);"></div>
+                                </div>
+                                <div class="info-list mt-lg" id="refreshTokenInfoList"></div>
+                                <div style="margin-top: var(--space-lg); display: flex; gap: var(--space-md); flex-wrap: wrap;">
+                                    <button class="btn btn-primary" onclick="handleRefreshToken()" id="refreshBtn">Renovar Tokens</button>
+                                    <button class="btn btn-secondary" onclick="handleValidateRefresh()" id="validateBtn">Validar Token</button>
+                                    <button class="btn btn-secondary" onclick="handleRevokeToken()" id="revokeBtn" style="border-color: var(--aurora-red); color: var(--aurora-red);">Revogar</button>
+                                </div>
+                            </div>
+
+                            <div id="noRefreshContent" style="display: none; text-align: center; padding: var(--space-xl);">
+                                <p style="color: var(--text-secondary); margin-bottom: var(--space-lg);">
+                                    Nenhum refresh token disponivel. Refresh tokens sao gerados quando habilitados na configuracao do servidor.
+                                </p>
+                                <a href="/login.html" class="btn btn-primary">Fazer Login Novamente</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var jwtToken = null;
+        var refreshToken = null;
+        var allClaims = [];
+
+        // ==============================
+        // Initialization
+        // ==============================
+        async function initDashboard() {
+            jwtToken = localStorage.getItem('jwt_token');
+            refreshToken = localStorage.getItem('refresh_token');
+
+            // Fluxo server-side do FUNCEF.Autenticacao: apos o callback os tokens ficam na sessao
+            // (cookie HttpOnly) e sao expostos uma unica vez via /auth/tokens. Evita trafegar tokens
+            // na URL (que vazariam em historico/logs/Referer).
+            if (!jwtToken) {
+                await bootstrapTokensFromSession();
+            }
+
+            if (!jwtToken) {
+                showError('Voce precisa fazer login para acessar o dashboard.');
+                return;
+            }
+
+            await loadUserInfo();
+        }
+
+        async function bootstrapTokensFromSession() {
+            try {
+                var response = await fetch('/auth/tokens', { credentials: 'same-origin' });
+                if (!response.ok) return; // 204 = nenhum token na sessao
+                var data = await response.json();
+                if (data && data.accessToken) {
+                    jwtToken = data.accessToken;
+                    localStorage.setItem('jwt_token', jwtToken);
+                    if (data.refreshToken) {
+                        refreshToken = data.refreshToken;
+                        localStorage.setItem('refresh_token', refreshToken);
+                    }
+                }
+            } catch (e) {
+                console.error('Falha ao obter tokens da sessao:', e);
+            }
+        }
+
+        // ==============================
+        // API Calls
+        // ==============================
+        async function loadUserInfo() {
+            try {
+                var headers = {
+                    'Authorization': 'Bearer ' + jwtToken,
+                    'Content-Type': 'application/json'
+                };
+
+                // Fetch user info and claims in parallel
+                var responses = await Promise.all([
+                    fetch('/auth/user/me', { headers: headers }),
+                    fetch('/auth/user/claims', { headers: headers })
+                ]);
+
+                if (responses[0].status === 401) {
+                    showError('Sessao expirada ou token invalido. Por favor, faca login novamente.');
+                    return;
+                }
+
+                if (!responses[0].ok) throw new Error('Erro ' + responses[0].status);
+
+                var data = await responses[0].json();
+                var claims = [];
+                if (responses[1].ok) {
+                    var claimsData = await responses[1].json();
+                    claims = claimsData.claims || [];
+                }
+
+                displayDashboard(data, claims);
+            } catch (error) {
+                console.error('Erro ao carregar dados:', error);
+                showError('Erro ao carregar informacoes: ' + error.message);
+            }
+        }
+
+        // ==============================
+        // Display
+        // ==============================
+        function displayDashboard(data, claims) {
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('dashboardContent').style.display = 'block';
+
+            allClaims = claims;
+
+            // Header
+            var name = (data.user && data.user.name) || 'Usuario';
+            var email = (data.user && data.user.email) || '';
+            document.getElementById('userName').textContent = name;
+            document.getElementById('userEmail').textContent = email;
+            document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
+
+            // User Info
+            replaceChildrenWith(document.getElementById('userInfoList'), [
+                infoItem('ID', (data.user && data.user.id) || 'N/A'),
+                infoItem('Nome', (data.user && data.user.name) || 'N/A'),
+                infoItem('Email', (data.user && data.user.email) || 'N/A'),
+                infoItem('Login', (data.user && data.user.login) || 'N/A')
+            ]);
+
+            // Auth Info
+            var isAuthenticated = data.isAuthenticated;
+            var providerName = (data.provider && data.provider.name) || 'N/A';
+            var isM2M = data.authentication && data.authentication.isM2M;
+            var issuer = (data.provider && data.provider.issuer) || 'N/A';
+
+            replaceChildrenWith(document.getElementById('authInfoList'), [
+                statusInfoItem(isAuthenticated),
+                infoItem('Provedor', providerName),
+                infoItem('Tipo', isM2M ? 'M2M (Aplicacao)' : 'Interativo (Usuario)'),
+                infoItem('Issuer', issuer, { valueFontSize: '0.75rem' })
+            ]);
+
+            // Roles
+            var roles = data.roles || [];
+            replaceChildrenWith(document.getElementById('rolesList'), roles.length > 0
+                ? roles.map(function(role) { return el('span', 'role-badge', role); })
+                : [mutedText('Nenhuma role atribuida')]);
+
+            // Token displays
+            document.getElementById('tokenDisplayOverview').textContent = jwtToken;
+            document.getElementById('tokenDisplayFull').textContent = jwtToken;
+
+            // Parse JWT
+            try {
+                var parts = jwtToken.split('.');
+                var header = JSON.parse(decodeJwtSegment(parts[0]));
+                var payload = JSON.parse(decodeJwtSegment(parts[1]));
+
+                // JWT Header
+                document.getElementById('jwtHeader').textContent = JSON.stringify(header, null, 2);
+
+                // JWT Payload
+                document.getElementById('jwtPayload').textContent = JSON.stringify(payload, null, 2);
+                document.getElementById('payloadClaimsCount').textContent = Object.keys(payload).length + ' campos';
+
+                // Token metadata
+                var expDate = payload.exp ? new Date(payload.exp * 1000) : null;
+                var iatDate = payload.iat ? new Date(payload.iat * 1000) : null;
+                var nbfDate = payload.nbf ? new Date(payload.nbf * 1000) : null;
+                var isExpired = expDate && expDate < new Date();
+
+                replaceChildrenWith(document.getElementById('jwtMetadata'), [
+                    infoItem('Algoritmo (alg)', header.alg || 'N/A'),
+                    infoItem('Tipo (typ)', header.typ || 'N/A'),
+                    header.kid ? infoItem('Key ID (kid)', header.kid) : null,
+                    infoItem('Emitido em (iat)', iatDate ? iatDate.toLocaleString('pt-BR') : 'N/A'),
+                    nbfDate ? infoItem('Valido a partir de (nbf)', nbfDate.toLocaleString('pt-BR')) : null,
+                    expiryInfoItem('Expira em (exp)', expDate, isExpired),
+                    payload.aud ? infoItem('Audience (aud)', typeof payload.aud === 'string' ? payload.aud : JSON.stringify(payload.aud)) : null,
+                    payload.iss ? infoItem('Issuer (iss)', payload.iss) : null,
+                    payload.sub ? infoItem('Subject (sub)', payload.sub) : null,
+                    payload.azp ? infoItem('Authorized Party (azp)', payload.azp) : null,
+                    payload.tid ? infoItem('Tenant ID (tid)', payload.tid) : null,
+                    payload.oid ? infoItem('Object ID (oid)', payload.oid) : null
+                ]);
+
+                // Token info on overview tab
+                replaceChildrenWith(document.getElementById('tokenInfoList'), [
+                    infoItem('Emitido em', iatDate ? iatDate.toLocaleString('pt-BR') : 'N/A'),
+                    expiryInfoItem('Expira em', expDate, isExpired)
+                ]);
+
+            } catch (e) {
+                console.error('Erro ao parsear JWT:', e);
+                document.getElementById('jwtHeader').textContent = 'Erro ao decodificar header';
+                document.getElementById('jwtPayload').textContent = 'Erro ao decodificar payload';
+            }
+
+            // Claims
+            displayClaims(claims);
+
+            // Refresh Token
+            if (refreshToken) {
+                document.getElementById('refreshContent').style.display = 'block';
+                document.getElementById('noRefreshContent').style.display = 'none';
+                document.getElementById('refreshTokenDisplay').textContent = refreshToken;
+                validateRefreshToken();
+            } else {
+                document.getElementById('refreshContent').style.display = 'none';
+                document.getElementById('noRefreshContent').style.display = 'block';
+                document.getElementById('refreshStatus').textContent = 'Indisponivel';
+                document.getElementById('refreshStatus').className = 'badge badge-warning';
+            }
+        }
+
+        function displayClaims(claims) {
+            var claimsList = document.getElementById('claimsList');
+            document.getElementById('claimsCount').textContent = claims.length + ' claims';
+
+            if (claims.length === 0) {
+                replaceChildrenWith(claimsList, [mutedText('Nenhuma claim encontrada')]);
+                return;
+            }
+
+            replaceChildrenWith(claimsList, claims.map(function(claim) {
+                var type = claim.type == null ? '' : String(claim.type);
+                var value = claim.value == null ? '' : String(claim.value);
+                var item = el('div', 'claim-item');
+                // setAttribute nao interpreta HTML: o valor fica inerte no atributo,
+                // ao contrario de interpola-lo em uma string de markup.
+                item.setAttribute('data-type', type);
+                item.setAttribute('data-value', value);
+                item.appendChild(el('div', 'claim-type', type));
+                item.appendChild(el('div', 'claim-value', value));
+                return item;
+            }));
+        }
+
+        function filterClaims() {
+            var query = document.getElementById('claimsSearch').value.toLowerCase();
+            var items = document.querySelectorAll('#claimsList .claim-item');
+            var visibleCount = 0;
+
+            items.forEach(function(item) {
+                var type = (item.getAttribute('data-type') || '').toLowerCase();
+                var value = (item.getAttribute('data-value') || '').toLowerCase();
+                var match = type.indexOf(query) !== -1 || value.indexOf(query) !== -1;
+                item.style.display = match ? '' : 'none';
+                if (match) visibleCount++;
+            });
+
+            document.getElementById('claimsCount').textContent = visibleCount + ' claims' + (query ? ' (filtrado)' : '');
+        }
+
+        // ==============================
+        // Refresh Token Operations
+        // ==============================
+        async function validateRefreshToken() {
+            if (!refreshToken) return;
+
+            try {
+                var response = await fetch('/auth/validate-refresh', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ refreshToken: refreshToken })
+                });
+
+                var data = await response.json();
+                var statusBadge = document.getElementById('refreshStatus');
+                var infoList = document.getElementById('refreshTokenInfoList');
+
+                if (data.isValid) {
+                    statusBadge.textContent = 'Ativo';
+                    statusBadge.className = 'badge badge-success';
+
+                    var createdAt = data.createdAt ? new Date(data.createdAt) : null;
+                    var expiresAt = data.expiresAt ? new Date(data.expiresAt) : null;
+                    var lastUsedAt = data.lastUsedAt ? new Date(data.lastUsedAt) : null;
+
+                    replaceChildrenWith(infoList, [
+                        infoItem('Usuario', data.userName || data.userEmail || 'N/A'),
+                        infoItem('Criado em', createdAt ? createdAt.toLocaleString('pt-BR') : 'N/A'),
+                        infoItem('Expira em', expiresAt ? expiresAt.toLocaleString('pt-BR') : 'N/A'),
+                        infoItem('Ultimo uso', lastUsedAt ? lastUsedAt.toLocaleString('pt-BR') : 'Nunca usado'),
+                        infoItem('Vezes usado', String(data.usageCount || 0))
+                    ]);
+                } else {
+                    statusBadge.textContent = 'Invalido';
+                    statusBadge.className = 'badge badge-error';
+                    replaceChildrenWith(infoList, [
+                        errorInfoItem('Status', data.error || 'Token invalido ou expirado')
+                    ]);
+                }
+            } catch (error) {
+                console.error('Erro ao validar refresh token:', error);
+                var statusBadge = document.getElementById('refreshStatus');
+                statusBadge.textContent = 'Erro';
+                statusBadge.className = 'badge badge-error';
+                replaceChildrenWith(document.getElementById('refreshTokenInfoList'), [
+                    errorInfoItem('Status', 'Erro ao validar token')
+                ]);
+            }
+        }
+
+        async function handleRefreshToken() {
+            if (!refreshToken) return;
+
+            var btn = document.getElementById('refreshBtn');
+            btn.disabled = true;
+            btn.textContent = 'Renovando...';
+
+            try {
+                var deviceId = localStorage.getItem('device_id') || '';
+                var response = await fetch('/auth/refresh', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        refreshToken: refreshToken,
+                        deviceId: deviceId
+                    })
+                });
+
+                if (response.ok) {
+                    var data = await response.json();
+                    jwtToken = data.accessToken;
+                    refreshToken = data.refreshToken;
+                    localStorage.setItem('jwt_token', jwtToken);
+                    localStorage.setItem('refresh_token', refreshToken);
+
+                    // Reload
+                    await loadUserInfo();
+                    btn.textContent = 'Renovado!';
+                    setTimeout(function() { btn.textContent = 'Renovar Tokens'; btn.disabled = false; }, 2000);
+                } else {
+                    try {
+                        var errorData = await response.json();
+                        alert('Erro ao renovar: ' + (errorData.error || 'Erro desconhecido'));
+                    } catch (e) {
+                        alert('Erro ao renovar: HTTP ' + response.status);
+                    }
+                    btn.textContent = 'Renovar Tokens';
+                    btn.disabled = false;
+                }
+            } catch (error) {
+                alert('Erro ao renovar token: ' + error.message);
+                btn.textContent = 'Renovar Tokens';
+                btn.disabled = false;
+            }
+        }
+
+        async function handleValidateRefresh() {
+            var btn = document.getElementById('validateBtn');
+            btn.disabled = true;
+            btn.textContent = 'Validando...';
+            await validateRefreshToken();
+            btn.textContent = 'Validar Token';
+            btn.disabled = false;
+        }
+
+        async function handleRevokeToken() {
+            if (!refreshToken) return;
+            if (!confirm('Tem certeza que deseja revogar o refresh token? Voce precisara fazer login novamente.')) return;
+
+            var btn = document.getElementById('revokeBtn');
+            btn.disabled = true;
+            btn.textContent = 'Revogando...';
+
+            try {
+                var response = await fetch('/auth/revoke', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        refreshToken: refreshToken,
+                        reason: 'Revogado pelo usuario via dashboard'
+                    })
+                });
+
+                if (response.ok) {
+                    localStorage.removeItem('refresh_token');
+                    refreshToken = null;
+                    document.getElementById('refreshContent').style.display = 'none';
+                    document.getElementById('noRefreshContent').style.display = 'block';
+                    document.getElementById('refreshStatus').textContent = 'Revogado';
+                    document.getElementById('refreshStatus').className = 'badge badge-error';
+                } else {
+                    try {
+                        var errorData = await response.json();
+                        alert('Erro ao revogar: ' + (errorData.error || 'Erro desconhecido'));
+                    } catch (e) {
+                        alert('Erro ao revogar: HTTP ' + response.status);
+                    }
+                    btn.textContent = 'Revogar';
+                    btn.disabled = false;
+                }
+            } catch (error) {
+                alert('Erro ao revogar: ' + error.message);
+                btn.textContent = 'Revogar';
+                btn.disabled = false;
+            }
+        }
+
+        // ==============================
+        // Tabs
+        // ==============================
+        function switchTab(tabName) {
+            // Deactivate all
+            document.querySelectorAll('.tab-btn').forEach(function(btn) { btn.classList.remove('active'); });
+            document.querySelectorAll('.tab-panel').forEach(function(panel) { panel.classList.remove('active'); });
+
+            // Activate selected
+            document.getElementById('tab-' + tabName).classList.add('active');
+            // Find the button
+            var buttons = document.querySelectorAll('.tab-btn');
+            var tabNames = ['overview', 'jwt', 'claims', 'refresh'];
+            var idx = tabNames.indexOf(tabName);
+            if (idx >= 0 && buttons[idx]) buttons[idx].classList.add('active');
+        }
+
+        // ==============================
+        // Utilities
+        // ==============================
+        function showError(message) {
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('errorState').style.display = 'block';
+            document.getElementById('errorMessage').textContent = message;
+        }
+
+        function copyToken() {
+            if (jwtToken) {
+                navigator.clipboard.writeText(jwtToken).then(function() {
+                    var btns = document.querySelectorAll('.copy-btn');
+                    btns.forEach(function(b) { b.textContent = 'Copiado!'; });
+                    setTimeout(function() { btns.forEach(function(b) { b.textContent = 'Copiar'; }); }, 2000);
+                });
+            }
+        }
+
+        function copyRefreshToken() {
+            if (refreshToken) {
+                navigator.clipboard.writeText(refreshToken).then(function() {
+                    var btn = document.querySelector('#refreshTokenCard .copy-btn');
+                    btn.textContent = 'Copiado!';
+                    setTimeout(function() { btn.textContent = 'Copiar'; }, 2000);
+                });
+            }
+        }
+
+        function handleLogout() {
+            localStorage.removeItem('jwt_token');
+            localStorage.removeItem('refresh_token');
+            window.location.href = '/auth/logout';
+        }
+
+        // ==============================
+        // Construcao de DOM (anti-XSS por construcao)
+        // ==============================
+        // Nenhum dado vindo do servidor/token e interpolado em markup: tudo entra por
+        // textContent/createElement, que tratam o valor como texto e nunca como HTML.
+        // Por isso nao existe escapeHtml aqui - nao ha string de HTML para escapar.
+
+        function el(tag, className, text) {
+            var node = document.createElement(tag);
+            if (className) node.className = className;
+            if (text !== undefined && text !== null) node.textContent = String(text);
+            return node;
+        }
+
+        function clearNode(node) {
+            while (node.firstChild) node.removeChild(node.firstChild);
+        }
+
+        // Substitui o conteudo do container pelos nos informados.
+        // Itens null/undefined sao ignorados, permitindo listas com itens condicionais.
+        function replaceChildrenWith(node, children) {
+            if (!node) return;
+            clearNode(node);
+            children.forEach(function(child) {
+                if (child) node.appendChild(child);
+            });
+        }
+
+        function mutedText(text) {
+            var span = el('span', null, text);
+            span.style.color = 'var(--text-muted)';
+            return span;
+        }
+
+        // opts: { valueFontSize, valueColor, borderLeftColor }
+        function infoItem(label, value, opts) {
+            opts = opts || {};
+            var item = el('div', 'info-item');
+            if (opts.borderLeftColor) item.style.borderLeftColor = opts.borderLeftColor;
+            item.appendChild(el('span', 'info-label', label));
+            var valueNode = el('span', 'info-value', value == null ? '' : value);
+            if (opts.valueFontSize) valueNode.style.fontSize = opts.valueFontSize;
+            if (opts.valueColor) valueNode.style.color = opts.valueColor;
+            item.appendChild(valueNode);
+            return item;
+        }
+
+        function errorInfoItem(label, message) {
+            return infoItem(label, message, {
+                borderLeftColor: 'var(--aurora-red)',
+                valueColor: 'var(--aurora-red)'
+            });
+        }
+
+        function statusInfoItem(isAuthenticated) {
+            var item = el('div', 'info-item');
+            item.appendChild(el('span', 'info-label', 'Status'));
+            var value = el('span', 'info-value');
+            value.appendChild(el('span', 'status-dot ' + (isAuthenticated ? 'online' : 'offline')));
+            value.appendChild(document.createTextNode(isAuthenticated ? 'Autenticado' : 'Nao autenticado'));
+            item.appendChild(value);
+            return item;
+        }
+
+        function expiryInfoItem(label, expDate, isExpired) {
+            var text = (expDate ? expDate.toLocaleString('pt-BR') : 'N/A') + (isExpired ? ' (EXPIRADO)' : '');
+            return infoItem(label, text, {
+                borderLeftColor: isExpired ? 'var(--aurora-red)' : 'var(--aurora-green)',
+                valueColor: isExpired ? 'var(--aurora-red)' : null
+            });
+        }
+
+        // JWT usa Base64URL sem padding: atob() sozinho quebra em '-'/'_' e em segmentos
+        // sem '='. Decodifica tambem como UTF-8 para nao corromper acentos nas claims.
+        function decodeJwtSegment(segment) {
+            var base64 = String(segment).replace(/-/g, '+').replace(/_/g, '/');
+            while (base64.length % 4 !== 0) base64 += '=';
+            var binary = atob(base64);
+            var bytes = new Uint8Array(binary.length);
+            for (var i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+            return new TextDecoder('utf-8').decode(bytes);
+        }
+
+        // Initialize
+        initDashboard();
+    </script>
+</body>
+</html>

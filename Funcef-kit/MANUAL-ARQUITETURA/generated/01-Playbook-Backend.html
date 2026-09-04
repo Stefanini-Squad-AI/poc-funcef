@@ -1,0 +1,220 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Playbook Backend (fábrica) &mdash; Manual de Arquitetura FUNCEF</title>
+  <link rel="stylesheet" href="../assets/style.css" />
+</head>
+<body>
+<div class="layout">
+  <nav>
+    <h1>Manual de Arquitetura</h1>
+    <p class="subtitle"><a href="../index.html">&larr; Portal</a></p>
+    <div class="section">Cap&iacute;tulo</div>
+    <a href="#" class="active">Playbook Backend (fábrica)</a>
+  </nav>
+  <main class="wide generated-content">
+    <h1>01 — Playbook Backend</h1>
+<p><div class="callout note"><strong>Nota</strong> **Objetivo**</p>
+<p>Deixar o time BE apto a criar um microserviço a partir de `funcef/api-template-base` e adicionar um recurso de domínio no padrão FUNCEF.</p>
+<p>[!CAUTION]</p>
+<p>**Sem segredos**</p>
+<p>Não cole connection strings, URLs reais de Key Vault, Client Secrets ou Tenant IDs neste material de trabalho compartilhado. Use placeholders; valores vêm do kickoff.</p>
+<h2>1. Pré-requisitos</h2>
+<table><thead><tr><th>Item</th><th>Esperado</th></tr></thead><tbody><tr><td>.NET SDK</td><td>10.0.300+ (`dotnet --version`)</td></tr><tr><td>Git</td><td>Instalado</td></tr><tr><td>Acesso</td><td>Clone `api-template-base`, feed NuGet `FUNCEF.*` 3.x (kickoff)</td></tr><tr><td>Oracle / KV / Entra</td><td>Provisionados no kickoff (secrets fora deste doc)</td></tr></tbody></table>
+<h2>2. Bootstrap a partir do template</h2>
+<pre><code>git clone &lt;URL_DO_TEMPLATE_FORNECIDA_NO_KICKOFF&gt; MeuServico
+cd MeuServico
+git remote remove origin
+git remote add origin &lt;URL_DO_NOVO_REPO&gt;
+```</code></pre>
+<h3>2.1 Renomear solution (PowerShell)</h3>
+<p>Substitua `{Servico}` pelo nome do microserviço (ex.: `CadastroTasks`).</p>
+<pre><code>Remove-Item TemplateBase.slnx, TemplateBase.sln -ErrorAction SilentlyContinue
+
+Rename-Item src/TemplateBase.API            src/{Servico}.API
+Rename-Item src/TemplateBase.Application    src/{Servico}.Application
+Rename-Item src/TemplateBase.Domain         src/{Servico}.Domain
+Rename-Item src/TemplateBase.Infrastructure src/{Servico}.Infrastructure
+Rename-Item tests/TemplateBase.Tests        tests/{Servico}.Tests
+```</code></pre>
+<p>Find/replace no repositório: `TemplateBase.*` → `{Servico}.*`, cookie `.TemplateBase.Session` → `.{Servico}.Session`.</p>
+<pre><code>dotnet new sln -n {Servico}
+dotnet sln add src/{Servico}.API/{Servico}.API.csproj
+dotnet sln add src/{Servico}.Application/{Servico}.Application.csproj
+dotnet sln add src/{Servico}.Domain/{Servico}.Domain.csproj
+dotnet sln add src/{Servico}.Infrastructure/{Servico}.Infrastructure.csproj
+dotnet sln add tests/{Servico}.Tests/{Servico}.Tests.csproj
+dotnet build
+```</code></pre>
+<h3>2.2 Schema Oracle e domínio didático</h3>
+<ul>
+<li>Trocar schema `TEMPLATETESTE` (ou equivalente do template) por `<SCHEMA>` do serviço (fornecido no kickoff).  </li>
+<li>Domínio didático `Cliente`/`Ordem` existe só para demonstrar padrões — **substituir** pelo domínio real (ver §4 e walkthrough Task) e remover o didático quando o slice novo estiver verde.</li>
+</ul>
+<h3>2.3 Configuração (placeholders)</h3>
+<p>Em `appsettings*.json` / User Secrets / KV, configurar **chaves**, não valores neste documento:</p>
+<table><thead><tr><th>Chave (exemplo)</th><th>Papel</th></tr></thead><tbody><tr><td>`KeyVault:Url`</td><td>URL do Key Vault do ambiente (kickoff)</td></tr><tr><td>`FuncefORM:Connection:SecretName`</td><td>Nome do segredo da connection string Oracle</td></tr><tr><td>`Auth:*`</td><td>ClientId, Tenant, Audience — valores no kickoff</td></tr></tbody></table>
+<p>Smoke: subir API e chamar health público (`/health` ou equivalente do template).</p>
+<h2>3. Anatomia obrigatória (4 projetos)</h2>
+<table><thead><tr><th>Projeto</th><th>Contém</th><th>Pode referenciar</th></tr></thead><tbody><tr><td>`{Servico}.Domain`</td><td>Entidades, atributos Oracle</td><td>`FUNCEF.ORM` (atributos)</td></tr><tr><td>`{Servico}.Application`</td><td>Commands, Queries, Handlers, Services, Validators, DTOs</td><td>Domain + `FUNCEF.Essenciais` / `FUNCEF.ORM`</td></tr><tr><td>`{Servico}.Infrastructure`</td><td>`AppDbContext`, DI externa, seeders</td><td>Domain + Application</td></tr><tr><td>`{Servico}.API`</td><td>`Program.cs`, controllers finos, pipeline</td><td>Application + Infrastructure</td></tr></tbody></table>
+<p>**Application nunca referencia Infrastructure.** O amarro é em `Program.cs`.</p>
+<pre><code>Controller → IMediator (Send|Receive) → Handler (IUnitOfWork) → Service → IRepository&lt;T&gt;
+```</code></pre>
+<table><thead><tr><th>Método</th><th>Uso</th></tr></thead><tbody><tr><td>`Send`</td><td>Commands (escrita)</td></tr><tr><td>`Receive`</td><td>Queries (leitura)</td></tr><tr><td>`Publish`</td><td>Eventos in-process (não mensageria cross-service)</td></tr></tbody></table>
+<h2>4. Padrão de código — nova entidade (exemplo Produto)</h2>
+<p>Substitua `Produto` / `{SCHEMA}` / `{Servico}` pelos nomes reais. Trechos alinhados ao guia interno *Adicionando Nova Entidade*.</p>
+<h3>4.1 Domain</h3>
+<pre><code>[Table("TB_PRODUTOS", Schema = "{SCHEMA}")]
+[Auditable("Produto")]
+public class Produto
+{
+    [Key]
+    [Column("PRODUTO_ID")]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public long Id { get; set; }
+
+    [Required, Column("NOME"), MaxLength(200)]
+    public string Nome { get; set; } = string.Empty;
+
+    [Required, Column("FLAG_ATIVO", TypeName = "NUMBER(1)")]
+    public bool Ativo { get; set; } = true;
+
+    [Required, Column("DATA_CRIACAO")]
+    public DateTime DataCriacao { get; set; } = DateTime.UtcNow;
+}
+```</code></pre>
+<p>Regras: PK `long` IDENTITY · coluna `{ENTIDADE}_ID` · tabela `TB_` + plural · boolean `NUMBER(1)` · sem `BaseEntity`.</p>
+<p>Registrar `DbSet<Produto>` em `AppDbContext`.</p>
+<h3>4.2 DTOs + mapeamento</h3>
+<pre><code>public class ProdutoRequest
+{
+    public string Nome { get; set; } = string.Empty;
+    public bool Ativo { get; set; } = true;
+}
+
+public class ProdutoResponse
+{
+    [MapFrom("Id")] public long Id { get; set; }
+    [MapFrom("Nome")] public string Nome { get; set; } = string.Empty;
+    [MapFrom("Ativo")] public bool Ativo { get; set; }
+}
+```</code></pre>
+<p>Usar `[MapFrom]` / `MapTo<>` — **não** AutoMapper.</p>
+<h3>4.3 Service (regra + dados; sem SaveChanges)</h3>
+<pre><code>public async Task&lt;Produto&gt; CreateAsync(ProdutoRequest request, CancellationToken ct = default)
+{
+    if (await _repository.ExistsAsync(p =&gt; p.Nome == request.Nome, cancellationToken: ct))
+        throw new ConflictException("Produto", "Já existe um produto com este nome");
+
+    var entity = request.MapTo&lt;ProdutoRequest, Produto&gt;(p =&gt;
+    {
+        p.DataCriacao = DateTime.UtcNow;
+    });
+
+    await _repository.AddAsync(entity, ct);
+    return entity;
+}
+```</code></pre>
+<h3>4.4 Command + Validator + Handler</h3>
+<pre><code>public class CreateProdutoCommand : ICommand&lt;ProdutoResponse&gt;
+{
+    public ProdutoRequest Request { get; set; } = new();
+}
+
+public class CreateProdutoValidator : AbstractValidator&lt;CreateProdutoCommand&gt;
+{
+    public CreateProdutoValidator()
+    {
+        this.RuleForRequiredText(x =&gt; x.Request.Nome, "nome", 200);
+    }
+}
+
+public class CreateProdutoHandler : ICommandHandler&lt;CreateProdutoCommand, ProdutoResponse&gt;
+{
+    private readonly IProdutoService _service;
+    private readonly IUnitOfWork _unitOfWork;
+
+    public async Task&lt;ProdutoResponse&gt; Handle(CreateProdutoCommand command, CancellationToken ct)
+    {
+        var produto = await _service.CreateAsync(command.Request, ct);
+        await _unitOfWork.SaveChangesAsync(ct);
+        return produto.MapTo&lt;Produto, ProdutoResponse&gt;();
+    }
+}
+```</code></pre>
+<ul>
+<li>Validators no **Command**, não no controller.  </li>
+<li>Handler controla transação (`SaveChangesAsync`).  </li>
+<li>Sem `try/catch` defensivo — exceções tipadas sobem ao middleware.</li>
+</ul>
+<h3>4.5 Query (leitura)</h3>
+<pre><code>public class GetProdutoByIdQuery : IQuery&lt;ProdutoResponse&gt;
+{
+    public long Id { get; set; }
+}
+
+// Handler usa Receive no controller; Service.GetByIdAsync → MapTo Response
+// NotFoundException.ForResource("Produto", id) se ausente
+```</code></pre>
+<h3>4.6 Controller fino</h3>
+<pre><code>[ApiController]
+[Route("api/v1/produtos")]
+[FuncefAuthorize]
+public class ProdutosController : BaseController
+{
+    private readonly IMediator _mediator;
+
+    [HttpPost]
+    public Task&lt;IActionResult&gt; Create([FromBody] ProdutoRequest request, CancellationToken ct)
+        =&gt; ApiCreated(_mediator.Send(new CreateProdutoCommand { Request = request }, ct));
+
+    [HttpGet("{id:long}")]
+    public Task&lt;IActionResult&gt; GetById(long id, CancellationToken ct)
+        =&gt; ApiOk(_mediator.Receive(new GetProdutoByIdQuery { Id = id }, ct));
+}
+```</code></pre>
+<p>Registrar `IProdutoService` em `AddApplicationServices`. Envelope de resposta segue o padrão do template (`ApiOk` / `ApiCreated`).</p>
+<h3>4.7 Exceções → HTTP (resumo)</h3>
+<table><thead><tr><th>Exceção</th><th>HTTP</th></tr></thead><tbody><tr><td>`NotFoundException`</td><td>404</td></tr><tr><td>`ConflictException` (`FUNCEF.Essenciais`)</td><td>409</td></tr><tr><td>Validation (pipeline)</td><td>400</td></tr></tbody></table>
+<h2>5. Catálogo `FUNCEF.*` (quando usar)</h2>
+<p>Pin: `[3.0.0,4.0.0)` no feed do kickoff.</p>
+<table><thead><tr><th>Quero…</th><th>Lib</th><th>Extensão típica</th></tr></thead><tbody><tr><td>Mediator, BaseController, exceções, validação</td><td>`FUNCEF.Essenciais`</td><td>`AddMediatorWithDefaults`</td></tr><tr><td>EF + Dapper, `IRepository`, `IUnitOfWork`, `[MapFrom]`</td><td>`FUNCEF.ORM` (+ `.Dapper`, `.Audit`)</td><td>`AddFuncefORM*`</td></tr><tr><td>Entra + `[FuncefAuthorize]` / GAP</td><td>`FUNCEF.Autenticacao`</td><td>`AddFUNCEFAuthentication`</td></tr><tr><td>Redis / Mongo</td><td>`FUNCEF.NoSql`</td><td>`AddRedisCache` / `AddMongoDocuments`</td></tr><tr><td>Key Vault</td><td>`FUNCEF.Cofre`</td><td>`AddVaultComplete`</td></tr><tr><td>Blob/Queue/Service Bus</td><td>`FUNCEF.Armazenamentos`</td><td>`AddStorageServices`</td></tr><tr><td>Contratos (`ITelemetry`, paginação)</td><td>`FUNCEF.Abstractions`</td><td>—</td></tr><tr><td>Analisadores de build</td><td>`FUNCEF.Build`</td><td>`PrivateAssets=all`</td></tr></tbody></table>
+<p>**Não usar** (sem ADR): MediatR nuget, AutoMapper, Serilog standalone, Polly direto na Application, Newtonsoft.Json, `ILogger<T>` no lugar de `ITelemetry`.</p>
+<h2>6. Segurança na API</h2>
+<ul>
+<li>Endpoints de domínio: `[FuncefAuthorize]` (e `Acao = "..."` quando o produto usar GAP).  </li>
+<li>Não reimplementar JWT/login — usar stack `FUNCEF.Autenticacao`.  </li>
+<li>Health/version públicos conforme template.  </li>
+<li>Ordem de middleware: seguir o `Program.cs` do template (não inventar pipeline).</li>
+</ul>
+<h2>7. Testes</h2>
+<ul>
+<li>MSTest + NSubstitute (+ EF InMemory quando fizer sentido).  </li>
+<li>Cobrir Validators e Handlers do novo recurso.  </li>
+<li>`dotnet test` deve passar no CI do fornecedor / PR.</li>
+</ul>
+<h2>8. Checklist — primeiro endpoint de domínio</h2>
+<ul>
+<li>[ ] Solution renomeada; `dotnet build` OK  </li>
+<li>[ ] Schema `<SCHEMA>` aplicado nas entidades novas  </li>
+<li>[ ] Entity + DbSet + DTOs + Service + Command/Query + Handler + Validator + Controller  </li>
+<li>[ ] `[FuncefAuthorize]` no controller  </li>
+<li>[ ] Tabela criada via Liquibase (playbook Dados)  </li>
+<li>[ ] Testes do Create/Get verdes  </li>
+<li>[ ] Smoke autenticado acordado no kickoff (sem colar tokens em issues/PRs)  </li>
+<li>[ ] Nenhum secret no repositório  </li>
+</ul>
+<h2>9. Próximo passo</h2>
+<ol>
+<li>[Playbook Dados](03-Playbook-Dados.md) — DDL/changeset  </li>
+<li>[Walkthrough E2E](04-Walkthrough-E2E.md) — entidade **Task** alinhada ao FE  </li>
+</ol>
+<h2>Histórico</h2>
+<p>___TABLE_PLACEHOLDER_6___</div></p>
+    <p class="meta">Gerado de: <code>../onboarding-fabrica/01-Playbook-Backend.md</code> &middot; <a href="../index.html">Portal</a></p>
+  </main>
+</div>
+</body>
+</html>

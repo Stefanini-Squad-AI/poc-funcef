@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Login - TemplateBase</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
+    <style>
+        .login-page {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: var(--space-xl);
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 460px;
+        }
+
+        .login-card {
+            opacity: 0;
+            animation: slideUp 0.6s ease-out forwards;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-md);
+            margin-bottom: var(--space-2xl);
+        }
+
+        .brand-icon {
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, var(--coral) 0%, var(--coral-dark) 100%);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 16px rgba(255, 107, 107, 0.3);
+        }
+
+        .brand-icon svg {
+            width: 32px;
+            height: 32px;
+            fill: white;
+        }
+
+        .brand-text h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+        }
+
+        .brand-text p {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .login-title {
+            text-align: center;
+            margin-bottom: var(--space-xl);
+        }
+
+        .login-title h2 { font-size: 1.5rem; margin-bottom: var(--space-xs); }
+        .login-title p { color: var(--text-secondary); font-size: 0.9rem; }
+
+        .provider-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-md);
+        }
+
+        .provider-btn {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            padding: var(--space-lg);
+            background: var(--bg-tertiary);
+            border: 1px solid var(--nord-polar-3);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            text-align: left;
+            color: var(--text-primary);
+            font-size: 1rem;
+        }
+
+        .provider-btn:hover {
+            background: var(--nord-polar-3);
+            border-color: var(--nord-frost-2);
+            transform: translateX(4px);
+        }
+
+        .provider-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .provider-icon {
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-primary);
+            border-radius: var(--radius-sm);
+            flex-shrink: 0;
+        }
+
+        .provider-icon svg { width: 24px; height: 24px; }
+
+        .provider-info { flex: 1; }
+        .provider-info strong { display: block; font-weight: 600; }
+        .provider-info span { font-size: 0.8rem; color: var(--text-secondary); }
+
+        .provider-arrow {
+            color: var(--text-muted);
+            transition: transform var(--transition-fast);
+            font-size: 1.2rem;
+        }
+
+        .provider-btn:hover .provider-arrow {
+            transform: translateX(4px);
+            color: var(--coral);
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            margin: var(--space-xl) 0;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--nord-polar-3);
+        }
+
+        .swagger-link {
+            display: block;
+            text-align: center;
+            color: var(--nord-frost-1);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color var(--transition-fast);
+        }
+
+        .swagger-link:hover { color: var(--coral); }
+
+        .error-alert {
+            background: rgba(191, 97, 106, 0.15);
+            border: 1px solid var(--aurora-red);
+            color: var(--aurora-red);
+            padding: var(--space-md);
+            border-radius: var(--radius-sm);
+            margin-bottom: var(--space-lg);
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        .error-alert.show {
+            display: block;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        .loading-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(46, 52, 64, 0.9);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: var(--space-md);
+            border-radius: var(--radius-lg);
+            z-index: 10;
+        }
+
+        .loading-overlay.show { display: flex; }
+
+        .footer-text {
+            text-align: center;
+            margin-top: var(--space-xl);
+            color: var(--text-muted);
+            font-size: 0.75rem;
+        }
+
+        /* Floating shapes */
+        .floating-shapes {
+            position: fixed;
+            inset: 0;
+            overflow: hidden;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .shape {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.4;
+        }
+
+        .shape-1 {
+            width: 400px;
+            height: 400px;
+            background: var(--coral);
+            top: -10%;
+            right: -10%;
+            animation: float 20s ease-in-out infinite;
+        }
+
+        .shape-2 {
+            width: 300px;
+            height: 300px;
+            background: var(--nord-frost-1);
+            bottom: -5%;
+            left: -5%;
+            animation: float 25s ease-in-out infinite reverse;
+        }
+
+        .shape-3 {
+            width: 200px;
+            height: 200px;
+            background: var(--nord-frost-3);
+            top: 50%;
+            left: 30%;
+            animation: float 15s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="bg-mesh bg-grid">
+    <div class="floating-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+    </div>
+
+    <div class="login-page">
+        <div class="login-container">
+            <div class="card card-glass login-card" style="position: relative;">
+                <div class="loading-overlay" id="loadingOverlay">
+                    <div class="spinner"></div>
+                    <span style="color: var(--text-secondary);">Redirecionando para autenticacao...</span>
+                </div>
+
+                <div class="brand">
+                    <div class="brand-icon">
+                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M4 8h4V4H4v4zm6 12h4v-4h-4v4zm-6 0h4v-4H4v4zm0-6h4v-4H4v4zm6 0h4v-4h-4v4zm6-10v4h4V4h-4zm-6 4h4V4h-4v4zm6 6h4v-4h-4v4zm0 6h4v-4h-4v4z"/>
+                        </svg>
+                    </div>
+                    <div class="brand-text">
+                        <h1 class="text-gradient">TemplateBase</h1>
+                        <p>API Template FUNCEF</p>
+                    </div>
+                </div>
+
+                <div id="errorAlert" class="error-alert"></div>
+
+                <div class="login-title">
+                    <h2>Bem-vindo</h2>
+                    <p>Escolha como deseja se autenticar</p>
+                </div>
+
+                <div class="provider-buttons">
+                    <!-- Entra ID (Corporativo) -->
+                    <button class="provider-btn" onclick="handleLogin('entraid')" id="btnEntraId">
+                        <div class="provider-icon">
+                            <svg viewBox="0 0 23 23" xmlns="http://www.w3.org/2000/svg">
+                                <rect width="11" height="11" fill="#f25022"/>
+                                <rect x="12" width="11" height="11" fill="#7fba00"/>
+                                <rect y="12" width="11" height="11" fill="#00a4ef"/>
+                                <rect x="12" y="12" width="11" height="11" fill="#ffb900"/>
+                            </svg>
+                        </div>
+                        <div class="provider-info">
+                            <strong>Microsoft Entra ID</strong>
+                            <span>Funcionarios FUNCEF - Rede Corporativa</span>
+                        </div>
+                        <span class="provider-arrow">&rarr;</span>
+                    </button>
+
+                    <!-- Entra ID External (Parceiros) -->
+                    <button class="provider-btn" onclick="handleLogin('external')" id="btnExternal">
+                        <div class="provider-icon">
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="9" cy="7" r="4" stroke="#88C0D0" stroke-width="2"/>
+                                <path d="M2 21v-2c0-2.66 5.33-4 8-4" stroke="#88C0D0" stroke-width="2" stroke-linecap="round"/>
+                                <circle cx="19" cy="11" r="3" stroke="#A3BE8C" stroke-width="2"/>
+                                <path d="M22 21v-1.5c0-1.5-2-3-4-3" stroke="#A3BE8C" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                        </div>
+                        <div class="provider-info">
+                            <strong>Entra ID External</strong>
+                            <span>Usuarios externos e parceiros</span>
+                        </div>
+                        <span class="provider-arrow">&rarr;</span>
+                    </button>
+                </div>
+
+                <div class="divider">ou</div>
+
+                <a href="/swagger" class="swagger-link">
+                    Documentacao da API (Swagger) &rarr;
+                </a>
+
+                <div class="footer-text">
+                    &copy; 2026 FUNCEF - Fundacao dos Economiarios Federais
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Verificar erros na URL (redirecionados pelo callback)
+        const urlParams = new URLSearchParams(window.location.search);
+        const error = urlParams.get('error');
+        
+        if (error) {
+            const errorAlert = document.getElementById('errorAlert');
+            const errorMessages = {
+                'access_denied': 'Acesso negado. Autorize o aplicativo para continuar.',
+                'authorization_code_missing': 'Codigo de autorizacao nao recebido.',
+                'invalid_state': 'Sessao expirada. Tente novamente.',
+                'token_exchange_failed': 'Falha ao obter token. Tente novamente.',
+                'session_expired': 'Sessao expirada. Inicie o login novamente.',
+                'no_token_received': 'Nenhum token recebido. Tente novamente.',
+                'callback_failed': 'Falha ao processar retorno do login. Tente novamente.',
+                'entra_error': 'Erro no Azure Entra ID. Tente novamente.',
+                'external_not_configured': 'Entra ID External nao esta configurado neste ambiente.'
+            };
+            errorAlert.textContent = errorMessages[error] || 'Erro: ' + error;
+            errorAlert.classList.add('show');
+        }
+
+        async function handleLogin(provider) {
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            const buttons = document.querySelectorAll('.provider-btn');
+            
+            buttons.forEach(function(btn) { btn.disabled = true; });
+            loadingOverlay.classList.add('show');
+
+            try {
+                // Rotas conforme FUNCEF.Autenticacao: [Route("auth")] -> /auth/login (não /api/auth)
+                var returnUrl = urlParams.get('returnUrl') || '/dashboard.html';
+                var response = await fetch('/auth/login?returnUrl=' + encodeURIComponent(returnUrl) + '&provider=' + provider);
+                
+                if (!response.ok) {
+                    var errData = null;
+                    try { errData = await response.json(); } catch(e) {}
+                    throw new Error(errData && errData.error ? errData.error : 'Falha ao iniciar login (HTTP ' + response.status + ')');
+                }
+                
+                var data = await response.json();
+                
+                if (data.authUrl) {
+                    window.location.href = data.authUrl;
+                } else {
+                    throw new Error('URL de autenticacao nao recebida');
+                }
+            } catch (err) {
+                buttons.forEach(function(btn) { btn.disabled = false; });
+                loadingOverlay.classList.remove('show');
+                
+                var errorAlert = document.getElementById('errorAlert');
+                errorAlert.textContent = err.message || 'Erro ao iniciar login';
+                errorAlert.classList.add('show');
+            }
+        }
+    </script>
+</body>
+</html>

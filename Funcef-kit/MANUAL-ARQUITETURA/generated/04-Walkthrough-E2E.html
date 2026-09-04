@@ -1,0 +1,184 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Walkthrough E2E (fábrica) &mdash; Manual de Arquitetura FUNCEF</title>
+  <link rel="stylesheet" href="../assets/style.css" />
+</head>
+<body>
+<div class="layout">
+  <nav>
+    <h1>Manual de Arquitetura</h1>
+    <p class="subtitle"><a href="../index.html">&larr; Portal</a></p>
+    <div class="section">Cap&iacute;tulo</div>
+    <a href="#" class="active">Walkthrough E2E (fábrica)</a>
+  </nav>
+  <main class="wide generated-content">
+    <h1>04 — Walkthrough E2E (Task)</h1>
+<p><div class="callout note"><strong>Nota</strong> **Objetivo**</p>
+<p>Entregar um slice vertical completo: **criar e listar tarefas**. O FE de referência já existe em `web-template` (`features/tasks`); o BE e a tabela devem espelhar o mesmo contrato.</p>
+<p>[!IMPORTANT]</p>
+<p>**Não é slice pré-ligado**</p>
+<p>O `web-template` traz `features/tasks` (mock em `:3001` no bootstrap). O `api-template-base` **não** expõe `/tasks` — só o domínio didático Clientes/Ordens. Este walkthrough é **exercício de implementação** (criar tabela + endpoints + apontar o BFF), não um pacote FE+BE já integrado.</p>
+<p>[!CAUTION]</p>
+<p>**Sem segredos**</p>
+<p>Exemplos de HTTP usam `Authorization: Bearer <ACCESS_TOKEN>` como placeholder. Não cole tokens reais em PRs, chats ou este arquivo.</p>
+<h2>Contrato do slice</h2>
+<table><thead><tr><th>Operação</th><th>Método</th><th>Path (API)</th><th>Body</th></tr></thead><tbody><tr><td>Listar</td><td>`GET`</td><td>`/tasks`</td><td>—</td></tr><tr><td>Criar</td><td>`POST`</td><td>`/tasks`</td><td>`{ "title": "string" }`</td></tr></tbody></table>
+<p>**Modelo de leitura (JSON de negócio dentro do envelope):**</p>
+<pre><code>{
+  "id": 1,
+  "title": "Preparar kickoff",
+  "done": false
+}
+```</code></pre>
+<p>**Envelope FUNCEF (forma típica):**</p>
+<pre><code>{
+  "resultado": [ { "id": 1, "title": "Preparar kickoff", "done": false } ],
+  "mensagem": "",
+  "qtdRegistros": 1
+}
+```</code></pre>
+<p>No FE, após `createApi`, o hook lê `query.data?.data`.</p>
+<p>Ajuste paths se o template BE usar prefixo `api/v1` — o BFF encaminha o sufixo após `/api/bff`. O importante é **FE `endpoints` = path relativo que a API expõe**.</p>
+<hr />
+<h2>Passo 1 — Tabela (Dados)</h2>
+<p>Ver [Playbook Dados](03-Playbook-Dados.md). Criar `<SCHEMA>.TB_TAREFAS` via Liquibase:</p>
+<ul>
+<li>`TAREFA_ID` IDENTITY  </li>
+<li>`TITULO` VARCHAR2(200)  </li>
+<li>`FLAG_CONCLUIDO` NUMBER(1)  </li>
+<li>`DATA_CRIACAO` DATE  </li>
+</ul>
+<hr />
+<h2>Passo 2 — Entidade e Application (Backend)</h2>
+<h3>2.1 Entity</h3>
+<pre><code>[Table("TB_TAREFAS", Schema = "{SCHEMA}")]
+[Auditable("Tarefa")]
+public class Tarefa
+{
+    [Key]
+    [Column("TAREFA_ID")]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public long Id { get; set; }
+
+    [Required, Column("TITULO"), MaxLength(200)]
+    public string Titulo { get; set; } = string.Empty;
+
+    [Required, Column("FLAG_CONCLUIDO", TypeName = "NUMBER(1)")]
+    public bool Concluido { get; set; }
+
+    [Required, Column("DATA_CRIACAO")]
+    public DateTime DataCriacao { get; set; } = DateTime.UtcNow;
+}
+```</code></pre>
+<p>Registrar `DbSet<Tarefa>` em `AppDbContext`.</p>
+<h3>2.2 DTOs alinhados ao FE</h3>
+<p>O FE usa `title` / `done` (inglês no contrato JSON do exemplo do template). Exponha JSON com essas propriedades (ou configure naming) para não quebrar o cliente:</p>
+<pre><code>public class TarefaCreateRequest
+{
+    public string Title { get; set; } = string.Empty;
+}
+
+public class TarefaResponse
+{
+    public long Id { get; set; }
+    public string Title { get; set; } = string.Empty;
+    public bool Done { get; set; }
+}
+```</code></pre>
+<p>No Service, mapear `Title` ↔ `Titulo`, `Done` ↔ `Concluido`.</p>
+<h3>2.3 Command Create + Query list</h3>
+<p>Siga o playbook Backend:</p>
+<ol>
+<li>`CreateTarefaCommand` + Validator (`Title` obrigatório, máx. 200) + Handler (`SaveChangesAsync`)  </li>
+<li>`GetAllTarefasQuery` + Handler (lista → `List<TarefaResponse>`)  </li>
+<li>`ITarefaService` / `TarefaService` com `IRepository<Tarefa>`  </li>
+<li>Registrar service no DI  </li>
+</ol>
+<h3>2.4 Controller</h3>
+<pre><code>[ApiController]
+[Route("tasks")] // ou "api/v1/tasks" — alinhar ao FE
+[FuncefAuthorize]
+public class TasksController : BaseController
+{
+    private readonly IMediator _mediator;
+
+    [HttpGet]
+    public Task&lt;IActionResult&gt; GetAll(CancellationToken ct)
+        =&gt; ApiOk(_mediator.Receive(new GetAllTarefasQuery(), ct));
+
+    [HttpPost]
+    public Task&lt;IActionResult&gt; Create([FromBody] TarefaCreateRequest request, CancellationToken ct)
+        =&gt; ApiCreated(_mediator.Send(new CreateTarefaCommand { Request = request }, ct));
+}
+```</code></pre>
+<h3>2.5 Testes BE</h3>
+<ul>
+<li>Validator: título vazio → erro  </li>
+<li>Handler Create: mock de service/UoW ou teste de integração InMemory conforme padrão do template  </li>
+<li>`dotnet test` verde  </li>
+</ul>
+<hr />
+<h2>Passo 3 — Smoke da API (local)</h2>
+<p>Com a API no ar (porta conforme template):</p>
+<pre><code>GET /tasks
+Authorization: Bearer &lt;ACCESS_TOKEN&gt;
+```</code></pre>
+<pre><code>POST /tasks
+Authorization: Bearer &lt;ACCESS_TOKEN&gt;
+Content-Type: application/json
+
+{ "title": "Primeira tarefa" }
+```</code></pre>
+<p>Obter `<ACCESS_TOKEN>` pelo fluxo Entra do kickoff — **não** versionar o token.</p>
+<hr />
+<h2>Passo 4 — Ligar o Frontend</h2>
+<p>O template já traz `features/tasks`. Ajustes:</p>
+<ol>
+<li>Em `.env.local`, `API_URL` aponta para a API real (dev) **ou** `http://localhost:3001` com `pnpm mock` enquanto o BE não estiver pronto.  </li>
+<li>Confirme que `endpoints.ts` usa os mesmos paths do controller (`/tasks`).  </li>
+<li>Tipos FE:</li>
+</ol>
+<pre><code>export interface Task {
+  id: number;
+  title: string;
+  done: boolean;
+}
+
+export interface CreateTaskData {
+  title: string;
+}
+```</code></pre>
+<ol>
+<li>Rota autenticada `/tasks` + item de menu (ver `menu.config.ts` no template).  </li>
+<li>`pnpm dev` — listar e criar tarefa via UI.</li>
+</ol>
+<p>Fluxo de confiança: UI → `useAllTasks` / `useCreateTask` → `tasksApi` → `/api/bff/tasks` → API → Oracle.</p>
+<hr />
+<h2>Passo 5 — Teste FE (MSW)</h2>
+<p>Manter/ajustar handler MSW em `src/__tests__/msw/handlers.ts` para `GET/POST /tasks` (ou path BFF que os testes usam).  </p>
+<p>Rodar teste do hook (`use-tasks-query.test.tsx` no template) e `pnpm test:run`.</p>
+<hr />
+<h2>Passo 6 — Critérios de “slice pronto”</h2>
+<ul>
+<li>[ ] Changeset Liquibase aplicado em DEV  </li>
+<li>[ ] `GET/POST /tasks` na API com `[FuncefAuthorize]`  </li>
+<li>[ ] Envelope compatível com `createApi`  </li>
+<li>[ ] UI lista e cria tarefa autenticada  </li>
+<li>[ ] `dotnet test` + `pnpm typecheck && pnpm lint && pnpm test:run` verdes  </li>
+<li>[ ] Nenhum secret/token no Git  </li>
+<li>[ ] Demonstração no review (tela + request sem expor Bearer)  </li>
+</ul>
+<hr />
+<h2>Passo 7 — Remover domínio didático do template BE</h2>
+<p>Quando Task (ou o domínio real) estiver estável, remova `Cliente`/`Ordem` do `api-template-base` conforme playbook Backend — evite dois domínios de exemplo em produção.</p>
+<hr />
+<h2>Histórico</h2>
+<p>___TABLE_PLACEHOLDER_1___</div></p>
+    <p class="meta">Gerado de: <code>../onboarding-fabrica/04-Walkthrough-E2E.md</code> &middot; <a href="../index.html">Portal</a></p>
+  </main>
+</div>
+</body>
+</html>

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Componentes FUNCEF.* — Manual de Arquitetura FUNCEF</title>
+  <link rel="stylesheet" href="../assets/style.css" />
+</head>
+<body>
+<div class="layout">
+  <nav>
+    <h1>Manual de Arquitetura</h1>
+    <p class="subtitle"><a href="../index.html">← Portal</a></p>
+    <div class="section">Síntese</div>
+    <a href="visao-fullstack.html">Visão full-stack</a>
+    <a href="decisoes-resumo.html">Decisões (ADRs)</a>
+    <a href="componentes-funcef.html" class="active">Componentes FUNCEF.*</a>
+    <a href="processos-entrega.html">Processos de entrega</a>
+  </nav>
+  <main>
+    <h1>Componentes FUNCEF.* (linha 3.0)</h1>
+    <p>Dez pacotes NuGet corporativos + Design System npm. Princípio: <strong>não substituir por equivalentes externos</strong> sem aprovação; manter pin <code>[3.0.0,4.0.0)</code> (Abstractions em <strong>3.1.0</strong>).</p>
+
+    <h2>Mapa — qual lib para o quê</h2>
+    <table>
+      <thead><tr><th>Componente</th><th>Responsabilidade</th><th>Registro típico</th></tr></thead>
+      <tbody>
+        <tr><td><code>FUNCEF.Abstractions</code> 3.1.0</td><td>Contratos: <code>ICacheStore</code>, <code>ISecretReader</code>, <code>SecretRef</code>, paginação, <code>ITelemetry</code></td><td>— (referenciado pelas outras)</td></tr>
+        <tr><td><code>FUNCEF.Build</code> 3.0.0</td><td>Analisadores e build-time</td><td><code>PrivateAssets</code></td></tr>
+        <tr><td><code>FUNCEF.Essenciais</code></td><td>Mediator, <code>BaseController</code>, validações BR, exceções tipadas, telemetria</td><td><code>AddMediatorWithDefaults</code></td></tr>
+        <tr><td><code>FUNCEF.ORM</code></td><td>EF + Dapper, <code>IRepository&lt;T&gt;</code>, UoW, auditoria Oracle</td><td><code>AddFuncefORM*</code></td></tr>
+        <tr><td><code>FUNCEF.Autenticacao</code></td><td>Entra, <code>[FuncefAuthorize]</code>, refresh, PEP→PDP GAP</td><td><code>AddFUNCEFAuthentication</code></td></tr>
+        <tr><td><code>FUNCEF.NoSql</code></td><td>Redis cache + Mongo documentos</td><td><code>AddRedisCache</code> / <code>AddMongoDocuments</code></td></tr>
+        <tr><td><code>FUNCEF.Cofre</code></td><td>Azure Key Vault</td><td><code>AddVaultComplete</code></td></tr>
+        <tr><td><code>FUNCEF.Armazenamentos</code></td><td>Blob, Queue, Table, Data Lake</td><td><code>AddStorageServices</code></td></tr>
+        <tr><td><code>Funcef.Api.Template</code></td><td>Scaffold <code>dotnet new funcef-api</code></td><td>CLI template</td></tr>
+      </tbody>
+    </table>
+    <p>Capítulo completo: <a href="../generated/CMP-00-Indice.html">CMP-00 — Índice</a>.</p>
+
+    <h2>Frontend — @funcef-componentes/*</h2>
+    <table>
+      <thead><tr><th>Pacote npm</th><th>Papel</th></tr></thead>
+      <tbody>
+        <tr><td><code>@funcef-componentes/react</code></td><td>Design System (componentes, hooks, utils)</td></tr>
+        <tr><td><code>@funcef-componentes/auth</code></td><td>Autenticação Better Auth + Entra; integração BFF</td></tr>
+        <tr><td><code>@funcef-componentes/tailwind</code></td><td>Tokens, <code>global.css</code>, fonts</td></tr>
+        <tr><td><code>@funcef-componentes/observability</code></td><td>Telemetria frontend (opt-in)</td></tr>
+        <tr><td><code>@funcef-componentes/cli</code></td><td>CLI (scenarios, manifest DS)</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Camadas de abstração (por que Abstractions 3.1)</h2>
+    <p>Antes da linha 3.0, contratos compartilhados circulavam entre libs e geravam dependências circulares. <strong>FUNCEF.Abstractions</strong> centraliza interfaces que todas implementam:</p>
+    <ul>
+      <li><code>ISecretReader</code> / <code>SecretRef</code> — cofre e config</li>
+      <li><code>ICacheStore</code> — Redis via NoSql (não <code>IKeyValueStore</code> legado)</li>
+      <li><code>ITelemetry</code>, paginação — Essenciais e ORM consomem sem acoplar implementação</li>
+    </ul>
+    <div class="callout ok">
+      Regra prática: se você precisa de um contrato transversal, procure primeiro em Abstractions; se precisa de implementação, use a lib especializada (Cofre, NoSql, Essenciais).
+    </div>
+
+    <h2>Ordem de registro DI (backend)</h2>
+    <p>Ordem importa para refresh token e resolução de segredos:</p>
+    <ol>
+      <li>Config + Key Vault (<code>FUNCEF.Cofre</code>)</li>
+      <li>Redis cache (<code>AddRedisCache</code> — <code>NoSql:RedisCache</code>)</li>
+      <li>ORM / persistência</li>
+      <li>Autenticação + autorização (<code>AddFUNCEFAuthentication</code>, cliente GAP)</li>
+      <li>Mediator, health, telemetria</li>
+    </ol>
+    <p>Detalhe e troubleshooting: <a href="../generated/BE-05-Seguranca-Auth.html">BE-05</a>, <a href="../generated/BE-11-Troubleshooting.html">BE-11</a>.</p>
+
+    <h2>Anti-padrões</h2>
+    <ul>
+      <li>Substituir Mediator por MediatR externo sem aprovação</li>
+      <li>AutoMapper quando <code>[MapFrom]</code> do ORM resolve</li>
+      <li>StackExchange.Redis direto — usar <code>FUNCEF.NoSql</code></li>
+      <li>Mongo para auditoria — auditoria de entidade é Oracle Lakehouse; Mongo só document store</li>
+      <li>Axios ou fetch ad hoc no frontend — usar <code>@/core/api</code></li>
+    </ul>
+
+    <p class="meta">Síntese editorial · Fonte: CMP-00, Stack-Canonica, BE-01</p>
+  </main>
+</div>
+</body>
+</html>

@@ -1,0 +1,291 @@
+# =============================================================================
+# Workflow de inicialização automática do GitHub Template
+# =============================================================================
+# Este workflow é executado UMA ÚNICA VEZ quando um novo repositório é criado
+# a partir do GitHub Template. Ele:
+#   1. Achata a estrutura: move TemplateBase/* para a raiz do repositório
+#   2. Remove artefatos exclusivos do empacotamento NuGet
+#   3. Substitui "TemplateBase" pelo nome real do projeto em todos os arquivos
+#   4. Renomeia arquivos e pastas (.slnx, .csproj, namespaces)
+#   5. Remove a si mesmo e os demais workflows de packaging
+#
+# COEXISTÊNCIA: este workflow convive com o dotnet new template.
+# O dotnet new usa .template.config/template.json para substituições;
+# este workflow faz o equivalente para repos criados via "Use this template".
+#
+# SEGURANÇA: a condição "is_template != true" garante que este workflow
+# NUNCA execute no repositório fonte (que deve estar marcado como Template).
+# Ele só executa em repositórios criados a partir do template.
+# =============================================================================
+
+name: '🔧 Inicializar Projeto a partir do Template'
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+env:
+  TEMPLATE_NAME: 'TemplateBase'
+
+jobs:
+  setup:
+    name: "SETUP - Inicializar Projeto"
+    if: >-
+      github.event.repository.is_template != true &&
+      github.run_number == 1
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: "Checkout do Repositorio"
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 1
+
+      - name: "Extrair Nome do Projeto"
+        id: project
+        shell: bash
+        run: |
+          REPO_NAME="${{ github.event.repository.name }}"
+
+          # Remove prefixo "api-" do nome do repositório (ex: api-template-base -> template-base)
+          REPO_NAME_CLEAN=$(echo "$REPO_NAME" | sed -E 's/^api-//i')
+
+          # Converte para PascalCase (ex: template-base -> TemplateBase)
+          PROJECT_NAME=$(echo "$REPO_NAME_CLEAN" | sed -E 's/(^|[-_ ])([a-z])/\U\2/g')
+
+          echo "repo_name=$REPO_NAME" >> "$GITHUB_OUTPUT"
+          echo "project_name=$PROJECT_NAME" >> "$GITHUB_OUTPUT"
+
+          echo "==============================="
+          echo "  Repositorio: $REPO_NAME"
+          echo "  Nome do Projeto: $PROJECT_NAME"
+          echo "==============================="
+
+      - name: "Achatar estrutura do template"
+        shell: bash
+        run: |
+          echo "Achatando TemplateBase/ para a raiz..."
+
+          # 1. Remover artefatos exclusivos de empacotamento NuGet
+          rm -f Funcef.Api.Template.csproj
+          rm -f nuget.config
+          rm -f README.md
+          rm -f *.sln
+          # Remove .slnx da raiz (ex.: LibApiTemplate.slnx) antes de mover TemplateBase/ — evita solução obsoleta duplicada
+          rm -f ./*.slnx
+          echo "  Removidos: Funcef.Api.Template.csproj, nuget.config, README.md, *.sln, ./*.slnx (artefatos de packaging / monólito)"
+
+          # 2. Remover workflows de packaging e este setup (não pertencem ao projeto gerado)
+          rm -f .github/workflows/publish-package.yml
+          rm -f .github/workflows/test-restore.yml
+          rm -f .github/workflows/create-release.yml
+          rm -f .github/workflows/setup-template.yml
+          echo "  Removidos: workflows de packaging e setup"
+
+          # Limpar .github/ se ficou vazio
+          find .github -type d -empty -delete 2>/dev/null || true
+
+          # 3. Mover conteúdo de TemplateBase/ para a raiz
+          shopt -s dotglob
+          for item in TemplateBase/*; do
+            base_item=$(basename "$item")
+
+            # Pular .github se existir (já limpamos os workflows)
+            if [ "$base_item" = ".github" ]; then
+              continue
+            fi
+
+            # Se o destino já existe (ex: LICENSE.md, .gitignore), sobrescrever
+            if [ -e "./$base_item" ]; then
+              rm -rf "./$base_item"
+            fi
+
+            mv "$item" ./
+            echo "  Movido: TemplateBase/$base_item -> ./$base_item"
+          done
+          shopt -u dotglob
+
+          # 4. Remover pasta TemplateBase/ (agora vazia ou com .github vazio)
+          rm -rf TemplateBase
+          echo "  Removido: TemplateBase/"
+
+          # 5. Remover .template.config/ (exclusivo do dotnet new)
+          rm -rf .template.config
+          echo "  Removido: .template.config/"
+
+          echo ""
+          echo "Estrutura achatada com sucesso"
+
+      - name: "Substituir conteudo dos arquivos"
+        shell: bash
+        env:
+          PROJECT_NAME: ${{ steps.project.outputs.project_name }}
+        run: |
+          echo "Substituindo '${{ env.TEMPLATE_NAME }}' por '$PROJECT_NAME' no conteudo dos arquivos..."
+
+          find . -type f \
+            -not -path './.git/*' \
+            -not -name '*.png' \
+            -not -name '*.ico' \
+            -not -name '*.jpg' \
+            -not -name '*.jpeg' \
+            -not -name '*.gif' \
+            -not -name '*.woff' \
+            -not -name '*.woff2' \
+            -not -name '*.eot' \
+            -not -name '*.ttf' \
+            -not -name '*.dll' \
+            -not -name '*.exe' \
+            | while IFS= read -r file; do
+                if file "$file" | grep -q "text"; then
+                  sed -i "s/${{ env.TEMPLATE_NAME }}/$PROJECT_NAME/g" "$file" 2>/dev/null || true
+                fi
+              done
+
+          echo "Substituicao de conteudo concluida"
+
+      - name: "Renomear arquivos e pastas"
+        shell: bash
+        env:
+          PROJECT_NAME: ${{ steps.project.outputs.project_name }}
+        run: |
+          echo "Renomeando arquivos que contem '${{ env.TEMPLATE_NAME }}' no nome..."
+
+          find . -depth -type f -name "*${{ env.TEMPLATE_NAME }}*" -not -path './.git/*' | while IFS= read -r file; do
+            dir=$(dirname "$file")
+            base=$(basename "$file")
+            new_base="${base//${{ env.TEMPLATE_NAME }}/$PROJECT_NAME}"
+            if [ "$base" != "$new_base" ]; then
+              mv "$file" "$dir/$new_base"
+              echo "  Arquivo: $base -> $new_base"
+            fi
+          done
+
+          echo "Renomeando pastas que contem '${{ env.TEMPLATE_NAME }}' no nome..."
+
+          find . -depth -type d -name "*${{ env.TEMPLATE_NAME }}*" -not -path './.git/*' | while IFS= read -r dir; do
+            parent=$(dirname "$dir")
+            base=$(basename "$dir")
+            new_base="${base//${{ env.TEMPLATE_NAME }}/$PROJECT_NAME}"
+            if [ "$base" != "$new_base" ]; then
+              mv "$dir" "$parent/$new_base"
+              echo "  Pasta: $base -> $new_base"
+            fi
+          done
+
+          echo "Renomeacao concluida"
+
+      - name: "Limpar link do guia de instalacao"
+        shell: bash
+        run: |
+          # O README.md do projeto referencia ../README.md (guia de instalação do template)
+          # que não existe mais após o achatamento. Remover essa linha da tabela de documentação.
+          if [ -f "README.md" ]; then
+            sed -i '/Instalação do Template.*\.\.\/README\.md/d' README.md 2>/dev/null || true
+            echo "Link para guia de instalacao removido do README.md"
+          fi
+
+      - name: "Commit das alteracoes"
+        id: commit
+        shell: bash
+        env:
+          PROJECT_NAME: ${{ steps.project.outputs.project_name }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add -A
+
+          if git diff --cached --quiet; then
+            echo "Nenhuma alteracao detectada"
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          COMMIT_MSG="chore: inicializar projeto $PROJECT_NAME a partir do template
+
+          Substituicoes automaticas realizadas pelo GitHub Template:
+          - Estrutura achatada (TemplateBase/ -> raiz)
+          - ${{ env.TEMPLATE_NAME }} -> $PROJECT_NAME em todos os arquivos
+          - Renomeados arquivos e pastas (.slnx, .csproj, namespaces)
+          - Removidos artefatos de empacotamento NuGet
+          - Removidos .template.config/ e workflows do template"
+
+          git commit -m "$COMMIT_MSG"
+          echo "has_changes=true" >> "$GITHUB_OUTPUT"
+
+      - name: "Push direto para main"
+        id: push
+        if: steps.commit.outputs.has_changes == 'true'
+        shell: bash
+        continue-on-error: true
+        run: |
+          git push origin main
+          echo "push_ok=true" >> "$GITHUB_OUTPUT"
+
+      - name: "Fallback - Criar PR (branch protection ativa)"
+        if: steps.commit.outputs.has_changes == 'true' && steps.push.outcome == 'failure'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PROJECT_NAME: ${{ steps.project.outputs.project_name }}
+        run: |
+          echo "Push direto bloqueado por branch protection. Criando PR..."
+
+          BRANCH="chore/inicializar-template"
+          git checkout -b "$BRANCH"
+          git push origin "$BRANCH"
+
+          gh pr create \
+            --title "chore: inicializar projeto $PROJECT_NAME" \
+            --body "## Inicialização automática do template
+
+          Este PR foi criado automaticamente pelo workflow **setup-template.yml** porque o repositório possui **branch protection** ativa na branch main.
+
+          ### O que foi feito
+          - Estrutura achatada (TemplateBase/ → raiz)
+          - TemplateBase → $PROJECT_NAME em todos os arquivos
+          - Renomeados arquivos e pastas (.slnx, .csproj, namespaces)
+          - Removidos artefatos de empacotamento NuGet
+          - Removidos .template.config/ e workflows do template
+
+          ### Próximos passos
+          1. **Faça merge deste PR**
+          2. Configure o appsettings.Development.json e appsettings.Homologation.json
+          3. Substitua o domínio de exemplo (Cliente/Ordem)" \
+            --base main \
+            --head "$BRANCH"
+
+          echo ""
+          echo "=============================================="
+          echo "PR CRIADO - MERGE NECESSARIO"
+          echo "=============================================="
+          echo "Branch protection impediu push direto."
+          echo "Um PR foi criado na branch: $BRANCH"
+          echo "Faca merge para concluir a inicializacao."
+          echo "=============================================="
+
+      - name: "Resumo final"
+        if: steps.commit.outputs.has_changes == 'true'
+        shell: bash
+        env:
+          PROJECT_NAME: ${{ steps.project.outputs.project_name }}
+        run: |
+          if [ "${{ steps.push.outcome }}" = "success" ]; then
+            echo ""
+            echo "=============================================="
+            echo "PROJETO INICIALIZADO COM SUCESSO"
+            echo "=============================================="
+            echo "Nome: $PROJECT_NAME"
+            echo "Repositorio: ${{ github.repository }}"
+            echo ""
+            echo "Proximos passos:"
+            echo "  1. Clone o repositorio: git clone ${{ github.server_url }}/${{ github.repository }}"
+            echo "  2. Configure o appsettings.Development.json e appsettings.Homologation.json"
+            echo "  3. Substitua o dominio de exemplo (Cliente/Ordem)"
+            echo "=============================================="
+          fi

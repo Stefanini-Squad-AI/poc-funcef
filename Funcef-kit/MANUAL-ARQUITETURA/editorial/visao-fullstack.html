@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Visão full-stack — Manual de Arquitetura FUNCEF</title>
+  <link rel="stylesheet" href="../assets/style.css" />
+</head>
+<body>
+<div class="layout">
+  <nav>
+    <h1>Manual de Arquitetura</h1>
+    <p class="subtitle"><a href="../index.html">← Portal</a></p>
+    <div class="section">Síntese</div>
+    <a href="visao-fullstack.html" class="active">Visão full-stack</a>
+    <a href="decisoes-resumo.html">Decisões (ADRs)</a>
+    <a href="componentes-funcef.html">Componentes FUNCEF.*</a>
+    <a href="processos-entrega.html">Processos de entrega</a>
+  </nav>
+  <main>
+    <h1>Visão full-stack FUNCEF</h1>
+    <p>A arquitetura alvo FUNCEF é um sistema distribuído em três camadas de produto — frontend, backend e dados — unificado por contratos, identidade corporativa e padrões de entrega. Este capítulo dá o mapa mental antes de mergulhar nos detalhes de cada família.</p>
+
+    <h2>Stack canônica (linha 3.0)</h2>
+    <table>
+      <thead><tr><th>Camada</th><th>Tecnologia</th><th>Referência</th></tr></thead>
+      <tbody>
+        <tr><td>Frontend</td><td>Next.js 16 · React 19 · TypeScript · TanStack Query · RHF + Zod</td><td><code>web-template</code> · <code>@funcef-componentes/*</code></td></tr>
+        <tr><td>Backend</td><td>.NET 10 · Clean Architecture · CQRS/Mediator · Oracle</td><td><code>api-template-base</code> · <code>FUNCEF.*</code> 3.x</td></tr>
+        <tr><td>Dados</td><td>Oracle 19c+ · PadraoBD v2.2 · Liquibase (DB-as-Code)</td><td>Doutrina BancoDados · LB-*</td></tr>
+        <tr><td>Identidade</td><td>Azure Entra ID · OAuth2/PKCE · Client Credentials</td><td><code>FUNCEF.Autenticacao</code></td></tr>
+        <tr><td>Autorização</td><td>PDP GAP (RBAC/ABAC) · <code>[FuncefAuthorize(Acao=)]</code></td><td>BE-05 · CMP-03</td></tr>
+        <tr><td>Segredos</td><td>Azure Key Vault · <code>SecretRef</code> / <code>*FromKeyVault</code></td><td><code>FUNCEF.Cofre</code> · CMP-08</td></tr>
+        <tr><td>Cache</td><td>Redis 7+ · seção <code>NoSql:RedisCache</code></td><td><code>FUNCEF.NoSql</code></td></tr>
+      </tbody>
+    </table>
+
+    <h2>Fluxo de confiança (Full BA)</h2>
+    <p>No cenário padrão (<strong>Full Better Auth / Entra</strong>), o browser <strong>não</strong> chama a API de microsserviço diretamente com credenciais expostas. O fluxo canônico é:</p>
+    <pre>Usuário → Next.js (login Entra via @funcef-componentes/auth)
+       → BFF same-origin (/api/bff) resolve Bearer server-side
+       → API .NET (FUNCEF.Autenticacao valida token)
+       → PDP GAP (autorização por ação, se [FuncefAuthorize])
+       → Oracle / Redis / Key Vault</pre>
+    <div class="callout ok">
+      <strong>Por quê BFF?</strong> Mantém tokens e políticas de sessão no servidor Next; reduz superfície CORS; alinha com o template <code>web-template</code> onde features chamam <code>api&lt;T&gt;</code> em <code>@/core/api</code>, nunca um client HTTP ad hoc no browser.
+    </div>
+
+    <h2>Backend — quatro camadas</h2>
+    <p>Cada microsserviço segue Clean Architecture. Dependências apontam para dentro:</p>
+    <pre>API (Controllers, Program.cs)
+  → Application (Commands, Queries, Handlers, Services, Validators)
+    → Domain (Entidades)
+  → Infrastructure (DbContext, DI, integrações FUNCEF.*)</pre>
+    <p>Detalhe: <a href="../generated/BE-02-Clean-Architecture.html">BE-02 Clean Architecture</a>.</p>
+
+    <h2>Frontend — quatro camadas</h2>
+    <pre>app/ (rotas Next.js, orquestradores)
+  → features/ (domínio: hooks, api, components, validators)
+    → core/ (auth, config, api client, providers)
+      → shared/ (UI genérica, utils)</pre>
+    <p>Regra rígida: <strong>features não importam de outras features</strong> — código compartilhado sobe para <code>shared/</code> ou <code>core/</code>. Detalhe: <a href="../generated/FE-01-Architecture.html">FE-01</a>.</p>
+
+    <h2>Componentização FUNCEF.*</h2>
+    <p>Dez bibliotecas NuGet coordenadas (pin <code>[3.0.0,4.0.0)</code>, <code>FUNCEF.Abstractions</code> em 3.1.0). Contratos compartilhados (<code>ICacheStore</code>, <code>ISecretReader</code>, paginação) vivem em <strong>Abstractions</strong>; implementações ficam nas libs especializadas. Mapa completo: <a href="componentes-funcef.html">Componentes FUNCEF.*</a>.</p>
+
+    <h2>Dados e entrega</h2>
+    <ul>
+      <li><strong>Modelagem:</strong> PadraoBD v2.2 — prefixo <code>TB_</code>, PK surrogate <code>NUMBER IDENTITY</code>, boolean <code>NUMBER(1) CHECK IN (0,1)</code> (ADR-017).</li>
+      <li><strong>Versionamento:</strong> Liquibase em repositório DB-as-Code — feature/fix → dev → hom → main via PR.</li>
+      <li><strong>Spec:</strong> comportamento definido em UCs/contratos (SDD); código cita a spec. Ver <a href="processos-entrega.html">Processos de entrega</a>.</li>
+    </ul>
+
+    <h2>Precedência em conflito</h2>
+    <table>
+      <thead><tr><th>Área</th><th>Fonte que vence</th></tr></thead>
+      <tbody>
+        <tr><td>Frontend (estrutura, BFF)</td><td><code>web-template</code> + Doutrina FE</td></tr>
+        <tr><td>Backend / API</td><td>Doutrina BE + <code>api-template-base</code></td></tr>
+        <tr><td>Banco / DDL</td><td>PadraoBD + Doutrina BD</td></tr>
+        <tr><td>Comportamento de produto</td><td>Spec funcional (UCs, contratos) — SDD</td></tr>
+      </tbody>
+    </table>
+
+    <p class="meta">Síntese editorial · Fontes: BE-01, FE-01, Guia-Onboarding-Fabrica, Stack-Canonica</p>
+  </main>
+</div>
+</body>
+</html>

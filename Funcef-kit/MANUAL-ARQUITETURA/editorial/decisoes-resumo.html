@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Decisões arquiteturais — Manual de Arquitetura FUNCEF</title>
+  <link rel="stylesheet" href="../assets/style.css" />
+</head>
+<body>
+<div class="layout">
+  <nav>
+    <h1>Manual de Arquitetura</h1>
+    <p class="subtitle"><a href="../index.html">← Portal</a></p>
+    <div class="section">Síntese</div>
+    <a href="visao-fullstack.html">Visão full-stack</a>
+    <a href="decisoes-resumo.html" class="active">Decisões (ADRs)</a>
+    <a href="componentes-funcef.html">Componentes FUNCEF.*</a>
+    <a href="processos-entrega.html">Processos de entrega</a>
+  </nav>
+  <main>
+    <h1>Decisões arquiteturais (ADRs)</h1>
+    <p>ADRs registram <strong>contexto</strong>, <strong>decisão</strong>, <strong>alternativas rejeitadas</strong> e <strong>consequências</strong>. São imutáveis — mudanças geram novo ADR que supersede o anterior. Abaixo, os ADRs mais relevantes para quem implementa na stack FUNCEF (resumo; detalhe na Doutrina).</p>
+
+    <h2>Backend (BE)</h2>
+    <table>
+      <thead><tr><th>ADR</th><th>Decisão</th><th>Por quê</th></tr></thead>
+      <tbody>
+        <tr><td>ADR-001</td><td>Clean Architecture 4 camadas</td><td>Testabilidade, domínio isolado, troca de infra sem tocar regra</td></tr>
+        <tr><td>ADR-002</td><td>CQRS + Mediator + Service Layer</td><td>Controller fino; regra no Service; Handler orquestra transação</td></tr>
+        <tr><td>ADR-003</td><td><code>Send</code> / <code>Receive</code> / <code>Publish</code></td><td>Intenção explícita; validação só em Commands</td></tr>
+        <tr><td>ADR-004</td><td>Validação no pipeline (<code>ValidationBehavior</code>)</td><td>FluentValidation antes do Handler; 400 padronizado</td></tr>
+        <tr><td>ADR-005</td><td>Exceções tipadas + middleware global</td><td>404/400/409 consistentes; sem try/catch em Handler</td></tr>
+        <tr><td>ADR-006</td><td>EF Core + Dapper híbrido</td><td>CRUD produtivo + SQL Oracle performático; mesmo <code>IUnitOfWork</code></td></tr>
+        <tr><td>ADR-007</td><td><code>IRepository&lt;T&gt;</code> genérico</td><td>Menos boilerplate; lógica específica no Service</td></tr>
+        <tr><td>ADR-009</td><td>Entra ID + refresh Redis</td><td>Identidade corporativa; refresh compartilhado entre réplicas</td></tr>
+        <tr><td>ADR-013</td><td>Ordem fixa de middlewares de segurança</td><td>Auth antes de authZ; headers e rate limit previsíveis</td></tr>
+      </tbody>
+    </table>
+    <p>Lista completa: capítulo gerado a partir de <code>Decisoes-Arquiteturais.md</code> (backend). Leitura: <a href="../generated/BE-02-Clean-Architecture.html">BE-02</a>, <a href="../generated/BE-03-CQRS-Mediator-Service.html">BE-03</a>.</p>
+
+    <h2>Cross-família (_shared)</h2>
+    <table>
+      <thead><tr><th>ADR</th><th>Decisão</th><th>Impacto</th></tr></thead>
+      <tbody>
+        <tr><td>ADR-004 (SDD)</td><td>Spec Driven Development</td><td>Spec funcional = fonte do “o quê”; doutrina = “como”; handshake spec→código</td></tr>
+        <tr><td>ADR-005 (delta)</td><td>Change/delta specs</td><td>Evolução brownfield via <code>proposal.md</code> + <code>delta-spec.md</code></td></tr>
+      </tbody>
+    </table>
+    <p><a href="../generated/ADR-004-Spec-Driven-Development.html">ADR-004 — Spec Driven Development</a></p>
+
+    <h2>Banco de dados (BD)</h2>
+    <table>
+      <thead><tr><th>ADR</th><th>Decisão</th><th>Impacto</th></tr></thead>
+      <tbody>
+        <tr><td>ADR-014</td><td>Constraints sem prefixo <code>TB_</code></td><td><code>PK_</code>, <code>UK_</code>, <code>IDX_</code> — só a tabela usa <code>TB_</code></td></tr>
+        <tr><td>ADR-015</td><td><code>NOME</code> e <code>DATA</code> por extenso</td><td><code>NM</code>/<code>DT</code> proibidos fora da lista oficial</td></tr>
+        <tr><td>ADR-016</td><td><code>DATA_INCLUSAO_ALTERACAO</code> padrão</td><td>Coluna de controle em tabelas novas</td></tr>
+        <tr><td>ADR-017</td><td>Boolean <code>NUMBER(1) 0/1</code></td><td>Substitui <code>CHAR 'S'/'N'</code> em objetos novos</td></tr>
+        <tr><td>ADR-018</td><td><code>DESC</code> só qualificado</td><td>Palavra reservada Oracle — ex.: <code>DESC_TIPO_ADESAO</code></td></tr>
+      </tbody>
+    </table>
+    <p>Detalhe: <a href="../generated/BD-08-Padroes-Tecnicos.html">BD-08 Padrões técnicos</a>.</p>
+
+    <h2>Decisões recentes de configuração (2026)</h2>
+    <div class="callout warn">
+      <strong>SecretRef canônico</strong> — Toda referência a segredo usa subseção <code>&lt;Coisa&gt;FromKeyVault: { Enabled, SecretName }</code>. Sintaxes antigas (<code>*KeyName</code>, <code>UseKeyVaultForX</code>) foram removidas das libs; chaves legadas são ignoradas (fail silencioso).
+    </div>
+    <div class="callout warn">
+      <strong>Redis</strong> — Seção de configuração = <code>NoSql:RedisCache</code> (não <code>NoSql:Redis</code>). Refresh token usa <code>Auth:RefreshToken:StorageType = "Redis"</code> após <code>AddRedisCache</code>.
+    </div>
+    <div class="callout note">
+      <strong>Audience Entra v2</strong> — Com <code>requestedAccessTokenVersion=2</code>, o <code>aud</code> do access token é o ClientId GUID puro; config deve usar o GUID (não <code>api://</code> salvo cenário v1).
+    </div>
+
+    <h2>Como usar ADRs no dia a dia</h2>
+    <ol>
+      <li>Antes de propor exceção (“vamos usar AutoMapper”, “vamos pular Service Layer”), verifique se há ADR ou princípio que proíbe.</li>
+      <li>Exceções aprovadas ficam registradas em <code>Excecoes-Aprovadas.md</code> — não são defaults.</li>
+      <li>Mudança de padrão → novo ADR + atualização da Doutrina e agentes em dual-write.</li>
+    </ol>
+
+    <p class="meta">Síntese editorial · Fonte completa: <code>Doutrina/backend/_shared/Decisoes-Arquiteturais.md</code>, <code>Doutrina/bancodados/_shared/Decisoes-Arquiteturais.md</code></p>
+  </main>
+</div>
+</body>
+</html>

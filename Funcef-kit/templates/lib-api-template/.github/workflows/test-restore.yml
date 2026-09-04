@@ -1,0 +1,145 @@
+# =============================================================================
+# Workflow para testar restore e build do template
+# =============================================================================
+
+name: '🧪 Teste de Restore - FUNCEF API Template'
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths: [ 'Funcef.Api.Template.csproj', 'nuget.config', 'TemplateBase/.template.config/**' ]
+
+permissions:
+  contents: read
+  packages: read
+  id-token: write
+  actions: read
+
+env:
+  DOTNET_VERSION: '10.0.x'
+  DOTNET_NOLOGO: true
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+
+jobs:
+  test-restore:
+    name: "TEST - Pack e Validacao do Template"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: "Checkout do Repositorio"
+        uses: actions/checkout@v5
+
+      - name: "Configurar .NET SDK"
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+          source-url: https://nuget.pkg.github.com/FUNCEF-Componentes/index.json
+        env:
+          NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: "Configurar Autenticacao NuGet"
+        shell: bash
+        run: |
+          echo "Configurando autenticacao para GitHub Packages..."
+          
+          dotnet nuget remove source "FUNCEF-Componentes" 2>/dev/null || true
+          
+          dotnet nuget add source https://nuget.pkg.github.com/FUNCEF-Componentes/index.json \
+            --name "FUNCEF-Componentes" \
+            --username "TOKEN" \
+            --password "${{ secrets.GITHUB_TOKEN }}" \
+            --store-password-in-clear-text
+          
+          echo "Fontes configuradas:"
+          dotnet nuget list source
+
+      - name: "Validar template.json"
+        shell: bash
+        run: |
+          echo "Validando template.json..."
+          
+          if [[ ! -f "TemplateBase/.template.config/template.json" ]]; then
+            echo "::error::template.json nao encontrado"
+            exit 1
+          fi
+          
+          python3 -c "import json; json.load(open('TemplateBase/.template.config/template.json'))" 2>/dev/null
+          if [[ $? -ne 0 ]]; then
+            echo "::error::template.json contem JSON invalido"
+            exit 1
+          fi
+          
+          echo "template.json valido"
+
+      - name: "Testar Pack do Template"
+        shell: bash
+        run: |
+          echo "Testando empacotamento..."
+          
+          dotnet pack Funcef.Api.Template.csproj \
+            -c Release \
+            -o ./test-out \
+            --verbosity minimal
+          
+          PACKAGE_FILE=$(find ./test-out -name "*.nupkg" | head -n 1)
+          
+          if [[ -z "$PACKAGE_FILE" ]]; then
+            echo "::error::Falha ao gerar pacote!"
+            exit 1
+          fi
+          
+          echo "Pack concluido: $PACKAGE_FILE"
+
+      - name: "Testar Instalacao Local do Template"
+        shell: bash
+        run: |
+          echo "Testando instalacao local..."
+          
+          dotnet new install ./TemplateBase --force
+          
+          dotnet new list funcef-api
+          
+          echo "Instalacao local concluida"
+
+      - name: "Testar Geracao de Projeto"
+        shell: bash
+        run: |
+          echo "Testando geracao de projeto..."
+          
+          mkdir -p ./test-project
+          dotnet new funcef-api --name TesteTemplate --output ./test-project
+          
+          if [[ ! -f "./test-project/TesteTemplate.slnx" ]]; then
+            echo "::error::Solution (.slnx) nao foi gerada!"
+            exit 1
+          fi
+          
+          if [[ ! -f "./test-project/src/TesteTemplate.API/TesteTemplate.API.csproj" ]]; then
+            echo "::error::Projeto API nao foi gerado!"
+            exit 1
+          fi
+          
+          echo "Projeto gerado com sucesso"
+          echo "Arquivos gerados:"
+          find ./test-project -name "*.csproj" -o -name "*.slnx" | sort
+
+      - name: "Limpar Template de Teste"
+        shell: bash
+        if: always()
+        run: |
+          dotnet new uninstall ./TemplateBase 2>/dev/null || true
+          rm -rf ./test-out ./test-project
+
+      - name: "Relatorio Final"
+        shell: bash
+        run: |
+          echo "=============================================="
+          echo "TESTE DO TEMPLATE CONCLUIDO"
+          echo "=============================================="
+          echo "Status: SUCESSO"
+          echo ".NET Version: ${{ env.DOTNET_VERSION }}"
+          echo "Template: funcef-api"
+          echo "Feed: GitHub Packages (FUNCEF-Componentes)"
+          echo "Data: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+          echo "=============================================="

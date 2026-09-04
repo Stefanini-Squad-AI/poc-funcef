@@ -1,0 +1,401 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>BE-03 — CQRS / Mediator / Service &mdash; Manual de Arquitetura FUNCEF</title>
+  <link rel="stylesheet" href="../assets/style.css" />
+</head>
+<body>
+<div class="layout">
+  <nav>
+    <h1>Manual de Arquitetura</h1>
+    <p class="subtitle"><a href="../index.html">&larr; Portal</a></p>
+    <div class="section">Cap&iacute;tulo</div>
+    <a href="#" class="active">BE-03 — CQRS / Mediator / Service</a>
+  </nav>
+  <main class="wide generated-content">
+    <h1>BE-03 — CQRS, Mediator e Service Layer</h1>
+<h2>3.1 Modelo conceitual</h2>
+<table><thead><tr><th>Conceito</th><th>Implementação</th></tr></thead><tbody><tr><td>**Command**</td><td>`ICommand` (void) ou `ICommand<TResponse>` — intenção de mudança de estado</td></tr><tr><td>**Query**</td><td>`IQuery<TResponse>` — intenção de leitura</td></tr><tr><td>**Handler**</td><td>`ICommandHandler<TCommand,TResponse>` / `ICommandHandler<TCommand>` / `IQueryHandler<TQuery,TResponse>` — executa o caso de uso</td></tr><tr><td>**Notification**</td><td>`INotification` (marcador) + `INotificationHandler<TNotification>` — evento de domínio in-process, com **0..N** handlers</td></tr><tr><td>**Mediator**</td><td>`IMediator.Send(command)` despacha Command · `IMediator.Receive(query)` despacha Query · `IMediator.Publish(notification)` despacha Notification</td></tr><tr><td>**Pipeline**</td><td>`IPipelineBehavior<TRequest,TResponse>` — middleware do Mediator; `ValidationBehavior` é o behavior canônico</td></tr><tr><td>**Validator**</td><td>`AbstractValidator<TCommand>` do FluentValidation — só Commands têm</td></tr><tr><td>**Service**</td><td>`I{Entidade}Service` — regras de negócio + acesso a dados (via `IRepository<T>`)</td></tr></tbody></table>
+<p>Todas as interfaces vêm do componente <code>FUNCEF.Essenciais</code> (<code>FuncefEssenciais.Application.Commands</code>, <code>FuncefEssenciais.Application.Queries</code>, <code>FuncefEssenciais.Application</code>).</p>
+<h2>3.2 <code>Send</code> para Commands, <code>Receive</code> para Queries, <code>Publish</code> para Notifications</h2>
+<p>O Mediator FUNCEF (<code>IMediator : ISender, IReceiver, IPublisher</code>) distingue <strong>explicitamente</strong> as operações no contrato:</p>
+<table><thead><tr><th>Método</th><th>Aceita</th><th>Handlers</th><th>Significado</th></tr></thead><tbody><tr><td>`Task<T> Send<T>(ICommand<T>)`</td><td>Command que retorna</td><td>1</td><td>Mudança de estado</td></tr><tr><td>`Task Send(ICommand)`</td><td>Command void</td><td>1</td><td>Mudança de estado sem retorno</td></tr><tr><td>`Task<T> Receive<T>(IQuery<T>)`</td><td>Query</td><td>1</td><td>Leitura pura</td></tr><tr><td>`Task Publish(INotification)`</td><td>Notification</td><td>**0..N**</td><td>Evento de domínio in-process (publish/subscribe)</td></tr></tbody></table>
+<p>Ler o nome do método no código já diz a intenção. Decisão registrada em <a href="../_shared/Decisoes-Arquiteturais.md">Decisoes-Arquiteturais</a> ADR-003.</p>
+<h3>3.2.1 Notifications (<code>Publish</code>) — eventos de domínio in-process</h3>
+<p>Use <code>Publish</code> para <strong>desacoplar efeitos colaterais</strong> da lógica principal (auditoria, e-mail, invalidação de cache). Diferente de Command (exatamente 1 handler), uma <code>INotification</code> pode ter <strong>0 ou mais</strong> <code>INotificationHandler<T></code>.</p>
+<pre><code>// Evento (marcador INotification)
+public record ClienteCriadoNotification(long ClienteId, string Nome) : INotification;
+
+// Handler — auto-registrado por AddMediatorWithDefaults; pode haver vários
+public class AuditarCriacaoCliente : INotificationHandler&lt;ClienteCriadoNotification&gt;
+{
+    public Task Handle(ClienteCriadoNotification n, CancellationToken ct) =&gt; /* ... */;
+}
+
+// Publicação — tipicamente no Handler de um Command, após persistir
+await _mediator.Publish(new ClienteCriadoNotification(cliente.Id, cliente.Nome), ct);
+```</code></pre>
+<p><div class="callout warn"><strong>Aviso</strong> **Semântica de execução (FUNCEF.Essenciais v3.0.0)**</p>
+<p>Os handlers de uma notificação rodam **sequencialmente** e **in-process** (mesmo processo). Falhas de handlers individuais são **agregadas** em `AggregateException` ao final — um handler de auditoria/telemetria com bug **não impede** os demais (mudança v3.0.0). `OperationCanceledException` por cancelamento é propagada imediatamente. **Não** use `Publish` para integração entre microserviços — para isso use mensageria (Azure Service Bus via `FUNCEF.Armazenamentos`); `Publish` é para eventos **dentro** do mesmo serviço.</p>
+<h2>3.3 Estrutura de pastas (CQRS)</h2>
+<p>Convenção rígida:</p>
+<pre><code>Commands/
+└── {Entidade}/
+    └── {Acao}/
+        ├── {Acao}{Entidade}Command.cs    # ICommand&lt;TResponse&gt;
+        ├── {Acao}{Entidade}Handler.cs    # ICommandHandler&lt;TCommand,TResponse&gt;
+        └── {Acao}{Entidade}Validator.cs  # AbstractValidator&lt;TCommand&gt;
+
+Queries/
+└── {Entidade}/
+    └── {Detalhe}/
+        ├── Get{Entidade}{Detalhe}Query.cs    # IQuery&lt;TResponse&gt;
+        └── Get{Entidade}{Detalhe}Handler.cs  # IQueryHandler&lt;TQuery,TResponse&gt;
+```</code></pre>
+<p>Exemplos de ações típicas: `Create`, `Update`, `UpdateStatus`, `Delete`, `CreateCom{X}Ef`, `CreateCom{X}Dapper`.</p>
+<p>Exemplos de detalhes típicos: `GetById`, `GetPaged`, `GetBy{Filtro}`.</p>
+<h2>3.4 Anatomia de um Command</h2>
+<pre><code>using FuncefEssenciais.Application.Commands;
+using {Servico}.Application.DTOs.{Entidade}Dto.Request;
+using {Servico}.Application.DTOs.{Entidade}Dto.Response;
+
+namespace {Servico}.Application.Commands.{Entidade}.Create;
+
+public class Create{Entidade}Command : ICommand&lt;{Entidade}Response&gt;
+{
+    public {Entidade}Request Request { get; set; } = new();
+}
+```</code></pre>
+<p>Padrões:</p>
+<ul>
+<li>O Command é uma **classe pública** com propriedades públicas (não record). É instanciada pelo controller via `new Create{Entidade}Command { Request = request }`.</li>
+<li>O payload de entrada típico vai dentro de uma propriedade `Request` que carrega o DTO de Request — isso simplifica os Validators (`x => x.Request.Campo`) e reduz duplicação entre Command e DTO.</li>
+<li>`Update{Entidade}Command` adicionam um `Id` no **nível do Command** (não no DTO), porque o ID vem da rota.</li>
+</ul>
+<h2>3.5 Anatomia de um Validator</h2>
+<pre><code>using FluentValidation;
+using FuncefEssenciais.Core.Validation.FluentValidation;
+
+namespace {Servico}.Application.Commands.{Entidade}.Create;
+
+public class Create{Entidade}Validator : AbstractValidator&lt;Create{Entidade}Command&gt;
+{
+    public Create{Entidade}Validator()
+    {
+        this.RuleForRequiredText(x =&gt; x.Request.Nome, "nome", 100);
+        this.RuleForOptionalEmail(x =&gt; x.Request.Email, maxLength: 150);
+    }
+}
+```</code></pre>
+<p>Padrões:</p>
+<ul>
+<li>Validator valida **o Command**, não o DTO. Permite validar combinações entre `Id` (vindo da rota) e propriedades do Request num único lugar.</li>
+<li>Usar **métodos de conveniência do FUNCEF** (`RuleForRequiredText`, `RuleForOptionalEmail`, `RuleForRequiredId`, `RuleForPositiveDecimal`, `RuleForRequiredAllowedValues`, `RuleForPagination`, `RuleForSortField`, `RuleForSortDirection`) — padronizam mensagens em PT-BR e limites do projeto.</li>
+<li>Detalhes em [BE-06-Validacao-Excecoes](../seguranca/BE-06-Validacao-Excecoes.md).</li>
+</ul>
+<h2>3.6 Anatomia de um Command Handler</h2>
+<pre><code>using FuncefEssenciais.Application.Commands;
+using FuncefORM.Contracts;
+using FuncefORM.Mapping.Extensions;
+using {Servico}.Application.DTOs.{Entidade}Dto.Response;
+using {Servico}.Application.Services;
+
+namespace {Servico}.Application.Commands.{Entidade}.Create;
+
+public class Create{Entidade}Handler : ICommandHandler&lt;Create{Entidade}Command, {Entidade}Response&gt;
+{
+    private readonly I{Entidade}Service _service;
+    private readonly IUnitOfWork _unitOfWork;
+
+    public Create{Entidade}Handler(I{Entidade}Service service, IUnitOfWork unitOfWork)
+    {
+        _service = service;
+        _unitOfWork = unitOfWork;
+    }
+
+    public async Task&lt;{Entidade}Response&gt; Handle(Create{Entidade}Command command, CancellationToken cancellationToken)
+    {
+        var entity = await _service.CreateAsync(command.Request, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        return entity.MapTo&lt;Domain.Entities.{Entidade}, {Entidade}Response&gt;();
+    }
+}
+```</code></pre>
+<p>Padrões:</p>
+<ul>
+<li>**Sem `try/catch`.** Exceções tipadas (`NotFoundException`, `ConflictException`, …) sobem e são tratadas pelo `GlobalExceptionMiddleware`. Exceção: transações multi-passo com `Begin/Commit/Rollback` (§3.13).</li>
+<li>O Handler **não chama o repositório diretamente** — sempre via Service.</li>
+<li>O Handler **sempre chama `SaveChangesAsync()`** quando faz mudança de estado. O Service usa `_repository.AddAsync(entity)` mas não salva — quem decide quando persistir é o Handler.</li>
+<li>`MapTo<TSrc,TDst>(…)` é a extensão do `FuncefORM.Mapping`; o DTO precisa de `[MapFrom("Prop")]` em cada propriedade que deve ser populada.</li>
+</ul>
+<h2>3.7 Anatomia de uma Query</h2>
+<pre><code>using FuncefEssenciais.Application.Queries;
+using {Servico}.Application.DTOs.{Entidade}Dto.Response;
+
+namespace {Servico}.Application.Queries.{Entidade}.GetById;
+
+public class Get{Entidade}ByIdQuery : IQuery&lt;{Entidade}Response&gt;
+{
+    public long Id { get; set; }
+    public bool Incluir{Navegacao} { get; set; }   // quando aplicável
+}
+```</code></pre>
+<pre><code>public class Get{Entidade}ByIdHandler : IQueryHandler&lt;Get{Entidade}ByIdQuery, {Entidade}Response&gt;
+{
+    private readonly I{Entidade}Service _service;
+    public Get{Entidade}ByIdHandler(I{Entidade}Service service) =&gt; _service = service;
+
+    public async Task&lt;{Entidade}Response&gt; Handle(Get{Entidade}ByIdQuery query, CancellationToken ct)
+    {
+        var entity = query.Incluir{Navegacao}
+            ? await _service.GetByIdWithAutoIncludesAsync(query.Id, ct)
+            : await _service.GetByIdAsync(query.Id, ct);
+
+        if (entity is null)
+            throw NotFoundException.ForResource("{Entidade}", query.Id);
+
+        return entity.MapTo&lt;Domain.Entities.{Entidade}, {Entidade}Response&gt;();
+    }
+}
+```</code></pre>
+<p>Padrões:</p>
+<ul>
+<li>Queries **não injetam `IUnitOfWork`** — não fazem commit.</li>
+<li>A decisão entre `GetByIdAsync` (sem includes) e `GetByIdWithAutoIncludesAsync` (com navegações marcadas com `[AutoInclude]`) fica no Handler/Query, não no Service.</li>
+<li>Quando o recurso não existe, **o Handler de Query lança `NotFoundException`** — não devolve `null`.</li>
+</ul>
+<h2>3.8 Query paginada com filtro</h2>
+<p>Padrão de listagem com paginação, busca e ordenação:</p>
+<pre><code>public async Task&lt;PaginatedResult&lt;{Entidade}Resume&gt;&gt; Handle(
+    Get{Entidade}PagedQuery query, CancellationToken ct)
+{
+    var sortDirection = query.DirecaoOrdenacao?.ToLowerInvariant() == "desc"
+        ? SortDirection.Descending
+        : SortDirection.Ascending;
+
+    var pagedRequest = PagedRequest.Create(
+        query.Pagina, query.TamanhoPagina,
+        query.OrdenarPor ?? "Nome", sortDirection);
+
+    Expression&lt;Func&lt;{Entidade}, bool&gt;&gt;? predicate = null;
+    if (!string.IsNullOrEmpty(query.TermoBusca))
+    {
+        var termo = query.TermoBusca.ToLowerInvariant();
+        predicate = e =&gt; e.Nome.ToLower().Contains(termo);
+    }
+
+    var pagedResult = await _service.GetPagedAsync(pagedRequest, predicate, ct);
+    var dtos = pagedResult.Items.MapToList&lt;{Entidade}, {Entidade}Resume&gt;();
+
+    return new PaginatedResult&lt;{Entidade}Resume&gt;
+    {
+        Items = dtos, Page = pagedResult.Page, PageSize = pagedResult.PageSize,
+        TotalItems = pagedResult.TotalItems, TotalPages = pagedResult.TotalPages
+    };
+}
+```</code></pre>
+<p>Tipos chave (`PagedRequest`/`SortDirection` de `Funcef.Abstractions.Pagination` — ver [CMP-08-Abstractions](../componentes/CMP-08-Abstractions.md); `PaginatedResult<T>` de `FuncefORM.Data`):</p>
+<table><thead><tr><th>Tipo</th><th>Papel</th></tr></thead><tbody><tr><td>`PagedRequest`</td><td>Encapsula `Pagina`, `TamanhoPagina`, `OrdenarPor`, `SortDirection`</td></tr><tr><td>`PaginatedResult<T>`</td><td>Resposta com `Items`, `Page`, `PageSize`, `TotalItems`, `TotalPages`</td></tr><tr><td>`SortDirection`</td><td>`Ascending` ou `Descending`</td></tr><tr><td>`MapToList<TSrc,TDst>`</td><td>Mapeia uma `IEnumerable<TSrc>` para `List<TDst>`</td></tr></tbody></table>
+<h2>3.9 Pipeline `ValidationBehavior`</h2>
+<pre><code>sequenceDiagram
+    autonumber
+    participant Med as IMediator
+    participant Beh as ValidationBehavior
+    participant Vdr as Validator(s)
+    participant Hnd as Handler
+
+    Med-&gt;&gt;Beh: invoke(request)
+    Beh-&gt;&gt;Vdr: ValidateAsync(request)
+    alt failures.Count &gt; 0
+        Vdr--&gt;&gt;Beh: ValidationResult com erros
+        Beh--&gt;&gt;Med: throw ValidationException
+    else
+        Vdr--&gt;&gt;Beh: ok
+        Beh-&gt;&gt;Hnd: Handle(request)
+        Hnd--&gt;&gt;Beh: response
+        Beh--&gt;&gt;Med: response
+    end
+```</code></pre>
+<p>O behavior é registrado automaticamente por `AddMediatorWithDefaults(assembly)`. O `GlobalExceptionMiddleware` mapeia `ValidationException` para HTTP 400.</p>
+<p>**Importante:** O behavior **só roda para Commands** (Validators são `AbstractValidator<TCommand>`). Para validar uma Query, fazer dentro do Handler.</p>
+<h2>3.10 Service — anatomia</h2>
+<pre><code>public interface I{Entidade}Service
+{
+    Task&lt;{Entidade}&gt; CreateAsync({Entidade}Request request, CancellationToken ct = default);
+    Task&lt;{Entidade}&gt; UpdateAsync(long id, {Entidade}Request request, CancellationToken ct = default);
+    Task ValidateAndDeleteAsync(long id, CancellationToken ct = default);
+    Task&lt;{Entidade}?&gt; GetByIdAsync(long id, CancellationToken ct = default);
+    Task&lt;{Entidade}?&gt; GetByIdWithAutoIncludesAsync(long id, CancellationToken ct = default);
+    Task&lt;PaginatedResult&lt;{Entidade}&gt;&gt; GetPagedAsync(
+        PagedRequest request, Expression&lt;Func&lt;{Entidade}, bool&gt;&gt;? predicate = null,
+        CancellationToken ct = default);
+}
+```</code></pre>
+<pre><code>public class {Entidade}Service : I{Entidade}Service
+{
+    private readonly IRepository&lt;{Entidade}&gt; _repository;
+
+    public {Entidade}Service(IRepository&lt;{Entidade}&gt; repository) =&gt; _repository = repository;
+
+    public virtual async Task&lt;{Entidade}&gt; CreateAsync({Entidade}Request request, CancellationToken ct = default)
+    {
+        if (await _repository.ExistsAsync(e =&gt; e.CampoUnico == request.CampoUnico, cancellationToken: ct))
+            throw new ConflictException("{Entidade}", "Já existe um registro com este {campo}");
+
+        var entity = request.MapTo&lt;{Entidade}Request, {Entidade}&gt;(e =&gt;
+        {
+            // Id NÃO é setado: PK IDENTITY gerada pelo banco no insert.
+            e.DataCriacao = DateTime.UtcNow;
+        });
+
+        await _repository.AddAsync(entity, ct);
+        return entity;
+    }
+
+    public virtual async Task&lt;{Entidade}&gt; UpdateAsync(long id, {Entidade}Request request, CancellationToken ct = default)
+    {
+        var entity = await _repository.GetByIdAsync(id, cancellationToken: ct)
+            ?? throw NotFoundException.ForResource("{Entidade}", id);
+
+        // ... aplica mudanças
+        await _repository.UpdateAsync(entity, ct);
+        return entity;
+    }
+
+    public virtual async Task ValidateAndDeleteAsync(long id, CancellationToken ct = default)
+    {
+        var entity = await _repository.GetByIdAsync(id, cancellationToken: ct)
+            ?? throw NotFoundException.ForResource("{Entidade}", id);
+
+        // Validações de integridade (ex.: tem dependentes?)
+        await _repository.DeleteAsync(entity, ct);
+    }
+
+    public virtual Task&lt;{Entidade}?&gt; GetByIdAsync(long id, CancellationToken ct = default)
+        =&gt; _repository.GetByIdAsync(id, cancellationToken: ct);
+
+    public virtual Task&lt;{Entidade}?&gt; GetByIdWithAutoIncludesAsync(long id, CancellationToken ct = default)
+        =&gt; _repository.GetByIdWithAutoIncludesAsync(id, cancellationToken: ct);
+
+    public virtual Task&lt;PaginatedResult&lt;{Entidade}&gt;&gt; GetPagedAsync(
+        PagedRequest request, Expression&lt;Func&lt;{Entidade}, bool&gt;&gt;? predicate = null,
+        CancellationToken ct = default)
+        =&gt; _repository.GetPagedAsync(request, predicate, cancellationToken: ct);
+}
+```</code></pre>
+<p>Padrões observáveis:</p>
+<table><thead><tr><th>Padrão</th><th>Por quê</th></tr></thead><tbody><tr><td>Métodos `virtual`</td><td>Permite mock/override em testes e extensão por herança</td></tr><tr><td>Service **nunca** chama `SaveChangesAsync()`</td><td>Quem decide quando persistir é o Handler — possibilita transações multi-Service</td></tr><tr><td>Validações de domínio antes da escrita</td><td>Falha rápido com exceção tipada — sem corromper estado</td></tr><tr><td>`GetByIdAsync` retorna `null` para "não encontrado" no Service</td><td>Quem traduz para HTTP 404 é o Handler (`?? throw NotFoundException.ForResource`) — exceto em UPDATE/DELETE onde o próprio Service já lança</td></tr></tbody></table>
+<h2>3.11 Controller — anatomia</h2>
+<pre><code>[Route("[controller]")]
+[ApiController]
+public class {Entidades}Controller : BaseController
+{
+    private readonly IMediator _mediator;
+
+    public {Entidades}Controller(ITelemetry telemetry, IMediator mediator) : base(telemetry)
+        =&gt; _mediator = mediator;
+
+    [HttpPost]
+    [FuncefAuthorize]
+    [ProducesResponseType(typeof({Entidade}Response), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    public async Task&lt;IActionResult&gt; Create(
+        [FromBody] {Entidade}Request request, CancellationToken ct = default)
+    {
+        var result = await _mediator.Send(
+            new Create{Entidade}Command { Request = request }, ct);
+        return ApiCreated(result);
+    }
+
+    [HttpGet("{id:long}")]
+    [FuncefAuthorize]
+    public async Task&lt;IActionResult&gt; Get(long id, CancellationToken ct = default)
+    {
+        var result = await _mediator.Receive(new Get{Entidade}ByIdQuery { Id = id }, ct);
+        return ApiOk(result);
+    }
+
+    [HttpDelete("{id:long}")]
+    [FuncefAuthorize]
+    public async Task&lt;IActionResult&gt; Delete(long id, CancellationToken ct = default)
+    {
+        await _mediator.Send(new Delete{Entidade}Command { Id = id }, ct);
+        return ApiNoContent();
+    }
+}
+```</code></pre>
+<p>Helpers de `BaseController` retornam `ObjectResult`s padronizados:</p>
+<table><thead><tr><th>Método</th><th>HTTP</th><th>Uso</th></tr></thead><tbody><tr><td>`ApiOk(result)`</td><td>200</td><td>Leitura ou update bem-sucedido</td></tr><tr><td>`ApiCreated(result)`</td><td>201</td><td>Recurso criado</td></tr><tr><td>`ApiNoContent()`</td><td>204</td><td>Operação sem corpo (delete típico)</td></tr></tbody></table>
+<h2>3.12 Registro automático no DI</h2>
+<p>`{Servico}.Application/Extensions/ServiceCollectionExtensions.cs`:</p>
+<pre><code>public static IServiceCollection AddApplicationServices(this IServiceCollection services)
+{
+    services.AddMediatorWithDefaults(typeof(ServiceCollectionExtensions).Assembly);
+
+    services.AddScoped&lt;I{Entidade1}Service, {Entidade1}Service&gt;();
+    services.AddScoped&lt;I{Entidade2}Service, {Entidade2}Service&gt;();
+    // ... outros services
+
+    return services;
+}
+```</code></pre>
+<p>`AddMediatorWithDefaults(assembly)` (do `FuncefEssenciais.Application.Extensions`) usa Scrutor para varrer o assembly e registrar:</p>
+<table><thead><tr><th>Tipo registrado</th><th>Como é encontrado</th></tr></thead><tbody><tr><td>`IMediator`</td><td>Singleton interno do FuncefEssenciais</td></tr><tr><td>`ICommandHandler<,>` e `ICommandHandler<>`</td><td>Scrutor scan da assembly</td></tr><tr><td>`IQueryHandler<,>`</td><td>Scrutor scan</td></tr><tr><td>`AbstractValidator<>` (FluentValidation)</td><td>Scrutor scan</td></tr><tr><td>`IPipelineBehavior<,>` (incluindo `ValidationBehavior`)</td><td>Defaults do FuncefEssenciais</td></tr></tbody></table>
+<p>**Conclusão:** **só Services precisam de `AddScoped` manual**. Handlers e Validators são automáticos.</p>
+<h2>3.13 Transações multi-passo no Handler</h2>
+<p>Quando o caso de uso envolve mais de uma operação que precisa ser **atômica**, o Handler controla a transação:</p>
+<pre><code>public async Task&lt;{Resultado}Response&gt; Handle({Comando}Command command, CancellationToken ct)
+{
+    await _unitOfWork.BeginAsync(ct);
+    try
+    {
+        var entityA = await _serviceA.CreateAsync(command.RequestA, ct);
+        await _unitOfWork.SaveChangesAsync(ct);
+
+        var entityB = await _serviceB.CreateAsync(command.RequestB, ct);
+        await _unitOfWork.SaveChangesAsync(ct);
+
+        await _unitOfWork.CommitAsync(ct);
+        return new {Resultado}Response { /* ... */ };
+    }
+    catch
+    {
+        await SafeRollbackAsync(ct);
+        throw;
+    }
+}
+
+private async Task SafeRollbackAsync(CancellationToken ct)
+{
+    try
+    {
+        await _unitOfWork.RollbackAsync(ct);
+        _telemetry.LogWarning("Rollback executado com sucesso");
+    }
+    catch (Exception rollbackEx)
+    {
+        _telemetry.LogError("Erro ao executar rollback", rollbackEx);
+    }
+}
+```</code></pre>
+<p>Detalhes (incluindo variante com Dapper) em [BE-04-Persistencia-Transacoes](../persistencia/BE-04-Persistencia-Transacoes.md) §4.7.</p>
+<h2>3.14 Mapa Command/Query → Handler → Service (padrão)</h2>
+<table><thead><tr><th>Command/Query</th><th>Handler</th><th>Service usado</th></tr></thead><tbody><tr><td>`Create{Entidade}Command`</td><td>`Create{Entidade}Handler`</td><td>`I{Entidade}Service.CreateAsync`</td></tr><tr><td>`Update{Entidade}Command`</td><td>`Update{Entidade}Handler`</td><td>`I{Entidade}Service.UpdateAsync`</td></tr><tr><td>`Delete{Entidade}Command`</td><td>`Delete{Entidade}Handler`</td><td>`I{Entidade}Service.ValidateAndDeleteAsync`</td></tr><tr><td>`Create{Entidade}Com{X}EfCommand`</td><td>`Create{Entidade}Com{X}EfHandler`</td><td>`I{Entidade}Service.CreateAsync` + `I{X}Service.CreateAsync` (com `IUnitOfWork.BeginAsync/CommitAsync`)</td></tr><tr><td>`Create{Entidade}Com{X}DapperCommand`</td><td>`Create{Entidade}Com{X}DapperHandler`</td><td>`…CreateWithDapperAsync` (vide [BE-04-Persistencia-Transacoes](../persistencia/BE-04-Persistencia-Transacoes.md))</td></tr><tr><td>`Get{Entidade}ByIdQuery`</td><td>`Get{Entidade}ByIdHandler`</td><td>`I{Entidade}Service.GetByIdAsync` ou `GetByIdWithAutoIncludesAsync`</td></tr><tr><td>`Get{Entidade}PagedQuery`</td><td>`Get{Entidade}PagedHandler`</td><td>`I{Entidade}Service.GetPagedAsync`</td></tr></tbody></table>
+<h2>3.15 Quando NÃO criar um Service</h2>
+<p>Para queries muito simples (1-2 linhas de delegação ao repositório), o Handler **pode** chamar `IRepository<T>` diretamente — mas o padrão dominante é Handler → Service. Manter o Service como camada estável ajuda em refactors e cobertura de testes. **Justificar** ao optar pelo atalho.</p>
+<h2>3.16 Padrão canônico: `IMediator` + `ICommand`/`IQuery` (vs `IUseCase` do projeto de referência)</h2>
+<p><div class="callout ok"><strong>Importante</strong> **Qual é o padrão (decisão 2026-05-26)**</p>
+<p>O padrão **canônico** FUNCEF é o deste capítulo: despacho via **`IMediator`** (`Send` para Commands, `Receive` para Queries, `Publish` para Notifications), com `ICommand`/`IQuery` + `Handler` + `Service`, e respostas padronizadas no Controller via `BaseController` (`ApiOk`/`ApiCreated`).</p>
+<p>O projeto de referência `api-nexus-cadastro` adota hoje uma variante (`IUseCase<TCommand,TResponse>` + `UseCaseResponse` + `ProcessUseCaseResponse`). **Essa variante é uma divergência conhecida, não o padrão.** Ao escrever código novo, siga BE-03 (`IMediator`/`ICommand`). O alinhamento do projeto de referência ao padrão é tratado pela governança de BackEnd — não adote a variante por imitação.</p>
+<h2>Histórico</h2>
+<table><thead><tr><th>Data</th><th>Mudança</th></tr></thead><tbody><tr><td>2026-05-26</td><td>§3.16: reafirma `IMediator`/`ICommand`/`Send`/`Receive` como padrão canônico; registra a variante `IUseCase`/`UseCaseResponse` do `api-nexus-cadastro` como divergência conhecida (decisão tomada na recriação da Central de Notificações).</td></tr><tr><td>2026-05-26</td><td>§3.1/§3.2: documentado `Publish` (Notifications) — `IMediator : ISender, IReceiver, IPublisher`; nova §3.2.1 (eventos in-process, 0..N handlers, execução sequencial com falhas agregadas em `AggregateException`). Verificado contra `FUNCEF.Essenciais` v3.0.0 (`lib-back-essenciais`).</td></tr><tr><td>2026-06-16</td><td>§3.8 — tipos de paginação `PagedRequest`/`SortDirection` agora têm contrato em `Funcef.Abstractions.Pagination` ([CMP-08-Abstractions](../componentes/CMP-08-Abstractions.md)); `PaginatedResult<T>` permanece em `FuncefORM.Data`.</td></tr></tbody></table>
+<hr />
+<p>**Anterior:** [BE-02 — Clean Architecture](BE-02-Clean-Architecture.md) · **Próximo:** [BE-04 — Persistência e transações](../persistencia/BE-04-Persistencia-Transacoes.md)</div></div></p>
+    <p class="meta">Gerado de: <code>../../backend/arquitetura/BE-03-CQRS-Mediator-Service.md</code> &middot; <a href="../index.html">Portal</a></p>
+  </main>
+</div>
+</body>
+</html>

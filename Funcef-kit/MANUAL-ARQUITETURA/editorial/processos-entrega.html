@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Processos de entrega — Manual de Arquitetura FUNCEF</title>
+  <link rel="stylesheet" href="../assets/style.css" />
+</head>
+<body>
+<div class="layout">
+  <nav>
+    <h1>Manual de Arquitetura</h1>
+    <p class="subtitle"><a href="../index.html">← Portal</a></p>
+    <div class="section">Síntese</div>
+    <a href="visao-fullstack.html">Visão full-stack</a>
+    <a href="decisoes-resumo.html">Decisões (ADRs)</a>
+    <a href="componentes-funcef.html">Componentes FUNCEF.*</a>
+    <a href="processos-entrega.html" class="active">Processos de entrega</a>
+  </nav>
+  <main>
+    <h1>Processos de entrega</h1>
+    <p>A FUNCEF adota <strong>Spec Driven Development (SDD)</strong>: a especificação funcional define o comportamento; a Doutrina define como implementar; o código deve ser rastreável à spec.</p>
+
+    <h2>Ciclo SDD FUNCEF</h2>
+    <pre>constitution (princípios Doutrina / CLAUDE.md)
+    → specify (UCs, contratos, telas, state machines)
+    → plan (decisões técnicas por marco)
+    → tasks (T-NNN rastreáveis)
+    → implement (BE / FE / BD)
+    → validate → sync → archive (changes brownfield)</pre>
+    <p>Detalhe: <a href="../generated/ADR-004-Spec-Driven-Development.html">ADR-004 — Spec Driven Development</a>.</p>
+
+    <h2>Handshake spec → código</h2>
+    <table>
+      <thead><tr><th>Artefato spec</th><th>O que o código deve refletir</th></tr></thead>
+      <tbody>
+        <tr><td>UC (AG-13)</td><td>Regras de negócio, Gherkin, fluxos principal/alternativo/exceção</td></tr>
+        <tr><td>Contrato (AG-16)</td><td>Assinatura HTTP, DTOs, códigos de erro, validações</td></tr>
+        <tr><td>Screen (AG-15)</td><td>Campos UI, ações, estados, permissões por campo</td></tr>
+        <tr><td>State machine (AG-17)</td><td>Transições de status, guards, side effects</td></tr>
+        <tr><td>Tasks (AG-20)</td><td>Itens <code>T-NNN</code> com agente roteado (be-*, fe-*, bd-*)</td></tr>
+      </tbody>
+    </table>
+    <div class="callout ok">
+      <strong>Regra:</strong> divergência spec ↔ doutrina é sinalizada e registrada — não improvisada. Código em sistema especificado deve citar <code>UC-NNN</code>, contrato ou <code>T-NNN</code> quando aplicável.
+    </div>
+
+    <h2>Evolução brownfield (change/delta)</h2>
+    <p>Sistemas já em produção evoluem via <strong>change proposal</strong>:</p>
+    <ol>
+      <li><code>proposal.md</code> — Why / What / Impact</li>
+      <li><code>delta-spec.md</code> — ADDED / MODIFIED / REMOVED sobre spec viva</li>
+      <li>Implementação alinhada ao delta</li>
+      <li>Sync funde delta em <code>funcional/</code> e arquiva a change</li>
+    </ol>
+
+    <h2>Entrega de banco (DB-as-Code)</h2>
+    <pre>changeset Liquibase → PR → review (CODEOWNERS) → merge
+    → pipeline DEV → HOM → MAIN (promoção controlada)</pre>
+    <ul>
+      <li>DDL/DML versionados; nunca editar changeset já aplicado — corrigir com novo changeset</li>
+      <li>SQL segue PadraoBD v2.2</li>
+      <li>PROD: IA/repositório só gera scripts; execução exige DBA/aprovação</li>
+    </ul>
+    <p><a href="../generated/LB-01-Visao-Geral.html">LB-01 — Visão geral Liquibase</a></p>
+
+    <h2>Definition of Done (fábrica)</h2>
+    <p>Resumo do guia de onboarding — entrega aceita quando:</p>
+    <ul>
+      <li>Conforme templates (<code>web-template</code>, <code>api-template-base</code>)</li>
+      <li>Build/testes/lint verdes (<code>dotnet build</code>, <code>pnpm typecheck/lint/test:run</code>)</li>
+      <li>Sem segredos commitados; Key Vault em HML/PRD</li>
+      <li>Contratos e UCs cobertos (Gherkin principal + alternativas + exceções)</li>
+      <li>DDL conforme PadraoBD quando aplicável</li>
+    </ul>
+    <p>Detalhe: <a href="../generated/Guia-Onboarding-Fabrica-Arquitetura-Alvo.html">Guia onboarding fábrica</a> §7.</p>
+
+    <h2>Qualidade contínua</h2>
+    <ul>
+      <li><strong>Doutrina viva</strong> — padrões evoluem com uso real; proposta antes de aplicar</li>
+      <li><strong>Dual-write</strong> — capítulo Doutrina + agente/skill sincronizados</li>
+      <li><strong>Validate-Pacote.ps1</strong> — gate de consistência do pacote de agentes</li>
+    </ul>
+
+    <p class="meta">Síntese editorial · Fontes: ADR-004, ADR-005, LB-01, Guia-Onboarding-Fabrica</p>
+  </main>
+</div>
+</body>
+</html>

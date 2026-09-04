@@ -1,0 +1,258 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>BE-02 — Clean Architecture &mdash; Manual de Arquitetura FUNCEF</title>
+  <link rel="stylesheet" href="../assets/style.css" />
+</head>
+<body>
+<div class="layout">
+  <nav>
+    <h1>Manual de Arquitetura</h1>
+    <p class="subtitle"><a href="../index.html">&larr; Portal</a></p>
+    <div class="section">Cap&iacute;tulo</div>
+    <a href="#" class="active">BE-02 — Clean Architecture</a>
+  </nav>
+  <main class="wide generated-content">
+    <h1>BE-02 — Clean Architecture</h1>
+<h2>2.1 Visão macro</h2>
+<p>Todo microserviço FUNCEF segue <strong>Clean Architecture</strong> em 4 camadas. As dependências apontam <strong>para dentro</strong> (em direção ao Domain). Nenhuma camada interna conhece as camadas externas.</p>
+<pre><code>graph TB
+    subgraph Outer ["Camada externa"]
+        API["{Servico}.API&lt;br/&gt;(Controllers, Program.cs)"]
+        Tests["{Servico}.Tests"]
+    end
+
+    subgraph Middle ["Camada intermediária"]
+        App["{Servico}.Application&lt;br/&gt;(Commands, Queries, Handlers,&lt;br/&gt;Services, Validators, DTOs)"]
+        Infra["{Servico}.Infrastructure&lt;br/&gt;(AppDbContext, Seeders, DI)"]
+    end
+
+    subgraph Inner ["Camada central"]
+        Domain["{Servico}.Domain&lt;br/&gt;(Entidades)"]
+    end
+
+    API --&gt; App
+    API --&gt; Infra
+    App --&gt; Domain
+    Infra --&gt; Domain
+    Infra --&gt; App
+    Tests --&gt; API
+    Tests --&gt; App
+    Tests --&gt; Domain
+    Tests --&gt; Infra
+```</code></pre>
+<h2>2.2 Regras de dependência (não-negociáveis)</h2>
+<table><thead><tr><th>Camada</th><th>`ProjectReference` declaradas</th><th>Pode depender de</th><th>NÃO pode depender de</th></tr></thead><tbody><tr><td>`{Servico}.Domain`</td><td>(nenhuma)</td><td>Pacote NuGet `FUNCEF.ORM` apenas (para atributos `[Auditable]` e `[AutoInclude]`)</td><td>Application, Infrastructure, API</td></tr><tr><td>`{Servico}.Application`</td><td>`Domain`</td><td>Domain + pacotes `FUNCEF.*` (Essenciais, ORM)</td><td>Infrastructure, API</td></tr><tr><td>`{Servico}.Infrastructure`</td><td>`Domain`, `Application`</td><td>Domain, Application, todos os componentes FUNCEF</td><td>API</td></tr><tr><td>`{Servico}.API`</td><td>`Application`, `Infrastructure`</td><td>Tudo abaixo + `AspNetCore.HealthChecks.UI.Client`</td><td>—</td></tr></tbody></table>
+<p><div class="callout warn"><strong>Aviso</strong> **Convenção crítica**</p>
+<p>A camada `Application` **NÃO** referencia `Infrastructure`. Quem amarra as duas é o `Program.cs` (camada API) via `AddApplicationServices()` + `AddInfrastructureServices()`.</p>
+<h2>2.3 Árvore de pastas (padrão)</h2>
+<pre><code>src/
+├── {Servico}.API/                                  # SDK: Microsoft.NET.Sdk.Web
+│   ├── Controllers/
+│   │   └── {Entidades}Controller.cs                # [FuncefAuthorize] herda BaseController
+│   ├── wwwroot/                                    # páginas estáticas (login.html, callback, dashboards)
+│   ├── Program.cs                                  # startup, pipeline HTTP, health endpoints
+│   ├── appsettings.json                            # base + produção
+│   ├── appsettings.Development.json                # overrides dev (KeyVault opcional, Swagger on)
+│   └── appsettings.Homologation.json
+│
+├── {Servico}.Application/                          # SDK: Microsoft.NET.Sdk
+│   ├── Commands/
+│   │   └── {Entidade}/{Acao}/
+│   │         ├── {Acao}{Entidade}Command.cs        # ICommand&lt;TResponse&gt;
+│   │         ├── {Acao}{Entidade}Handler.cs        # ICommandHandler&lt;TCommand,TResponse&gt;
+│   │         └── {Acao}{Entidade}Validator.cs      # AbstractValidator&lt;TCommand&gt;
+│   ├── Queries/
+│   │   └── {Entidade}/{Detalhe}/
+│   │         ├── Get{Entidade}{Detalhe}Query.cs    # IQuery&lt;TResponse&gt;
+│   │         └── Get{Entidade}{Detalhe}Handler.cs  # IQueryHandler&lt;TQuery,TResponse&gt;
+│   ├── Services/
+│   │   ├── I{Entidade}Service.cs
+│   │   └── {Entidade}Service.cs
+│   ├── DTOs/
+│   │   └── {Entidade}Dto/
+│   │         ├── Request/{Entidade}Request.cs
+│   │         ├── Response/{Entidade}Response.cs
+│   │         └── Resume/{Entidade}Resume.cs
+│   ├── Exceptions/                                 # (opcional) exceções de domínio próprias
+│   │   └── {Dominio}Exception.cs                    # ConflictException já vem de FUNCEF.Essenciais (409)
+│   └── Extensions/
+│       └── ServiceCollectionExtensions.cs          # AddApplicationServices()
+│
+├── {Servico}.Domain/                               # SDK: Microsoft.NET.Sdk
+│   └── Entities/
+│       └── {Entidade}.cs                           # [Table("TB_{ENTIDADES}",Schema="{SCHEMA}")] · PK própria {ENTIDADE}_ID (long Identity) · [Auditable]
+│
+└── {Servico}.Infrastructure/                       # SDK: Microsoft.NET.Sdk
+    ├── Persistence/
+    │   ├── Context/
+    │   │   └── AppDbContext.cs                     # herda BaseDbContext (FuncefORM)
+    │   └── Seeders/
+    │       └── {Entidade}Seeder.cs                 # EntitySeederBase&lt;TEntity&gt;
+    ├── Configuration/
+    │   └── ConfigurationValidationExtensions.cs    # fail-fast em produção
+    └── Extensions/
+        └── ServiceCollectionExtensions.cs          # AddInfrastructureServices / AddInfrastructureDevelopment
+```</code></pre>
+<h2>2.4 Responsabilidades por camada</h2>
+<h3>Domain — `{Servico}.Domain`</h3>
+<table><thead><tr><th>Responsável por</th><th>NÃO faz</th></tr></thead><tbody><tr><td>Entidades de negócio (cada uma com **PK própria**, sem classe base compartilhada)</td><td>Acesso a banco, HTTP, DI, lógica de aplicação</td></tr><tr><td>Mapeamento Oracle via Data Annotations (`[Table]`, `[Column]`, `[Index]`, `[ForeignKey]`)</td><td>Fluent API (vai no `AppDbContext`)</td></tr><tr><td>Atributos de auditoria (`[Auditable]`) e auto-include (`[AutoInclude]`)</td><td>Repositórios, services</td></tr><tr><td>Invariantes simples (`[Required]`, `[Range]`, `[MaxLength]`, `[EmailAddress]`)</td><td>Regras de domínio ricas com I/O (vão no Service). Motores de domínio puros, sem I/O (ex.: avaliador de decisão do GAP), são aceitáveis no Domain</td></tr></tbody></table>
+<p>Único pacote NuGet usado: `FUNCEF.ORM` (para os atributos). **Não depende** de EF Core diretamente.</p>
+<p>**PK — surrogate `long` Identity, nomeada por entidade (alinhada ao BancoDados).** Não há `BaseEntity` compartilhado: um `[Column("ID")]` herdado fixaria o nome da PK para todas as tabelas e violaria a convenção BancoDados (ADR-014/015: PK = `{ENTIDADE}_ID`, FK com o mesmo nome). Cada entidade declara a própria chave:</p>
+<pre><code>[Table("TB_SISTEMAS", Schema = "GAP")]
+[Auditable("Sistema")]
+public class Sistema
+{
+    [Key]
+    [Column("SISTEMA_ID")]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public long Id { get; set; }
+    // ... demais colunas
+}
+```</code></pre>
+<p>**Nota Oracle:** o padrão FUNCEF de PK é **`NUMBER` surrogate com `IDENTITY`** (`DatabaseGeneratedOption.Identity`) — o banco gera o valor no insert; a aplicação **não** seta o `Id`. A coluna da PK segue a nomenclatura BancoDados `{ENTIDADE}_ID` (não um `ID` genérico). FK usa exatamente o mesmo nome da PK referenciada. Ver [BE-04](../persistencia/BE-04-Persistencia-Transacoes.md) §4.4 e a doutrina BancoDados (BD-04, ADR-014/015).</p>
+<h3>Application — `{Servico}.Application`</h3>
+<table><thead><tr><th>Responsável por</th><th>NÃO faz</th></tr></thead><tbody><tr><td>**Commands** (`ICommand<TResponse>`): intenção de mudança de estado</td><td>Persistência direta</td></tr><tr><td>**Queries** (`IQuery<TResponse>`): leitura</td><td>Lógica de negócio espalhada nos controllers</td></tr><tr><td>**Handlers**: orquestram o caso de uso. Em Commands controlam transação (`IUnitOfWork`); em Queries só leem.</td><td>Validação manual de entrada (delegada ao pipeline `ValidationBehavior`)</td></tr><tr><td>**Services**: regras de negócio e acesso a dados via `IRepository<T>`</td><td>Controle de transação (responsabilidade do Handler)</td></tr><tr><td>**Validators**: `AbstractValidator<TCommand>` — só Commands têm validators</td><td>Validar Queries (validadas no próprio Handler quando necessário)</td></tr><tr><td>**DTOs**: Request (entrada), Response (saída completa), Resume (saída resumida para listagens)</td><td>DTOs sem `[MapFrom]`/`[NestedMap]`</td></tr><tr><td>**Exceptions**: (opcional) extensões locais de `BusinessException` para conflitos de domínio próprios — `NotFoundException`/`BusinessException`/`ValidationException`/`ConflictException` já vêm de `FUNCEF.Essenciais`</td><td>Try/catch espalhado</td></tr><tr><td>`ServiceCollectionExtensions.AddApplicationServices()`</td><td>Registrar serviços de infraestrutura</td></tr></tbody></table>
+<h3>Infrastructure — `{Servico}.Infrastructure`</h3>
+<table><thead><tr><th>Responsável por</th><th>NÃO faz</th></tr></thead><tbody><tr><td>`AppDbContext : BaseDbContext` — DbSets e Fluent API avançada (índices compostos, unique filtrados, `OnDelete`)</td><td>Entidades (ficam no Domain)</td></tr><tr><td>Seeders (`EntitySeederBase<T>`) executados em Dev via `AddFuncefORMDevelopment`</td><td>Seeders de produção</td></tr><tr><td>Registro de **toda** a stack externa via `ServiceCollectionExtensions`: Key Vault, ORM, NoSQL (cache/documentos), Auth (inclui auditoria de acesso em Oracle), Storage, Telemetria</td><td>Lógica de negócio</td></tr><tr><td>`ConfigurationValidationExtensions` — fail-fast em produção (`ValidateOnStart`)</td><td>Validação em dev/hml (mais flexível)</td></tr></tbody></table>
+<h3>API — `{Servico}.API`</h3>
+<table><thead><tr><th>Responsável por</th><th>NÃO faz</th></tr></thead><tbody><tr><td>`Program.cs`: pipeline HTTP, CORS, sessão, rate limiting, health, Swagger, exception handler</td><td>Lógica de negócio</td></tr><tr><td>Controllers herdando de `BaseController` (FuncefEssenciais), recebendo `IMediator` + `ITelemetry`</td><td>Acesso direto a `AppDbContext` ou repositórios</td></tr><tr><td>Mapeamento HTTP→Command/Query (controller fino)</td><td>Validação manual (pipeline cuida)</td></tr><tr><td>Configuração JSON: CamelCase, ignore null, enum como string</td><td>—</td></tr></tbody></table>
+<h2>2.5 Fluxo de uma requisição (sequência canônica)</h2>
+<p>Sequência genérica para um POST `/{Entidades}` que cria recurso:</p>
+<pre><code>sequenceDiagram
+    autonumber
+    participant Cli as Cliente HTTP
+    participant Ctrl as {Entidades}Controller
+    participant Med as IMediator
+    participant Val as ValidationBehavior
+    participant Vdr as Create{Entidade}Validator
+    participant Hnd as Create{Entidade}Handler
+    participant Svc as {Entidade}Service
+    participant Rep as IRepository&lt;{Entidade}&gt;
+    participant UoW as IUnitOfWork
+    participant Db as Oracle
+
+    Cli-&gt;&gt;Ctrl: POST /{Entidades} (Bearer JWT)
+    Ctrl-&gt;&gt;Med: Send(Create{Entidade}Command)
+    Med-&gt;&gt;Val: pipeline
+    Val-&gt;&gt;Vdr: ValidateAsync(command)
+    alt Erros
+        Vdr--&gt;&gt;Val: failures
+        Val--&gt;&gt;Ctrl: ValidationException (400)
+        Ctrl--&gt;&gt;Cli: HTTP 400 (GlobalExceptionMiddleware)
+    else OK
+        Val-&gt;&gt;Hnd: Handle(command)
+        Hnd-&gt;&gt;Svc: CreateAsync(request)
+        Svc-&gt;&gt;Rep: ExistsAsync(predicate)
+        Rep-&gt;&gt;Db: SELECT 1 FROM {TABELA} WHERE …
+        alt Conflito (unicidade)
+            Svc--&gt;&gt;Hnd: throw ConflictException
+            Hnd--&gt;&gt;Med: bubble up
+            Med--&gt;&gt;Ctrl: ConflictException
+            Ctrl--&gt;&gt;Cli: HTTP 409
+        else Disponível
+            Svc-&gt;&gt;Rep: AddAsync(entity)
+            Svc--&gt;&gt;Hnd: entity
+            Hnd-&gt;&gt;UoW: SaveChangesAsync()
+            UoW-&gt;&gt;Db: INSERT {TABELA}
+            Hnd-&gt;&gt;Hnd: entity.MapTo&lt;…,Response&gt;()
+            Hnd--&gt;&gt;Ctrl: {Entidade}Response
+            Ctrl--&gt;&gt;Cli: HTTP 201 Created
+        end
+    end
+```</code></pre>
+<h2>2.6 Pipeline HTTP (`Program.cs`)</h2>
+<p>A ordem dos middlewares é **fixa** (justificativa em [Decisoes-Arquiteturais](../_shared/Decisoes-Arquiteturais.md) ADR-013):</p>
+<pre><code>WebApplication.CreateBuilder
+  ├─ AddHttpClient
+  ├─ AddControllers + JsonOptions
+  │   └─ AddFuncefAuthControllers          (registra controllers de /auth/* do FuncefAutenticacao)
+  ├─ AddFluentValidationFilterGlobally
+  ├─ AddSwaggerDocumentation
+  │   └─ AddSwaggerBearerAuthentication    (Bearer JWT no Swagger)
+  ├─ AddConfigurationValidation            (fail-fast em PRD/HML)
+  ├─ AddApplicationServices                (Mediator + Services do domínio)
+  ├─ AddInfrastructureDevelopment | AddInfrastructureServices  (decide pelo Env)
+  ├─ AddDistributedMemoryCache + AddSession (PKCE state/nonce)
+  ├─ AddCorsPolicyWithConfiguration        (Cors:Politica + OriginsPermitidas; sem "*")
+  └─ AddHealthChecks
+        └─ AddAuthenticationHealthChecks   (se Auth:EntraId:TenantId definido)
+
+app =
+  ├─ (Dev/Hml) verifica conectividade do AppDbContext via CanConnectAsync, loga via ITelemetry
+  ├─ UseGlobalExceptionHandler            (mapeia ConflictException → 409, etc.)
+  ├─ UseHttpsRedirection
+  ├─ UseDefaultFiles + UseStaticFiles     (servem wwwroot)
+  ├─ (Dev OR Swagger:Enabled) UseSwaggerDocumentation
+  ├─ UseCors
+  ├─ UseSession
+  ├─ UseRateLimiting                       (FUNCEF.Essenciais — lê seção RateLimiting; Redis)
+  ├─ UseAuthentication                    (JWT Bearer via Entra ID)
+  ├─ UseAuthorization
+  ├─ MapHealthChecks "/health" "/health/live" "/health/ready"
+  ├─ MapGet "/health/version" + "/info"
+  └─ MapControllers
+```</code></pre>
+<p>Detalhamento da ordem em [BE-05-Seguranca-Auth](../seguranca/BE-05-Seguranca-Auth.md) §5.12.</p>
+<h2>2.7 Dependency Injection — onde cada coisa é registrada</h2>
+<table><thead><tr><th>Onde</th><th>O que é registrado</th></tr></thead><tbody><tr><td>`{Servico}.Application/Extensions/ServiceCollectionExtensions.cs`</td><td>`AddMediatorWithDefaults(this assembly)` (escaneia handlers, validators, behaviors) + `AddScoped<I{Entidade}Service, {Entidade}Service>` para cada Service</td></tr><tr><td>`{Servico}.Infrastructure/Extensions/ServiceCollectionExtensions.cs`</td><td>Key Vault, Telemetria (Azure Monitor ou Console), `FUNCEF.ORM` + `AppDbContext` + `IUnitOfWork`, cache/documentos NoSQL (`AddRedisCache` / `AddMongoDocuments<T>`, conn string via Key Vault), `FUNCEF.ORM.Audit`, `AddFUNCEFAuthentication` (já inclui auditoria de acesso em Oracle via `IAccessAuditService` e Redis via `FUNCEF.NoSql`/`ICacheStore`), Azure Storage, Object Mapper</td></tr><tr><td>`Program.cs`</td><td>Pipeline HTTP, controllers, Swagger, CORS, sessão, rate limiter, health checks, exception handler</td></tr></tbody></table>
+<h2>2.8 Handler × Service — a separação de responsabilidades</h2>
+<p>A separação Handler/Service é uma escolha consciente da equipe (não está no padrão CQRS clássico). Aparece em **todos** os casos de uso:</p>
+<pre><code>graph LR
+    H["Handler&lt;br/&gt;(orquestra)"] --&gt;|"chama lógica"| S["Service&lt;br/&gt;(regras + dados)"]
+    H --&gt;|"controla transação"| U["IUnitOfWork&lt;br/&gt;(SaveChanges,&lt;br/&gt;Begin/Commit/Rollback)"]
+    S --&gt;|"persistência"| R["IRepository&amp;lt;T&amp;gt;&lt;br/&gt;(Add/Update/Delete/&lt;br/&gt;GetById/GetPaged)"]
+```</code></pre>
+<table><thead><tr><th>Componente</th><th>Responsabilidade</th><th>Injeta</th></tr></thead><tbody><tr><td>**Handler**</td><td>Orquestra o caso de uso. Faz `Begin/Commit/Rollback` quando precisa. Faz `MapTo<…>` para DTO. Loga via `ITelemetry`.</td><td>`I{Entidade}Service`, `IUnitOfWork`, `ITelemetry` (opcional)</td></tr><tr><td>**Service**</td><td>Validações de negócio (unicidade, existência, integridade referencial). Acesso a dados via `IRepository<T>`. Lança exceções tipadas.</td><td>`IRepository<TEntity>` (uma ou mais)</td></tr></tbody></table>
+<p>Padrão de Handler (placeholder):</p>
+<pre><code>public class Create{Entidade}Handler : ICommandHandler&lt;Create{Entidade}Command, {Entidade}Response&gt;
+{
+    private readonly I{Entidade}Service _service;
+    private readonly IUnitOfWork _unitOfWork;
+
+    public Create{Entidade}Handler(I{Entidade}Service service, IUnitOfWork unitOfWork)
+    {
+        _service = service;
+        _unitOfWork = unitOfWork;
+    }
+
+    public async Task&lt;{Entidade}Response&gt; Handle(Create{Entidade}Command command, CancellationToken ct)
+    {
+        var entity = await _service.CreateAsync(command.Request, ct);
+        await _unitOfWork.SaveChangesAsync(ct);
+        return entity.MapTo&lt;Domain.Entities.{Entidade}, {Entidade}Response&gt;();
+    }
+}
+```</code></pre>
+<p>Padrão de Service com regra de negócio + exceção tipada:</p>
+<pre><code>public virtual async Task&lt;{Entidade}&gt; CreateAsync({Entidade}Request request, CancellationToken ct = default)
+{
+    if (await _repository.ExistsAsync(e =&gt; e.CampoUnico == request.CampoUnico, cancellationToken: ct))
+        throw new ConflictException("{Entidade}", "Já existe um registro com este {campo}");
+
+    var entity = request.MapTo&lt;{Entidade}Request, {Entidade}&gt;(e =&gt;
+    {
+        // Id NÃO é setado: a PK é IDENTITY, gerada pelo banco no insert.
+        e.DataCriacao = DateTime.UtcNow;
+    });
+
+    await _repository.AddAsync(entity, ct);
+    return entity;
+}
+```</code></pre>
+<p>**Detalhamento completo de Commands, Handlers e Services** em [BE-03-CQRS-Mediator-Service](./BE-03-CQRS-Mediator-Service.md).</p>
+<h2>2.9 Benefícios e tradeoffs do desenho</h2>
+<table><thead><tr><th>Benefício</th><th>Como aparece</th></tr></thead><tbody><tr><td>Testabilidade alta</td><td>Handlers e Services testados sem banco real, via `Substitute.For<IRepository<T>>()`</td></tr><tr><td>Trocar EF Core por Dapper sem mudar Handler</td><td>Handler chama método do Service; só a implementação do Service muda</td></tr><tr><td>Domain livre de framework</td><td>Entidades dependem só de Data Annotations padrão do .NET + atributos do `FUNCEF.ORM`</td></tr><tr><td>Validação isolada do controller</td><td>Controller nunca tem `if (!request.IsValid) return BadRequest()`</td></tr><tr><td>Reutilização de Services entre Handlers</td><td>Handler de transação combinada pode chamar `I{Entidade1}Service` + `I{Entidade2}Service`</td></tr></tbody></table>
+<table><thead><tr><th>Tradeoff</th><th>Mitigação</th></tr></thead><tbody><tr><td>Mais arquivos por feature (Command + Handler + Validator + Service + DTOs)</td><td>Convenção rígida de nome/pasta torna previsível; Scrutor registra Handlers e Validators automaticamente</td></tr><tr><td>Service é "extra" comparado a CQRS clássico</td><td>Reutilização entre Handlers e separação clara transação ↔ regra justifica o custo</td></tr></tbody></table>
+<hr />
+<h2>Histórico</h2>
+<table><thead><tr><th>Data</th><th>Mudança</th></tr></thead><tbody><tr><td>2026-06-16</td><td>Alinhamento das libs FUNCEF.* (CMP-03/CMP-04): no registro DI (§2.4 e §2.7), removida a associação **AccessAudit↔MongoDB**. Auditoria de acesso passa a ser registrada pelo próprio `AddFUNCEFAuthentication` (Oracle, `IAccessAuditService`); NoSQL fica só com cache/documentos (`AddRedisCache` / `AddMongoDocuments<T>`); Redis da Seguranca é interno.</td></tr><tr><td>2026-07-06</td><td>Rename `FUNCEF.Seguranca` → `FUNCEF.Autenticacao` (namespace `FuncefAutenticacao.*`) no §2.6 e §2.7. Correção factual: o refresh token da lib de autenticação usa Redis via `FUNCEF.NoSql` (`ICacheStore`), não interno.</td></tr><tr><td>2026-07-08</td><td>**Alinhamento de PK ao BancoDados (ADR-014/015) — BE vs BD reconciliado a favor do BD.** Removido o `BaseEntity` compartilhado (Guid/RAW(16)/`DatabaseGenerated.None`): cada entidade passa a declarar a própria PK **`long` surrogate `IDENTITY`** com coluna `{ENTIDADE}_ID` (não `ID` genérico); FK com o mesmo nome. §2.3 (árvore), §2.4 (responsabilidades Domain + código de exemplo), §2.8 (Service não seta mais `Id`) e §2.9 atualizados. Aberta exceção para motor de domínio puro sem I/O no Domain (ex.: `DecisionEvaluator` do GAP). Origem: auditoria de conformidade backend 2026-07-08; `api-ms-gap` já conforme, `api-template-base` migrado. Cascata em [BE-04](../persistencia/BE-04-Persistencia-Transacoes.md) §4.4/§4.5/§4.14.</td></tr></tbody></table>
+<hr />
+<p>**Anterior:** [BE-01 — Visão geral](../fundamentos/BE-01-Visao-Geral.md) · **Próximo:** [BE-03 — CQRS, Mediator e Service Layer](BE-03-CQRS-Mediator-Service.md)</div></p>
+    <p class="meta">Gerado de: <code>../../backend/arquitetura/BE-02-Clean-Architecture.md</code> &middot; <a href="../index.html">Portal</a></p>
+  </main>
+</div>
+</body>
+</html>

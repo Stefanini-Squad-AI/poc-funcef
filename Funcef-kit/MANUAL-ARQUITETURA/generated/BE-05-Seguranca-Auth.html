@@ -1,0 +1,470 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>BE-05 — Segurança e autenticação &mdash; Manual de Arquitetura FUNCEF</title>
+  <link rel="stylesheet" href="../assets/style.css" />
+</head>
+<body>
+<div class="layout">
+  <nav>
+    <h1>Manual de Arquitetura</h1>
+    <p class="subtitle"><a href="../index.html">&larr; Portal</a></p>
+    <div class="section">Cap&iacute;tulo</div>
+    <a href="#" class="active">BE-05 — Segurança e autenticação</a>
+  </nav>
+  <main class="wide generated-content">
+    <h1>BE-05 — Segurança e Autenticação</h1>
+<h2>5.1 Provedor de identidade</h2>
+<table><thead><tr><th>Item</th><th>Valor</th></tr></thead><tbody><tr><td>Identidade</td><td>**Azure Entra ID** (ex-Azure AD)</td></tr><tr><td>Protocolo (fluxo interativo)</td><td>OAuth 2.0 com PKCE — `response_type=code`</td></tr><tr><td>Protocolo (M2M)</td><td>OAuth 2.0 — Client Credentials</td></tr><tr><td>Formato de token</td><td>JWT Bearer assinado pelo Entra ID</td></tr><tr><td>Componente FUNCEF</td><td>`FUNCEF.Autenticacao`</td></tr></tbody></table>
+<p>Toda a autenticação é provida pelo <code>FUNCEF.Autenticacao</code> — <strong>não há código aplicacional</strong> para login, callback, refresh ou validação de token. O microserviço apenas:</p>
+<ol>
+<li>Liga o componente em <code>Program.cs</code> (<code>builder.Services.AddFUNCEFAuthentication(configuration)</code>)</li>
+<li>Registra os controllers de auth (<code>AddFuncefAuthControllers()</code>)</li>
+<li>Marca endpoints com <code>[FuncefAuthorize]</code></li>
+</ol>
+<p>Decisão registrada em <a href="../_shared/Decisoes-Arquiteturais.md">Decisoes-Arquiteturais</a> ADR-009.</p>
+<h2>5.2 Fluxo OAuth 2.0 + PKCE (usuário interativo)</h2>
+<pre><code>sequenceDiagram
+    autonumber
+    participant Br as Browser
+    participant API as {Servico}.API
+    participant EID as Azure Entra ID
+
+    Br-&gt;&gt;API: GET /auth/login
+    API-&gt;&gt;API: Gera code_verifier, code_challenge, state, nonce&lt;br/&gt;(armazena na Session)
+    API--&gt;&gt;Br: 302 → Entra ID (authorize?…code_challenge…state)
+    Br-&gt;&gt;EID: GET /authorize
+    EID--&gt;&gt;Br: tela de login
+    Br-&gt;&gt;EID: credenciais + MFA
+    EID--&gt;&gt;Br: 302 → /auth/callback?code=…&amp;state=…
+    Br-&gt;&gt;API: GET /auth/callback?code=…&amp;state=…
+    API-&gt;&gt;API: Valida state e nonce da sessão
+    API-&gt;&gt;EID: POST /token&lt;br/&gt;(code, code_verifier, client_secret)
+    EID--&gt;&gt;API: id_token, access_token, refresh_token
+    API-&gt;&gt;API: Persiste sessão, emite cookie .{Servico}.Session&lt;br/&gt;(HttpOnly, Secure, SameSite=None)
+    API--&gt;&gt;Br: 302 → /login-success.html
+```</code></pre>
+<p>Configuração em <code>appsettings.json</code>:</p>
+<pre><code>"Auth": {
+  "Provider": "EntraId",
+  "LoginPage": "/login.html",
+  "SuccessPage": "/login-success.html",
+  "EntraId": {
+    "TenantId": "", "ClientId": "", "ClientSecret": "",
+    "Audience": "",
+    "Instance": "https://login.microsoftonline.com/",
+    "ValidateIssuer": true, "ValidateAudience": true,
+    "RedirectUri": "", "PostLogoutRedirectUri": "",
+    "Scope": "openid profile email User.Read",
+    "EnablePkce": true,
+    "ResponseType": "code",
+    "AllowM2M": true
+  }
+}
+```</code></pre>
+<p><code>appsettings.Development.json</code> (apenas overrides):</p>
+<pre><code>"Auth": {
+  "EntraId": {
+    "RedirectUri": "https://localhost:{PORTA}/auth/callback",
+    "PostLogoutRedirectUri": "https://localhost:{PORTA}/login.html"
+  }
+}
+```</code></pre>
+<p><code>TenantId</code>, <code>ClientId</code>, <code>ClientSecret</code>, <code>Audience</code> em dev vêm de <code>dotnet user-secrets</code> ou do <code>appsettings.Development.json</code> local <strong>não commitado</strong>.</p>
+<p>> ⚠️ <strong><code>Audience</code> depende da versão do access token do App Registration</strong> (<code>api.requestedAccessTokenVersion</code> no manifesto — confira com <code>az ad app show --id {clientId} --query api.requestedAccessTokenVersion</code>):</p>
+<p>></p>
+<p>> - <strong>v2</strong> (padrão dos app registrations novos): o <code>aud</code> do access token é o <strong>ClientId GUID puro</strong> → configure <code>Audience</code> com o <strong>GUID</strong>. O <code>AudienceHelper</code> da lib deriva e aceita também <code>api://{clientId}</code> a partir do GUID, mas <strong>nunca deriva o inverso</strong> (decisão de segurança).</p>
+<p>> - <strong>v1</strong> (<code>null</code>/<code>1</code>): o <code>aud</code> vem como <code>api://{clientId}</code> → configure <code>api://{clientId}</code> (fecha replay de id_token).</p>
+<p>></p>
+<p>> <strong>Sintoma do erro:</strong> <code>Audience: "api://{clientId}"</code> com token v2 ⇒ <strong>401 em todos os endpoints, sem <code>WWW-Authenticate</code></strong> e sem log óbvio. Diagnóstico: decodifique o payload do token e compare o <code>aud</code> com a config. Origem: migração do app registration do GAP (2026-07-10).</p>
+<h2>5.3 Fluxo Client Credentials (M2M)</h2>
+<pre><code>sequenceDiagram
+    participant App as Aplicação externa
+    participant API as {Servico}.API
+    participant EID as Azure Entra ID
+
+    App-&gt;&gt;API: POST /auth/m2m/token&lt;br/&gt;{ clientId, clientSecret, scope }
+    API-&gt;&gt;EID: POST /token (grant_type=client_credentials)
+    EID--&gt;&gt;API: access_token (JWT)
+    API--&gt;&gt;App: { access_token, expires_in, token_type=Bearer }
+
+    Note over App,API: Subsequente
+    App-&gt;&gt;API: GET /{Recurso}&lt;br/&gt;Authorization: Bearer access_token
+    API-&gt;&gt;API: ValidateToken (audience, issuer, signature)
+    API--&gt;&gt;App: 200 / 401 / 403
+```</code></pre>
+<p>Habilitado via <code>Auth:EntraId:AllowM2M = true</code>. O endpoint <code>POST /auth/m2m/token</code> é registrado por <code>AddFuncefAuthControllers()</code>.</p>
+<p>> 🔸 <strong>Credencial do próprio app (<code>Auth:EntraId:CredentialType</code>)</strong> — usada nos fluxos em que a API se autentica no Entra (callback do authorization code e <code>client_credentials</code> app-only, ex.: Graph). Valores (<code>EntraCredentialType</code>): <strong><code>ClientSecret</code></strong> (default; direto ou via <code>ClientSecretKeyName</code> do KV), <strong><code>Certificate</code></strong> (<code>client_assertion</code> RS256; certificado no KV via <code>ClientCertificateKeyName</code>/FUNCEF.Cofre ou store local via <code>ClientCertificateThumbprint</code>) e <strong><code>ManagedIdentity</code></strong> (WIF — token da MI para <code>api://AzureADTokenExchange</code> como <code>client_assertion</code> federado; requer Federated Identity Credential no App Registration).</p>
+<p>></p>
+<p>> ⚠️ <strong><code>ManagedIdentity</code> só funciona rodando no Azure.</strong> Em dev, o <code>DefaultAzureCredential</code> cai na credencial do <code>az login</code> (usuário) e o Entra <strong>rejeita token de usuário como client_assertion federado</strong> (<code>AADSTS700222</code>) — a falha aparece como "Falha ao adquirir token app-only (HTTP 401)" e, com PDP, vira fail-closed (Deny). Dev <strong>secretless</strong> ⇒ <code>CredentialType=Certificate</code> no <code>appsettings.Development.json</code>; fallback ⇒ <code>ClientSecret</code> em user-secrets.</p>
+<h2>5.4 Sessão (PKCE state/nonce)</h2>
+<p>Para guardar <code>state</code> e <code>nonce</code> durante o redirect OAuth, ASP.NET Core Session em memória distribuída:</p>
+<pre><code>builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =&gt;
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+    options.Cookie.SameSite = SameSiteMode.None;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+    options.Cookie.Name = ".{Servico}.Session";
+});
+```</code></pre>
+<table><thead><tr><th>Setting</th><th>Razão</th></tr></thead><tbody><tr><td>`HttpOnly = true`</td><td>Impede acesso via JavaScript (mitiga XSS)</td></tr><tr><td>`Secure = Always`</td><td>Cookie só sai por HTTPS</td></tr><tr><td>`SameSite = None`</td><td>Necessário para o redirect cross-site do Entra ID (com `Secure=true` é seguro)</td></tr><tr><td>`IdleTimeout = 30min`</td><td>Sessão de PKCE expira em 30min de inatividade</td></tr></tbody></table>
+<p><div class="callout warn"><strong>Aviso</strong> **Produção multi-instância**</p>
+<p>Em produção com múltiplas instâncias da API, **substituir `AddDistributedMemoryCache()` por Redis** — caso contrário, instâncias diferentes não compartilham a sessão e o callback falha. Usar o mesmo Redis de `NoSql:RedisCache` com `Auth:RefreshToken:StorageType = "Redis"`.</p>
+<h2>5.5 Refresh tokens</h2>
+<p>A **política de segurança** do refresh token é **fixa no componente** (CMP-03): rotação, revogação em reuso e algoritmo de hash são invariantes forçados (não configuráveis pelo microserviço), e os lifetimes têm clamp de faixa segura. O consumidor fornece apenas o **segredo** (Key Vault) e a **infra** (Redis via `FUNCEF.NoSql`):</p>
+<pre><code>"NoSql": {
+  "Redis": {
+    "ConnectionStringFromKeyVault": { "Enabled": true, "SecretName": "api-redis-conn" },
+    "EnableSsl": true
+  }
+},
+"Auth": {
+  "RefreshToken": {
+    "Enabled": true,
+    "StorageType": "Redis",
+    "SigningKeyFromKeyVault": { "Enabled": true, "SecretName": "glb-auth-refresh-jwt" }
+  }
+}
+```</code></pre>
+<p>**Caminho canônico (api-template-base):** registrar `AddRedisCache(configuration, "NoSql:RedisCache")` **antes** de `AddFUNCEFAuthentication` — o store de refresh/revogação reaproveita `ICacheStore`. Alternativa da lib: `AddFuncefSecurityRedis` mapeia a seção opcional `Auth:Redis` → `AddRedisCache` (mesmo contrato `ConnectionStringFromKeyVault`); preferir **`NoSql:RedisCache`** para um único Redis compartilhado (cache + refresh).</p>
+<p>Em dev (`appsettings.Development.json`): `"StorageType": "InMemory"`. O `SigningKey` (≥ 32 chars) é obrigatório e resolvido do Key Vault via `SigningKeyFromKeyVault` — propagado **para dentro** do `IOptions` consumido pelo serviço.</p>
+<p><div class="callout note"><strong>Nota</strong> **Comportamento na renovação**</p>
+<ul>
+<li>**Revalidação no Entra:** a renovação revalida os privilégios via hook plugável `IRefreshClaimsRevalidator`. O default é no-op; em produção registre um revalidador real (Graph app-only pelo `oid`).</li>
+<li>**Limite LRU:** ao exceder `MaxActiveTokens*`, revoga apenas o token **mais antigo** (não derruba todas as sessões).</li>
+<li>**Fail-fast do storage:** `StorageType = Redis` sem `ICacheStore` registrado **falha no startup** (não degrada silenciosamente para InMemory).</li>
+<li>**Rotação:** consumo único; a atomicidade total no Redis depende de um lock plugável (`IRefreshTokenRotationLock`), pois o `ICacheStore` do FUNCEF.NoSql não expõe *set-if-not-exists* nativo — sem o lock, é *best-effort* (documentado).</li>
+</ul>
+<h2>5.6 Autenticação e conformidade Entra — `[FuncefAuthorize]`</h2>
+<p>[!IMPORTANT]</p>
+<p>**`[FuncefAuthorize]` — autenticação + conformidade Entra e, com `Acao`, autorização no PDP (CMP-03)**</p>
+<p>Sem `Acao`, `[FuncefAuthorize]` exige um token válido do Entra ID e valida **conformidade de tenant** (`EntraTenantType.Any` / `Internal` / `External`); roles/scopes declarados são **opcionais** em **OR**. Com **`Acao`**, o atributo **também autoriza** a ação canônica no **PDP RBAC/ABAC do GAP** (ver nota abaixo). Regras de domínio pontuais (não governadas pelo GAP) continuam na aplicação.</p>
+<p>Marcação por método (ou controller) que exige token válido e conformidade de tenant:</p>
+<pre><code>[HttpPost]
+[FuncefAuthorize]                                   // qualquer tenant conforme (default)
+public async Task&lt;IActionResult&gt; Create([FromBody] {Entidade}Request request, CancellationToken ct = default)
+{
+    var result = await _mediator.Send(new Create{Entidade}Command { Request = request }, ct);
+    return ApiCreated(result);
+}
+```</code></pre>
+<pre><code>// Conformidade de tenant explícita + roles/scopes OPCIONAIS (avaliados em OR)
+[FuncefAuthorize(TenantType = EntraTenantType.Internal, Roles = "Gestor", Scopes = "api.write")]
+```</code></pre>
+<p>[!IMPORTANT]</p>
+<p>**`[FuncefAuthorize(Acao = "...")]` autoriza no GAP (PDP).** Além dos modos acima, informar a propriedade **`Acao`** faz o atributo, após a conformidade Entra, **autorizar a ação canônica no PDP RBAC/ABAC do GAP** via `IFuncefAuthorizationClient` (com tokens de rota `{sistema}`, fail-closed). Requer registrar o cliente do PDP (`AddFuncefAuthorizationClient` HTTP, ou o cliente in-process no próprio `api-ms-gap`). Ver [[CMP-03-Autenticacao]].</p>
+<pre><code>// Autentica + autoriza a ação no PDP (por sistema via token de rota {sistema})
+[FuncefAuthorize(Acao = "Funcef.&lt;Sistema&gt;/{sistema}/recurso/write")]
+```</code></pre>
+<p>[!NOTE]</p>
+<p>**Onde fica a autorização de negócio**</p>
+<p>Autorização governada por **permissões do GAP** (RBAC/ABAC) → `[FuncefAuthorize(Acao = ...)]` (o PDP decide). Regras de domínio pontuais como "só o dono do recurso edita" continuam no Handler/Service da aplicação (BE-03).</p>
+<p>Cobertura típica:</p>
+<table><thead><tr><th>Controller</th><th>Cobertura</th></tr></thead><tbody><tr><td>Controllers de domínio (`{Entidades}Controller`)</td><td>**Todos** os métodos: `[FuncefAuthorize]` (autenticação + conformidade Entra)</td></tr><tr><td>Endpoints de `/auth/*`</td><td>Mistos (login e callback são públicos; user/me etc. são autenticados) — registro feito por `AddFuncefAuthControllers()`</td></tr><tr><td>`/health*`, `/info`</td><td>**Públicos** (não exigem token)</td></tr><tr><td>`/swagger`</td><td>**Público** em Dev/Hml quando `Swagger:Enabled = true`</td></tr></tbody></table>
+<h2>5.6.1 Tokens de Acesso (PAT) — consumidor</h2>
+<p>Um **PAT** (Personal Access Token) do GAP é um **token opaco** `gap_…` (não é JWT): não há validação</p>
+<p>local. Um serviço que aceita PAT valida-o por **introspecção** no GAP. Habilite (opt-in) **após**</p>
+<p>`AddFUNCEFAuthentication`:</p>
+<pre><code>builder.Services.AddFUNCEFAuthentication(builder.Configuration);
+builder.Services.AddFuncefPatAuthentication(builder.Configuration);   // seção Auth:Pat
+```</code></pre>
+<p>O que a extensão registra:</p>
+<ul>
+<li>**Smart-forwarding** (policy scheme `Funcef.Smart`, vira o scheme padrão): `Authorization: Bearer gap_…`</li>
+</ul>
+<p>  → handler `Pat`; qualquer outro `Bearer` → JWT do Entra. O mesmo endpoint aceita PAT e Entra.</p>
+<ul>
+<li>**Introspecção**: `POST {Auth:Pat:BaseUrl}{Auth:Pat:IntrospectionPath}` (padrão</li>
+</ul>
+<p>  `/autorizacao/introspect`, corpo `{ "token": "gap_..." }`). O serviço se autentica como **M2M</p>
+<p>  Entra (client-credentials)** usando a **própria app** (`Auth:EntraId`), que precisa ter a **app role</p>
+<p>  `Gap.Introspect`** no GAP; escopo `.default` em `Auth:Pat:IntrospectionScope`.</p>
+<ul>
+<li>**Cache** curto em processo (`Auth:Pat:CacheTtlSeconds`, padrão 60s; só resultados ativos). **Fail-closed**:</li>
+</ul>
+<p>  erro/indisponibilidade ⇒ PAT inativo (401). Revogação observável após o TTL.</p>
+<ul>
+<li>**Identidade** materializada com as claims canônicas do GAP: `auth_method=pat`, `oid`, `pat_scope`</li>
+</ul>
+<p>  (`read-only`/`full-access`), `pat_sistema`, `pat_perm` (multivalorada); `AuthenticationType = "Pat"`.</p>
+<p>**Teto do PAT:**</p>
+<ul>
+<li>Endpoints com `[FuncefAuthorize(Acao = "...")]` → o **PDP do GAP** aplica o teto completo (sistema +</li>
+</ul>
+<p>  verbo + subconjunto granular); a lib só propaga o `Bearer gap_…`.</p>
+<ul>
+<li>Endpoints com só `[FuncefAuthorize]` (sem `Acao`) → a lib aplica o **teto por verbo HTTP**: escopo</li>
+</ul>
+<p>  `read-only` só permite métodos seguros (GET/HEAD/OPTIONS); `full-access` passa; caso contrário 403</p>
+<p>  (`code: PAT_SCOPE_DENIED`).</p>
+<p>Config `Auth:Pat` (obrigatórios quando habilitado: `BaseUrl`, `IntrospectionScope`):</p>
+<pre><code>"Auth": {
+  "Pat": {
+    "Enabled": true,
+    "BaseUrl": "https://gap.funcef.com.br",
+    "IntrospectionPath": "/autorizacao/introspect",
+    "IntrospectionScope": "api://&lt;gap-client-id&gt;/.default",
+    "CacheTtlSeconds": 60,
+    "TimeoutMs": 2000,
+    "ForwardedScheme": "Bearer"
+  }
+}
+```</code></pre>
+<p>[!NOTE]</p>
+<p>**Decisão em lote:** o cliente do PDP consome o endpoint de **lote real** `POST /autorizacao/decisao/lote`</p>
+<p>(`{ "actions": [...] }` → `{ "results": [...] }`) numa única chamada; caminho parametrizável em</p>
+<p>`Auth:Autorizacao:BatchDecisionPath`. `FuncefDecisao` expõe `PolicyCode` (diagnóstico ABAC).</p>
+<h2>5.6.2 Autorização granular por sistema — onboarding no GAP e menu efetivo</h2>
+<p>Um sistema que usa `[FuncefAuthorize(Acao = "...")]` e/ou o menu efetivo (`GET /auth/menu/me`) precisa</p>
+<p>estar **cadastrado no GAP**. O contrato do ecossistema:</p>
+<ol>
+<li>**PEP encaminha o Bearer do usuário** ao PDP (nunca token próprio) — e o GAP aceita a audience do</li>
+</ol>
+<p>   sistema chamador porque os `ID_CLIENTE_APLICACAO` dos sistemas **ativos** de `TB_SISTEMAS` formam a</p>
+<p>   lista de confiança de audiences do PDP (validador por sistema, cache 60s, fail-closed; issuer e</p>
+<p>   assinatura seguem validados normalmente). Desativar o sistema no GAP revoga a audience.</p>
+<ol>
+<li>**Ações canônicas** seguem `Funcef.<CodigoSistema>/<recurso>/<verbo>`: **`read`** em GET,</li>
+</ol>
+<p>   **`write`** em POST/PUT/PATCH/DELETE — um par por recurso do sistema, mais a **wildcard</p>
+<p>   administrativa `Funcef.<CodigoSistema>/**`** (sensível) para o grupo admin. Anote cada action do</p>
+<p>   controller com a `Acao` correspondente.</p>
+<ol>
+<li>**Onboarding no GAP** (registros mínimos; em dev via script idempotente, em ambientes promovidos</li>
+</ol>
+<p>   via changeset Liquibase no repo do GAP):</p>
+<p>   - Sistema (`TB_SISTEMAS`): código PascalCase, app registration (ClientId), área, link principal;</p>
+<p>   - Permissões (`TB_PERMISSOES`): pares read/write por recurso + wildcard;</p>
+<p>   - Grupo de acesso (`TB_GRUPOS_ACESSO`): espelho do grupo de segurança do **Entra** (objectId) por</p>
+<p>     sistema + vínculo grupo→permissão (`TB_GRUPO_ACESSO_PERMISSAO`);</p>
+<p>   - Menu (`TB_ITENS_MENU`): dois níveis — seções (raiz, sem rota/permissão) e itens (rota + a</p>
+<p>     permissão de **leitura** que guia a visibilidade).</p>
+<ol>
+<li>**Menu efetivo no consumidor**: `GET /auth/menu/me` retorna a árvore podada pelo permission-set do</li>
+</ol>
+<p>   usuário no sistema **fixado por `Auth:Autorizacao:CodigoSistema`** (config; sem override por query —</p>
+<p>   isolamento por sistema). Fail-closed = `"itens": []`, nunca erro — as três causas de menu vazio e o</p>
+<p>   ajuste de `TimeoutMs` estão no [BE-11](../operacao/BE-11-Troubleshooting.md).</p>
+<p>[!IMPORTANT]</p>
+<p>**Fail-closed muda o custo de configuração ausente.** Com `Acao` nos controllers, a seção</p>
+<p>`Auth:Autorizacao` (com `BaseUrl` e `CodigoSistema`) passa a ser **obrigatória em todos os</p>
+<p>ambientes** — sem ela, todo endpoint com `Acao` responde 403 e o menu responde 503</p>
+<p>(`AUTHORIZATION_CLIENT_NOT_CONFIGURED`).</p>
+<h2>5.7 Endpoints de auth (auto-registrados)</h2>
+<p>`AddFuncefAuthControllers()` registra ~24 endpoints (verificável no Swagger). Resumo:</p>
+<p><details></p>
+<p><summary>Tabela completa</summary></p>
+<table><thead><tr><th>Rota</th><th>Método</th><th>Auth</th><th>Propósito</th></tr></thead><tbody><tr><td>`/auth/login`</td><td>GET</td><td>Público</td><td>Inicia fluxo OAuth2 + PKCE</td></tr><tr><td>`/auth/callback`</td><td>GET</td><td>Público</td><td>Callback do Entra ID</td></tr><tr><td>`/auth/logout`</td><td>GET</td><td>Público</td><td>Encerra sessão</td></tr><tr><td>`/auth/session-token`</td><td>GET</td><td>Sessão</td><td>Retorna token da sessão atual</td></tr><tr><td>`/auth/tokens`</td><td>GET</td><td>Sessão</td><td>Access + refresh token</td></tr><tr><td>`/auth/refresh`</td><td>POST</td><td>Refresh token</td><td>Renova access token</td></tr><tr><td>`/auth/validate-refresh`</td><td>POST</td><td>—</td><td>Valida refresh token (introspecção)</td></tr><tr><td>`/auth/user/me`</td><td>GET</td><td>JWT</td><td>Info completa do usuário</td></tr><tr><td>`/auth/user/profile`</td><td>GET</td><td>JWT</td><td>Perfil resumido</td></tr><tr><td>`/auth/user/roles`</td><td>GET</td><td>JWT</td><td>Roles do token</td></tr><tr><td>`/auth/user/scopes`</td><td>GET</td><td>JWT</td><td>Scopes do token</td></tr><tr><td>`/auth/user/permissions`</td><td>GET</td><td>JWT</td><td>Permissões</td></tr><tr><td>`/auth/user/claims`</td><td>GET</td><td>JWT</td><td>Claims do token</td></tr><tr><td>`/auth/menu/me`</td><td>GET</td><td>JWT</td><td>**Linha 3.0** — menu efetivo do usuário no sistema (`Auth:Autorizacao:CodigoSistema`), podado pelo permission-set do GAP (§5.6.2)</td></tr><tr><td>`/auth/m2m/token`</td><td>POST</td><td>clientId/secret</td><td>Client Credentials</td></tr><tr><td>…</td><td></td><td></td><td>(outras: introspecção, status, revogação)</td></tr></tbody></table>
+<p></details></p>
+<p>Os endpoints e suas regras estão no componente — alterações precisam ser feitas no `FUNCEF.Autenticacao`, não no microserviço.</p>
+<h2>5.8 Auditoria de acesso (`IAccessAuditService`)</h2>
+<p>[!IMPORTANT]</p>
+<p>**Auditoria de acesso vive em **Oracle**, não em MongoDB (CMP-03)**</p>
+<p>No `FUNCEF.Autenticacao` atual, a auditoria de tentativas de login (sucesso e falha) é persistida em **Oracle** via `IAccessAuditService`, na tabela **`LOG_AUDIT.Acesso_LOG`**. O MongoDB **não é mais** usado para isso. A seção de configuração passou de `Auth:AccessAudit` para **`Auth:Audit`**.</p>
+<p>Toda tentativa de login (sucesso e falha) é registrada em Oracle:</p>
+<pre><code>"Auth": {
+  "Audit": {
+    "Enabled": true,
+    "LogSuccessfulAccess": true,
+    "LogFailedAccess": true,
+    "IncludeClaims": true,
+    "IncludeRequestInfo": true,
+    "IncludeClientIp": true,
+    "IncludeUserAgent": true,
+    "RetentionDays": 90,
+    "IgnoredPaths": [
+      "/health", "/healthz", "/ready", "/metrics", "/swagger"
+    ]
+  }
+}
+```</code></pre>
+<p>O registro de `IAccessAuditService` é feito pelo próprio `AddFUNCEFAuthentication(configuration)` — não há mais `AddMongoDbDocumentStore<AccessLog>(...)` para auditoria de acesso. A connection string Oracle dedicada à auditoria mora no Key Vault (§5.13, `AuditOracle`).</p>
+<p>[!NOTE]</p>
+<p>**Auditoria de acesso ≠ auditoria de entidade**</p>
+<p>Esta seção trata de **acesso/login** (Oracle, `LOG_AUDIT.Acesso_LOG`). A auditoria de **mudança de entidade** é responsabilidade do ORM, via `[Auditable]` + interceptor `FUNCEF.ORM.Audit` (BE-04). O antigo `EntityAudit`/`IEntityAuditService` do `FUNCEF.Autenticacao` foi **removido** (2026-06-16).</p>
+<p>Em dev: `Auth:Audit:Enabled = false` para reduzir ruído.</p>
+<h2>5.9 Swagger com Bearer JWT</h2>
+<pre><code>builder.Services.AddSwaggerDocumentation(new SwaggerOptions
+{
+    Title = "{Servico} API",
+    Version = "v1",
+    IncludeXmlComments = true
+});
+builder.Services.AddSwaggerBearerAuthentication(builder.Configuration);
+```</code></pre>
+<p>Em dev: `Swagger:Enabled = true` (forçado por código).</p>
+<p>Em prd: `Swagger:Enabled = false`.</p>
+<p>Em hml: pode ser ligado por feature flag (`Swagger:Enabled = true`).</p>
+<h2>5.10 CORS restrito (sem wildcard)</h2>
+<p>[!IMPORTANT]</p>
+<p>**Regra dura — CORS nunca usa `"*"` fora do Dev**</p>
+<p>A FUNCEF autentica com **cookie de sessão + credenciais** (`AllowCredentials`, §5.4). A especificação CORS **proíbe** combinar `AllowAnyOrigin()` (`*`) com `AllowCredentials()` — o browser rejeita. Portanto **toda origem é explícita**, inclusive em Dev (lista de `localhost`). Wildcard em Hml/Prd é **bloqueado por fail-fast no startup**.</p>
+<p>Caminho canônico (api-template-base / FUNCEF.Essenciais):</p>
+<pre><code>services.AddCorsPolicyWithConfiguration(environment, configuration);
+// Lê Cors:Politica + Cors:OriginsPermitidas (BE-08 §8.3)
+```</code></pre>
+<pre><code>"Cors": {
+  "Politica": "Production",
+  "OriginsPermitidas": [ "https://app.funcef.com.br" ],
+  "AllowCredentials": false
+}
+```</code></pre>
+<p>Configuração por ambiente:</p>
+<table><thead><tr><th>Ambiente</th><th>`Cors:Politica` / `Cors:OriginsPermitidas`</th></tr></thead><tbody><tr><td>Dev</td><td>`"Development"` — lista explícita de `localhost` (ex.: `["https://localhost:3000"]`) — **nunca** `["*"]`</td></tr><tr><td>Hml / Prd</td><td>`"Production"` + lista explícita das origens reais do front</td></tr></tbody></table>
+<p>[!WARNING]</p>
+<p>**Nunca relaxar**</p>
+<ul>
+<li>**Não** usar `AllowAnyOrigin()`, nem `SetIsOriginAllowed(_ => true)`, nem refletir o header `Origin` da requisição — equivalem a `*` com credenciais e abrem CSRF cross-origin.</li>
+<li>Restringir métodos ao necessário (`WithMethods`) em vez de `AllowAnyMethod()`.</li>
+<li>Mudança na lista de origens é alteração de segurança: registrar no PR.</li>
+</ul>
+<h2>5.10.1 Cabeçalhos de segurança (HTTP security headers)</h2>
+<p>Todo microserviço FUNCEF responde com um conjunto fixo de **security headers**. Não há dependência externa: um middleware curto adiciona os headers, e `UseHsts()` entra no pipeline fora do Dev.</p>
+<table><thead><tr><th>Header</th><th>Valor padrão</th><th>Por quê</th></tr></thead><tbody><tr><td>`Strict-Transport-Security`</td><td>`max-age=31536000; includeSubDomains` (via `UseHsts()`, **só Hml/Prd**)</td><td>Força HTTPS no browser; nunca em Dev (quebra `localhost` http).</td></tr><tr><td>`X-Content-Type-Options`</td><td>`nosniff`</td><td>Impede MIME sniffing.</td></tr><tr><td>`X-Frame-Options`</td><td>`DENY`</td><td>Anti-clickjacking (back-stop do CSP `frame-ancestors`).</td></tr><tr><td>`Referrer-Policy`</td><td>`strict-origin-when-cross-origin`</td><td>Não vaza URL completa para terceiros.</td></tr><tr><td>`Content-Security-Policy`</td><td>API JSON: `default-src 'none'; frame-ancestors 'none'`. Páginas servidas de `wwwroot` (login/dashboards): política explícita por serviço.</td><td>Reduz superfície de XSS/injeção.</td></tr><tr><td>`Permissions-Policy`</td><td>`geolocation=(), camera=(), microphone=()`</td><td>Desliga APIs de browser não usadas.</td></tr><tr><td>`X-Powered-By` / `Server`</td><td>**removidos**</td><td>Não expor stack/versão.</td></tr></tbody></table>
+<pre><code>// Infrastructure/Middleware/SecurityHeadersMiddleware.cs — sem dependência externa
+public sealed class SecurityHeadersMiddleware(RequestDelegate next)
+{
+    public async Task InvokeAsync(HttpContext context)
+    {
+        var h = context.Response.Headers;
+        h["X-Content-Type-Options"] = "nosniff";
+        h["X-Frame-Options"] = "DENY";
+        h["Referrer-Policy"] = "strict-origin-when-cross-origin";
+        h["Permissions-Policy"] = "geolocation=(), camera=(), microphone=()";
+        h["Content-Security-Policy"] = "default-src 'none'; frame-ancestors 'none'";
+        h.Remove("X-Powered-By");
+        h.Remove("Server");
+        await next(context);
+    }
+}
+```</code></pre>
+<pre><code>// Program.cs
+if (!app.Environment.IsDevelopment())
+    app.UseHsts();                 // STS só fora do Dev
+app.UseSecurityHeaders();          // extension que registra o middleware acima
+```</code></pre>
+<p>[!NOTE]</p>
+<p>**CSP para páginas HTML servidas pelo serviço**</p>
+<p>APIs que retornam só JSON usam o CSP restritivo acima. Quando o serviço serve `wwwroot/login.html`/dashboards (§5.12 `UseStaticFiles`), defina um CSP explícito (`script-src`/`style-src` com nonce/hash) por serviço — `default-src 'none'` sozinho quebra a página.</p>
+<h2>5.11 Rate limiting</h2>
+<p>Implementação canônica via **`FUNCEF.Essenciais`** (`RateLimitingMiddleware` + `[RateLimit]`), com contadores **distribuídos** no Redis (`ICacheStore` registrado por `AddRedisCache` antes do pipeline). **Não** usar `Microsoft.AspNetCore.RateLimiting` built-in nem lógica inline em controllers.</p>
+<h3>Configuração global (`appsettings.json`)</h3>
+<p>Padrão: **100 req/min por IP**.</p>
+<pre><code>"RateLimiting": {
+  "PermitLimit": 100,
+  "Window": "00:01:00",
+  "Strategy": "ByIp",
+  "FailOpenWhenCacheUnavailable": true,
+  "ExcludedPaths": [ "/health", "/info", "/swagger" ]
+}
+```</code></pre>
+<table><thead><tr><th>Parâmetro</th><th>Valor padrão</th><th>Observação</th></tr></thead><tbody><tr><td>`PermitLimit`</td><td>100</td><td>Requisições por janela</td></tr><tr><td>`Window`</td><td>`00:01:00`</td><td>Janela fixa (`TimeSpan`)</td></tr><tr><td>`Strategy`</td><td>`ByIp`</td><td>`ByIp`, `ByUser`, `ByEndpoint`, `ByIpAndEndpoint`, `ByUserAndEndpoint`</td></tr><tr><td>`ExcludedPaths`</td><td>—</td><td>Prefixos ignorados (ex.: `/health` isenta `/health/ready`)</td></tr><tr><td>`AllowedPaths`</td><td>—</td><td>Se preenchido, limita **só** essas rotas (wildcard `/*`)</td></tr><tr><td>`FailOpenWhenCacheUnavailable`</td><td>`true`</td><td>`true` = libera se Redis indisponível (warning no log); `false` = 503 fail-closed</td></tr><tr><td>Status code</td><td>429</td><td>Too Many Requests + header `Retry-After` + `X-RateLimit-*`</td></tr></tbody></table>
+<p>Ajustar por serviço editando a seção `RateLimiting` no `appsettings.{Env}.json`. O middleware lê a config via `app.UseRateLimiting(app.Configuration)` — **não há** registro em `builder.Services`.</p>
+<h3>Pipeline</h3>
+<pre><code>// ApiPipeline — ordem BE-05 §5.12
+app.UseRateLimiting(app.Configuration);
+app.UseAuthentication();
+app.UseAuthorization();
+```</code></pre>
+<p>**Pré-requisitos operacionais:** Redis (`CacheRegistration` / `AddRedisCache`) registrado; com `Strategy: ByIp` atrás de proxy/ingress, `Auth:TrustForwardedHeaders = true` (senão todos os clientes compartilham o IP do proxy).</p>
+<h3>Limite por endpoint (opcional)</h3>
+<p>Para operações sensíveis (ex.: POST de escrita), complementar o global com atributo **após autenticação**:</p>
+<pre><code>using FuncefEssenciais.Http.Attributes;
+using FuncefEssenciais.Http.Middleware;
+
+[RateLimit(permitLimit: 5, windowSeconds: 300, strategy: RateLimitStrategy.ByUser)]
+[HttpPost("incluir")]
+public IActionResult Incluir(...) { ... }
+```</code></pre>
+<p>O middleware global e o `[RateLimit]` usam contadores independentes — o endpoint fica **mais restrito**, não menos.</p>
+<h3>Checklist operacional (deploy)</h3>
+<ul>
+<li>[ ] `NoSql:RedisCache` configurado e `ICacheStore` registrado (`CacheRegistration` antes de `AddFUNCEFAuthentication`).</li>
+<li>[ ] Health check de Redis verde (`/health/ready`).</li>
+<li>[ ] Atrás de ingress/proxy: `Auth:TrustForwardedHeaders = true` com proxy confiável.</li>
+<li>[ ] `RateLimiting:Strategy` coerente com o cenário (`ByIp` global; `ByUser` no `[RateLimit]` de endpoints sensíveis).</li>
+<li>[ ] `ExcludedPaths` não expõe `/health/*` publicamente no ingress externo (probe ready amplifica carga).</li>
+<li>[ ] Monitorar log `"Rate limiting desabilitado: cache store indisponível"` — indica fail-open ativo.</li>
+<li>[ ] Em produção crítica, avaliar `FailOpenWhenCacheUnavailable: false` (503 enquanto Redis estiver fora).</li>
+</ul>
+<h2>5.12 Pipeline de segurança — ordem dos middlewares</h2>
+<p>A ordem dos middlewares relativos a segurança é **fixa** (decisão em [Decisoes-Arquiteturais](../_shared/Decisoes-Arquiteturais.md) ADR-013):</p>
+<pre><code>UseGlobalExceptionHandler              # mapeia exceções tipadas → HTTP
+UseHttpsRedirection                    # força HTTPS
+UseHsts                                # (Hml/Prd) Strict-Transport-Security — §5.10.1
+UseSecurityHeaders                     # nosniff, X-Frame-Options, CSP, Referrer-Policy — §5.10.1
+UseDefaultFiles + UseStaticFiles       # serve wwwroot/login.html, dashboards
+UseSwaggerDocumentation (Dev/feature)  # Swagger em Dev (ou Hml com flag)
+UseCors                                # antes de Session e auth
+UseSession                             # estado PKCE
+UseRateLimiting                       # FUNCEF.Essenciais — bloqueia abusos (Redis)
+UseAuthentication                      # valida JWT Bearer
+UseAuthorization                       # avalia [FuncefAuthorize]
+MapHealthChecks                        # endpoints públicos
+MapControllers                         # routing final
+```</code></pre>
+<p>A ordem **não é negociável** — alterá-la pode causar:</p>
+<ul>
+<li>CORS depois de Authentication → falha com 401 antes do preflight.</li>
+<li>Authorization antes de Authentication → `User.Identity` sem claims, autorização rejeita tudo.</li>
+<li>Rate limiter depois de Auth → abusos consomem CPU validando tokens.</li>
+</ul>
+<h2>5.13 Política de não-secrets-no-código</h2>
+<table><thead><tr><th>Tipo</th><th>Onde mora</th></tr></thead><tbody><tr><td>ConnectionString Oracle</td><td>Key Vault (`OracleConnectionString` em prod, nome alternativo em dev/hml)</td></tr><tr><td>ConnectionString MongoDB</td><td>Key Vault (`MongoConnectionString`)</td></tr><tr><td>ConnectionString Redis</td><td>Key Vault (`RedisConnectionString`)</td></tr><tr><td>ConnectionString Auditoria</td><td>Key Vault (`AuditOracle`)</td></tr><tr><td>Storage URI</td><td>Key Vault (`BlobStorageKey` ou similar)</td></tr><tr><td>App Insights connection string</td><td>Key Vault (chave em `ApplicationInsights:SecretName`)</td></tr><tr><td>Refresh Token Signing Key</td><td>Key Vault (`RefreshTokenSigningKey`)</td></tr><tr><td>`Auth:EntraId:ClientSecret`</td><td>`dotnet user-secrets` em dev; Key Vault → variável de ambiente em prod</td></tr></tbody></table>
+<p>**Nunca commitar** `appsettings.Development.json` com `ClientSecret` preenchido. Em dev local:</p>
+<pre><code>cd src/{Servico}.API
+dotnet user-secrets set "Auth:EntraId:ClientSecret" "&lt;segredo&gt;"
+```</code></pre>
+<p>Em produção (containers): variáveis de ambiente seguindo a convenção `Auth__EntraId__ClientSecret` (duplo underscore vira `:`).</p>
+<p>Detalhes de Key Vault em [BE-08-Configuracao-Ambientes](../operacao/BE-08-Configuracao-Ambientes.md) §8.5.</p>
+<h3>5.13.1 Regras de configuração e propagação de segredos (padrão de componente)</h3>
+<p>Três invariantes que **toda lib FUNCEF** que expõe configuração e consome Key Vault deve seguir — como na `FUNCEF.Autenticacao`:</p>
+<ol>
+<li>**Segredo do Key Vault sempre via `IPostConfigureOptions<T>`.** Resolver segredos apenas em uma cópia local no momento do registro **não** os entrega ao `IOptions<T>` consumido por controllers/handlers em runtime — o que quebra cenários "só Key Vault" e pode **desligar silenciosamente** validações que dependem desses valores (foi o caso da conformidade de tenant do `[FuncefAuthorize]`). Registre um `IPostConfigureOptions<T>` que resolve os `*KeyName` **para dentro** das opções resolvidas via DI.</li>
+<li>**Toda chave de configuração pertence a uma classe de options tipada e vinculada, sob o grupo do componente.** Nada de chaves lidas soltas de `IConfiguration["..."]` (config "fantasma": sem IntelliSense, sem validação, sem descoberta). Na `FUNCEF.Autenticacao` tudo vive sob **`Auth`** — inclusive `Auth:Autorizacao` (cliente do PDP), `Auth:Endpoints` (páginas/diagnóstico/proxy) e `Auth:M2M`.</li>
+<li>**Endpoints de diagnóstico atrás de um gate desligado por padrão.** Qualquer endpoint que decodifique token sem validar assinatura ou exponha configuração/claims só deve responder quando um flag explícito estiver ligado (`Auth:Endpoints:EnableDebugEndpoints = true`) — nunca ativo em produção.</li>
+</ol>
+<h2>5.14 Mapeamento de exceções de segurança para HTTP</h2>
+<table><thead><tr><th>Situação</th><th>Status</th><th>Mecanismo</th></tr></thead><tbody><tr><td>Sem token / token inválido</td><td>401</td><td>Pipeline `UseAuthentication`</td></tr><tr><td>Token de tenant não-conforme ou sem role/scope exigido</td><td>403</td><td>`UseAuthorization` + `[FuncefAuthorize]` (conformidade Entra; roles/scopes opcionais em OR)</td></tr><tr><td>Autorização de negócio negada</td><td>403 / 400</td><td>Regra de domínio na app (Handler/Service) via `BusinessException` (→400), **fora** do `FUNCEF.Autenticacao`</td></tr><tr><td>Rate limit estourado</td><td>429</td><td>`UseRateLimiting` (`FUNCEF.Essenciais`)</td></tr><tr><td>CORS bloqueado (preflight)</td><td>0 (não chega ao código)</td><td>`UseCors`</td></tr><tr><td>Erro interno inesperado</td><td>500</td><td>`UseGlobalExceptionHandler` (mascarado para o cliente)</td></tr></tbody></table>
+<h2>5.15 Health check do Entra ID</h2>
+<p>Quando `Auth:EntraId:TenantId` está configurado:</p>
+<pre><code>var entraIdTenantId = builder.Configuration["Auth:EntraId:TenantId"];
+if (!string.IsNullOrEmpty(entraIdTenantId))
+    healthChecksBuilder.AddAuthenticationHealthChecks();
+```</code></pre>
+<p>O check valida que o Entra ID está alcançável e responde — útil para `/health/ready`. Quando indisponível, o serviço pode ainda servir endpoints públicos mas não autentica.</p>
+<h2>5.16 Checklist de segurança para um novo microserviço</h2>
+<ul>
+<li>[ ] `Auth:Provider = "EntraId"`.</li>
+<li>[ ] App Registration criado no Entra ID; `TenantId`, `ClientId`, `Audience` configurados por ambiente.</li>
+<li>[ ] `ClientSecret` em `user-secrets` (dev) e Key Vault (hml/prd) — **nunca** em `appsettings.*.json`.</li>
+<li>[ ] `Auth:EntraId:RedirectUri` aponta para `https://{host}/auth/callback` de cada ambiente.</li>
+<li>[ ] `Cors:Politica` + `Cors:OriginsPermitidas` — lista **explícita** em todos os ambientes (inclusive Dev) — **nunca** `"*"`; fail-fast ativo em Hml/Prd (§5.10 / BE-08).</li>
+<li>[ ] `UseSecurityHeaders()` no pipeline e `UseHsts()` em Hml/Prd; CSP definido por serviço se servir páginas de `wwwroot` (§5.10.1).</li>
+<li>[ ] Rate limit: seção `RateLimiting` no appsettings; `UseRateLimiting` no pipeline; Redis (`ICacheStore`) ativo; `TrustForwardedHeaders` se atrás de proxy (§5.11 checklist operacional).</li>
+<li>[ ] Refresh token `StorageType = Redis` em prd (via `NoSql:RedisCache` + `ICacheStore`; `SigningKeyFromKeyVault`); `InMemory` em dev. Política (rotação/reuso/lifetimes) é fixa no componente — não configurar. Em prd, registre um `IRefreshClaimsRevalidator` real (revalidação no Entra) e, para rotação atômica, um `IRefreshTokenRotationLock`.</li>
+<li>[ ] Se usar `[FuncefAuthorize(Acao = "...")]`: `AddFuncefAuthorizationClient` registrado e **`Auth:Autorizacao:BaseUrl`** apontando o PDP (**obrigatória** — validada no startup); sistema **cadastrado e ativo no GAP** (§5.6.2 — audience do chamador só é aceita pelo PDP se o sistema estiver em `TB_SISTEMAS`).</li>
+<li>[ ] Se usar o **menu efetivo** (`GET /auth/menu/me`): `Auth:Autorizacao:CodigoSistema` preenchido e menu cadastrado no GAP; `TimeoutMs` calibrado (default 800ms cancela a 1ª chamada fria — BE-11).</li>
+<li>[ ] `Auth:Endpoints:EnableDebugEndpoints = false` em prd (endpoints de diagnóstico desligados); `Auth:Endpoints:TrustForwardedHeaders = true` só atrás de proxy confiável.</li>
+<li>[ ] `Audience` conforme a **versão do access token** do App Registration (§5.2): **v2** (`requestedAccessTokenVersion=2`, padrão dos apps novos) ⇒ **ClientId GUID puro** (a lib deriva `api://`; `api://` configurado com token v2 dá 401 silencioso); **v1** ⇒ `api://{clientId}` (fecha replay de id_token).</li>
+<li>[ ] Se o serviço aceita **PAT**: `AddFuncefPatAuthentication` registrado; `Auth:Pat:BaseUrl`/`IntrospectionScope` preenchidos; app do serviço com a app role **`Gap.Introspect`** no GAP (§5.6.1).</li>
+<li>[ ] `Auth:Audit:Enabled = true` em hml/prd; `false` em dev (auditoria de acesso em Oracle via `IAccessAuditService`, tabela `LOG_AUDIT.Acesso_LOG`).</li>
+<li>[ ] Cookie de sessão renomeado para `.{Servico}.Session`.</li>
+<li>[ ] Em produção multi-instância, sessão movida para Redis (não `DistributedMemoryCache`).</li>
+<li>[ ] Todos os endpoints de domínio têm `[FuncefAuthorize]`.</li>
+</ul>
+<hr />
+<h2>Histórico</h2>
+<table><thead><tr><th>Data</th><th>Mudança</th></tr></thead><tbody><tr><td>2026-08-27</td><td>**§5.11–5.12 alinhados ao código:** rate limiting documentado como `UseRateLimiting` + seção `RateLimiting` do `FUNCEF.Essenciais` (Redis via `ICacheStore`); removido snippet obsoleto `AddRateLimiter`/`UseRateLimiter` built-in; adicionados `[RateLimit]`, checklist operacional de deploy e binding de `FailOpenWhenCacheUnavailable`/`AllowedPaths`. Origem: validação arquitetura moderna pós-plano legado.</td></tr><tr><td>2026-08-24</td><td>Cascata alinhamento `api-template-base`: §5.5 refresh via `NoSql:RedisCache` + `SigningKeyFromKeyVault`; §5.10 CORS via `AddCorsPolicyWithConfiguration` (`Politica`/`OriginsPermitidas`). Dual-write `be-seguranca-auth` / `cmp-autenticacao`. Origem: auditoria tripla doutrina × templates.</td></tr><tr><td>2026-07-14</td><td>Nova **§5.6.2 — autorização granular por sistema**: contrato do ecossistema (PEP encaminha o Bearer **do usuário**; PDP aceita audiences dos sistemas ativos de `TB_SISTEMAS`, fail-closed), convenção de ações canônicas (`read` GET / `write` POST-PUT-PATCH-DELETE + wildcard admin), onboarding no GAP (sistema/permissões/grupo de acesso Entra/menu em dois níveis) e menu efetivo (`GET /auth/menu/me`, `CodigoSistema` por config). +Linha `/auth/menu/me` na tabela §5.7; +2 itens no checklist (onboarding do sistema; `CodigoSistema`/`TimeoutMs` do menu). Callout: com `Acao`, `Auth:Autorizacao` vira obrigatória em todos os ambientes (fail-closed 403/503). Dual-write CMP-03, BE-11, skills `cmp-autenticacao`/`be-troubleshooting`, agente `be-seguranca-auth`. Origem: validação runtime `api-template-base` × GAP (2026-07-14).</td></tr><tr><td>2026-07-10</td><td>**Rotas do GAP sem `api/v1`**: exemplos de `IntrospectionPath` e decisão em lote atualizados de `/api/v1/autorizacao/...` para `/autorizacao/...` — o `api-ms-gap` removeu o prefixo de versão (realinhamento ao ADR-017; exceção encerrada em [Excecoes-Aprovadas](../_shared/Excecoes-Aprovadas.md), ADR-GAP-002 no repo do serviço). Defaults correspondentes na `FUNCEF.Autenticacao` 3.0.1.</td></tr><tr><td>2026-07-10</td><td>**`Audience` × versão do access token** (§5.2 + checklist §5.16): com `requestedAccessTokenVersion=2` (padrão dos app registrations novos) o `aud` é o **ClientId GUID puro** e a config deve usar o GUID (o `AudienceHelper` deriva `api://` a partir do GUID, nunca o inverso); `api://` com token v2 causa **401 silencioso sem `WWW-Authenticate`**. O item do checklist que mandava sempre `api://{clientId}` foi corrigido (vale só para v1). Nova nota em §5.3: **`CredentialType`** (`ClientSecret`/`Certificate`/`ManagedIdentity`) — `ManagedIdentity` (WIF) **só no Azure**; em dev o az login é rejeitado como client_assertion (`AADSTS700222`, fail-closed no PDP); dev secretless ⇒ `Certificate`. Dual-write no agente `be-seguranca-auth` e skill `cmp-autenticacao`. Origem: migração do app registration do GAP (401 no login do web-gap, diagnóstico real).</td></tr><tr><td>2026-07-10</td><td>Cobertura de **PAT** e padrão de configuração de componente: nova **§5.6.1** (consumidor PAT — `AddFuncefPatAuthentication`, introspecção no GAP, smart-forwarding `Funcef.Smart`, teto por verbo HTTP, `Auth:Pat`, decisão em lote `/decisao/lote`); nova **§5.13.1** (invariantes: segredo do KV via `IPostConfigureOptions`, options tipadas sob `Auth`, gate `EnableDebugEndpoints`); §5.5 realinhada ao `StorageType`/`Auth:Redis` (FUNCEF.NoSql) com política fixa no componente (`IRefreshClaimsRevalidator`, LRU, fail-fast, `IRefreshTokenRotationLock`); itens de checklist (PAT, `Audience api://`, debug endpoints). Dual-write no agente `be-seguranca-auth` e skill `cmp-autenticacao`.</td></tr><tr><td>2026-07-09</td><td>**`[FuncefAuthorize]` passa a autorizar no PDP via `Acao`** (§5.6): `[FuncefAuthorize(Acao = "Funcef.<Sistema>/.../verbo")]` autoriza a ação canônica no motor RBAC/ABAC do GAP (tokens de rota `{sistema}`, fail-closed). Dual-write no agente `be-seguranca-auth`. Ver [[CMP-03-Autenticacao]].</td></tr><tr><td>2026-07-06</td><td>Rename `FUNCEF.Seguranca` → `FUNCEF.Autenticacao` (repo `lib-back-autenticacao`, namespace `FuncefAutenticacao.*`) no corpo do capítulo (§5.1, §5.6, §5.7, §5.8, §5.14). Refresh token/revogação em Redis via `FUNCEF.NoSql` (`ICacheStore`); `AddFUNCEFAuthentication` inalterado.</td></tr><tr><td>2026-06-16</td><td>`FUNCEF.Seguranca` reenquadrada como autenticação **pura** (CMP-03, breaking). §5.6 reenquadrada — `[FuncefAuthorize]` = conformidade Entra (`EntraTenantType.Any/Internal/External`), roles/scopes **opcionais em OR**; autorização de **negócio** fica na app. §5.8 — auditoria de acesso migrada de MongoDB para **Oracle** (`IAccessAuditService`, `LOG_AUDIT.Acesso_LOG`); config `Auth:AccessAudit` → **`Auth:Audit`**; fim do `AddMongoDbDocumentStore<AccessLog>`; `EntityAudit`/`IEntityAuditService` removidos (entidade fica no ORM via `[Auditable]`); Redis agora **interno** à lib (StackExchange.Redis), sem dependência de `FUNCEF.NoSql`. §5.14 e checklist §5.16 alinhados.</td></tr><tr><td>2026-06-16</td><td>§5.14: "autorização de negócio negada" alinhada para **403 / 400** (via `BusinessException`→400), removendo o 422 — coerente com BE-06 §6.8 (`BusinessException` mapeia 400; `ConflictException` local→409).</td></tr><tr><td>2026-05-27</td><td>CORS endurecido (§5.10): lista explícita em todos os ambientes, fail-fast contra `"*"` em Hml/Prd, fim do `AllowAnyOrigin`. Nova §5.10.1 **Cabeçalhos de segurança** (HSTS, CSP, nosniff, X-Frame-Options, Referrer-Policy, Permissions-Policy) + middleware sem dependência externa; `UseHsts`/`UseSecurityHeaders` no pipeline §5.12; checklist §5.16. Frontmatter: `agent_name`.</td></tr></tbody></table>
+<hr />
+<p>**Anterior:** [BE-04 — Persistência e transações](../persistencia/BE-04-Persistencia-Transacoes.md) · **Próximo:** [BE-06 — Validação e exceções](BE-06-Validacao-Excecoes.md)</div></div></p>
+    <p class="meta">Gerado de: <code>../../backend/seguranca/BE-05-Seguranca-Auth.md</code> &middot; <a href="../index.html">Portal</a></p>
+  </main>
+</div>
+</body>
+</html>

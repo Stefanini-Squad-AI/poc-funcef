@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Bem-sucedido - TemplateBase</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
+    <style>
+        .success-page {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: var(--space-xl);
+        }
+
+        .success-card {
+            max-width: 480px;
+            text-align: center;
+            animation: scaleIn 0.5s ease-out;
+        }
+
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto var(--space-xl);
+            background: linear-gradient(135deg, var(--aurora-green) 0%, #7EAD6A 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 32px rgba(163, 190, 140, 0.4);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .success-icon svg {
+            width: 40px;
+            height: 40px;
+            fill: white;
+        }
+
+        .success-title {
+            font-size: 1.75rem;
+            margin-bottom: var(--space-sm);
+            color: var(--aurora-green);
+        }
+
+        .success-message {
+            color: var(--text-secondary);
+            margin-bottom: var(--space-xl);
+            line-height: 1.7;
+        }
+
+        .redirect-info {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-sm);
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .redirect-info .spinner {
+            width: 16px;
+            height: 16px;
+            border-width: 2px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-full);
+            margin-top: var(--space-lg);
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--coral) 0%, var(--aurora-green) 100%);
+            border-radius: var(--radius-full);
+            width: 0%;
+            animation: progress 2s ease-out forwards;
+        }
+
+        @keyframes progress { to { width: 100%; } }
+
+        .token-preview {
+            background: var(--bg-primary);
+            border: 1px solid var(--nord-polar-2);
+            border-radius: var(--radius-sm);
+            padding: var(--space-md);
+            margin-top: var(--space-xl);
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            word-break: break-all;
+            max-height: 80px;
+            overflow: hidden;
+            position: relative;
+            text-align: left;
+        }
+
+        .token-preview::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 40px;
+            background: linear-gradient(transparent, var(--bg-primary));
+        }
+
+        .provider-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-xs);
+            padding: var(--space-xs) var(--space-md);
+            background: rgba(136, 192, 208, 0.15);
+            color: var(--nord-frost-1);
+            border-radius: var(--radius-full);
+            font-size: 0.8rem;
+            font-weight: 500;
+            margin-bottom: var(--space-md);
+        }
+    </style>
+</head>
+<body class="bg-mesh bg-grid">
+    <div class="success-page">
+        <div class="card card-glass success-card">
+            <div class="success-icon">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                </svg>
+            </div>
+
+            <div class="provider-badge" id="providerBadge" style="display: none;"></div>
+
+            <h1 class="success-title">Autenticacao bem-sucedida!</h1>
+            <p class="success-message">
+                Voce foi autenticado com sucesso no Azure Entra ID.
+                <span id="refreshInfo" style="display: none;"><br>Refresh Token ativo para sessoes prolongadas.</span>
+                <br>Redirecionando para o dashboard...
+            </p>
+
+            <div class="redirect-info">
+                <div class="spinner"></div>
+                <span id="countdownText">Redirecionando em 2s...</span>
+            </div>
+
+            <div class="progress-bar">
+                <div class="progress-bar-fill"></div>
+            </div>
+
+            <div class="token-preview" id="tokenPreview" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script>
+        var urlParams = new URLSearchParams(window.location.search);
+        var provider = urlParams.get('provider');
+
+        // Recupera os tokens da SESSAO (fluxo server-side do FUNCEF.Autenticacao), evitando
+        // trafega-los pela URL. /auth/tokens e de uso unico e exige o cookie de sessao.
+        async function loadSessionTokens() {
+            try {
+                var response = await fetch('/auth/tokens', { credentials: 'same-origin' });
+                if (!response.ok) return; // 204 = sem tokens (ex.: pagina aberta sem login)
+                var data = await response.json();
+
+                if (data && data.accessToken) {
+                    localStorage.setItem('jwt_token', data.accessToken);
+                    var tokenPreview = document.getElementById('tokenPreview');
+                    // textContent: nunca interpreta o token como HTML.
+                    tokenPreview.textContent = data.accessToken.substring(0, 100) + '...';
+                    tokenPreview.style.display = 'block';
+                }
+
+                if (data && data.refreshToken) {
+                    localStorage.setItem('refresh_token', data.refreshToken);
+                    document.getElementById('refreshInfo').style.display = 'inline';
+                }
+            } catch (e) {
+                console.error('Falha ao obter tokens da sessao:', e);
+            }
+        }
+
+        // Mostrar provedor usado (apenas valores conhecidos; nunca injeta HTML).
+        if (provider) {
+            var providerBadge = document.getElementById('providerBadge');
+            providerBadge.style.display = 'inline-flex';
+            providerBadge.textContent = provider === 'external' ? 'Entra ID External' : 'Microsoft Entra ID';
+        }
+
+        // Gerar deviceId se nao existir
+        if (!localStorage.getItem('device_id')) {
+            localStorage.setItem('device_id', crypto.randomUUID());
+        }
+
+        // Countdown e redirect
+        var countdown = 2;
+        var countdownText = document.getElementById('countdownText');
+
+        var interval = setInterval(function() {
+            countdown--;
+            if (countdown > 0) {
+                countdownText.textContent = 'Redirecionando em ' + countdown + 's...';
+            } else {
+                countdownText.textContent = 'Redirecionando...';
+                clearInterval(interval);
+            }
+        }, 1000);
+
+        // Recupera tokens da sessao e depois redireciona para o dashboard.
+        loadSessionTokens().finally(function() {
+            setTimeout(function() {
+                window.location.href = '/dashboard.html';
+            }, 2000);
+        });
+    </script>
+</body>
+</html>

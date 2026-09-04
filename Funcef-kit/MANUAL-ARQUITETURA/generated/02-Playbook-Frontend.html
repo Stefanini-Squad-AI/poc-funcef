@@ -1,0 +1,180 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Playbook Frontend (fábrica) &mdash; Manual de Arquitetura FUNCEF</title>
+  <link rel="stylesheet" href="../assets/style.css" />
+</head>
+<body>
+<div class="layout">
+  <nav>
+    <h1>Manual de Arquitetura</h1>
+    <p class="subtitle"><a href="../index.html">&larr; Portal</a></p>
+    <div class="section">Cap&iacute;tulo</div>
+    <a href="#" class="active">Playbook Frontend (fábrica)</a>
+  </nav>
+  <main class="wide generated-content">
+    <h1>02 — Playbook Frontend</h1>
+<p><div class="callout ok"><strong>Importante</strong> **Precedência**</p>
+<p>Em qualquer dúvida de FE, o repositório **`funcef/web-template`** vence (código + `ARCHITECTURE.md` + `README.md`).</p>
+<p>[!CAUTION]</p>
+<p>**Sem segredos**</p>
+<p>`.env.local` nunca vai para o Git nem para este pacote. Aqui só aparecem **nomes de variáveis** e placeholders.</p>
+<h2>1. Pré-requisitos e setup</h2>
+<table><thead><tr><th>Item</th><th>Esperado</th></tr></thead><tbody><tr><td>Node</td><td>≥ 22</td></tr><tr><td>Package manager</td><td>**pnpm** (ver `packageManager` do template)</td></tr><tr><td>Clone</td><td>`web-template` (URL no kickoff)</td></tr></tbody></table>
+<pre><code>pnpm install
+cp .env.example .env.local
+# Preencher .env.local com valores do kickoff (canal seguro) — NÃO commitar
+```</code></pre>
+<h3>1.1 Variáveis (somente chaves + placeholders)</h3>
+<table><thead><tr><th>Variável</th><th>Papel</th></tr></thead><tbody><tr><td>`NEXT_PUBLIC_APP_URL`</td><td>Origem pública (ex.: `http://localhost:3000`)</td></tr><tr><td>`NEXT_PUBLIC_BASE_PATH`</td><td>Prefixo de path ou vazio</td></tr><tr><td>`API_URL`</td><td>Upstream **só servidor** (mock: `http://localhost:3001`)</td></tr><tr><td>`MICROSOFT_CLIENT_ID`</td><td>App Registration (kickoff)</td></tr><tr><td>`MICROSOFT_CLIENT_SECRET`</td><td>Secret (kickoff) — nunca no doc</td></tr><tr><td>`TENANT_ID`</td><td>Tenant (kickoff)</td></tr><tr><td>`AUDIENCE_API`</td><td>Audience da API (kickoff)</td></tr><tr><td>`BETTER_AUTH_SECRET`</td><td>Segredo de sessão — gerar localmente; não versionar</td></tr></tbody></table>
+<p>Opcional: `REDIS_URL`, `COOKIE_DOMAIN` — ver `.env.example` do template.</p>
+<h3>1.2 Subir local</h3>
+<pre><code>pnpm mock          # json-server :3001 — API de negócio fake
+pnpm dev           # Next.js
+pnpm typecheck &amp;&amp; pnpm lint &amp;&amp; pnpm test:run &amp;&amp; pnpm build
+```</code></pre>
+<p>Auth Full BA ainda exige credenciais Entra reais do kickoff; o mock cobre só a API de negócio.</p>
+<h2>2. Quatro camadas</h2>
+<pre><code>app/        → orquestração de rotas (o que mostrar)
+features/   → domínio (como funciona)
+core/       → api, auth, providers, config
+shared/     → UI genérica, utils, env, query-keys
+```</code></pre>
+<p>Import **one-way**: `app` → `features` → `core` → `shared`.  </p>
+<p>**Features nunca importam outras features** — promover para `shared/` ou `core/`.  </p>
+<p>Enforced por `eslint-plugin-boundaries` — não suprimir.</p>
+<table><thead><tr><th>Certo</th><th>Errado</th></tr></thead><tbody><tr><td>`import { api } from '@/core/api'`</td><td>`import axios from 'axios'`</td></tr><tr><td>`import { useAllTasks } from '@/features/tasks'`</td><td>`import { x } from '@/features/other'`</td></tr><tr><td>página importa barrel da feature</td><td>componente chama `api.get` direto</td></tr></tbody></table>
+<h2>3. Contrato de feature</h2>
+<pre><code>features/&lt;domínio&gt;/
+├── api/
+│   ├── endpoints.ts   # URLs puras — sem HTTP
+│   ├── client.ts      # api.get/post via @/core/api
+│   └── index.ts
+├── hooks/             # React Query
+├── components/
+├── types.ts
+├── validators.ts      # Zod (se houver form)
+└── index.ts           # barrel público
+```</code></pre>
+<p>Fluxo: `components → hooks → api/{endpoints,client} → types/validators`.  </p>
+<p>**Não existe `service.ts`.**</p>
+<h3>3.1 Exemplo vivo — `tasks` (template)</h3>
+<p>**endpoints.ts**</p>
+<pre><code>export const endpoints = {
+  list: () =&gt; '/tasks',
+  create: () =&gt; '/tasks',
+};
+```</code></pre>
+<p>**client.ts**</p>
+<pre><code>import { api } from '@/core/api';
+import { endpoints } from './endpoints';
+import type { CreateTaskData, Task } from '../types';
+
+export const tasksApi = {
+  getAll: () =&gt; api.get&lt;Task[]&gt;(endpoints.list()),
+  create: (data: CreateTaskData) =&gt;
+    api.post&lt;Task, CreateTaskData&gt;(endpoints.create(), data),
+};
+```</code></pre>
+<p>**Hook query**</p>
+<pre><code>export function useAllTasks() {
+  const query = useQuery({
+    queryKey: queryKeys.tasks.list(),
+    queryFn: () =&gt; tasksApi.getAll(),
+  });
+  return {
+    tasks: query.data?.data ?? null, // envelope normalizado pela lib
+    isTasksLoading: query.isLoading,
+    error: query.error,
+  };
+}
+```</code></pre>
+<p>**Hook mutation**</p>
+<pre><code>export function useCreateTask() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: CreateTaskData) =&gt; tasksApi.create(data),
+    onSuccess: () =&gt;
+      queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all }),
+    meta: { globalErrorToast: true },
+  });
+}
+```</code></pre>
+<p>**Query keys** — sempre em `src/shared/lib/query-keys.ts`:</p>
+<pre><code>export const queryKeys = {
+  tasks: {
+    all: ['tasks'] as const,
+    list: () =&gt; [...queryKeys.tasks.all, 'list'] as const,
+    detail: (id: string | number) =&gt;
+      [...queryKeys.tasks.all, 'detail', id] as const,
+  },
+} as const;
+```</code></pre>
+<p>**Naming:** `useAllTasks` / `useTaskById` / `useCreateTask` — nunca `useGet*`.</p>
+<p>**Validators (PT):**</p>
+<pre><code>export const createTaskSchema = z.object({
+  title: z.string().trim().min(3, 'Informe um título com ao menos 3 caracteres'),
+});
+```</code></pre>
+<h2>4. BFF e `api`</h2>
+<pre><code>// src/core/api.ts (conceito — ver arquivo no template)
+export const api = createApi({
+  baseURL: `${envClient.APP_URL}${envClient.BASE_PATH}/api/bff`,
+});
+```</code></pre>
+<ul>
+<li>Browser → `/api/bff/*` only.  </li>
+<li>Route handler `createBffHandler` anexa Bearer no **servidor**.  </li>
+<li>Não reimplementar parsing do envelope `{ resultado, mensagem, qtdRegistros }`.  </li>
+<li>`401` → teardown de sessão (lib) — não tratar auth expiry ad hoc na feature.</li>
+</ul>
+<h2>5. Auth e rotas</h2>
+<table><thead><tr><th>Cenário</th><th>Login</th><th>Sessão</th></tr></thead><tbody><tr><td>**2 — Full BA** (default do template)</td><td>Entra local `/api/auth`</td><td>cookie better-auth</td></tr><tr><td>**1 — Consumidor TKF2**</td><td>Portal externo</td><td>cookie TKF2 (conversão via CLI do ecossistema)</td></tr></tbody></table>
+<ul>
+<li>Guard de cookie: `src/proxy.ts` (`createSessionProxy`) — **não** é boundary de segurança.  </li>
+<li>Layout autenticado: `getServerSession()`; sem sessão → sign-in.  </li>
+<li>Shell: `AppShell` da lib auth.  </li>
+<li>Next.js 16 neste template: **`proxy.ts`**, não `middleware.ts`.</li>
+</ul>
+<h2>6. UI e idioma</h2>
+<ul>
+<li>Preferir `@funcef-componentes/react` **v3**: prop **`render`** (não `asChild`), `data-state`, `LoadingFuncef`.  </li>
+<li>**Código EN** (arquivos, rotas, identificadores); **UI PT** (labels, toasts, Zod).  </li>
+<li>Env: só via `src/shared/config/env.ts` e `env-client.ts` (exceção: `process.env.NODE_ENV`).  </li>
+<li>Duas mocks: **dev** = `pnpm mock`; **testes** = MSW — nunca misturar.</li>
+</ul>
+<h2>7. Página e rota</h2>
+<ul>
+<li>Página em `app/(authenticated)/...` **orquestra** (smart): chama hooks, passa props.  </li>
+<li>Componentes da feature são apresentacionais.  </li>
+<li>Exemplo: rota `/tasks` + `features/tasks`.  </li>
+<li>Sem páginas stub — rota sem UI → `not-found`.</li>
+</ul>
+<h2>8. Testes</h2>
+<ul>
+<li>Vitest + Testing Library + MSW (`src/__tests__/msw/`).  </li>
+<li>Hook tests: `renderHookWithProviders` (padrão do template).  </li>
+<li>Sem rede real; sem Jest.</li>
+</ul>
+<h2>9. Checklist — primeira feature de domínio</h2>
+<ul>
+<li>[ ] Pasta `features/<domínio>/` no contrato completo  </li>
+<li>[ ] `queryKeys` registrados  </li>
+<li>[ ] Hooks + client + endpoints  </li>
+<li>[ ] Rota autenticada + menu (se aplicável)  </li>
+<li>[ ] Formulário com Zod em PT (se houver)  </li>
+<li>[ ] Teste MSW do hook principal  </li>
+<li>[ ] `pnpm typecheck && pnpm lint && pnpm test:run` verdes  </li>
+<li>[ ] Nenhum secret em `.env*` versionado  </li>
+</ul>
+<h2>10. Próximo passo</h2>
+<p>[Walkthrough E2E](04-Walkthrough-E2E.md) — amarrar Task FE com API BE e tabela.</p>
+<h2>Histórico</h2>
+<p>___TABLE_PLACEHOLDER_4___</div></p>
+    <p class="meta">Gerado de: <code>../onboarding-fabrica/02-Playbook-Frontend.md</code> &middot; <a href="../index.html">Portal</a></p>
+  </main>
+</div>
+</body>
+</html>

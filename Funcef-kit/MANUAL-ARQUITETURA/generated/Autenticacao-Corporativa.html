@@ -1,0 +1,104 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Autenticação corporativa (FE) &mdash; Manual de Arquitetura FUNCEF</title>
+  <link rel="stylesheet" href="../assets/style.css" />
+</head>
+<body>
+<div class="layout">
+  <nav>
+    <h1>Manual de Arquitetura</h1>
+    <p class="subtitle"><a href="../index.html">&larr; Portal</a></p>
+    <div class="section">Cap&iacute;tulo</div>
+    <a href="#" class="active">Autenticação corporativa (FE)</a>
+  </nav>
+  <main class="wide generated-content">
+    <h1>Autenticação Corporativa e Operação (FrontEnd)</h1>
+<p><div class="callout note"><strong>Nota</strong> **Papel**</p>
+<p>Conhecimento operacional do frontend FUNCEF que complementa a arquitetura Feature-Based (FE-01..06): **autenticação corporativa**, **config de ambiente server-only** e **versionamento da lib (Changesets)**. Baseado no `web-template` v3.4.0.</p>
+<h2>Autenticação — `@funcef-componentes/auth` + Better Auth + Microsoft Entra</h2>
+<p>Auth, HTTP, shell e proxy vêm da **lib** — nada de cópia local de adapters. O template configura em `src/core/auth/`.</p>
+<table><thead><tr><th>Item</th><th>Valor / decisão</th></tr></thead><tbody><tr><td>Lib de auth</td><td>`@funcef-componentes/auth` **v3** (`^3.1.0`)</td></tr><tr><td>Better Auth</td><td>`better-auth` **^1.6** (dependência direta; factory via auth lib)</td></tr><tr><td>Factory server</td><td>`createFuncefAuth` em `src/core/auth/index.ts`</td></tr><tr><td>Sessão server</td><td>`createGetServerSession(auth)` exportado do mesmo módulo</td></tr><tr><td>Client browser</td><td>`createAuthClient` (better-auth/react) em `src/core/auth/client.ts` — baseURL `/api/auth`</td></tr><tr><td>Social provider</td><td>**microsoft** (Entra ID): `clientId`, credencial (`clientSecret` \</td><td>cert \</td><td>federated), `tenantId`, `audience`</td></tr><tr><td>Storage de sessão</td><td>`redisStorage` via `secondaryStorage` quando `REDIS_URL` presente; senão stateless com degradação graciosa</td></tr><tr><td>Credencial Entra</td><td>Cascata: `MICROSOFT_CLIENT_SECRET` → cert PEM → federated (`azureClientAssertion`)</td></tr><tr><td>Profile photo</td><td>`profilePhoto: true` na factory (Graph + Redis quando disponível)</td></tr><tr><td>Cookies</td><td>`cookieDomain` + `secureCookies` em produção; `COOKIE_MAX_AGE` opcional</td></tr><tr><td>Trusted origins</td><td>`https://*.funcef.com.br` (configurável na factory)</td></tr><tr><td>Layout autenticado</td><td>`getServerSession()` server-side → redirect se ausente; guard binário em `proxy.ts`</td></tr><tr><td>HTTP autenticado (BFF)</td><td>Browser fala **só** com `/api/bff/*`; Bearer resolvido no `createBffHandler` — **nunca** no JS</td></tr><tr><td>Tratamento 401</td><td>BFF devolve `401` → `createApi` sinaliza `AUTH_ERROR_EVENT` → teardown (`core/auth/teardown.ts`)</td></tr></tbody></table>
+<p>[!WARNING]</p>
+<p>**Distinção dev × prod**</p>
+<ul>
+<li>**dev:** sem `REDIS_URL` → sessão stateless/degradada. Cookies host-only.</li>
+<li>**prod:** `REDIS_URL` recomendado; `COOKIE_DOMAIN` para cross-subdomain; `secureCookies: true`.</li>
+</ul>
+<h2>Guard de sessão — `src/proxy.ts`</h2>
+<pre><code>import { createSessionProxy } from '@funcef-componentes/auth/proxy';
+
+export const proxy = createSessionProxy({
+  publicRoutes: ['/sign-in'],
+  sessionCookieNames: [...DEFAULT_SESSION_COOKIE_NAMES],
+  signInPath: '/sign-in',
+  // ...
+});
+```</code></pre>
+<ul>
+<li>Guard **binário** (presença de cookie): anônimo em rota protegida → `/sign-in`; autenticado em rota pública → home.</li>
+<li>**Não** é fronteira de segurança absoluta — a fronteira real é `getServerSession` no layout + backend a cada request + `401 → teardown`.</li>
+<li>Cenário **Consumidor TKF2**: overlay via CLI (`pnpm dlx @funcef-componentes/cli scenario apply consumidor-tkf2`) — `signInPath` absoluto da porta de entrada.</li>
+</ul>
+<h2>BFF único — `app/api/bff/[...path]/route.ts`</h2>
+<pre><code>import { createBffHandler } from '@funcef-componentes/auth/server';
+import { auth } from '@/core/auth';
+
+export const { GET, POST, PUT, PATCH, DELETE } = createBffHandler(auth, {
+  upstreamUrl: env.API_URL,
+  providerId: 'microsoft',
+});
+```</code></pre>
+<ul>
+<li>Um único BFF same-origin — não há `app/api/<svc>/[...path]` por microsserviço no template base.</li>
+<li>`API_URL` é **server-only** (`shared/config/env.ts`).</li>
+</ul>
+<h2>Configuração de ambiente — `env.ts` server-only</h2>
+<p>`src/shared/config/env.ts` valida via Zod no boot. Variáveis: `APP_URL`, **`API_URL`** (backend — **server-only**, usada só pelo BFF), `BASE_PATH`, `MICROSOFT_CLIENT_ID/SECRET` (ou cert/federated), `TENANT_ID`, `AUDIENCE_API`, `BETTER_AUTH_SECRET`, `REDIS_URL` (opcional em dev), `COOKIE_MAX_AGE`, `COOKIE_DOMAIN`, `NODE_ENV`.</p>
+<p>[!CAUTION]</p>
+<p>**`env.ts` vs `env-client.ts`**</p>
+<ul>
+<li>`env.ts` usa `import 'server-only'` — só em código server (route handlers do BFF, Server Components, `getServerSession`, auth). **`API_URL` mora aqui** e nunca vaza para o cliente.</li>
+<li>`env-client.ts` expõe apenas `NEXT_PUBLIC_*` (ex.: `APP_URL`, `BASE_PATH`) — pode ser importado de Client Components. **Não** colocar a URL do backend aqui.</li>
+</ul>
+<p>Importar `env.ts` em código client **quebra o build propositalmente**. Não contornar.</p>
+<h2>Segurança web — CSP estática em `next.config.ts`</h2>
+<p>A superfície de segurança web do frontend está em **dois lugares canônicos**:</p>
+<ol>
+<li>**`src/proxy.ts`** — guard binário de sessão via `createSessionProxy` (sem CSP nonce por requisição).</li>
+<li>**`next.config.ts`** — headers estáticos + **CSP em produção** montada estaticamente:</li>
+</ol>
+<p>   - `script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'`</p>
+<p>   - `style-src 'self' 'unsafe-inline'`</p>
+<p>   - `connect-src 'self'` (backend via BFF same-origin — não entra aqui)</p>
+<p>   - `object-src 'none'`, `base-uri 'self'`, `form-action 'self'`</p>
+<p>   - Também: `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy`, `Vary`</p>
+<p>   - CSP **só em produção** (`NODE_ENV === 'production'`); dev sem CSP para não quebrar HMR.</p>
+<p>[!NOTE]</p>
+<p>**WEB-1 — RESOLVIDO (BFF same-origin)**</p>
+<p>O browser fala só com `/api/bff/*`; o Bearer é resolvido no servidor e nunca chega ao JS. Implementado via `createBffHandler` + `createApi`. Referência: `web-template/src/app/api/bff/[...path]/route.ts`, `src/core/api.ts`.</p>
+<h2>Versionamento da lib (Changesets)</h2>
+<p>A `lib-front-ui` usa **Changesets** — versionamento independente por pacote + changelog automático.</p>
+<pre><code>pnpm changeset            # descrever a mudança (escolher pacotes + bump semver)
+# PR de versionamento é criado/atualizado automaticamente (version-publish.yml)
+# ao merge, publica no GitHub Packages
+```</code></pre>
+<ul>
+<li>CI/CD da lib: `ci-cd.yml` (lint + typecheck + build + test + deploy Storybook no GitHub Pages); `version-publish.yml` (Changesets → publish).</li>
+<li>CI/CD do app: cada app define seu pipeline em `funcef-devops/`.</li>
+</ul>
+<h2>Referências</h2>
+<ul>
+<li>Stack/versões: [Stack-Canonica](./Stack-Canonica.md)</li>
+<li>Design System (Figma/Storybook/tokens): [Integracao-lib-front-ui](./Integracao-lib-front-ui.md) + família Design (FG-)</li>
+<li>Fluxo de dados BFF e camadas: [Padroes-Arquiteturais](./Padroes-Arquiteturais.md)</li>
+</ul>
+<h2>Histórico</h2>
+<p>___TABLE_PLACEHOLDER_1___</div></p>
+    <p class="meta">Gerado de: <code>../../frontend/_shared/Autenticacao-Corporativa.md</code> &middot; <a href="../index.html">Portal</a></p>
+  </main>
+</div>
+</body>
+</html>

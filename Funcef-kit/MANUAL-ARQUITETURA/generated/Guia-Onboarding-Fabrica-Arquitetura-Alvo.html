@@ -1,0 +1,151 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Guia onboarding fábrica &mdash; Manual de Arquitetura FUNCEF</title>
+  <link rel="stylesheet" href="../assets/style.css" />
+</head>
+<body>
+<div class="layout">
+  <nav>
+    <h1>Manual de Arquitetura</h1>
+    <p class="subtitle"><a href="../index.html">&larr; Portal</a></p>
+    <div class="section">Cap&iacute;tulo</div>
+    <a href="#" class="active">Guia onboarding fábrica</a>
+  </nav>
+  <main class="wide generated-content">
+    <h1>Guia de Onboarding de Fábrica — Arquitetura Alvo FUNCEF</h1>
+<p><div class="callout ok"><strong>Importante</strong> **Público e propósito**</p>
+<p>Documento para **fornecedor / fábrica de software** (anexo de RFP ou kickoff). Este arquivo é o **guia-mestre**: encaixa as peças e define Definition of Done. A implementação passo a passo está no pacote [`onboarding-fabrica/`](onboarding-fabrica/README.md).</p>
+<p><div class="callout note"><strong>Nota</strong> **Escopo**</p>
+<p>Arquitetura alvo full-stack (FE · BE · dados). **Não** cobre legado, cutover, SLA comercial nem uso de ferramentas de IA.</p>
+<p>[!CAUTION]</p>
+<p>**Segredos e dados sensíveis**</p>
+<p>Este pacote **nunca** contém tokens, senhas, connection strings, Client Secrets, Tenant IDs reais ou nomes internos de Key Vault/hosts. Use apenas placeholders. Credenciais e endpoints reais são entregues **somente** pelo canal seguro do kickoff FUNCEF.</p>
+<h2>Sumário</h2>
+<ol>
+<li>[Sumário executivo](#1-sumário-executivo)</li>
+<li>[Como usar este pacote](#2-como-usar-este-pacote)</li>
+<li>[Stack canônica (resumo)](#3-stack-canônica-resumo)</li>
+<li>[Visão full-stack e fluxo de confiança](#4-visão-full-stack-e-fluxo-de-confiança)</li>
+<li>[Mapa dos playbooks](#5-mapa-dos-playbooks)</li>
+<li>[Modelo de entrega e governança](#6-modelo-de-entrega-e-governança)</li>
+<li>[Qualidade e Definition of Done](#7-qualidade-e-definition-of-done)</li>
+<li>[Kickoff — acessos (sem segredos)](#8-kickoff--acessos-sem-segredos)</li>
+<li>[Referências](#9-referências)</li>
+<li>[Exportação para PDF](#10-exportação-para-pdf)</li>
+</ol>
+<hr />
+<h2>1. Sumário executivo</h2>
+<h3>1.1 O que construir</h3>
+<table><thead><tr><th>Camada</th><th>Referência obrigatória</th></tr></thead><tbody><tr><td>**Frontend**</td><td>`funcef/web-template` (Next.js App Router, feature-based)</td></tr><tr><td>**Backend**</td><td>`funcef/api-template-base` + libs `FUNCEF.*` 3.x (.NET 10)</td></tr><tr><td>**Dados**</td><td>Oracle 19c+ · PadraoBD · Liquibase (DB-as-Code)</td></tr></tbody></table>
+<h3>1.2 Precedência de fontes</h3>
+<table><thead><tr><th>Área</th><th>Fonte</th><th>Em conflito</th></tr></thead><tbody><tr><td>Frontend</td><td>`web-template` (`ARCHITECTURE.md`, código em `src/`)</td><td>**web-template vence**</td></tr><tr><td>Backend / ops API</td><td>Doutrina Backend + este pacote</td><td>Doutrina vigente</td></tr><tr><td>Dados</td><td>Doutrina BancoDados + PadraoBD</td><td>Doutrina vigente</td></tr><tr><td>Integração browser→API</td><td>BFF same-origin do web-template</td><td>Detalhe no playbook FE</td></tr></tbody></table>
+<h3>1.3 Dentro / fora</h3>
+<table><thead><tr><th>Dentro</th><th>Fora</th></tr></thead><tbody><tr><td>Bootstrap, padrões com código, slice E2E didático</td><td>Specs funcionais do produto (pacote to-be separado)</td></tr><tr><td>Contratos BFF/envelope/auth (sem secrets)</td><td>Cutover legado→novo</td></tr><tr><td>Checklists e DoD</td><td>Provisionamento interno (pedido no kickoff)</td></tr></tbody></table>
+<hr />
+<h2>2. Como usar este pacote</h2>
+<p>**Ordem de leitura recomendada:**</p>
+<ol>
+<li>Este guia-mestre (visão e DoD)</li>
+<li>[Playbook Backend](onboarding-fabrica/01-Playbook-Backend.md)</li>
+<li>[Playbook Dados](onboarding-fabrica/03-Playbook-Dados.md)</li>
+<li>[Playbook Frontend](onboarding-fabrica/02-Playbook-Frontend.md)</li>
+<li>[Walkthrough E2E — Task](onboarding-fabrica/04-Walkthrough-E2E.md)</li>
+<li>Voltar ao DoD deste mestre</li>
+</ol>
+<p>[!TIP]</p>
+<p>**Manual de arquitetura (leitura humana)**</p>
+<p>Para compreensão embasada da arquitetura (camadas, ADRs, componentes, SDD) sem depender de Obsidian ou agentes IA, use o portal HTML [`Manual-Arquitetura/index.html`](Manual-Arquitetura/index.html). Este guia-mestre foca implementação e DoD; o manual foca o *por quê* e o encaixe das peças.</p>
+<p>Índice do pacote: [`onboarding-fabrica/README.md`](onboarding-fabrica/README.md).</p>
+<hr />
+<h2>3. Stack canônica (resumo)</h2>
+<p>Confirme versões nos templates no kickoff. Referência vigente (2026-08):</p>
+<table><thead><tr><th>Camada</th><th>Tecnologia</th></tr></thead><tbody><tr><td>FE</td><td>Node ≥22 · pnpm · Next.js 16 · React 19 · TypeScript · Tailwind 4 · TanStack Query · RHF+Zod · `@funcef-componentes/react` **v3** · `@funcef-componentes/auth` **v3**</td></tr><tr><td>BE</td><td>.NET 10 · C# 13 · Clean Arch 4 projetos · CQRS/Mediator (`FUNCEF.Essenciais`) · EF+Dapper (`FUNCEF.ORM`) · `FUNCEF.*` 3.x</td></tr><tr><td>Dados</td><td>Oracle 19c+ · Liquibase · PK `long` IDENTITY · `FLAG_*` NUMBER(1)</td></tr><tr><td>Identidade</td><td>Azure Entra ID (OAuth2+PKCE web / Client Credentials M2M)</td></tr><tr><td>Secrets</td><td>Azure Key Vault (valores **fora** deste documento)</td></tr></tbody></table>
+<p>**Proibido sem ADR:** Axios/`fetch` ad hoc no FE · `service.ts` no FE · MediatR/AutoMapper/Serilog/Newtonsoft de terceiros · provider ≠ Oracle · `middleware.ts` (usar `src/proxy.ts`) · npm/yarn no FE.</p>
+<p>Detalhe: playbooks + [Stack-Canonica-Nucleo](Stack-Canonica-Nucleo.md).</p>
+<h3>3.1 Matriz de autenticação (FE × API)</h3>
+<table><thead><tr><th>Cenário</th><th>Login</th><th>Redirect / session</th><th>Papel do CORS na API</th></tr></thead><tbody><tr><td>**Full BA (padrão fábrica)**</td><td>Better Auth no Next (`@funcef-componentes/auth`)</td><td>`/api/auth/*`, cookie no FE</td><td>Dados via BFF server-side (`/api/bff` → `API_URL`) — CORS browser→API **não** é o caminho principal</td></tr><tr><td>**Demo API wwwroot**</td><td>`FUNCEF.Autenticacao` no API</td><td>`Auth:EntraId:RedirectUri` (ex. `https://localhost:56055/auth/callback`)</td><td>`Cors:Politica` / `Cors:OriginsPermitidas` importam para o browser no API</td></tr></tbody></table>
+<p>Não registre o RedirectUri do **API wwwroot** no App Registration quando o produto for Full BA (login no Next).</p>
+<hr />
+<h2>4. Visão full-stack e fluxo de confiança</h2>
+<pre><code>sequenceDiagram
+  participant Browser
+  participant NextBFF as NextBFF_api_bff
+  participant Auth as FuncefAuth_Entra
+  participant API as ApiMicroservice
+  participant DB as Oracle
+
+  Browser-&gt;&gt;NextBFF: same-origin /api/bff
+  NextBFF-&gt;&gt;Auth: resolve Bearer server-side
+  NextBFF-&gt;&gt;API: Authorization Bearer
+  API-&gt;&gt;DB: EF_or_Dapper
+  API--&gt;&gt;NextBFF: envelope resultado
+  NextBFF--&gt;&gt;Browser: ApiResponse normalizado
+```</code></pre>
+<ol>
+<li>Bearer Microsoft **não** circula em JavaScript do browser.  </li>
+<li>Cliente chama só `/api/bff/*`.  </li>
+<li>`API_URL` é variável **somente servidor**.  </li>
+<li>API aplica authZ (`[FuncefAuthorize]` / GAP quando aplicável).  </li>
+<li>Envelope FUNCEF normalizado pela lib FE (`createApi`).</li>
+</ol>
+<hr />
+<h2>5. Mapa dos playbooks</h2>
+<table><thead><tr><th>Artefato</th><th>Conteúdo</th></tr></thead><tbody><tr><td>[01 Backend](onboarding-fabrica/01-Playbook-Backend.md)</td><td>Bootstrap `api-template-base`, CQRS, `FUNCEF.*`, primeiro endpoint</td></tr><tr><td>[02 Frontend](onboarding-fabrica/02-Playbook-Frontend.md)</td><td>Camadas, feature contract, BFF, auth, primeira feature</td></tr><tr><td>[03 Dados](onboarding-fabrica/03-Playbook-Dados.md)</td><td>PadraoBD, Liquibase, alinhamento EF</td></tr><tr><td>[04 Walkthrough E2E](onboarding-fabrica/04-Walkthrough-E2E.md)</td><td>Slice **Task** ponta a ponta (tabela → API → BFF → UI → testes)</td></tr></tbody></table>
+<hr />
+<h2>6. Modelo de entrega e governança</h2>
+<table><thead><tr><th>Artefato</th><th>Responde</th></tr></thead><tbody><tr><td>Spec to-be (quando houver)</td><td>*O quê* (comportamento)</td></tr><tr><td>Este pacote + Doutrina</td><td>*Como* (padrão técnico)</td></tr><tr><td>Código</td><td>Derivado; rastreável a `UC-NNN` / `T-NNN` quando a spec exigir</td></tr></tbody></table>
+<ul>
+<li>Propor desvio **antes** de implementar.  </li>
+<li>Troca de stack major → ADR + aprovação arquitetura.  </li>
+<li>Segredos nunca no Git.  </li>
+<li>PROD / schema: aprovação DBA.</li>
+</ul>
+<hr />
+<h2>7. Qualidade e Definition of Done</h2>
+<h3>7.1 Anti-padrões (rejeitar)</h3>
+<p>**FE:** import cross-feature · `service.ts` · HTTP fora de `@/core/api` · Bearer no client · UI em inglês / código em PT · `middleware.ts` · MSW misturado com json-server · query keys inline.</p>
+<p>**BE:** Application → Infrastructure · regra no controller · libs proibidas · PK Guid/`BaseEntity` sem ADR · engolir exceções tipadas · endpoint sem `[FuncefAuthorize]` (quando aplicável) · secrets commitados.</p>
+<p>**Dados:** DDL direto em Hml/Prd sem Liquibase · renomear legado sem governança · `BOOLEAN` Oracle.</p>
+<h3>7.2 DoD de incremento</h3>
+<ul>
+<li>[ ] Comportamento coberto pela spec do incremento  </li>
+<li>[ ] FE: `pnpm typecheck && pnpm lint && pnpm test:run && pnpm build`  </li>
+<li>[ ] BE: `dotnet build` + testes verdes  </li>
+<li>[ ] Schema: changeset Liquibase (se houver mudança)  </li>
+<li>[ ] Rastreabilidade UC/contrato → código  </li>
+<li>[ ] Sem segredos no diff · Conventional Commits  </li>
+<li>[ ] Slice E2E do walkthrough (ou equivalente de domínio) demonstrável  </li>
+</ul>
+<hr />
+<h2>8. Kickoff — acessos (sem segredos)</h2>
+<p>Solicitar à FUNCEF (valores **fora** deste doc):</p>
+<ul>
+<li>[ ] Clone dos templates (`web-template`, `api-template-base`, repo DB-as-Code se houver)  </li>
+<li>[ ] Acesso ao feed NuGet `FUNCEF.*`  </li>
+<li>[ ] App Registration Entra (dev) — Client ID / secret / tenant / audience via canal seguro  </li>
+<li>[ ] Leitura Key Vault e schema Oracle DEV (nomes e secrets no kickoff)  </li>
+<li>[ ] Cenário de auth FE: **Full BA** (default) ou Consumidor TKF2  </li>
+<li>[ ] Pacote de especificação to-be do produto (se existir)  </li>
+</ul>
+<p>**Critério de onboarding completo:** ambientes locais sobem sem atalho que viole BFF/auth; existe um slice Task (ou domínio real) FE+BE; gates verdes; time alinhado aos anti-padrões.</p>
+<hr />
+<h2>9. Referências</h2>
+<table><thead><tr><th>Tema</th><th>Onde</th></tr></thead><tbody><tr><td>Manual de arquitetura (HTML, humano)</td><td>[`Manual-Arquitetura/index.html`](Manual-Arquitetura/index.html)</td></tr><tr><td>Pacote didático</td><td>[`onboarding-fabrica/`](onboarding-fabrica/README.md)</td></tr><tr><td>Núcleo de stack</td><td>[Stack-Canonica-Nucleo.md](Stack-Canonica-Nucleo.md)</td></tr><tr><td>Backend</td><td>[../backend/](../backend/)</td></tr><tr><td>BancoDados</td><td>[../bancodados/](../bancodados/)</td></tr><tr><td>FE código</td><td>`funcef/web-template`</td></tr><tr><td>BE código</td><td>`funcef/api-template-base`</td></tr></tbody></table>
+<hr />
+<h2>10. Exportação para PDF</h2>
+<pre><code>cd Doutrina/_shared/pdf
+npm install
+npm run build:all
+```</code></pre>
+<p>Gera o PDF deste mestre e os PDFs em `onboarding-fabrica/`. Detalhes: [`pdf/README.md`](pdf/README.md).</p>
+<hr />
+<h2>Histórico</h2>
+<p>___TABLE_PLACEHOLDER_8___</div></div></p>
+    <p class="meta">Gerado de: <code>../Guia-Onboarding-Fabrica-Arquitetura-Alvo.md</code> &middot; <a href="../index.html">Portal</a></p>
+  </main>
+</div>
+</body>
+</html>

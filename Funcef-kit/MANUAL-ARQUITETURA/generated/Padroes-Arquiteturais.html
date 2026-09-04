@@ -1,0 +1,233 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Padrões arquiteturais frontend &mdash; Manual de Arquitetura FUNCEF</title>
+  <link rel="stylesheet" href="../assets/style.css" />
+</head>
+<body>
+<div class="layout">
+  <nav>
+    <h1>Manual de Arquitetura</h1>
+    <p class="subtitle"><a href="../index.html">&larr; Portal</a></p>
+    <div class="section">Cap&iacute;tulo</div>
+    <a href="#" class="active">Padrões arquiteturais frontend</a>
+  </nav>
+  <main class="wide generated-content">
+    <h1>Padrões Arquiteturais — Frontend FUNCEF</h1>
+<p><div class="callout note"><strong>Nota</strong> **Fonte autoritativa**</p>
+<p>`funcef/web-template/ARCHITECTURE.md` e código em `src/`. Este documento condensa os padrões em formato útil para agentes IA.</p>
+<h2>Visão geral em uma frase</h2>
+<p>**Feature-Based + Colocation**: a aplicação é fatiada por funcionalidade do usuário (`features/<dominio>`), cada uma auto-contida; componentes de página ficam ao lado da rota (`_components/`); o que é genuinamente compartilhado vive em `shared/`; infra transversal em `core/`.</p>
+<h2>Camadas e regra de dependência (4 camadas)</h2>
+<p>O `web-template` v3.4.0 organiza `src/` em **4 camadas**. A camada `core/` concentra **infra transversal**: `api`, `auth`, `config`. Estado global (Zustand) **não é camada** — adicionar sob demanda.</p>
+<pre><code>+-----------------------------------------------------+
+|  app/                  (Next.js App Router)         |  ← topo; importa feature/core/shared
+|    (authenticated)/                                 |
+|    &lt;rota&gt;/page.tsx                                  |
+|    &lt;rota&gt;/_components/                              |
+|    api/bff/[...path]/route.ts   (BFF único)         |
++-----------------------------------------------------+
+                ↓ importa
++-----------------------------------------------------+
+|  features/&lt;dominio&gt;/   (lógica de negócio)          |
+|    api/{client,endpoints,index}  hooks/  components/|
+|    types.ts  validators.ts  index.ts   (SEM service)|
++-----------------------------------------------------+
+                ↓ importa
++-----------------------------------------------------+
+|  core/                 (infra transversal)          |
+|    api.ts  auth/  config/                           |
++-----------------------------------------------------+
+                ↓ importa
++-----------------------------------------------------+
+|  shared/               (utilitários e UI base)      |
+|    ui/  lib/  hooks/  types/  config/               |
++-----------------------------------------------------+
+```</code></pre>
+<p>Fora das camadas: arquivos na raiz de `src/` (`proxy.ts`, `instrumentation.ts`) — tratados como `app` pelo lint.</p>
+<p>**Regra de dependência (exatamente o que o lint aplica):**</p>
+<table><thead><tr><th>De</th><th>Pode importar</th></tr></thead><tbody><tr><td>`app`</td><td>`app`, `feature`, `core`, `shared`</td></tr><tr><td>`feature`</td><td>**a MESMA feature** (não outra), `core`, `shared`</td></tr><tr><td>`core`</td><td>`core`, `shared`</td></tr><tr><td>`shared`</td><td>**só** `shared`</td></tr></tbody></table>
+<p>[!IMPORTANT]</p>
+<p>**Boundaries são guardrail duro, não convenção textual**</p>
+<p>A regra acima é **enforçada por `eslint-plugin-boundaries` (`^7.2.0`)** em `eslint.config.mjs` (`default: 'disallow'` + regra explícita por camada; `feature` usa `capture: ['feature']` para permitir apenas imports **dentro da mesma feature**). Import que cruze a fronteira **falha o lint** (não é só recomendação). Ao mover/renomear código, este é o mecanismo canônico de verificação — não a leitura manual do diagrama.</p>
+<h2>Estrutura canônica de uma feature (SEM `service.ts`)</h2>
+<p>Estrutura observada em `web-template/src/features/tasks/`. **Não existe `service.ts`** — os hooks (React Query) chamam a instância `api` de `@/core/api` direto, via `api/client.ts`:</p>
+<pre><code>features/&lt;dominio&gt;/
+├── api/
+│   ├── client.ts        ← objeto tipado que chama api&lt;T&gt; (tasksApi.getAll(), .create(), ...)
+│   ├── endpoints.ts     ← builders puros — retornam paths, sem HTTP
+│   └── index.ts         ← barrel
+├── hooks/
+│   ├── use-&lt;dominio&gt;-query.ts     ← useQuery → chama &lt;dominio&gt;Api.*
+│   ├── use-&lt;dominio&gt;-mutation.ts  ← useMutation + invalidateQueries
+│   └── index.ts
+├── components/          ← UI do domínio (quando reutilizada entre rotas)
+├── types.ts             ← tipos do domínio (Task, CreateTaskData)
+├── validators.ts        ← schemas Zod (somente quando há formulários)
+└── index.ts             ← barrel
+```</code></pre>
+<p>**Fluxo dentro da feature:** `components → hooks (React Query) → api/{client,endpoints} → api (@/core/api) → types/validators`. Regra de negócio/orquestração/transformação vive **no hook** (ou num util de `shared/lib`), não numa classe estática intermediária.</p>
+<h3>Padrão de `api/client.ts`</h3>
+<pre><code>import { api } from '@/core/api';
+import { endpoints } from './endpoints';
+import type { CreateTaskData, Task } from '../types';
+
+export const tasksApi = {
+  getAll: () =&gt; api.get&lt;Task[]&gt;(endpoints.list()),
+  create: (data: CreateTaskData) =&gt;
+    api.post&lt;Task, CreateTaskData&gt;(endpoints.create(), data),
+};
+```</code></pre>
+<p>`api` (de `@/core/api`, `createApi` da lib) é o **cliente único same-origin** — envelope FUNCEF normalizado, erro carimbado e `401 → teardown`. Não instanciar HTTP client na feature.</p>
+<h3>Padrão de `types.ts`</h3>
+<pre><code>export type Task = {
+  id: number;
+  title: string;
+  completed: boolean;
+};
+
+export type CreateTaskData = Omit&lt;Task, 'id'&gt;;
+```</code></pre>
+<h3>Padrão de `validators.ts`</h3>
+<pre><code>import { z } from 'zod';
+
+export const taskSchema = z.object({
+  id: z.number().int().positive(),
+  title: z.string().min(1).max(200).trim(),
+  completed: z.boolean(),
+});
+
+export const createTaskSchema = taskSchema.omit({ id: true });
+
+export type TaskValidated = z.infer&lt;typeof taskSchema&gt;;
+export type CreateTaskValidated = z.infer&lt;typeof createTaskSchema&gt;;
+```</code></pre>
+<h2>Fluxo de dados (mutation típica) — BFF único same-origin</h2>
+<p>O padrão canônico de dados é **BFF (Backend-for-Frontend) same-origin**: o browser fala **apenas** com `/api/bff/*` (rota `app/api/bff/[...path]/route.ts`). O access token (Bearer) é resolvido **no servidor** (`createBffHandler` + `createFuncefAuth`) e anexado ao upstream (`API_URL`) — **nunca** exposto ao JavaScript do browser. O browser só envia o cookie de sessão httpOnly.</p>
+<pre><code>User clica "Salvar"
+    ↓
+Componente em app/&lt;rota&gt;/_components/
+    ↓ chama
+useCreateTask().mutateAsync(data)              ← hook React Query (features/tasks/hooks)
+    ↓
+tasksApi.create(data)                          ← features/tasks/api/client.ts
+    ↓
+api.post&lt;Task&gt;(endpoints.create(), data)       ← api (@/core/api — createApi da lib)
+    ↓  baseURL = ${APP_URL}${BASE_PATH}/api/bff
+BFF route handler: app/api/bff/[...path]/route.ts
+    ↓  resolve Bearer server-side e encaminha para API_URL
+Backend (microsserviço / mock json-server)
+    ↓ resposta (envelope normalizado pela lib)
+React Query Cache → invalidateQueries(queryKeys.tasks.all)
+    ↓
+UI re-renderiza (query refetched)
+```</code></pre>
+<p>[!NOTE]</p>
+<p>**`createApi` não injeta Bearer no browser**</p>
+<p>No modelo BFF o `Authorization` é anexado **no route handler** (server). O token nunca transita pelo cliente. Query keys sempre pela factory central `queryKeys` (`src/shared/lib/query-keys.ts`).</p>
+<h2>Camadas de validação (Zod)</h2>
+<pre><code>shared/lib/validators/         ← funções puras (Business Logic)
+  cpf-validation.ts (isCpfValid, cleanCpf)
+  password-validation.ts
+        ↓ usadas por
+shared/lib/fields/              ← Zod schemas atômicos reutilizáveis
+  cpf-field.ts (cpfField)
+  email-field.ts (emailField)
+        ↓ usados por
+features/&lt;X&gt;/validators.ts      ← schemas compostos (taskSchema)
+        ↓ usado por
+zodResolver(schema) em React Hook Form
+```</code></pre>
+<p>`shared/lib/formatters/` (CPF, moeda, data) **consome** `validators/` — nunca duplica lógica.</p>
+<h2>Organização de componentes — 3 lugares válidos</h2>
+<pre><code>graph TB
+    A[Componente que vou criar] --&gt; B{Onde colocar?}
+    B --&gt;|Reusável em múltiplas páginas/features&lt;br/&gt;e não existe na lib| C["shared/ui/&amp;lt;componente&amp;gt;/"]
+    B --&gt;|Específico de UMA rota| D["app/.../&amp;lt;rota&amp;gt;/_components/&amp;lt;componente&amp;gt;/"]
+    B --&gt;|Específico de UMA feature, usado por múltiplas rotas| E["features/&amp;lt;X&amp;gt;/components/&amp;lt;componente&amp;gt;/"]
+    B --&gt;|"Já existe na @funcef-componentes/react"| F["NÃO criar — usar a lib"]
+
+    style C fill:#e8f5e9
+    style D fill:#fff4e1
+    style E fill:#e1f5ff
+    style F fill:#ffcccc
+```</code></pre>
+<p>**Decisão em árvore**:</p>
+<ol>
+<li>A lib `@funcef-componentes/react` já tem? → **usa a lib**.</li>
+<li>A lib quase tem mas falta uma variante? → **abre issue no lib-front-ui**, não duplica.</li>
+<li>É genuinamente novo e usado em **mais de uma rota**? → `shared/ui/`.</li>
+<li>É de **uma feature** mas reutilizado em rotas diferentes? → `features/<X>/components/`.</li>
+<li>É de **uma rota específica**? → `app/.../_components/`.</li>
+</ol>
+<h2>Estado global (Zustand) — sob demanda</h2>
+<p>O template v3.4.0 **não inclui** Zustand nem pasta `store/`. Adicionar apenas quando:</p>
+<ul>
+<li>Estado é **cross-componente / cross-rota** (preferências de UI, wizard multi-step).</li>
+<li>**Não** é estado de servidor (React Query) nem local de componente (`useState`/RHF).</li>
+</ul>
+<p>Quando adotado, seguir padrão de slices documentado em FE-05 — fora do grafo de camadas do lint.</p>
+<h2>Configuração de HTTP — `core/api.ts`</h2>
+<p>**Padrão canônico:** instância única `api` em `src/core/api.ts`:</p>
+<pre><code>import { createApi } from '@funcef-componentes/auth/http';
+import { envClient } from '@/shared/config/env-client';
+
+export const api = createApi({
+  baseURL: `${envClient.APP_URL}${envClient.BASE_PATH}/api/bff`,
+});
+```</code></pre>
+<ul>
+<li>BFF: `app/api/bff/[...path]/route.ts` com `createBffHandler(auth, { upstreamUrl: env.API_URL })`.</li>
+<li>`API_URL` é **server-only** (Zod em `shared/config/env.ts` + `import 'server-only'`).</li>
+<li>Envelope FUNCEF, retry seletivo e toasts vêm da lib — não reimplementar por feature.</li>
+</ul>
+<p>[!WARNING]</p>
+<p>**Chamada direta ao backend no browser é EXCEÇÃO**</p>
+<p>Bypass do BFF reexpõe o token ao JS. Registrar exceção em [Excecoes-Aprovadas](./Excecoes-Aprovadas.md) e justificar.</p>
+<h2>Convenções de import</h2>
+<pre><code>// 1. React e externos
+import React from 'react';
+import { useRouter } from 'next/navigation';
+
+// 2. Internos via alias @
+import { Button } from '@funcef-componentes/react';
+import { useAllTasks } from '@/features/tasks';
+import { cn } from '@funcef-componentes/react/utils';
+
+// 3. Tipos (separados, prefix 'type')
+import type { Task } from '@/features/tasks';
+
+// 4. Relativos
+import './task-form.module.css';
+```</code></pre>
+<h2>Roteamento (Next App Router)</h2>
+<pre><code>app/
+├── layout.tsx                ← layout raiz (html, body, providers globais)
+├── (authenticated)/          ← route group autenticado
+│   ├── layout.tsx            ← AppShell + getServerSession
+│   ├── tasks/
+│   │   ├── page.tsx          ← lista
+│   │   └── _components/      ← task-list, create-task-form (locais)
+│   └── ...
+├── api/
+│   ├── auth/[...all]/route.ts
+│   └── bff/[...path]/route.ts
+└── sign-in/
+    └── page.tsx
+```</code></pre>
+<ul>
+<li>**`(group)`** = route group (não vira segmento de URL).</li>
+<li>**`_components/`** com underscore = pasta privada (não vira rota).</li>
+<li>**`page.tsx`** vira a rota; **`layout.tsx`** envolve todas as páginas abaixo.</li>
+</ul>
+<h2>Boas práticas resumidas</h2>
+<table><thead><tr><th>#</th><th>Regra</th></tr></thead><tbody><tr><td>1</td><td>Uma feature por domínio. Não misturar `tasks` com `pedidos`.</td></tr><tr><td>2</td><td>Estado de servidor → React Query. Estado de UI cross-componente → Zustand (opt-in). Estado local → `useState`.</td></tr><tr><td>3</td><td>Componente sem estado é melhor — extrair lógica para hook.</td></tr><tr><td>4</td><td>`forwardRef` quando o componente renderiza HTML primitivo. Sempre setar `displayName`.</td></tr><tr><td>5</td><td>Sem `console.log` em produção (lint avisa). Usar logger se necessário.</td></tr><tr><td>6</td><td>Sem `any` casual — preferir `unknown` + narrowing.</td></tr><tr><td>7</td><td>Toda mutation invalida queries relacionadas via `queryKeys` factory.</td></tr><tr><td>8</td><td>Toda chamada HTTP do browser passa por `api` (`@/core/api`) → BFF `/api/bff` — nada de `fetch()` solto nem client HTTP ad hoc (exceção documentada à parte).</td></tr><tr><td>9</td><td>Tailwind: classes inline; composição via `cn()`. Sem CSS Module a não ser exceção justificada.</td></tr><tr><td>10</td><td>Imports relativos só dentro da mesma pasta (`./` ok, `../../` proibido — usar alias `@/`).</td></tr></tbody></table>
+<h2>Histórico</h2>
+<p>___TABLE_PLACEHOLDER_2___</div></p>
+    <p class="meta">Gerado de: <code>../../frontend/_shared/Padroes-Arquiteturais.md</code> &middot; <a href="../index.html">Portal</a></p>
+  </main>
+</div>
+</body>
+</html>

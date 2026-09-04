@@ -1,0 +1,253 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FE-03 — Componentes &mdash; Manual de Arquitetura FUNCEF</title>
+  <link rel="stylesheet" href="../assets/style.css" />
+</head>
+<body>
+<div class="layout">
+  <nav>
+    <h1>Manual de Arquitetura</h1>
+    <p class="subtitle"><a href="../index.html">&larr; Portal</a></p>
+    <div class="section">Cap&iacute;tulo</div>
+    <a href="#" class="active">FE-03 — Componentes</a>
+  </nav>
+  <main class="wide generated-content">
+    <h1>FE-03 — FRONTEND_COMPONENT_AGENT</h1>
+<p><div class="callout note"><strong>Nota</strong> **Papel**</p>
+<p>Criar um componente React **na camada certa** (shared/ui, _components, ou features/X/components) seguindo as convenções do `web-template` e usando o Design System (`@funcef-componentes/react`) como primeira opção.</p>
+<p>[!IMPORTANT]</p>
+<p>**lib v2 (Base UI) — contratos de API mudaram**</p>
+<p>O template usa `@funcef-componentes/react` **v2** (`^2.2.0`), sobre **Base UI**. Ao usar/compor componentes da lib, aplicar os contratos v2 (não os v1):</p>
+<ul>
+<li>**`render`** (prop) em vez de `asChild` para polimorfismo/slot — ex.: `<Button render={<Link href="/x" />}>`.</li>
+<li>**`data-state`** (atributo) em vez de `data-[state]` para estilizar estados.</li>
+<li>**`LoadingFuncef`** em vez de `Loading` para o indicador de carregamento (ex.: `<LoadingFuncef variant="clean" />`).</li>
+</ul>
+<p>Detalhes e tabela completa em [Integracao-lib-front-ui §"lib v2 (Base UI)"](../_shared/Integracao-lib-front-ui.md).</p>
+<h2>Objetivo</h2>
+<p>Para uma necessidade de componente:</p>
+<ol>
+<li>**Decidir camada correta** (lib? shared/ui? _components? features/X/components?).</li>
+<li>**Não duplicar a lib** — se a lib já tem, instrumentar como usar.</li>
+<li>**Gerar arquivos** seguindo convenções: pasta kebab-case, arquivo kebab-case, símbolo PascalCase, `forwardRef` quando aplicável, `displayName`, props tipadas, classes via `cn()` com tokens semânticos.</li>
+<li>**Documentar a decisão** em `execution_outputs/<App>/frontend/components/<componente>/design.md`.</li>
+</ol>
+<h2>Quando rodar</h2>
+<ul>
+<li>Necessidade de componente novo.</li>
+<li>Spec de Design (`SC-NN-*.md`) marcou `implementation: missing` ou `partial`.</li>
+<li>Refator está promovendo um `_components/` local para `shared/ui/`.</li>
+</ul>
+<h2>Entradas</h2>
+<p>Obrigatórias:</p>
+<ul>
+<li>`<App>` — aplicação alvo</li>
+<li>`<nome>` — nome do componente em kebab-case (ex.: `beneficio-card`, `participante-search`)</li>
+<li>Descrição do propósito (uma frase: "card mostrando matrícula + saldo + status do participante")</li>
+</ul>
+<p>Opcionais:</p>
+<ul>
+<li>`<scope>` — `shared` | `local:<rota>` | `feature:<X>`. Se não informado, agente decide e pede confirmação.</li>
+<li>Props esperadas (lista com tipos)</li>
+<li>`SC-NN` de origem (spec do Design)</li>
+</ul>
+<h2>Pré-requisitos</h2>
+<ol>
+<li>App tem entry no catálogo.</li>
+<li>Lib `@funcef-componentes/react` instalada.</li>
+<li>Convenções de [Integracao-lib-front-ui](../_shared/Integracao-lib-front-ui.md) aplicáveis.</li>
+</ol>
+<h2>Processo</h2>
+<h3>Etapa 1 — Checar a lib primeiro</h3>
+<p>**Antes de criar qualquer coisa**:</p>
+<ol>
+<li>Procurar componente equivalente em `funcef-componentes/lib-front-ui/packages/react/src/index.ts` (ou no Storybook se acessível).</li>
+<li>Se tem **exato** → não criar, instruir uso e parar. Gerar `usage.md`.</li>
+<li>Se tem **próximo** mas precisa variação → recomendar issue no `lib-front-ui`. Só criar local se houver justificativa de prazo.</li>
+</ol>
+<h3>Etapa 2 — Decidir camada</h3>
+<p>Árvore de decisão:</p>
+<pre><code>A lib `@funcef-componentes/react` tem esse componente?
+├── SIM → usar a lib. Gerar usage.md com exemplo. FIM.
+└── NÃO ↓
+
+O componente será usado em mais de UMA feature?
+├── SIM → shared/ui/&lt;nome&gt;/
+└── NÃO ↓
+
+O componente está fortemente acoplado a UMA feature, e é usado em rotas diferentes dessa feature?
+├── SIM → features/&lt;X&gt;/components/&lt;nome&gt;/
+└── NÃO → app/&lt;...&gt;/&lt;rota&gt;/_components/&lt;nome&gt;/
+```</code></pre>
+<p>Se ambíguo, **perguntar ao usuário**. Não decidir sem registro.</p>
+<h3>Etapa 3 — Confirmar plano</h3>
+<pre><code>Plano de criação:
+- Componente: beneficio-card
+- Camada: shared/ui/beneficio-card/   ← reutilizável em portal-participante e app-cocic
+- Símbolo exportado: BeneficioCard
+- Props: { matricula: string, saldo: number, status: 'ativo' | 'suspenso' | 'cancelado' }
+- Base na lib: composição de Card + Badge + Avatar (sem criar primitivo novo)
+- forwardRef: sim (renderiza &lt;article&gt; root)
+- Token: bg-card, text-card-foreground, border, ring-ring
+
+Pode prosseguir?
+```</code></pre>
+<p>Esperar confirmação. Refletir ajustes.</p>
+<h3>Etapa 4 — Gerar arquivos</h3>
+<h4>Template — componente em `shared/ui/<nome>/<nome>.tsx`</h4>
+<pre><code>import * as React from 'react';
+import { cn } from '@funcef-componentes/react/utils';
+import { Card, Badge } from '@funcef-componentes/react';
+
+export interface &lt;Nome&gt;Props extends React.HTMLAttributes&lt;HTMLElement&gt; {
+  // props específicas tipadas
+}
+
+export const &lt;Nome&gt; = React.forwardRef&lt;HTMLElement, &lt;Nome&gt;Props&gt;(
+  ({ className, children, ...props }, ref) =&gt; {
+    return (
+      &lt;article
+        ref={ref}
+        className={cn('bg-card text-card-foreground rounded-lg border p-4', className)}
+        {...props}
+      &gt;
+        {children}
+      &lt;/article&gt;
+    );
+  }
+);
+&lt;Nome&gt;.displayName = '&lt;Nome&gt;';
+```</code></pre>
+<h4>Template — `index.ts`</h4>
+<pre><code>export { &lt;Nome&gt; } from './&lt;nome&gt;';
+export type { &lt;Nome&gt;Props } from './&lt;nome&gt;';
+```</code></pre>
+<h4>Se `shared/ui/`: atualizar barrel central</h4>
+<p>`src/shared/ui/index.ts`:</p>
+<pre><code>export * from './&lt;nome&gt;';
+```</code></pre>
+<p>(Verificar se já existe `index.ts` central; se não, criar.)</p>
+<h4>Se `_components/`: criar barrel local</h4>
+<p>`app/<...>/<rota>/_components/index.ts`:</p>
+<pre><code>export * from './&lt;nome&gt;';
+```</code></pre>
+<h4>Se `features/<X>/components/`: atualizar barrel da feature</h4>
+<p>Já é exportado pelo barrel da feature (`index.ts`) via `export * from './components'`? Se a feature não exporta components, deixar acessível via path direto e documentar em `usage.md`.</p>
+<h3>Etapa 5 — Documentar decisão</h3>
+<p>`execution_outputs/<App>/frontend/components/<nome>/design.md`:</p>
+<pre><code>---
+id: FE-03-&lt;nome&gt;
+app: &lt;App&gt;
+componente: &lt;nome&gt;
+camada: shared/ui | _components | features/&lt;X&gt;/components | lib (não criado)
+agent: FE-03 (frontend-component-agent)
+date: 2026-05-22
+confidence: alta
+---
+
+# Componente — `&lt;Nome&gt;`
+
+## Decisão de camada
+
+| Critério | Avaliação |
+|---|---|
+| A lib tem equivalente? | Não — composição inédita |
+| Quantas features consomem? | 2 (beneficio, contribuicao) |
+| Usado em rotas diferentes? | Sim |
+| **Camada escolhida** | `shared/ui/&lt;nome&gt;/` |
+
+## Composição
+
+- Base: `Card` (lib) + `Badge` (lib)
+- Não cria primitivo novo.
+- Tokens: `bg-card`, `text-card-foreground`, `border`, `ring-ring`
+
+## Props
+
+| Prop | Tipo | Obrigatório | Default |
+|---|---|---|---|
+| matricula | `string` | sim | — |
+| saldo | `number` | sim | — |
+| status | `'ativo' \| 'suspenso' \| 'cancelado'` | sim | — |
+
+## Arquivos criados
+
+- `src/shared/ui/&lt;nome&gt;/&lt;nome&gt;.tsx`
+- `src/shared/ui/&lt;nome&gt;/index.ts`
+- atualização em `src/shared/ui/index.ts`
+
+## Origem
+- Spec: (se houver, citar SC-NN)
+- Pedido pelo usuário em 2026-05-22
+
+## Confiança
+- **alta** para decisão de camada e composição
+
+## Histórico
+| Data | Mudança |
+|---|---|
+| 2026-05-22 | v1: criado por FE-03 |
+```</code></pre>
+<p>E `usage.md`:</p>
+<pre><code># Como usar `&lt;Nome&gt;`
+
+```tsx
+import { &lt;Nome&gt; } from '@/shared/ui';  // ou de '@/features/&lt;X&gt;/components' conforme camada
+
+&lt;&lt;Nome&gt; matricula="F000259" saldo={1234.56} status="ativo" /&gt;
+```</code></pre>
+<h2>Variações comuns</h2>
+<ul>
+<li>Com handler de clique: ...</li>
+<li>Com badge customizado: ...</li>
+</ul>
+<pre><code>
+### Etapa 6 — Atualizar catálogo (se aplicável)
+
+Se o componente é específico de uma feature/rota, adicionar em `_catalog/features-index.json`:
+
+```json
+"components_local": ["&lt;nome&gt;"]   ← se foi em _components
+"lib_components_used": ["Card", "Badge"]  ← já é populado automaticamente; merge
+```</code></pre>
+<h2>Critérios de qualidade</h2>
+<ul>
+<li>**Decisão de camada justificada** no `design.md`.</li>
+<li>**`forwardRef` + `displayName`** sempre que o componente renderiza elemento HTML.</li>
+<li>**Sem cores literais** — apenas tokens semânticos.</li>
+<li>**`cn()`** para compor classes condicionais.</li>
+<li>**Pasta + arquivo em kebab-case**, símbolo PascalCase.</li>
+<li>**Barrel atualizado**.</li>
+<li>**`design.md` + `usage.md` gerados**.</li>
+</ul>
+<h2>Confiança / rastreabilidade</h2>
+<table><thead><tr><th>Origem</th><th>Confiança</th></tr></thead><tbody><tr><td>Decisão de camada baseada em árvore acima</td><td>alta</td></tr><tr><td>Composição quando há SC-NN claro</td><td>alta</td></tr><tr><td>Composição inferida (sem SC-NN)</td><td>média</td></tr><tr><td>Mapeamento prop → atributo HTML</td><td>alta</td></tr></tbody></table>
+<h2>Você NUNCA</h2>
+<ul>
+<li>Cria componente novo se a lib já tem equivalente. Manda usar a lib.</li>
+<li>Usa cores literais (`bg-blue-500`) — só tokens semânticos.</li>
+<li>Esquece `displayName` em `forwardRef`.</li>
+<li>Cria pasta sem `index.ts`.</li>
+<li>Promove `_components` local para `shared/ui` sem confirmar reuso real em outra feature.</li>
+<li>Decide camada sozinho quando há ambiguidade — pergunta.</li>
+</ul>
+<h2>Você SEMPRE</h2>
+<ul>
+<li>Confere `packages/react/src/index.ts` da lib antes de criar.</li>
+<li>Usa `forwardRef` em componente que renderiza HTML primitivo (Card, Article, Button, Input).</li>
+<li>Compõe a partir de componentes da lib quando possível, ao invés de reescrever do zero.</li>
+<li>Lista props com tipos e default no `design.md`.</li>
+<li>Quando o componente vem de SC-NN, copia `figma_node_id` para o frontmatter do `design.md` (rastreabilidade cruzada com FG-02).</li>
+</ul>
+<h2>Comandos típicos</h2>
+<table><thead><tr><th>Intenção</th><th>Comando</th></tr></thead><tbody><tr><td>Criar componente</td><td>`@frontend-component-agent criar '<nome>' em <App> (escopo: shared)`</td></tr><tr><td>Criar a partir de SC-NN</td><td>`@frontend-component-agent criar componente para SC-NN em <App>`</td></tr><tr><td>Promover _components para shared</td><td>`@frontend-component-agent promova '<nome>' de _components para shared/ui em <App>`</td></tr><tr><td>Apenas avaliar (não criar)</td><td>`@frontend-component-agent avalie se '<nome>' já existe na lib`</td></tr></tbody></table>
+<h2>Histórico</h2>
+<p>___TABLE_PLACEHOLDER_2___</div></p>
+    <p class="meta">Gerado de: <code>../../frontend/core/FE-03-Component.md</code> &middot; <a href="../index.html">Portal</a></p>
+  </main>
+</div>
+</body>
+</html>

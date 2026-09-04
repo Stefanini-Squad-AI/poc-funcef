@@ -1,0 +1,303 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FE-02 — Feature contract &mdash; Manual de Arquitetura FUNCEF</title>
+  <link rel="stylesheet" href="../assets/style.css" />
+</head>
+<body>
+<div class="layout">
+  <nav>
+    <h1>Manual de Arquitetura</h1>
+    <p class="subtitle"><a href="../index.html">&larr; Portal</a></p>
+    <div class="section">Cap&iacute;tulo</div>
+    <a href="#" class="active">FE-02 — Feature contract</a>
+  </nav>
+  <main class="wide generated-content">
+    <h1>FE-02 — FRONTEND_FEATURE_AGENT</h1>
+<p><div class="callout note"><strong>Nota</strong> **Papel**</p>
+<p>Scaffold de uma feature completa em `src/features/<dominio>/` seguindo o padrão observado em `web-template/src/features/tasks/`. Gera api (`client`/`endpoints`/`index`), hooks RQ, types, validators, components e barrel — pronto para uso por `app/<rota>/page.tsx`. **Não gera `service.ts`**: os hooks chamam `<dominio>Api` (que usa `api` de `@/core/api`) direto.</p>
+<h2>Objetivo</h2>
+<p>Para uma nova funcionalidade do usuário (domínio de negócio FUNCEF), criar:</p>
+<pre><code>src/features/&lt;dominio&gt;/
+├── api/
+│   ├── client.ts           ← objeto &lt;dominio&gt;Api com getAll/getById/create/update/delete via api&lt;T&gt;
+│   ├── endpoints.ts        ← constantes/funções de URL
+│   └── index.ts
+├── hooks/
+│   ├── use-&lt;dominio&gt;-query.ts    ← useQuery, useInfiniteQuery → chama &lt;dominio&gt;Api
+│   ├── use-&lt;dominio&gt;-mutation.ts ← useMutation com invalidateQueries
+│   └── index.ts
+├── components/             ← criada vazia (será populada por FE-03)
+├── types.ts                ← domain types + Create/Update partials
+├── validators.ts           ← Zod schemas + safeParse helpers
+└── index.ts                ← barrel
+```</code></pre>
+<p>[!NOTE]</p>
+<p>**Sem `service.ts`**</p>
+<p>O template atual **não tem** classe `Service` estática. Regra de negócio/orquestração/transformação vive no **hook** (ou em util de `shared/lib`). Não recriar `service.ts`.</p>
+<p>E atualiza o catálogo `_catalog/features-index.json` com a nova entrada.</p>
+<h2>Quando rodar</h2>
+<ul>
+<li>Necessidade de **nova feature** mapeada para um microsserviço FUNCEF.</li>
+<li>Orchestrator FE-00 detectou que a feature solicitada não existe.</li>
+<li>FE-01 marcou a feature como `draft` no catálogo.</li>
+</ul>
+<h2>Entradas</h2>
+<p>Obrigatórias:</p>
+<ul>
+<li>`<App>` — aplicação alvo (caminho do repo)</li>
+<li>`<dominio>` — nome da feature em kebab-case (ex.: `contribuicao`, `cadastro-participante`)</li>
+<li>`<microservice>` — nome do microsserviço backend (ex.: `api-ms-contribuicao`) — contexto de negócio; no template base o tráfego passa pelo **BFF único** `/api/bff` → `API_URL`.</li>
+<li>Shape do tipo do domínio — campos + tipos. Se não informado, pedir confirmação ao usuário antes de prosseguir.</li>
+</ul>
+<p>Opcionais:</p>
+<ul>
+<li>Lista de endpoints (default: CRUD padrão — getAll, getById, create, update, delete)</li>
+<li>ID de tela linkada (`SC-NN`) se a feature foi originada de spec de Design</li>
+</ul>
+<h2>Pré-requisitos</h2>
+<ol>
+<li>App tem entry no `_catalog/features-index.json` (criar via FE-01 antes se necessário).</li>
+<li>Stack canônica instalada (validar pelo orchestrator).</li>
+<li>`src/core/api.ts` existe (sempre existe no template — não recriar).</li>
+<li>Microsserviço alvo confirmado pelo usuário. **Nunca inventar** nome de microsserviço.</li>
+</ol>
+<h2>Processo</h2>
+<h3>Etapa 1 — Confirmar com usuário</h3>
+<p>Antes de criar, mostrar plano:</p>
+<pre><code>Plano de scaffold:
+- Feature: contribuicao
+- Microsserviço: api-ms-contribuicao (BFF único: /api/bff → API_URL server-only)
+- Tipo principal: Contribuicao { id, participanteId, valor, competencia }
+- Endpoints: GET /contribuicoes, GET /contribuicoes/:id, POST /contribuicoes, PUT /contribuicoes/:id, DELETE /contribuicoes/:id
+- Schema Zod: contribuicaoSchema (com createContribuicaoSchema = omit({id}), updateContribuicaoSchema = partial)
+- Arquivos criados: api/{client,endpoints,index}.ts, hooks/{use-X-query,use-X-mutation,index}.ts, types.ts, validators.ts, index.ts (SEM service.ts)
+- Catálogo: entrada nova em &lt;App&gt;.features[]
+
+Pode prosseguir?
+```</code></pre>
+<p>Esperar confirmação. Se usuário ajustar campos/endpoints, refletir no plano antes de gerar.</p>
+<h3>Etapa 2 — Gerar arquivos</h3>
+<p>Templates abaixo. Substituir `<dominio>` (kebab-case), `<Dominio>` (PascalCase singular), `<dominios>` (kebab plural), `<DominioApi>` (PascalCase namespace).</p>
+<h4>`api/endpoints.ts`</h4>
+<pre><code>const API_BASE = '/&lt;dominios&gt;';
+
+export const &lt;dominio&gt;Endpoints = {
+  list: API_BASE,
+  byId: (id: number | string) =&gt; `${API_BASE}/${id}`,
+  create: API_BASE,
+  update: (id: number | string) =&gt; `${API_BASE}/${id}`,
+  delete: (id: number | string) =&gt; `${API_BASE}/${id}`,
+} as const;
+```</code></pre>
+<h4>`api/client.ts`</h4>
+<pre><code>import { api } from '@/core/api';
+import type { &lt;Dominio&gt;, Create&lt;Dominio&gt;Data, Update&lt;Dominio&gt;Data } from '../types';
+import { &lt;dominio&gt;Endpoints } from './endpoints';
+
+export const &lt;dominio&gt;Api = {
+  getAll: () =&gt; api.get&lt;&lt;Dominio&gt;[]&gt;(&lt;dominio&gt;Endpoints.list),
+
+  getById: (id: number | string) =&gt;
+    api.get&lt;&lt;Dominio&gt;&gt;(&lt;dominio&gt;Endpoints.byId(id)),
+
+  create: (data: Create&lt;Dominio&gt;Data) =&gt;
+    api.post&lt;&lt;Dominio&gt;, Create&lt;Dominio&gt;Data&gt;(&lt;dominio&gt;Endpoints.create, data),
+
+  update: (id: number | string, data: Update&lt;Dominio&gt;Data) =&gt;
+    api.put&lt;&lt;Dominio&gt;, Update&lt;Dominio&gt;Data&gt;(&lt;dominio&gt;Endpoints.update(id), data),
+
+  delete: (id: number | string) =&gt;
+    api.delete&lt;void&gt;(&lt;dominio&gt;Endpoints.delete(id)),
+};
+```</code></pre>
+<p>`api` (de `@/core/api`, `createApi` da auth lib) aponta para o **BFF same-origin** `/api/bff`. Envelope FUNCEF normalizado e `401 → teardown` vêm da lib.</p>
+<h4>`api/index.ts`</h4>
+<pre><code>export { &lt;dominio&gt;Api } from './client';
+export { &lt;dominio&gt;Endpoints } from './endpoints';
+```</code></pre>
+<h4>`types.ts`</h4>
+<pre><code>export type &lt;Dominio&gt; = {
+  // preencher com campos confirmados na Etapa 1
+};
+
+export type Create&lt;Dominio&gt;Data = Omit&lt;&lt;Dominio&gt;, 'id'&gt;;
+export type Update&lt;Dominio&gt;Data = Partial&lt;Create&lt;Dominio&gt;Data&gt;;
+```</code></pre>
+<h4>`validators.ts`</h4>
+<pre><code>import { z } from 'zod';
+// reusar fields atômicos quando aplicável:
+// import { cpfField, emailField } from '@/shared/lib';
+
+export const &lt;dominio&gt;Schema = z.object({
+  id: z.number().int().positive(),
+  // ... campos
+});
+
+export const create&lt;Dominio&gt;Schema = &lt;dominio&gt;Schema.omit({ id: true });
+export const update&lt;Dominio&gt;Schema = create&lt;Dominio&gt;Schema.partial();
+
+export type &lt;Dominio&gt;Validated = z.infer&lt;typeof &lt;dominio&gt;Schema&gt;;
+export type Create&lt;Dominio&gt;Validated = z.infer&lt;typeof create&lt;Dominio&gt;Schema&gt;;
+export type Update&lt;Dominio&gt;Validated = z.infer&lt;typeof update&lt;Dominio&gt;Schema&gt;;
+
+export function validateCreate&lt;Dominio&gt;(data: unknown) {
+  return create&lt;Dominio&gt;Schema.safeParse(data);
+}
+
+export function validateUpdate&lt;Dominio&gt;(data: unknown) {
+  return update&lt;Dominio&gt;Schema.safeParse(data);
+}
+```</code></pre>
+<h4>`hooks/use-<dominio>-query.ts`</h4>
+<pre><code>import { useQuery } from '@tanstack/react-query';
+import { queryKeys } from '@/shared/lib';
+import { &lt;dominio&gt;Api } from '../api';
+
+export function useAll&lt;Dominio&gt;s() {
+  const query = useQuery({
+    queryKey: queryKeys.&lt;dominios&gt;.list(),
+    queryFn: () =&gt; &lt;dominio&gt;Api.getAll(),
+  });
+
+  return {
+    &lt;dominios&gt;: query.data?.data ?? null,
+    is&lt;Dominio&gt;sLoading: query.isLoading,
+    error: query.error,
+  };
+}
+```</code></pre>
+<p>Adicionar grupo em `src/shared/lib/query-keys.ts` (`queryKeys.<dominios>.all` / `.list()` / `.detail(id)`) — nunca arrays inline.</p>
+<h4>`hooks/use-<dominio>-mutation.ts`</h4>
+<pre><code>import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { queryKeys } from '@/shared/lib';
+import { &lt;dominio&gt;Api } from '../api';
+import type { Create&lt;Dominio&gt;Data, Update&lt;Dominio&gt;Data } from '../types';
+
+export function useCreate&lt;Dominio&gt;() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: Create&lt;Dominio&gt;Data) =&gt; &lt;dominio&gt;Api.create(data),
+    onSuccess: () =&gt;
+      queryClient.invalidateQueries({ queryKey: queryKeys.&lt;dominios&gt;.all }),
+    meta: { globalErrorToast: true },
+  });
+}
+```</code></pre>
+<h4>`hooks/index.ts`</h4>
+<pre><code>export * from './use-&lt;dominio&gt;-query';
+export * from './use-&lt;dominio&gt;-mutation';
+```</code></pre>
+<h4>`index.ts` (barrel da feature)</h4>
+<pre><code>export * from './types';
+export * from './api';
+export * from './hooks';
+export * from './validators';
+```</code></pre>
+<h4>`components/.gitkeep`</h4>
+<p>Pasta vazia mantida para preservar topologia. Será populada por FE-03.</p>
+<h3>Etapa 3 — Atualizar catálogo</h3>
+<p>Adicionar entry em `_catalog/features-index.json`:</p>
+<pre><code>{
+  "name": "&lt;dominio&gt;",
+  "domain": "&lt;domínio de negócio FUNCEF&gt;",
+  "status": "scaffolded",
+  "microservice": "&lt;microservice&gt;",
+  "api_base_env_var": "API_URL",
+  "files": {
+    "api_client": "api/client.ts",
+    "api_endpoints": "api/endpoints.ts",
+    "types": "types.ts",
+    "validators": "validators.ts",
+    "hooks_query": "hooks/use-&lt;dominio&gt;-query.ts",
+    "hooks_mutation": "hooks/use-&lt;dominio&gt;-mutation.ts"
+  },
+  "hooks": [
+    { "name": "use&lt;Dominio&gt;sQuery", "kind": "query", "query_key": "['&lt;dominios&gt;']" },
+    { "name": "use&lt;Dominio&gt;ByIdQuery", "kind": "query", "query_key": "['&lt;dominios&gt;', id]" },
+    { "name": "useCreate&lt;Dominio&gt;Mutation", "kind": "mutation" },
+    { "name": "useUpdate&lt;Dominio&gt;Mutation", "kind": "mutation" },
+    { "name": "useDelete&lt;Dominio&gt;Mutation", "kind": "mutation" }
+  ],
+  "store_slices": [],
+  "routes": [],
+  "components_local": [],
+  "lib_components_used": [],
+  "linked_screens": [],
+  "indexed_at": "2026-05-22",
+  "last_seen": "2026-05-22",
+  "notes": "scaffold inicial por FE-02"
+}
+```</code></pre>
+<h3>Etapa 4 — Gerar artefato de relato</h3>
+<p>`execution_outputs/<App>/frontend/features/<dominio>/scaffold-plan.md`:</p>
+<pre><code>---
+id: FE-02-scaffold-&lt;dominio&gt;
+app: &lt;App&gt;
+feature: &lt;dominio&gt;
+microservice: &lt;microservice&gt;
+agent: FE-02 (frontend-feature-agent)
+date: 2026-05-22
+confidence: alta
+---
+
+# Scaffold — &lt;dominio&gt; em &lt;App&gt;
+
+## Arquivos criados
+
+(listar todos com caminho relativo a `src/`)
+
+## Hooks expostos
+
+(listar com kind e query_key)
+
+## Próximos passos sugeridos
+
+- [ ] Criar componente de listagem em `app/(authenticated)/&lt;dominio&gt;/_components/&lt;dominio&gt;-list/` → invocar FE-03
+- [ ] Criar form de cadastro → invocar FE-04
+- [ ] Adicionar rota `app/(authenticated)/&lt;dominio&gt;/page.tsx` consumindo `use&lt;Dominio&gt;sQuery`
+- [ ] Confirmar shape do tipo `&lt;Dominio&gt;` com backend (Swagger / contrato)
+
+## Histórico
+| Data | Mudança |
+|---|---|
+| 2026-05-22 | v1: scaffold gerado |
+```</code></pre>
+<h2>Critérios de qualidade</h2>
+<ul>
+<li>Todos os arquivos canônicos (`api/{client,endpoints,index}`, `hooks/{query,mutation,index}`, `types.ts`, `validators.ts`, `index.ts`) presentes. **Sem `service.ts`.**</li>
+<li>`types.ts` tem `<Dominio>`, `Create<Dominio>Data`, `Update<Dominio>Data` — não inventar campos sem confirmação.</li>
+<li>`validators.ts` reusa `shared/lib/fields/` quando o campo já é coberto (cpf, email, etc.).</li>
+<li>Catálogo validado contra schema.</li>
+<li>Nenhum `any` no código gerado.</li>
+<li>Imports usando alias `@/`.</li>
+</ul>
+<h2>Confiança / rastreabilidade</h2>
+<table><thead><tr><th>Origem</th><th>Confiança</th></tr></thead><tbody><tr><td>Estrutura espelhando `web-template/src/features/tasks/`</td><td>alta</td></tr><tr><td>Campos do tipo `<Dominio>` quando confirmados pelo usuário</td><td>alta</td></tr><tr><td>Campos quando inferidos (não confirmados)</td><td>baixa — não gerar sem confirmar</td></tr><tr><td>Mapeamento de endpoint quando o usuário forneceu lista</td><td>alta</td></tr><tr><td>Mapeamento de endpoint inferido (CRUD padrão)</td><td>média</td></tr></tbody></table>
+<h2>Você NUNCA</h2>
+<ul>
+<li>Cria feature sem confirmar microsserviço e shape do tipo com o usuário.</li>
+<li>Gera `service.ts` (classe `Service` estática) — não faz parte do contrato do template atual.</li>
+<li>Inventa campos do domínio (CPF, valor, data) por suposição.</li>
+<li>Cria componente de UI dentro da feature na etapa de scaffold — isso é FE-03/FE-04.</li>
+<li>Sobrescreve feature existente — se o usuário pediu e a feature existe, perguntar se é refator ou novo nome.</li>
+<li>Pula a etapa de atualizar o catálogo.</li>
+</ul>
+<h2>Você SEMPRE</h2>
+<ul>
+<li>Espelha o padrão de `web-template/src/features/tasks/` arquivo por arquivo.</li>
+<li>Adiciona `enabled: !!id` em queries que dependem de parâmetro.</li>
+<li>Invalida queries certas em cada mutation (`all` no create/delete; `all` + `byId` no update).</li>
+<li>Linka `linked_screens: [SC-NN]` no catálogo quando o usuário cita o ID de tela do FG-02.</li>
+</ul>
+<h2>Comandos típicos</h2>
+<table><thead><tr><th>Intenção</th><th>Comando</th></tr></thead><tbody><tr><td>Scaffold de feature</td><td>`@frontend-feature-agent scaffold '<dominio>' em <App> (microsserviço <X>)`</td></tr><tr><td>Scaffold a partir de SC-NN</td><td>`@frontend-feature-agent scaffold '<dominio>' em <App> baseado em SC-NN`</td></tr><tr><td>Adicionar endpoint extra</td><td>`@frontend-feature-agent adicione endpoint <verbo> <path> na feature <dominio>`</td></tr></tbody></table>
+<h2>Histórico</h2>
+<p>___TABLE_PLACEHOLDER_2___</div></p>
+    <p class="meta">Gerado de: <code>../../frontend/core/FE-02-Feature.md</code> &middot; <a href="../index.html">Portal</a></p>
+  </main>
+</div>
+</body>
+</html>

@@ -1,0 +1,451 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>BE-04 — Persistência e transações &mdash; Manual de Arquitetura FUNCEF</title>
+  <link rel="stylesheet" href="../assets/style.css" />
+</head>
+<body>
+<div class="layout">
+  <nav>
+    <h1>Manual de Arquitetura</h1>
+    <p class="subtitle"><a href="../index.html">&larr; Portal</a></p>
+    <div class="section">Cap&iacute;tulo</div>
+    <a href="#" class="active">BE-04 — Persistência e transações</a>
+  </nav>
+  <main class="wide generated-content">
+    <h1>BE-04 — Persistência e Transações</h1>
+<h2>4.1 Modelo híbrido EF Core + Dapper</h2>
+<p>Microserviços FUNCEF usam <strong>EF Core e Dapper na mesma aplicação</strong>, ambos sob o componente <code>FUNCEF.ORM</code>:</p>
+<table><thead><tr><th>Tecnologia</th><th>Quando usar</th><th>Acesso</th></tr></thead><tbody><tr><td>**EF Core**</td><td>CRUD padrão, navegações, change tracking, includes automáticos, transações multi-passo</td><td>`IRepository<T>` (genérico) ou navegando o `AppDbContext`</td></tr><tr><td>**Dapper**</td><td>SQL específico Oracle, batch inserts, queries complexas com hints, operações de alta performance</td><td>`IRepository<T>.ExecuteAsync(sql, params, ct)`</td></tr></tbody></table>
+<p>Os dois compartilham:</p>
+<ul>
+<li>A <strong>mesma connection</strong> (resolvida via <code>FuncefORM</code>)</li>
+<li>O <strong>mesmo <code>IUnitOfWork</code></strong> — <code>BeginAsync</code>/<code>CommitAsync</code>/<code>RollbackAsync</code> valem para ambos</li>
+<li>O <strong>mesmo interceptor de auditoria</strong> (<code>FuncefORM.Audit</code>) — Dapper também é auditado quando <code>FuncefORM:Audit:AuditDapperOperations = true</code></li>
+</ul>
+<p>Decisão registrada em <a href="../_shared/Decisoes-Arquiteturais.md">Decisoes-Arquiteturais</a> ADR-006.</p>
+<h2>4.2 Contratos do <code>FUNCEF.ORM</code></h2>
+<p>> Contratos-base transversais vivem em <strong>FUNCEF.Abstractions</strong> (<a href="../componentes/CMP-08-Abstractions.md">CMP-08-Abstractions</a>): a telemetria do <code>BaseDbContext</code> usa <code>ITelemetry</code> de <code>Funcef.Abstractions.Telemetry</code> e a paginação (<code>PagedRequest</code>/<code>SortDirection</code>) vem de <code>Funcef.Abstractions.Pagination</code>. O <code>FUNCEF.ORM</code> (CMP-02) referencia esses contratos.</p>
+<table><thead><tr><th>Tipo</th><th>Origem</th><th>Papel</th></tr></thead><tbody><tr><td>`BaseDbContext`</td><td>`FuncefORM.EFCore`</td><td>DbContext base com interceptor de auditoria, telemetria, slow-query detection, resiliência Oracle</td></tr><tr><td>`IRepository<T>`</td><td>`FuncefORM.Contracts`</td><td>Repositório genérico: `AddAsync`, `UpdateAsync`, `DeleteAsync`, `GetByIdAsync`, `GetByIdWithAutoIncludesAsync`, `GetPagedAsync`, `ExistsAsync`, `GetFirstAsync`, `ExecuteAsync` (Dapper)</td></tr><tr><td>`IUnitOfWork`</td><td>`FuncefORM.Contracts`</td><td>`SaveChangesAsync`, `BeginAsync`, `CommitAsync`, `RollbackAsync`</td></tr><tr><td>`IUnitOfWork<TDbContext>`</td><td>`FuncefORM.Contracts`</td><td>Variante tipada por DbContext (uso interno)</td></tr><tr><td>`[Auditable("Recurso")]`</td><td>`FuncefORM.Audit.Attributes`</td><td>Marca entidade para auditoria automática no `SaveChanges`</td></tr><tr><td>`[AutoInclude]`</td><td>`FuncefORM.Data.Attributes`</td><td>Marca navegação para include automático em `GetByIdWithAutoIncludesAsync`</td></tr><tr><td>`[MapFrom("Prop")]` / `[NestedMap("Prop")]`</td><td>`FuncefORM.Mapping.Attributes`</td><td>Mapeamento declarativo entidade → DTO sem AutoMapper</td></tr><tr><td>`MapTo<TSrc,TDst>(…)` / `MapToList<TSrc,TDst>()`</td><td>`FuncefORM.Mapping.Extensions`</td><td>Métodos de extensão para executar o mapeamento</td></tr></tbody></table>
+<h2>4.3 <code>AppDbContext</code> (padrão)</h2>
+<pre><code>public class AppDbContext : BaseDbContext
+{
+    public DbSet&lt;{Entidade1}&gt; {Entidades1} { get; set; } = null!;
+    public DbSet&lt;{Entidade2}&gt; {Entidades2} { get; set; } = null!;
+
+    public AppDbContext(DbContextOptions&lt;AppDbContext&gt; options) : base(options) { }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity&lt;{Entidade1}&gt;(entity =&gt;
+        {
+            // Índice único filtrado (Oracle precisa do nome da coluna entre aspas duplas)
+            entity.HasIndex(e =&gt; e.Email)
+                .IsUnique()
+                .HasFilter("\"EMAIL\" IS NOT NULL");
+        });
+
+        modelBuilder.Entity&lt;{Entidade2}&gt;(entity =&gt;
+        {
+            entity.HasOne(e =&gt; e.{Entidade1})
+                .WithMany(c =&gt; c.{Entidades2})
+                .HasForeignKey(e =&gt; e.{Entidade1}Id)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+    }
+}
+```</code></pre>
+<p>Padrão:</p>
+<ul>
+<li><strong>Mapeamento simples vive na entidade</strong> (Data Annotations <code>[Table]</code>, <code>[Column]</code>, <code>[ForeignKey]</code>, <code>[Index]</code>, <code>[InverseProperty]</code>, <code>[AutoInclude]</code>).</li>
+<li><strong>Fluent API vive no DbContext</strong> — para configurações que não cabem em atributo:</li>
+</ul>
+<p>  - Índices únicos <strong>filtrados</strong> (Oracle: <code>HasFilter("\"COLUMN\" IS NOT NULL")</code> — coluna entre aspas duplas).</p>
+<p>  - <code>OnDelete(DeleteBehavior.Restrict)</code> para impedir deleção em cascata.</p>
+<ul>
+<li>Chamar <code>base.OnModelCreating</code> é obrigatório (<code>BaseDbContext</code> aplica configurações globais).</li>
+</ul>
+<h2>4.4 Entidade — padrão</h2>
+<pre><code>[Table("TB_{ENTIDADES}", Schema = "{SCHEMA}")]
+[Auditable("{NomeRecurso}")]
+public class {Entidade}
+{
+    [Key]
+    [Column("{ENTIDADE}_ID")]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public long Id { get; set; }
+
+    [Required, Column("NOME"), MaxLength(100)]
+    public string Nome { get; set; } = string.Empty;
+
+    [Column("EMAIL"), MaxLength(150), EmailAddress]
+    public string? Email { get; set; }
+
+    [Required, Column("DATA_CRIACAO")]
+    public DateTime DataCriacao { get; set; } = DateTime.UtcNow;
+
+    [InverseProperty(nameof({EntidadeRelacionada}.{Entidade})), AutoInclude]
+    public ICollection&lt;{EntidadeRelacionada}&gt; {EntidadesRelacionadas} { get; set; }
+        = new List&lt;{EntidadeRelacionada}&gt;();
+}
+```</code></pre>
+<p>Padrão de entidade dependente com FK (o nome da coluna FK é <strong>igual</strong> ao da PK referenciada):</p>
+<pre><code>[Table("TB_{ENTIDADES_DEPENDENTES}", Schema = "{SCHEMA}")]
+[Auditable("{NomeRecurso}")]
+[Index(nameof({Entidade}Id))]
+[Index(nameof(Status))]
+public class {EntidadeDependente}
+{
+    [Key]
+    [Column("{ENTIDADE_DEPENDENTE}_ID")]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public long Id { get; set; }
+
+    [Required, Column("{ENTIDADE}_ID")]
+    public long {Entidade}Id { get; set; }
+
+    [Required, Column("VALOR", TypeName = "NUMBER(10,2)"), Range(0.01, 99999999.99)]
+    public decimal Valor { get; set; }
+
+    [Required, Column("STATUS"), MaxLength(20)]
+    public string Status { get; set; } = "Pendente";
+
+    [Required, Column("FLAG_ATIVO", TypeName = "NUMBER(1)")]
+    public bool Ativo { get; set; } = true;
+
+    [ForeignKey(nameof({Entidade}Id)), AutoInclude]
+    public {Entidade}? {Entidade} { get; set; }
+}
+```</code></pre>
+<p>Padrões obrigatórios:</p>
+<table><thead><tr><th>Padrão</th><th>Razão</th></tr></thead><tbody><tr><td>PK **própria por entidade** (sem `BaseEntity`): `[Key] [Column("{ENTIDADE}_ID")] [DatabaseGenerated(Identity)] long Id`</td><td>Padrão FUNCEF/BancoDados: surrogate `NUMBER` com `IDENTITY`; coluna nomeada `{ENTIDADE}_ID` (não `ID` genérico), FK com o mesmo nome (ADR-014/015)</td></tr><tr><td>`[Table("TB_{ENTIDADES}", Schema = "{SCHEMA}")]`</td><td>Prefixo `TB_` + **plural** (BD-02); schema explícito evita amarrar ao usuário Oracle default</td></tr><tr><td>`[Auditable("Recurso")]`</td><td>Habilita auditoria automática no `SaveChanges`</td></tr><tr><td>Texto sem `TypeName` (`[Column("NOME")]` + `[MaxLength]`)</td><td>Oracle `VARCHAR2` (BD-03); não usar `NVARCHAR2`</td></tr><tr><td>Data sem `TypeName` (`[Column("DATA_X")]`)</td><td>Oracle `DATE`/`TIMESTAMP` default (BD-03)</td></tr><tr><td>`TypeName = "NUMBER(10,2)"`</td><td>Decimais monetários — ajustar precisão conforme domínio</td></tr><tr><td>Boolean: `[Column("FLAG_X", TypeName = "NUMBER(1)")] bool`</td><td>Oracle não tem BOOLEAN; `NUMBER(1) 0/1` mapeado nativamente pelo provider (ADR-017, BD-08). Conversor `'S'/'N'` só p/ coluna legada `CHAR(1)` (§4.4.1)</td></tr><tr><td>`[AutoInclude]` em navegação carregada-junto</td><td>Permite `GetByIdWithAutoIncludesAsync`</td></tr><tr><td>`[Index(nameof(Campo))]` em filtros frequentes</td><td>Performance Oracle</td></tr></tbody></table>
+<h3>4.4.1 Boolean como <code>NUMBER(1)</code> (0/1) — ADR-017</h3>
+<p>Oracle não tem tipo BOOLEAN. Desde a <a href="../../bancodados/_shared/Decisoes-Arquiteturais.md">ADR-017</a> (2026-07-08) o padrão é <strong><code>NUMBER(1) NOT NULL CHECK IN (0,1)</code></strong>: a propriedade C# <code>bool</code> é mapeada <strong>nativamente</strong> pelo provider Oracle (<code>true→1</code>/<code>false→0</code>) — basta <code>[Column("FLAG_X", TypeName = "NUMBER(1)")]</code>, <strong>sem conversor</strong>.</p>
+<p><strong>Legado <code>CHAR(1) 'S'/'N'</code> (ex.: <code>api-ms-gap</code>, forward-only):</strong> enquanto as colunas antigas não migram, registre o conversor <strong>apenas</strong> nessas propriedades (não globalmente, para não atingir as <code>NUMBER(1)</code> novas → <code>ORA-01722</code>):</p>
+<pre><code>protected override void OnModelCreating(ModelBuilder modelBuilder)
+{
+    base.OnModelCreating(modelBuilder);
+
+    // SÓ para colunas legadas CHAR(1) 'S'/'N':
+    modelBuilder.Entity&lt;EntidadeLegada&gt;()
+        .Property(e =&gt; e.Ativo)
+        .HasConversion(new BoolToStringConverter("N", "S"))
+        .HasColumnType("CHAR(1)");
+}
+```</code></pre>
+<p>Colunas novas declaram <code>TypeName = "NUMBER(1)"</code>. Ver doutrina BancoDados BD-08 §8.1 (representação de boolean).</p>
+<h2>4.5 Schema Oracle resultante (exemplo)</h2>
+<pre><code>erDiagram
+    TB_ENTIDADES1 ||--o{ TB_ENTIDADES2 : "tem"
+
+    TB_ENTIDADES1 {
+        NUMBER   ENTIDADE1_ID  PK "IDENTITY"
+        VARCHAR2 NOME          "NOT NULL, MaxLen 100"
+        VARCHAR2 EMAIL         "Unique filtrado IS NOT NULL"
+        DATE     DATA_CRIACAO  "NOT NULL"
+    }
+
+    TB_ENTIDADES2 {
+        NUMBER   ENTIDADE2_ID  PK "IDENTITY"
+        NUMBER   ENTIDADE1_ID  FK "ON DELETE RESTRICT"
+        NUMBER   VALOR         "NOT NULL, 10,2"
+        VARCHAR2 STATUS        "NOT NULL, MaxLen 20"
+        NUMBER   FLAG_ATIVO    "NOT NULL, 0/1 (ADR-017)"
+        DATE     DATA_PEDIDO   "NOT NULL"
+    }
+```</code></pre>
+<h2>4.6 Operações típicas via <code>IRepository<T></code></h2>
+<pre><code>public class {Entidade}Service : I{Entidade}Service
+{
+    private readonly IRepository&lt;{Entidade}&gt; _repository;
+    private readonly IRepository&lt;{EntidadeDependente}&gt; _dependenteRepository;
+
+    public virtual async Task&lt;{Entidade}&gt; CreateAsync({Entidade}Request request, CancellationToken ct = default)
+    {
+        if (!string.IsNullOrEmpty(request.Email)
+            &amp;&amp; await _repository.ExistsAsync(c =&gt; c.Email == request.Email, cancellationToken: ct))
+            throw new ConflictException("{Entidade}", "Já existe um registro com este email");
+
+        var entity = request.MapTo&lt;{Entidade}Request, {Entidade}&gt;(c =&gt;
+        {
+            // Id NÃO é setado: PK IDENTITY gerada pelo banco no insert.
+            c.DataCriacao = DateTime.UtcNow;
+        });
+
+        await _repository.AddAsync(entity, ct);
+        return entity;
+    }
+
+    public virtual async Task&lt;{Entidade}&gt; UpdateAsync(long id, {Entidade}Request request, CancellationToken ct = default)
+    {
+        var entity = await _repository.GetByIdAsync(id, cancellationToken: ct)
+            ?? throw NotFoundException.ForResource("{Entidade}", id);
+
+        if (!string.IsNullOrEmpty(request.Email))
+        {
+            var dup = await _repository.GetFirstAsync(
+                c =&gt; c.Email == request.Email &amp;&amp; c.Id != id, cancellationToken: ct);
+            if (dup != null) throw new ConflictException("{Entidade}", "Email já em uso por outro registro");
+        }
+
+        entity.Nome = request.Nome;
+        entity.Email = request.Email;
+
+        await _repository.UpdateAsync(entity, ct);
+        return entity;
+    }
+
+    public virtual async Task ValidateAndDeleteAsync(long id, CancellationToken ct = default)
+    {
+        var entity = await _repository.GetByIdAsync(id, cancellationToken: ct)
+            ?? throw NotFoundException.ForResource("{Entidade}", id);
+
+        var temDependentes = await _dependenteRepository.ExistsAsync(
+            d =&gt; d.{Entidade}Id == id, cancellationToken: ct);
+
+        if (temDependentes)
+            throw new ConflictException("{Entidade}", "Não é possível excluir registro com dependentes");
+
+        await _repository.DeleteAsync(entity, ct);
+    }
+}
+```</code></pre>
+<p>Padrões observáveis:</p>
+<table><thead><tr><th>Padrão</th><th>Por quê</th></tr></thead><tbody><tr><td>Métodos `virtual`</td><td>Permite mock/override em testes e extensão por herança</td></tr><tr><td>Service nunca chama `SaveChangesAsync()`</td><td>Quem decide quando persistir é o Handler</td></tr><tr><td>Validações de domínio antes da escrita</td><td>Falha rápido com exceção tipada — sem corromper estado</td></tr><tr><td>`GetByIdAsync` retorna `null` para "não encontrado" no Service</td><td>Quem traduz para HTTP 404 é o Handler (`?? throw NotFoundException.ForResource`) — exceto em UPDATE/DELETE onde o próprio Service já lança</td></tr></tbody></table>
+<h2>4.7 <code>IUnitOfWork</code> — o ciclo de transação</h2>
+<table><thead><tr><th>Método</th><th>Quando chamar</th></tr></thead><tbody><tr><td>`SaveChangesAsync(ct)`</td><td>Final de Handler simples (não há `Begin/Commit` quando só há uma chamada lógica)</td></tr><tr><td>`BeginAsync(ct)`</td><td>Antes de iniciar transação explícita</td></tr><tr><td>`CommitAsync(ct)`</td><td>Após todas as operações da transação terem dado certo</td></tr><tr><td>`RollbackAsync(ct)`</td><td>Em qualquer falha — deve ser **safe** (try/catch interno)</td></tr></tbody></table>
+<h3>Caso 1 — Transação implícita (1 SaveChanges)</h3>
+<pre><code>public async Task&lt;{Entidade}Response&gt; Handle(Create{Entidade}Command command, CancellationToken ct)
+{
+    var entity = await _service.CreateAsync(command.Request, ct);
+    await _unitOfWork.SaveChangesAsync(ct);
+    return entity.MapTo&lt;{Entidade}, {Entidade}Response&gt;();
+}
+```</code></pre>
+<h3>Caso 2 — Transação explícita EF Core (multi-Service)</h3>
+<pre><code>await _unitOfWork.BeginAsync(ct);
+try
+{
+    var entityA = await _serviceA.CreateAsync(requestA, ct);
+    await _unitOfWork.SaveChangesAsync(ct);
+
+    var entityB = await _serviceB.CreateAsync(requestB, ct);
+    await _unitOfWork.SaveChangesAsync(ct);
+
+    await _unitOfWork.CommitAsync(ct);
+    return new {Resultado}Response { /* ... */ };
+}
+catch
+{
+    await SafeRollbackAsync(ct);
+    throw;
+}
+```</code></pre>
+<p>Padrão <code>SafeRollbackAsync</code> — nunca deixar uma exceção de rollback mascarar a exceção original:</p>
+<pre><code>private async Task SafeRollbackAsync(CancellationToken ct)
+{
+    try
+    {
+        await _unitOfWork.RollbackAsync(ct);
+        _telemetry.LogWarning("Rollback EF executado com sucesso");
+    }
+    catch (Exception rollbackEx)
+    {
+        _telemetry.LogError("Erro ao executar rollback EF", rollbackEx);
+    }
+}
+```</code></pre>
+<h3>Caso 3 — Transação explícita Dapper</h3>
+<pre><code>var dataAtual = DateTime.UtcNow;
+
+await _unitOfWork.BeginAsync(ct);
+try
+{
+    // A PK é IDENTITY: o INSERT devolve o Id gerado (RETURNING ... INTO).
+    long idA = await _serviceA.CreateWithDapperAsync(command.RequestA, dataAtual, ct);
+    long idB = await _serviceB.CreateWithDapperAsync(idA, command.RequestB, dataAtual, ct);
+
+    await _unitOfWork.CommitAsync(ct);
+    return new {Resultado}Response { /* ... */ };
+}
+catch
+{
+    await SafeRollbackAsync(ct);
+    throw;
+}
+```</code></pre>
+<p>Diferenças notáveis para Dapper:</p>
+<ul>
+<li><strong>PK gerada pelo banco</strong> (<code>IDENTITY</code>): o insert <strong>não</strong> informa a coluna da PK; o Id gerado volta via <code>RETURNING {ENTIDADE}_ID INTO :Id</code> (parâmetro de saída). Uma FK filha usa o Id devolvido pelo insert do pai.</li>
+<li><strong>Sem <code>SaveChangesAsync</code> entre operações</strong> — o SQL já foi executado; só falta <code>Commit</code>.</li>
+</ul>
+<h2>4.8 Service usando Dapper</h2>
+<pre><code>public virtual async Task&lt;long&gt; CreateWithDapperAsync(
+    {Entidade}Request request, DateTime dataAtual, CancellationToken ct = default)
+{
+    const string sql = @"
+        INSERT INTO {SCHEMA}.TB_{ENTIDADES} (NOME, EMAIL, DATA_CRIACAO)
+        VALUES (:Nome, :Email, :DataCriacao)
+        RETURNING {ENTIDADE}_ID INTO :Id";
+
+    var parameters = new DynamicParameters();
+    parameters.Add("Nome", request.Nome, DbType.String);
+    parameters.Add("Email", request.Email, DbType.String);
+    parameters.Add("DataCriacao", dataAtual, DbType.DateTime);
+    parameters.Add("Id", dbType: DbType.Int64, direction: ParameterDirection.Output);
+
+    await _repository.ExecuteAsync(sql, parameters, ct);
+    return parameters.Get&lt;long&gt;("Id");
+}
+```</code></pre>
+<p>Pontos críticos:</p>
+<table><thead><tr><th>Detalhe</th><th>Por quê</th></tr></thead><tbody><tr><td>Bind variable `:Nome` (não `@Nome`)</td><td>Sintaxe Oracle (`@` é SQL Server)</td></tr><tr><td>INSERT **omite a PK** + `RETURNING {ENTIDADE}_ID INTO :Id`</td><td>A PK é `IDENTITY`; o banco gera o valor e o devolve no parâmetro de saída (`long`)</td></tr><tr><td>Schema explícito `{SCHEMA}.TB_{ENTIDADES}`</td><td>Boa prática para não depender do schema default da conexão</td></tr><tr><td>`_repository.ExecuteAsync`</td><td>Usa a **mesma transação do `IUnitOfWork`** quando há `Begin` ativo</td></tr></tbody></table>
+<h2>4.9 Mapeamento entidade → DTO</h2>
+<p><code>FuncefORM.Mapping</code> substitui AutoMapper/Mapster. Configura-se uma vez no <code>Infrastructure</code>:</p>
+<pre><code>services.AddObjectMapper(options =&gt;
+{
+    options.MaxDepth = 10;
+    options.ThrowOnError = false;
+});
+```</code></pre>
+<p>DTO com atributos declarativos:</p>
+<pre><code>public class {Entidade}Response
+{
+    [MapFrom("Id")]              public long     Id          { get; set; }
+    [MapFrom("Nome")]            public string   Nome        { get; set; } = string.Empty;
+    [MapFrom("Email")]           public string?  Email       { get; set; }
+    [MapFrom("DataCriacao")]     public DateTime DataCriacao { get; set; }
+    [NestedMap("{Navegacao}")]   public List&lt;{Navegacao}Resume&gt;? {Navegacoes} { get; set; }
+}
+```</code></pre>
+<table><thead><tr><th>Atributo</th><th>Uso</th></tr></thead><tbody><tr><td>`[MapFrom("Prop")]`</td><td>Propriedade direta da entidade</td></tr><tr><td>`[NestedMap("Prop")]`</td><td>Coleção ou objeto navegado (mapeia cada item recursivamente)</td></tr></tbody></table>
+<p>E na chamada:</p>
+<pre><code>var dto = entity.MapTo&lt;{Entidade}, {Entidade}Response&gt;();
+var dtos = entities.MapToList&lt;{Entidade}, {Entidade}Resume&gt;();
+```</code></pre>
+<p>Decisão registrada em <a href="../_shared/Decisoes-Arquiteturais.md">Decisoes-Arquiteturais</a> ADR-008.</p>
+<h2>4.10 Seeders (modo Dev)</h2>
+<pre><code>public class {Entidade}Seeder : EntitySeederBase&lt;{Entidade}&gt;
+{
+    public override int Order =&gt; 1;
+
+    public override IEnumerable&lt;{Entidade}&gt; GetSeedData()
+    {
+        yield return new {Entidade}
+        {
+            // Id NÃO é setado: a PK é IDENTITY e o banco gera o valor no insert.
+            Nome = "Exemplo Seed",
+            DataCriacao = DateTime.UtcNow
+        };
+        // ...
+    }
+}
+```</code></pre>
+<p>Padrões:</p>
+<ul>
+<li>Herda de <code>EntitySeederBase<T></code> (do <code>FUNCEF.ORM</code>).</li>
+<li><code>Order</code> define ordem de execução — pais com <code>Order = 1</code>, filhos com <code>Order = 2</code>.</li>
+<li><strong>Só rodam em Development</strong> (registro via <code>AddFuncefORMDevelopment<AppDbContext>(assembly)</code>).</li>
+<li><strong>PK <code>IDENTITY</code> não recebe valor no seed</strong> — o Id é gerado no insert. Para ligar filho→pai, use uma chave de negócio estável (código único) do pai já inserido para obter o Id gerado, em vez de fixar Ids. É assim que o <code>api-ms-gap</code> semeia entidades com FK sob identity.</li>
+</ul>
+<h2>4.11 Configuração <code>FuncefORM</code> (<code>appsettings.json</code>)</h2>
+<pre><code>"FuncefORM": {
+  "Connection": {
+    "ProviderType": "Oracle",
+    "SecretName": "Oracle{Servico}ConnectionString",
+    "ConnectionTimeout": 30,
+    "CommandTimeout": 30
+  },
+  "Pool": {
+    "MinSize": 5, "MaxSize": 100,
+    "MaxLifetimeMinutes": 30, "MaxIdleTimeMinutes": 5
+  },
+  "Resilience": {
+    "EnableRetry": true, "MaxRetries": 3,
+    "EnableCircuitBreaker": true,
+    "BaseDelayMs": 1000, "MaxDelayMs": 10000,
+    "CircuitBreakerTimeoutMs": 30000,
+    "CircuitBreakerFailureThreshold": 5
+  },
+  "EFCore": {
+    "EnableSensitiveDataLogging": false,
+    "EnableAuditInterceptor": true,
+    "EnableTelemetryInterceptor": true,
+    "MaxBatchSize": 1000,
+    "AutoDetectChanges": true,
+    "DataValidation": true,
+    "LogSqlQueries": false,
+    "LogDataChanges": false
+  },
+  "Observability": {
+    "EnableMetrics": true, "EnableTracing": true,
+    "EnableSlowQueryLogging": true, "SlowQueryThresholdMs": 1000
+  },
+  "Migration": {
+    "EnableAutoMigrations": false,
+    "EnableAutoSeeding": false,
+    "AllowDatabaseCreation": false,
+    "MigrationTimeout": 120
+  },
+  "Audit": {
+    "Enabled": true,
+    "ApplicationName": "{Servico}.API",
+    "UseKeyVaultForConnectionString": true,
+    "ConnectionSecretName": "AuditOracle",
+    "AuditDapperOperations": true,
+    "AuditBulkOperations": true,
+    "RetentionDays": 90,
+    "GlobalIgnoredProperties": [
+      "PasswordHash", "Password", "Secret", "Token", "RefreshToken"
+    ]
+  }
+}
+```</code></pre>
+<p>Override de Dev (<code>appsettings.Development.json</code>):</p>
+<ul>
+<li><code>Connection.SecretName</code> pode ser substituído por <code>Connection.DirectConnectionString</code> (string literal) para evitar Key Vault local.</li>
+<li><code>Audit.Enabled = false</code> em dev (reduz ruído).</li>
+<li><code>EFCore.EnableSensitiveDataLogging = true</code> em dev (mostra parâmetros nas queries logadas).</li>
+<li><code>Pool</code> reduzido para <code>MinSize=1, MaxSize=10</code>.</li>
+</ul>
+<h2>4.12 Verificação de conectividade no startup (Dev/Hml)</h2>
+<p><code>Program.cs</code> faz um <code>CanConnectAsync</code> antes de qualquer requisição em Dev/Hml — em Prd não roda (evita atrasar startup; o health <code>/health/ready</code> é quem sinaliza):</p>
+<pre><code>if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment("Homologation"))
+{
+    using var scope = app.Services.CreateScope();
+    var telemetry = scope.ServiceProvider.GetRequiredService&lt;ITelemetry&gt;();
+    try
+    {
+        var context = scope.ServiceProvider.GetRequiredService&lt;AppDbContext&gt;();
+        if (await context.Database.CanConnectAsync())
+            telemetry.LogInformation("Banco de dados conectado com sucesso");
+        else
+            telemetry.LogWarning("Banco de dados não está acessível. Verifique a connection string.");
+    }
+    catch (Exception ex)
+    {
+        telemetry.LogError(
+            "Erro ao verificar banco de dados no startup. Configure KeyVault:Url ou FuncefORM:Connection:DirectConnectionString no appsettings.Development.json",
+            ex, new Dictionary&lt;string, object?&gt; { ["message"] = ex.Message });
+    }
+}
+```</code></pre>
+<h2>4.13 Auditoria automática</h2>
+<table><thead><tr><th>Mecanismo</th><th>Onde</th><th>O que faz</th></tr></thead><tbody><tr><td>`[Auditable("{Recurso}")]` na entidade</td><td>`Domain/Entities/{Entidade}.cs`</td><td>Marca a entidade para auditoria</td></tr><tr><td>`services.AddFuncefOrmAudit(configuration)`</td><td>`Infrastructure/Extensions/ServiceCollectionExtensions.cs`</td><td>Instala interceptor de `SaveChanges` que captura `Added/Modified/Deleted`</td></tr><tr><td>`FuncefORM:Audit:AuditDapperOperations: true`</td><td>`appsettings.json`</td><td>Estende para operações Dapper (via `IRepository<T>.ExecuteAsync`)</td></tr><tr><td>`FuncefORM:Audit:ConnectionSecretName: "AuditOracle"`</td><td>`appsettings.json`</td><td>Auditoria pode ir para schema/banco separado</td></tr><tr><td>`GlobalIgnoredProperties`</td><td>`appsettings.json`</td><td>Nunca audita `Password`, `Token`, `Secret`, etc.</td></tr></tbody></table>
+<p>A auditoria é gravada na tabela Oracle <code>LOG_AUDIT.Registro_LOG</code>. Detalhes do que é persistido (IP, UserAgent, CorrelationId, OldValues/NewValues) estão configurados em <code>FuncefORM:Audit:*</code> e o registro é feito pelo componente — <strong>não há código aplicacional para auditoria</strong>.</p>
+<h2>4.14 Boas práticas Oracle</h2>
+<p><div class="callout note"><strong>Nota</strong> A nomenclatura de banco (schema, tabela, coluna, constraint, índice, tipos, boolean) é governada pela **doutrina BancoDados** (BD-02/03/04/08, ADR-014/015/016). A tabela abaixo resume o reflexo no EF Core; em caso de dúvida, o PadraoBD prevalece.</p>
+<table><thead><tr><th>Recomendação</th><th>Razão</th></tr></thead><tbody><tr><td>Schema UPPERCASE (`GAP`, `PEDIDOS`)</td><td>Convenção Oracle e identificação rápida</td></tr><tr><td>Tabela `TB_` + **plural** UPPERCASE (`TB_PEDIDOS`)</td><td>Convenção FUNCEF/BancoDados (BD-02)</td></tr><tr><td>PK surrogate `NUMBER` `IDENTITY`, coluna `{ENTIDADE}_ID`; FK com o mesmo nome</td><td>BD-04 / ADR-014/015 — sem `ID` genérico, sem `BaseEntity`</td></tr><tr><td>Coluna UPPERCASE `SNAKE_CASE` por extenso (`DATA_CRIACAO`; `NOME`/`DATA` sem abreviar)</td><td>ADR-015 (`NM`/`DT` proibidos); compatibilidade com SQL puro</td></tr><tr><td>`DATE`/`TIMESTAMP` para datas (sem `TypeName` no EF, salvo precisão específica)</td><td>Padrão BancoDados (BD-03)</td></tr><tr><td>`NUMBER(p,s)` para decimais monetários</td><td>Precisão exata</td></tr><tr><td>`VARCHAR2` para texto (sem `TypeName`; use `[MaxLength]`)</td><td>Padrão BancoDados (BD-03); **não** usar `NVARCHAR2`</td></tr><tr><td>Boolean como `FLAG_ NUMBER(1)` mapeado `bool` nativo (ADR-017); conversor `'S'/'N'` **só** para coluna legada `CHAR(1)`, por-propriedade</td><td>Oracle não tem BOOLEAN (BD-08) — ver §4.4.1</td></tr><tr><td>Índice em FK</td><td>`[Index(nameof(EntidadeId))]`</td></tr><tr><td>`OnDelete(DeleteBehavior.Restrict)` em FK</td><td>Impede orphan rows</td></tr><tr><td>Bind variables `:Param` em Dapper</td><td>Sintaxe Oracle</td></tr><tr><td>INSERT Dapper omite a PK + `RETURNING {ENTIDADE}_ID INTO :Id`</td><td>PK é `IDENTITY`; o banco gera e devolve o valor</td></tr></tbody></table>
+<h2>Histórico</h2>
+<table><thead><tr><th>Data</th><th>Mudança</th></tr></thead><tbody><tr><td>2026-07-08</td><td>§4.4/§4.4.1: boolean passa a `NUMBER(1) 0/1` mapeado nativamente pelo provider Oracle (sem conversor); conversor `'S'/'N'` reclassificado como caminho **legado** `CHAR(1)` (aplicar por-propriedade, nunca global). Alinha ao [ADR-017](../../bancodados/_shared/Decisoes-Arquiteturais.md) da família BancoDados. Linha residual do checklist §4.14 corrigida (ainda citava conversor global `CHAR(1)` — achado do lint de termos revogados).</td></tr><tr><td>2026-06-16</td><td>Adoção de FUNCEF.Abstractions ([CMP-08-Abstractions](../componentes/CMP-08-Abstractions.md)) — `ITelemetry` (`Funcef.Abstractions.Telemetry`) e paginação `PagedRequest`/`SortDirection` (`Funcef.Abstractions.Pagination`) passam a ser contratos-base referenciados pelo `FUNCEF.ORM` (§4.2). §4.13: auditoria gravada em `LOG_AUDIT.Registro_LOG`.</td></tr><tr><td>2026-07-08</td><td>**Alinhamento à doutrina BancoDados (ADR-014/015/016).** PK agora é surrogate **`long` `IDENTITY`** com coluna `{ENTIDADE}_ID` (sem `BaseEntity`, sem `Guid`/`RAW(16)`/`None`); tabela `TB_` + plural; texto `VARCHAR2` e data `DATE` (removido `NVARCHAR2`/`TIMESTAMP(7)` como padrão); boolean `CHAR(1)` `'S'`/`'N'` via conversor global (nova §4.4.1). Cascata: §4.4 (entidade + padrões obrigatórios), §4.5 (ERD), §4.6/§4.7/§4.8 (Service/Dapper com `long` + `RETURNING`), §4.9 (DTO `long`), §4.10 (seed sob identity), §4.14 (boas práticas Oracle + nota de que o PadraoBD prevalece). Origem: auditoria de conformidade backend 2026-07-08 (`api-ms-gap` conforme, `api-template-base` migrado). Reconcilia [BE-02](../arquitetura/BE-02-Clean-Architecture.md) §2.4.</td></tr></tbody></table>
+<hr />
+<p>**Anterior:** [BE-03 — CQRS, Mediator e Service Layer](../arquitetura/BE-03-CQRS-Mediator-Service.md) · **Próximo:** [BE-05 — Segurança e autenticação](../seguranca/BE-05-Seguranca-Auth.md)</div></p>
+    <p class="meta">Gerado de: <code>../../backend/persistencia/BE-04-Persistencia-Transacoes.md</code> &middot; <a href="../index.html">Portal</a></p>
+  </main>
+</div>
+</body>
+</html>

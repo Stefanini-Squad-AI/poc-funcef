@@ -1,0 +1,19 @@
+// ==============================================================================================
+// ARQUIVO DE EXEMPLO
+// Este arquivo faz parte do dominio de exemplo (Cliente/Ordem) incluido no template FUNCEF
+// para demonstrar os padroes e convencoes do projeto.
+// Use como referencia, crie seus proprios arquivos e depois EXCLUA este.
+// ==============================================================================================
+using FuncefEssenciais.Application.Queries;
+using TemplateBase.Application.DTOs.ClienteDto.Response;
+
+namespace TemplateBase.Application.Queries.Cliente.GetById;
+
+/// <summary>
+/// Query para obtenção de um cliente por ID.
+/// </summary>
+public class GetClienteByIdQuery : IQuery<ClienteResponse>
+{
+    public long Id { get; set; }
+    public bool IncluirOrdens { get; set; }
+}

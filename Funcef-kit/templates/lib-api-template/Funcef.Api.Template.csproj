@@ -1,0 +1,97 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <PackageType>Template</PackageType>
+    <PackageId>funcef-api</PackageId>
+    <Title>FUNCEF API Template — .NET 10 Clean Architecture + CQRS</Title>
+    <Authors>FUNCEF - Fundação dos Economiários Federais</Authors>
+    <Company>FUNCEF - Fundação dos Economiários Federais</Company>
+    <Product>funcef-api</Product>
+    <Description>
+      Template de API REST para o ecossistema FUNCEF.
+      Gera uma solução .NET 10 com Clean Architecture (4 camadas: API, Application, Domain, Infrastructure),
+      CQRS/Mediator e Service Layer, já integrada com os componentes internos da FUNCEF:
+
+      • FuncefEssenciais — IMediator, ICommand, IQuery, FluentValidation pipeline, telemetria OpenTelemetry, middleware
+      • FuncefORM — EF Core + Dapper com Oracle, IRepository, IUnitOfWork, MapFrom/NestedMap, auditoria automática no Oracle Lakehouse (LOG_AUDIT)
+      • FuncefAutenticacao — Azure Entra ID com OAuth2/PKCE, JWT Bearer, M2M, Refresh Tokens e 24 endpoints de autenticação
+      • FuncefNoSql — Redis para cache; MongoDB opcional para document store
+      • FuncefCofre — Azure Key Vault para gestão de secrets
+      • FuncefArmazenamentos — Azure Blob, Queue, Table, File Share e Data Lake
+
+      Inclui domínio de exemplo (Cliente/Ordem) modelado com DDD — entidades ricas com factories,
+      invariantes e máquina de estados (StatusOrdem) — e CRUD completo via Commands/Queries/Handlers/Services,
+      infraestrutura permanente de segundo banco relacional (SQL Server via EF Core, pronta para receber
+      entidades), document store (MongoDB — histórico de Ordem gravado após o commit), health checks por
+      dependência (Oracle, Redis, MongoDB, SQL Server, Entra ID) com /health público mínimo e
+      /health/detalhado restrito, cliente de autorização do GAP (PDP fail-closed) com validação fail-fast
+      de configuração por ambiente, scripts de banco (Oracle, SQL Server e registro no GAP), pipeline HTTP
+      com GlobalExceptionMiddleware, Swagger com autenticação Bearer e testes unitários com
+      MSTest + NSubstitute — pronto para ser substituído pelo domínio real do novo projeto.
+
+      Uso: dotnet new funcef-api --name MeuProjeto
+    </Description>
+    <Summary>Template CLI (dotnet new funcef-api) que gera uma API REST .NET 10 com Clean Architecture, CQRS/Mediator, Service Layer e todos os componentes FUNCEF integrados.</Summary>
+    <PackageTags>funcef;api;template;clean-architecture;cqrs;dotnet;net10;oracle;scaffold;corporativo</PackageTags>
+    <PackageProjectUrl>https://github.com/FUNCEF-Componentes/lib-api-template</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/FUNCEF-Componentes/lib-api-template</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <Copyright>Copyright © FUNCEF 2025-2026. Todos os direitos reservados. Software Proprietário.</Copyright>
+    <PackageReleaseNotes>Consulte o GitHub Releases para detalhes completos das alterações.</PackageReleaseNotes>
+
+    <RepositoryOwner>FUNCEF-Componentes</RepositoryOwner>
+    <RepositoryName>lib-api-template</RepositoryName>
+
+    <TargetFramework>net10.0</TargetFramework>
+    <IncludeContentInPack>true</IncludeContentInPack>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <ContentTargetFolders>content</ContentTargetFolders>
+    <NoDefaultExcludes>true</NoDefaultExcludes>
+    <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
+    <NeutralLanguage>pt-BR</NeutralLanguage>
+
+    <!-- Version aligned with SemVer — 4.0.0 (sync 2026-08-11 com api-template-base).
+         BREAKING (configuração): todas as referências a segredo do Key Vault migraram para a forma
+         canônica única do ecossistema — SecretRef, `<Coisa>FromKeyVault: { Enabled, SecretName }`.
+         As quatro sintaxes anteriores (Auth:EntraId:*KeyName, FuncefORM:Connection:SecretName,
+         Auth:RefreshToken:SigningKeySecretName, UseKeyVaultForConnectionString + *SecretName em
+         FuncefORM:Audit / Auth:Audit / Storage / ApplicationInsights) foram REMOVIDAS dos
+         componentes FUNCEF 3.0.0 republicados: uma chave antiga não quebra o build nem o startup —
+         é ignorada, e o segredo nunca é resolvido. Ver FUNCEF.Abstractions/docs/CONFIGURACAO-FUNCEF.md.
+         Também nesta versão: Auth:EntraId:CredentialType (padrão ManagedIdentity — secretless) e
+         DeveloperUserCredential para desenvolvimento local via `az login`; seção Auth:Pat (consumo de
+         PAT do GAP por introspecção, desligada por padrão); pipelines padronizadas de DEV/HML
+         (funcef-devops/pipelines) agora EMPACOTADAS no projeto gerado; Dockerfile e nuget.config
+         alinhados ao build secret FUNCEF_PACKAGES_TOKEN; correção do alvo da connection string da
+         auditoria de acesso (Auth:Audit:ConnectionString — a chave anterior não era lida por ninguém).
+         Major: o appsettings de todo projeto gerado precisa ser reescrito na forma canônica. -->
+    <VersionPrefix>4.0.0</VersionPrefix>
+    <AssemblyVersion>4.0.0.0</AssemblyVersion>
+    <FileVersion>4.0.0.0</FileVersion>
+  </PropertyGroup>
+
+  <!-- CI/CD -->
+  <PropertyGroup Condition="'$(CI)' == 'true'">
+    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+
+  <!-- Template content -->
+  <ItemGroup>
+    <!-- .github/ é EMPACOTADO de propósito (desde 4.0.0): as pipelines padronizadas de DEV/HML
+         acompanham o projeto gerado. Sem isso o microsserviço novo nasce sem CI/CD. -->
+    <Content Include="TemplateBase\**\*"
+             Exclude="TemplateBase\**\bin\**;TemplateBase\**\obj\**;TemplateBase\.git\**;TemplateBase\.vs\**;TemplateBase\docs\**;TemplateBase\README.md" />
+    <Compile Remove="**\*" />
+  </ItemGroup>
+
+  <!-- Package metadata files -->
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" Condition="Exists('README.md')" />
+    <None Include="LICENSE.md" Pack="true" PackagePath="\" Condition="Exists('LICENSE.md')" />
+  </ItemGroup>
+
+</Project>

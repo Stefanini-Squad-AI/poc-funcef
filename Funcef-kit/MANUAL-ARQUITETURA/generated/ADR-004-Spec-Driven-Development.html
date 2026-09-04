@@ -1,0 +1,77 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ADR-004 — Spec Driven Development &mdash; Manual de Arquitetura FUNCEF</title>
+  <link rel="stylesheet" href="../assets/style.css" />
+</head>
+<body>
+<div class="layout">
+  <nav>
+    <h1>Manual de Arquitetura</h1>
+    <p class="subtitle"><a href="../index.html">&larr; Portal</a></p>
+    <div class="section">Cap&iacute;tulo</div>
+    <a href="#" class="active">ADR-004 — Spec Driven Development</a>
+  </nav>
+  <main class="wide generated-content">
+    <h1>ADR-004 — Spec Driven Development como fluxo de entrega FUNCEF</h1>
+<p><div class="callout note"><strong>Nota</strong> **Status**</p>
+<p>**Aceito** (2026-06-01). Decorre da análise de aderência do pacote `DoutrinaFUNCEF` ao conceito de **Spec Driven Development** (SDD). O diagnóstico concluiu que o pacote já era **~70% aderente ao espírito do SDD** — e em um pilar (a "constituição") **mais maduro** que o SDD canônico (GitHub Spec Kit, Amazon Kiro). A decisão **não é refazer** a arquitetura: é **nomear** o que já existe e **fechar os 2 elos** que faltavam.</p>
+<h2>Contexto</h2>
+<p>**Spec Driven Development** inverte o vetor tradicional "código primeiro, documentação depois": a **especificação é a fonte de verdade** e o código é **derivado** dela. O fluxo canônico (Spec Kit/Kiro) é:</p>
+<pre><code>constitution → specify → plan → tasks → implement
+(princípios)   (o quê)    (o como)  (passos)  (código derivado da spec)
+```</code></pre>
+<p>A auditoria do pacote contra esse fluxo encontrou alinhamento **conceitual forte**, mas **dois mundos desconectados**:</p>
+<ul>
+<li>A família **Documentacao** (AG-12..19) produz **especificação de alta qualidade** — UCs Cockburn + **Gherkin** ([AG-13-UseCase](../documentacao/funcional/AG-13-UseCase.md)), contratos ([AG-16-DataContract](../documentacao/funcional/AG-16-DataContract.md)), telas ([AG-15-Screen](../documentacao/funcional/AG-15-Screen.md)), máquinas de estado ([AG-17-StateMachine](../documentacao/funcional/AG-17-StateMachine.md)), validada por um guardião ([AG-18-AcceptanceCriteria](../documentacao/funcional/AG-18-AcceptanceCriteria.md)) e consolidável por marco ([AG-08-Documentation](../documentacao/diagnostico/AG-08-Documentation.md) §"spec consolidada").</li>
+<li>As famílias **BackEnd / FrontEnd / BancoDados** geram código a partir da **doutrina de padrões** (Clean Arch, CQRS, stack canônica) — **sem consumir** a especificação funcional como entrada formal. O desenvolvedor humano era a única ponte.</li>
+</ul>
+<h3>Mapeamento SDD ↔ FUNCEF (o que já existia)</h3>
+<table><thead><tr><th>Pilar SDD</th><th>Estado antes desta ADR</th><th>Onde</th></tr></thead><tbody><tr><td>**Constitution** (princípios imutáveis)</td><td>✅ Forte (mais explícito que o SDD canônico)</td><td>9 princípios globais (`CLAUDE.md`) + 5× `<Família>/_shared/Principios.md` ("violar = inconforme")</td></tr><tr><td>**Specify** (o quê/porquê, estruturado)</td><td>✅ Forte</td><td>Bloco funcional AG-12..19; Gherkin em UCs; contratos; telas; state machines</td></tr><tr><td>Spec **versionada/consolidável**</td><td>✅ Existe</td><td>`consolidated-spec-<marco>.md` (AG-08), incl. "spec de sistema completa" para `novo`</td></tr><tr><td>**Plan** (decisões técnicas)</td><td>🟡 Fragmentado</td><td>AG-03 (arquitetura), AG-10 (roadmap/épicos), `scaffold-plan.md` (FE-02) — sem um plano de marco unificado</td></tr><tr><td>**Tasks** (decomposição executável)</td><td>❌ **Ausente**</td><td>pulava de roadmap (épicos) direto para código</td></tr><tr><td>**Implement** (derivado da spec)</td><td>🟡 **Desconectado**</td><td>BE/FE/BD geravam por doutrina, não consumiam a spec funcional</td></tr></tbody></table>
+<h2>Forças</h2>
+<table><thead><tr><th>Critério</th><th>Adotar SDD explícito (esta ADR)</th><th>Refatorar para "arquitetura SDD" (big-bang)</th><th>Status quo</th></tr></thead><tbody><tr><td>Aproveita a base existente</td><td>Total (renomeia/conecta)</td><td>Descarta o que funciona</td><td>Total</td></tr><tr><td>Fecha a lacuna de tasks</td><td>Sim (AG-20)</td><td>Sim</td><td>Não</td></tr><tr><td>Conecta spec → código</td><td>Sim (handshake BE/FE)</td><td>Sim</td><td>Não</td></tr><tr><td>Custo / risco</td><td>Baixo (incremental, 1 ADR + 1 agente + 2 handshakes)</td><td>Alto (reescrita)</td><td>Zero, mas mantém o gap</td></tr><tr><td>Coerente com a doutrina viva</td><td>Sim (ADR + propor antes de aplicar)</td><td>Não (ruptura)</td><td>n/a</td></tr></tbody></table>
+<h2>Decisão</h2>
+<p>Adotar **Spec Driven Development como o fluxo de entrega FUNCEF**, de forma **incremental**, com três movimentos:</p>
+<ol>
+<li>**Nomear o vocabulário SDD sobre os artefatos existentes** (sem renomear arquivos):</li>
+</ol>
+<p>   | Pilar SDD | Artefato/agente FUNCEF |</p>
+<p>   |---|---|</p>
+<p>   | **Constitution** | `<Família>/_shared/Principios.md` + os 9 princípios não-negociáveis globais (`CLAUDE.md`) |</p>
+<p>   | **Specify** | Bloco funcional AG-12..19 (UC+Gherkin, contracts, screens, SM, messages) — validado por AG-18 |</p>
+<p>   | **Plan** | `entrega/<marco>/plan.md` (novo, AG-20) — consolida arquitetura (AG-03) + roadmap (AG-10) no recorte de um marco |</p>
+<p>   | **Tasks** | `entrega/<marco>/tasks.md` (novo, AG-20) — tarefas `T-NNN` executáveis, rastreáveis a UC/SC/contract |</p>
+<p>   | **Implement** | Famílias BackEnd / FrontEnd / BancoDados consumindo a spec via **handshake** (BE-00 / FE-00) |</p>
+<ol>
+<li>**Criar a camada de Tasks** — novo agente [AG-20-TaskBreakdown](../documentacao/entrega/AG-20-TaskBreakdown.md) (`task-breakdown-agent`), **bloco `entrega`** da família Documentacao. Consome a spec consolidada do marco (AG-08) + UCs/contracts/screens/SM/BRs + roadmap (AG-10) e emite **`plan.md` + `tasks.md`** com tarefas `T-NNN` rastreáveis. **Não inventa requisito** — desdobra só o que está na spec; lacuna na spec vira bloqueio (Princípio #8 — falhar barulhento), nunca preenchimento.</li>
+</ol>
+<ol>
+<li>**Estabelecer o handshake spec → código** — os orchestrators `backend-orchestrator` (BE-00) e `frontend-orchestrator` (FE-00) passam a aceitar a especificação funcional (e, quando existir, `entrega/<marco>/tasks.md`) como **entrada formal**, e a exigir **rastreabilidade reversa**: todo Handler/endpoint/Service (BE) e toda feature/componente/form (FE) cita o `UC-NNN` / `contract` / `SC-NN` / `T-NNN` que o originou. Divergência spec↔código é **sinalizada** (propor atualizar a spec ou registrar exceção) — nunca improvisada.</li>
+</ol>
+<h3>Princípio de fronteira (não-negociável do SDD-FUNCEF)</h3>
+<p>**Spec = o "o quê" (fonte de verdade do comportamento). Doutrina = o "como" (fonte de verdade do padrão técnico).**</p>
+<p>A spec não dita stack nem arquitetura (isso é a doutrina BE/FE/BD); a doutrina não inventa comportamento (isso é a spec). O AG-20 é a charneira: traduz o "o quê" em tarefas que apontam para o "como" da família certa.</p>
+<h2>Consequências</h2>
+<p>**Positivas:**</p>
+<ul>
+<li>O pacote passa a ter o fluxo SDD **completo e nominal** (`constitution → specify → plan → tasks → implement`), sem perder a maturidade da constituição.</li>
+<li>Greenfield (`pacote_tipo: novo`) ganha o caminho natural: especifica-se primeiro, desdobra-se em tarefas, implementa-se com rastreabilidade — código derivado da spec.</li>
+<li>Rastreabilidade ponta-a-ponta auditável: `Principio → RF/UC → T-NNN → Handler/endpoint/componente`.</li>
+<li>O gap "dois mundos paralelos" fecha sem reescrever nada.</li>
+</ul>
+<p>**Negativas / riscos:**</p>
+<ul>
+<li>Mais um bloco (`entrega`) e um agente (AG-20) na família Documentacao — mitigado por ser **opcional** (só roda quando se parte para implementação de um marco; não bloqueia diagnóstico/funcional, análogo ao AG-19).</li>
+<li>O handshake depende de a spec existir; em apps sem bloco funcional, BE/FE seguem gerando por doutrina (degradação graciosa — o handshake é "quando houver spec").</li>
+<li>Risco de a spec e o código divergirem com o tempo — mitigado pela rastreabilidade reversa obrigatória e pela doutrina viva ([Manutencao-Continua](./Manutencao-Continua.md)).</li>
+</ul>
+<p>**Métrica de sucesso:** após uso real em ≥1 pacote `novo`, (a) `tasks.md` cobre 100% dos UCs do marco sem inventar requisito; (b) o código entregue cita a origem (`UC/SC/contract/T`) e a matriz de rastreabilidade fecha nos dois sentidos; (c) divergências spec↔código são sinalizadas, não silenciosas. Se a camada `entrega` ficar inerte (ninguém desdobra) → reavaliar (reverter é barato: o bloco é opcional).</p>
+<h2>Histórico</h2>
+<p>___TABLE_PLACEHOLDER_2___</div></p>
+    <p class="meta">Gerado de: <code>../ADR-004-Spec-Driven-Development.md</code> &middot; <a href="../index.html">Portal</a></p>
+  </main>
+</div>
+</body>
+</html>

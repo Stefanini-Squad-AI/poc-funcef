@@ -1,0 +1,187 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>BE-06 — Validação e exceções &mdash; Manual de Arquitetura FUNCEF</title>
+  <link rel="stylesheet" href="../assets/style.css" />
+</head>
+<body>
+<div class="layout">
+  <nav>
+    <h1>Manual de Arquitetura</h1>
+    <p class="subtitle"><a href="../index.html">&larr; Portal</a></p>
+    <div class="section">Cap&iacute;tulo</div>
+    <a href="#" class="active">BE-06 — Validação e exceções</a>
+  </nav>
+  <main class="wide generated-content">
+    <h1>BE-06 — Validação e Tratamento de Exceções</h1>
+<h2>6.1 Princípios</h2>
+<table><thead><tr><th>Princípio</th><th>Como aplica</th></tr></thead><tbody><tr><td>**Validação acontece no pipeline, não no controller**</td><td>`ValidationBehavior` roda antes do Handler; controller nunca tem `if (!request.IsValid)`</td></tr><tr><td>**Validators validam o Command** (não o DTO)</td><td>`AbstractValidator<{Acao}{Entidade}Command>` referencia `x => x.Request.Campo`</td></tr><tr><td>**Apenas Commands têm Validators**</td><td>Queries são validadas no próprio Handler quando necessário</td></tr><tr><td>**Erros viram exceções tipadas**</td><td>`NotFoundException`, `BusinessException`, `ValidationException`, `ConflictException` (todas de `FUNCEF.Essenciais`; `ConflictException` herda `BusinessException` e mapeia 409)</td></tr><tr><td>**Exceções viram HTTP via middleware global**</td><td>`UseGlobalExceptionHandler` mapeia tipos → status codes</td></tr><tr><td>**Nunca `try/catch` defensivo dentro do Handler**</td><td>Exceção sobe; o pipeline + middleware decidem (única exceção: `Rollback` em transação multi-passo)</td></tr></tbody></table>
+<p>Decisão registrada em <a href="../_shared/Decisoes-Arquiteturais.md">Decisoes-Arquiteturais</a> ADR-004 e ADR-005.</p>
+<h2>6.2 Stack de validação</h2>
+<pre><code>graph LR
+    Req["HTTP Request"] --&gt; Bind["Model Binding&lt;br/&gt;(ASP.NET)"]
+    Bind --&gt; Filter["FluentValidation&lt;br/&gt;Filter (global)"]
+    Filter --&gt; Ctrl["Controller"]
+    Ctrl --&gt; Send["IMediator.Send"]
+    Send --&gt; Beh["ValidationBehavior&lt;br/&gt;(pipeline)"]
+    Beh --&gt; Val["Validator(s)&lt;br/&gt;do Command"]
+    Val --&gt;|"ok"| Hnd["Handler"]
+    Val --&gt;|"falhas"| Ex["ValidationException"]
+    Ex --&gt; Mid["GlobalExceptionMiddleware"]
+    Mid --&gt; Resp400["HTTP 400"]
+```</code></pre>
+<p>Camadas de validação:</p>
+<ol>
+<li><strong>Model binding</strong> (ASP.NET) — falha com 400 se o JSON não bindar (tipo errado).</li>
+<li><strong>FluentValidation filter global</strong> (<code>AddFluentValidationFilterGlobally</code>) — caso o controller receba um DTO com Validator registrado.</li>
+<li><strong>ValidationBehavior do Mediator</strong> — onde <strong>realmente</strong> a validação de Commands acontece, porque o Validator é do Command e o Command é construído pelo controller.</li>
+</ol>
+<h2>6.3 Validator — padrão</h2>
+<pre><code>using FluentValidation;
+using FuncefEssenciais.Core.Validation.FluentValidation;
+
+namespace {Servico}.Application.Commands.{Entidade}.Create;
+
+public class Create{Entidade}Validator : AbstractValidator&lt;Create{Entidade}Command&gt;
+{
+    public Create{Entidade}Validator()
+    {
+        this.RuleForRequiredText(x =&gt; x.Request.Nome, "nome", 100);
+        this.RuleForOptionalEmail(x =&gt; x.Request.Email, maxLength: 150);
+    }
+}
+```</code></pre>
+<h2>6.4 Métodos de conveniência do <code>FUNCEF.Essenciais</code></h2>
+<p>Helpers ficam em <code>FuncefEssenciais.Core.Validation.FluentValidation</code>:</p>
+<table><thead><tr><th>Método</th><th>Significado</th><th>Erro típico</th></tr></thead><tbody><tr><td>`RuleForRequiredText(x => x.Nome, "nome", 100)`</td><td>Texto obrigatório com tamanho máximo</td><td>`"O campo 'nome' é obrigatório."` / `"… até 100 caracteres."`</td></tr><tr><td>`RuleForOptionalText(x => x.Desc, "descrição", 500)`</td><td>Texto opcional com tamanho máximo</td><td>Apenas se vier preenchido e exceder</td></tr><tr><td>`RuleForOptionalEmail(x => x.Email, maxLength: 150)`</td><td>Email opcional, formato válido</td><td>`"O e-mail informado é inválido."`</td></tr><tr><td>`RuleForRequiredId(x => x.Id, "id")`</td><td>Guid não vazio (não `Guid.Empty`)</td><td>`"O campo 'id' é obrigatório."`</td></tr><tr><td>`RuleForPositiveDecimal(x => x.Valor)`</td><td>Decimal > 0</td><td>`"O valor deve ser maior que zero."`</td></tr><tr><td>`RuleForRequiredAllowedValues(x => x.Status, valoresPermitidos, "status")`</td><td>Valor em lista permitida (enum-like)</td><td>`"O 'status' deve ser um dos: A, B, C."`</td></tr><tr><td>`RuleForPagination(x => x.Pagina, x => x.TamanhoPagina)`</td><td>Página >= 1 e tamanho > 0 / <= limite</td><td>`"A 'página' deve ser maior ou igual a 1."`</td></tr><tr><td>`RuleForSortField(x => x.OrdenarPor, new[] { "Nome", "DataCriacao" })`</td><td>Campo de ordenação em allowlist</td><td>`"O campo de ordenação deve ser um dos: Nome, DataCriacao."`</td></tr><tr><td>`RuleForSortDirection(x => x.DirecaoOrdenacao)`</td><td>`"asc"` ou `"desc"` (case-insensitive)</td><td>`"A direção da ordenação deve ser 'asc' ou 'desc'."`</td></tr></tbody></table>
+<p><strong>Vantagem:</strong> mensagens <strong>em português padronizadas</strong> em todos os microserviços FUNCEF, sem cada dev escrever a sua.</p>
+<h2>6.5 Quando criar regras customizadas</h2>
+<p>Quando os helpers não cobrem, usar a sintaxe nativa do FluentValidation:</p>
+<pre><code>public class Update{Entidade}StatusValidator : AbstractValidator&lt;Update{Entidade}StatusCommand&gt;
+{
+    private static readonly string[] StatusValidos =
+        new[] { "Pendente", "Aprovada", "Cancelada", "Entregue" };
+
+    public Update{Entidade}StatusValidator()
+    {
+        this.RuleForRequiredId(x =&gt; x.Id, "id");
+        this.RuleForRequiredAllowedValues(x =&gt; x.Request.Status, StatusValidos, "status");
+
+        // Regra customizada: 'Observacoes' obrigatória se status = Cancelada
+        RuleFor(x =&gt; x.Request.Observacoes)
+            .NotEmpty().WithMessage("A observação é obrigatória ao cancelar.")
+            .When(x =&gt; string.Equals(x.Request.Status, "Cancelada", StringComparison.OrdinalIgnoreCase));
+    }
+}
+```</code></pre>
+<h2>6.6 Validators são registrados automaticamente</h2>
+<p><code>AddMediatorWithDefaults(assembly)</code> (chamado em <code>AddApplicationServices()</code>) escaneia a assembly e registra qualquer <code>AbstractValidator<></code>. <strong>Não há registro manual.</strong></p>
+<p>Para criar um Validator novo basta colocar a classe na pasta <code>Commands/{Entidade}/{Acao}/{Acao}{Entidade}Validator.cs</code> — ele será descoberto.</p>
+<h2>6.7 Pipeline <code>ValidationBehavior</code> — comportamento</h2>
+<table><thead><tr><th>Caso</th><th>Comportamento</th></tr></thead><tbody><tr><td>Command sem Validator registrado</td><td>Pipeline passa direto ao Handler</td></tr><tr><td>Command com 1 Validator</td><td>Executa; se `IsValid = false`, lança `ValidationException` (do `FuncefEssenciais.Exceptions`) com a lista de erros</td></tr><tr><td>Command com múltiplos Validators</td><td>Todos executam; erros agregados em um único `ValidationException`</td></tr><tr><td>Query</td><td>Validators de Query **não são executados** pelo behavior (só `AbstractValidator<TCommand>`)</td></tr></tbody></table>
+<h2>6.8 Tipos de exceção e mapeamento HTTP</h2>
+<p>Exceções da camada <code>FuncefEssenciais.Exceptions</code>:</p>
+<table><thead><tr><th>Exceção</th><th>HTTP</th><th>Uso típico</th></tr></thead><tbody><tr><td>`ValidationException`</td><td>**400 Bad Request**</td><td>Falha do `ValidationBehavior` ou validações manuais em Queries</td></tr><tr><td>`NotFoundException`</td><td>**404 Not Found**</td><td>Recurso não existe — `NotFoundException.ForResource("{Entidade}", id)`</td></tr><tr><td>`BusinessException`</td><td>**400 Bad Request**</td><td>Regra de negócio violada — `new BusinessException("Status inválido", "INVALID_STATUS")`</td></tr><tr><td>`ConflictException`</td><td>**409 Conflict**</td><td>Conflito com o estado atual (duplicidade, transição inválida) — `new ConflictException("{Entidade}", "msg")`</td></tr><tr><td>`UnauthorizedAccessException` (built-in)</td><td>**401 Unauthorized**</td><td>Trata pelo pipeline de auth, não pelo middleware</td></tr></tbody></table>
+<p>> ✅ <strong>Todas as exceções acima vêm de <code>FuncefEssenciais.Exceptions</code></strong> e são mapeadas pelo <code>GlobalExceptionMiddleware</code> — inclusive <strong><code>ConflictException</code> → 409 nativamente</strong> (não é preciso classe local nem <code>CustomExceptionMappings</code>). Fonte: <code>funcef-componentes/lib-back-essenciais/FuncefEssenciais/Exceptions/ConflictException.cs</code> e <code>.../Http/Middleware/GlobalExceptionMiddleware.cs</code>.</p>
+<p><code>ConflictException</code> (da lib) — API disponível:</p>
+<pre><code>using FuncefEssenciais.Exceptions;
+
+// Construtor recurso + mensagem (o mais usado nos Services):
+throw new ConflictException("{Entidade}", "Já existe um registro com este {campo}");
+
+// Factories:
+throw ConflictException.ForResource("{Entidade}", id);                 // "Recurso '{Entidade}' com identificador '{id}' já existe ou está em conflito"
+throw ConflictException.ForResourceWithMessage("{Entidade}", "msg");   // recurso + mensagem custom
+```</code></pre>
+<p>Expõe <code>NomeRecurso</code> e <code>Identificador</code>; o middleware usa <code>NomeRecurso</code> na resposta 409.</p>
+<p>> <strong><code>CustomExceptionMappings</code></strong> continua útil para mapear exceções <strong>próprias</strong> do domínio a status específicos; <strong>não</strong> é necessário para <code>ConflictException</code> (já é 409 na lib).</p>
+<h2>6.9 Quando usar qual exceção</h2>
+<table><thead><tr><th>Cenário</th><th>Exceção</th><th>Status</th></tr></thead><tbody><tr><td>Recurso não existe (consulta)</td><td>`NotFoundException.ForResource("{Entidade}", id)`</td><td>404</td></tr><tr><td>Já existe registro com mesmo campo único</td><td>`new ConflictException("{Entidade}", "Já existe um registro com este {campo}")`</td><td>409</td></tr><tr><td>Tentar deletar registro com dependentes</td><td>`new ConflictException("{Entidade}", "Não é possível excluir registro com dependentes")`</td><td>409</td></tr><tr><td>Transição de status inválida</td><td>`new BusinessException("Não é permitido aprovar registro já entregue", "INVALID_TRANSITION")`</td><td>400</td></tr><tr><td>Campo obrigatório vazio no POST</td><td>(não escrever manualmente) `ValidationException` automática</td><td>400</td></tr></tbody></table>
+<h2>6.10 Exemplos reais</h2>
+<h3>Lançar <code>NotFoundException</code> no Handler de Query</h3>
+<pre><code>public async Task&lt;{Entidade}Response&gt; Handle(Get{Entidade}ByIdQuery query, CancellationToken ct)
+{
+    var entity = query.Incluir{Navegacao}
+        ? await _service.GetByIdWithAutoIncludesAsync(query.Id, ct)
+        : await _service.GetByIdAsync(query.Id, ct);
+
+    if (entity is null)
+        throw NotFoundException.ForResource("{Entidade}", query.Id);
+
+    return entity.MapTo&lt;{Entidade}, {Entidade}Response&gt;();
+}
+```</code></pre>
+<h3>Lançar <code>ConflictException</code> no Service</h3>
+<pre><code>if (!string.IsNullOrEmpty(request.Email)
+    &amp;&amp; await _repository.ExistsAsync(c =&gt; c.Email == request.Email, cancellationToken: ct))
+{
+    throw new ConflictException("{Entidade}", "Já existe um registro com este email");
+}
+```</code></pre>
+<h3>Service que delega o "404" para o próprio caller</h3>
+<p><code>UpdateAsync</code> e <code>ValidateAndDeleteAsync</code> lançam <code>NotFoundException</code> diretamente — o Handler permanece livre de <code>if (entity == null)</code>:</p>
+<pre><code>public virtual async Task&lt;{Entidade}&gt; UpdateAsync(long id, {Entidade}Request request, CancellationToken ct = default)
+{
+    var entity = await _repository.GetByIdAsync(id, cancellationToken: ct)
+        ?? throw NotFoundException.ForResource("{Entidade}", id);
+    // ...
+}
+```</code></pre>
+<h2>6.11 Forma do payload de erro</h2>
+<p>A resposta de erro retornada pelo <code>GlobalExceptionMiddleware</code> segue um shape padronizado (definido pelo componente). Em produção, evita expor stack trace ou mensagens de banco.</p>
+<pre><code>// 404
+{
+  "errorCode": "NOT_FOUND",
+  "message": "{Entidade}: o recurso com identificador '…' não foi encontrado.",
+  "traceId": "00-..."
+}
+
+// 409
+{
+  "errorCode": "CONFLICT",
+  "message": "{Entidade}: Já existe um registro com este email",
+  "traceId": "00-..."
+}
+
+// 400 (BusinessException)
+{
+  "errorCode": "INVALID_TRANSITION",
+  "message": "Não é permitido aprovar registro já entregue",
+  "traceId": "00-..."
+}
+```</code></pre>
+<p>Para <code>ValidationException</code>, o payload inclui a lista de erros campo a campo:</p>
+<pre><code>{
+  "errorCode": "VALIDATION_FAILED",
+  "message": "Um ou mais campos são inválidos.",
+  "errors": {
+    "Request.Nome": ["O campo 'nome' é obrigatório."],
+    "Request.Email": ["O e-mail informado é inválido."]
+  },
+  "traceId": "00-..."
+}
+```</code></pre>
+<h2>6.12 Boas práticas (resumo)</h2>
+<ul>
+<li>✅ Em Commands: declarar Validator (com helpers FUNCEF sempre que possível).</li>
+<li>✅ Em Queries: validar no Handler apenas o que for <strong>regra</strong>, não tipo/range (deixar pra Validator se a Query for crítica).</li>
+<li>✅ Em Services: lançar exceção tipada — nunca devolver <code>null</code>/<code>Result<></code> para sinalizar erro de domínio.</li>
+<li>✅ Em Handlers: <strong>deixar a exceção subir</strong>. Só usar <code>try/catch</code> para <code>BeginAsync/CommitAsync/RollbackAsync</code> (vide <a href="../persistencia/BE-04-Persistencia-Transacoes.md">BE-04-Persistencia-Transacoes</a> §4.7).</li>
+<li>❌ Não escrever <code>throw new Exception(...)</code> genérico — sempre tipo específico.</li>
+<li>❌ Não inventar HTTP code em controller (<code>return BadRequest(...)</code>) — sempre via exceção tipada.</li>
+<li>❌ Não engolir exceção com <code>try { … } catch { /* swallow */ }</code>.</li>
+</ul>
+<h2>6.13 Anti-padrões frequentes</h2>
+<table><thead><tr><th>Anti-padrão</th><th>Por que é proibido</th><th>Correção</th></tr></thead><tbody><tr><td>`return BadRequest(ModelState)` no controller</td><td>Inconsistência de respostas; bypass do middleware</td><td>Deixar a exceção subir; `ValidationBehavior` cuida</td></tr><tr><td>`try { … } catch (Exception ex) { return StatusCode(500, ex.Message) }`</td><td>Vazamento de detalhes internos</td><td>Sem `try/catch`; middleware mascara em prd</td></tr><tr><td>`throw new Exception("Email duplicado")`</td><td>Sem tipo, sem código</td><td>`throw new ConflictException("{Entidade}", "Email duplicado")`</td></tr><tr><td>`if (entity == null) return NotFound()` em controller</td><td>Lógica espalhada</td><td>`throw NotFoundException.ForResource(...)` no Handler</td></tr><tr><td>Validar `Guid.Empty` manualmente</td><td>Repetição</td><td>`this.RuleForRequiredId(x => x.Id, "id")`</td></tr><tr><td>Sem Validator porque "é simples"</td><td>Inconsistência em PR review</td><td>**Sempre** criar Validator para Command, mesmo que com 1 regra</td></tr></tbody></table>
+<hr />
+<p><strong>Anterior:</strong> <a href="BE-05-Seguranca-Auth.md">BE-05 — Segurança e autenticação</a> · <strong>Próximo:</strong> <a href="../operacao/BE-07-Observabilidade.md">BE-07 — Observabilidade e saúde</a></p>
+<hr />
+<h2>Histórico</h2>
+<table><thead><tr><th>Data</th><th>Mudança</th></tr></thead><tbody><tr><td>2026-06-16</td><td>Corrigido: FUNCEF.Essenciais não expõe `ConflictException` (lib só tem `BusinessException`/`NotFoundException`/`ValidationException`) e `BusinessException` mapeia **400** (não 422). 409 passa a ser documentado via `ConflictException` **local** herdando `BusinessException` + registro em `CustomExceptionMappings[typeof(ConflictException)] = HttpStatusCode.Conflict`. Fonte: `funcef-componentes/lib-back-essenciais/FuncefEssenciais/Exceptions/`.</td></tr><tr><td>2026-07-08</td><td>**Reversão factual (§6.8/§6.9):** `FUNCEF.Essenciais` **passou a expor `ConflictException`** (construtor `(nomeRecurso, mensagem)` + factories `ForResource`/`ForResourceWithMessage`, propriedades `NomeRecurso`/`Identificador`) e o `GlobalExceptionMiddleware` a mapeia para **409 nativamente**. Removida a instrução de classe **local** + `CustomExceptionMappings` (desnecessária); passa-se a usar a exceção **da lib** diretamente. Verificado em `lib-back-essenciais/.../Exceptions/ConflictException.cs` e `.../Http/Middleware/GlobalExceptionMiddleware.cs:165`. Ambos os repos (gap, template) já usam a versão da lib. Origem: auditoria de conformidade backend 2026-07-08.</td></tr></tbody></table>
+    <p class="meta">Gerado de: <code>../../backend/seguranca/BE-06-Validacao-Excecoes.md</code> &middot; <a href="../index.html">Portal</a></p>
+  </main>
+</div>
+</body>
+</html>

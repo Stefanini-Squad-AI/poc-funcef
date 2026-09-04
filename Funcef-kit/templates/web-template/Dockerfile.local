@@ -1,0 +1,114 @@
+# syntax=docker.io/docker/dockerfile:1
+#
+# Dockerfile.local — build local da mesma imagem usada no CI.
+# Monta o ~/.npmrc do host como secret durante o install (não fica na imagem).
+#
+# Usage:
+#   docker buildx build \
+#     -f Dockerfile.local \
+#     --secret id=npmrc,src=$HOME/.npmrc \
+#     -t web-template:local --load .
+#   Ou com build-args:
+#     docker buildx build -f Dockerfile.local \
+#       --secret id=npmrc,src=$HOME/.npmrc \
+#       --build-arg API_URL=http://localhost:8080 \
+#       --build-arg NEXT_PUBLIC_ENTRADA_URL=http://localhost:3000 \
+#       -t web-template:local --load .
+
+ARG NODE_VERSION=24.3.0-slim
+
+##########################################
+# Stage 1 — Install dependencies
+##########################################
+FROM node:${NODE_VERSION} AS dependencies
+
+ENV HUSKY=0 \
+    NEXT_TELEMETRY_DISABLED=1
+
+WORKDIR /app
+
+COPY package.json pnpm-lock.yaml* .npmrc* ./
+
+# Mount host ~/.npmrc as /root/.npmrc só durante o install — pnpm lê o token.
+# Nada fica gravado na imagem final.
+RUN --mount=type=secret,id=npmrc,target=/root/.npmrc \
+    --mount=type=cache,target=/root/.local/share/pnpm/store \
+    corepack enable pnpm && pnpm install --frozen-lockfile
+
+
+##########################################
+# Stage 2 — Build Next.js (standalone)
+##########################################
+FROM node:${NODE_VERSION} AS builder
+
+ENV NEXT_TELEMETRY_DISABLED=1
+
+WORKDIR /app
+
+COPY --from=dependencies /app/node_modules ./node_modules
+COPY . .
+
+ARG NEXT_PUBLIC_BASE_PATH=/
+ENV NEXT_PUBLIC_BASE_PATH=${NEXT_PUBLIC_BASE_PATH}
+
+ARG NEXT_PUBLIC_APP_URL=http://localhost:3000
+ENV NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL}
+
+ARG API_URL=http://localhost:8080
+ENV API_URL=${API_URL}
+
+ARG NEXT_PUBLIC_ENTRADA_URL=http://localhost:3000
+ENV NEXT_PUBLIC_ENTRADA_URL=${NEXT_PUBLIC_ENTRADA_URL}
+
+ARG NEXT_PUBLIC_APPINSIGHTS_CONNECTION_STRING=
+ENV NEXT_PUBLIC_APPINSIGHTS_CONNECTION_STRING=${NEXT_PUBLIC_APPINSIGHTS_CONNECTION_STRING}
+
+ENV NODE_ENV=production
+
+RUN --mount=type=cache,target=/app/.next/cache \
+    corepack enable pnpm && pnpm build
+
+
+##########################################
+# Stage 3 — Run
+##########################################
+FROM node:${NODE_VERSION} AS runner
+
+WORKDIR /app
+
+ARG NEXT_PUBLIC_BASE_PATH=/
+ENV NEXT_PUBLIC_BASE_PATH=${NEXT_PUBLIC_BASE_PATH}
+
+ARG NEXT_PUBLIC_APP_URL=http://localhost:3000
+ENV NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL}
+
+ARG API_URL=http://localhost:8080
+ENV API_URL=${API_URL}
+
+ARG NEXT_PUBLIC_ENTRADA_URL=http://localhost:3000
+ENV NEXT_PUBLIC_ENTRADA_URL=${NEXT_PUBLIC_ENTRADA_URL}
+
+ARG NEXT_PUBLIC_APPINSIGHTS_CONNECTION_STRING=
+ENV NEXT_PUBLIC_APPINSIGHTS_CONNECTION_STRING=${NEXT_PUBLIC_APPINSIGHTS_CONNECTION_STRING}
+
+# Telemetria servidor — passadas em runtime (não embarcadas no bundle)
+ARG APPLICATIONINSIGHTS_CONNECTION_STRING=
+ENV APPLICATIONINSIGHTS_CONNECTION_STRING=${APPLICATIONINSIGHTS_CONNECTION_STRING}
+
+ARG OTEL_DEBUG=false
+ENV OTEL_DEBUG=${OTEL_DEBUG}
+
+ENV NODE_ENV=production \
+    HOSTNAME="0.0.0.0" \
+    PORT=3000 \
+    NEXT_TELEMETRY_DISABLED=1
+
+COPY --from=builder --chown=node:node /app/public ./public
+RUN mkdir .next && chown node:node .next
+COPY --from=builder --chown=node:node /app/.next/standalone ./
+COPY --from=builder --chown=node:node /app/.next/static ./.next/static
+
+USER node
+
+EXPOSE 3000
+CMD ["node", "server.js"]

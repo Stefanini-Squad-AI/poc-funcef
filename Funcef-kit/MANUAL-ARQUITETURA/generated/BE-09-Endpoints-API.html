@@ -1,0 +1,267 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>BE-09 — Endpoints API &mdash; Manual de Arquitetura FUNCEF</title>
+  <link rel="stylesheet" href="../assets/style.css" />
+</head>
+<body>
+<div class="layout">
+  <nav>
+    <h1>Manual de Arquitetura</h1>
+    <p class="subtitle"><a href="../index.html">&larr; Portal</a></p>
+    <div class="section">Cap&iacute;tulo</div>
+    <a href="#" class="active">BE-09 — Endpoints API</a>
+  </nav>
+  <main class="wide generated-content">
+    <h1>BE-09 — Endpoints da API</h1>
+<h2>9.1 Convenções gerais</h2>
+<p>> Todos os endpoints de domínio exigem <strong>JWT Bearer</strong> (<code>[FuncefAuthorize]</code>).</p>
+<p>> Endpoints de <code>/health/*</code>, <code>/info</code> são <strong>públicos</strong>.</p>
+<p>> Endpoints de <code>/auth/*</code> são auto-registrados pelo <code>FUNCEF.Autenticacao</code> via <code>AddFuncefAuthControllers()</code>.</p>
+<h3>Rotas e verbos HTTP</h3>
+<table><thead><tr><th>Operação</th><th>Verbo</th><th>Rota típica</th><th>Mediator</th><th>Sucesso</th></tr></thead><tbody><tr><td>Listar (paginado)</td><td>GET</td><td>`/{Entidades}`</td><td>`Receive(Get{Entidade}PagedQuery)`</td><td>200 `PaginatedResult<{Entidade}Resume>`</td></tr><tr><td>Obter por ID</td><td>GET</td><td>`/{Entidades}/{id}`</td><td>`Receive(Get{Entidade}ByIdQuery)`</td><td>200 `{Entidade}Response`</td></tr><tr><td>Obter por critério</td><td>GET</td><td>`/{Entidades}/{criterio}/{valor}`</td><td>`Receive(Get{Entidade}By{Criterio}Query)`</td><td>200</td></tr><tr><td>Criar</td><td>POST</td><td>`/{Entidades}`</td><td>`Send(Create{Entidade}Command)`</td><td>201 `{Entidade}Response`</td></tr><tr><td>Atualizar (completo)</td><td>PUT</td><td>`/{Entidades}/{id}`</td><td>`Send(Update{Entidade}Command)`</td><td>200</td></tr><tr><td>Atualizar (parcial / campo específico)</td><td>PATCH</td><td>`/{Entidades}/{id}/{campo}`</td><td>`Send(Update{Entidade}{Campo}Command)`</td><td>200</td></tr><tr><td>Excluir</td><td>DELETE</td><td>`/{Entidades}/{id}`</td><td>`Send(Delete{Entidade}Command)`</td><td>204</td></tr></tbody></table>
+<h3>Controller — padrão</h3>
+<pre><code>[Route("[controller]")]
+[ApiController]
+public class {Entidades}Controller : BaseController
+{
+    private readonly IMediator _mediator;
+
+    public {Entidades}Controller(ITelemetry telemetry, IMediator mediator) : base(telemetry)
+        =&gt; _mediator = mediator;
+
+    [HttpGet]
+    [FuncefAuthorize]
+    [ProducesResponseType(typeof(PaginatedResult&lt;{Entidade}Resume&gt;), StatusCodes.Status200OK)]
+    public async Task&lt;IActionResult&gt; GetAll(
+        [FromQuery] int pagina = 1,
+        [FromQuery] int tamanhoPagina = 10,
+        [FromQuery] string? termoBusca = null,
+        [FromQuery] string? ordenarPor = null,
+        [FromQuery] string direcaoOrdenacao = "asc",
+        CancellationToken ct = default)
+    {
+        var result = await _mediator.Receive(new Get{Entidade}PagedQuery
+        {
+            Pagina = pagina, TamanhoPagina = tamanhoPagina,
+            TermoBusca = termoBusca,
+            OrdenarPor = ordenarPor, DirecaoOrdenacao = direcaoOrdenacao
+        }, ct);
+        return ApiOk(result);
+    }
+
+    [HttpGet("{id:long}")]
+    [FuncefAuthorize]
+    [ProducesResponseType(typeof({Entidade}Response), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task&lt;IActionResult&gt; Get(long id, CancellationToken ct = default)
+    {
+        var result = await _mediator.Receive(new Get{Entidade}ByIdQuery { Id = id }, ct);
+        return ApiOk(result);
+    }
+
+    [HttpPost]
+    [FuncefAuthorize]
+    [ProducesResponseType(typeof({Entidade}Response), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    public async Task&lt;IActionResult&gt; Create(
+        [FromBody] {Entidade}Request request, CancellationToken ct = default)
+    {
+        var result = await _mediator.Send(new Create{Entidade}Command { Request = request }, ct);
+        return ApiCreated(result);
+    }
+
+    [HttpPut("{id:long}")]
+    [FuncefAuthorize]
+    public async Task&lt;IActionResult&gt; Update(
+        long id, [FromBody] {Entidade}Request request, CancellationToken ct = default)
+    {
+        var result = await _mediator.Send(
+            new Update{Entidade}Command { Id = id, Request = request }, ct);
+        return ApiOk(result);
+    }
+
+    [HttpDelete("{id:long}")]
+    [FuncefAuthorize]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task&lt;IActionResult&gt; Delete(long id, CancellationToken ct = default)
+    {
+        await _mediator.Send(new Delete{Entidade}Command { Id = id }, ct);
+        return ApiNoContent();
+    }
+}
+```</code></pre>
+<p>Helpers de <code>BaseController</code> retornam <code>ObjectResult</code>s padronizados:</p>
+<table><thead><tr><th>Método</th><th>HTTP</th><th>Uso</th></tr></thead><tbody><tr><td>`ApiOk(result)`</td><td>200</td><td>Leitura ou update bem-sucedido</td></tr><tr><td>`ApiCreated(result)`</td><td>201</td><td>Recurso criado</td></tr><tr><td>`ApiNoContent()`</td><td>204</td><td>Operação sem corpo (delete típico)</td></tr></tbody></table>
+<h2>9.2 Query parameters padronizados</h2>
+<h3>Listagem paginada</h3>
+<table><thead><tr><th>Parâmetro</th><th>Tipo</th><th>Default</th><th>Descrição</th></tr></thead><tbody><tr><td>`pagina`</td><td>int</td><td>`1`</td><td>Página atual (>= 1)</td></tr><tr><td>`tamanhoPagina`</td><td>int</td><td>`10`</td><td>Tamanho da página</td></tr><tr><td>`termoBusca`</td><td>string?</td><td>`null`</td><td>Busca textual (case-insensitive, contém)</td></tr><tr><td>`ordenarPor`</td><td>string?</td><td>(depende do recurso)</td><td>Campo de ordenação</td></tr><tr><td>`direcaoOrdenacao`</td><td>string</td><td>`"asc"`</td><td>`"asc"` ou `"desc"`</td></tr></tbody></table>
+<p>Filtros adicionais (status, datas, FK) variam por recurso. Validar valores permitidos via <code>RuleForRequiredAllowedValues</code>/<code>RuleForSortField</code> no Validator da Query (quando criado).</p>
+<h3>Inclusão de navegação</h3>
+<table><thead><tr><th>Parâmetro</th><th>Tipo</th><th>Default</th><th>Descrição</th></tr></thead><tbody><tr><td>`incluir{Navegacao}`</td><td>bool</td><td>`false`</td><td>Quando `true`, usa `GetByIdWithAutoIncludesAsync` para carregar navegação marcada com `[AutoInclude]`</td></tr></tbody></table>
+<h2>9.3 DTOs padrão</h2>
+<h3>Request</h3>
+<pre><code>public class {Entidade}Request
+{
+    public string Nome { get; set; } = string.Empty;
+    public string? Email { get; set; }
+    public decimal Valor { get; set; }
+    // ... outros campos
+}
+```</code></pre>
+<p>Sem <code>[MapFrom]</code> em Request — só Response e Resume usam <code>[MapFrom]</code>.</p>
+<h3>Response (completo)</h3>
+<pre><code>public class {Entidade}Response
+{
+    [MapFrom("Id")]          public Guid     Id          { get; set; }
+    [MapFrom("Nome")]        public string   Nome        { get; set; } = string.Empty;
+    [MapFrom("Email")]       public string?  Email       { get; set; }
+    [MapFrom("DataCriacao")] public DateTime DataCriacao { get; set; }
+    [NestedMap("{Navegacao}")] public List&lt;{Navegacao}Resume&gt;? {Navegacoes} { get; set; }
+}
+```</code></pre>
+<h3>Resume (listagens)</h3>
+<pre><code>public class {Entidade}Resume
+{
+    [MapFrom("Id")]   public Guid    Id   { get; set; }
+    [MapFrom("Nome")] public string  Nome { get; set; } = string.Empty;
+}
+```</code></pre>
+<h3><code>PaginatedResult<T></code></h3>
+<pre><code>{
+  "items":       [ /* T */ ],
+  "page":        1,
+  "pageSize":    10,
+  "totalItems":  42,
+  "totalPages":  5
+}
+```</code></pre>
+<h2>9.4 Códigos de status HTTP — padronização</h2>
+<table><thead><tr><th>Código</th><th>Significado</th><th>Quando ocorre</th><th>Exceção/origem</th></tr></thead><tbody><tr><td>200</td><td>OK</td><td>GET com sucesso · PUT/PATCH retornando recurso atualizado</td><td>`ApiOk(result)`</td></tr><tr><td>201</td><td>Created</td><td>POST que cria recurso (resposta inclui o recurso)</td><td>`ApiCreated(result)`</td></tr><tr><td>204</td><td>No Content</td><td>DELETE com sucesso</td><td>`ApiNoContent()`</td></tr><tr><td>400</td><td>Bad Request</td><td>Validação falhou; body malformado</td><td>`ValidationException`</td></tr><tr><td>400</td><td>Bad Request</td><td>Regra de negócio violada</td><td>`BusinessException` (de `FUNCEF.Essenciais`)</td></tr><tr><td>401</td><td>Unauthorized</td><td>Token ausente/inválido</td><td>Pipeline `UseAuthentication`</td></tr><tr><td>403</td><td>Forbidden</td><td>Token válido mas sem permissão</td><td>`UseAuthorization` + `[FuncefAuthorize]`</td></tr><tr><td>404</td><td>Not Found</td><td>Recurso inexistente</td><td>`NotFoundException`</td></tr><tr><td>409</td><td>Conflict</td><td>Unicidade ou estado conflitante</td><td>`ConflictException` (de `FUNCEF.Essenciais`, herda `BusinessException`; mapeada a 409 nativamente)</td></tr><tr><td>429</td><td>Too Many Requests</td><td>Rate limit estourado</td><td>`UseRateLimiting` (`FUNCEF.Essenciais`)</td></tr><tr><td>500</td><td>Internal Server Error</td><td>Falha inesperada (mascarada)</td><td>`GlobalExceptionMiddleware`</td></tr></tbody></table>
+<p>> ✅ <code>FUNCEF.Essenciais</code> expõe <code>BusinessException</code> (→ <strong>400</strong>), <code>NotFoundException</code>, <code>ValidationException</code> <strong>e <code>ConflictException</code></strong> (→ <strong>409</strong>, herda <code>BusinessException</code> e é mapeada nativamente pelo <code>GlobalExceptionMiddleware</code> — sem classe local nem <code>CustomExceptionMappings</code>). Detalhes em <a href="../seguranca/BE-06-Validacao-Excecoes.md">BE-06-Validacao-Excecoes</a> §6.8.</p>
+<h2>9.5 Convenção JSON</h2>
+<p>Configurada em <code>Program.cs</code>:</p>
+<pre><code>builder.Services.AddControllers()
+    .AddJsonOptions(options =&gt;
+    {
+        options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+        options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    });
+```</code></pre>
+<table><thead><tr><th>Comportamento</th><th>Efeito</th></tr></thead><tbody><tr><td>`PropertyNamingPolicy = CamelCase`</td><td>Propriedades em camelCase no JSON, PascalCase no C#</td></tr><tr><td>`DefaultIgnoreCondition = WhenWritingNull`</td><td>Propriedades null **omitidas** da resposta</td></tr><tr><td>`JsonStringEnumConverter`</td><td>Enums serializados como string (`"Pendente"`, não `0`)</td></tr></tbody></table>
+<p><strong>Não usar</strong> <code>[JsonPropertyName]</code> campo a campo — configuração global cobre. Decisão registrada em <a href="../_shared/Decisoes-Arquiteturais.md">Decisoes-Arquiteturais</a> ADR-016.</p>
+<h2>9.6 Health & info — públicos</h2>
+<table><thead><tr><th>Método</th><th>Rota</th><th>Sucesso</th><th>Uso</th></tr></thead><tbody><tr><td>GET</td><td>`/health`</td><td>200 (`UIResponseWriter`)</td><td>Dashboard / monitoramento agregado</td></tr><tr><td>GET</td><td>`/health/live`</td><td>200 / 503</td><td>K8s liveness probe</td></tr><tr><td>GET</td><td>`/health/ready`</td><td>200 / 503</td><td>K8s readiness probe</td></tr><tr><td>GET</td><td>`/health/version`</td><td>200</td><td>CI/CD, runtime info</td></tr><tr><td>GET</td><td>`/info`</td><td>200</td><td>Alias de `/health/version`</td></tr></tbody></table>
+<p>Detalhes em <a href="./BE-07-Observabilidade.md">BE-07-Observabilidade</a> §7.8.</p>
+<h2>9.7 Auth — auto-registrados</h2>
+<p>Endpoints <code>/auth/*</code> são registrados pelo <code>FUNCEF.Autenticacao</code> (~24 rotas). Catálogo em <a href="../seguranca/BE-05-Seguranca-Auth.md">BE-05-Seguranca-Auth</a> §5.7.</p>
+<h2>9.8 Versionamento de API</h2>
+<p>> O padrão FUNCEF <strong>não</strong> implementa versionamento preventivo (<code>/v1/...</code>). A rota usa <code>[Route("[controller]")]</code> direto. A primeira versão não leva prefixo.</p>
+<p><strong>Quando versionar</strong> (critérios do <a href="../_shared/Decisoes-Arquiteturais.md">Decisoes-Arquiteturais</a> ADR-017):</p>
+<ul>
+<li><strong>Breaking change</strong> em contrato público consumido por <strong>cliente externo/terceiro</strong> que não pode ser migrado simultaneamente.</li>
+<li>Mudanças <strong>internas</strong> (mesmo time, mesmo deploy) → deprecar endpoint antigo e migrar; <strong>não</strong> versionar.</li>
+</ul>
+<p><strong>Como versionar</strong> (quando inevitável):</p>
+<table><thead><tr><th>Cenário</th><th>Mecanismo</th><th>Exemplo</th></tr></thead><tbody><tr><td>API pública/externa</td><td>Path</td><td>`[Route("v2/[controller]")]` + `Microsoft.AspNetCore.Mvc.Versioning`</td></tr><tr><td>API interna (raro)</td><td>Header</td><td>`X-API-Version: 2`</td></tr></tbody></table>
+<p>Registrar ADR de serviço justificando a necessidade e documentar no README.</p>
+<h2>9.9 Exemplos curl</h2>
+<pre><code># Autenticar (interativo no browser primeiro; aqui assume Bearer já obtido)
+TOKEN="eyJ0eXAiOiJKV1Qi..."
+BASE="https://localhost:{PORTA}"
+
+# Listar com paginação
+curl -k -H "Authorization: Bearer $TOKEN" \
+  "$BASE/{Entidades}?pagina=1&amp;tamanhoPagina=10&amp;termoBusca=joao&amp;ordenarPor=Nome&amp;direcaoOrdenacao=asc"
+
+# Obter por ID com inclusão de navegação
+curl -k -H "Authorization: Bearer $TOKEN" \
+  "$BASE/{Entidades}/11111111-1111-1111-1111-111111111111?incluir{Navegacao}=true"
+
+# Criar
+curl -k -X POST -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+  -d '{"nome":"Exemplo","email":"exemplo@dominio.com.br"}' \
+  "$BASE/{Entidades}"
+
+# Atualizar
+curl -k -X PUT -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+  -d '{"nome":"Exemplo Atualizado","email":"exemplo@dominio.com.br"}' \
+  "$BASE/{Entidades}/11111111-1111-1111-1111-111111111111"
+
+# Excluir
+curl -k -X DELETE -H "Authorization: Bearer $TOKEN" \
+  "$BASE/{Entidades}/11111111-1111-1111-1111-111111111111"
+
+# Health
+curl -k "$BASE/health/live"
+curl -k "$BASE/health/ready"
+curl -k "$BASE/health/version"
+```</code></pre>
+<h2>9.10 Erros — exemplos de respostas</h2>
+<pre><code>// 400 Bad Request — validação
+{
+  "errorCode": "VALIDATION_FAILED",
+  "message": "Um ou mais campos são inválidos.",
+  "errors": {
+    "Request.Nome": ["O campo 'nome' é obrigatório."]
+  },
+  "traceId": "00-..."
+}
+
+// 404 Not Found
+{
+  "errorCode": "NOT_FOUND",
+  "message": "{Entidade}: o recurso com identificador '...' não foi encontrado.",
+  "traceId": "00-..."
+}
+
+// 409 Conflict
+{
+  "errorCode": "CONFLICT",
+  "message": "{Entidade}: Já existe um registro com este email",
+  "traceId": "00-..."
+}
+
+// 400 Bad Request (regra de negócio — BusinessException)
+{
+  "errorCode": "INVALID_TRANSITION",
+  "message": "Não é permitido aprovar registro já entregue",
+  "traceId": "00-..."
+}
+
+// 429 Too Many Requests
+// (corpo vazio, header Retry-After)
+
+// 500 Internal Server Error
+{
+  "errorCode": "INTERNAL_ERROR",
+  "message": "Ocorreu um erro inesperado. Tente novamente.",
+  "traceId": "00-..."
+}
+```</code></pre>
+<p>> A <strong>forma exata</strong> do payload é definida pelo <code>GlobalExceptionMiddleware</code> do <code>FUNCEF.Essenciais</code>. Os exemplos acima são representativos do shape padrão.</p>
+<h2>9.11 Documentação Swagger</h2>
+<p><code>AddSwaggerDocumentation</code> (FuncefEssenciais) gera Swagger UI a partir dos:</p>
+<ul>
+<li><code>[ProducesResponseType(typeof(...), StatusCodes.Status...)]</code> no controller.</li>
+<li>XML doc comments quando <code>IncludeXmlComments = true</code> e <code><GenerateDocumentationFile>true</GenerateDocumentationFile></code> no <code>.csproj</code>.</li>
+<li><code>AddSwaggerBearerAuthentication</code> adiciona campo de Bearer token na UI.</li>
+</ul>
+<p><strong>Recomendação:</strong> anotar todos os endpoints com <code>ProducesResponseType</code> para os status codes esperados — facilita consumo por clientes e geração de SDK.</p>
+<h2>9.12 Anti-padrões</h2>
+<table><thead><tr><th>Anti-padrão</th><th>Por quê é proibido</th><th>Correção</th></tr></thead><tbody><tr><td>`return BadRequest("erro")`</td><td>Bypassa middleware</td><td>Lançar `ValidationException`</td></tr><tr><td>`return NotFound()` no controller</td><td>Lógica fora do Handler</td><td>Lançar `NotFoundException.ForResource(...)`</td></tr><tr><td>Controller "fat" (regra de negócio)</td><td>Quebra Clean Architecture</td><td>Mover para Service via Handler</td></tr><tr><td>Rota com verbos (`POST /CreateCliente`)</td><td>Não-REST</td><td>Usar `[HttpPost] /{Entidades}`</td></tr><tr><td>`[JsonPropertyName]` em todos os campos</td><td>Redundante</td><td>Config global de CamelCase cobre</td></tr><tr><td>Sem `[ProducesResponseType]`</td><td>Swagger pobre</td><td>Anotar pelo menos sucessos + 400/404/409 quando aplicável</td></tr><tr><td>Versionamento `v1` "preventivo"</td><td>Complexidade desnecessária</td><td>Implementar só quando precisar</td></tr></tbody></table>
+<hr />
+<p><strong>Anterior:</strong> <a href="BE-08-Configuracao-Ambientes.md">BE-08 — Configuração e ambientes</a> · <strong>Próximo:</strong> <a href="../qualidade/BE-10-Testes.md">BE-10 — Testes</a></p>
+<hr />
+<h2>Histórico</h2>
+<table><thead><tr><th>Data</th><th>Mudança</th></tr></thead><tbody><tr><td>2026-07-15</td><td>Reversão factual (cascata): o **409 Conflict** passa a ser obtido com `ConflictException` **da `FUNCEF.Essenciais`** (herda `BusinessException`, mapeada nativamente) — removida a instrução de classe **local** + `CustomExceptionMappings` na tabela §9.4 e no callout. Propaga a correção do BE-06 §6.8 (2026-07-08). Origem: auditoria de conformidade do `api-template-base`.</td></tr><tr><td>2026-06-16</td><td>Corrigido o mapeamento exceção→status: `BusinessException` (de `FUNCEF.Essenciais`) mapeia **400** (não 422); o **409 Conflict** é obtido com `ConflictException` **local** (herda `BusinessException`) + `CustomExceptionMappings[typeof(ConflictException)] = HttpStatusCode.Conflict`. `FUNCEF.Essenciais` expõe apenas `BusinessException`/`NotFoundException`/`ValidationException` — não há `ConflictException` na lib. Removida a linha "422 Unprocessable Entity" da tabela 9.4 e do exemplo de payload (§9.10). Ver BE-06 §6.8.</td></tr><tr><td>2026-07-06</td><td>Rename `FUNCEF.Seguranca` → `FUNCEF.Autenticacao` (namespace `FuncefAutenticacao.*`) nas notas §9.1 e §9.7 (auto-registro de `/auth/*`).</td></tr></tbody></table>
+    <p class="meta">Gerado de: <code>../../backend/operacao/BE-09-Endpoints-API.md</code> &middot; <a href="../index.html">Portal</a></p>
+  </main>
+</div>
+</body>
+</html>

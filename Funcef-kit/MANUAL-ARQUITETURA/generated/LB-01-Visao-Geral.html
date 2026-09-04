@@ -1,0 +1,98 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>LB-01 — DB-as-Code Liquibase &mdash; Manual de Arquitetura FUNCEF</title>
+  <link rel="stylesheet" href="../assets/style.css" />
+</head>
+<body>
+<div class="layout">
+  <nav>
+    <h1>Manual de Arquitetura</h1>
+    <p class="subtitle"><a href="../index.html">&larr; Portal</a></p>
+    <div class="section">Cap&iacute;tulo</div>
+    <a href="#" class="active">LB-01 — DB-as-Code Liquibase</a>
+  </nav>
+  <main class="wide generated-content">
+    <h1>LB-01 — Visão Geral: DB-as-Code com Liquibase</h1>
+<p><div class="callout note"><strong>Nota</strong> **Mensagem-chave**</p>
+<p>**A branch do ambiente é a porta de entrada para o banco.** Tratamos mudanças de banco como **código versionado, revisado e promovido por ambiente** — o banco deixa de ser "um lugar onde alguém roda script" e vira parte da esteira de entrega.</p>
+<h2>1.1 O cenário</h2>
+<p>Uma pessoa nova no time recebe uma demanda simples: *"criar uma tabela e uma package para uma nova funcionalidade"*. No modelo antigo, ela talvez aplicasse um script manualmente no banco. No modelo DB-as-Code, **tudo passa por Git, Pull Request, aprovação e Liquibase**. Este capítulo explica o porquê; os capítulos seguintes ensinam o caminho certo.</p>
+<h2>1.2 Por que abandonamos o modelo manual</h2>
+<p>Script manual parece rápido, mas gera **risco operacional**:</p>
+<table><thead><tr><th>Modelo antigo (manual)</th><th>Modelo novo (DB-as-Code)</th></tr></thead><tbody><tr><td>Script aplicado manualmente</td><td>Script **versionado no Git**</td></tr><tr><td>Difícil saber quem aplicou e quando</td><td>**Pull Request e aprovação** registram autoria/intenção</td></tr><tr><td>Risco de aplicar no ambiente errado</td><td>**Execução automatizada por ambiente** (branch → ambiente)</td></tr><tr><td>Sem histórico confiável por ambiente</td><td>Histórico no **Git** e no **`DATABASECHANGELOG`**</td></tr><tr><td>Correções feitas direto no banco</td><td>Correção **sempre via novo changeset**</td></tr></tbody></table>
+<h2>1.3 O que é DB-as-Code</h2>
+<pre><code>flowchart LR
+    G["Git&lt;br/&gt;scripts versionados"] --&gt; P["Pull Request&lt;br/&gt;revisão e aprovação"]
+    P --&gt; L["Liquibase&lt;br/&gt;execução controlada"]
+    L --&gt; O["Oracle&lt;br/&gt;ambiente correto"]
+```</code></pre>
+<p>Quatro responsabilidades distintas:</p>
+<ul>
+<li>**Git registra a intenção** — o changeset versionado.</li>
+<li>**PR aprova a mudança** — a barreira de controle humana.</li>
+<li>**Promotion Policy valida o caminho** — impede promoção fora da cadeia.</li>
+<li>**Liquibase aplica no banco** — após o merge na branch do ambiente.</li>
+</ul>
+<p>[!IMPORTANT]</p>
+<p>**Aprovação ≠ Execução**</p>
+<p>**Aprovação = GitHub. Execução = Liquibase.** O *runner* não aprova nada; ele só executa **depois** do merge. Branch protegida significa que merge direto é bloqueado.</p>
+<h2>1.4 O que existe por trás do pipeline</h2>
+<table><thead><tr><th>Componente</th><th>Função</th></tr></thead><tbody><tr><td>**GitHub**</td><td>Repositório, branches, Pull Requests e regras (rulesets, CODEOWNERS)</td></tr><tr><td>**Liquibase**</td><td>Lê os changelogs e aplica as mudanças no banco; mantém `DATABASECHANGELOG`</td></tr><tr><td>**Runner `runner-self-hosted-001`**</td><td>Runner self-hosted que executa os jobs do GitHub Actions</td></tr><tr><td>**Podman**</td><td>Sobe o container temporário da imagem `liquibase/liquibase` para rodar os comandos</td></tr><tr><td>**Oracle (DEV/HOM/PROD)**</td><td>Ambientes de destino (no `nexus`: `ORCLPDB-DEV-001`; no `planus`: PDBs OCI/RAC)</td></tr></tbody></table>
+<p>Detalhes de cada um em [LB-07-Pipeline-CICD](../pipeline/LB-07-Pipeline-CICD.md).</p>
+<h2>1.5 Branches: o mapa dos ambientes</h2>
+<pre><code>flowchart LR
+    F["feature/* fix/* short/*"] --&gt; DEV["dev&lt;br/&gt;Deploy DEV"]
+    DEV --&gt; HOM["hom&lt;br/&gt;Deploy HOM"]
+    HOM --&gt; MAIN["main&lt;br/&gt;Candidato PROD"]
+```</code></pre>
+<p>**Regra de ouro:** o desenvolvedor trabalha em `feature/*`, `fix/*` ou `short/*` (tarefas rotineiras); merge em `dev`/`hom`/`main` **só via PR aprovado**. Detalhe do fluxo em [LB-05-Git-Pull-Request](../fluxo/LB-05-Git-Pull-Request.md).</p>
+<h2>1.6 Como o desenvolvedor trabalha no dia a dia</h2>
+<pre><code>flowchart TD
+    A[1. Criar branch feature/fix] --&gt; B[2. Criar script DDL/DML/DCL/DQL/PLSQL]
+    B --&gt; C[3. Registrar include no changelog da categoria]
+    C --&gt; D[4. Commit e push da branch]
+    D --&gt; E[5. Abrir PR para dev]
+    E --&gt; F[6. Aguardar aprovação e merge]
+    F --&gt; G[Pipeline aplica automaticamente no banco DEV]
+```</code></pre>
+<p>O ciclo é sempre o mesmo: **criar script → registrar include → commit → push → PR → aprovar → merge → deploy**. Promoção para HOM e MAIN repete o ciclo (PR `dev→hom`, depois `hom→main`).</p>
+<h2>1.7 Quem aprova antes de aplicar no banco</h2>
+<p>A aprovação acontece **no Pull Request, antes** do Liquibase rodar:</p>
+<ul>
+<li>**PR para `dev`** — revisão técnica antes de aplicar em DEV.</li>
+<li>**PR `dev → hom`** — aprovação após testes em DEV.</li>
+<li>**PR `hom → main`** — aprovação final para baseline de produção.</li>
+</ul>
+<p>Os aprovadores exigidos variam por **tipo de mudança** (DML/DDL/DCL/DQL/PLSQL) e **ambiente** — ver [LB-06-Governanca-Aprovacao](../governanca/LB-06-Governanca-Aprovacao.md) e [Matriz-Aprovacao](../_shared/Matriz-Aprovacao.md).</p>
+<h2>1.8 Relação com o PadraoBD (BD-NN) e com scripts manuais</h2>
+<pre><code>flowchart TB
+    subgraph QUE["O QUE escrever (conteúdo do SQL)"]
+        BD[PadraoBD v2.2 — BD-01..10]
+    end
+    subgraph COMO["COMO entregar (este corpus)"]
+        LB[DB-as-Code — LB-00..09]
+    end
+    BD --&gt;|SQL do changeset segue o padrão| LB
+```</code></pre>
+<ul>
+<li>**Conteúdo SQL** de cada changeset segue o **PadraoBD** ([BD-00-Orchestrator](../../BD-00-Orchestrator.md)): `TB_`/`VW_`, UPPERCASE, surrogate key, `FLAG_ NUMBER(1)+CHECK` (ADR-017), `COMMENT ON`, etc.</li>
+<li>**Entrega** segue este corpus `LB-NN`.</li>
+<li>**Hotfix emergencial** em PROD que (ainda) não passa pela esteira segue [Padroes-Scripts-Operacionais](../../operacional/Padroes-Scripts-Operacionais.md) (manual, defensivo, com DBA). A meta de longo prazo é trazer tudo para a esteira DB-as-Code — ver [LB-08-Correcao-Troubleshooting](../operacional/LB-08-Correcao-Troubleshooting.md) §8.7.</li>
+</ul>
+<h2>1.9 Próximas leituras</h2>
+<ul>
+<li>[LB-02-Estrutura-Repositorio](./LB-02-Estrutura-Repositorio.md) — onde colocar o script e qual XML alterar.</li>
+<li>[LB-03-Changeset](../changeset/LB-03-Changeset.md) — anatomia de um changeset.</li>
+<li>[LB-05-Git-Pull-Request](../fluxo/LB-05-Git-Pull-Request.md) — branches, base × compare, promoção.</li>
+<li>[Primeira-Mudanca-de-Banco](../guias/Primeira-Mudanca-de-Banco.md) — passo a passo ponta a ponta.</li>
+</ul>
+<h2>Histórico</h2>
+<p>___TABLE_PLACEHOLDER_2___</div></p>
+    <p class="meta">Gerado de: <code>../../bancodados/liquibase/fundamentos/LB-01-Visao-Geral.md</code> &middot; <a href="../index.html">Portal</a></p>
+  </main>
+</div>
+</body>
+</html>

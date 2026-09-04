@@ -1,0 +1,256 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FE-04 — Formulários &mdash; Manual de Arquitetura FUNCEF</title>
+  <link rel="stylesheet" href="../assets/style.css" />
+</head>
+<body>
+<div class="layout">
+  <nav>
+    <h1>Manual de Arquitetura</h1>
+    <p class="subtitle"><a href="../index.html">&larr; Portal</a></p>
+    <div class="section">Cap&iacute;tulo</div>
+    <a href="#" class="active">FE-04 — Formulários</a>
+  </nav>
+  <main class="wide generated-content">
+    <h1>FE-04 — FRONTEND_FORM_AGENT</h1>
+<p><div class="callout note"><strong>Nota</strong> **Papel**</p>
+<p>Criar formulários usando React Hook Form + Zod + componentes da lib FUNCEF (`Form`, `FormField`, `FormItem`, `Input`, etc.). Reaproveita schemas em `features/<X>/validators.ts` e fields atômicos em `shared/lib/fields/`.</p>
+<h2>Objetivo</h2>
+<p>Para uma necessidade de form (cadastro, edição, busca):</p>
+<ol>
+<li>**Reusar schema Zod existente** (`features/<X>/validators.ts`) ou criar se faltar.</li>
+<li>**Reusar fields atômicos** (`shared/lib/fields/`) quando aplicável (CPF, email, CNPJ, telefone).</li>
+<li>**Gerar form** com RHF + zodResolver + componentes `Form*` da lib.</li>
+<li>**Conectar com mutation** da feature (`useCreate<Dominio>Mutation` ou `useUpdate<Dominio>Mutation`).</li>
+<li>**Tratar estados** (loading, error, success com toast).</li>
+<li>**Documentar** em `execution_outputs/<App>/frontend/components/<form>/design.md`.</li>
+</ol>
+<h2>Quando rodar</h2>
+<ul>
+<li>Necessidade de form (cadastro, edição, busca, filtros).</li>
+<li>Feature já tem `validators.ts` mas falta UI conectada.</li>
+<li>Spec de Design (`SC-NN-*.md`) descreve campos de um form.</li>
+</ul>
+<h2>Entradas</h2>
+<p>Obrigatórias:</p>
+<ul>
+<li>`<App>` — aplicação alvo</li>
+<li>`<dominio>` — feature alvo (ex.: `contribuicao`)</li>
+<li>`<acao>` — `create` | `update` | `search` | `custom`</li>
+<li>Localização do form (qual rota / componente vai consumir)</li>
+</ul>
+<p>Opcionais:</p>
+<ul>
+<li>Lista de campos (se diferentes do schema da feature)</li>
+<li>`SC-NN` de origem</li>
+<li>Schema customizado (se action = `custom`)</li>
+</ul>
+<h2>Pré-requisitos</h2>
+<ol>
+<li>Feature alvo existe (criada por FE-02). Se não, despachar para FE-02 primeiro.</li>
+<li>`validators.ts` da feature define `create<Dominio>Schema` ou `update<Dominio>Schema`.</li>
+<li>`hooks/use-<dominio>-mutation.ts` exporta a mutation correspondente.</li>
+<li>Lib `@funcef-componentes/react` instalada e configurada.</li>
+</ol>
+<h2>Processo</h2>
+<h3>Etapa 1 — Resolver schema</h3>
+<ol>
+<li>Ler `src/features/<dominio>/validators.ts`.</li>
+<li>Identificar schema correto:</li>
+</ol>
+<p>   - `create<Dominio>Schema` → `acao = create`</p>
+<p>   - `update<Dominio>Schema` → `acao = update`</p>
+<p>   - schema dedicado para busca/filtro → criar em `features/<X>/validators.ts` com nome `search<Dominio>Schema`.</p>
+<ol>
+<li>Mapear campos do schema → componentes da lib (tabela abaixo).</li>
+</ol>
+<h3>Etapa 2 — Mapear campo → componente</h3>
+<table><thead><tr><th>Tipo no schema</th><th>Componente da lib</th><th>Notas</th></tr></thead><tbody><tr><td>`z.string()` simples</td><td>`Input`</td><td>type="text"</td></tr><tr><td>`z.string().email()`</td><td>`Input`</td><td>type="email"</td></tr><tr><td>`z.string()` com regra de senha</td><td>`Input`</td><td>type="password" + InputGroup com toggle visibility</td></tr><tr><td>`z.number()`</td><td>`Input`</td><td>type="number" — converter `valueAsNumber`</td></tr><tr><td>`z.string()` com mask (CPF, CNPJ, telefone)</td><td>`Input` + masking (libs externas ou format on change)</td></tr><tr><td>`z.boolean()`</td><td>`Switch` ou `Checkbox`</td><td>preferir Switch para opt-in; Checkbox para listas</td></tr><tr><td>`z.enum([...])` poucos valores</td><td>`RadioGroup` ou `Select`</td><td>até 4 → Radio; 5+ → Select</td></tr><tr><td>`z.enum([...])` busca por texto</td><td>`Combobox`</td><td>quando lista é longa e usuário digita</td></tr><tr><td>`z.date()`</td><td>`InputDatePicker`</td><td>da lib</td></tr><tr><td>`z.string()` longo (descrição)</td><td>`Textarea`</td><td>da lib</td></tr><tr><td>`z.array(z.string())`</td><td>múltiplos `Checkbox` agrupados ou `Combobox` multi</td></tr><tr><td>OTP / código</td><td>`InputOTP`</td><td>da lib</td></tr></tbody></table>
+<h3>Etapa 3 — Decidir camada do form</h3>
+<p>Mesma árvore de FE-03:</p>
+<ul>
+<li>Se o form é específico de UMA rota → `app/<...>/<rota>/_components/<form>/`</li>
+<li>Se é da feature mas usado em rotas diferentes → `features/<X>/components/<form>/`</li>
+<li>Forms raramente vão para `shared/ui/` (são domínio-específicos).</li>
+</ul>
+<h3>Etapa 4 — Confirmar plano</h3>
+<pre><code>Plano de form:
+- Form: ContribuicaoForm (ação: create)
+- Camada: app/(authenticated)/contribuicao/_components/contribuicao-form/
+- Schema: createContribuicaoSchema (features/contribuicao/validators.ts:23)
+- Mutation: useCreateContribuicaoMutation
+- Campos mapeados:
+  - participanteId: Input (number)
+  - valor: Input (number) com formatter de moeda
+  - competencia: InputDatePicker (mensal)
+- onSuccess: toast.success + reset() do form
+- onError: toast.error com message do error.response.data
+- Botão submit: variant="default", loading durante mutation.isPending
+
+Pode prosseguir?
+```</code></pre>
+<h3>Etapa 5 — Gerar arquivo</h3>
+<p>Template canônico (em `app/.../_components/<form>/<form>.tsx`):</p>
+<pre><code>'use client';
+
+import * as React from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import {
+  Form, FormField, FormItem, FormLabel, FormControl, FormMessage, FormDescription,
+  Input,
+  Button,
+  toast,
+} from '@funcef-componentes/react';
+import {
+  create&lt;Dominio&gt;Schema,
+  type Create&lt;Dominio&gt;Validated,
+} from '@/features/&lt;dominio&gt;';
+import { useCreate&lt;Dominio&gt;Mutation } from '@/features/&lt;dominio&gt;';
+
+export interface &lt;Form&gt;Props {
+  onSuccess?: (data: &lt;Dominio&gt;) =&gt; void;
+  defaultValues?: Partial&lt;Create&lt;Dominio&gt;Validated&gt;;
+}
+
+export function &lt;Form&gt;({ onSuccess, defaultValues }: &lt;Form&gt;Props) {
+  const mutation = useCreate&lt;Dominio&gt;Mutation();
+  const form = useForm&lt;Create&lt;Dominio&gt;Validated&gt;({
+    resolver: zodResolver(create&lt;Dominio&gt;Schema),
+    defaultValues,
+  });
+
+  const onSubmit = async (values: Create&lt;Dominio&gt;Validated) =&gt; {
+    try {
+      const result = await mutation.mutateAsync(values);
+      toast.success('&lt;Dominio&gt; criado com sucesso');
+      form.reset();
+      onSuccess?.(result);
+    } catch (error) {
+      toast.error('Falha ao criar &lt;dominio&gt;', {
+        description: error instanceof Error ? error.message : 'Erro desconhecido',
+      });
+    }
+  };
+
+  return (
+    &lt;Form {...form}&gt;
+      &lt;form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4"&gt;
+
+        {/* Campo: &lt;nome do campo&gt; */}
+        &lt;FormField
+          control={form.control}
+          name="&lt;campo&gt;"
+          render={({ field }) =&gt; (
+            &lt;FormItem&gt;
+              &lt;FormLabel&gt;&lt;Label do campo&gt;&lt;/FormLabel&gt;
+              &lt;FormControl&gt;
+                &lt;Input placeholder="&lt;placeholder&gt;" {...field} /&gt;
+              &lt;/FormControl&gt;
+              &lt;FormDescription&gt;&lt;dica curta se necessária&gt;&lt;/FormDescription&gt;
+              &lt;FormMessage /&gt;
+            &lt;/FormItem&gt;
+          )}
+        /&gt;
+
+        {/* Repetir para cada campo */}
+
+        &lt;Button type="submit" disabled={mutation.isPending}&gt;
+          {mutation.isPending ? 'Salvando...' : 'Salvar'}
+        &lt;/Button&gt;
+      &lt;/form&gt;
+    &lt;/Form&gt;
+  );
+}
+```</code></pre>
+<h4>`index.ts` do form</h4>
+<pre><code>export { &lt;Form&gt; } from './&lt;form&gt;';
+export type { &lt;Form&gt;Props } from './&lt;form&gt;';
+```</code></pre>
+<h3>Etapa 6 — Gerar artefato de relato</h3>
+<p>`execution_outputs/<App>/frontend/components/<form>/design.md`:</p>
+<pre><code>---
+id: FE-04-&lt;form&gt;
+app: &lt;App&gt;
+form: &lt;form&gt;
+feature: &lt;dominio&gt;
+acao: create | update | search | custom
+schema: &lt;nome do schema&gt;
+mutation: &lt;nome da mutation&gt;
+agent: FE-04 (frontend-form-agent)
+date: 2026-05-22
+confidence: alta
+linked_screens: [SC-NN]  # se houver
+---
+
+# Form — `&lt;Form&gt;`
+
+## Campos
+
+| Nome | Componente lib | Schema | Validação | Origem |
+|---|---|---|---|---|
+| participanteId | Input (number) | z.number().int().positive() | obrigatório | createContribuicaoSchema |
+| valor | Input (number) | z.number().positive() | &gt; 0 | createContribuicaoSchema |
+| competencia | InputDatePicker | z.date() | obrigatório | createContribuicaoSchema |
+
+## Fluxo
+
+1. Usuário preenche → validação client-side via zodResolver
+2. Submit → useCreateContribuicaoMutation.mutateAsync
+3. Sucesso → toast.success + form.reset() + onSuccess prop
+4. Erro → toast.error com message
+
+## Arquivos criados
+- `app/(authenticated)/contribuicao/_components/contribuicao-form/contribuicao-form.tsx`
+- `app/(authenticated)/contribuicao/_components/contribuicao-form/index.ts`
+
+## Confiança
+- **alta** — schema lido do disco, mapeamento campo→componente segue tabela canônica
+
+## Histórico
+| Data | Mudança |
+|---|---|
+| 2026-05-22 | v1: criado por FE-04 |
+```</code></pre>
+<h2>Critérios de qualidade</h2>
+<ul>
+<li>**Schema é importado** da feature, não duplicado inline.</li>
+<li>**Mutation é importada** da feature, não criada nova.</li>
+<li>**`'use client'`** no topo do arquivo (forms são client components).</li>
+<li>**`toast`** da lib usado para feedback.</li>
+<li>**Loading state** no botão (`disabled={mutation.isPending}` + label dinâmico).</li>
+<li>**`form.reset()`** após sucesso.</li>
+<li>**`FormMessage`** em cada `FormItem` — exibe erros do Zod automaticamente.</li>
+<li>**`FormDescription`** apenas se há dica genuína; não poluir.</li>
+</ul>
+<h2>Confiança / rastreabilidade</h2>
+<table><thead><tr><th>Origem</th><th>Confiança</th></tr></thead><tbody><tr><td>Schema lido de `validators.ts`</td><td>alta</td></tr><tr><td>Mapeamento campo→componente da lib (tabela canônica)</td><td>alta</td></tr><tr><td>Mensagem de erro vinda do backend (estrutura)</td><td>média — depende do contrato do microsserviço</td></tr><tr><td>Toast como UX padrão</td><td>alta</td></tr></tbody></table>
+<h2>Você NUNCA</h2>
+<ul>
+<li>Define schema Zod inline no componente — sempre importa da feature.</li>
+<li>Chama `apiClient.post()` direto no form — usa o hook de mutation.</li>
+<li>Usa `console.log` de erro em produção — usa `toast.error`.</li>
+<li>Esquece `'use client'` no topo (forms são client).</li>
+<li>Cria masking complexo inline — extrai para `shared/lib/formatters/` se reusável.</li>
+</ul>
+<h2>Você SEMPRE</h2>
+<ul>
+<li>Reusa `shared/lib/fields/` quando o campo é coberto (cpfField, emailField, telefoneField).</li>
+<li>Usa `Form*` da lib — não monta a estrutura manualmente.</li>
+<li>Adiciona `defaultValues` quando o form é de edição.</li>
+<li>Trata estado de loading no botão.</li>
+<li>Reseta o form após sucesso (a menos que o usuário diga o contrário).</li>
+<li>Quando vem de SC-NN, copia `figma_node_id` para frontmatter do `design.md`.</li>
+</ul>
+<h2>Comandos típicos</h2>
+<table><thead><tr><th>Intenção</th><th>Comando</th></tr></thead><tbody><tr><td>Criar form de create</td><td>`@frontend-form-agent criar form de cadastro do <dominio> em <App>`</td></tr><tr><td>Criar form de update</td><td>`@frontend-form-agent criar form de edição do <dominio> em <App>`</td></tr><tr><td>Criar form de busca</td><td>`@frontend-form-agent criar form de busca/filtro para <dominio> em <App>`</td></tr><tr><td>Form a partir de SC-NN</td><td>`@frontend-form-agent criar form para SC-NN em <App>`</td></tr></tbody></table>
+<h2>Histórico</h2>
+<p>___TABLE_PLACEHOLDER_3___</div></p>
+    <p class="meta">Gerado de: <code>../../frontend/core/FE-04-Form.md</code> &middot; <a href="../index.html">Portal</a></p>
+  </main>
+</div>
+</body>
+</html>

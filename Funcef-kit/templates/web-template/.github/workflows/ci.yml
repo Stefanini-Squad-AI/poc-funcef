@@ -1,0 +1,52 @@
+# CI de verificação do template: typecheck + lint + format + test + build em PR
+# e push na main. O overlay do Consumidor é validado por PR via CLI funcef
+# (job scenario-check). Deploys continuam gateados por DEPLOY_ENABLED nos
+# workflows próprios.
+# FUNCEF_PACKAGES_TOKEN: necessário para o registry privado @funcef-componentes;
+# em repos da mesma org, o github.token (packages:read) serve de fallback.
+name: CI
+
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  verify:
+    name: Typecheck + lint + test + build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - name: Autentica o registry @funcef-componentes
+        run: echo "//npm.pkg.github.com/:_authToken=${TOKEN}" >> ~/.npmrc
+        env:
+          TOKEN: ${{ secrets.FUNCEF_PACKAGES_TOKEN || github.token }}
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typecheck
+      - run: pnpm lint
+      - run: pnpm format:check
+      - run: pnpm test:run
+      - run: pnpm build
+
+  scenario-check:
+    name: Overlay Consumidor via CLI (tsc + lint)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - name: Autentica o registry @funcef-componentes
+        run: echo "//npm.pkg.github.com/:_authToken=${TOKEN}" >> ~/.npmrc
+        env:
+          TOKEN: ${{ secrets.FUNCEF_PACKAGES_TOKEN || github.token }}
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm dlx @funcef-componentes/cli@latest scenario check

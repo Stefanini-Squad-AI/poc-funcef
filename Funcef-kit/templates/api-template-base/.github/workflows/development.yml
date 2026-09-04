@@ -1,0 +1,66 @@
+# Pipeline de DESENVOLVIMENTO — padrão FUNCEF (reusable workflows de funcef-devops/pipelines).
+#
+# Ao gerar um microsserviço a partir deste template, ajuste APENAS o valor de `environment`
+# (o GitHub Environment do seu sistema, ex.: sis-internos-dev) — os secrets são herdados do
+# Environment/repositório e não devem ser redeclarados com valores literais.
+#
+# Pré-requisitos no repositório derivado:
+#   - GitHub Environment criado com os secrets ARM_*, APP_*, APIM_*, DOCKER_REGISTRY;
+#   - FUNCEF_PACKAGES_TOKEN (PAT com read:packages) — consumido pelo Dockerfile como build secret
+#     de mesmo nome para restaurar os pacotes FUNCEF.* do GitHub Packages.
+name: Desenvolvimento
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:
+
+concurrency:
+  group: "deploy-dev"
+
+jobs:
+  deploy-to-web-app:
+    name: Deploy para ambiente de desenvolvimento
+    uses: funcef-devops/pipelines/.github/workflows/dotnet-deploy-to-web-app.yml@main
+    with:
+      environment: sis-internos-dev
+    secrets:
+      ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+      ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+      ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+      APP_SUBSCRIPTION_ID: ${{ secrets.APP_SUBSCRIPTION_ID }}
+      APP_RESOURCE_GROUP: ${{ secrets.APP_RESOURCE_GROUP }}
+      FUNCEF_PACKAGES_TOKEN: ${{ secrets.FUNCEF_PACKAGES_TOKEN }}
+      DOCKER_REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
+
+  create-api-apim:
+    name: Criar API no API Management
+    uses: funcef-devops/pipelines/.github/workflows/create-api-apim.yml@main
+    needs: deploy-to-web-app
+    with:
+      environment: sis-internos-dev
+    secrets:
+      ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+      ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+      ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+      APP_SUBSCRIPTION_ID: ${{ secrets.APP_SUBSCRIPTION_ID }}
+      APP_RESOURCE_GROUP: ${{ secrets.APP_RESOURCE_GROUP }}
+      APIM_SUBSCRIPTION_ID: ${{ secrets.APIM_SUBSCRIPTION_ID }}
+      APIM_RESOURCE_GROUP_NAME: ${{ secrets.APIM_RESOURCE_GROUP_NAME }}
+      APIM_NAME: ${{ secrets.APIM_NAME }}
+
+  deploy-to-apim:
+    name: API Management
+    uses: funcef-devops/pipelines/.github/workflows/update-apim.yml@main
+    needs: create-api-apim
+    with:
+      environment: sis-internos-dev
+    secrets:
+      ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+      ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+      ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+      APP_SUBSCRIPTION_ID: ${{ secrets.APP_SUBSCRIPTION_ID }}
+      APP_RESOURCE_GROUP: ${{ secrets.APP_RESOURCE_GROUP }}
+      APIM_SUBSCRIPTION_ID: ${{ secrets.APIM_SUBSCRIPTION_ID }}
+      APIM_RESOURCE_GROUP_NAME: ${{ secrets.APIM_RESOURCE_GROUP_NAME }}
+      APIM_NAME: ${{ secrets.APIM_NAME }}

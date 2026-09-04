@@ -1,0 +1,47 @@
+name: Homologação
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy-to-homologation:
+    name: Build e deploy
+    if: ${{ vars.DEPLOY_ENABLED == 'true' && (github.event_name == 'workflow_dispatch' || (!startsWith(github.event.head_commit.message, 'chore(main):') && !contains(github.event.head_commit.message, 'release-please'))) }}
+    uses: funcef-devops/pipelines/.github/workflows/nextjs-deploy-to-web-app.yml@main
+    with:
+      environment: web-template-hom # TODO: Rename to <project>-hom
+      additional-variables: |
+        API_URL
+        NEXT_PUBLIC_ENTRADA_URL
+        NEXT_PUBLIC_APP_URL
+        NEXT_PUBLIC_BASE_PATH
+        MICROSOFT_CLIENT_ID
+        MICROSOFT_CLIENT_SECRET
+        TENANT_ID
+        AUDIENCE_API
+        BETTER_AUTH_SECRET
+        REDIS_URL
+        COOKIE_MAX_AGE
+    secrets:
+      ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+      ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+      ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+      KEY_VAULT_RESOURCE_NAME: ${{ secrets.KEY_VAULT_RESOURCE_NAME }}
+      APP_SUBSCRIPTION_ID: ${{ secrets.APP_SUBSCRIPTION_ID }}
+      APP_RESOURCE_GROUP: ${{ secrets.APP_RESOURCE_GROUP }}
+      FUNCEF_PACKAGES_TOKEN: ${{ secrets.FUNCEF_PACKAGES_TOKEN }}
+      FUNCEF_DEVOPS_TOKEN: ${{ secrets.FUNCEF_DEVOPS_TOKEN }}
+      DOCKER_REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
+
+  generate-release-pr:
+    name: Gerar PR de release
+    if: ${{ vars.DEPLOY_ENABLED == 'true' }}
+    uses: funcef-devops/pipelines/.github/workflows/open-release-pr.yml@main
+    permissions:
+      contents: write
+      pull-requests: write
+    secrets:
+      FUNCEF_DEVOPS_TOKEN: ${{ secrets.FUNCEF_DEVOPS_TOKEN }}
+      RELEASE_PLEASE_GITHUB_TOKEN: ${{ secrets.RELEASE_PLEASE_GITHUB_TOKEN }}

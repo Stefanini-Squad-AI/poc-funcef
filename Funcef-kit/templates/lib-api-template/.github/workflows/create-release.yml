@@ -1,0 +1,277 @@
+# =============================================================================
+# Workflow para criar Release e Tag
+# =============================================================================
+
+name: '🏷️ Criar Release e Tag - FUNCEF API Template'
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Versao do release (ex: 1.0.0, 1.0.0-beta.1)'
+        required: true
+        type: string
+      
+      release_type:
+        description: 'Tipo de release'
+        required: true
+        default: 'stable'
+        type: choice
+        options:
+          - stable
+          - prerelease
+      
+      generate_changelog:
+        description: 'Gerar changelog automaticamente'
+        required: false
+        default: true
+        type: boolean
+      
+      release_notes:
+        description: 'Notas da release (opcional)'
+        required: false
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: read
+  issues: read
+  packages: read
+
+env:
+  DOTNET_VERSION: '10.0.x'
+  PROJECT_NAME: 'funcef-api'
+  MAIN_PROJECT: 'Funcef.Api.Template.csproj'
+  PACKAGE_ID: 'funcef-api'
+  ORGANIZATION: 'FUNCEF-Componentes'
+
+jobs:
+  validate:
+    name: "VALIDATE - Versao e Projeto"
+    runs-on: ubuntu-latest
+    
+    outputs:
+      version: ${{ steps.validate-version.outputs.version }}
+      version-tag: ${{ steps.validate-version.outputs.version-tag }}
+      is-prerelease: ${{ steps.validate-version.outputs.is-prerelease }}
+    
+    steps:
+      - name: "Checkout do Repositorio"
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      
+      - name: "Configurar .NET SDK"
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+          source-url: https://nuget.pkg.github.com/FUNCEF-Componentes/index.json
+        env:
+          NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: "Validar Versao"
+        id: validate-version
+        run: |
+          VERSION="${{ inputs.version }}"
+          VERSION_TAG="v${VERSION}"
+          
+          if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.]+)?$ ]]; then
+            echo "::error::Versao invalida! Use o formato SemVer (ex: 1.0.0 ou 1.0.0-beta.1)"
+            exit 1
+          fi
+          
+          IS_PRERELEASE="false"
+          if [[ "$VERSION" =~ - ]] || [ "${{ inputs.release_type }}" = "prerelease" ]; then
+            IS_PRERELEASE="true"
+          fi
+          
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "version-tag=$VERSION_TAG" >> $GITHUB_OUTPUT
+          echo "is-prerelease=$IS_PRERELEASE" >> $GITHUB_OUTPUT
+          
+          echo "Versao validada:"
+          echo "  Versao: $VERSION"
+          echo "  Tag: $VERSION_TAG"
+          echo "  Prerelease: $IS_PRERELEASE"
+      
+      - name: "Verificar Tag Existente"
+        run: |
+          VERSION_TAG="${{ steps.validate-version.outputs.version-tag }}"
+          
+          if git rev-parse "$VERSION_TAG" >/dev/null 2>&1; then
+            echo "::error::Tag $VERSION_TAG ja existe!"
+            exit 1
+          fi
+          
+          echo "Tag $VERSION_TAG disponivel"
+      
+      - name: "Verificar Projeto"
+        run: |
+          if [ ! -f "${{ env.MAIN_PROJECT }}" ]; then
+            echo "::error::Projeto nao encontrado: ${{ env.MAIN_PROJECT }}"
+            exit 1
+          fi
+          
+          dotnet pack "${{ env.MAIN_PROJECT }}" -c Release -o ./validate-out --verbosity minimal
+          
+          if [ ! "$(find ./validate-out -name '*.nupkg' | head -n 1)" ]; then
+            echo "::error::Falha ao gerar pacote de validacao"
+            exit 1
+          fi
+          
+          rm -rf ./validate-out
+          echo "Projeto validado e empacota corretamente"
+
+  changelog:
+    name: "CHANGELOG - Geracao Automatica"
+    runs-on: ubuntu-latest
+    needs: validate
+    
+    outputs:
+      changelog: ${{ steps.generate-changelog.outputs.changelog }}
+      has-changes: ${{ steps.generate-changelog.outputs.has-changes }}
+    
+    steps:
+      - name: "Checkout do Repositorio"
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      
+      - name: "Gerar Changelog"
+        id: generate-changelog
+        if: inputs.generate_changelog == true
+        run: |
+          echo "Gerando changelog..."
+          
+          LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          
+          if [ -z "$LAST_TAG" ]; then
+            COMMIT_RANGE="HEAD"
+          else
+            COMMIT_RANGE="${LAST_TAG}..HEAD"
+          fi
+          
+          echo "## Novidades na versao ${{ needs.validate.outputs.version }}" > changelog.md
+          echo "" >> changelog.md
+          
+          FEATURES=$(git log $COMMIT_RANGE --pretty=format:"- %s (%h)" --grep="^feat" -i 2>/dev/null || echo "")
+          if [ -n "$FEATURES" ]; then
+            echo "### Novas Funcionalidades" >> changelog.md
+            echo "$FEATURES" >> changelog.md
+            echo "" >> changelog.md
+          fi
+          
+          FIXES=$(git log $COMMIT_RANGE --pretty=format:"- %s (%h)" --grep="^fix" -i 2>/dev/null || echo "")
+          if [ -n "$FIXES" ]; then
+            echo "### Correcoes" >> changelog.md
+            echo "$FIXES" >> changelog.md
+            echo "" >> changelog.md
+          fi
+          
+          COMMIT_COUNT=$(git rev-list --count $COMMIT_RANGE 2>/dev/null || echo "0")
+          echo "---" >> changelog.md
+          echo "**$COMMIT_COUNT commits nesta release**" >> changelog.md
+          
+          echo "changelog<<EOF" >> $GITHUB_OUTPUT
+          cat changelog.md >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+          echo "has-changes=true" >> $GITHUB_OUTPUT
+      
+      - name: "Notas Manuais"
+        if: inputs.generate_changelog == false
+        run: |
+          echo "has-changes=false" >> $GITHUB_OUTPUT
+
+  create-release:
+    name: "RELEASE - Criar e Publicar"
+    runs-on: ubuntu-latest
+    needs: [validate, changelog]
+    
+    outputs:
+      release-url: ${{ steps.create-release.outputs.html_url }}
+    
+    steps:
+      - name: "Checkout do Repositorio"
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      
+      - name: "Criar Tag Git"
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          git tag -a "${{ needs.validate.outputs.version-tag }}" \
+            -m "Release ${{ needs.validate.outputs.version }}"
+          
+          git push origin "${{ needs.validate.outputs.version-tag }}"
+          
+          echo "Tag criada: ${{ needs.validate.outputs.version-tag }}"
+      
+      - name: "Preparar Notas da Release"
+        id: prepare-notes
+        env:
+          VERSION: ${{ needs.validate.outputs.version }}
+          CHANGELOG: ${{ needs.changelog.outputs.changelog }}
+          RELEASE_NOTES: ${{ inputs.release_notes }}
+          PACKAGE_ID: ${{ env.PACKAGE_ID }}
+          ORGANIZATION: ${{ env.ORGANIZATION }}
+        run: |
+          touch release-notes.md
+          
+          if [ "${{ inputs.generate_changelog }}" = "true" ]; then
+            echo "$CHANGELOG" > release-notes.md
+          else
+            echo "## Release ${VERSION}" > release-notes.md
+          fi
+          
+          if [ -n "$RELEASE_NOTES" ]; then
+            echo "" >> release-notes.md
+            echo "## Notas Adicionais" >> release-notes.md
+            echo "$RELEASE_NOTES" >> release-notes.md
+          fi
+          
+          echo "" >> release-notes.md
+          echo "---" >> release-notes.md
+          echo "## Instalacao" >> release-notes.md
+          echo '```bash' >> release-notes.md
+          echo "dotnet new install $PACKAGE_ID --version ${VERSION}" >> release-notes.md
+          echo '```' >> release-notes.md
+          echo "" >> release-notes.md
+          echo "## Uso" >> release-notes.md
+          echo '```bash' >> release-notes.md
+          echo "dotnet new funcef-api --name MeuProjeto" >> release-notes.md
+          echo '```' >> release-notes.md
+      
+      - name: "Criar Release no GitHub"
+        id: create-release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION_TAG: ${{ needs.validate.outputs.version-tag }}
+          VERSION: ${{ needs.validate.outputs.version }}
+          IS_PRERELEASE: ${{ needs.validate.outputs.is-prerelease }}
+        run: |
+          PRERELEASE_FLAG=""
+          if [ "$IS_PRERELEASE" = "true" ]; then
+            PRERELEASE_FLAG="--prerelease"
+          fi
+          
+          RELEASE_URL=$(gh release create "$VERSION_TAG" \
+            --title "Release $VERSION - FUNCEF API Template" \
+            --notes-file release-notes.md \
+            $PRERELEASE_FLAG \
+            --repo ${{ github.repository }})
+          
+          echo "html_url=$RELEASE_URL" >> $GITHUB_OUTPUT
+          echo "Release criada: $RELEASE_URL"
+      
+      - name: "Confirmacao"
+        run: |
+          echo "=============================================="
+          echo "RELEASE CRIADA COM SUCESSO"
+          echo "=============================================="
+          echo "Versao: ${{ needs.validate.outputs.version }}"
+          echo "Tag: ${{ needs.validate.outputs.version-tag }}"
+          echo "Tipo: ${{ needs.validate.outputs.is-prerelease == 'true' && 'Prerelease' || 'Stable' }}"
+          echo "URL: ${{ steps.create-release.outputs.html_url }}"
+          echo "=============================================="

@@ -1,0 +1,126 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>BE-01 — Visão geral backend &mdash; Manual de Arquitetura FUNCEF</title>
+  <link rel="stylesheet" href="../assets/style.css" />
+</head>
+<body>
+<div class="layout">
+  <nav>
+    <h1>Manual de Arquitetura</h1>
+    <p class="subtitle"><a href="../index.html">&larr; Portal</a></p>
+    <div class="section">Cap&iacute;tulo</div>
+    <a href="#" class="active">BE-01 — Visão geral backend</a>
+  </nav>
+  <main class="wide generated-content">
+    <h1>BE-01 — Visão Geral</h1>
+<h2>1.1 Propósito</h2>
+<p>Um <strong>microserviço backend FUNCEF</strong> é uma API REST <code>.NET 10</code> que:</p>
+<ol>
+<li>Expõe um <strong>conjunto coeso de endpoints HTTP</strong> para um domínio específico (ex.: cadastro de participantes, contábil, financeiro).</li>
+<li>Persiste em <strong>Oracle</strong> (banco corporativo) via <code>FUNCEF.ORM</code> (EF Core + Dapper híbrido).</li>
+<li>Autentica via <strong>Azure Entra ID</strong> (OAuth 2.0 + PKCE para usuários, Client Credentials para M2M).</li>
+<li>Resolve segredos via <strong>Azure Key Vault</strong> (<code>FUNCEF.Cofre</code>).</li>
+<li>Reporta telemetria via <strong>OpenTelemetry → Application Insights</strong>.</li>
+<li>Audita mudanças de entidade no Oracle (via interceptor <code>FUNCEF.ORM.Audit</code>, atributo <code>[Auditable]</code>) e tentativas de login também no Oracle (via <code>IAccessAuditService</code> do <code>FUNCEF.Autenticacao</code>, tabela <code>LOG_AUDIT.Acesso_LOG</code>).</li>
+<li>Opera atrás de <strong>proxy/ingress</strong> que termina TLS, exposto na porta <code>8080</code>.</li>
+<li>Roda em <strong>Kubernetes</strong> com probes <code>/health/live</code> e <code>/health/ready</code>.</li>
+</ol>
+<p>A documentação desta família descreve o <strong>padrão</strong>; o projeto <code>funcef/api-template-base</code> materializa esse padrão com um domínio didático para servir de referência viva.</p>
+<h2>1.2 Capacidades esperadas de qualquer microserviço FUNCEF</h2>
+<table><thead><tr><th>Capacidade</th><th>Onde se materializa</th></tr></thead><tbody><tr><td>**CRUD completo via CQRS/Mediator**</td><td>Pasta `Commands/{Entidade}/{Acao}/` + `Queries/{Entidade}/{Detalhe}/`</td></tr><tr><td>**Query paginada com busca e ordenação**</td><td>`GetPagedAsync` em Service + `PagedRequest`/`PaginatedResult<T>`</td></tr><tr><td>**Query com auto-include de navegação**</td><td>`[AutoInclude]` em navegação + `GetByIdWithAutoIncludesAsync`</td></tr><tr><td>**Transação multi-entidade (EF Core)**</td><td>Handler com `IUnitOfWork.BeginAsync / CommitAsync / RollbackAsync`</td></tr><tr><td>**Transação multi-entidade (Dapper)**</td><td>Handler usa mesmo `IUnitOfWork`; Service usa `_repository.ExecuteAsync(sql, params)`</td></tr><tr><td>**Validação no pipeline do Mediator**</td><td>`AbstractValidator<TCommand>` + `ValidationBehavior`</td></tr><tr><td>**Exceções tipadas → HTTP padronizado**</td><td>`NotFoundException` (404), `BusinessException` (400), `ConflictException` (409, herda `BusinessException`, mapeada nativamente pela lib) + `GlobalExceptionMiddleware`</td></tr><tr><td>**Auditoria automática de entidades**</td><td>`[Auditable("Recurso")]` + interceptor do `FUNCEF.ORM.Audit`</td></tr><tr><td>**Auditoria de acesso (login)**</td><td>`IAccessAuditService` → Oracle (`LOG_AUDIT.Acesso_LOG`), registrado por `AddFUNCEFAuthentication`</td></tr><tr><td>**OAuth2 + PKCE interativo**</td><td>`AddFuncefAuthControllers` (rotas `/auth/login`, `/auth/callback`, …)</td></tr><tr><td>**Client Credentials (M2M)**</td><td>Endpoint `POST /auth/m2m/token`</td></tr><tr><td>**Refresh tokens em Redis**</td><td>`AddRedisCache` (`NoSql:RedisCache`) + `Auth:RefreshToken:StorageType = "Redis"`</td></tr><tr><td>**Health checks com probes K8s**</td><td>`/health`, `/health/live`, `/health/ready`, `/health/version`</td></tr><tr><td>**Telemetria estruturada**</td><td>`ITelemetry` injetado; OpenTelemetry → App Insights</td></tr><tr><td>**Fail-fast em produção**</td><td>`AddConfigurationValidation` aborta startup se config crítica inválida</td></tr><tr><td>**Containerização**</td><td>`Dockerfile` multi-stage com `HEALTHCHECK` em `/health/live`</td></tr><tr><td>**Rate limiting por IP**</td><td>`UseRateLimiting` (`FUNCEF.Essenciais`) — seção `RateLimiting` no appsettings (default 100 req/min)</td></tr><tr><td>**CORS configurável por ambiente**</td><td>`Cors:Politica` + `Cors:OriginsPermitidas` no `appsettings.{Env}.json`</td></tr></tbody></table>
+<h2>1.3 Stack canônica (resumo)</h2>
+<table><thead><tr><th>Camada</th><th>Tecnologia</th><th>Componente FUNCEF</th></tr></thead><tbody><tr><td>Runtime</td><td>.NET 10 / C# 13 / `Nullable=enable` / `TreatWarningsAsErrors=true`</td><td>—</td></tr><tr><td>Arquitetura</td><td>Clean Architecture + CQRS/Mediator</td><td>`FUNCEF.Essenciais`</td></tr><tr><td>Banco relacional</td><td>Oracle</td><td>`FUNCEF.ORM`</td></tr><tr><td>ORM híbrido</td><td>EF Core (CRUD/transações) + Dapper (SQL direto)</td><td>`FUNCEF.ORM`, `FUNCEF.ORM.Dapper`</td></tr><tr><td>Autenticação</td><td>Azure Entra ID — OAuth 2.0 + PKCE + Client Credentials</td><td>`FUNCEF.Autenticacao`</td></tr><tr><td>Cache / documentos</td><td>Redis 7+ / MongoDB 7+</td><td>`FUNCEF.NoSql` (`AddRedisCache` / `AddMongoDocuments<T>`)</td></tr><tr><td>Refresh Token Store / Auditoria de acesso</td><td>Redis (via `FUNCEF.NoSql`) / Oracle</td><td>`FUNCEF.Autenticacao` (Redis via `FUNCEF.NoSql` (`ICacheStore`); auditoria de acesso em Oracle via `IAccessAuditService`)</td></tr><tr><td>Secrets</td><td>Azure Key Vault</td><td>`FUNCEF.Cofre`</td></tr><tr><td>Telemetria</td><td>OpenTelemetry + Azure Monitor (Application Insights)</td><td>`FUNCEF.Essenciais` (`AddAzureMonitorTelemetry`)</td></tr><tr><td>Storage</td><td>Azure Blob / Queue / Table</td><td>`FUNCEF.Armazenamentos`</td></tr><tr><td>Validação</td><td>FluentValidation com helpers FUNCEF</td><td>`FUNCEF.Essenciais.Core.Validation.FluentValidation`</td></tr><tr><td>Testes</td><td>MSTest + NSubstitute</td><td>—</td></tr></tbody></table>
+<p>Detalhes em <a href="../_shared/Stack-Canonica.md">Stack-Canonica</a>.</p>
+<h2>1.4 Componentes FUNCEF.* utilizados</h2>
+<table><thead><tr><th>Componente</th><th>Pontos de extensão expostos</th><th>Responsabilidade</th></tr></thead><tbody><tr><td>`FUNCEF.Essenciais`</td><td>`IMediator`, `ICommand`, `IQuery`, `BaseController`, `ITelemetry`, `BusinessException`, `NotFoundException`, `ValidationBehavior`, `AddMediatorWithDefaults`, `GlobalExceptionMiddleware`, helpers de validação, helpers de paginação</td><td>Cérebro do microserviço — CQRS, telemetria, exceções, validação, pipeline HTTP base</td></tr><tr><td>`FUNCEF.ORM`</td><td>`BaseDbContext`, `IRepository<T>`, `IUnitOfWork`, `[Auditable]`, `[AutoInclude]`, `AddFuncefORM`, `AddFuncefORMDbContext`, `AddFuncefORMDevelopment`, `AddFuncefORMHealthCheck`, `AddObjectMapper`, `[MapFrom]`, `[NestedMap]`, `MapTo`</td><td>Persistência (EF + Dapper), repositório genérico, UoW, mapeamento, auditoria</td></tr><tr><td>`FUNCEF.Autenticacao`</td><td>`AddFUNCEFAuthentication`, `AddFuncefAuthControllers`, `[FuncefAuthorize]`, `AddSwaggerBearerAuthentication`, `AddFuncefSecurityRedis`, `IAccessAuditService`</td><td>Autenticação **pura** (conformidade Entra; autorização de negócio fica na app), controllers de auth auto-registrados, auditoria de acesso em Oracle, Redis via `FUNCEF.NoSql` (`ICacheStore`)</td></tr><tr><td>`FUNCEF.NoSql`</td><td>`AddRedisCache`, `AddMongoDocuments<T>`</td><td>Cache (Redis) e documentos (MongoDB) com resolução de conn string via Key Vault</td></tr><tr><td>`FUNCEF.Cofre`</td><td>`AddVaultComplete`, `IVaultService`</td><td>Segredos no Key Vault com cache, telemetria, circuit breaker</td></tr><tr><td>`FUNCEF.Armazenamentos`</td><td>`AddStorageServices`</td><td>Azure Blob/Queue/Table com circuit breaker e health check</td></tr><tr><td>`FUNCEF.ORM.Audit`</td><td>`AddFuncefOrmAudit`</td><td>Interceptor `SaveChanges` que persiste auditoria de mudanças de entidade no Oracle</td></tr><tr><td>`FUNCEF.Abstractions`</td><td>contratos compartilhados ([CMP-08-Abstractions](../componentes/CMP-08-Abstractions.md))</td><td>Abstrações comuns às libs FUNCEF.* (3.0.0)</td></tr><tr><td>`FUNCEF.Build`</td><td>props/targets de build ([CMP-09-Build](../componentes/CMP-09-Build.md))</td><td>Padronização de build dos pacotes FUNCEF.* (3.0.0)</td></tr></tbody></table>
+<p>Catálogo orientativo (resumo, when-to-use, principais APIs) em <a href="../componentes/CMP-00-Indice.md"><code>componentes/</code></a>. Código-fonte e READMEs oficiais em <code>funcef-componentes/<lib>/</code>.</p>
+<h2>1.5 Estrutura do repositório (padrão)</h2>
+<pre><code>{servico-repo}/
+├── Directory.Build.props            # net10.0 · C# 13 · Nullable · TreatWarningsAsErrors
+├── Dockerfile                       # multi-stage; HEALTHCHECK em /health/live
+├── {Servico}.slnx                   # solution (.slnx, novo formato)
+├── README.md                        # documentação interna do serviço
+├── docs/                            # documentação técnica interna (opcional)
+├── src/
+│   ├── {Servico}.API/               # ASP.NET Core 10 · Program.cs · Controllers · appsettings
+│   ├── {Servico}.Application/       # Commands · Queries · Handlers · Services · DTOs · Exceptions
+│   ├── {Servico}.Domain/            # Entidades (PK própria long IDENTITY, sem BaseEntity)
+│   └── {Servico}.Infrastructure/    # AppDbContext · Seeders · DI
+└── tests/
+    └── {Servico}.Tests/             # MSTest + NSubstitute · Domain/Application/Infrastructure/API
+```</code></pre>
+<p>> <strong>Nota:</strong> no projeto de referência <code>api-template-base</code>, <code>{Servico}</code> é materializado como <code>TemplateBase</code>. Em um serviço real, use o nome do domínio — <code>PortalParticipante.API</code>, <code>MsContabil.Application</code>, etc.</p>
+<p>Detalhes em <a href="../arquitetura/BE-02-Clean-Architecture.md">BE-02-Clean-Architecture</a> §2.3.</p>
+<h2>1.6 Diagrama de contexto</h2>
+<pre><code>graph TB
+    subgraph Users ["Atores"]
+        WebUser["Usuário Web&lt;br/&gt;(Browser)"]
+        ExternalApp["Aplicação M2M&lt;br/&gt;(Client Credentials)"]
+        Dev["Desenvolvedor&lt;br/&gt;(Swagger)"]
+    end
+
+    API["{Servico}.API&lt;br/&gt;(.NET 10)"]
+
+    subgraph Azure ["Azure"]
+        EntraId["Entra ID&lt;br/&gt;(Identity)"]
+        KeyVault["Key Vault&lt;br/&gt;(Secrets)"]
+        AppInsights["Application Insights&lt;br/&gt;(Telemetria)"]
+        AzStorage["Storage&lt;br/&gt;(Blob/Queue/Table)"]
+    end
+
+    subgraph Data ["Persistência"]
+        Oracle[("Oracle&lt;br/&gt;{SCHEMA} + Auditoria/Access Logs")]
+        Redis[("Redis&lt;br/&gt;Cache + Refresh Tokens")]
+        Mongo[("MongoDB&lt;br/&gt;Documentos")]
+    end
+
+    WebUser --&gt;|"OAuth2 + PKCE&lt;br/&gt;HTTPS"| API
+    ExternalApp --&gt;|"Client Credentials&lt;br/&gt;JWT Bearer"| API
+    Dev --&gt;|"Swagger UI&lt;br/&gt;(dev/hml)"| API
+
+    API --&gt;|"OIDC"| EntraId
+    API --&gt;|"Resolve segredos"| KeyVault
+    API --&gt;|"OpenTelemetry"| AppInsights
+    API --&gt;|"FUNCEF.Armazenamentos"| AzStorage
+    API --&gt;|"EF Core + Dapper"| Oracle
+    API --&gt;|"StackExchange.Redis"| Redis
+    API --&gt;|"MongoDB.Driver"| Mongo
+```</code></pre>
+<h2>1.7 Decisões arquiteturais (resumo)</h2>
+<table><thead><tr><th>Decisão</th><th>Escolha</th><th>Motivação</th></tr></thead><tbody><tr><td>Arquitetura macro</td><td>Clean Architecture (4 camadas)</td><td>Isolamento de domínio, testabilidade, independência de frameworks</td></tr><tr><td>Padrão de aplicação</td><td>CQRS/Mediator + Service Layer</td><td>Handler = orquestração + transação · Service = lógica + dados</td></tr><tr><td>ORM</td><td>EF Core + Dapper híbrido</td><td>EF para CRUD/transações · Dapper para SQL Oracle específico</td></tr><tr><td>Pipeline de validação</td><td>FluentValidation com `ValidationBehavior` no Mediator</td><td>Validação antes do Handler; controllers ficam finos</td></tr><tr><td>Tratamento de exceções</td><td>Exceções tipadas + `GlobalExceptionMiddleware`</td><td>Respostas HTTP padronizadas (400/404/409/500) sem `try/catch` espalhado</td></tr><tr><td>Mapeamento DTO</td><td>`[MapFrom]` / `[NestedMap]` do `FuncefORM.Mapping`</td><td>Atributos explícitos no DTO; sem reflection opaca</td></tr><tr><td>Identidade</td><td>Azure Entra ID com PKCE para web e Client Credentials para M2M</td><td>Padrão corporativo FUNCEF</td></tr><tr><td>Segredos</td><td>Azure Key Vault com `UseKeyVaultForConnectionString = true` em produção</td><td>Nunca commitar credenciais; rotação centralizada</td></tr><tr><td>Endpoints de saúde</td><td>`/health`, `/health/live`, `/health/ready`, `/health/version`</td><td>Probes K8s (liveness/readiness)</td></tr></tbody></table>
+<p>ADRs completos em <a href="../_shared/Decisoes-Arquiteturais.md">Decisoes-Arquiteturais</a>.</p>
+<h2>1.8 O que NÃO está no padrão base</h2>
+<table><thead><tr><th>Não incluído</th><th>Como tratar quando precisar</th></tr></thead><tbody><tr><td>Mensageria (Queue / Service Bus)</td><td>Azure Queue Storage para fire-and-forget simples; Service Bus para pub/sub, dead-letter, sessions. Ver [Decisoes-Arquiteturais](../_shared/Decisoes-Arquiteturais.md) ADR-018</td></tr><tr><td>Background jobs / scheduling</td><td>**Quartz.NET** (`FUNCEF.Jobs`) in-process; Azure Functions Timer Trigger quando desacoplado. Ver ADR-020</td></tr><tr><td>GraphQL</td><td>Não está no padrão; manter REST salvo justificativa explícita</td></tr><tr><td>AutoMapper / Mapster</td><td>Não — usar `[MapFrom]`/`[NestedMap]` do `FuncefORM.Mapping`</td></tr><tr><td>Repositórios específicos por entidade</td><td>Usar `IRepository<T>` do `FUNCEF.ORM`; lógica vai no Service</td></tr><tr><td>Versionamento de API (`/v1/...`)</td><td>Não implementar preventivamente. Versionar só em breaking change de contrato externo. Ver ADR-017</td></tr><tr><td>Multi-tenancy</td><td>Não-padrão. Quando necessário: schema por tenant + ADR de serviço + aprovação arquitetura/DBA. Ver ADR-019</td></tr></tbody></table>
+<h2>1.9 Sinais de saúde de um microserviço FUNCEF</h2>
+<p>Ao revisar (humano ou IA), verificar:</p>
+<ul>
+<li>[ ] Existe <code>Directory.Build.props</code> com <code>net10.0</code> + <code>TreatWarningsAsErrors=true</code>.</li>
+<li>[ ] Existem 4 projetos (<code>Domain</code>, <code>Application</code>, <code>Infrastructure</code>, <code>API</code>) + 1 de testes.</li>
+<li>[ ] <code>Application</code> <strong>não</strong> referencia <code>Infrastructure</code>.</li>
+<li>[ ] Todos os Commands têm Validators.</li>
+<li>[ ] Controllers herdam de <code>BaseController</code> e recebem <code>IMediator</code> + <code>ITelemetry</code>.</li>
+<li>[ ] Nenhum Controller tem <code>try/catch</code> ou <code>return BadRequest(...)</code>.</li>
+<li>[ ] Nenhum Handler tem <code>try/catch</code> defensivo (apenas em transações multi-passo com Rollback).</li>
+<li>[ ] Entidades sensíveis têm <code>[Auditable("Recurso")]</code>.</li>
+<li>[ ] Endpoints autenticados têm <code>[FuncefAuthorize]</code>.</li>
+<li>[ ] <code>appsettings.json</code> <strong>não</strong> contém segredos preenchidos.</li>
+<li>[ ] <code>Telemetry:ServiceName</code> reflete o nome real do serviço (não cópia).</li>
+<li>[ ] Cookie de sessão é <code>.{Servico}.Session</code>.</li>
+<li>[ ] <code>Cors:Politica</code> + <code>Cors:OriginsPermitidas</code> definidos por ambiente (lista explícita inclusive Dev — <strong>nunca</strong> <code>["*"]</code>; ver BE-05 §5.10).</li>
+<li>[ ] Health checks com tags <code>live</code>/<code>ready</code> registrados conforme dependências reais.</li>
+<li>[ ] <code>Dockerfile</code> referencia <code>{Servico}.sln</code>/<code>{Servico}.slnx</code> e expõe <code>8080</code>.</li>
+<li>[ ] Testes verdes (<code>dotnet test</code>).</li>
+</ul>
+<hr />
+<h2>Histórico</h2>
+<table><thead><tr><th>Data</th><th>Mudança</th></tr></thead><tbody><tr><td>2026-08-24</td><td>Cascata alinhamento `api-template-base`: `Cors:AllowedOrigins` → `Cors:Politica`/`OriginsPermitidas`; refresh token via `NoSql:RedisCache` + `StorageType` (não `Storage`); checklist Dev sem `"*"`. Origem: auditoria tripla doutrina × templates.</td></tr><tr><td>2026-06-16</td><td>Alinhamento das libs FUNCEF.*. Auditoria de **acesso** (login) migrada de MongoDB para **Oracle** via `IAccessAuditService` (`LOG_AUDIT.Acesso_LOG`); `FUNCEF.Seguranca` virou autenticação **pura** com Redis **interno** (StackExchange.Redis, `AddFuncefSecurityRedis`) — não depende mais de `FUNCEF.NoSql`. `FUNCEF.NoSql` reduzido a cache + documentos (`AddRedisCache` / `AddMongoDocuments<T>`). Tabelas §1.1/§1.2/§1.3/§1.4 e diagrama §1.6 atualizados; novas libs `FUNCEF.Abstractions` (CMP-08) e `FUNCEF.Build` (CMP-09).</td></tr><tr><td>2026-06-16</td><td>Corrigido mapeamento de exceções: `BusinessException` mapeia **400** (não 422); `ConflictException` é **local** (herda `BusinessException` + `CustomExceptionMappings`) e não pertence a `FUNCEF.Essenciais`. Status codes padronizados ajustados para 400/404/409/500. Ver BE-06 §6.8.</td></tr><tr><td>2026-07-06</td><td>Rename `FUNCEF.Seguranca` → `FUNCEF.Autenticacao` (repo `lib-back-autenticacao`, namespace `FuncefAutenticacao.*`) nas tabelas §1.3/§1.4 e no §1.1. Correção factual: refresh token/revogação usa Redis via `FUNCEF.NoSql` (`ICacheStore`) — não "interno via StackExchange.Redis". `AddFUNCEFAuthentication` inalterado.</td></tr></tbody></table>
+<hr />
+<p><strong>Próximo:</strong> <a href="../arquitetura/BE-02-Clean-Architecture.md">BE-02 — Clean Architecture</a></p>
+    <p class="meta">Gerado de: <code>../../backend/fundamentos/BE-01-Visao-Geral.md</code> &middot; <a href="../index.html">Portal</a></p>
+  </main>
+</div>
+</body>
+</html>

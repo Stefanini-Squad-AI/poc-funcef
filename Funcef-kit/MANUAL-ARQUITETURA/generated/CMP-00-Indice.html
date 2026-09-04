@@ -1,0 +1,105 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CMP-00 — Índice de componentes &mdash; Manual de Arquitetura FUNCEF</title>
+  <link rel="stylesheet" href="../assets/style.css" />
+</head>
+<body>
+<div class="layout">
+  <nav>
+    <h1>Manual de Arquitetura</h1>
+    <p class="subtitle"><a href="../index.html">&larr; Portal</a></p>
+    <div class="section">Cap&iacute;tulo</div>
+    <a href="#" class="active">CMP-00 — Índice de componentes</a>
+  </nav>
+  <main class="wide generated-content">
+    <h1>CMP-00 — Componentes FUNCEF.* (índice)</h1>
+<p><div class="callout note"><strong>Nota</strong> **Propósito**</p>
+<p>Catálogo orientativo das bibliotecas mantidas em `funcef-componentes/`. Cada `CMP-NN-*.md` resume **propósito**, **quando usar**, **principais extension methods**, **configuração mínima**, **snippets** e **anti-padrões**. Para detalhes profundos, consulte o `README.md` da lib correspondente (link no final de cada CMP).</p>
+<p>[!NOTE]</p>
+<p>**Stack linha 3.0 (3.0.0)**</p>
+<p>As libs runtime FUNCEF.* estão em **3.0.0** (exceto **FUNCEF.Abstractions 3.1.0**), publicadas no GitHub Packages (pin canônico `[3.0.0,4.0.0)`). A linha inclui duas libs-base — **FUNCEF.Abstractions** ([CMP-08-Abstractions](./CMP-08-Abstractions.md), contratos-base) e **FUNCEF.Build** ([CMP-09-Build](./CMP-09-Build.md), build-time) — e o fim das dependências circulares: os contratos compartilhados (`ITelemetry`, `ISecretReader`, `ICacheStore`, paginação, health, identidade) agora vivem em **Abstractions**, e as demais libs apenas os implementam.</p>
+<h2>Quando consultar este índice</h2>
+<ul>
+<li>Quando o pedido envolver chamar um `Add{Servico}*` ou usar uma interface `FUNCEF.*` sem certeza do contrato.</li>
+<li>Antes de gerar `Program.cs` ou `Infrastructure/Extensions/ServiceCollectionExtensions.cs`.</li>
+<li>Quando o usuário perguntar "que lib faz X?" ou "como configuro Y?".</li>
+<li>Para validar que um pacote externo (AutoMapper, Polly, etc.) não tem equivalente FUNCEF antes de propor.</li>
+</ul>
+<h2>Mapa rápido — qual lib usar para o quê</h2>
+<table><thead><tr><th>Quero…</th><th>Lib</th><th>Doc</th></tr></thead><tbody><tr><td>Despachar Commands/Queries via Mediator</td><td>`FUNCEF.Essenciais`</td><td>[CMP-01-Essenciais](./CMP-01-Essenciais.md)</td></tr><tr><td>Validar CPF/CNPJ/Email; formatar texto/datas</td><td>`FUNCEF.Essenciais`</td><td>[CMP-01-Essenciais](./CMP-01-Essenciais.md)</td></tr><tr><td>`BaseController` com `ApiOk/ApiCreated/ApiNoContent`</td><td>`FUNCEF.Essenciais`</td><td>[CMP-01-Essenciais](./CMP-01-Essenciais.md)</td></tr><tr><td>Exceções tipadas (`NotFoundException`, `BusinessException`, `ValidationException`, `ConflictException` → 409)</td><td>`FUNCEF.Essenciais`</td><td>[CMP-01-Essenciais](./CMP-01-Essenciais.md)</td></tr><tr><td>Persistir entidades em Oracle/SQL Server (EF + Dapper)</td><td>`FUNCEF.ORM`</td><td>[CMP-02-ORM](./CMP-02-ORM.md)</td></tr><tr><td>`IRepository<T>`, `IUnitOfWork`, `BaseDbContext`</td><td>`FUNCEF.ORM`</td><td>[CMP-02-ORM](./CMP-02-ORM.md)</td></tr><tr><td>Mapear entidade → DTO com `[MapFrom]`</td><td>`FUNCEF.ORM`</td><td>[CMP-02-ORM](./CMP-02-ORM.md)</td></tr><tr><td>Auditoria de mudança de entidade (`[Auditable]`)</td><td>`FUNCEF.ORM` (`.Audit`)</td><td>[CMP-02-ORM](./CMP-02-ORM.md)</td></tr><tr><td>Autenticar via Azure Entra ID (OAuth2 + PKCE)</td><td>`FUNCEF.Autenticacao`</td><td>[CMP-03-Autenticacao](./CMP-03-Autenticacao.md)</td></tr><tr><td>Client Credentials (M2M)</td><td>`FUNCEF.Autenticacao`</td><td>[CMP-03-Autenticacao](./CMP-03-Autenticacao.md)</td></tr><tr><td>`[FuncefAuthorize]` (conformidade Entra), refresh tokens, auditoria de acesso</td><td>`FUNCEF.Autenticacao`</td><td>[CMP-03-Autenticacao](./CMP-03-Autenticacao.md)</td></tr><tr><td>**Autorizar (RBAC+ABAC) por ação canônica** — `[FuncefAuthorize(Acao = "...")]`, `IFuncefAuthorizationClient` (PEP → PDP do GAP)</td><td>`FUNCEF.Autenticacao`</td><td>[CMP-03-Autenticacao](./CMP-03-Autenticacao.md)</td></tr><tr><td>Cache distribuído Redis (`ICacheStore`)</td><td>`FUNCEF.NoSql`</td><td>[CMP-04-NoSql](./CMP-04-NoSql.md)</td></tr><tr><td>Document store MongoDB (`IDocumentStore<T>`)</td><td>`FUNCEF.NoSql`</td><td>[CMP-04-NoSql](./CMP-04-NoSql.md)</td></tr><tr><td>Buscar segredo no Azure Key Vault</td><td>`FUNCEF.Cofre`</td><td>[CMP-05-Cofre](./CMP-05-Cofre.md)</td></tr><tr><td>Operações criptográficas (AES-GCM, RSA) server-side</td><td>`FUNCEF.Cofre`</td><td>[CMP-05-Cofre](./CMP-05-Cofre.md)</td></tr><tr><td>Azure Blob/Queue/Table/File/Data Lake</td><td>`FUNCEF.Armazenamentos`</td><td>[CMP-06-Armazenamentos](./CMP-06-Armazenamentos.md)</td></tr><tr><td>Azure Service Bus / messaging unificado (`IMessageService`)</td><td>`FUNCEF.Armazenamentos`</td><td>[CMP-06-Armazenamentos](./CMP-06-Armazenamentos.md)</td></tr><tr><td>SAS tokens para download/upload</td><td>`FUNCEF.Armazenamentos`</td><td>[CMP-06-Armazenamentos](./CMP-06-Armazenamentos.md)</td></tr><tr><td>Gerar um microserviço novo via `dotnet new funcef-api`</td><td>`Funcef.Api.Template`</td><td>[CMP-07-ApiTemplate](./CMP-07-ApiTemplate.md)</td></tr><tr><td>Contratos-base (`ITelemetry`, `ISecretReader`, paginação, health)</td><td>`FUNCEF.Abstractions`</td><td>[CMP-08-Abstractions](./CMP-08-Abstractions.md)</td></tr><tr><td>Política de build compartilhada (analisadores, nullable, símbolos)</td><td>`FUNCEF.Build`</td><td>[CMP-09-Build](./CMP-09-Build.md)</td></tr></tbody></table>
+<h2>Tabela de versões e dependências</h2>
+<table><thead><tr><th>Lib</th><th>Versão atual</th><th>Depende de</th></tr></thead><tbody><tr><td>`FUNCEF.Abstractions`</td><td>3.0.0</td><td>— (só `System.*`; contratos-base)</td></tr><tr><td>`FUNCEF.Build`</td><td>3.0.0</td><td>— (build-time; `PrivateAssets="all"`)</td></tr><tr><td>`FUNCEF.Essenciais`</td><td>3.0.0</td><td>Abstractions</td></tr><tr><td>`FUNCEF.Cofre`</td><td>3.0.0</td><td>Abstractions, Essenciais</td></tr><tr><td>`FUNCEF.NoSql`</td><td>3.0.0</td><td>Abstractions, Essenciais, Cofre</td></tr><tr><td>`FUNCEF.Autenticacao`</td><td>3.0.0</td><td>Abstractions, Essenciais, Cofre, NoSql (Redis via `ICacheStore`)</td></tr><tr><td>`FUNCEF.ORM`</td><td>3.0.0</td><td>Abstractions, Autenticacao, Cofre, Essenciais, NoSql (cache)</td></tr><tr><td>`FUNCEF.Armazenamentos`</td><td>3.0.0</td><td>Abstractions, Essenciais, Cofre</td></tr><tr><td>`Funcef.Api.Template`</td><td>**4.0.0** (template)</td><td>Stack linha 3.0 (ver nota abaixo)</td></tr></tbody></table>
+<p>Mantenha o ecossistema **no mesmo major** — `3.x` com `3.x`. Misturar major versions causa quebra de contrato. Todas as libs declaram suas dependências FUNCEF na faixa `[3.0.0,4.0.0)` — o mesmo pin canônico dos consumidores (`Directory.Packages.props`).</p>
+<p>[!NOTE]</p>
+<p>**Template `funcef-api`**</p>
+<p>O template **v4.0.0** gera o scaffold com Central Package Management; ao criar um microsserviço novo, confirme que o `Directory.Packages.props` gerado usa o pin canônico `[3.0.0,4.0.0)` para todas as `FUNCEF.*`. Ver [CMP-07-ApiTemplate](./CMP-07-ApiTemplate.md).</p>
+<h2>Grafo de dependências</h2>
+<pre><code>graph TB
+    Abstractions[FUNCEF.Abstractions]
+    Essenciais[FUNCEF.Essenciais]
+    Cofre[FUNCEF.Cofre]
+    NoSql[FUNCEF.NoSql]
+    Autenticacao[FUNCEF.Autenticacao]
+    ORM[FUNCEF.ORM]
+    Armazenamentos[FUNCEF.Armazenamentos]
+
+    Essenciais --&gt; Abstractions
+    Cofre --&gt; Abstractions
+    Cofre --&gt; Essenciais
+    NoSql --&gt; Abstractions
+    NoSql --&gt; Essenciais
+    NoSql --&gt; Cofre
+    Autenticacao --&gt; Abstractions
+    Autenticacao --&gt; Essenciais
+    Autenticacao --&gt; Cofre
+    Autenticacao --&gt; NoSql
+    ORM --&gt; Abstractions
+    ORM --&gt; Essenciais
+    ORM --&gt; Cofre
+    ORM --&gt; NoSql
+    ORM --&gt; Autenticacao
+    Armazenamentos --&gt; Abstractions
+    Armazenamentos --&gt; Essenciais
+    Armazenamentos --&gt; Cofre
+
+    style Abstractions fill:#0ea5e9,color:#fff
+    style Essenciais fill:#6366f1,color:#fff
+```</code></pre>
+<p>`Abstractions` é o **piso de contratos** (zero dependências externas) — todas dependem dele, eliminando os ciclos que existiam antes de `Abstractions`. `Essenciais` é a base de implementação. `Cofre` é referenciada por quase todas (Key Vault). `ORM` está no topo da cadeia. `Build` não aparece no grafo de runtime: é build-time (`PrivateAssets="all"`).</p>
+<h2>Como cada CMP-NN está estruturado</h2>
+<p>Cada documento segue o mesmo esqueleto (~150-250 linhas, padrão Anthropic SKILL.md para progressive disclosure):</p>
+<ol>
+<li>**Frontmatter** com `id`, `lib_path`, `version`, `tags`, `related`.</li>
+<li>**Propósito** — 1 parágrafo.</li>
+<li>**Quando usar / Quando NÃO usar**.</li>
+<li>**Instalação NuGet**.</li>
+<li>**Principais extension methods** (`AddXxx`) e contratos (`IXxxService`, `IXxxStore`).</li>
+<li>**Configuração mínima** (`appsettings.json`).</li>
+<li>**Snippets** representativos (3-5).</li>
+<li>**Anti-padrões** específicos da lib.</li>
+<li>**Onde aprofundar** — link para `funcef-componentes/<lib>/README.md`.</li>
+</ol>
+<h2>Política de uso (válida para todas as libs)</h2>
+<ol>
+<li>**Toda dependência é registrada via `Add{Lib}*` no `Infrastructure/Extensions/ServiceCollectionExtensions.cs`**, nunca em controllers ou handlers.</li>
+<li>**Segredos resolvidos via Key Vault** (`FUNCEF.Cofre`) — não commitar credenciais.</li>
+<li>**Versões alinhadas no mesmo major (3.x)** — atualizar uma lib geralmente força atualizar as outras.</li>
+<li>**Contratos compartilhados vêm de `FUNCEF.Abstractions`** — ao injetar `ITelemetry`, `ISecretReader`, `IKeyValueStore` ou paginação, o `using` é `Funcef.Abstractions.*`, não o namespace da lib que implementa.</li>
+<li>**Não substituir** por equivalentes externos (AutoMapper, Polly, MediatR, Serilog standalone) — vide [Principios](../_shared/Principios.md) §2.</li>
+<li>**Quando há feature do `FUNCEF.*` para o caso de uso, usá-la** mesmo que pareça verbosa. Inconsistência entre microserviços é caro.</li>
+</ol>
+<h2>Fontes autoritativas (por lib)</h2>
+<table><thead><tr><th>Lib</th><th>README oficial</th></tr></thead><tbody><tr><td>Abstractions</td><td>`funcef-componentes/lib-back-abstractions/README.md`</td></tr><tr><td>Build</td><td>`funcef-componentes/lib-back-build/README.md`</td></tr><tr><td>Essenciais</td><td>`funcef-componentes/lib-back-essenciais/README.md`</td></tr><tr><td>ORM</td><td>`funcef-componentes/lib-back-orm/README.md`</td></tr><tr><td>Autenticacao</td><td>`funcef-componentes/lib-back-autenticacao/README.md`</td></tr><tr><td>NoSql</td><td>`funcef-componentes/lib-back-nosql/README.md`</td></tr><tr><td>Cofre</td><td>`funcef-componentes/lib-back-cofre/README.md`</td></tr><tr><td>Armazenamentos</td><td>`funcef-componentes/lib-back-armazenamento/readme.md`</td></tr><tr><td>ApiTemplate</td><td>`funcef-componentes/lib-api-template/README.md`</td></tr></tbody></table>
+<hr />
+<p>**Próximo:** [CMP-01 — Essenciais](CMP-01-Essenciais.md)</p>
+<hr />
+<h2>Histórico</h2>
+<p>___TABLE_PLACEHOLDER_3___</div></p>
+    <p class="meta">Gerado de: <code>../../backend/componentes/CMP-00-Indice.md</code> &middot; <a href="../index.html">Portal</a></p>
+  </main>
+</div>
+</body>
+</html>
