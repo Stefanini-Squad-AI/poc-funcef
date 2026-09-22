@@ -1,0 +1,45 @@
+-- ================================================================
+-- FUNCEF POC - Verificación de Usuarios
+-- Los usuarios CM y LOGPLANUS se crean vía docker-compose
+-- Este script solo verifica que existan
+-- ================================================================
+
+-- Conectar a PDB (Pluggable Database)
+ALTER SESSION SET CONTAINER = FREEPDB1;
+
+-- Verificar si CM existe, si no, crearlo
+DECLARE
+  v_count NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_count FROM dba_users WHERE username = 'CM';
+  
+  IF v_count = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE USER CM IDENTIFIED BY cm_password DEFAULT TABLESPACE USERS TEMPORARY TABLESPACE TEMP QUOTA UNLIMITED ON USERS';
+    EXECUTE IMMEDIATE 'GRANT CONNECT, RESOURCE TO CM';
+    EXECUTE IMMEDIATE 'GRANT CREATE SESSION, CREATE TABLE, CREATE VIEW, CREATE SEQUENCE, CREATE TRIGGER, CREATE PROCEDURE, CREATE SYNONYM TO CM';
+  END IF;
+END;
+/
+
+-- Crear usuario LOGPLANUS (auditoría)
+DECLARE
+  v_count NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_count FROM dba_users WHERE username = 'LOGPLANUS';
+  
+  IF v_count = 0 THEN
+    EXECUTE IMMEDIATE 'CREATE USER LOGPLANUS IDENTIFIED BY log_password DEFAULT TABLESPACE USERS TEMPORARY TABLESPACE TEMP QUOTA UNLIMITED ON USERS';
+    EXECUTE IMMEDIATE 'GRANT CONNECT, RESOURCE TO LOGPLANUS';
+    EXECUTE IMMEDIATE 'GRANT CREATE SESSION, CREATE TABLE, CREATE SEQUENCE TO LOGPLANUS';
+  END IF;
+END;
+/
+
+COMMIT;
+
+-- Mostrar usuarios creados
+SELECT USERNAME, ACCOUNT_STATUS, DEFAULT_TABLESPACE 
+FROM DBA_USERS 
+WHERE USERNAME IN ('CM', 'LOGPLANUS');
+
+EXIT;
