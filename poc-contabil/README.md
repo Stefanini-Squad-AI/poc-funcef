@@ -98,6 +98,10 @@ Consulta los README específicos en cada carpeta para configuración detallada.
 
 | Documento | Ubicación | Contenido |
 |-----------|-----------|-----------|
+| Roadmap de Migração | [`docs/ROADMAP-MIGRACAO.md`](docs/ROADMAP-MIGRACAO.md) | Fases, mapeo Delphi→.NET/React, estado por tab, pendientes |
+| Manual de Usuario | [`docs/MANUAL-USUARIO.md`](docs/MANUAL-USUARIO.md) | Documentación funcional detallada (6 tabs, reglas, validaciones) |
+| Guía de Setup | [`docs/SETUP.md`](docs/SETUP.md) | Configuración completa del ambiente de desarrollo |
+| Getting Started | [`GETTING-STARTED.md`](GETTING-STARTED.md) | Guía rápida de inicio |
 | Análisis POC | [`../docs/POC-ANALISIS-RECOMENDACION.md`](../docs/POC-ANALISIS-RECOMENDACION.md) | Decisión de pantalla, justificación técnica |
 | Manual Arquitectura | [`../Funcef-kit/MANUAL-ARQUITETURA/`](../Funcef-kit/MANUAL-ARQUITETURA/) | Playbooks backend/frontend/datos |
 | Template Backend | [`../Funcef-kit/templates/api-template-base/`](../Funcef-kit/templates/api-template-base/) | Referencia Clean Architecture |

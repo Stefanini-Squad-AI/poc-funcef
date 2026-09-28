@@ -384,17 +384,64 @@ El botão **>>** (Associar Todos) solo asocia los analíticos, ignorando los sin
 
 ## 7. Tab 4: Conta x Sub-Conta
 
-> **Estado:** Placeholder — funcionalidad pendiente de implementación.
+> **Estado:** ✅ Implementado — funcionalidad migrada del legacy Delphi (FCadContasContabMT.pas → CdsContasxSC).
 
-Esta pestaña permitirá asociar la cuenta contable con sub-contas / contas auxiliares.
+Esta pestaña permite asociar la cuenta contable con sub-contas / contas auxiliares mediante un patrón de lista dual (dual-list).
+
+### 7.1 Habilitación
+
+La pestaña solo está habilitada cuando el campo **Obriga Sub-Conta / Contas Auxiliares** (`PLASUBCONTA = 'S'`) está marcado en la cuenta contable y la conta ya está guardada en el backend. Si no está marcado, la pestaña permanece deshabilitada.
+
+### 7.2 Layout: Lista Dual (Dual-List)
+
+| Componente | Descripción |
+|------------|-------------|
+| **Grid Izquierdo (Disponíveis)** | Sub-contas disponibles (no asociadas a la cuenta). Tabla `SUBCONTA` filtrada por `IDPESSOA = IdEmpresa`, excluyendo los ya asociados en `CONTASXSUBC`. |
+| **Grid Derecho (Associados)** | Sub-contas ya asociadas a la cuenta. Tabla `CONTASXSUBC`. |
+| **Botão >> (Associar Todos)** | Associa todas las sub-contas disponibles. |
+| **Botão > (Associar Selecionados)** | Associa las sub-contas seleccionadas en el grid izquierdo. |
+| **Botão < (Desassociar Selecionados)** | Desassocia las sub-contas seleccionadas en el grid derecho. |
+| **Botão << (Desassociar Todos)** | Desassocia todas las sub-contas asociadas. Pide confirmación. |
+
+### 7.3 Movimientos Locales
+
+Los movimientos (>>, >, <, <<) son **locales** (en memória), replicando el comportamiento del Delphi donde `CdsContasxSC` es un dataset en memória. Las alteraciones solo se persisten en el backend cuando el usuario hace clic en **"Salvar Associações"**.
+
+### 7.4 Endpoints de la API
+
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| `GET` | `/api/subcontas?idEmpresa={id}&plano={p}&placConta={c}` | Sub-contas disponibles |
+| `GET` | `/api/contasxsc?idEmpresa={id}&plano={p}&placConta={c}` | Sub-contas asociadas |
+| `POST` | `/api/contasxsc/associate` | Associa sub-contas |
+| `POST` | `/api/contasxsc/disassociate` | Desassocia sub-contas |
 
 ---
 
 ## 8. Tab 5: Árvore de Contas Contábeis
 
-> **Estado:** Placeholder — funcionalidad pendiente de implementación.
+> **Estado:** ✅ Implementado — árbol jerárquico visual funcional.
 
-Esta pestaña mostrará la jerarquía visual (árbol) de las cuentas contables del plano seleccionado.
+Esta pestaña muestra la jerarquía visual (árbol) de las cuentas contables del plano seleccionado.
+
+### 8.1 Construcción del Árbol
+
+El árbol se construye desde una lista plana de contas obtenida del endpoint `GET /api/contascontabeis/tree`. La jerarquía se determina por el código: un código `1.1.01` es hijo de `1.1`, que es hijo de `1`.
+
+### 8.2 Funcionalidades
+
+| Funcionalidad | Descripción |
+|---------------|-------------|
+| **Expandir/Colapsar nodos** | Cada nodo con hijos tiene un botón para expandir/colapsar |
+| **Expandir todos** | Botón para expandir todos los nodos del árbol |
+| **Colapsar todos** | Botón para colapsar todos los nodos (mostrar solo raíces) |
+| **Badges por nodo** | Tipo (Sintética/Analítica), Grupo, Inativa, Bloqueada |
+| **Contador de nós** | Muestra el total de contas en el árbol |
+| **Indentación por nivel** | Cada nivel jerárquico se indenta visualmente |
+
+### 8.3 Comportamiento por Defecto
+
+Al cargar, los nodos raíz (nivel 1) se expanden automáticamente, mostrando sus hijos directos. Los nodos de niveles más profundos permanecen colapsados.
 
 ---
 
@@ -693,6 +740,7 @@ Las mismas validaciones del frontend se replican en el backend con FluentValidat
 
 | 1.6 | 18-sep-2026 | **Tab 3: Conta x C.Custo — migración completa.** Implementación del patrón dual-list migrado de `FCadContasContabMT.pas` → `CdsContasxCC`. Backend: entidades `CentroCusto` (CENTCUST) y `ContasxCC` (CONTASXCC), EF configs, DTOs, queries (`GetCentrosCusto`, `GetContasxCC`), commands (`Associate`, `Disassociate`), controllers (`GET /api/centroscusto`, `GET /api/contasxcc`, `POST /api/contasxcc/associate`, `POST /api/contasxcc/disassociate`). Frontend: hooks `useCentrosCusto`, `useContasxCC`, `useAssociateContasxCC`, `useDisassociateContasxCC`; componente `tab-centro-custo.tsx` con grids de disponibles/asociados, 4 botões (>>, >, <, <<), validación de sintéticos. Trigger Oracle `TRG_BI_CONTASXCC` para auto-generar `IDCONTACC` via `SEQ_CONTASXCC`. Regla: solo analíticos pueden ser asociados; sintéticos bloqueados con mensaje de error. Tab habilitada solo cuando `PLACCUST='S'`. |
 
+| 1.7 | 28-sep-2026 | **Tab 4 (Conta x Sub-Conta) y Tab 5 (Árvore) — documentación actualizada.** Las secciones 7 y 8 fueron actualizadas de "Placeholder" a "Implementado". Tab 4: patrón dual-list con movimientos locales (`tab-sub-conta.tsx`, 474 líneas), hooks `useSubContas`/`useContasxSC`/`useAssociateContasxSC`/`useDisassociateContasxSC`, endpoints `/api/subcontas` y `/api/contasxsc`. Tab 5: árbol jerárquico visual recursivo (`contas-list.tsx`, 277 líneas) con `buildTree`, `TreeNodeItem`, expandir/colapsar, badges. |
+
 ---
 
-> **Nota:** Este es un documento **incremental**. Se actualizará a medida que se implementen nuevas funcionalidades en el frontend. Las secciones marcadas como *"Placeholder — funcionalidad pendiente de implementación"* serán completadas en futuras versiones.

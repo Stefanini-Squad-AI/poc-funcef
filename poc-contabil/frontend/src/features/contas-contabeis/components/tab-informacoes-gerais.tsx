@@ -249,13 +249,21 @@ export function TabInformacoesGerais({ form, isEditing = false, contaCarregada =
     }
 
     // (a) Verifica se conta já está cadastrada (Delphi líneas 517-522)
-    const existe = contasExistentes.some(
-      (c) => c.codigo === watchedCodigo && c.plano === watchedPlano,
-    );
-    if (existe) {
-      form.setError('codigo', { type: 'manual', message: 'Conta já cadastrada.' });
-      setGrupoLocked(false);
-      return;
+    //     Skip em modo edição/consulta (isEditing || contaCarregada):
+    //     a conta existe, isso é esperado. Esta validação só se aplica
+    //     em modo inserção (nova conta). Sem este skip, ao carregar uma
+    //     conta via Procurar o useEffect dispara e seta o erro
+    //     "Conta já cadastrada." no campo código, bloqueando o salvamento
+    //     de alterações (handleSalvar aborta por form.formState.errors).
+    if (!isEditing && !contaCarregada) {
+      const existe = contasExistentes.some(
+        (c) => c.codigo === watchedCodigo && c.plano === watchedPlano,
+      );
+      if (existe) {
+        form.setError('codigo', { type: 'manual', message: 'Conta já cadastrada.' });
+        setGrupoLocked(false);
+        return;
+      }
     }
 
     // Calcula grau e código do pai
@@ -293,7 +301,7 @@ export function TabInformacoesGerais({ form, isEditing = false, contaCarregada =
     }
 
     form.clearErrors('codigo');
-  }, [watchedCodigo, watchedPlano, contasExistentes, isLoadingContas, form]);
+  }, [watchedCodigo, watchedPlano, contasExistentes, isLoadingContas, form, isEditing, contaCarregada]);
 
   return (
     <div className="space-y-6">
