@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CM Contabilidade — Roadmap de Migração — Cadastro de Contas Contábeis</title>
+<style>
+
+:root {
+  --bg: #0f1419; --bg2: #1a2332; --bg3: #243044; --card: #1e2a3a;
+  --text: #e7ecf3; --muted: #9aa8bc; --accent: #3d9cf0; --accent2: #2dd4bf;
+  --ok: #34d399; --warn: #fbbf24; --bad: #f87171; --border: #2d3a4d;
+  --tag-alta: #065f46; --tag-media: #92400e; --tag-baixa: #7f1d1d;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0; font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(160deg, #0f1419 0%, #152033 50%, #0f1419 100%);
+  color: var(--text); line-height: 1.55; min-height: 100vh;
+}
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+header {
+  background: linear-gradient(135deg, #152033 0%, #1a3a5c 100%);
+  border-bottom: 1px solid var(--border); padding: 2rem 1.5rem 1.5rem;
+}
+header .badge {
+  display: inline-block; background: #1e3a5f; color: var(--accent2);
+  padding: .25rem .75rem; border-radius: 999px; font-size: .8rem;
+  border: 1px solid #2a5080; margin-bottom: .75rem;
+}
+header h1 { margin: 0 0 .5rem; font-size: clamp(1.5rem, 3vw, 2.2rem); }
+header p { margin: 0; color: var(--muted); max-width: 70ch; }
+nav {
+  display: flex; flex-wrap: wrap; gap: .5rem; padding: .75rem 1.5rem;
+  background: rgba(15,20,25,.85); border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 20; backdrop-filter: blur(8px);
+}
+nav a {
+  color: var(--text); background: var(--bg2); padding: .4rem .75rem;
+  border-radius: 6px; border: 1px solid var(--border); font-size: .85rem;
+}
+nav a:hover { background: var(--bg3); text-decoration: none; }
+main { padding: 1.5rem; max-width: 1200px; margin: 0 auto; }
+section {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1.25rem;
+}
+.section-title {
+  font-size: 1.15rem; font-weight: 700; margin-bottom: 1rem;
+  padding-bottom: .5rem; border-bottom: 1px solid var(--border);
+}
+.cards-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1rem;
+}
+.card {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 10px;
+  padding: 1rem; transition: border-color .2s, transform .2s;
+}
+.card:hover { border-color: var(--accent); transform: translateY(-2px); }
+.card h3 { margin: 0 0 .5rem; font-size: 1rem; }
+.card p { margin: 0; color: var(--muted); font-size: .9rem; }
+.stats {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: .75rem;
+}
+.stat {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 8px;
+  padding: .85rem; text-align: center;
+}
+.stat .n { font-size: 1.6rem; font-weight: 700; color: var(--accent2); }
+.stat .l { font-size: .75rem; color: var(--muted); }
+table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+th, td {
+  border: 1px solid var(--border); padding: .5rem .65rem; text-align: left;
+  vertical-align: top;
+}
+th { background: var(--bg3); }
+tbody tr:nth-child(even) { background: rgba(255,255,255,.02); }
+.table-wrap { overflow-x: auto; }
+code {
+  font-family: Consolas, "Courier New", monospace; font-size: .85em;
+  background: var(--bg); padding: .1rem .35rem; border-radius: 4px;
+}
+.tag {
+  display: inline-block; padding: .15rem .45rem; border-radius: 4px;
+  font-size: .75rem; font-weight: 600;
+}
+.tag-alta { background: var(--tag-alta); color: #a7f3d0; }
+.tag-media { background: var(--tag-media); color: #fde68a; }
+.tag-baixa { background: var(--tag-baixa); color: #fecaca; }
+.story-card {
+  background: var(--bg2); border-left: 4px solid var(--accent);
+  padding: .85rem 1rem; margin-bottom: .75rem; border-radius: 0 8px 8px 0;
+}
+.criteria-block, .rule-block {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 8px; padding: .85rem 1rem; margin-bottom: .75rem;
+}
+.rule-id { font-weight: 700; color: var(--accent2); margin-bottom: .35rem; }
+.rule-origin { font-size: .85rem; color: var(--muted); margin-top: .5rem; }
+.complexity-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: .75rem;
+}
+.complexity-item {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; text-align: center;
+}
+.level { font-weight: 700; margin-bottom: .35rem; }
+.level-simples { color: var(--ok); }
+.level-media { color: var(--warn); }
+.level-complexa { color: var(--bad); }
+.points { font-size: 1.4rem; font-weight: 700; }
+.desc { color: var(--muted); font-size: .85rem; margin-top: .35rem; }
+footer {
+  text-align: center; padding: 2rem 1rem; color: var(--muted);
+  border-top: 1px solid var(--border); margin-top: 2rem; font-size: .85rem;
+}
+.back-btn {
+  display: inline-block; margin-bottom: 1rem; background: var(--bg2);
+  border: 1px solid var(--border); padding: .4rem .8rem; border-radius: 6px;
+  color: var(--text);
+}
+.back-btn:hover { background: var(--bg3); text-decoration: none; }
+.layout-2 {
+  display: grid; grid-template-columns: 1fr 300px; gap: 1.25rem; padding: 1.5rem; max-width: 1200px; margin: 0 auto;
+}
+@media (max-width: 900px) { .layout-2 { grid-template-columns: 1fr; } }
+.info-list, .dep-list { list-style: none; padding: 0; margin: 0; }
+.info-list li, .dep-list li {
+  display: flex; justify-content: space-between; gap: .5rem;
+  padding: .45rem 0; border-bottom: 1px solid var(--border); font-size: .9rem;
+}
+.info-list .key { color: var(--muted); }
+.mermaid {
+  background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+  padding: 1rem; overflow-x: auto; font-family: monospace; font-size: .8rem;
+  white-space: pre-wrap; color: var(--muted);
+}
+.note {
+  background: #1a2740; border-left: 3px solid var(--warn);
+  padding: .75rem 1rem; margin: .75rem 0; border-radius: 0 6px 6px 0; font-size: .9rem;
+}
+.doc-links { display: flex; flex-wrap: wrap; gap: .5rem; margin: 1rem 0; }
+.doc-links a {
+  background: var(--bg3); border: 1px solid var(--border); padding: .5rem .85rem;
+  border-radius: 6px; color: var(--text);
+}
+.given,.when,.then { margin: .25rem 0; }
+.role,.want,.why { margin: .2rem 0; }
+ul.check { list-style: none; padding-left: 0; }
+ul.check li::before { content: "☐ "; }
+h3 { font-size: 1rem; color: var(--accent2); margin: 1.25rem 0 .6rem; }
+h4 { font-size: .95rem; color: var(--muted); margin: 1rem 0 .5rem; }
+pre.mermaid { white-space: pre; }
+section { scroll-margin-top: 4rem; }
+
+</style>
+</head>
+<body>
+
+<header>
+  <div class="badge">PFC-5 — Roadmap de Migração</div>
+  <h1>🗺️ Roadmap de Migração — Cadastro de Contas Contábeis</h1>
+  <p><strong>Tela migrada:</strong> <code>FCadContasContabMT</code> (Delphi 5) → <code>ContasContabeisPage</code> (.NET 10 + React 19)<br><strong>Projeto:</strong> POC Contabilidade — FUNCEF / Stefanini<br><strong>Líder Técnico:</strong> Santiago Guauque<br><strong>Versão:</strong> 1.0 (28-set-2026)<br><strong>Estado:</strong> 🟡 Em progresso — Todos os 6 Tabs concluídos; faltam testing, refinamento e apresentação</p>
+  <div class="doc-links">
+    <a href="site/index.html">Portal</a>
+    <a href="system-overview.html">Visão Geral</a>
+    <a href="business-rules-catalog.html">Regras de Negócio</a>
+    <a href="database-model.html">Modelo de Dados</a>
+    <a href="api-catalog.html">Catálogo de APIs</a>
+    <a href="module-file-map.html">Mapa de Arquivos</a>
+    <a href="migration-contabil.html">Migração Contábil</a>
+    <a href="documentation-gap-analysis.html">Levantamento de Lacunas</a>
+  </div>
+</header>
+<nav>
+  <a href="#1-visao-geral">📋 Visão Geral</a>
+  <a href="#2-tela-migrada">🖥️ Tela Migrada</a>
+  <a href="#3-arquitetura-de-destino">🏗️ Arquitetura</a>
+  <a href="#4-fases-da-migracao">🚦 Fases</a>
+  <a href="#5-mapeamento-delphi-net-react">🔀 Mapeamento</a>
+  <a href="#6-regras-de-negocio-migradas">📏 Regras</a>
+  <a href="#7-endpoints-da-api">🔌 Endpoints</a>
+  <a href="#8-base-de-dados">🗄️ Base de Dados</a>
+  <a href="#9-estado-detalhado-por-tab">🗂️ Estado por Tab</a>
+  <a href="#10-pendentes-e-proximos-passos">⏭️ Pendentes</a>
+  <a href="#11-criterios-de-aceitacao">✅ Critérios</a>
+  <a href="#12-riscos-e-mitigacoes">⚠️ Riscos</a>
+</nav>
+<main>
+<section id="conteudo">
+  <div class="section-title">📋 Tabela de Conteúdos</div>
+  <ol><li><a href="#1-visao-geral">Visão Geral</a></li><li><a href="#2-tela-migrada">Tela Migrada</a></li><li><a href="#3-arquitetura-de-destino">Arquitetura de Destino</a></li><li><a href="#4-fases-da-migracao">Fases da Migração</a></li><li><a href="#5-mapeamento-delphi-net-react">Mapeamento Delphi → .NET / React</a></li><li><a href="#6-regras-de-negocio-migradas">Regras de Negócio Migradas</a></li><li><a href="#7-endpoints-da-api">Endpoints da API</a></li><li><a href="#8-base-de-dados">Base de Dados</a></li><li><a href="#9-estado-detalhado-por-tab">Estado Detalhado por Tab</a></li><li><a href="#10-pendentes-e-proximos-passos">Pendentes e Próximos Passos</a></li><li><a href="#11-criterios-de-aceitacao">Critérios de Aceitação</a></li><li><a href="#12-riscos-e-mitigacoes">Riscos e Mitigações</a></li></ol>
+  <div class="stats">
+    <div class="stat"><div class="n">~85%</div><div class="l">Progresso geral</div></div>
+    <div class="stat"><div class="n">11/13</div><div class="l">Fases concluídas</div></div>
+    <div class="stat"><div class="n">6/6</div><div class="l">Tabs concluídas</div></div>
+    <div class="stat"><div class="n">13</div><div class="l">Tabelas Oracle</div></div>
+  </div>
+</section>
+<section id="1-visao-geral">
+  <div class="section-title"><a href="#1-visao-geral" style="color:inherit">1. Visão Geral</a></div>
+<p>Este roadmap documenta o processo de migração da tela <strong>Cadastro de Contas Contábeis</strong> (<code>FCadContasContabMT</code>) desde o sistema legacy em Delphi 5 para o stack moderno FUNCEF (.NET 10 + React 19 + Oracle 23ai).</p>
+<h3>Objetivo</h3>
+<p>Validar a arquitetura completa end-to-end com uma tela real do módulo Contábil, demonstrando que o stack FUNCEF pode replicar a funcionalidade do sistema legacy com UX moderna.</p>
+<h3>Escopo</h3>
+<pre class="mermaid">FCadContasContabMT (Delphi 5)
+        ↓ migração
+ContasContabeisPage (Next.js 16 + React 19)
+    ├── Backend: .NET 10 Clean Architecture + CQRS + EF Core + Oracle
+    ├── Frontend: Next.js 16 App Router + React 19 + TanStack Query
+    ├── Auth: Azure Entra ID (BFF same-origin)
+    └── DB: Oracle 23ai (esquema PLANOCONTA + tabelas relacionadas)</pre>
+<h3>Justificativa da Tela Selecionada</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>Critério</th><th>Avaliação</th></tr></thead>
+<tbody>
+<tr><td><strong>Fundacional</strong></td><td>✅ Todo o módulo contábil depende deste cadastro</td></tr>
+<tr><td><strong>Representativa</strong></td><td>✅ Exercita CRUD hierárquico, regras de negócio reais, UI complexa</td></tr>
+<tr><td><strong>Complexidade</strong></td><td>5/10 — alcançável em 5-6 semanas</td></tr>
+<tr><td><strong>Reutilizável</strong></td><td>✅ O construído se usa diretamente na migração real</td></tr>
+<tr><td><strong>Alinhada com FUNCEF</strong></td><td>✅ Uma das 3 telas sugeridas oficialmente pelo cliente</td></tr>
+</tbody></table></div>
+</section>
+<section id="2-tela-migrada">
+  <div class="section-title"><a href="#2-tela-migrada" style="color:inherit">2. Tela Migrada</a></div>
+<h3>Origem (Delphi 5)</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>Atributo</th><th>Valor</th></tr></thead>
+<tbody>
+<tr><td><strong>Form</strong></td><td><code>TfrmCadContasContabMT</code></td></tr>
+<tr><td><strong>Arquivo .pas</strong></td><td><code>FCadContasContabMT.pas</code> (1690 linhas)</td></tr>
+<tr><td><strong>Arquivo .dfm</strong></td><td><code>FCadContasContabMT.dfm</code> (1835 linhas)</td></tr>
+<tr><td><strong>Control Object</strong></td><td><code>uCtrlPlanoConta.pas</code> (613 linhas)</td></tr>
+<tr><td><strong>Localização</strong></td><td><code>poc-funcef/CONTAB/FontesMT/</code></td></tr>
+<tr><td><strong>Tabelas Oracle</strong></td><td><code>PLANOCONTA</code>, <code>PLANO</code>, <code>CONTASXCC</code>, <code>CONTASXSUBC</code>, <code>CENTCUST</code>, <code>SUBCONTA</code>, <code>SUBGRUPO</code>, <code>MOEDA</code>, <code>PARAMGLOBAL</code>, <code>PARAMCONTAB</code>, <code>SEGREGACRITER</code>, <code>PROGRAMA</code>, <code>RATADMPLANPATRO</code></td></tr>
+<tr><td><strong>UI</strong></td><td>Árvore hierárquica + 6 TabSheets</td></tr>
+</tbody></table></div>
+<h3>Destino (.NET 10 + React 19)</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>Atributo</th><th>Valor</th></tr></thead>
+<tbody>
+<tr><td><strong>Página</strong></td><td><code>ContasContabeisPage</code></td></tr>
+<tr><td><strong>Rota</strong></td><td><code>/contas-contabeis</code></td></tr>
+<tr><td><strong>Feature</strong></td><td><code>frontend/src/features/contas-contabeis/</code></td></tr>
+<tr><td><strong>Controller</strong></td><td><code>ContasContabeisController</code></td></tr>
+<tr><td><strong>Entidade</strong></td><td><code>ContaContabil</code></td></tr>
+<tr><td><strong>Tabela principal</strong></td><td><code>PLANOCONTA</code> (PK composta: <code>PLANO</code> + <code>PLACONTA</code>)</td></tr>
+</tbody></table></div>
+<h3>Estrutura do Formulário (6 Tabs)</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>Aba</th><th>Equivalente Delphi</th><th style="text-align:center">Estado</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>Informações Gerais</td><td><code>TabSheet1</code></td><td style="text-align:center">✅ Completo</td></tr>
+<tr><td>2</td><td>Sub-Grupos &amp; Moedas</td><td><code>TabSheet3</code></td><td style="text-align:center">✅ Completo</td></tr>
+<tr><td>3</td><td>Conta x C.Custo</td><td><code>TabSheet4</code></td><td style="text-align:center">✅ Completo</td></tr>
+<tr><td>4</td><td>Conta x Sub-Conta</td><td><code>TabSheet5</code></td><td style="text-align:center">✅ Completo</td></tr>
+<tr><td>5</td><td>Árvore de Contas Contábeis</td><td><code>TabSheet2</code></td><td style="text-align:center">✅ Completo</td></tr>
+<tr><td>6</td><td>Detalhes</td><td><code>TabSheet6</code></td><td style="text-align:center">✅ Completo</td></tr>
+</tbody></table></div>
+</section>
+<section id="3-arquitetura-de-destino">
+  <div class="section-title"><a href="#3-arquitetura-de-destino" style="color:inherit">3. Arquitetura de Destino</a></div>
+<h3>Backend: Clean Architecture + CQRS</h3>
+<pre class="mermaid">ContabPOC.API              → Controllers, Program.cs, Pipeline
+ContabPOC.Application      → Commands, Queries, Handlers, DTOs, Validators
+ContabPOC.Domain           → Entities, Enums
+ContabPOC.Infrastructure   → DbContext, EF Core Configurations</pre>
+<p><strong>Fluxo:</strong> <code>Controller → IMediator → Handler → DbContext → Oracle</code></p>
+<div class="table-wrap"><table>
+<thead><tr><th>Componente</th><th>Tecnologia</th><th>Pacote FUNCEF</th></tr></thead>
+<tbody>
+<tr><td>Runtime</td><td>.NET 10 / C# 13</td><td>—</td></tr>
+<tr><td>Arquitetura</td><td>Clean + CQRS/Mediator</td><td><code>FUNCEF.Essenciais</code></td></tr>
+<tr><td>ORM</td><td>EF Core + Dapper</td><td><code>FUNCEF.ORM</code></td></tr>
+<tr><td>Base de dados</td><td>Oracle 23ai</td><td>—</td></tr>
+<tr><td>Auth</td><td>Azure Entra ID</td><td><code>FUNCEF.Autenticacao</code></td></tr>
+<tr><td>Cache</td><td>Redis 7+</td><td><code>FUNCEF.NoSql</code></td></tr>
+<tr><td>Secrets</td><td>Azure Key Vault</td><td><code>FUNCEF.Cofre</code></td></tr>
+<tr><td>Telemetria</td><td>App Insights + OTel</td><td><code>FUNCEF.Essenciais</code></td></tr>
+<tr><td>Validação</td><td>FluentValidation</td><td>—</td></tr>
+</tbody></table></div>
+<h3>Frontend: 4 Camadas</h3>
+<pre class="mermaid">app/        → Rotas Next.js (authenticated)/contas-contabeis
+features/   → contas-contabeis/ (api, hooks, components, types, validators)
+core/       → api client, auth, config
+shared/     → UI genérico, utils, query-keys</pre>
+<p><strong>Fluxo:</strong> <code>Component → Hook (React Query) → API Client → BFF → Backend</code></p>
+<div class="table-wrap"><table>
+<thead><tr><th>Componente</th><th>Tecnologia</th><th>Pacote FUNCEF</th></tr></thead>
+<tbody>
+<tr><td>Framework</td><td>Next.js 16 (App Router)</td><td>—</td></tr>
+<tr><td>UI Library</td><td>React 19</td><td>—</td></tr>
+<tr><td>Linguagem</td><td>TypeScript 6</td><td>—</td></tr>
+<tr><td>Data fetching</td><td>TanStack Query 5</td><td>—</td></tr>
+<tr><td>Forms</td><td>React Hook Form + Zod</td><td>—</td></tr>
+<tr><td>CSS</td><td>Tailwind CSS 4</td><td><code>@funcef-componentes/tailwind</code></td></tr>
+<tr><td>Auth</td><td>Better Auth + Entra ID</td><td><code>@funcef-componentes/auth</code></td></tr>
+<tr><td>Design System</td><td>Radix-based</td><td><code>@funcef-componentes/react</code> v2</td></tr>
+<tr><td>Package manager</td><td>pnpm 11.5.2+</td><td>—</td></tr>
+</tbody></table></div>
+<h3>Conformidade com os Templates FUNCEF</h3>
+<p>O código migrado segue os padrões de arquitetura dos templates oficiais enviados pela FUNCEF:</p>
+<h4>Backend — <code>api-template-base</code> (TemplateBase)</h4>
+<div class="table-wrap"><table>
+<thead><tr><th>Template FUNCEF</th><th>Código Migrado (<code>ContabPOC</code>)</th><th style="text-align:center">Conformidade</th></tr></thead>
+<tbody>
+<tr><td><code>TemplateBase.API/</code> (Controllers, Program.cs)</td><td><code>ContabPOC.API/</code> (13 Controllers, Program.cs)</td><td style="text-align:center">✅</td></tr>
+<tr><td><code>TemplateBase.Application/</code> (Commands, Queries, Handlers, DTOs, Validators)</td><td><code>ContabPOC.Application/</code> (Commands, Queries, Handlers, DTOs, DI)</td><td style="text-align:center">✅</td></tr>
+<tr><td><code>TemplateBase.Domain/</code> (Entities)</td><td><code>ContabPOC.Domain/</code> (13 Entities + 3 Enums)</td><td style="text-align:center">✅</td></tr>
+<tr><td><code>TemplateBase.Infrastructure/</code> (DbContext, EF Configs, DI)</td><td><code>ContabPOC.Infrastructure/</code> (Persistence/Configuration, DI)</td><td style="text-align:center">✅</td></tr>
+<tr><td><code>TemplateBase.slnx</code> (4 projetos)</td><td><code>ContabPOC.slnx</code> (4 projetos)</td><td style="text-align:center">✅</td></tr>
+<tr><td>Clean Architecture + CQRS/Mediator</td><td>Clean Architecture + CQRS/Mediator</td><td style="text-align:center">✅</td></tr>
+<tr><td>Fluxo: <code>Controller → IMediator → Handler → DbContext → Oracle</code></td><td>Idêntico</td><td style="text-align:center">✅</td></tr>
+</tbody></table></div>
+<h4>Frontend — <code>web-template</code></h4>
+<div class="table-wrap"><table>
+<thead><tr><th>Template FUNCEF (<code>web-template/src</code>)</th><th>Código Migrado (<code>frontend/src</code>)</th><th style="text-align:center">Conformidade</th></tr></thead>
+<tbody>
+<tr><td><code>app/</code> (Next.js App Router)</td><td><code>app/</code> (rotas autenticadas)</td><td style="text-align:center">✅</td></tr>
+<tr><td><code>features/</code> (feature-based)</td><td><code>features/contas-contabeis/</code> (api, hooks, components, types, validators)</td><td style="text-align:center">✅</td></tr>
+<tr><td><code>core/</code> (api client, auth, config)</td><td><code>core/</code></td><td style="text-align:center">✅</td></tr>
+<tr><td><code>shared/</code> (UI genérico, utils)</td><td><code>shared/</code></td><td style="text-align:center">✅</td></tr>
+<tr><td><code>assets/</code></td><td><code>assets/</code></td><td style="text-align:center">✅</td></tr>
+<tr><td>4 camadas + ESLint boundaries</td><td>Idêntico</td><td style="text-align:center">✅</td></tr>
+<tr><td>Fluxo: <code>Component → Hook → API Client → BFF → Backend</code></td><td>Idêntico</td><td style="text-align:center">✅</td></tr>
+</tbody></table></div>
+<h4>Diferenças Esperadas (Simplificações de POC)</h4>
+<div class="table-wrap"><table>
+<thead><tr><th>Item</th><th>Template</th><th>POC</th><th>Justificativa</th></tr></thead>
+<tbody>
+<tr><td><code>Services/</code> layer</td><td><code>Application/Services/</code> (Service Layer)</td><td>Lógica nos Handlers</td><td>Escopo reduzido da POC</td></tr>
+<tr><td>Projeto <code>Tests/</code></td><td><code>TemplateBase.Tests/</code> (MSTest + NSubstitute)</td><td>Não criado</td><td>Pendente na Fase 11</td></tr>
+<tr><td><code>Abstractions/</code></td><td><code>Application/Abstractions/</code></td><td>Não necessário</td><td>Escopo não exigiu</td></tr>
+<tr><td><code>Configuration/</code> (Key Vault)</td><td><code>Infrastructure/Configuration/</code> (VaultBootstrap)</td><td>Apenas EF Core configs</td><td>POC usa config local</td></tr>
+</tbody></table></div>
+<div class="note">Estas diferenças são <strong>normais e esperadas</strong> para uma POC — o foco foi validar a funcionalidade da tela, não replicar toda a infraestrutura corporativa do template.</div>
+</section>
+<section id="4-fases-da-migracao">
+  <div class="section-title"><a href="#4-fases-da-migracao" style="color:inherit">4. Fases da Migração</a></div>
+<h3>Resumo Visual</h3>
+<pre class="mermaid">Fase 0: Setup              ████████████████████ ✅ Concluído
+Fase 1: Backend Domain     ████████████████████ ✅ Concluído
+Fase 2: Backend CRUD       ████████████████████ ✅ Concluído
+Fase 3: Backend Regras     ████████████████████ ✅ Concluído
+Fase 4: Frontend Scaffold  ████████████████████ ✅ Concluído
+Fase 5: Frontend Tab 1     ████████████████████ ✅ Concluído
+Fase 6: Frontend Tab 2     ████████████████████ ✅ Concluído
+Fase 7: Frontend Tab 3     ████████████████████ ✅ Concluído
+Fase 8: Frontend Tab 6     ████████████████████ ✅ Concluído
+Fase 9: Frontend Tab 4     ████████████████████ ✅ Concluído
+Fase 10: Frontend Tab 5    ████████████████████ ✅ Concluído
+Fase 11: Integração        ░░░░░░░░░░░░░░░░░░░░ 🟡 Pendente</pre>
+<h3>Fase 0: Setup Inicial ✅</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>Item</th><th style="text-align:center">Estado</th><th>Descrição</th></tr></thead>
+<tbody>
+<tr><td>Estrutura de pastas</td><td style="text-align:center">✅</td><td><code>backend/</code>, <code>frontend/</code>, <code>database/</code>, <code>docs/</code></td></tr>
+<tr><td>Solução .NET</td><td style="text-align:center">✅</td><td><code>ContabPOC.slnx</code> com 4 projetos</td></tr>
+<tr><td>Configuração NuGet</td><td style="text-align:center">✅</td><td><code>nuget.config</code> + <code>Directory.Packages.props</code> com pacotes FUNCEF</td></tr>
+<tr><td>Frontend scaffold</td><td style="text-align:center">✅</td><td>Next.js 16 + React 19 + Tailwind 4</td></tr>
+<tr><td>Docker compose</td><td style="text-align:center">✅</td><td>Oracle 23ai Free em contêiner</td></tr>
+<tr><td>Scripts SQL init</td><td style="text-align:center">✅</td><td>6 scripts de inicialização</td></tr>
+<tr><td>Documentação base</td><td style="text-align:center">✅</td><td>README, GETTING-STARTED, SETUP, MANUAL-USUARIO</td></tr>
+</tbody></table></div>
+<h3>Fase 1: Backend — Domain ✅</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>Entidade</th><th>Tabela Oracle</th><th style="text-align:center">Estado</th></tr></thead>
+<tbody>
+<tr><td><code>ContaContabil</code></td><td><code>PLANOCONTA</code></td><td style="text-align:center">✅</td></tr>
+<tr><td><code>PlanoContabil</code></td><td><code>PLANO</code></td><td style="text-align:center">✅</td></tr>
+<tr><td><code>CentroCusto</code></td><td><code>CENTCUST</code></td><td style="text-align:center">✅</td></tr>
+<tr><td><code>ContasxCC</code></td><td><code>CONTASXCC</code></td><td style="text-align:center">✅</td></tr>
+<tr><td><code>ContasxSC</code></td><td><code>CONTASXSUBC</code></td><td style="text-align:center">✅</td></tr>
+<tr><td><code>SubConta</code></td><td><code>SUBCONTA</code></td><td style="text-align:center">✅</td></tr>
+<tr><td><code>SubGrupo</code></td><td><code>SUBGRUPO</code></td><td style="text-align:center">✅</td></tr>
+<tr><td><code>Moeda</code></td><td><code>MOEDA</code></td><td style="text-align:center">✅</td></tr>
+<tr><td><code>ParamGlobal</code></td><td><code>PARAMGLOBAL</code></td><td style="text-align:center">✅</td></tr>
+<tr><td><code>ParamContab</code></td><td><code>PARAMCONTAB</code></td><td style="text-align:center">✅</td></tr>
+<tr><td><code>SegregacaoCriter</code></td><td><code>SEGREGACRITER</code></td><td style="text-align:center">✅</td></tr>
+<tr><td><code>Programa</code></td><td><code>PROGRAMA</code></td><td style="text-align:center">✅</td></tr>
+<tr><td><code>RateioPlanoPatro</code></td><td><code>RATADMPLANPATRO</code></td><td style="text-align:center">✅</td></tr>
+</tbody></table></div>
+<p><strong>Enums:</strong> <code>GrupoContaEnum</code> (A/P/R/D/C/O/E/S), <code>NaturezaContaEnum</code> (D/C/N), <code>TipoContaEnum</code> (S/A)</p>
+<h3>Fase 2: Backend — CRUD Básico ✅</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>Operação</th><th>Command/Query</th><th>Handler</th><th>Validador</th><th style="text-align:center">Estado</th></tr></thead>
+<tbody>
+<tr><td>Create</td><td><code>CreateContaContabilCommand</code></td><td>✅</td><td>✅ FluentValidation</td><td style="text-align:center">✅</td></tr>
+<tr><td>Update</td><td><code>UpdateContaContabilCommand</code></td><td>✅</td><td>✅ FluentValidation</td><td style="text-align:center">✅</td></tr>
+<tr><td>Delete</td><td><code>DeleteContaContabilCommand</code></td><td>✅</td><td>—</td><td style="text-align:center">✅</td></tr>
+<tr><td>GetById</td><td><code>GetContaContabilByIdQuery</code></td><td>✅</td><td>—</td><td style="text-align:center">✅</td></tr>
+<tr><td>GetTree</td><td><code>GetContaContabilTreeQuery</code></td><td>✅</td><td>—</td><td style="text-align:center">✅</td></tr>
+<tr><td>Associate CC</td><td><code>AssociateContasxCCCommand</code></td><td>✅</td><td>—</td><td style="text-align:center">✅</td></tr>
+<tr><td>Disassociate CC</td><td><code>DisassociateContasxCCCommand</code></td><td>✅</td><td>—</td><td style="text-align:center">✅</td></tr>
+<tr><td>Associate SC</td><td><code>AssociateContasxSCCommand</code></td><td>✅</td><td>—</td><td style="text-align:center">✅</td></tr>
+<tr><td>Disassociate SC</td><td><code>DisassociateContasxSCCommand</code></td><td>✅</td><td>—</td><td style="text-align:center">✅</td></tr>
+</tbody></table></div>
+<p><strong>EF Core Configurations:</strong> 13 arquivos de mapeamento entidade → tabela Oracle</p>
+<h3>Fase 3: Backend — Regras de Negócio ✅</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>Regra</th><th>Implementação</th><th style="text-align:center">Estado</th></tr></thead>
+<tbody>
+<tr><td>RN006: Bloqueio/inativação</td><td>Handlers + Validators</td><td style="text-align:center">✅</td></tr>
+<tr><td>RN021: Exclusão com lançamentos/saldo/filhas</td><td><code>DeleteContaContabilCommandHandler</code> → <code>InvalidOperationException</code> → 409 Conflict</td><td style="text-align:center">✅</td></tr>
+<tr><td>Grupo ↔ Natureza consistente</td><td>FluentValidation</td><td style="text-align:center">✅</td></tr>
+<tr><td>Sintética não pode ter CC</td><td>FluentValidation</td><td style="text-align:center">✅</td></tr>
+<tr><td>Nível 1 → Sintética</td><td>FluentValidation</td><td style="text-align:center">✅</td></tr>
+<tr><td>Pai Grupo=E → filha Grupo=E</td><td>FluentValidation</td><td style="text-align:center">✅</td></tr>
+<tr><td>Taxa juros 0-100</td><td>FluentValidation</td><td style="text-align:center">✅</td></tr>
+<tr><td>Conta já cadastrada</td><td>FluentValidation</td><td style="text-align:center">✅</td></tr>
+</tbody></table></div>
+<h3>Fase 4: Frontend — Scaffold ✅</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>Item</th><th style="text-align:center">Estado</th></tr></thead>
+<tbody>
+<tr><td>Página <code>/contas-contabeis</code></td><td style="text-align:center">✅</td></tr>
+<tr><td>Feature <code>contas-contabeis/</code> (api, hooks, components, types, validators)</td><td style="text-align:center">✅</td></tr>
+<tr><td>API client + endpoints</td><td style="text-align:center">✅</td></tr>
+<tr><td>React Query configurado</td><td style="text-align:center">✅</td></tr>
+<tr><td>ESLint boundaries</td><td style="text-align:center">✅</td></tr>
+<tr><td>Auth layout</td><td style="text-align:center">✅</td></tr>
+</tbody></table></div>
+<h3>Fase 5: Frontend — Tab 1: Informações Gerais ✅</h3>
+<p><strong>Componente:</strong> <a href="../poc-contabil/frontend/src/features/contas-contabeis/components/tab-informacoes-gerais.tsx"><code>tab-informacoes-gerais.tsx</code></a></p>
+<div class="table-wrap"><table>
+<thead><tr><th>Seção</th><th>Campos</th><th style="text-align:center">Estado</th></tr></thead>
+<tbody>
+<tr><td>Identificação</td><td>Plano, Código, Grau, Tipo, Grupo, Cód.Reduzido, Natureza, Descrição PT, Descrição outro idioma, Conta Correspondente</td><td style="text-align:center">✅</td></tr>
+<tr><td>Parâmetros</td><td>12 checkboxes + Bloqueada até + Conta Estatística</td><td style="text-align:center">✅</td></tr>
+<tr><td>Segreg. Investimento</td><td>Radio group (N/S/R) + Nome do Rateio</td><td style="text-align:center">✅</td></tr>
+<tr><td>Segregação de Recursos</td><td>Critério + Programa + Conta Extracontábil + Uso PGA</td><td style="text-align:center">✅</td></tr>
+<tr><td>Segregação</td><td>4 campos de texto + lookup</td><td style="text-align:center">✅</td></tr>
+</tbody></table></div>
+<h3>Fase 6: Frontend — Tab 2: Sub-Grupos &amp; Moedas ✅</h3>
+<p><strong>Componente:</strong> <a href="../poc-contabil/frontend/src/features/contas-contabeis/components/tab-subgrupos-moeda.tsx"><code>tab-subgrupos-moeda.tsx</code></a></p>
+<div class="table-wrap"><table>
+<thead><tr><th>Seção</th><th>Campos</th><th style="text-align:center">Estado</th></tr></thead>
+<tbody>
+<tr><td>Sub-Grupos</td><td>4 dropdowns (SUBGRUPO)</td><td style="text-align:center">✅</td></tr>
+<tr><td>Tipo de Conversão Padrão</td><td>4 dropdowns com habilitação dinâmica (Regra 7)</td><td style="text-align:center">✅</td></tr>
+<tr><td>Moeda Histórica</td><td>Moeda + Contra Partida + lookup</td><td style="text-align:center">✅</td></tr>
+<tr><td>Taxa de Juros</td><td>Percentual + Contrapartida</td><td style="text-align:center">✅</td></tr>
+</tbody></table></div>
+<h3>Fase 7: Frontend — Tab 3: Conta x C.Custo ✅</h3>
+<p><strong>Componente:</strong> <a href="../poc-contabil/frontend/src/features/contas-contabeis/components/tab-centro-custo.tsx"><code>tab-centro-custo.tsx</code></a></p>
+<div class="table-wrap"><table>
+<thead><tr><th>Funcionalidade</th><th style="text-align:center">Estado</th></tr></thead>
+<tbody>
+<tr><td>Dual-list (Disponíveis ↔ Associados)</td><td style="text-align:center">✅</td></tr>
+<tr><td>Botões &gt;&gt;, &gt;, &lt;, &lt;&lt;</td><td style="text-align:center">✅</td></tr>
+<tr><td>Validação: sintéticos bloqueados</td><td style="text-align:center">✅</td></tr>
+<tr><td>Tab habilitada somente quando <code>PLACCUST=&#x27;S&#x27;</code></td><td style="text-align:center">✅</td></tr>
+<tr><td>Endpoints associate/disassociate</td><td style="text-align:center">✅</td></tr>
+</tbody></table></div>
+<h3>Fase 8: Frontend — Tab 6: Detalhes ✅</h3>
+<p><strong>Componente:</strong> <a href="../poc-contabil/frontend/src/features/contas-contabeis/components/tab-outros.tsx"><code>tab-outros.tsx</code></a></p>
+<div class="table-wrap"><table>
+<thead><tr><th>Campo</th><th style="text-align:center">Estado</th></tr></thead>
+<tbody>
+<tr><td>Descrição/Observações (textarea, máx 1000)</td><td style="text-align:center">✅</td></tr>
+</tbody></table></div>
+<h3>Fase 9: Frontend — Tab 4: Conta x Sub-Conta ✅</h3>
+<p><strong>Componente:</strong> <a href="../poc-contabil/frontend/src/features/contas-contabeis/components/tab-sub-conta.tsx"><code>tab-sub-conta.tsx</code></a> (474 linhas)</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Funcionalidade</th><th style="text-align:center">Estado</th></tr></thead>
+<tbody>
+<tr><td>Dual-list (Sub-Contas Disponíveis ↔ Associados)</td><td style="text-align:center">✅</td></tr>
+<tr><td>Botões &gt;&gt;, &gt;, &lt;, &lt;&lt;</td><td style="text-align:center">✅</td></tr>
+<tr><td>Movimentações locais (em memória) + persistir ao salvar</td><td style="text-align:center">✅</td></tr>
+<tr><td>Confirmação ao desassociar todos (&lt;&lt;)</td><td style="text-align:center">✅</td></tr>
+<tr><td>Tab habilitada somente quando <code>PLASUBCONTA=&#x27;S&#x27;</code></td><td style="text-align:center">✅</td></tr>
+<tr><td>Endpoints backend</td><td style="text-align:center">✅ (<code>SubContasController</code>, <code>ContasxSCController</code>)</td></tr>
+<tr><td>Hooks frontend</td><td style="text-align:center">✅ (<code>useSubContas</code>, <code>useContasxSC</code>, <code>useAssociateContasxSC</code>, <code>useDisassociateContasxSC</code>)</td></tr>
+</tbody></table></div>
+<h3>Fase 10: Frontend — Tab 5: Árvore de Contas Contábeis ✅</h3>
+<p><strong>Componente:</strong> <a href="../poc-contabil/frontend/src/features/contas-contabeis/components/contas-list.tsx"><code>contas-list.tsx</code></a> (277 linhas)</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Funcionalidade</th><th style="text-align:center">Estado</th></tr></thead>
+<tbody>
+<tr><td>Árvore hierárquica visual (<code>buildTree</code>)</td><td style="text-align:center">✅</td></tr>
+<tr><td>Expandir/colapsar nós (<code>TreeNodeItem</code> recursivo)</td><td style="text-align:center">✅</td></tr>
+<tr><td>Expandir todos / Colapsar todos</td><td style="text-align:center">✅</td></tr>
+<tr><td>Badges (Tipo, Grupo, Inativa, Bloqueada)</td><td style="text-align:center">✅</td></tr>
+<tr><td>Contador de nós</td><td style="text-align:center">✅</td></tr>
+<tr><td>Endpoint backend</td><td style="text-align:center">✅ (<code>GET /api/contascontabeis/tree</code>)</td></tr>
+<tr><td>Hook frontend</td><td style="text-align:center">✅ (<code>useContasTree</code>)</td></tr>
+</tbody></table></div>
+<h3>Fase 11: Integração e Validações 🟡</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>Item</th><th style="text-align:center">Estado</th></tr></thead>
+<tbody>
+<tr><td>Dupla validação frontend (Zod) + backend (FluentValidation)</td><td style="text-align:center">✅</td></tr>
+<tr><td>Envelope FUNCEF normalizado (<code>{ resultado, mensagem, qtdRegistros }</code>)</td><td style="text-align:center">✅</td></tr>
+<tr><td>Paridade funcional com tela Delphi</td><td style="text-align:center">✅</td></tr>
+</tbody></table></div>
+</section>
+<section id="5-mapeamento-delphi-net-react">
+  <div class="section-title"><a href="#5-mapeamento-delphi-net-react" style="color:inherit">5. Mapeamento Delphi → .NET / React</a></div>
+<h3>Mapeamento de Eventos Delphi → Endpoints API</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>Evento Delphi</th><th>Método HTTP</th><th>Endpoint</th><th>Descrição</th></tr></thead>
+<tbody>
+<tr><td><code>CmeCadastroFind</code></td><td><code>GET</code></td><td><code>/api/contascontabeis/{plano}/{codigo}</code></td><td>Buscar conta por PK</td></tr>
+<tr><td><code>CmeCadastroInsert</code></td><td><code>POST</code></td><td><code>/api/contascontabeis</code></td><td>Criar nova conta</td></tr>
+<tr><td><code>CmeCadastroEdit</code></td><td><code>PUT</code></td><td><code>/api/contascontabeis/{plano}/{codigo}</code></td><td>Atualizar conta</td></tr>
+<tr><td><code>CmeCadastroDelete</code></td><td><code>DELETE</code></td><td><code>/api/contascontabeis/{plano}/{codigo}</code></td><td>Excluir conta</td></tr>
+<tr><td><code>pgCtrlChange</code> / <code>treePlano.MontaArvore</code></td><td><code>GET</code></td><td><code>/api/contascontabeis/tree</code></td><td>Árvore hierárquica</td></tr>
+<tr><td><code>btnVaiTodosClick</code> / <code>btnVaiUmClick</code></td><td><code>POST</code></td><td><code>/api/contasxcc/associate</code></td><td>Associar C.Custos</td></tr>
+<tr><td><code>btnVoltaTodosClick</code> / <code>btnVoltaUmClick</code></td><td><code>POST</code></td><td><code>/api/contasxcc/disassociate</code></td><td>Desassociar C.Custos</td></tr>
+</tbody></table></div>
+<h3>Mapeamento de Campos Delphi → Oracle → .NET Entity</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>Componente Delphi</th><th>Coluna Oracle</th><th>Propriedade .NET</th><th>Tipo</th></tr></thead>
+<tbody>
+<tr><td><code>dbeCodigo</code></td><td><code>PLACONTA</code></td><td><code>Codigo</code></td><td><code>string</code></td></tr>
+<tr><td><code>dbeGrau</code></td><td><code>PLAGRAU</code></td><td><code>Nivel</code></td><td><code>int</code></td></tr>
+<tr><td><code>grpTipo</code></td><td><code>PLATIPO</code></td><td><code>Tipo</code></td><td><code>string</code> (S/A)</td></tr>
+<tr><td><code>cmbGrp</code></td><td><code>PLAGRUPO</code></td><td><code>Grupo</code></td><td><code>string</code> (A/P/R/D/C/O/E/S)</td></tr>
+<tr><td><code>dbeCodReduz</code></td><td><code>PLAREDUZ</code></td><td><code>CodigoReduzido</code></td><td><code>int</code></td></tr>
+<tr><td><code>grpNatureza</code></td><td><code>PLANATUREZA</code></td><td><code>Natureza</code></td><td><code>string</code> (D/C/N)</td></tr>
+<tr><td><code>dbeDescPort</code></td><td><code>PLANOME</code></td><td><code>Descricao</code></td><td><code>string</code></td></tr>
+<tr><td><code>dbeDescOIdi</code></td><td><code>PLANOMEOUTLING</code></td><td><code>DescricaoIdioma</code></td><td><code>string?</code></td></tr>
+<tr><td><code>dbeCorresp</code></td><td><code>PLACONCORRESP</code></td><td><code>ContaCorrespondente</code></td><td><code>string?</code></td></tr>
+<tr><td><code>chkOrdAlf</code></td><td><code>PLAORDALF</code></td><td><code>OrdemAlfabetica</code></td><td><code>bool?</code></td></tr>
+<tr><td><code>chkCentCust</code></td><td><code>PLACCUST</code></td><td><code>AceitaCentroCusto</code></td><td><code>bool?</code></td></tr>
+<tr><td><code>chkInativa</code></td><td><code>PLAINATIVA</code></td><td><code>Inativa</code></td><td><code>bool</code></td></tr>
+<tr><td><code>chkBloqueia</code></td><td><code>PLABLOQUE</code></td><td><code>Bloqueada</code></td><td><code>bool?</code></td></tr>
+<tr><td><code>dteBloqueada</code></td><td><code>PLABLOQUEDATA</code></td><td><code>DataBloqueio</code></td><td><code>string?</code></td></tr>
+<tr><td><code>rdgRateio</code></td><td><code>PLARATEIOAP</code></td><td><code>AceitaRateio</code></td><td><code>string?</code> (N/S/R)</td></tr>
+<tr><td><code>dblkSubGrupo1..4</code></td><td><code>IDSUBGRUPO1..4</code></td><td><code>SubGrupo1..4</code></td><td><code>int?</code></td></tr>
+<tr><td><code>dblkMoeda</code></td><td><code>IDMOEDA</code></td><td><code>MoedaId</code></td><td><code>int?</code></td></tr>
+<tr><td><code>dblkSegregacao</code></td><td><code>IDSEGREGACRITER</code></td><td><code>SegregacaoCriterId</code></td><td><code>int?</code></td></tr>
+<tr><td><code>cboPrograma</code></td><td><code>IDPROGRAMA</code></td><td><code>ProgramaId</code></td><td><code>int?</code></td></tr>
+<tr><td><code>dblkRateioPlanoPatro</code></td><td><code>IDRATADMPLANPATRO</code></td><td><code>RateioPlanoAdmId</code></td><td><code>int?</code></td></tr>
+<tr><td><code>DBMemoObs</code></td><td><code>OBSERVACAO</code></td><td><code>Observacoes</code></td><td><code>string?</code></td></tr>
+</tbody></table></div>
+<h3>Mapeamento de TabSheets → Componentes React</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>TabSheet Delphi</th><th>Componente React</th><th>Arquivo</th></tr></thead>
+<tbody>
+<tr><td><code>TabSheet1</code> (Informações Gerais)</td><td><code>TabInformacoesGerais</code></td><td><code>tab-informacoes-gerais.tsx</code></td></tr>
+<tr><td><code>TabSheet3</code> (Sub-Grupos &amp; Moedas)</td><td><code>TabSubgruposMoeda</code></td><td><code>tab-subgrupos-moeda.tsx</code></td></tr>
+<tr><td><code>TabSheet4</code> (Conta x C.Custo)</td><td><code>TabCentroCusto</code></td><td><code>tab-centro-custo.tsx</code></td></tr>
+<tr><td><code>TabSheet5</code> (Conta x Sub-Conta)</td><td><code>TabSubConta</code></td><td><code>tab-sub-conta.tsx</code></td></tr>
+<tr><td><code>TabSheet2</code> (Árvore)</td><td><code>ContasList</code></td><td><code>contas-list.tsx</code></td></tr>
+<tr><td><code>TabSheet6</code> (Detalhes)</td><td><code>TabOutros</code></td><td><code>tab-outros.tsx</code></td></tr>
+</tbody></table></div>
+</section>
+<section id="6-regras-de-negocio-migradas">
+  <div class="section-title"><a href="#6-regras-de-negocio-migradas" style="color:inherit">6. Regras de Negócio Migradas</a></div>
+<h3>Regras Automáticas (Frontend)</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>Regra</th><th>Evento Delphi</th><th>Origem Legacy</th><th style="text-align:center">Estado</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>Código → Grau (automático)</td><td><code>dbeCodigoExit</code></td><td>Linhas 488-611</td><td style="text-align:center">✅</td></tr>
+<tr><td>2</td><td>Grau → Tipo (automático)</td><td><code>dbeCodigoExit</code></td><td>Linhas 488-611</td><td style="text-align:center">✅</td></tr>
+<tr><td>3</td><td>Grupo → Natureza (automático)</td><td><code>cmbGrpExit</code></td><td>Linhas 613-670</td><td style="text-align:center">✅</td></tr>
+<tr><td>4</td><td>Tipo → Habilitação de checkboxes</td><td><code>grpTipoClick</code></td><td>Linhas 986-999</td><td style="text-align:center">✅</td></tr>
+<tr><td>5</td><td>SegregaVirtual → Habilitação de campos</td><td><code>FormCreate</code></td><td>Linhas 376-383</td><td style="text-align:center">✅</td></tr>
+<tr><td>6</td><td>Conta pai Grupo=E → filha Grupo=E</td><td><code>CmeCadastroBeforeConfirma</code></td><td>Linhas 1396-1477</td><td style="text-align:center">✅</td></tr>
+<tr><td>7</td><td>Configuração moedas → habilitar combos</td><td><code>FormShow</code></td><td>Linhas 740-762</td><td style="text-align:center">✅</td></tr>
+<tr><td>8</td><td>Normalização conversão vazia → 'N'</td><td><code>CmeCadastroBeforeConfirma</code></td><td>Linhas 1448-1458</td><td style="text-align:center">✅</td></tr>
+</tbody></table></div>
+<h3>Regras de Validação (Backend + Frontend)</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>Regra</th><th style="text-align:center">Frontend (Zod)</th><th style="text-align:center">Backend (FluentValidation)</th><th style="text-align:center">Estado</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>Plano obrigatório</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td></tr>
+<tr><td>2</td><td>Código obrigatório</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td></tr>
+<tr><td>3</td><td>Código máx 20 caracteres</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td></tr>
+<tr><td>4</td><td>Descrição obrigatória</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td></tr>
+<tr><td>5</td><td>Tipo S ou A</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td></tr>
+<tr><td>6</td><td>Grupo válido (A/P/R/D/C/O/E/S)</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td></tr>
+<tr><td>7</td><td>Nível 1-20</td><td style="text-align:center">✅</td><td style="text-align:center">✅ (1-99)</td><td style="text-align:center">✅</td></tr>
+<tr><td>8</td><td>Código Reduzido &gt; 0</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td></tr>
+<tr><td>9</td><td>Grupo ↔ Natureza consistente</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td></tr>
+<tr><td>10</td><td>Sintética não pode ter CC</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td></tr>
+<tr><td>11</td><td>Nível 1 → Sintética</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td></tr>
+<tr><td>12</td><td>Taxa juros &gt; 0 → contrapartida obrigatória</td><td style="text-align:center">✅</td><td style="text-align:center">—</td><td style="text-align:center">✅</td></tr>
+<tr><td>13</td><td>Taxa juros 0-100</td><td style="text-align:center">—</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td></tr>
+<tr><td>14</td><td>Conta já cadastrada</td><td style="text-align:center">—</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td></tr>
+<tr><td>15</td><td>Pai Grupo=E → filha Grupo=E</td><td style="text-align:center">—</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td></tr>
+</tbody></table></div>
+<h3>Regras de Exclusão (RN021)</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>Validação</th><th>Origem Legacy</th><th>Implementação</th><th style="text-align:center">Estado</th></tr></thead>
+<tbody>
+<tr><td>Conta com lançamentos</td><td><code>CmeCadastroApplyDelete</code></td><td><code>DeleteContaContabilCommandHandler</code></td><td style="text-align:center">✅</td></tr>
+<tr><td>Conta com saldo</td><td><code>CmeCadastroApplyDelete</code></td><td><code>DeleteContaContabilCommandHandler</code></td><td style="text-align:center">✅</td></tr>
+<tr><td>Conta com filhas</td><td><code>CmeCadastroApplyDelete</code></td><td><code>DeleteContaContabilCommandHandler</code></td><td style="text-align:center">✅</td></tr>
+<tr><td>Resposta HTTP</td><td>—</td><td><code>409 Conflict</code> com mensagem</td><td style="text-align:center">✅</td></tr>
+</tbody></table></div>
+</section>
+<section id="7-endpoints-da-api">
+  <div class="section-title"><a href="#7-endpoints-da-api" style="color:inherit">7. Endpoints da API</a></div>
+<h3>Contas Contábeis (CRUD principal)</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>Método</th><th>Endpoint</th><th>Descrição</th><th>Controller</th></tr></thead>
+<tbody>
+<tr><td><code>GET</code></td><td><code>/api/contascontabeis/tree</code></td><td>Árvore hierárquica</td><td><code>ContasContabeisController</code></td></tr>
+<tr><td><code>GET</code></td><td><code>/api/contascontabeis/{plano}/{codigo}</code></td><td>Buscar por PK</td><td><code>ContasContabeisController</code></td></tr>
+<tr><td><code>POST</code></td><td><code>/api/contascontabeis</code></td><td>Criar conta</td><td><code>ContasContabeisController</code></td></tr>
+<tr><td><code>PUT</code></td><td><code>/api/contascontabeis/{plano}/{codigo}</code></td><td>Atualizar conta</td><td><code>ContasContabeisController</code></td></tr>
+<tr><td><code>DELETE</code></td><td><code>/api/contascontabeis/{plano}/{codigo}</code></td><td>Excluir conta</td><td><code>ContasContabeisController</code></td></tr>
+</tbody></table></div>
+<h3>Contas x C.Custo (Tab 3)</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>Método</th><th>Endpoint</th><th>Descrição</th></tr></thead>
+<tbody>
+<tr><td><code>GET</code></td><td><code>/api/centroscusto?idEmpresa={id}&amp;plano={p}&amp;placConta={c}</code></td><td>C.Custos disponíveis</td></tr>
+<tr><td><code>GET</code></td><td><code>/api/contasxcc?idEmpresa={id}&amp;plano={p}&amp;placConta={c}</code></td><td>C.Custos associados</td></tr>
+<tr><td><code>POST</code></td><td><code>/api/contasxcc/associate</code></td><td>Associar C.Custos</td></tr>
+<tr><td><code>POST</code></td><td><code>/api/contasxcc/disassociate</code></td><td>Desassociar C.Custos</td></tr>
+</tbody></table></div>
+<h3>Contas x Sub-Conta (Tab 4)</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>Método</th><th>Endpoint</th><th>Descrição</th></tr></thead>
+<tbody>
+<tr><td><code>GET</code></td><td><code>/api/subcontas?idEmpresa={id}&amp;plano={p}&amp;placConta={c}</code></td><td>Sub-contas disponíveis</td></tr>
+<tr><td><code>GET</code></td><td><code>/api/contasxsc?idEmpresa={id}&amp;plano={p}&amp;placConta={c}</code></td><td>Sub-contas associadas</td></tr>
+<tr><td><code>POST</code></td><td><code>/api/contasxsc/associate</code></td><td>Associar sub-contas</td></tr>
+<tr><td><code>POST</code></td><td><code>/api/contasxsc/disassociate</code></td><td>Desassociar sub-contas</td></tr>
+</tbody></table></div>
+<h3>Endpoints de Suporte (Dropdowns)</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>Método</th><th>Endpoint</th><th>Descrição</th><th>Tabela Oracle</th></tr></thead>
+<tbody>
+<tr><td><code>GET</code></td><td><code>/api/planoscontabeis</code></td><td>Planos contábeis</td><td><code>PLANO</code></td></tr>
+<tr><td><code>GET</code></td><td><code>/api/subgrupos</code></td><td>Sub-grupos</td><td><code>SUBGRUPO</code></td></tr>
+<tr><td><code>GET</code></td><td><code>/api/moedas</code></td><td>Moedas</td><td><code>MOEDA</code></td></tr>
+<tr><td><code>GET</code></td><td><code>/api/programas</code></td><td>Programas</td><td><code>PROGRAMA</code></td></tr>
+<tr><td><code>GET</code></td><td><code>/api/segregacoescriter</code></td><td>Critérios de segregação</td><td><code>SEGREGACRITER</code></td></tr>
+<tr><td><code>GET</code></td><td><code>/api/rateiosplanopatro</code></td><td>Rateios por plano/patro</td><td><code>RATADMPLANPATRO</code></td></tr>
+<tr><td><code>GET</code></td><td><code>/api/paramglobal/{idEmpresa}</code></td><td>Parâmetros globais</td><td><code>PARAMGLOBAL</code></td></tr>
+<tr><td><code>GET</code></td><td><code>/api/paramcontab/{idEmpresa}</code></td><td>Parâmetros contábeis</td><td><code>PARAMCONTAB</code></td></tr>
+</tbody></table></div>
+<h3>Envelope de Resposta FUNCEF</h3>
+<p>Todas as respostas seguem o formato normalizado:</p>
+<pre class="mermaid">{
+  &quot;resultado&quot;: { ... },
+  &quot;mensagem&quot;: &quot;Conta contábil criada com sucesso&quot;,
+  &quot;qtdRegistros&quot;: 1
+}</pre>
+</section>
+<section id="8-base-de-dados">
+  <div class="section-title"><a href="#8-base-de-dados" style="color:inherit">8. Base de Dados</a></div>
+<h3>Tabelas Oracle Migradas</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>Tabela</th><th>PK</th><th>Descrição</th><th>Script</th></tr></thead>
+<tbody>
+<tr><td><code>PLANO</code></td><td><code>IDPLANO</code></td><td>Planos contábeis</td><td><code>02-create-schema.sql</code></td></tr>
+<tr><td><code>PLANOCONTA</code></td><td><code>(PLANO, PLACONTA)</code></td><td>Contas contábeis</td><td><code>02-create-schema.sql</code></td></tr>
+<tr><td><code>CENTCUST</code></td><td><code>(IDPESSOA, CODCENTROCUSTO)</code></td><td>Centros de custo</td><td><code>02-create-schema.sql</code></td></tr>
+<tr><td><code>CONTASXCC</code></td><td><code>IDCONTACC</code> (seq)</td><td>Relação conta × C.Custo</td><td><code>02-create-schema.sql</code></td></tr>
+<tr><td><code>CONTASXSUBC</code></td><td><code>IDCONTASC</code> (seq)</td><td>Relação conta × Sub-Conta</td><td><code>02-create-schema.sql</code></td></tr>
+<tr><td><code>SUBCONTA</code></td><td><code>(IDPESSOA, CODSUBCONTA)</code></td><td>Sub-contas</td><td><code>06-create-subconta.sql</code></td></tr>
+<tr><td><code>SUBGRUPO</code></td><td><code>IDSUBGRUPO</code></td><td>Sub-grupos</td><td><code>05-create-subgrupo-moeda.sql</code></td></tr>
+<tr><td><code>MOEDA</code></td><td><code>IDMOEDA</code></td><td>Moedas</td><td><code>05-create-subgrupo-moeda.sql</code></td></tr>
+<tr><td><code>PARAMGLOBAL</code></td><td><code>IDPESSOA</code></td><td>Parâmetros globais por empresa</td><td><code>02-create-schema.sql</code></td></tr>
+<tr><td><code>PARAMCONTAB</code></td><td><code>IDPESSOA</code></td><td>Parâmetros contábeis por empresa</td><td><code>02-create-schema.sql</code></td></tr>
+<tr><td><code>SEGREGACRITER</code></td><td><code>IDSEGREGACRITER</code></td><td>Critérios de segregação</td><td><code>02-create-schema.sql</code></td></tr>
+<tr><td><code>PROGRAMA</code></td><td><code>IDPROGRAMA</code></td><td>Programas</td><td><code>02-create-schema.sql</code></td></tr>
+<tr><td><code>RATADMPLANPATRO</code></td><td><code>IDRATADMPLANPATRO</code></td><td>Rateios por plano/patro</td><td><code>02-create-schema.sql</code></td></tr>
+</tbody></table></div>
+<h3>Scripts de Inicialização</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>Script</th><th>Descrição</th></tr></thead>
+<tbody>
+<tr><td>1</td><td><code>01-create-users.sql</code></td><td>Usuários Oracle (<code>CONTAB_DEV</code>, <code>CONTAB_TEST</code>)</td></tr>
+<tr><td>2</td><td><code>02-create-schema.sql</code></td><td>Esquema completo (tabelas, constraints, índices)</td></tr>
+<tr><td>3</td><td><code>03-create-triggers.sql</code></td><td>Triggers (auditoria, sequências, <code>TRG_BI_CONTASXCC</code>)</td></tr>
+<tr><td>4</td><td><code>04-seed-data.sql</code></td><td>Dados seed (planos, paramglobal, paramcontab, segregação, programas)</td></tr>
+<tr><td>5</td><td><code>05-create-subgrupo-moeda.sql</code></td><td>Tabelas SUBGRUPO e MOEDA + seed</td></tr>
+<tr><td>6</td><td><code>06-create-subconta.sql</code></td><td>Tabela SUBCONTA + seed</td></tr>
+</tbody></table></div>
+<h3>Infraestrutura</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>Componente</th><th>Arquivo</th><th>Descrição</th></tr></thead>
+<tbody>
+<tr><td>Docker Compose</td><td><code>docker-compose.yml</code></td><td>Oracle 23ai Free em contêiner</td></tr>
+<tr><td>Fix schema</td><td><code>fix-schema.sql</code></td><td>Correções de esquema</td></tr>
+<tr><td>Fix triggers</td><td><code>fix-trigger-mutating.sql</code></td><td>Fix trigger mutating table</td></tr>
+<tr><td>Fix PLAREDUZ</td><td><code>fix-plareduz.sql</code></td><td>Fix geração código reduzido</td></tr>
+<tr><td>Verify schema</td><td><code>verify-schema.sql</code></td><td>Verificação de integridade</td></tr>
+</tbody></table></div>
+</section>
+<section id="9-estado-detalhado-por-tab">
+  <div class="section-title"><a href="#9-estado-detalhado-por-tab" style="color:inherit">9. Estado Detalhado por Tab</a></div>
+<h3>Tab 1: Informações Gerais ✅</h3>
+<p><strong>Seções implementadas:</strong></p>
+<ol><li><strong>Identificação da Conta</strong> — Plano, Código, Grau (auto), Tipo (auto), Grupo, Cód.Reduzido, Natureza (auto), Descrição PT, Descrição outro idioma, Conta Correspondente</li><li><strong>Parâmetros</strong> — 12 checkboxes (ordem alfabética, centro de custo, movimentação, inativa, concilia, imprime rel., sub-conta, sumariza, altera PL, conta padrão, bloqueada até, conta estatística)</li><li><strong>Segreg. Investimento (antiga)</strong> — Radio group N/S/R + dropdown Nome do Rateio (<code>RATADMPLANPATRO</code>)</li><li><strong>Segregação de Recursos</strong> — Dropdown Critério (<code>SEGREGACRITER</code>), Dropdown Programa (<code>PROGRAMA</code>), Conta Extracontábil, Uso PGA</li><li><strong>Segregação</strong> — 4 campos de texto com lookup (segregação planos, aglutinação, fundo adm crédito/débito)</li></ol>
+<p><strong>Regras automáticas ativas:</strong> Regras 1, 2, 3, 4, 5, 6</p>
+<h3>Tab 2: Sub-Grupos &amp; Moedas ✅</h3>
+<p><strong>Seções implementadas:</strong></p>
+<ol><li><strong>Sub-Grupos</strong> — 4 dropdowns (<code>SUBGRUPO</code> 1-4)</li><li><strong>Tipo de Conversão Padrão</strong> — 4 dropdowns com habilitação dinâmica conforme <code>PARAMCONTAB</code> (Regra 7) + labels dinâmicas com sigla de moeda</li><li><strong>Moeda Histórica</strong> — Dropdown Moeda (<code>MOEDA</code>) + Contra Partida com lookup</li><li><strong>Taxa de Juros</strong> — Percentual (0-100) + Contrapartida com lookup</li></ol>
+<p><strong>Regras automáticas ativas:</strong> Regras 7, 8</p>
+<h3>Tab 3: Conta x C.Custo ✅</h3>
+<p><strong>Padrão:</strong> Dual-list (Disponíveis ↔ Associados)</p>
+<ul><li>Grid esquerdo: C.Custos disponíveis (<code>CENTCUST</code> filtrado por empresa, excluindo associados)</li><li>Grid direito: C.Custos associados (<code>CONTASXCC</code>)</li><li>4 botões: <code>&gt;&gt;</code> (associar todos analíticos), <code>&gt;</code> (associar selecionados), <code>&lt;</code> (desassociar selecionados), <code>&lt;&lt;</code> (desassociar todos)</li><li>Validação: sintéticos (<code>STATUSGRUPOCDC = &#x27;S&#x27;</code>) bloqueados com mensagem de erro</li><li>Tab habilitada somente quando <code>PLACCUST = &#x27;S&#x27;</code></li></ul>
+<h3>Tab 4: Conta x Sub-Conta ✅</h3>
+<p><strong>Padrão:</strong> Dual-list (Sub-Contas Disponíveis ↔ Associados) com movimentações locais</p>
+<ul><li>Grid esquerdo: Sub-contas disponíveis (<code>SUBCONTA</code> filtrado por empresa, excluindo associados)</li><li>Grid direito: Sub-contas associadas (<code>CONTASXSUBC</code>)</li><li>4 botões: <code>&gt;&gt;</code> (associar todos), <code>&gt;</code> (associar selecionados), <code>&lt;</code> (desassociar selecionados), <code>&lt;&lt;</code> (desassociar todos com confirmação)</li><li>Movimentações locais em memória (replica <code>CdsContasxSC</code> do Delphi) — persistência ao salvar</li><li>Tab habilitada somente quando <code>PLASUBCONTA = &#x27;S&#x27;</code> e a conta já está salva</li></ul>
+<h3>Tab 5: Árvore de Contas Contábeis ✅</h3>
+<p><strong>Padrão:</strong> Árvore hierárquica visual recursiva</p>
+<ul><li>Construção da árvore desde lista plana (<code>buildTree</code>) — hierarquia por código (<code>1</code> → <code>1.1</code> → <code>1.1.01</code>)</li><li>Componente recursivo <code>TreeNodeItem</code> com indentação por nível</li><li>Expandir/colapsar nós individuais + expandir/colapsar todos</li><li>Badges: Tipo (Sintética/Analítica), Grupo, Inativa, Bloqueada</li><li>Contador total de nós</li><li>Equivalente ao <code>treePlano.MontaArvore</code> do Delphi</li></ul>
+<h3>Tab 6: Detalhes ✅</h3>
+<p><strong>Seções implementadas:</strong></p>
+<ol><li><strong>Descrição/Observações</strong> — Textarea (máx 1000 caracteres)</li></ol>
+</section>
+<section id="10-pendentes-e-proximos-passos">
+  <div class="section-title"><a href="#10-pendentes-e-proximos-passos" style="color:inherit">10. Pendentes e Próximos Passos</a></div>
+<h3>Prioridade 1: Testing</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>Tarefa</th><th>Esforço</th><th>Descrição</th></tr></thead>
+<tbody>
+<tr><td>Tests backend</td><td>2 dias</td><td>Unit tests para Handlers, Validators; Integration tests para Controllers</td></tr>
+<tr><td>Tests frontend</td><td>2 dias</td><td>Component tests (Vitest + Testing Library), API mocks (MSW)</td></tr>
+</tbody></table></div>
+<h3>Prioridade 2: Refinamento</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>Tarefa</th><th>Esforço</th><th>Descrição</th></tr></thead>
+<tbody>
+<tr><td>Paridade visual com Delphi</td><td>2 dias</td><td>Ajustes de UX, não pixel-perfect mas funcional</td></tr>
+<tr><td>Responsividade</td><td>1 dia</td><td>Mobile/tablet breakpoints</td></tr>
+<tr><td>Acessibilidade</td><td>1 dia</td><td>ARIA labels, keyboard navigation</td></tr>
+</tbody></table></div>
+<h3>Timeline Estimado Restante</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>Semana</th><th>Entregável</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>Tests backend + frontend</td></tr>
+<tr><td>2</td><td>Refinamento + paridade visual</td></tr>
+<tr><td>3</td><td>Apresentação à FUNCEF</td></tr>
+</tbody></table></div>
+<p><strong>Duração restante estimada:</strong> 2-3 semanas</p>
+</section>
+<section id="11-criterios-de-aceitacao">
+  <div class="section-title"><a href="#11-criterios-de-aceitacao" style="color:inherit">11. Critérios de Aceitação</a></div>
+<h3>Critérios Funcionais</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>Critério</th><th style="text-align:center">Estado</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>Árvore hierárquica de contas contábeis carrega desde Oracle</td><td style="text-align:center">✅</td></tr>
+<tr><td>2</td><td>CRUD completo com validações (RN006, RN021)</td><td style="text-align:center">✅</td></tr>
+<tr><td>3</td><td>Autenticação Entra ID (BFF same-origin, Bearer nunca no browser)</td><td style="text-align:center">✅</td></tr>
+<tr><td>4</td><td>Envelope FUNCEF normalizado (<code>{ resultado, mensagem, qtdRegistros }</code>)</td><td style="text-align:center">✅</td></tr>
+<tr><td>5</td><td>UI responsiva com componentes <code>@funcef-componentes/react</code></td><td style="text-align:center">✅</td></tr>
+<tr><td>6</td><td>Paridade funcional com tela Delphi</td><td style="text-align:center">✅</td></tr>
+<tr><td>7</td><td>Build + tests + verificação CI passam</td><td style="text-align:center">🟡 Pendente</td></tr>
+<tr><td>8</td><td>Tab 4 (Sub-Conta) funcional</td><td style="text-align:center">✅</td></tr>
+<tr><td>9</td><td>Tab 5 (Árvore) funcional</td><td style="text-align:center">✅</td></tr>
+</tbody></table></div>
+<h3>Critérios Técnicos</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>Critério</th><th style="text-align:center">Estado</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>Clean Architecture respeitada (dependências para dentro)</td><td style="text-align:center">✅</td></tr>
+<tr><td>2</td><td>CQRS/Mediator em todos os endpoints</td><td style="text-align:center">✅</td></tr>
+<tr><td>3</td><td>FluentValidation no pipeline Mediator</td><td style="text-align:center">✅</td></tr>
+<tr><td>4</td><td>EF Core configs separadas por entidade</td><td style="text-align:center">✅</td></tr>
+<tr><td>5</td><td>Frontend 4 camadas com ESLint boundaries</td><td style="text-align:center">✅</td></tr>
+<tr><td>6</td><td>React Query para data fetching</td><td style="text-align:center">✅</td></tr>
+<tr><td>7</td><td>React Hook Form + Zod para forms</td><td style="text-align:center">✅</td></tr>
+<tr><td>8</td><td>Dupla validação (frontend Zod + backend FluentValidation)</td><td style="text-align:center">✅</td></tr>
+</tbody></table></div>
+</section>
+<section id="12-riscos-e-mitigacoes">
+  <div class="section-title"><a href="#12-riscos-e-mitigacoes" style="color:inherit">12. Riscos e Mitigações</a></div>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>Risco</th><th>Impacto</th><th style="text-align:center">Probabilidade</th><th>Mitigação</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>Regras de negócio não documentadas no legacy</td><td>Alto</td><td style="text-align:center">Média</td><td>Reunião funcional com FUNCEF antes de começar cada tab</td></tr>
+<tr><td>2</td><td>Comportamento de triggers Oracle diferente em EF Core</td><td>Médio</td><td style="text-align:center">Baixa</td><td>Tests de integração com Oracle real em Docker</td></tr>
+<tr><td>3</td><td>Pacotes FUNCEF em GitHub Packages com auth</td><td>Baixo</td><td style="text-align:center">Média</td><td>Documentar PAT em SETUP.md, <code>nuget.config</code> configurado</td></tr>
+<tr><td>4</td><td>Performance da árvore hierárquica com muitas contas</td><td>Médio</td><td style="text-align:center">Baixa</td><td>Paginação server-side, lazy loading de nós</td></tr>
+<tr><td>5</td><td>Diferenças de máscara de código entre planos</td><td>Médio</td><td style="text-align:center">Média</td><td>Validação dinâmica conforme máscara do plano selecionado</td></tr>
+<tr><td>6</td><td><code>SegregaVirtual</code> varia por empresa</td><td>Baixo</td><td style="text-align:center">Baixa</td><td>Endpoint <code>GET /api/paramglobal/{idEmpresa}</code> já implementado</td></tr>
+</tbody></table></div>
+</section>
+<section id="documentacao-relacionada">
+  <div class="section-title"><a href="#documentacao-relacionada" style="color:inherit">📚 Documentação Relacionada</a></div>
+<div class="table-wrap"><table>
+<thead><tr><th>Documento</th><th>Localização</th><th>Conteúdo</th></tr></thead>
+<tbody>
+<tr><td>README principal</td><td><a href="../poc-contabil/README.md"><code>README.md</code></a></td><td>Visão geral do projeto</td></tr>
+<tr><td>Getting Started</td><td><a href="../poc-contabil/GETTING-STARTED.md"><code>GETTING-STARTED.md</code></a></td><td>Guia rápida de início</td></tr>
+<tr><td>Manual de Usuário</td><td><a href="../poc-contabil/docs/MANUAL-USUARIO.md"><code>MANUAL-USUARIO.md</code></a></td><td>Documentação funcional detalhada por tab</td></tr>
+<tr><td>Guia de Setup</td><td><a href="../poc-contabil/docs/SETUP.md"><code>SETUP.md</code></a></td><td>Configuração completa do ambiente</td></tr>
+<tr><td>README Backend</td><td><a href="../poc-contabil/backend/README.md"><code>backend/README.md</code></a></td><td>Documentação técnica do backend</td></tr>
+<tr><td>README Frontend</td><td><a href="../poc-contabil/frontend/README.md"><code>frontend/README.md</code></a></td><td>Documentação técnica do frontend</td></tr>
+<tr><td>Código Delphi origem</td><td><a href="../CONTAB/FontesMT/FCadContasContabMT.pas"><code>FCadContasContabMT.pas</code></a></td><td>Implementação original em Delphi 5</td></tr>
+</tbody></table></div>
+</section>
+<section id="historico-de-versoes">
+  <div class="section-title"><a href="#historico-de-versoes" style="color:inherit">📅 Histórico de Versões</a></div>
+<div class="table-wrap"><table>
+<thead><tr><th>Versão</th><th>Data</th><th>Alterações</th></tr></thead>
+<tbody>
+<tr><td>1.0</td><td>28-set-2026</td><td>Versão inicial do roadmap. Documenta as 13 fases de migração, mapeamento Delphi → .NET/React, regras de negócio, endpoints, base de dados, estado por tab, pendentes e critérios de aceitação.</td></tr>
+</tbody></table></div>
+<div class="note"><strong>Nota:</strong> Este roadmap foca exclusivamente na tela <strong><code>FCadContasContabMT</code></strong> (Cadastro de Contas Contábeis). A migração de outras telas do módulo Contábil será documentada em roadmaps separados quando suas respectivas POCs forem iniciadas.</div>
+<p><strong>Status:</strong> 🟡 Em progresso<br><strong>Progresso geral:</strong> ~85% (11 de 13 fases concluídas)<br><strong>Última atualização:</strong> 2026-09-28</p>
+</section>
+</main>
+
+<footer>
+<p>CM Contabilidade — Roadmap de Migração v1.0 · fonte: <code>docs/ROADMAP-MIGRACAO.md</code> · publicado em 2026-09-29 (PFC-5) | Delphi 5 → .NET 10 + React 19 | pt-BR</p>
+</footer>
+</body>
+</html>
