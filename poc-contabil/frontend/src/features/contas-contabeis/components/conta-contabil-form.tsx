@@ -174,11 +174,21 @@ export function ContaContabilForm() {
         codigo: data.codigo,
         data: data as UpdateContaContabilRequest,
       });
-      toast.success('Conta contábil alterada com sucesso');
-      reset(contaContabilDefaults);
-      setIsEditing(false);
-      setContaCarregada(false);
-      setActiveTab('gerais');
+      if (obrigacaoPendente) {
+        // Não resetar o form nem limpar o estado — verificarObrigacoes()
+        // fará o reset após confirmar que as associações obrigatórias existem.
+        // Se resetarmos aqui, verificarObrigacoes() não terá acesso ao
+        // plano/codigo para verificar as associações via API.
+        toast.success('Conta contábil alterada com sucesso');
+      } else {
+        // No Delphi, após ApplyEdit a conta permanece carregada em modo
+        // consulta (CmeCadastroAfterPost). Mantemos o form com os dados
+        // e contaCarregada=true para que as queries do tab (CC/subconta)
+        // continuem habilitadas e mostrem as associações persistidas.
+        toast.success('Conta contábil alterada com sucesso');
+        setIsEditing(false);
+        // contaCarregada permanece true — modo consulta
+      }
     } else {
       // CmeCadastroApplyInsert → CtrlPlanoConta.Gravar (INSERT)
       //
@@ -281,58 +291,128 @@ export function ContaContabilForm() {
     //    no backend, então não há associações de CC para verificar.
     //    Skip quando obrigaPendente: as associações ainda são locais, serão
     //    persistidas no passo 5 e verificadas no passo 6 (verificarObrigacoes).
+    //
+    //    IMPORTANTE: Considera mudanças locais (associadosCount do ref) para evitar
+    //    que o usuário salve sem CCs após desassociar todos localmente.
     if (contaCarregada && values.aceitaCentroCusto && !obrigacaoPendente) {
-      try {
-        const contasxCCResp = await contasContabeisApi.getContasxCC(
-          1,
-          values.plano,
-          values.codigo,
-        );
-        const contasxCC = contasxCCResp.data;
-        if (!contasxCC || contasxCC.length === 0) {
+      const localCount = centroCustoRef.current?.associadosCount;
+      if (localCount !== undefined) {
+        // O tab está montado e tem o count local — usa diretamente
+        if (localCount === 0) {
           toast.error(
             'Conta obriga Centro de Custo. Obrigatório indicar os centros de custo vinculados a esta conta.',
           );
           setActiveTab('ccusto');
           return;
         }
-      } catch {
-        // Se não conseguir verificar, continua (erro de rede já tratado pelo toast)
+      } else {
+        // Fallback: tab não montado, consulta a API
+        try {
+          const contasxCCResp = await contasContabeisApi.getContasxCC(
+            1,
+            values.plano,
+            values.codigo,
+          );
+          const contasxCC = contasxCCResp.data;
+          if (!contasxCC || contasxCC.length === 0) {
+            toast.error(
+              'Conta obriga Centro de Custo. Obrigatório indicar os centros de custo vinculados a esta conta.',
+            );
+            setActiveTab('ccusto');
+            return;
+          }
+        } catch {
+          // Se não conseguir verificar, continua (erro de rede já tratado pelo toast)
+        }
       }
     }
 
     // 3. Validação de Subconta (migrado de CmeCadastroBeforeConfirma línea 1441)
     //    No Delphi: if (PLASUBCONTA = 'S') and (CdsContasxSC.isEmpty) then error
     //    Skip quando obrigaPendente: as associações ainda são locais.
+    //
+    //    IMPORTANTE: Considera mudanças locais (associadosCount do ref) para evitar
+    //    que o usuário salve sem subcontas após desassociar todas localmente.
     if (contaCarregada && values.obrigaSubconta && !obrigacaoPendente) {
-      try {
-        const contasxSCResp = await contasContabeisApi.getContasxSC(
-          1,
-          values.plano,
-          values.codigo,
-        );
-        const contasxSC = contasxSCResp.data;
-        if (!contasxSC || contasxSC.length === 0) {
+      const localCount = subContasRef.current?.associadosCount;
+      if (localCount !== undefined) {
+        if (localCount === 0) {
           toast.error(
             'Conta obriga Subconta. Obrigatório indicar as subcontas vinculadas a esta conta.',
           );
           setActiveTab('subconta');
           return;
         }
-      } catch {
-        // Se não conseguir verificar, continua
+      } else {
+        try {
+          const contasxSCResp = await contasContabeisApi.getContasxSC(
+            1,
+            values.plano,
+            values.codigo,
+          );
+          const contasxSC = contasxSCResp.data;
+          if (!contasxSC || contasxSC.length === 0) {
+            toast.error(
+              'Conta obriga Subconta. Obrigatório indicar as subcontas vinculadas a esta conta.',
+            );
+            setActiveTab('subconta');
+            return;
+          }
+        } catch {
+          // Se não conseguir verificar, continua
+        }
       }
     }
 
     // 4. Gravar (CmeCadastroApplyInsert/ApplyEdit → CtrlPlanoConta.Gravar)
     setIsSaving(true);
     try {
-      await onSubmit(values);
-
-      // 5. Salvar associações de sub-contas e centros de custo (mudanças locais)
-      //    No Delphi, CdsContasxSC e CdsContasxCC são persistidos junto no Gravar.
-      //    Aqui, após salvar a conta, persistimos as associações via API.
+      // 4a. Salvar associações ANTES de onSubmit (para UPDATE).
+      //     Motivo: onSubmit faz reset(contaContabilDefaults) que limpa
+      //     plano/codigo do form, o que faria as mutations do tab (que
+      //     usam useWatch para plano/codigo) usar valores errados
+      //     (plano=0, placConta=''), resultando em associações fantasmas
+      //     que não se persistem corretamente no backend.
+      //
+      //     Para INSERT (contaCarregada=false), isto é skipado — a conta
+      //     ainda não existe. Para INSERT com obrigaPendente (segundo save),
+      //     contaCarregada=true e onSubmit não reseta o form, então funciona.
       if (contaCarregada) {
+        // 4a-1. Se aceitaCentroCusto foi desmarcado, desassociar todos os CCs
+        if (!values.aceitaCentroCusto) {
+          try {
+            const contasxCCResp = await contasContabeisApi.getContasxCC(
+              1, values.plano, values.codigo,
+            );
+            const ccCods = (contasxCCResp.data ?? []).map(c => c.codCentroCusto);
+            if (ccCods.length > 0) {
+              await contasContabeisApi.disassociateContasxCC({
+                plano: values.plano,
+                placConta: values.codigo,
+                idEmpresa: 1,
+                codCentrosCusto: ccCods,
+              });
+            }
+          } catch { /* erro de rede já tratado pelo toast */ }
+        }
+        // 4a-2. Se obrigaSubconta foi desmarcado, desassociar todas as subcontas
+        if (!values.obrigaSubconta) {
+          try {
+            const contasxSCResp = await contasContabeisApi.getContasxSC(
+              1, values.plano, values.codigo,
+            );
+            const scCods = (contasxSCResp.data ?? []).map(s => s.codSubConta);
+            if (scCods.length > 0) {
+              await contasContabeisApi.disassociateContasxSC({
+                plano: values.plano,
+                placConta: values.codigo,
+                idEmpresa: 1,
+                codSubContas: scCods,
+              });
+            }
+          } catch { /* erro de rede já tratado pelo toast */ }
+        }
+        // 4a-3. Salvar mudanças locais dos tabs (quando ainda aceita/obriga)
         try {
           await subContasRef.current?.salvarAssociacoes();
         } catch { /* erro já tratado no tab */ }
@@ -341,7 +421,10 @@ export function ContaContabilForm() {
         } catch { /* erro já tratado no tab */ }
       }
 
-      // 6. Se há obrigação pendente, verificar se foi cumprida
+      // 4b. Gravar a conta (INSERT ou UPDATE)
+      await onSubmit(values);
+
+      // 5. Se há obrigação pendente, verificar se foi cumprida
       if (obrigacaoPendente) {
         await verificarObrigacoes();
       }
@@ -682,18 +765,6 @@ export function ContaContabilForm() {
           </form>
         </TabsContent>
 
-        <TabsContent value="ccusto" className="flex-1 min-h-0 overflow-y-auto data-[state=active]:flex data-[state=active]:flex-col">
-          <fieldset disabled={contaCarregada && !isEditing} className="border-0 p-0 m-0">
-            <TabCentroCusto ref={centroCustoRef} form={form} contaCarregada={contaCarregada} />
-          </fieldset>
-        </TabsContent>
-
-        <TabsContent value="subconta" className="flex-1 min-h-0 overflow-y-auto data-[state=active]:flex data-[state=active]:flex-col">
-          <fieldset disabled={contaCarregada && !isEditing} className="border-0 p-0 m-0">
-            <TabSubContas ref={subContasRef} form={form} contaCarregada={contaCarregada} />
-          </fieldset>
-        </TabsContent>
-
         <TabsContent value="arvore" className="flex-1 min-h-0 overflow-y-auto data-[state=active]:flex data-[state=active]:flex-col">
           <TabArvoreContas plano={planoSelecionado} />
         </TabsContent>
@@ -705,6 +776,31 @@ export function ContaContabilForm() {
             </fieldset>
           </form>
         </TabsContent>
+
+        {/*
+          BUG FIX: Renderizar os tabs de CC e subconta sempre montados (fora do
+          TabsContent) para preservar o estado local (localAdded/localRemoved)
+          ao trocar de aba. O TabsContent do kit desmonta o conteúdo quando não
+          está ativo, perdendo as seleções locais. Controlamos a visibilidade
+          via display CSS baseado em activeTab.
+        */}
+        <div
+          className="flex-1 min-h-0 overflow-y-auto"
+          style={{ display: activeTab === 'ccusto' ? 'flex' : 'none', flexDirection: 'column' }}
+        >
+          <fieldset disabled={contaCarregada && !isEditing} className="border-0 p-0 m-0">
+            <TabCentroCusto ref={centroCustoRef} form={form} contaCarregada={contaCarregada} />
+          </fieldset>
+        </div>
+
+        <div
+          className="flex-1 min-h-0 overflow-y-auto"
+          style={{ display: activeTab === 'subconta' ? 'flex' : 'none', flexDirection: 'column' }}
+        >
+          <fieldset disabled={contaCarregada && !isEditing} className="border-0 p-0 m-0">
+            <TabSubContas ref={subContasRef} form={form} contaCarregada={contaCarregada} />
+          </fieldset>
+        </div>
       </Tabs>
 
       {/* FOOTER — fixo na parte inferior, sempre visível */}

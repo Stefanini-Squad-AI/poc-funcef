@@ -51,6 +51,8 @@ type FormValues = TContaContabilSchema;
 export interface TabSubContasRef {
   salvarAssociacoes: () => Promise<void>;
   hasChanges: boolean;
+  /** Número de sub-contas associadas considerando mudanças locais (displayAssociados.length). */
+  associadosCount: number;
 }
 
 export const TabSubContas = forwardRef<TabSubContasRef, { form: UseFormReturn<FormValues>; contaCarregada?: boolean }>(function TabSubContas({ form, contaCarregada = false }, ref) {
@@ -235,6 +237,7 @@ export const TabSubContas = forwardRef<TabSubContasRef, { form: UseFormReturn<Fo
   useImperativeHandle(ref, () => ({
     salvarAssociacoes: handleSalvar,
     hasChanges,
+    associadosCount: displayAssociados.length,
   }));
 
   // ─── Render ───
