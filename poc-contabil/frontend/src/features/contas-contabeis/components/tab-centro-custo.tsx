@@ -41,6 +41,8 @@ type FormValues = TContaContabilSchema;
 export interface TabCentroCustoRef {
   salvarAssociacoes: () => Promise<void>;
   hasChanges: boolean;
+  /** Número de CCs associados considerando mudanças locais (displayAssociados.length). */
+  associadosCount: number;
 }
 
 export const TabCentroCusto = forwardRef<TabCentroCustoRef, { form: UseFormReturn<FormValues>; contaCarregada?: boolean }>(function TabCentroCusto({ form, contaCarregada = false }, ref) {
@@ -223,6 +225,7 @@ export const TabCentroCusto = forwardRef<TabCentroCustoRef, { form: UseFormRetur
   useImperativeHandle(ref, () => ({
     salvarAssociacoes: handleSalvar,
     hasChanges,
+    associadosCount: displayAssociados.length,
   }));
 
   // ─── Render ───

@@ -13,6 +13,7 @@ export function useSubContas(idEmpresa: number, plano: number, placConta: string
     queryKey: [...queryKeys.subContas.list(idEmpresa, plano, placConta)],
     queryFn: () => contasContabeisApi.getSubContas(idEmpresa, plano, placConta),
     enabled: enabled && !!placConta,
+    staleTime: 0, // Sempre refetch ao montar (dados podem ter mudado via API)
   });
 
   return {
@@ -33,6 +34,7 @@ export function useContasxSC(idEmpresa: number, plano: number, placConta: string
     queryKey: [...queryKeys.contasxSC.list(idEmpresa, plano, placConta)],
     queryFn: () => contasContabeisApi.getContasxSC(idEmpresa, plano, placConta),
     enabled: enabled && !!placConta,
+    staleTime: 0, // Sempre refetch ao montar (dados podem ter mudado via API)
   });
 
   return {

@@ -13,6 +13,7 @@ export function useCentrosCusto(idEmpresa: number, plano: number, placConta: str
     queryKey: [...queryKeys.centrosCusto.list(idEmpresa, plano, placConta)],
     queryFn: () => contasContabeisApi.getCentrosCusto(idEmpresa, plano, placConta),
     enabled: enabled && !!placConta,
+    staleTime: 0, // Sempre refetch ao montar (dados podem ter mudado via API)
   });
 
   return {
@@ -33,6 +34,7 @@ export function useContasxCC(idEmpresa: number, plano: number, placConta: string
     queryKey: [...queryKeys.contasxCC.list(idEmpresa, plano, placConta)],
     queryFn: () => contasContabeisApi.getContasxCC(idEmpresa, plano, placConta),
     enabled: enabled && !!placConta,
+    staleTime: 0, // Sempre refetch ao montar (dados podem ter mudado via API)
   });
 
   return {
