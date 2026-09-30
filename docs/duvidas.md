@@ -178,8 +178,27 @@ Exemplos das 42 descartadas: `FExecAlteraConcessao_81962_379367`, `FExecAlteraCo
 |---|---:|---:|---:|
 | Contábil | 85 | 48 | 133 |
 | Empréstimos | 131 | 79 | 210 |
+| **Total** | **216** | **127** | **343** |
 
 Para estimar, use as **telas interativas** como unidade de esforço de frontend e trate os **filtros de relatório** como itens de baixa complexidade ou como um único componente reaproveitável.
+
+### 6.1 Dimensionamento da migração (PFC-8)
+
+**Premissa de esforço (a validar com a FUNCEF):** ~1 semana de migração por tela, considerando 1 desenvolvedor.
+
+| Módulo | Telas interativas em uso | Filtros de relatório em uso | Total de telas funcionais que o usuário vê |
+|---|---:|---:|---:|
+| Contábil | 85 | 48 | 133 |
+| Empréstimos | 131 | 79 | 210 |
+| **Total** | **216** | **127** | **343** |
+
+**Cálculo de prazo visível:**
+
+> 343 telas funcionais × 1 semana/tela ÷ 1 desenvolvedor = **343 semanas-equivalentes** (≈ 6,6 anos com 1 desenvolvedor)
+
+**Nota de otimização de esforço (frontend):** dos 343, **127 são telas de filtro de relatório** (48 do Contábil + 79 do Empréstimos). Por serem telas simples e repetitivas (período, plano, patrocinadora… e botão Imprimir), podem ser tratadas como **um único componente genérico de filtro + relatório**, configurado por relatório, e não como 127 telas construídas uma a uma. Isso reduz o esforço efetivo de frontend sem remover o número bruto da contagem. As **216 telas interativas** (cadastros, lançamentos, processamentos, consultas e diálogos) é que demandam migração individual.
+
+**Critério de contagem (o que é "tela"):** um arquivo `.dfm` só é contado como tela se expuser interface com a qual o usuário interage — cadastro, lançamento, processamento, consulta, diálogo ou filtro de relatório. São **explicitamente excluídos** da contagem: data modules (`Tdtm*`), objetos de negócio (`Tmol*`), layouts de impressão (`Trpt*`/`Trel*`), forms-base, janelas genéricas ("Aguarde", progresso, OK/Cancelar), cópias não usadas e arquivos fora do build. A classificação completa arquivo a arquivo está no Apêndice.
 
 ---
 
