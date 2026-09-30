@@ -21,6 +21,8 @@
 | Contábil | 113 | **85** | 48 (em `CONTAB/Reports`, **fora** das 113) |
 | Empréstimos | 422 | **131** | 79 (dentro das 422) |
 
+**Dimensionamento da migração (PFC-8):** somando as telas interativas e os filtros de relatório, o usuário vê **343 telas funcionais** (Contábil 133 + Empréstimos 210). A ~1 semana por tela com 1 desenvolvedor, são **343 semanas-equivalentes**. O cálculo e as premissas estão na [seção 8](#8-dimensionamento-da-migração--inventário-de-telas-para-a-proposta-comercial).
+
 ---
 
 ## 1. De onde vêm os números
@@ -189,6 +191,68 @@ Para estimar, use as **telas interativas** como unidade de esforço de frontend 
 - A análise vale para o **snapshot deste repositório**. Se a produção roda um executável gerado de outra versão das fontes, os números de "fora do build" podem mudar.
 - Diálogos pequenos (seleção de contrato/mutuário, justificativa, observação, simulação de prazo) foram contados como telas interativas porque o usuário interage com eles, mas são de baixa complexidade.
 - A classificação das categorias 1 e 2 usa nome do arquivo, classe raiz e título. Casos de fronteira (por exemplo `RContrato`, que é uma consulta completa de contratos e parcelas, e `FParamEmptmo`, que é a tela de parâmetros do sistema e não um filtro de relatório) foram revisados à mão.
+
+---
+
+## 8. Dimensionamento da migração — inventário de telas para a proposta comercial
+
+**Referência:** PFC-8 — Levantamento telas migração
+**Data:** 2026-09-30
+**Base:** resultado das seções 4 a 6 (análise PFC-7). Nenhuma nova varredura de código foi feita; os números abaixo são uma síntese auditável do apêndice.
+
+### 8.1 O que conta como tela
+
+Um arquivo `.dfm` só é contado como **tela funcional** quando expõe uma interface com a qual o usuário interage:
+
+- **Conta:** cadastro, lançamento, processamento, consulta, diálogo de seleção/confirmação de negócio **e tela de filtro de relatório** (a tela em que o usuário digita os parâmetros para gerar um relatório).
+- **Não conta:** data modules (`Tdtm*`), objetos de negócio (`Tmol*`), layouts de impressão (`Trpt*`/`Trel*`), forms-base herdados por outras telas, janelas genéricas ("Aguarde", progresso, OK/Cancelar), a janela principal/menu, cópias não usadas, versões antigas, cópias sombreadas pelo BPL e qualquer arquivo fora do build.
+
+Os itens excluídos continuam tendo esforço de migração (serviços/queries no backend, definições de relatório, layout e navegação do frontend — ver seção 6), mas **não são telas** e não entram na conta de "semanas por tela".
+
+### 8.2 Inventário por módulo
+
+| Módulo | Arquivos .dfm documentados | Telas interativas em uso | Telas de filtro de relatório em uso | **Total de telas funcionais** |
+|---|---:|---:|---:|---:|
+| Contábil | 113 (`CONTAB/FontesMT`) | **85** | **48** (`CONTAB/Reports`, **fora** das 113) | **133** |
+| Empréstimos | 422 (`EMPRESTIMO/Fontes` + `EMPRESTIMOBPL`) | **131** | **79** (dentro das 422) | **210** |
+| **Total** | **535** | **216** | **127** | **343** |
+
+De onde saem os números:
+
+- **Contábil (133):** 113 arquivos − 1 data module (`dTermoDiario`) − 5 forms-base/infraestrutura − 22 telas fora do build = **85** telas interativas (seção 4). Somam-se as **48** telas `TfrmParam*` compiladas no `Contab.exe`, que ficam em `CONTAB/Reports` (seção 1.1). 85 + 48 = **133**.
+- **Empréstimos (210):** 173 telas interativas − 42 fora do build, sombreadas pelo BPL ou não empacotadas = **131** (seção 5.2), mais **79** telas de filtro de relatório em uso (70 `Tcfg*` + 9 forms de filtro). 131 + 79 = **210**. Os outros **212** arquivos dos 422 (data modules, objetos de negócio, layouts de impressão, infraestrutura, cópias e versões fora do build) **não são telas**.
+
+### 8.3 Cálculo de prazo
+
+**Premissa do cliente (a validar antes da proposta):** ~**1 semana de migração por tela**, com **1 desenvolvedor**.
+
+| Módulo | Telas funcionais | × semanas/tela | ÷ desenvolvedores | = Semanas-equivalentes |
+|---|---:|---:|---:|---:|
+| Contábil | 133 | 1 | 1 | 133 |
+| Empréstimos | 210 | 1 | 1 | 210 |
+| **Total** | **343** | 1 | 1 | **343** |
+
+**343 telas funcionais × 1 semana/tela ÷ 1 desenvolvedor = 343 semanas-equivalentes (≈ 6,6 anos com 1 desenvolvedor**, considerando 52 semanas/ano, sem férias nem feriados). O prazo cai de forma proporcional ao número de desenvolvedores em paralelo. Por exemplo, com 4 desenvolvedores são ≈ 86 semanas, sem contar o custo de coordenação.
+
+Para comparar: usar os números brutos de arquivos (113 + 422 = 535) daria 535 semanas, ou seja, **192 semanas a mais** do que o escopo real de telas.
+
+### 8.4 Nota de otimização — filtros de relatório
+
+Das 343 telas, **127 são filtros de relatório** (48 no Contábil + 79 no Empréstimos). São telas pequenas e repetitivas: período, plano, patrocinadora e outros parâmetros, mais um botão de imprimir. Como sugerido na seção 6, elas podem ser migradas como **um único componente genérico de filtro + relatório, configurado por relatório**, e não como 127 telas feitas uma a uma. Isso reduz o esforço efetivo de frontend:
+
+| Cenário | Telas contadas a 1 semana | Semanas-equivalentes |
+|---|---:|---:|
+| Bruto (todas as telas a 1 semana) | 343 | 343 |
+| Só telas interativas a 1 semana; filtros no componente genérico | 216 | 216 + esforço do componente genérico e da configuração dos 127 relatórios |
+
+O número bruto (**343**) continua sendo a contagem oficial de telas funcionais. O cenário otimizado é só uma alternativa de esforço para negociar com o cliente.
+
+### 8.5 Pontos a validar com a FUNCEF antes da proposta
+
+- A premissa de **1 semana/tela/desenvolvedor** é do cliente e deve ser confirmada, ou ajustada por faixa de complexidade (ver os diálogos simples citados na seção 7).
+- A lista de 85/131 telas interativas usa o critério "compilado no executável". Ela deve ser conferida com os **menus e perfis de produção** (controle de acesso em tempo de execução via SAD).
+- Os números valem para o **snapshot deste repositório** (seção 7).
+- Fora do escopo desta contagem, com esforço a estimar à parte: backend (serviços/APIs C# que substituem os data modules e objetos de negócio), layouts de impressão dos relatórios, infraestrutura de frontend (menu, navegação, modais) e migração de dados.
 
 ---
 
