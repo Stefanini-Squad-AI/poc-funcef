@@ -273,6 +273,49 @@ O número bruto (**343**) continua sendo a contagem oficial de telas funcionais.
 - Os números valem para o **snapshot deste repositório** (seção 7).
 - Fora do escopo desta contagem, com esforço a estimar à parte: backend (serviços/APIs C# que substituem os data modules e objetos de negócio), layouts de impressão dos relatórios, infraestrutura de frontend (menu, navegação, modais) e migração de dados.
 
+### 8.6 Inventário separado em telas funcionais e relatórios, com complexidade por tela (PFC-9)
+
+**Referência:** PFC-9 — Melhoria documentação. A seção "Inventário funcional" das páginas `docs/site/modules/contab/index.html` e `docs/site/modules/emprestimo/index.html` foi dividida em blocos com título. Cada arquivo aparece em um único bloco. A tabela ganhou a coluna **"Complexidade de migração"** (Baixa/Média/Alta), logo à direita de "Origem/confiança". **As contagens das seções 8.1 a 8.5 não mudam:** os blocos "Telas funcionais" e "Relatórios" reproduzem exatamente os números do dimensionamento.
+
+| Módulo | Telas funcionais | Relatórios | = Telas funcionais (8.2) | Outros arquivos (não-tela) | Linhas do inventário |
+|---|---:|---:|---:|---:|---:|
+| Contábil | 85 | 48 | **133** | 28 | 161 (113 de `CONTAB/FontesMT` + 48 de `CONTAB/Reports/Source`) |
+| Empréstimos | 131 | 79 | **210** | 212 | 422 |
+| **Total** | **216** | **127** | **343** | 240 | 583 |
+
+- **Telas funcionais:** categoria 1 com situação "compilado" no apêndice.
+- **Relatórios:** no Empréstimos, categoria 2 com situação "compilado" (inclui `cfgRelAnaliseContabil` e `cfgRelCartaCobrEP`). No Contábil, as 48 telas de filtro compiladas no `Contab.exe`, que ficam em `CONTAB/Reports/Source` e não estão nas 113. Elas foram **acrescentadas** à tabela (seção 1.1).
+- **Outros arquivos (não-tela):** o restante dos arquivos já inventariados, ou seja, categorias 3 e 4 e qualquer arquivo fora do build, cópia não usada, cópia não empacotada ou cópia sombreada pelo BPL. Nenhum dos 113 ou dos 422 arquivos foi removido do inventário.
+
+**Critério de complexidade (Delphi 5 → .NET + React).** O critério é medido no `.dfm` da tela e na unit `.pas` de mesmo nome:
+
+- **L** = linhas não vazias do `.pas`.
+- **V** = controles visuais, sem contar componentes de dados, campos, ações, menus, imagens e `Tpp*`.
+- **G** = grades.
+- **A** = abas (`TTabSheet`).
+- **D** = componentes de acesso a dados.
+
+As regras são aplicadas nesta ordem:
+
+1. Fora do build, cópia ou cópia sombreada pelo BPL → **Baixa** (não é migrado).
+2. **Alta** se L > 1000, V > 80, G ≥ 3, A ≥ 4 ou D ≥ 15.
+3. **Baixa** se L ≤ 300, V ≤ 40, G ≤ 1, A ≤ 1 e D ≤ 5.
+4. **Média** nos demais casos.
+
+Os indicadores de cada linha aparecem na própria página, para conferência. A lógica de negócio dos objetos compartilhados (`CONTAB/CtrlObjects/uCtrl*` e pacotes BPL) não entra nos indicadores da tela e continua no esforço de backend (8.5).
+
+| Módulo / bloco | Linhas | Baixa | Média | Alta |
+|---|---:|---:|---:|---:|
+| Contábil — Telas funcionais | 85 | 52 | 23 | 10 |
+| Contábil — Relatórios | 48 | 9 | 33 | 6 |
+| Contábil — Outros arquivos (não-tela) | 28 | 28 | 0 | 0 |
+| Empréstimos — Telas funcionais | 131 | 31 | 57 | 43 |
+| Empréstimos — Relatórios | 79 | 19 | 51 | 9 |
+| Empréstimos — Outros arquivos (não-tela) | 212 | 134 | 70 | 8 |
+| **Telas funcionais + Relatórios (343)** | **343** | **111** | **164** | **68** |
+
+Nos relatórios, o indicador L inclui a montagem da consulta do relatório. Por isso, parte dos filtros sai como Média ou Alta. A nota de otimização (8.4) continua valendo para a parte visual: o componente genérico de filtro + relatório.
+
 ---
 
 ## Apêndice — Classificação arquivo a arquivo
