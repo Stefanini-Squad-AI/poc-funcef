@@ -1,0 +1,177 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using Microsoft.Practices.EnterpriseLibrary.Data;
+using System.Data.Common;
+using System.Data;
+using FUNCEF.Planus.WebEmprestimo.AcessoDados.Estado;
+using FUNCEF.Planus.WebEmprestimo.Tipos.Estado;
+using Tibero.DbAccess;
+using System.Data.OleDb;
+using FUNCEF.Planus.Componentes.AcessoDados;
+
+namespace FUNCEF.Planus.WebEmprestimo.AcessoDados.Objetos.Estado
+{
+    /// <summary>
+    /// Objeto de acesso a dados de estado do sistema.
+    /// </summary>
+    public class AcessoEstado : ObjetoAcessoDados, IAcessoEstado
+    {
+        #region IAcessoEstadoSistema Members
+
+        /// <summary>
+        /// Adiciona uma nova entrada de estado do sistema.
+        /// </summary>
+        /// <param name="chave">Chave da entrada.</param>
+        /// <param name="dados">Dados associados.</param>
+        public void adicionarEntrada(EntradaEstado entrada)
+        {
+            string query = null, query2 = null;
+            //Valor do Blob
+            //string blob = null;
+
+            #region Query
+
+            query = $@"
+                MERGE INTO CM.TB_EMP_ESTADO_SISTEMA ES USING
+                    (SELECT COUNT(0) AS TOTAL FROM CM.TB_EMP_ESTADO_SISTEMA WHERE UPPER(CD_ESTADO_SISTEMA) = '{entrada.chave.ToUpper()}') T
+                        ON (T.TOTAL > 0)
+                WHEN MATCHED THEN
+                    UPDATE SET ES.DT_ESTADO_SISTEMA = :DT_ESTADO_SISTEMA
+                    WHERE CD_ESTADO_SISTEMA = '{entrada.chave.ToUpper()}'
+                WHEN NOT MATCHED THEN
+                    INSERT (CD_ESTADO_SISTEMA, DT_ESTADO_SISTEMA, DS_ESTADO_SISTEMA) VALUES ('{entrada.chave.ToUpper()}', :DT_ESTADO_SISTEMA, EMPTY_BLOB())";
+
+            if(entrada.dados == null)
+            {
+                query2 = $@"UPDATE CM.TB_EMP_ESTADO_SISTEMA SET DS_ESTADO_SISTEMA = NULL WHERE UPPER(CD_ESTADO_SISTEMA) = '{entrada.chave.ToUpper()}'";
+            }else
+            {
+                query2 = $@"UPDATE CM.TB_EMP_ESTADO_SISTEMA SET DS_ESTADO_SISTEMA = :DS_ESTADO_SISTEMA WHERE UPPER(CD_ESTADO_SISTEMA) = '{entrada.chave.ToUpper()}'";
+            }
+
+            #endregion
+
+            //Caso os dados sejam null, envia um blob nulo ao banco de dados
+            //if (entrada.dados == null)
+            //{
+            //    blob = null;
+            //}
+            //else
+            //{
+            //    blob = System.Text.Encoding.Default.obterString(entrada.dados);
+            //}
+
+            Database bancoDeDados = this.obterBancoDeDados();
+
+            using (OleDbConnection conexao = bancoDeDados.CreateConnection() as OleDbConnection)
+            {
+                conexao.Open();
+
+                using (OleDbCommand comando = new OleDbCommand(query))
+                {
+                    try
+                    {
+                        //OleDbCommandTbr comando = new OleDbCommandTbr(query);
+                        //OleDbCommandTbr comando2 = new OleDbCommandTbr(query2);
+
+                        comando.Connection = conexao as OleDbConnection;
+
+                        //comando.Parameters.AddWithValue("CD_ESTADO_SISTEMA", entrada.chave.ToUpper());
+                        comando.Parameters.AddWithValue("DT_ESTADO_SISTEMA", entrada.dataEntrada);
+                        comando.Parameters.AddWithValue("DT_ESTADO_SISTEMA", entrada.dataEntrada);
+                        comando.ExecuteNonQuery();
+                    }
+                    catch(Exception ex)
+                    {
+
+                    }
+                }
+
+                conexao.Close();
+                conexao.Open();
+                
+                //blob = Encoding.ASCII.GetBytes("teste");
+                using (OleDbCommand comando2 = new OleDbCommand(query2))
+                {
+                    try
+                    {
+                        comando2.Connection = conexao as OleDbConnection;
+
+                        //comando2.Parameters.AddWithValue("DS_ESTADO_SISTEMA", blob);
+                        if(entrada.dados != null)
+                        {
+                            comando2.Parameters.Clear();
+                            comando2.Parameters.Add("DS_ESTADO_SISTEMA", OleDbType.LongVarBinary);
+                            comando2.Parameters["DS_ESTADO_SISTEMA"].Value = entrada.dados;
+                        }
+
+                        comando2.ExecuteNonQuery();
+                    }
+                    catch (Exception ex)
+                    {
+
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Recupera uma entrada de estado do sistema.
+        /// </summary>
+        /// <param name="chave">Chave da entrada que deve ser recuperado.</param>
+        /// <returns>Array de <see cref="System.Byte"/> com os dados que devem ser mantidos.</returns>
+        public EntradaEstado recuperarEntrada(string chave)
+        {
+            string query = null;
+            EntradaEstado retorno = null;
+            const int posicaoChave = 0;
+            const int posicaoDados = 1;
+            const int posicaoData = 2;
+
+            #region Query
+
+            query = "SELECT CD_ESTADO_SISTEMA, DS_ESTADO_SISTEMA, DT_ESTADO_SISTEMA FROM CM.TB_EMP_ESTADO_SISTEMA WHERE UPPER(CD_ESTADO_SISTEMA) = :CD_ESTADO_SISTEMA";
+
+            #endregion
+
+            Database bancoDeDados = this.obterBancoDeDados();
+
+            using (OleDbConnection conexao = bancoDeDados.CreateConnection() as OleDbConnection)
+            {
+                conexao.Open();
+
+                using (OleDbCommand comando = new OleDbCommand(query))
+                {
+                    comando.Connection = conexao as OleDbConnection;
+
+                    comando.Parameters.AddWithValue("CD_ESTADO_SISTEMA", chave.ToUpper());
+
+                    using (OleDbDataReader leitor = comando.ExecuteReader())
+                    {
+                        if (leitor.Read())
+                        {
+                            retorno = new EntradaEstado
+                            {
+                                chave = leitor.obterString(posicaoChave),
+                                dataEntrada = leitor.obterValorData(posicaoData).Value
+                            };
+
+                            if (!leitor.IsDBNull(posicaoDados))
+                            {
+                                byte[] blob = (byte[])(leitor.GetValue(posicaoDados));
+                                retorno.dados = blob;
+                            }
+                            return retorno;
+                        }
+                    }
+                }
+            }
+            return null;
+        }
+
+        #endregion
+    }
+}
+
