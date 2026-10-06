@@ -268,14 +268,14 @@ O número bruto (**343**) continua sendo a contagem oficial de telas funcionais.
 
 ### 8.5 Pontos a validar com a FUNCEF antes da proposta
 
-- A premissa de **1 semana/tela/desenvolvedor** é do cliente e deve ser confirmada, ou ajustada por faixa de complexidade (ver os diálogos simples citados na seção 7).
+- A premissa de **1 semana/tela/desenvolvedor** é do cliente e deve ser confirmada, ou ajustada por faixa de complexidade (ver os diálogos simples citados na seção 7). As faixas Muito Baixa, Baixa, Média e Alta estão na seção 8.6.
 - A lista de 85/131 telas interativas usa o critério "compilado no executável". Ela deve ser conferida com os **menus e perfis de produção** (controle de acesso em tempo de execução via SAD).
 - Os números valem para o **snapshot deste repositório** (seção 7).
 - Fora do escopo desta contagem, com esforço a estimar à parte: backend (serviços/APIs C# que substituem os data modules e objetos de negócio), layouts de impressão dos relatórios, infraestrutura de frontend (menu, navegação, modais) e migração de dados.
 
-### 8.6 Inventário separado em telas funcionais e relatórios, com complexidade por tela (PFC-9)
+### 8.6 Inventário separado em telas funcionais e relatórios, com complexidade por tela (PFC-9, PFC-11)
 
-**Referência:** PFC-9 — Melhoria documentação. A seção "Inventário funcional" das páginas `docs/site/modules/contab/index.html` e `docs/site/modules/emprestimo/index.html` foi dividida em blocos com título. Cada arquivo aparece em um único bloco. A tabela ganhou a coluna **"Complexidade de migração"** (Baixa/Média/Alta), logo à direita de "Origem/confiança". **As contagens das seções 8.1 a 8.5 não mudam:** os blocos "Telas funcionais" e "Relatórios" reproduzem exatamente os números do dimensionamento.
+**Referência:** PFC-9 — Melhoria documentação. A seção "Inventário funcional" das páginas `docs/site/modules/contab/index.html` e `docs/site/modules/emprestimo/index.html` foi dividida em blocos com título. Cada arquivo aparece em um único bloco. A tabela ganhou a coluna **"Complexidade de migração"**, logo à direita de "Origem/confiança". No PFC-11 (Melhoria documentação 2), a escala passou de três para **quatro níveis: Muito Baixa, Baixa, Média e Alta**. O nível Baixa juntava desde diálogos triviais até formulários simples; o novo nível separa os diálogos triviais. **As contagens das seções 8.1 a 8.5 não mudam:** os blocos "Telas funcionais" e "Relatórios" reproduzem exatamente os números do dimensionamento.
 
 | Módulo | Telas funcionais | Relatórios | = Telas funcionais (8.2) | Outros arquivos (não-tela) | Linhas do inventário |
 |---|---:|---:|---:|---:|---:|
@@ -297,22 +297,30 @@ O número bruto (**343**) continua sendo a contagem oficial de telas funcionais.
 
 As regras são aplicadas nesta ordem:
 
-1. Fora do build, cópia ou cópia sombreada pelo BPL → **Baixa** (não é migrado).
+1. Fora do build, cópia não usada, cópia não empacotada ou cópia sombreada pelo BPL → **Muito Baixa** (não é migrado; o único esforço é confirmar que está desativado).
 2. **Alta** se L > 1000, V > 80, G ≥ 3, A ≥ 4 ou D ≥ 15.
-3. **Baixa** se L ≤ 300, V ≤ 40, G ≤ 1, A ≤ 1 e D ≤ 5.
-4. **Média** nos demais casos.
+3. **Muito Baixa** se L ≤ 150, V ≤ 20, G = 0, A = 0 e D ≤ 2 (diálogo trivial, sem grade nem abas).
+4. **Baixa** se L ≤ 300, V ≤ 40, G ≤ 1, A ≤ 1 e D ≤ 5 (formulário ou diálogo simples, com no máximo uma grade e uma aba).
+5. **Média** nos demais casos.
+
+Os limites de Muito Baixa ficam dentro dos de Baixa, e a regra de Alta vem antes. Por isso, cada linha cai em um único nível, e só linhas que antes eram Baixa passaram a Muito Baixa: Média e Alta não mudaram.
+
+**A validar com o solicitante (PFC-11):** os limites de Muito Baixa (regra 3) e a decisão de classificar como Muito Baixa os arquivos que não são migrados (regra 1). Essa decisão só afeta os blocos "Outros arquivos (não-tela)": nenhum arquivo fora do build está em "Telas funcionais" ou "Relatórios".
 
 Os indicadores de cada linha aparecem na própria página, para conferência. A lógica de negócio dos objetos compartilhados (`CONTAB/CtrlObjects/uCtrl*` e pacotes BPL) não entra nos indicadores da tela e continua no esforço de backend (8.5).
 
-| Módulo / bloco | Linhas | Baixa | Média | Alta |
-|---|---:|---:|---:|---:|
-| Contábil — Telas funcionais | 85 | 52 | 23 | 10 |
-| Contábil — Relatórios | 48 | 9 | 33 | 6 |
-| Contábil — Outros arquivos (não-tela) | 28 | 28 | 0 | 0 |
-| Empréstimos — Telas funcionais | 131 | 31 | 57 | 43 |
-| Empréstimos — Relatórios | 79 | 19 | 51 | 9 |
-| Empréstimos — Outros arquivos (não-tela) | 212 | 134 | 70 | 8 |
-| **Telas funcionais + Relatórios (343)** | **343** | **111** | **164** | **68** |
+| Módulo / bloco | Linhas | Muito Baixa | Baixa | Média | Alta |
+|---|---:|---:|---:|---:|---:|
+| Contábil — Telas funcionais | 85 | 11 | 41 | 23 | 10 |
+| Contábil — Relatórios | 48 | 5 | 4 | 33 | 6 |
+| Contábil — Outros arquivos (não-tela) | 28 | 27 | 1 | 0 | 0 |
+| Empréstimos — Telas funcionais | 131 | 7 | 24 | 57 | 43 |
+| Empréstimos — Relatórios | 79 | 4 | 15 | 51 | 9 |
+| Empréstimos — Outros arquivos (não-tela) | 212 | 126 | 8 | 70 | 8 |
+| **Telas funcionais + Relatórios (343)** | **343** | **27** | **84** | **164** | **68** |
+| **Total de linhas do inventário (583)** | **583** | **180** | **93** | **234** | **76** |
+
+Das 111 telas que antes eram Baixa (Telas funcionais + Relatórios), 27 passaram a Muito Baixa e 84 continuam Baixa.
 
 Nos relatórios, o indicador L inclui a montagem da consulta do relatório. Por isso, parte dos filtros sai como Média ou Alta. A nota de otimização (8.4) continua valendo para a parte visual: o componente genérico de filtro + relatório.
 
