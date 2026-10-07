@@ -87,6 +87,12 @@ pre code { background: none; padding: 0; }
 .tag-alta { background: var(--tag-alta); color: #a7f3d0; }
 .tag-media { background: var(--tag-media); color: #fde68a; }
 .tag-baixa { background: var(--tag-baixa); color: #fecaca; }
+.tag-ja { background: #065f46; color: #a7f3d0; }
+.tag-parcial { background: #92400e; color: #fde68a; }
+.tag-nao { background: #7f1d1d; color: #fecaca; }
+.tag-web { background: #1e3a8a; color: #bfdbfe; }
+.tag-nc { background: #374151; color: #e5e7eb; }
+tr.grupo td { background: var(--bg3); font-weight: 700; }
 .note {
   background: #1a2740; border-left: 3px solid var(--warn);
   padding: .75rem 1rem; margin: .75rem 0; border-radius: 0 6px 6px 0; font-size: .9rem;
@@ -112,7 +118,9 @@ footer {
   <strong>EMPRESTIMO</strong>, em Delphi 5), do que mudou na atualização de versão e do que cada ambiente precisa ter. Segue os critérios do card
   <a href="https://stefaninisophiedelivery.atlassian.net/browse/PFC-12">PFC-12</a>, com o escopo restrito pelo card
   <a href="https://stefaninisophiedelivery.atlassian.net/browse/PFC-13">PFC-13</a>.<br>
-  <strong>Versão do documento:</strong> 1.1 (2026-10-06) · <strong>Situação:</strong> 🟡 Aguardando aprovação técnica (ver <a href="#aprovacao">Aprovação</a>)</p>
+  A partir da versão 1.2, o documento traz também a <a href="#analise-migracao">Análise de Migração Funcional — Delphi 5 × .NET 4.8</a>
+  (card <a href="https://stefaninisophiedelivery.atlassian.net/browse/PFC-16">PFC-16</a>).<br>
+  <strong>Versão do documento:</strong> 1.2 (2026-10-07) · <strong>Situação:</strong> 🟡 Aguardando aprovação técnica (ver <a href="#aprovacao">Aprovação</a>)</p>
   <div class="doc-links">
     <a href="site/index.html">Portal</a>
     <a href="site/modules/emprestimo/index.html">Módulo Empréstimo</a>
@@ -132,6 +140,8 @@ footer {
   <a href="#config-antigas">⚠️ Configurações Antigas</a>
   <a href="#incidentes">🧯 Incidentes</a>
   <a href="#verificacao">🔍 Como Verificar</a>
+  <a href="#analise-migracao">🧩 Análise de Migração Funcional</a>
+  <a href="#escopo-real">🎯 Escopo Real</a>
   <a href="#pendencias">❓ Pendências</a>
   <a href="#aprovacao">✅ Aprovação</a>
 </nav>
@@ -393,6 +403,567 @@ grep -o 'delphi5' EMPRESTIMO/Fontes/emprestimo.cfg | head -1</code></pre>
   <p>Ao criar, remover ou atualizar um projeto do módulo de Empréstimo, atualize este documento no mesmo PR.</p>
 </section>
 
+<section id="analise-migracao">
+  <div class="section-title">🧩 Análise de Migração Funcional — Delphi 5 × .NET 4.8</div>
+  <div class="note"><strong>Estratégia do projeto (regra governante):</strong> o <strong><code>FUNCEF.WebEmprestimo</code> em .NET Framework 4.8 é a base da
+  nova aplicação</strong>. Tudo o que já estiver implementado nele deve ser <strong>aproveitado e apenas modernizado</strong> para <strong>.NET 10 + React 19</strong>.
+  Somente as funcionalidades do módulo Delphi <code>EMPRESTIMO</code> com <strong>lacuna funcional comprovada</strong> em relação ao .NET 4.8 entram como
+  <strong>migração funcional do Delphi</strong>. O esforço de modernização do WebEmprestimo e o esforço de migração de funcionalidades exclusivas do Delphi são
+  contados <strong>separadamente</strong>, sem misturar.</div>
+  <p>O enunciado do card cita <code>Funcef/EMPRESTIMO</code>. No repositório, o módulo Delphi está em <code>EMPRESTIMO/</code>. A pasta <code>FUNCEF/</code> é outra
+  aplicação Delphi, e <code>FUNCEF.WebEmprestimo/</code> é a aplicação .NET. Esta análise usa os caminhos reais do repositório.</p>
+  <p><strong>Convenção de caminhos:</strong> caminhos Delphi são relativos à raiz do repositório (<code>EMPRESTIMO/…</code>, <code>EMPRESTIMOBPL/…</code>).
+  Caminhos .NET são relativos a <code>FUNCEF.WebEmprestimo/</code>. Todos os caminhos citados foram conferidos no repositório.</p>
+
+  <h3>Classificações usadas</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Situação</th><th>Quando se aplica</th><th>Ação</th></tr></thead>
+    <tbody>
+<tr><td><span class="tag tag-ja">Já existe no .NET 4.8</span></td><td>O .NET 4.8 reproduz o comportamento e as regras de negócio do Delphi (não só o nome da tela)</td><td><code>ATUALIZAR .NET 4.8 → .NET 10</code> (interface pode ser refeita em React 19 sem reimplementar a regra)</td></tr>
+<tr><td><span class="tag tag-parcial">Parcialmente implementada</span></td><td>Parte do comportamento existe; o que falta está descrito na linha</td><td><code>COMPLEMENTAR + ATUALIZAR PARA .NET 10</code></td></tr>
+<tr><td><span class="tag tag-nao">Não existe no .NET 4.8</span></td><td>Busca feita (páginas, Gerenciadores, acesso a dados, SQL, serviços WCF, Conector) sem nenhuma implementação. Quando o .NET só <em>lê</em> a tabela que o Delphi cadastra, a função de cadastro conta como inexistente</td><td><code>MIGRAR DO DELPHI PARA .NET 10 + REACT 19</code></td></tr>
+<tr><td><span class="tag tag-web">Somente Web</span></td><td>Funcionalidade do WebEmprestimo sem correspondente no Delphi</td><td><code>PRESERVAR E ATUALIZAR PARA .NET 10</code></td></tr>
+<tr><td><span class="tag tag-nc">Não conclusiva</span></td><td>Evidência insuficiente, lógica fora do repositório ou equivalência que não dá para comprovar</td><td><code>ANÁLISE MANUAL NECESSÁRIA</code></td></tr>
+    </tbody>
+  </table></div>
+
+  <h3 id="cobertura">1. Cobertura da análise</h3>
+  <p>A pasta <code>EMPRESTIMO/</code> foi percorrida <strong>recursivamente</strong> (<code>find EMPRESTIMO -type f</code>), não só pelo <code>emprestimo.dpr</code>.
+  A travessia encontrou 2 diretórios (<code>EMPRESTIMO/</code> e <code>EMPRESTIMO/Fontes/</code>). Todos os arquivos estão em <code>Fontes/</code>.</p>
+  <div class="stats">
+    <div class="stat"><div class="n">740</div><div class="l">Arquivos em <code>EMPRESTIMO/</code></div></div>
+    <div class="stat"><div class="n">355</div><div class="l"><code>.pas</code></div></div>
+    <div class="stat"><div class="n">344</div><div class="l"><code>.dfm</code></div></div>
+    <div class="stat"><div class="n">1</div><div class="l"><code>.dpr</code></div></div>
+    <div class="stat"><div class="n">40</div><div class="l">Demais extensões</div></div>
+  </div>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Extensão</th><th>Qtde</th><th>Conteúdo</th><th>Examinado?</th></tr></thead>
+    <tbody>
+<tr><td><code>.pas</code></td><td>355</td><td>Units Object Pascal (forms, data modules, funções)</td><td>Sim. Varredura textual de todas as units (SQL, tabelas, procedures Oracle, colunas de regra) e leitura dirigida das units de cada funcionalidade da tabela principal</td></tr>
+<tr><td><code>.dfm</code></td><td>344</td><td>Formulários e data modules (componentes, SQL embutido em <code>TQuery</code>/<code>TStoredProc</code>, captions)</td><td>Sim, mesmo critério dos <code>.pas</code>. O SQL do Delphi fica em grande parte nos <code>.dfm</code></td></tr>
+<tr><td><code>.dpr</code></td><td>1</td><td><code>Fontes/emprestimo.dpr</code>: ponto de entrada, 269 units declaradas, histórico <code>CM$VER</code></td><td>Sim</td></tr>
+<tr><td><code>.dof</code>, <code>.cfg</code>, <code>.bpg</code></td><td>3</td><td>Opções de compilação, pacotes de runtime, grupo de projetos</td><td>Sim</td></tr>
+<tr><td><code>.dti</code></td><td>8</td><td>Layout do designer de data modules (texto, sem regra de negócio)</td><td>Sim (só layout)</td></tr>
+<tr><td><code>.txt</code>, <code>.alt</code>, <code>.ALT</code>, <code>.todo</code></td><td>5</td><td>Histórico de alterações (<code>Emprestimo Alt-V.txt</code>, <code>Emprestimo.alt</code>, <code>Copy of Emprestimo.ALT</code>), versão do recurso (<code>emprestimo_RES.txt</code>), lista de tarefas vazia</td><td>Sim</td></tr>
+<tr><td><code>.log</code>, <code>.ERR</code></td><td>2</td><td><code>sqlnet.log</code> (erros de conexão Oracle) e <code>LISTA.ERR</code> (saída do compilador)</td><td>Sim (sem regra de negócio)</td></tr>
+<tr><td><code>.MB</code></td><td>18</td><td><code>Del1.MB</code>…<code>Del29.MB</code>: arquivos binários de 4 KB (memo/temporários do BDE/Paradox)</td><td><strong>Não</strong>. Motivo: binários. Impacto: nenhum esperado (temporários de execução, não são fontes)</td></tr>
+<tr><td><code>.res</code>, <code>.ico</code></td><td>3</td><td>Recursos compilados (ícone, informação de versão)</td><td><strong>Não</strong>. Motivo: binários. Impacto: nenhum (sem regra)</td></tr>
+<tr><td><code>.xls</code></td><td>1</td><td><code>Emprestimo - Modificações Padrão 18.xls</code></td><td><strong>Não</strong>. Motivo: planilha binária. Impacto: baixo. Pelo nome, registra alterações de uma versão; não foi usada como evidência</td></tr>
+<tr><td><strong>Total</strong></td><td><strong>740</strong></td><td>718 examinados · 22 não examinados (binários)</td><td></td></tr>
+    </tbody>
+  </table></div>
+  <p><strong>Dependências seguidas fora de <code>EMPRESTIMO/</code>:</strong></p>
+  <ul>
+    <li><code>EMPRESTIMOBPL/</code> (208 arquivos, pacotes <code>CMObjetosEP50</code>, <code>CMIntegraEP50</code>, <code>CMExecEP50</code>). Várias telas do processo
+        estão só ali (ex.: <code>EMPRESTIMOBPL/Interface/Source/FCadInscricao.pas</code>, <code>EMPRESTIMOBPL/Interface/Source/FPrazoSimula.pas</code>, <code>EMPRESTIMOBPL/Interface/Source/FPessoaFiador.pas</code>,
+        <code>EMPRESTIMOBPL/Interface/Source/FCadBenefSeguro.pas</code>, <code>EMPRESTIMOBPL/Interface/Source/FExecTrataParcAtraso.pas</code>; <code>EMPRESTIMOBPL/Integra/Source/dAtualizacaoDiaria.pas</code>).
+        Essas units foram examinadas como evidência e são citadas com o caminho real.</li>
+  </ul>
+  <p><strong>Dependências externas não disponíveis ou não examinadas em profundidade</strong> (nenhuma funcionalidade foi classificada como inexistente só por isso):</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Dependência</th><th>Motivo</th><th>Impacto na análise</th></tr></thead>
+    <tbody>
+<tr><td>Pacotes do framework CM usados pelo <code>.dof</code> (<code>CMRegra50</code>, <code>CmRegra50MT</code>, <code>CmForms50</code>, <code>CMIntBancoMT50</code>…) e as 26 units de <code>CM/Forms/Source</code></td><td>Fora da pasta do módulo; o motor de regras do Delphi (<code>CMRegra50</code>) não foi lido linha a linha</td><td>A equivalência das regras de cálculo foi comprovada por outro caminho: as duas aplicações usam as mesmas colunas de regra de <code>CM.TIPOCONTREMPTMO</code> (<code>IDREGRAELEG</code>, <code>IDREGRAMARGEM</code>, <code>IDREGRAPRAZOSCONC</code>, <code>IDREGRAJURCONC</code>, <code>IDREGRARESERVA</code>, <code>IDREGRALIMITES</code>)</td></tr>
+<tr><td>Corpo PL/SQL das packages <code>CM.PCK_EMP_REGRA_*_R</code>, <code>CM.PCK_EMPRESTIMO</code> e das procedures <code>CM.SP_ATUALIZA_DIARIA</code>, <code>CM.SP_TRAT_PARCELAS_EM_ATRASO</code>, <code>CM.SP_EMP_ATUALIZASALDODEV</code>, <code>CM.PR_EMP_AJUSTA_SITUACAO_CONTR</code></td><td>Não estão no repositório. O .NET tem só os wrappers em <code>FUNCEF.WebEmprestimo.AcessoDados.Objetos/Scripts/Procedures/PR_EMP_REGRA_*.sql</code> (107 arquivos)</td><td>O cálculo financeiro fica no Oracle e é compartilhado pelas duas aplicações. Premissa: ele continua no Oracle após a migração (ver <a href="#pendencias">P9</a>)</td></tr>
+<tr><td>Workflow Informatica <code>wf_COPART_002_CRIA_PARAMETROS</code> (ETL de envio)</td><td>Fora do repositório; o .NET só grava parâmetros e dispara o workflow</td><td>Origem das classificações não conclusivas N1 e N2</td></tr>
+<tr><td>Projetos <code>FUNCEF.GlobalWeb.*</code> (autenticação, componentes de UI), serviços Proton, CRM e API geradora de contrato</td><td>Fora do repositório</td><td>Afetam só a infraestrutura e as integrações somente Web; não mudam nenhuma classificação</td></tr>
+    </tbody>
+  </table></div>
+  <p><strong>Lado .NET 4.8 examinado:</strong> páginas <code>FUNCEF.WebEmprestimo.Web/Paginas/**</code> (code-behind), menu <code>FUNCEF.WebEmprestimo.Web/Web.sitemap</code>,
+  14 Gerenciadores em <code>FUNCEF.WebEmprestimo.Negocio/</code>, motor de regras (<code>FUNCEF.WebEmprestimo.Negocio/MecanismoRegras/</code>, 139 classes de regra),
+  acesso a dados (<code>FUNCEF.WebEmprestimo.AcessoDados.Objetos/Acesso*.cs</code>), scripts SQL, serviços WCF (<code>FUNCEF.WebEmprestimo.Servicos/IServico*.cs</code>)
+  e o Conector ASMX. A cópia antiga da camada de dados em <code>FUNCEF.WebEmprestimo.Bibliotecas/FUNCEF.WebEmprestimo.AcessoDados.Objetos/</code> foi
+  desconsiderada (fora da solução ativa). Busca feita com <code>grep -a</code>, porque os fontes estão em Latin-1.</p>
+<pre><code># Conferir a cobertura (raiz do repositório)
+find EMPRESTIMO -type f | wc -l                                   # esperado: 740
+find EMPRESTIMO -type f | sed 's/.*\.//' | sort | uniq -c | sort -rn  # 355 pas, 344 dfm, 18 MB, 8 dti, 1 dpr...
+find EMPRESTIMO -type d                                           # EMPRESTIMO, EMPRESTIMO/Fontes
+# Tabelas cadastradas só pelo Delphi (esperado: nenhuma ocorrência no .NET ativo)
+grep -rail "INSCRICAOLOTE\|VERBAEMPTMO\|HMECONTABILIZACAO\|PARAMINTEGRAEP\|TRANSPERFILINVEST\|SEGURADORA\|RESTRCOBR\|CONTRATOEMPTMOMSG" \
+  FUNCEF.WebEmprestimo --include=*.cs | grep -v Bibliotecas</code></pre>
+
+  <h3 id="tabela-principal">2. Tabela principal — funcionalidades Delphi × .NET 4.8</h3>
+  <p>Uma linha por <strong>funcionalidade</strong>, não por arquivo nem por tela. Uma funcionalidade pode reunir várias units, e uma unit pode servir a várias
+  funcionalidades. As linhas estão agrupadas pelos <strong>10 processos funcionais</strong> e pelas faixas de regras <strong>RN280–RN408</strong> da
+  <a href="site/modules/emprestimo/index.html">página do Módulo Empréstimo</a>. Cada funcionalidade é contada uma única vez: <strong>49 funcionalidades</strong> Delphi.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>#</th><th>Funcionalidade Delphi</th><th>Fonte(s) Delphi</th><th>Existe no .NET 4.8?</th><th>Fonte(s) .NET 4.8</th><th>Evidência e lacunas</th><th>Situação</th><th>Ação</th></tr></thead>
+    <tbody>
+<tr class="grupo"><td colspan="8">Processo 1 — Inscrição e concessão (RN280–RN308)</td></tr>
+<tr><td>F01</td><td>Simulação da concessão: margem consignável, valor máximo, taxas de juros e de administração, opções de prazo</td>
+  <td><code>EMPRESTIMOBPL/Interface/Source/FCadInscricao.pas</code>, <code>EMPRESTIMOBPL/Interface/Source/FPrazoSimula.pas</code>, <code>EMPRESTIMO/Fontes/RSimula.pas</code>, <code>EMPRESTIMO/Fontes/dCalcEmptmo.pas</code></td>
+  <td>Sim</td>
+  <td><code>FUNCEF.WebEmprestimo.Negocio/GerenciadorConcessao.cs</code> (<code>calcular</code>), <code>FUNCEF.WebEmprestimo.Negocio/GerenciadorRegra.cs</code>, <code>FUNCEF.WebEmprestimo.AcessoDados.Objetos/AcessoRegra.cs</code>, <code>FUNCEF.WebEmprestimo.Web/Paginas/CicloNormal/Emprestimo/Visualizacao.aspx.cs</code></td>
+  <td>O .NET executa as regras configuradas no tipo de contrato (<code>regraMargem</code>, <code>regraValorMaximo</code>, <code>regraJurosConcessao</code>, <code>regraPrazosConcessao</code>, <code>regraSalarioBase</code>, <code>regraReservaPoupanca</code>, <code>regraPrimeiraParcela</code>) chamando <code>CM.PR_EMP_REGRA_&lt;n&gt;</code> → <code>PCK_EMP_REGRA_MARGEM_R</code>, <code>VLMAXIMO_R</code>, <code>TAXAJUROS_R</code>, <code>PRAZOCONTRATO_R</code>… O Delphi lê as mesmas colunas de regra de <code>TIPOCONTREMPTMO</code>. Ressalva: o corpo das regras está no Oracle, fora do repositório (P9)</td>
+  <td><span class="tag tag-ja">Já existe</span></td><td><code>ATUALIZAR .NET 4.8 → .NET 10</code></td></tr>
+<tr><td>F02</td><td>Validação de elegibilidade e impedimentos: limites de inscrições e contratos por tipo, contrato anterior ativo, concessão não efetivada, contrato em quitação, débitos em atraso</td>
+  <td><code>EMPRESTIMOBPL/Interface/Source/FCadInscricao.pas</code>, <code>EMPRESTIMO/Fontes/UFuncoesEmptmo.pas</code></td>
+  <td>Sim</td>
+  <td><code>FUNCEF.WebEmprestimo.Negocio/GerenciadorConcessao.cs</code> (<code>verificarDisponibilidadeEmprestimo</code>, <code>verificarConcessaoNaoEfetivada</code>, <code>verificarConcessaoExistente</code>), <code>FUNCEF.WebEmprestimo.Negocio/GerenciadorMutuario.cs</code> (<code>consultarContratosEmAberto</code>)</td>
+  <td>Regras <code>ELEGIBILIDADE_R</code> (25208, 25662), <code>LIMITE_R</code> (5099, 24631), <code>TIPOCONTRATO_R</code> (25789). Também verifica concessão não efetivada, quitação já lançada, máximo de contratos do mesmo tipo e débitos em atraso, com flags de exceção (margem, elegibilidade, inadimplência, outros). Ressalva: o bloqueio por "outras dívidas" está comentado em <code>FUNCEF.WebEmprestimo.Negocio/GerenciadorMutuario.cs</code></td>
+  <td><span class="tag tag-ja">Já existe</span></td><td><code>ATUALIZAR .NET 4.8 → .NET 10</code></td></tr>
+<tr><td>F03</td><td>Inscrição e concessão individual com refinanciamento: grava inscrição, contrato e histórico e quita os contratos anteriores</td>
+  <td><code>EMPRESTIMOBPL/Interface/Source/FCadInscricao.pas</code>, <code>EMPRESTIMO/Fontes/dCalcEmptmo.pas</code></td>
+  <td>Sim</td>
+  <td><code>FUNCEF.WebEmprestimo.Negocio/GerenciadorConcessao.cs</code> (<code>gravar</code>), <code>FUNCEF.WebEmprestimo.AcessoDados.Objetos/AcessoConcessao.cs</code>, <code>FUNCEF.WebEmprestimo.AcessoDados.Objetos/AcessoContrato.cs</code></td>
+  <td>Em transação: INSERT em <code>INSCRICAOEMPTMO</code>, <code>HISTMOVINSCRICAO</code>, <code>CONTRATOEMPTMO</code>, <code>CONTRATOXAVALISTA</code> e <code>HISTMOVEMPTMO</code>. Quitação dos contratos refinanciados (<code>PCK_EMPRESTIMO.PR_MARCA_ITENS_QUITADO</code>, estorno dos itens a vencer, <code>PR_EMP_AJUSTA_SITUACAO_CONTR</code>, <code>sp_emp_atualizasaldodev</code>). Antes de gravar: exige atualização diária e período contábil aberto</td>
+  <td><span class="tag tag-ja">Já existe</span></td><td><code>ATUALIZAR .NET 4.8 → .NET 10</code></td></tr>
+<tr><td>F04</td><td>Concessão automática em lote</td>
+  <td><code>EMPRESTIMO/Fontes/FExecConcessaoAutomatica.pas</code></td>
+  <td>Não</td><td>—</td>
+  <td>Nenhuma concessão em lote no .NET: <code>INSCRICAOLOTE</code> tem 0 ocorrências e a concessão é sempre individual (página ou Conector). O Delphi grava o movimento e contabiliza a concessão do lote (<code>CONTABILIZACONCESSAO</code>)</td>
+  <td><span class="tag tag-nao">Não existe</span></td><td><code>MIGRAR DO DELPHI PARA .NET 10 + REACT 19</code></td></tr>
+<tr><td>F05</td><td>Controle de verbas por plano, tipo de contrato e unidade centralizadora</td>
+  <td><code>EMPRESTIMO/Fontes/FCadVerbas.pas</code></td>
+  <td>Não</td><td>—</td>
+  <td><code>VERBAEMPTMO</code> e <code>EPVERBAPLANO</code>: 0 ocorrências no .NET. A concessão Web não consome verba</td>
+  <td><span class="tag tag-nao">Não existe</span></td><td><code>MIGRAR DO DELPHI PARA .NET 10 + REACT 19</code></td></tr>
+<tr><td>F06</td><td>Bloqueio (suspensão) de concessão por contrato, com motivo</td>
+  <td><code>EMPRESTIMO/Fontes/FSuspensaoConcessao.pas</code></td>
+  <td>Em parte</td>
+  <td><code>FUNCEF.WebEmprestimo.Negocio/GerenciadorConcessao.cs</code> (<code>consultarSuspensao</code>, <code>IncluirBloqueioConcessaoPorAcordoJudicial</code>), <code>FUNCEF.WebEmprestimo.AcessoDados.Objetos/AcessoMutuario.cs</code></td>
+  <td><strong>Implementado:</strong> consulta de <code>SUSPCONCESSAO</code> e <code>SUSPXPLANOPREVEMPTMO</code> na concessão; inclusão automática (acordo judicial; descontos acima de 300 na campanha P3); cancelamento junto com a concessão. <strong>Falta:</strong> cadastro manual com motivo (<code>MOTIVOSUSPCONCESSAO</code>), como no Delphi</td>
+  <td><span class="tag tag-parcial">Parcial</span></td><td><code>COMPLEMENTAR + ATUALIZAR PARA .NET 10</code></td></tr>
+<tr><td>F07</td><td>Cadastro do valor máximo de prestação por contrato</td>
+  <td><code>EMPRESTIMO/Fontes/FValorMaximoPrestacao.pas</code></td>
+  <td>Não (só leitura)</td><td><code>FUNCEF.WebEmprestimo.AcessoDados.Objetos/AcessoContrato.cs</code> (leitura)</td>
+  <td>O .NET só lê <code>VALORMAXPRESTEP</code> (JOIN em consultas). Não há tela nem INSERT/UPDATE</td>
+  <td><span class="tag tag-nao">Não existe</span></td><td><code>MIGRAR DO DELPHI PARA .NET 10 + REACT 19</code></td></tr>
+<tr><td>F08</td><td>Liberação da concessão e envio ao Contas a Pagar (individual e em lote)</td>
+  <td><code>EMPRESTIMO/Fontes/FExecLiberaConcessao.pas</code>, <code>EMPRESTIMO/Fontes/FExecEnvioLoteConcessao.pas</code></td>
+  <td>Não comprovado</td><td><code>FUNCEF.WebEmprestimo.Web/Paginas/CicloNormal/Envio/Visualizacao.aspx.cs</code> (indireto)</td>
+  <td>Não há código .NET para pagamento da concessão (0 ocorrências de Contas a Pagar). A página "Envio por ETL" só grava parâmetros em <code>ETL_EMPTMO.PARAM_ETL_002_ENVIO</code> (incluindo a flag <code>FLGDESATIVACONC</code>) e dispara um workflow Informatica cuja lógica está fora do repositório</td>
+  <td><span class="tag tag-nc">Não conclusiva</span></td><td><code>ANÁLISE MANUAL NECESSÁRIA</code></td></tr>
+<tr><td>F09</td><td>Cancelamento de concessão e de inscrição (antes da efetivação)</td>
+  <td><code>EMPRESTIMO/Fontes/fCancConcessao.pas</code>, <code>EMPRESTIMO/Fontes/FCancInscricao.pas</code></td>
+  <td>Sim</td>
+  <td><code>FUNCEF.WebEmprestimo.Web/Paginas/CicloNormal/Cancelamento/Visualizacao.aspx.cs</code>, <code>FUNCEF.WebEmprestimo.Negocio/GerenciadorConcessao.cs</code> (<code>CancelarConcessaoEmprestimo</code>), <code>FUNCEF.WebEmprestimo.Negocio/GerenciadorContrato.cs</code> (<code>CancelarInscricao</code>)</td>
+  <td>Em transação: contrato e inscrição passam para <code>'C'</code>, com protocolo. Reativa os contratos que tinham sido quitados (estorno em <code>HMEQUITACAO</code>), estorna <code>HMEATUDIARIA</code> e <code>HMECONCESSAO</code> e grava log. Bloqueia se o documento já foi baixado ou se já existem parcelas. Ressalva: o estorno contábil depende da contabilização (F40), que não existe no .NET</td>
+  <td><span class="tag tag-ja">Já existe</span></td><td><code>ATUALIZAR .NET 4.8 → .NET 10</code></td></tr>
+<tr><td>F10</td><td>Estorno individual de concessão já efetivada (com lançamento de documento financeiro)</td>
+  <td><code>EMPRESTIMO/Fontes/FExecEstornoIndividual.pas</code></td>
+  <td>Não</td><td>—</td>
+  <td>O Delphi insere e lança documento (<code>INSEREDOCUMENTO</code>, <code>LANCADOCUMENTO</code>). O .NET tem <code>EstornarConcesssao</code> em <code>FUNCEF.WebEmprestimo.Negocio/GerenciadorContrato.cs</code>, mas sem chamador e sem documento financeiro</td>
+  <td><span class="tag tag-nao">Não existe</span></td><td><code>MIGRAR DO DELPHI PARA .NET 10 + REACT 19</code></td></tr>
+<tr><td>F11</td><td>Avalistas / fiadores do contrato</td>
+  <td><code>EMPRESTIMOBPL/Interface/Source/FPessoaFiador.pas</code></td>
+  <td>Sim</td>
+  <td><code>FUNCEF.WebEmprestimo.Web/Paginas/CicloNormal/Emprestimo/PopupAvalista.aspx</code>, <code>FUNCEF.WebEmprestimo.Web/Paginas/CicloNormal/Emprestimo/PopupNovoAvalista.aspx</code>, <code>FUNCEF.WebEmprestimo.Negocio/GerenciadorConcessao.cs</code></td>
+  <td>Pesquisa, vínculo e desvínculo em <code>CONTRATOXAVALISTA</code>. Cadastro completo do novo avalista (<code>PESSOA</code>, <code>PESSOAFISICA</code>, <code>DOCPESSOA</code>, endereços, telefones, contatos, <code>AVALISTA</code>)</td>
+  <td><span class="tag tag-ja">Já existe</span></td><td><code>ATUALIZAR .NET 4.8 → .NET 10</code></td></tr>
+
+<tr class="grupo"><td colspan="8">Processo 2 — Contrato (RN309–RN317)</td></tr>
+<tr><td>F12</td><td>Cadastro de tipos de empréstimo e de contrato, itens e itens × tipo de contrato (indexador, regras de cálculo, sequência, contas)</td>
+  <td><code>EMPRESTIMO/Fontes/FCadTipoEmptmo.pas</code>, <code>EMPRESTIMO/Fontes/FCadTipoContratoEmptmo.pas</code>, <code>EMPRESTIMO/Fontes/FCadItemEmptmo.pas</code>, <code>EMPRESTIMO/Fontes/FCadItemxTipoContrato.pas</code></td>
+  <td>Não (só leitura)</td><td><code>FUNCEF.WebEmprestimo.Negocio/GerenciadorTipoContrato.cs</code> (leitura)</td>
+  <td>O .NET só consulta <code>TIPOCONTREMPTMO</code>, <code>ITEMXTIPOCONTR</code>, <code>ITEMEMPTMO</code> e <code>TIPOCONTRXQUIT</code>. Não há tela nem INSERT/UPDATE nessas tabelas. É a configuração que move todo o cálculo</td>
+  <td><span class="tag tag-nao">Não existe</span></td><td><code>MIGRAR DO DELPHI PARA .NET 10 + REACT 19</code></td></tr>
+<tr><td>F13</td><td>Cadastro do contrato padrão e vínculo com tipos de contrato</td>
+  <td><code>EMPRESTIMO/Fontes/fCadContratoPadrao.pas</code></td>
+  <td>Não (só leitura)</td><td><code>FUNCEF.WebEmprestimo.Servicos.Objetos/ServicoContrato.cs</code> (<code>consultarContratos</code>, <code>validarContratoPadrao</code>)</td>
+  <td>O .NET lê <code>CONTRATOPADRAO</code> para a assinatura, mas não mantém <code>CONTRATOPADRAO</code>/<code>CONTRPADRXTIPOCONTR</code>. O "Modelo de Contrato de Mútuo" do .NET usa outra tabela (<code>TB_EMP_CONTRATOS</code>, texto do contrato); ver W6</td>
+  <td><span class="tag tag-nao">Não existe</span></td><td><code>MIGRAR DO DELPHI PARA .NET 10 + REACT 19</code></td></tr>
+<tr><td>F14</td><td>Assinatura do contrato padrão</td>
+  <td><code>EMPRESTIMO/Fontes/FCadAssinaturaContrato.pas</code>, <code>EMPRESTIMOBPL/Interface/Source/FCadAssinaturaContrato.pas</code></td>
+  <td>Sim</td>
+  <td><code>FUNCEF.WebEmprestimo.Web/Paginas/Tratamentos/Assinatura/Edicao.aspx</code>, <code>FUNCEF.WebEmprestimo.Web/Paginas/Tratamentos/Assinatura/Helper.cs</code>, <code>FUNCEF.WebEmprestimo.Negocio/GerenciadorMutuario.cs</code> (<code>verificarAssinatura</code>)</td>
+  <td>Manutenção de <code>ASSINCONTRPADRAO</code>, vínculo com o NUP. Na concessão, a falta de assinatura ou o <code>flagBloqueio</code> impedem contratar</td>
+  <td><span class="tag tag-ja">Já existe</span></td><td><code>ATUALIZAR .NET 4.8 → .NET 10</code></td></tr>
+<tr><td>F15</td><td>Mensagens informativas por contrato (com data de expiração e importação de arquivo)</td>
+  <td><code>EMPRESTIMO/Fontes/FCadMensagemContrato.pas</code></td>
+  <td>Não</td><td>—</td>
+  <td><code>CONTRATOEMPTMOMSG</code> (<code>DESCRICAO</code>, <code>DATAEXPIRAMSG</code>, <code>FLGEXIBEMSG</code>): 0 ocorrências no .NET</td>
+  <td><span class="tag tag-nao">Não existe</span></td><td><code>MIGRAR DO DELPHI PARA .NET 10 + REACT 19</code></td></tr>
+<tr><td>F16</td><td>Alteração contratual (forma de recebimento, conta de débito, dados do contrato)</td>
+  <td><code>EMPRESTIMO/Fontes/FExecAlteraContrato.pas</code>, <code>EMPRESTIMOBPL/Interface/Source/FExecAlteraContrato.pas</code></td>
+  <td>Em parte</td>
+  <td><code>FUNCEF.WebEmprestimo.Web/Paginas/Tratamentos/ContaCorrente/Visualizacao.aspx.cs</code>, <code>FUNCEF.WebEmprestimo.Negocio/GerenciadorContrato.cs</code> (<code>alterarInformacoesContratuais</code>, <code>alterarFormaCobranca</code>)</td>
+  <td><strong>Implementado:</strong> forma de recebimento, portador, conta de débito (só Caixa) e número de parcelas de desconto, com log em <code>HSTCBANCARIAEMPTMO</code>; atualiza a forma de cobrança dos itens ainda não enviados. <strong>Falta:</strong> o histórico em <code>ALTERACONTREMPTMO</code> (0 ocorrências) e os demais campos que o Delphi altera (dados de suspensão e beneficiários de seguro na mesma tela)</td>
+  <td><span class="tag tag-parcial">Parcial</span></td><td><code>COMPLEMENTAR + ATUALIZAR PARA .NET 10</code></td></tr>
+<tr><td>F17</td><td>Recálculo da situação contratual e ajuste do saldo devedor</td>
+  <td><code>EMPRESTIMO/Fontes/dCalcEmptmo.pas</code> (<code>CM.SP_EMP_ATUALIZASALDODEV</code>, <code>CM.SP_EMP_ATUALIZAFLGESTORNO</code>)</td>
+  <td>Sim</td>
+  <td><code>FUNCEF.WebEmprestimo.AcessoDados.Objetos/AcessoContrato.cs</code> (<code>alterarSituacao</code>), <code>FUNCEF.WebEmprestimo.Web/Paginas/Consultas/Contratos/Visualizacao.aspx.cs</code></td>
+  <td>As duas aplicações usam as mesmas procedures Oracle: <code>CM.PR_EMP_AJUSTA_SITUACAO_CONTR</code> para a situação e <code>CM.sp_emp_atualizasaldodev</code> para o saldo. Botões "Ajustar Situação" e "Ajustar Saldo" com trava de período contábil</td>
+  <td><span class="tag tag-ja">Já existe</span></td><td><code>ATUALIZAR .NET 4.8 → .NET 10</code></td></tr>
+<tr><td>F18</td><td>Consultas do contrato: extrato, conta corrente, evolução e mapa de movimentação</td>
+  <td><code>EMPRESTIMO/Fontes/RContrato.pas</code>, <code>EMPRESTIMO/Fontes/CRelMovContr.pas</code>, <code>EMPRESTIMO/Fontes/FEvolucaoContrato.pas</code></td>
+  <td>Em parte</td>
+  <td><code>FUNCEF.WebEmprestimo.Web/Paginas/Consultas/Contratos/Visualizacao.aspx.cs</code>, <code>FUNCEF.WebEmprestimo.Negocio/GerenciadorHistorico.cs</code></td>
+  <td><strong>Implementado:</strong> consulta "Contratos e Parcelas" com abas de contrato, valores, integração, contratos quitados, beneficiários, exceções, log, suspensões, eventos de cobrança, itens em aberto e simulação de quitação. <strong>Falta:</strong> relatórios de extrato, evolução do contrato e mapa de movimentação (<code>FUNCEF.WebEmprestimo.Tipos/ExtratoEmprestimoDTO.cs</code> existe, mas nenhuma página usa)</td>
+  <td><span class="tag tag-parcial">Parcial</span></td><td><code>COMPLEMENTAR + ATUALIZAR PARA .NET 10</code></td></tr>
+<tr><td>F19</td><td>Carga / migração de contratos FCRT</td>
+  <td><code>EMPRESTIMO/Fontes/FExecCargaFCRT.pas</code></td>
+  <td>Não</td><td>—</td>
+  <td>Sem equivalente (<code>MIGRACONTRATOEP</code>: 0 ocorrências). Pode ser rotina de carga pontual; confirmar uso (P10)</td>
+  <td><span class="tag tag-nao">Não existe</span></td><td><code>MIGRAR DO DELPHI PARA .NET 10 + REACT 19</code> (se confirmado o uso)</td></tr>
+
+<tr class="grupo"><td colspan="8">Processo 3 — Atualização de saldo devedor (RN318–RN328)</td></tr>
+<tr><td>F20</td><td>Atualização diária do saldo devedor (evento 5) para toda a carteira</td>
+  <td><code>EMPRESTIMO/Fontes/FExecAtualizaDiariaNova.pas</code>, <code>EMPRESTIMOBPL/Integra/Source/dAtualizacaoDiaria.pas</code> (<code>SP_ATUALIZA_DIARIA</code>)</td>
+  <td>Em parte</td>
+  <td><code>FUNCEF.WebEmprestimo.Negocio/GerenciadorContrato.cs</code> (<code>executarAtualizacaoDiaria</code>), <code>FUNCEF.WebEmprestimo.AcessoDados.Objetos/AcessoContrato.cs</code></td>
+  <td><strong>Implementado:</strong> chamada de <code>CM.sp_atualiza_diaria</code> para <strong>um</strong> contrato, depois de amortização, suspensão e renegociação. Concessão e quitação exigem a atualização em dia. <strong>Falta:</strong> a execução em lote da carteira por período (commit a cada 500 contratos, no Delphi)</td>
+  <td><span class="tag tag-parcial">Parcial</span></td><td><code>COMPLEMENTAR + ATUALIZAR PARA .NET 10</code></td></tr>
+<tr><td>F21</td><td>Desfazer a atualização diária por período (com estorno contábil)</td>
+  <td><code>EMPRESTIMO/Fontes/FCancAtualizacaoDiaria.pas</code></td>
+  <td>Não</td><td>—</td>
+  <td>O .NET só estorna <code>HMEATUDIARIA</code> de um contrato, dentro do cancelamento de concessão ou da quitação. Não há desfazer por período</td>
+  <td><span class="tag tag-nao">Não existe</span></td><td><code>MIGRAR DO DELPHI PARA .NET 10 + REACT 19</code></td></tr>
+<tr><td>F22</td><td>Cálculo da provisão para perdas</td>
+  <td><code>EMPRESTIMO/Fontes/FProvPerdas.pas</code> (<code>SP_PROVISAO_DE_PERDAS</code> em <code>EMPRESTIMOBPL/Integra/Source/dAtualizacaoDiaria.dfm</code>)</td>
+  <td>Não (só exibe)</td><td>—</td>
+  <td>O .NET só exibe <code>CONTRATOEMPTMO.PROVISAO_PERDA</code> na consulta. Não chama <code>SP_PROVISAO_DE_PERDAS</code> e chama <code>sp_atualiza_diaria</code> com <code>icalculaprov=0</code></td>
+  <td><span class="tag tag-nao">Não existe</span></td><td><code>MIGRAR DO DELPHI PARA .NET 10 + REACT 19</code></td></tr>
+<tr><td>F23</td><td>Relatórios de carteira e dívidas: fechamento visão saldo e visão caixa, dívidas, crédito duvidoso, valor atualizado</td>
+  <td><code>EMPRESTIMO/Fontes/cRelFechamentoCarteira.pas</code>, <code>EMPRESTIMO/Fontes/cRelFechamentoCarteiraCaixa.pas</code>, <code>EMPRESTIMO/Fontes/CRelDividas.pas</code>, <code>EMPRESTIMO/Fontes/CRelDividaDuvidoso.pas</code>, <code>EMPRESTIMO/Fontes/CRelValorAtualizado.pas</code></td>
+  <td>Não</td><td>—</td>
+  <td>Nenhum relatório de carteira no .NET. Os relatórios RDLC existentes são de inadimplência e renegociação (W5)</td>
+  <td><span class="tag tag-nao">Não existe</span></td><td><code>MIGRAR DO DELPHI PARA .NET 10 + REACT 19</code></td></tr>
+
+<tr class="grupo"><td colspan="8">Processo 4 — Cobrança (RN329–RN357)</td></tr>
+<tr><td>F24</td><td>Geração mensal de parcelas (prestação e encargos) e desfazer geração</td>
+  <td><code>EMPRESTIMO/Fontes/FExecGeraParcela.pas</code>, <code>EMPRESTIMO/Fontes/FCancGeraParcela.pas</code></td>
+  <td>Não</td><td>—</td>
+  <td>Em <code>FUNCEF.WebEmprestimo.Tipos/Origem.cs</code>, "Geração de Parcelas" é só um valor de enum, sem uso</td>
+  <td><span class="tag tag-nao">Não existe</span></td><td><code>MIGRAR DO DELPHI PARA .NET 10 + REACT 19</code></td></tr>
+<tr><td>F25</td><td>Envio das parcelas ao destino (folha via <code>TMPDESC</code>, Contas a Receber/Pagar) e desfazer envio</td>
+  <td><code>EMPRESTIMO/Fontes/FExecEnvio.pas</code>, <code>EMPRESTIMO/Fontes/FCancEnvio.pas</code></td>
+  <td>Não comprovado</td><td><code>FUNCEF.WebEmprestimo.Web/Paginas/CicloNormal/Envio/Visualizacao.aspx.cs</code>, <code>FUNCEF.WebEmprestimo.Negocio/GerenciadorContrato.cs</code> (<code>incluirInformacoesEnvioETL</code>)</td>
+  <td>O Delphi grava <code>TMPDESC</code> (<code>CM.SEQTMPDESC</code>, regra de suspensão de cobrança). O .NET valida destino (folha patrocinadora, folha benefício, financeiro a receber), patrocinadora, plano e vencimento e dispara o workflow Informatica. Não dá para comprovar que o ETL reproduz as regras do Delphi. Não há "desfazer envio" no .NET</td>
+  <td><span class="tag tag-nc">Não conclusiva</span></td><td><code>ANÁLISE MANUAL NECESSÁRIA</code></td></tr>
+<tr><td>F26</td><td>Recebimento automático, desfazer recebimento e fechamento por patrocinadora</td>
+  <td><code>EMPRESTIMO/Fontes/FExecRecebimento.pas</code>, <code>EMPRESTIMO/Fontes/fCancRecebimento.pas</code>, <code>EMPRESTIMO/Fontes/FExecFechaPatro.pas</code></td>
+  <td>Não</td><td>—</td>
+  <td><code>HISTRECPATROEP</code>: 0 ocorrências. Em <code>FUNCEF.WebEmprestimo.Tipos/Origem.cs</code>, <code>recebimento</code> e <code>desfazerRecebimento</code> são enums sem uso</td>
+  <td><span class="tag tag-nao">Não existe</span></td><td><code>MIGRAR DO DELPHI PARA .NET 10 + REACT 19</code></td></tr>
+<tr><td>F27</td><td>Tratamento de divergências (enviado × recebido) e de itens não recebidos</td>
+  <td><code>EMPRESTIMO/Fontes/FExecTrataDivergNovo.pas</code>, <code>EMPRESTIMO/Fontes/FExecTrataItemNaoRecebido.pas</code></td>
+  <td>Não</td><td>—</td>
+  <td><code>HMETRATADIVERG</code> só aparece em LEFT JOIN de leitura (<code>FUNCEF.WebEmprestimo.AcessoDados.Objetos/AcessoHistorico.cs</code>). Não há processo de tratamento</td>
+  <td><span class="tag tag-nao">Não existe</span></td><td><code>MIGRAR DO DELPHI PARA .NET 10 + REACT 19</code></td></tr>
+<tr><td>F28</td><td>Tratamento de parcelas em atraso (novo vencimento com encargos)</td>
+  <td><code>EMPRESTIMOBPL/Interface/Source/FExecTrataParcAtraso.pas</code></td>
+  <td>Sim</td>
+  <td><code>FUNCEF.WebEmprestimo.Negocio/GerenciadorInadimplencia.cs</code> (<code>tratarParcelasEmAtraso</code>), <code>FUNCEF.WebEmprestimo.Web/Paginas/Tratamentos/Individual/Itens.aspx.cs</code></td>
+  <td>As duas aplicações chamam a mesma procedure <code>CM.SP_TRAT_PARCELAS_EM_ATRASO</code>. O .NET calcula os encargos por item (<code>calcularEncargosVencimento</code>, <code>CM.FN_EMP_CALC_*</code>) e muda o vencimento com ou sem encargos</td>
+  <td><span class="tag tag-ja">Já existe</span></td><td><code>ATUALIZAR .NET 4.8 → .NET 10</code></td></tr>
+<tr><td>F29</td><td>Entrada manual de cobranças e devoluções</td>
+  <td><code>EMPRESTIMO/Fontes/FExecEntradaManual.pas</code></td>
+  <td>Em parte</td>
+  <td><code>FUNCEF.WebEmprestimo.Web/Paginas/Tratamentos/Individual/Itens.aspx.cs</code> (baixa manual e desfazer), <code>FUNCEF.WebEmprestimo.Web/Paginas/Consultas/Contratos/PopupEditHistorico.aspx</code> (chave mestre)</td>
+  <td><strong>Implementado:</strong> baixa manual e desfazer baixa (permissão <code>baixarManualmente</code>); inclusão e edição manual de linhas de histórico pela chave mestre. <strong>Falta:</strong> lançamento de cobrança ou devolução por item/parcela/forma de cobrança com o cálculo do Delphi (<code>dCalcEmptmo</code>, taxa de juros, parcela alterada)</td>
+  <td><span class="tag tag-parcial">Parcial</span></td><td><code>COMPLEMENTAR + ATUALIZAR PARA .NET 10</code></td></tr>
+<tr><td>F30</td><td>Suspensão de cobrança por contrato (histórico de suspensões)</td>
+  <td><code>EMPRESTIMO/Fontes/fHistoricoSuspensaoCob.pas</code>, <code>EMPRESTIMOBPL/Interface/Source/fHistoricoSuspensaoCob.pas</code></td>
+  <td>Sim</td>
+  <td><code>FUNCEF.WebEmprestimo.Web/Paginas/Tratamentos/Parcela/Inclusao.aspx</code>, <code>FUNCEF.WebEmprestimo.Web/Paginas/Tratamentos/Parcela/FormularioParcelas.ascx.cs</code>, <code>FUNCEF.WebEmprestimo.Negocio/GerenciadorHistoricoSuspensao.cs</code></td>
+  <td>Inclusão e alteração em <code>HISTSUSPCOBEP</code>; marca as prestações suspensas (<code>HMEPRESTACAO.IDTIPOSUSPEMPTMO</code>), respeitando <code>ITEMXTIPOCONTR.FLGSUSPENSO</code>. Regras <code>SUSPENSAO_R</code> (parcela projetada, margem) e a regra do tipo de suspensão. Ressalva: o cadastro de tipos de suspensão (<code>TIPOSUSPEMPTMO</code>) não existe no .NET; ele entra em F12/F47 como parametrização</td>
+  <td><span class="tag tag-ja">Já existe</span></td><td><code>ATUALIZAR .NET 4.8 → .NET 10</code></td></tr>
+<tr><td>F31</td><td>Eventos de cobrança por contrato (cartas, acordos judiciais, SPC)</td>
+  <td><code>EMPRESTIMO/Fontes/FEventoCobrancaContrato.pas</code></td>
+  <td>Em parte</td>
+  <td><code>FUNCEF.WebEmprestimo.Negocio/GerenciadorConcessao.cs</code> (<code>IncluirEventoDeCobranca</code>), <code>FUNCEF.WebEmprestimo.Web/Paginas/Consultas/Contratos/PopupHistoricoCobranca.aspx</code></td>
+  <td><strong>Implementado:</strong> inclusão automática dos eventos 20 (acordo judicial) e 32 (campanha P3) em <code>HISTEVENTOCOBEMPTMO</code>/<code>EVENTOCOBXHISTMOVEMPTMO</code>, consulta e exclusão no cancelamento. <strong>Falta:</strong> lançamento manual de qualquer tipo de evento (<code>TIPOEVENTOCOBEMPTMO</code>)</td>
+  <td><span class="tag tag-parcial">Parcial</span></td><td><code>COMPLEMENTAR + ATUALIZAR PARA .NET 10</code></td></tr>
+<tr><td>F32</td><td>Restrições de cobrança por CPF, matrícula, contrato ou cargo</td>
+  <td><code>EMPRESTIMO/Fontes/FRestrCobranca.pas</code></td>
+  <td>Não</td><td>—</td>
+  <td>Tabelas <code>RESTRCOBR*</code>: 0 ocorrências no .NET</td>
+  <td><span class="tag tag-nao">Não existe</span></td><td><code>MIGRAR DO DELPHI PARA .NET 10 + REACT 19</code></td></tr>
+<tr><td>F33</td><td>Geração de arquivo de remessa de documentos de cobrança</td>
+  <td><code>EMPRESTIMO/Fontes/FExecGeraArquivoRemessa.pas</code></td>
+  <td>Não</td><td>—</td>
+  <td><code>CONTROLEREMESSA</code>: 0 ocorrências. O boleto Web (W3) emite documento individual pelo Oracle e não gera arquivo de remessa</td>
+  <td><span class="tag tag-nao">Não existe</span></td><td><code>MIGRAR DO DELPHI PARA .NET 10 + REACT 19</code></td></tr>
+
+<tr class="grupo"><td colspan="8">Processo 5 — Quitação e alterações (RN358–RN379)</td></tr>
+<tr><td>F34</td><td>Amortização, com ou sem repactuação de prazo</td>
+  <td><code>EMPRESTIMO/Fontes/FExecAmortizacao.pas</code>, <code>EMPRESTIMOBPL/Interface/Source/FExecAmortizacao.pas</code></td>
+  <td>Sim</td>
+  <td><code>FUNCEF.WebEmprestimo.Web/Paginas/Transacoes/Amortizacao/Visualizacao.aspx</code>, <code>FUNCEF.WebEmprestimo.Negocio/GerenciadorAmortizacao.cs</code></td>
+  <td>Validação de datas (data limite, horário de corte, dias úteis), sem parcela em atraso (salvo exceção), atualização diária obrigatória, sem quitação lançada. Itens pelas regras <code>AMORTIZACAO_R</code>, novo prazo opcional, verificação de margem. Valor ≥ saldo devedor manda para a quitação</td>
+  <td><span class="tag tag-ja">Já existe</span></td><td><code>ATUALIZAR .NET 4.8 → .NET 10</code></td></tr>
+<tr><td>F35</td><td>Quitação antecipada e por falecimento</td>
+  <td><code>EMPRESTIMO/Fontes/FExecQuitacao.pas</code>, <code>EMPRESTIMOBPL/Interface/Source/FExecQuitacao.pas</code></td>
+  <td>Sim</td>
+  <td><code>FUNCEF.WebEmprestimo.Web/Paginas/Transacoes/Quitacao/Visualizacao.aspx</code>, <code>FUNCEF.WebEmprestimo.Negocio/GerenciadorQuitacao.cs</code></td>
+  <td>Validações de data e de atualização diária, exigência de documento de óbito (<code>PARAMEMPTMO.IDDOCUMENTO</code>), itens pelas regras <code>ITEMQUITACAO_R</code>. Gravação: <code>PR_MARCA_ITENS_QUITADO</code>, estorno dos itens a vencer, <code>PR_EMP_AJUSTA_SITUACAO_CONTR</code>, ajuste de saldo</td>
+  <td><span class="tag tag-ja">Já existe</span></td><td><code>ATUALIZAR .NET 4.8 → .NET 10</code></td></tr>
+<tr><td>F36</td><td>Cancelamento de amortização e de quitação</td>
+  <td><code>EMPRESTIMO/Fontes/FCancAmortizacao.pas</code>, <code>EMPRESTIMO/Fontes/fCancQuitacao.pas</code></td>
+  <td>Não</td><td>—</td>
+  <td>Em <code>FUNCEF.WebEmprestimo.Negocio/GerenciadorContrato.cs</code>, <code>DesfazerQuitacaoContrato</code> existe, mas a única chamada está comentada. Não há tela, nem as travas do Delphi (valor baixado, enviado, IOF retido)</td>
+  <td><span class="tag tag-nao">Não existe</span></td><td><code>MIGRAR DO DELPHI PARA .NET 10 + REACT 19</code></td></tr>
+<tr><td>F37</td><td>Quitação em lote</td>
+  <td><code>EMPRESTIMO/Fontes/fQuitacaoLote.pas</code></td>
+  <td>Não</td><td>—</td>
+  <td>A quitação no .NET é sempre por contrato</td>
+  <td><span class="tag tag-nao">Não existe</span></td><td><code>MIGRAR DO DELPHI PARA .NET 10 + REACT 19</code></td></tr>
+<tr><td>F38</td><td>Alteração do valor da concessão (até 5 dias úteis após o crédito) e seu cancelamento</td>
+  <td><code>EMPRESTIMO/Fontes/FExecAlteraConcessao.pas</code>, <code>EMPRESTIMO/Fontes/fCancAlteracaoConcessao.pas</code></td>
+  <td>Não</td><td>—</td>
+  <td>Em <code>FUNCEF.WebEmprestimo.Tipos/Origem.cs</code>, <code>alteracaoConcesao</code> é um enum sem uso</td>
+  <td><span class="tag tag-nao">Não existe</span></td><td><code>MIGRAR DO DELPHI PARA .NET 10 + REACT 19</code></td></tr>
+<tr><td>F39</td><td>Pagamento e recebimento de empréstimo com resgate (quitação por resgate)</td>
+  <td><code>EMPRESTIMO/Fontes/FPagtoEmprestimoResgate.pas</code>, <code>EMPRESTIMO/Fontes/FRecebtoEmprestimoResgate.pas</code></td>
+  <td>Não</td><td>—</td>
+  <td><code>quitacaoResgate</code> e <code>quitacaoDesligamento</code> estão definidos nos tipos do .NET, mas não são usados</td>
+  <td><span class="tag tag-nao">Não existe</span></td><td><code>MIGRAR DO DELPHI PARA .NET 10 + REACT 19</code></td></tr>
+
+<tr class="grupo"><td colspan="8">Processo 6 — Contabilização (RN380–RN391)</td></tr>
+<tr><td>F40</td><td>Contabilização em lote (concessão, prestação, atualização diária, quitação) e desfazer contabilização</td>
+  <td><code>EMPRESTIMO/Fontes/FExecContabilizaLoteConcessao.pas</code>, <code>EMPRESTIMO/Fontes/FExecContabilizaLotePrestacao.pas</code>, <code>EMPRESTIMO/Fontes/FExecContabilizaLoteAtuDia.pas</code>, <code>EMPRESTIMO/Fontes/FExecContabilizaLoteQuitacao.pas</code>, <code>EMPRESTIMO/Fontes/FCancContabLoteAtuDia.pas</code></td>
+  <td>Não</td><td>—</td>
+  <td><code>HMECONTABILIZACAO</code> e <code>PARAMINTEGRAEP</code>: 0 ocorrências. O .NET usa a contabilidade só como trava (<code>verificarBloqueioContabil</code>, <code>verificarPeriodo</code> em <code>FUNCEF.WebEmprestimo.Negocio/GerenciadorRegra.cs</code>)</td>
+  <td><span class="tag tag-nao">Não existe</span></td><td><code>MIGRAR DO DELPHI PARA .NET 10 + REACT 19</code></td></tr>
+<tr><td>F41</td><td>Conciliações contábeis, análise contábil e conferência de planilhas</td>
+  <td><code>EMPRESTIMO/Fontes/CRelConciliaContab.pas</code>, <code>EMPRESTIMO/Fontes/CRelConciliaContabPP.pas</code>, <code>EMPRESTIMO/Fontes/CRelAnaliseContabil.pas</code>, <code>EMPRESTIMO/Fontes/CRelConferePlanilha.pas</code></td>
+  <td>Não</td><td>—</td>
+  <td>Nenhum relatório contábil no .NET</td>
+  <td><span class="tag tag-nao">Não existe</span></td><td><code>MIGRAR DO DELPHI PARA .NET 10 + REACT 19</code></td></tr>
+
+<tr class="grupo"><td colspan="8">Processo 7 — Seguro (RN392–RN397)</td></tr>
+<tr><td>F42</td><td>Cadastro de beneficiários do seguro (percentuais somando 100%)</td>
+  <td><code>EMPRESTIMOBPL/Interface/Source/FCadBenefSeguro.pas</code>, <code>EMPRESTIMOBPL/Interface/Source/FPessoaBenefSeguro.pas</code>, <code>EMPRESTIMO/Fontes/fPessoaBenefSeguro.pas</code></td>
+  <td>Não (só leitura)</td><td><code>FUNCEF.WebEmprestimo.AcessoDados.Objetos/AcessoBeneficiario.cs</code> (leitura)</td>
+  <td>O .NET só exibe os beneficiários (aba da consulta e da concessão). Não há inclusão, alteração nem validação dos 100%</td>
+  <td><span class="tag tag-nao">Não existe</span></td><td><code>MIGRAR DO DELPHI PARA .NET 10 + REACT 19</code></td></tr>
+<tr><td>F43</td><td>Cálculo do seguro complementar</td>
+  <td><code>EMPRESTIMO/Fontes/fExecCalculaSegCompl.pas</code></td>
+  <td>Não</td><td>—</td>
+  <td>Nenhuma ocorrência. O item de seguro na concessão só é calculado se estiver configurado como item do tipo de contrato (F01)</td>
+  <td><span class="tag tag-nao">Não existe</span></td><td><code>MIGRAR DO DELPHI PARA .NET 10 + REACT 19</code></td></tr>
+<tr><td>F44</td><td>Repasse de seguro por falecimento: cálculo, envio e desfazer envio em lote, depósitos da seguradora, relatório</td>
+  <td><code>EMPRESTIMO/Fontes/FExecCalculoRepasse.pas</code>, <code>EMPRESTIMO/Fontes/FExecEnvioLoteSeguro.pas</code>, <code>EMPRESTIMO/Fontes/FCancEnvioLoteSeguro.pas</code>, <code>EMPRESTIMO/Fontes/fCadLancaSeguro.pas</code>, <code>EMPRESTIMO/Fontes/CRelRepasseSeguro.pas</code></td>
+  <td>Não</td><td>—</td>
+  <td><code>SEGURADORA</code> e <code>EPSEGUROESPECIAL</code>: 0 ocorrências. A quitação por falecimento do .NET (F35) não calcula nem envia repasse</td>
+  <td><span class="tag tag-nao">Não existe</span></td><td><code>MIGRAR DO DELPHI PARA .NET 10 + REACT 19</code></td></tr>
+
+<tr class="grupo"><td colspan="8">Processo 8 — Perfil de investimento (RN398–RN400)</td></tr>
+<tr><td>F45</td><td>Transferência de contratos entre perfis de investimento por competência</td>
+  <td><code>EMPRESTIMO/Fontes/FTransferePerfilInves.pas</code></td>
+  <td>Não</td><td>—</td>
+  <td><code>PERFILINVEST</code> e <code>TRANSPERFILINVEST</code>: 0 ocorrências</td>
+  <td><span class="tag tag-nao">Não existe</span></td><td><code>MIGRAR DO DELPHI PARA .NET 10 + REACT 19</code></td></tr>
+
+<tr class="grupo"><td colspan="8">Processo 9 — Parametrização e integração (RN401–RN408)</td></tr>
+<tr><td>F46</td><td>Parâmetros do sistema (integrações, cálculo diário, estornos, itens especiais, obrigatoriedades)</td>
+  <td><code>EMPRESTIMO/Fontes/FParamEmptmo.pas</code></td>
+  <td>Não (só leitura)</td><td><code>FUNCEF.WebEmprestimo.AcessoDados.Objetos/AcessoRegra.cs</code> (<code>consultarParametroSistema</code>)</td>
+  <td>O .NET lê 5 campos de <code>PARAMEMPTMO</code> (<code>FLGEXCEPCIONAL</code>, <code>HORAENCERRA</code>, <code>IDREGRATIPOCONTR</code>, <code>FLGTRATAASSINAT</code>, <code>HORAENCERRADEBITO</code>). Não há manutenção. A tela "Parametrizar Renegociação" do .NET trata de outra coisa (campanhas, W4)</td>
+  <td><span class="tag tag-nao">Não existe</span></td><td><code>MIGRAR DO DELPHI PARA .NET 10 + REACT 19</code></td></tr>
+<tr><td>F47</td><td>Parâmetros de integração por item, portador × forma de pagamento/recebimento, banco portador, plano previdenciário × entidade contábil, conta de baixa × patrocinadora</td>
+  <td><code>EMPRESTIMO/Fontes/FCadParamIntegraRec.pas</code>, <code>EMPRESTIMO/Fontes/FCadPortFormaxEmptmo.pas</code>, <code>EMPRESTIMO/Fontes/FCadBancoPortador.pas</code>, <code>EMPRESTIMO/Fontes/FCadPlanPrevXContabil.pas</code>, <code>EMPRESTIMO/Fontes/FCadCCBaixaXPatro.pas</code></td>
+  <td>Não</td><td>—</td>
+  <td><code>PARAMINTEGRAEP</code>: 0 ocorrências. <code>PORTADORFORMA</code> e <code>PLANPREVCONTABIL</code> só são lidos (o "nosso número" do boleto é a única escrita)</td>
+  <td><span class="tag tag-nao">Não existe</span></td><td><code>MIGRAR DO DELPHI PARA .NET 10 + REACT 19</code></td></tr>
+
+<tr class="grupo"><td colspan="8">Processo 10 — Infraestrutura e utilitários (sem regra de negócio própria)</td></tr>
+<tr><td>F48</td><td>Segurança de acesso, permissões por tela, log de operações e tratamento de erros</td>
+  <td><code>EMPRESTIMO/Fontes/FPrincipal.pas</code>, <code>EMPRESTIMO/Fontes/dEmptmo.pas</code> (+ framework CM: <code>FTelaAut</code>)</td>
+  <td>Sim (infra própria)</td>
+  <td><code>FUNCEF.WebEmprestimo.Web.Componentes/PermissoesSistema.cs</code>, <code>FUNCEF.WebEmprestimo.Web/Web.sitemap</code>, <code>FUNCEF.WebEmprestimo.Negocio/GerenciadorContrato.cs</code> (<code>incluirLog</code>)</td>
+  <td>Autenticação pelo GlobalWeb, permissões por contexto (bitmask: excepcional, líquido zero, chave mestre, abonar, baixar…), log de negócio em <code>LOGTOTALPREV</code> (a mesma tabela do Delphi), Exception Shielding nos serviços WCF</td>
+  <td><span class="tag tag-ja">Já existe</span></td><td><code>ATUALIZAR .NET 4.8 → .NET 10</code></td></tr>
+<tr><td>F49</td><td>Utilitários: consulta SQL personalizada, desenho de relatório, relatório de log, assistentes</td>
+  <td><code>EMPRESTIMOBPL/Objetos/Source/FSQL.pas</code>, <code>EMPRESTIMO/Fontes/RLogTotalPrev.pas</code>, <code>EMPRESTIMOBPL/Objetos/Source/FWizardMTEP.pas</code></td>
+  <td>Não comprovado</td><td><code>FUNCEF.WebEmprestimo.Negocio/GerenciadorContrato.cs</code> (<code>consultarLog</code>, parcial)</td>
+  <td>O .NET mostra o log por contrato, mas não tem SQL livre nem desenho de relatório. Não se sabe se esses utilitários ainda são usados nem se devem existir na nova aplicação (risco de segurança do SQL livre)</td>
+  <td><span class="tag tag-nc">Não conclusiva</span></td><td><code>ANÁLISE MANUAL NECESSÁRIA</code></td></tr>
+    </tbody>
+  </table></div>
+  <div class="stats">
+    <div class="stat"><div class="n">49</div><div class="l">Funcionalidades Delphi</div></div>
+    <div class="stat"><div class="n">12</div><div class="l">Já existem</div></div>
+    <div class="stat"><div class="n">6</div><div class="l">Parcialmente implementadas</div></div>
+    <div class="stat"><div class="n">28</div><div class="l">Não existem</div></div>
+    <div class="stat"><div class="n">3</div><div class="l">Não conclusivas</div></div>
+    <div class="stat"><div class="n">8</div><div class="l">Somente Web (fora das 49)</div></div>
+  </div>
+</section>
+
+<section id="migrar">
+  <div class="section-title">🚚 Funcionalidades que DEVEM ser migradas do Delphi</div>
+  <p>Entram aqui as <strong>lacunas comprovadas</strong>: as funcionalidades que <strong>não existem</strong> no .NET 4.8 (migração integral, A) e o complemento das
+  <strong>parcialmente implementadas</strong> (migração só da parte que falta, B). As não conclusivas ficam fora até a análise manual (<a href="#nao-conclusivas">ver abaixo</a>).
+  A complexidade é relativa (Baixa / Média / Alta) e considera o volume de regras, a quantidade de units e as integrações envolvidas.</p>
+  <h3>A. Não existem no .NET 4.8 — migração integral</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>#</th><th>Funcionalidade</th><th>Arquivo(s) Delphi</th><th>Dependências identificadas</th><th>Complexidade</th><th>Motivo / lacunas</th></tr></thead>
+    <tbody>
+<tr><td>F04</td><td>Concessão automática em lote</td><td><code>EMPRESTIMO/Fontes/FExecConcessaoAutomatica.pas</code></td><td>F01–F03 (regras), F40 (contabiliza a concessão), <code>INSCRICAOEMPTMO</code></td><td><span class="tag tag-baixa">Alta</span></td><td>Sem processamento em lote no .NET</td></tr>
+<tr><td>F05</td><td>Controle de verbas</td><td><code>EMPRESTIMO/Fontes/FCadVerbas.pas</code></td><td><code>VERBAEMPTMO</code>, <code>EPVERBAPLANO</code>; consumo na concessão (F03)</td><td><span class="tag tag-media">Média</span></td><td>Tabelas ausentes no .NET; a concessão Web não consome verba</td></tr>
+<tr><td>F07</td><td>Cadastro do valor máximo de prestação</td><td><code>EMPRESTIMO/Fontes/FValorMaximoPrestacao.pas</code></td><td><code>VALORMAXPRESTEP</code></td><td><span class="tag tag-alta">Baixa</span></td><td>O .NET só lê</td></tr>
+<tr><td>F10</td><td>Estorno individual de concessão efetivada</td><td><code>EMPRESTIMO/Fontes/FExecEstornoIndividual.pas</code></td><td>Documento financeiro (<code>INSEREDOCUMENTO</code>/<code>LANCADOCUMENTO</code>), F40</td><td><span class="tag tag-media">Média</span></td><td>Método sem chamador no .NET</td></tr>
+<tr><td>F12</td><td>Cadastro de tipos de empréstimo/contrato e itens</td><td><code>EMPRESTIMO/Fontes/FCadTipoEmptmo.pas</code>, <code>EMPRESTIMO/Fontes/FCadTipoContratoEmptmo.pas</code>, <code>EMPRESTIMO/Fontes/FCadItemEmptmo.pas</code>, <code>EMPRESTIMO/Fontes/FCadItemxTipoContrato.pas</code></td><td><code>TIPOCONTREMPTMO</code> (colunas <code>IDREGRA*</code>), <code>ITEMXTIPOCONTR</code>, <code>TB_EMP_REGRA</code></td><td><span class="tag tag-baixa">Alta</span></td><td>O .NET só lê. É a configuração de que todo o cálculo depende</td></tr>
+<tr><td>F13</td><td>Cadastro do contrato padrão × tipo</td><td><code>EMPRESTIMO/Fontes/fCadContratoPadrao.pas</code></td><td><code>CONTRATOPADRAO</code>, <code>CONTRPADRXTIPOCONTR</code>; F14</td><td><span class="tag tag-alta">Baixa</span></td><td>O .NET só lê</td></tr>
+<tr><td>F15</td><td>Mensagens informativas por contrato</td><td><code>EMPRESTIMO/Fontes/FCadMensagemContrato.pas</code></td><td><code>CONTRATOEMPTMOMSG</code>; exibição na consulta (F18)</td><td><span class="tag tag-alta">Baixa</span></td><td>Tabela ausente no .NET</td></tr>
+<tr><td>F19</td><td>Carga / migração de contratos FCRT</td><td><code>EMPRESTIMO/Fontes/FExecCargaFCRT.pas</code></td><td><code>HISTMOVEMPTMO</code>, <code>ITEMXTIPOCONTR</code></td><td><span class="tag tag-media">Média</span></td><td>Sem equivalente; confirmar se ainda é usada (P10)</td></tr>
+<tr><td>F21</td><td>Desfazer atualização diária por período</td><td><code>EMPRESTIMO/Fontes/FCancAtualizacaoDiaria.pas</code></td><td><code>HMEATUDIARIA</code>, F40 (estorno contábil), F20</td><td><span class="tag tag-media">Média</span></td><td>O .NET só estorna por contrato, dentro de outras operações</td></tr>
+<tr><td>F22</td><td>Provisão para perdas</td><td><code>EMPRESTIMO/Fontes/FProvPerdas.pas</code></td><td><code>SP_PROVISAO_DE_PERDAS</code> (Oracle)</td><td><span class="tag tag-media">Média</span></td><td>O .NET só exibe o valor</td></tr>
+<tr><td>F23</td><td>Relatórios de carteira e dívidas (5 relatórios)</td><td><code>EMPRESTIMO/Fontes/cRelFechamentoCarteira.pas</code>, <code>EMPRESTIMO/Fontes/cRelFechamentoCarteiraCaixa.pas</code>, <code>EMPRESTIMO/Fontes/CRelDividas.pas</code>, <code>EMPRESTIMO/Fontes/CRelDividaDuvidoso.pas</code>, <code>EMPRESTIMO/Fontes/CRelValorAtualizado.pas</code></td><td><code>HISTMOVEMPTMO</code>, <code>VW_MOVEP</code>, F20</td><td><span class="tag tag-media">Média</span></td><td>Nenhum relatório de carteira no .NET</td></tr>
+<tr><td>F24</td><td>Geração de parcelas e desfazer</td><td><code>EMPRESTIMO/Fontes/FExecGeraParcela.pas</code>, <code>EMPRESTIMO/Fontes/FCancGeraParcela.pas</code></td><td>Regras dos itens, <code>HMEPRESTACAO</code>, <code>HMEENCARGOS</code>, F30</td><td><span class="tag tag-baixa">Alta</span></td><td>Enum sem uso no .NET</td></tr>
+<tr><td>F26</td><td>Recebimento, desfazer e fechamento por patrocinadora</td><td><code>EMPRESTIMO/Fontes/FExecRecebimento.pas</code>, <code>EMPRESTIMO/Fontes/fCancRecebimento.pas</code>, <code>EMPRESTIMO/Fontes/FExecFechaPatro.pas</code></td><td><code>TMPDESC</code>, <code>HISTRECPATROEP</code>, F25, F40</td><td><span class="tag tag-baixa">Alta</span></td><td>Inexistente no .NET</td></tr>
+<tr><td>F27</td><td>Tratamento de divergências e itens não recebidos</td><td><code>EMPRESTIMO/Fontes/FExecTrataDivergNovo.pas</code>, <code>EMPRESTIMO/Fontes/FExecTrataItemNaoRecebido.pas</code></td><td><code>HMETRATADIVERG</code>, F26</td><td><span class="tag tag-baixa">Alta</span></td><td>O .NET só lê a tabela</td></tr>
+<tr><td>F32</td><td>Restrições de cobrança</td><td><code>EMPRESTIMO/Fontes/FRestrCobranca.pas</code></td><td><code>RESTRCOBR*</code>; consumo no envio (F25)</td><td><span class="tag tag-alta">Baixa</span></td><td>Tabelas ausentes no .NET</td></tr>
+<tr><td>F33</td><td>Arquivo de remessa de cobrança</td><td><code>EMPRESTIMO/Fontes/FExecGeraArquivoRemessa.pas</code></td><td><code>CONTROLEREMESSA</code>, documentos</td><td><span class="tag tag-media">Média</span></td><td>Inexistente no .NET</td></tr>
+<tr><td>F36</td><td>Cancelamento de amortização e de quitação</td><td><code>EMPRESTIMO/Fontes/FCancAmortizacao.pas</code>, <code>EMPRESTIMO/Fontes/fCancQuitacao.pas</code></td><td>F34, F35, travas de envio/baixa/IOF</td><td><span class="tag tag-media">Média</span></td><td>Método sem chamador no .NET</td></tr>
+<tr><td>F37</td><td>Quitação em lote</td><td><code>EMPRESTIMO/Fontes/fQuitacaoLote.pas</code></td><td>F35</td><td><span class="tag tag-media">Média</span></td><td>O .NET só quita por contrato</td></tr>
+<tr><td>F38</td><td>Alteração do valor da concessão e cancelamento</td><td><code>EMPRESTIMO/Fontes/FExecAlteraConcessao.pas</code>, <code>EMPRESTIMO/Fontes/fCancAlteracaoConcessao.pas</code></td><td><code>HMECONCESSAO</code>, F03</td><td><span class="tag tag-media">Média</span></td><td>Enum sem uso no .NET</td></tr>
+<tr><td>F39</td><td>Pagamento e recebimento com resgate</td><td><code>EMPRESTIMO/Fontes/FPagtoEmprestimoResgate.pas</code>, <code>EMPRESTIMO/Fontes/FRecebtoEmprestimoResgate.pas</code></td><td>F35, integração com o previdenciário</td><td><span class="tag tag-media">Média</span></td><td>Enum sem uso no .NET</td></tr>
+<tr><td>F40</td><td>Contabilização em lote e desfazer</td><td><code>EMPRESTIMO/Fontes/FExecContabilizaLoteConcessao.pas</code>, <code>EMPRESTIMO/Fontes/FExecContabilizaLotePrestacao.pas</code>, <code>EMPRESTIMO/Fontes/FExecContabilizaLoteAtuDia.pas</code>, <code>EMPRESTIMO/Fontes/FExecContabilizaLoteQuitacao.pas</code>, <code>EMPRESTIMO/Fontes/FCancContabLoteAtuDia.pas</code></td><td><code>HMECONTABILIZACAO</code>, <code>PARAMINTEGRAEP</code>, <code>PLANILHA</code>, F45, F47</td><td><span class="tag tag-baixa">Alta</span></td><td>O .NET só usa a contabilidade como trava</td></tr>
+<tr><td>F41</td><td>Conciliações e análise contábil</td><td><code>EMPRESTIMO/Fontes/CRelConciliaContab.pas</code>, <code>EMPRESTIMO/Fontes/CRelConciliaContabPP.pas</code>, <code>EMPRESTIMO/Fontes/CRelAnaliseContabil.pas</code>, <code>EMPRESTIMO/Fontes/CRelConferePlanilha.pas</code></td><td>F40, Contabilidade (<code>LANCAMENTO</code>)</td><td><span class="tag tag-media">Média</span></td><td>Inexistente no .NET</td></tr>
+<tr><td>F42</td><td>Cadastro de beneficiários do seguro</td><td><code>EMPRESTIMOBPL/Interface/Source/FCadBenefSeguro.pas</code>, <code>EMPRESTIMOBPL/Interface/Source/FPessoaBenefSeguro.pas</code></td><td><code>CONTRATOXBENEFSEG</code>, <code>BENEFSEGURO</code></td><td><span class="tag tag-alta">Baixa</span></td><td>O .NET só exibe</td></tr>
+<tr><td>F43</td><td>Seguro complementar</td><td><code>EMPRESTIMO/Fontes/fExecCalculaSegCompl.pas</code></td><td>Item de seguro do tipo de contrato (F12)</td><td><span class="tag tag-media">Média</span></td><td>Inexistente no .NET</td></tr>
+<tr><td>F44</td><td>Repasse de seguro e lotes</td><td><code>EMPRESTIMO/Fontes/FExecCalculoRepasse.pas</code>, <code>EMPRESTIMO/Fontes/FExecEnvioLoteSeguro.pas</code>, <code>EMPRESTIMO/Fontes/FCancEnvioLoteSeguro.pas</code>, <code>EMPRESTIMO/Fontes/fCadLancaSeguro.pas</code>, <code>EMPRESTIMO/Fontes/CRelRepasseSeguro.pas</code></td><td><code>SEGURADORA</code>, <code>EPSEGUROESPECIAL</code>, financeiro, F35</td><td><span class="tag tag-baixa">Alta</span></td><td>Inexistente no .NET</td></tr>
+<tr><td>F45</td><td>Transferência de perfil de investimento</td><td><code>EMPRESTIMO/Fontes/FTransferePerfilInves.pas</code></td><td><code>PERFILINVEST</code>, <code>TRANSPERFILINVEST</code>, F40</td><td><span class="tag tag-media">Média</span></td><td>Inexistente no .NET</td></tr>
+<tr><td>F46</td><td>Parâmetros do sistema</td><td><code>EMPRESTIMO/Fontes/FParamEmptmo.pas</code></td><td><code>PARAMEMPTMO</code></td><td><span class="tag tag-alta">Baixa</span></td><td>O .NET só lê 5 campos</td></tr>
+<tr><td>F47</td><td>Parâmetros de integração, portador e plano × contábil</td><td><code>EMPRESTIMO/Fontes/FCadParamIntegraRec.pas</code>, <code>EMPRESTIMO/Fontes/FCadPortFormaxEmptmo.pas</code>, <code>EMPRESTIMO/Fontes/FCadBancoPortador.pas</code>, <code>EMPRESTIMO/Fontes/FCadPlanPrevXContabil.pas</code>, <code>EMPRESTIMO/Fontes/FCadCCBaixaXPatro.pas</code></td><td><code>PARAMINTEGRAEP</code>, <code>PORTFORMAXMODULO</code>, <code>PLANPREVCONTABIL</code>; pré-requisito de F40</td><td><span class="tag tag-media">Média</span></td><td>O .NET só lê</td></tr>
+    </tbody>
+  </table></div>
+  <p>Complexidade de A: 7 Alta (F04, F12, F24, F26, F27, F40, F44) · 15 Média · 6 Baixa (F07, F13, F15, F32, F42, F46).</p>
+
+  <h3>B. Parcialmente implementadas — migrar só o complemento</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>#</th><th>Funcionalidade</th><th>Arquivo(s) Delphi</th><th>Dependências identificadas</th><th>Complexidade do complemento</th><th>Motivo / lacunas</th></tr></thead>
+    <tbody>
+<tr><td>F06</td><td>Bloqueio de concessão</td><td><code>EMPRESTIMO/Fontes/FSuspensaoConcessao.pas</code></td><td><code>SUSPCONCESSAO</code>, <code>MOTIVOSUSPCONCESSAO</code></td><td><span class="tag tag-alta">Baixa</span></td><td>Falta o cadastro manual com motivo</td></tr>
+<tr><td>F16</td><td>Alteração contratual</td><td><code>EMPRESTIMO/Fontes/FExecAlteraContrato.pas</code></td><td><code>ALTERACONTREMPTMO</code>, F42</td><td><span class="tag tag-media">Média</span></td><td>Falta o histórico <code>ALTERACONTREMPTMO</code> e os demais campos alteráveis</td></tr>
+<tr><td>F18</td><td>Extrato, evolução e mapa de movimentação</td><td><code>EMPRESTIMO/Fontes/RContrato.pas</code>, <code>EMPRESTIMO/Fontes/CRelMovContr.pas</code>, <code>EMPRESTIMO/Fontes/FEvolucaoContrato.pas</code></td><td><code>HISTMOVEMPTMO</code></td><td><span class="tag tag-media">Média</span></td><td>Falta a parte de relatórios; a consulta já existe</td></tr>
+<tr><td>F20</td><td>Atualização diária da carteira</td><td><code>EMPRESTIMO/Fontes/FExecAtualizaDiariaNova.pas</code>, <code>EMPRESTIMOBPL/Integra/Source/dAtualizacaoDiaria.pas</code></td><td><code>CM.SP_ATUALIZA_DIARIA</code>, agendamento</td><td><span class="tag tag-baixa">Alta</span></td><td>Falta a execução em lote e por período (o cálculo já está no Oracle)</td></tr>
+<tr><td>F29</td><td>Entrada manual de cobranças e devoluções</td><td><code>EMPRESTIMO/Fontes/FExecEntradaManual.pas</code></td><td><code>HISTMOVEMPTMO</code>, <code>EMPRESTIMO/Fontes/dCalcEmptmo.pas</code></td><td><span class="tag tag-media">Média</span></td><td>Falta o lançamento com cálculo; existem a baixa manual e a chave mestre</td></tr>
+<tr><td>F31</td><td>Eventos de cobrança</td><td><code>EMPRESTIMO/Fontes/FEventoCobrancaContrato.pas</code></td><td><code>HISTEVENTOCOBEMPTMO</code>, <code>TIPOEVENTOCOBEMPTMO</code></td><td><span class="tag tag-alta">Baixa</span></td><td>Falta o lançamento manual de qualquer tipo de evento</td></tr>
+    </tbody>
+  </table></div>
+  <div class="note"><strong>Total de funcionalidades a migrar do Delphi: 34</strong> = <strong>28</strong> inexistentes (migração integral) + <strong>6</strong> parcialmente
+  implementadas (só o complemento). As <strong>3</strong> não conclusivas não estão neste total; se a análise manual confirmar lacuna, elas entram aqui.</div>
+</section>
+
+<section id="nao-migrar">
+  <div class="section-title">✅ Funcionalidades já implementadas no .NET 4.8 — NÃO MIGRAR DO DELPHI</div>
+  <p>Para estas funcionalidades o Delphi <strong>não</strong> é fonte de migração. Elas são modernizadas a partir do <code>FUNCEF.WebEmprestimo</code>
+  (.NET 4.8 → .NET 10, interface em React 19), preservando as regras do .NET e do Oracle.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>#</th><th>Funcionalidade</th><th>Arquivo(s) Delphi</th><th>Arquivo(s) .NET 4.8</th><th>Evidência de equivalência</th><th>Ressalvas</th></tr></thead>
+    <tbody>
+<tr><td>F01</td><td>Simulação da concessão</td><td><code>EMPRESTIMOBPL/Interface/Source/FCadInscricao.pas</code>, <code>EMPRESTIMOBPL/Interface/Source/FPrazoSimula.pas</code></td><td><code>FUNCEF.WebEmprestimo.Negocio/GerenciadorConcessao.cs</code>, <code>FUNCEF.WebEmprestimo.Negocio/GerenciadorRegra.cs</code></td><td>Mesmas colunas de regra de <code>TIPOCONTREMPTMO</code>; regras executadas no Oracle (<code>PCK_EMP_REGRA_*_R</code>)</td><td>Corpo das regras fora do repositório (P9)</td></tr>
+<tr><td>F02</td><td>Elegibilidade e impedimentos</td><td><code>EMPRESTIMOBPL/Interface/Source/FCadInscricao.pas</code></td><td><code>FUNCEF.WebEmprestimo.Negocio/GerenciadorConcessao.cs</code>, <code>FUNCEF.WebEmprestimo.Negocio/GerenciadorMutuario.cs</code></td><td>Regras <code>ELEGIBILIDADE_R</code>, <code>LIMITE_R</code>, <code>TIPOCONTRATO_R</code> + validações em C#</td><td>Bloqueio por "outras dívidas" comentado no .NET; validar com o negócio</td></tr>
+<tr><td>F03</td><td>Concessão individual e refinanciamento</td><td><code>EMPRESTIMOBPL/Interface/Source/FCadInscricao.pas</code></td><td><code>FUNCEF.WebEmprestimo.Negocio/GerenciadorConcessao.cs</code></td><td>Gravação transacional de inscrição, contrato, histórico e quitação dos anteriores</td><td>Não consome verba (F05)</td></tr>
+<tr><td>F09</td><td>Cancelamento de concessão e de inscrição</td><td><code>EMPRESTIMO/Fontes/fCancConcessao.pas</code>, <code>EMPRESTIMO/Fontes/FCancInscricao.pas</code></td><td><code>FUNCEF.WebEmprestimo.Web/Paginas/CicloNormal/Cancelamento/Visualizacao.aspx.cs</code>, <code>FUNCEF.WebEmprestimo.Negocio/GerenciadorConcessao.cs</code></td><td>Cancela, reativa os contratos quitados e estorna movimentos, com travas de documento baixado e parcelas</td><td>Validação do protocolo CRM desligada no código; estorno contábil depende de F40</td></tr>
+<tr><td>F11</td><td>Avalistas</td><td><code>EMPRESTIMOBPL/Interface/Source/FPessoaFiador.pas</code></td><td><code>FUNCEF.WebEmprestimo.Web/Paginas/CicloNormal/Emprestimo/PopupAvalista.aspx</code></td><td><code>CONTRATOXAVALISTA</code> e cadastro de pessoa</td><td>—</td></tr>
+<tr><td>F14</td><td>Assinatura do contrato padrão</td><td><code>EMPRESTIMO/Fontes/FCadAssinaturaContrato.pas</code></td><td><code>FUNCEF.WebEmprestimo.Web/Paginas/Tratamentos/Assinatura/Edicao.aspx</code></td><td><code>ASSINCONTRPADRAO</code>, bloqueio na concessão</td><td>Consulta ao Proton (W8)</td></tr>
+<tr><td>F17</td><td>Situação contratual e ajuste de saldo</td><td><code>EMPRESTIMO/Fontes/dCalcEmptmo.pas</code></td><td><code>FUNCEF.WebEmprestimo.AcessoDados.Objetos/AcessoContrato.cs</code></td><td>Mesmas procedures Oracle nas duas aplicações</td><td>—</td></tr>
+<tr><td>F28</td><td>Parcelas em atraso</td><td><code>EMPRESTIMOBPL/Interface/Source/FExecTrataParcAtraso.pas</code></td><td><code>FUNCEF.WebEmprestimo.Negocio/GerenciadorInadimplencia.cs</code></td><td>Mesma procedure <code>CM.SP_TRAT_PARCELAS_EM_ATRASO</code></td><td>—</td></tr>
+<tr><td>F30</td><td>Suspensão de cobrança</td><td><code>EMPRESTIMO/Fontes/fHistoricoSuspensaoCob.pas</code></td><td><code>FUNCEF.WebEmprestimo.Negocio/GerenciadorHistoricoSuspensao.cs</code></td><td><code>HISTSUSPCOBEP</code>, marcação das prestações, regras <code>SUSPENSAO_R</code></td><td>Cadastro dos tipos de suspensão fica com a parametrização</td></tr>
+<tr><td>F34</td><td>Amortização</td><td><code>EMPRESTIMO/Fontes/FExecAmortizacao.pas</code></td><td><code>FUNCEF.WebEmprestimo.Negocio/GerenciadorAmortizacao.cs</code></td><td>Regras <code>AMORTIZACAO_R</code>, repactuação, margem, travas de data</td><td>Cancelamento é lacuna (F36)</td></tr>
+<tr><td>F35</td><td>Quitação antecipada e por falecimento</td><td><code>EMPRESTIMO/Fontes/FExecQuitacao.pas</code></td><td><code>FUNCEF.WebEmprestimo.Negocio/GerenciadorQuitacao.cs</code></td><td>Regras <code>ITEMQUITACAO_R</code>, <code>PR_MARCA_ITENS_QUITADO</code>, documento de óbito</td><td>Repasse de seguro (F44) e resgate (F39) são lacunas</td></tr>
+<tr><td>F48</td><td>Segurança, permissões, log, erros</td><td><code>EMPRESTIMO/Fontes/FPrincipal.pas</code></td><td><code>FUNCEF.WebEmprestimo.Web.Componentes/PermissoesSistema.cs</code></td><td>Infraestrutura própria da Web, com log em <code>LOGTOTALPREV</code></td><td>Depende do GlobalWeb (fora do repositório)</td></tr>
+    </tbody>
+  </table></div>
+  <div class="note"><strong>Total de funcionalidades já implementadas no .NET 4.8 (NÃO MIGRAR DO DELPHI): 12.</strong></div>
+
+  <h3 id="parciais">Funcionalidades parcialmente implementadas</h3>
+  <p><strong>6 funcionalidades</strong>: F06, F16, F18, F20, F29 e F31. O que existe e o que falta está na <a href="#tabela-principal">tabela principal</a>
+  e na tabela B de <a href="#migrar">Funcionalidades que DEVEM ser migradas</a>. Ação: <code>COMPLEMENTAR + ATUALIZAR PARA .NET 10</code>. A parte já
+  existente é modernizada a partir do .NET; o Delphi serve de referência só para o complemento.</p>
+
+  <h3 id="somente-web">Funcionalidades somente Web</h3>
+  <p>Existem no <code>FUNCEF.WebEmprestimo</code> e não têm correspondente no Delphi. Ação: <code>PRESERVAR E ATUALIZAR PARA .NET 10</code>.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>#</th><th>Funcionalidade</th><th>Arquivo(s) .NET 4.8</th><th>Observação</th></tr></thead>
+    <tbody>
+<tr><td>W1</td><td>Conector para internet / autoatendimento: simulação, concessão, número do contrato, conta bancária, assinatura</td><td><code>FUNCEF.WebEmprestimo.Conector/ConectorWeb.asmx.cs</code>, <code>FUNCEF.WebEmprestimo.Conector/Negocio/GerenciadorConector.cs</code></td><td>Reusa as regras de F01–F03 com <code>FLGINTERNET_P=1</code>; autenticação por chave RC2</td></tr>
+<tr><td>W2</td><td>Remessa de inclusão no SERASA e desfazer remessa</td><td><code>FUNCEF.WebEmprestimo.Web/Paginas/Tratamentos/Serasa/Listagem.aspx.cs</code>, <code>FUNCEF.WebEmprestimo.Web/Paginas/Tratamentos/Serasa/DesfazerRemessa.aspx.cs</code></td><td>Gera arquivo em caminho UNC e marca <code>HISTEVENTOCOBEMPTMO</code></td></tr>
+<tr><td>W3</td><td>Boleto bancário em PDF</td><td><code>FUNCEF.WebEmprestimo.Web/Boleto/BoletoEmprestimo.cs</code>, <code>FUNCEF.WebEmprestimo.Web/Boleto/Pdf.aspx</code></td><td>Código de barras e "nosso número" em C#; documento por <code>PCK_AA_EMPTMO_FINANCEIRO</code></td></tr>
+<tr><td>W4</td><td>Renegociação de inadimplência e campanha de descontos (P3), com parametrização de campanhas e bloqueio automático</td><td><code>FUNCEF.WebEmprestimo.Web/Paginas/CicloNormal/Emprestimo/PopupRenegociacao.aspx</code>, <code>FUNCEF.WebEmprestimo.Negocio/GerenciadorDesconto.cs</code>, <code>FUNCEF.WebEmprestimo.Web/Paginas/Tratamentos/Parametrizacao/Inclusao.aspx</code>, <code>FUNCEF.WebEmprestimo.Web/Relatorio/Renegociacao/RenegociacaoPDF.aspx</code></td><td>O menu "Política de descontos" aponta para <code>~/Paginas/Tratamentos/PoliticaDescontos/Listagem.aspx</code>, arquivo que não existe no repositório</td></tr>
+<tr><td>W5</td><td>Relatórios de inadimplência e demonstrativo de valor em aberto</td><td><code>FUNCEF.WebEmprestimo.Web/Paginas/Inadimplencia/RelatorioInadimplencia/Visualizacao.aspx.cs</code>, <code>FUNCEF.WebEmprestimo.Web/Relatorio/Inadimplencia/RelatorioInadimplencia.rdlc</code>, <code>FUNCEF.WebEmprestimo.Web/Relatorio/DemonstrativoValorEmAberto/DemonstrativoValorEmAberto.rdlc</code></td><td><code>CM.PR_RELINADIMPLENTESNOVO</code>, <code>PCK_EMP_RENEG_INADIMPLENCIA</code></td></tr>
+<tr><td>W6</td><td>Modelo de contrato de mútuo (texto por tipo e vigência), impressão via API geradora e link de 2ª via</td><td><code>FUNCEF.WebEmprestimo.Web/Paginas/Tratamentos/ModeloContrato/Alteracao.aspx</code>, <code>FUNCEF.WebEmprestimo.Web/Paginas/CicloNormal/Emprestimo/ImpressaoContrato.aspx</code></td><td><code>TB_EMP_CONTRATOS</code>, <code>TB_CONTRATO_HISTORICO</code>, <code>CONTRATOEMPTMO.TX_CONTRATO</code></td></tr>
+<tr><td>W7</td><td>Chave mestre: edição e exclusão manual do histórico e situação forçada</td><td><code>FUNCEF.WebEmprestimo.Web/Paginas/Consultas/Contratos/PopupChaveMestre.aspx</code>, <code>FUNCEF.WebEmprestimo.Web/Paginas/Consultas/Contratos/PopupEditHistorico.aspx</code></td><td>Permissão <code>chaveMestre</code>, com log e trava de período contábil</td></tr>
+<tr><td>W8</td><td>Integrações externas: Proton (documento assinado), protocolo CRM, barra de progresso e estado de página no banco</td><td><code>FUNCEF.WebEmprestimo.Web/Paginas/Tratamentos/Assinatura/Helper.cs</code>, <code>FUNCEF.WebEmprestimo.Web/Paginas/CicloNormal/Emprestimo/Progresso.ashx</code>, <code>FUNCEF.WebEmprestimo.AcessoDados.Objetos/Estado/AcessoEstado.cs</code></td><td>A barra de progresso e o estado de sessão são infraestrutura de Web Forms. Na nova arquitetura podem ser substituídos, preservando o comportamento</td></tr>
+    </tbody>
+  </table></div>
+  <p><strong>Total somente Web: 8.</strong></p>
+
+  <h3 id="nao-conclusivas">Análises não conclusivas</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>#</th><th>Funcionalidade</th><th>Por que não é conclusiva</th><th>O que é preciso para concluir</th></tr></thead>
+    <tbody>
+<tr><td>N1 (F08)</td><td>Liberação da concessão e envio ao Contas a Pagar</td><td>Não há código .NET. O envio Web é feito por um ETL Informatica fora do repositório, com flag <code>FLGDESATIVACONC</code></td><td>Mapping do workflow <code>wf_COPART_002_CRIA_PARAMETROS</code> e confirmação do fluxo atual de pagamento da concessão</td></tr>
+<tr><td>N2 (F25)</td><td>Envio de parcelas à folha / financeiro e desfazer envio</td><td>O .NET delega ao mesmo ETL; não dá para comparar com as regras do <code>FExecEnvio</code> (<code>TMPDESC</code>, suspensão de cobrança)</td><td>Mapping do ETL; teste comparativo de envio de uma competência</td></tr>
+<tr><td>N3 (F49)</td><td>Utilitários (SQL livre, desenho de relatório, relatório de log, assistentes)</td><td>Uso atual desconhecido; o SQL livre pode não ser desejável na nova aplicação</td><td>Decisão do negócio e da segurança da informação</td></tr>
+    </tbody>
+  </table></div>
+  <p><strong>Total não conclusivas: 3.</strong> Ação: <code>ANÁLISE MANUAL NECESSÁRIA</code> (pendência <a href="#pendencias">P8</a>).</p>
+
+  <h3 id="estimativa">Estimativa de esforço</h3>
+  <p>Ordem de grandeza, em <strong>semanas-pessoa de backend (.NET 10)</strong>, com faixa larga de propósito: a análise foi feita no código, sem medir o PL/SQL nem
+  conversar com os usuários. Faixas por funcionalidade: migração integral Baixa 1–2, Média 2–4, Alta 4–8; complemento Baixa 0,5–1, Média 1–2, Alta 2–4;
+  modernização 1–3.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Categoria</th><th>Qtde</th><th>Esforço (semanas-pessoa)</th><th>Premissas</th></tr></thead>
+    <tbody>
+<tr><td><strong>Modernização</strong> — já existe no .NET 4.8 (Web Forms/WCF → .NET 10 Web API)</td><td>12</td><td>12–36</td><td>Regras e SQL mantidos; troca de Web Forms/WCF por API; ODP.NET Managed para .NET 10; GlobalWeb substituído por autenticação equivalente</td></tr>
+<tr><td><strong>Modernização</strong> — somente Web</td><td>8</td><td>8–24</td><td>Mesmo critério; W8 pode encolher se a barra de progresso e o estado de sessão forem eliminados</td></tr>
+<tr><td><strong>Migração funcional</strong> — não existe (integral)</td><td>28</td><td>64–128</td><td>6 Baixa (6–12) + 15 Média (30–60) + 7 Alta (28–56). Tabelas e procedures Oracle reaproveitadas; regras lidas do Delphi</td></tr>
+<tr><td><strong>Migração funcional</strong> — complemento das parciais</td><td>6</td><td>6–12</td><td>2 Baixa (1–2) + 3 Média (3–6) + 1 Alta (2–4)</td></tr>
+<tr><td><strong>Análise manual</strong> — não conclusivas</td><td>3</td><td>1,5–3 (só a análise)</td><td>O esforço de implementação depende do resultado</td></tr>
+<tr><td><strong>Frontend React 19</strong></td><td>—</td><td><strong>À parte</strong> (não incluído nas linhas acima)</td><td>Estimar por tela após definir o design. Base: 76 páginas <code>.aspx</code> do .NET e as telas Delphi das funcionalidades a migrar</td></tr>
+<tr><td><strong>Total backend</strong> (sem React 19 e sem implementar as não conclusivas)</td><td>57</td><td><strong>≈ 92–203</strong></td><td>Modernização ≈ 20–60 · migração funcional ≈ 70–140 · análise 1,5–3</td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li><strong>Premissas gerais:</strong> o banco Oracle (schema <code>CM</code>) e o PL/SQL (<code>PCK_EMP_REGRA_*_R</code>, <code>PCK_EMPRESTIMO</code>, <code>SP_ATUALIZA_DIARIA</code>…)
+        continuam sendo a fonte do cálculo; a migração não reescreve PL/SQL. Testes, homologação e implantação não estão incluídos.</li>
+    <li><strong>Incertezas:</strong> corpo do PL/SQL indisponível (P9); uso real das funções Delphi (P10); dependências entre processos em lote (F24 → F25 → F26 → F27 → F40)
+        que obrigam a migrar em bloco; a migração precisa conviver com o Delphi enquanto os dois sistemas compartilham o banco.</li>
+    <li>Os números não devem ser usados como orçamento fechado. Antes de comprometer prazo, faça uma estimativa detalhada por funcionalidade.</li>
+  </ul>
+
+  <h3 id="frontend">Estratégia de frontend React 19</h3>
+  <ul>
+    <li><strong>Preservar comportamento e regras:</strong> validações, mensagens, permissões e fluxos (ex.: confirmações de exceção na concessão) do .NET 4.8 são o contrato
+        funcional da nova interface.</li>
+    <li><strong>Backend:</strong> modernizar o <code>FUNCEF.WebEmprestimo</code> para .NET 10, expondo APIs no lugar dos serviços WCF e do Conector ASMX e mantendo os Gerenciadores e o
+        acesso ao Oracle.</li>
+    <li><strong>Interface:</strong> reconstruir em React 19 quando aplicável. Os HTML existentes em <code>docs/</code> (<a href="site/modules/emprestimo/index.html">página do Módulo Empréstimo</a>,
+        protótipos do portal em <code>docs/site/</code>) servem de referência visual.</li>
+    <li><strong>Separação de esforço:</strong> reconstruir o frontend de uma funcionalidade que já existe no .NET <strong>não</strong> a transforma em migração funcional do Delphi.
+        Ela continua na lista NÃO MIGRAR; o trabalho de tela é contado na linha "Frontend React 19".</li>
+    <li>Para as funcionalidades migradas do Delphi, as telas Delphi (<code>.dfm</code>) descrevem os campos e as ações; o layout segue o padrão React adotado para o restante.</li>
+  </ul>
+</section>
+
+<section id="escopo-real">
+  <div class="section-title">🎯 Resumo do Escopo Real da Migração</div>
+  <p>Cada funcionalidade aparece em uma única lista.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Lista</th><th>Qtde</th><th>Funcionalidades</th></tr></thead>
+    <tbody>
+<tr><td><span class="tag tag-ja">NÃO MIGRAR</span> do Delphi — modernizar a partir do .NET 4.8</td><td>12 (+ 8 somente Web)</td>
+  <td>F01 Simulação · F02 Elegibilidade · F03 Concessão individual/refinanciamento · F09 Cancelamento de concessão/inscrição · F11 Avalistas · F14 Assinatura do contrato padrão ·
+      F17 Situação/ajuste de saldo · F28 Parcelas em atraso · F30 Suspensão de cobrança · F34 Amortização · F35 Quitação antecipada/falecimento · F48 Segurança/log.
+      <br>Somente Web (preservar): W1 Conector · W2 SERASA · W3 Boleto · W4 Renegociação/campanha P3 · W5 Relatórios de inadimplência · W6 Modelo de contrato · W7 Chave mestre · W8 Integrações externas</td></tr>
+<tr><td><span class="tag tag-nao">MIGRAR</span> do Delphi para .NET 10 + React 19</td><td>28</td>
+  <td>F04 Concessão em lote · F05 Verbas · F07 Valor máximo de prestação · F10 Estorno individual · F12 Tipos de contrato/itens · F13 Contrato padrão · F15 Mensagens ·
+      F19 Carga FCRT · F21 Desfazer atualização diária · F22 Provisão para perdas · F23 Relatórios de carteira · F24 Geração de parcelas · F26 Recebimento/fechamento ·
+      F27 Divergências/não recebidos · F32 Restrições de cobrança · F33 Arquivo de remessa · F36 Cancelamento de amortização/quitação · F37 Quitação em lote ·
+      F38 Alteração de concessão · F39 Resgate · F40 Contabilização · F41 Conciliações · F42 Beneficiários do seguro · F43 Seguro complementar · F44 Repasse de seguro ·
+      F45 Perfil de investimento · F46 Parâmetros do sistema · F47 Parâmetros de integração</td></tr>
+<tr><td><span class="tag tag-parcial">COMPLEMENTAR</span> + atualizar para .NET 10</td><td>6</td>
+  <td>F06 Bloqueio de concessão · F16 Alteração contratual · F18 Extrato/evolução · F20 Atualização diária em lote · F29 Entrada manual · F31 Eventos de cobrança</td></tr>
+<tr><td><span class="tag tag-nc">NÃO CONCLUSIVAS</span> — análise manual</td><td>3</td>
+  <td>F08 Liberação/Contas a Pagar · F25 Envio de parcelas (ETL) · F49 Utilitários</td></tr>
+<tr><td><strong>Total de funcionalidades Delphi</strong></td><td><strong>49</strong></td><td>12 + 28 + 6 + 3 = 49 (as 8 somente Web ficam fora desse total)</td></tr>
+    </tbody>
+  </table></div>
+  <div class="note"><strong>Leitura do escopo:</strong> o .NET 4.8 cobre o ciclo <em>de balcão</em> do contrato: simulação, concessão, refinanciamento, amortização,
+  quitação, suspensão, tratamento de atraso e inadimplência. As lacunas comprovadas estão nos <strong>processamentos em lote de retaguarda</strong> (geração, recebimento,
+  divergências, atualização da carteira), na <strong>contabilização</strong>, no <strong>seguro</strong>, no <strong>perfil de investimento</strong> e nos <strong>cadastros de
+  parametrização</strong>, que hoje só o Delphi mantém. Esses blocos concentram a migração funcional.</div>
+</section>
+
 <section id="pendencias">
   <div class="section-title">❓ Pendências e Dúvidas</div>
   <div class="table-wrap"><table>
@@ -405,6 +976,9 @@ grep -o 'delphi5' EMPRESTIMO/Fontes/emprestimo.cfg | head -1</code></pre>
 <tr><td>P5</td><td>Corrigir <code>Net20Dir</code> nos scripts de instalação e o <code>targetFramework</code> do Conector antes da próxima implantação</td><td>Infraestrutura + desenvolvimento</td></tr>
 <tr><td>P6</td><td>Confirmar se a pasta <code>EMPRESTIMOBPL/</code> (pacotes <code>CMObjetosEP50</code>, <code>CMIntegraEP50</code>, <code>CMExecEP50</code>, usados pelo <code>Emprestimo.bpg</code>) entra no escopo "EMPRESTIMO (Delphi 5)". Hoje ela só é citada como dependência</td><td>Lucas Marçal Moreira (solicitante)</td></tr>
 <tr><td>P7</td><td>Confirmar a versão do cliente Oracle e a configuração do BDE usadas nas estações que executam o <code>emprestimo.exe</code></td><td>Infraestrutura + responsável técnico do EMPRESTIMO Delphi 5</td></tr>
+<tr><td>P8</td><td>Resolver as 3 análises <a href="#nao-conclusivas">não conclusivas</a> (N1 liberação/envio da concessão ao Contas a Pagar, N2 envio de parcelas via ETL Informatica, N3 utilitários de infraestrutura) antes de fechar o escopo de migração</td><td>Lucas Marçal Moreira + responsável técnico do Web Empréstimo + equipe de ETL</td></tr>
+<tr><td>P9</td><td>Obter o código-fonte PL/SQL das packages <code>CM.PCK_EMP_REGRA_*_R</code>, <code>CM.PCK_EMPRESTIMO</code> e das procedures <code>CM.SP_ATUALIZA_DIARIA</code>, <code>CM.SP_TRAT_PARCELAS_EM_ATRASO</code>, <code>CM.PR_EMP_AJUSTA_SITUACAO_CONTR</code> (não estão no repositório) e confirmar se continuam no Oracle após a migração (premissa da <a href="#estimativa">estimativa</a>)</td><td>DBA / responsável pelo schema <code>CM</code></td></tr>
+<tr><td>P10</td><td>Confirmar quais funcionalidades exclusivas do Delphi ainda são usadas em produção (ex.: <code>FExecCargaFCRT</code>, carga pontual de contratos) antes de migrá-las</td><td>Área de negócio do Empréstimo</td></tr>
     </tbody>
   </table></div>
 </section>
@@ -425,6 +999,7 @@ grep -o 'delphi5' EMPRESTIMO/Fontes/emprestimo.cfg | head -1</code></pre>
     <thead><tr><th>Versão</th><th>Data</th><th>Alteração</th></tr></thead>
     <tbody>
 <tr><td>1.0</td><td>2026-10-06</td><td>Versão inicial (PFC-12): inventário dos projetos .NET do repositório, atualização por aplicação, requisitos de ambiente, configurações antigas e incidentes.</td></tr>
+<tr><td>1.2</td><td>2026-10-07</td><td>PFC-16: nova seção <a href="#analise-migracao">Análise de Migração Funcional — Delphi 5 × .NET 4.8</a> (cobertura da pasta <code>EMPRESTIMO/</code>, classificação de 49 funcionalidades Delphi frente ao <code>FUNCEF.WebEmprestimo</code>, 8 funcionalidades somente Web, estimativa de esforço, estratégia de frontend React 19) e seção <a href="#escopo-real">Resumo do Escopo Real da Migração</a>; pendências P8–P10 incluídas. Conteúdo das versões 1.0/1.1 mantido.</td></tr>
 <tr><td>1.1</td><td>2026-10-06</td><td>PFC-13: escopo restrito ao módulo de Empréstimo (FUNCEF.WebEmprestimo e EMPRESTIMO Delphi 5). Removidas as aplicações fora do módulo; totais recalculados (2 aplicações, 19 projetos .NET, 1 projeto Delphi 5); nova seção do EMPRESTIMO (Delphi 5) com plataforma, ponto de entrada, relação com o Web Empréstimo e requisitos de ambiente; pendências P2, P3, P6 e P7 revistas/incluídas.</td></tr>
     </tbody>
   </table></div>
@@ -433,7 +1008,7 @@ grep -o 'delphi5' EMPRESTIMO/Fontes/emprestimo.cfg | head -1</code></pre>
 </main>
 
 <footer>
-<p>Módulo de Empréstimo — Versões .NET · v1.1 gerada em 2026-10-06 (PFC-13, critérios do PFC-12) | Fontes: arquivos <code>.csproj</code>, <code>.sln</code>, <code>Web.config</code> e documentos técnicos de <code>FUNCEF.WebEmprestimo/</code>; <code>emprestimo.dpr</code>, <code>.dof</code>, <code>.cfg</code> e <code>.bpg</code> de <code>EMPRESTIMO/Fontes/</code> | pt-BR</p>
+<p>Módulo de Empréstimo — Versões .NET · v1.2 gerada em 2026-10-07 (PFC-16; base PFC-13, critérios do PFC-12) | Fontes: arquivos <code>.csproj</code>, <code>.sln</code>, <code>Web.config</code> e documentos técnicos de <code>FUNCEF.WebEmprestimo/</code>; <code>emprestimo.dpr</code>, <code>.dof</code>, <code>.cfg</code> e <code>.bpg</code> de <code>EMPRESTIMO/Fontes/</code> | pt-BR</p>
 </footer>
 </body>
 </html>
