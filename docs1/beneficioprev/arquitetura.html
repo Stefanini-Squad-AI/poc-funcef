@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Benefício Previdenciário — Arquitetura — Blueprint AS-IS</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+
+</head>
+<body>
+<header>
+  <div class="badge">Blueprint AS-IS — Delphi 5</div>
+  <h1>🏗️ Arquitetura — Benefício Previdenciário</h1>
+  <p>Camadas, padrão de acesso a dados e inventário de forms</p>
+</header>
+<nav>
+  <a href="index.html">📋 Visão Geral</a>
+  <a href="arquitetura.html">🏗️ Arquitetura</a>
+  <a href="funcionalidades.html">⚙️ Funcionalidades</a>
+  <a href="regras-de-negocio.html">📏 Regras</a>
+  <a href="dados.html">🗄️ Dados</a>
+  <a href="integracoes.html">🔗 Integrações</a>
+</nav>
+
+
+<main>
+<section><div class="section-title">🏗️ Arquitetura do Módulo</div>
+<p>O módulo <strong>BENEFICIOPREV</strong> tem 144 artefatos. O entry point <code>BeneficioPrev.dpr</code> cria o splash CM e o form principal <code>frmPrincipal</code> (Caption "Concessão e Manut de Benefícios Previdenciários", IdModulo SAD=454). O menu de Eventos é montado dinamicamente em runtime lendo <code>EVENTOGERADOR</code> por <code>FLGINTERNO</code> (TS/ID/IN/FL/AI/BI/RC/DO/OE).</p><p>A arquitetura segue o padrão CM com SQL inline dominante via <code>TwwQuery</code>/<code>TQuery</code>. A camada <code>CtrlObjects/</code>+<code>DBObjects/</code> cobre apenas 2 entidades locais (<code>EVOLFUNCPREV</code>, <code>HISTRUBSAL</code>); o motor de cálculo/concessão reside no pacote externo <strong>CMAdmPrev</strong> — o BENEFICIOPREV atua principalmente como orquestrador de UI, eventos, manutenção, conciliação INSS e desfazimento.</p><p>Toda operação de negócio é auditada em <code>LOGTOTALPREV</code> (IdModulo=454). Filtros de multi-fundação (IDFUNDACAO/PATRO) estão presentes em quase toda SQL de negócio.</p><div class="note"><strong>Nota (PENDENTE):</strong> O <code>uses</code> do DPR referencia unidades sem prefixo (<code>FConciliacao</code>, <code>FIdentificaINSS</code>, etc.) mas no filesystem existem versões com underscore (<code>_FConciliacao.pas</code>, ...). O DPR está parcialmente dessincronizado do diretório; a compilação real provavelmente usa os arquivos <code>_</code> (alternativos/mais novos).</div><p>Evidência: ~92% <span class="ev ev-comprovado">COMPROVADO</span>, ~6% <span class="ev ev-inferido">INFERIDO</span>, ~2% <span class="ev ev-pendente">PENDENTE</span>.</p>
+</section>
+
+<section><div class="section-title">🗈¸ Camadas e Componentes</div>
+<div class="table-wrap"><table class=""><thead><tr><th>Camada</th><th>Localização</th><th>Padrão</th><th>Evidência</th></tr></thead><tbody><tr><td>Apresentação</td><td><code>Fontes/</code> (55), <code>Relatorios/</code> (14)</td><td>Forms VCL herdados de CM (TfrmOkCancelar, TfrmCadMestreDetalheCS, TfrmCMPrincipal)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr><tr><td>Controle</td><td><code>CtrlObjects/</code> (2: uCtrlEvolFuncPrev, uCtrlPCS)</td><td>TCmControlObject, modo dual cnsClient/cnsServer</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr><tr><td>Acesso a Dados</td><td><code>DBObjects/</code> (2 locais) + SQL inline + CMAdmPrev/CMPrevMT50</td><td>TCmDbObject (EVOLFUNCPREV, HISTRUBSAL) + TwwQuery inline dominante</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr><tr><td>Framework base</td><td><code>..\..\Cm\Forms\Source\</code>, CMAdmPrev, CMPrevMT50</td><td>20+ units CM + 8 units CMAdmPrev no DPR</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr></tbody></table></div>
+</section>
+
+<section><div class="section-title">🔗 Dependências Internas entre Sub-áreas</div>
+<div class="table-wrap"><table class=""><thead><tr><th>Origem</th><th>Destino</th><th>Natureza</th><th>Evidência</th></tr></thead><tbody><tr><td>Fontes/ (forms)</td><td>DBObjects/ (uDbEvolfuncprev, uDbHistrubsal)</td><td>Acesso a dados local (2 entidades)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr><tr><td>Fontes/ (forms)</td><td>CtrlObjects/ (uCtrlEvolFuncPrev, uCtrlPCS)</td><td>Controle de evolução funcional e listas PCS</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr><tr><td>Fontes/ (forms)</td><td>Relatorios/</td><td>Relatórios do próprio módulo (14 units)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr><tr><td>FPrincipal.pas</td><td>EVENTOGERADOR (tabela)</td><td>Menu dinâmico montado por FLGINTERNO em runtime</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr><tr><td>UModulo.pas</td><td>LOGTOTALPREV (tabela)</td><td>Auditoria de operações (GravaLogTOTALPREV, IdModulo=454)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr></tbody></table></div>
+</section>
+
+<section><div class="section-title">📂 Inventário de Forms por Área Funcional</div>
+<p>Total de forms visuais identificados: ~68</p><h4 style="color:var(--accent);margin:1rem 0 .5rem">Concessão / Requerimento / Simulação (8 forms)</h4><div class="table-wrap"><table class=""><thead><tr><th>Form (arquivo)</th><th>Caption</th></tr></thead><tbody><tr><td>FPrincipal.dfm</td><td>Concessão e Manut de Benefícios Previdenciários</td></tr><tr><td>FSimulaBeneficio.dfm</td><td>Simulação de Benefício</td></tr><tr><td>fTipoLiberacao.dfm</td><td>Liberação de Benefício</td></tr><tr><td>FLiberaBeneficioProvisorio.dfm</td><td>Liberação de Benefício Provisório</td></tr></tbody></table></div><h4 style="color:var(--accent);margin:1rem 0 .5rem">Manutenção / Alteração / Desfazimento (9 forms)</h4><div class="table-wrap"><table class=""><thead><tr><th>Form (arquivo)</th><th>Caption</th></tr></thead><tbody><tr><td>FAlteraBeneficio.dfm</td><td>Alteração de Dados de Benefícios Concedidos</td></tr><tr><td>FAlteraBeneficioLote.dfm</td><td>Alteração de Valor do Benefício em Lote</td></tr><tr><td>FDesfazConcessaoBenefNOVO.dfm</td><td>Desfazer Operações de Benefícios</td></tr><tr><td>FReaberturaBeneficio.dfm</td><td>Reabertura de Benefício</td></tr><tr><td>FIndicadorRecebedor.dfm</td><td>Indicação de Recebedor</td></tr></tbody></table></div><h4 style="color:var(--accent);margin:1rem 0 .5rem">Eventos Previdenciários (5 forms)</h4><div class="table-wrap"><table class=""><thead><tr><th>Form (arquivo)</th><th>Caption</th></tr></thead><tbody><tr><td>FEventoAposentaBenef.dfm</td><td>Evento Aposentadoria</td></tr><tr><td>FEventoMorte.dfm</td><td>Evento Falecimento</td></tr><tr><td>FEventoReclusao.dfm</td><td>Evento Reclusão</td></tr><tr><td>FEventoAssistidoBenef.dfm</td><td>Evento Assistido Temporário</td></tr><tr><td>FEventoAssistidoINSS.dfm</td><td>Evento Aposentadoria Exclusiva do INSS</td></tr></tbody></table></div><h4 style="color:var(--accent);margin:1rem 0 .5rem">Reajuste / Desdobramento / Dívida (5 forms)</h4><div class="table-wrap"><table class=""><thead><tr><th>Form (arquivo)</th><th>Caption</th></tr></thead><tbody><tr><td>FReajuesteBenef.dfm</td><td>Reajuste Benefícios</td></tr><tr><td>FReajusteJudicial.dfm</td><td>Reajuste Judicial</td></tr><tr><td>FDesdobramentoBenef.dfm</td><td>Desdobramento de Benefícios para Beneficiários</td></tr><tr><td>FParamDividaBenef.dfm</td><td>Parametrização de Parcelamento de Dívida</td></tr><tr><td>FCadReajINSS.dfm</td><td>Cadastro de Regras de Reajuste dos Benefícios do INSS</td></tr></tbody></table></div><h4 style="color:var(--accent);margin:1rem 0 .5rem">Conciliação INSS / Reembolso (12 forms)</h4><div class="table-wrap"><table class=""><thead><tr><th>Form (arquivo)</th><th>Caption</th></tr></thead><tbody><tr><td>_FConciliacao.dfm</td><td>Conciliação do INSS com as Mantenedoras</td></tr><tr><td>_FExtratoINSS.dfm</td><td>Extrato Individual de Conciliação dos Proventos INSS</td></tr><tr><td>_FEncerraConciliacao.dfm</td><td>Encerramento de Conciliação</td></tr><tr><td>_FComparaReembDesemb.dfm</td><td>Resumo de Reembolso e Desembolso INSS</td></tr><tr><td>_FIdentificaINSS.pas</td><td>Identificação de Processos</td></tr></tbody></table></div><h4 style="color:var(--accent);margin:1rem 0 .5rem">Relatórios / Consultas (14 forms em Relatorios/)</h4><div class="table-wrap"><table class=""><thead><tr><th>Form (arquivo)</th><th>Caption</th></tr></thead><tbody><tr><td>FConsProcessoBenef.dfm</td><td>Consulta Processos de Benefícios</td></tr><tr><td>FConsMemoriaCalculo.dfm</td><td>Consulta a Memória de Cálculo</td></tr><tr><td>FConsHistPagBeneficio.dfm</td><td>Consulta Histórico de Pagamento de Benefícios</td></tr><tr><td>FConsLogTotalPREV.dfm</td><td>Log de Operações do TotalPREV</td></tr><tr><td>FParamRelDemonsSRB.dfm</td><td>Demonstrativo de Cálculo do SRB e INSS</td></tr></tbody></table></div>
+</section>
+
+</main>
+
+<footer>
+<p>Blueprint AS-IS — PFC-21 — Documentação dos módulos FOLHA, CONTRIBUIÇÃO e BENEFICIOPREV | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-09</p>
+</footer>
+</body>
+</html>

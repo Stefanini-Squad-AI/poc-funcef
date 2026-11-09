@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Folha de Benefícios — Arquitetura — Blueprint AS-IS</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+
+</head>
+<body>
+<header>
+  <div class="badge">Blueprint AS-IS — Delphi 5</div>
+  <h1>🏗️ Arquitetura — Folha de Benefícios</h1>
+  <p>Camadas, padrão de acesso a dados e inventário de forms</p>
+</header>
+<nav>
+  <a href="index.html">📋 Visão Geral</a>
+  <a href="arquitetura.html">🏗️ Arquitetura</a>
+  <a href="funcionalidades.html">⚙️ Funcionalidades</a>
+  <a href="regras-de-negocio.html">📏 Regras</a>
+  <a href="dados.html">🗄️ Dados</a>
+  <a href="integracoes.html">🔗 Integrações</a>
+</nav>
+
+
+<main>
+<section><div class="section-title">🏗️ Arquitetura do Módulo</div>
+<p>O módulo <strong>FOLHA</strong> (Folha de Benefícios) é o maior dos três, com 528 artefatos Delphi. O entry point é <code>FOLHA/Fontes/Folha.dpr</code> (6.588 linhas), que cria o form principal <code>frmPrincipal</code> (Caption "Folha de Benefícios").</p><p>Segue o padrão CM em 4 camadas: apresentação (Fontes/ + FontesMT/), controle (CtrlObjects/ + business objects em CMFbObj50/ e CMFolhaObjMt/), acesso a dados (DBObjects/ com 41 unidades, uma por tabela) e framework CM base. O motor de cálculo central reside no DataModule <code>dFolhaPrevia.pas</code> (30.856 linhas).</p><p>Além dos 3 packages internos (CMFbComum50 — código comum; CMFbObj50 — business objects TObjSistemaFolha/TFolhaBenef; CMFolhaObjMt — multi-thread para 2ª via de contra-cheque), o módulo acessa Oracle via schema <code>CM.</code>, sequences e <code>DUAL</code>.</p><p>Evidência: <span class="ev ev-comprovado">COMPROVADO</span> — verificado em todos os 41 DBObjects (TableName confirmada), 4 CtrlObjects, DPR e forms.</p>
+</section>
+
+<section><div class="section-title">🗈¸ Camadas e Componentes</div>
+<div class="table-wrap"><table class=""><thead><tr><th>Camada</th><th>Localização</th><th>Padrão</th><th>Evidência</th></tr></thead><tbody><tr><td>Apresentação</td><td><code>Fontes/</code> (473), <code>FontesMT/</code> (8)</td><td>Forms VCL herdados de CM (frmCadastro, frmCadMestreDet, frmCMPrincipal)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr><tr><td>Controle</td><td><code>CtrlObjects/</code> (4), <code>CMFbObj50/Source/</code>, <code>CMFolhaObjMt/Source/</code></td><td>TCmControlObject + business objects (TObjSistemaFolha, TFolhaBenef)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr><tr><td>Acesso a Dados</td><td><code>DBObjects/</code> (41 uDb*.pas) + DataModules</td><td>TCmDbObject (1 por tabela, TableName confirmada) + dFolhaPrevia.pas (30.856 lin)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr><tr><td>Framework base</td><td><code>..\..\Cm\Forms\Source\</code></td><td>uCmDbObject, uCmControlObject, uCmClientDataSet, uSistema</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr></tbody></table></div>
+</section>
+
+<section><div class="section-title">🔗 Dependências Internas entre Sub-áreas</div>
+<div class="table-wrap"><table class=""><thead><tr><th>Origem</th><th>Destino</th><th>Natureza</th><th>Evidência</th></tr></thead><tbody><tr><td>Fontes/ (forms)</td><td>DBObjects/ (uDb*)</td><td>Acesso a dados</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr><tr><td>Fontes/ (forms)</td><td>CtrlObjects/ (uCtrl*)</td><td>Controle</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr><tr><td>Fontes/ (forms)</td><td>CMFbObj50/Source/</td><td>Business objects (UObjFolha, UFolhaBenef)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr><tr><td>Fontes/ (forms)</td><td>CMFbComum50/Source/</td><td>Código comum (frame consulta histórica)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr><tr><td>Fontes/ (forms)</td><td>CMFolhaObjMt/Source/</td><td>Multi-thread (2ª via contra-cheque)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr><tr><td>CtrlObjects/</td><td>DBObjects/</td><td>Acesso a dados (uCtrl* uses uDb*)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr><tr><td>dFolhaPrevia.pas</td><td>dContabil.pas</td><td>Contabilidade (InstanciaDtmLocal:19438)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr><tr><td>dFolhaPrevia.pas</td><td>UFuncoesFolha.pas</td><td>Funções de cálculo compartilhadas</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr></tbody></table></div>
+</section>
+
+<section><div class="section-title">📂 Inventário de Forms por Área Funcional</div>
+<p>Total de forms visuais identificados: ~180</p><h4 style="color:var(--accent);margin:1rem 0 .5rem">Cálculos da Folha / Processamento (22 forms)</h4><div class="table-wrap"><table class=""><thead><tr><th>Form (arquivo)</th><th>Caption</th></tr></thead><tbody><tr><td>FPreparo.dfm</td><td>Preparo da Folha de Benefícios</td></tr><tr><td>FFolhaNormalPrevia.dfm</td><td>Prévia da Folha de Benefícios</td></tr><tr><td>fFolhaExtra.dfm</td><td>Prévia para Pagamento por Folha Extra</td></tr><tr><td>fFolhaNormalEfet.dfm</td><td>Efetivação de Versão de Pagamento</td></tr><tr><td>fGeraArquivoRemessa.dfm</td><td>Geração de Arquivo de Remessa de Pagamento</td></tr><tr><td>festornafolha.dfm</td><td>Estorno de Folha de Benefícios</td></tr><tr><td>FAberturaFitaCredit.dfm</td><td>Abertura da Fita de Crédito por Plano</td></tr><tr><td>fConferenciaPrevia.dfm</td><td>Conferência da Prévia</td></tr><tr><td>fBatimentoPrevia.dfm</td><td>Batimento de Líquido da Folha</td></tr><tr><td>FMapaFolhaBenef.dfm</td><td>Mapa da Folha de Benefício</td></tr><tr><td>FEncerramentoPorFalecimento.dfm</td><td>Encerramento de Benefícios</td></tr><tr><td>FAdiantamentoExtraFolha.dfm</td><td>Insere Adiantamento Extra Folha</td></tr></tbody></table></div><h4 style="color:var(--accent);margin:1rem 0 .5rem">Consultas (8 forms)</h4><div class="table-wrap"><table class=""><thead><tr><th>Form (arquivo)</th><th>Caption</th></tr></thead><tbody><tr><td>FConsultaPrevia.dfm</td><td>Consulta Prévia da Folha de Benefícios</td></tr><tr><td>FConsultaHistorico.dfm</td><td>Consulta o Histórico da Folha de Benefícios</td></tr><tr><td>fConsultaGlobalPrevia.dfm</td><td>Consulta Global da Prévia</td></tr><tr><td>fConsultaParametrizacaoPrevia.dfm</td><td>Consulta Parametrização Contábil/Financeira da Prévia</td></tr><tr><td>fConsHstCompensaIR.dfm</td><td>Consulta do Histórico de Compensação IRRF</td></tr><tr><td>fVisaoGerencial.dfm</td><td>Visão Gerencial da Folha de Benefícios</td></tr></tbody></table></div><h4 style="color:var(--accent);margin:1rem 0 .5rem">Cadastros (~40 forms)</h4><div class="table-wrap"><table class=""><thead><tr><th>Form (arquivo)</th><th>Caption</th></tr></thead><tbody><tr><td>FCadProvento.dfm</td><td>Rubricas Salariais</td></tr><tr><td>FAssocRubricaPlano.dfm</td><td>Associação de Rubricas por Plano</td></tr><tr><td>FCadAlimentados.dfm</td><td>Cadastro de Alimentados</td></tr><tr><td>FCadCompensaIRRF.dfm</td><td>Compensação de IRRF</td></tr><tr><td>FCadDepJudicial.dfm</td><td>Ação Judicial de Imposto de Renda</td></tr><tr><td>FEstruturaCalculo.dfm</td><td>Estruturas de Cálculo</td></tr><tr><td>FParametroFolha.dfm</td><td>Parâmetros Globais da Folha</td></tr><tr><td>fColMapaFolha.dfm</td><td>Coluna do Mapa da Folha</td></tr></tbody></table></div><h4 style="color:var(--accent);margin:1rem 0 .5rem">Reembolso INSS (5 forms)</h4><div class="table-wrap"><table class=""><thead><tr><th>Form (arquivo)</th><th>Caption</th></tr></thead><tbody><tr><td>FConciliacaoReembolsoINSS.dfm</td><td>Conciliação do Reembolso do INSS</td></tr><tr><td>FPrestacaoContasINSS.dfm</td><td>Prestação de Contas INSS</td></tr><tr><td>FInsereRubricasINSSFolha.dfm</td><td>Insere Rubricas INSS na Folha</td></tr><tr><td>FManutRubricaReembolsoINSS.dfm</td><td>Manutenção Rubricas Reembolso INSS</td></tr></tbody></table></div><h4 style="color:var(--accent);margin:1rem 0 .5rem">Relatórios (~55 forms FPRel*/FParamRel*)</h4><div class="table-wrap"><table class=""><thead><tr><th>Form (arquivo)</th><th>Caption</th></tr></thead><tbody><tr><td>FPRelPrevia.dfm</td><td>Relatório de Prévia</td></tr><tr><td>FPRelDemPag.dfm</td><td>Demonstrativo de Pagamento</td></tr><tr><td>FPRelContraCheque.dfm</td><td>Contra-Cheque</td></tr><tr><td>FPRelCredBenef.dfm</td><td>Crédito de Beneficiários</td></tr><tr><td>FParamRelApropContabil.dfm</td><td>Apropriação Contábil</td></tr></tbody></table></div>
+</section>
+
+</main>
+
+<footer>
+<p>Blueprint AS-IS — PFC-21 — Documentação dos módulos FOLHA, CONTRIBUIÇÃO e BENEFICIOPREV | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-09</p>
+</footer>
+</body>
+</html>
