@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Visão Geral — Blueprint AS-IS</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+
+</head>
+<body>
+<header>
+  <div class="badge">Blueprint AS-IS — Delphi 5</div>
+  <h1>📋 Visão Geral</h1>
+  <p>Contexto do sistema legado Delphi 5 e escopo dos três módulos documentados</p>
+</header>
+<nav>
+  <a href="#">📋 Contexto</a>
+  <a href="#">📊 Indicadores</a>
+  <a href="#">🏗️ Fundo Técnico</a>
+  <a href="#">🔐 Padrão Arquitetural</a>
+  <a href="#">🔎 Módulos</a>
+</nav>
+
+
+<main>
+<section><div class="section-title">📋 Contexto do Sistema</div>
+<p>A suíte <strong>CM Contabilidade</strong> (CM Soluções Informática / FUNCEF) é um sistema legado escrito em <strong>Delphi 5</strong> (Object Pascal / VCL), com acesso a banco <strong>Oracle</strong> via framework próprio <strong>CM (Componente Master)</strong> e componentes InfoPower (Woll2Woll). A suíte compreende ~25 módulos, dos quais <strong>três</strong> são objeto deste Blueprint:</p><ul><li><strong>FOLHA</strong> (pasta <code>FOLHA</code>) — Folha de Benefícios</li><li><strong>CONTRIBUIÇÃO</strong> (pasta <code>CONTRIBUICAOPREV</code>) — Contribuição Previdenciária</li><li><strong>BENEFICIOPREV</strong> (pasta <code>BENEFICIOPREV</code>) — Benefício Previdenciário</li></ul><div class="note-info">Tecnologia futura (.NET 10 + React 19 + Oracle 23ai) é informada <strong>exclusivamente como contexto</strong> e não influencia, modifica ou direciona esta documentação. O Blueprint documenta somente o AS-IS (funcionamento atual).</div>
+</section>
+
+<section><div class="section-title">📊 Indicadores Agregados</div>
+<div class="stats"><div class="stat"><div class="n">830</div><div class="l">Arquivos analisados</div></div><div class="stat"><div class="n">453</div><div class="l">Units (.pas)</div></div><div class="stat"><div class="n">362</div><div class="l">Forms (.dfm)</div></div><div class="stat"><div class="n">3</div><div class="l">Projects (.dpr)</div></div><div class="stat"><div class="n">78</div><div class="l">Regras de negócio</div></div><div class="stat"><div class="n">40</div><div class="l">Processos funcionais</div></div><div class="stat"><div class="n">101</div><div class="l">Tabelas mapeadas</div></div><div class="stat"><div class="n">119</div><div class="l">Dependências externas</div></div></div>
+</section>
+
+<section><div class="section-title">🏗️ Fundo Técnico Comum</div>
+<ul><li><strong>Linguagem:</strong> Object Pascal (Delphi 5)</li><li><strong>GUI:</strong> VCL (Visual Component Library)</li><li><strong>Banco de dados:</strong> Oracle (uso de <code>DUAL</code>, sequences, packages stored, schema <code>CM.</code>)</li><li><strong>Framework base:</strong> CM (Componente Master) — forms base em <code>CM/Forms/Source/</code> (<code>frmCadastro</code>, <code>frmCadMestreDetalhe</code>, <code>frmCMPrincipal</code>, etc.)</li><li><strong>Acesso a dados:</strong> padrão misto — (1) <code>TCmDbObject</code> + <code>TCmControlObject</code> (camada BO Builder); (2) SQL inline via <code>TwwQuery</code> (InfoPower) nos forms; (3) DataModules (<code>TDataModule</code>) com queries parametrizadas</li><li><strong>Distribuído:</strong> MIDAS/DataSnap — <code>TSocketConnection</code> / <code>TDCOMConnection</code> com bifurcação cliente/servidor (<code>ConnectionSide = cnsClient</code> → <code>Connection.AppServer.*</code>)</li><li><strong>Relatórios:</strong> ReportBuilder (componentes <code>ppReport</code> / família <code>pp*</code>)</li><li><strong>Componentes de terceiros:</strong> InfoPower/Woll2Woll (<code>TwwQuery</code>, <code>TwwDBGrid</code>), Toolbar97 (TB97), TMS/Inova (i18n)</li></ul>
+</section>
+
+<section><div class="section-title">🔐 Padrão Arquitetural por Módulo</div>
+<p>Cada módulo segue o padrão CM de organização em camadas, com grau variável de adesão:</p><div class="table-wrap"><table class=""><thead><tr><th>Módulo</th><th>Camada de apresentação</th><th>Camada de controle (CtrlObjects)</th><th>Camada de dados (DBObjects)</th><th>SQL inline em forms</th><th>Evidência</th></tr></thead><tbody><tr><td>FOLHA</td><td>180 forms (Fontes/ + FontesMT/)</td><td>4 units</td><td>41 units (1 por tabela)</td><td>Presente em DataModules (dFolhaPrevia.pas: 30.856 linhas)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr><tr><td>CONTRIBUIÇÃO</td><td>75 forms (Fontes/ + Relatorios/)</td><td>2 units</td><td>2 units locais (+~33 via CMPrevMT50 externo)</td><td>Predominante (SQL inline massivo nos forms)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr><tr><td>BENEFICIOPREV</td><td>68 forms (Fontes/ + Relatorios/)</td><td>2 units</td><td>2 units locais (+~23 via CMPrevMT50 externo)</td><td>Predominante (SQL inline via TwwQuery)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr></tbody></table></div><div class="note">FOLHA possui a camada de DBObjects mais completa (41 unidades, uma por tabela). CONTRIBUIÇÃO e BENEFICIOPREV delegam a maior parte do acesso a dados a DataModules do pacote externo <code>CMPrevMT50</code> (não aberto por escopo) e usam SQL inline nos forms.</div>
+</section>
+
+<section><div class="section-title">🔎 Navegação para os Módulos</div>
+<div class="cards-grid"><a class="card" href="../folha/index.html" style="display:block;color:inherit"><h3>FOLHA</h3><p>Folha de Benefícios — 528 artefatos</p></a><a class="card" href="../contribuicao/index.html" style="display:block;color:inherit"><h3>CONTRIBUIÇÃO</h3><p>Contribuição Previdenciária — 158 artefatos</p></a><a class="card" href="../beneficioprev/index.html" style="display:block;color:inherit"><h3>BENEFICIOPREV</h3><p>Benefício Previdenciário — 144 artefatos</p></a></div>
+</section>
+
+</main>
+
+<footer>
+<p>Blueprint AS-IS — PFC-21 — Documentação dos módulos FOLHA, CONTRIBUIÇÃO e BENEFICIOPREV | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-09</p>
+</footer>
+</body>
+</html>

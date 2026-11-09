@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contribuição Previdenciária — Arquitetura — Blueprint AS-IS</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+
+</head>
+<body>
+<header>
+  <div class="badge">Blueprint AS-IS — Delphi 5</div>
+  <h1>🏗️ Arquitetura — Contribuição Previdenciária</h1>
+  <p>Camadas, padrão de acesso a dados e inventário de forms</p>
+</header>
+<nav>
+  <a href="index.html">📋 Visão Geral</a>
+  <a href="arquitetura.html">🏗️ Arquitetura</a>
+  <a href="funcionalidades.html">⚙️ Funcionalidades</a>
+  <a href="regras-de-negocio.html">📏 Regras</a>
+  <a href="dados.html">🗄️ Dados</a>
+  <a href="integracoes.html">🔗 Integrações</a>
+</nav>
+
+
+<main>
+<section><div class="section-title">🏗️ Arquitetura do Módulo</div>
+<p>O módulo <strong>CONTRIBUIÇÃO</strong> (pasta <code>CONTRIBUICAOPREV</code>) tem 158 artefatos. O entry point <code>ContribuicaoPREV.dpr</code> cria o splash CM, auto-instancia DataModules (<code>dtmAPrev</code>, <code>dtmIntegraCAPCAR</code>, <code>dtmAPrevIntegraBack</code>, <code>dtmPreparaContrib</code>, <code>dmRetroativoLote</code>) e o form principal <code>frmPrincipal</code> (Caption "Manutenção e Cobrança de Contribuição").</p><p>A arquitetura é <strong>híbrida</strong>: herança CM framework + DataModules InfoPower (<code>TwwQuery</code>) com SQL inline massivo nos forms (baixa separação de camadas). A camada <code>CtrlObjects/</code>+<code>DBObjects/</code> existe mas cobre apenas 2 entidades locais (<code>EVOLFUNCPREV</code>, <code>HISTRUBSAL</code>); o restante do acesso a dados é direto nos forms ou via DataModules externos de <strong>CMAdmPrev</strong> e <strong>CMPrevMT50</strong>.</p><p>Os CtrlObjects operam em modo dual: <code>cnsClient</code> delega ao <code>Connection.AppServer</code> (AppServer remoto CM); caso contrário executa SQL local. Integração OLE/Excel é usada para alteração em lote de salários. Package Oracle <code>PCK_BENEFSALDFAB.SP_ATUALIZASALDO</code> é invocado para benefício saldado/FAB.</p><p>Evidência: <span class="ev ev-comprovado">COMPROVADO</span> — DPR, DBObjects, CtrlObjects e SQL inline verificados.</p>
+</section>
+
+<section><div class="section-title">🗈¸ Camadas e Componentes</div>
+<div class="table-wrap"><table class=""><thead><tr><th>Camada</th><th>Localização</th><th>Padrão</th><th>Evidência</th></tr></thead><tbody><tr><td>Apresentação</td><td><code>Fontes/</code> (59), <code>Relatorios/</code> (16)</td><td>Forms VCL herdados de CM (TfrmCMPrincipal, TfrmCadMestreDetalhe)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr><tr><td>Controle</td><td><code>CtrlObjects/</code> (2: uCtrlEvolFuncPrev, uCtrlPCS)</td><td>TCmControlObject, modo dual cliente/servidor</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr><tr><td>Acesso a Dados</td><td><code>DBObjects/</code> (2 locais) + SQL inline + DataModules externos</td><td>TCmDbObject (EVOLFUNCPREV, HISTRUBSAL) + TwwQuery inline + CMAdmPrev/CMPrevMT50</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr><tr><td>Framework base</td><td><code>..\..\Cm\Forms\Source\</code>, CMAdmPrev, CMPrevMT50</td><td>27 units CM + 11 units CMAdmPrev no DPR</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr></tbody></table></div>
+</section>
+
+<section><div class="section-title">🔗 Dependências Internas entre Sub-áreas</div>
+<div class="table-wrap"><table class=""><thead><tr><th>Origem</th><th>Destino</th><th>Natureza</th><th>Evidência</th></tr></thead><tbody><tr><td>Fontes/ (forms)</td><td>DBObjects/ (uDbEvolfuncprev, uDbHistrubsal)</td><td>Acesso a dados local (2 entidades)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr><tr><td>Fontes/ (forms)</td><td>CtrlObjects/ (uCtrlEvolFuncPrev, uCtrlPCS)</td><td>Controle de evolução funcional e listas PCS</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr><tr><td>Fontes/ (forms)</td><td>Relatorios/</td><td>Relatórios do próprio módulo (16 units)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr><tr><td>CtrlObjects/</td><td>DBObjects/</td><td>uCtrlEvolFuncPrev uses uDbEvolfuncprev, uDbHistrubsal</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr><tr><td>FPreparaEnvia.pas</td><td>DPreparaContrib.pas (DataModule)</td><td>DataModule de preparo de contribuições</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr></tbody></table></div>
+</section>
+
+<section><div class="section-title">📂 Inventário de Forms por Área Funcional</div>
+<p>Total de forms visuais identificados: ~75</p><h4 style="color:var(--accent);margin:1rem 0 .5rem">Participante / Cadastro de Contribuições (7 forms)</h4><div class="table-wrap"><table class=""><thead><tr><th>Form (arquivo)</th><th>Caption</th></tr></thead><tbody><tr><td>FPrincipal.dfm</td><td>Manutenção e Cobrança de Contribuição</td></tr><tr><td>FCadHstContribuicao.dfm</td><td>Cadastro de Histórico de Contribuição</td></tr><tr><td>FCadContribNucleoFamiliar.dfm</td><td>Cadastro de Contribuição por Núcleo Familiar</td></tr><tr><td>FReajustaSalarioMantido.dfm</td><td>Reajuste de Salário Mantido</td></tr><tr><td>FCadContribuicaoLote.dfm</td><td>Cadastro de Contribuição em Lote</td></tr></tbody></table></div><h4 style="color:var(--accent);margin:1rem 0 .5rem">Cobrança / Recebimento multi-canal (16 forms)</h4><div class="table-wrap"><table class=""><thead><tr><th>Form (arquivo)</th><th>Caption</th></tr></thead><tbody><tr><td>FPreparaEnvia.dfm</td><td>Envio de Cobrança</td></tr><tr><td>FRecebeContribuicaoNovo.dfm</td><td>Recebimento de Contribuições via Folha</td></tr><tr><td>FRecebeContribEmptmo.dfm</td><td>Recebimento de Contribuições Via Empréstimo</td></tr><tr><td>FBaixaContribCAR.dfm</td><td>Baixa de Contribuição (CAR/Banco)</td></tr><tr><td>FControleIndivContrib.dfm</td><td>Controle Individual de Contribuição</td></tr><tr><td>FDesfDocContribuicao.dfm</td><td>Desfazer Documento de Contribuição</td></tr></tbody></table></div><h4 style="color:var(--accent);margin:1rem 0 .5rem">Reservas (7 forms)</h4><div class="table-wrap"><table class=""><thead><tr><th>Form (arquivo)</th><th>Caption</th></tr></thead><tbody><tr><td>FAlimReservasReplan.dfm</td><td>Alimentação de Reservas (REPLAN)</td></tr><tr><td>FAtualizaPorIndice.dfm</td><td>Atualização por Índice</td></tr><tr><td>FRodaPadraoMovReserva.dfm</td><td>Movimentação Padrão de Reserva</td></tr></tbody></table></div><h4 style="color:var(--accent);margin:1rem 0 .5rem">Provisão para Perdas (3 forms)</h4><div class="table-wrap"><table class=""><thead><tr><th>Form (arquivo)</th><th>Caption</th></tr></thead><tbody><tr><td>FProvPerdasIndiv.dfm</td><td>Provisão para Perdas Individual</td></tr><tr><td>FProvPerdasLote.dfm</td><td>Provisão para Perdas em Lote</td></tr></tbody></table></div><h4 style="color:var(--accent);margin:1rem 0 .5rem">Benefício Saldado / FAB / Tributação (6 forms)</h4><div class="table-wrap"><table class=""><thead><tr><th>Form (arquivo)</th><th>Caption</th></tr></thead><tbody><tr><td>FBeneficioSaldadoFAB.dfm</td><td>Benefício Saldado FAB</td></tr><tr><td>FCalcSalContr.dfm</td><td>Cálculo do Saldo de Contribuições</td></tr><tr><td>fCalculoIRRF.dfm</td><td>Cálculo de IRRF</td></tr><tr><td>FCadContribuicaoPortada.dfm</td><td>Cadastro de Contribuições Portadas</td></tr></tbody></table></div><h4 style="color:var(--accent);margin:1rem 0 .5rem">Divergências / Retroativo / Simulação (5 forms)</h4><div class="table-wrap"><table class=""><thead><tr><th>Form (arquivo)</th><th>Caption</th></tr></thead><tbody><tr><td>FDivergContrib.dfm</td><td>Divergências de Contribuição</td></tr><tr><td>FSimulaContrib.dfm</td><td>Simulação de Contribuição</td></tr><tr><td>FRevisaoIndice.dfm</td><td>Revisão de Índice</td></tr></tbody></table></div><h4 style="color:var(--accent);margin:1rem 0 .5rem">Relatórios (16 forms em Relatorios/)</h4><div class="table-wrap"><table class=""><thead><tr><th>Form (arquivo)</th><th>Caption</th></tr></thead><tbody><tr><td>FParamRelMovContrib.dfm</td><td>Relatório de Movimento de Contribuição</td></tr><tr><td>FParamRelFinanc.dfm</td><td>Relatório Financeiro</td></tr><tr><td>FConsLogTotalPREV.dfm</td><td>Log de Operações do TotalPREV</td></tr></tbody></table></div>
+</section>
+
+</main>
+
+<footer>
+<p>Blueprint AS-IS — PFC-21 — Documentação dos módulos FOLHA, CONTRIBUIÇÃO e BENEFICIOPREV | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-09</p>
+</footer>
+</body>
+</html>

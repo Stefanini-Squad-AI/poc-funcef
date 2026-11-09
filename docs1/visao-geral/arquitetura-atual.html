@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arquitetura Atual — Blueprint AS-IS</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+
+</head>
+<body>
+<header>
+  <div class="badge">Blueprint AS-IS — Delphi 5</div>
+  <h1>🏗️ Arquitetura Atual</h1>
+  <p>Camadas, padrão de acesso a dados e framework CM dos três módulos</p>
+</header>
+<nav>
+  <a href="#">🏗️ Camadas</a>
+  <a href="#">⚙️ Acesso a Dados</a>
+  <a href="#">🔗 Framework CM</a>
+  <a href="#">🔐 Entry Points</a>
+</nav>
+
+
+<main>
+<section><div class="section-title">🏗️ Camadas Arquiteturais (padrão CM)</div>
+<p>Os três módulos seguem uma arquitetura em camadas MVC-like / 3-tier sobre o framework CM, com grau variável de separação:</p><div class="mermaid">┌── Apresentação (Forms VCL: F*.pas/F*.dfm) ── herdam de CM (frmCadastro, frmCadMestreDet, frmCMPrincipal)
+│        │ usam
+│        ├── Controle (CtrlObjects: uCtrl*.pas) — TCmControlObject, modo dual cliente/servidor
+│        │        │ usam
+│        └── Acesso a Dados (DBObjects: uDb*.pas) — TCmDbObject, 1 unidade por tabela
+│                 │ via
+└── Framework CM (CM/Forms/Source/) — uCmDbObject, uCmControlObject, uCmClientDataSet, uSistema
+
+Acesso complementar: SQL inline (TwwQuery/InfoPower) em forms + DataModules (TDataModule)
+Distribuído: MIDAS/DataSnap (TSocketConnection / TDCOMConnection)</div><p><strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> — verificada nos DPRs, DBObjects e CtrlObjects dos três módulos.</p>
+</section>
+
+<section><div class="section-title">⚙️ Padrão de Acesso a Dados</div>
+<p>Três padrões coexistem:</p><ol><li><strong>CM DbObject/ControlObject</strong> (camada BO Builder): CRUD via <code>ApplyCds</code> + <code>StartTransaction/Commit/Rollback</code>, com fallback remoto <code>Connection.AppServer.*</code>. Cada <code>uDb*.pas</code> declara <code>TableName</code> e expõe SQLs parametrizados. <span class="ev ev-comprovado">COMPROVADO</span></li><li><strong>SQL inline em forms</strong> (predominante em CONTRIBUIÇÃO e BENEFICIOPREV): montagem de strings SQL com <code>qry.SQL.Add('INSERT INTO ...')</code> e <code>ExecSQL</code>. <span class="ev ev-comprovado">COMPROVADO</span></li><li><strong>DataModules</strong> (<code>TDataModule</code> com <code>TwwQuery</code>/<code>TUpdateSQL</code>): queries parametrizadas reutilizáveis (ex.: <code>dFolhaPrevia.pas</code> — 30.856 linhas, motor de cálculo central da FOLHA). <span class="ev ev-comprovado">COMPROVADO</span></li></ol>
+</section>
+
+<section><div class="section-title">🔗 Framework CM e Pacotes Externos</div>
+<p>Todos os módulos dependem do framework <strong>CM (Componente Master)</strong> em <code>CM/Forms/Source/</code> para herança de forms base, autorização, consultas e relatórios. Além disso:</p><ul><li><strong>CMAdmPrev</strong> (<code>CM/CMAdmPrev/</code>): DataModules de cálculo previdenciário, integração CAP/CAR, retroativo em lote — usado por CONTRIBUIÇÃO e BENEFICIOPREV. <span class="ev ev-comprovado">COMPROVADO</span></li><li><strong>CMPrevMT50</strong> (<code>CM/CMPrevMT50/</code>): DataModules de entidades previdenciárias centrais (DPLANOPREV, DBENEFICIO, etc.) — referenciado massivamente mas não aberto por escopo. <span class="ev ev-inferido">INFERIDO</span></li><li><strong>CMGLOBALOBJ50</strong>, <strong>CMCAPCARUTILOBJ50</strong>: objetos globais e utilitários CAP/CAR. <span class="ev ev-inferido">INFERIDO</span></li></ul><div class="note">As implementações internas desses pacotes externos não foram analisadas (fora do escopo autorizado). São registrados apenas como dependências de framework/outro-módulo.</div>
+</section>
+
+<section><div class="section-title">🔐 Entry Points</div>
+<div class="table-wrap"><table class=""><thead><tr><th>Módulo</th><th>DPR (entry point)</th><th>Form principal</th><th>Application.Title</th></tr></thead><tbody><tr><td>FOLHA</td><td><code>FOLHA/Fontes/Folha.dpr</code></td><td><code>FPrincipal.pas {frmPrincipal}</code></td><td>Folha de Benefícios</td></tr><tr><td>CONTRIBUIÇÃO</td><td><code>CONTRIBUICAOPREV/Fontes/ContribuicaoPREV.dpr</code></td><td><code>FPrincipal.pas {frmPrincipal}</code></td><td>Manutenção e Cobrança de Contribuição</td></tr><tr><td>BENEFICIOPREV</td><td><code>BENEFICIOPREV/Fontes/BeneficioPrev.dpr</code></td><td><code>FPrincipal.pas {frmPrincipal}</code></td><td>Concessão e Manut de Benefícios Previdenciários</td></tr></tbody></table></div>
+</section>
+
+</main>
+
+<footer>
+<p>Blueprint AS-IS — PFC-21 — Documentação dos módulos FOLHA, CONTRIBUIÇÃO e BENEFICIOPREV | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-09</p>
+</footer>
+</body>
+</html>
