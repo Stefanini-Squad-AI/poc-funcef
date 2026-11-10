@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UC007 – Provisão para perdas — Contribuição Previdenciária — Blueprint AS-IS</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<header>
+  <div class="badge">Blueprint AS-IS — PFC-23 (enriquecido) — PFC-32</div>
+  <h1>UC007 – Provisão para perdas</h1>
+  <p>Caso de Uso do módulo Contribuição Previdenciária — jornada JF007 (PF-07) — Provisão para perdas.</p>
+</header>
+<nav>
+  <a href="index.html">📋 Visão Geral</a>
+  <a href="arquitetura.html">🏗️ Arquitetura</a>
+  <a href="inventario-tecnico.html">📦 Inventário</a>
+  <a href="funcionalidades.html">⚙️ Processos Funcionais</a>
+  <a href="procedures-functions.html">🔧 Procedures</a>
+  <a href="dados.html">🗄️ Dados</a>
+  <a href="relatorios.html">📄 Relatórios</a>
+  <a href="integracoes.html">🔗 Integrações</a>
+  <a href="tratamento-erros.html">⚠️ Erros</a>
+  <a href="diagramas-fluxo.html">🔀 Fluxos</a>
+  <a href="lacunas.html">🔍 Lacunas</a>
+  <a href="controle-cobertura.html">📊 Cobertura</a>
+</nav>
+<main>
+
+<p><a class="back-btn" href="funcionalidades.html">← Voltar à lista de Casos de Uso</a></p>
+
+<section><div class="section-title">1. Identificação</div>
+<div class="table-wrap"><table><tbody>
+<tr><th>Caso de Uso</th><td><strong>UC007</strong> – Provisão para perdas</td></tr>
+<tr><th>Módulo</th><td>Contribuição Previdenciária</td></tr>
+<tr><th>Jornada</th><td>JF007 (PF-07) — Provisão para perdas</td></tr>
+<tr><th>Sistema</th><td>CM Contabilidade / FUNCEF (Delphi 5 / VCL / MIDAS)</td></tr>
+<tr><th>Tipo</th><td>Sistema Desktop</td></tr>
+<tr><th>Ator</th><td>Usuário operacional (analista previdenciário, financeiro, contábil)</td></tr>
+<tr><th>Entry point</th><td><code>CONTRIBUICAOPREV/Fontes/ContribuicaoPREV.dpr</code></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">2. Descrição Resumida</div>
+<p>Caso de Uso <strong>UC007</strong> do módulo Contribuição Previdenciária, correspondente à JF007 (PF-07) — Provisão para perdas. Esta página detalha a jornada funcional com sua sequência operacional, ações, regras de negócio, tratamentos de erro e mensagens.</p>
+</section>
+
+<section><div class="section-title">3. Pré-condições</div>
+<p>Consulte as pré-condições específicas na seção da jornada abaixo.</p>
+</section>
+
+<section><div class="section-title">4. Pós-condições</div>
+<p>Consulte as pós-condições específicas na seção da jornada abaixo.</p>
+</section>
+
+<section><div class="section-title">5. Sequência Operacional e Ações</div>
+<div class="pf-block" id="PF-07">
+<h4>JF007 (PF-07) — Provisão para perdas</h4>
+<p><strong>Objetivo:</strong> Calcular, registrar ou desfazer a provisão para perdas de contribuições, individualmente ou em lote, e emitir o relatório de provisão.</p>
+<p><strong>Ator / gatilho:</strong> Analista contábil, nas telas <em>Provisão para Perdas Individual</em>, <em>Provisão para Perdas em Lote</em> e <em>Relatório de Provisão para Perdas</em>.</p>
+<p><strong>Pré-condições:</strong> Contribuições em atraso; faixas de provisão parametrizadas.</p>
+<p><strong>Pós-condições:</strong> PROVISAOPERDASCONTRIBUICAO gravada; lançamentos contábeis gerados; relatório emitido.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li>Em lote: selecionar ano/mês de cobrança, patrocinadora(s) e plano(s). [<a href="#CONTRIB-RN020">RS020</a>] [<a href="#TRT034">TRT034</a>]</li>
+<li>O sistema calcula a provisão por faixas parametrizadas; matrículas com erro são listadas. [<a href="#TRT036">TRT036</a>]</li>
+<li>Individual: selecionar a contribuição e confirmar registrar ou desfazer a provisão. [<a href="#TRT035">TRT035</a>]</li>
+<li>Relatório: informar matrícula, parâmetro de pesquisa e mês de cobrança. [<a href="#CONTRIB-RN021">RS021</a>] [<a href="#TRT037">TRT037</a>]</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Provisionar em lote</td><td>Registrar perdas por competência</td><td>Ano/mês de cobrança, patrocinadoras, planos</td><td>Valida parâmetros (EValidacao) e calcula por faixa</td><td>PROVISAOPERDASCONTRIBUICAO gravada</td><td><a href="#CONTRIB-RN020">RS020</a></td><td><a href="#MSG059">MSG059</a>, <a href="#MSG060">MSG060</a>, <a href="#MSG061">MSG061</a></td><td><code>FProvPerdasLote.dfm</code></td></tr>
+<tr><td>Provisionar/desfazer individual</td><td>Tratar uma contribuição</td><td>Contribuição selecionada; confirmação</td><td>Registra ou reverte a provisão</td><td>Provisão registrada/desfeita</td><td>—</td><td><a href="#MSG062">MSG062</a>, <a href="#MSG063">MSG063</a>, <a href="#MSG064">MSG064</a></td><td><code>FProvPerdasIndiv.dfm</code></td></tr>
+<tr><td>Emitir relatório</td><td>Consultar provisões</td><td>Matrícula, parâmetro de pesquisa, mês de cobrança</td><td>Valida parâmetros (EValidacao)</td><td>Relatório emitido</td><td><a href="#CONTRIB-RN021">RS021</a></td><td><a href="#MSG065">MSG065</a>, <a href="#MSG066">MSG066</a>, <a href="#MSG067">MSG067</a></td><td><code>FFRelProvPerdas.dfm</code></td></tr>
+</tbody></table></div>
+<p><strong>Regras de negócio da jornada:</strong> <a href="#CONTRIB-RN020">RS020 (CONTRIB-RN020)</a> — Provisão em lote exige parâmetros, <a href="#CONTRIB-RN021">RS021 (CONTRIB-RN021)</a> — Relatório de provisão exige parâmetros</p>
+<p><strong>Tratamentos de erro:</strong> <a href="#TRT034">TRT034</a>, <a href="#TRT035">TRT035</a>, <a href="#TRT036">TRT036</a>, <a href="#TRT037">TRT037</a></p>
+<p><strong>Mensagens:</strong> <a href="#MSG059">MSG059</a>, <a href="#MSG060">MSG060</a>, <a href="#MSG061">MSG061</a>, <a href="#MSG062">MSG062</a>, <a href="#MSG063">MSG063</a>, <a href="#MSG064">MSG064</a>, <a href="#MSG065">MSG065</a>, <a href="#MSG066">MSG066</a>, <a href="#MSG067">MSG067</a></p>
+<p><strong>Telas:</strong> Provisão para Perdas Individual (<code>FProvPerdasIndiv.dfm</code>), Provisão para Perdas em Lote (<code>FProvPerdasLote.dfm</code>), Relatório de Provisão para Perdas (<code>FFRelProvPerdas.dfm</code>)</p>
+<p><strong>Dependências:</strong> Usa contribuições não recebidas de <a href="uc002.html">JF002</a>.</p>
+<div class="note note-info"><p><strong>Registro original do processo PF-07</strong></p><p><strong>Forms de entrada:</strong> <code>FProvPerdasIndiv.dfm</code>, <code>FProvPerdasLote.dfm</code>, <code>FFRelProvPerdas.dfm</code></p><p><strong>Lógica de processamento:</strong> Calcula provisão para perdas por faixas parametrizadas; emite relatório</p><p><strong>Saídas:</strong> Provisão calculada, relatório</p><p><strong>Persistência (tabelas escritas):</strong> PROVISAOPERDASCONTRIBUICAO (I/U), FAIXASPROVISAOPERDACONTRIB (PENDENTE)</p><p><strong>Evidência:</strong> <code>CONTRIBUICAOPREV/Fontes/FProvPerdasLote.pas:428-437</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+</div>
+</div>
+</section>
+
+<section><div class="section-title">6. Regras de Negócio da Jornada</div>
+<p>As regras de negócio aplicáveis a esta jornada são apresentadas abaixo com seu texto completo, sem necessidade de acessar outra página.</p>
+<div class="rule-block" id="CONTRIB-RN020">
+<div class="rule-id">RS020 (CONTRIB-RN020) — Provisão em lote exige parâmetros</div>
+<div class="rule-desc">A provisão para perdas em lote só roda com competência de cobrança, ao menos uma patrocinadora e ao menos um plano.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>cmbMesCob / spedAnoCob</code> — [obrigatório] — mês 1–12 e ano</li>
+<li><code>chklstPatro</code> — [obrigatório] — ≥ 1 patrocinadora</li>
+<li><code>chklstPlano</code> — [obrigatório] — ≥ 1 plano</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT034">TRT034</a> → <a href="#MSG059">MSG059</a>, <a href="#MSG060">MSG060</a>, <a href="#MSG061">MSG061</a> → Bloqueia (EValidacao)</p>
+<p><strong>Jornada:</strong> <a href="uc007.html">JF007</a></p>
+<p><strong>Descrição original:</strong> Provisão para perdas em lote exige ano/mês cobrança, ≥1 patrocinadora, ≥1 plano.</p>
+<p><strong>Condições:</strong> Validação de parâmetros</p>
+<p><strong>Dados envolvidos:</strong> PROVISAOPERDASCONTRIBUICAO</p>
+<p><strong>Resultado/Exceção:</strong> raise EValidacao.CreateVal(...)</p>
+<div class="rule-origin">📂 Origem: <code>CONTRIBUICAOPREV/Fontes/FProvPerdasLote.pas:428-437</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+</div>
+
+<div class="rule-block" id="CONTRIB-RN021">
+<div class="rule-id">RS021 (CONTRIB-RN021) — Relatório de provisão exige parâmetros</div>
+<div class="rule-desc">O relatório de provisão exige matrícula (quando a pesquisa é por participante), ao menos um parâmetro de pesquisa e o mês de cobrança.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>matrícula (bbtnProcurar)</code> — [condicional] — obrigatória na pesquisa por participante</li>
+<li><code>cmbPatro e demais parâmetros</code> — [obrigatório] — ≥ 1 parâmetro</li>
+<li><code>txtMesCobr</code> — [obrigatório] — mês de cobrança</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT037">TRT037</a> → <a href="#MSG065">MSG065</a>, <a href="#MSG066">MSG066</a>, <a href="#MSG067">MSG067</a> → Bloqueia o relatório (EValidacao)</p>
+<p><strong>Jornada:</strong> <a href="uc007.html">JF007</a></p>
+<p><strong>Descrição original:</strong> Relatório de provisão exige matrícula, ≥1 parâmetro, mês de cobrança.</p>
+<p><strong>Condições:</strong> Validação de parâmetros</p>
+<p><strong>Dados envolvidos:</strong> relatório</p>
+<p><strong>Resultado/Exceção:</strong> raise EValidacao.CreateVal(...)</p>
+<div class="rule-origin">📂 Origem: <code>CONTRIBUICAOPREV/Fontes/FFRelProvPerdas.pas:366,394</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+</div>
+
+<div class="rule-block" id="CONTRIB-RN042">
+<div class="rule-id">CONTRIB-RN042 — Provisão para perdas = (TOTALESPERADO / 100) × PERCENTUAL</div>
+<p><strong>Descrição:</strong> A provisão para perdas é calculada sobre o valor total esperado de contribuições atrasadas (SITRECEBIMENTO IN (0,1) com pai SITRECEBIMENTO=4), aplicando o percentual da faixa de dias de atraso (FAIXASPROVISAOPERDACONTRIB).</p>
+<p><strong>Fórmula:</strong> <code>VALORPROV = (TOTALESPERADO / 100) × PERCENTUAL</code> onde <code>DIASATRASO = TRUNC(SYSDATE) − MIN(DATAPREVISAORECE do pai)</code></p>
+<p><strong>Condições:</strong> MESCOBRANCA ≠ MESREFERENCIA; SITRECEBIMENTO IN (0,1); SITRECEBIMENTO do pai = 4.</p>
+<p><strong>Dados:</strong> HSTCONTRIBPREV, FAIXASPROVISAOPERDACONTRIB, PROVISAOPERDASCONTRIBUICAO</p>
+<p><strong>Rotina:</strong> <code>FProvPerdasLote.AbreQryContribuicao</code> · <strong>Arquivo:</strong> <code>FProvPerdasLote.pas:847-848</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+</div>
+
+<div class="rule-block" id="CONTRIB-RN046">
+<div class="rule-id">CONTRIB-RN046 — Três inadimplências consecutivas disparam evento de inadimplência</div>
+<p><strong>Descrição:</strong> Se o titular tem ≥ 3 inadimplências consecutivas (via SQL analítico DENSE_RANK/LAG sobre HSTCONTRIBPREV), o sistema dispara AjustaEventoInadimplencia.</p>
+<p><strong>Condições:</strong> COUNT(consecutivas WHERE VALORRECEBIDO < VALORESPERADO) >= 3, excluindo quem tem EVENTOSPREV com DATAVOLTA NOT NULL e IDEVENTOGERADOR=274.</p>
+<p><strong>Dados:</strong> HSTCONTRIBPREV, DEPENTIT, PARTPREVPLAN, SITPART, EVENTOSPREV</p>
+<p><strong>Rotina:</strong> <code>FBaixaContribCAR.titularTemMaisDe3InadConsecutivas</code> · <strong>Arquivo:</strong> <code>FBaixaContribCAR.pas:726-849</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+</div>
+
+
+</section>
+
+<section><div class="section-title">7. Tratamentos (TRT)</div>
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Condição</th><th>Mensagem</th><th>Resultado</th><th>Regra</th><th>Jornada</th></tr></thead><tbody>
+<tr id="TRT034"><td><strong>TRT034</strong></td><td>Ano/mês de cobrança, patrocinadora ou plano não selecionados na provisão em lote</td><td><a href="#MSG059">MSG059</a>, <a href="#MSG060">MSG060</a>, <a href="#MSG061">MSG061</a></td><td>Bloqueia (EValidacao)</td><td><a href="#CONTRIB-RN020">RS020</a></td><td><a href="uc007.html">JF007</a></td></tr>
+<tr id="TRT035"><td><strong>TRT035</strong></td><td>Nenhuma contribuição selecionada na provisão individual</td><td><a href="#MSG062">MSG062</a></td><td>Não registra/desfaz a provisão</td><td>validação de tela</td><td><a href="uc007.html">JF007</a></td></tr>
+<tr id="TRT036"><td><strong>TRT036</strong></td><td>Erro no processamento da provisão para uma matrícula</td><td><a href="#MSG064">MSG064</a></td><td>Conclui as demais e lista as matrículas com erro</td><td>validação de tela</td><td><a href="uc007.html">JF007</a></td></tr>
+<tr id="TRT037"><td><strong>TRT037</strong></td><td>Matrícula, parâmetro de pesquisa ou mês de cobrança não informados no relatório</td><td><a href="#MSG065">MSG065</a>, <a href="#MSG066">MSG066</a>, <a href="#MSG067">MSG067</a></td><td>Bloqueia o relatório (EValidacao)</td><td><a href="#CONTRIB-RN021">RS021</a></td><td><a href="uc007.html">JF007</a></td></tr>
+</tbody></table></div></section>
+
+<section><div class="section-title">8. Mensagens (MSG)</div>
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Texto da mensagem</th><th>Tipo</th><th>Origem (CONTRIBUICAOPREV/Fontes/)</th><th>Jornadas</th></tr></thead><tbody>
+<tr id="MSG059"><td><strong>MSG059</strong></td><td>“É necessário selecionar o ano/mês de cobrança das contribuições.”</td><td>Erro (validação)</td><td><code>FProvPerdasLote.pas:428,431</code></td><td><a href="uc007.html">JF007</a></td></tr>
+<tr id="MSG060"><td><strong>MSG060</strong></td><td>“É necessário selecionar pelo menos uma patrocinadora.”</td><td>Erro (validação)</td><td><code>FProvPerdasLote.pas:434</code></td><td><a href="uc007.html">JF007</a></td></tr>
+<tr id="MSG061"><td><strong>MSG061</strong></td><td>“É necessário selecionar pelo menos um plano previdenciário.”</td><td>Erro (validação)</td><td><code>FProvPerdasLote.pas:437</code></td><td><a href="uc007.html">JF007</a></td></tr>
+<tr id="MSG062"><td><strong>MSG062</strong></td><td>“É necessário selecionar uma contribuição para registrar/desfazer a provisão para perdas.”</td><td>Alerta</td><td><code>FProvPerdasIndiv.pas:715</code></td><td><a href="uc007.html">JF007</a></td></tr>
+<tr id="MSG063"><td><strong>MSG063</strong></td><td>“Processo finalizado com sucesso.”</td><td>Sucesso</td><td><code>FProvPerdasIndiv.pas:813</code></td><td><a href="uc007.html">JF007</a></td></tr>
+<tr id="MSG064"><td><strong>MSG064</strong></td><td>“Processo finalizado com erros. Verifique a aba Resultados.”</td><td>Informação</td><td><code>FProvPerdasIndiv.pas:815</code></td><td><a href="uc007.html">JF007</a></td></tr>
+<tr id="MSG065"><td><strong>MSG065</strong></td><td>“É necessário selecionar matricula para apresentação do relatório.”</td><td>Erro (validação)</td><td><code>FFRelProvPerdas.pas:366</code></td><td><a href="uc007.html">JF007</a></td></tr>
+<tr id="MSG066"><td><strong>MSG066</strong></td><td>“É necessário selecionar pelo menos um parâmetro de pesquisa para apresentação do relatório.”</td><td>Erro (validação)</td><td><code>FFRelProvPerdas.pas:394</code></td><td><a href="uc007.html">JF007</a></td></tr>
+<tr id="MSG067"><td><strong>MSG067</strong></td><td>“É necessário informar o mês de cobrança.”</td><td>Erro (validação)</td><td><code>FFRelProvPerdas.pas:398</code></td><td><a href="uc007.html">JF007</a></td></tr>
+</tbody></table></div></section>
+
+
+<p><a class="back-btn" href="funcionalidades.html">← Voltar à lista de Casos de Uso</a></p>
+
+</main>
+<footer>
+<p>Blueprint AS-IS — PFC-23 / PFC-32 — Módulo Contribuição Previdenciária | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-10</p>
+</footer>
+</body>
+</html>

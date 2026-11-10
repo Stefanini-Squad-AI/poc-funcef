@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UC003 – Alimentação de reservas — Contribuição Previdenciária — Blueprint AS-IS</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<header>
+  <div class="badge">Blueprint AS-IS — PFC-23 (enriquecido) — PFC-32</div>
+  <h1>UC003 – Alimentação de reservas</h1>
+  <p>Caso de Uso do módulo Contribuição Previdenciária — jornada JF003 (PF-03) — Alimentação de reservas.</p>
+</header>
+<nav>
+  <a href="index.html">📋 Visão Geral</a>
+  <a href="arquitetura.html">🏗️ Arquitetura</a>
+  <a href="inventario-tecnico.html">📦 Inventário</a>
+  <a href="funcionalidades.html">⚙️ Processos Funcionais</a>
+  <a href="procedures-functions.html">🔧 Procedures</a>
+  <a href="dados.html">🗄️ Dados</a>
+  <a href="relatorios.html">📄 Relatórios</a>
+  <a href="integracoes.html">🔗 Integrações</a>
+  <a href="tratamento-erros.html">⚠️ Erros</a>
+  <a href="diagramas-fluxo.html">🔀 Fluxos</a>
+  <a href="lacunas.html">🔍 Lacunas</a>
+  <a href="controle-cobertura.html">📊 Cobertura</a>
+</nav>
+<main>
+
+<p><a class="back-btn" href="funcionalidades.html">← Voltar à lista de Casos de Uso</a></p>
+
+<section><div class="section-title">1. Identificação</div>
+<div class="table-wrap"><table><tbody>
+<tr><th>Caso de Uso</th><td><strong>UC003</strong> – Alimentação de reservas</td></tr>
+<tr><th>Módulo</th><td>Contribuição Previdenciária</td></tr>
+<tr><th>Jornada</th><td>JF003 (PF-03) — Alimentação de reservas</td></tr>
+<tr><th>Sistema</th><td>CM Contabilidade / FUNCEF (Delphi 5 / VCL / MIDAS)</td></tr>
+<tr><th>Tipo</th><td>Sistema Desktop</td></tr>
+<tr><th>Ator</th><td>Usuário operacional (analista previdenciário, financeiro, contábil)</td></tr>
+<tr><th>Entry point</th><td><code>CONTRIBUICAOPREV/Fontes/ContribuicaoPREV.dpr</code></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">2. Descrição Resumida</div>
+<p>Caso de Uso <strong>UC003</strong> do módulo Contribuição Previdenciária, correspondente à JF003 (PF-03) — Alimentação de reservas. Esta página detalha a jornada funcional com sua sequência operacional, ações, regras de negócio, tratamentos de erro e mensagens.</p>
+</section>
+
+<section><div class="section-title">3. Pré-condições</div>
+<p>Consulte as pré-condições específicas na seção da jornada abaixo.</p>
+</section>
+
+<section><div class="section-title">4. Pós-condições</div>
+<p>Consulte as pós-condições específicas na seção da jornada abaixo.</p>
+</section>
+
+<section><div class="section-title">5. Sequência Operacional e Ações</div>
+<div class="pf-block" id="PF-03">
+<h4>JF003 (PF-03) — Alimentação de reservas</h4>
+<p><strong>Objetivo:</strong> Alimentar e atualizar as reservas dos participantes por índice de correção, por replanejamento (alimentação rápida) ou pela movimentação padrão de reserva.</p>
+<p><strong>Ator / gatilho:</strong> Analista de reservas, nas telas <em>Atualização de Reservas por Índice</em>, <em>Alimentação RÁPIDA de reservas Replan</em> e <em>Movimentação Padrão de Reserva</em>.</p>
+<p><strong>Pré-condições:</strong> Contribuições recebidas (<a href="uc002.html">JF002</a>); índices de correção cadastrados; patrocinadoras, planos e reservas cadastrados.</p>
+<p><strong>Pós-condições:</strong> HISTMOVRESERVA, RESERVAPART e RESERVAXPLANO atualizados; log de auditoria gravado.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li>Atualização por índice: selecionar patrocinadora(s), plano(s) e reserva(s) (ou indicar arquivo com lista). [<a href="#TRT013">TRT013</a>]</li>
+<li>Informar a data de atualização e processar. [<a href="#TRT014">TRT014</a>] [<a href="#TRT015">TRT015</a>]</li>
+<li>Opcional: desfazer as atualizações até uma data. [<a href="#TRT015">TRT015</a>]</li>
+<li>Alimentação rápida Replan: informar mês inicial/final de cobrança e, opcionalmente, o participante; executar a procedure. [<a href="#TRT016">TRT016</a>]</li>
+<li>Movimentação padrão: escolher a seleção e executar; erros por matrícula vão para o resultado. [<a href="#TRT015">TRT015</a>] [<a href="#TRT053">TRT053</a>]</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Selecionar escopo da atualização</td><td>Delimitar reservas a corrigir</td><td>Patrocinadoras, planos, reservas ou arquivo com lista</td><td>Valida seleção mínima</td><td>Escopo aceito</td><td>—</td><td><a href="#MSG020">MSG020</a>, <a href="#MSG021">MSG021</a>, <a href="#MSG022">MSG022</a></td><td><code>FAtualizaPorIndice.dfm</code></td></tr>
+<tr><td>Atualizar por índice</td><td>Corrigir saldos de reserva</td><td>Escopo + data de atualização</td><td>Calcula a correção e grava movimentos</td><td>HISTMOVRESERVA/RESERVAPART/RESERVAXPLANO atualizados</td><td>—</td><td><a href="#MSG023">MSG023</a>, <a href="#MSG024">MSG024</a>, <a href="#MSG025">MSG025</a></td><td><code>FAtualizaPorIndice.dfm</code></td></tr>
+<tr><td>Alimentação rápida (Replan)</td><td>Alimentar reservas do período</td><td>Mês inicial/final; participante opcional</td><td>Executa a procedure de alimentação</td><td>Reservas alimentadas</td><td>—</td><td><a href="#MSG026">MSG026</a>, <a href="#MSG027">MSG027</a></td><td><code>FAlimReservasReplan.dfm</code></td></tr>
+<tr><td>Rodar movimentação padrão</td><td>Aplicar movimentação padrão de reserva</td><td>Opções de seleção</td><td>Processa por matrícula; registra erros e log</td><td>Movimentos gerados</td><td>—</td><td><a href="#MSG024">MSG024</a>, <a href="#MSG028">MSG028</a>, <a href="#MSG100">MSG100</a></td><td><code>FRodaPadraoMovReserva.dfm</code></td></tr>
+</tbody></table></div>
+<p><strong>Regras de negócio da jornada:</strong> nenhuma regra CONTRIB-RN catalogada para este processo; as validações da jornada estão nos tratamentos abaixo.</p>
+<p><strong>Tratamentos de erro:</strong> <a href="#TRT013">TRT013</a>, <a href="#TRT014">TRT014</a>, <a href="#TRT015">TRT015</a>, <a href="#TRT016">TRT016</a>, <a href="#TRT053">TRT053</a></p>
+<p><strong>Mensagens:</strong> <a href="#MSG020">MSG020</a>, <a href="#MSG021">MSG021</a>, <a href="#MSG022">MSG022</a>, <a href="#MSG023">MSG023</a>, <a href="#MSG024">MSG024</a>, <a href="#MSG025">MSG025</a>, <a href="#MSG026">MSG026</a>, <a href="#MSG027">MSG027</a>, <a href="#MSG028">MSG028</a>, <a href="#MSG100">MSG100</a></p>
+<p><strong>Telas:</strong> Alimentação RÁPIDA de reservas Replan (<code>FAlimReservasReplan.dfm</code>), Atualização de Reservas por Índice (<code>FAtualizaPorIndice.dfm</code>), Movimentação Padrão de Reserva (<code>FRodaPadraoMovReserva.dfm</code>)</p>
+<p><strong>Dependências:</strong> Sucede <a href="uc002.html">JF002</a>.</p>
+<div class="note note-info"><p><strong>Registro original do processo PF-03</strong></p><p><strong>Forms de entrada:</strong> <code>FAlimReservasReplan.dfm</code>, <code>FAtualizaPorIndice.dfm</code>, <code>FRodaPadraoMovReserva.dfm</code></p><p><strong>Lógica de processamento:</strong> Calcula/atualiza reservas por índice ou replanejamento; roda padrão de movimentação de reserva</p><p><strong>Saídas:</strong> Reservas atualizadas</p><p><strong>Persistência (tabelas escritas):</strong> HISTMOVRESERVA (I/U), RESERVAPART (U), RESERVAXPLANO (U)</p><p><strong>Evidência:</strong> <code>CONTRIBUICAOPREV/Fontes/FAtualizaPorIndice.pas:931</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+</div>
+</div>
+</section>
+
+<section><div class="section-title">6. Regras de Negócio da Jornada</div>
+<p>As regras de negócio aplicáveis a esta jornada são apresentadas abaixo com seu texto completo, sem necessidade de acessar outra página.</p>
+<div class="rule-block" id="CONTRIB-RN043">
+<div class="rule-id">CONTRIB-RN043 — Atualização de reserva por índice (dValor × COTVALOR)</div>
+<p><strong>Descrição:</strong> A atualização de reservas por índice aplica o COTVALOR da COTACAOMOEDA mês a mês: <code>dValorAtualizado = dValorAtualizado × COTVALOR</code>. Se a reserva tem regra de cálculo, usa RegraNumerica em vez de índice direto.</p>
+<p><strong>Fórmula:</strong> <code>dValorAtualizado = dValorAtualizado × COTVALOR</code>; <code>VLRREAL = dValorAtualizado − dValorAcumulado</code></p>
+<p><strong>Condições:</strong> Participante inscrito, não cancelado, não falecido (PF.DATAMORTE IS NULL); mês atual ≤ mês cancelamento/falecimento.</p>
+<p><strong>Dados:</strong> RESERVAXPLANO, RESERVAPART, HISTMOVRESERVA, COTACAOMOEDA</p>
+<p><strong>Rotina:</strong> <code>FAtualizaPorIndice.bbtnEnviarClick</code> · <strong>Arquivo:</strong> <code>FAtualizaPorIndice.pas:851-852</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+</div>
+
+
+</section>
+
+<section><div class="section-title">7. Tratamentos (TRT)</div>
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Condição</th><th>Mensagem</th><th>Resultado</th><th>Regra</th><th>Jornada</th></tr></thead><tbody>
+<tr id="TRT013"><td><strong>TRT013</strong></td><td>Patrocinadora, plano ou reserva não selecionados</td><td><a href="#MSG020">MSG020</a>, <a href="#MSG021">MSG021</a>, <a href="#MSG022">MSG022</a></td><td>Bloqueia a atualização de reservas</td><td>validação de tela</td><td><a href="uc003.html">JF003</a></td></tr>
+<tr id="TRT014"><td><strong>TRT014</strong></td><td>Data de atualização não preenchida</td><td><a href="#MSG023">MSG023</a></td><td>Bloqueia a atualização de reservas</td><td>validação de tela</td><td><a href="uc003.html">JF003</a></td></tr>
+<tr id="TRT015"><td><strong>TRT015</strong></td><td>Erro durante a atualização ou a movimentação padrão de reservas</td><td><a href="#MSG024">MSG024</a>, <a href="#MSG028">MSG028</a></td><td>Interrompe a operação</td><td>validação de tela</td><td><a href="uc003.html">JF003</a></td></tr>
+<tr id="TRT016"><td><strong>TRT016</strong></td><td>Falha na procedure de alimentação rápida de reservas</td><td><a href="#MSG027">MSG027</a></td><td>Informa o erro; reservas não alimentadas</td><td>validação de tela</td><td><a href="uc003.html">JF003</a></td></tr>
+<tr id="TRT053"><td><strong>TRT053</strong></td><td>Falha ao gravar o log de auditoria</td><td><a href="#MSG100">MSG100</a></td><td>Exceção; a transação em curso não é concluída</td><td>validação de tela</td><td><a href="uc003.html">JF003</a>, <a href="uc004.html">JF004</a>, <a href="uc008.html">JF008</a>, <a href="uc009.html">JF009</a></td></tr>
+</tbody></table></div></section>
+
+<section><div class="section-title">8. Mensagens (MSG)</div>
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Texto da mensagem</th><th>Tipo</th><th>Origem (CONTRIBUICAOPREV/Fontes/)</th><th>Jornadas</th></tr></thead><tbody>
+<tr id="MSG020"><td><strong>MSG020</strong></td><td>“Preencha pelo menos uma patrocinadora para esta operação.”</td><td>Erro</td><td><code>FAtualizaPorIndice.pas:294</code></td><td><a href="uc003.html">JF003</a></td></tr>
+<tr id="MSG021"><td><strong>MSG021</strong></td><td>“Preencha pelo menos um plano previdenciário para esta operação.”</td><td>Erro</td><td><code>FAtualizaPorIndice.pas:315</code></td><td><a href="uc003.html">JF003</a></td></tr>
+<tr id="MSG022"><td><strong>MSG022</strong></td><td>“Preencha pelo menos uma reserva para esta operação.”</td><td>Erro</td><td><code>FAtualizaPorIndice.pas:335</code></td><td><a href="uc003.html">JF003</a></td></tr>
+<tr id="MSG023"><td><strong>MSG023</strong></td><td>“Data de Atualização não foi preenchida.”</td><td>Erro</td><td><code>FAtualizaPorIndice.pas:473</code></td><td><a href="uc003.html">JF003</a></td></tr>
+<tr id="MSG024"><td><strong>MSG024</strong></td><td>“Operação Interrompida com Erros.”</td><td>Erro</td><td><code>FAtualizaPorIndice.pas:518; FRodaPadraoMovReserva.pas:356</code></td><td><a href="uc003.html">JF003</a></td></tr>
+<tr id="MSG025"><td><strong>MSG025</strong></td><td>“Processo finalizado com sucesso.”</td><td>Sucesso</td><td><code>FAtualizaPorIndice.pas:1173</code></td><td><a href="uc003.html">JF003</a></td></tr>
+<tr id="MSG026"><td><strong>MSG026</strong></td><td>“Alimentação bem sucedida.”</td><td>Sucesso</td><td><code>FAlimReservasReplan.pas:108</code></td><td><a href="uc003.html">JF003</a></td></tr>
+<tr id="MSG027"><td><strong>MSG027</strong></td><td>“Alimentação com erro!”</td><td>Erro</td><td><code>FAlimReservasReplan.pas:110</code></td><td><a href="uc003.html">JF003</a></td></tr>
+<tr id="MSG028"><td><strong>MSG028</strong></td><td>“Operação Interrompida Pelo Usuário.”</td><td>Aviso</td><td><code>FRodaPadraoMovReserva.pas:444</code></td><td><a href="uc003.html">JF003</a></td></tr>
+<tr id="MSG100"><td><strong>MSG100</strong></td><td>“Erro ao gravar Log.”</td><td>Erro (exceção)</td><td><code>FCadHstContribuicao.pas:1091; FAtualizaPorIndice.pas:931; FDivergContrib.pas:5019; FControleIndivContrib.pas:2006; FCadContribNucleoFamiliar.pas:236</code></td><td><a href="uc003.html">JF003</a>, <a href="uc004.html">JF004</a>, <a href="uc008.html">JF008</a>, <a href="uc009.html">JF009</a></td></tr>
+</tbody></table></div></section>
+
+
+<p><a class="back-btn" href="funcionalidades.html">← Voltar à lista de Casos de Uso</a></p>
+
+</main>
+<footer>
+<p>Blueprint AS-IS — PFC-23 / PFC-32 — Módulo Contribuição Previdenciária | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-10</p>
+</footer>
+</body>
+</html>

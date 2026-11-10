@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UC004 – Estorno de Folha — Folha de Benefícios — Blueprint AS-IS</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<header>
+  <div class="badge">Blueprint AS-IS — PFC-29 — v2.1 — PFC-32</div>
+  <h1>UC004 – Estorno de Folha</h1>
+  <p>Caso de Uso do módulo Folha de Benefícios — jornada JF004 (PF-04) — Estorno de Folha.</p>
+</header>
+<nav>
+  <a href="index.html">📋 Visão Geral</a>
+  <a href="arquitetura.html">🏗️ Arquitetura</a>
+  <a href="inventario-tecnico.html">📦 Inventário</a>
+  <a href="funcionalidades.html">⚙️ Processos Funcionais</a>
+  <a href="procedures-functions.html">🔧 Procedures</a>
+  <a href="dados.html">🗄️ Dados</a>
+  <a href="relatorios.html">📄 Relatórios</a>
+  <a href="integracoes.html">🔗 Integrações</a>
+  <a href="tratamento-erros.html">⚠️ Erros</a>
+  <a href="diagramas-fluxo.html">🔀 Fluxos</a>
+  <a href="lacunas.html">🔍 Lacunas</a>
+  <a href="controle-cobertura.html">📊 Cobertura</a>
+</nav>
+<main>
+
+<p><a class="back-btn" href="funcionalidades.html">← Voltar à lista de Casos de Uso</a></p>
+
+<section><div class="section-title">1. Identificação</div>
+<div class="table-wrap"><table><tbody>
+<tr><th>Caso de Uso</th><td><strong>UC004</strong> – Estorno de Folha</td></tr>
+<tr><th>Módulo</th><td>Folha de Benefícios</td></tr>
+<tr><th>Jornada</th><td>JF004 (PF-04) — Estorno de Folha</td></tr>
+<tr><th>Sistema</th><td>CM Contabilidade / FUNCEF (Delphi 5 / VCL / MIDAS)</td></tr>
+<tr><th>Tipo</th><td>Sistema Desktop</td></tr>
+<tr><th>Ator</th><td>Usuário operacional (analista de folha, financeiro, contábil)</td></tr>
+<tr><th>Entry point</th><td><code>FOLHA/Fontes/Folha.dpr</code></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">2. Descrição Resumida</div>
+<p>Caso de Uso <strong>UC004</strong> do módulo Folha de Benefícios, correspondente à JF004 (PF-04) — Estorno de Folha. Esta página detalha a jornada funcional com sua sequência operacional, ações, regras de negócio, tratamentos de erro e mensagens.</p>
+</section>
+
+<section><div class="section-title">3. Pré-condições</div>
+<p>Consulte as pré-condições específicas na seção da jornada abaixo.</p>
+</section>
+
+<section><div class="section-title">4. Pós-condições</div>
+<p>Consulte as pós-condições específicas na seção da jornada abaixo.</p>
+</section>
+
+<section><div class="section-title">5. Sequência Operacional e Ações</div>
+<div class="pf-block" id="PF-04">
+<h4>JF004 (PF-04) — Estorno de Folha</h4>
+<p><strong>Objetivo:</strong> desfazer folha individual ou por lote preservando histórico.</p>
+<p><strong>Gatilho/Ator:</strong> botão processar em <code>festornafolha.dfm</code> (:4576).</p>
+<p><strong>Pré-condições:</strong> versão efetivada (<a href="uc003.html">JF003</a>); usuário com permissão; motivo de estorno informado.</p>
+<p><strong>Pós-condições:</strong> HSTFOLHABENEFCAP, HISTRUBSAL, RUBRICAINDIV, ARQUIVOPAGTO estornados; CAP/CAR gerados.</p>
+<p><strong>Sequência operacional (festornafolha.pas):</strong></p>
+<ol>
+<li><code>VerificaStatusDocumentosVersao</code> (:900) → <code>HabilitaEstornoIndividual</code> (:939)</li>
+<li><code>VerificaTmpDesc</code> (:2030) → <code>DesfazRubricaIndividual</code> (:1843)</li>
+<li><code>GeraAlterador</code> (:1183) → <code>GeraCAP</code> (:1523) → <code>GeraCAR</code> (:1654)</li>
+<li><code>GravaMotivoEstorno</code> (:1709) → <code>ProcessaCompensacao</code> (:1739)</li>
+<li><code>Exec_SP_ExcessoDebito</code> (:1801) → <code>EstornoFolhaCompleto</code> (:2062)</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Verificar status</td><td>Confirmar que a versão pode ser estornada</td><td>Versão efetivada</td><td>VerificaStatusDocumentosVersao → HabilitaEstornoIndividual</td><td>Estorno habilitado</td><td>—</td><td>—</td><td><code>festornafolha.dfm</code></td></tr>
+<tr><td>Desfazer rubrica individual</td><td>Reverter rubrica individual</td><td>Rubrica, TMPDESC</td><td>VerificaTmpDesc → DesfazRubricaIndividual</td><td>Rubrica desfeita</td><td>—</td><td>—</td><td><code>festornafolha.dfm</code></td></tr>
+<tr><td>Gerar CAP/CAR</td><td>Produzir alterador e documentos de estorno</td><td>Dados do estorno</td><td>GeraAlterador → GeraCAP → GeraCAR</td><td>CAP/CAR gerados</td><td>—</td><td>—</td><td><code>festornafolha.dfm</code></td></tr>
+<tr><td>Gravar motivo e compensar</td><td>Registrar motivo e processar compensação</td><td>Motivo do estorno</td><td>GravaMotivoEstorno → ProcessaCompensacao</td><td>Compensação processada</td><td>—</td><td>—</td><td><code>festornafolha.dfm</code></td></tr>
+<tr><td>Estorno completo</td><td>Executar estorno e excesso de débito</td><td>Compensação OK</td><td>Exec_SP_ExcessoDebito → EstornoFolhaCompleto</td><td>Folha estornada</td><td>—</td><td>—</td><td><code>festornafolha.dfm</code></td></tr>
+</tbody></table></div>
+<p><strong>Exceções:</strong> estorno de pagamento pendente (:2384), erro de processo (:2455), novo CAP (:2911), reprocessamento (:3013).</p>
+<p><strong>Regras de negócio da jornada:</strong> — (validações inline de status/permissão).</p>
+<p><strong>Dependências:</strong> sucede <a href="uc003.html">JF003</a>. Evidência: <code>FOLHA/Fontes/festornafolha.pas:624-3013</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<div class="mermaid">graph LR
+  n0["festornafolha"] --> n1["VerificaStatus"] --> n2["DesfazRubricaIndividual"] --> n3["GeraAlterador"] --> n4["GeraCAP"] --> n5["GeraCAR"] --> n6["GravaMotivoEstorno"] --> n7["ProcessaCompensacao"] --> n8["Exec_SP_ExcessoDebito"] --> n9["EstornoFolhaCompleto"] --> n10["estorna HSTFOLHABENEFCAP/HISTRUBSAL/RUBRICAINDIV + CAP/CAR"]</div>
+</div>
+</div>
+</section>
+
+<section><div class="section-title">6. Regras de Negócio da Jornada</div>
+<p>As regras de negócio aplicáveis a esta jornada são apresentadas abaixo com seu texto completo, sem necessidade de acessar outra página.</p>
+<p>Nenhuma regra de negócio específica catalogada para esta jornada.</p>
+
+</section>
+
+<section><div class="section-title">7. Tratamentos (TRT)</div>
+<p>Nenhum tratamento de erro específico para esta jornada.</p>
+</section>
+
+<section><div class="section-title">8. Mensagens (MSG)</div>
+<p>Nenhuma mensagem específica para esta jornada.</p>
+</section>
+
+
+<p><a class="back-btn" href="funcionalidades.html">← Voltar à lista de Casos de Uso</a></p>
+
+</main>
+<footer>
+<p>Blueprint AS-IS — PFC-22 / PFC-32 — Módulo Folha de Benefícios | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-10</p>
+</footer>
+</body>
+</html>

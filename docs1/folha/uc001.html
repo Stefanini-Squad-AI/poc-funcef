@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UC001 – Preparo da Folha — Folha de Benefícios — Blueprint AS-IS</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<header>
+  <div class="badge">Blueprint AS-IS — PFC-29 — v2.1 — PFC-32</div>
+  <h1>UC001 – Preparo da Folha</h1>
+  <p>Caso de Uso do módulo Folha de Benefícios — jornada JF001 (PF-01) — Preparo da Folha.</p>
+</header>
+<nav>
+  <a href="index.html">📋 Visão Geral</a>
+  <a href="arquitetura.html">🏗️ Arquitetura</a>
+  <a href="inventario-tecnico.html">📦 Inventário</a>
+  <a href="funcionalidades.html">⚙️ Processos Funcionais</a>
+  <a href="procedures-functions.html">🔧 Procedures</a>
+  <a href="dados.html">🗄️ Dados</a>
+  <a href="relatorios.html">📄 Relatórios</a>
+  <a href="integracoes.html">🔗 Integrações</a>
+  <a href="tratamento-erros.html">⚠️ Erros</a>
+  <a href="diagramas-fluxo.html">🔀 Fluxos</a>
+  <a href="lacunas.html">🔍 Lacunas</a>
+  <a href="controle-cobertura.html">📊 Cobertura</a>
+</nav>
+<main>
+
+<p><a class="back-btn" href="funcionalidades.html">← Voltar à lista de Casos de Uso</a></p>
+
+<section><div class="section-title">1. Identificação</div>
+<div class="table-wrap"><table><tbody>
+<tr><th>Caso de Uso</th><td><strong>UC001</strong> – Preparo da Folha</td></tr>
+<tr><th>Módulo</th><td>Folha de Benefícios</td></tr>
+<tr><th>Jornada</th><td>JF001 (PF-01) — Preparo da Folha</td></tr>
+<tr><th>Sistema</th><td>CM Contabilidade / FUNCEF (Delphi 5 / VCL / MIDAS)</td></tr>
+<tr><th>Tipo</th><td>Sistema Desktop</td></tr>
+<tr><th>Ator</th><td>Usuário operacional (analista de folha, financeiro, contábil)</td></tr>
+<tr><th>Entry point</th><td><code>FOLHA/Fontes/Folha.dpr</code></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">2. Descrição Resumida</div>
+<p>Caso de Uso <strong>UC001</strong> do módulo Folha de Benefícios, correspondente à JF001 (PF-01) — Preparo da Folha. Esta página detalha a jornada funcional com sua sequência operacional, ações, regras de negócio, tratamentos de erro e mensagens.</p>
+</section>
+
+<section><div class="section-title">3. Pré-condições</div>
+<p>Consulte as pré-condições específicas na seção da jornada abaixo.</p>
+</section>
+
+<section><div class="section-title">4. Pós-condições</div>
+<p>Consulte as pós-condições específicas na seção da jornada abaixo.</p>
+</section>
+
+<section><div class="section-title">5. Sequência Operacional e Ações</div>
+<div class="pf-block" id="PF-01">
+<h4>JF001 (PF-01) — Preparo da Folha</h4>
+<p><strong>Objetivo:</strong> selecionar patrocinadoras/planos/benefícios e aplicar reajustes/eventos antes da prévia.</p>
+<p><strong>Gatilho/Ator:</strong> usuário aciona o botão Preparo em <code>FPreparo.dfm</code>.</p>
+<p><strong>Pré-condições:</strong> lote aberto; patrocinadoras/planos cadastrados; benefícios ativos.</p>
+<p><strong>Pós-condições:</strong> HSTBENEFBFCIARIO, PROCESSOBENEF, HSTCONTRIBPREV populados; benefícios preparados para prévia.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li><code>MontaListaPatro</code> → <code>MontaListaPlano</code> → <code>MontaListaBenef</code> (FPreparo.pas:1030/1042/1075)</li>
+<li><code>InicializaProcessoBeneficio</code> (:1755) → <code>InicializaContadores</code> (:1812)</li>
+<li>Loop: <code>PassoProcessoBeneficio</code> (:1901) → <code>ExecutaRegraProcessoBeneficio</code> (:1943) → <code>IncrementaTotais</code> (:1837) <a href="#FOLHA-RN010">[RS010]</a> <a href="#TRT006">[TRT006]</a></li>
+<li><code>GravaHstBeneficio</code> (:2375) → <code>InsereHstBfciario</code> (:1383) → <code>GravaProcessoBeneficio</code> (:2678)</li>
+<li><code>CalculaProRata</code> (:2931) → <code>CalculaEnviaContribuicaoPensionista</code> (:2958)</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Montar listas</td><td>Selecionar patro/planos/benefícios</td><td>Tipo folha, lote, patro, planos, benefícios, mês/ano</td><td>Popula chklstPatro, chklstPlano, grdBenef</td><td>Listas preenchidas</td><td>—</td><td>—</td><td><code>FPreparo.dfm</code></td></tr>
+<tr><td>Inicializar processo</td><td>Preparar contadores e estado</td><td>Listas montadas</td><td>InicializaProcessoBeneficio + contadores</td><td>Pronto para loop</td><td>—</td><td>—</td><td><code>FPreparo.dfm</code></td></tr>
+<tr><td>Processar benefícios (loop)</td><td>Aplicar regras e gravar histórico</td><td>Benefícios selecionados</td><td>PassoProcessoBeneficio → ExecutaRegra → IncrementaTotais</td><td>Benefícios processados</td><td><a href="#FOLHA-RN010">RS010</a></td><td><a href="#MSG006">MSG006</a></td><td><code>FPreparo.dfm</code></td></tr>
+<tr><td>Gravar histórico</td><td>Persistir benefícios preparados</td><td>Benefícios processados</td><td>GravaHstBeneficio → InsereHstBfciario → GravaProcessoBeneficio</td><td>HSTBENEFBFCIARIO/PROCESSOBENEF gravados</td><td>—</td><td>—</td><td><code>FPreparo.dfm</code></td></tr>
+<tr><td>Calcular pro-rata</td><td>Pró-rata e contribuição de pensionista</td><td>Benefícios gravados</td><td>CalculaProRata → CalculaEnviaContribuicaoPensionista</td><td>HSTCONTRIBPREV gravado</td><td>—</td><td>—</td><td><code>FPreparo.dfm</code></td></tr>
+</tbody></table></div>
+<p><strong>Regras de negócio da jornada:</strong> <a href="#FOLHA-RN010">RS010 (FOLHA-RN010)</a> — Duplicidade de lotes na prévia.</p>
+<p><strong>Dependências:</strong> precede <a href="uc002.html">JF002</a> (prévia). Evidência: <code>FOLHA/Fontes/FPreparo.pas:1015-2958</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<div class="mermaid">graph LR
+  n0["FPreparo"] --> n1["MontaListas"] --> n2["InicializaProcessoBeneficio"] --> n3["loop(PassoProcessoBeneficio"] --> n4["ExecutaRegra"] --> n5["GravaHstBeneficio)"] --> n6["CalculaProRata"] --> n7["CalculaEnviaContribuicaoPensionista"] --> n8["HSTBENEFBFCIARIO/PROCESSOBENEF"]</div>
+</div>
+</div>
+</section>
+
+<section><div class="section-title">6. Regras de Negócio da Jornada</div>
+<p>As regras de negócio aplicáveis a esta jornada são apresentadas abaixo com seu texto completo, sem necessidade de acessar outra página.</p>
+<div class="rule-block" id="FOLHA-RN010">
+<div class="rule-id">RS010 (FOLHA-RN010) — Duplicidade de lotes na prévia</div>
+<p><strong>Descrição:</strong> evitar geração de benefício em duplicidade quando o mesmo lote é processado mais de uma vez.</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>HSTBENEFBFCIARIO</code> — [obrigatório] — histórico de benefícios (verificação de duplicidade)</li>
+<li><code>PROCESSOBENEF</code> — [obrigatório] — processo de benefício corrente</li>
+<li><code>lote</code> — [obrigatório] — identificador do lote</li>
+<li><code>competência</code> — [obrigatório] — mês/ano de referência</li>
+</ul>
+<p><strong>Condição:</strong> benefício já presente no histórico para o lote/competência → não regera.</p>
+<p><strong>Tratamento (TRT):</strong> <a href="funcionalidades.html#TRT006">TRT006</a> → <a href="#MSG006">MSG006</a> → Não regenera benefício</p>
+<p><strong>Rotina:</strong> <code>TfrmPreparo.InsereHstBfciario</code>. <strong>Origem:</strong> <code>FOLHA/Fontes/FPreparo.pas:126,1383</code>. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> · <strong>Severidade:</strong> alta · <strong>Jornada:</strong> <a href="uc001.html">JF001</a> · <strong>Relacionadas:</strong> —</p>
+</div>
+</div>
+
+
+</section>
+
+<section><div class="section-title">7. Tratamentos (TRT)</div>
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Condição</th><th>Mensagem</th><th>Resultado</th><th>Regra</th><th>Jornada</th></tr></thead><tbody>
+<tr id="TRT001"><td><strong>TRT001</strong></td><td>Mês/ano de referência não informados</td><td><a href="#MSG001">MSG001</a></td><td>Bloqueia execução</td><td><a href="#FOLHA-RN001">RS001</a></td><td>JF001, JF015</td></tr>
+<tr id="TRT006"><td><strong>TRT006</strong></td><td>Duplicidade de lote na prévia</td><td><a href="#MSG006">MSG006</a></td><td>Não regenera benefício</td><td><a href="#FOLHA-RN010">RS010</a></td><td>JF001</td></tr>
+</tbody></table></div></section>
+
+<section><div class="section-title">8. Mensagens (MSG)</div>
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Texto da Mensagem</th><th>Jornadas relacionadas</th></tr></thead><tbody>
+<tr id="MSG001"><td><strong>MSG001</strong></td><td>"É necessário indicar o Mês/Ano de Referência!"</td><td>JF001, JF015</td></tr>
+<tr id="MSG006"><td><strong>MSG006</strong></td><td>"Benefício já existe no lote/competência — duplicidade não regenerada"</td><td>JF001</td></tr>
+</tbody></table></div></section>
+
+
+<p><a class="back-btn" href="funcionalidades.html">← Voltar à lista de Casos de Uso</a></p>
+
+</main>
+<footer>
+<p>Blueprint AS-IS — PFC-22 / PFC-32 — Módulo Folha de Benefícios | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-10</p>
+</footer>
+</body>
+</html>

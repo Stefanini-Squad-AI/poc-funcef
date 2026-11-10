@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UC002 – Prévia (Cálculo da Folha) — Folha de Benefícios — Blueprint AS-IS</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<header>
+  <div class="badge">Blueprint AS-IS — PFC-29 — v2.1 — PFC-32</div>
+  <h1>UC002 – Prévia (Cálculo da Folha)</h1>
+  <p>Caso de Uso do módulo Folha de Benefícios — jornada JF002 (PF-02) — Prévia (Cálculo da Folha).</p>
+</header>
+<nav>
+  <a href="index.html">📋 Visão Geral</a>
+  <a href="arquitetura.html">🏗️ Arquitetura</a>
+  <a href="inventario-tecnico.html">📦 Inventário</a>
+  <a href="funcionalidades.html">⚙️ Processos Funcionais</a>
+  <a href="procedures-functions.html">🔧 Procedures</a>
+  <a href="dados.html">🗄️ Dados</a>
+  <a href="relatorios.html">📄 Relatórios</a>
+  <a href="integracoes.html">🔗 Integrações</a>
+  <a href="tratamento-erros.html">⚠️ Erros</a>
+  <a href="diagramas-fluxo.html">🔀 Fluxos</a>
+  <a href="lacunas.html">🔍 Lacunas</a>
+  <a href="controle-cobertura.html">📊 Cobertura</a>
+</nav>
+<main>
+
+<p><a class="back-btn" href="funcionalidades.html">← Voltar à lista de Casos de Uso</a></p>
+
+<section><div class="section-title">1. Identificação</div>
+<div class="table-wrap"><table><tbody>
+<tr><th>Caso de Uso</th><td><strong>UC002</strong> – Prévia (Cálculo da Folha)</td></tr>
+<tr><th>Módulo</th><td>Folha de Benefícios</td></tr>
+<tr><th>Jornada</th><td>JF002 (PF-02) — Prévia (Cálculo da Folha)</td></tr>
+<tr><th>Sistema</th><td>CM Contabilidade / FUNCEF (Delphi 5 / VCL / MIDAS)</td></tr>
+<tr><th>Tipo</th><td>Sistema Desktop</td></tr>
+<tr><th>Ator</th><td>Usuário operacional (analista de folha, financeiro, contábil)</td></tr>
+<tr><th>Entry point</th><td><code>FOLHA/Fontes/Folha.dpr</code></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">2. Descrição Resumida</div>
+<p>Caso de Uso <strong>UC002</strong> do módulo Folha de Benefícios, correspondente à JF002 (PF-02) — Prévia (Cálculo da Folha). Esta página detalha a jornada funcional com sua sequência operacional, ações, regras de negócio, tratamentos de erro e mensagens.</p>
+</section>
+
+<section><div class="section-title">3. Pré-condições</div>
+<p>Consulte as pré-condições específicas na seção da jornada abaixo.</p>
+</section>
+
+<section><div class="section-title">4. Pós-condições</div>
+<p>Consulte as pós-condições específicas na seção da jornada abaixo.</p>
+</section>
+
+<section><div class="section-title">5. Sequência Operacional e Ações</div>
+<div class="pf-block" id="PF-02">
+<h4>JF002 (PF-02) — Prévia (Cálculo da Folha)</h4>
+<p><strong>Objetivo:</strong> calcular a prévia de pagamento por recebedor/rubrica (motor central).</p>
+<p><strong>Gatilho/Ator:</strong> botão processar em <code>FFolhaNormalPrevia.dfm</code> ou <code>fFolhaExtra.dfm</code>.</p>
+<p><strong>Pré-condições:</strong> preparo concluído (<a href="uc001.html">JF001</a>); lote com benefícios preparados; parâmetros globais em <code>FParametroFolha</code>.</p>
+<p><strong>Pós-condições:</strong> PREVIA, BASEDEPAGAMENTO, BITRIBUTACAO, HSTBITRIBUTACAO, CTRLINTERFACE populados; prévia pronta para conferência/efetivação.</p>
+<p><strong>Sequência operacional (motor dFolhaPrevia.pas):</strong></p>
+<ol>
+<li><code>ProcessaPrevia</code> (:24781) — orquestra; abre transação (:25386) <a href="#FOLHA-RN022">[RS022]</a></li>
+<li>Para cada recebedor: <code>CriaRecebedor</code> (:19243) → <code>ProcessaRubricaProvento</code> (:24378) <a href="#FOLHA-RN029">[RS029]</a></li>
+<li><code>ProcessaRubrica</code> (:17697) → <code>ExecutaRegraRubrica</code> (:16865) → <code>ClassificaRubricaBase</code> (:15076)</li>
+<li><code>DeterminaBasesIRRF</code> (:7180) → <code>CaluloIRRF</code> (:13493) <a href="#FOLHA-RN004">[RS004]</a> <a href="#FOLHA-RN005">[RS005]</a> <a href="#FOLHA-RN015">[RS015]</a> <a href="#FOLHA-RN017">[RS017]</a></li>
+<li><code>VerificaMargemDesconto</code> (:7496) → <code>CalculaMargemDesconto</code> (:7676) <a href="#FOLHA-RN008">[RS008]</a> <a href="#TRT010">[TRT010]</a></li>
+<li><code>CalculaCPMF</code> (:16764) → <code>CalculaBeneficioMinimo</code> (:8298) → <code>CalculaCorrecaoBeneficio</code> (:8615) → <code>CaluloSalarioFamilia</code> (:9555) <a href="#FOLHA-RN007">[RS007]</a> <a href="#FOLHA-RN009">[RS009]</a> <a href="#FOLHA-RN020">[RS020]</a> <a href="#FOLHA-RN021">[RS021]</a> <a href="#TRT011">[TRT011]</a></li>
+<li><code>InsereRubrica</code> (:15183) → <code>IncluiPrevia</code> (:4096) — commit (:4138) <a href="#FOLHA-RN006">[RS006]</a> <a href="#TRT005">[TRT005]</a></li>
+<li><code>ProcessaFechamentoRecebedor</code> (:23310) → <code>ProcessaRateioRubricas</code> (:22816) → <code>ProcessaReinf</code> (:19882) <a href="#FOLHA-RN018">[RS018]</a> <a href="#FOLHA-RN019">[RS019]</a></li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Orquestrar prévia</td><td>Processar lote completo</td><td>Lote, mês/ano, modo automático</td><td>ProcessaPrevia abre transação e itera recebedores</td><td>Prévia calculada</td><td><a href="#FOLHA-RN022">RS022</a></td><td>—</td><td><code>FFolhaNormalPrevia.dfm</code></td></tr>
+<tr><td>Criar recebedor</td><td>Instanciar objeto por recebedor</td><td>ID do recebedor</td><td>CriaRecebedor; avalia dado bancário</td><td>Recebedor válido</td><td><a href="#FOLHA-RN029">RS029</a></td><td>—</td><td><code>FFolhaNormalPrevia.dfm</code></td></tr>
+<tr><td>Processar rubrica</td><td>Classificar e calcular rubrica</td><td>Rubrica, provento</td><td>ProcessaRubrica → ExecutaRegraRubrica → ClassificaRubricaBase</td><td>Rubrica classificada</td><td>—</td><td>—</td><td><code>FFolhaNormalPrevia.dfm</code></td></tr>
+<tr><td>Calcular IRRF</td><td>Determinar bases e calcular IR</td><td>Bases de provento</td><td>DeterminaBasesIRRF → CaluloIRRF</td><td>BITRIBUTACAO atualizada</td><td><a href="#FOLHA-RN004">RS004</a>, <a href="#FOLHA-RN005">RS005</a>, <a href="#FOLHA-RN015">RS015</a>, <a href="#FOLHA-RN017">RS017</a></td><td><a href="#MSG004">MSG004</a></td><td><code>FFolhaNormalPrevia.dfm</code></td></tr>
+<tr><td>Verificar margem</td><td>Validar desconto consignável</td><td>Renda, descontos, perc. margem</td><td>VerificaMargemDesconto → CalculaMargemDesconto</td><td>Rubrica bloqueada/ajustada se exceder</td><td><a href="#FOLHA-RN008">RS008</a></td><td><a href="#MSG010">MSG010</a></td><td><code>FFolhaNormalPrevia.dfm</code></td></tr>
+<tr><td>Calcular CPMF/benef. mín./correção/sal. família</td><td>Aplicar cálculos complementares</td><td>Valores base</td><td>CalculaCPMF → CalculaBeneficioMinimo → CalculaCorrecaoBeneficio → CaluloSalarioFamilia</td><td>Rubricas complementares inseridas</td><td><a href="#FOLHA-RN007">RS007</a>, <a href="#FOLHA-RN009">RS009</a>, <a href="#FOLHA-RN020">RS020</a>, <a href="#FOLHA-RN021">RS021</a></td><td><a href="#MSG011">MSG011</a></td><td><code>FFolhaNormalPrevia.dfm</code></td></tr>
+<tr><td>Inserir rubrica e gravar prévia</td><td>Persistir com commit por blocos</td><td>Rubrica calculada</td><td>InsereRubrica → IncluiPrevia → Commit</td><td>PREVIA gravada</td><td><a href="#FOLHA-RN006">RS006</a>, <a href="#FOLHA-RN022">RS022</a></td><td><a href="#MSG005">MSG005</a></td><td><code>FFolhaNormalPrevia.dfm</code></td></tr>
+<tr><td>Fechar recebedor e ratear</td><td>Rateio multiplano e REINF</td><td>Proporção planos</td><td>ProcessaFechamentoRecebedor → ProcessaRateioRubricas → ProcessaReinf</td><td>Rateio e REINF processados</td><td><a href="#FOLHA-RN018">RS018</a>, <a href="#FOLHA-RN019">RS019</a></td><td>—</td><td><code>FFolhaNormalPrevia.dfm</code></td></tr>
+</tbody></table></div>
+<p><strong>Regras de negócio da jornada:</strong> <a href="#FOLHA-RN004">RS004</a>, <a href="#FOLHA-RN005">RS005</a>, <a href="#FOLHA-RN006">RS006</a>, <a href="#FOLHA-RN007">RS007</a>, <a href="#FOLHA-RN008">RS008</a>, <a href="#FOLHA-RN009">RS009</a>, <a href="#FOLHA-RN015">RS015</a>, <a href="#FOLHA-RN017">RS017</a>, <a href="#FOLHA-RN018">RS018</a>, <a href="#FOLHA-RN019">RS019</a>, <a href="#FOLHA-RN020">RS020</a>, <a href="#FOLHA-RN021">RS021</a>, <a href="#FOLHA-RN022">RS022</a>, <a href="#FOLHA-RN028">RS028</a>, <a href="#FOLHA-RN029">RS029</a>, <a href="#FOLHA-RN030">RS030</a>.</p>
+<p><strong>Dependências:</strong> sucede <a href="uc001.html">JF001</a>; precede <a href="uc003.html">JF003</a>, <a href="uc006.html">JF006</a>. Evidência: <code>FOLHA/Fontes/dFolhaPrevia.pas:4096-25405</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<div class="mermaid">graph LR
+  n0["FFolhaNormalPrevia"] --> n1["ProcessaPrevia(:24781)"] --> n2["CriaRecebedor"] --> n3["ProcessaRubricaProvento"] --> n4["ProcessaRubrica"] --> n5["ExecutaRegraRubrica"] --> n6["ClassificaRubricaBase"] --> n7["DeterminaBasesIRRF"] --> n8["CaluloIRRF"] --> n9["VerificaMargemDesconto"] --> n10["CalculaCPMF"] --> n11["CalculaBeneficioMinimo"] --> n12["CalculaCorrecaoBeneficio"] --> n13["CaluloSalarioFamilia"] --> n14["InsereRubrica"] --> n15["IncluiPrevia"] --> n16["Commit"] --> n17["ProcessaFechamentoRecebedor"] --> n18["ProcessaReinf"] --> n19["PREVIA/BASEDEPAGAMENTO/BITRIBUTACAO"]</div>
+</div>
+</div>
+</section>
+
+<section><div class="section-title">6. Regras de Negócio da Jornada</div>
+<p>As regras de negócio aplicáveis a esta jornada são apresentadas abaixo com seu texto completo, sem necessidade de acessar outra página.</p>
+<div class="rule-block" id="FOLHA-RN004">
+<div class="rule-id">RS004 (FOLHA-RN004) — Rubrica de IR exige natureza de rendimento</div>
+<p><strong>Descrição:</strong> toda rubrica que compõe a base de IRRF deve ter natureza de rendimento informada.</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>PROVDESC.natureza</code> — [obrigatório] — domínio: código de natureza de rendimento</li>
+<li><code>PROVDESC.FLGIRRF</code> — [obrigatório] — indica se rubrica compõe base de IR (S/N)</li>
+<li><code>BITRIBUTACAO</code> — [condicional] — tributação calculada</li>
+</ul>
+<p><strong>Condição:</strong> rubrica marcada como base de IR sem natureza de rendimento → não soma à base.</p>
+<p><strong>Tratamento (TRT):</strong> <a href="funcionalidades.html#TRT004">TRT004</a> → <a href="#MSG004">MSG004</a> → Não soma à base de IRRF</p>
+<p><strong>Rotina:</strong> <code>TobjRecebedor.DeterminaBasesIRRF</code>. <strong>Origem:</strong> <code>FOLHA/Fontes/dFolhaPrevia.pas:7180</code>. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> · <strong>Severidade:</strong> média · <strong>Jornada:</strong> <a href="uc002.html">JF002</a>, <a href="uc008.html">JF008</a> · <strong>Relacionadas:</strong> <a href="#FOLHA-RN005">RS005</a></p>
+</div>
+</div>
+
+<div class="rule-block" id="FOLHA-RN005">
+<div class="rule-id">RS005 (FOLHA-RN005) — Proventos somam à base de IRRF</div>
+<p><strong>Descrição:</strong> os proventos tributáveis são acumulados na base de IRRF por fonte pagadora e tipo de base.</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>PREVIA.VALORPROVENTO</code> — [obrigatório] — valor do provento</li>
+<li><code>BITRIBUTACAO</code> — [obrigatório] — base de IRRF por fonte/tipo</li>
+<li><code>fonte</code> — [obrigatório] — fonte pagadora</li>
+<li><code>tipo</code> — [obrigatório] — domínio: normal, regressivo</li>
+</ul>
+<p><strong>Fórmula:</strong> <code>BaseIRRF[fonte,tipo] = Σ proventos tributáveis</code>.</p>
+<p><strong>Rotina:</strong> <code>DeterminaBasesIRRF</code> → <code>AlocaBase</code>. <strong>Origem:</strong> <code>FOLHA/Fontes/dFolhaPrevia.pas:7180,15010</code>. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> · <strong>Severidade:</strong> alta · <strong>Jornada:</strong> <a href="uc008.html">JF008</a> · <strong>Relacionadas:</strong> <a href="#FOLHA-RN004">RS004</a>, <a href="#FOLHA-RN015">RS015</a></p>
+</div>
+</div>
+
+<div class="rule-block" id="FOLHA-RN006">
+<div class="rule-id">RS006 (FOLHA-RN006) — Líquido negativo zera e transfere desconto</div>
+<p><strong>Descrição:</strong> quando o líquido do recebedor fica negativo após descontos, o valor é zerado e o desconto excedente é transferido/tratado.</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>lrvalorliquido</code> — [obrigatório] — valor líquido calculado</li>
+<li><code>lrvalordesc</code> — [obrigatório] — total de descontos</li>
+<li><code>excedente</code> — [condicional] — desconto excedente transferido</li>
+</ul>
+<p><strong>Condição:</strong> <code>if lrvalorliquido - lrvalordesc &lt; 0</code> → ação de zera/transfere. <strong>Fórmula:</strong> <code>líquido = proventos − descontos; se líquido &lt; 0 → líquido := 0 (e excedente tratado)</code>.</p>
+<p><strong>Tratamento (TRT):</strong> <a href="funcionalidades.html#TRT005">TRT005</a> → <a href="#MSG005">MSG005</a> → Zera líquido e transfere desconto</p>
+<p><strong>Rotina:</strong> <code>TobjRecebedor.EfetivaRubricas</code> / processamento de líquido. <strong>Origem:</strong> <code>FOLHA/Fontes/dFolhaPrevia.pas:7269</code> (e :8000). <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> · <strong>Severidade:</strong> alta · <strong>Jornada:</strong> <a href="uc002.html">JF002</a> · <strong>Relacionadas:</strong> <a href="#FOLHA-RN008">RS008</a></p>
+</div>
+</div>
+
+<div class="rule-block" id="FOLHA-RN007">
+<div class="rule-id">RS007 (FOLHA-RN007) — CPMF = valor × (percCPMF − 1)</div>
+<p><strong>Descrição:</strong> o CPMF é calculado sobre o valor base pelo fator <code>(prmPercCPMF − 1)</code>.</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>arvalor</code> — [obrigatório] — valor base (parâmetro de entrada)</li>
+<li><code>prmPercCPMF</code> — [obrigatório] — percentual global do CPMF (parâmetro do sistema)</li>
+<li><code>CPMF</code> — [opcional] — resultado calculado</li>
+</ul>
+<p><strong>Fórmula:</strong> <code>CPMF = arvalor × (prmPercCPMF − 1)</code>.</p>
+<p><strong>Rotina:</strong> <code>TobjRecebedor.CalculaCPMF</code>. <strong>Origem:</strong> <code>FOLHA/Fontes/dFolhaPrevia.pas:16764-16766</code>. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> (fórmula literal) · <strong>Severidade:</strong> média · <strong>Jornada:</strong> <a href="uc002.html">JF002</a> · <strong>Relacionadas:</strong> <a href="#FOLHA-RN016">RS016</a></p>
+</div>
+</div>
+
+<div class="rule-block" id="FOLHA-RN008">
+<div class="rule-id">RS008 (FOLHA-RN008) — Margem de desconto consignável</div>
+<p><strong>Descrição:</strong> o total de descontos consignáveis não pode ultrapassar a margem disponível do recebedor; rubricas que excedem são bloqueadas/ajustadas.</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>rliquidototal</code> — [obrigatório] — líquido total do recebedor</li>
+<li><code>renda</code> — [obrigatório] — renda do recebedor</li>
+<li><code>percMargem</code> — [obrigatório] — percentual de margem consignável</li>
+<li><code>descontosConsignaveis</code> — [obrigatório] — soma dos descontos consignáveis</li>
+<li><code>margemDisponivel</code> — [condicional] — margem restante</li>
+</ul>
+<p><strong>Condição:</strong> <code>if rliquidototal &lt;= 0.009</code> → margem esgotada. <strong>Fórmula:</strong> <code>margemDisponivel = renda × percMargem − Σ descontosConsignaveis</code>.</p>
+<p><strong>Tratamento (TRT):</strong> <a href="funcionalidades.html#TRT010">TRT010</a> → <a href="#MSG010">MSG010</a> → Bloqueia/ajusta rubrica</p>
+<p><strong>Rotina:</strong> <code>VerificaMargemDesconto</code> → <code>CalculaMargemDesconto</code> → <code>DeterminaTipoMargem</code>. <strong>Origem:</strong> <code>FOLHA/Fontes/dFolhaPrevia.pas:7496,7440,7676,14922</code>. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> · <strong>Severidade:</strong> alta · <strong>Jornada:</strong> <a href="uc002.html">JF002</a> · <strong>Relacionadas:</strong> <a href="#FOLHA-RN006">RS006</a></p>
+</div>
+</div>
+
+<div class="rule-block" id="FOLHA-RN009">
+<div class="rule-id">RS009 (FOLHA-RN009) — Benefício mínimo por concessão</div>
+<p><strong>Descrição:</strong> se o valor previado ficar abaixo do benefício mínimo da concessão, o valor é ajustado ao mínimo.</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>valorPrev</code> — [obrigatório] — valor previado</li>
+<li><code>valorBenefMin</code> — [obrigatório] — benefício mínimo (regra/concessão)</li>
+<li><code>lspercentual</code> — [opcional] — percentual decimal</li>
+</ul>
+<p><strong>Condição:</strong> <code>valorPrev &lt; valorBenefMin</code> → ajusta. <strong>Fórmula:</strong> <code>valorPrev = max(valorPrev, valorBenefMin)</code>.</p>
+<p><strong>Tratamento (TRT):</strong> <a href="funcionalidades.html#TRT011">TRT011</a> → <a href="#MSG011">MSG011</a> → Ajusta ao mínimo</p>
+<p><strong>Rotina:</strong> <code>TobjRecebedor.CalculaBeneficioMinimo</code>. <strong>Origem:</strong> <code>FOLHA/Fontes/dFolhaPrevia.pas:8298</code>. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> · <strong>Severidade:</strong> média · <strong>Jornada:</strong> <a href="uc002.html">JF002</a> · <strong>Relacionadas:</strong> —</p>
+</div>
+</div>
+
+<div class="rule-block" id="FOLHA-RN015">
+<div class="rule-id">RS015 (FOLHA-RN015) — IR regressivo por tipo de base (0/1/7)</div>
+<p><strong>Descrição:</strong> o IR regressivo é calculado conforme o tipo de base: 0=vitalício, 1=abono, 7=reserva.</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>aiTipoBase</code> — [obrigatório] — domínio fechado: 0 (vitalício), 1 (abono), 7 (reserva)</li>
+<li><code>base por tipo</code> — [obrigatório] — base de IR apurada por tipo</li>
+<li><code>tabela regressiva</code> — [obrigatório] — tabela de IR regressiva</li>
+</ul>
+<p><strong>Condição:</strong> plano com opção de IR regressivo → <code>CalculaLancaIRRegressivo(aiTipoBase)</code>. <strong>Fórmula:</strong> apura base por tipo → aplica tabela regressiva → lanca rubrica de IR.</p>
+<p><strong>Rotina:</strong> <code>CalculaLancaIRRegressivo</code> / <code>CalculaLancaIRRegressivoValor</code>. <strong>Origem:</strong> <code>FOLHA/Fontes/dFolhaPrevia.pas:12123,12254</code>. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> · <strong>Severidade:</strong> alta · <strong>Jornada:</strong> <a href="uc008.html">JF008</a> · <strong>Relacionadas:</strong> <a href="#FOLHA-RN005">RS005</a></p>
+</div>
+</div>
+
+<div class="rule-block" id="FOLHA-RN017">
+<div class="rule-id">RS017 (FOLHA-RN017) — Compensação de IRRF respeita saldo</div>
+<p><strong>Descrição:</strong> a compensação de IRRF só lanca até o saldo de compensação disponível.</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>valorIRRF</code> — [obrigatório] — valor de IRRF a compensar</li>
+<li><code>saldoComp</code> — [obrigatório] — saldo de compensação disponível</li>
+<li><code>valorCompensado</code> — [opcional] — valor efetivamente compensado</li>
+</ul>
+<p><strong>Fórmula:</strong> <code>valorCompensado = min(valorIRRF, saldoComp)</code>.</p>
+<p><strong>Rotina:</strong> <code>VerificaCompensacaoIRRF</code> → <code>LancaIRCompensado</code>. <strong>Origem:</strong> <code>FOLHA/Fontes/dFolhaPrevia.pas:10254,12005</code>. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> · <strong>Severidade:</strong> média · <strong>Jornada:</strong> <a href="uc008.html">JF008</a> · <strong>Relacionadas:</strong> <a href="#FOLHA-RN005">RS005</a>, <a href="#FOLHA-RN015">RS015</a></p>
+</div>
+</div>
+
+<div class="rule-block" id="FOLHA-RN018">
+<div class="rule-id">RS018 (FOLHA-RN018) — Rateio de rubricas entre planos (proporção)</div>
+<p><strong>Descrição:</strong> quando o recebedor possui proporção multiplano (progressivo/regressivo), as rubricas são rateadas.</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>VerificaProporcaoPlanos</code> — [obrigatório] — resultado: progressivo/regressivo</li>
+<li><code>rubricas</code> — [obrigatório] — rubricas a ratear</li>
+<li><code>proporcao</code> — [condicional] — proporção por plano</li>
+</ul>
+<p><strong>Condição:</strong> <code>VerificaProporcaoPlanos</code> retorna progressivo/regressivo → rateia.</p>
+<p><strong>Rotina:</strong> <code>ProcessaRateioRubricas</code> / <code>ProcessaRateioRubricasReinf</code>. <strong>Origem:</strong> <code>FOLHA/Fontes/dFolhaPrevia.pas:22816,19765,19640</code>. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> · <strong>Severidade:</strong> média · <strong>Jornada:</strong> <a href="uc002.html">JF002</a> · <strong>Relacionadas:</strong> <a href="#FOLHA-RN019">RS019</a></p>
+</div>
+</div>
+
+<div class="rule-block" id="FOLHA-RN019">
+<div class="rule-id">RS019 (FOLHA-RN019) — REINF (eSocial) rateado por plano</div>
+<p><strong>Descrição:</strong> o processamento REINF rateia rubricas conforme proporção progressivo/regressivo do plano.</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>rubricas REINF</code> — [obrigatório] — rubricas sujeitas a REINF</li>
+<li><code>proporcao plano</code> — [obrigatório] — progressivo/regressivo</li>
+</ul>
+<p><strong>Rotina:</strong> <code>ProcessaReinf</code> → <code>ProcessaRateioRubricasReinf</code>. <strong>Origem:</strong> <code>FOLHA/Fontes/dFolhaPrevia.pas:19882,19765</code>. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> · <strong>Severidade:</strong> média · <strong>Jornada:</strong> <a href="uc002.html">JF002</a> · <strong>Relacionadas:</strong> <a href="#FOLHA-RN018">RS018</a></p>
+</div>
+</div>
+
+<div class="rule-block" id="FOLHA-RN020">
+<div class="rule-id">RS020 (FOLHA-RN020) — Correção/alterador do benefício por data de pagamento</div>
+<p><strong>Descrição:</strong> a correção do benefício é aplicada conforme a data de pagamento, determinando a rubrica de correção e o alterador.</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>dataPagamento</code> — [obrigatório] — data de pagamento</li>
+<li><code>rubricaCorrecao</code> — [condicional] — rubrica de correção determinada</li>
+<li><code>alterador</code> — [condicional] — alterador calculado</li>
+</ul>
+<p><strong>Rotina:</strong> <code>CalculaCorrecaoBeneficio</code> → <code>CalculaAlterador</code> → <code>DeterminaRubricaCorrecao</code> → <code>InsereRubricaAlterador</code> → <code>CalculaCorrecaoTmpDesc</code>. <strong>Origem:</strong> <code>FOLHA/Fontes/dFolhaPrevia.pas:8615,8920,9013,9022,9122</code>. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> · <strong>Severidade:</strong> média · <strong>Jornada:</strong> <a href="uc002.html">JF002</a>, <a href="uc009.html">JF009</a> · <strong>Relacionadas:</strong> —</p>
+</div>
+</div>
+
+<div class="rule-block" id="FOLHA-RN021">
+<div class="rule-id">RS021 (FOLHA-RN021) — Salário-família sobre base específica</div>
+<p><strong>Descrição:</strong> o salário-família é calculado sobre a base determinada para tal fim.</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>baseSalarioFamilia</code> — [obrigatório] — base determinada para salário-família</li>
+<li><code>valorSalarioFamilia</code> — [opcional] — valor calculado</li>
+</ul>
+<p><strong>Rotina:</strong> <code>CaluloSalarioFamilia</code> → <code>DeterminabaseSalariofamilia</code>. <strong>Origem:</strong> <code>FOLHA/Fontes/dFolhaPrevia.pas:9555,7160</code>. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> · <strong>Severidade:</strong> média · <strong>Jornada:</strong> <a href="uc002.html">JF002</a> · <strong>Relacionadas:</strong> —</p>
+</div>
+</div>
+
+<div class="rule-block" id="FOLHA-RN022">
+<div class="rule-id">RS022 (FOLHA-RN022) — Transação da prévia com commit/StartTransaction por blocos</div>
+<p><strong>Descrição:</strong> a prévia grava em transações Oracle com commit e início de nova transação em blocos.</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>dtmBaseDados.dbBaseDados</code> — [obrigatório] — conexão Oracle</li>
+<li><code>lote de prévia</code> — [obrigatório] — bloco a gravar</li>
+</ul>
+<p><strong>Condição:</strong> após gravar lote de prévia → <code>Commit</code> + <code>StartTransaction</code>.</p>
+<p><strong>Rotina:</strong> <code>IncluiPrevia</code> / <code>ProcessaPrevia</code>. <strong>Origem:</strong> <code>FOLHA/Fontes/dFolhaPrevia.pas:4138-4139,6468-6471,24890,25383-25405</code>. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> · <strong>Severidade:</strong> alta · <strong>Jornada:</strong> <a href="uc002.html">JF002</a> · <strong>Relacionadas:</strong> —</p>
+</div>
+</div>
+
+<div class="rule-block" id="FOLHA-RN028">
+<div class="rule-id">RS028 (FOLHA-RN028) — Arredondamento do líquido por base</div>
+<p><strong>Descrição:</strong> o líquido é arredondado conforme a base de cálculo (casas decimais do parâmetro).</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>líquido</code> — [obrigatório] — valor líquido a arredondar</li>
+<li><code>casas decimais</code> — [obrigatório] — definido pelo parâmetro da base</li>
+</ul>
+<p><strong>Rotina:</strong> <code>CalculaArredondamento</code> / <code>CalculaArredondamentoLiquido</code>. <strong>Origem:</strong> <code>FOLHA/Fontes/dFolhaPrevia.pas:6777,6794</code>. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> · <strong>Severidade:</strong> baixa · <strong>Jornada:</strong> <a href="uc002.html">JF002</a> · <strong>Relacionadas:</strong> —</p>
+</div>
+</div>
+
+<div class="rule-block" id="FOLHA-RN029">
+<div class="rule-id">RS029 (FOLHA-RN029) — Avaliação de dado bancário do recebedor</div>
+<p><strong>Descrição:</strong> antes de processar, o dado bancário do recebedor é avaliado (banco/agência/conta).</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>banco</code> — [obrigatório] — código do banco</li>
+<li><code>agência</code> — [obrigatório] — código da agência</li>
+<li><code>conta</code> — [obrigatório] — número da conta</li>
+</ul>
+<p><strong>Rotina:</strong> <code>AvaliaDadoBancario</code>. <strong>Origem:</strong> <code>FOLHA/Fontes/dFolhaPrevia.pas:19115</code>. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> · <strong>Severidade:</strong> média · <strong>Jornada:</strong> <a href="uc002.html">JF002</a> · <strong>Relacionadas:</strong> <a href="#FOLHA-RN012">RS012</a></p>
+</div>
+</div>
+
+<div class="rule-block" id="FOLHA-RN030">
+<div class="rule-id">RS030 (FOLHA-RN030) — Controle de interface (CTRLINTERFACE) por situação/lote</div>
+<p><strong>Descrição:</strong> o motor grava/atualiza CTRLINTERFACE com a situação da prévia e o lote corrente.</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>CTRLINTERFACE.situação</code> — [obrigatório] — situação da prévia</li>
+<li><code>CTRLINTERFACE.lote</code> — [obrigatório] — lote corrente</li>
+</ul>
+<p><strong>Rotina:</strong> <code>SetCtrlInterface</code> / <code>GetCtrlInterface</code>. <strong>Origem:</strong> <code>FOLHA/Fontes/dFolhaPrevia.pas:19492,19505</code>. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> · <strong>Severidade:</strong> média · <strong>Jornada:</strong> <a href="uc002.html">JF002</a> · <strong>Relacionadas:</strong> —</p>
+</div>
+</div>
+
+
+</section>
+
+<section><div class="section-title">7. Tratamentos (TRT)</div>
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Condição</th><th>Mensagem</th><th>Resultado</th><th>Regra</th><th>Jornada</th></tr></thead><tbody>
+<tr id="TRT004"><td><strong>TRT004</strong></td><td>Rubrica de IR sem natureza de rendimento</td><td><a href="#MSG004">MSG004</a></td><td>Não soma à base de IRRF</td><td><a href="#FOLHA-RN004">RS004</a></td><td>JF002, JF008</td></tr>
+<tr id="TRT005"><td><strong>TRT005</strong></td><td>Líquido do recebedor negativo após descontos</td><td><a href="#MSG005">MSG005</a></td><td>Zera líquido e transfere desconto</td><td><a href="#FOLHA-RN006">RS006</a></td><td>JF002</td></tr>
+<tr id="TRT010"><td><strong>TRT010</strong></td><td>Margem de desconto consignável excedida</td><td><a href="#MSG010">MSG010</a></td><td>Bloqueia/ajusta rubrica</td><td><a href="#FOLHA-RN008">RS008</a></td><td>JF002</td></tr>
+<tr id="TRT011"><td><strong>TRT011</strong></td><td>Benefício abaixo do mínimo da concessão</td><td><a href="#MSG011">MSG011</a></td><td>Ajusta ao mínimo</td><td><a href="#FOLHA-RN009">RS009</a></td><td>JF002</td></tr>
+</tbody></table></div></section>
+
+<section><div class="section-title">8. Mensagens (MSG)</div>
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Texto da Mensagem</th><th>Jornadas relacionadas</th></tr></thead><tbody>
+<tr id="MSG004"><td><strong>MSG004</strong></td><td>"Rubrica sem natureza de rendimento — não soma à base de IRRF"</td><td>JF002, JF008</td></tr>
+<tr id="MSG005"><td><strong>MSG005</strong></td><td>"Líquido negativo — valor zerado e desconto excedente transferido"</td><td>JF002</td></tr>
+<tr id="MSG010"><td><strong>MSG010</strong></td><td>"Margem consignável excedida — rubrica bloqueada/ajustada"</td><td>JF002</td></tr>
+<tr id="MSG011"><td><strong>MSG011</strong></td><td>"Benefício abaixo do mínimo — ajustado ao mínimo da concessão"</td><td>JF002</td></tr>
+</tbody></table></div></section>
+
+
+<p><a class="back-btn" href="funcionalidades.html">← Voltar à lista de Casos de Uso</a></p>
+
+</main>
+<footer>
+<p>Blueprint AS-IS — PFC-22 / PFC-32 — Módulo Folha de Benefícios | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-10</p>
+</footer>
+</body>
+</html>

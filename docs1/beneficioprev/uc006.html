@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UC006 – Reajuste de Benefícios — Benefício Previdenciário — Blueprint AS-IS</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<header>
+  <div class="badge">Blueprint AS-IS — PFC-24 — PFC-32</div>
+  <h1>UC006 – Reajuste de Benefícios</h1>
+  <p>Caso de Uso do módulo Benefício Previdenciário — jornada JF006 (PF-06) — Reajuste de Benefícios.</p>
+</header>
+<nav>
+  <a href="index.html">📋 Visão Geral</a>
+  <a href="arquitetura.html">🏗️ Arquitetura</a>
+  <a href="inventario-tecnico.html">📦 Inventário</a>
+  <a href="funcionalidades.html">⚙️ Processos Funcionais</a>
+  <a href="procedures-functions.html">🔧 Procedures</a>
+  <a href="dados.html">🗄️ Dados</a>
+  <a href="relatorios.html">📄 Relatórios</a>
+  <a href="integracoes.html">🔗 Integrações</a>
+  <a href="tratamento-erros.html">⚠️ Erros</a>
+  <a href="diagramas-fluxo.html">🔀 Fluxos</a>
+  <a href="lacunas.html">🔍 Lacunas</a>
+  <a href="controle-cobertura.html">📊 Cobertura</a>
+</nav>
+<main>
+
+<p><a class="back-btn" href="funcionalidades.html">← Voltar à lista de Casos de Uso</a></p>
+
+<section><div class="section-title">1. Identificação</div>
+<div class="table-wrap"><table><tbody>
+<tr><th>Caso de Uso</th><td><strong>UC006</strong> – Reajuste de Benefícios</td></tr>
+<tr><th>Módulo</th><td>Benefício Previdenciário</td></tr>
+<tr><th>Jornada</th><td>JF006 (PF-06) — Reajuste de Benefícios</td></tr>
+<tr><th>Sistema</th><td>CM Contabilidade / FUNCEF (Delphi 5 / VCL / MIDAS)</td></tr>
+<tr><th>Tipo</th><td>Sistema Desktop</td></tr>
+<tr><th>Ator</th><td>Usuário operacional (analista previdenciário)</td></tr>
+<tr><th>Entry point</th><td><code>BENEFICIOPREV/Fontes/BeneficioPrev.dpr</code></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">2. Descrição Resumida</div>
+<p>Caso de Uso <strong>UC006</strong> do módulo Benefício Previdenciário, correspondente à JF006 (PF-06) — Reajuste de Benefícios. Esta página detalha a jornada funcional com sua sequência operacional, ações, regras de negócio, tratamentos de erro e mensagens.</p>
+</section>
+
+<section><div class="section-title">3. Pré-condições</div>
+<p>Consulte as pré-condições específicas na seção da jornada abaixo.</p>
+</section>
+
+<section><div class="section-title">4. Pós-condições</div>
+<p>Consulte as pós-condições específicas na seção da jornada abaixo.</p>
+</section>
+
+<section><div class="section-title">5. Sequência Operacional e Ações</div>
+<div class="pf-block" id="PF-06">
+<h4>JF006 (PF-06) — Reajuste de Benefícios</h4>
+<p><strong>Objetivo:</strong> Reajustar os benefícios vitalícios por plano e fonte pagadora, aplicando índice e percentual FRB, e manter as regras de reajuste do INSS.</p>
+<p><strong>Ator / gatilho:</strong> Analista de benefícios, nas telas Reajuste Benefícios e Cadastro de Regras de Reajuste dos Benefícios do INSS.</p>
+<p><strong>Pré-condições:</strong> Índices de reajuste cadastrados; regras de reajuste do INSS cadastradas quando a fonte é INSS.</p>
+<p><strong>Pós-condições:</strong> REAJUSTEBENEFICIO e LISTABENEFICIOREAJUSTE gravados; valores em BENEFBFCIARIO e HSTBENEFBFCIARIO atualizados.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li>Cadastrar ou conferir as regras de reajuste dos benefícios do INSS. [<a href="#TRT010">TRT010</a>]</li>
+<li>Informar plano e fonte pagadora (Funcef ou INSS). [<a href="#BENEF-RN009">RS009</a>]</li>
+<li>O sistema seleciona os benefícios vitalícios não-resgate, fora dos planos 255 e 358. [<a href="#BENEF-RN007">RS007</a>] [<a href="#BENEF-RN008">RS008</a>]</li>
+<li>O sistema grava a lista de reajuste e aplica índice e %FRB aos benefícios.</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Manter regras de reajuste INSS</td><td>Parametrizar o reajuste INSS</td><td>Regras de reajuste</td><td>Grava a regra e o log</td><td>Regras disponíveis</td><td><a href="#BENEF-RN025">RS025</a></td><td><a href="#MSG008">MSG008</a></td><td><code>FCadReajINSS.dfm</code></td></tr>
+<tr><td>Selecionar benefícios</td><td>Montar a lista de reajuste</td><td>Plano, fonte pagadora</td><td>Filtra vitalícios não-resgate, fora de 255/358, pela fonte</td><td>Lista de benefícios a reajustar</td><td><a href="#BENEF-RN007">RS007</a>, <a href="#BENEF-RN008">RS008</a>, <a href="#BENEF-RN009">RS009</a></td><td>—</td><td><code>FReajuesteBenef.dfm</code></td></tr>
+<tr><td>Aplicar o reajuste</td><td>Atualizar os valores</td><td>Lista e índice</td><td>Insere REAJUSTEBENEFICIO/LISTABENEFICIOREAJUSTE e aplica índice e %FRB</td><td>Benefícios reajustados</td><td>—</td><td>—</td><td><code>FReajuesteBenef.dfm</code></td></tr>
+</tbody></table></div>
+<p><strong>Regras de negócio da jornada:</strong> <a href="#BENEF-RN007">RS007 (BENEF-RN007)</a> — Reajuste só para benefícios vitalícios não-resgate, <a href="#BENEF-RN008">RS008 (BENEF-RN008)</a> — Reajuste exclui REPLAN não saldado (255 e 358), <a href="#BENEF-RN009">RS009 (BENEF-RN009)</a> — Reajuste por fonte pagadora</p>
+<p><strong>Tratamentos de erro:</strong> <a href="#TRT010">TRT010</a></p>
+<p><strong>Mensagens:</strong> <a href="#MSG008">MSG008</a></p>
+<p><strong>Telas:</strong> Reajuste Benefícios (<code>FReajuesteBenef.dfm</code>), Cadastro de Regras de Reajuste dos Benefícios do INSS (<code>FCadReajINSS.dfm</code>)</p>
+<p><strong>Dependências:</strong> Independente; o reajuste judicial é tratado em <a href="uc007.html">JF007</a>.</p>
+<div class="note note-info"><p><strong>Registro original do processo PF-06</strong></p><p><strong>Forms de entrada:</strong> <code>FReajuesteBenef.dfm</code>, <code>FCadReajINSS.dfm</code></p><p><strong>Lógica de processamento:</strong> Seleciona benefícios vitais não-resgate por plano/fonte; insere em REAJUSTEBENEFICIO/LISTABENEFICIOREAJUSTE; aplica índice e %FRB</p><p><strong>Saídas:</strong> Benefícios reajustados</p><p><strong>Persistência (tabelas escritas):</strong> REAJUSTEBENEFICIO, LISTABENEFICIOREAJUSTE, HSTBENEFBFCIARIO, BENEFBFCIARIO</p><p><strong>Evidência:</strong> <code>BENEFICIOPREV/Fontes/FReajuesteBenef.pas:38-113</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+</div>
+</div>
+</section>
+
+<section><div class="section-title">6. Regras de Negócio da Jornada</div>
+<p>As regras de negócio aplicáveis a esta jornada são apresentadas abaixo com seu texto completo, sem necessidade de acessar outra página.</p>
+<div class="rule-block" id="BENEF-RN007">
+<div class="rule-id">RS007 (BENEF-RN007) — Reajuste só para benefícios vitalícios não-resgate</div>
+<div class="rule-desc">O reajuste periódico alcança somente benefícios de pagamento vitalício que não sejam resgate.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>IDTPPAGTOBENEFIC</code> — [obrigatório] — = 1 (vitalício)</li>
+<li><code>FLGRESGATE</code> — [opcional] — nulo é tratado como 0</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> — (regra de seleção/cálculo, sem crítica ao usuário)</p>
+<p><strong>Jornada:</strong> <a href="uc006.html">JF006</a></p>
+<p><strong>Descrição original:</strong> Reajuste só atua sobre benefícios vitalícios não-resgate.</p>
+<p><strong>Condições:</strong> IDTPPAGTOBENEFIC = 1 AND NVL(FLGRESGATE,0) = 0</p><p><strong>Dados envolvidos:</strong> BENEFBFCIARIO</p><p><strong>Resultado/Exceção:</strong> Exclui resgate e temporários</p>
+<div class="rule-origin">📂 Origem: <code>BENEFICIOPREV/Fontes/FReajuesteBenef.pas:95-96</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+</div>
+
+<div class="rule-block" id="BENEF-RN008">
+<div class="rule-id">RS008 (BENEF-RN008) — Reajuste exclui REPLAN não saldado (255 e 358)</div>
+<div class="rule-desc">Os benefícios e planos 255 e 358 (REPLAN não saldado) ficam fora do reajuste.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>IDBENEFICIO</code> — [obrigatório] — ∉ (255, 358)</li>
+<li><code>IDPLANOPREV</code> — [obrigatório] — ∉ (255, 358)</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> — (regra de seleção/cálculo, sem crítica ao usuário)</p>
+<p><strong>Jornada:</strong> <a href="uc006.html">JF006</a></p>
+<p><strong>Descrição original:</strong> Reajuste exclui benefícios 255 e 358 (REPLAN não saldado).</p>
+<p><strong>Condições:</strong> IDBENEFICIO NOT IN (255,358) e IDPLANOPREV NOT IN (255,358)</p><p><strong>Dados envolvidos:</strong> BENEFPLANPREV</p><p><strong>Resultado/Exceção:</strong> Planos REPLAN fora do reajuste</p>
+<div class="rule-origin">📂 Origem: <code>BENEFICIOPREV/Fontes/FReajuesteBenef.pas:100,110</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+</div>
+
+<div class="rule-block" id="BENEF-RN009">
+<div class="rule-id">RS009 (BENEF-RN009) — Reajuste por fonte pagadora</div>
+<div class="rule-desc">O reajuste é executado separadamente por fonte pagadora: Funcef (0) ou INSS (1).</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li>Fonte pagadora (parâmetro de tela) — [obrigatório] — 0 = Funcef, 1 = INSS</li>
+<li><code>BENEFPLANPREV.FLGREFERENCIA</code> — [obrigatório] — comparado com a fonte escolhida</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> — (regra de seleção/cálculo, sem crítica ao usuário)</p>
+<p><strong>Jornada:</strong> <a href="uc006.html">JF006</a></p>
+<p><strong>Descrição original:</strong> Reajuste distingue fonte pagadora (Funcef=0 / INSS=1).</p>
+<p><strong>Condições:</strong> FLGREFERENCIA = :FONTEPAGADORA</p><p><strong>Dados envolvidos:</strong> BENEFPLANPREV</p><p><strong>Resultado/Exceção:</strong> Seleção de benefícios por fonte</p>
+<div class="rule-origin">📂 Origem: <code>BENEFICIOPREV/Fontes/FReajuesteBenef.pas:101-102</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+</div>
+
+<div class="rule-block" id="BENEF-RN025">
+<div class="rule-id">RS025 (BENEF-RN025) — Operações auditadas no log do TotalPREV</div>
+<div class="rule-desc">As operações de negócio do módulo são registradas no log do TotalPREV com módulo, usuário, descrição e data.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>IDMODULO</code> — [obrigatório] — = 454</li>
+<li><code>IDUSUARIO</code> — [obrigatório]</li>
+<li><code>DESCOPERACAO</code> — [obrigatório]</li>
+<li><code>DATA</code> — [obrigatório] — SYSDATE</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT010">TRT010</a> → <a href="#MSG008">MSG008</a> → Levanta exceção “Erro ao gravar Log.”; em FEventoMorte, FEventoReclusao, FCadReajINSS e FCadContribParticipante ela é capturada por um except vazio e a operação segue sem log; em FDesdobramentoBenef cai no except externo da transação (:6325-6331)</p>
+<p><strong>Jornada:</strong> Transversal (todas)</p>
+<p><strong>Nota de verificação:</strong> Em vários forms a falha do log é engolida por um except vazio (ver TRT010).</p>
+<p><strong>Descrição original:</strong> Toda operação de negócio é auditada em LOGTOTALPREV (IdModulo=454).</p>
+<p><strong>Condições:</strong> INSERT INTO LOGTOTALPREV(IDMODULO=454, IDUSUARIO, DESCOPERACAO, DATA=SYSDATE)</p><p><strong>Dados envolvidos:</strong> LOGTOTALPREV</p><p><strong>Resultado/Exceção:</strong> Log de operações do TotalPREV</p>
+<div class="rule-origin">📂 Origem: <code>BENEFICIOPREV/Fontes/UModulo.pas:64-88</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+</div>
+
+
+</section>
+
+<section><div class="section-title">7. Tratamentos (TRT)</div>
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Condição</th><th>Mensagem</th><th>Resultado</th><th>Regra</th><th>Jornada</th></tr></thead><tbody>
+<tr id="TRT010"><td><strong>TRT010</strong></td><td>Falha ao gravar o log de operações (<code>Sistema.GravaLogOperacoes</code> retorna falso)</td><td><a href="#MSG008">MSG008</a></td><td>Levanta exceção “Erro ao gravar Log.”; em FEventoMorte, FEventoReclusao, FCadReajINSS e FCadContribParticipante ela é capturada por um except vazio e a operação segue sem log; em FDesdobramentoBenef cai no except externo da transação (:6325-6331)</td><td><a href="#BENEF-RN025">RS025 (BENEF-RN025)</a></td><td><a href="uc005.html">JF005</a>, <a href="uc006.html">JF006</a>, <a href="uc008.html">JF008</a></td></tr>
+</tbody></table></div></section>
+
+<section><div class="section-title">8. Mensagens (MSG)</div>
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Texto da mensagem</th><th>Tipo</th><th>Origem (BENEFICIOPREV/Fontes/)</th><th>Jornadas</th></tr></thead><tbody>
+<tr id="MSG008"><td><strong>MSG008</strong></td><td>“Erro ao gravar Log.”</td><td>Erro (exceção)</td><td><code>FEventoMorte.pas:1441; FEventoReclusao.pas:855; FCadReajINSS.pas:162; FDesdobramentoBenef.pas:6316; FCadContribParticipante.pas:934</code></td><td><a href="uc005.html">JF005</a>, <a href="uc006.html">JF006</a>, <a href="uc008.html">JF008</a></td></tr>
+</tbody></table></div></section>
+
+
+<p><a class="back-btn" href="funcionalidades.html">← Voltar à lista de Casos de Uso</a></p>
+
+</main>
+<footer>
+<p>Blueprint AS-IS — PFC-24 / PFC-32 — Módulo Benefício Previdenciário | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-10</p>
+</footer>
+</body>
+</html>

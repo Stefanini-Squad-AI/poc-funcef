@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UC008 – Tratamento de divergências e inconsistências — Contribuição Previdenciária — Blueprint AS-IS</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<header>
+  <div class="badge">Blueprint AS-IS — PFC-23 (enriquecido) — PFC-32</div>
+  <h1>UC008 – Tratamento de divergências e inconsistências</h1>
+  <p>Caso de Uso do módulo Contribuição Previdenciária — jornada JF008 (PF-08) — Tratamento de divergências e inconsistências.</p>
+</header>
+<nav>
+  <a href="index.html">📋 Visão Geral</a>
+  <a href="arquitetura.html">🏗️ Arquitetura</a>
+  <a href="inventario-tecnico.html">📦 Inventário</a>
+  <a href="funcionalidades.html">⚙️ Processos Funcionais</a>
+  <a href="procedures-functions.html">🔧 Procedures</a>
+  <a href="dados.html">🗄️ Dados</a>
+  <a href="relatorios.html">📄 Relatórios</a>
+  <a href="integracoes.html">🔗 Integrações</a>
+  <a href="tratamento-erros.html">⚠️ Erros</a>
+  <a href="diagramas-fluxo.html">🔀 Fluxos</a>
+  <a href="lacunas.html">🔍 Lacunas</a>
+  <a href="controle-cobertura.html">📊 Cobertura</a>
+</nav>
+<main>
+
+<p><a class="back-btn" href="funcionalidades.html">← Voltar à lista de Casos de Uso</a></p>
+
+<section><div class="section-title">1. Identificação</div>
+<div class="table-wrap"><table><tbody>
+<tr><th>Caso de Uso</th><td><strong>UC008</strong> – Tratamento de divergências e inconsistências</td></tr>
+<tr><th>Módulo</th><td>Contribuição Previdenciária</td></tr>
+<tr><th>Jornada</th><td>JF008 (PF-08) — Tratamento de divergências e inconsistências</td></tr>
+<tr><th>Sistema</th><td>CM Contabilidade / FUNCEF (Delphi 5 / VCL / MIDAS)</td></tr>
+<tr><th>Tipo</th><td>Sistema Desktop</td></tr>
+<tr><th>Ator</th><td>Usuário operacional (analista previdenciário, financeiro, contábil)</td></tr>
+<tr><th>Entry point</th><td><code>CONTRIBUICAOPREV/Fontes/ContribuicaoPREV.dpr</code></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">2. Descrição Resumida</div>
+<p>Caso de Uso <strong>UC008</strong> do módulo Contribuição Previdenciária, correspondente à JF008 (PF-08) — Tratamento de divergências e inconsistências. Esta página detalha a jornada funcional com sua sequência operacional, ações, regras de negócio, tratamentos de erro e mensagens.</p>
+</section>
+
+<section><div class="section-title">3. Pré-condições</div>
+<p>Consulte as pré-condições específicas na seção da jornada abaixo.</p>
+</section>
+
+<section><div class="section-title">4. Pós-condições</div>
+<p>Consulte as pós-condições específicas na seção da jornada abaixo.</p>
+</section>
+
+<section><div class="section-title">5. Sequência Operacional e Ações</div>
+<div class="pf-block" id="PF-08">
+<h4>JF008 (PF-08) — Tratamento de divergências e inconsistências</h4>
+<p><strong>Objetivo:</strong> Comparar contribuições enviadas e recebidas, identificar e tratar divergências, desfazer documentos e consultar estatísticas de divergência.</p>
+<p><strong>Ator / gatilho:</strong> Analista de arrecadação, nas telas <em>Tratamento de Divergência de Contribuição</em>, <em>Consulta de Estatística de Massa</em> e <em>Interface do Desfazer Documento</em>.</p>
+<p><strong>Pré-condições:</strong> Contribuições enviadas (<a href="uc001.html">JF001</a>) e retornos processados (<a href="uc002.html">JF002</a>); motivo padrão de tratamento cadastrado.</p>
+<p><strong>Pós-condições:</strong> HSTCONTRIBPREV ajustado; HSTATRASOCONTRIB atualizado; LOGTOTALPREV gravado; documentos desfeitos quando solicitado.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li>Selecionar o modo de divergência e informar os filtros (patrocinadora, plano, contribuição, faixas, participante, mês de referência). [<a href="#TRT038">TRT038</a>] [<a href="#TRT039">TRT039</a>]</li>
+<li>O sistema compara enviado × recebido e verifica baixas no CAP/CAR.</li>
+<li>Tratar as divergências: gera documentos e lançamentos e atualiza HSTATRASOCONTRIB. [<a href="#TRT040">TRT040</a>] [<a href="#TRT053">TRT053</a>]</li>
+<li>Desfazer documento: informar o código do documento e processar. [<a href="#TRT041">TRT041</a>]</li>
+<li>Consultar a estatística de divergências.</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Filtrar divergências</td><td>Localizar contribuições divergentes</td><td>Modo de divergência + filtros</td><td>Valida o modo e o valor de cada filtro escolhido</td><td>Lista de divergências</td><td>—</td><td><a href="#MSG068">MSG068</a>, <a href="#MSG069">MSG069</a>, <a href="#MSG071">MSG071</a>, <a href="#MSG070">MSG070</a></td><td><code>FDivergContrib.dfm</code></td></tr>
+<tr><td>Tratar divergência</td><td>Regularizar enviado × recebido</td><td>Divergências selecionadas</td><td>Exige motivo padrão; gera documentos/lançamentos; grava HSTATRASOCONTRIB e log</td><td>Divergências resolvidas</td><td>—</td><td><a href="#MSG072">MSG072</a>, <a href="#MSG100">MSG100</a></td><td><code>FDivergContrib.dfm</code></td></tr>
+<tr><td>Desfazer documento</td><td>Reverter documento de contribuição</td><td>Código do documento</td><td>Valida existência e desfaz</td><td>Documento desfeito</td><td>—</td><td><a href="#MSG073">MSG073</a>, <a href="#MSG074">MSG074</a>, <a href="#MSG075">MSG075</a></td><td><code>FDesfDocContribuicao.dfm</code></td></tr>
+<tr><td>Consultar estatística</td><td>Acompanhar volume de divergências</td><td>Parâmetros da consulta</td><td>Exibe a estatística de massa</td><td>Estatística exibida</td><td>—</td><td><a href="#MSG076">MSG076</a></td><td><code>FConsEstatDivergContrib.dfm</code></td></tr>
+</tbody></table></div>
+<p><strong>Regras de negócio da jornada:</strong> nenhuma regra CONTRIB-RN catalogada para este processo; as validações da jornada estão nos tratamentos abaixo.</p>
+<p><strong>Tratamentos de erro:</strong> <a href="#TRT038">TRT038</a>, <a href="#TRT039">TRT039</a>, <a href="#TRT040">TRT040</a>, <a href="#TRT041">TRT041</a>, <a href="#TRT053">TRT053</a></p>
+<p><strong>Mensagens:</strong> <a href="#MSG068">MSG068</a>, <a href="#MSG069">MSG069</a>, <a href="#MSG070">MSG070</a>, <a href="#MSG071">MSG071</a>, <a href="#MSG072">MSG072</a>, <a href="#MSG073">MSG073</a>, <a href="#MSG074">MSG074</a>, <a href="#MSG075">MSG075</a>, <a href="#MSG076">MSG076</a>, <a href="#MSG100">MSG100</a></p>
+<p><strong>Telas:</strong> Tratamento de Divergência de Contribuição (<code>FDivergContrib.dfm</code>), Consulta de Estatística de Massa (<code>FConsEstatDivergContrib.dfm</code>), Interface do Desfazer Documento (<code>FDesfDocContribuicao.dfm</code>)</p>
+<p><strong>Dependências:</strong> Sucede <a href="uc001.html">JF001</a> e <a href="uc002.html">JF002</a>; é o caminho indicado pelo sistema para corrigir contribuições bloqueadas em <a href="uc009.html">JF009</a>.</p>
+<div class="note note-info"><p><strong>Registro original do processo PF-08</strong></p><p><strong>Forms de entrada:</strong> <code>FDivergContrib.dfm</code>, <code>FConsEstatDivergContrib.dfm</code>, <code>FDesfDocContribuicao.dfm</code></p><p><strong>Lógica de processamento:</strong> Compara enviado vs recebido, identifica divergências, tratamento manual, desfaz documentos</p><p><strong>Saídas:</strong> Divergências resolvidas, logs</p><p><strong>Persistência (tabelas escritas):</strong> HSTCONTRIBPREV (U), HSTATRASOCONTRIB (I/U/D), LOGTOTALPREV (I)</p><p><strong>Evidência:</strong> <code>CONTRIBUICAOPREV/Fontes/FDivergContrib.pas:2737-2768</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+</div>
+</div>
+</section>
+
+<section><div class="section-title">6. Regras de Negócio da Jornada</div>
+<p>As regras de negócio aplicáveis a esta jornada são apresentadas abaixo com seu texto completo, sem necessidade de acessar outra página.</p>
+<div class="rule-block" id="CONTRIB-RN032">
+<div class="rule-id">CONTRIB-RN032 — Divergência aceita por margem (VLRACEITADIVERG)</div>
+<p><strong>Descrição:</strong> Se |VALORESPERADO − VALORRECEBIDO| ≤ VLRACEITADIVERG (margem de aceitação), a contribuição é considerada recebida corretamente (SITRECEBIMENTO=2); senão, divergência não tratada (SITRECEBIMENTO=3).</p>
+<p><strong>Fórmula:</strong> <code>SITRECEBIMENTO = 2 se |esperado − recebido| ≤ VLRACEITADIVERG, senão 3</code></p>
+<p><strong>Dados:</strong> HSTCONTRIBPREV.VALORESPERADO, VALORRECEBIDO; CONTPREV.VLRACEITADIVERG</p>
+<p><strong>Rotina:</strong> <code>FRecebeContribuicao.IncluiHSTCONTRIBPREV</code> · <strong>Arquivo:</strong> <code>FRecebeContribuicao.pas:2871-2873, 3079-3091</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+</div>
+
+<div class="rule-block" id="CONTRIB-RN037">
+<div class="rule-id">CONTRIB-RN037 — Tratamento de divergência por modo (9 tratamentos)</div>
+<p><strong>Descrição:</strong> O tratamento de divergência tem 9 opções (OPTRATDIVERG): 1=Cobrar via Interface, 2=Cobrar via Banco, 3=Descontar no Próximo Benefício, 4=Devolver via Interface, 5=Devolver via Banco, 6=Acrescentar no Próximo Benefício, 7=Adicionar como Aporte, 8=Ignorar (não recalculou patronal), 9=Ignorar (já recalculou patronal).</p>
+<p><strong>Condições:</strong> Cada modo valida situação do participante (AT/MA/MP/AS) e direção da divergência (pagou a maior/menor).</p>
+<p><strong>Dados:</strong> HSTCONTRIBPREV.OPTRATDIVERG, SITRECEBIMENTO, FLGDEVOLUCAO</p>
+<p><strong>Rotina:</strong> <code>FDivergContrib.BuscaOpcoes</code> · <strong>Arquivo:</strong> <code>FDivergContrib.pas:4534-4623, 619-631</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+</div>
+
+
+</section>
+
+<section><div class="section-title">7. Tratamentos (TRT)</div>
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Condição</th><th>Mensagem</th><th>Resultado</th><th>Regra</th><th>Jornada</th></tr></thead><tbody>
+<tr id="TRT038"><td><strong>TRT038</strong></td><td>Modo de divergência não selecionado</td><td><a href="#MSG068">MSG068</a></td><td>Bloqueia a consulta/tratamento</td><td>validação de tela</td><td><a href="uc008.html">JF008</a></td></tr>
+<tr id="TRT039"><td><strong>TRT039</strong></td><td>Filtro escolhido sem valor informado (ou datas inválidas)</td><td><a href="#MSG069">MSG069</a>, <a href="#MSG071">MSG071</a>, <a href="#MSG070">MSG070</a></td><td>Bloqueia a consulta</td><td>validação de tela</td><td><a href="uc008.html">JF008</a></td></tr>
+<tr id="TRT040"><td><strong>TRT040</strong></td><td>Motivo padrão para tratamento de divergência não cadastrado</td><td><a href="#MSG072">MSG072</a></td><td>Bloqueia o tratamento</td><td>validação de tela</td><td><a href="uc008.html">JF008</a></td></tr>
+<tr id="TRT041"><td><strong>TRT041</strong></td><td>Código do documento não informado ou não encontrado no desfazer documento</td><td><a href="#MSG073">MSG073</a>, <a href="#MSG074">MSG074</a></td><td>Não desfaz</td><td>validação de tela</td><td><a href="uc008.html">JF008</a></td></tr>
+<tr id="TRT053"><td><strong>TRT053</strong></td><td>Falha ao gravar o log de auditoria</td><td><a href="#MSG100">MSG100</a></td><td>Exceção; a transação em curso não é concluída</td><td>validação de tela</td><td><a href="uc003.html">JF003</a>, <a href="uc004.html">JF004</a>, <a href="uc008.html">JF008</a>, <a href="uc009.html">JF009</a></td></tr>
+</tbody></table></div></section>
+
+<section><div class="section-title">8. Mensagens (MSG)</div>
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Texto da mensagem</th><th>Tipo</th><th>Origem (CONTRIBUICAOPREV/Fontes/)</th><th>Jornadas</th></tr></thead><tbody>
+<tr id="MSG068"><td><strong>MSG068</strong></td><td>“Selecione um Modo de Divergência na Lista de Modos.”</td><td>Erro</td><td><code>FDivergContrib.pas:1555,1831,4133</code></td><td><a href="uc008.html">JF008</a></td></tr>
+<tr id="MSG069"><td><strong>MSG069</strong></td><td>“A Patrocinadora deve ser informada para o filtro desejado. (mesmo padrão para Plano, Contribuição, Faixa/Tempo/Valor de Divergência, Participante, Situação e Mês de Referência)”</td><td>Erro</td><td><code>FDivergContrib.pas:1443-1527</code></td><td><a href="uc008.html">JF008</a></td></tr>
+<tr id="MSG070"><td><strong>MSG070</strong></td><td>“Para o Recálculo Patronal o período selecionado só pode conter um mês.”</td><td>Informação</td><td><code>FDivergContrib.pas:2186</code></td><td><a href="uc008.html">JF008</a></td></tr>
+<tr id="MSG071"><td><strong>MSG071</strong></td><td>“É necessário informar a data inicial e a final.”</td><td>Informação</td><td><code>FDivergContrib.pas:2951,2993</code></td><td><a href="uc008.html">JF008</a></td></tr>
+<tr id="MSG072"><td><strong>MSG072</strong></td><td>“Motivo padrão para tratamento de divergência não cadastrado. Verique.”</td><td>Erro</td><td><code>FDivergContrib.pas:3640</code></td><td><a href="uc008.html">JF008</a></td></tr>
+<tr id="MSG073"><td><strong>MSG073</strong></td><td>“Preencha o Código do Documento.”</td><td>Erro</td><td><code>FDesfDocContribuicao.pas:79</code></td><td><a href="uc008.html">JF008</a></td></tr>
+<tr id="MSG074"><td><strong>MSG074</strong></td><td>“Código do Documento não encontrado.”</td><td>Erro</td><td><code>FDesfDocContribuicao.pas:85,240</code></td><td><a href="uc008.html">JF008</a></td></tr>
+<tr id="MSG075"><td><strong>MSG075</strong></td><td>“Processamento efetuado com sucesso”</td><td>Sucesso</td><td><code>FDesfDocContribuicao.pas:231,263</code></td><td><a href="uc008.html">JF008</a></td></tr>
+<tr id="MSG076"><td><strong>MSG076</strong></td><td>“Estatística não disponível”</td><td>Informação</td><td><code>FConsEstatDivergContrib.pas:638</code></td><td><a href="uc008.html">JF008</a></td></tr>
+<tr id="MSG100"><td><strong>MSG100</strong></td><td>“Erro ao gravar Log.”</td><td>Erro (exceção)</td><td><code>FCadHstContribuicao.pas:1091; FAtualizaPorIndice.pas:931; FDivergContrib.pas:5019; FControleIndivContrib.pas:2006; FCadContribNucleoFamiliar.pas:236</code></td><td><a href="uc003.html">JF003</a>, <a href="uc004.html">JF004</a>, <a href="uc008.html">JF008</a>, <a href="uc009.html">JF009</a></td></tr>
+</tbody></table></div></section>
+
+
+<p><a class="back-btn" href="funcionalidades.html">← Voltar à lista de Casos de Uso</a></p>
+
+</main>
+<footer>
+<p>Blueprint AS-IS — PFC-23 / PFC-32 — Módulo Contribuição Previdenciária | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-10</p>
+</footer>
+</body>
+</html>

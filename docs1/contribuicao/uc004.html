@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UC004 – Salário de participação / manutenção — Contribuição Previdenciária — Blueprint AS-IS</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<header>
+  <div class="badge">Blueprint AS-IS — PFC-23 (enriquecido) — PFC-32</div>
+  <h1>UC004 – Salário de participação / manutenção</h1>
+  <p>Caso de Uso do módulo Contribuição Previdenciária — jornada JF004 (PF-04) — Salário de participação / manutenção.</p>
+</header>
+<nav>
+  <a href="index.html">📋 Visão Geral</a>
+  <a href="arquitetura.html">🏗️ Arquitetura</a>
+  <a href="inventario-tecnico.html">📦 Inventário</a>
+  <a href="funcionalidades.html">⚙️ Processos Funcionais</a>
+  <a href="procedures-functions.html">🔧 Procedures</a>
+  <a href="dados.html">🗄️ Dados</a>
+  <a href="relatorios.html">📄 Relatórios</a>
+  <a href="integracoes.html">🔗 Integrações</a>
+  <a href="tratamento-erros.html">⚠️ Erros</a>
+  <a href="diagramas-fluxo.html">🔀 Fluxos</a>
+  <a href="lacunas.html">🔍 Lacunas</a>
+  <a href="controle-cobertura.html">📊 Cobertura</a>
+</nav>
+<main>
+
+<p><a class="back-btn" href="funcionalidades.html">← Voltar à lista de Casos de Uso</a></p>
+
+<section><div class="section-title">1. Identificação</div>
+<div class="table-wrap"><table><tbody>
+<tr><th>Caso de Uso</th><td><strong>UC004</strong> – Salário de participação / manutenção</td></tr>
+<tr><th>Módulo</th><td>Contribuição Previdenciária</td></tr>
+<tr><th>Jornada</th><td>JF004 (PF-04) — Salário de participação / manutenção</td></tr>
+<tr><th>Sistema</th><td>CM Contabilidade / FUNCEF (Delphi 5 / VCL / MIDAS)</td></tr>
+<tr><th>Tipo</th><td>Sistema Desktop</td></tr>
+<tr><th>Ator</th><td>Usuário operacional (analista previdenciário, financeiro, contábil)</td></tr>
+<tr><th>Entry point</th><td><code>CONTRIBUICAOPREV/Fontes/ContribuicaoPREV.dpr</code></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">2. Descrição Resumida</div>
+<p>Caso de Uso <strong>UC004</strong> do módulo Contribuição Previdenciária, correspondente à JF004 (PF-04) — Salário de participação / manutenção. Esta página detalha a jornada funcional com sua sequência operacional, ações, regras de negócio, tratamentos de erro e mensagens.</p>
+</section>
+
+<section><div class="section-title">3. Pré-condições</div>
+<p>Consulte as pré-condições específicas na seção da jornada abaixo.</p>
+</section>
+
+<section><div class="section-title">4. Pós-condições</div>
+<p>Consulte as pós-condições específicas na seção da jornada abaixo.</p>
+</section>
+
+<section><div class="section-title">5. Sequência Operacional e Ações</div>
+<div class="pf-block" id="PF-04">
+<h4>JF004 (PF-04) — Salário de participação / manutenção</h4>
+<p><strong>Objetivo:</strong> Reajustar o salário de manutenção dos participantes mantidos e alterar em lote, por planilha Excel, o salário mantido e o salário de participação.</p>
+<p><strong>Ator / gatilho:</strong> Analista de cadastro previdenciário, nas telas <em>Reajusta Salário de Manutenção</em> e <em>Alterar Salário de Manutenção e Participação</em>.</p>
+<p><strong>Pré-condições:</strong> Participantes com plano (PARTPREVPLAN); para o lote, planilha com IDPESSOA, IDPLANOPREV, SALMANTIDO e SALPARTICIPACAO.</p>
+<p><strong>Pós-condições:</strong> PARTPREVPLAN atualizado; LOGTOTALPREV gravado.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li>Reajuste: informar as opções e selecionar os participantes mantidos. [<a href="#TRT017">TRT017</a>]</li>
+<li>Processar o reajuste; em caso de erro em um participante, o usuário decide se continua. [<a href="#TRT018">TRT018</a>]</li>
+<li>Conferir o resultado e confirmar a efetivação. [<a href="#TRT053">TRT053</a>]</li>
+<li>Alteração em lote: selecionar o arquivo Excel e quais salários alterar (mantido e/ou participação). [<a href="#CONTRIB-RN025">RS025</a>] [<a href="#TRT019">TRT019</a>]</li>
+<li>O sistema atualiza PARTPREVPLAN e grava o log de auditoria. [<a href="#CONTRIB-RN025">RS025</a>]</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Selecionar participantes mantidos</td><td>Definir quem será reajustado</td><td>Opções de seleção</td><td>Lista participantes mantidos</td><td>Participantes selecionados</td><td>—</td><td><a href="#MSG029">MSG029</a>, <a href="#MSG030">MSG030</a></td><td><code>FReajustaSalarioMantido.dfm</code></td></tr>
+<tr><td>Reajustar salário mantido</td><td>Aplicar índice ao salário de manutenção</td><td>Participantes selecionados</td><td>Calcula o reajuste; pergunta se continua quando há erro</td><td>Reajuste pronto para confirmar</td><td>—</td><td><a href="#MSG031">MSG031</a>, <a href="#MSG032">MSG032</a></td><td><code>FReajustaSalarioMantido.dfm</code></td></tr>
+<tr><td>Alterar salários em lote</td><td>Atualizar salários a partir de planilha</td><td>Arquivo Excel; seleção SALMANTIDO/SALPARTICIPACAO</td><td>Lê a planilha via OLE e atualiza PARTPREVPLAN + log</td><td>Salários atualizados</td><td><a href="#CONTRIB-RN025">RS025</a></td><td><a href="#MSG033">MSG033</a>, <a href="#MSG034">MSG034</a></td><td><code>FAlteraSalPart.dfm</code></td></tr>
+</tbody></table></div>
+<p><strong>Regras de negócio da jornada:</strong> <a href="#CONTRIB-RN023">RS023 (CONTRIB-RN023)</a> — Evolução funcional fecha o cargo anterior, <a href="#CONTRIB-RN025">RS025 (CONTRIB-RN025)</a> — Alteração de salários em lote via Excel</p>
+<p><strong>Tratamentos de erro:</strong> <a href="#TRT017">TRT017</a>, <a href="#TRT018">TRT018</a>, <a href="#TRT019">TRT019</a>, <a href="#TRT053">TRT053</a></p>
+<p><strong>Mensagens:</strong> <a href="#MSG029">MSG029</a>, <a href="#MSG030">MSG030</a>, <a href="#MSG031">MSG031</a>, <a href="#MSG032">MSG032</a>, <a href="#MSG033">MSG033</a>, <a href="#MSG034">MSG034</a>, <a href="#MSG100">MSG100</a></p>
+<p><strong>Telas:</strong> Reajusta Salário de Manutenção (<code>FReajustaSalarioMantido.dfm</code>), Alterar Salário de Manutenção e Participação (<code>FAlteraSalPart.dfm</code>)</p>
+<p><strong>Dependências:</strong> Alimenta a base de cálculo de <a href="uc001.html">JF001</a>. Regra transversal de evolução funcional: <a href="#CONTRIB-RN023">RS023</a>.</p>
+<div class="note note-info"><p><strong>Registro original do processo PF-04</strong></p><p><strong>Forms de entrada:</strong> <code>FReajustaSalarioMantido.dfm</code>, <code>FAlteraSalPart.dfm</code></p><p><strong>Lógica de processamento:</strong> Reajuste por índice ou alteração em lote de SALMANTIDO/SALPARTICIPACAO via OLE/Excel</p><p><strong>Saídas:</strong> Salários atualizados</p><p><strong>Persistência (tabelas escritas):</strong> PARTPREVPLAN (U), LOGTOTALPREV (I)</p><p><strong>Evidência:</strong> <code>CONTRIBUICAOPREV/Fontes/FAlteraSalPart.pas:154-188</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+</div>
+</div>
+</section>
+
+<section><div class="section-title">6. Regras de Negócio da Jornada</div>
+<p>As regras de negócio aplicáveis a esta jornada são apresentadas abaixo com seu texto completo, sem necessidade de acessar outra página.</p>
+<div class="rule-block" id="CONTRIB-RN023">
+<div class="rule-id">RS023 (CONTRIB-RN023) — Evolução funcional fecha o cargo anterior</div>
+<div class="rule-desc">Ao registrar novo cargo/função do participante, o registro anterior é encerrado na véspera do início do novo.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>EVOLFUNCPREV.DATAINICIO</code> — [obrigatório] — data do novo cargo</li>
+<li><code>EVOLFUNCPREV.DATAFINAL</code> — [obrigatório] — anterior recebe DATAINICIO − 1</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> não se aplica — regra de seleção/cálculo, sem mensagem ao usuário.</p>
+<p><strong>Jornada:</strong> <a href="uc004.html">JF004</a></p>
+<p><strong>Nota de verificação:</strong> Regra de objeto de controle (CtrlObjects), associada à jornada de salário por afetar a base salarial do participante.</p>
+<p><strong>Descrição original:</strong> Inserção/edição de EVOLFUNCPREV atualiza DATAFINAL do cargo anterior.</p>
+<p><strong>Condições:</strong> Troca de cargo/função</p>
+<p><strong>Dados envolvidos:</strong> EVOLFUNCPREV</p>
+<p><strong>Resultado/Exceção:</strong> UPDATE SET DATAFINAL=DATAINICIO-1</p>
+<div class="rule-origin">📂 Origem: <code>CONTRIBUICAOPREV/CtrlObjects/uCtrlEvolFuncPrev.pas:515-559</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+</div>
+
+<div class="rule-block" id="CONTRIB-RN025">
+<div class="rule-id">RS025 (CONTRIB-RN025) — Alteração de salários em lote via Excel</div>
+<div class="rule-desc">A planilha atualiza o salário mantido e/ou o salário de participação do participante no plano, com registro em log.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>IDPESSOA, IDPLANOPREV</code> — [obrigatório] — chaves do participante no plano</li>
+<li><code>SALMANTIDO</code> — [condicional] — se “salário mantido” marcado</li>
+<li><code>SALPARTICIPACAO</code> — [condicional] — se “salário de participação” marcado</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT019">TRT019</a> → <a href="#MSG033">MSG033</a>, <a href="#MSG034">MSG034</a> → Bloqueia a alteração em lote</p>
+<p><strong>Jornada:</strong> <a href="uc004.html">JF004</a></p>
+<p><strong>Descrição original:</strong> Alteração em lote de salário via Excel atualiza PARTPREVPLAN.</p>
+<p><strong>Condições:</strong> Arquivo Excel com IDPESSOA, IDPLANOPREV, SALMANTIDO, SALPARTICIPACAO</p>
+<p><strong>Dados envolvidos:</strong> PARTPREVPLAN</p>
+<p><strong>Resultado/Exceção:</strong> UPDATE SET SALMANTIDO=..., SALPARTICIPACAO=... + GravaLogTotalPrev</p>
+<div class="rule-origin">📂 Origem: <code>CONTRIBUICAOPREV/Fontes/FAlteraSalPart.pas:154-188</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+</div>
+
+<div class="rule-block" id="CONTRIB-RN034">
+<div class="rule-id">CONTRIB-RN034 — Mês 13º usa salário SALPARTIC13</div>
+<p><strong>Descrição:</strong> Quando o mês de referência é '13', o salário da regra de cálculo usa SALPARTIC13 em vez de VALORPROVENTO. Exceção SIG62812: plano 66/pj 1 não usa SALPARTIC13.</p>
+<p><strong>Fórmula:</strong> <code>sSalarioRegra = SALPARTIC13 se mês='13' (e não plano 66/pj 1), senão VALORPROVENTO</code></p>
+<p><strong>Dados:</strong> CONTRIBPREVPARTP.SALPARTIC13, VALORPROVENTO</p>
+<p><strong>Rotina:</strong> <code>FPreparaEnvia.MontaSQLParaRegraCalculo</code> · <strong>Arquivo:</strong> <code>FPreparaEnvia.pas:1188-1196, 1809-1812</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+</div>
+
+
+</section>
+
+<section><div class="section-title">7. Tratamentos (TRT)</div>
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Condição</th><th>Mensagem</th><th>Resultado</th><th>Regra</th><th>Jornada</th></tr></thead><tbody>
+<tr id="TRT017"><td><strong>TRT017</strong></td><td>Nenhum participante mantido encontrado ou selecionado para reajuste</td><td><a href="#MSG029">MSG029</a>, <a href="#MSG030">MSG030</a></td><td>Não processa o reajuste</td><td>validação de tela</td><td><a href="uc004.html">JF004</a></td></tr>
+<tr id="TRT018"><td><strong>TRT018</strong></td><td>Erro ao reajustar o salário de um participante</td><td><a href="#MSG031">MSG031</a>, <a href="#MSG032">MSG032</a></td><td>Usuário decide se continua com os demais</td><td>validação de tela</td><td><a href="uc004.html">JF004</a></td></tr>
+<tr id="TRT019"><td><strong>TRT019</strong></td><td>Arquivo Excel ou tipo de salário (mantido/participação) não selecionados</td><td><a href="#MSG033">MSG033</a>, <a href="#MSG034">MSG034</a></td><td>Bloqueia a alteração em lote</td><td><a href="#CONTRIB-RN025">RS025</a></td><td><a href="uc004.html">JF004</a></td></tr>
+<tr id="TRT053"><td><strong>TRT053</strong></td><td>Falha ao gravar o log de auditoria</td><td><a href="#MSG100">MSG100</a></td><td>Exceção; a transação em curso não é concluída</td><td>validação de tela</td><td><a href="uc003.html">JF003</a>, <a href="uc004.html">JF004</a>, <a href="uc008.html">JF008</a>, <a href="uc009.html">JF009</a></td></tr>
+</tbody></table></div></section>
+
+<section><div class="section-title">8. Mensagens (MSG)</div>
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Texto da mensagem</th><th>Tipo</th><th>Origem (CONTRIBUICAOPREV/Fontes/)</th><th>Jornadas</th></tr></thead><tbody>
+<tr id="MSG029"><td><strong>MSG029</strong></td><td>“Não existem Participantes Mantidos com as opções indicadas.”</td><td>Informação</td><td><code>FReajustaSalarioMantido.pas:293</code></td><td><a href="uc004.html">JF004</a></td></tr>
+<tr id="MSG030"><td><strong>MSG030</strong></td><td>“Nenhum Participante foi selecionado.”</td><td>Informação</td><td><code>FReajustaSalarioMantido.pas:317</code></td><td><a href="uc004.html">JF004</a></td></tr>
+<tr id="MSG031"><td><strong>MSG031</strong></td><td>“Ocorreu um erro ao reajustar o salário do participante. Deseja continuar para os próximos participantes ?”</td><td>Confirmação</td><td><code>FReajustaSalarioMantido.pas:353</code></td><td><a href="uc004.html">JF004</a></td></tr>
+<tr id="MSG032"><td><strong>MSG032</strong></td><td>“Reajuste efetuado com erros.”</td><td>Informação</td><td><code>FReajustaSalarioMantido.pas:384</code></td><td><a href="uc004.html">JF004</a></td></tr>
+<tr id="MSG033"><td><strong>MSG033</strong></td><td>“É necessário selecionar o arquivo para carregar as informações.”</td><td>Alerta</td><td><code>FAlteraSalPart.pas:102</code></td><td><a href="uc004.html">JF004</a></td></tr>
+<tr id="MSG034"><td><strong>MSG034</strong></td><td>“É necessário selecionar o salário que deseja alterar.”</td><td>Alerta</td><td><code>FAlteraSalPart.pas:108</code></td><td><a href="uc004.html">JF004</a></td></tr>
+<tr id="MSG100"><td><strong>MSG100</strong></td><td>“Erro ao gravar Log.”</td><td>Erro (exceção)</td><td><code>FCadHstContribuicao.pas:1091; FAtualizaPorIndice.pas:931; FDivergContrib.pas:5019; FControleIndivContrib.pas:2006; FCadContribNucleoFamiliar.pas:236</code></td><td><a href="uc003.html">JF003</a>, <a href="uc004.html">JF004</a>, <a href="uc008.html">JF008</a>, <a href="uc009.html">JF009</a></td></tr>
+</tbody></table></div></section>
+
+
+<p><a class="back-btn" href="funcionalidades.html">← Voltar à lista de Casos de Uso</a></p>
+
+</main>
+<footer>
+<p>Blueprint AS-IS — PFC-23 / PFC-32 — Módulo Contribuição Previdenciária | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-10</p>
+</footer>
+</body>
+</html>

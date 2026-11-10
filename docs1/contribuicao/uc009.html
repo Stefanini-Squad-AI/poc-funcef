@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UC009 – Controle individual / Entrada manual — Contribuição Previdenciária — Blueprint AS-IS</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<header>
+  <div class="badge">Blueprint AS-IS — PFC-23 (enriquecido) — PFC-32</div>
+  <h1>UC009 – Controle individual / Entrada manual</h1>
+  <p>Caso de Uso do módulo Contribuição Previdenciária — jornada JF009 (PF-09) — Controle individual / Entrada manual.</p>
+</header>
+<nav>
+  <a href="index.html">📋 Visão Geral</a>
+  <a href="arquitetura.html">🏗️ Arquitetura</a>
+  <a href="inventario-tecnico.html">📦 Inventário</a>
+  <a href="funcionalidades.html">⚙️ Processos Funcionais</a>
+  <a href="procedures-functions.html">🔧 Procedures</a>
+  <a href="dados.html">🗄️ Dados</a>
+  <a href="relatorios.html">📄 Relatórios</a>
+  <a href="integracoes.html">🔗 Integrações</a>
+  <a href="tratamento-erros.html">⚠️ Erros</a>
+  <a href="diagramas-fluxo.html">🔀 Fluxos</a>
+  <a href="lacunas.html">🔍 Lacunas</a>
+  <a href="controle-cobertura.html">📊 Cobertura</a>
+</nav>
+<main>
+
+<p><a class="back-btn" href="funcionalidades.html">← Voltar à lista de Casos de Uso</a></p>
+
+<section><div class="section-title">1. Identificação</div>
+<div class="table-wrap"><table><tbody>
+<tr><th>Caso de Uso</th><td><strong>UC009</strong> – Controle individual / Entrada manual</td></tr>
+<tr><th>Módulo</th><td>Contribuição Previdenciária</td></tr>
+<tr><th>Jornada</th><td>JF009 (PF-09) — Controle individual / Entrada manual</td></tr>
+<tr><th>Sistema</th><td>CM Contabilidade / FUNCEF (Delphi 5 / VCL / MIDAS)</td></tr>
+<tr><th>Tipo</th><td>Sistema Desktop</td></tr>
+<tr><th>Ator</th><td>Usuário operacional (analista previdenciário, financeiro, contábil)</td></tr>
+<tr><th>Entry point</th><td><code>CONTRIBUICAOPREV/Fontes/ContribuicaoPREV.dpr</code></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">2. Descrição Resumida</div>
+<p>Caso de Uso <strong>UC009</strong> do módulo Contribuição Previdenciária, correspondente à JF009 (PF-09) — Controle individual / Entrada manual. Esta página detalha a jornada funcional com sua sequência operacional, ações, regras de negócio, tratamentos de erro e mensagens.</p>
+</section>
+
+<section><div class="section-title">3. Pré-condições</div>
+<p>Consulte as pré-condições específicas na seção da jornada abaixo.</p>
+</section>
+
+<section><div class="section-title">4. Pós-condições</div>
+<p>Consulte as pós-condições específicas na seção da jornada abaixo.</p>
+</section>
+
+<section><div class="section-title">5. Sequência Operacional e Ações</div>
+<div class="pf-block" id="PF-09">
+<h4>JF009 (PF-09) — Controle individual / Entrada manual</h4>
+<p><strong>Objetivo:</strong> Consultar e manter individualmente as contribuições de um participante e cadastrar/alterar manualmente o histórico de contribuições, inclusive por núcleo familiar.</p>
+<p><strong>Ator / gatilho:</strong> Analista de arrecadação, nas telas <em>Controle Individual de Contribuições</em>, <em>Cadastro Manual do Histórico de Contribuições</em> e <em>Cadastro de Contribuições por Núcleo Familiar</em>.</p>
+<p><strong>Pré-condições:</strong> Participante cadastrado; motivos de alteração cadastrados.</p>
+<p><strong>Pós-condições:</strong> HSTCONTRIBPREV, CONTRIBPREVNUCLEO e NUCLEOFAMILIAR atualizados; HSTATRASOCONTRIB coerente com o recebimento; log gravado.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li>Selecionar o participante e a contribuição. [<a href="#TRT042">TRT042</a>]</li>
+<li>Alterar contribuição: bloqueado se já recebida ou enviada à folha/Contas a Receber. [<a href="#CONTRIB-RN018">RS018</a>] [<a href="#TRT043">TRT043</a>]</li>
+<li>Entrada manual do histórico: informar meses de cobrança/referência e motivo. [<a href="#TRT044">TRT044</a>]</li>
+<li>Informar o recebimento: valor e data juntos e situação coerente; a data de emissão é ajustada pela situação. [<a href="#CONTRIB-RN009">RS009</a>] [<a href="#CONTRIB-RN010">RS010</a>] [<a href="#CONTRIB-RN011">RS011</a>] [<a href="#TRT045">TRT045</a>] [<a href="#TRT046">TRT046</a>]</li>
+<li>Planos contábeis 66 e 74: salário e percentual de contribuição maiores que zero. [<a href="#CONTRIB-RN012">RS012</a>] [<a href="#TRT047">TRT047</a>]</li>
+<li>Na entrada manual, a TMPDESC não é verificada quando a contribuição não foi enviada (SITRECEBIMENTO = 0). [<a href="#CONTRIB-RN019">RS019</a>]</li>
+<li>Núcleo familiar: selecionar a contribuição e gravar. [<a href="#TRT048">TRT048</a>] [<a href="#TRT053">TRT053</a>]</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Consultar contribuições do participante</td><td>Ver a situação individual</td><td>Participante</td><td>Lista contribuições e situação</td><td>Contribuições exibidas</td><td>—</td><td><a href="#MSG077">MSG077</a>, <a href="#MSG078">MSG078</a></td><td><code>FControleIndivContrib.dfm</code></td></tr>
+<tr><td>Alterar contribuição no controle individual</td><td>Corrigir dados de uma contribuição</td><td>Contribuição selecionada</td><td>Bloqueia se recebida/enviada e orienta usar Desfazer ou Divergência</td><td>Alteração realizada ou negada</td><td><a href="#CONTRIB-RN018">RS018</a></td><td><a href="#MSG079">MSG079</a>, <a href="#MSG080">MSG080</a>, <a href="#MSG081">MSG081</a></td><td><code>FControleIndivContrib.dfm</code></td></tr>
+<tr><td>Enviar contribuições individualmente</td><td>Cobrar contribuições pendentes do participante</td><td>Contribuições selecionadas</td><td>Gera documento e lançamentos</td><td>Contribuições enviadas</td><td>—</td><td><a href="#MSG082">MSG082</a></td><td><code>FControleIndivContrib.dfm</code></td></tr>
+<tr><td>Gravar histórico manual</td><td>Registrar/ajustar histórico</td><td>Meses, motivo, valor/data de recebimento, situação, salário/percentual</td><td>Valida obrigatórios e coerência; ajusta DATAEMISSCOB; atualiza HSTATRASOCONTRIB</td><td>HSTCONTRIBPREV gravado</td><td><a href="#CONTRIB-RN009">RS009</a>, <a href="#CONTRIB-RN010">RS010</a>, <a href="#CONTRIB-RN011">RS011</a>, <a href="#CONTRIB-RN012">RS012</a>, <a href="#CONTRIB-RN019">RS019</a></td><td><a href="#MSG083">MSG083</a>, <a href="#MSG084">MSG084</a>, <a href="#MSG085">MSG085</a>, <a href="#MSG086">MSG086</a>, <a href="#MSG087">MSG087</a>, <a href="#MSG088">MSG088</a>, <a href="#MSG089">MSG089</a>, <a href="#MSG090">MSG090</a></td><td><code>FCadHstContribuicao.dfm</code></td></tr>
+<tr><td>Cadastrar contribuição por núcleo familiar</td><td>Associar contribuição ao núcleo</td><td>Contribuição, membros do núcleo</td><td>Valida seleção e grava log</td><td>CONTRIBPREVNUCLEO/NUCLEOFAMILIAR gravados</td><td>—</td><td><a href="#MSG091">MSG091</a>, <a href="#MSG100">MSG100</a></td><td><code>FCadContribNucleoFamiliar.dfm</code></td></tr>
+</tbody></table></div>
+<p><strong>Regras de negócio da jornada:</strong> <a href="#CONTRIB-RN009">RS009 (CONTRIB-RN009)</a> — Data de emissão por situação, <a href="#CONTRIB-RN010">RS010 (CONTRIB-RN010)</a> — Valor e data de recebimento conjuntos, <a href="#CONTRIB-RN011">RS011 (CONTRIB-RN011)</a> — Situação coerente com recebimento, <a href="#CONTRIB-RN012">RS012 (CONTRIB-RN012)</a> — Salário e percentual positivos na edição, <a href="#CONTRIB-RN018">RS018 (CONTRIB-RN018)</a> — Recebida ou enviada não pode ser alterada, <a href="#CONTRIB-RN019">RS019 (CONTRIB-RN019)</a> — TMPDESC não verificada para não enviadas</p>
+<p><strong>Tratamentos de erro:</strong> <a href="#TRT042">TRT042</a>, <a href="#TRT043">TRT043</a>, <a href="#TRT044">TRT044</a>, <a href="#TRT045">TRT045</a>, <a href="#TRT046">TRT046</a>, <a href="#TRT047">TRT047</a>, <a href="#TRT048">TRT048</a>, <a href="#TRT053">TRT053</a></p>
+<p><strong>Mensagens:</strong> <a href="#MSG077">MSG077</a>, <a href="#MSG078">MSG078</a>, <a href="#MSG079">MSG079</a>, <a href="#MSG080">MSG080</a>, <a href="#MSG081">MSG081</a>, <a href="#MSG082">MSG082</a>, <a href="#MSG083">MSG083</a>, <a href="#MSG084">MSG084</a>, <a href="#MSG085">MSG085</a>, <a href="#MSG086">MSG086</a>, <a href="#MSG087">MSG087</a>, <a href="#MSG088">MSG088</a>, <a href="#MSG089">MSG089</a>, <a href="#MSG090">MSG090</a>, <a href="#MSG091">MSG091</a>, <a href="#MSG100">MSG100</a></p>
+<p><strong>Telas:</strong> Controle Individual de Contribuições (<code>FControleIndivContrib.dfm</code>), Cadastro Manual do Histórico de Contribuições (<code>FCadHstContribuicao.dfm</code>), Cadastro de Contribuições por Núcleo Familiar (<code>FCadContribNucleoFamiliar.dfm</code>)</p>
+<p><strong>Dependências:</strong> Correções de contribuições já enviadas seguem para <a href="uc008.html">JF008</a>.</p>
+<div class="note note-info"><p><strong>Registro original do processo PF-09</strong></p><p><strong>Forms de entrada:</strong> <code>FControleIndivContrib.dfm</code>, <code>FCadHstContribuicao.dfm</code>, <code>FCadContribNucleoFamiliar.dfm</code></p><p><strong>Lógica de processamento:</strong> Cadastro/alteração manual de históricos de contribuição; valida regras RN009-RN012</p><p><strong>Saídas:</strong> Contribuições cadastradas/alteradas</p><p><strong>Persistência (tabelas escritas):</strong> HSTCONTRIBPREV (I/U/D), CONTRIBPREVNUCLEO (I/U/D), NUCLEOFAMILIAR (I/U/D)</p><p><strong>Evidência:</strong> <code>CONTRIBUICAOPREV/Fontes/FCadHstContribuicao.pas:1091</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+</div>
+</div>
+</section>
+
+<section><div class="section-title">6. Regras de Negócio da Jornada</div>
+<p>As regras de negócio aplicáveis a esta jornada são apresentadas abaixo com seu texto completo, sem necessidade de acessar outra página.</p>
+<div class="rule-block" id="CONTRIB-RN009">
+<div class="rule-id">RS009 (CONTRIB-RN009) — Data de emissão por situação</div>
+<div class="rule-desc">A data de emissão da cobrança acompanha a situação: fica vazia para contribuições não cobradas (situação 0 ou 8) e recebe a data do dia para enviadas/recebidas (situação 1 ou 2).</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>HSTCONTRIBPREV.SITRECEBIMENTO</code> — [obrigatório] — 0, 1, 2, 8 (demais sem ajuste)</li>
+<li><code>HSTCONTRIBPREV.DATAEMISSCOB</code> — [condicional] — zerada (0/8) ou data atual (1/2)</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> não se aplica — regra de seleção/cálculo, sem mensagem ao usuário.</p>
+<p><strong>Jornada:</strong> <a href="uc009.html">JF009</a></p>
+<p><strong>Descrição original:</strong> DATAEMISSCOB zerada se SITRECEBIMENTO∈{0,8}; data atual se ∈{1,2}.</p>
+<p><strong>Condições:</strong> Edição do detalhe</p>
+<p><strong>Dados envolvidos:</strong> HSTCONTRIBPREV.DATAEMISSCOB</p>
+<p><strong>Resultado/Exceção:</strong> Atribuição condicional</p>
+<div class="rule-origin">📂 Origem: <code>CONTRIBUICAOPREV/Fontes/FCadHstContribuicao.pas:~1163</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+</div>
+
+<div class="rule-block" id="CONTRIB-RN010">
+<div class="rule-id">RS010 (CONTRIB-RN010) — Valor e data de recebimento conjuntos</div>
+<div class="rule-desc">Na entrada manual, valor recebido e data de recebimento são informados juntos: um não pode existir sem o outro (exceto registros importados).</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>dbedRecebido (VALORRECEBIDO)</code> — [condicional] — &gt; 0 exige data</li>
+<li><code>dbdtRecebimento (DATARECEBIMENTO)</code> — [condicional] — preenchida exige valor &gt; 0</li>
+<li><code>FLGIMPORTADO</code> — [opcional] — &gt; 0 dispensa a crítica</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT045">TRT045</a> → <a href="#MSG085">MSG085</a>, <a href="#MSG086">MSG086</a> → Bloqueia a gravação (Abort)</p>
+<p><strong>Jornada:</strong> <a href="uc009.html">JF009</a></p>
+<p><strong>Descrição original:</strong> Valor recebido e data de recebimento devem ser informados juntos.</p>
+<p><strong>Condições:</strong> dbedRecebido&gt;0 sem data OU =0 com data</p>
+<p><strong>Dados envolvidos:</strong> HSTCONTRIBPREV</p>
+<p><strong>Resultado/Exceção:</strong> Abort</p>
+<div class="rule-origin">📂 Origem: <code>CONTRIBUICAOPREV/Fontes/FCadHstContribuicao.pas:~1186</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+</div>
+
+<div class="rule-block" id="CONTRIB-RN011">
+<div class="rule-id">RS011 (CONTRIB-RN011) — Situação coerente com recebimento</div>
+<div class="rule-desc">Se há data de recebimento, a situação deve ser de recebida; se a situação é de recebida, deve haver data de recebimento.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>dbrgrpSitRecebimento (SITRECEBIMENTO)</code> — [obrigatório] — ≥ 2 quando recebida</li>
+<li><code>dbdtRecebimento</code> — [condicional] — obrigatória se situação ≥ 2</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT046">TRT046</a> → <a href="#MSG087">MSG087</a>, <a href="#MSG088">MSG088</a> → Bloqueia a gravação (Abort)</p>
+<p><strong>Jornada:</strong> <a href="uc009.html">JF009</a></p>
+<p><strong>Descrição original:</strong> Situação da contribuição coerente com recebimento.</p>
+<p><strong>Condições:</strong> Data recebimento sem SITRECEBIMENTO≥2</p>
+<p><strong>Dados envolvidos:</strong> HSTCONTRIBPREV</p>
+<p><strong>Resultado/Exceção:</strong> Abort</p>
+<div class="rule-origin">📂 Origem: <code>CONTRIBUICAOPREV/Fontes/FCadHstContribuicao.pas:~1202</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+</div>
+
+<div class="rule-block" id="CONTRIB-RN012">
+<div class="rule-id">RS012 (CONTRIB-RN012) — Salário e percentual positivos na edição</div>
+<div class="rule-desc">Para os planos contábeis que exigem, o salário de contribuição e o percentual (opção 1) devem ser maiores que zero.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>SALCONTRIB</code> — [condicional] — &gt; 0</li>
+<li><code>VALOROP1</code> — [condicional] — &gt; 0</li>
+<li><code>IDPLANPREVCONTAB</code> — [obrigatório] — crítica aplicada aos planos 66 e 74</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT047">TRT047</a> → <a href="#MSG089">MSG089</a> → Bloqueia a gravação (Abort)</p>
+<p><strong>Jornada:</strong> <a href="uc009.html">JF009</a></p>
+<p><strong>Nota de verificação:</strong> No código atual a crítica vale para <code>IDPLANPREVCONTAB</code> 66 e 74 (<code>FCadHstContribuicao.pas:1218-1227</code>, SIG 61677).</p>
+<p><strong>Descrição original:</strong> SALCONTRIB e VALOROP1 devem ser &gt; 0 em edição.</p>
+<p><strong>Condições:</strong> qryDetSALCONTRIB≤0 ou qryDetVALOROP1≤0</p>
+<p><strong>Dados envolvidos:</strong> HSTCONTRIBPREV</p>
+<p><strong>Resultado/Exceção:</strong> Abort</p>
+<div class="rule-origin">📂 Origem: <code>CONTRIBUICAOPREV/Fontes/FCadHstContribuicao.pas:~1224</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+</div>
+
+<div class="rule-block" id="CONTRIB-RN018">
+<div class="rule-id">RS018 (CONTRIB-RN018) — Recebida ou enviada não pode ser alterada</div>
+<div class="rule-desc">No controle individual, contribuições já recebidas ou já enviadas à folha/Contas a Receber não podem ser alteradas; o caminho é Desfazer ou Tratamento de Divergência.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>SITRECEBIMENTO</code> — [obrigatório] — &gt; 1 recebida; = 1 enviada</li>
+<li><code>CODDOCUMENTOPREV</code> — [condicional] — preenchido = enviada ao CaR; vazio = enviada à folha</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT043">TRT043</a> → <a href="#MSG079">MSG079</a>, <a href="#MSG080">MSG080</a>, <a href="#MSG081">MSG081</a>, <a href="#MSG090">MSG090</a> → Cancela a alteração e orienta usar Desfazer ou Tratamento de Divergência</p>
+<p><strong>Jornada:</strong> <a href="uc009.html">JF009</a></p>
+<p><strong>Nota de verificação:</strong> Implementação da crítica: <code>FControleIndivContrib.pas:2140-2153</code>.</p>
+<p><strong>Descrição original:</strong> Proibida alteração de registro recebido ou enviado à folha/contas a receber.</p>
+<p><strong>Condições:</strong> Verificação de situação</p>
+<p><strong>Dados envolvidos:</strong> HSTCONTRIBPREV</p>
+<p><strong>Resultado/Exceção:</strong> Crítica impede edição</p>
+<div class="rule-origin">📂 Origem: <code>CONTRIBUICAOPREV/Fontes/ContribuicaoPREV.dpr:262-268</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+</div>
+
+<div class="rule-block" id="CONTRIB-RN019">
+<div class="rule-id">RS019 (CONTRIB-RN019) — TMPDESC não verificada para não enviadas</div>
+<div class="rule-desc">Na entrada manual, a existência de desconto temporário (TMPDESC) só é verificada para contribuições já enviadas.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>HSTCONTRIBPREV.SITRECEBIMENTO</code> — [obrigatório] — 0 dispensa a verificação</li>
+<li><code>TMPDESC</code> — [condicional] — verificada se situação ≠ 0</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> não se aplica — regra de seleção/cálculo, sem mensagem ao usuário.</p>
+<p><strong>Jornada:</strong> <a href="uc009.html">JF009</a></p>
+<p><strong>Descrição original:</strong> Não verificar TMPDESC se HSTCONTRIBPREV.SITRECEBIMENTO=0.</p>
+<p><strong>Condições:</strong> SITRECEBIMENTO=0</p>
+<p><strong>Dados envolvidos:</strong> TMPDESC, HSTCONTRIBPREV</p>
+<p><strong>Resultado/Exceção:</strong> Skip da verificação</p>
+<div class="rule-origin">📂 Origem: <code>CONTRIBUICAOPREV/Fontes/ContribuicaoPREV.dpr:275-282</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+</div>
+
+<div class="rule-block" id="CONTRIB-RN029">
+<div class="rule-id">CONTRIB-RN029 — Situação da contribuição bloqueia alteração (SITRECEBIMENTO > 1)</div>
+<p><strong>Descrição:</strong> Uma contribuição com SITRECEBIMENTO > 1 (recebida/divergência) não pode ser alterada.</p>
+<p><strong>Objetivo:</strong> Preservar a integridade do histórico de contribuições já recebidas.</p>
+<p><strong>Condições:</strong> SITRECEBIMENTO > 1 no registro selecionado.</p>
+<p><strong>Dados:</strong> HSTCONTRIBPREV.SITRECEBIMENTO</p>
+<p><strong>Processamento:</strong> Ao clicar Alterar, verifica SITRECEBIMENTO; se > 1, exibe erro e aborta.</p>
+<p><strong>Resultado:</strong> Alteração bloqueada; mensagem "Não é possível alterar registro já recebido".</p>
+<p><strong>Exceções:</strong> Nenhuma.</p>
+<p><strong>Rotina:</strong> <code>FControleIndivContrib.tbButtonAlterarClick</code> · <strong>Arquivo:</strong> <code>FControleIndivContrib.pas:2140-2144</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+</div>
+
+
+</section>
+
+<section><div class="section-title">7. Tratamentos (TRT)</div>
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Condição</th><th>Mensagem</th><th>Resultado</th><th>Regra</th><th>Jornada</th></tr></thead><tbody>
+<tr id="TRT042"><td><strong>TRT042</strong></td><td>Participante ou contribuição não selecionados no controle individual</td><td><a href="#MSG077">MSG077</a>, <a href="#MSG078">MSG078</a></td><td>Bloqueia a operação</td><td>validação de tela</td><td><a href="uc009.html">JF009</a></td></tr>
+<tr id="TRT043"><td><strong>TRT043</strong></td><td>Alteração de contribuição já recebida ou já enviada à folha/Contas a Receber</td><td><a href="#MSG079">MSG079</a>, <a href="#MSG080">MSG080</a>, <a href="#MSG081">MSG081</a>, <a href="#MSG090">MSG090</a></td><td>Cancela a alteração e orienta usar Desfazer ou Tratamento de Divergência</td><td><a href="#CONTRIB-RN018">RS018</a></td><td><a href="uc009.html">JF009</a></td></tr>
+<tr id="TRT044"><td><strong>TRT044</strong></td><td>Mês de cobrança/referência ou motivo não preenchidos na entrada manual</td><td><a href="#MSG083">MSG083</a>, <a href="#MSG084">MSG084</a></td><td>Bloqueia a gravação (Abort)</td><td>validação de tela</td><td><a href="uc009.html">JF009</a></td></tr>
+<tr id="TRT045"><td><strong>TRT045</strong></td><td>Valor recebido sem data de recebimento, ou data sem valor</td><td><a href="#MSG085">MSG085</a>, <a href="#MSG086">MSG086</a></td><td>Bloqueia a gravação (Abort)</td><td><a href="#CONTRIB-RN010">RS010</a></td><td><a href="uc009.html">JF009</a></td></tr>
+<tr id="TRT046"><td><strong>TRT046</strong></td><td>Situação da contribuição incoerente com o recebimento informado</td><td><a href="#MSG087">MSG087</a>, <a href="#MSG088">MSG088</a></td><td>Bloqueia a gravação (Abort)</td><td><a href="#CONTRIB-RN011">RS011</a></td><td><a href="uc009.html">JF009</a></td></tr>
+<tr id="TRT047"><td><strong>TRT047</strong></td><td>Salário ou percentual de contribuição menor ou igual a zero (planos contábeis 66 e 74)</td><td><a href="#MSG089">MSG089</a></td><td>Bloqueia a gravação (Abort)</td><td><a href="#CONTRIB-RN012">RS012</a></td><td><a href="uc009.html">JF009</a></td></tr>
+<tr id="TRT048"><td><strong>TRT048</strong></td><td>Nenhuma contribuição selecionada no núcleo familiar</td><td><a href="#MSG091">MSG091</a></td><td>Bloqueia (EValidacao)</td><td>validação de tela</td><td><a href="uc009.html">JF009</a></td></tr>
+<tr id="TRT053"><td><strong>TRT053</strong></td><td>Falha ao gravar o log de auditoria</td><td><a href="#MSG100">MSG100</a></td><td>Exceção; a transação em curso não é concluída</td><td>validação de tela</td><td><a href="uc003.html">JF003</a>, <a href="uc004.html">JF004</a>, <a href="uc008.html">JF008</a>, <a href="uc009.html">JF009</a></td></tr>
+</tbody></table></div></section>
+
+<section><div class="section-title">8. Mensagens (MSG)</div>
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Texto da mensagem</th><th>Tipo</th><th>Origem (CONTRIBUICAOPREV/Fontes/)</th><th>Jornadas</th></tr></thead><tbody>
+<tr id="MSG077"><td><strong>MSG077</strong></td><td>“Selecione o Participante.”</td><td>Erro</td><td><code>FControleIndivContrib.pas:1328</code></td><td><a href="uc009.html">JF009</a></td></tr>
+<tr id="MSG078"><td><strong>MSG078</strong></td><td>“Selecione alguma contribuição.”</td><td>Erro</td><td><code>FControleIndivContrib.pas:1517,2393</code></td><td><a href="uc009.html">JF009</a></td></tr>
+<tr id="MSG079"><td><strong>MSG079</strong></td><td>“Não é possível alterar registro já recebido! Operação Cancelada!”</td><td>Alerta</td><td><code>FControleIndivContrib.pas:2142</code></td><td><a href="uc009.html">JF009</a></td></tr>
+<tr id="MSG080"><td><strong>MSG080</strong></td><td>“Esta contribuição já foi enviada para o sistema de Contas e Receber não podendo ser alterada. Caso seja necessário, utilize a opção de "Desfazer" ou a tela de Tratamento de Divergência.”</td><td>Alerta</td><td><code>FControleIndivContrib.pas:2149</code></td><td><a href="uc009.html">JF009</a></td></tr>
+<tr id="MSG081"><td><strong>MSG081</strong></td><td>“Esta contribuição já foi enviada para a folha não podendo ser alterada. Caso seja necessário, utilize a opção de "Desfazer" ou a tela de Tratamento de Divergência.”</td><td>Alerta</td><td><code>FControleIndivContrib.pas:2152</code></td><td><a href="uc009.html">JF009</a></td></tr>
+<tr id="MSG082"><td><strong>MSG082</strong></td><td>“Envio de Contribuições efetuado com sucesso.”</td><td>Sucesso</td><td><code>FControleIndivContrib.pas:2014</code></td><td><a href="uc009.html">JF009</a></td></tr>
+<tr id="MSG083"><td><strong>MSG083</strong></td><td>“Mês de Cobrança ou Referência não preenchido.Verifique.”</td><td>Erro</td><td><code>FCadHstContribuicao.pas:1174</code></td><td><a href="uc009.html">JF009</a></td></tr>
+<tr id="MSG084"><td><strong>MSG084</strong></td><td>“Motivo não preenchido. Verifique.”</td><td>Erro</td><td><code>FCadHstContribuicao.pas:1180</code></td><td><a href="uc009.html">JF009</a></td></tr>
+<tr id="MSG085"><td><strong>MSG085</strong></td><td>“O valor recebido foi preenchido, porém, a data de recebimento não foi informada. Verifique.”</td><td>Erro</td><td><code>FCadHstContribuicao.pas:1190</code></td><td><a href="uc009.html">JF009</a></td></tr>
+<tr id="MSG086"><td><strong>MSG086</strong></td><td>“A data de recebimento foi informada, porém, o valor recebido não. Verifique.”</td><td>Erro</td><td><code>FCadHstContribuicao.pas:1195</code></td><td><a href="uc009.html">JF009</a></td></tr>
+<tr id="MSG087"><td><strong>MSG087</strong></td><td>“O recebimento foi informado, porém, a situação da contribuição não se refere a uma contribuição recebida. Verifique.”</td><td>Erro</td><td><code>FCadHstContribuicao.pas:1204</code></td><td><a href="uc009.html">JF009</a></td></tr>
+<tr id="MSG088"><td><strong>MSG088</strong></td><td>“A situação da contribuição foi informada como recebida, porém, não existem data ou valor do recebimento. Verifique.”</td><td>Erro</td><td><code>FCadHstContribuicao.pas:1209</code></td><td><a href="uc009.html">JF009</a></td></tr>
+<tr id="MSG089"><td><strong>MSG089</strong></td><td>“O Salário e o Percentual de Contribuição, são de preenchimento obrigatório para o plano selecionado.”</td><td>Alerta</td><td><code>FCadHstContribuicao.pas:1225</code></td><td><a href="uc009.html">JF009</a></td></tr>
+<tr id="MSG090"><td><strong>MSG090</strong></td><td>“Esta contribuição já foi cobrada, não podendo mais ser alterada.”</td><td>Erro</td><td><code>FCadHstContribuicao.pas:1374</code></td><td><a href="uc009.html">JF009</a></td></tr>
+<tr id="MSG091"><td><strong>MSG091</strong></td><td>“É necessário selecionar uma contribuição.”</td><td>Erro (validação)</td><td><code>FCadContribNucleoFamiliar.pas:419</code></td><td><a href="uc009.html">JF009</a></td></tr>
+<tr id="MSG100"><td><strong>MSG100</strong></td><td>“Erro ao gravar Log.”</td><td>Erro (exceção)</td><td><code>FCadHstContribuicao.pas:1091; FAtualizaPorIndice.pas:931; FDivergContrib.pas:5019; FControleIndivContrib.pas:2006; FCadContribNucleoFamiliar.pas:236</code></td><td><a href="uc003.html">JF003</a>, <a href="uc004.html">JF004</a>, <a href="uc008.html">JF008</a>, <a href="uc009.html">JF009</a></td></tr>
+</tbody></table></div></section>
+
+
+<p><a class="back-btn" href="funcionalidades.html">← Voltar à lista de Casos de Uso</a></p>
+
+</main>
+<footer>
+<p>Blueprint AS-IS — PFC-23 / PFC-32 — Módulo Contribuição Previdenciária | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-10</p>
+</footer>
+</body>
+</html>

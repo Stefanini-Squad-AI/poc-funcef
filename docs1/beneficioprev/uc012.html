@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UC012 – Conciliação INSS (mantenedoras/extrato/encerramento) — Benefício Previdenciário — Blueprint AS-IS</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<header>
+  <div class="badge">Blueprint AS-IS — PFC-24 — PFC-32</div>
+  <h1>UC012 – Conciliação INSS (mantenedoras/extrato/encerramento)</h1>
+  <p>Caso de Uso do módulo Benefício Previdenciário — jornada JF012 (PF-12) — Conciliação INSS (mantenedoras/extrato/encerramento).</p>
+</header>
+<nav>
+  <a href="index.html">📋 Visão Geral</a>
+  <a href="arquitetura.html">🏗️ Arquitetura</a>
+  <a href="inventario-tecnico.html">📦 Inventário</a>
+  <a href="funcionalidades.html">⚙️ Processos Funcionais</a>
+  <a href="procedures-functions.html">🔧 Procedures</a>
+  <a href="dados.html">🗄️ Dados</a>
+  <a href="relatorios.html">📄 Relatórios</a>
+  <a href="integracoes.html">🔗 Integrações</a>
+  <a href="tratamento-erros.html">⚠️ Erros</a>
+  <a href="diagramas-fluxo.html">🔀 Fluxos</a>
+  <a href="lacunas.html">🔍 Lacunas</a>
+  <a href="controle-cobertura.html">📊 Cobertura</a>
+</nav>
+<main>
+
+<p><a class="back-btn" href="funcionalidades.html">← Voltar à lista de Casos de Uso</a></p>
+
+<section><div class="section-title">1. Identificação</div>
+<div class="table-wrap"><table><tbody>
+<tr><th>Caso de Uso</th><td><strong>UC012</strong> – Conciliação INSS (mantenedoras/extrato/encerramento)</td></tr>
+<tr><th>Módulo</th><td>Benefício Previdenciário</td></tr>
+<tr><th>Jornada</th><td>JF012 (PF-12) — Conciliação INSS (mantenedoras/extrato/encerramento)</td></tr>
+<tr><th>Sistema</th><td>CM Contabilidade / FUNCEF (Delphi 5 / VCL / MIDAS)</td></tr>
+<tr><th>Tipo</th><td>Sistema Desktop</td></tr>
+<tr><th>Ator</th><td>Usuário operacional (analista previdenciário)</td></tr>
+<tr><th>Entry point</th><td><code>BENEFICIOPREV/Fontes/BeneficioPrev.dpr</code></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">2. Descrição Resumida</div>
+<p>Caso de Uso <strong>UC012</strong> do módulo Benefício Previdenciário, correspondente à JF012 (PF-12) — Conciliação INSS (mantenedoras/extrato/encerramento). Esta página detalha a jornada funcional com sua sequência operacional, ações, regras de negócio, tratamentos de erro e mensagens.</p>
+</section>
+
+<section><div class="section-title">3. Pré-condições</div>
+<p>Consulte as pré-condições específicas na seção da jornada abaixo.</p>
+</section>
+
+<section><div class="section-title">4. Pós-condições</div>
+<p>Consulte as pós-condições específicas na seção da jornada abaixo.</p>
+</section>
+
+<section><div class="section-title">5. Sequência Operacional e Ações</div>
+<div class="pf-block" id="PF-12">
+<h4>JF012 (PF-12) — Conciliação INSS (mantenedoras/extrato/encerramento)</h4>
+<p><strong>Objetivo:</strong> Conciliar o reembolso do INSS com as mantenedoras: importar arquivos, identificar processos, compor valores, comparar reembolso × desembolso e encerrar a conciliação.</p>
+<p><strong>Ator / gatilho:</strong> Analista de conciliação INSS, nas telas de conciliação, extrato, encerramento e cadastros de apoio.</p>
+<p><strong>Pré-condições:</strong> Mantenedoras e rubricas do INSS cadastradas e associadas; mês de conciliação aberto.</p>
+<p><strong>Pós-condições:</strong> DETCONCINSS, TEMPCONCINSS, CONCINSS e HISTRUBSAL gravados; conciliação encerrada.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li>Cadastrar mantenedoras e associar as rubricas do INSS. [<a href="#TRT023">TRT023</a>] [<a href="#TRT024">TRT024</a>] [<a href="#BENEF-RN022">RS022</a>] [<a href="#TRT019">TRT019</a>]</li>
+<li>Importar os arquivos do INSS; cada linha traz até 9 rubricas. [<a href="#BENEF-RN042">RS042</a>]</li>
+<li>Incluir rubricas por entrada manual, em mês aberto. [<a href="#TRT020">TRT020</a>] [<a href="#BENEF-RN044">RS044</a>] [<a href="#TRT021">TRT021</a>]</li>
+<li>Compor os valores do reembolso; o sistema bloqueia ao atingir 20 rubricas no mesmo mês. [<a href="#BENEF-RN043">RS043</a>] [<a href="#TRT022">TRT022</a>]</li>
+<li>Consultar o resultado e o extrato, comparar reembolso × desembolso e encerrar a conciliação. [<a href="#TRT023">TRT023</a>]</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Cadastrar mantenedora</td><td>Manter as mantenedoras</td><td>Código e dados</td><td>Exige código e não aceita código repetido</td><td>Mantenedora gravada</td><td>—</td><td><a href="#MSG032">MSG032</a>, <a href="#MSG033">MSG033</a></td><td><code>_FCadMantenedora.dfm</code></td></tr>
+<tr><td>Associar rubrica do INSS</td><td>Relacionar rubrica INSS e rubrica interna</td><td>Rubrica INSS e rubrica</td><td>Não aceita associação duplicada</td><td>Associação gravada</td><td><a href="#BENEF-RN022">RS022</a></td><td><a href="#MSG025">MSG025</a></td><td><code>_FAssocRubINSS.dfm</code></td></tr>
+<tr><td>Importar arquivos do INSS</td><td>Carregar o reembolso</td><td>Arquivos do INSS</td><td>Lê até 9 rubricas por linha e identifica processos</td><td>DETCONCINSS/TEMPCONCINSS gravados</td><td><a href="#BENEF-RN042">RS042</a></td><td>—</td><td><code>_FConciliacao.dfm</code></td></tr>
+<tr><td>Entrada manual de rubricas</td><td>Complementar o reembolso</td><td>Rubrica, mês de cobrança e referência, valor</td><td>Valida obrigatórios e mês aberto</td><td>Rubrica incluída</td><td><a href="#BENEF-RN044">RS044</a></td><td><a href="#MSG026">MSG026</a>, <a href="#MSG027">MSG027</a>, <a href="#MSG028">MSG028</a>, <a href="#MSG029">MSG029</a>, <a href="#MSG030">MSG030</a></td><td><code>_fCadEntrManualINSS.dfm</code></td></tr>
+<tr><td>Compor valores</td><td>Montar os valores do mês</td><td>Rubricas do mês</td><td>Limita a quantidade de rubricas por mês</td><td>Valores compostos</td><td><a href="#BENEF-RN043">RS043</a></td><td><a href="#MSG031">MSG031</a></td><td><code>_fCompoeValoresRI.dfm</code></td></tr>
+<tr><td>Consultar resultado e encerrar</td><td>Fechar a conciliação</td><td>Ano e mês</td><td>Compara reembolso × desembolso e encerra</td><td>Conciliação encerrada</td><td>—</td><td><a href="#MSG032">MSG032</a></td><td><code>_FResultConciliacao.dfm, _FExtratoINSS.dfm, _FEncerraConciliacao.dfm</code></td></tr>
+</tbody></table></div>
+<p><strong>Regras de negócio da jornada:</strong> <a href="#BENEF-RN022">RS022 (BENEF-RN022)</a> — Rubrica do INSS associada uma única vez, <a href="#BENEF-RN042">RS042 (BENEF-RN042)</a> — Até 9 rubricas por linha do arquivo do INSS, <a href="#BENEF-RN043">RS043 (BENEF-RN043)</a> — Máximo de rubricas por mês na composição de valores, <a href="#BENEF-RN044">RS044 (BENEF-RN044)</a> — Meses fechados não aceitam entrada manual</p>
+<p><strong>Tratamentos de erro:</strong> <a href="#TRT019">TRT019</a>, <a href="#TRT020">TRT020</a>, <a href="#TRT021">TRT021</a>, <a href="#TRT022">TRT022</a>, <a href="#TRT023">TRT023</a>, <a href="#TRT024">TRT024</a></p>
+<p><strong>Mensagens:</strong> <a href="#MSG025">MSG025</a>, <a href="#MSG026">MSG026</a>, <a href="#MSG027">MSG027</a>, <a href="#MSG028">MSG028</a>, <a href="#MSG029">MSG029</a>, <a href="#MSG030">MSG030</a>, <a href="#MSG031">MSG031</a>, <a href="#MSG032">MSG032</a>, <a href="#MSG033">MSG033</a></p>
+<p><strong>Telas:</strong> Conciliação do INSS com as Mantenedoras (<code>_FConciliacao.dfm</code>), Extrato Individual de Conciliação dos Proventos INSS (<code>_FExtratoINSS.dfm</code>), Encerramento de Conciliação (<code>_FEncerraConciliacao.dfm</code>), Resultado de Importação dos Arquivos do Reembolso do INSS (<code>_FResultConciliacao.dfm</code>), Cadastro de Mantenedora (<code>_FCadMantenedora.dfm</code>), Associação de Rubricas do INSS (<code>_FAssocRubINSS.dfm</code>), Reembolso do INSS - Entrada Manual de Rubricas (<code>_fCadEntrManualINSS.dfm</code>), Composição de Valores (<code>_fCompoeValoresRI.dfm</code>)</p>
+<p><strong>Dependências:</strong> Usa os processos INSS cadastrados em <a href="uc015.html">JF015</a> e o histórico reconstruído em <a href="uc016.html">JF016</a>.</p>
+<div class="note note-info"><p><strong>Registro original do processo PF-12</strong></p><p><strong>Forms de entrada:</strong> <code>_FConciliacao.dfm</code>, <code>_FExtratoINSS.dfm</code>, <code>_FEncerraConciliacao.dfm</code></p><p><strong>Lógica de processamento:</strong> Importa arquivos (até 9 rubricas/linha), identifica processos, compara reembolso×desembolso, encerra conciliação</p><p><strong>Saídas:</strong> Conciliação INSS encerrada</p><p><strong>Persistência (tabelas escritas):</strong> DETCONCINSS, TEMPCONCINSS, CONCINSS, RUBRICAXINSS, HISTRUBSAL</p><p><strong>Evidência:</strong> <code>BENEFICIOPREV/Fontes/_FConciliacao.pas</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+</div>
+</div>
+</section>
+
+<section><div class="section-title">6. Regras de Negócio da Jornada</div>
+<p>As regras de negócio aplicáveis a esta jornada são apresentadas abaixo com seu texto completo, sem necessidade de acessar outra página.</p>
+<div class="rule-block" id="BENEF-RN022">
+<div class="rule-id">RS022 (BENEF-RN022) — Rubrica do INSS associada uma única vez</div>
+<div class="rule-desc">Uma rubrica do INSS não pode ser associada duas vezes.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li>Rubrica do INSS — [obrigatório] — não pode já estar em <code>RUBRICAXINSS</code></li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT019">TRT019</a> → <a href="#MSG025">MSG025</a> → Não grava a associação duplicada</p>
+<p><strong>Jornada:</strong> <a href="uc012.html">JF012</a></p>
+<p><strong>Descrição original:</strong> Associação de rubrica INSS não admite duplicidade.</p>
+<p><strong>Condições:</strong> Rubrica já associada</p><p><strong>Dados envolvidos:</strong> RUBRICAXINSS</p><p><strong>Resultado/Exceção:</strong> ShowMessage('Rubrica do INSS já associada!')</p>
+<div class="rule-origin">📂 Origem: <code>BENEFICIOPREV/Fontes/_FAssocRubINSS.pas:290</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+</div>
+
+<div class="rule-block" id="BENEF-RN042">
+<div class="rule-id">RS042 (BENEF-RN042) — Até 9 rubricas por linha do arquivo do INSS</div>
+<div class="rule-desc">Na importação da conciliação INSS, cada linha de detalhe traz até 9 rubricas.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li>Rubricas da linha de detalhe — [opcional] — até 9</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> — (regra de seleção/cálculo, sem crítica ao usuário)</p>
+<p><strong>Jornada:</strong> <a href="uc012.html">JF012</a></p>
+<p><strong>Descrição original:</strong> Conciliação INSS: até 9 rubricas por linha de detail do arquivo importado.</p>
+<p><strong>Condições:</strong> Loop i := 0 to 8 (9 rubricas)</p><p><strong>Dados envolvidos:</strong> DETCONCINSS</p><p><strong>Resultado/Exceção:</strong> Insert DETCONCINSS com até 9 rubricas</p>
+<div class="rule-origin">📂 Origem: <code>BENEFICIOPREV/Fontes/_FConciliacao.pas:2498</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+</div>
+
+<div class="rule-block" id="BENEF-RN043">
+<div class="rule-id">RS043 (BENEF-RN043) — Máximo de rubricas por mês na composição de valores</div>
+<div class="rule-desc">Na composição de valores do reembolso INSS, um mês não pode ter 20 rubricas ou mais.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li>Quantidade de rubricas no mês — [obrigatório] — &lt; 20</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT022">TRT022</a> → <a href="#MSG031">MSG031</a> → Desfaz a transação (Rollback) e interrompe</p>
+<p><strong>Jornada:</strong> <a href="uc012.html">JF012</a></p>
+<p><strong>Nota de verificação:</strong> A condição no código é <code>iContRubrica &gt;= 20</code> (_fCompoeValoresRI.pas:862).</p>
+<p><strong>Descrição original:</strong> Composição de valores RI: máximo 20 rubricas por mês.</p>
+<p><strong>Condições:</strong> Contagem de rubricas > 20</p><p><strong>Dados envolvidos:</strong> DETCONCINSS</p><p><strong>Resultado/Exceção:</strong> "Excesso de rubricas no mesmo mês (20)"</p>
+<div class="rule-origin">📂 Origem: <code>BENEFICIOPREV/Fontes/_fCompoeValoresRI.pas:863</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+</div>
+
+<div class="rule-block" id="BENEF-RN044">
+<div class="rule-id">RS044 (BENEF-RN044) — Meses fechados não aceitam entrada manual</div>
+<div class="rule-desc">A entrada manual de rubricas do INSS não aceita registros em mês de cobrança com conciliação fechada.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li>Mês/ano de cobrança — [obrigatório] — conciliação aberta</li>
+<li>Rubrica do INSS, mês de referência, valor — [obrigatório] — validados antes (TRT020)</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT021">TRT021</a> → <a href="#MSG030">MSG030</a> → Bloqueia a inclusão (EValidacao) e posiciona no mês de cobrança</p>
+<p><strong>Jornada:</strong> <a href="uc012.html">JF012</a></p>
+<p><strong>Descrição original:</strong> Entrada manual INSS bloqueia inserção/alteração/exclusão em meses fechados.</p>
+<p><strong>Condições:</strong> VerificaConcINSS(mês) = fechado</p><p><strong>Dados envolvidos:</strong> DETCONCINSS, TEMPCONCINSS</p><p><strong>Resultado/Exceção:</strong> raise EValidacao "Não é possível inserir registros em meses fechados!"</p>
+<div class="rule-origin">📂 Origem: <code>BENEFICIOPREV/Fontes/_fCadEntrManualINSS.pas:326</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+</div>
+
+
+</section>
+
+<section><div class="section-title">7. Tratamentos (TRT)</div>
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Condição</th><th>Mensagem</th><th>Resultado</th><th>Regra</th><th>Jornada</th></tr></thead><tbody>
+<tr id="TRT019"><td><strong>TRT019</strong></td><td>Rubrica do INSS já associada</td><td><a href="#MSG025">MSG025</a></td><td>Não grava a associação duplicada</td><td><a href="#BENEF-RN022">RS022 (BENEF-RN022)</a></td><td><a href="uc012.html">JF012</a></td></tr>
+<tr id="TRT020"><td><strong>TRT020</strong></td><td>Rubrica do INSS, mês de cobrança, mês de referência ou valor não informados na entrada manual</td><td><a href="#MSG026">MSG026</a>, <a href="#MSG027">MSG027</a>, <a href="#MSG028">MSG028</a>, <a href="#MSG029">MSG029</a></td><td>Bloqueia a gravação (EValidacao) e posiciona no campo</td><td>validação de tela</td><td><a href="uc012.html">JF012</a></td></tr>
+<tr id="TRT021"><td><strong>TRT021</strong></td><td>Mês de cobrança da entrada manual com conciliação fechada</td><td><a href="#MSG030">MSG030</a></td><td>Bloqueia a inclusão (EValidacao) e posiciona no mês de cobrança</td><td><a href="#BENEF-RN044">RS044 (BENEF-RN044)</a></td><td><a href="uc012.html">JF012</a></td></tr>
+<tr id="TRT022"><td><strong>TRT022</strong></td><td>20 ou mais rubricas no mesmo mês na composição de valores</td><td><a href="#MSG031">MSG031</a></td><td>Desfaz a transação (Rollback) e interrompe</td><td><a href="#BENEF-RN043">RS043 (BENEF-RN043)</a></td><td><a href="uc012.html">JF012</a></td></tr>
+<tr id="TRT023"><td><strong>TRT023</strong></td><td>Campos obrigatórios não preenchidos no cadastro de mantenedora (código) ou na consulta de resultado da importação (ano/mês)</td><td><a href="#MSG032">MSG032</a></td><td>Não prossegue (Exit) e posiciona no campo</td><td>validação de tela</td><td><a href="uc012.html">JF012</a></td></tr>
+<tr id="TRT024"><td><strong>TRT024</strong></td><td>Código de mantenedora já cadastrado na inclusão</td><td><a href="#MSG033">MSG033</a></td><td>Não grava (Exit)</td><td>validação de tela</td><td><a href="uc012.html">JF012</a></td></tr>
+</tbody></table></div></section>
+
+<section><div class="section-title">8. Mensagens (MSG)</div>
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Texto da mensagem</th><th>Tipo</th><th>Origem (BENEFICIOPREV/Fontes/)</th><th>Jornadas</th></tr></thead><tbody>
+<tr id="MSG025"><td><strong>MSG025</strong></td><td>“Rubrica do INSS já associada!”</td><td>Alerta</td><td><code>_FAssocRubINSS.pas:290</code></td><td><a href="uc012.html">JF012</a></td></tr>
+<tr id="MSG026"><td><strong>MSG026</strong></td><td>“É necessário indicar a Rubrica do INSS!”</td><td>Erro (validação)</td><td><code>_fCadEntrManualINSS.pas:314</code></td><td><a href="uc012.html">JF012</a></td></tr>
+<tr id="MSG027"><td><strong>MSG027</strong></td><td>“É necessário indicar o Mês de Cobrança!”</td><td>Erro (validação)</td><td><code>_fCadEntrManualINSS.pas:317</code></td><td><a href="uc012.html">JF012</a></td></tr>
+<tr id="MSG028"><td><strong>MSG028</strong></td><td>“É necessário indicar o Mês de Referência!”</td><td>Erro (validação)</td><td><code>_fCadEntrManualINSS.pas:320</code></td><td><a href="uc012.html">JF012</a></td></tr>
+<tr id="MSG029"><td><strong>MSG029</strong></td><td>“É necessário indicar o Valor!”</td><td>Erro (validação)</td><td><code>_fCadEntrManualINSS.pas:323</code></td><td><a href="uc012.html">JF012</a></td></tr>
+<tr id="MSG030"><td><strong>MSG030</strong></td><td>“Não é possível inserir registros em meses fechados!”</td><td>Erro (validação)</td><td><code>_fCadEntrManualINSS.pas:326</code></td><td><a href="uc012.html">JF012</a></td></tr>
+<tr id="MSG031"><td><strong>MSG031</strong></td><td>“Excesso de rubricas no mesmo mês (20)”</td><td>Alerta</td><td><code>_fCompoeValoresRI.pas:863</code></td><td><a href="uc012.html">JF012</a></td></tr>
+<tr id="MSG032"><td><strong>MSG032</strong></td><td>“Faltam Preencher Campos ...”</td><td>Alerta</td><td><code>_FCadMantenedora.pas:211; _FResultConciliacao.pas:437</code></td><td><a href="uc012.html">JF012</a></td></tr>
+<tr id="MSG033"><td><strong>MSG033</strong></td><td>“Código já Cadastrado.”</td><td>Erro</td><td><code>_FCadMantenedora.pas:221</code></td><td><a href="uc012.html">JF012</a></td></tr>
+</tbody></table></div></section>
+
+
+<p><a class="back-btn" href="funcionalidades.html">← Voltar à lista de Casos de Uso</a></p>
+
+</main>
+<footer>
+<p>Blueprint AS-IS — PFC-24 / PFC-32 — Módulo Benefício Previdenciário | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-10</p>
+</footer>
+</body>
+</html>

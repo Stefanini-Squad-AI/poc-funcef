@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UC004 – Desfazer Operações de Benefícios — Benefício Previdenciário — Blueprint AS-IS</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<header>
+  <div class="badge">Blueprint AS-IS — PFC-24 — PFC-32</div>
+  <h1>UC004 – Desfazer Operações de Benefícios</h1>
+  <p>Caso de Uso do módulo Benefício Previdenciário — jornada JF004 (PF-04) — Desfazer Operações de Benefícios.</p>
+</header>
+<nav>
+  <a href="index.html">📋 Visão Geral</a>
+  <a href="arquitetura.html">🏗️ Arquitetura</a>
+  <a href="inventario-tecnico.html">📦 Inventário</a>
+  <a href="funcionalidades.html">⚙️ Processos Funcionais</a>
+  <a href="procedures-functions.html">🔧 Procedures</a>
+  <a href="dados.html">🗄️ Dados</a>
+  <a href="relatorios.html">📄 Relatórios</a>
+  <a href="integracoes.html">🔗 Integrações</a>
+  <a href="tratamento-erros.html">⚠️ Erros</a>
+  <a href="diagramas-fluxo.html">🔀 Fluxos</a>
+  <a href="lacunas.html">🔍 Lacunas</a>
+  <a href="controle-cobertura.html">📊 Cobertura</a>
+</nav>
+<main>
+
+<p><a class="back-btn" href="funcionalidades.html">← Voltar à lista de Casos de Uso</a></p>
+
+<section><div class="section-title">1. Identificação</div>
+<div class="table-wrap"><table><tbody>
+<tr><th>Caso de Uso</th><td><strong>UC004</strong> – Desfazer Operações de Benefícios</td></tr>
+<tr><th>Módulo</th><td>Benefício Previdenciário</td></tr>
+<tr><th>Jornada</th><td>JF004 (PF-04) — Desfazer Operações de Benefícios</td></tr>
+<tr><th>Sistema</th><td>CM Contabilidade / FUNCEF (Delphi 5 / VCL / MIDAS)</td></tr>
+<tr><th>Tipo</th><td>Sistema Desktop</td></tr>
+<tr><th>Ator</th><td>Usuário operacional (analista previdenciário)</td></tr>
+<tr><th>Entry point</th><td><code>BENEFICIOPREV/Fontes/BeneficioPrev.dpr</code></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">2. Descrição Resumida</div>
+<p>Caso de Uso <strong>UC004</strong> do módulo Benefício Previdenciário, correspondente à JF004 (PF-04) — Desfazer Operações de Benefícios. Esta página detalha a jornada funcional com sua sequência operacional, ações, regras de negócio, tratamentos de erro e mensagens.</p>
+</section>
+
+<section><div class="section-title">3. Pré-condições</div>
+<p>Consulte as pré-condições específicas na seção da jornada abaixo.</p>
+</section>
+
+<section><div class="section-title">4. Pós-condições</div>
+<p>Consulte as pós-condições específicas na seção da jornada abaixo.</p>
+</section>
+
+<section><div class="section-title">5. Sequência Operacional e Ações</div>
+<div class="pf-block" id="PF-04">
+<h4>JF004 (PF-04) — Desfazer Operações de Benefícios</h4>
+<p><strong>Objetivo:</strong> Desfazer a última operação feita sobre um benefício (concessão, renovação, reabertura, desdobramento, etc.), restaurando os valores e excluindo os efeitos gravados.</p>
+<p><strong>Ator / gatilho:</strong> Analista de benefícios, na tela Desfazer Operações de Benefícios.</p>
+<p><strong>Pré-condições:</strong> Benefício com movimento (MOVBENEF) e log de ocorrência com os valores anteriores; benefício não pago no período afetado.</p>
+<p><strong>Pós-condições:</strong> Valores e vigências anteriores restaurados; históricos derivados excluídos; contribuições reabertas.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li>Selecionar o processo e o movimento a desfazer; o sistema identifica o tipo do movimento e aplica o tratamento correspondente. [<a href="#BENEF-RN030">RS030</a>]</li>
+<li>O sistema verifica se o benefício já foi pago no período; se sim, interrompe. [<a href="#BENEF-RN028">RS028</a>] [<a href="#TRT003">TRT003</a>]</li>
+<li>Para desdobramento, verifica se a folha com os acertos já foi executada; se sim, interrompe. [<a href="#BENEF-RN029">RS029</a>] [<a href="#TRT004">TRT004</a>]</li>
+<li>Considera apenas os registros gerados pela concessão. [<a href="#BENEF-RN010">RS010</a>]</li>
+<li>Restaura o valor atual do benefício e a data final da contribuição a partir do log. [<a href="#BENEF-RN011">RS011</a>] [<a href="#BENEF-RN013">RS013</a>]</li>
+<li>Na pensão Reg/Replan, restaura os valores usados no percentual por dependente. [<a href="#BENEF-RN034">RS034</a>]</li>
+<li>Exclui históricos derivados, inclusive a correção monetária. [<a href="#BENEF-RN012">RS012</a>] [<a href="#TRT005">TRT005</a>]</li>
+<li>Em erro de gravação, a transação é revertida. [<a href="#TRT006">TRT006</a>]</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Selecionar a operação a desfazer</td><td>Identificar o que reverter</td><td>Processo, movimento (TIPOMOV)</td><td>Escolhe o tratamento pelo tipo de movimento</td><td>Operação identificada</td><td><a href="#BENEF-RN030">RS030</a></td><td>—</td><td><code>FDesfazConcessaoBenefNOVO.dfm</code></td></tr>
+<tr><td>Verificar pagamentos e folha</td><td>Evitar desfazer o que já foi pago</td><td>Período da operação</td><td>Consulta VLBENEFPGTO e lotes da folha</td><td>Desfazimento liberado ou bloqueado</td><td><a href="#BENEF-RN028">RS028</a>, <a href="#BENEF-RN029">RS029</a></td><td><a href="#MSG003">MSG003</a>, <a href="#MSG004">MSG004</a></td><td><code>FDesfazConcessaoBenefNOVO.dfm</code></td></tr>
+<tr><td>Restaurar valores</td><td>Voltar à situação anterior</td><td>Log de ocorrência</td><td>Restaura VALORATUAL, DATAFINAL e valores BS/FAB</td><td>Benefício e contribuição restaurados</td><td><a href="#BENEF-RN010">RS010</a>, <a href="#BENEF-RN011">RS011</a>, <a href="#BENEF-RN013">RS013</a>, <a href="#BENEF-RN034">RS034</a></td><td>—</td><td><code>FDesfazConcessaoBenefNOVO.dfm</code></td></tr>
+<tr><td>Excluir efeitos da operação</td><td>Limpar registros derivados</td><td>Processo e pessoa</td><td>Exclui históricos, TMPDESC, PREVIA e correção monetária</td><td>Efeitos removidos</td><td><a href="#BENEF-RN012">RS012</a></td><td><a href="#MSG005">MSG005</a></td><td><code>FDesfazConcessaoBenefNOVO.dfm</code></td></tr>
+</tbody></table></div>
+<p><strong>Regras de negócio da jornada:</strong> <a href="#BENEF-RN010">RS010 (BENEF-RN010)</a> — Desfazimento só atua sobre registros concedidos, <a href="#BENEF-RN011">RS011 (BENEF-RN011)</a> — Desfazimento restaura o valor do benefício, <a href="#BENEF-RN012">RS012 (BENEF-RN012)</a> — Desfazimento exclui históricos derivados da concessão, <a href="#BENEF-RN013">RS013 (BENEF-RN013)</a> — Desfazimento reabre a vigência da contribuição, <a href="#BENEF-RN028">RS028 (BENEF-RN028)</a> — Benefício já pago não pode ser desfeito, <a href="#BENEF-RN029">RS029 (BENEF-RN029)</a> — Desdobramento já processado em folha não pode ser desfeito, <a href="#BENEF-RN030">RS030 (BENEF-RN030)</a> — Desfazimento conforme o tipo de movimento, <a href="#BENEF-RN034">RS034 (BENEF-RN034)</a> — Percentual da pensão Reg/Replan</p>
+<p><strong>Tratamentos de erro:</strong> <a href="#TRT003">TRT003</a>, <a href="#TRT004">TRT004</a>, <a href="#TRT005">TRT005</a>, <a href="#TRT006">TRT006</a></p>
+<p><strong>Mensagens:</strong> <a href="#MSG003">MSG003</a>, <a href="#MSG004">MSG004</a>, <a href="#MSG005">MSG005</a></p>
+<p><strong>Telas:</strong> Desfazer Operações de Benefícios (<code>FDesfazConcessaoBenefNOVO.dfm</code>)</p>
+<p><strong>Dependências:</strong> Reverte <a href="uc001.html">JF001</a>, <a href="uc008.html">JF008</a>, <a href="uc009.html">JF009</a> e <a href="uc010.html">JF010</a>.</p>
+<div class="note note-info"><p><strong>Registro original do processo PF-04</strong></p><p><strong>Forms de entrada:</strong> <code>FDesfazConcessaoBenefNOVO.dfm</code> (6.940 linhas)</p><p><strong>Lógica de processamento:</strong> Restaura valores do log (qryLogOcorrencia), exclui históricos com FLGCONCESSAO=1, reabre contribuições, exclui TMPDESC/PREVIA/HISTMOVRESERVA/HSTPERCGRUPO</p><p><strong>Saídas:</strong> Concessão desfeita</p><p><strong>Persistência (tabelas escritas):</strong> U/D em BENEFBFCIARIO, HSTBENEFBFCIARIO, HSTCONTRIBPREV, CONTRIBPREVPARTP, MOVBENEF, PROCESSOBENEF, TMPDESC, PREVIA</p><p><strong>Evidência:</strong> <code>BENEFICIOPREV/Fontes/FDesfazConcessaoBenefNOVO.pas:913-3628</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+</div>
+</div>
+</section>
+
+<section><div class="section-title">6. Regras de Negócio da Jornada</div>
+<p>As regras de negócio aplicáveis a esta jornada são apresentadas abaixo com seu texto completo, sem necessidade de acessar outra página.</p>
+<div class="rule-block" id="BENEF-RN010">
+<div class="rule-id">RS010 (BENEF-RN010) — Desfazimento só atua sobre registros concedidos</div>
+<div class="rule-desc">O desfazimento só reverte históricos marcados como gerados pela concessão; registros de pré-concessão não são tocados.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>FLGCONCESSAO</code> (HSTBENEFBFCIARIO, HSTCONTRIBPREV) — [obrigatório] — = 1</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> — (regra de seleção/cálculo, sem crítica ao usuário)</p>
+<p><strong>Jornada:</strong> <a href="uc004.html">JF004</a></p>
+<p><strong>Descrição original:</strong> Desfazimento só atua sobre registros concedidos (FLGCONCESSAO=1).</p>
+<p><strong>Condições:</strong> FLGCONCESSAO = 1</p><p><strong>Dados envolvidos:</strong> HSTBENEFBFCIARIO, HSTCONTRIBPREV</p><p><strong>Resultado/Exceção:</strong> Não desfaz pré-concessão</p>
+<div class="rule-origin">📂 Origem: <code>BENEFICIOPREV/Fontes/FDesfazConcessaoBenefNOVO.pas:979,1517</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+</div>
+
+<div class="rule-block" id="BENEF-RN011">
+<div class="rule-id">RS011 (BENEF-RN011) — Desfazimento restaura o valor do benefício</div>
+<div class="rule-desc">Ao desfazer, o valor atual do benefício volta ao valor anterior registrado no log de ocorrência.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>VALORATUALANT</code> (log de ocorrência) — [obrigatório]</li>
+<li><code>BENEFBFCIARIO.VALORATUAL</code> — [obrigatório] — recebe o valor anterior</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> — (regra de seleção/cálculo, sem crítica ao usuário)</p>
+<p><strong>Jornada:</strong> <a href="uc004.html">JF004</a></p>
+<p><strong>Descrição original:</strong> Desfazimento restaura VALORATUAL do log de ocorrência.</p>
+<p><strong>Condições:</strong> UPDATE BENEFBFCIARIO SET VALORATUAL = VALORATUALANT</p><p><strong>Dados envolvidos:</strong> BENEFBFCIARIO</p><p><strong>Resultado/Exceção:</strong> Reversão de valor</p>
+<div class="rule-origin">📂 Origem: <code>BENEFICIOPREV/Fontes/FDesfazConcessaoBenefNOVO.pas:2120,2167</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+</div>
+
+<div class="rule-block" id="BENEF-RN012">
+<div class="rule-id">RS012 (BENEF-RN012) — Desfazimento exclui históricos derivados da concessão</div>
+<div class="rule-desc">Ao desfazer, os históricos e movimentos gerados pela operação (benefício, contribuição, reserva, percentual de grupo, descontos temporários, prévia e correção monetária) são excluídos.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li>Processo e pessoa (<code>NUMEROPROCESSO</code>, <code>IDPESSOA</code>) — [obrigatório] — identificam os registros a excluir</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT005">TRT005</a> → <a href="#MSG005">MSG005</a> → Interrompe o desfazimento (Exit)</p>
+<p><strong>Jornada:</strong> <a href="uc004.html">JF004</a></p>
+<p><strong>Descrição original:</strong> Desfazimento exclui históricos derivados da concessão.</p>
+<p><strong>Condições:</strong> DELETE de HSTBENEFBFCIARIO, HSTCONTRIBPREV, HISTMOVRESERVA, HSTPERCGRUPO, TMPDESC, PREVIA</p><p><strong>Dados envolvidos:</strong> Múltiplas</p><p><strong>Resultado/Exceção:</strong> Limpa efeitos da concessão</p>
+<div class="rule-origin">📂 Origem: <code>BENEFICIOPREV/Fontes/FDesfazConcessaoBenefNOVO.pas:913,1007,1796</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+</div>
+
+<div class="rule-block" id="BENEF-RN013">
+<div class="rule-id">RS013 (BENEF-RN013) — Desfazimento reabre a vigência da contribuição</div>
+<div class="rule-desc">Ao desfazer, a data final da contribuição do participante volta ao valor anterior, reabrindo a vigência.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>DATAFINALANT</code> — [obrigatório]</li>
+<li><code>CONTRIBPREVPARTP.DATAFINAL</code> — [obrigatório] — recebe a data anterior</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> — (regra de seleção/cálculo, sem crítica ao usuário)</p>
+<p><strong>Jornada:</strong> <a href="uc004.html">JF004</a></p>
+<p><strong>Descrição original:</strong> Desfazimento restaura DATAFINAL da contribuição.</p>
+<p><strong>Condições:</strong> UPDATE CONTRIBPREVPARTP SET DATAFINAL = DATAFINALANT</p><p><strong>Dados envolvidos:</strong> CONTRIBPREVPARTP</p><p><strong>Resultado/Exceção:</strong> Reabre vigência</p>
+<div class="rule-origin">📂 Origem: <code>BENEFICIOPREV/Fontes/FDesfazConcessaoBenefNOVO.pas:2892,3566</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+</div>
+
+<div class="rule-block" id="BENEF-RN028">
+<div class="rule-id">RS028 (BENEF-RN028) — Benefício já pago não pode ser desfeito</div>
+<div class="rule-desc">Uma operação não pode ser desfeita se o benefício já foi pago no período afetado.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>HSTBENEFBFCIARIO.VLBENEFPGTO</code> — [obrigatório] — &gt; 0 bloqueia</li>
+<li>Período da operação (início e fim da faixa) — [obrigatório]</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT003">TRT003</a> → <a href="#MSG003">MSG003</a> → Interrompe o desfazimento (Exit); nada é alterado</p>
+<p><strong>Jornada:</strong> <a href="uc004.html">JF004</a></p>
+<p><strong>Descrição original:</strong> Desfazimento bloqueia se benefício já foi pago no período (VLBENEFPGTO > 0).</p>
+<p><strong>Condições:</strong> EXISTS HSTBENEFBFCIARIO WHERE VLBENEFPGTO > 0</p><p><strong>Dados envolvidos:</strong> HSTBENEFBFCIARIO</p><p><strong>Resultado/Exceção:</strong> "Benefício já foi pago… não pode ser desfeita"</p>
+<div class="rule-origin">📂 Origem: <code>BENEFICIOPREV/Fontes/FDesfazConcessaoBenefNOVO.pas:1529-1534</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+</div>
+
+<div class="rule-block" id="BENEF-RN029">
+<div class="rule-id">RS029 (BENEF-RN029) — Desdobramento já processado em folha não pode ser desfeito</div>
+<div class="rule-desc">O desdobramento não pode ser desfeito se a folha de benefícios com os seus acertos já foi executada.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>FLGENVIADO</code> — [condicional] — = 1 bloqueia</li>
+<li><code>VLBENEFPGTO</code> — [condicional] — &gt; 0 bloqueia</li>
+<li>Lote na folha (<code>LOTEXHSTFOLHABENEF.IDLOTE</code>) — [obrigatório]</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT004">TRT004</a> → <a href="#MSG004">MSG004</a> → Interrompe o desfazimento do desdobramento (Exit)</p>
+<p><strong>Jornada:</strong> <a href="uc004.html">JF004</a>, <a href="uc008.html">JF008</a></p>
+<p><strong>Descrição original:</strong> DesfazDesdobramento bloqueia se folha de benefícios já efetivada (FLGENVIADO=1).</p>
+<p><strong>Condições:</strong> FLGENVIADO = 1 OR VLBENEFPGTO > 0</p><p><strong>Dados envolvidos:</strong> HSTBENEFBFCIARIO, LOTEXHSTFOLHABENEF</p><p><strong>Resultado/Exceção:</strong> "Folha já executada. Desdobramento não pode ser desfeito."</p>
+<div class="rule-origin">📂 Origem: <code>BENEFICIOPREV/Fontes/FDesfazConcessaoBenefNOVO.pas:4520-4533</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+</div>
+
+<div class="rule-block" id="BENEF-RN030">
+<div class="rule-id">RS030 (BENEF-RN030) — Desfazimento conforme o tipo de movimento</div>
+<div class="rule-desc">O desfazimento segue um tratamento específico conforme o tipo do último movimento: renovação, reabertura, retenção, encerramento, desdobramento, concessão, falecimento, liberação de retido, revisão, reversão ou alteração manual.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>MOVBENEF.TIPOMOV</code> — [obrigatório] — 0, 1, 3, 4, 5, 7, 9, 12, 13, 16, 17</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> — (regra de seleção/cálculo, sem crítica ao usuário)</p>
+<p><strong>Jornada:</strong> <a href="uc004.html">JF004</a></p>
+<p><strong>Descrição original:</strong> Desfazimento roteia por TIPOMOV: 0=Renovação, 1=Reabertura, 3=Retenção, 4=Encerramento, 5=Desdobramento, 7=Concessão, 9=Falecimento, 12=Lib.Retido, 13=Revisão, 16=Reversão, 17=Alt.Manual.</p>
+<p><strong>Condições:</strong> case TIPOMOV</p><p><strong>Dados envolvidos:</strong> MOVBENEF</p><p><strong>Resultado/Exceção:</strong> Despacha para Desfaz* específico</p>
+<div class="rule-origin">📂 Origem: <code>BENEFICIOPREV/Fontes/FDesfazConcessaoBenefNOVO.pas:732-744,1146-1324</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+</div>
+
+<div class="rule-block" id="BENEF-RN034">
+<div class="rule-id">RS034 (BENEF-RN034) — Percentual da pensão Reg/Replan</div>
+<div class="rule-desc">Na pensão Reg/Replan, o percentual é 50% mais 10% por dependente, limitado a 80%.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li>Quantidade de dependentes — [obrigatório]</li>
+<li>Percentual aplicado — [obrigatório] — máximo 80%</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> — (regra de seleção/cálculo, sem crítica ao usuário)</p>
+<p><strong>Jornada:</strong> <a href="uc004.html">JF004</a></p>
+<p><strong>Nota de verificação:</strong> A regra 50% + 10% por dependente está descrita no registro de alterações WO18367 (FDesfazConcessaoBenefNOVO.pas:6-15); <code>AtribuiValorAnterior</code> (:5184-5206) restaura os valores BS/FAB do titular usados nesse cálculo.</p>
+<p><strong>Descrição original:</strong> Pensão Reg/Replan: percentual = 50% + 10% por dependente, máximo 80% (WO18367).</p>
+<p><strong>Condições:</strong> AtribuiValorAnterior em desfazimento de pensão</p><p><strong>Dados envolvidos:</strong> BENEFBFCIARIO</p><p><strong>Resultado/Exceção:</strong> Percentual calculado e limitado a 80%</p>
+<div class="rule-origin">📂 Origem: <code>BENEFICIOPREV/Fontes/FDesfazConcessaoBenefNOVO.pas:5184-5206</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+</div>
+
+
+</section>
+
+<section><div class="section-title">7. Tratamentos (TRT)</div>
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Condição</th><th>Mensagem</th><th>Resultado</th><th>Regra</th><th>Jornada</th></tr></thead><tbody>
+<tr id="TRT003"><td><strong>TRT003</strong></td><td>Benefício já pago no período da operação que se quer desfazer (VLBENEFPGTO &gt; 0)</td><td><a href="#MSG003">MSG003</a></td><td>Interrompe o desfazimento (Exit); nada é alterado</td><td><a href="#BENEF-RN028">RS028 (BENEF-RN028)</a></td><td><a href="uc004.html">JF004</a></td></tr>
+<tr id="TRT004"><td><strong>TRT004</strong></td><td>Folha de Benefícios com os acertos do desdobramento já executada (FLGENVIADO = 1 ou VLBENEFPGTO &gt; 0 em lote da folha)</td><td><a href="#MSG004">MSG004</a></td><td>Interrompe o desfazimento do desdobramento (Exit)</td><td><a href="#BENEF-RN029">RS029 (BENEF-RN029)</a></td><td><a href="uc004.html">JF004</a></td></tr>
+<tr id="TRT005"><td><strong>TRT005</strong></td><td>Erro ao excluir a correção monetária durante o desfazimento</td><td><a href="#MSG005">MSG005</a></td><td>Interrompe o desfazimento (Exit)</td><td><a href="#BENEF-RN012">RS012 (BENEF-RN012)</a></td><td><a href="uc004.html">JF004</a></td></tr>
+<tr id="TRT006"><td><strong>TRT006</strong></td><td>Erro de banco em operação de escrita (desfazimento, reabertura, liberação)</td><td>— (texto não catalogado)</td><td>Transação revertida (RollBack) e mensagem exibida pelo form (padrão try/except + RollBack; texto varia por operação e não está catalogado no AS-IS)</td><td>validação técnica</td><td><a href="uc004.html">JF004</a>, <a href="uc009.html">JF009</a>, <a href="uc010.html">JF010</a></td></tr>
+</tbody></table></div></section>
+
+<section><div class="section-title">8. Mensagens (MSG)</div>
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Texto da mensagem</th><th>Tipo</th><th>Origem (BENEFICIOPREV/Fontes/)</th><th>Jornadas</th></tr></thead><tbody>
+<tr id="MSG003"><td><strong>MSG003</strong></td><td>“Benefício já foi pago no período de &lt;início&gt; a &lt;fim&gt;. &lt;operação&gt; não pode ser desfeita...”</td><td>Erro</td><td><code>FDesfazConcessaoBenefNOVO.pas:1531-1532 (também :3256)</code></td><td><a href="uc004.html">JF004</a></td></tr>
+<tr id="MSG004"><td><strong>MSG004</strong></td><td>“A Folha de Benefícios com os acertos do desdobramento já foi executada. O desdobramento não pode ser desfeito.”</td><td>Erro</td><td><code>FDesfazConcessaoBenefNOVO.pas:4530-4531</code></td><td><a href="uc004.html">JF004</a></td></tr>
+<tr id="MSG005"><td><strong>MSG005</strong></td><td>“Erro ao Excluir Correção monetária. Verifique.”</td><td>Erro (exibida como informação)</td><td><code>FDesfazConcessaoBenefNOVO.pas:935 (também :957)</code></td><td><a href="uc004.html">JF004</a></td></tr>
+</tbody></table></div></section>
+
+
+<p><a class="back-btn" href="funcionalidades.html">← Voltar à lista de Casos de Uso</a></p>
+
+</main>
+<footer>
+<p>Blueprint AS-IS — PFC-24 / PFC-32 — Módulo Benefício Previdenciário | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-10</p>
+</footer>
+</body>
+</html>

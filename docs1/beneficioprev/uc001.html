@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UC001 – Concessão de Benefício — Benefício Previdenciário — Blueprint AS-IS</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<header>
+  <div class="badge">Blueprint AS-IS — PFC-24 — PFC-32</div>
+  <h1>UC001 – Concessão de Benefício</h1>
+  <p>Caso de Uso do módulo Benefício Previdenciário — jornada JF001 (PF-01) — Concessão de Benefício.</p>
+</header>
+<nav>
+  <a href="index.html">📋 Visão Geral</a>
+  <a href="arquitetura.html">🏗️ Arquitetura</a>
+  <a href="inventario-tecnico.html">📦 Inventário</a>
+  <a href="funcionalidades.html">⚙️ Processos Funcionais</a>
+  <a href="procedures-functions.html">🔧 Procedures</a>
+  <a href="dados.html">🗄️ Dados</a>
+  <a href="relatorios.html">📄 Relatórios</a>
+  <a href="integracoes.html">🔗 Integrações</a>
+  <a href="tratamento-erros.html">⚠️ Erros</a>
+  <a href="diagramas-fluxo.html">🔀 Fluxos</a>
+  <a href="lacunas.html">🔍 Lacunas</a>
+  <a href="controle-cobertura.html">📊 Cobertura</a>
+</nav>
+<main>
+
+<p><a class="back-btn" href="funcionalidades.html">← Voltar à lista de Casos de Uso</a></p>
+
+<section><div class="section-title">1. Identificação</div>
+<div class="table-wrap"><table><tbody>
+<tr><th>Caso de Uso</th><td><strong>UC001</strong> – Concessão de Benefício</td></tr>
+<tr><th>Módulo</th><td>Benefício Previdenciário</td></tr>
+<tr><th>Jornada</th><td>JF001 (PF-01) — Concessão de Benefício</td></tr>
+<tr><th>Sistema</th><td>CM Contabilidade / FUNCEF (Delphi 5 / VCL / MIDAS)</td></tr>
+<tr><th>Tipo</th><td>Sistema Desktop</td></tr>
+<tr><th>Ator</th><td>Usuário operacional (analista previdenciário)</td></tr>
+<tr><th>Entry point</th><td><code>BENEFICIOPREV/Fontes/BeneficioPrev.dpr</code></td></tr>
+<tr id="TRT010"><td><strong>TRT010</strong></td><td>Margem de desconto consignável excedida</td><td><a href="#MSG010">MSG010</a></td><td>Bloqueia/ajusta rubrica</td><td><a href="#FOLHA-RN008">RS008</a></td><td>JF002</td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">2. Descrição Resumida</div>
+<p>Caso de Uso <strong>UC001</strong> do módulo Benefício Previdenciário, correspondente à JF001 (PF-01) — Concessão de Benefício. Esta página detalha a jornada funcional com sua sequência operacional, ações, regras de negócio, tratamentos de erro e mensagens.</p>
+</section>
+
+<section><div class="section-title">3. Pré-condições</div>
+<p>Consulte as pré-condições específicas na seção da jornada abaixo.</p>
+</section>
+
+<section><div class="section-title">4. Pós-condições</div>
+<p>Consulte as pós-condições específicas na seção da jornada abaixo.</p>
+</section>
+
+<section><div class="section-title">5. Sequência Operacional e Ações</div>
+<div class="pf-block" id="PF-01">
+<h4>JF001 (PF-01) — Concessão de Benefício</h4>
+<p><strong>Objetivo:</strong> Conceder um benefício previdenciário ao participante, beneficiário ou designado, com cálculo feito pelo motor externo CMAdmPrev.</p>
+<p><strong>Ator / gatilho:</strong> Analista de concessão de benefícios, no menu da tela principal.</p>
+<p><strong>Pré-condições:</strong> Participante com plano (PARTPREVPLAN) e dados de elegibilidade (ELEGPATRO); motor CMAdmPrev disponível.</p>
+<p><strong>Pós-condições:</strong> Benefício concedido em BENEFBFCIARIO, com histórico (HSTBENEFBFCIARIO), movimento (MOVBENEF), processo (PROCESSOBENEF), contribuições e descontos atualizados (HSTCONTRIBPREV, TMPDESC).</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li>Acionar a concessão no menu e escolher o tipo: participante titular, beneficiário direto ou beneficiário designado/herdeiro. [<a href="#BENEF-RN001">RS001</a>]</li>
+<li>O sistema abre o requerimento do tipo escolhido.</li>
+<li>O cálculo e a concessão são executados pelo CMAdmPrev, com o mesmo IDCALCULO do início ao fim.</li>
+<li>Informar a data de início de liberação na tela Liberação de Benefício. [<a href="#TRT002">TRT002</a>]</li>
+<li>O sistema grava o benefício, o histórico, o movimento e o processo, e registra a operação no log. [<a href="#BENEF-RN025">RS025</a>]</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Escolher o tipo de benefício</td><td>Definir o requerimento a abrir</td><td>Tipo P, B ou D</td><td>Abre o requerimento do tipo escolhido</td><td>Requerimento aberto</td><td><a href="#BENEF-RN001">RS001</a></td><td>—</td><td><code>FPrincipal.dfm</code></td></tr>
+<tr><td>Calcular e conceder</td><td>Gerar o benefício</td><td>Requerimento preenchido</td><td>Delega o cálculo ao CMAdmPrev mantendo o IDCALCULO</td><td>Benefício, histórico, movimento e processo gravados</td><td><a href="#BENEF-RN001">RS001</a>, <a href="#BENEF-RN025">RS025</a></td><td>—</td><td><code>FPrincipal.dfm</code></td></tr>
+<tr><td>Informar a data de início de liberação</td><td>Definir o início do pagamento</td><td>Data de início de liberação</td><td>A crítica contra a data de início de pagamento está comentada no código</td><td>Liberação registrada</td><td>—</td><td><a href="#MSG002">MSG002</a></td><td><code>fTipoLiberacao.dfm</code></td></tr>
+</tbody></table></div>
+<p><strong>Regras de negócio da jornada:</strong> <a href="#BENEF-RN001">RS001 (BENEF-RN001)</a> — Tipo de benefício direciona o fluxo</p>
+<p><strong>Tratamentos de erro:</strong> <a href="#TRT002">TRT002</a></p>
+<p><strong>Mensagens:</strong> <a href="#MSG002">MSG002</a></p>
+<p><strong>Telas:</strong> Concessão e Manut de Benefícios Previdenciários (<code>FPrincipal.dfm</code>), Liberação de Benefício (<code>fTipoLiberacao.dfm</code>)</p>
+<p><strong>Dependências:</strong> Usa a simulação (<a href="uc003.html">JF003</a>) como apoio; precede a liberação (<a href="uc010.html">JF010</a>, <a href="uc011.html">JF011</a>), o desdobramento (<a href="uc008.html">JF008</a>), a alteração (<a href="uc014.html">JF014</a>) e o desfazimento (<a href="uc004.html">JF004</a>).</p>
+<div class="note note-info"><p><strong>Registro original do processo PF-01</strong></p><p><strong>Forms de entrada:</strong> <code>FPrincipal.dfm</code> → <code>fTipoLiberacao.dfm</code></p><p><strong>Lógica de processamento:</strong> Seleção de tipo (Participante/Beneficiário/Designado); chama motor externo CMAdmPrev; mantém IDCALCULO durante todo o processo</p><p><strong>Saídas:</strong> Benefício concedido</p><p><strong>Persistência (tabelas escritas):</strong> BENEFBFCIARIO, HSTBENEFBFCIARIO, MOVBENEF, PROCESSOBENEF, HSTCONTRIBPREV, TMPDESC</p><p><strong>Evidência:</strong> <code>BENEFICIOPREV/Fontes/FPrincipal.pas:1720-1763</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+</div>
+</div>
+</section>
+
+<section><div class="section-title">6. Regras de Negócio da Jornada</div>
+<p>As regras de negócio aplicáveis a esta jornada são apresentadas abaixo com seu texto completo, sem necessidade de acessar outra página.</p>
+<div class="rule-block" id="BENEF-RN001">
+<div class="rule-id">RS001 (BENEF-RN001) — Tipo de benefício direciona o fluxo</div>
+<div class="rule-desc">Ao conceder ou manter um benefício, o usuário escolhe para quem o processo será tratado — participante titular, beneficiário direto ou beneficiário designado/herdeiro — e o sistema abre o requerimento correspondente.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li>Tipo de benefício desejado (<code>rgrpTipo</code> → P/B/D) — [obrigatório] — define o requerimento aberto</li>
+<li><code>IDCALCULO</code> — [condicional] — mantido durante todo o processo quando já existe cálculo</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> — (regra de seleção/cálculo, sem crítica ao usuário)</p>
+<p><strong>Jornada:</strong> <a href="uc001.html">JF001</a>, <a href="uc002.html">JF002</a></p>
+<p><strong>Descrição original:</strong> Seleção de tipo de benefício (Participante/Beneficiário/Designado) direciona o fluxo de concessão.</p>
+<p><strong>Condições:</strong> Usuário escolhe P/B/D</p><p><strong>Dados envolvidos:</strong> frmTipoBenefConcede</p><p><strong>Resultado/Exceção:</strong> Direciona para AbreRequerParticip/Bfciario/Pensionista</p>
+<div class="rule-origin">📂 Origem: <code>BENEFICIOPREV/Fontes/FPrincipal.pas:1689-1761</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+</div>
+
+<div class="rule-block" id="BENEF-RN025">
+<div class="rule-id">RS025 (BENEF-RN025) — Operações auditadas no log do TotalPREV</div>
+<div class="rule-desc">As operações de negócio do módulo são registradas no log do TotalPREV com módulo, usuário, descrição e data.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>IDMODULO</code> — [obrigatório] — = 454</li>
+<li><code>IDUSUARIO</code> — [obrigatório]</li>
+<li><code>DESCOPERACAO</code> — [obrigatório]</li>
+<li><code>DATA</code> — [obrigatório] — SYSDATE</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT010">TRT010</a> → <a href="#MSG008">MSG008</a> → Levanta exceção “Erro ao gravar Log.”; em FEventoMorte, FEventoReclusao, FCadReajINSS e FCadContribParticipante ela é capturada por um except vazio e a operação segue sem log; em FDesdobramentoBenef cai no except externo da transação (:6325-6331)</p>
+<p><strong>Jornada:</strong> Transversal (todas)</p>
+<p><strong>Nota de verificação:</strong> Em vários forms a falha do log é engolida por um except vazio (ver TRT010).</p>
+<p><strong>Descrição original:</strong> Toda operação de negócio é auditada em LOGTOTALPREV (IdModulo=454).</p>
+<p><strong>Condições:</strong> INSERT INTO LOGTOTALPREV(IDMODULO=454, IDUSUARIO, DESCOPERACAO, DATA=SYSDATE)</p><p><strong>Dados envolvidos:</strong> LOGTOTALPREV</p><p><strong>Resultado/Exceção:</strong> Log de operações do TotalPREV</p>
+<div class="rule-origin">📂 Origem: <code>BENEFICIOPREV/Fontes/UModulo.pas:64-88</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+</div>
+
+<div class="rule-block" id="BENEF-RN026">
+<div class="rule-id">RS026 (BENEF-RN026) — Instituto troca a nomenclatura das telas</div>
+<div class="rule-desc">Quando a entidade é um instituto de previdência, as telas trocam “Fundação” por “Instituto”, “Patrocinadora” por “Entidade” e “Plano” por “Regime”.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>prmFLGTIPOPREVIDENC</code> — [obrigatório] — 'I' ativa a troca</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> — (regra de seleção/cálculo, sem crítica ao usuário)</p>
+<p><strong>Jornada:</strong> Transversal (todas)</p>
+<p><strong>Descrição original:</strong> Instituto previdenciário (FLGTIPOPREVIDENC='I') substitui captions: Fundação→Instituto, Patrocinadora→Entidade, Plano→Regime.</p>
+<p><strong>Condições:</strong> prmFLGTIPOPREVIDENC = 'I'</p><p><strong>Dados envolvidos:</strong> TLabel, TMenuItem, TGroupBox, TCheckBox, TPanel</p><p><strong>Resultado/Exceção:</strong> Captions alterados em runtime</p>
+<div class="rule-origin">📂 Origem: <code>BENEFICIOPREV/Fontes/FPrincipal.pas:598-775</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+</div>
+
+<div class="rule-block" id="BENEF-RN027">
+<div class="rule-id">RS027 (BENEF-RN027) — Integração contábil por parâmetro</div>
+<div class="rule-desc">A integração com a contabilidade só é ativada quando o parâmetro de integração contábil está ligado.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>PARAMAPREV.FLGINTCONTAB</code> — [obrigatório] — 1 = integra</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> — (regra de seleção/cálculo, sem crítica ao usuário)</p>
+<p><strong>Jornada:</strong> Transversal (todas)</p>
+<p><strong>Descrição original:</strong> Integração contábil ativada quando PARAMAPREV.FLGINTCONTAB=1.</p>
+<p><strong>Condições:</strong> FLGINTCONTAB = 1</p><p><strong>Dados envolvidos:</strong> PARAMAPREV, IntegraBack.Contabilidade</p><p><strong>Resultado/Exceção:</strong> Contabilidade='S' ou 'N'</p>
+<div class="rule-origin">📂 Origem: <code>BENEFICIOPREV/Fontes/FPrincipal.pas:928-930</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+</div>
+
+<div class="rule-block" id="BENEF-RN045">
+<div class="rule-id">RS045 (BENEF-RN045) — Dados isolados por fundação</div>
+<div class="rule-desc">As consultas de negócio filtram os dados pela fundação do usuário.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>IDFUNDACAO</code> — [obrigatório] — fundação da sessão</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> — (regra de seleção/cálculo, sem crítica ao usuário)</p>
+<p><strong>Jornada:</strong> Transversal (todas)</p>
+<p><strong>Descrição original:</strong> Filtro de multi-fundação (IDFUNDACAO) presente em quase toda SQL de negócio e MontaSelect.</p>
+<p><strong>Condições:</strong> IDFUNDACAO = iIdFundacao em SELECTs</p><p><strong>Dados envolvidos:</strong> PATRO, PARTPREVPLAN, EVENTOGERADOR</p><p><strong>Resultado/Exceção:</strong> Isolamento de dados por fundação</p>
+<div class="rule-origin">📂 Origem: <code>BENEFICIOPREV/Fontes/FPrincipal.pas:566-567</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+</div>
+
+
+</section>
+
+<section><div class="section-title">7. Tratamentos (TRT)</div>
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Condição</th><th>Mensagem</th><th>Resultado</th><th>Regra</th><th>Jornada</th></tr></thead><tbody>
+<tr id="TRT002"><td><strong>TRT002</strong></td><td>Data de início de liberação anterior à data de início de pagamento</td><td><a href="#MSG002">MSG002</a></td><td><strong>Inativo no código atual</strong>: a crítica está comentada (fTipoLiberacao.pas:154-181); quando ativa, impedia o fechamento da tela (CanClose := False)</td><td>validação de tela</td><td><a href="uc001.html">JF001</a></td></tr>
+</tbody></table></div></section>
+
+<section><div class="section-title">8. Mensagens (MSG)</div>
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Texto da mensagem</th><th>Tipo</th><th>Origem (BENEFICIOPREV/Fontes/)</th><th>Jornadas</th></tr></thead><tbody>
+<tr id="MSG002"><td><strong>MSG002</strong></td><td>“A data de início de liberação deve ser igual ou maior a data de início de pagamento.”<br><em>Inativa: trecho comentado (<code>{ … }</code> em fTipoLiberacao.pas:154-181).</em></td><td>Erro</td><td><code>fTipoLiberacao.pas:157</code></td><td><a href="uc001.html">JF001</a></td></tr>
+
+<tr id="MSG008"><td><strong>MSG008</strong></td><td>"Conta bancária do lote inválida"</td><td>JF003</td></tr>
+<tr id="MSG010"><td><strong>MSG010</strong></td><td>"Margem consignável excedida — rubrica bloqueada/ajustada"</td><td>JF002</td></tr></tbody></table></div></section>
+
+
+<p><a class="back-btn" href="funcionalidades.html">← Voltar à lista de Casos de Uso</a></p>
+
+</main>
+<footer>
+<p>Blueprint AS-IS — PFC-24 / PFC-32 — Módulo Benefício Previdenciário | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-10</p>
+</footer>
+</body>
+</html>

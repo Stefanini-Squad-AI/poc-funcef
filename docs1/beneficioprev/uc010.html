@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UC010 – Liberação de Benefício em Exigência ou Retido — Benefício Previdenciário — Blueprint AS-IS</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<header>
+  <div class="badge">Blueprint AS-IS — PFC-24 — PFC-32</div>
+  <h1>UC010 – Liberação de Benefício em Exigência ou Retido</h1>
+  <p>Caso de Uso do módulo Benefício Previdenciário — jornada JF010 (PF-10) — Liberação de Benefício em Exigência ou Retido.</p>
+</header>
+<nav>
+  <a href="index.html">📋 Visão Geral</a>
+  <a href="arquitetura.html">🏗️ Arquitetura</a>
+  <a href="inventario-tecnico.html">📦 Inventário</a>
+  <a href="funcionalidades.html">⚙️ Processos Funcionais</a>
+  <a href="procedures-functions.html">🔧 Procedures</a>
+  <a href="dados.html">🗄️ Dados</a>
+  <a href="relatorios.html">📄 Relatórios</a>
+  <a href="integracoes.html">🔗 Integrações</a>
+  <a href="tratamento-erros.html">⚠️ Erros</a>
+  <a href="diagramas-fluxo.html">🔀 Fluxos</a>
+  <a href="lacunas.html">🔍 Lacunas</a>
+  <a href="controle-cobertura.html">📊 Cobertura</a>
+</nav>
+<main>
+
+<p><a class="back-btn" href="funcionalidades.html">← Voltar à lista de Casos de Uso</a></p>
+
+<section><div class="section-title">1. Identificação</div>
+<div class="table-wrap"><table><tbody>
+<tr><th>Caso de Uso</th><td><strong>UC010</strong> – Liberação de Benefício em Exigência ou Retido</td></tr>
+<tr><th>Módulo</th><td>Benefício Previdenciário</td></tr>
+<tr><th>Jornada</th><td>JF010 (PF-10) — Liberação de Benefício em Exigência ou Retido</td></tr>
+<tr><th>Sistema</th><td>CM Contabilidade / FUNCEF (Delphi 5 / VCL / MIDAS)</td></tr>
+<tr><th>Tipo</th><td>Sistema Desktop</td></tr>
+<tr><th>Ator</th><td>Usuário operacional (analista previdenciário)</td></tr>
+<tr><th>Entry point</th><td><code>BENEFICIOPREV/Fontes/BeneficioPrev.dpr</code></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">2. Descrição Resumida</div>
+<p>Caso de Uso <strong>UC010</strong> do módulo Benefício Previdenciário, correspondente à JF010 (PF-10) — Liberação de Benefício em Exigência ou Retido. Esta página detalha a jornada funcional com sua sequência operacional, ações, regras de negócio, tratamentos de erro e mensagens.</p>
+</section>
+
+<section><div class="section-title">3. Pré-condições</div>
+<p>Consulte as pré-condições específicas na seção da jornada abaixo.</p>
+</section>
+
+<section><div class="section-title">4. Pós-condições</div>
+<p>Consulte as pós-condições específicas na seção da jornada abaixo.</p>
+</section>
+
+<section><div class="section-title">5. Sequência Operacional e Ações</div>
+<div class="pf-block" id="PF-10">
+<h4>JF010 (PF-10) — Liberação de Benefício em Exigência ou Retido</h4>
+<p><strong>Objetivo:</strong> Liberar benefícios em exigência ou retidos, concluindo o processo e iniciando o pagamento.</p>
+<p><strong>Ator / gatilho:</strong> Analista de benefícios, na tela Liberação de Benefício em Exigência.</p>
+<p><strong>Pré-condições:</strong> Benefício em exigência ou retido; limites de valor e percentual parametrizados.</p>
+<p><strong>Pós-condições:</strong> Processo concluído (IDSITPROCESSO = 1); benefício ativo; históricos, contribuições e movimento atualizados.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li>Selecionar os benefícios a liberar. [<a href="#TRT016">TRT016</a>]</li>
+<li>Com recálculo, o sistema confere os limites de valor e de percentual. [<a href="#BENEF-RN033">RS033</a>] [<a href="#TRT017">TRT017</a>] [<a href="#TRT018">TRT018</a>]</li>
+<li>O sistema conclui o processo e atualiza benefício, históricos, contribuições e movimento. [<a href="#BENEF-RN021">RS021</a>]</li>
+<li>Em erro de gravação, a transação é revertida. [<a href="#TRT006">TRT006</a>]</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Selecionar benefícios</td><td>Definir o que liberar</td><td>Benefícios em exigência/retidos</td><td>Exige ao menos um selecionado</td><td>Benefícios selecionados</td><td>—</td><td><a href="#MSG022">MSG022</a></td><td><code>FCadInicioBenefExigencia.dfm</code></td></tr>
+<tr><td>Conferir limites</td><td>Evitar liberação acima do permitido</td><td>Valor atualizado</td><td>Verifica limite de valor e de percentual</td><td>Liberação permitida ou bloqueada</td><td><a href="#BENEF-RN033">RS033</a></td><td><a href="#MSG023">MSG023</a>, <a href="#MSG024">MSG024</a></td><td><code>FCadInicioBenefExigencia.dfm</code></td></tr>
+<tr><td>Liberar</td><td>Iniciar o pagamento</td><td>Benefícios aprovados</td><td>Atualiza PROCESSOBENEF, BENEFBFCIARIO, MOVBENEF e contribuições</td><td>Benefício liberado</td><td><a href="#BENEF-RN021">RS021</a></td><td>—</td><td><code>FCadInicioBenefExigencia.dfm</code></td></tr>
+</tbody></table></div>
+<p><strong>Regras de negócio da jornada:</strong> <a href="#BENEF-RN021">RS021 (BENEF-RN021)</a> — Liberação em exigência conclui o processo, <a href="#BENEF-RN033">RS033 (BENEF-RN033)</a> — Liberação acima dos limites exige autorização</p>
+<p><strong>Tratamentos de erro:</strong> <a href="#TRT006">TRT006</a>, <a href="#TRT016">TRT016</a>, <a href="#TRT017">TRT017</a>, <a href="#TRT018">TRT018</a></p>
+<p><strong>Mensagens:</strong> <a href="#MSG022">MSG022</a>, <a href="#MSG023">MSG023</a>, <a href="#MSG024">MSG024</a></p>
+<p><strong>Telas:</strong> Liberação de Benefício em Exigência (<code>FCadInicioBenefExigencia.dfm</code>)</p>
+<p><strong>Dependências:</strong> Sucede <a href="uc001.html">JF001</a>; pode ser revertida em <a href="uc004.html">JF004</a>.</p>
+<div class="note note-info"><p><strong>Registro original do processo PF-10</strong></p><p><strong>Forms de entrada:</strong> <code>FCadInicioBenefExigencia.dfm</code> (4.646 linhas)</p><p><strong>Lógica de processamento:</strong> UPDATE BENEFBFCIARIO (situação/valor/datas), HSTBENEFBFCIARIO, HSTCONTRIBPREV, CONTRIBPREVPARTP.FLGCOBRA, PROCESSOBENEF.IDSITPROCESSO=1, MOVBENEF.DTINICIOLIBERACAO</p><p><strong>Saídas:</strong> Benefício liberado</p><p><strong>Persistência (tabelas escritas):</strong> BENEFBFCIARIO, HSTBENEFBFCIARIO, HSTCONTRIBPREV, CONTRIBPREVPARTP, CONTRIBPREVNUCLEO, PROCESSOBENEF, MOVBENEF</p><p><strong>Evidência:</strong> <code>BENEFICIOPREV/Fontes/FCadInicioBenefExigencia.pas:1256-4283</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+</div>
+</div>
+</section>
+
+<section><div class="section-title">6. Regras de Negócio da Jornada</div>
+<p>As regras de negócio aplicáveis a esta jornada são apresentadas abaixo com seu texto completo, sem necessidade de acessar outra página.</p>
+<div class="rule-block" id="BENEF-RN021">
+<div class="rule-id">RS021 (BENEF-RN021) — Liberação em exigência conclui o processo</div>
+<div class="rule-desc">Ao liberar um benefício em exigência ou retido, o processo passa a concluído e o benefício passa a ativo/pago, com a data de início da liberação registrada no movimento.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>PROCESSOBENEF.IDSITPROCESSO</code> — [obrigatório] — = 1</li>
+<li><code>MOVBENEF.DTINICIOLIBERACAO</code> — [obrigatório]</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> — (regra de seleção/cálculo, sem crítica ao usuário)</p>
+<p><strong>Jornada:</strong> <a href="uc010.html">JF010</a></p>
+<p><strong>Descrição original:</strong> Liberação em exigência conclui o processo (IDSITPROCESSO=1).</p>
+<p><strong>Condições:</strong> UPDATE PROCESSOBENEF SET IDSITPROCESSO = 1; UPDATE BENEFBFCIARIO; UPDATE MOVBENEF</p><p><strong>Dados envolvidos:</strong> PROCESSOBENEF, BENEFBFCIARIO, MOVBENEF</p><p><strong>Resultado/Exceção:</strong> Benefício passa a ativo/pago</p>
+<div class="rule-origin">📂 Origem: <code>BENEFICIOPREV/Fontes/FCadInicioBenefExigencia.pas:1972,1330</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+</div>
+
+<div class="rule-block" id="BENEF-RN033">
+<div class="rule-id">RS033 (BENEF-RN033) — Liberação acima dos limites exige autorização</div>
+<div class="rule-desc">Na liberação em exigência com recálculo, o valor atualizado é conferido contra os limites de valor e de percentual; acima de qualquer um deles, só com autorização.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li>Valor atualizado — [obrigatório]</li>
+<li><code>VALORATUAL</code> — [obrigatório] — base do limite percentual</li>
+<li>Usuário autorizador — [condicional] — exigido quando excede</li>
+<li><code>prmFlgLibRecalc</code> — [condicional] — a conferência ocorre no bloco de recálculo</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT017">TRT017</a> → <a href="#MSG023">MSG023</a> → Desfaz a transação (RollBack) e interrompe a liberação; <a href="#TRT018">TRT018</a> → <a href="#MSG024">MSG024</a> → Desfaz a transação (RollBack) e interrompe a liberação</p>
+<p><strong>Jornada:</strong> <a href="uc010.html">JF010</a></p>
+<p><strong>Descrição original:</strong> Liberação em exigência verifica limites de valor E percentual antes de processar.</p>
+<p><strong>Condições:</strong> VerificaVALORLimiteBeneficio AND VerificaPERCLimiteBeneficio</p><p><strong>Dados envolvidos:</strong> BENEFBFCIARIO</p><p><strong>Resultado/Exceção:</strong> Bloqueia se excede sem autorização</p>
+<div class="rule-origin">📂 Origem: <code>BENEFICIOPREV/Fontes/FCadInicioBenefExigencia.pas:1575-1610</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+</div>
+
+
+</section>
+
+<section><div class="section-title">7. Tratamentos (TRT)</div>
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Condição</th><th>Mensagem</th><th>Resultado</th><th>Regra</th><th>Jornada</th></tr></thead><tbody>
+<tr id="TRT006"><td><strong>TRT006</strong></td><td>Erro de banco em operação de escrita (desfazimento, reabertura, liberação)</td><td>— (texto não catalogado)</td><td>Transação revertida (RollBack) e mensagem exibida pelo form (padrão try/except + RollBack; texto varia por operação e não está catalogado no AS-IS)</td><td>validação técnica</td><td><a href="uc004.html">JF004</a>, <a href="uc009.html">JF009</a>, <a href="uc010.html">JF010</a></td></tr>
+<tr id="TRT016"><td><strong>TRT016</strong></td><td>Nenhum benefício selecionado para liberação</td><td><a href="#MSG022">MSG022</a></td><td>Não processa a liberação (Exit)</td><td>validação de tela</td><td><a href="uc010.html">JF010</a></td></tr>
+<tr id="TRT017"><td><strong>TRT017</strong></td><td>Valor atualizado excede o limite de valor sem autorização</td><td><a href="#MSG023">MSG023</a></td><td>Desfaz a transação (RollBack) e interrompe a liberação</td><td><a href="#BENEF-RN033">RS033 (BENEF-RN033)</a></td><td><a href="uc010.html">JF010</a></td></tr>
+<tr id="TRT018"><td><strong>TRT018</strong></td><td>Valor atualizado excede o limite percentual sem autorização</td><td><a href="#MSG024">MSG024</a></td><td>Desfaz a transação (RollBack) e interrompe a liberação</td><td><a href="#BENEF-RN033">RS033 (BENEF-RN033)</a></td><td><a href="uc010.html">JF010</a></td></tr>
+</tbody></table></div></section>
+
+<section><div class="section-title">8. Mensagens (MSG)</div>
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Texto da mensagem</th><th>Tipo</th><th>Origem (BENEFICIOPREV/Fontes/)</th><th>Jornadas</th></tr></thead><tbody>
+<tr id="MSG022"><td><strong>MSG022</strong></td><td>“Nenhum Benefício selecionado para efetuar a liberação.”</td><td>Erro</td><td><code>FCadInicioBenefExigencia.pas:965</code></td><td><a href="uc010.html">JF010</a></td></tr>
+<tr id="MSG023"><td><strong>MSG023</strong></td><td>“Liberação não permitida por exceder valor limite e não ter autorização. Verifique.”</td><td>Erro</td><td><code>FCadInicioBenefExigencia.pas:1589</code></td><td><a href="uc010.html">JF010</a></td></tr>
+<tr id="MSG024"><td><strong>MSG024</strong></td><td>“Liberação não permitida por exceder percentual limite e não ter autorização. Verifique.”</td><td>Erro</td><td><code>FCadInicioBenefExigencia.pas:1608</code></td><td><a href="uc010.html">JF010</a></td></tr>
+</tbody></table></div></section>
+
+
+<p><a class="back-btn" href="funcionalidades.html">← Voltar à lista de Casos de Uso</a></p>
+
+</main>
+<footer>
+<p>Blueprint AS-IS — PFC-24 / PFC-32 — Módulo Benefício Previdenciário | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-10</p>
+</footer>
+</body>
+</html>

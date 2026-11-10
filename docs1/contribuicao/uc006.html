@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UC006 – Portabilidade e Benefício Saldado/FAB — Contribuição Previdenciária — Blueprint AS-IS</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<header>
+  <div class="badge">Blueprint AS-IS — PFC-23 (enriquecido) — PFC-32</div>
+  <h1>UC006 – Portabilidade e Benefício Saldado/FAB</h1>
+  <p>Caso de Uso do módulo Contribuição Previdenciária — jornada JF006 (PF-06) — Portabilidade e Benefício Saldado/FAB.</p>
+</header>
+<nav>
+  <a href="index.html">📋 Visão Geral</a>
+  <a href="arquitetura.html">🏗️ Arquitetura</a>
+  <a href="inventario-tecnico.html">📦 Inventário</a>
+  <a href="funcionalidades.html">⚙️ Processos Funcionais</a>
+  <a href="procedures-functions.html">🔧 Procedures</a>
+  <a href="dados.html">🗄️ Dados</a>
+  <a href="relatorios.html">📄 Relatórios</a>
+  <a href="integracoes.html">🔗 Integrações</a>
+  <a href="tratamento-erros.html">⚠️ Erros</a>
+  <a href="diagramas-fluxo.html">🔀 Fluxos</a>
+  <a href="lacunas.html">🔍 Lacunas</a>
+  <a href="controle-cobertura.html">📊 Cobertura</a>
+</nav>
+<main>
+
+<p><a class="back-btn" href="funcionalidades.html">← Voltar à lista de Casos de Uso</a></p>
+
+<section><div class="section-title">1. Identificação</div>
+<div class="table-wrap"><table><tbody>
+<tr><th>Caso de Uso</th><td><strong>UC006</strong> – Portabilidade e Benefício Saldado/FAB</td></tr>
+<tr><th>Módulo</th><td>Contribuição Previdenciária</td></tr>
+<tr><th>Jornada</th><td>JF006 (PF-06) — Portabilidade e Benefício Saldado/FAB</td></tr>
+<tr><th>Sistema</th><td>CM Contabilidade / FUNCEF (Delphi 5 / VCL / MIDAS)</td></tr>
+<tr><th>Tipo</th><td>Sistema Desktop</td></tr>
+<tr><th>Ator</th><td>Usuário operacional (analista previdenciário, financeiro, contábil)</td></tr>
+<tr><th>Entry point</th><td><code>CONTRIBUICAOPREV/Fontes/ContribuicaoPREV.dpr</code></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">2. Descrição Resumida</div>
+<p>Caso de Uso <strong>UC006</strong> do módulo Contribuição Previdenciária, correspondente à JF006 (PF-06) — Portabilidade e Benefício Saldado/FAB. Esta página detalha a jornada funcional com sua sequência operacional, ações, regras de negócio, tratamentos de erro e mensagens.</p>
+</section>
+
+<section><div class="section-title">3. Pré-condições</div>
+<p>Consulte as pré-condições específicas na seção da jornada abaixo.</p>
+</section>
+
+<section><div class="section-title">4. Pós-condições</div>
+<p>Consulte as pós-condições específicas na seção da jornada abaixo.</p>
+</section>
+
+<section><div class="section-title">5. Sequência Operacional e Ações</div>
+<div class="pf-block" id="PF-06">
+<h4>JF006 (PF-06) — Portabilidade e Benefício Saldado/FAB</h4>
+<p><strong>Objetivo:</strong> Cadastrar portabilidades e contribuições portadas, calcular o benefício saldado e o FAB e fazer carga/descarga dos arquivos correspondentes.</p>
+<p><strong>Ator / gatilho:</strong> Analista de cadastro previdenciário, nas telas <em>Cadastro de Contribuições Portadas</em>, <em>Benefício Saldado e FAB</em> e <em>Benefício Saldado e FAB - Carga de Arquivo</em>.</p>
+<p><strong>Pré-condições:</strong> Participante cadastrado; para importação, planilha Excel no layout esperado.</p>
+<p><strong>Pós-condições:</strong> PORTABILIDADEPREV, BENEFSALDFAB e CARGABENEFSALDFAB atualizados; contribuições portadas registradas.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li>Selecionar o participante e informar os dados da portabilidade (meses de vínculo 0–11, opção de IR). [<a href="#CONTRIB-RN001">RS001</a>] [<a href="#CONTRIB-RN006">RS006</a>] [<a href="#TRT024">TRT024</a>] [<a href="#TRT025">TRT025</a>] [<a href="#TRT023">TRT023</a>]</li>
+<li>Incluir contribuições portadas manualmente (referência obrigatória e não posterior à cobrança; valor esperado &gt; 0) ou importar planilha. [<a href="#CONTRIB-RN002">RS002</a>] [<a href="#CONTRIB-RN003">RS003</a>] [<a href="#CONTRIB-RN008">RS008</a>] [<a href="#TRT026">TRT026</a>] [<a href="#TRT027">TRT027</a>] [<a href="#TRT031">TRT031</a>]</li>
+<li>Alterar/excluir contribuição portada: bloqueado se já recebida ou enviada. [<a href="#CONTRIB-RN004">RS004</a>] [<a href="#CONTRIB-RN005">RS005</a>] [<a href="#TRT028">TRT028</a>] [<a href="#TRT029">TRT029</a>]</li>
+<li>Excluir portabilidade: exige excluir antes as contribuições. [<a href="#CONTRIB-RN007">RS007</a>] [<a href="#TRT030">TRT030</a>]</li>
+<li>Benefício saldado/FAB: atualizar ou reprocessar via PCK_BENEFSALDFAB.SP_ATUALIZASALDO. [<a href="#TRT033">TRT033</a>]</li>
+<li>Carga de arquivo de BS/FAB: selecionar arquivo, conferir leiaute e importar. [<a href="#TRT032">TRT032</a>]</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Cadastrar portabilidade</td><td>Registrar o vínculo portado</td><td>Participante, meses de vínculo, opção de IR</td><td>Valida participante, meses 0–11 e opção de IR</td><td>PORTABILIDADEPREV gravada</td><td><a href="#CONTRIB-RN001">RS001</a>, <a href="#CONTRIB-RN006">RS006</a></td><td><a href="#MSG041">MSG041</a>, <a href="#MSG042">MSG042</a>, <a href="#MSG040">MSG040</a>, <a href="#MSG053">MSG053</a></td><td><code>FCadContribuicaoPortada.dfm</code></td></tr>
+<tr><td>Incluir contribuição portada</td><td>Registrar contribuições do vínculo anterior</td><td>Ano/mês de referência e cobrança, valor esperado</td><td>Valida referência e valor</td><td>Contribuição portada gravada</td><td><a href="#CONTRIB-RN002">RS002</a>, <a href="#CONTRIB-RN003">RS003</a></td><td><a href="#MSG043">MSG043</a>, <a href="#MSG044">MSG044</a>, <a href="#MSG045">MSG045</a></td><td><code>FCadContribuicaoPortada.dfm</code></td></tr>
+<tr><td>Importar contribuições portadas</td><td>Carregar em lote</td><td>Planilha Excel</td><td>Valida formato e layout</td><td>Contribuições importadas</td><td><a href="#CONTRIB-RN008">RS008</a></td><td><a href="#MSG051">MSG051</a>, <a href="#MSG052">MSG052</a></td><td><code>FCadContribuicaoPortada.dfm</code></td></tr>
+<tr><td>Alterar/excluir contribuição portada</td><td>Corrigir o cadastro</td><td>Contribuição selecionada</td><td>Bloqueia se recebida ou enviada; pede confirmação na exclusão</td><td>Contribuição alterada/excluída</td><td><a href="#CONTRIB-RN004">RS004</a>, <a href="#CONTRIB-RN005">RS005</a></td><td><a href="#MSG046">MSG046</a>, <a href="#MSG047">MSG047</a>, <a href="#MSG048">MSG048</a>, <a href="#MSG049">MSG049</a></td><td><code>FCadContribuicaoPortada.dfm</code></td></tr>
+<tr><td>Excluir portabilidade</td><td>Remover o vínculo portado</td><td>Portabilidade selecionada</td><td>Verifica se há histórico</td><td>Portabilidade excluída ou exclusão negada</td><td><a href="#CONTRIB-RN007">RS007</a></td><td><a href="#MSG050">MSG050</a></td><td><code>FCadContribuicaoPortada.dfm</code></td></tr>
+<tr><td>Atualizar/reprocessar BS-FAB</td><td>Calcular benefício saldado e FAB</td><td>Participante(s)</td><td>Executa PCK_BENEFSALDFAB.SP_ATUALIZASALDO</td><td>BENEFSALDFAB atualizado</td><td>—</td><td><a href="#MSG057">MSG057</a>, <a href="#MSG058">MSG058</a></td><td><code>FBeneficioSaldadoFAB.dfm</code></td></tr>
+<tr><td>Carregar arquivo BS-FAB</td><td>Importar valores de BS/FAB</td><td>Planilha</td><td>Valida seleção, leiaute e benefício INSS</td><td>CARGABENEFSALDFAB gravada</td><td>—</td><td><a href="#MSG054">MSG054</a>, <a href="#MSG055">MSG055</a>, <a href="#MSG056">MSG056</a></td><td><code>fCargaArquivo.dfm</code></td></tr>
+</tbody></table></div>
+<p><strong>Regras de negócio da jornada:</strong> <a href="#CONTRIB-RN001">RS001 (CONTRIB-RN001)</a> — Mês de vínculo da portabilidade válido, <a href="#CONTRIB-RN002">RS002 (CONTRIB-RN002)</a> — Ano/mês de referência obrigatório, <a href="#CONTRIB-RN003">RS003 (CONTRIB-RN003)</a> — Valor esperado maior que zero, <a href="#CONTRIB-RN004">RS004 (CONTRIB-RN004)</a> — Contribuição recebida não pode ser alterada, <a href="#CONTRIB-RN005">RS005 (CONTRIB-RN005)</a> — Contribuição enviada não pode ser alterada/excluída, <a href="#CONTRIB-RN006">RS006 (CONTRIB-RN006)</a> — Opção de IR obrigatória, <a href="#CONTRIB-RN007">RS007 (CONTRIB-RN007)</a> — Exclusão de portabilidade exige excluir contribuições, <a href="#CONTRIB-RN008">RS008 (CONTRIB-RN008)</a> — Importação exige arquivo válido</p>
+<p><strong>Tratamentos de erro:</strong> <a href="#TRT023">TRT023</a>, <a href="#TRT024">TRT024</a>, <a href="#TRT025">TRT025</a>, <a href="#TRT026">TRT026</a>, <a href="#TRT027">TRT027</a>, <a href="#TRT028">TRT028</a>, <a href="#TRT029">TRT029</a>, <a href="#TRT030">TRT030</a>, <a href="#TRT031">TRT031</a>, <a href="#TRT032">TRT032</a>, <a href="#TRT033">TRT033</a></p>
+<p><strong>Mensagens:</strong> <a href="#MSG040">MSG040</a>, <a href="#MSG041">MSG041</a>, <a href="#MSG042">MSG042</a>, <a href="#MSG043">MSG043</a>, <a href="#MSG044">MSG044</a>, <a href="#MSG045">MSG045</a>, <a href="#MSG046">MSG046</a>, <a href="#MSG047">MSG047</a>, <a href="#MSG048">MSG048</a>, <a href="#MSG049">MSG049</a>, <a href="#MSG050">MSG050</a>, <a href="#MSG051">MSG051</a>, <a href="#MSG052">MSG052</a>, <a href="#MSG053">MSG053</a>, <a href="#MSG054">MSG054</a>, <a href="#MSG055">MSG055</a>, <a href="#MSG056">MSG056</a>, <a href="#MSG057">MSG057</a>, <a href="#MSG058">MSG058</a></p>
+<p><strong>Telas:</strong> Cadastro de Contribuições Portadas (<code>FCadContribuicaoPortada.dfm</code>), Benefício Saldado e FAB (<code>FBeneficioSaldadoFAB.dfm</code>), Benefício Saldado e FAB - Carga de Arquivo (<code>fCargaArquivo.dfm</code>)</p>
+<p><strong>Dependências:</strong> Compartilha a opção de IR com <a href="uc005.html">JF005</a>; a revisão de índice do BS/FAB está em <a href="uc010.html">JF010</a>.</p>
+<div class="note note-info"><p><strong>Registro original do processo PF-06</strong></p><p><strong>Forms de entrada:</strong> <code>FCadContribuicaoPortada.dfm</code>, <code>FBeneficioSaldadoFAB.dfm</code>, <code>fCargaArquivo.dfm</code></p><p><strong>Lógica de processamento:</strong> Cadastra contribuições portadas; calcula benefício saldado e FAB via PCK_BENEFSALDFAB.SP_ATUALIZASALDO; carga/descarga de arquivos</p><p><strong>Saídas:</strong> Benefício saldado, FAB, portabilidades</p><p><strong>Persistência (tabelas escritas):</strong> PORTABILIDADEPREV (I/U/D), BENEFSALDFAB (I/U/D), CARGABENEFSALDFAB (I)</p><p><strong>Evidência:</strong> <code>CONTRIBUICAOPREV/Fontes/FCadContribuicaoPortada.pas:367</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+</div>
+</div>
+</section>
+
+<section><div class="section-title">6. Regras de Negócio da Jornada</div>
+<p>As regras de negócio aplicáveis a esta jornada são apresentadas abaixo com seu texto completo, sem necessidade de acessar outra página.</p>
+<div class="rule-block" id="CONTRIB-RN001">
+<div class="rule-id">RS001 (CONTRIB-RN001) — Mês de vínculo da portabilidade válido</div>
+<div class="rule-desc">Na portabilidade, os meses de vínculo no plano anterior completam os anos informados e por isso devem estar entre 0 e 11. Campo vazio é tratado como 0.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>edtmeses (meses de vínculo)</code> — [obrigatório] — inteiro de 0 a 11; vazio assume 0</li>
+<li><code>PORTABILIDADEPREV</code> — [condicional] — gravada somente com valor válido</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT025">TRT025</a> → <a href="#MSG042">MSG042</a> → Bloqueia (Abort)</p>
+<p><strong>Jornada:</strong> <a href="uc006.html">JF006</a></p>
+<p><strong>Nota de verificação:</strong> No código atual, a validação é feita no campo <code>edtmeses</code> (evento <code>edtmesesExit</code>, :793-800).</p>
+<p><strong>Descrição original:</strong> Mês de vínculo da portabilidade deve estar entre 0 e 11.</p>
+<p><strong>Condições:</strong> EdtMesReferencia informado</p>
+<p><strong>Dados envolvidos:</strong> PORTABILIDADEPREV</p>
+<p><strong>Resultado/Exceção:</strong> MessageDlg('Mês de Vínculo Inválido...') + Abort</p>
+<div class="rule-origin">📂 Origem: <code>CONTRIBUICAOPREV/Fontes/FCadContribuicaoPortada.pas:799-800</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+</div>
+
+<div class="rule-block" id="CONTRIB-RN002">
+<div class="rule-id">RS002 (CONTRIB-RN002) — Ano/mês de referência obrigatório</div>
+<div class="rule-desc">Toda contribuição portada precisa de ano/mês de referência, que não pode ser posterior ao ano/mês de cobrança.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>EdtMesReferencia / EdtAnoReferencia</code> — [obrigatório] — mês 1–12 e ano válidos</li>
+<li><code>EdtMesCobranca / EdtAnoCobranca</code> — [obrigatório] — referência ≤ cobrança</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT026">TRT026</a> → <a href="#MSG043">MSG043</a>, <a href="#MSG044">MSG044</a> → Bloqueia (Abort)</p>
+<p><strong>Jornada:</strong> <a href="uc006.html">JF006</a></p>
+<p><strong>Descrição original:</strong> Ano/Mês de referência obrigatório e ≤ mês de cobrança.</p>
+<p><strong>Condições:</strong> EdtMesReferencia/EdtAnoReferencia vazios OU &gt; cobrança</p>
+<p><strong>Dados envolvidos:</strong> contribuição</p>
+<p><strong>Resultado/Exceção:</strong> MessageDlg + Abort</p>
+<div class="rule-origin">📂 Origem: <code>CONTRIBUICAOPREV/Fontes/FCadContribuicaoPortada.pas:1186-1199</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+</div>
+
+<div class="rule-block" id="CONTRIB-RN003">
+<div class="rule-id">RS003 (CONTRIB-RN003) — Valor esperado maior que zero</div>
+<div class="rule-desc">Uma contribuição portada só pode ser gravada com valor esperado positivo.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>VALORESPERADO</code> — [obrigatório] — decimal &gt; 0</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT027">TRT027</a> → <a href="#MSG045">MSG045</a> → Bloqueia (Abort)</p>
+<p><strong>Jornada:</strong> <a href="uc006.html">JF006</a></p>
+<p><strong>Descrição original:</strong> Valor esperado da contribuição deve ser &gt; 0.</p>
+<p><strong>Condições:</strong> Validação antes de gravar</p>
+<p><strong>Dados envolvidos:</strong> VALORESPERADO</p>
+<p><strong>Resultado/Exceção:</strong> MessageDlg('Valor Esperado deve ser maior que zero') + Abort</p>
+<div class="rule-origin">📂 Origem: <code>CONTRIBUICAOPREV/Fontes/FCadContribuicaoPortada.pas:1208-1211</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+</div>
+
+<div class="rule-block" id="CONTRIB-RN004">
+<div class="rule-id">RS004 (CONTRIB-RN004) — Contribuição recebida não pode ser alterada</div>
+<div class="rule-desc">Depois de recebida, a contribuição portada não pode ser alterada nem excluída.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>HSTCONTRIBPREV.SITRECEBIMENTO</code> — [obrigatório] — situação de recebida bloqueia</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT028">TRT028</a> → <a href="#MSG046">MSG046</a>, <a href="#MSG048">MSG048</a> → Bloqueia a alteração/exclusão</p>
+<p><strong>Jornada:</strong> <a href="uc006.html">JF006</a></p>
+<p><strong>Descrição original:</strong> Contribuição já recebida bloqueia alteração.</p>
+<p><strong>Condições:</strong> SITRECEBIMENTO indica recebido</p>
+<p><strong>Dados envolvidos:</strong> HSTCONTRIBPREV</p>
+<p><strong>Resultado/Exceção:</strong> MessageDlg('Contribuição já foi Recebida')</p>
+<div class="rule-origin">📂 Origem: <code>CONTRIBUICAOPREV/Fontes/FCadContribuicaoPortada.pas:1222</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+</div>
+
+<div class="rule-block" id="CONTRIB-RN005">
+<div class="rule-id">RS005 (CONTRIB-RN005) — Contribuição enviada não pode ser alterada/excluída</div>
+<div class="rule-desc">Depois de enviada para cobrança (folha ou Contas a Receber), a contribuição portada não pode ser alterada nem excluída.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>HSTCONTRIBPREV.SITRECEBIMENTO</code> — [obrigatório] — situação de enviada bloqueia</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT029">TRT029</a> → <a href="#MSG047">MSG047</a>, <a href="#MSG049">MSG049</a> → Bloqueia a alteração/exclusão</p>
+<p><strong>Jornada:</strong> <a href="uc006.html">JF006</a></p>
+<p><strong>Descrição original:</strong> Contribuição já enviada bloqueia alteração/exclusão.</p>
+<p><strong>Condições:</strong> Enviada à folha/CaR</p>
+<p><strong>Dados envolvidos:</strong> HSTCONTRIBPREV</p>
+<p><strong>Resultado/Exceção:</strong> MessageDlg('já foi Enviada')</p>
+<div class="rule-origin">📂 Origem: <code>CONTRIBUICAOPREV/Fontes/FCadContribuicaoPortada.pas:1228</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+</div>
+
+<div class="rule-block" id="CONTRIB-RN006">
+<div class="rule-id">RS006 (CONTRIB-RN006) — Opção de IR obrigatória</div>
+<div class="rule-desc">Ao gravar a portabilidade, o participante deve ter a opção de tributação escolhida: regime regressivo ou progressivo.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>RbRegressivo / RbProgressivo</code> — [obrigatório] — exatamente uma opção marcada</li>
+<li><code>PORTABILIDADEPREV (opção de IR)</code> — [obrigatório] — regressivo | progressivo</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT023">TRT023</a> → <a href="#MSG040">MSG040</a> → Bloqueia a gravação da portabilidade</p>
+<p><strong>Jornada:</strong> <a href="uc005.html">JF005</a>, <a href="uc006.html">JF006</a></p>
+<p><strong>Nota de verificação:</strong> A mensagem é exibida em <code>FCadContribuicaoPortada.pas:384</code>.</p>
+<p><strong>Descrição original:</strong> Opção de IR (regressivo/progressivo) obrigatória.</p>
+<p><strong>Condições:</strong> RbRegressivo/RbProgressivo não marcados</p>
+<p><strong>Dados envolvidos:</strong> portabilidade</p>
+<p><strong>Resultado/Exceção:</strong> MessageDlg('Necessário informar a Opção de IR')</p>
+<div class="rule-origin">📂 Origem: <code>CONTRIBUICAOPREV/Fontes/FCadContribuicaoPortada.pas:323</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+</div>
+
+<div class="rule-block" id="CONTRIB-RN007">
+<div class="rule-id">RS007 (CONTRIB-RN007) — Exclusão de portabilidade exige excluir contribuições</div>
+<div class="rule-desc">Uma portabilidade só pode ser excluída depois que todas as contribuições portadas dela forem excluídas.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>PORTABILIDADEPREV</code> — [obrigatório] — registro selecionado</li>
+<li><code>HSTCONTRIBPREV (contribuições portadas)</code> — [condicional] — deve estar vazio para excluir</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT030">TRT030</a> → <a href="#MSG050">MSG050</a> → Cancela a exclusão</p>
+<p><strong>Jornada:</strong> <a href="uc006.html">JF006</a></p>
+<p><strong>Descrição original:</strong> Exclusão de portabilidade exige excluir contribuições primeiro.</p>
+<p><strong>Condições:</strong> PortabilidadeTemHistorico verdadeiro</p>
+<p><strong>Dados envolvidos:</strong> PORTABILIDADEPREV+HSTCONTRIBPREV</p>
+<p><strong>Resultado/Exceção:</strong> MessageDlg('exclua o cadastro das contribuições, primeiro')</p>
+<div class="rule-origin">📂 Origem: <code>CONTRIBUICAOPREV/Fontes/FCadContribuicaoPortada.pas:521,1393</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+</div>
+
+<div class="rule-block" id="CONTRIB-RN008">
+<div class="rule-id">RS008 (CONTRIB-RN008) — Importação exige arquivo válido</div>
+<div class="rule-desc">Quando as contribuições portadas são importadas, o arquivo deve ser uma planilha Excel no layout esperado; senão nada é gravado.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>edtImportaArquivo</code> — [condicional] — obrigatório na importação; arquivo Excel</li>
+<li><code>layout da planilha</code> — [condicional] — colunas no layout de importação</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT031">TRT031</a> → <a href="#MSG051">MSG051</a>, <a href="#MSG052">MSG052</a> → Bloqueia a importação (Abort)</p>
+<p><strong>Jornada:</strong> <a href="uc006.html">JF006</a></p>
+<p><strong>Descrição original:</strong> Importação exige arquivo válido.</p>
+<p><strong>Condições:</strong> edtImportaArquivo preenchido e validaArquivoImportacao</p>
+<p><strong>Dados envolvidos:</strong> arquivo</p>
+<p><strong>Resultado/Exceção:</strong> Abort</p>
+<div class="rule-origin">📂 Origem: <code>CONTRIBUICAOPREV/Fontes/FCadContribuicaoPortada.pas:1173-1178</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+</div>
+
+<div class="rule-block" id="CONTRIB-RN039">
+<div class="rule-id">CONTRIB-RN039 — Cálculo do Benefício Saldado via package Oracle</div>
+<p><strong>Descrição:</strong> O Benefício Saldado é calculado pela função Oracle <code>CM.PCK_BENEFSALDFAB.FN_CALCULABS(IDPESSOA, SALPART, BINSS, PBE)</code>. A fórmula de demonstração é <code>BS = (SALPART × 1,015^i − BINSS) × (IDC − IDADE) / TS</code>.</p>
+<p><strong>Fórmula:</strong> <code>BS = (SALPART × 1,015^i − BINSS) × (IDC − IDADE) / TS</code> onde IDC = 53 (M) ou 48 (F) se maior</p>
+<p><strong>Dados:</strong> SALPART, BINSS, PBE, IDC (idade comparativa), TS (tempo de serviço)</p>
+<p><strong>Rotina:</strong> <code>FAlteracaoBeneficioSaldadoFAB.dbredBeneficioSaldadoBtnClick</code> · <strong>Arquivo:</strong> <code>FAlteracaoBeneficioSaldadoFAB.pas:420-454</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+</div>
+
+<div class="rule-block" id="CONTRIB-RN044">
+<div class="rule-id">CONTRIB-RN044 — Portabilidade exige opção IR e tempo de vínculo</div>
+<p><strong>Descrição:</strong> O cadastro de contribuição portada exige opção IR (regressivo/progressivo), tempo de vínculo > 0 (meses 0-11), data de recebimento, CNPB/CNPJ da entidade de origem. A exclusão é bloqueada se a portabilidade tem histórico.</p>
+<p><strong>Condições:</strong> OPCAOIR ∈ {R,P}; tempomeses = anos×12 + meses > 0; meses ∈ [0,11].</p>
+<p><strong>Dados:</strong> PORTABILIDADEPREV (OPCAOIR, TEMPOVINCULO, IDENTIDADEORIGEM), HSTCONTRIBPREV</p>
+<p><strong>Rotina:</strong> <code>FCadContribuicaoPortada.ValicaCampoObrigatoriosPortabilidade</code> · <strong>Arquivo:</strong> <code>FCadContribuicaoPortada.pas:832-904</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+</div>
+
+
+</section>
+
+<section><div class="section-title">7. Tratamentos (TRT)</div>
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Condição</th><th>Mensagem</th><th>Resultado</th><th>Regra</th><th>Jornada</th></tr></thead><tbody>
+<tr id="TRT023"><td><strong>TRT023</strong></td><td>Opção de IR (regressivo/progressivo) não informada</td><td><a href="#MSG040">MSG040</a></td><td>Bloqueia a gravação da portabilidade</td><td><a href="#CONTRIB-RN006">RS006</a></td><td><a href="uc005.html">JF005</a>, <a href="uc006.html">JF006</a></td></tr>
+<tr id="TRT024"><td><strong>TRT024</strong></td><td>Participante não selecionado na portabilidade</td><td><a href="#MSG041">MSG041</a></td><td>Bloqueia a operação</td><td>validação de tela</td><td><a href="uc006.html">JF006</a></td></tr>
+<tr id="TRT025"><td><strong>TRT025</strong></td><td>Meses de vínculo maior que 11</td><td><a href="#MSG042">MSG042</a></td><td>Bloqueia (Abort)</td><td><a href="#CONTRIB-RN001">RS001</a></td><td><a href="uc006.html">JF006</a></td></tr>
+<tr id="TRT026"><td><strong>TRT026</strong></td><td>Ano/mês de referência vazio ou maior que o ano/mês de cobrança</td><td><a href="#MSG043">MSG043</a>, <a href="#MSG044">MSG044</a></td><td>Bloqueia (Abort)</td><td><a href="#CONTRIB-RN002">RS002</a></td><td><a href="uc006.html">JF006</a></td></tr>
+<tr id="TRT027"><td><strong>TRT027</strong></td><td>Valor esperado menor ou igual a zero</td><td><a href="#MSG045">MSG045</a></td><td>Bloqueia (Abort)</td><td><a href="#CONTRIB-RN003">RS003</a></td><td><a href="uc006.html">JF006</a></td></tr>
+<tr id="TRT028"><td><strong>TRT028</strong></td><td>Alteração ou exclusão de contribuição portada já recebida</td><td><a href="#MSG046">MSG046</a>, <a href="#MSG048">MSG048</a></td><td>Bloqueia a alteração/exclusão</td><td><a href="#CONTRIB-RN004">RS004</a></td><td><a href="uc006.html">JF006</a></td></tr>
+<tr id="TRT029"><td><strong>TRT029</strong></td><td>Alteração ou exclusão de contribuição portada já enviada</td><td><a href="#MSG047">MSG047</a>, <a href="#MSG049">MSG049</a></td><td>Bloqueia a alteração/exclusão</td><td><a href="#CONTRIB-RN005">RS005</a></td><td><a href="uc006.html">JF006</a></td></tr>
+<tr id="TRT030"><td><strong>TRT030</strong></td><td>Exclusão de portabilidade que ainda tem contribuições</td><td><a href="#MSG050">MSG050</a></td><td>Cancela a exclusão</td><td><a href="#CONTRIB-RN007">RS007</a></td><td><a href="uc006.html">JF006</a></td></tr>
+<tr id="TRT031"><td><strong>TRT031</strong></td><td>Arquivo de importação fora do formato Excel ou do layout</td><td><a href="#MSG051">MSG051</a>, <a href="#MSG052">MSG052</a></td><td>Bloqueia a importação (Abort)</td><td><a href="#CONTRIB-RN008">RS008</a></td><td><a href="uc006.html">JF006</a></td></tr>
+<tr id="TRT032"><td><strong>TRT032</strong></td><td>Arquivo de carga do benefício saldado/FAB não selecionado, com leiaute incorreto ou com benefício INSS inconsistente</td><td><a href="#MSG054">MSG054</a>, <a href="#MSG055">MSG055</a>, <a href="#MSG056">MSG056</a></td><td>Bloqueia a carga</td><td>validação de tela</td><td><a href="uc006.html">JF006</a></td></tr>
+<tr id="TRT033"><td><strong>TRT033</strong></td><td>Erro na atualização/reprocessamento do BS-FAB ou na revisão de índice</td><td><a href="#MSG058">MSG058</a></td><td>Atualização não concluída</td><td>validação de tela</td><td><a href="uc006.html">JF006</a>, <a href="uc010.html">JF010</a></td></tr>
+</tbody></table></div></section>
+
+<section><div class="section-title">8. Mensagens (MSG)</div>
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Texto da mensagem</th><th>Tipo</th><th>Origem (CONTRIBUICAOPREV/Fontes/)</th><th>Jornadas</th></tr></thead><tbody>
+<tr id="MSG040"><td><strong>MSG040</strong></td><td>“Necessário informar a Opção de IR .”</td><td>Erro</td><td><code>FCadContribuicaoPortada.pas:384</code></td><td><a href="uc005.html">JF005</a>, <a href="uc006.html">JF006</a></td></tr>
+<tr id="MSG041"><td><strong>MSG041</strong></td><td>“Selecione um Participante”</td><td>Erro</td><td><code>FCadContribuicaoPortada.pas:417,429</code></td><td><a href="uc006.html">JF006</a></td></tr>
+<tr id="MSG042"><td><strong>MSG042</strong></td><td>“Mêses de Vinculo Inválido. Informe o mês entre 0 e 11”</td><td>Erro</td><td><code>FCadContribuicaoPortada.pas:799</code></td><td><a href="uc006.html">JF006</a></td></tr>
+<tr id="MSG043"><td><strong>MSG043</strong></td><td>“O Ano/Mês de Referencia deve ser informado”</td><td>Informação</td><td><code>FCadContribuicaoPortada.pas:1188</code></td><td><a href="uc006.html">JF006</a></td></tr>
+<tr id="MSG044"><td><strong>MSG044</strong></td><td>“O Ano/Mês de Referencia não pode ser maior que o Ano/Mês de Cobrança”</td><td>Informação</td><td><code>FCadContribuicaoPortada.pas:1196</code></td><td><a href="uc006.html">JF006</a></td></tr>
+<tr id="MSG045"><td><strong>MSG045</strong></td><td>“O campo Valor Esperado deve ser maior que zero.”</td><td>Informação</td><td><code>FCadContribuicaoPortada.pas:1208</code></td><td><a href="uc006.html">JF006</a></td></tr>
+<tr id="MSG046"><td><strong>MSG046</strong></td><td>“Essa Contribuição já foi Recebida, Alteração não permitida”</td><td>Erro</td><td><code>FCadContribuicaoPortada.pas:1222</code></td><td><a href="uc006.html">JF006</a></td></tr>
+<tr id="MSG047"><td><strong>MSG047</strong></td><td>“Essa Contribuição já foi Enviada, Alteração não permitida”</td><td>Erro</td><td><code>FCadContribuicaoPortada.pas:1228</code></td><td><a href="uc006.html">JF006</a></td></tr>
+<tr id="MSG048"><td><strong>MSG048</strong></td><td>“Essa Contribuição já foi Recebida, Exclusão não permitida”</td><td>Erro</td><td><code>FCadContribuicaoPortada.pas:1246</code></td><td><a href="uc006.html">JF006</a></td></tr>
+<tr id="MSG049"><td><strong>MSG049</strong></td><td>“Essa Contribuição já foi Enviada, Exclusão não permitida”</td><td>Erro</td><td><code>FCadContribuicaoPortada.pas:1252</code></td><td><a href="uc006.html">JF006</a></td></tr>
+<tr id="MSG050"><td><strong>MSG050</strong></td><td>“Para excluir esse registro, exclua o cadastro das contribuições, primeiro.”</td><td>Informação</td><td><code>FCadContribuicaoPortada.pas:521</code></td><td><a href="uc006.html">JF006</a></td></tr>
+<tr id="MSG051"><td><strong>MSG051</strong></td><td>“O arquivo deverá ser em formato excel.”</td><td>Erro</td><td><code>FCadContribuicaoPortada.pas:1802</code></td><td><a href="uc006.html">JF006</a></td></tr>
+<tr id="MSG052"><td><strong>MSG052</strong></td><td>“O arquivo não está no layout correto para importação.”</td><td>Erro</td><td><code>FCadContribuicaoPortada.pas:1815</code></td><td><a href="uc006.html">JF006</a></td></tr>
+<tr id="MSG053"><td><strong>MSG053</strong></td><td>“Dados gravados com sucesso.”</td><td>Sucesso</td><td><code>FCadContribuicaoPortada.pas:367</code></td><td><a href="uc006.html">JF006</a></td></tr>
+<tr id="MSG054"><td><strong>MSG054</strong></td><td>“Favor selecionar arquivo de importação!”</td><td>Informação</td><td><code>fCargaArquivo.pas:251</code></td><td><a href="uc006.html">JF006</a></td></tr>
+<tr id="MSG055"><td><strong>MSG055</strong></td><td>“O leiaute do arquivo selecionado não está correto.”</td><td>Informação</td><td><code>fCargaArquivo.pas:498</code></td><td><a href="uc006.html">JF006</a></td></tr>
+<tr id="MSG056"><td><strong>MSG056</strong></td><td>“Inconsistência no benefício INSS para a matrícula &lt;matrícula&gt;. Verifique.”</td><td>Erro</td><td><code>fCargaArquivo.pas:341</code></td><td><a href="uc006.html">JF006</a></td></tr>
+<tr id="MSG057"><td><strong>MSG057</strong></td><td>“Atualização Concluída.”</td><td>Sucesso</td><td><code>FBeneficioSaldadoFAB.pas:850; FRevisaoIndice.pas:102</code></td><td><a href="uc006.html">JF006</a>, <a href="uc010.html">JF010</a></td></tr>
+<tr id="MSG058"><td><strong>MSG058</strong></td><td>“Ocorreu um erro, a atualização não foi concluída.”</td><td>Informação</td><td><code>FBeneficioSaldadoFAB.pas:852; FRevisaoIndice.pas:104</code></td><td><a href="uc006.html">JF006</a>, <a href="uc010.html">JF010</a></td></tr>
+</tbody></table></div></section>
+
+
+<p><a class="back-btn" href="funcionalidades.html">← Voltar à lista de Casos de Uso</a></p>
+
+</main>
+<footer>
+<p>Blueprint AS-IS — PFC-23 / PFC-32 — Módulo Contribuição Previdenciária | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-10</p>
+</footer>
+</body>
+</html>

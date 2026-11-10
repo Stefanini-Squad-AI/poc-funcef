@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UC005 – Tributação — Bitributação / IR Regressivo — Contribuição Previdenciária — Blueprint AS-IS</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<header>
+  <div class="badge">Blueprint AS-IS — PFC-23 (enriquecido) — PFC-32</div>
+  <h1>UC005 – Tributação — Bitributação / IR Regressivo</h1>
+  <p>Caso de Uso do módulo Contribuição Previdenciária — jornada JF005 (PF-05) — Tributação — Bitributação / IR Regressivo.</p>
+</header>
+<nav>
+  <a href="index.html">📋 Visão Geral</a>
+  <a href="arquitetura.html">🏗️ Arquitetura</a>
+  <a href="inventario-tecnico.html">📦 Inventário</a>
+  <a href="funcionalidades.html">⚙️ Processos Funcionais</a>
+  <a href="procedures-functions.html">🔧 Procedures</a>
+  <a href="dados.html">🗄️ Dados</a>
+  <a href="relatorios.html">📄 Relatórios</a>
+  <a href="integracoes.html">🔗 Integrações</a>
+  <a href="tratamento-erros.html">⚠️ Erros</a>
+  <a href="diagramas-fluxo.html">🔀 Fluxos</a>
+  <a href="lacunas.html">🔍 Lacunas</a>
+  <a href="controle-cobertura.html">📊 Cobertura</a>
+</nav>
+<main>
+
+<p><a class="back-btn" href="funcionalidades.html">← Voltar à lista de Casos de Uso</a></p>
+
+<section><div class="section-title">1. Identificação</div>
+<div class="table-wrap"><table><tbody>
+<tr><th>Caso de Uso</th><td><strong>UC005</strong> – Tributação — Bitributação / IR Regressivo</td></tr>
+<tr><th>Módulo</th><td>Contribuição Previdenciária</td></tr>
+<tr><th>Jornada</th><td>JF005 (PF-05) — Tributação — Bitributação / IR Regressivo</td></tr>
+<tr><th>Sistema</th><td>CM Contabilidade / FUNCEF (Delphi 5 / VCL / MIDAS)</td></tr>
+<tr><th>Tipo</th><td>Sistema Desktop</td></tr>
+<tr><th>Ator</th><td>Usuário operacional (analista previdenciário, financeiro, contábil)</td></tr>
+<tr><th>Entry point</th><td><code>CONTRIBUICAOPREV/Fontes/ContribuicaoPREV.dpr</code></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">2. Descrição Resumida</div>
+<p>Caso de Uso <strong>UC005</strong> do módulo Contribuição Previdenciária, correspondente à JF005 (PF-05) — Tributação — Bitributação / IR Regressivo. Esta página detalha a jornada funcional com sua sequência operacional, ações, regras de negócio, tratamentos de erro e mensagens.</p>
+</section>
+
+<section><div class="section-title">3. Pré-condições</div>
+<p>Consulte as pré-condições específicas na seção da jornada abaixo.</p>
+</section>
+
+<section><div class="section-title">4. Pós-condições</div>
+<p>Consulte as pós-condições específicas na seção da jornada abaixo.</p>
+</section>
+
+<section><div class="section-title">5. Sequência Operacional e Ações</div>
+<div class="pf-block" id="PF-05">
+<h4>JF005 (PF-05) — Tributação — Bitributação / IR Regressivo</h4>
+<p><strong>Objetivo:</strong> Calcular o saldo de contribuições para bitributação, calcular o IR regressivo e registrar a opção de IR na portabilidade.</p>
+<p><strong>Ator / gatilho:</strong> Analista de tributação, nas telas <em>Cálculo do Saldo de Contribuições - Bitributação</em>, <em>Cálculos IR Regressivo</em> e <em>Cadastro de Contribuições Portadas</em>.</p>
+<p><strong>Pré-condições:</strong> Participantes com histórico de contribuições; índices cadastrados; prévia da folha de benefícios fora de execução (para o IR regressivo).</p>
+<p><strong>Pós-condições:</strong> HSTBITRIBUTACAO e BITRIBUTACAO atualizados; IRRF calculado; opção de IR gravada em PORTABILIDADEPREV.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li>Selecionar os participantes (individualmente ou todos) e confirmar o cálculo dos saldos. [<a href="#TRT020">TRT020</a>]</li>
+<li>O sistema calcula o saldo de contribuições e grava HSTBITRIBUTACAO/BITRIBUTACAO. [<a href="#CONTRIB-RN022">RS022</a>] [<a href="#TRT021">TRT021</a>]</li>
+<li>IR regressivo: informar a data de pagamento e processar; bloqueado enquanto a prévia da folha estiver em execução. [<a href="#TRT022">TRT022</a>]</li>
+<li>Na portabilidade, registrar a opção de IR (regressivo ou progressivo). [<a href="#CONTRIB-RN006">RS006</a>] [<a href="#TRT023">TRT023</a>]</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Selecionar participantes</td><td>Definir a base do cálculo</td><td>Participante(s)</td><td>Monta a lista; confirmações de inclusão/exclusão</td><td>Lista pronta</td><td>—</td><td><a href="#MSG035">MSG035</a></td><td><code>FCalcSalContr.dfm</code></td></tr>
+<tr><td>Calcular saldo de bitributação</td><td>Apurar o saldo tributado</td><td>Lista de participantes</td><td>Lê/insere HSTBITRIBUTACAO e BITRIBUTACAO</td><td>Saldos gravados</td><td><a href="#CONTRIB-RN022">RS022</a></td><td><a href="#MSG036">MSG036</a>, <a href="#MSG037">MSG037</a>, <a href="#MSG038">MSG038</a></td><td><code>FCalcSalContr.dfm</code></td></tr>
+<tr><td>Calcular IR regressivo</td><td>Apurar IRRF</td><td>Data de pagamento</td><td>Verifica se a prévia está em execução e processa todos</td><td>IRRF calculado</td><td>—</td><td><a href="#MSG039">MSG039</a></td><td><code>fCalculoIRRF.dfm</code></td></tr>
+<tr><td>Registrar opção de IR</td><td>Definir o regime de tributação</td><td>Regressivo ou progressivo</td><td>Exige uma das opções</td><td>Opção gravada em PORTABILIDADEPREV</td><td><a href="#CONTRIB-RN006">RS006</a></td><td><a href="#MSG040">MSG040</a></td><td><code>FCadContribuicaoPortada.dfm</code></td></tr>
+</tbody></table></div>
+<p><strong>Regras de negócio da jornada:</strong> <a href="#CONTRIB-RN006">RS006 (CONTRIB-RN006)</a> — Opção de IR obrigatória, <a href="#CONTRIB-RN022">RS022 (CONTRIB-RN022)</a> — Saldo de contribuições via bitributação</p>
+<p><strong>Tratamentos de erro:</strong> <a href="#TRT020">TRT020</a>, <a href="#TRT021">TRT021</a>, <a href="#TRT022">TRT022</a>, <a href="#TRT023">TRT023</a></p>
+<p><strong>Mensagens:</strong> <a href="#MSG035">MSG035</a>, <a href="#MSG036">MSG036</a>, <a href="#MSG037">MSG037</a>, <a href="#MSG038">MSG038</a>, <a href="#MSG039">MSG039</a>, <a href="#MSG040">MSG040</a></p>
+<p><strong>Telas:</strong> Cálculo do Saldo de Contribuições - Bitributação (<code>FCalcSalContr.dfm</code>), Cálculos IR Regressivo (<code>fCalculoIRRF.dfm</code>), Cadastro de Contribuições Portadas (<code>FCadContribuicaoPortada.dfm</code>)</p>
+<p><strong>Dependências:</strong> Usa o histórico gerado em <a href="uc002.html">JF002</a> e <a href="uc009.html">JF009</a>; compartilha a tela de portabilidade com <a href="uc006.html">JF006</a>.</p>
+<div class="note note-info"><p><strong>Registro original do processo PF-05</strong></p><p><strong>Forms de entrada:</strong> <code>FCalcSalContr.dfm</code>, <code>fCalculoIRRF.dfm</code>, <code>FCadContribuicaoPortada.dfm</code></p><p><strong>Lógica de processamento:</strong> Calcula saldo via HSTBITRIBUTACAO/BITRIBUTACAO; calcula IRRF; registra opção de IR na portabilidade</p><p><strong>Saídas:</strong> Saldos bitributação, IRRF</p><p><strong>Persistência (tabelas escritas):</strong> HSTBITRIBUTACAO (I/U/D), BITRIBUTACAO (U), PORTABILIDADEPREV (U)</p><p><strong>Evidência:</strong> <code>CONTRIBUICAOPREV/Fontes/FCalcSalContr.pas:277-330</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+</div>
+</div>
+</section>
+
+<section><div class="section-title">6. Regras de Negócio da Jornada</div>
+<p>As regras de negócio aplicáveis a esta jornada são apresentadas abaixo com seu texto completo, sem necessidade de acessar outra página.</p>
+<div class="rule-block" id="CONTRIB-RN006">
+<div class="rule-id">RS006 (CONTRIB-RN006) — Opção de IR obrigatória</div>
+<div class="rule-desc">Ao gravar a portabilidade, o participante deve ter a opção de tributação escolhida: regime regressivo ou progressivo.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>RbRegressivo / RbProgressivo</code> — [obrigatório] — exatamente uma opção marcada</li>
+<li><code>PORTABILIDADEPREV (opção de IR)</code> — [obrigatório] — regressivo | progressivo</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT023">TRT023</a> → <a href="#MSG040">MSG040</a> → Bloqueia a gravação da portabilidade</p>
+<p><strong>Jornada:</strong> <a href="uc005.html">JF005</a>, <a href="uc006.html">JF006</a></p>
+<p><strong>Nota de verificação:</strong> A mensagem é exibida em <code>FCadContribuicaoPortada.pas:384</code>.</p>
+<p><strong>Descrição original:</strong> Opção de IR (regressivo/progressivo) obrigatória.</p>
+<p><strong>Condições:</strong> RbRegressivo/RbProgressivo não marcados</p>
+<p><strong>Dados envolvidos:</strong> portabilidade</p>
+<p><strong>Resultado/Exceção:</strong> MessageDlg('Necessário informar a Opção de IR')</p>
+<div class="rule-origin">📂 Origem: <code>CONTRIBUICAOPREV/Fontes/FCadContribuicaoPortada.pas:323</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+</div>
+
+<div class="rule-block" id="CONTRIB-RN022">
+<div class="rule-id">RS022 (CONTRIB-RN022) — Saldo de contribuições via bitributação</div>
+<div class="rule-desc">O saldo de contribuições para bitributação é recalculado por participante: o histórico anterior é excluído e um novo é gravado.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>IDPESSOA</code> — [obrigatório] — participante selecionado</li>
+<li><code>HSTBITRIBUTACAO</code> — [obrigatório] — excluído e reinserido</li>
+<li><code>BITRIBUTACAO</code> — [obrigatório] — saldo atualizado</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT020">TRT020</a> → <a href="#MSG035">MSG035</a> → Não calcula; <a href="#TRT021">TRT021</a> → <a href="#MSG037">MSG037</a> → Informa e não calcula o saldo</p>
+<p><strong>Jornada:</strong> <a href="uc005.html">JF005</a></p>
+<p><strong>Descrição original:</strong> Cálculo do saldo de contribuições (bitributação) lê/insere HSTBITRIBUTACAO e BITRIBUTACAO.</p>
+<p><strong>Condições:</strong> Cálculo de saldo</p>
+<p><strong>Dados envolvidos:</strong> HSTBITRIBUTACAO, BITRIBUTACAO</p>
+<p><strong>Resultado/Exceção:</strong> InserirHSTBITRIBUTACAO; DELETE WHERE IDPESSOA=...</p>
+<div class="rule-origin">📂 Origem: <code>CONTRIBUICAOPREV/Fontes/FCalcSalContr.pas:277-330,488</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+</div>
+
+<div class="rule-block" id="CONTRIB-RN040">
+<div class="rule-id">CONTRIB-RN040 — Bitributação: correção por moeda 557 e IPCA-E (285)</div>
+<p><strong>Descrição:</strong> Fase 1: contribuições 1989-1995 são corrigidas pela moeda 557. Fase 2: a partir de 2008/01, o saldo é atualizado pelo IPCA-E (moeda 285): <code>saldo = saldo × (COTVALOR/100 + 1)</code>, subtraindo saídas (OPERACAO='S').</p>
+<p><strong>Fórmula:</strong> <code>saldo = saldo × (COTVALOR_IPCAE / 100 + 1) + SALDO(OPERACAO='S')</code></p>
+<p><strong>Dados:</strong> HSTBITRIBUTACAO, COTACAOMOEDA (moeda 557 e 285), BITRIBUTACAO</p>
+<p><strong>Rotina:</strong> <code>FCalcSalContr.bbtnConfirmarClick</code> · <strong>Arquivo:</strong> <code>FCalcSalContr.pas:440-781</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+</div>
+
+<div class="rule-block" id="CONTRIB-RN041">
+<div class="rule-id">CONTRIB-RN041 — IR Regressivo restrito a planos 66 e 74</div>
+<p><strong>Descrição:</strong> O cálculo de IR regressivo (prazo de acumulação e prazo médio ponderado) só se aplica aos planos 66 e 74, com IDPESSOA=IDTITULAR.</p>
+<p><strong>Fórmula:</strong> <code>IRRF = (VLRVALOR × PERCENTUALIR) / 100</code></p>
+<p><strong>Condições:</strong> IDPLANOPREV IN (66, 74) AND IDPESSOA = IDTITULAR.</p>
+<p><strong>Dados:</strong> PRAZOACUMULACAO, HSTCALCULOPMP, HSTPRAZOACUMULACAOFOLHA</p>
+<p><strong>Rotina:</strong> <code>fCalculoIRRF.ListaParticipante</code> · <strong>Arquivo:</strong> <code>fCalculoIRRF.pas:1172, 884</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+</div>
+
+
+</section>
+
+<section><div class="section-title">7. Tratamentos (TRT)</div>
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Condição</th><th>Mensagem</th><th>Resultado</th><th>Regra</th><th>Jornada</th></tr></thead><tbody>
+<tr id="TRT020"><td><strong>TRT020</strong></td><td>Nenhum participante selecionado para cálculo do saldo</td><td><a href="#MSG035">MSG035</a></td><td>Não calcula</td><td><a href="#CONTRIB-RN022">RS022</a></td><td><a href="uc005.html">JF005</a></td></tr>
+<tr id="TRT021"><td><strong>TRT021</strong></td><td>Índice necessário ao cálculo não cadastrado</td><td><a href="#MSG037">MSG037</a></td><td>Informa e não calcula o saldo</td><td><a href="#CONTRIB-RN022">RS022</a></td><td><a href="uc005.html">JF005</a></td></tr>
+<tr id="TRT022"><td><strong>TRT022</strong></td><td>Prévia da folha em execução</td><td><a href="#MSG039">MSG039</a></td><td>Bloqueia o cálculo do IR regressivo</td><td>validação de tela</td><td><a href="uc005.html">JF005</a></td></tr>
+<tr id="TRT023"><td><strong>TRT023</strong></td><td>Opção de IR (regressivo/progressivo) não informada</td><td><a href="#MSG040">MSG040</a></td><td>Bloqueia a gravação da portabilidade</td><td><a href="#CONTRIB-RN006">RS006</a></td><td><a href="uc005.html">JF005</a>, <a href="uc006.html">JF006</a></td></tr>
+</tbody></table></div></section>
+
+<section><div class="section-title">8. Mensagens (MSG)</div>
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Texto da mensagem</th><th>Tipo</th><th>Origem (CONTRIBUICAOPREV/Fontes/)</th><th>Jornadas</th></tr></thead><tbody>
+<tr id="MSG035"><td><strong>MSG035</strong></td><td>“Nenhum Participante selecionado. Verifique!”</td><td>Erro</td><td><code>FCalcSalContr.pas:450</code></td><td><a href="uc005.html">JF005</a></td></tr>
+<tr id="MSG036"><td><strong>MSG036</strong></td><td>“Confirma cálculo dos saldos ?”</td><td>Confirmação</td><td><code>FCalcSalContr.pas:455</code></td><td><a href="uc005.html">JF005</a></td></tr>
+<tr id="MSG037"><td><strong>MSG037</strong></td><td>“Índice não cadastrado.”</td><td>Informação</td><td><code>FCalcSalContr.pas:612</code></td><td><a href="uc005.html">JF005</a></td></tr>
+<tr id="MSG038"><td><strong>MSG038</strong></td><td>“Cálculo(s) efetuado(s) com sucesso.”</td><td>Sucesso</td><td><code>FCalcSalContr.pas:745</code></td><td><a href="uc005.html">JF005</a></td></tr>
+<tr id="MSG039"><td><strong>MSG039</strong></td><td>“A funcionalidade de Prévia está sendo executada! Entre em contato com a área de Pagamento de Benefícios!”</td><td>Alerta</td><td><code>fCalculoIRRF.pas:808</code></td><td><a href="uc005.html">JF005</a></td></tr>
+<tr id="MSG040"><td><strong>MSG040</strong></td><td>“Necessário informar a Opção de IR .”</td><td>Erro</td><td><code>FCadContribuicaoPortada.pas:384</code></td><td><a href="uc005.html">JF005</a>, <a href="uc006.html">JF006</a></td></tr>
+</tbody></table></div></section>
+
+
+<p><a class="back-btn" href="funcionalidades.html">← Voltar à lista de Casos de Uso</a></p>
+
+</main>
+<footer>
+<p>Blueprint AS-IS — PFC-23 / PFC-32 — Módulo Contribuição Previdenciária | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-10</p>
+</footer>
+</body>
+</html>

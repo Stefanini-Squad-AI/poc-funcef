@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UC002 – Recebimento por múltiplos canais — Contribuição Previdenciária — Blueprint AS-IS</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<header>
+  <div class="badge">Blueprint AS-IS — PFC-23 (enriquecido) — PFC-32</div>
+  <h1>UC002 – Recebimento por múltiplos canais</h1>
+  <p>Caso de Uso do módulo Contribuição Previdenciária — jornada JF002 (PF-02) — Recebimento por múltiplos canais.</p>
+</header>
+<nav>
+  <a href="index.html">📋 Visão Geral</a>
+  <a href="arquitetura.html">🏗️ Arquitetura</a>
+  <a href="inventario-tecnico.html">📦 Inventário</a>
+  <a href="funcionalidades.html">⚙️ Processos Funcionais</a>
+  <a href="procedures-functions.html">🔧 Procedures</a>
+  <a href="dados.html">🗄️ Dados</a>
+  <a href="relatorios.html">📄 Relatórios</a>
+  <a href="integracoes.html">🔗 Integrações</a>
+  <a href="tratamento-erros.html">⚠️ Erros</a>
+  <a href="diagramas-fluxo.html">🔀 Fluxos</a>
+  <a href="lacunas.html">🔍 Lacunas</a>
+  <a href="controle-cobertura.html">📊 Cobertura</a>
+</nav>
+<main>
+
+<p><a class="back-btn" href="funcionalidades.html">← Voltar à lista de Casos de Uso</a></p>
+
+<section><div class="section-title">1. Identificação</div>
+<div class="table-wrap"><table><tbody>
+<tr><th>Caso de Uso</th><td><strong>UC002</strong> – Recebimento por múltiplos canais</td></tr>
+<tr><th>Módulo</th><td>Contribuição Previdenciária</td></tr>
+<tr><th>Jornada</th><td>JF002 (PF-02) — Recebimento por múltiplos canais</td></tr>
+<tr><th>Sistema</th><td>CM Contabilidade / FUNCEF (Delphi 5 / VCL / MIDAS)</td></tr>
+<tr><th>Tipo</th><td>Sistema Desktop</td></tr>
+<tr><th>Ator</th><td>Usuário operacional (analista previdenciário, financeiro, contábil)</td></tr>
+<tr><th>Entry point</th><td><code>CONTRIBUICAOPREV/Fontes/ContribuicaoPREV.dpr</code></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">2. Descrição Resumida</div>
+<p>Caso de Uso <strong>UC002</strong> do módulo Contribuição Previdenciária, correspondente à JF002 (PF-02) — Recebimento por múltiplos canais. Esta página detalha a jornada funcional com sua sequência operacional, ações, regras de negócio, tratamentos de erro e mensagens.</p>
+</section>
+
+<section><div class="section-title">3. Pré-condições</div>
+<p>Consulte as pré-condições específicas na seção da jornada abaixo.</p>
+</section>
+
+<section><div class="section-title">4. Pós-condições</div>
+<p>Consulte as pós-condições específicas na seção da jornada abaixo.</p>
+</section>
+
+<section><div class="section-title">5. Sequência Operacional e Ações</div>
+<div class="pf-block" id="PF-02">
+<h4>JF002 (PF-02) — Recebimento por múltiplos canais</h4>
+<p><strong>Objetivo:</strong> Registrar o recebimento das contribuições cobradas (via folha, empréstimo ou Contas a Receber), baixando contribuições e documentos.</p>
+<p><strong>Ator / gatilho:</strong> Analista de arrecadação, nas telas <em>Recebimento de Contribuições via Folha</em>, <em>Recebimento de Contribuições Via Empréstimo</em> e <em>Receber Contribuições do Contas a Receber</em>.</p>
+<p><strong>Pré-condições:</strong> Contribuições enviadas (<a href="uc001.html">JF001</a>) com SITRECEBIMENTO = 1; retorno do canal disponível; período contábil aberto.</p>
+<p><strong>Pós-condições:</strong> HSTCONTRIBPREV com VALORRECEBIDO, DATARECEBIMENTO e situação de recebida; DOCUMENTO e LANCTODOCUM baixados; lançamentos contábeis gerados.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li>Via folha: informar o mês de cobrança e a data de recebimento. [<a href="#TRT007">TRT007</a>]</li>
+<li>O sistema seleciona as contribuições a receber (enviadas e não recebidas, ou recebidas com data, de origem diferente de 'B' e descontadas em folha). [<a href="#CONTRIB-RN024">RS024</a>]</li>
+<li>Selecionar as contribuições da lista e processar o recebimento. [<a href="#TRT008">TRT008</a>] [<a href="#TRT009">TRT009</a>]</li>
+<li>Com “Efetuar apenas integração” e “Documentos distintos por dia” marcadas, os documentos do CaR são gerados por data de recebimento gravada. [<a href="#CONTRIB-RN028">RS028</a>]</li>
+<li>Via empréstimo: consultar, selecionar registros e baixar; o valor em aberto deve igualar o do empréstimo. [<a href="#TRT010">TRT010</a>] [<a href="#TRT011">TRT011</a>]</li>
+<li>Via Contas a Receber: baixar as contribuições por matrícula e conferir a lista de resultado. [<a href="#TRT012">TRT012</a>]</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Informar parâmetros do recebimento via folha</td><td>Delimitar a competência recebida</td><td>Mês de cobrança, data de recebimento</td><td>Valida obrigatórios</td><td>Parâmetros aceitos</td><td>—</td><td><a href="#MSG011">MSG011</a>, <a href="#MSG012">MSG012</a></td><td><code>FRecebeContribuicaoNovo.dfm</code></td></tr>
+<tr><td>Selecionar contribuições a receber</td><td>Montar a lista de recebimento</td><td>Parâmetros aceitos</td><td>Filtra por SITRECEBIMENTO/VALORRECEBIDO/DATARECEBIMENTO/FOLHAORIGEM/FLGDESCFOLHA</td><td>Lista para baixa</td><td><a href="#CONTRIB-RN024">RS024</a></td><td><a href="#MSG013">MSG013</a></td><td><code>FRecebeContribuicaoNovo.dfm</code></td></tr>
+<tr><td>Processar recebimento via folha</td><td>Baixar contribuições e documentos</td><td>Contribuições selecionadas</td><td>Executa a procedure de recebimento; erros vão para o log; com as opções de integração, gera documento CaR por data de recebimento</td><td>HSTCONTRIBPREV/DOCUMENTO/LANCTODOCUM atualizados</td><td><a href="#CONTRIB-RN024">RS024</a>, <a href="#CONTRIB-RN028">RS028</a></td><td><a href="#MSG014">MSG014</a></td><td><code>FRecebeContribuicaoNovo.dfm</code></td></tr>
+<tr><td>Baixar via empréstimo</td><td>Quitar contribuições com crédito de empréstimo</td><td>Registros selecionados</td><td>Confere valor em aberto × empréstimo; contabiliza e integra com o PGA</td><td>Contribuições baixadas</td><td>—</td><td><a href="#MSG015">MSG015</a>, <a href="#MSG016">MSG016</a>, <a href="#MSG017">MSG017</a></td><td><code>FRecebeContribEmptmo.dfm</code></td></tr>
+<tr><td>Baixar via Contas a Receber</td><td>Refletir baixas do CaR</td><td>Contribuições a receber do CaR</td><td>Baixa por matrícula; registra erros na lista de resultado</td><td>Contribuições baixadas</td><td>—</td><td><a href="#MSG018">MSG018</a>, <a href="#MSG019">MSG019</a></td><td><code>FBaixaContribCAR.dfm</code></td></tr>
+</tbody></table></div>
+<p><strong>Regras de negócio da jornada:</strong> <a href="#CONTRIB-RN024">RS024 (CONTRIB-RN024)</a> — Filtro de recebimento via folha, <a href="#CONTRIB-RN028">RS028 (CONTRIB-RN028)</a> — Documentos CaR por data de recebimento</p>
+<p><strong>Tratamentos de erro:</strong> <a href="#TRT007">TRT007</a>, <a href="#TRT008">TRT008</a>, <a href="#TRT009">TRT009</a>, <a href="#TRT010">TRT010</a>, <a href="#TRT011">TRT011</a>, <a href="#TRT012">TRT012</a></p>
+<p><strong>Mensagens:</strong> <a href="#MSG011">MSG011</a>, <a href="#MSG012">MSG012</a>, <a href="#MSG013">MSG013</a>, <a href="#MSG014">MSG014</a>, <a href="#MSG015">MSG015</a>, <a href="#MSG016">MSG016</a>, <a href="#MSG017">MSG017</a>, <a href="#MSG018">MSG018</a>, <a href="#MSG019">MSG019</a></p>
+<p><strong>Telas:</strong> Recebimento de Contribuições via Folha (<code>FRecebeContribuicaoNovo.dfm</code>), Recebimento de Contribuições Via Empréstimo (<code>FRecebeContribEmptmo.dfm</code>), Receber Contribuições do Contas a Receber (<code>FBaixaContribCAR.dfm</code>)</p>
+<p><strong>Dependências:</strong> Sucede <a href="uc001.html">JF001</a>; precede <a href="uc003.html">JF003</a> (alimentação de reservas) e <a href="uc008.html">JF008</a> (divergências).</p>
+<div class="note note-info"><p><strong>Registro original do processo PF-02</strong></p><p><strong>Forms de entrada:</strong> <code>FRecebeContribuicaoNovo.dfm</code>, <code>FRecebeContribEmptmo.dfm</code>, <code>FBaixaContribCAR.dfm</code></p><p><strong>Lógica de processamento:</strong> Lê arquivo de retorno, faz match por SITRECEBIMENTO/VALORRECEBIDO/DATARECEBIMENTO/FOLHAORIGEM/FLGDESCFOLHA, baixa documentos</p><p><strong>Saídas:</strong> Contribuições baixadas, documentos baixados</p><p><strong>Persistência (tabelas escritas):</strong> HSTCONTRIBPREV (U), DOCUMENTO (U), LANCTODOCUM (U)</p><p><strong>Evidência:</strong> <code>CONTRIBUICAOPREV/Fontes/FRecebeContribuicaoNovo.pas:617-622</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+</div>
+</div>
+</section>
+
+<section><div class="section-title">6. Regras de Negócio da Jornada</div>
+<p>As regras de negócio aplicáveis a esta jornada são apresentadas abaixo com seu texto completo, sem necessidade de acessar outra página.</p>
+<div class="rule-block" id="CONTRIB-RN024">
+<div class="rule-id">RS024 (CONTRIB-RN024) — Filtro de recebimento via folha</div>
+<div class="rule-desc">O recebimento via folha considera as contribuições enviadas e ainda sem valor recebido, ou as já recebidas com data, desde que não sejam de origem 'B' e sejam descontadas em folha.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>SITRECEBIMENTO</code> — [obrigatório] — 1 (com VALORRECEBIDO = 0) ou 2/3 (com DATARECEBIMENTO)</li>
+<li><code>FOLHAORIGEM</code> — [obrigatório] — ≠ 'B'</li>
+<li><code>FLGDESCFOLHA</code> — [obrigatório] — = 1</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT009">TRT009</a> → <a href="#MSG014">MSG014</a> → Mensagem exibida e registrada no log de resultado; recebimento não concluído</p>
+<p><strong>Jornada:</strong> <a href="uc002.html">JF002</a></p>
+<p><strong>Descrição original:</strong> Recebimento via folha seleciona contribuições com SITRECEBIMENTO=1 e VALORRECEBIDO=0, ou SITRECEBIMENTO∈{2,3} com DATARECEBIMENTO não nulo, FOLHAORIGEM&lt;&gt;'B' e FLGDESCFOLHA=1.</p>
+<p><strong>Condições:</strong> Processamento de retorno</p>
+<p><strong>Dados envolvidos:</strong> HSTCONTRIBPREV</p>
+<p><strong>Resultado/Exceção:</strong> Filtro SQL</p>
+<div class="rule-origin">📂 Origem: <code>CONTRIBUICAOPREV/Fontes/FRecebeContribuicaoNovo.pas:617-622</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+</div>
+
+<div class="rule-block" id="CONTRIB-RN028">
+<div class="rule-id">RS028 (CONTRIB-RN028) — Documentos CaR por data de recebimento</div>
+<div class="rule-desc">No recebimento via folha, quando “Efetuar apenas integração” e “Documentos distintos por dia” estão marcadas, os documentos do Contas a Receber são gerados por data de recebimento gravada, e não pela data da tela.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>“Efetuar apenas integração”</code> — [obrigatório] — marcada</li>
+<li><code>“Documentos distintos por dia”</code> — [obrigatório] — marcada</li>
+<li><code>DATARECEBIMENTO</code> — [obrigatório] — agrupa os documentos</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> não se aplica — regra de seleção/cálculo, sem mensagem ao usuário.</p>
+<p><strong>Jornada:</strong> <a href="uc002.html">JF002</a></p>
+<p><strong>Descrição original:</strong> Geração de documentos CaR por data de recebimento gravada quando 'Efetuar apenas integração' + 'Documentos distintos por dia'.</p>
+<p><strong>Condições:</strong> 'Efetuar apenas integração' + 'Documentos distintos por dia'</p>
+<p><strong>Dados envolvidos:</strong> DOCUMENTO</p>
+<p><strong>Resultado/Exceção:</strong> Geração por data de recebimento</p>
+<div class="rule-origin">📂 Origem: <code>CONTRIBUICAOPREV/Fontes/ContribuicaoPREV.dpr:222-225 (SIG 25044)</code> | Evidência: <span class="ev ev-inferido">INFERIDO</span></div></div>
+</div>
+
+<div class="rule-block" id="CONTRIB-RN030">
+<div class="rule-id">CONTRIB-RN030 — Documento baixado no CAR não pode ser desfeito (STATUS='2')</div>
+<p><strong>Descrição:</strong> Se o documento de cobrança (DOCUMENTO.STATUS='2') já foi baixado no CAR, o envio não pode ser desfeito.</p>
+<p><strong>Condições:</strong> DOCUMENTO.STATUS = '2' para o CODDOCUMENTOPREV da contribuição.</p>
+<p><strong>Dados:</strong> DOCUMENTO.STATUS, HSTCONTRIBPREV.CODDOCUMENTOPREV</p>
+<p><strong>Processamento:</strong> Ao cancelar, verifica STATUS; se '2', exibe erro e aborta.</p>
+<p><strong>Resultado:</strong> Cancelamento bloqueado; mensagem "já está baixado, não pode ser desfeito".</p>
+<p><strong>Rotina:</strong> <code>FControleIndivContrib.tbButtonCancelarClick</code> · <strong>Arquivo:</strong> <code>FControleIndivContrib.pas:2338-2352</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+</div>
+
+<div class="rule-block" id="CONTRIB-RN031">
+<div class="rule-id">CONTRIB-RN031 — Boleta enviada ao banco bloqueia desfazer (EMISBLOQ='S')</div>
+<p><strong>Descrição:</strong> Se o documento tem EMISBLOQ='S' (boleta já enviada ao banco), não permite desfazer o preparo/envio.</p>
+<p><strong>Condições:</strong> DOCUMENTO.EMISBLOQ = 'S'.</p>
+<p><strong>Dados:</strong> DOCUMENTO.EMISBLOQ</p>
+<p><strong>Resultado:</strong> Desfazer bloqueado.</p>
+<p><strong>Rotina:</strong> <code>FPreparaEnvia.bbtnDesfazerClick</code> · <strong>Arquivo:</strong> <code>FPreparaEnvia.pas:6214-6229</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+</div>
+
+<div class="rule-block" id="CONTRIB-RN045">
+<div class="rule-id">CONTRIB-RN045 — Recebimento via empréstimo exige valor igual ao contrato</div>
+<p><strong>Descrição:</strong> No recebimento via empréstimo (IDTIPOCONTREMPTMO=21, integralização de reservas), o valor das contribuições em aberto deve ser igual ao valor do contrato (VLRCONTRATO). Se diferente, aborta.</p>
+<p><strong>Condições:</strong> SUM(VALORESPERADO contribuições abertas) = VLRCONTRATO.</p>
+<p><strong>Dados:</strong> CONTRATOEMPTMO.VLRCONTRATO, HSTCONTRIBPREV.VALORESPERADO</p>
+<p><strong>Rotina:</strong> <code>FRecebeContribEmptmo.btnReceberClick</code> · <strong>Arquivo:</strong> <code>FRecebeContribEmptmo.pas:693-697</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+</div>
+
+
+</section>
+
+<section><div class="section-title">7. Tratamentos (TRT)</div>
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Condição</th><th>Mensagem</th><th>Resultado</th><th>Regra</th><th>Jornada</th></tr></thead><tbody>
+<tr id="TRT007"><td><strong>TRT007</strong></td><td>Mês de cobrança ou data de recebimento não informados (recebimento via folha)</td><td><a href="#MSG011">MSG011</a>, <a href="#MSG012">MSG012</a></td><td>Bloqueia o recebimento</td><td>validação de tela</td><td><a href="uc002.html">JF002</a></td></tr>
+<tr id="TRT008"><td><strong>TRT008</strong></td><td>Nenhuma contribuição selecionada para receber</td><td><a href="#MSG013">MSG013</a></td><td>Não processa</td><td>validação de tela</td><td><a href="uc002.html">JF002</a></td></tr>
+<tr id="TRT009"><td><strong>TRT009</strong></td><td>Procedure de recebimento retorna erro</td><td><a href="#MSG014">MSG014</a></td><td>Mensagem exibida e registrada no log de resultado; recebimento não concluído</td><td><a href="#CONTRIB-RN024">RS024</a></td><td><a href="uc002.html">JF002</a></td></tr>
+<tr id="TRT010"><td><strong>TRT010</strong></td><td>Valor das contribuições em aberto diferente do valor do empréstimo</td><td><a href="#MSG015">MSG015</a></td><td>Impede a baixa</td><td>validação de tela</td><td><a href="uc002.html">JF002</a></td></tr>
+<tr id="TRT011"><td><strong>TRT011</strong></td><td>Erro na contabilização ou na integração com o PGA (recebimento via empréstimo)</td><td><a href="#MSG016">MSG016</a>, <a href="#MSG017">MSG017</a></td><td>Cancela o processo</td><td>validação de tela</td><td><a href="uc002.html">JF002</a></td></tr>
+<tr id="TRT012"><td><strong>TRT012</strong></td><td>Baixa via Contas a Receber com erro em alguma matrícula</td><td><a href="#MSG018">MSG018</a></td><td>Conclui as demais e lista as matrículas com erro no resultado</td><td>validação de tela</td><td><a href="uc002.html">JF002</a></td></tr>
+</tbody></table></div></section>
+
+<section><div class="section-title">8. Mensagens (MSG)</div>
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Texto da mensagem</th><th>Tipo</th><th>Origem (CONTRIBUICAOPREV/Fontes/)</th><th>Jornadas</th></tr></thead><tbody>
+<tr id="MSG011"><td><strong>MSG011</strong></td><td>“Preencha o mês de cobrança.”</td><td>Erro</td><td><code>FRecebeContribuicaoNovo.pas:301</code></td><td><a href="uc002.html">JF002</a></td></tr>
+<tr id="MSG012"><td><strong>MSG012</strong></td><td>“O campo Data de Recebimento é obrigatório.”</td><td>Erro</td><td><code>FRecebeContribuicaoNovo.pas:313</code></td><td><a href="uc002.html">JF002</a></td></tr>
+<tr id="MSG013"><td><strong>MSG013</strong></td><td>“Nenhuma contribuição foi selecionada.”</td><td>Alerta</td><td><code>FRecebeContribuicaoNovo.pas:752</code></td><td><a href="uc002.html">JF002</a></td></tr>
+<tr id="MSG014"><td><strong>MSG014</strong></td><td>“Erro ao Receber Contribuição.”</td><td>Erro</td><td><code>FRecebeContribuicaoNovo.pas:995</code></td><td><a href="uc002.html">JF002</a></td></tr>
+<tr id="MSG015"><td><strong>MSG015</strong></td><td>“O valor das contribuições em aberto não corresponde ao valor do empréstimo. Não é possível fazer a baixa.”</td><td>Informação</td><td><code>FRecebeContribEmptmo.pas:694</code></td><td><a href="uc002.html">JF002</a></td></tr>
+<tr id="MSG016"><td><strong>MSG016</strong></td><td>“Ocorreram erros na contabilização, o processo será cancelado.”</td><td>Informação</td><td><code>FRecebeContribEmptmo.pas:787</code></td><td><a href="uc002.html">JF002</a></td></tr>
+<tr id="MSG017"><td><strong>MSG017</strong></td><td>“Ocorreram erros na integração com o PGA, o processo será cancelado.”</td><td>Informação</td><td><code>FRecebeContribEmptmo.pas:829</code></td><td><a href="uc002.html">JF002</a></td></tr>
+<tr id="MSG018"><td><strong>MSG018</strong></td><td>“Baixa das contribuições efetuada com problemas. Verifique a lista de resultado.”</td><td>Informação</td><td><code>FBaixaContribCAR.pas:460</code></td><td><a href="uc002.html">JF002</a></td></tr>
+<tr id="MSG019"><td><strong>MSG019</strong></td><td>“Baixa das contribuições efetuada com sucesso.”</td><td>Sucesso</td><td><code>FBaixaContribCAR.pas:478</code></td><td><a href="uc002.html">JF002</a></td></tr>
+</tbody></table></div></section>
+
+
+<p><a class="back-btn" href="funcionalidades.html">← Voltar à lista de Casos de Uso</a></p>
+
+</main>
+<footer>
+<p>Blueprint AS-IS — PFC-23 / PFC-32 — Módulo Contribuição Previdenciária | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-10</p>
+</footer>
+</body>
+</html>

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UC014 – Alteração de Benefício (individual e em lote) — Benefício Previdenciário — Blueprint AS-IS</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<header>
+  <div class="badge">Blueprint AS-IS — PFC-24 — PFC-32</div>
+  <h1>UC014 – Alteração de Benefício (individual e em lote)</h1>
+  <p>Caso de Uso do módulo Benefício Previdenciário — jornada JF014 (PF-14) — Alteração de Benefício (individual e em lote).</p>
+</header>
+<nav>
+  <a href="index.html">📋 Visão Geral</a>
+  <a href="arquitetura.html">🏗️ Arquitetura</a>
+  <a href="inventario-tecnico.html">📦 Inventário</a>
+  <a href="funcionalidades.html">⚙️ Processos Funcionais</a>
+  <a href="procedures-functions.html">🔧 Procedures</a>
+  <a href="dados.html">🗄️ Dados</a>
+  <a href="relatorios.html">📄 Relatórios</a>
+  <a href="integracoes.html">🔗 Integrações</a>
+  <a href="tratamento-erros.html">⚠️ Erros</a>
+  <a href="diagramas-fluxo.html">🔀 Fluxos</a>
+  <a href="lacunas.html">🔍 Lacunas</a>
+  <a href="controle-cobertura.html">📊 Cobertura</a>
+</nav>
+<main>
+
+<p><a class="back-btn" href="funcionalidades.html">← Voltar à lista de Casos de Uso</a></p>
+
+<section><div class="section-title">1. Identificação</div>
+<div class="table-wrap"><table><tbody>
+<tr><th>Caso de Uso</th><td><strong>UC014</strong> – Alteração de Benefício (individual e em lote)</td></tr>
+<tr><th>Módulo</th><td>Benefício Previdenciário</td></tr>
+<tr><th>Jornada</th><td>JF014 (PF-14) — Alteração de Benefício (individual e em lote)</td></tr>
+<tr><th>Sistema</th><td>CM Contabilidade / FUNCEF (Delphi 5 / VCL / MIDAS)</td></tr>
+<tr><th>Tipo</th><td>Sistema Desktop</td></tr>
+<tr><th>Ator</th><td>Usuário operacional (analista previdenciário)</td></tr>
+<tr><th>Entry point</th><td><code>BENEFICIOPREV/Fontes/BeneficioPrev.dpr</code></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">2. Descrição Resumida</div>
+<p>Caso de Uso <strong>UC014</strong> do módulo Benefício Previdenciário, correspondente à JF014 (PF-14) — Alteração de Benefício (individual e em lote). Esta página detalha a jornada funcional com sua sequência operacional, ações, regras de negócio, tratamentos de erro e mensagens.</p>
+</section>
+
+<section><div class="section-title">3. Pré-condições</div>
+<p>Consulte as pré-condições específicas na seção da jornada abaixo.</p>
+</section>
+
+<section><div class="section-title">4. Pós-condições</div>
+<p>Consulte as pós-condições específicas na seção da jornada abaixo.</p>
+</section>
+
+<section><div class="section-title">5. Sequência Operacional e Ações</div>
+<div class="pf-block" id="PF-14">
+<h4>JF014 (PF-14) — Alteração de Benefício (individual e em lote)</h4>
+<p><strong>Objetivo:</strong> Alterar dados de benefícios concedidos, individualmente ou em lote por planilha.</p>
+<p><strong>Ator / gatilho:</strong> Analista de benefícios, nas telas Alteração de Dados de Benefícios Concedidos e Alteração de Valor do Benefício em Lote.</p>
+<p><strong>Pré-condições:</strong> Benefícios concedidos; para o lote, planilha no leiaute esperado e ainda não importada.</p>
+<p><strong>Pós-condições:</strong> BENEFBFCIARIO e HSTBENEFBFCIARIO atualizados; arquivo do lote registrado em HSTARQUIVOALTBENEF.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li>Individual: editar os dados do benefício, com datas no formato DD/MM/AAAA. [<a href="#BENEF-RN015">RS015</a>] [<a href="#TRT025">TRT025</a>]</li>
+<li>Individual: confirmar; o sistema informa o sucesso.</li>
+<li>Lote: escolher a planilha; o sistema recusa arquivo já importado. [<a href="#BENEF-RN041">RS041</a>] [<a href="#TRT026">TRT026</a>]</li>
+<li>Lote: validar a planilha; registros com valor divergente de BS + FAB são rejeitados. [<a href="#BENEF-RN040">RS040</a>] [<a href="#TRT027">TRT027</a>]</li>
+<li>Lote: processar os registros válidos.</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Editar e confirmar dados</td><td>Corrigir um benefício</td><td>Datas e dados do benefício</td><td>Valida datas e grava</td><td>Benefício alterado</td><td><a href="#BENEF-RN015">RS015</a></td><td><a href="#MSG034">MSG034</a>, <a href="#MSG035">MSG035</a></td><td><code>FAlteraBeneficio.dfm</code></td></tr>
+<tr><td>Escolher planilha do lote</td><td>Preparar a alteração em lote</td><td>Arquivo Excel</td><td>Recusa arquivo já importado (hash)</td><td>Validação habilitada</td><td><a href="#BENEF-RN041">RS041</a></td><td><a href="#MSG036">MSG036</a></td><td><code>FAlteraBeneficioLote.dfm</code></td></tr>
+<tr><td>Validar e processar o lote</td><td>Alterar vários benefícios</td><td>Planilha escolhida</td><td>Confere valor × BS + FAB e lista as falhas</td><td>Benefícios válidos alterados</td><td><a href="#BENEF-RN040">RS040</a></td><td><a href="#MSG037">MSG037</a></td><td><code>FAlteraBeneficioLote.dfm</code></td></tr>
+</tbody></table></div>
+<p><strong>Regras de negócio da jornada:</strong> <a href="#BENEF-RN015">RS015 (BENEF-RN015)</a> — Datas no formato DD/MM/AAAA, <a href="#BENEF-RN040">RS040 (BENEF-RN040)</a> — Alteração em lote rejeita divergência de valores, <a href="#BENEF-RN041">RS041 (BENEF-RN041)</a> — Arquivo de lote não pode ser importado duas vezes</p>
+<p><strong>Tratamentos de erro:</strong> <a href="#TRT025">TRT025</a>, <a href="#TRT026">TRT026</a>, <a href="#TRT027">TRT027</a></p>
+<p><strong>Mensagens:</strong> <a href="#MSG034">MSG034</a>, <a href="#MSG035">MSG035</a>, <a href="#MSG036">MSG036</a>, <a href="#MSG037">MSG037</a></p>
+<p><strong>Telas:</strong> Alteração de Dados de Benefícios Concedidos (<code>FAlteraBeneficio.dfm</code>), Alteração de Valor do Benefício em Lote (<code>FAlteraBeneficioLote.dfm</code>)</p>
+<p><strong>Dependências:</strong> Sucede <a href="uc001.html">JF001</a>.</p>
+<div class="note note-info"><p><strong>Registro original do processo PF-14</strong></p><p><strong>Forms de entrada:</strong> <code>FAlteraBeneficio.dfm</code>, <code>FAlteraBeneficioLote.dfm</code></p><p><strong>Lógica de processamento:</strong> Valida datas (DD/MM/AAAA); atualiza dados do benefício; lote via arquivo de matrículas</p><p><strong>Saídas:</strong> Benefícios alterados</p><p><strong>Persistência (tabelas escritas):</strong> BENEFBFCIARIO, HSTBENEFBFCIARIO</p><p><strong>Evidência:</strong> <code>BENEFICIOPREV/Fontes/FAlteraBeneficio.pas:249,456</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+</div>
+</div>
+</section>
+
+<section><div class="section-title">6. Regras de Negócio da Jornada</div>
+<p>As regras de negócio aplicáveis a esta jornada são apresentadas abaixo com seu texto completo, sem necessidade de acessar outra página.</p>
+<div class="rule-block" id="BENEF-RN015">
+<div class="rule-id">RS015 (BENEF-RN015) — Datas no formato DD/MM/AAAA</div>
+<div class="rule-desc">Na alteração de dados do benefício, as datas digitadas devem estar no formato DD/MM/AAAA; data vazia é aceita.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li>Datas do benefício (requerimento, início na fundação, início, final, DIB anterior, encerramento) — [opcional] — se preenchidas, DD/MM/AAAA</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT025">TRT025</a> → <a href="#MSG034">MSG034</a> → <code>CheckDate</code> retorna falso e o campo é rejeitado (Abort) — chamadas comentadas no código atual (ver RS015)</p>
+<p><strong>Jornada:</strong> <a href="uc014.html">JF014</a></p>
+<p><strong>Nota de verificação:</strong> A função <code>CheckDate</code> (FAlteraBeneficio.pas:235-253) existe, mas os seis tratadores <code>SetText</code> que a chamam (:676-721) estão dentro de um bloco de comentário <code>{ … }</code>. Validar se a crítica ainda é acionada por outro caminho. Classificação original mantida.</p>
+<p><strong>Descrição original:</strong> Validação de formato de data DD/MM/AAAA.</p>
+<p><strong>Condições:</strong> CheckDate(Sender,Text) falso</p><p><strong>Dados envolvidos:</strong> —</p><p><strong>Resultado/Exceção:</strong> MessageDlg + Abort</p>
+<div class="rule-origin">📂 Origem: <code>BENEFICIOPREV/Fontes/FAlteraBeneficio.pas:249,680-720</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+</div>
+
+<div class="rule-block" id="BENEF-RN040">
+<div class="rule-id">RS040 (BENEF-RN040) — Alteração em lote rejeita divergência de valores</div>
+<div class="rule-desc">Na alteração de valores em lote, para benefícios que exigem BS/FAB, o registro é rejeitado se o valor informado superar a soma BS + FAB em mais de 0,02.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li>Valor atual / valor total — [obrigatório]</li>
+<li>Valores BS e FAB — [obrigatório]</li>
+<li><code>FLGOBRIGA_BS_FAB</code> — [condicional] — = 1 ativa a crítica</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT027">TRT027</a> → <a href="#MSG037">MSG037</a> → Registro rejeitado: valor marcado como -1, falha contada e listada no resultado</p>
+<p><strong>Jornada:</strong> <a href="uc014.html">JF014</a></p>
+<p><strong>Nota de verificação:</strong> O código compara <code>valor − (BS + FAB) &gt; 0,02</code> sem valor absoluto e só quando <code>FLGOBRIGA_BS_FAB</code> = 1 (FAlteraBeneficioLote.pas:322-324, 349-351).</p>
+<p><strong>Descrição original:</strong> Alteração em lote: divergência > 0,02 entre Valor Atual e (BS + FAB) rejeita o registro.</p>
+<p><strong>Condições:</strong> ABS(ValorAtual - (BS + FAB)) > 0.02</p><p><strong>Dados envolvidos:</strong> BENEFBFCIARIO</p><p><strong>Resultado/Exceção:</strong> Registro rejeitado na importação</p>
+<div class="rule-origin">📂 Origem: <code>BENEFICIOPREV/Fontes/FAlteraBeneficioLote.pas:324,351</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+</div>
+
+<div class="rule-block" id="BENEF-RN041">
+<div class="rule-id">RS041 (BENEF-RN041) — Arquivo de lote não pode ser importado duas vezes</div>
+<div class="rule-desc">Um arquivo de alteração em lote já importado é recusado.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li>Hash CRC32 do arquivo (<code>HASHARQUIVO</code>) — [obrigatório] — não pode existir em HSTARQUIVOALTBENEF</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT026">TRT026</a> → <a href="#MSG036">MSG036</a> → Limpa o arquivo escolhido e não habilita a validação (Exit)</p>
+<p><strong>Jornada:</strong> <a href="uc014.html">JF014</a></p>
+<p><strong>Nota de verificação:</strong> O hash é calculado sobre <code>edtArquivo.text</code>, que recebe o nome do arquivo (FAlteraBeneficioLote.pas:436-439); confirmar se <code>GetCRC32</code> lê o conteúdo ou só o nome.</p>
+<p><strong>Descrição original:</strong> Arquivo de importação rejeitado por duplicidade via hash CRC32.</p>
+<p><strong>Condições:</strong> Hash CRC32 do arquivo já existe em HSTARQUIVOALTBENEF</p><p><strong>Dados envolvidos:</strong> HSTARQUIVOALTBENEF</p><p><strong>Resultado/Exceção:</strong> "Arquivo já importado"</p>
+<div class="rule-origin">📂 Origem: <code>BENEFICIOPREV/Fontes/FAlteraBeneficioLote.pas:439-445</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+</div>
+
+
+</section>
+
+<section><div class="section-title">7. Tratamentos (TRT)</div>
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Condição</th><th>Mensagem</th><th>Resultado</th><th>Regra</th><th>Jornada</th></tr></thead><tbody>
+<tr id="TRT025"><td><strong>TRT025</strong></td><td>Data digitada fora do formato DD/MM/AAAA na alteração de benefício</td><td><a href="#MSG034">MSG034</a></td><td><code>CheckDate</code> retorna falso e o campo é rejeitado (Abort) — chamadas comentadas no código atual (ver RS015)</td><td><a href="#BENEF-RN015">RS015 (BENEF-RN015)</a></td><td><a href="uc014.html">JF014</a></td></tr>
+<tr id="TRT026"><td><strong>TRT026</strong></td><td>Arquivo de alteração em lote já importado (hash já existe em HSTARQUIVOALTBENEF)</td><td><a href="#MSG036">MSG036</a></td><td>Limpa o arquivo escolhido e não habilita a validação (Exit)</td><td><a href="#BENEF-RN041">RS041 (BENEF-RN041)</a></td><td><a href="uc014.html">JF014</a></td></tr>
+<tr id="TRT027"><td><strong>TRT027</strong></td><td>Diferença maior que 0,02 entre o valor informado e a soma BS + FAB, para benefício que exige BS/FAB</td><td><a href="#MSG037">MSG037</a></td><td>Registro rejeitado: valor marcado como -1, falha contada e listada no resultado</td><td><a href="#BENEF-RN040">RS040 (BENEF-RN040)</a></td><td><a href="uc014.html">JF014</a></td></tr>
+</tbody></table></div></section>
+
+<section><div class="section-title">8. Mensagens (MSG)</div>
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Texto da mensagem</th><th>Tipo</th><th>Origem (BENEFICIOPREV/Fontes/)</th><th>Jornadas</th></tr></thead><tbody>
+<tr id="MSG034"><td><strong>MSG034</strong></td><td>“Os campos de datas devem estar no formato DD/MM/AAAA!”<br><em>Função ativa; as chamadas a <code>CheckDate</code> (:676-721) estão comentadas — ver nota de RS015.</em></td><td>Informação</td><td><code>FAlteraBeneficio.pas:249</code></td><td><a href="uc014.html">JF014</a></td></tr>
+<tr id="MSG035"><td><strong>MSG035</strong></td><td>“Alteração realizada com sucesso!”</td><td>Sucesso</td><td><code>FAlteraBeneficio.pas:456</code></td><td><a href="uc014.html">JF014</a></td></tr>
+<tr id="MSG036"><td><strong>MSG036</strong></td><td>“Arquivo já Importado”</td><td>Informação</td><td><code>FAlteraBeneficioLote.pas:442</code></td><td><a href="uc014.html">JF014</a></td></tr>
+<tr id="MSG037"><td><strong>MSG037</strong></td><td>“&lt;matrícula&gt; &lt;processo&gt; Valores divergentes no &lt;coluna da planilha&gt;”<br><em>Linha gravada no memo de resultado da importação.</em></td><td>Log de processamento</td><td><code>FAlteraBeneficioLote.pas:326-327, 353-354</code></td><td><a href="uc014.html">JF014</a></td></tr>
+</tbody></table></div></section>
+
+
+<p><a class="back-btn" href="funcionalidades.html">← Voltar à lista de Casos de Uso</a></p>
+
+</main>
+<footer>
+<p>Blueprint AS-IS — PFC-24 / PFC-32 — Módulo Benefício Previdenciário | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-10</p>
+</footer>
+</body>
+</html>

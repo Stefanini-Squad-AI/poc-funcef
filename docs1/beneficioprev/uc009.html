@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UC009 – Reabertura / Renovação de Benefício — Benefício Previdenciário — Blueprint AS-IS</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<header>
+  <div class="badge">Blueprint AS-IS — PFC-24 — PFC-32</div>
+  <h1>UC009 – Reabertura / Renovação de Benefício</h1>
+  <p>Caso de Uso do módulo Benefício Previdenciário — jornada JF009 (PF-09) — Reabertura / Renovação de Benefício.</p>
+</header>
+<nav>
+  <a href="index.html">📋 Visão Geral</a>
+  <a href="arquitetura.html">🏗️ Arquitetura</a>
+  <a href="inventario-tecnico.html">📦 Inventário</a>
+  <a href="funcionalidades.html">⚙️ Processos Funcionais</a>
+  <a href="procedures-functions.html">🔧 Procedures</a>
+  <a href="dados.html">🗄️ Dados</a>
+  <a href="relatorios.html">📄 Relatórios</a>
+  <a href="integracoes.html">🔗 Integrações</a>
+  <a href="tratamento-erros.html">⚠️ Erros</a>
+  <a href="diagramas-fluxo.html">🔀 Fluxos</a>
+  <a href="lacunas.html">🔍 Lacunas</a>
+  <a href="controle-cobertura.html">📊 Cobertura</a>
+</nav>
+<main>
+
+<p><a class="back-btn" href="funcionalidades.html">← Voltar à lista de Casos de Uso</a></p>
+
+<section><div class="section-title">1. Identificação</div>
+<div class="table-wrap"><table><tbody>
+<tr><th>Caso de Uso</th><td><strong>UC009</strong> – Reabertura / Renovação de Benefício</td></tr>
+<tr><th>Módulo</th><td>Benefício Previdenciário</td></tr>
+<tr><th>Jornada</th><td>JF009 (PF-09) — Reabertura / Renovação de Benefício</td></tr>
+<tr><th>Sistema</th><td>CM Contabilidade / FUNCEF (Delphi 5 / VCL / MIDAS)</td></tr>
+<tr><th>Tipo</th><td>Sistema Desktop</td></tr>
+<tr><th>Ator</th><td>Usuário operacional (analista previdenciário)</td></tr>
+<tr><th>Entry point</th><td><code>BENEFICIOPREV/Fontes/BeneficioPrev.dpr</code></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">2. Descrição Resumida</div>
+<p>Caso de Uso <strong>UC009</strong> do módulo Benefício Previdenciário, correspondente à JF009 (PF-09) — Reabertura / Renovação de Benefício. Esta página detalha a jornada funcional com sua sequência operacional, ações, regras de negócio, tratamentos de erro e mensagens.</p>
+</section>
+
+<section><div class="section-title">3. Pré-condições</div>
+<p>Consulte as pré-condições específicas na seção da jornada abaixo.</p>
+</section>
+
+<section><div class="section-title">4. Pós-condições</div>
+<p>Consulte as pós-condições específicas na seção da jornada abaixo.</p>
+</section>
+
+<section><div class="section-title">5. Sequência Operacional e Ações</div>
+<div class="pf-block" id="PF-09">
+<h4>JF009 (PF-09) — Reabertura / Renovação de Benefício</h4>
+<p><strong>Objetivo:</strong> Reabrir, renovar ou prorrogar um benefício encerrado, voltando as situações do processo, do participante e da contribuição.</p>
+<p><strong>Ator / gatilho:</strong> Analista de benefícios, nas telas Reabertura de Benefícios e Datas para Reabertura de Benefício.</p>
+<p><strong>Pré-condições:</strong> Benefício encerrado; benefício ainda não processado pela prévia nem calculado no mês de pagamento.</p>
+<p><strong>Pós-condições:</strong> PROCESSOBENEF, ELEGPATRO, PARTPREVPLAN, CONTRIBPREVPARTP, EVENTOSPREV e BENEFBFCIARIO atualizados.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li>Selecionar o benefício e informar as datas da reabertura.</li>
+<li>O sistema verifica se o benefício já foi processado pela prévia ou calculado no mês; se sim, bloqueia. [<a href="#BENEF-RN039">RS039</a>] [<a href="#TRT015">TRT015</a>]</li>
+<li>O sistema atualiza as situações do processo, do participante e do evento, e a vigência da contribuição. [<a href="#BENEF-RN020">RS020</a>]</li>
+<li>Na reabertura, o benefício é recalculado; na renovação ou prorrogação, não.</li>
+<li>Em erro de gravação, a transação é revertida. [<a href="#TRT006">TRT006</a>]</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Informar datas da reabertura</td><td>Definir a nova vigência</td><td>Datas de reabertura</td><td>Registra as datas</td><td>Datas aceitas</td><td>—</td><td>—</td><td><code>FReaberturaData.dfm</code></td></tr>
+<tr><td>Verificar folha do mês</td><td>Evitar conflito com a folha</td><td>Mês de pagamento</td><td>Consulta prévia e HSTBENEFBFCIARIO.MESREFERENCIA</td><td>Reabertura liberada ou bloqueada</td><td><a href="#BENEF-RN039">RS039</a></td><td><a href="#MSG020">MSG020</a>, <a href="#MSG021">MSG021</a></td><td><code>FReaberturaBeneficio.dfm</code></td></tr>
+<tr><td>Reabrir o benefício</td><td>Voltar o benefício a vigorar</td><td>Benefício liberado</td><td>Atualiza situações e DATAFINAL/FLGCOBRA; recalcula na reabertura</td><td>Benefício reaberto</td><td><a href="#BENEF-RN020">RS020</a></td><td>—</td><td><code>FReaberturaBeneficio.dfm</code></td></tr>
+</tbody></table></div>
+<p><strong>Regras de negócio da jornada:</strong> <a href="#BENEF-RN020">RS020 (BENEF-RN020)</a> — Reabertura atualiza as situações, <a href="#BENEF-RN039">RS039 (BENEF-RN039)</a> — Benefício processado na folha do mês não pode ser reaberto</p>
+<p><strong>Tratamentos de erro:</strong> <a href="#TRT006">TRT006</a>, <a href="#TRT015">TRT015</a></p>
+<p><strong>Mensagens:</strong> <a href="#MSG020">MSG020</a>, <a href="#MSG021">MSG021</a></p>
+<p><strong>Telas:</strong> Reabertura de Benefícios (<code>FReaberturaBeneficio.dfm</code>), Datas para Reabertura de Benefício (<code>FReaberturaData.dfm</code>)</p>
+<p><strong>Dependências:</strong> Pode ser revertida em <a href="uc004.html">JF004</a>.</p>
+<div class="note note-info"><p><strong>Registro original do processo PF-09</strong></p><p><strong>Forms de entrada:</strong> <code>FReaberturaBeneficio.dfm</code>, <code>FReaberturaData.dfm</code></p><p><strong>Lógica de processamento:</strong> UPDATE PROCESSOBENEF.IDSITPROCESSO, ELEGPATRO.IDSITFUNC, PARTPREVPLAN.IDSITPART, CONTRIBPREVPARTP.DATAFINAL/FLGCOBRA, EVENTOSPREV.DATAVOLTA</p><p><strong>Saídas:</strong> Benefício reaberto</p><p><strong>Persistência (tabelas escritas):</strong> PROCESSOBENEF, ELEGPATRO, PARTPREVPLAN, CONTRIBPREVPARTP, EVENTOSPREV, BENEFBFCIARIO</p><p><strong>Evidência:</strong> <code>BENEFICIOPREV/Fontes/FReaberturaBeneficio.pas:947-2530</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+</div>
+</div>
+</section>
+
+<section><div class="section-title">6. Regras de Negócio da Jornada</div>
+<p>As regras de negócio aplicáveis a esta jornada são apresentadas abaixo com seu texto completo, sem necessidade de acessar outra página.</p>
+<div class="rule-block" id="BENEF-RN020">
+<div class="rule-id">RS020 (BENEF-RN020) — Reabertura atualiza as situações</div>
+<div class="rule-desc">Ao reabrir um benefício, voltam a situação do processo, a situação funcional e no plano do participante e a data de volta do evento.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>PROCESSOBENEF.IDSITPROCESSO</code> — [obrigatório]</li>
+<li><code>ELEGPATRO.IDSITFUNC</code> — [obrigatório]</li>
+<li><code>PARTPREVPLAN.IDSITPART</code> — [obrigatório]</li>
+<li><code>EVENTOSPREV.DATAVOLTA</code> — [obrigatório]</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> — (regra de seleção/cálculo, sem crítica ao usuário)</p>
+<p><strong>Jornada:</strong> <a href="uc009.html">JF009</a></p>
+<p><strong>Descrição original:</strong> Reabertura atualiza situação do processo e do participante.</p>
+<p><strong>Condições:</strong> UPDATE PROCESSOBENEF, ELEGPATRO, PARTPREVPLAN, EVENTOSPREV</p><p><strong>Dados envolvidos:</strong> Múltiplas</p><p><strong>Resultado/Exceção:</strong> Reverte situação para reabrir</p>
+<div class="rule-origin">📂 Origem: <code>BENEFICIOPREV/Fontes/FReaberturaBeneficio.pas:1040,1596</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+</div>
+
+<div class="rule-block" id="BENEF-RN039">
+<div class="rule-id">RS039 (BENEF-RN039) — Benefício processado na folha do mês não pode ser reaberto</div>
+<div class="rule-desc">A reabertura/renovação é bloqueada se o benefício já foi processado pela prévia da folha ou já foi calculado para o mês de pagamento.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>HSTBENEFBFCIARIO.MESREFERENCIA</code> — [obrigatório] — = mês de pagamento bloqueia</li>
+<li>Mês de pagamento — [obrigatório]</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT015">TRT015</a> → <a href="#MSG020">MSG020</a>, <a href="#MSG021">MSG021</a> → Bloqueia a renovação/reabertura e desfaz a transação (RollBack)</p>
+<p><strong>Jornada:</strong> <a href="uc009.html">JF009</a></p>
+<p><strong>Nota de verificação:</strong> Há duas verificações: prévia da folha (FReaberturaBeneficio.pas:838) e cálculo no mês (:843-862); ambas exibem a mensagem de :869.</p>
+<p><strong>Descrição original:</strong> Reabertura bloqueia se benefício já foi processado pela prévia da folha (HSTBENEFBFCIARIO com MESREFERENCIA).</p>
+<p><strong>Condições:</strong> EXISTS HSTBENEFBFCIARIO WHERE MESREFERENCIA = mês pagamento</p><p><strong>Dados envolvidos:</strong> HSTBENEFBFCIARIO</p><p><strong>Resultado/Exceção:</strong> Bloqueia renovação</p>
+<div class="rule-origin">📂 Origem: <code>BENEFICIOPREV/Fontes/FReaberturaBeneficio.pas:843-862</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+</div>
+
+
+</section>
+
+<section><div class="section-title">7. Tratamentos (TRT)</div>
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Condição</th><th>Mensagem</th><th>Resultado</th><th>Regra</th><th>Jornada</th></tr></thead><tbody>
+<tr id="TRT006"><td><strong>TRT006</strong></td><td>Erro de banco em operação de escrita (desfazimento, reabertura, liberação)</td><td>— (texto não catalogado)</td><td>Transação revertida (RollBack) e mensagem exibida pelo form (padrão try/except + RollBack; texto varia por operação e não está catalogado no AS-IS)</td><td>validação técnica</td><td><a href="uc004.html">JF004</a>, <a href="uc009.html">JF009</a>, <a href="uc010.html">JF010</a></td></tr>
+<tr id="TRT015"><td><strong>TRT015</strong></td><td>Benefício já processado pela prévia da folha ou já calculado no mês de pagamento</td><td><a href="#MSG020">MSG020</a>, <a href="#MSG021">MSG021</a></td><td>Bloqueia a renovação/reabertura e desfaz a transação (RollBack)</td><td><a href="#BENEF-RN039">RS039 (BENEF-RN039)</a></td><td><a href="uc009.html">JF009</a></td></tr>
+</tbody></table></div></section>
+
+<section><div class="section-title">8. Mensagens (MSG)</div>
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Texto da mensagem</th><th>Tipo</th><th>Origem (BENEFICIOPREV/Fontes/)</th><th>Jornadas</th></tr></thead><tbody>
+<tr id="MSG020"><td><strong>MSG020</strong></td><td>“Operação NÃO Permitida. Motivo : Este Benefício já foi processado pela Prévia da Folha de Benefícios do mês &lt;MM/AAAA&gt;. Favor entrar em contato com o setor de Pagamento de Benefício para desbloquear o benefício. Verifique.”</td><td>Informação (bloqueio)</td><td><code>FReaberturaBeneficio.pas:869 (motivo em :838-839)</code></td><td><a href="uc009.html">JF009</a></td></tr>
+<tr id="MSG021"><td><strong>MSG021</strong></td><td>“Operação NÃO Permitida. Motivo : Este Benefício já foi calculado para o mês &lt;MM/AAAA&gt;. Favor entrar em contato com o setor de Pagamento de Benefício para desbloquear o benefício. Verifique.”</td><td>Informação (bloqueio)</td><td><code>FReaberturaBeneficio.pas:869 (motivo em :858-859)</code></td><td><a href="uc009.html">JF009</a></td></tr>
+</tbody></table></div></section>
+
+
+<p><a class="back-btn" href="funcionalidades.html">← Voltar à lista de Casos de Uso</a></p>
+
+</main>
+<footer>
+<p>Blueprint AS-IS — PFC-24 / PFC-32 — Módulo Benefício Previdenciário | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-10</p>
+</footer>
+</body>
+</html>
