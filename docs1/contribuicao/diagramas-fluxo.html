@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contribuição Previdenciária — Diagramas de Fluxo — Blueprint AS-IS</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:true,theme:'dark',flowchart:{curve:'basis',useMaxWidth:true}});</script>
+</head>
+<body>
+<header>
+  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-23 (enriquecido)</div>
+  <h1>🔀 Diagramas de Fluxo de Processos — Contribuição Previdenciária</h1>
+  <p>Fluxos comprovados pelo código com rastreabilidade — 10 jornadas (JF001–JF010)</p>
+</header>
+<nav>
+  <a href="index.html">📋 Visão Geral</a>
+  <a href="arquitetura.html">🏗️ Arquitetura</a>
+  <a href="inventario.html">📦 Inventário</a>
+  <a href="formularios.html">🧾 Formulários</a>
+  <a href="funcionalidades.html">⚙️ Funcionalidades</a>
+  <a href="rotinas.html">🔧 Procedures</a>
+  <a href="regras-de-negocio.html">📏 Regras</a>
+  <a href="dados.html">🗄️ Dados</a>
+  <a href="relatorios.html">📄 Relatórios</a>
+  <a href="integracoes.html">🔗 Integrações</a>
+  <a href="tratamento-erros.html">⚠️ Erros</a>
+  <a href="diagramas-fluxo.html">🔀 Fluxos</a>
+  <a href="lacunas.html">🔍 Lacunas</a>
+  <a href="controle-cobertura.html">📊 Cobertura</a>
+</nav>
+<main>
+<section><div class="section-title">🔀 Fluxo JF001 (PF-01) — Manutenção e cobrança (Preparo e Envio)</div>
+<div class="mermaid">
+flowchart TD
+    A["FPreparaEnvia"] --> B["MontaSelect"]
+    B --> C["PreparaContribuicoes"]
+    C --> D["ValidaMotivoPadrao"]
+    D --> E["EnviaLote"]
+    E --> F["Contabiliza"]
+    F --> G["HSTCONTRIBPREV /<br/>CONTRIBPREVPARTP"]
+</div>
+<p><strong>Evidência:</strong> <code>FPreparaEnvia</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</section>
+
+<section><div class="section-title">🔀 Fluxo JF002 (PF-02) — Recebimento por múltiplos canais</div>
+<div class="mermaid">
+flowchart TD
+    A["FRecebeContribuicaoNovo"] --> B["SelecionaCanal"]
+    B --> C{"Canal"}
+    C -->|"Folha"| D1["Folha"]
+    C -->|"Emprestimo"| D2["Emprestimo"]
+    C -->|"CaR"| D3["CaR"]
+    C -->|"Banco"| D4["Banco"]
+    D1 --> E["RecebeContribuicao"]
+    D2 --> E
+    D3 --> E
+    D4 --> E
+    E --> F["HSTCONTRIBPREV /<br/>DOCUMENTO /<br/>LANCTODOCUM"]
+</div>
+<p><strong>Evidência:</strong> <code>FRecebeContribuicaoNovo</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</section>
+
+<section><div class="section-title">🔀 Fluxo JF003 (PF-03) — Alimentação de reservas</div>
+<div class="mermaid">
+flowchart TD
+    A["FAlimReservasReplan"] --> B["SelecionaReserva"]
+    B --> C["AtualizaPorIndice"]
+    C --> D["RodaPadraoMovReserva"]
+    D --> E["RESERVAPART /<br/>RESERVAXPLANO /<br/>HISTMOVRESERVA"]
+</div>
+<p><strong>Evidência:</strong> <code>FAlimReservasReplan</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</section>
+
+<section><div class="section-title">🔀 Fluxo JF004 (PF-04) — Salário de participação/manutenção</div>
+<div class="mermaid">
+flowchart TD
+    A["FReajustaSalarioMantido"] --> B["SelecionaParticipantes"]
+    B --> C{"Modo"}
+    C -->|"Individual"| D1["ReajustaIndividual"]
+    C -->|"Lote"| D2["AlteraEmLote (Excel)"]
+    D1 --> E["CONTRIBPREVPARTP"]
+    D2 --> E
+</div>
+<p><strong>Evidência:</strong> <code>FReajustaSalarioMantido</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</section>
+
+<section><div class="section-title">🔀 Fluxo JF005 (PF-05) — Tributação (Bitributação/IR Regressivo)</div>
+<div class="mermaid">
+flowchart TD
+    A["FCalcSalContr"] --> B["CalculaSaldoContribuicoes"]
+    B --> C["fCalculoIRRF"]
+    C --> D["VerificaRegressivo"]
+    D --> E["BITRIBUTACAO /<br/>HSTBITRIBUTACAO"]
+</div>
+<p><strong>Evidência:</strong> <code>FCalcSalContr</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</section>
+
+<section><div class="section-title">🔀 Fluxo JF006 (PF-06) — Portabilidade e Benefício Saldado/FAB</div>
+<div class="mermaid">
+flowchart TD
+    A["FCadContribuicaoPortada"] --> B["ValidaMesesVinculo"]
+    B --> C["ValidaAnoMesRef"]
+    C --> D["ValidaValor"]
+    D --> E["ImportaArquivo"]
+    E --> F["HSTCONTRIBPREV /<br/>CONTRIBPREVPARTP"]
+</div>
+<p><strong>Evidência:</strong> <code>FCadContribuicaoPortada</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</section>
+
+<section><div class="section-title">🔀 Fluxo JF007 (PF-07) — Provisão para perdas</div>
+<div class="mermaid">
+flowchart TD
+    A{"Modo"} -->|"Individual"| B1["FProvPerdasIndiv"]
+    A -->|"Lote"| B2["FProvPerdasLote"]
+    B1 --> C["ValidaParametros"]
+    B2 --> C
+    C --> D["CalculaProvisao"]
+    D --> E["PROVISAO /<br/>HPROVISAO"]
+</div>
+<p><strong>Evidência:</strong> <code>FProvPerdasIndiv / FProvPerdasLote</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</section>
+
+<section><div class="section-title">🔀 Fluxo JF008 (PF-08) — Tratamento de divergências</div>
+<div class="mermaid">
+flowchart TD
+    A["FDivergContrib"] --> B["SelecionaModo"]
+    B --> C["ConsultaDivergencias"]
+    C --> D["TrataDivergencia"]
+    D --> E["FDesfDocContribuicao"]
+    E --> F["HSTCONTRIBPREV"]
+</div>
+<p><strong>Evidência:</strong> <code>FDivergContrib</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</section>
+
+<section><div class="section-title">🔀 Fluxo JF009 (PF-09) — Controle individual/Entrada manual</div>
+<div class="mermaid">
+flowchart TD
+    A["FControleIndivContrib"] --> B["SelecionaParticipante"]
+    B --> C["FCadHstContribuicao"]
+    C --> D["ValidaCampos"]
+    D --> E["GravaContribuicao"]
+    E --> F["HSTCONTRIBPREV"]
+</div>
+<p><strong>Evidência:</strong> <code>FControleIndivContrib</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</section>
+
+<section><div class="section-title">🔀 Fluxo JF010 (PF-10) — Retroativo e Simulação</div>
+<div class="mermaid">
+flowchart TD
+    A["FSimulaContrib"] --> B["ConfiguraSimulacao"]
+    B --> C["CalculaCenarios"]
+    C --> D["FRevisaoIndice"]
+    D --> E["Resultado da simulação"]
+</div>
+<p><strong>Evidência:</strong> <code>FSimulaContrib</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</section>
+</main>
+<footer>
+<p>Blueprint AS-IS — PFC-21 / PFC-23 (enriquecido) — Módulo CONTRIBUIÇÃO | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-10</p>
+</footer>
+</body>
+</html>
