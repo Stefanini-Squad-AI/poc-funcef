@@ -1,10 +1,10 @@
-# Análise Blueprint CONTRIBUIÇÃO — Adaptação ao padrão de jornadas funcionais
+# Análise Blueprint CONTRIBUIÇÃO — Adaptação ao padrão de jornadas funcionais (PFC-30)
 
-**Issue:** PFC-27 — Adaptação CONTRIBUIÇÃO
+**Issue:** PFC-30 — Adaptação BENEFICIOPREV 2 (realinhamento das abas Processos e Regras do módulo Contribuição)
 **Data:** 2026-11-10
 **Documento de referência (somente apresentação):** `UC097_Verificar_Elegibilidade_para_Adesão_ao_Plano_de_Previdência.pdf`, na raiz do repositório
-**Blueprint alvo:** `docs1/contribuicao/` (módulo Contribuição Previdenciária, Blueprint AS-IS PFC-21)
-**Precedente seguido:** PFC-25 — Adaptação FOLHA (`Analise_Blueprint_Folha.md`)
+**Blueprint alvo:** `docs1/contribuicao/` (módulo Contribuição Previdenciária, Blueprint AS-IS PFC-21 / PFC-27 / PFC-23)
+**Precedente seguido:** PFC-25 — Adaptação FOLHA (`Analise_Blueprint_Folha.md`), PFC-27 — Adaptação CONTRIBUIÇÃO inicial, PFC-29 — Adaptação FOLHA pós-enriquecimento
 
 > O documento de referência foi usado só como modelo de apresentação. Nenhuma página de `docs1/contribuicao/` o cita: a busca por "UC097" e pelo nome do PDF nas seis páginas retorna 0 ocorrências. Este arquivo de análise é o único lugar onde ele é nomeado.
 
@@ -12,25 +12,26 @@
 
 ## 0. Resumo executivo
 
-Antes desta issue, o Blueprint do módulo Contribuição tinha 10 processos (PF-01 a PF-10) e 28 regras (CONTRIB-RN001 a CONTRIB-RN028), organizados a partir do código-fonte. Cada processo tinha forms, lógica, saídas, persistência e evidência. Cada regra tinha descrição, condições, dados, resultado/exceção, origem e evidência.
+Antes desta issue, o Blueprint do módulo Contribuição tinha 10 jornadas funcionais (JF001 a JF010) e 28 regras de jornada (RS001 a RS028, do PFC-27), mais 20 regras adicionais (CONTRIB-RN029 a CONTRIB-RN048) descobertas no PFC-23 em formato antigo (sem código RS, sem campos de dados classificados, sem tratamento de erro, sem mensagens ligadas e sem jornada associada). As abas Processos e Regras estavam com dois formatos convivendo.
 
-O padrão adotado organiza a documentação em **jornadas funcionais**, com estas seções: identificação, descrição resumida, pré/pós-condições, jornadas com sequência operacional e tabela de ações práticas, regras de jornada (RS), tratamentos de erro (TRT), catálogo de mensagens (MSG), observações (OBS), casos de uso associados, tabela/programa, telas, visão consolidada com critérios de aceitação e histórico de versões.
+O PFC-30 converte as 20 regras do PFC-23 para o mesmo padrão de regra de jornada já aplicado nas 28 originais, liga cada uma a pelo menos uma jornada, adiciona os tratamentos de erro e mensagens correspondentes, e atualiza contagens, visão consolidada e histórico de versões. O resultado é uma especificação funcional uniforme e rastreável (jornada → regra → tratamento → mensagem → tela).
 
 Resultado:
 
-| Item | Antes | Depois | Perdas |
+| Item | Antes (PFC-23) | Depois (PFC-30) | Perdas |
 |---|---|---|---|
-| Processos → jornadas | 10 (PF-01..PF-10) | 10 (JF001..JF010), mapeamento 1:1 | 0 |
-| Regras → regras de jornada | 28 (CONTRIB-RN001..028) | 28 (RS001..RS028), mapeamento 1:1 | 0 |
-| Tratamentos de erro | — | 53 (TRT001..TRT053); 19 ligados a 18 regras, 34 "validação de tela" | — |
-| Mensagens | — | 100 (MSG001..MSG100), transcritas do código com arquivo:linha | — |
-| Ações práticas | — | 45 linhas de ação nas 10 jornadas | — |
-| Links/âncoras usados pelas outras abas | 10 `#PF-xx` + 28 `#CONTRIB-RNxxx` | os mesmos 38 `id` mantidos | 0 quebrados |
+| Processos → jornadas | 10 (JF001..JF010) | 10 (JF001..JF010), inalteradas | 0 |
+| Regras → regras de jornada | 28 (RS001..RS028) + 20 em formato antigo (RN029..RN048) | 48 (RS001..RS048), todas no padrão de jornada | 0 |
+| Tratamentos de erro | 53 (TRT001..TRT053) | 57 (TRT001..TRT057); +4 para as novas regras com erro | 0 |
+| Mensagens | 100 (MSG001..MSG100) | 102 (MSG001..MSG102); +2 novas | 0 |
+| Ações práticas | 45 linhas nas 10 jornadas | 45 linhas (inalteradas) | 0 |
+| Regras ligadas a jornadas | 28 de 48 (58%) | 48 de 48 (100%) | 0 |
+| Links/âncoras usados pelas outras abas | 10 `#PF-xx` + 48 `#CONTRIB-RNxxx` | os mesmos 58 `id` mantidos | 0 quebrados |
 
-**Abas alteradas:** `funcionalidades.html` (reestruturada), `regras-de-negocio.html` (reestruturada), `index.html` (só rótulos e textos; nenhum `href` alterado).
-**Abas sem alteração:** `arquitetura.html`, `dados.html`, `integracoes.html`.
+**Abas alteradas:** `funcionalidades.html` (regras ligadas às jornadas, +TRT/MSG, visão consolidada, histórico), `regras-de-negocio.html` (20 regras convertidas, +TRT/MSG, visão consolidada, histórico), `index.html` (lista de regras estendida para 48, rótulos).
+**Abas sem alteração:** `arquitetura.html`, `dados.html`, `integracoes.html`, `inventario.html`, `formularios.html`, `rotinas.html`.
 
-**Fonte do conteúdo novo:** as ações práticas, os tratamentos, as mensagens e as telas foram levantados nos forms Delphi de `CONTRIBUICAOPREV/Fontes` (`.pas` lidos em Latin-1). São 25 units, entre elas `FPreparaEnvia`, `FRecebeContribuicaoNovo`, `FRecebeContribEmptmo`, `FBaixaContribCAR`, `FAtualizaPorIndice`, `FAlimReservasReplan`, `FRodaPadraoMovReserva`, `FReajustaSalarioMantido`, `FAlteraSalPart`, `FCalcSalContr`, `fCalculoIRRF`, `FCadContribuicaoPortada`, `FBeneficioSaldadoFAB`, `fCargaArquivo`, `FProvPerdasIndiv/Lote`, `FFRelProvPerdas`, `FDivergContrib`, `FConsEstatDivergContrib`, `FDesfDocContribuicao`, `FControleIndivContrib`, `FCadHstContribuicao`, `FCadContribNucleoFamiliar`, `FSimulaContrib` e `FRevisaoIndice`. Os títulos das telas vêm da propriedade `Caption` dos `.dfm`. Nada foi inventado: cada mensagem e cada tratamento aponta para o arquivo:linha de origem.
+**Fonte do conteúdo convertido:** as 20 regras (CONTRIB-RN029 a CONTRIB-RN048) foram descobertas no PFC-23 por leitura linha-a-linha do código-fonte de `CONTRIBUICAOPREV/Fontes`. No PFC-30, cada regra recebeu código RS (RS029 a RS048), descrição em linguagem de negócio, campos de dados classificados como [obrigatório]/[opcional]/[condicional], tratamento de erro (TRT → MSG → resultado) ou indicação "seleção/cálculo", jornada associada com link, e manteve o registro original (descrição, condições, dados, resultado/exceção, origem e evidência). Nenhum conteúdo do PFC-23 foi perdido.
 
 ---
 
@@ -85,15 +86,15 @@ Resultado:
 
 | Jornada | Processo original (`id` mantido) | Título | Telas (forms) | Ações práticas | Regras (RS) | TRT | MSG |
 |---|---|---|---|---|---|---|---|
-| JF001 | PF-01 | Manutenção e cobrança de contribuições (Preparo e Envio) | `FPreparaEnvia.dfm` | 6 | RS013, RS014, RS015, RS016, RS017, RS026, RS027 | 6 | 10 |
-| JF002 | PF-02 | Recebimento por múltiplos canais | `FRecebeContribuicaoNovo.dfm`, `FRecebeContribEmptmo.dfm`, `FBaixaContribCAR.dfm` | 5 | RS024, RS028 | 6 | 9 |
-| JF003 | PF-03 | Alimentação de reservas | `FAlimReservasReplan.dfm`, `FAtualizaPorIndice.dfm`, `FRodaPadraoMovReserva.dfm` | 4 | — | 5 | 10 |
+| JF001 | PF-01 | Manutenção e cobrança de contribuições (Preparo e Envio) | `FPreparaEnvia.dfm` | 6 | RS013, RS014, RS015, RS016, RS017, RS026, RS027, RS031, RS033, RS034, RS035, RS036, RS047, RS048 | 7 | 11 |
+| JF002 | PF-02 | Recebimento por múltiplos canais | `FRecebeContribuicaoNovo.dfm`, `FRecebeContribEmptmo.dfm`, `FBaixaContribCAR.dfm` | 5 | RS024, RS028, RS032, RS045, RS046 | 7 | 9 |
+| JF003 | PF-03 | Alimentação de reservas | `FAlimReservasReplan.dfm`, `FAtualizaPorIndice.dfm`, `FRodaPadraoMovReserva.dfm` | 4 | RS043 | 5 | 10 |
 | JF004 | PF-04 | Salário de participação / manutenção | `FReajustaSalarioMantido.dfm`, `FAlteraSalPart.dfm` | 3 | RS023, RS025 | 4 | 7 |
-| JF005 | PF-05 | Tributação — Bitributação / IR Regressivo | `FCalcSalContr.dfm`, `fCalculoIRRF.dfm`, `FCadContribuicaoPortada.dfm` | 4 | RS006, RS022 | 4 | 6 |
-| JF006 | PF-06 | Portabilidade e Benefício Saldado/FAB | `FCadContribuicaoPortada.dfm`, `FBeneficioSaldadoFAB.dfm`, `fCargaArquivo.dfm` | 7 | RS001, RS002, RS003, RS004, RS005, RS006, RS007, RS008 | 11 | 19 |
-| JF007 | PF-07 | Provisão para perdas | `FProvPerdasIndiv.dfm`, `FProvPerdasLote.dfm`, `FFRelProvPerdas.dfm` | 3 | RS020, RS021 | 4 | 9 |
-| JF008 | PF-08 | Tratamento de divergências e inconsistências | `FDivergContrib.dfm`, `FConsEstatDivergContrib.dfm`, `FDesfDocContribuicao.dfm` | 4 | — | 5 | 10 |
-| JF009 | PF-09 | Controle individual / Entrada manual | `FControleIndivContrib.dfm`, `FCadHstContribuicao.dfm`, `FCadContribNucleoFamiliar.dfm` | 5 | RS009, RS010, RS011, RS012, RS018, RS019 | 8 | 16 |
+| JF005 | PF-05 | Tributação — Bitributação / IR Regressivo | `FCalcSalContr.dfm`, `fCalculoIRRF.dfm`, `FCadContribuicaoPortada.dfm` | 4 | RS006, RS022, RS040, RS041 | 4 | 6 |
+| JF006 | PF-06 | Portabilidade e Benefício Saldado/FAB | `FCadContribuicaoPortada.dfm`, `FBeneficioSaldadoFAB.dfm`, `fCargaArquivo.dfm` | 7 | RS001, RS002, RS003, RS004, RS005, RS006, RS007, RS008, RS039, RS044 | 11 | 19 |
+| JF007 | PF-07 | Provisão para perdas | `FProvPerdasIndiv.dfm`, `FProvPerdasLote.dfm`, `FFRelProvPerdas.dfm` | 3 | RS020, RS021, RS042 | 4 | 9 |
+| JF008 | PF-08 | Tratamento de divergências e inconsistências | `FDivergContrib.dfm`, `FConsEstatDivergContrib.dfm`, `FDesfDocContribuicao.dfm` | 4 | RS037, RS038 | 5 | 10 |
+| JF009 | PF-09 | Controle individual / Entrada manual | `FControleIndivContrib.dfm`, `FCadHstContribuicao.dfm`, `FCadContribNucleoFamiliar.dfm` | 5 | RS009, RS010, RS011, RS012, RS018, RS019, RS029, RS030 | 10 | 17 |
 | JF010 | PF-10 | Retroativo e Simulação | `FSimulaContrib.dfm`, `FRevisaoIndice.dfm`, `dmRetroativoLote (externo)` | 4 | — | 5 | 10 |
 
 - **Adicionado:** em cada jornada: objetivo, ator/gatilho (tela de entrada), pré-condições, pós-condições, sequência operacional numerada com referências `[RSxxx]` e `[TRTxxx]`, tabela de ações práticas com as 8 colunas do padrão, regras da jornada, tratamentos, mensagens, telas e dependências entre jornadas.
@@ -143,8 +144,28 @@ Resultado:
 | RS026 | CONTRIB-RN026 | Divergência de plano contábil questiona o usuário | JF001 | — (seleção/cálculo) | INFERIDO |
 | RS027 | CONTRIB-RN027 | Filtro de envio por evento | JF001 | — (seleção/cálculo) | INFERIDO |
 | RS028 | CONTRIB-RN028 | Documentos CaR por data de recebimento | JF002 | — (seleção/cálculo) | INFERIDO |
+| RS029 | CONTRIB-RN029 | Situação da contribuição bloqueia alteração (SITRECEBIMENTO > 1) | JF009 | TRT054 | COMPROVADO |
+| RS030 | CONTRIB-RN030 | Documento baixado no CAR não pode ser desfeito (STATUS='2') | JF009 | TRT055 | COMPROVADO |
+| RS031 | CONTRIB-RN031 | Boleta enviada ao banco bloqueia desfazer (EMISBLOQ='S') | JF001 | TRT056 | COMPROVADO |
+| RS032 | CONTRIB-RN032 | Divergência aceita por margem (VLRACEITADIVERG) | JF002 | — (seleção/cálculo) | COMPROVADO |
+| RS033 | CONTRIB-RN033 | Tipo de valor da contribuição (FLGTPVLR: B/V/E) | JF001 | — (seleção/cálculo) | COMPROVADO |
+| RS034 | CONTRIB-RN034 | Mês 13º usa salário SALPARTIC13 | JF001 | — (seleção/cálculo) | COMPROVADO |
+| RS035 | CONTRIB-RN035 | Contribuição associada (FLGPAGADOR='E' usa CONTRIBPREVPATRO) | JF001 | — (seleção/cálculo) | COMPROVADO |
+| RS036 | CONTRIB-RN036 | Encerramento de contribuição (DATAFINAL = ULTMESPREPARO) | JF001 | — (seleção/cálculo) | COMPROVADO |
+| RS037 | CONTRIB-RN037 | Tratamento de divergência por modo (9 tratamentos) | JF008 | — (seleção/cálculo) | COMPROVADO |
+| RS038 | CONTRIB-RN038 | Ação judicial vigente impede cobrança | JF008 | — (seleção/cálculo) | COMPROVADO |
+| RS039 | CONTRIB-RN039 | Cálculo do Benefício Saldado via package Oracle | JF006 | — (seleção/cálculo) | COMPROVADO |
+| RS040 | CONTRIB-RN040 | Bitributação: correção por moeda 557 e IPCA-E (285) | JF005 | — (seleção/cálculo) | COMPROVADO |
+| RS041 | CONTRIB-RN041 | IR Regressivo restrito a planos 66 e 74 | JF005 | — (seleção/cálculo) | COMPROVADO |
+| RS042 | CONTRIB-RN042 | Provisão para perdas = (TOTALESPERADO / 100) × PERCENTUAL | JF007 | — (seleção/cálculo) | COMPROVADO |
+| RS043 | CONTRIB-RN043 | Atualização de reserva por índice (dValor × COTVALOR) | JF003 | — (seleção/cálculo) | COMPROVADO |
+| RS044 | CONTRIB-RN044 | Portabilidade exige opção IR e tempo de vínculo | JF006 | TRT023, TRT025 | COMPROVADO |
+| RS045 | CONTRIB-RN045 | Recebimento via empréstimo exige valor igual ao contrato | JF002 | TRT057 | COMPROVADO |
+| RS046 | CONTRIB-RN046 | Três inadimplências consecutivas disparam evento de inadimplência | JF002 | — (seleção/cálculo) | COMPROVADO |
+| RS047 | CONTRIB-RN047 | BPD mutuamente exclusivo com PGA e Envio | JF001 | — (seleção/cálculo) | COMPROVADO |
+| RS048 | CONTRIB-RN048 | Commit parcial a cada 800 registros (ictMaxCommit) | JF001 | — (seleção/cálculo) | COMPROVADO |
 
-- **Adicionado:** código RS (RS001–RS028, mesma ordem dos CONTRIB-RN), título, descrição de negócio, campos de dados classificados, tratamento de erro (TRT → MSG → resultado) e jornada com link.
+- **Adicionado:** código RS (RS001–RS048, mesma ordem dos CONTRIB-RN), título, descrição de negócio, campos de dados classificados, tratamento de erro (TRT → MSG → resultado) e jornada com link. As 20 regras do PFC-23 (RS029–RS048) foram convertidas do formato antigo para o padrão de jornada, mantendo todos os 14 atributos originais.
 - **Adicionado:** na aba Regras, a seção "5. Mapa de Regras por Jornada" e a seção "10. Visão Consolidada — Critérios de Aceitação por Regra" (Dado/Quando/Então).
 - **Adicionado:** "Notas de verificação" onde a leitura do código atual completa ou precisa o registro original, sem substituí-lo:
   - **RS001:** a crítica está no campo `edtmeses` (`FCadContribuicaoPortada.pas:793-800`). Vazio assume 0.
@@ -155,7 +176,7 @@ Resultado:
   - **RS026:** texto da pergunta não localizado. Continua INFERIDO.
 - **Alterado:** o `rule-id` passou de "CONTRIB-RNxxx" para "RSxxx (CONTRIB-RNxxx) — Título". O `id` HTML foi mantido (`id="CONTRIB-RN001"` …), então os 28 links de `index.html` continuam funcionando.
 - **Alterado:** os atributos originais (descrição, condições, dados envolvidos, resultado/exceção, origem e evidência COMPROVADO/INFERIDO/PENDENTE) estão em cada bloco com o texto original.
-- **Removido:** nada. 28 de 28 regras estão presentes. Classificação mantida: 25 COMPROVADO e 3 INFERIDO (RS026–RS028).
+- **Removido:** nada. 48 de 48 regras estão presentes. Classificação mantida: 45 COMPROVADO e 3 INFERIDO (RS026–RS028). A seção "11. Regras adicionais descobertas em PFC-23" foi removida da aba Regras porque as 20 regras foram integradas à seção 6 no padrão de jornada.
 
 ## 7. Tratamentos de erro (TRT)
 
@@ -163,7 +184,7 @@ Resultado:
 |---|---|---|
 | Tratamento (Condição, Mensagem, Resultado) | Campo "Resultado/Exceção" das regras + críticas `MessageDlg`/`MsgDlg`/`EValidacao`/`Abort` dos forms | funcionalidades.html (seção 7 + referências nas jornadas), regras-de-negocio.html (seção 7 + campo em cada regra) |
 
-- **Adicionado:** catálogo TRT001–TRT053 nas duas abas, com Condição, Mensagem, Resultado, Regra e Jornada. Cada linha tem `id` (`#TRT001`…) para os links da sequência operacional.
+- **Adicionado:** catálogo TRT001–TRT057 nas duas abas, com Condição, Mensagem, Resultado, Regra e Jornada. Cada linha tem `id` (`#TRT001`…) para os links da sequência operacional. TRT054–TRT057 foram adicionados em PFC-30 para as regras RS029, RS030, RS031 e RS045.
 - **Adicionado:** a coluna Regra recebe "validação de tela" nos 34 tratamentos que vêm de críticas comprovadas nos forms sem regra CONTRIB-RN correspondente. Isso cobre as jornadas JF003, JF008 e JF010, que não tinham regra catalogada. As críticas **não** foram promovidas a novas regras RS, para manter 28 = 28.
 - **Removido:** nada.
 
@@ -224,6 +245,10 @@ Catálogo completo:
 | TRT051 | Data final calculada anterior à data de início, ausência de contribuições para a categoria ou erro no cálculo de alteradores | MSG094, MSG095, MSG097 | Interrompe a simulação | validação de tela | JF010 |
 | TRT052 | Data de revisão de índice ausente ou não posterior a 31/08/2006 | MSG098, MSG099 | Bloqueia a revisão | validação de tela | JF010 |
 | TRT053 | Falha ao gravar o log de auditoria | MSG100 | Exceção; a transação em curso não é concluída | validação de tela | JF003, JF004, JF008, JF009 |
+| TRT054 | Situação da contribuição > 1 bloqueia alteração no controle individual | MSG079 | Bloqueia a alteração (Abort) | RS029 (CONTRIB-RN029) | JF009 |
+| TRT055 | Documento baixado no CAR (STATUS='2') não pode ser desfeito | MSG101 | Bloqueia o desfazimento (Abort) | RS030 (CONTRIB-RN030) | JF009 |
+| TRT056 | Boleta enviada ao banco (EMISBLOQ='S') bloqueia desfazer preparo/envio | MSG102 | Bloqueia o desfazimento | RS031 (CONTRIB-RN031) | JF001 |
+| TRT057 | Recebimento via empréstimo com valor das contribuições diferente do contrato | MSG015 | Impede a baixa | RS045 (CONTRIB-RN045) | JF002 |
 
 ## 8. Catálogo de Mensagens (MSG)
 
@@ -231,8 +256,8 @@ Catálogo completo:
 |---|---|---|
 | Mensagens (código, texto, jornadas) | Textos de `MessageDlg`/`MsgDlg`/`ShowMessage`/`Application.MessageBox`/`EValidacao.CreateVal` e linhas de log dos forms | funcionalidades.html (seção 8), regras-de-negocio.html (seção 8) |
 
-- **Adicionado:** catálogo MSG001–MSG100 nas duas abas, com Código, Texto (grafia original), Tipo, Origem (arquivo:linha) e Jornadas. Na aba Regras, também com as regras relacionadas. Cada linha tem `id` (`#MSG001`…), usado pelas tabelas de ações práticas e pelos TRT.
-- **Tipos:** Erro 44, Erro (validação) 7, Erro (exceção) 1, Informação 20, Alerta 12, Aviso 1, Confirmação 4, Sucesso 9, Log de processamento 2.
+- **Adicionado:** catálogo MSG001–MSG102 nas duas abas, com Código, Texto (grafia original), Tipo, Origem (arquivo:linha) e Jornadas. Na aba Regras, também com as regras relacionadas. Cada linha tem `id` (`#MSG001`…), usado pelas tabelas de ações práticas e pelos TRT. MSG101 e MSG102 foram adicionados em PFC-30 para TRT055 e TRT056.
+- **Tipos:** Erro 46, Erro (validação) 7, Erro (exceção) 1, Informação 20, Alerta 12, Aviso 1, Confirmação 4, Sucesso 9, Log de processamento 2.
 - **Alterado:** os textos que o catálogo anterior citava de forma abreviada (por exemplo, "MessageDlg('já foi Enviada')") continuam no "Resultado/Exceção" original de cada regra. O texto completo está agora na MSG correspondente (por exemplo, MSG047 "Essa Contribuição já foi Enviada, Alteração não permitida").
 - **Removido:** nada.
 
@@ -240,7 +265,7 @@ Distribuição por jornada:
 
 | Jornada | Faixa / quantidade de mensagens |
 |---|---|
-| JF001 | 10 mensagens (MSG001, MSG002, MSG003, MSG004, MSG005, MSG006, MSG007, MSG008, MSG009, MSG010) |
+| JF001 | 11 mensagens (MSG001, MSG002, MSG003, MSG004, MSG005, MSG006, MSG007, MSG008, MSG009, MSG010, MSG102) |
 | JF002 | 9 mensagens (MSG011, MSG012, MSG013, MSG014, MSG015, MSG016, MSG017, MSG018, MSG019) |
 | JF003 | 10 mensagens (MSG020, MSG021, MSG022, MSG023, MSG024, MSG025, MSG026, MSG027, MSG028, MSG100) |
 | JF004 | 7 mensagens (MSG029, MSG030, MSG031, MSG032, MSG033, MSG034, MSG100) |
@@ -248,7 +273,7 @@ Distribuição por jornada:
 | JF006 | 19 mensagens (MSG040, MSG041, MSG042, MSG043, MSG044, MSG045, MSG046, MSG047, MSG048, MSG049, MSG050, MSG051, MSG052, MSG053, MSG054, MSG055, MSG056, MSG057, MSG058) |
 | JF007 | 9 mensagens (MSG059, MSG060, MSG061, MSG062, MSG063, MSG064, MSG065, MSG066, MSG067) |
 | JF008 | 10 mensagens (MSG068, MSG069, MSG070, MSG071, MSG072, MSG073, MSG074, MSG075, MSG076, MSG100) |
-| JF009 | 16 mensagens (MSG077, MSG078, MSG079, MSG080, MSG081, MSG082, MSG083, MSG084, MSG085, MSG086, MSG087, MSG088, MSG089, MSG090, MSG091, MSG100) |
+| JF009 | 17 mensagens (MSG077, MSG078, MSG079, MSG080, MSG081, MSG082, MSG083, MSG084, MSG085, MSG086, MSG087, MSG088, MSG089, MSG090, MSG091, MSG100, MSG101) |
 | JF010 | 10 mensagens (MSG057, MSG058, MSG092, MSG093, MSG094, MSG095, MSG096, MSG097, MSG098, MSG099) |
 
 ## 9. Observações Gerais (OBS)
@@ -302,8 +327,8 @@ Distribuição por jornada:
 |---|---|---|
 | Histórico de versões | Rodapé "Blueprint AS-IS — PFC-21 … Gerado em 2026-11-09" | funcionalidades.html, regras-de-negocio.html |
 
-- **Adicionado:** tabela de versões: v1.0 (PFC-21, 2026-11-09) e v2.0 (PFC-27, 2026-11-10).
-- **Alterado:** o rodapé das duas abas passou a "Blueprint AS-IS — PFC-21 / PFC-27 — Módulo CONTRIBUIÇÃO organizado em jornadas funcionais … Atualizado em 2026-11-10".
+- **Adicionado:** tabela de versões: v1.0 (PFC-21, 2026-11-09), v2.0 (PFC-27, 2026-11-10), v3.0 (PFC-23, 2026-11-10) e v4.0 (PFC-30, 2026-11-10).
+- **Alterado:** o rodapé das duas abas passou a "Blueprint AS-IS — PFC-21 / PFC-27 / PFC-23 / PFC-30 — Módulo CONTRIBUIÇÃO … Atualizado em 2026-11-10".
 - **Removido:** o texto de rodapé anterior (substituído).
 
 ---
@@ -312,7 +337,7 @@ Distribuição por jornada:
 
 | Aba | Ajuste | Motivo |
 |---|---|---|
-| `index.html` | Cards de processos com "JFnnn (PF-xx) — título"; lista de regras com "RSxxx (CONTRIB-RNxxx)"; dois parágrafos de introdução atualizados para falar de jornadas e catálogos TRT/MSG. **Nenhum `href` foi alterado** (mesma contagem de links antes e depois). | Manter a Visão Geral coerente com os novos códigos |
+| `index.html` | Lista de regras estendida de 28 para 48 (RS029–RS048 adicionados); descrição atualizada para "48 regras de jornada"; badge atualizado para PFC-30; rótulo de navegação "Regras (48 regras de jornada)". **Nenhum `href` foi alterado** nos links existentes. | Manter a Visão Geral coerente com os 48 códigos RS |
 | `arquitetura.html`, `dados.html`, `integracoes.html` | Sem alteração | Fora do escopo; só recebem links das abas novas |
 
 ## 16. Decisões de projeto
@@ -328,16 +353,19 @@ Distribuição por jornada:
 | D07 | As duas abas são geradas a partir de uma única estrutura de dados (jornadas, regras, TRT, MSG), e os códigos TRT/MSG são atribuídos em sequência por jornada. | Garante que referências cruzadas e catálogos sejam consistentes nas duas abas. |
 | D08 | O nome do modelo não aparece em nenhuma página do docs1. Os termos de seção usados são genéricos ("Jornadas Funcionais", "Tratamentos de Erro", "Catálogo de Mensagens"…). | Restrição explícita do requisitante (AC3). |
 | D09 | Nome da navegação mantido como "⚙️ Funcionalidades" (o FOLHA usa "Processos"). | Não alterar a navegação já publicada do módulo (AC5). |
+| D10 | As 20 regras do PFC-23 (RN029–RN048) foram convertidas para RS029–RS048 na mesma numeração, mantendo os `id` HTML originais. A seção "11. Regras adicionais" foi removida e as regras integradas à seção 6. | Mapeamento trivial, 0 perdas de `id`, uniformização do formato (AC1). |
+| D11 | Regras de seleção/cálculo sem mensagem ao usuário receberam "não se aplica — regra de seleção/cálculo" no campo Tratamento de erro. Regras com mensagem receberam TRT novo (TRT054–TRT057) ou referência a TRT existente (TRT023, TRT025). | Mantém o padrão das 28 regras originais e não inventa tratamento onde não existe (AC2). |
+| D12 | JF010 (simulação) permanece sem regra CONTRIB-RN catalogada. As jornadas JF003, JF008 e JF009 receberam regras em PFC-30. | JF010 não tem regras de negócio no código; suas validações são "validação de tela" (AC2). |
 
 ## 17. Verificação de aceitação
 
 | AC | Status | Evidência |
 |---|---|---|
-| AC1 — 10 processos como jornadas com objetivo, pré/pós-condições, sequência numerada e ações práticas (8 colunas) | OK | 10 `pf-block` em `funcionalidades.html` (`id` PF-01..PF-10); 45 linhas de ações práticas |
-| AC2 — 28 regras no formato de regra de jornada, com catálogos de TRT e MSG e código/evidência originais | OK | 28 `rule-block` (`id` CONTRIB-RN001..028) em `regras-de-negocio.html`; seções 7 (TRT) e 8 (MSG) |
-| AC3 — 0 menções ao modelo em `docs1/contribuicao/` | OK | `grep -ril "UC097\|Verificar_Elegibilidade" docs1/contribuicao` → 0 ocorrências |
-| AC4 — este documento: seção por seção, elemento correspondente, aba afetada, adicionado/alterado/removido, e tabelas de correspondência 10 + 28 | OK | Seções 1–14, tabelas das seções 5 e 6 |
-| AC5 — navegação e âncoras preservadas | OK | Verificação automática de todos os `href` de `docs1/` (arquivo + âncora): 0 links quebrados; nav das 6 abas inalterada |
+| AC1 — 48 regras (RS001–RS048) no padrão de regra de jornada, com campos classificados, jornada e tratamento | OK | 48 `rule-block` (`id` CONTRIB-RN001..048) em `regras-de-negocio.html`; 0 regras no formato antigo; seção "11. Regras adicionais" removida |
+| AC2 — Cada nova regra em pelo menos 1 jornada; TRT e MSG com origem no código | OK | 20 regras (RS029–RS048) ligadas a 8 jornadas; TRT054–TRT057 e MSG101–MSG102 com arquivo:linha |
+| AC3 — 0 âncoras quebradas; contagens consistentes; visão consolidada e histórico atualizados | OK | 48 `id` CONTRIB-RN + 10 `id` PF mantidos; index.html e docs1/index.html com 48 regras; histórico v4.0 |
+| AC4 — 0 menções ao modelo em `docs1/contribuicao/` | OK | `grep -ril "UC097\|Verificar_Elegibilidade" docs1/contribuicao` → 0 ocorrências |
+| AC5 — este documento: seção por seção, tabelas de correspondência 10 + 48, contagens antes/depois | OK | Seções 1–14, tabelas das seções 5 e 6 (48 regras), resumo executivo com antes/depois |
 
 ---
 
