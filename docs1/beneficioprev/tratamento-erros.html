@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Benefício Previdenciário — Tratamento de Erros — Blueprint AS-IS</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<header>
+  <div class="badge">Blueprint AS-IS — Delphi 5</div>
+  <h1>⚠️ Tratamento de Erros e Exceções — Benefício Previdenciário</h1>
+  <p>Blocos try/except/finally, mensagens de validação e erros com rastreabilidade</p>
+</header>
+<nav>
+  <a href="index.html">📋 Visão Geral</a><a href="arquitetura.html">🏗️ Arquitetura</a><a href="inventario-tecnico.html">📦 Inventário</a><a href="funcionalidades.html">⚙️ Funcionalidades</a><a href="procedures-functions.html">🔧 Procedures</a><a href="regras-de-negocio.html">📏 Regras</a><a href="dados.html">🗄️ Dados</a><a href="relatorios.html">📄 Relatórios</a><a href="integracoes.html">🔗 Integrações</a><a href="tratamento-erros.html">⚠️ Erros</a><a href="diagramas-fluxo.html">🔀 Fluxos</a><a href="lacunas.html">🔍 Lacunas</a><a href="controle-cobertura.html">📊 Cobertura</a>
+</nav>
+<main>
+<section><div class="section-title">⚠️ Visão Geral</div>
+<p>O módulo utiliza três padrões de tratamento de erros: (1) <code>try/except</code> com <code>MessageDlg</code>/<code>ShowMessage</code> para exibir mensagens ao usuário, (2) <code>try/except</code> com <code>RollBack</code> para reverter transações, e (3) <code>raise exception.Create</code> / <code>raise EValidacao.CreateVal</code> para propagar erros de validação. O arquivo com mais blocos try é <code>FDesfazConcessaoBenefNOVO.pas</code> (91 blocos).</p>
+</section>
+
+<section><div class="section-title">📊 Distribuição de Blocos try por Arquivo</div>
+<div class="table-wrap"><table><thead><tr><th>Arquivo</th><th>Blocos try</th><th>Padrão dominante</th></tr></thead><tbody>
+<tr><td>FDesfazConcessaoBenefNOVO.pas</td><td>91</td><td>try/except + RollBack + MessageDlg por TIPOMOV</td></tr>
+<tr><td>_FDesfazConcessaoBenefNOVO.pas</td><td>51</td><td>Idem (variante underscore)</td></tr>
+<tr><td>FDesdobramentoBenef.pas</td><td>27</td><td>try/except + MsgDlg + "Erro na Regra de Cálculo"</td></tr>
+<tr><td>_FConciliacao.pas</td><td>26</td><td>try/except + MsgDlg em importação</td></tr>
+<tr><td>FEventoMorte.pas</td><td>20</td><td>try/except + MostrarErro(E) em gravações</td></tr>
+<tr><td>FEventoAssistidoINSS.pas</td><td>18</td><td>try/except + MostrarErro(E) + MessageDlg datamodule</td></tr>
+<tr><td>FCadContribParticipante.pas</td><td>18</td><td>try/except + raise exception.Create('Erro ao gravar Log.')</td></tr>
+<tr><td>FCadInicioBenefExigencia.pas</td><td>17</td><td>try/except + RollBack + MsgDlg validação</td></tr>
+<tr><td>FPrincipal.pas</td><td>12</td><td>try/except em CriaDataModule + try/finally em login</td></tr>
+<tr><td>FReaberturaBeneficio.pas</td><td>9</td><td>try/except + MsgDlg + RollBack</td></tr>
+<tr><td>_fCompoeValoresRI.pas</td><td>8</td><td>try/except + MsgDlg validação</td></tr>
+<tr><td>FEventoReclusao.pas</td><td>8</td><td>try/except + MostrarErro(E)</td></tr>
+<tr><td>FEventoAssistidoBenef.pas</td><td>7</td><td>try/except + MostrarErro(E)</td></tr>
+<tr><td>_fCadEntrManualINSS.pas</td><td>6</td><td>raise EValidacao.CreateVal + MsgDlg</td></tr>
+<tr><td>_FEncerraConciliacao.pas</td><td>6</td><td>try/except + MsgDlg validação</td></tr>
+<tr><td>FReajuesteBenef.pas</td><td>6</td><td>try/except + RollBackTransacao</td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">📋 Mensagens de Validação Significativas</div>
+<div class="table-wrap"><table><thead><tr><th>Mensagem</th><th>Arquivo:linha</th><th>Tipo</th><th>Evidência</th></tr></thead><tbody>
+<tr><td>"Benefício já foi pago no período… não pode ser desfeita"</td><td>FDesfazConcessaoBenefNOVO.pas:1531</td><td>MessageDlg</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>"A Folha de Benefícios com os acertos do desdobramento já foi executada. O desdobramento não pode ser desfeito."</td><td>FDesfazConcessaoBenefNOVO.pas:4530</td><td>MessageDlg</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>"Desdobramento não permitido por exceder valor limite e não ter autorização."</td><td>FDesdobramentoBenef.pas:2650</td><td>MsgDlg</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>"Liberação não permitida por exceder valor limite e não ter autorização."</td><td>FCadInicioBenefExigencia.pas:1589</td><td>MsgDlg</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>"Liberação não permitida por exceder percentual limite e não ter autorização."</td><td>FCadInicioBenefExigencia.pas:1608</td><td>MsgDlg</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>"Nenhum Benefício selecionado para efetuar a liberação."</td><td>FCadInicioBenefExigencia.pas:965</td><td>MsgDlg</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>"É necessário indicar a Rubrica do INSS!"</td><td>_fCadEntrManualINSS.pas:314</td><td>raise EValidacao</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>"Não é possível inserir registros em meses fechados!"</td><td>_fCadEntrManualINSS.pas:326</td><td>raise EValidacao</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>"Os campos de datas devem estar no formato DD/MM/AAAA!"</td><td>FAlteraBeneficio.pas:249</td><td>MessageDlg</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>"A data de início de liberação deve ser igual ou maior a data de início de pagamento."</td><td>fTipoLiberacao.pas:157</td><td>MsgDlg</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>"Erro ao Excluir Correção monetária. Verifique."</td><td>FDesfazConcessaoBenefNOVO.pas:935</td><td>MessageDlg</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>"Erro ao gravar Log."</td><td>FCadContribParticipante.pas:934, FEventoMorte.pas:1441, FDesdobramentoBenef.pas:6316</td><td>raise exception.Create</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>"Erro ao criar datamodule 'TDtmRelatorios'..."</td><td>FPrincipal.pas:783–795</td><td>MessageDlg (mtError)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>"Faltam Preencher Campos ..."</td><td>_FCadMantenedora.pas:211, _FResultConciliacao.pas:437</td><td>ShowMessage</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>"Excesso de rubricas no mesmo mês (20)"</td><td>_fCompoeValoresRI.pas:863</td><td>MsgDlg</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>"NB já existe cadastrado"</td><td>FCadProcHabINSS.pas:590</td><td>MsgDlg</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>"Rubrica do INSS já associada!"</td><td>_FAssocRubINSS.pas:290</td><td>ShowMessage</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>"Código já Cadastrado."</td><td>_FCadMantenedora.pas:221</td><td>MsgDlg</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>"Informar moeda é obrigatório."</td><td>FReconstruirINSS.pas:270</td><td>MsgDlg</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>"Alteração realizada com sucesso!"</td><td>FAlteraBeneficio.pas:456</td><td>MessageDlg (mtInformation)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">🔄 Padrões de Tratamento Identificados</div>
+<div class="cards-grid">
+<div class="card"><h3>try/except + RollBack</h3><p>Usado em operações de escrita (desfazimento, liberação, reabertura). O except reverte a transação e exibe MessageDlg. Padrão dominante em FDesfazConcessaoBenefNOVO.pas e FCadInicioBenefExigencia.pas.</p></div>
+<div class="card"><h3>try/except + MostrarErro(E)</h3><p>Usado em gravações de eventos (FEventoMorte, FEventoAposentaBenef, FEventoReclusao). O except chama MostrarErro(E) que exibe a mensagem da exceção.</p></div>
+<div class="card"><h3>raise exception.Create</h3><p>Usado para erros de log: "Erro ao gravar Log." em FCadContribParticipante, FEventoMorte, FDesdobramentoBenef, FEventoReclusao, FCadReajINSS.</p></div>
+<div class="card"><h3>raise EValidacao.CreateVal</h3><p>Usado em _fCadEntrManualINSS para validação de campos obrigatórios com indicação do controle visual (edtRubricaINSS, cboMesCobranca, etc.).</p></div>
+<div class="card"><h3>try/finally (cleanup)</h3><p>Usado em FPrincipal (AppPadraoAfterLogin, AppPadraoPrintReportPadrao), FReconstruirINSS, FAlteraBeneficioLote para garantir liberação de recursos (Free de forms/queries).</p></div>
+<div class="card"><h3>try/except silenciado</h3><p>Em _FAssocRubINSS (ExecSQL) e FReajuesteBenef (IncluirNovaLista) — except vazio, erros ignorados. <span class="ev ev-pendente">PENDENTE</span> — verificar se intencional.</p></div>
+</div>
+</section>
+</main>
+<footer>
+<p>Blueprint AS-IS — PFC-24 — Enriquecimento BENEFICIOPREV | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-10</p>
+</footer>
+</body>
+</html>

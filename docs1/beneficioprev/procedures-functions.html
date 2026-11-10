@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Benefício Previdenciário — Procedures/Functions — Blueprint AS-IS</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<header>
+  <div class="badge">Blueprint AS-IS — Delphi 5</div>
+  <h1>🔧 Procedures, Functions e Métodos — Benefício Previdenciário</h1>
+  <p>2307 declarações identificadas — métodos relevantes com parâmetros, regras, chamadas e rastreabilidade</p>
+</header>
+<nav>
+  <a href="index.html">📋 Visão Geral</a>
+  <a href="arquitetura.html">🏗️ Arquitetura</a>
+  <a href="inventario-tecnico.html">📦 Inventário</a>
+  <a href="funcionalidades.html">⚙️ Funcionalidades</a>
+  <a href="procedures-functions.html">🔧 Procedures</a>
+  <a href="regras-de-negocio.html">📏 Regras</a>
+  <a href="dados.html">🗄️ Dados</a>
+  <a href="relatorios.html">📄 Relatórios</a>
+  <a href="integracoes.html">🔗 Integrações</a>
+  <a href="tratamento-erros.html">⚠️ Erros</a>
+  <a href="diagramas-fluxo.html">🔀 Fluxos</a>
+  <a href="lacunas.html">🔍 Lacunas</a>
+  <a href="controle-cobertura.html">📊 Cobertura</a>
+</nav>
+<main>
+<section><div class="section-title">🔧 Visão Geral</div>
+<p>Foram identificadas <strong>2307 declarações</strong> de procedures/functions nos 73 arquivos .pas do módulo (incluindo declarações de interface e implementação). Esta página detalha os métodos mais relevantes — aqueles que contêm lógica de negócio significativa — com parâmetros, regras aplicadas, chamadas externas e rastreabilidade real.</p>
+<div class="legend"><span><span class="ev ev-comprovado">COMPROVADO</span> — linha verificada no código</span><span><span class="ev ev-inferido">INFERIDO</span> — inferido do contexto</span></div>
+</section>
+
+<section><div class="section-title">📋 UModulo.pas — Auditoria (TModulo)</div>
+<div class="table-wrap"><table><thead><tr><th>Método</th><th>Linhas</th><th>Parâmetros</th><th>Retorno</th><th>Descrição</th><th>Evidência</th></tr></thead><tbody>
+<tr><td><code>GravaLogTOTALPREV</code></td><td>64–88</td><td>psDescOperacao: string</td><td>boolean</td><td>INSERT INTO LOGTOTALPREV (IDLOGTOTALPREV, IDMODULO=454, DESCOPERACAO, IDUSUARIO, SYSDATE). Chamado por toda operação de negócio para auditoria.</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">📋 FPrincipal.pas — Form Principal (TfrmPrincipal)</div>
+<div class="table-wrap"><table><thead><tr><th>Método</th><th>Linhas</th><th>Descrição</th><th>Chamadas externas</th><th>Evidência</th></tr></thead><tbody>
+<tr><td><code>AppPadraoAfterLogin</code></td><td>514–569</td><td>Post-login: rollback se sem login, carrega params, Verifica_Situacao_Empresa, seta iIdFundacao, monta menu dinâmico, filtros MontaSelect por IDFUNDACAO</td><td>ParamIntegra.GetParams, LeParam</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><code>Verifica_Situacao_Empresa</code></td><td>914–1035</td><td>Consulta PARAMAPREV/PLANO/PARAMCONTAB/PARAMCAP/PARAMGLOBAL; seta flags IntegraBack.Contabilidade/Financeiro/ABC/CentroResp</td><td>IntegraBack</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><code>MontaMenu</code></td><td>1038–1387</td><td>Monta submenu dinâmico de Eventos lendo EVENTOGERADOR por FLGINTERNO (TS/ID/IN/FL/AI/BI ativos; DO/AC/RC/OE comentados). Cada item: Name='A'+IDEVENTOGERADOR, Caption=NOME</td><td>qryAux (TwwQuery)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><code>MudaCaptionFundacao</code></td><td>598–775</td><td>Se prmFLGTIPOPREVIDENC='I': substitui "Fundação"→"Instituto", "Patrocinadora"→"Entidade", "Plano"→"Regime" em captions</td><td>—</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><code>CriaDataModule</code></td><td>777–912</td><td>Cria 8 datamodules de relatório com try/except individual</td><td>Application.CreateForm</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><code>mnuBenefConcessaoClick</code></td><td>1720–1763</td><td>Fluxo de concessão: mostra seleção P/B/D, chama AbreRequerParticip/Bfciario/Pensionista com modo 'CO'</td><td>fCadRequerBenefParticip/Bfciario/Pensionista</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><code>mnuBenefRequerimento1Click</code></td><td>1673–1718</td><td>Manutenção: seleção P/B/D, modo 'MA'</td><td>Idem concessão</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><code>mnuSimulaRequerimentoClick</code></td><td>1765–1805</td><td>Simulação: seleção P/B/D, modo 'SI'</td><td>Idem concessão</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><code>AbreFormEventoFL</code></td><td>1504–1521</td><td>Abre TfrmEventoMorte (FLGINTERNO='FL', HelpContext=160033)</td><td>FEventoMorte</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><code>AbreFormEventoTS/ID/IN</code></td><td>1436–1501</td><td>Abre TfrmEventoAposentaBenef (TS/ID) ou TfrmEventoAssistidoBenef (IN)</td><td>FEventoAposentaBenef/FEventoAssistidoBenef</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><code>AbreFormEventoAI/BI</code></td><td>1565–1601</td><td>Abre TfrmEventoAssistidoINSS (AI/BI)</td><td>FEventoAssistidoINSS</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">📋 FDesfazConcessaoBenefNOVO.pas — Desfazimento (TfrmDesfazConcessaoBeneficioNOVO)</div>
+<div class="table-wrap"><table><thead><tr><th>Método</th><th>Linhas</th><th>Descrição</th><th>Tabelas escritas</th><th>Evidência</th></tr></thead><tbody>
+<tr><td><code>bbtnConfirmarClick</code></td><td>888–1324</td><td>Dispatcher principal: inicia transação, exclui atraso, roteia por TIPOMOV (case 1/3,4,9/5/12/13,14/16,17) para Desfaz* específicos, commit/rollback</td><td>—</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><code>DesfazOutrasOperacoes</code></td><td>1341–1660</td><td>Desfazimento padrão: limpa HSTBENEFBFCIARIO/HSTCONTRIBPREV, exclui PREVIA/TMPDESC, restaura BENEFBFCIARIO, atualiza MOVBENEF</td><td>BENEFBFCIARIO, HSTBENEFBFCIARIO, HSTCONTRIBPREV, PREVIA, TMPDESC, MOVBENEF</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><code>DesfazLiberacaoRetido</code></td><td>3130–3460</td><td>Reverte "Liberação de Benefício Retido" (TIPOMOV=12)</td><td>HSTBENEFBFCIARIO, HSTCONTRIBPREV</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><code>DesfazRevisaoBeneficio</code></td><td>3777–3960</td><td>Reverte revisão (TIPOMOV 13/14): exclui HSTREVISOES, restaura valores</td><td>HSTREVISOES, HSTBENEFBFCIARIO, BENEFBFCIARIO</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><code>DesfazDesdobramento</code></td><td>4483–4840</td><td>Reverte desdobramento (TIPOMOV=5): bloqueia se folha efetivada, exclui BENEFBFCIARIO/PROCESSOBENEF</td><td>BENEFBFCIARIO, HSTBENEFBFCIARIO, PROCESSOBENEF, RELBENEFPART</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><code>DesfazOperacoesFalecimentoBenef</code></td><td>4065–4145</td><td>Reverte falecimento (TIPOMOV=9): limpa PESSOAFISICA.DATAMORTE, exclui MOVBENEF</td><td>PESSOAFISICA, MOVBENEF, EVENTOSPREV</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><code>AtribuiValorAnterior</code></td><td>5184–5206</td><td>Restaura BS/FAB/Deficit anteriores; pensão Reg/Replan = 50% + 10%/dependente, máx 80% (WO18367)</td><td>BENEFBFCIARIO</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">📋 FDesdobramentoBenef.pas — Desdobramento (TfrmDesdobramentoBenef)</div>
+<div class="table-wrap"><table><thead><tr><th>Método</th><th>Linhas</th><th>Descrição</th><th>Tabelas escritas</th><th>Evidência</th></tr></thead><tbody>
+<tr><td><code>sbtnInserirClick</code></td><td>1442–6280</td><td>Lógica principal: valida, gera processo individual (equacionamento), calcula benefício/abono, insert BENEFBFCIARIO, histórico, dívida, commit</td><td>BENEFBFCIARIO, HSTBENEFBFCIARIO, PROCESSOBENEF, CONTROLEDIVIDABENEFICIO, HSTDIVIDABENEFICIO</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><code>GeraNumeroProcesso</code></td><td>8983–9014</td><td>Gera novo número de processo individual por benefício (equacionamento SOL 253577)</td><td>PROCESSOBENEF</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><code>InserirControleDividaBenef</code></td><td>7496–7982</td><td>Insert/update CONTROLEDIVIDABENEFICIO + HSTDIVIDABENEFICIO</td><td>CONTROLEDIVIDABENEFICIO, HSTDIVIDABENEFICIO</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><code>CalculaBeneficioMinimoLocal</code></td><td>6610–6697</td><td>Wrapper de CalculaBeneficioMinimo (UBeneficio) para aplicar benefício mínimo</td><td>—</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><code>MostraDemonstrativoConcessao</code></td><td>6714–7091</td><td>Constrói e exibe demonstrativo de concessão</td><td>—</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">📋 FCadInicioBenefExigencia.pas — Liberação Retido (TfrmCadInicioBenefExigencia)</div>
+<div class="table-wrap"><table><thead><tr><th>Método</th><th>Linhas</th><th>Descrição</th><th>Evidência</th></tr></thead><tbody>
+<tr><td><code>bbtnConfirmarClick</code></td><td>894–2010</td><td>Valida benefícios, pede data/tipo liberação, seleciona lote, recalcula beneficiários, verifica limites, atualiza BENEFBFCIARIO/MOVBENEF/PROCESSOBENEF, commit</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><code>RecalculaBeneficiarios</code></td><td>2641–4140</td><td>Núcleo: loop meses da data liberação ao final, calcula benefício/abono/BS/FAB/Deficit por beneficiário, aplica reajuste, insert HSTBENEFBFCIARIO</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><code>GravarHSTBENEFBFCIARIO</code></td><td>4385–4568</td><td>Insert HSTBENEFBFCIARIO com todos os valores do benefício</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><code>AjustaAbonoPago</code></td><td>4304–4385</td><td>Ajusta abono antecipado já pago (pro-rata, SIG121019)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">📋 Eventos Previdenciários — Métodos Comuns</div>
+<div class="table-wrap"><table><thead><tr><th>Arquivo</th><th>Método</th><th>Linhas</th><th>Descrição</th><th>Evidência</th></tr></thead><tbody>
+<tr><td>FEventoMorte.pas</td><td><code>bbtnConfirmarClick</code></td><td>1189–1468</td><td>Valida conta salário/CPF/IRRF, grava PESSOAFISICA.DATAMORTE, suspende contribuições, associa rubricas</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>FEventoMorte.pas</td><td><code>GravaEVENTOSPREV</code></td><td>1573–1644</td><td>INSERT/UPDATE em EVENTOSPREV</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>FEventoAposentaBenef.pas</td><td><code>VerificaeGravaSituacoes</code></td><td>458–591</td><td>Atualiza TEMPOSERVTOTAL em ELEGPATRO, IDSITFUNC/IDSITPART/IDSITPLANOPREV em ELEGPATRO/PARTPREVPLAN</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>FEventoAssistidoINSS.pas</td><td><code>AtualizaTempoContribuicaoBenefBfCiario</code></td><td>2018–2081</td><td>UPDATE BENEFBFCIARIO SET TEMPOSERVICO (SOL 249379)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>FEventoAssistidoINSS.pas</td><td><code>EventoEfetivado</code></td><td>2117–2256</td><td>Trata evento efetivado; permite novo se benefício encerrado (SOL 157501)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">📋 Reajuste e Reabertura — Métodos Relevantes</div>
+<div class="table-wrap"><table><thead><tr><th>Arquivo</th><th>Método</th><th>Linhas</th><th>Descrição</th><th>Evidência</th></tr></thead><tbody>
+<tr><td>FReajuesteBenef.pas</td><td><code>Parametrizacao</code></td><td>762–874</td><td>INSERT INTO REAJUSTEBENEFICIO com todos os parâmetros do reajuste</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>FReajuesteBenef.pas</td><td><code>ExeProc</code></td><td>905–953</td><td>Executa stored procedure de reajuste</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>FReajusteJudicial.pas</td><td><code>bbtnConfirmarClick</code></td><td>258–407</td><td>Grava reajuste em BENEFBFCIARIO; executa rateio para beneficiários (ExecutaRegraCalculoBeneficioBfciario)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>FReaberturaBeneficio.pas</td><td><code>sbtnAlteraDataClick</code></td><td>569–1683</td><td>Reabertura/renovação/prorrogação: valida folha, atualiza benefício, prepara contribuições, gera demonstrativo</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>FReaberturaBeneficio.pas</td><td><code>AtualizaContribuicoes</code></td><td>2507–2560</td><td>UPDATE CONTRIBPREVPARTP SET FLGCOBRA para assistido e ativo</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">📋 Conciliação INSS — Métodos Relevantes</div>
+<div class="table-wrap"><table><thead><tr><th>Arquivo</th><th>Método</th><th>Linhas</th><th>Descrição</th><th>Evidência</th></tr></thead><tbody>
+<tr><td>_FConciliacao.pas</td><td><code>ImportaINSS</code></td><td>626–1206</td><td>Parser do arquivo INSS: header/detail/rubrica/footer, insert CONCINSS/DETCONCINSS/TEMPCONCINSS</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>_FConciliacao.pas</td><td><code>GravaDetConcINSS</code></td><td>2459–2777</td><td>Insert DETCONCINSS com rateio por plano (FLGRATEIOPLANO=1)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>_FEncerraConciliacao.pas</td><td><code>GeraFinanceiroCR</code></td><td>561–1224</td><td>Gera documentos de Contas a Receber via CtrlDocumento</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>_FEncerraConciliacao.pas</td><td><code>InsereContabil</code></td><td>1428–1575</td><td>Gera lançamentos contábeis do encerramento</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>_FComparaReembDesemb.pas</td><td><code>ConsultasReembolso</code></td><td>180–827</td><td>15+ queries de reembolso (concessão, revisão, glosa, PAB, CPMF, pensão alimentícia) com DECODE por prefixo de rubrica</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>_fCompoeValoresRI.pas</td><td><code>btnOkAlteracaoClick</code></td><td>641–900</td><td>Insert/update DETCONCINSS com ajuste manual entre planos/meses (FLGMANUAL=4)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">📋 CtrlObjects — Camada de Controle</div>
+<div class="table-wrap"><table><thead><tr><th>Classe</th><th>Método</th><th>Descrição</th><th>Evidência</th></tr></thead><tbody>
+<tr><td>TCtrlEvolFuncPrev</td><td><code>BuscaFuncoes</code></td><td>Retorna funções por patrocinadora/pessoa/plano (OleVariant, modo dual client/server)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>TCtrlEvolFuncPrev</td><td><code>GravaEvolFuncPrev</code></td><td>Persiste evolução funcional via TDbEvolfuncprev</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>TCtrlEvolFuncPrev</td><td><code>BuscaDetCalculo</code></td><td>Retorna detalhe de cálculo por pessoa/mês referência</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>TCtrlPCS</td><td><code>ListaCargo</code></td><td>SELECT DISTINCT CARGOEXT, NIVEL, CARGOXNIVEL por patrocinadora</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>TCtrlPCS</td><td><code>ListaModoFuncao</code></td><td>Lista modos de função (PCS)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+</tbody></table></div>
+</section>
+</main>
+<footer>
+<p>Blueprint AS-IS — PFC-24 — Enriquecimento BENEFICIOPREV | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-10</p>
+</footer>
+</body>
+</html>

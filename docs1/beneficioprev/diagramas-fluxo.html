@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Benefício Previdenciário — Diagramas de Fluxo — Blueprint AS-IS</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<header>
+  <div class="badge">Blueprint AS-IS — Delphi 5</div>
+  <h1>🔀 Diagramas de Fluxo de Processos — Benefício Previdenciário</h1>
+  <p>Fluxos comprovados pelo código com rastreabilidade</p>
+</header>
+<nav>
+  <a href="index.html">📋 Visão Geral</a><a href="arquitetura.html">🏗️ Arquitetura</a><a href="inventario-tecnico.html">📦 Inventário</a><a href="funcionalidades.html">⚙️ Funcionalidades</a><a href="procedures-functions.html">🔧 Procedures</a><a href="regras-de-negocio.html">📏 Regras</a><a href="dados.html">🗄️ Dados</a><a href="relatorios.html">📄 Relatórios</a><a href="integracoes.html">🔗 Integrações</a><a href="tratamento-erros.html">⚠️ Erros</a><a href="diagramas-fluxo.html">🔀 Fluxos</a><a href="lacunas.html">🔍 Lacunas</a><a href="controle-cobertura.html">📊 Cobertura</a>
+</nav>
+<main>
+<section><div class="section-title">🔀 Fluxo PF-01 — Concessão de Benefício</div>
+<div class="mermaid">FPrincipal.mnuBenefConcessaoClick (L1720)
+  │
+  ├─ Mostra frmTipoBenefConcede → usuário escolhe P/B/D
+  │
+  ├─ P → AbreRequerParticip('CO') → CMAdmPrev (motor externo)
+  ├─ B → AbreRequerBfciario('CO') → CMAdmPrev
+  ├─ D → AbreRequerPensionista('CO') → CMAdmPrev
+  │
+  ├─ Mantém IDCALCULO durante todo o processo (SOL 24224)
+  │
+  └─ Persistência: BENEFBFCIARIO, HSTBENEFBFCIARIO,
+     MOVBENEF, PROCESSOBENEF, HSTCONTRIBPREV, TMPDESC
+     + GravaLogTOTALPREV (IdModulo=454)</div>
+<p><strong>Evidência:</strong> <code>FPrincipal.pas:1720-1763</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</section>
+
+<section><div class="section-title">🔀 Fluxo PF-04 — Desfazer Operações de Benefícios</div>
+<div class="mermaid">FDesfazConcessaoBenefNOVO.bbtnConfirmarClick (L888)
+  │
+  ├─ Seleciona processo (MontaSelect)
+  ├─ Identifica última operação (TIPOMOV de MOVBENEF, exclui TIPOMOV=10)
+  │
+  ├─ Validações:
+  │   ├─ Benefício já pago? → BLOQUEIA (L1531)
+  │   ├─ Prévia existe? → BLOQUEIA (L1442)
+  │   └─ Folha efetivada? → BLOQUEIA (L4530, só desdobramento)
+  │
+  ├─ Dispatch por TIPOMOV:
+  │   ├─ 0/7 (Renovação/Concessão) → DesfazOutrasOperacoes
+  │   ├─ 3/4 (Retenção/Encerramento) → DesfazRetencaoEncerramento
+  │   ├─ 9 (Falecimento) → DesfazOperacoesFalecimentoBenef
+  │   ├─ 5 (Desdobramento) → DesfazDesdobramento
+  │   ├─ 12 (Liberação Retido) → DesfazLiberacaoRetido
+  │   ├─ 13/14 (Revisão) → DesfazRevisaoBeneficio
+  │   ├─ 16 (Reversão Cotas) → DesfazReversao
+  │   ├─ 17 (Alteração Manual) → DesfazOperManual
+  │   └─ else → DesfazOutrasOperacoes
+  │
+  ├─ Commit + GravaLogTOTALPREV
+  └─ ou RollBack + MsgDlg erro</div>
+<p><strong>Evidência:</strong> <code>FDesfazConcessaoBenefNOVO.pas:888-1324</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</section>
+
+<section><div class="section-title">🔀 Fluxo PF-05 — Eventos Previdenciários (menu dinâmico)</div>
+<div class="mermaid">FPrincipal.MontaMenu (L1038)
+  │
+  ├─ SELECT EVENTOGERADOR WHERE FLGINTERNO=? AND IDFUNDACAO=?
+  │
+  ├─ FLGINTERNO → Form aberto:
+  │   ├─ TS (Tempo Serviço) → TfrmEventoAposentaBenef
+  │   ├─ ID (Idade)          → TfrmEventoAposentaBenef
+  │   ├─ IN (Incapacidade)   → TfrmEventoAssistidoBenef
+  │   ├─ FL (Falecimento)    → TfrmEventoMorte [exclui evento 346]
+  │   ├─ AI (INSS Partic.)   → TfrmEventoAssistidoINSS
+  │   ├─ BI (INSS Benefic.)  → TfrmEventoAssistidoINSS
+  │   ├─ DO/AC/OE (Doen/Acid/Outros) → COMENTADOS (inativos)
+  │   └─ RC (Reclusão)       → COMENTADO (inativo)
+  │
+  └─ Evento confirmado:
+      ├─ Grava EVENTOSPREV (INSERT/UPDATE)
+      ├─ Atualiza ELEGPATRO/PARTPREVPLAN (situações)
+      ├─ Suspende contribuições (se não só INSS)
+      └─ GravaLogTOTALPREV</div>
+<p><strong>Evidência:</strong> <code>FPrincipal.pas:1038-1387</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</section>
+
+<section><div class="section-title">🔀 Fluxo PF-08 — Desdobramento de Benefício</div>
+<div class="mermaid">FDesdobramentoBenef.sbtnInserirClick (L1442)
+  │
+  ├─ Seleciona processo + beneficiários (≥1 obrigatório)
+  ├─ Lê FLGAPRESENTABSFAB/FLGAPRESENTADEFICIT (BENEFPLANPREV)
+  │
+  ├─ Validações:
+  │   ├─ ≥1 beneficiário selecionado (L1580)
+  │   ├─ Valor limite c/ autorização (L2636)
+  │   └─ Motivo devolução cadastrado (L1779)
+  │
+  ├─ GeraNumeroProcesso (individual, equacionamento SOL 253577)
+  ├─ Calcula benefício/abono (CalculaBeneficioMinimo)
+  ├─ Reajusta desde DIP original
+  │
+  ├─ Persistência:
+  │   ├─ INSERT BENEFBFCIARIO (L5401)
+  │   ├─ UPDATE HSTBENEFBFCIARIO (L5705)
+  │   ├─ INSERT PROCESSOBENEF (L8998)
+  │   ├─ INSERT CONTROLEDIVIDABENEFICIO (L7776)
+  │   └─ INSERT HSTDIVIDABENEFICIO (L7846)
+  │
+  └─ Commit + MostraDemonstrativoConcessao</div>
+<p><strong>Evidência:</strong> <code>FDesdobramentoBenef.pas:1442-6280</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</section>
+
+<section><div class="section-title">🔀 Fluxo PF-14 — Conciliação INSS com Mantenedoras</div>
+<div class="mermaid">_FConciliacao.bbtnConfirmarClick (L525)
+  │
+  ├─ VerificaINSSImportado (mês/ano já importado?)
+  ├─ Origem do arquivo: INSS / Mantenedora / FUNCEF
+  │
+  ├─ ImportaINSS (L626):
+  │   ├─ Parser: header → detail → rubrica → footer
+  │   ├─ INSERT CONCINSS (L741)
+  │   ├─ INSERT DETCONCINSS c/ rateio por plano (L1646)
+  │   └─ INSERT TEMPCONCINSS (não identificados)
+  │
+  ├─ ImportaMantenedora (L1482):
+  │   └─ INSERT DETCONCINSS (valores da mantenedora)
+  │
+  └─ Resultado:
+      ├─ _FResultConciliacao: divergências NVL(VALORINSS,0)≠NVL(VALORMANT,0)
+      ├─ _FIdentificaINSS: identifica registros não casados
+      └─ _FEncerraConciliacao: gera CR/CP + lançamentos contábeis</div>
+<p><strong>Evidência:</strong> <code>_FConciliacao.pas:525-1206</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</section>
+
+<section><div class="section-title">🔀 Fluxo PF-03 — Simulação / Memória de Cálculo</div>
+<div class="mermaid">FSimulaBeneficio (TfrmSairAjuda, wizard 4 etapas)
+  │
+  ├─ Etapa 1: Seleciona participante (MontaSelect)
+  ├─ Etapa 2: ProcessaEtapa2 (L194)
+  │   ├─ SELECT ELEGPATRO/PARTPREVPLAN (dados de elegibilidade)
+  │   ├─ RegraString(IDRGDATAELEG) → data de elegibilidade
+  │   │   └─ Se data ≤ hoje → "Elegível"; senão "Bloqueado"
+  │   └─ RegraNumerica(IDRGVALORPREV) → valor previsionado
+  ├─ Etapa 3: Exibe resultados (situação + valor)
+  └─ Etapa 4: Apenas leitura (memResult)</div>
+<p><strong>Evidência:</strong> <code>FSimulaBeneficio.pas:194-262</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</section>
+
+<section><div class="section-title">🔀 Fluxo PF-06 — Reajuste de Benefícios</div>
+<div class="mermaid">FReajuesteBenef (TfrmOkCancelar)
+  │
+  ├─ CarregaBeneficios (L401):
+  │   └─ SELECT BENEFICIO JOIN BENEFPLANPREV
+  │      WHERE IDTPPAGTOBENEFIC=1 (vitalício)
+  │        AND NVL(FLGRESGATE,0)=0 (não resgate)
+  │      Exclui espécies 255 e 358 (SOL 225546)
+  │
+  ├─ Fonte pagadora: 0=FUNCEF, 1=INSS
+  ├─ Importa lista de matrículas (Excel, hash CRC32)
+  │
+  ├─ Parametrizacao (L762): INSERT REAJUSTEBENEFICIO
+  ├─ InsertListaBenef (L874): INSERT LISTABENEFICIOREAJUSTE
+  └─ ExeProc (L905): executa stored procedure de reajuste</div>
+<p><strong>Evidência:</strong> <code>FReajuesteBenef.pas:401-953</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</section>
+</main>
+<footer>
+<p>Blueprint AS-IS — PFC-24 — Enriquecimento BENEFICIOPREV | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-10</p>
+</footer>
+</body>
+</html>
