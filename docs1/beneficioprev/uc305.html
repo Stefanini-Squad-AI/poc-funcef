@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Benefício Previdenciário — UC305 – Desdobrar Benefício e Controlar Dívidas — Blueprint AS-IS</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<header>
+  <div class="badge">Blueprint AS-IS — PFC-32 — Processos Funcionais</div>
+  <h1>UC305 – Desdobrar Benefício e Controlar Dívidas</h1>
+  <p>Caso de uso do módulo Benefício Previdenciário: 2 jornada(s) funcional(is) e 9 regra(s) de negócio descritas dentro de cada jornada.</p>
+</header>
+<nav>
+  <a href="index.html">📋 Visão Geral</a>
+  <a href="arquitetura.html">🏗️ Arquitetura</a>
+  <a href="inventario-tecnico.html">📦 Inventário</a>
+  <a href="funcionalidades.html">⚙️ Processos Funcionais</a>
+  <a href="procedures-functions.html">🔧 Procedures</a>
+  <a href="dados.html">🗄️ Dados</a>
+  <a href="relatorios.html">📄 Relatórios</a>
+  <a href="integracoes.html">🔗 Integrações</a>
+  <a href="tratamento-erros.html">⚠️ Erros</a>
+  <a href="diagramas-fluxo.html">🔀 Fluxos</a>
+  <a href="lacunas.html">🔍 Lacunas</a>
+  <a href="controle-cobertura.html">📊 Cobertura</a>
+</nav>
+<main>
+
+<a class="back-btn" href="funcionalidades.html">← Voltar à lista de Casos de Uso (Processos Funcionais)</a>
+<div class="breadcrumb"><a href="index.html">Benefício Previdenciário</a> › <a href="funcionalidades.html">Processos Funcionais</a> › UC305</div>
+
+<section><div class="section-title">1. Identificação</div>
+<div class="table-wrap"><table><tbody>
+<tr><th>Caso de Uso</th><td><strong>UC305 – Desdobrar Benefício e Controlar Dívidas</strong></td></tr>
+<tr><th>Módulo</th><td>BENEFICIOPREV — Benefício Previdenciário</td></tr>
+<tr><th>Sistema</th><td>CM Contabilidade / FUNCEF (Delphi 5 / VCL / MIDAS / Oracle)</td></tr>
+<tr><th>Tipo</th><td>Sistema Desktop</td></tr>
+<tr><th>Ator</th><td>Usuário operacional (analistas de concessão e manutenção de benefícios, eventos previdenciários, reajuste e conciliação INSS)</td></tr>
+<tr><th>Jornadas</th><td><a href="#PF-08">JF008 — Desdobramento de Benefício</a>, <a href="#PF-13">JF013 — Controle / Histórico de Dívidas de Benefícios</a></td></tr>
+<tr><th>Regras de negócio</th><td>9 regra(s) BENEF-RN, descritas na íntegra dentro de cada jornada</td></tr>
+<tr><th>OS - Título</th><td>PFC-32 — Lista de UC (Processos Funcionais organizados em Casos de Uso)</td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">2. Descrição Resumida</div>
+<p>Desdobramento do benefício entre beneficiários e controle/histórico das dívidas geradas. Este caso de uso reúne 2 jornada(s) funcional(is) do módulo Benefício Previdenciário:</p>
+<ul>
+<li><a href="#PF-08"><strong>JF008 — Desdobramento de Benefício</strong></a>: Desdobrar um benefício entre beneficiários, gerando novos benefícios e processos, aplicando a regra contábil, reajustando desde a DIP original e gerando dívida quando houver.</li>
+<li><a href="#PF-13"><strong>JF013 — Controle / Histórico de Dívidas de Benefícios</strong></a>: Parametrizar e controlar o parcelamento das dívidas de benefícios, incluindo o reajuste das dívidas vinculadas ao plano REG REPLAN.</li>
+</ul>
+</section>
+
+<section><div class="section-title">3. Pré-condições</div>
+<p><strong>Gerais do módulo:</strong></p>
+<ul>
+<li>Módulo disponível (entry point <code>BENEFICIOPREV/Fontes/BeneficioPrev.dpr</code>) e usuário com permissão de acesso às telas.</li>
+<li>Banco Oracle acessível; parâmetros do módulo carregados (PARAMAPREV, tipo de previdência, fundação do usuário).</li>
+<li>Participantes, planos (PARTPREVPLAN), elegibilidade (ELEGPATRO), benefícios e eventos geradores (EVENTOGERADOR) cadastrados.</li>
+<li>Componentes externos disponíveis quando a jornada os usa: CMAdmPrev (cálculo/concessão/retroativo), bibliotecas UAdmPrev/UBeneficio, Folha de Benefícios (ver <a href="integracoes.html">🔗 Integrações</a>).</li>
+</ul>
+<p><strong>Por jornada:</strong></p>
+<ul>
+<li><a href="#PF-08">JF008</a>: Benefício concedido com beneficiários; regra contábil automática e regra de cálculo parametrizadas.</li>
+<li><a href="#PF-13">JF013</a>: Dívida de benefício gerada (por exemplo, no desdobramento).</li>
+</ul>
+</section>
+
+<section><div class="section-title">4. Pós-condições</div>
+<ul>
+<li><a href="#PF-08">JF008</a>: Novos benefícios e processos gravados; conta bancária, rubricas individuais e controle de dívida atualizados; log gravado.</li>
+<li><a href="#PF-13">JF013</a>: CONTROLEDIVIDABENEFICIO, HSTDIVIDABENEFICIO e PARAMPARCDIVIDABENEFICIO gravados.</li>
+</ul>
+</section>
+
+<section><div class="section-title">5. Jornadas Funcionais (JF008, JF013)</div>
+<p>Cada jornada traz objetivo, ator/gatilho, pré e pós-condições, sequência operacional, ações práticas, <strong>regras de negócio da jornada</strong> (texto completo de cada regra), tratamentos e mensagens.</p>
+<div class="legend"><span><span class="ev ev-comprovado">COMPROVADO</span> — no código</span><span><span class="ev ev-inferido">INFERIDO</span> — plausível</span><span><span class="ev ev-pendente">PENDENTE</span> — validar</span></div>
+</section>
+
+<div class="pf-block" id="PF-08"><h4>JF008 (PF-08) — Desdobramento de Benefício</h4>
+<p><strong>Objetivo:</strong> Desdobrar um benefício entre beneficiários, gerando novos benefícios e processos, aplicando a regra contábil, reajustando desde a DIP original e gerando dívida quando houver.</p>
+<p><strong>Ator / gatilho:</strong> Analista de benefícios, nas telas Desdobramento de Benefícios para Beneficiários e Dados para o Desdobramento do Benefício.</p>
+<p><strong>Pré-condições:</strong> Benefício concedido com beneficiários; regra contábil automática e regra de cálculo parametrizadas.</p>
+<p><strong>Pós-condições:</strong> Novos benefícios e processos gravados; conta bancária, rubricas individuais e controle de dívida atualizados; log gravado.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li>Selecionar o benefício e os beneficiários.</li>
+<li>Informar os dados do desdobramento (datas, tipo de pagamento e, se exigido, Nº do Processo INSS). [<a href="#BENEF-RN014">RS014</a>] [<a href="#TRT011">TRT011</a>]</li>
+<li>O sistema calcula o valor pela regra de cálculo do benefício. [<a href="#TRT013">TRT013</a>]</li>
+<li>Se o valor rateado exceder o limite, exige autorização. [<a href="#BENEF-RN032">RS032</a>] [<a href="#TRT014">TRT014</a>]</li>
+<li>O sistema aplica a regra contábil automática (entidade e contas D/C). [<a href="#BENEF-RN017">RS017</a>] [<a href="#TRT012">TRT012</a>]</li>
+<li>O sistema gera um número de processo por benefício, reajusta desde a DIP original e gera a dívida, quando houver. [<a href="#BENEF-RN031">RS031</a>]</li>
+<li>O sistema grava a operação e o log. [<a href="#TRT010">TRT010</a>]</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Informar dados do desdobramento</td><td>Completar o requerimento</td><td>Datas, tipo de pagamento, Nº Processo INSS</td><td>Valida obrigatórios</td><td>Dados aceitos</td><td><a href="#BENEF-RN014">RS014</a></td><td><a href="#MSG010">MSG010</a>, <a href="#MSG011">MSG011</a>, <a href="#MSG012">MSG012</a>, <a href="#MSG013">MSG013</a>, <a href="#MSG014">MSG014</a></td><td><code>FPedeInfRevisao.dfm</code></td></tr>
+<tr><td>Calcular o desdobramento</td><td>Obter o valor de cada beneficiário</td><td>Benefício e beneficiários</td><td>Executa a regra de cálculo e confere o limite de valor</td><td>Valores rateados</td><td><a href="#BENEF-RN032">RS032</a></td><td><a href="#MSG018">MSG018</a>, <a href="#MSG019">MSG019</a></td><td><code>FDesdobramentoBenef.dfm</code></td></tr>
+<tr><td>Aplicar regra contábil</td><td>Definir entidade e contas</td><td>Regra contábil do benefício</td><td>Executa as regras de entidade, débito e crédito</td><td>Contabilização definida</td><td><a href="#BENEF-RN017">RS017</a></td><td><a href="#MSG015">MSG015</a>, <a href="#MSG016">MSG016</a>, <a href="#MSG017">MSG017</a></td><td><code>FDesdobramentoBenef.dfm</code></td></tr>
+<tr><td>Confirmar o desdobramento</td><td>Gravar os novos benefícios</td><td>Desdobramento calculado</td><td>Gera processos, reajusta desde a DIP, gera dívida e grava log</td><td>Benefício desdobrado</td><td><a href="#BENEF-RN031">RS031</a>, <a href="uc301.html#BENEF-RN025">RS025</a></td><td><a href="#MSG008">MSG008</a></td><td><code>FDesdobramentoBenef.dfm</code></td></tr>
+</tbody></table></div>
+<div class="jf-rules">
+<p><strong>Regras de negócio da jornada:</strong> 5 regra(s) — texto completo abaixo.</p>
+<div class="rule-block" id="BENEF-RN014"><div class="rule-id">RS014 (BENEF-RN014) — Dados obrigatórios do desdobramento</div>
+<div class="rule-desc">Para confirmar os dados do desdobramento, o usuário precisa informar as datas de requerimento, de início na fundação e de início do pagamento, o tipo de pagamento e, quando o benefício exige, o número do processo no INSS.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li>Nº do Processo no INSS (<code>edNumProcINSS</code>) — [condicional] — obrigatório quando <code>FLGOBRIGANPROC</code> = 1</li>
+<li>Data de Requerimento (<code>dtDataRequerimento</code>) — [obrigatório]</li>
+<li>Data de Início na Fundação (<code>dtInicioFund</code>) — [obrigatório]</li>
+<li>Data de Início do Pagamento (<code>dtDataInicio</code>) — [obrigatório]</li>
+<li>Tipo de Pagamento do Benefício (<code>dblkcmbTpPgtoBenef</code>) — [obrigatório]</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT011">TRT011</a> → <a href="#MSG010">MSG010</a>, <a href="#MSG011">MSG011</a>, <a href="#MSG012">MSG012</a>, <a href="#MSG013">MSG013</a>, <a href="#MSG014">MSG014</a> → Bloqueia a confirmação (ModalResult := mrNone + Abort)</p>
+<p><strong>Jornada:</strong> <a href="#PF-08">JF008</a></p>
+<p><strong>Nota de verificação:</strong> O código exige também a Data de Início na Fundação (FPedeInfRevisao.pas:288), e o Nº do Processo INSS só é obrigatório quando <code>FLGOBRIGANPROC</code> = 1 (:271-277).</p>
+<p><strong>Descrição original:</strong> Validação de dados de revisão/desdobramento (Nº Processo INSS, datas, tipo pagamento).</p>
+<p><strong>Condições:</strong> Nº Processo INSS, Data Requerimento, Data Início, Tipo Pagamento obrigatórios</p><p><strong>Dados envolvidos:</strong> PROCESSOBENEF</p><p><strong>Resultado/Exceção:</strong> MsgDlg + Abort + ModalResult:=mrNone</p>
+<div class="rule-origin">📂 Origem: <code>BENEFICIOPREV/Fontes/FPedeInfRevisao.pas:274-304</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<div class="rule-block" id="BENEF-RN017"><div class="rule-id">RS017 (BENEF-RN017) — Desdobramento exige regra contábil automática válida</div>
+<div class="rule-desc">No desdobramento, a entidade contábil e as contas de débito e de crédito são obtidas por regra automática; se a regra falhar ou devolver resultado vazio ou inválido, o desdobramento não prossegue.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li>Regra contábil (<code>prmIdRegraContabBenefIndiv</code>) — [obrigatório]</li>
+<li>Entidade contábil, conta débito, conta crédito (resultado da regra) — [obrigatório] — não nulo e válido</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT012">TRT012</a> → <a href="#MSG015">MSG015</a>, <a href="#MSG016">MSG016</a>, <a href="#MSG017">MSG017</a> → Bloqueia o desdobramento</p>
+<p><strong>Jornada:</strong> <a href="#PF-08">JF008</a></p>
+<p><strong>Descrição original:</strong> Desdobramento exige regra contábil automática válida (entidade/conta D/C).</p>
+<p><strong>Condições:</strong> Regra de entidade contábil / conta débito / conta crédito inválida</p><p><strong>Dados envolvidos:</strong> CONTROLEDIVIDABENEFICIO</p><p><strong>Resultado/Exceção:</strong> MsgDlg + Abort</p>
+<div class="rule-origin">📂 Origem: <code>BENEFICIOPREV/Fontes/FDesdobramentoBenef.pas:5184-5293</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<div class="rule-block" id="BENEF-RN029"><div class="rule-id">RS029 (BENEF-RN029) — Desdobramento já processado em folha não pode ser desfeito</div>
+<div class="rule-desc">O desdobramento não pode ser desfeito se a folha de benefícios com os seus acertos já foi executada.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>FLGENVIADO</code> — [condicional] — = 1 bloqueia</li>
+<li><code>VLBENEFPGTO</code> — [condicional] — &gt; 0 bloqueia</li>
+<li>Lote na folha (<code>LOTEXHSTFOLHABENEF.IDLOTE</code>) — [obrigatório]</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="uc302.html#TRT004">TRT004</a> → <a href="uc302.html#MSG004">MSG004</a> → Interrompe o desfazimento do desdobramento (Exit)</p>
+<p><strong>Jornada:</strong> <a href="uc302.html#PF-04">JF004</a>, <a href="#PF-08">JF008</a></p>
+<p><strong>Descrição original:</strong> DesfazDesdobramento bloqueia se folha de benefícios já efetivada (FLGENVIADO=1).</p>
+<p><strong>Condições:</strong> FLGENVIADO = 1 OR VLBENEFPGTO > 0</p><p><strong>Dados envolvidos:</strong> HSTBENEFBFCIARIO, LOTEXHSTFOLHABENEF</p><p><strong>Resultado/Exceção:</strong> "Folha já executada. Desdobramento não pode ser desfeito."</p>
+<div class="rule-origin">📂 Origem: <code>BENEFICIOPREV/Fontes/FDesfazConcessaoBenefNOVO.pas:4520-4533</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<div class="rule-block" id="BENEF-RN031"><div class="rule-id">RS031 (BENEF-RN031) — Desdobramento gera processo por benefício</div>
+<div class="rule-desc">No desdobramento, cada benefício gerado recebe um número de processo próprio.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>PROCESSOBENEF.NUMEROPROCESSO</code> — [obrigatório] — gerado pelo sistema</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> — (regra de seleção/cálculo, sem crítica ao usuário)</p>
+<p><strong>Jornada:</strong> <a href="#PF-08">JF008</a></p>
+<p><strong>Descrição original:</strong> Desdobramento gera número de processo individual por benefício (equacionamento).</p>
+<p><strong>Condições:</strong> GeraNumeroProcesso para cada benefício</p><p><strong>Dados envolvidos:</strong> PROCESSOBENEF</p><p><strong>Resultado/Exceção:</strong> INSERT INTO PROCESSOBENEF com novo número</p>
+<div class="rule-origin">📂 Origem: <code>BENEFICIOPREV/Fontes/FDesdobramentoBenef.pas:8983-9014</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<div class="rule-block" id="BENEF-RN032"><div class="rule-id">RS032 (BENEF-RN032) — Desdobramento acima do limite exige autorização</div>
+<div class="rule-desc">Se o valor rateado no desdobramento exceder o limite de valor do benefício, a operação só prossegue com autorização.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li>Valor rateado — [obrigatório]</li>
+<li>Usuário autorizador — [condicional] — exigido quando o valor excede o limite</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT014">TRT014</a> → <a href="#MSG019">MSG019</a> → Zera o valor rateado e interrompe (Exit)</p>
+<p><strong>Jornada:</strong> <a href="#PF-08">JF008</a></p>
+<p><strong>Descrição original:</strong> Desdobramento bloqueia se valor excede limite sem autorização (iIdUsuarioAutoriza < 0).</p>
+<p><strong>Condições:</strong> VerificaVALORLimiteBeneficio AND iIdUsuarioAutoriza < 0</p><p><strong>Dados envolvidos:</strong> BENEFBFCIARIO</p><p><strong>Resultado/Exceção:</strong> "Desdobramento não permitido por exceder valor limite"</p>
+<div class="rule-origin">📂 Origem: <code>BENEFICIOPREV/Fontes/FDesdobramentoBenef.pas:2636-2653</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<p><strong>Regras transversais do módulo</strong> (valem para todas as jornadas, inclusive esta): 4 regra(s) — texto completo abaixo.</p>
+<div class="rule-block" id="BENEF-RN025"><div class="rule-id">RS025 (BENEF-RN025) — Operações auditadas no log do TotalPREV</div>
+<div class="rule-desc">As operações de negócio do módulo são registradas no log do TotalPREV com módulo, usuário, descrição e data.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>IDMODULO</code> — [obrigatório] — = 454</li>
+<li><code>IDUSUARIO</code> — [obrigatório]</li>
+<li><code>DESCOPERACAO</code> — [obrigatório]</li>
+<li><code>DATA</code> — [obrigatório] — SYSDATE</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT010">TRT010</a> → <a href="#MSG008">MSG008</a> → Levanta exceção “Erro ao gravar Log.”; em FEventoMorte, FEventoReclusao, FCadReajINSS e FCadContribParticipante ela é capturada por um except vazio e a operação segue sem log; em FDesdobramentoBenef cai no except externo da transação (:6325-6331)</p>
+<p><strong>Jornada:</strong> Transversal (todas)</p>
+<p><strong>Nota de verificação:</strong> Em vários forms a falha do log é engolida por um except vazio (ver TRT010).</p>
+<p><strong>Descrição original:</strong> Toda operação de negócio é auditada em LOGTOTALPREV (IdModulo=454).</p>
+<p><strong>Condições:</strong> INSERT INTO LOGTOTALPREV(IDMODULO=454, IDUSUARIO, DESCOPERACAO, DATA=SYSDATE)</p><p><strong>Dados envolvidos:</strong> LOGTOTALPREV</p><p><strong>Resultado/Exceção:</strong> Log de operações do TotalPREV</p>
+<div class="rule-origin">📂 Origem: <code>BENEFICIOPREV/Fontes/UModulo.pas:64-88</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<div class="rule-block" id="BENEF-RN026"><div class="rule-id">RS026 (BENEF-RN026) — Instituto troca a nomenclatura das telas</div>
+<div class="rule-desc">Quando a entidade é um instituto de previdência, as telas trocam “Fundação” por “Instituto”, “Patrocinadora” por “Entidade” e “Plano” por “Regime”.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>prmFLGTIPOPREVIDENC</code> — [obrigatório] — 'I' ativa a troca</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> — (regra de seleção/cálculo, sem crítica ao usuário)</p>
+<p><strong>Jornada:</strong> Transversal (todas)</p>
+<p><strong>Descrição original:</strong> Instituto previdenciário (FLGTIPOPREVIDENC='I') substitui captions: Fundação→Instituto, Patrocinadora→Entidade, Plano→Regime.</p>
+<p><strong>Condições:</strong> prmFLGTIPOPREVIDENC = 'I'</p><p><strong>Dados envolvidos:</strong> TLabel, TMenuItem, TGroupBox, TCheckBox, TPanel</p><p><strong>Resultado/Exceção:</strong> Captions alterados em runtime</p>
+<div class="rule-origin">📂 Origem: <code>BENEFICIOPREV/Fontes/FPrincipal.pas:598-775</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<div class="rule-block" id="BENEF-RN027"><div class="rule-id">RS027 (BENEF-RN027) — Integração contábil por parâmetro</div>
+<div class="rule-desc">A integração com a contabilidade só é ativada quando o parâmetro de integração contábil está ligado.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>PARAMAPREV.FLGINTCONTAB</code> — [obrigatório] — 1 = integra</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> — (regra de seleção/cálculo, sem crítica ao usuário)</p>
+<p><strong>Jornada:</strong> Transversal (todas)</p>
+<p><strong>Descrição original:</strong> Integração contábil ativada quando PARAMAPREV.FLGINTCONTAB=1.</p>
+<p><strong>Condições:</strong> FLGINTCONTAB = 1</p><p><strong>Dados envolvidos:</strong> PARAMAPREV, IntegraBack.Contabilidade</p><p><strong>Resultado/Exceção:</strong> Contabilidade='S' ou 'N'</p>
+<div class="rule-origin">📂 Origem: <code>BENEFICIOPREV/Fontes/FPrincipal.pas:928-930</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<div class="rule-block" id="BENEF-RN045"><div class="rule-id">RS045 (BENEF-RN045) — Dados isolados por fundação</div>
+<div class="rule-desc">As consultas de negócio filtram os dados pela fundação do usuário.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>IDFUNDACAO</code> — [obrigatório] — fundação da sessão</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> — (regra de seleção/cálculo, sem crítica ao usuário)</p>
+<p><strong>Jornada:</strong> Transversal (todas)</p>
+<p><strong>Descrição original:</strong> Filtro de multi-fundação (IDFUNDACAO) presente em quase toda SQL de negócio e MontaSelect.</p>
+<p><strong>Condições:</strong> IDFUNDACAO = iIdFundacao em SELECTs</p><p><strong>Dados envolvidos:</strong> PATRO, PARTPREVPLAN, EVENTOGERADOR</p><p><strong>Resultado/Exceção:</strong> Isolamento de dados por fundação</p>
+<div class="rule-origin">📂 Origem: <code>BENEFICIOPREV/Fontes/FPrincipal.pas:566-567</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+</div>
+
+<p><strong>Tratamentos de erro:</strong> <a href="#TRT010">TRT010</a>, <a href="#TRT011">TRT011</a>, <a href="#TRT012">TRT012</a>, <a href="#TRT013">TRT013</a>, <a href="#TRT014">TRT014</a></p>
+<p><strong>Mensagens:</strong> <a href="#MSG008">MSG008</a>, <a href="#MSG010">MSG010</a>, <a href="#MSG011">MSG011</a>, <a href="#MSG012">MSG012</a>, <a href="#MSG013">MSG013</a>, <a href="#MSG014">MSG014</a>, <a href="#MSG015">MSG015</a>, <a href="#MSG016">MSG016</a>, <a href="#MSG017">MSG017</a>, <a href="#MSG018">MSG018</a>, <a href="#MSG019">MSG019</a></p>
+<p><strong>Telas:</strong> Desdobramento de Benefícios para Beneficiários (<code>FDesdobramentoBenef.dfm</code>), Dados para o Desdobramento do Benefício ... (<code>FPedeInfRevisao.dfm</code>)</p>
+<p><strong>Dependências:</strong> Sucede <a href="uc301.html#PF-01">JF001</a>; gera a dívida controlada em <a href="#PF-13">JF013</a>; pode ser revertido em <a href="uc302.html#PF-04">JF004</a>.</p>
+<div class="note note-info"><p><strong>Registro original do processo PF-08</strong></p><p><strong>Forms de entrada:</strong> <code>FDesdobramentoBenef.dfm</code> (9.118 linhas), <code>FPedeInfRevisao.dfm</code></p><p><strong>Lógica de processamento:</strong> INSERT BENEFBFCIARIO; aplica regra contábil automática (entidade/conta D/C); reajusta desde DIP original; gera dívida</p><p><strong>Saídas:</strong> Benefício desdobrado entre beneficiários</p><p><strong>Persistência (tabelas escritas):</strong> BENEFBFCIARIO, HSTBENEFBFCIARIO, CONTABANCARIA, RUBRICAINDIV, CONTROLEDIVIDABENEFICIO, PROCESSOBENEF</p><p><strong>Evidência:</strong> <code>BENEFICIOPREV/Fontes/FDesdobramentoBenef.pas:5184-5293</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+</div>
+
+<div class="pf-block" id="PF-13"><h4>JF013 (PF-13) — Controle / Histórico de Dívidas de Benefícios</h4>
+<p><strong>Objetivo:</strong> Parametrizar e controlar o parcelamento das dívidas de benefícios, incluindo o reajuste das dívidas vinculadas ao plano REG REPLAN.</p>
+<p><strong>Ator / gatilho:</strong> Analista de benefícios, na tela Parametrização de Parcelamento de Dívida de Benefícios.</p>
+<p><strong>Pré-condições:</strong> Dívida de benefício gerada (por exemplo, no desdobramento).</p>
+<p><strong>Pós-condições:</strong> CONTROLEDIVIDABENEFICIO, HSTDIVIDABENEFICIO e PARAMPARCDIVIDABENEFICIO gravados.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li>Informar os parâmetros de parcelamento da dívida.</li>
+<li>O sistema grava ou atualiza o controle da dívida.</li>
+<li>Para dívidas do plano REG REPLAN, o sistema reajusta o saldo.</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Parametrizar parcelamento</td><td>Definir como a dívida será paga</td><td>Parâmetros de parcelamento</td><td>Insere/atualiza CONTROLEDIVIDABENEFICIO e parâmetros</td><td>Dívida parametrizada</td><td>—</td><td>—</td><td><code>FParamDividaBenef.dfm</code></td></tr>
+<tr><td>Reajustar dívidas REG REPLAN</td><td>Manter o saldo atualizado</td><td>Dívidas vinculadas ao plano</td><td>Reajusta e grava histórico</td><td>Saldo reajustado</td><td>—</td><td>—</td><td><code>FParamDividaBenef.dfm</code></td></tr>
+</tbody></table></div>
+<div class="jf-rules">
+<p><strong>Regras de negócio da jornada:</strong> nenhuma regra BENEF-RN específica desta jornada; as validações estão nos tratamentos (TRT) do caso de uso.</p>
+<p><strong>Regras transversais do módulo</strong> (valem também para esta jornada; texto completo na primeira jornada deste caso de uso): <a href="#BENEF-RN025">RS025 (BENEF-RN025) — Operações auditadas no log do TotalPREV</a>, <a href="#BENEF-RN026">RS026 (BENEF-RN026) — Instituto troca a nomenclatura das telas</a>, <a href="#BENEF-RN027">RS027 (BENEF-RN027) — Integração contábil por parâmetro</a>, <a href="#BENEF-RN045">RS045 (BENEF-RN045) — Dados isolados por fundação</a>.</p>
+</div>
+
+<p><strong>Tratamentos de erro:</strong> —</p>
+<p><strong>Mensagens:</strong> —</p>
+<p><strong>Telas:</strong> Parametrização de Parcelamento de Dívida de Benefícios (<code>FParamDividaBenef.dfm</code>)</p>
+<p><strong>Dependências:</strong> Sucede <a href="#PF-08">JF008</a>.</p>
+<div class="note note-info"><p><strong>Registro original do processo PF-13</strong></p><p><strong>Forms de entrada:</strong> <code>FParamDividaBenef.dfm</code></p><p><strong>Lógica de processamento:</strong> INSERT/UPDATE CONTROLEDIVIDABENEFICIO; reajusta dívidas vinculadas a plano REG REPLAN</p><p><strong>Saídas:</strong> Dívidas parametrizadas</p><p><strong>Persistência (tabelas escritas):</strong> CONTROLEDIVIDABENEFICIO, HSTDIVIDABENEFICIO, PARAMPARCDIVIDABENEFICIO</p><p><strong>Evidência:</strong> <code>BENEFICIOPREV/Fontes/FDesdobramentoBenef.pas:7776,8130-8337</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+</div>
+
+<section id="TRT-section"><div class="section-title">6. Tratamentos (TRT)</div>
+<p>Cada tratamento traz a condição, a mensagem exibida, o resultado e a regra/jornada de origem. Foram derivados apenas das validações e exceções documentadas no AS-IS (regras e aba <a href="tratamento-erros.html">⚠️ Erros</a>). “validação de tela” = crítica documentada sem regra BENEF-RN correspondente; “validação técnica” = falha técnica tratada pelo form.</p>
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Condição</th><th>Mensagem</th><th>Resultado</th><th>Regra</th><th>Jornada</th></tr></thead><tbody>
+<tr id="TRT001"><td><strong>TRT001</strong></td><td>Falha ao criar o datamodule de relatórios ao abrir uma tela pelo menu principal (<code>CriaDataModule</code>)</td><td><a href="#MSG001">MSG001</a></td><td>Exibe o erro técnico e orienta contatar o suporte (try/except)</td><td>validação técnica</td><td>Transversal (todas)</td></tr>
+<tr id="TRT010"><td><strong>TRT010</strong></td><td>Falha ao gravar o log de operações (<code>Sistema.GravaLogOperacoes</code> retorna falso)</td><td><a href="#MSG008">MSG008</a></td><td>Levanta exceção “Erro ao gravar Log.”; em FEventoMorte, FEventoReclusao, FCadReajINSS e FCadContribParticipante ela é capturada por um except vazio e a operação segue sem log; em FDesdobramentoBenef cai no except externo da transação (:6325-6331)</td><td><a href="uc301.html#BENEF-RN025">RS025 (BENEF-RN025)</a></td><td><a href="uc303.html#PF-05">JF005</a>, <a href="uc304.html#PF-06">JF006</a>, <a href="#PF-08">JF008</a></td></tr>
+<tr id="TRT011"><td><strong>TRT011</strong></td><td>Dado obrigatório do desdobramento não informado (Nº do Processo INSS quando exigido, Data de Requerimento, Data de Início na Fundação, Data de Início do Pagamento, Tipo de Pagamento)</td><td><a href="#MSG010">MSG010</a>, <a href="#MSG011">MSG011</a>, <a href="#MSG012">MSG012</a>, <a href="#MSG013">MSG013</a>, <a href="#MSG014">MSG014</a></td><td>Bloqueia a confirmação (ModalResult := mrNone + Abort)</td><td><a href="#BENEF-RN014">RS014 (BENEF-RN014)</a></td><td><a href="#PF-08">JF008</a></td></tr>
+<tr id="TRT012"><td><strong>TRT012</strong></td><td>Regra contábil automática (entidade, conta débito ou conta crédito) com erro, resultado nulo ou inválido</td><td><a href="#MSG015">MSG015</a>, <a href="#MSG016">MSG016</a>, <a href="#MSG017">MSG017</a></td><td>Bloqueia o desdobramento</td><td><a href="#BENEF-RN017">RS017 (BENEF-RN017)</a></td><td><a href="#PF-08">JF008</a></td></tr>
+<tr id="TRT013"><td><strong>TRT013</strong></td><td>Erro ao executar a regra de cálculo do benefício no desdobramento</td><td><a href="#MSG018">MSG018</a></td><td>Interrompe o cálculo do desdobramento</td><td>validação técnica</td><td><a href="#PF-08">JF008</a></td></tr>
+<tr id="TRT014"><td><strong>TRT014</strong></td><td>Valor rateado do desdobramento excede o limite e o usuário não tem autorização</td><td><a href="#MSG019">MSG019</a></td><td>Zera o valor rateado e interrompe (Exit)</td><td><a href="#BENEF-RN032">RS032 (BENEF-RN032)</a></td><td><a href="#PF-08">JF008</a></td></tr>
+</tbody></table></div>
+</section>
+
+<section id="MSG-section"><div class="section-title">7. Mensagens (MSG)</div>
+<p>Textos conferidos no código-fonte (grafia original mantida). Trechos variáveis aparecem entre &lt; &gt;.</p>
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Texto da mensagem</th><th>Tipo</th><th>Origem (BENEFICIOPREV/Fontes/)</th><th>Jornadas</th></tr></thead><tbody>
+<tr id="MSG001"><td><strong>MSG001</strong></td><td>“Erro ao criar datamodule "TDtmRelatorios". Mensagem de erro : &lt;mensagem da exceção&gt; Favor contatar o suporte da CM.”</td><td>Erro</td><td><code>FPrincipal.pas:790-793 (também FEventoMorte.pas:2228, FEventoAssistidoINSS.pas:1893)</code></td><td>Transversal (todas)</td></tr>
+<tr id="MSG008"><td><strong>MSG008</strong></td><td>“Erro ao gravar Log.”</td><td>Erro (exceção)</td><td><code>FEventoMorte.pas:1441; FEventoReclusao.pas:855; FCadReajINSS.pas:162; FDesdobramentoBenef.pas:6316; FCadContribParticipante.pas:934</code></td><td><a href="uc303.html#PF-05">JF005</a>, <a href="uc304.html#PF-06">JF006</a>, <a href="#PF-08">JF008</a></td></tr>
+<tr id="MSG010"><td><strong>MSG010</strong></td><td>“O Nº do Processo no INSS é obrigatório para este benefício.”</td><td>Erro</td><td><code>FPedeInfRevisao.pas:274</code></td><td><a href="#PF-08">JF008</a></td></tr>
+<tr id="MSG011"><td><strong>MSG011</strong></td><td>“Preencha a Data de Requerimento.”</td><td>Erro</td><td><code>FPedeInfRevisao.pas:281</code></td><td><a href="#PF-08">JF008</a></td></tr>
+<tr id="MSG012"><td><strong>MSG012</strong></td><td>“Preencha a Data de Início na Fundação.”</td><td>Erro</td><td><code>FPedeInfRevisao.pas:288</code></td><td><a href="#PF-08">JF008</a></td></tr>
+<tr id="MSG013"><td><strong>MSG013</strong></td><td>“Preencha a Data de Início do Pagamento.”</td><td>Erro</td><td><code>FPedeInfRevisao.pas:295</code></td><td><a href="#PF-08">JF008</a></td></tr>
+<tr id="MSG014"><td><strong>MSG014</strong></td><td>“Preencha o Tipo de Pagamento do Benefício.”</td><td>Erro</td><td><code>FPedeInfRevisao.pas:302</code></td><td><a href="#PF-08">JF008</a></td></tr>
+<tr id="MSG015"><td><strong>MSG015</strong></td><td>“Erro na regra para atribuição automática de entidade contábil.”<br><em>Mesmo padrão para resultado nulo (:5192) e inválido — “[&lt;regra&gt;] - Regra para atribuição automática de entidade contábil. Resultado inválido: &lt;resultado&gt;.” (:5209).</em></td><td>Erro</td><td><code>FDesdobramentoBenef.pas:5184</code></td><td><a href="#PF-08">JF008</a></td></tr>
+<tr id="MSG016"><td><strong>MSG016</strong></td><td>“Erro na regra para atribuição automática de conta para débito.”<br><em>Mesmo padrão para resultado nulo (:5234) e inválido (:5249).</em></td><td>Erro</td><td><code>FDesdobramentoBenef.pas:5226</code></td><td><a href="#PF-08">JF008</a></td></tr>
+<tr id="MSG017"><td><strong>MSG017</strong></td><td>“Erro na regra para atribuição automática de conta para crédito.”<br><em>Mesmo padrão para resultado nulo (:5275) e inválido (:5291).</em></td><td>Erro</td><td><code>FDesdobramentoBenef.pas:5267</code></td><td><a href="#PF-08">JF008</a></td></tr>
+<tr id="MSG018"><td><strong>MSG018</strong></td><td>“Erro na Regra de Cálculo - Nº &lt;IdRegraCalculo&gt;”</td><td>Erro</td><td><code>FDesdobramentoBenef.pas:2534 (também :2583, :2627, :3656, :3706, :3757)</code></td><td><a href="#PF-08">JF008</a></td></tr>
+<tr id="MSG019"><td><strong>MSG019</strong></td><td>“Desdobramento não permitido por exceder valor limite e não ter autorização. Verifique.”</td><td>Erro</td><td><code>FDesdobramentoBenef.pas:2650</code></td><td><a href="#PF-08">JF008</a></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">8. Tabela/API/Programa</div>
+<div class="table-wrap"><table><thead><tr><th>Jornada</th><th>Tabelas (escrita)</th><th>Rotinas (BENEFICIOPREV/Fontes/)</th></tr></thead><tbody>
+<tr><td><a href="#PF-08">JF008</a></td><td>BENEFBFCIARIO, HSTBENEFBFCIARIO, CONTABANCARIA, RUBRICAINDIV, CONTROLEDIVIDABENEFICIO, PROCESSOBENEF</td><td><code>FDesdobramentoBenef.pas:2534-2653, 5184-5293, 6315-6331, 8983-9014; FPedeInfRevisao.pas:270-305</code></td></tr>
+<tr><td><a href="#PF-13">JF013</a></td><td>CONTROLEDIVIDABENEFICIO, HSTDIVIDABENEFICIO, PARAMPARCDIVIDABENEFICIO</td><td><code>FDesdobramentoBenef.pas:7776, 8130-8337</code></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">9. Telas/Layouts</div>
+<div class="table-wrap"><table><thead><tr><th>Jornada</th><th>Tela (título)</th><th>Form (.dfm)</th></tr></thead><tbody>
+<tr><td><a href="#PF-08">JF008</a></td><td>Desdobramento de Benefícios para Beneficiários<br>Dados para o Desdobramento do Benefício ...</td><td><code>FDesdobramentoBenef.dfm</code><br><code>FPedeInfRevisao.dfm</code></td></tr>
+<tr><td><a href="#PF-13">JF013</a></td><td>Parametrização de Parcelamento de Dívida de Benefícios</td><td><code>FParamDividaBenef.dfm</code></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">10. Visão Consolidada das Jornadas</div>
+<div class="table-wrap"><table><thead><tr><th>Item</th><th>Jornada</th><th>Título</th><th>Critério de aceitação</th><th>Regras</th><th>Mensagens</th><th>Telas</th></tr></thead><tbody>
+<tr><td>[US] BENEF-JF008</td><td><a href="#PF-08">JF008</a></td><td>Desdobramento de Benefício</td><td><strong>Dado</strong> um benefício com beneficiários e regras parametrizadas, <strong>Quando</strong> o analista informa os dados obrigatórios e confirma o desdobramento, <strong>Então</strong> cada beneficiário recebe benefício e processo próprios; acima do limite sem autorização o sistema exibe <a href="#MSG019">MSG019</a> e não prossegue.</td><td><a href="#BENEF-RN014">RS014</a>, <a href="#BENEF-RN017">RS017</a>, <a href="uc302.html#BENEF-RN029">RS029</a>, <a href="#BENEF-RN031">RS031</a>, <a href="#BENEF-RN032">RS032</a></td><td><a href="#MSG008">MSG008</a>, <a href="#MSG010">MSG010</a>, <a href="#MSG011">MSG011</a>, <a href="#MSG012">MSG012</a>, <a href="#MSG013">MSG013</a>, <a href="#MSG014">MSG014</a>, <a href="#MSG015">MSG015</a>, <a href="#MSG016">MSG016</a>, <a href="#MSG017">MSG017</a>, <a href="#MSG018">MSG018</a>, <a href="#MSG019">MSG019</a></td><td>Desdobramento de Benefícios para Beneficiários<br>Dados para o Desdobramento do Benefício ...</td></tr>
+<tr><td>[US] BENEF-JF013</td><td><a href="#PF-13">JF013</a></td><td>Controle / Histórico de Dívidas de Benefícios</td><td><strong>Dado</strong> uma dívida de benefício, <strong>Quando</strong> o analista parametriza o parcelamento, <strong>Então</strong> o controle e o histórico da dívida são gravados.</td><td>—</td><td>—</td><td>Parametrização de Parcelamento de Dívida de Benefícios</td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">11. Critérios de Aceitação por Regra</div>
+<div class="table-wrap"><table><thead><tr><th>Regra</th><th>Jornada</th><th>Critério de aceitação</th></tr></thead><tbody>
+<tr><td><a href="#BENEF-RN014">RS014 (BENEF-RN014)</a></td><td><a href="#PF-08">JF008</a></td><td><strong>Dado</strong> dado obrigatório do desdobramento não informado (Nº do Processo INSS quando exigido, Data de Requerimento, Data de Início na Fundação, Data de Início do Pagamento, Tipo de Pagamento), <strong>Quando</strong> o usuário executa a operação, <strong>Então</strong> o sistema exibe <a href="#MSG010">MSG010</a>, <a href="#MSG011">MSG011</a>, <a href="#MSG012">MSG012</a>, <a href="#MSG013">MSG013</a>, <a href="#MSG014">MSG014</a> e bloqueia a confirmação (ModalResult := mrNone + Abort).</td></tr>
+<tr><td><a href="#BENEF-RN017">RS017 (BENEF-RN017)</a></td><td><a href="#PF-08">JF008</a></td><td><strong>Dado</strong> regra contábil automática (entidade, conta débito ou conta crédito) com erro, resultado nulo ou inválido, <strong>Quando</strong> o usuário executa a operação, <strong>Então</strong> o sistema exibe <a href="#MSG015">MSG015</a>, <a href="#MSG016">MSG016</a>, <a href="#MSG017">MSG017</a> e bloqueia o desdobramento.</td></tr>
+<tr><td><a href="#BENEF-RN025">RS025 (BENEF-RN025)</a></td><td>Transversal (todas)</td><td><strong>Dado</strong> falha ao gravar o log de operações (<code>Sistema.GravaLogOperacoes</code> retorna falso), <strong>Quando</strong> o usuário executa a operação, <strong>Então</strong> o sistema exibe <a href="#MSG008">MSG008</a> e levanta exceção “Erro ao gravar Log.”; em FEventoMorte, FEventoReclusao, FCadReajINSS e FCadContribParticipante ela é capturada por um except vazio e a operação segue sem log; em FDesdobramentoBenef cai no except externo da transação (:6325-6331).</td></tr>
+<tr><td><a href="#BENEF-RN026">RS026 (BENEF-RN026)</a></td><td>Transversal (todas)</td><td><strong>Dado</strong> a entidade configurada como instituto (FLGTIPOPREVIDENC = 'I'), <strong>Quando</strong> uma tela é aberta, <strong>Então</strong> os rótulos trocam Fundação/Patrocinadora/Plano por Instituto/Entidade/Regime.</td></tr>
+<tr><td><a href="#BENEF-RN027">RS027 (BENEF-RN027)</a></td><td>Transversal (todas)</td><td><strong>Dado</strong> FLGINTCONTAB = 1 em PARAMAPREV, <strong>Quando</strong> o módulo é iniciado, <strong>Então</strong> a integração contábil é ativada (Contabilidade = 'S'); com outro valor, fica desativada.</td></tr>
+<tr><td><a href="#BENEF-RN029">RS029 (BENEF-RN029)</a></td><td><a href="uc302.html#PF-04">JF004</a>, <a href="#PF-08">JF008</a></td><td><strong>Dado</strong> folha de Benefícios com os acertos do desdobramento já executada (FLGENVIADO = 1 ou VLBENEFPGTO &gt; 0 em lote da folha), <strong>Quando</strong> o usuário executa a operação, <strong>Então</strong> o sistema exibe <a href="uc302.html#MSG004">MSG004</a> e interrompe o desfazimento do desdobramento (Exit).</td></tr>
+<tr><td><a href="#BENEF-RN031">RS031 (BENEF-RN031)</a></td><td><a href="#PF-08">JF008</a></td><td><strong>Dado</strong> um desdobramento com vários benefícios, <strong>Quando</strong> o desdobramento é confirmado, <strong>Então</strong> cada benefício recebe um número de processo próprio em PROCESSOBENEF.</td></tr>
+<tr><td><a href="#BENEF-RN032">RS032 (BENEF-RN032)</a></td><td><a href="#PF-08">JF008</a></td><td><strong>Dado</strong> valor rateado do desdobramento excede o limite e o usuário não tem autorização, <strong>Quando</strong> o usuário executa a operação, <strong>Então</strong> o sistema exibe <a href="#MSG019">MSG019</a> e zera o valor rateado e interrompe (Exit).</td></tr>
+<tr><td><a href="#BENEF-RN045">RS045 (BENEF-RN045)</a></td><td>Transversal (todas)</td><td><strong>Dado</strong> um usuário de uma fundação, <strong>Quando</strong> qualquer consulta de negócio é feita, <strong>Então</strong> só os dados da fundação do usuário (IDFUNDACAO) são retornados.</td></tr>
+</tbody></table></div>
+</section>
+
+<p><a class="back-btn" href="funcionalidades.html">← Voltar à lista de Casos de Uso (Processos Funcionais)</a></p>
+</main>
+<footer>
+<p>Blueprint AS-IS — PFC-32 — Processos Funcionais organizados em Casos de Uso — Módulo BENEFICIOPREV | Sistema legado Delphi 5 | pt-BR | Atualizado em 2026-11-10</p>
+</footer>
+</body>
+</html>
