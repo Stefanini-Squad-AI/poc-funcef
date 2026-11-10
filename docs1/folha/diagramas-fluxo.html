@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Folha de Benefícios — Diagramas de Fluxo — Blueprint AS-IS</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:true,theme:'dark',flowchart:{curve:'basis',useMaxWidth:true}});</script>
+</head>
+<body>
+<header>
+  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-22 (enriquecido)</div>
+  <h1>🔀 Diagramas de Fluxo de Processos — Folha de Benefícios</h1>
+  <p>18 jornadas (JF001–JF018) com fluxos comprovados pelo código com rastreabilidade</p>
+</header>
+<nav>
+  <a href="index.html">📋 Visão Geral</a>
+  <a href="arquitetura.html">🏗️ Arquitetura</a>
+  <a href="inventario.html">📦 Inventário</a>
+  <a href="formularios.html">🧾 Formulários</a>
+  <a href="funcionalidades.html">⚙️ Funcionalidades</a>
+  <a href="rotinas.html">🔧 Procedures</a>
+  <a href="regras-de-negocio.html">📏 Regras</a>
+  <a href="dados.html">🗄️ Dados</a>
+  <a href="relatorios.html">📄 Relatórios</a>
+  <a href="integracoes.html">🔗 Integrações</a>
+  <a href="tratamento-erros.html">⚠️ Erros</a>
+  <a href="diagramas-fluxo.html">🔀 Fluxos</a>
+  <a href="lacunas.html">🔍 Lacunas</a>
+  <a href="controle-cobertura.html">📊 Cobertura</a>
+</nav>
+<main>
+<section><div class="section-title">🔀 Fluxo JF001 (PF-01) — Preparo da Folha</div>
+<div class="mermaid">
+flowchart TD
+    A["FPreparo"] --> B["MontaListas"]
+    B --> C["InicializaProcessoBeneficio"]
+    C --> D["loop: PassoProcessoBeneficio"]
+    D --> E["ExecutaRegra"]
+    E --> F["GravaHstBeneficio"]
+    F --> D
+    D --> G["CalculaProRata"]
+    G --> H["HSTBENEFBFCIARIO<br/>PROCESSOBENEF"]
+</div>
+<p><strong>Evidência:</strong> <code>FPreparo.pas</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</section>
+
+<section><div class="section-title">🔀 Fluxo JF002 (PF-02) — Prévia</div>
+<div class="mermaid">
+flowchart TD
+    A["FFolhaNormalPrevia"] --> B["ProcessaPrevia"]
+    B --> C["CriaRecebedor"]
+    C --> D["ProcessaRubrica"]
+    D --> E["DeterminaBasesIRRF"]
+    E --> F["CaluloIRRF"]
+    F --> G["VerificaMargemDesconto"]
+    G --> H["CalculaCPMF"]
+    H --> I["InsereRubrica"]
+    I --> J["IncluiPrevia"]
+    J --> K["Commit"]
+</div>
+<p><strong>Evidência:</strong> <code>FFolhaNormalPrevia.pas</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</section>
+
+<section><div class="section-title">🔀 Fluxo JF003 (PF-03) — Efetivação</div>
+<div class="mermaid">
+flowchart TD
+    A["fFolhaNormalEfet"] --> B["Valida Lote/Conta/ParamCF"]
+    B --> C["Executa_ETL"]
+    C --> D{"Formato bancário"}
+    D -->|"CNAB150"| E1["GeraArquivoCNAB150"]
+    D -->|"CNAB240"| E2["GeraArquivoCNAB240"]
+    E1 --> F["GeraArquivoSIACC"]
+    E2 --> F
+</div>
+<p><strong>Evidência:</strong> <code>fFolhaNormalEfet.pas</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</section>
+
+<section><div class="section-title">🔀 Fluxo JF004 (PF-04) — Estorno</div>
+<div class="mermaid">
+flowchart TD
+    A["festornafolha"] --> B["VerificaStatus"]
+    B --> C["DesfazRubricaIndividual"]
+    C --> D{"Persistência"}
+    D -->|"CAP"| E1["CAP"]
+    D -->|"CAR"| E2["CAR"]
+</div>
+<p><strong>Evidência:</strong> <code>festornafolha.pas</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</section>
+
+<section><div class="section-title">🔀 Fluxo JF005 (PF-05) — Remessa Bancária</div>
+<div class="mermaid">
+flowchart TD
+    A["FAberturaFitaCredit"] --> B["fGeraArquivoRemessa"]
+    B --> C{"Formato bancário"}
+    C -->|"CNAB150"| D1["GeraArquivoCNAB150"]
+    C -->|"CNAB240"| D2["GeraArquivoCNAB240"]
+    D1 --> E["ConciliaRetorno"]
+    D2 --> E
+</div>
+<p><strong>Evidência:</strong> <code>FAberturaFitaCredit.pas</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</section>
+
+<section><div class="section-title">🔀 Fluxo JF006 (PF-06) — Apropriação Contábil</div>
+<div class="mermaid">
+flowchart TD
+    A["FParamRelApropContabil"] --> B["apuraRubricasPorPlanoContabil"]
+    B --> C["Lançamentos contábeis"]
+</div>
+<p><strong>Evidência:</strong> <code>FParamRelApropContabil.pas</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</section>
+
+<section><div class="section-title">🔀 Fluxo JF007 (PF-07) — Pensão Alimentícia</div>
+<div class="mermaid">
+flowchart TD
+    A["FReajustaPensao"] --> B["uReajustaPercPensao"]
+    B --> C["rubricas incidentes"]
+</div>
+<p><strong>Evidência:</strong> <code>FReajustaPensao.pas</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</section>
+
+<section><div class="section-title">🔀 Fluxo JF008 (PF-08) — IRRF</div>
+<div class="mermaid">
+flowchart TD
+    A["CaluloIRRF"] --> B["DeterminaBasesIRRF"]
+    B --> C["AtualizaFlgIsento"]
+    C --> D["VerificaCompensacaoIRRF"]
+</div>
+<p><strong>Evidência:</strong> <code>dFolhaPrevia.pas</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</section>
+
+<section><div class="section-title">🔀 Fluxo JF009 (PF-09) — Retroativos</div>
+<div class="mermaid">
+flowchart TD
+    A["FInformaSalRetroEv"] --> B["BENEFRETROATIVO<br/>BENEFRETROXPESS"]
+</div>
+<p><strong>Evidência:</strong> <code>FInformaSalRetroEv.pas</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</section>
+
+<section><div class="section-title">🔀 Fluxo JF010 (PF-10) — Conciliação INSS</div>
+<div class="mermaid">
+flowchart TD
+    A["FPrestacaoContasINSS"] --> B["FConciliacaoReembolsoINSS"]
+    B --> C["FManutRubricaReembolsoINSS"]
+</div>
+<p><strong>Evidência:</strong> <code>FPrestacaoContasINSS.pas</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</section>
+
+<section><div class="section-title">🔀 Fluxo JF011 (PF-11) — Convênio</div>
+<div class="mermaid">
+flowchart TD
+    A["fImportaTxt"] --> B["fTratamentoConvenio"]
+    B --> C["FExportaTxT"]
+    C --> D["FExecGeraDocConvenio"]
+    D --> E["arquivos p/ entidades"]
+</div>
+<p><strong>Evidência:</strong> <code>fImportaTxt.pas</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</section>
+
+<section><div class="section-title">🔀 Fluxo JF012 (PF-12) — Regularização</div>
+<div class="mermaid">
+flowchart TD
+    A["UCadastroEventoRegularizacao"] --> B["ULancEventoRegularizacao"]
+    B --> C["UConciliacaoCredito"]
+    C --> D["crédito conciliado"]
+</div>
+<p><strong>Evidência:</strong> <code>UCadastroEventoRegularizacao.pas</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</section>
+
+<section><div class="section-title">🔀 Fluxo JF013 (PF-A) — Encerramento por Falecimento</div>
+<div class="mermaid">
+flowchart TD
+    A["FEncerramentoPorFalecimento"] --> B["calculaProRata"]
+    B --> C["encerraBeneficio"]
+</div>
+<p><strong>Evidência:</strong> <code>FEncerramentoPorFalecimento.pas</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</section>
+
+<section><div class="section-title">🔀 Fluxo JF014 (PF-B) — Adiantamento Extra Folha</div>
+<div class="mermaid">
+flowchart TD
+    A["FAdiantamentoExtraFolha"] --> B["registraAdiantamento"]
+    B --> C["HSTFOLHABENEF"]
+</div>
+<p><strong>Evidência:</strong> <code>FAdiantamentoExtraFolha.pas</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</section>
+
+<section><div class="section-title">🔀 Fluxo JF015 (PF-C) — Abatimento de Reservas</div>
+<div class="mermaid">
+flowchart TD
+    A["FExecAbateReserva"] --> B["abateReservas"]
+    B --> C["RESERVAPART<br/>RESERVAXPLANO"]
+</div>
+<p><strong>Evidência:</strong> <code>FExecAbateReserva.pas</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</section>
+
+<section><div class="section-title">🔀 Fluxo JF016 (PF-D) — Mapa da Folha</div>
+<div class="mermaid">
+flowchart TD
+    A["FMapaFolhaBenef"] --> B["geraMapa"]
+    B --> C["relatório"]
+</div>
+<p><strong>Evidência:</strong> <code>FMapaFolhaBenef.pas</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</section>
+
+<section><div class="section-title">🔀 Fluxo JF017 (PF-E) — Conferência e Batimento</div>
+<div class="mermaid">
+flowchart TD
+    A["fConferenciaPrevia"] --> B["fBatimentoPrevia"]
+    B --> C["validação do líquido"]
+</div>
+<p><strong>Evidência:</strong> <code>fConferenciaPrevia.pas</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</section>
+
+<section><div class="section-title">🔀 Fluxo JF018 (PF-F) — Financiamento Habitacional</div>
+<div class="mermaid">
+flowchart TD
+    A["FfinancHabitacional"] --> B["aplicaRubricaDesconto"]
+    B --> C["HSTFOLHABENEF"]
+</div>
+<p><strong>Evidência:</strong> <code>FfinancHabitacional.pas</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</section>
+</main>
+<footer>
+<p>Blueprint AS-IS — PFC-22 (enriquecido) — Módulo FOLHA | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-10</p>
+</footer>
+</body>
+</html>

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Folha de Benefícios — Tratamento de Erros — Blueprint AS-IS</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<header>
+  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-22 (enriquecido)</div>
+  <h1>⚠️ Tratamento de Erros e Exceções — Folha de Benefícios</h1>
+  <p>16 tratamentos de erro (TRT001–TRT016) e 16 mensagens (MSG001–MSG016) com rastreabilidade às regras e jornadas</p>
+</header>
+<nav>
+  <a href="index.html">📋 Visão Geral</a>
+  <a href="arquitetura.html">🏗️ Arquitetura</a>
+  <a href="inventario.html">📦 Inventário</a>
+  <a href="formularios.html">🧾 Formulários</a>
+  <a href="funcionalidades.html">⚙️ Funcionalidades</a>
+  <a href="rotinas.html">🔧 Procedures</a>
+  <a href="regras-de-negocio.html">📏 Regras</a>
+  <a href="dados.html">🗄️ Dados</a>
+  <a href="relatorios.html">📄 Relatórios</a>
+  <a href="integracoes.html">🔗 Integrações</a>
+  <a href="tratamento-erros.html">⚠️ Erros</a>
+  <a href="diagramas-fluxo.html">🔀 Fluxos</a>
+  <a href="lacunas.html">🔍 Lacunas</a>
+  <a href="controle-cobertura.html">📊 Cobertura</a>
+</nav>
+<main>
+<section><div class="section-title">⚠️ Visão Geral</div>
+<p>O módulo FOLHA utiliza três padrões de tratamento de erros: (1) <code>try/except</code> com <code>MessageDlg</code>/<code>ShowMessage</code> para exibir mensagens ao usuário, (2) <code>try/except</code> com <code>RollBack</code> para reverter transações, e (3) <code>raise EValidacao.CreateVal</code> / <code>raise exception.Create</code> para propagar erros de validação. Os 16 tratamentos (TRT001–TRT016) estão mapeados às regras de negócio (RS/ RN) e jornadas funcionais (JF).</p>
+</section>
+
+<section><div class="section-title">📋 Tratamentos de Erro (TRT001–TRT016)</div>
+<div class="table-wrap"><table><thead><tr><th>TRT</th><th>Condição</th><th>Mensagem</th><th>Resultado</th><th>Regra</th><th>Jornada</th></tr></thead><tbody>
+<tr><td>TRT001</td><td>Mês/ano de referência não informados</td><td>MSG001</td><td>Bloqueia execução</td><td>RS001 (RN001)</td><td>JF001, JF015</td></tr>
+<tr><td>TRT002</td><td>Layout de entrada/saída ou destino não informados na exportação</td><td>MSG002</td><td>Bloqueia execução</td><td>RS002 (RN002)</td><td>JF011</td></tr>
+<tr><td>TRT003</td><td>Nenhuma versão da folha selecionada</td><td>MSG003</td><td>Bloqueia execução</td><td>RS003 (RN003)</td><td>JF011</td></tr>
+<tr><td>TRT004</td><td>Rubrica de IR sem natureza de rendimento</td><td>MSG004</td><td>Não soma à base de IRRF</td><td>RS004 (RN004)</td><td>JF002, JF008</td></tr>
+<tr><td>TRT005</td><td>Líquido do recebedor negativo após descontos</td><td>MSG005</td><td>Zera líquido e transfere desconto</td><td>RS006 (RN006)</td><td>JF002</td></tr>
+<tr><td>TRT006</td><td>Duplicidade de lote na prévia</td><td>MSG006</td><td>Não regenera benefício</td><td>RS010 (RN010)</td><td>JF001</td></tr>
+<tr><td>TRT007</td><td>Críticas ETL na efetivação</td><td>MSG007</td><td>Aborta efetivação</td><td>RS011 (RN011)</td><td>JF003</td></tr>
+<tr><td>TRT008</td><td>Conta bancária do lote inválida</td><td>MSG008</td><td>Bloqueia efetivação</td><td>RS012 (RN012)</td><td>JF003</td></tr>
+<tr><td>TRT009</td><td>Parâmetros contábeis/financeiros não configurados</td><td>MSG009</td><td>Bloqueia efetivação</td><td>RS013 (RN013)</td><td>JF003, JF006</td></tr>
+<tr><td>TRT010</td><td>Margem de desconto consignável excedida</td><td>MSG010</td><td>Bloqueia/ajusta rubrica</td><td>RS008 (RN008)</td><td>JF002</td></tr>
+<tr><td>TRT011</td><td>Benefício abaixo do mínimo da concessão</td><td>MSG011</td><td>Ajusta ao mínimo</td><td>RS009 (RN009)</td><td>JF002</td></tr>
+<tr><td>TRT012</td><td>Mês/ano/previsão não informados (convênio)</td><td>MSG012</td><td>Bloqueia execução</td><td>RS026 (RN026)</td><td>JF011</td></tr>
+<tr><td>TRT013</td><td>Mês/ano/versão não informados (saída cadastral)</td><td>MSG013</td><td>Bloqueia execução</td><td>RS027 (RN027)</td><td>JF011</td></tr>
+<tr><td>TRT014</td><td>BS/FAB/déficit não informados (cadastro manual)</td><td>MSG014</td><td>Bloqueia cadastro</td><td>RS023 (RN023)</td><td>cadastro</td></tr>
+<tr><td>TRT015</td><td>Rubrica não parametrizada ao inserir INSS</td><td>MSG015</td><td>Aborta inserção</td><td>RS024 (RN024)</td><td>JF010</td></tr>
+<tr><td>TRT016</td><td>Cancelamento pelo usuário na prestação de contas INSS</td><td>MSG016</td><td>Aborta operação</td><td>RS025 (RN025)</td><td>JF010</td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">📋 Catálogo de Mensagens (MSG001–MSG016)</div>
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Texto</th><th>Jornadas</th></tr></thead><tbody>
+<tr><td>MSG001</td><td>Mês/ano de referência não informados</td><td>JF001, JF015</td></tr>
+<tr><td>MSG002</td><td>Layout de entrada/saída ou destino não informados na exportação</td><td>JF011</td></tr>
+<tr><td>MSG003</td><td>Nenhuma versão da folha selecionada</td><td>JF011</td></tr>
+<tr><td>MSG004</td><td>Rubrica de IR sem natureza de rendimento</td><td>JF002, JF008</td></tr>
+<tr><td>MSG005</td><td>Líquido do recebedor negativo após descontos</td><td>JF002</td></tr>
+<tr><td>MSG006</td><td>Duplicidade de lote na prévia</td><td>JF001</td></tr>
+<tr><td>MSG007</td><td>Críticas ETL na efetivação</td><td>JF003</td></tr>
+<tr><td>MSG008</td><td>Conta bancária do lote inválida</td><td>JF003</td></tr>
+<tr><td>MSG009</td><td>Parâmetros contábeis/financeiros não configurados</td><td>JF003, JF006</td></tr>
+<tr><td>MSG010</td><td>Margem de desconto consignável excedida</td><td>JF002</td></tr>
+<tr><td>MSG011</td><td>Benefício abaixo do mínimo da concessão</td><td>JF002</td></tr>
+<tr><td>MSG012</td><td>Mês/ano/previsão não informados (convênio)</td><td>JF011</td></tr>
+<tr><td>MSG013</td><td>Mês/ano/versão não informados (saída cadastral)</td><td>JF011</td></tr>
+<tr><td>MSG014</td><td>BS/FAB/déficit não informados (cadastro manual)</td><td>cadastro</td></tr>
+<tr><td>MSG015</td><td>Rubrica não parametrizada ao inserir INSS</td><td>JF010</td></tr>
+<tr><td>MSG016</td><td>Cancelamento pelo usuário na prestação de contas INSS</td><td>JF010</td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">🔄 Padrões de Tratamento Identificados</div>
+<div class="cards-grid">
+<div class="card"><h3>try/except + RollBack</h3><p>Usado em operações de escrita (efetivação, estorno, preparo). O except reverte a transação e exibe MessageDlg. Padrão dominante em fFolhaNormalEfet.pas e festornafolha.pas.</p></div>
+<div class="card"><h3>try/except + MostrarErro(E)</h3><p>Usado em gravações de rubrica e processamento de prévia. O except chama MostrarErro(E) que exibe a mensagem da exceção.</p></div>
+<div class="card"><h3>raise EValidacao.CreateVal</h3><p>Usado para validação de campos obrigatórios com indicação do controle visual (mês/ano, layout, versão, rubrica INSS).</p></div>
+<div class="card"><h3>raise exception.Create</h3><p>Usado para erros de log e erros fatais em operações de ETL e geração de arquivos CNAB/SIACC.</p></div>
+<div class="card"><h3>try/finally (cleanup)</h3><p>Usado para garantir liberação de recursos (Free de forms/queries/strings) em geração de arquivos e relatórios.</p></div>
+</div>
+</section>
+</main>
+<footer>
+<p>Blueprint AS-IS — PFC-22 (enriquecido) — Módulo FOLHA | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-10</p>
+</footer>
+</body>
+</html>
