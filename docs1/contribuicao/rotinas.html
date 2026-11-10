@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contribuição Previdenciária — Rotinas — Blueprint AS-IS</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<header>
+  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-23 (enriquecido)</div>
+  <h1>🔧 Rotinas (Procedures e Functions) — Contribuição Previdenciária</h1>
+  <p>Catálogo de procedures e functions relevantes com identificação, parâmetros, blocos de processamento, regras aplicadas, resultados e efeitos no banco.</p>
+</header>
+<nav>
+  <a href="index.html">📋 Visão Geral</a>
+  <a href="arquitetura.html">🏗️ Arquitetura</a>
+  <a href="inventario.html">📂 Inventário</a>
+  <a href="formularios.html">🧾 Formulários</a>
+  <a href="funcionalidades.html">⚙️ Processos</a>
+  <a href="rotinas.html">🔧 Rotinas</a>
+  <a href="regras-de-negocio.html">📏 Regras</a>
+  <a href="dados.html">🗄️ Dados</a>
+  <a href="integracoes.html">🔗 Integrações</a>
+</nav>
+<main>
+
+<section><div class="section-title">ℹ️ Sobre esta página</div>
+<p>Cada rotina abaixo tem: nome, unit/arquivo, localização (linha), propósito, parâmetros (nome:tipo:direção), blocos de processamento, regras aplicadas, resultados e efeitos no banco de dados. Evidência: <span class="ev ev-comprovado">COMPROVADO</span> — extraído diretamente do código-fonte.</p>
+</section>
+
+<section><div class="section-title">⚙️ FPreparaEnvia.pas — Preparo e Envio</div>
+<div class="rule-block">
+<div class="rule-id">PreparaContribuicao — FPreparaEnvia.pas:3724-4436</div>
+<p><strong>Propósito:</strong> Núcleo do preparo. Para cada patrocinadora×plano×situação, calcula e grava no histórico todas as contribuições devidas.</p>
+<p><strong>Parâmetros:</strong> nenhum → <code>boolean</code> (sucesso)</p>
+<p><strong>Processamento:</strong></p>
+<ol>
+<li>SELECT DISTINCT patrocinadora×plano×situação de PLANPREVPATRO/PLANPREV/PESSOA/SITPART/PATRO WHERE FLGINTERNO<>'PT' (3751-3766)</li>
+<li>Para cada combinação: verifica PARAMSAL13 (cobra 13º?), verifica preparo do mês anterior (3883-3903)</li>
+<li>Sincronismo: VerificaFechamento → ProximoMesAberto (3928-3953)</li>
+<li>SELECT DISTINCT contribuições de CONTRIBUICAO/CONTPREV/CONTPLANPATRO WHERE FLGINTERNO=situação ORDER BY ORDEMCALCULO (3986-4024)</li>
+<li>Para cada contribuição: PreparaQry (abre participantes) → loop GeraHistorico por participante (4105-4183)</li>
+<li>Commit parcial a cada 800 registros (ictMaxCommit) (4173-4180)</li>
+<li>EncerraContribLote (FLGCOBRA=0 onde DATAFINAL=ULTMESPREPARO) (4415-4425)</li>
+</ol>
+<p><strong>Regras:</strong> CONTRIB-RN013 (ignora planos desativados), CONTRIB-RN014-020 (condições ULTMESPREPARO), CONTRIB-RN046 (mês anterior não processado)</p>
+<p><strong>Efeitos BD:</strong> INSERT HSTCONTRIBPREV, INSERT CTRLINTERFACE, UPDATE CONTRIBPREVPARTP.ULTMESPREPARO, UPDATE CONTRIBPREVPARTP.FLGCOBRA</p>
+</div>
+<div class="rule-block">
+<div class="rule-id">EnviaContribuicaoCcp — FPreparaEnvia.pas:4510-5687</div>
+<p><strong>Propósito:</strong> Núcleo do envio. Envia contribuições preparadas para Folha (TMPDESC) ou Banco (CAR/CAP + contabilidade + alteradores).</p>
+<p><strong>Processamento:</strong></p>
+<ol>
+<li>SELECT TIPOPERENVIO de PARAMAPREV (4576); verifica 13º nos lotes (4588-4617)</li>
+<li>Monta sSQLLotes: SELECT HSTCONTRIBPREV WHERE SITRECEBIMENTO IN ('0','8') GROUP BY IDLOTE (4684-4814)</li>
+<li>Para cada lote: LerContribAEnviar → loop qryEnvio (4974-5465)</li>
+<li>Se FLGDESCFOLHA=1 e FlgPagador='C' → EnviaContribuicao (folha); senão EnviaContribuicaoBANCO (4984-5045)</li>
+<li>UPDATE HSTCONTRIBPREV SET SITRECEBIMENTO=1, DATAEMISSCOB=SYSDATE (5193-5212)</li>
+<li>IncluiContabilidade; INSERT CONTABCONTFUND (5143-5181)</li>
+<li>DescarregaDocumentos + EnviaAlteradorBANCO por quebra de pessoa/data (5268-5452)</li>
+<li>Se CbBpd: UPDATE HSTCONTRIBPREV SET CODDOCUMENTOPREV=20, SITRECEBIMENTO=1 (5560-5582)</li>
+<li>RealizaIntegracaoPGAIndiv; CtrlBaixaRecXPag.ProcessaBaixaDocumento (5646-5653)</li>
+</ol>
+<p><strong>Regras:</strong> CONTRIB-RN055-070 (filtros de envio), CONTRIB-RN072 (BPD)</p>
+<p><strong>Efeitos BD:</strong> UPDATE HSTCONTRIBPREV.SITRECEBIMENTO, INSERT TMPDESC, INSERT DOCUMENTO/LANCTODOCUM, INSERT CONTABCONTFUND, UPDATE CTRLINTERFACE</p>
+</div>
+<div class="rule-block">
+<div class="rule-id">GeraHistorico — FPreparaEnvia.pas:2952-3214</div>
+<p><strong>Propósito:</strong> Calcula o valor da contribuição via regra e grava no histórico.</p>
+<p><strong>Parâmetros:</strong> psDataPrevista, sNomeContrib, psFlgInterno, psAnoMesReferencia: String; piQtdeContribAssoc: Integer; var pbC<obra13: boolean → boolean</p>
+<p><strong>Processamento:</strong> MontaSQLParaRegraCalculo ou MontaSQLAssoc → RegraNumerica → TestaPrimeiroPagto → GravaHistorico → AtualizaUltMesPREPARO</p>
+<p><strong>Regras:</strong> CONTRIB-RN007 (mês 13 usa SALPARTIC13), CONTRIB-RN032-036 (FLGTPVLR B/N/V), CONTRIB-RN052 (cobra 13º)</p>
+<p><strong>Efeitos BD:</strong> INSERT/UPDATE HSTCONTRIBPREV, UPDATE CONTRIBPREVPARTP.ULTMESPREPARO</p>
+</div>
+<div class="rule-block">
+<div class="rule-id">GravaHistorico — FPreparaEnvia.pas:2611-2884</div>
+<p><strong>Propósito:</strong> Insere ou atualiza linha em HSTCONTRIBPREV.</p>
+<p><strong>Parâmetros:</strong> psAnoMesReferencia, psDataPrevista, sValEsperado, sFlgNaoExigeRec: String; iNumRecebimento, iNumParcela, iIdRegra, iIdPessoa, iIdPessJur, iIdPlanoPrev, iIdContribuicao: Integer; bTestarValor: boolean; var bValorZERO: boolean → boolean</p>
+<p><strong>Processamento:</strong> Converte valor; se <0 aborta; define SITRECEBIMENTO ('2' se FLGNAOEXIGEREC='1', senão '0'); INSERT ou UPDATE HSTCONTRIBPREV</p>
+<p><strong>Regras:</strong> CONTRIB-RN024 (valor negativo aborta), CONTRIB-RN025 (valor zero obrigatório), CONTRIB-RN026 (não exige recebimento)</p>
+<p><strong>Efeitos BD:</strong> INSERT HSTCONTRIBPREV (40+ campos) ou UPDATE HSTCONTRIBPREV</p>
+</div>
+<div class="rule-block">
+<div class="rule-id">MontaSQLParaRegraCalculo — FPreparaEnvia.pas:1153-1562</div>
+<p><strong>Propósito:</strong> Monta o SQL (SELECT ... FROM DUAL) com todos os campos da regra de cálculo (50+ variáveis: salário, datas, flags, associadas, etc.).</p>
+<p><strong>Parâmetros:</strong> psAnoMesReferencia, sSitucao: String; var sSql: String</p>
+<p><strong>Efeitos BD:</strong> SELECT de leitura em CONTRIBUICAO, CONTPREV, CONTRIBPREVPARTP, HSTCONTRIBPREV, BENEFBFCIARIO, DEPENTIT, EVENTOSPREV, SITPART, HISTRUBSAL</p>
+</div>
+<div class="rule-block">
+<div class="rule-id">bbtnDesfazerClick — FPreparaEnvia.pas:5897-6666</div>
+<p><strong>Propósito:</strong> Desfaz envio e/ou preparo de contribuições (coletivo ou individual por participantes selecionados).</p>
+<p><strong>Processamento:</strong> SELECT HSTCONTRIBPREV WHERE SITRECEBIMENTO<='1' → coleta documentos EMISBLOQ='S' (aborta) → loop por lote: DELETE TMPDESC, UPDATE/DELETE HSTCONTRIBPREV, DELETE HSTATRASOCONTRIB, DELETE HISTRUBSAL, DELETE CONTABCONTFUND, UPDATE CONTRIBPREVPARTP.ULTMESPREPARO, EstornaContribuicaoBANCO</p>
+<p><strong>Regras:</strong> CONTRIB-RN073 (mês 13→12), CONTRIB-RN074-080 (condições de desfazer), CONTRIB-RN077 (boleta enviada bloqueia)</p>
+<p><strong>Efeitos BD:</strong> DELETE TMPDESC, UPDATE/DELETE HSTCONTRIBPREV, DELETE HSTATRASOCONTRIB, DELETE HISTRUBSAL, DELETE CONTABCONTFUND, DELETE CTRLINTERFACE, UPDATE CONTRIBPREVPARTP</p>
+</div>
+</section>
+
+<section><div class="section-title">⚙️ FDivergContrib.pas — Tratamento de Divergências</div>
+<div class="rule-block">
+<div class="rule-id">ExibeDivergSintet — FDivergContrib.pas:1537-1810</div>
+<p><strong>Propósito:</strong> Monta e executa SQL da consulta sintética de divergências (agrupada por contribuição/pessoa).</p>
+<p><strong>Processamento:</strong> TrataFiltro → monta SELECT com JOINs (HSTCONTRIBPREV, PESSOA, PARTPREVPLAN, etc.) → WHERE por período/mês + filtros + CASE iModoSelecionado (0-10) → GROUP BY → abre qryDivergSintet</p>
+<p><strong>Regras:</strong> CONTRIB-RN14-24 (modos de divergência), CONTRIB-RN69-70 (filtros tipo cobrança/forma)</p>
+</div>
+<div class="rule-block">
+<div class="rule-id">CobraProxMes — FDivergContrib.pas:3613-4115</div>
+<p><strong>Propósito:</strong> Núcleo dos tratamentos via interface/folha. Percorre registros selecionados, valida, insere histórico e atualiza situação.</p>
+<p><strong>Parâmetros:</strong> var qryLeitura: Twwquery; bindividual: Boolean; sMesNovaCobranca, sDataRef, sCodPortForma, Referencia: String; flgtipodesc, flgdescfolha, crecpag: char; piOpTratDiverg: longint → Boolean</p>
+<p><strong>Processamento:</strong> valida prmIdMotivoDiverg → ProximoMesAberto → CriticaDataCobrancaSit → loop: BuscaOpcoes → ExisteAcaoJudicialVigente (modo=1,op=3) → VerificaCobrancaBancariaPendente → InsereHistorico → AtualizaSitRecebimento → INSERT CTRLINTERFACE</p>
+<p><strong>Regras:</strong> CONTRIB-RN25-30 (validação por situação/valor), CONTRIB-RN39-43 (validações CobraProxMes)</p>
+<p><strong>Efeitos BD:</strong> INSERT HSTCONTRIBPREV, INSERT HSTATRASOCONTRIB, UPDATE HSTCONTRIBPREV.SITRECEBIMENTO, INSERT CTRLINTERFACE</p>
+</div>
+<div class="rule-block">
+<div class="rule-id">TrataDivergenciaBanco — FDivergContrib.pas:6318-6943</div>
+<p><strong>Propósito:</strong> Núcleo dos tratamentos via banco (CAP/CAR). Valida, atualiza situação, insere histórico, envia contribuição e alteradores para banco, contabiliza.</p>
+<p><strong>Parâmetros:</strong> var CtrlDocumento: TCtrlDocumento; psDataCobranca: string; piCodPortForma, piIdLote: longint; cRecPag: char; bInsereUltDoc: Boolean → boolean</p>
+<p><strong>Processamento:</strong> VerificaCobrancaBancariaPendente → DocBaixadoCAR → valida devolução vs cobrança → ExisteAcaoJudicialVigente → calcula rValorDivergencia → UPDATE SITRECEBIMENTO=4 → InsereHistorico → EnviaContribuicaoBANCO → UPDATE SITRECEBIMENTO=1 → IncluiContabilidade → DescarregaDocumentos → EnviaAlteradorBANCO</p>
+<p><strong>Regras:</strong> CONTRIB-RN32-38 (validações banco), CONTRIB-RN49 (doc pendente)</p>
+<p><strong>Efeitos BD:</strong> UPDATE HSTCONTRIBPREV (SITRECEBIMENTO 4→1), INSERT HSTCONTRIBPREV, INSERT DOCUMENTO/LANCTODOCUM, INSERT CONTABCONTFUND</p>
+</div>
+<div class="rule-block">
+<div class="rule-id">InsereHistorico — FDivergContrib.pas:3026-3329</div>
+<p><strong>Propósito:</strong> Insere novo registro em HSTCONTRIBPREV representando o tratamento da divergência.</p>
+<p><strong>Parâmetros:</strong> var qryLeitura: TwwQuery; sMesCob, sCodportforma, sDataRef, sIdRegra: String; dValorAlter, dValorEsperado, dValorRecebido: Extended; pcFlgDescFolha, cRecPag: char; bAporte: Boolean; sIdContrib: String; piIdLote: longint; flgtipodesc: string; pNumRecebimentoPai: String → Boolean</p>
+<p><strong>Cálculos:</strong> sValor = Abs(dValorAlter + (dValorEsperado - dValorRecebido)) se cobrança; Abs(dValorAlter + (dValorRecebido - dValorEsperado)) se devolução · <code>:3071-3107</code></p>
+<p><strong>Efeitos BD:</strong> INSERT HSTCONTRIBPREV, CalculaAlteradores → INSERT HSTATRASOCONTRIB, INSERT CTRLINTERFACE</p>
+</div>
+<div class="rule-block">
+<div class="rule-id">BuscaOpcoes — FDivergContrib.pas:4534-4623</div>
+<p><strong>Propósito:</strong> Validação central de permissões por situação e valor. Bloqueia tratamentos incompatíveis.</p>
+<p><strong>Regras:</strong> CONTRIB-RN25-28 (situação AT/MA/MP/AS × modo), CONTRIB-RN29-30 (direção da divergência × modo)</p>
+</div>
+<div class="rule-block">
+<div class="rule-id">AcertaPatronalPorAceitar — FDivergContrib.pas:2152-2593</div>
+<p><strong>Propósito:</strong> Recalcula contribuições patronais quando houve "Ignorar" (OPTRATDIVERG=8): recalcula valor, estorna documento no CAR, recria documento contábil, verifica 13º.</p>
+<p><strong>Regras:</strong> CONTRIB-RN57-60 (recálculo patronal)</p>
+<p><strong>Efeitos BD:</strong> UPDATE HSTCONTRIBPREV (VALORESPERADO, SITRECEBIMENTO 'T'→1), EstornaContribuicaoBANCO, INSERT CONTABCONTFUND</p>
+</div>
+<div class="rule-block">
+<div class="rule-id">MarcaDevedoresAdmPrev — FDivergContrib.pas:8411-8532</div>
+<p><strong>Propósito:</strong> Marca participantes devedores: busca contribuintes com TMPDESC SITENVIO IN ('1','3'), DATACOBRANCA<SYSDATE, valor recebido<esperado, lote já recebido → UPDATE PARTPREVPLAN SET FLGDEVEPREVIDENC=1</p>
+<p><strong>Regras:</strong> CONTRIB-RN53-56 (condições de inadimplência)</p>
+<p><strong>Efeitos BD:</strong> UPDATE PARTPREVPLAN.FLGDEVEPREVIDENC</p>
+</div>
+</section>
+
+<section><div class="section-title">⚙️ FControleIndivContrib.pas — Controle Individual</div>
+<div class="rule-block">
+<div class="rule-id">tbButtonEnviarClick — FControleIndivContrib.pas:1385-2125</div>
+<p><strong>Propósito:</strong> Envia contribuições selecionadas para cobrança bancária (CAP/CAR) + contabilização + PGA.</p>
+<p><strong>Processamento:</strong> valida (SITRECEBIMENTO∈{0,4,8}, FLGDESCFOLHA=0, não participante+patronal simultâneo) → soma dVlRecPag (considera FLGDEVOLUCAO) → decide RECPAG R/P → AbreQryQuebraDoc → loop EnviaContribuicaoBANCO → UPDATE SITRECEBIMENTO=1 → IncluiContabilidade → DescarregaDocumentos → EnviaAlteradorBANCO → AgrupaBoletasBANCO → Commit → RealizaIntegracaoPGAIndiv</p>
+<p><strong>Regras:</strong> CONTRIB-RN04-06, CONTRIB-RN30-32, CONTRIB-RN37-38</p>
+<p><strong>Efeitos BD:</strong> UPDATE HSTCONTRIBPREV.SITRECEBIMENTO=1, INSERT DOCUMENTO/LANCTODOCUM, INSERT CONTAB8CONTFUND</p>
+</div>
+<div class="rule-block">
+<div class="rule-id">bbtnOKDesfazerClick — FControleIndivContrib.pas:2922-3164</div>
+<p><strong>Propósito:</strong> Executa cancelamento (desfazer envio).</p>
+<p><strong>Processamento:</strong> loop: UPDATE HSTCONTRIBPREV SET SITRECEBIMENTO=0, CODDOCUMENTOPREV=NULL, DATACANCELAMENTO=SYSDATE → DELETE CONTABCONTFUND → UPDATE DOCUMENTO EMISBLOQ='N' → se folha DELETE TMPDESC senão EstornaContribuicaoBANCO</p>
+<p><strong>Regras:</strong> CONTRIB-RN10-14 (validações de cancelamento)</p>
+<p><strong>Efeitos BD:</strong> UPDATE HSTCONTRIBPREV, DELETE CONTABCONTFUND, UPDATE DOCUMENTO, DELETE TMPDESC</p>
+</div>
+<div class="rule-block">
+<div class="rule-id">PreencheDadosTitular — FControleIndivContrib.pas:1075-1250</div>
+<p><strong>Propósito:</strong> Carrega titular, conta bancária, contribuições pendentes e baixa contribuições do CAR automaticamente.</p>
+<p><strong>Processamento:</strong> Abre qryTitular/qryContaBancaria/qryPendente → AbreQryContribuicao → loop: skip se SITRECEBIMENTO=2/3 → BaixaContribCAR → se ≥3 inadimplências → AjustaEventoInadimplencia → Commit</p>
+<p><strong>Regras:</strong> CONTRIB-RN03 (skip recebidas), CONTRIB-RN24 (3 inadimplências)</p>
+</div>
+</section>
+
+<section><div class="section-title">⚙️ FRecebeContribuicao.pas — Recebimento via Folha</div>
+<div class="rule-block">
+<div class="rule-id">RecebeContribuicao — FRecebeContribuicao.pas:1581-2311</div>
+<p><strong>Propósito:</strong> Recebe contribuições do participante da TMPDESC. Compara esperado vs recebido, atualiza HST>CONTRIBPREV.</p>
+<p><strong>Processamento:</strong> SELECT TMPDESC (SITENVIO='2' ou '1' com valor) → loop: AlteraHSTCONTRIBPREV ou IncluiHSTCONTRIBPREV + AtualizaUltMesPessoa → SITRECEBIMENTO=3 se alteradores com divergência, =2 se sem → UPDATE TMPDESC SITENVIO='9' → CobraContribuicaoPatroPart (patronais)</p>
+<p><strong>Regras:</strong> CONTRIB-RN16-20 (situação por divergência/margem), CONTRIB-RN33-34 (filtro TMPDESC)</p>
+<p><strong>Efeitos BD:</strong> INSERT/UPDATE HSTCONTRIBPREV, UPDATE TMPDESC.SITENVIO='9', UPDATE CTRLINTERFACE.FLGVOLTATMP=1</p>
+</div>
+<div class="rule-block">
+<div class="rule-id">IncluiHSTCONTRIBPREV — FRecebeContribuicao.pas:2703-3004</div>
+<p><strong>Propósito:</strong> Insere registro em HSTCONTRIBPREV. Define SITRECEBIMENTO: 2 se esperado=recebido, 3 se dif>margin (VLRACEITADIVERG).</p>
+<p><strong>Regras:</strong> CONTRIB-RN16-18 (situação por margem de aceitação)</p>
+<p><strong>Efeitos BD:</strong> INSERT HSTCONTRIBPREV, INSERT CONTRIBPREVPARTP (se DATAINICIO vazio)</p>
+</div>
+</section>
+
+<section><div class="section-title">⚙️ FBeneficioSaldadoFAB.pas — Benefício Saldado/FAB</div>
+<div class="rule-block">
+<div class="rule-id">Exec_SP_Atualiza_Benef_Sald_FAB — FBeneficioSaldadoFAB.pas:1016-1067</div>
+<p><strong>Propósito:</strong> Invoca package Oracle para atualizar benefício saldado e FAB.</p>
+<p><strong>Parâmetros:</strong> AtualizarTudo: Integer; AtualizarAte: TDateTime; aIdpessoa: integer; aForcaReproc: integer</p>
+<p><strong>Efeitos BD:</strong> EXEC <code>CM.PCK_BENEFSALDFAB.SP_ATUALIZASALDO(pAtualizarTudo, pAtualizarAte, pIdPessoa, pForcaReproc)</code></p>
+</div>
+<div class="rule-block">
+<div class="rule-id">dbredBeneficioSaldadoBtnClick — FAlteracaoBeneficioSaldadoFAB.pas:420-454</div>
+<p><strong>Propósito:</strong> Calcula BS via package Oracle.</p>
+<p><strong>Efeitos BD:</strong> SELECT <code>CM.PCK_BENEFSALDFAB.FN_CALCULABS(IDPESSOA, SALPART, BNINSS, PBE)</code> FROM DUAL</p>
+</div>
+</section>
+
+<section><div class="section-title">⚙️ FCalcSalContr.pas — Bitributação</div>
+<div class="rule-block">
+<div class="rule-id">bbtnConfirmarClick — FCalcSalContr.pas:440-781</div>
+<p><strong>Propósito:</strong> Núcleo do cálculo de bitributação.</p>
+<p><strong>Processamento:</strong> Para cada participante: DELETE HSTBITRIBUTACAO(OPERACAO='E') → busca DIP → Fase1: soma contribuições 1989-1995 corrigidas (moeda 557) → InserirHSTBITRIBUTACAO('E') → Fase2: saldo inicial 2007/12, itera IPCA-E (moeda 285) ≥2008/01: saldo = saldo × (COTVALOR/100 + 1), soma operação 'S' → InserirBITRIBUTACAO</p>
+<p><strong>Regras:</strong> CONTRIB-RN20 (flgativo se saldo>0 e DIP≥2013/01)</p>
+<p><strong>Efeitos BD:</strong> DELETE/INSERT HSTBITRIBUTACAO, INSERT/UPDATE BITRIBUTACAO</p>
+</div>
+</section>
+
+<section><div class="section-title">⚙️ FProvPerdasLote.pas / FProvPerdasIndiv.pas — Provisão para Perdas</div>
+<div class="rule-block">
+<div class="rule-id">Processa — FProvPerdasLote.pas:473-558 / ProcessaTodosSelecionados — FProvPerdasIndiv.pas:743-820</div>
+<p><strong>Propósito:</strong> Calcula e grava provisão para perdas de contribuições atrasadas.</p>
+<p><strong>Processamento:</strong> AbreQryContribuicao (SELECT HSTCONTRIBPREV WHERE MESCOBRANCA≠MESREFERENCIA, SITRECEBIMENTO IN (0,1), pai SITRECEBIMENTO=4) → loop: VALORPROV = (TOTALESPERADO/100) × PERCENTUAL (faixa de dias) → grava qryProvPerds → IncluiContabilidadeProvPerdas</p>
+<p><strong>Regras:</strong> CONTRIB-RN27 (filtros de contribuições atrasadas), CONTRIB-RN28 (seleção obrigatória)</p>
+<p><strong>Efeitos BD:</strong> INSERT PROVISAOPERDASCONTRIBUICAO, INSERT CONTABCONTFUND (contabilidade da provisão)</p>
+</div>
+</section>
+
+<section><div class="section-title">⚙️ FAtualizaPorIndice.pas — Atualização por Índice</div>
+<div class="rule-block">
+<div class="rule-id">bbtnEnviarClick — FAtualizaPorIndice.pas:421-957</div>
+<p><strong>Propósito:</strong> Atualiza reservas aplicando índice de correção mês a mês.</p>
+<p><strong>Processamento:</strong> valida data → SELECT RESERVAXPLANO (FLGMODATUALIZACAO=1) → para cada reserva: se tem regra → RegraNumerica mês a mês; senão itera índices: dValorAtualizado = dValorAtualizado × COTVALOR → InsereMovimentoReserva → UPDATE RESERVAPART.DATAULTATUALIZA</p>
+<p><strong>Regras:</strong> CONTRIB-RN42-45 (validações de seleção e participante)</p>
+<p><strong>Efeitos BD:</strong> INSERT HISTMOVRESERVA, UPDATE RESERVAPART.VALORRESERVA, UPDATE RESERVAPART.DATAULTATUALIZA</p>
+</div>
+</section>
+
+<section><div class="section-title">⚙️ FCadContribuicaoPortada.pas — Portabilidade</div>
+<div class="rule-block">
+<div class="rule-id">InserePortabilidade — FCadContribuicaoPortada.pas:661-717</div>
+<p><strong>Propósito:</strong> Insere portabilidade em PORTABILIDADEPREV.</p>
+<p><strong>Regras:</strong> CONTRIB-RN29 (opção IR obrigatória), CONTRIB-RN33 (validações de vínculo)</p>
+<p><strong>Efeitos BD:</strong> INSERT PORTABILIDADEPREV (SEQPORTABILIDADEPREV.NEXTVAL, OPCAOIR, IDCONTRIBUICAO, IDENTIDADEORIGEM)</p>
+</div>
+<div class="rule-block">
+<div class="rule-id">InsereHistorico — FCadContribuicaoPortada.pas:1045-1111</div>
+<p><strong>Propósito:</strong> Insere histórico de contribuição portada em HSTCONTRIBPREV.</p>
+<p><strong>Regras:</strong> CONTRIB-RN34 (IDMOTIVO=3054, CODPORTFORMA=10), CONTRIB-RN35-37 (validações de referência/valor)</p>
+<p><strong>Efeitos BD:</strong> INSERT HSTCONTRIBPREV (IDMOTIVO=3054, SITRECEBIMENTO=0, FLGMANUAL=2, FOLHAORIGEM='C', CODPORTFORMA=10)</p>
+</div>
+</section>
+
+<section><div class="section-title">⚙️ DBObjects e CtrlObjects</div>
+<div class="rule-block">
+<div class="rule-id">uDbEvolfuncprev.pas (280 lin) — TCmDbObject para EVOLFUNCPREV</div>
+<p><strong>Propósito:</strong> Cam"ada de acesso a dados para a entidade EVOLFUNCPREV (evolução funcional previdenciária). CRUD via TCmDbObject.</p>
+<p><strong>Efeitos BD:</strong> SELECT/INSERT/UPDATE/DELETE em EVOLFUNCPREV</p>
+</div>
+<div class="rule-block">
+<div class="rule-id">uDbHistrubsal.pas (827 lin) — TCmDbObject para HISTRUBSAL</div>
+<p><strong>Propósito:</strong> Camada de acesso+regras para HISTRUBSAL (histórico de rubricas salariais). Inclui lógica de salário de manutenção e participação.</p>
+<p><strong>Efeitos BD:</strong> SELECT/INSERT/UPDATE/DELETE em HISTRUBS%AL</p>
+</div>
+<div class="rule-block">
+<div class="rule-id">uCtrlEvolFuncPrev.pas (582 lin) — TCmControlObject</div>
+<p><strong>Propósito:</strong> Controle de evolução funcional. Modo dual: cnsClient delega ao Connection.AppServer (AppServer remoto CM); senão executa SQL local via uDbEvolfuncprev.</p>
+</div>
+<div class="rule-block">
+<div class="rule-id">uCtrlPCS.pas (189 lin) — TCmControlObject</div>
+<p><strong>Propósito:</strong> Controle de listas PCS (controle de processos/sessões).</p>
+</div>
+</section>
+
+<section><div class="section-title">🗺️ Mapa de rastreabilidade Feature → Form → Rotina → SQL → Tabela</div>
+<div class="table-wrap"><table><thead><tr><th>Feature (PF)</th><th>Form</th><th>Rotina principal</th><th>Tabelas principais</th></tr></thead><tbody>
+<tr><td><a href="funcionalidades.html#PF-01">PF-01 Preparo e Envio</a></td><td>FPreparaEnvia</td><td>PreparaContribuicao, EnviaContribuicaoCcp, GeraHistorico</td><td>HSTCONTRIBPREV, CONTRIBPREVPARTP, CTRLINTERFACE, TMPDESC, DOCUMENTO</td></tr>
+<tr><td><a href="funcionalidades.html#PF-02">PF-02 Recebimento multi-canal</a></td><td>FRecebeContribuicao, FRecebeContribuicaoNovo, FRecebeContribEmptmo, FBaixaContribCAR, FBaixaContribPIDPIA</td><td>RecebeContribuicao, bbtnReceberClick (SP Oracle), btnReceberClick</td><td>HSTCONTRIBPREV, TMPDESC, RETORNOHSTCONTRIBPATRO, CONTRATOEMPTMO, DOCUMENTO</td></tr>
+<tr><td><a href="funcionalidades.html#PF-03">PF-03 Alimentação de reservas</a></td><td>FAtualizaPorIndice, FAlimReservasReplan, FRodaPadraoMovReserva</td><td>bbtnEnviarClick, bbtnConfirmarClick</td><td>HISTMOVRESERVA, RESERVAPART, RESERVAXPLANO, COTACAOMOEDA</td></tr>
+<tr><td><a href="funcionalidades.html#PF-04">PF-04 Salário de participação</a></td><td>FReajustaSalarioMantido, FAlteraSalPart, FLerSalarios</td><td>—</td><td>PARTPREVPLAN, HISTRUBSAL</td></tr>
+<tr><td><a href="funcionalidades.html#PF-05">PF-05 Tributação</a></td><td>FCalcSalContr, fCalculoIRRF</td><td>bbtnConfirmarClick, tbButtonAlterarClick</td><td>HSTBITRIBUTACAO, BITRIBUTACAO, PRAZOACUMULACAO, HSTCALCULOPMP</td></tr>
+<tr><td><a href="funcionalidades.html#PF-06">PF-06 Portabilidade/Benefício Saldado</a></td><td>FCadContribuicaoPortada, FBeneficioSaldadoFAB, FAlteracaoBeneficioSaldadoFAB</td><td>InserePortabilidade, Exec_SP_Atualiza_Benef_Sald_FAB</td><td>PORTABILIDADEPREV, HSTCONTRIBPREV, BENEFSALDFAB, BENEFSALD_TEMP</td></tr>
+<tr><td><a href="funcionalidades.html#PF-07">PF-07 Provisão para perdas</a></td><td>FProvPerdasLote, FProvPerdasIndiv</td><td>Processa, ProcessaTodosSelecionados</td><td>PROVISAOPERDASCONTRIBUICAO, HSTCONTRIBPREV, FAIXASPROVISAOPERDACONTRIB</td></tr>
+<tr><td><a href="funcionalidades.html#PF-08">PF-08 Divergências</a></td><td>FDivergContrib, FConsEstatDivergContrib</td><td>CobraProxMes, TrataDivergenciaBanco, InsereHistorico, AcertaPatronalPorAceitar</td><td>HSTCONTRIBPREV, HSTATRASOCONTRIB, ALTERADORXCONTRIB, DOCUMENTO, LOGTOTALPREV</td></tr>
+<tr><td><a href="funcionalidades.html#PF-09">PF-09 Controle Individual</a></td><td>FControleIndivContrib</td><td>tbButtonEnviarClick, bbtnOKDesfazerClick, ProcessaAlteracao, ProcessaDevolucao</td><td>HSTCONTRIBPREV, HSTATRASOCONTRIB, DOCUMENTO, CONTABCONTFUND, TMPDESC</td></tr>
+<tr><td><a href="funcionalidades.html#PF-10">PF-10 Cadastro Manual</a></td><td>FCadHstContribuicao, FCadHstContribuicaoBeneficiario</td><td>bbtnConfirmarClick, BBtnImportaClick, BBtnContabilizaClick</td><td>HSTCONTRIBPREV, HSTATRASOCONTRIB, TMPDESC, IMPORTACAOHSTCONTRIB</td></tr>
+</tbody></table></div>
+</section>
+
+</main>
+<footer>
+<p>Blueprint AS-IS — PFC-23 (enriquecido) — Módulo CONTRIBUIÇÃO | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-10</p>
+</footer>
+</body>
+</html>
