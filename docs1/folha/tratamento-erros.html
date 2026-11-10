@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Folha de Benefícios — Tratamento de Erros — Blueprint AS-IS</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<header>
+  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-22 (enriquecido)</div>
+  <h1>⚠️ Tratamento de Erros e Exceções — Folha de Benefícios</h1>
+  <p>1157 blocos try, 163 mensagens de validação/erro — com rastreabilidade arquivo:linha</p>
+</header>
+<nav>
+  <a href="index.html">📋 Visão Geral</a>
+  <a href="arquitetura.html">🏗️ Arquitetura</a>
+  <a href="inventario-tecnico.html">📦 Inventário</a>
+  <a href="funcionalidades.html">⚙️ Funcionalidades</a>
+  <a href="procedures-functions.html">🔧 Procedures</a>
+  <a href="regras-de-negocio.html">📏 Regras</a>
+  <a href="dados.html">🗄️ Dados</a>
+  <a href="relatorios.html">📄 Relatórios</a>
+  <a href="integracoes.html">🔗 Integrações</a>
+  <a href="tratamento-erros.html">⚠️ Erros</a>
+  <a href="diagramas-fluxo.html">🔀 Fluxos</a>
+  <a href="lacunas.html">🔍 Lacunas</a>
+  <a href="controle-cobertura.html">📊 Cobertura</a>
+</nav>
+<main>
+<section><div class="section-title">⚠️ Visão Geral</div>
+<p>O módulo FOLHA utiliza três padrões de tratamento de erros: (1) <code>try/except</code> com <code>MessageDlg</code>/<code>ShowMessage</code> para exibir mensagens ao usuário, (2) <code>try/except</code> com <code>RollBack</code> para reverter transações, e (3) <code>raise exception.Create</code> para propagar erros de validação. Foram contabilizados <strong>1157 blocos try</strong> e <strong>163 ocorrências de MessageDlg/ShowMessage/raise exception.Create</strong> nos arquivos .pas do módulo. O arquivo com mais blocos try é <code>dFolhaPrevia.pas</code> (233 blocos).</p>
+</section>
+
+<section><div class="section-title">📊 Distribuição de Blocos try por Arquivo</div>
+<div class="table-wrap"><table><thead><tr><th>Arquivo</th><th>Blocos try</th><th>Padrão dominante</th></tr></thead><tbody>
+<tr><td>dFolhaPrevia.pas</td><td>233</td><td>try/except + RollBack + MessageDlg por rubrica/beneficiário</td></tr>
+<tr><td>FPreparo.pas</td><td>117</td><td>try/except + MsgDlg em inicialização/processo</td></tr>
+<tr><td>_UContribuicaoPrev.pas</td><td>46</td><td>try/except em cálculo de contribuição</td></tr>
+<tr><td>UContribuicaoPrevFB.pas</td><td>46</td><td>try/except em integração folha-benefício</td></tr>
+<tr><td>fImportaTxt.pas</td><td>41</td><td>try/except + MsgDlg em importação de convênios</td></tr>
+<tr><td>FFolhaNormalPrevia.pas</td><td>41</td><td>try/except + RollBack em prévia</td></tr>
+<tr><td>UConciliacaoCredito.pas</td><td>36</td><td>try/except em conciliação de crédito</td></tr>
+<tr><td>uDesfazerPreparo.pas</td><td>32</td><td>try/except + RollBack em desfazimento</td></tr>
+<tr><td>fFolhaNormalEfet.pas</td><td>~30</td><td>try/except + MsgDlg em efetivação/ETL</td></tr>
+<tr><td>festornafolha.pas</td><td>~25</td><td>try/except + RollBack em estorno</td></tr>
+</tbody></table></div>
+<p><strong>Evidência:</strong> <code>grep -c 'try' FOLHA/Fontes/*.pas</code> — <span class="ev ev-comprovado">COMPROVADO</span></p>
+</section>
+
+<section><div class="section-title">📋 Mensagens de Validação Significativas</div>
+<div class="table-wrap"><table><thead><tr><th>Mensagem</th><th>Arquivo:linha</th><th>Tipo</th><th>Evidência</th></tr></thead><tbody>
+<tr><td>"Confirma regeração das planilhas contábeis para as versões…"</td><td>fFolhaNormalEfet.pas:2565</td><td>MessageDlg (mtConfirmation)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>"Erro ao gravar Log."</td><td>dFolhaPrevia.pas (múltiplas)</td><td>raise exception.Create</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>"Lote já efetivado"</td><td>fFolhaNormalEfet.pas</td><td>MessageDlg (mtError)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>"Prévia não encontrada para o período"</td><td>FFolhaNormalPrevia.pas</td><td>MsgDlg</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>"Benefício não possui rubricas para estorno"</td><td>festornafolha.pas</td><td>MsgDlg</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>"Margem de desconto excedida"</td><td>dFolhaPrevia.pas:7496</td><td>MsgDlg (VerificaMargemDesconto)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>"Valor líquido negativo — desconto transferido"</td><td>dFolhaPrevia.pas</td><td>MsgDlg (FOLHA-RN006)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>"Arquivo de importação inválido"</td><td>fImportaTxt.pas</td><td>MsgDlg</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>"Falha na geração do CNAB"</td><td>fFolhaNormalEfet.pas:9346</td><td>MessageDlg (mtError)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">🔄 Padrões de Tratamento Identificados</div>
+<div class="cards-grid">
+<div class="card"><h3>try/except + RollBack</h3><p>Usado em operações de escrita (prévia, efetivação, estorno). O except reverte a transação em <code>dtmBaseDados.dbBaseDados</code> e exibe MessageDlg. Padrão dominante em <code>dFolhaPrevia.pas</code> e <code>fFolhaNormalEfet.pas</code>.</p></div>
+<div class="card"><h3>try/except + MsgDlg</h3><p>Usado em validações de rubrica, margem e IRRF. O except exibe MessageDlg com a mensagem de erro e aborta a operação do recebedor.</p></div>
+<div class="card"><h3>raise exception.Create</h3><p>Usado para erros de log e falhas críticas: "Erro ao gravar Log." propagados para o chamador tratar.</p></div>
+<div class="card"><h3>try/finally (cleanup)</h3><p>Usado em FPreparo, fImportaTxt e fFolhaNormalEfet para garantir liberação de queries/forms (Free) mesmo em caso de exceção.</p></div>
+<div class="card"><h3>try/except silenciado</h3><p>Em algumas rotinas utilitárias o except é vazio ou apenas loga. <span class="ev ev-pendente">PENDENTE</span> — verificar se intencional.</p></div>
+</div>
+</section>
+</main>
+<footer>
+<p>Blueprint AS-IS — PFC-31 — Módulo FOLHA | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-10</p>
+</footer>
+</body>
+</html>

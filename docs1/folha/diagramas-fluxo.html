@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Folha de Benefícios — Diagramas de Fluxo — Blueprint AS-IS</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<header>
+  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-22 (enriquecido)</div>
+  <h1>🔀 Diagramas de Fluxo de Processos — Folha de Benefícios</h1>
+  <p>Fluxos comprovados pelo código com rastreabilidade — renderizados via Mermaid.js</p>
+</header>
+<nav>
+  <a href="index.html">📋 Visão Geral</a>
+  <a href="arquitetura.html">🏗️ Arquitetura</a>
+  <a href="inventario-tecnico.html">📦 Inventário</a>
+  <a href="funcionalidades.html">⚙️ Funcionalidades</a>
+  <a href="procedures-functions.html">🔧 Procedures</a>
+  <a href="regras-de-negocio.html">📏 Regras</a>
+  <a href="dados.html">🗄️ Dados</a>
+  <a href="relatorios.html">📄 Relatórios</a>
+  <a href="integracoes.html">🔗 Integrações</a>
+  <a href="tratamento-erros.html">⚠️ Erros</a>
+  <a href="diagramas-fluxo.html">🔀 Fluxos</a>
+  <a href="lacunas.html">🔍 Lacunas</a>
+  <a href="controle-cobertura.html">📊 Cobertura</a>
+</nav>
+<main>
+<section><div class="section-title">🔀 Fluxo PF-01 — Preparo da Folha</div>
+<div class="mermaid">graph TD
+  A["FPreparo.sbtnInserirClick"] --> B["MontaListas<br/>patro/planos/benefícios"]
+  B --> C["InicializaProcessoBeneficio<br/>!1755"]
+  C --> D["Loop: PassoProcessoBeneficio<br/>!1901"]
+  D --> E["GrvHstBeneficio<br/>!2375"]
+  E --> F["CalculaProRata<br/>!2931"]
+  F --> G[("HSTBENEFBFCIARIO")]
+</div>
+<p><strong>Evidência:</strong> <code>FPreparo.pas:1755-2931</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</section>
+
+<section><div class="section-title">🔀 Fluxo PF-02 — Prévia (Cálculo)</div>
+<div class="mermaid">graph TD
+  A["FFolhaNormalPrevia"] --> B["ProcessaPrevia<br/>dFolhaPrevia.pas:24781"]
+  B --> C["CriaRecebedor<br/>!19243"]
+  C --> D["ProcessaRubricaProvento<br/>!24378"]
+  D --> E["ProcessaRubrica<br/>!17697"]
+  E --> F["ExecutaRegraRubrica<br/>!16865"]
+  F --> G["ClassificaRubricaBase<br/>!15076"]
+  G --> H["InsereRubrica<br/>!15183"]
+  H --> I["IncluiPrevia<br/>!4096"]
+  I --> J["ProcessaFechamentoRecebedor<br/>!23310"]
+  J --> K["ProcessaRateioRubricas<br/>!22816"]
+  K --> L["ProcessaReinf<br/>!19882"]
+  L --> M[("PREVIA / BASEDEPAGAMENTO<br/>BITRIBUTACAO")]
+</div>
+<p><strong>Evidência:</strong> <code>dFolhaPrevia.pas:24781-25405</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</section>
+
+<section><div class="section-title">🔀 Fluxo PF-03 — Efetivação</div>
+<div class="mermaid">graph TD
+  A["fFolhaNormalEfet"] --> B["Valida Lote/Conta/ParamCF"]
+  B --> C["Executa_ETL<br/>!8722"]
+  C --> D["RetornaDiretorioETL<br/>!8898"]
+  D --> E["VerificaEfeticaoETL<br/>!8928"]
+  E --> F["Monitoramento<br/>!9006"]
+  F --> G["GeraArquivoPagamentoCNAB150<br/>!9346"]
+  F --> H["GeraArquivoPagamentoCNAB240<br/>!9468"]
+  G --> I["atualizaBasePagamento<br/>!8328"]
+  H --> I
+  I --> J["GeraArquivoSIACC<br/>!9806"]
+  J --> K[("HSTFOLHABENEF / ARQUIVOPAGTO")]
+</div>
+<p><strong>Evidência:</strong> <code>fFolhaNormalEfet.pas:8328-9806</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</section>
+
+<section><div class="section-title">🔀 Fluxo PF-04 — Estorno</div>
+<div class="mermaid">graph TD
+  A["festornafolha"] --> B["VerificaStatus<br/>!900"]
+  B --> C["VerificaTmpDesc<br/>!2030"]
+  C --> D["EstornoFolhaCompleto<br/>!2062"]
+  D --> E["DesfazRubricaIndividual<br/>!1843"]
+  E --> F["GeraAlterador<br/>!1183"]
+  F --> G["GeraCAP<br/>!1523"]
+  G --> H["GeraCAR<br/>!1654"]
+  H --> I["GravaMotivoEstorno<br/>!1709"]
+  I --> J["ProcessaCompensacao<br/>!1739"]
+  J --> K[("HSTFOLHABENEFCAP / RUBRICAINDIV<br/>ARQUIVOPAGTO")]
+</div>
+<p><strong>Evidência:</strong> <code>festornafolha.pas:1843-2062</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</section>
+
+<section><div class="section-title">🔀 Fluxo PF-05 — Remessa Bancária</div>
+<div class="mermaid">graph TD
+  A["FAberturaFitaCredit"] --> B["fGeraArquivoRemessa"]
+  B --> C{"Leiaute?"}
+  C -->|"CNAB 150"| D["GeraArquivoCNAB150"]
+  C -->|"CNAB 240"| E["GeraArquivoCNAB240"]
+  D --> F["SetDocumentoArqPagamento<br/>!9584"]
+  E --> F
+  F --> G["SetFavorecidoArqPagamento<br/>!9618"]
+  G --> H["SetRegistrosArquivoPagamento<br/>!9661"]
+  H --> I[("ARQUIVOPAGTO + arquivo em disco")]
+</div>
+<p><strong>Evidência:</strong> <code>fFolhaNormalEfet.pas:9346-9728</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</section>
+
+<section><div class="section-title">🔀 Fluxo PF-08 — IRRF</div>
+<div class="mermaid">graph TD
+  A["CalculoIRRF<br/>!13493"] --> B["DeterminaBasesIRRF<br/>!7180"]
+  B --> C["AtualizaFlgIsento<br/>!10302"]
+  C --> D["VerificaCompensacaoIRRF<br/>!10254"]
+  D --> E{"Opção IR?"}
+  E -->|"Normal"| F["CalculaLancaIRNormal<br/>!12380"]
+  E -->|"Regressivo"| G["CalculaLancaIRRegressivo<br/>!12123"]
+  F --> H["LancaIRCompensado<br/>!12005"]
+  G --> H
+  H --> I[("BITRIBUTACAO / HSTBITRIBUTACAO<br/>PREVIA")]
+</div>
+<p><strong>Evidência:</strong> <code>dFolhaPrevia.pas:7180-13493</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</section>
+
+<section><div class="section-title">🔀 Fluxo PF-06 — Apropriação Contábil</div>
+<div class="mermaid">graph TD
+  A["FParamRelApropContabil"] --> B["apuraRubricasPorPlanoContabil"]
+  B --> C["dFolhaPrevia → dContabil<br/>InstanciaDtmLocal:19438"]
+  C --> D[("CONTABCONTFUND")]
+</div>
+<p><strong>Evidência:</strong> <code>dFolhaPrevia.pas:19438</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</section>
+
+<section><div class="section-title">🔀 Fluxo PF-09 — Conciliação INSS</div>
+<div class="mermaid">graph TD
+  A["FPrestacaoContasINSS"] --> B["FConciliacaoReembolsoINSS"]
+  B --> C["FManutRubricaReembolsoINSS"]
+  C --> D[("CONCINSS / DETCONCINSS")]
+</div>
+<p><strong>Evidência:</strong> <code>FOLHA/Fontes/FConciliacaoReembolsoINSS.pas</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</section>
+</main>
+<footer>
+<p>Blueprint AS-IS — PFC-31 — Módulo FOLHA | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-10</p>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+<script src="../assets/js/mermaid-init.js"></script>
+</body>
+</html>
