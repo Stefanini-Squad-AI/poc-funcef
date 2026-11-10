@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contribuição Previdenciária — UC209 – Simular Contribuições e Calcular Retroativos — Blueprint AS-IS</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<header>
+  <div class="badge">Blueprint AS-IS — PFC-35 — Processos Funcionais</div>
+  <h1>UC209 – Simular Contribuições e Calcular Retroativos</h1>
+  <p>Caso de uso do módulo Contribuição Previdenciária: 1 jornada(s) funcional(is) e 0 regra(s) de negócio descritas dentro de cada jornada.</p>
+</header>
+<nav>
+  <a href="index.html">📋 Visão Geral</a>
+  <a href="arquitetura.html">🏗️ Arquitetura</a>
+  <a href="inventario-tecnico.html">📦 Inventário</a>
+  <a href="funcionalidades.html">⚙️ Processos Funcionais</a>
+  <a href="procedures-functions.html">🔧 Procedures</a>
+  <a href="dados.html">🗄️ Dados</a>
+  <a href="relatorios.html">📄 Relatórios</a>
+  <a href="integracoes.html">🔗 Integrações</a>
+  <a href="tratamento-erros.html">⚠️ Erros</a>
+  <a href="diagramas-fluxo.html">🔀 Fluxos</a>
+  <a href="lacunas.html">🔍 Lacunas</a>
+  <a href="controle-cobertura.html">📊 Cobertura</a>
+</nav>
+<main>
+
+<a class="back-btn" href="funcionalidades.html">← Voltar à lista de Casos de Uso (Processos Funcionais)</a>
+<div class="breadcrumb"><a href="index.html">Contribuição Previdenciária</a> › <a href="funcionalidades.html">Processos Funcionais</a> › UC209</div>
+
+<section><div class="section-title">1. Identificação</div>
+<div class="table-wrap"><table><tbody>
+<tr><th>Caso de Uso</th><td><strong>UC209 – Simular Contribuições e Calcular Retroativos</strong></td></tr>
+<tr><th>Módulo</th><td>CONTRIBUIÇÃO — Contribuição Previdenciária</td></tr>
+<tr><th>Sistema</th><td>CM Contabilidade / FUNCEF (Delphi 5 / VCL / MIDAS / Oracle)</td></tr>
+<tr><th>Tipo</th><td>Sistema Desktop</td></tr>
+<tr><th>Ator</th><td>Usuário operacional (analista de arrecadação / contribuições previdenciárias)</td></tr>
+<tr><th>Jornadas</th><td><a href="#PF-10">JF010 — Retroativo e Simulação</a></td></tr>
+<tr><th>Regras de negócio</th><td>0 regra(s) CONTRIB-RN; as validações da jornada estão nos tratamentos (TRT), classificados como validação de tela</td></tr>
+<tr><th>OS - Título</th><td>PFC-35 — Correção UC's CONTRIBUICAO (JF010 separada do UC208 em caso de uso próprio)</td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">2. Descrição Resumida</div>
+<p>Simulação de contribuições, cálculo retroativo em lote e revisão do índice do benefício saldado/FAB. Este caso de uso reúne 1 jornada(s) funcional(is) do módulo Contribuição Previdenciária:</p>
+<ul>
+<li><a href="#PF-10"><strong>JF010 — Retroativo e Simulação</strong></a>: Simular contribuições a partir de um evento gerador, calcular retroativos em lote e revisar o índice do benefício saldado/FAB.</li>
+</ul>
+<div class="note note-info"><p><strong>Origem:</strong> até o PFC-32 esta jornada fazia parte do <a href="uc208.html">UC208</a>. No PFC-35 ela foi separada em caso de uso próprio, sem alteração do texto da jornada.</p></div>
+</section>
+
+<section><div class="section-title">3. Pré-condições</div>
+<p><strong>Gerais do módulo:</strong></p>
+<ul>
+<li>Módulo disponível (entry point <code>CONTRIBUICAOPREV/Fontes/ContribuicaoPREV.dpr</code>) e usuário com permissão de acesso às telas.</li>
+<li>Banco Oracle acessível e parâmetros do módulo carregados (motivo padrão de cobrança, motivo padrão de tratamento de divergência).</li>
+<li>Patrocinadoras, planos previdenciários, contribuições (CONTRIBUICAO) e participantes (PARTPREVPLAN, CONTRIBPREVPARTP) cadastrados.</li>
+<li>Integrações configuradas quando a jornada as usa: Folha, Contas a Receber/CAP, Contabilidade, PGA (ver <a href="integracoes.html">🔗 Integrações</a>).</li>
+<li>Período contábil aberto para as datas usadas em lançamentos.</li>
+</ul>
+<p><strong>Por jornada:</strong></p>
+<ul>
+<li><a href="#PF-10">JF010</a>: Plano e categorias de evento gerador cadastrados; regras de cálculo parametrizadas; para eventos de participante, matrícula existente.</li>
+</ul>
+</section>
+
+<section><div class="section-title">4. Pós-condições</div>
+<ul>
+<li><a href="#PF-10">JF010</a>: Simulação exibida; HSTCONTRIBPREV e HSTATRASOCONTRIB gravados no retroativo; índice revisado.</li>
+</ul>
+</section>
+
+<section><div class="section-title">5. Jornadas Funcionais (JF010)</div>
+<p>Cada jornada traz objetivo, ator/gatilho, pré e pós-condições, sequência operacional, ações práticas, <strong>regras de negócio da jornada</strong> (texto completo de cada regra), tratamentos e mensagens.</p>
+<div class="legend"><span><span class="ev ev-comprovado">COMPROVADO</span> — no código</span><span><span class="ev ev-inferido">INFERIDO</span> — plausível</span><span><span class="ev ev-pendente">PENDENTE</span> — validar</span></div>
+</section>
+
+<div class="pf-block" id="PF-10"><h4>JF010 (PF-10) — Retroativo e Simulação</h4>
+<p><strong>Objetivo:</strong> Simular contribuições a partir de um evento gerador, calcular retroativos em lote e revisar o índice do benefício saldado/FAB.</p>
+<p><strong>Ator / gatilho:</strong> Analista previdenciário, nas telas <em>Simulação de Contribuição</em> e <em>Benefício Saldado e FAB - Revisão de Índice</em>; retroativo em lote via <code>dmRetroativoLote</code> (externo).</p>
+<p><strong>Pré-condições:</strong> Plano e categorias de evento gerador cadastrados; regras de cálculo parametrizadas; para eventos de participante, matrícula existente.</p>
+<p><strong>Pós-condições:</strong> Simulação exibida; HSTCONTRIBPREV e HSTATRASOCONTRIB gravados no retroativo; índice revisado.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li>Informar os dados da simulação (plano, categoria do evento gerador, datas, salário, patrocinadora). [<a href="#TRT049">TRT049</a>]</li>
+<li>O sistema verifica o participante e as contribuições da categoria e aplica as regras de cálculo. [<a href="#TRT050">TRT050</a>] [<a href="#TRT051">TRT051</a>]</li>
+<li>Revisão de índice: informar a data de revisão (posterior a 31/08/2006) e processar. [<a href="#TRT052">TRT052</a>] [<a href="#TRT033">TRT033</a>]</li>
+<li>Retroativo em lote: executado pelo componente externo <code>dmRetroativoLote</code>.</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Informar dados da simulação</td><td>Definir o cenário</td><td>Plano, categoria do evento, datas, salário, patrocinadora, função</td><td>Valida obrigatórios conforme a categoria</td><td>Cenário aceito</td><td>—</td><td><a href="#MSG092">MSG092</a>, <a href="#MSG096">MSG096</a></td><td><code>FSimulaContrib.dfm</code></td></tr>
+<tr><td>Simular contribuições</td><td>Projetar contribuições do evento</td><td>Cenário aceito</td><td>Verifica participante e contribuições; executa regras de cálculo e alteradores</td><td>Simulação exibida</td><td>—</td><td><a href="#MSG093">MSG093</a>, <a href="#MSG094">MSG094</a>, <a href="#MSG095">MSG095</a>, <a href="#MSG097">MSG097</a></td><td><code>FSimulaContrib.dfm</code></td></tr>
+<tr><td>Revisar índice BS/FAB</td><td>Atualizar índice do benefício saldado</td><td>Data de revisão</td><td>Valida data e atualiza</td><td>Índice revisado</td><td>—</td><td><a href="#MSG098">MSG098</a>, <a href="#MSG099">MSG099</a>, <a href="#MSG057">MSG057</a>, <a href="#MSG058">MSG058</a></td><td><code>FRevisaoIndice.dfm</code></td></tr>
+<tr><td>Calcular retroativo em lote</td><td>Gerar diferenças retroativas</td><td>Parâmetros do lote</td><td>Processamento externo (dmRetroativoLote)</td><td>HSTCONTRIBPREV/HSTATRASOCONTRIB gravados</td><td>—</td><td>—</td><td><code>dmRetroativoLote (externo)</code></td></tr>
+</tbody></table></div>
+<div class="jf-rules">
+<p><strong>Regras de negócio da jornada:</strong> nenhuma regra CONTRIB-RN específica desta jornada; as validações estão nos tratamentos (TRT) do caso de uso.</p>
+</div>
+
+<p><strong>Tratamentos de erro:</strong> <a href="#TRT033">TRT033</a>, <a href="#TRT049">TRT049</a>, <a href="#TRT050">TRT050</a>, <a href="#TRT051">TRT051</a>, <a href="#TRT052">TRT052</a></p>
+<p><strong>Mensagens:</strong> <a href="#MSG057">MSG057</a>, <a href="#MSG058">MSG058</a>, <a href="#MSG092">MSG092</a>, <a href="#MSG093">MSG093</a>, <a href="#MSG094">MSG094</a>, <a href="#MSG095">MSG095</a>, <a href="#MSG096">MSG096</a>, <a href="#MSG097">MSG097</a>, <a href="#MSG098">MSG098</a>, <a href="#MSG099">MSG099</a></p>
+<p><strong>Telas:</strong> Simulação de Contribuição (<code>FSimulaContrib.dfm</code>), Benefício Saldado e FAB - Revisão de Índice (<code>FRevisaoIndice.dfm</code>)</p>
+<p><strong>Dependências:</strong> A revisão de índice complementa <a href="uc206.html#PF-06">JF006</a>.</p>
+<div class="note note-info"><p><strong>Registro original do processo PF-10</strong></p><p><strong>Forms de entrada:</strong> <code>FSimulaContrib.dfm</code>, <code>FRevisaoIndice.dfm</code>, <code>dmRetroativoLote</code> (externo)</p><p><strong>Lógica de processamento:</strong> Simulação de contribuições; cálculo retroativo em lote; revisão de índices</p><p><strong>Saídas:</strong> Simulações, recálculos retroativos</p><p><strong>Persistência (tabelas escritas):</strong> HSTCONTRIBPREV (I/U), HSTATRASOCONTRIB (I)</p><p><strong>Evidência:</strong> <code>CONTRIBUICAOPREV/Fontes/FSimulaContrib.pas</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+</div>
+
+<section id="TRT-section"><div class="section-title">6. Tratamentos (TRT)</div>
+<p>Validações bloqueantes, confirmações e falhas de processamento encontradas nos forms do módulo. Cada tratamento traz a condição, a mensagem exibida e o resultado.</p>
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Condição</th><th>Mensagem</th><th>Resultado</th><th>Regra</th><th>Jornada</th></tr></thead><tbody>
+<tr id="TRT033"><td><strong>TRT033</strong></td><td>Erro na atualização/reprocessamento do BS-FAB ou na revisão de índice</td><td><a href="#MSG058">MSG058</a></td><td>Atualização não concluída</td><td>validação de tela</td><td><a href="uc206.html#PF-06">JF006</a>, <a href="#PF-10">JF010</a></td></tr>
+<tr id="TRT049"><td><strong>TRT049</strong></td><td>Dado obrigatório da simulação não informado</td><td><a href="#MSG092">MSG092</a>, <a href="#MSG096">MSG096</a></td><td>Bloqueia a simulação</td><td>validação de tela</td><td><a href="#PF-10">JF010</a></td></tr>
+<tr id="TRT050"><td><strong>TRT050</strong></td><td>Participante inexistente para o evento simulado</td><td><a href="#MSG093">MSG093</a></td><td>Bloqueia a simulação</td><td>validação de tela</td><td><a href="#PF-10">JF010</a></td></tr>
+<tr id="TRT051"><td><strong>TRT051</strong></td><td>Data final calculada anterior à data de início, ausência de contribuições para a categoria ou erro no cálculo de alteradores</td><td><a href="#MSG094">MSG094</a>, <a href="#MSG095">MSG095</a>, <a href="#MSG097">MSG097</a></td><td>Interrompe a simulação</td><td>validação de tela</td><td><a href="#PF-10">JF010</a></td></tr>
+<tr id="TRT052"><td><strong>TRT052</strong></td><td>Data de revisão de índice ausente ou não posterior a 31/08/2006</td><td><a href="#MSG098">MSG098</a>, <a href="#MSG099">MSG099</a></td><td>Bloqueia a revisão</td><td>validação de tela</td><td><a href="#PF-10">JF010</a></td></tr>
+</tbody></table></div>
+</section>
+
+<section id="MSG-section"><div class="section-title">7. Mensagens (MSG)</div>
+<p>Textos transcritos do código-fonte (grafia original mantida). Trechos variáveis aparecem entre &lt; &gt;; “(…)” indica continuação da mensagem no código.</p>
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Texto da mensagem</th><th>Tipo</th><th>Origem (CONTRIBUICAOPREV/Fontes/)</th><th>Jornadas</th></tr></thead><tbody>
+<tr id="MSG057"><td><strong>MSG057</strong></td><td>“Atualização Concluída.”</td><td>Sucesso</td><td><code>FBeneficioSaldadoFAB.pas:850; FRevisaoIndice.pas:102</code></td><td><a href="uc206.html#PF-06">JF006</a>, <a href="#PF-10">JF010</a></td></tr>
+<tr id="MSG058"><td><strong>MSG058</strong></td><td>“Ocorreu um erro, a atualização não foi concluída.”</td><td>Informação</td><td><code>FBeneficioSaldadoFAB.pas:852; FRevisaoIndice.pas:104</code></td><td><a href="uc206.html#PF-06">JF006</a>, <a href="#PF-10">JF010</a></td></tr>
+<tr id="MSG092"><td><strong>MSG092</strong></td><td>“Informe o Plano Previdenciário. (mesmo padrão para Categoria do Evento Gerador, Data de Admissão, Data de Inscrição, Salário, último mês de contribuição, patrocinadora, data do evento, data de demissão e salário de manutenção)”</td><td>Erro</td><td><code>FSimulaContrib.pas:395-471</code></td><td><a href="#PF-10">JF010</a></td></tr>
+<tr id="MSG093"><td><strong>MSG093</strong></td><td>“Participante não encontrado. A simulação deste evento só é permitida para matrículas existentes.”</td><td>Erro</td><td><code>FSimulaContrib.pas:773,1742</code></td><td><a href="#PF-10">JF010</a></td></tr>
+<tr id="MSG094"><td><strong>MSG094</strong></td><td>“A data final calculada para este evento é anterior a data início do evento. Verifique. (…)”</td><td>Erro</td><td><code>FSimulaContrib.pas:789,901</code></td><td><a href="#PF-10">JF010</a></td></tr>
+<tr id="MSG095"><td><strong>MSG095</strong></td><td>“Não existem contribuições para esta Categoria de Evento Gerador no Plano selecionado.”</td><td>Erro</td><td><code>FSimulaContrib.pas:821</code></td><td><a href="#PF-10">JF010</a></td></tr>
+<tr id="MSG096"><td><strong>MSG096</strong></td><td>“Apenas uma função pode ser selecionada.”</td><td>Erro</td><td><code>FSimulaContrib.pas:1915</code></td><td><a href="#PF-10">JF010</a></td></tr>
+<tr id="MSG097"><td><strong>MSG097</strong></td><td>“Erro no cálculo dos alteradores.”</td><td>Erro</td><td><code>FSimulaContrib.pas:1332,1467</code></td><td><a href="#PF-10">JF010</a></td></tr>
+<tr id="MSG098"><td><strong>MSG098</strong></td><td>“A data de revisão é obrigatória.”</td><td>Alerta</td><td><code>FRevisaoIndice.pas:59</code></td><td><a href="#PF-10">JF010</a></td></tr>
+<tr id="MSG099"><td><strong>MSG099</strong></td><td>“A data de revisão deverá ser maior que 31/08/2006.”</td><td>Alerta</td><td><code>FRevisaoIndice.pas:65</code></td><td><a href="#PF-10">JF010</a></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">8. Tabela/API/Programa</div>
+<div class="table-wrap"><table><thead><tr><th>Jornada</th><th>Tabelas (escrita)</th><th>Rotinas (CONTRIBUICAOPREV/Fontes/)</th></tr></thead><tbody>
+<tr><td><a href="#PF-10">JF010</a></td><td>HSTCONTRIBPREV (I/U), HSTATRASOCONTRIB (I)</td><td><code>FSimulaContrib.pas:395-1924; FRevisaoIndice.pas:59-104</code></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">9. Telas/Layouts</div>
+<div class="table-wrap"><table><thead><tr><th>Jornada</th><th>Tela (título)</th><th>Form (.dfm)</th></tr></thead><tbody>
+<tr><td><a href="#PF-10">JF010</a></td><td>Simulação de Contribuição<br>Benefício Saldado e FAB - Revisão de Índice</td><td><code>FSimulaContrib.dfm</code><br><code>FRevisaoIndice.dfm</code><br><code>dmRetroativoLote (externo)</code></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">10. Visão Consolidada das Jornadas</div>
+<div class="table-wrap"><table><thead><tr><th>Item</th><th>Jornada</th><th>Título</th><th>Critério de aceitação</th><th>Regras</th><th>Mensagens</th><th>Telas</th></tr></thead><tbody>
+<tr><td>[US] CONTRIB-JF010</td><td><a href="#PF-10">JF010</a></td><td>Retroativo e Simulação</td><td><strong>Dado</strong> um plano com categorias de evento e regras de cálculo, <strong>Quando</strong> o analista simula um evento para matrícula existente, <strong>Então</strong> as contribuições simuladas são exibidas; sem contribuições para a categoria o sistema informa e interrompe.</td><td>—</td><td><a href="#MSG057">MSG057</a>, <a href="#MSG058">MSG058</a>, <a href="#MSG092">MSG092</a>, <a href="#MSG093">MSG093</a>, <a href="#MSG094">MSG094</a>, <a href="#MSG095">MSG095</a>, <a href="#MSG096">MSG096</a>, <a href="#MSG097">MSG097</a>, <a href="#MSG098">MSG098</a>, <a href="#MSG099">MSG099</a></td><td>Simulação de Contribuição<br>Benefício Saldado e FAB - Revisão de Índice</td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">11. Critérios de Aceitação por Regra</div>
+<p>Este caso de uso não tem regras CONTRIB-RN catalogadas. As validações da jornada são tratamentos de validação de tela e estão descritas na seção <a href="#TRT-section">6. Tratamentos (TRT)</a>; o critério de aceitação da jornada está na seção 10.</p>
+</section>
+
+<p><a class="back-btn" href="funcionalidades.html">← Voltar à lista de Casos de Uso (Processos Funcionais)</a></p>
+</main>
+<footer>
+<p>Blueprint AS-IS — PFC-35 — Processos Funcionais organizados em Casos de Uso — Módulo CONTRIBUIÇÃO | Sistema legado Delphi 5 | pt-BR | Atualizado em 2026-11-10</p>
+</footer>
+</body>
+</html>
