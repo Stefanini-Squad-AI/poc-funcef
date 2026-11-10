@@ -3,15 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Contribuição Previdenciária — Funcionalidades — Blueprint AS-IS</title>
+<title>Contribuição Previdenciária — Funcionalidades — Blueprint AS-IS (adaptado)</title>
 <link rel="stylesheet" href="../assets/css/style.css">
-
 </head>
 <body>
 <header>
-  <div class="badge">Blueprint AS-IS — Delphi 5</div>
-  <h1>⚔️ Funcionalidades — Contribuição Previdenciária</h1>
-  <p>10 processos funcionais com entradas, processamento, regras, saídas e persistência</p>
+  <div class="badge">Blueprint AS-IS — PFC-27 (adaptado) — v2.0</div>
+  <h1>⚙️ Funcionalidades — Contribuição Previdenciária</h1>
+  <p>10 jornadas funcionais (JF001–JF010) com objetivo, sequência operacional, ações práticas, regras (RS), tratamentos (TRT), catálogo de mensagens (MSG), visão consolidada e histórico de versões. Mapeia os 10 processos PF-01 a PF-10 do PFC-21.</p>
 </header>
 <nav>
   <a href="index.html">📋 Visão Geral</a>
@@ -21,17 +20,469 @@
   <a href="dados.html">🗄️ Dados</a>
   <a href="integracoes.html">🔗 Integrações</a>
 </nav>
-
-
 <main>
-<section><div class="section-title">⚔️ Processos Funcionais — Contribuição Previdenciária (10 processos)</div>
-<div class="pf-block" id="PF-01"><h4>PF-01 — Manutenção e cobrança de contribuições (Preparo e Envio)</h4><p><strong>Forms de entrada:</strong> <code>FPreparaEnvia.dfm</code></p><p><strong>Lógica de processamento:</strong> Seleciona contribuições (ULTMESPREPARO < mês cobrança), calcula valores, insere em HSTCONTRIBPREV, integra com Folha/CaR/Contabilidade, atualiza SITRECEBIMENTO=1 e ULTMESPREPARO</p><p><strong>Saídas:</strong> Lotes de cobrança, documentos CaR</p><p><strong>Persistência (tabelas escritas):</strong> HSTCONTRIBPREV (I/U), CONTRIBPREVPARTP (U), DOCUMENTO (I/U), LANCAMENTO (I)</p><p><strong>Evidência:</strong> <code>CONTRIBUICAOPREV/Fontes/FPreparaEnvia.pas:2746,5076,6516</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div><div class="pf-block" id="PF-02"><h4>PF-02 — Recebimento por múltiplos canais</h4><p><strong>Forms de entrada:</strong> <code>FRecebeContribuicaoNovo.dfm</code>, <code>FRecebeContribEmptmo.dfm</code>, <code>FBaixaContribCAR.dfm</code></p><p><strong>Lógica de processamento:</strong> Lê arquivo de retorno, faz match por SITRECEBIMENTO/VALORRECEBIDO/DATARECEBIMENTO/FOLHAORIGEM/FLGDESCFOLHA, baixa documentos</p><p><strong>Saídas:</strong> Contribuições baixadas, documentos baixados</p><p><strong>Persistência (tabelas escritas):</strong> HSTCONTRIBPREV (U), DOCUMENTO (U), LANCTODOCUM (U)</p><p><strong>Evidência:</strong> <code>CONTRIBUICAOPREV/Fontes/FRecebeContribuicaoNovo.pas:617-622</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div><div class="pf-block" id="PF-03"><h4>PF-03 — Alimentação de reservas</h4><p><strong>Forms de entrada:</strong> <code>FAlimReservasReplan.dfm</code>, <code>FAtualizaPorIndice.dfm</code>, <code>FRodaPadraoMovReserva.dfm</code></p><p><strong>Lógica de processamento:</strong> Calcula/atualiza reservas por índice ou replanejamento; roda padrão de movimentação de reserva</p><p><strong>Saídas:</strong> Reservas atualizadas</p><p><strong>Persistência (tabelas escritas):</strong> HISTMOVRESERVA (I/U), RESERVAPART (U), RESERVAXPLANO (U)</p><p><strong>Evidência:</strong> <code>CONTRIBUICAOPREV/Fontes/FAtualizaPorIndice.pas:931</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div><div class="pf-block" id="PF-04"><h4>PF-04 — Salário de participação / manutenção</h4><p><strong>Forms de entrada:</strong> <code>FReajustaSalarioMantido.dfm</code>, <code>FAlteraSalPart.dfm</code></p><p><strong>Lógica de processamento:</strong> Reajuste por índice ou alteração em lote de SALMANTIDO/SALPARTICIPACAO via OLE/Excel</p><p><strong>Saídas:</strong> Salários atualizados</p><p><strong>Persistência (tabelas escritas):</strong> PARTPREVPLAN (U), LOGTOTALPREV (I)</p><p><strong>Evidência:</strong> <code>CONTRIBUICAOPREV/Fontes/FAlteraSalPart.pas:154-188</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div><div class="pf-block" id="PF-05"><h4>PF-05 — Tributação — Bitributação / IR Regressivo</h4><p><strong>Forms de entrada:</strong> <code>FCalcSalContr.dfm</code>, <code>fCalculoIRRF.dfm</code>, <code>FCadContribuicaoPortada.dfm</code></p><p><strong>Lógica de processamento:</strong> Calcula saldo via HSTBITRIBUTACAO/BITRIBUTACAO; calcula IRRF; registra opção de IR na portabilidade</p><p><strong>Saídas:</strong> Saldos bitributação, IRRF</p><p><strong>Persistência (tabelas escritas):</strong> HSTBITRIBUTACAO (I/U/D), BITRIBUTACAO (U), PORTABILIDADEPREV (U)</p><p><strong>Evidência:</strong> <code>CONTRIBUICAOPREV/Fontes/FCalcSalContr.pas:277-330</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div><div class="pf-block" id="PF-06"><h4>PF-06 — Portabilidade e Benefício Saldado/FAB</h4><p><strong>Forms de entrada:</strong> <code>FCadContribuicaoPortada.dfm</code>, <code>FBeneficioSaldadoFAB.dfm</code>, <code>fCargaArquivo.dfm</code></p><p><strong>Lógica de processamento:</strong> Cadastra contribuições portadas; calcula benefício saldado e FAB via PCK_BENEFSALDFAB.SP_ATUALIZASALDO; carga/descarga de arquivos</p><p><strong>Saídas:</strong> Benefício saldado, FAB, portabilidades</p><p><strong>Persistência (tabelas escritas):</strong> PORTABILIDADEPREV (I/U/D), BENEFSALDFAB (I/U/D), CARGABENEFSALDFAB (I)</p><p><strong>Evidência:</strong> <code>CONTRIBUICAOPREV/Fontes/FCadContribuicaoPortada.pas:367</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div><div class="pf-block" id="PF-07"><h4>PF-07 — Provisão para perdas</h4><p><strong>Forms de entrada:</strong> <code>FProvPerdasIndiv.dfm</code>, <code>FProvPerdasLote.dfm</code>, <code>FFRelProvPerdas.dfm</code></p><p><strong>Lógica de processamento:</strong> Calcula provisão para perdas por faixas parametrizadas; emite relatório</p><p><strong>Saídas:</strong> Provisão calculada, relatório</p><p><strong>Persistência (tabelas escritas):</strong> PROVISAOPERDASCONTRIBUICAO (I/U), FAIXASPROVISAOPERDACONTRIB (PENDENTE)</p><p><strong>Evidência:</strong> <code>CONTRIBUICAOPREV/Fontes/FProvPerdasLote.pas:428-437</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div><div class="pf-block" id="PF-08"><h4>PF-08 — Tratamento de divergências e inconsistências</h4><p><strong>Forms de entrada:</strong> <code>FDivergContrib.dfm</code>, <code>FConsEstatDivergContrib.dfm</code>, <code>FDesfDocContribuicao.dfm</code></p><p><strong>Lógica de processamento:</strong> Compara enviado vs recebido, identifica divergências, tratamento manual, desfaz documentos</p><p><strong>Saídas:</strong> Divergências resolvidas, logs</p><p><strong>Persistência (tabelas escritas):</strong> HSTCONTRIBPREV (U), HSTATRASOCONTRIB (I/U/D), LOGTOTALPREV (I)</p><p><strong>Evidência:</strong> <code>CONTRIBUICAOPREV/Fontes/FDivergContrib.pas:2737-2768</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div><div class="pf-block" id="PF-09"><h4>PF-09 — Controle individual / Entrada manual</h4><p><strong>Forms de entrada:</strong> <code>FControleIndivContrib.dfm</code>, <code>FCadHstContribuicao.dfm</code>, <code>FCadContribNucleoFamiliar.dfm</code></p><p><strong>Lógica de processamento:</strong> Cadastro/alteração manual de históricos de contribuição; valida regras RN009-RN012</p><p><strong>Saídas:</strong> Contribuições cadastradas/alteradas</p><p><strong>Persistência (tabelas escritas):</strong> HSTCONTRIBPREV (I/U/D), CONTRIBPREVNUCLEO (I/U/D), NUCLEOFAMILIAR (I/U/D)</p><p><strong>Evidência:</strong> <code>CONTRIBUICAOPREV/Fontes/FCadHstContribuicao.pas:1091</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div><div class="pf-block" id="PF-10"><h4>PF-10 — Retroativo e Simulação</h4><p><strong>Forms de entrada:</strong> <code>FSimulaContrib.dfm</code>, <code>FRevisaoIndice.dfm</code>, <code>dmRetroativoLote</code> (externo)</p><p><strong>Lógica de processamento:</strong> Simulação de contribuições; cálculo retroativo em lote; revisão de índices</p><p><strong>Saídas:</strong> Simulações, recálculos retroativos</p><p><strong>Persistência (tabelas escritas):</strong> HSTCONTRIBPREV (I/U), HSTATRASOCONTRIB (I)</p><p><strong>Evidência:</strong> <code>CONTRIBUICAOPREV/Fontes/FSimulaContrib.pas</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+
+<section><div class="section-title">1. Identificação</div>
+<div class="table-wrap"><table><tbody>
+<tr><th>Caso de Uso</th><td>Módulo Contribuição Previdenciária</td></tr>
+<tr><th>Sistema</th><td>CM Contabilidade / FUNCEF (Delphi 5 / VCL / MIDAS)</td></tr>
+<tr><th>Tipo</th><td>Sistema Desktop</td></tr>
+<tr><th>Ator</th><td>Usuário operacional (analista de contribuição, financeiro, contábil, atuarial)</td></tr>
+<tr><th>OS - Título</th><td>PFC-27 — Adaptação CONTRIBUIÇÃO</td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">2. Descrição Resumida</div>
+<p>O módulo Contribuição Previdenciária (pasta <code>CONTRIBUICAOPREV</code>, entry point <code>ContribuicaoPREV.dpr</code>) é o componente do sistema CM Contabilidade / FUNCEF responsável pela manutenção, cobrança e recebimento de contribuições previdenciárias por múltiplos canais, alimentação de reservas, salário de participação, tributação (bitributação/IR regressivo), portabilidade, benefício saldado/FAB, provisão para perdas e tratamento de divergências. O caso de uso organiza-se em <strong>10 jornadas funcionais</strong> (JF001–JF010), mapeando 1:1 os 10 processos identificados no código-fonte (PF-01 a PF-10). Cada jornada possui objetivo, sequência operacional, ações práticas, regras de negócio (RS), tratamentos de erro (TRT) e mensagens (MSG). A arquitetura é híbrida: herança CM framework + DataModules InfoPower (<code>TwwQuery</code>) com SQL inline nos forms. Detalhamento de regras em <a href="regras-de-negocio.html">📏 Regras</a>, de dados em <a href="dados.html">🗄️ Dados</a> e de integrações em <a href="integracoes.html">🔗 Integrações</a>.</p>
+</section>
+
+<section><div class="section-title">3. Pré-condições</div>
+<ul>
+<li>O módulo CONTRIBUIÇÃO deve estar compilado e disponível (entry point <code>CONTRIBUICAOPREV/Fontes/ContribuicaoPREV.dpr</code>).</li>
+<li>O banco Oracle (schema <code>CM.</code>) deve estar acessível.</li>
+<li>Os DataModules (<code>dtmAPrev</code>, <code>dtmIntegraCAPCAR</code>, <code>dtmPreparaContrib</code>) devem estar instanciados.</li>
+<li>Patrocinadoras, planos previdenciários e participantes devem estar cadastrados (via CMPrevMT50/CMAdmPrev).</li>
+<li>O usuário deve ter permissão de acesso ao módulo.</li>
+</ul>
+</section>
+
+<section><div class="section-title">4. Pós-condições</div>
+<ul>
+<li>As tabelas de histórico e cobrança (HSTCONTRIBPREV, CONTRIBPREVPARTP, DOCUMENTO, LANCAMENTO) são populadas conforme a jornada executada.</li>
+<li>As reservas (HISTMOVRESERVA, RESERVAPART, RESERVAXPLANO) são atualizadas quando aplicável.</li>
+<li>Os documentos CAP/CAR de cobrança são gerados e integrados com Folha/CaR/Contabilidade.</li>
+<li>O controle de interface (CTRLINTERFACE) e o log de auditoria (LOGTOTALPREV) são atualizados.</li>
+</ul>
+</section>
+
+<section><div class="section-title">5. Jornadas Funcionais (JF001–JF010)</div>
+<p>Cada jornada abaixo mapeia um processo original (PF-01 a PF-10) para o formato de jornadas funcionais. O <code>id</code> HTML preserva o código original para manter os links existentes.</p>
+<div class="legend"><span><span class="ev ev-comprovado">COMPROVADO</span> — no código</span><span><span class="ev ev-inferido">INFERIDO</span> — plausível</span><span><span class="ev ev-pendente">PENDENTE</span> — validar</span></div>
+</section>
+
+<div class="pf-block" id="PF-01"><h4>JF001 (PF-01) — Manutenção e cobrança de contribuições (Preparo e Envio)</h4>
+<p><strong>Objetivo:</strong> selecionar contribuições elegíveis, calcular valores, gerar documentos de cobrança e integrar com Folha/CaR/Contabilidade.</p>
+<p><strong>Gatilho/Ator:</strong> usuário aciona o botão Preparo/Envio em <code>FPreparaEnvia.dfm</code>.</p>
+<p><strong>Pré-condições:</strong> mês/ano de cobrança informados; tipo de cobrança selecionado; patrocinadoras/planos cadastrados; motivo de cobrança parametrizado.</p>
+<p><strong>Pós-condições:</strong> HSTCONTRIBPREV populado com SITRECEBIMENTO=1; CONTRIBPREVPARTP.ULTMESPREPARO atualizado; documentos CaR gerados em DOCUMENTO; lançamentos em LANCAMENTO.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li>Validar parâmetros (mês/ano/tipo cobrança) <a href="regras-de-negocio.html#CONTRIB-RN013">[RS013]</a> <a href="#TRT013">[TRT013]</a> <a href="#TRT014">[TRT014]</a> <a href="#TRT015">[TRT015]</a></li>
+<li>Selecionar contribuições com ULTMESPREPARO &lt; mês cobrança (FPreparaEnvia.pas:2330,2466) <a href="regras-de-negocio.html#CONTRIB-RN013">[RS013]</a></li>
+<li>Calcular valores e inserir em HSTCONTRIBPREV (:2746) <a href="regras-de-negocio.html#CONTRIB-RN017">[RS017]</a> <a href="regras-de-negocio.html#CONTRIB-RN027">[RS027]</a></li>
+<li>Integrar com Folha/CaR/Contabilidade (:5076) <a href="regras-de-negocio.html#CONTRIB-RN014">[RS014]</a> <a href="regras-de-negocio.html#CONTRIB-RN028">[RS028]</a></li>
+<li>Atualizar SITRECEBIMENTO=1 e ULTMESPREPARO (:5198,6516) <a href="regras-de-negocio.html#CONTRIB-RN014">[RS014]</a> <a href="regras-de-negocio.html#CONTRIB-RN016">[RS016]</a></li>
+<li>Verificar TMPDESC quando SITRECEBIMENTO≠0 <a href="regras-de-negocio.html#CONTRIB-RN019">[RS019]</a></li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Validar parâmetros</td><td>Confirmar mês/ano/tipo cobrança</td><td>Mês, ano, tipo cobrança</td><td>Verifica preenchimento; aborta se vazio</td><td>Parâmetros válidos</td><td><a href="regras-de-negocio.html#CONTRIB-RN013">RS013</a></td><td><a href="#MSG013">MSG013</a>, <a href="#MSG014">MSG014</a>, <a href="#MSG015">MSG015</a></td><td><code>FPreparaEnvia.dfm</code></td></tr>
+<tr><td>Selecionar contribuições</td><td>Filtrar elegíveis por ULTMESPREPARO</td><td>Patro/planos, mês cobrança</td><td>SELECT WHERE ULTMESPREPARO &lt; mês</td><td>Lista de contribuições elegíveis</td><td><a href="regras-de-negocio.html#CONTRIB-RN013">RS013</a></td><td>—</td><td><code>FPreparaEnvia.dfm</code></td></tr>
+<tr><td>Calcular valores</td><td>Computar valores a cobrar</td><td>Contribuições selecionadas</td><td>Calcula por regra de cálculo; considera atraso se FLGTPVLR='B'</td><td>Valores calculados</td><td><a href="regras-de-negocio.html#CONTRIB-RN017">RS017</a>, <a href="regras-de-negocio.html#CONTRIB-RN027">RS027</a></td><td>—</td><td><code>FPreparaEnvia.dfm</code></td></tr>
+<tr><td>Integrar Folha/CaR</td><td>Gerar documentos e lançamentos</td><td>Valores calculados</td><td>Insere DOCUMENTO/LANCAMENTO; integra CaR</td><td>Documentos gerados</td><td><a href="regras-de-negocio.html#CONTRIB-RN014">RS014</a>, <a href="regras-de-negocio.html#CONTRIB-RN028">RS028</a></td><td>—</td><td><code>FPreparaEnvia.dfm</code></td></tr>
+<tr><td>Atualizar situação</td><td>Marcar como enviada</td><td>Integração concluída</td><td>UPDATE SITRECEBIMENTO=1, ULTMESPREPARO</td><td>Contribuições enviadas</td><td><a href="regras-de-negocio.html#CONTRIB-RN014">RS014</a>, <a href="regras-de-negocio.html#CONTRIB-RN016">RS016</a></td><td>—</td><td><code>FPreparaEnvia.dfm</code></td></tr>
+</tbody></table></div>
+<p><strong>Regras de negócio da jornada:</strong> <a href="regras-de-negocio.html#CONTRIB-RN013">RS013 (CONTRIB-RN013)</a> — Preparo só processa ULTMESPREPARO &lt; mês cobrança; <a href="regras-de-negocio.html#CONTRIB-RN014">RS014 (CONTRIB-RN014)</a> — Envio marca SITRECEBIMENTO=1; <a href="regras-de-negocio.html#CONTRIB-RN015">RS015 (CONTRIB-RN015)</a> — Desfazer preparo retorna SITRECEBIMENTO=0; <a href="regras-de-negocio.html#CONTRIB-RN016">RS016 (CONTRIB-RN016)</a> — Atualiza ULTMESPREPARO; <a href="regras-de-negocio.html#CONTRIB-RN017">RS017 (CONTRIB-RN017)</a> — FLGTPVLR='B' considera atraso; <a href="regras-de-negocio.html#CONTRIB-RN019">RS019 (CONTRIB-RN019)</a> — Skip TMPDESC se SITRECEBIMENTO=0; <a href="regras-de-negocio.html#CONTRIB-RN026">RS026 (CONTRIB-RN026)</a> — Plano contábil divergente questiona usuário; <a href="regras-de-negocio.html#CONTRIB-RN027">RS027 (CONTRIB-RN027)</a> — Filtro apenas calculadas por evento; <a href="regras-de-negocio.html#CONTRIB-RN028">RS028 (CONTRIB-RN028)</a> — Geração documentos por data recebimento.</p>
+<p><strong>Dependências:</strong> precede <a href="#PF-02">JF002</a> (recebimento) e <a href="#PF-03">JF003</a> (alimentação de reservas). Evidência: <code>CONTRIBUICAOPREV/Fontes/FPreparaEnvia.pas:2746,5076,6516</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<div class="mermaid">[FPreparaEnvia] --> ValidarParametros --> SelecionarContribuicoes(ULTMESPREPARO&lt;mes)
+  --> CalcularValores --> IntegrarFolhaCaR --> [DOCUMENTO/LANCAMENTO]
+  --> AtualizarSITRECEBIMENTO=1 --> AtualizarULTMESPREPARO --> [HSTCONTRIBPREV/CONTRIBPREVPARTP]</div>
+</div>
+
+<div class="pf-block" id="PF-02"><h4>JF002 (PF-02) — Recebimento por múltiplos canais</h4>
+<p><strong>Objetivo:</strong> processar retorno de contribuições via folha, empréstimo, contas a receber e banco, dando baixa nos documentos.</p>
+<p><strong>Gatilho/Ator:</strong> usuário aciona recebimento em <code>FRecebeContribuicaoNovo.dfm</code>, <code>FRecebeContribEmptmo.dfm</code> ou <code>FBaixaContribCAR.dfm</code>.</p>
+<p><strong>Pré-condições:</strong> mês de cobrança informado; data de recebimento informada; arquivo de retorno disponível (quando aplicável).</p>
+<p><strong>Pós-condições:</strong> HSTCONTRIBPREV atualizado com VALORRECEBIDO/DATARECEBIMENTO; DOCUMENTO baixado; LANCTODOCUM atualizado.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li>Validar mês de cobrança e data de recebimento <a href="#TRT021">[TRT021]</a> <a href="#TRT022">[TRT022]</a></li>
+<li>Ler arquivo de retorno / selecionar contribuições (FRecebeContribuicaoNovo.pas:617-622) <a href="regras-de-negocio.html#CONTRIB-RN024">[RS024]</a></li>
+<li>Fazer match por SITRECEBIMENTO/VALORRECEBIDO/DATARECEBIMENTO/FOLHAORIGEM/FLGDESCFOLHA</li>
+<li>Baixar documentos (UPDATE DOCUMENTO, LANCTODOCUM)</li>
+<li>Atualizar HSTCONTRIBPREV com recebimento</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Validar entrada</td><td>Confirmar mês e data recebimento</td><td>Mês cobrança, data recebimento</td><td>Aborta se vazio</td><td>Entrada válida</td><td>—</td><td><a href="#MSG021">MSG021</a>, <a href="#MSG022">MSG022</a></td><td><code>FRecebeContribuicaoNovo.dfm</code></td></tr>
+<tr><td>Ler retorno</td><td>Carregar arquivo de retorno</td><td>Arquivo de retorno</td><td>Parse do arquivo; carrega contribuições</td><td>Contribuições carregadas</td><td>—</td><td>—</td><td><code>FRecebeContribuicaoNovo.dfm</code></td></tr>
+<tr><td>Match e baixa</td><td>Casar e baixar documentos</td><td>Contribuições carregadas</td><td>Filtro SQL por situação/valor/data/origem; UPDATE DOCUMENTO</td><td>Documentos baixados</td><td><a href="regras-de-negocio.html#CONTRIB-RN024">RS024</a></td><td>—</td><td><code>FRecebeContribuicaoNovo.dfm</code></td></tr>
+<tr><td>Atualizar histórico</td><td>Registrar recebimento</td><td>Documentos baixados</td><td>UPDATE HSTCONTRIBPREV com recebimento</td><td>Contribuições recebidas</td><td>—</td><td>—</td><td><code>FRecebeContribuicaoNovo.dfm</code></td></tr>
+</tbody></table></div>
+<p><strong>Regras de negócio da jornada:</strong> <a href="regras-de-negocio.html#CONTRIB-RN024">RS024 (CONTRIB-RN024)</a> — Recebimento via folha seleciona contribuições com SITRECEBIMENTO=1 e VALORRECEBIDO=0, ou SITRECEBIMENTO∈{2,3} com DATARECEBIMENTO não nulo, FOLHAORIGEM&lt;&gt;'B' e FLGDESCFOLHA=1.</p>
+<p><strong>Dependências:</strong> sucede <a href="#PF-01">JF001</a> (envio); precede <a href="#PF-08">JF008</a> (divergências). Evidência: <code>CONTRIBUICAOPREV/Fontes/FRecebeContribuicaoNovo.pas:617-622</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<div class="mermaid">[FRecebeContribuicaoNovo] --> ValidarEntrada --> LerRetorno --> MatchSituacaoValorData
+  --> BaixarDocumentos --> AtualizarHSTCONTRIBPREV --> [DOCUMENTO/LANCTODOCUM baixados]</div>
+</div>
+
+<div class="pf-block" id="PF-03"><h4>JF003 (PF-03) — Alimentação de reservas</h4>
+<p><strong>Objetivo:</strong> calcular e atualizar reservas dos participantes por índice de correção ou replanejamento.</p>
+<p><strong>Gatilho/Ator:</strong> usuário aciona alimentação em <code>FAlimReservasReplan.dfm</code>, <code>FAtualizaPorIndice.dfm</code> ou <code>FRodaPadraoMovReserva.dfm</code>.</p>
+<p><strong>Pré-condições:</strong> patrocinadora(s)/plano(s)/reserva(s) selecionados; data de atualização informada; índice cadastrado.</p>
+<p><strong>Pós-condições:</strong> HISTMOVRESERVA populado; RESERVAPART e RESERVAXPLANO atualizados.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li>Validar seleção de patrocinadora/plano/reserva (FAtualizaPorIndice.pas:294,315,335)</li>
+<li>Informar data de atualização e índice (:473)</li>
+<li>Calcular/atualizar reservas por índice (:931)</li>
+<li>Rodar padrão de movimentação de reserva (FRodaPadraoMovReserva)</li>
+<li>Gravar HISTMOVRESERVA e atualizar RESERVAPART/RESERVAXPLANO</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Validar seleção</td><td>Confirmar patro/plano/reserva</td><td>Patro, planos, reservas</td><td>Aborta se nenhum selecionado</td><td>Seleção válida</td><td>—</td><td>—</td><td><code>FAtualizaPorIndice.dfm</code></td></tr>
+<tr><td>Atualizar por índice</td><td>Aplicar correção</td><td>Data atualização, índice</td><td>Calcula novo valor = reserva × índice</td><td>Reservas recalculadas</td><td>—</td><td>—</td><td><code>FAtualizaPorIndice.dfm</code></td></tr>
+<tr><td>Movimentar reserva</td><td>Registrar movimentação</td><td>Reservas atualizadas</td><td>Insere HISTMOVRESERVA; UPDATE RESERVAPART/RESERVAXPLANO</td><td>Reservas atualizadas</td><td>—</td><td>—</td><td><code>FRodaPadraoMovReserva.dfm</code></td></tr>
+</tbody></table></div>
+<p><strong>Regras de negócio da jornada:</strong> — (validações de seleção inline no form).</p>
+<p><strong>Dependências:</strong> sucede <a href="#PF-01">JF001</a> (contribuições recebidas alimentam reservas). Evidência: <code>CONTRIBUICAOPREV/Fontes/FAtualizaPorIndice.pas:931</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<div class="mermaid">[FAtualizaPorIndice] --> ValidarSelecao --> AtualizarPorIndice --> RodarPadraoMovReserva
+  --> GravarHISTMOVRESERVA --> [RESERVAPART/RESERVAXPLANO]</div>
+</div>
+
+<div class="pf-block" id="PF-04"><h4>JF004 (PF-04) — Salário de participação / manutenção</h4>
+<p><strong>Objetivo:</strong> reajustar salário mantido e alterar salário de participação em lote via OLE/Excel.</p>
+<p><strong>Gatilho/Ator:</strong> usuário aciona reajuste em <code>FReajustaSalarioMantido.dfm</code> ou alteração em lote em <code>FAlteraSalPart.dfm</code>.</p>
+<p><strong>Pré-condições:</strong> arquivo Excel selecionado; salário a alterar selecionado; participantes/planos cadastrados.</p>
+<p><strong>Pós-condições:</strong> PARTPREVPLAN atualizado com SALMANTIDO/SALPARTICIPACAO; LOGTOTALPREV registrado.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li>Selecionar arquivo Excel e salário a alterar (FAlteraSalPart.pas:102,108) <a href="#TRT023">[TRT023]</a> <a href="#TRT024">[TRT024]</a></li>
+<li>Ler planilha via OLE/Excel</li>
+<li>Para cada linha (IDPESSOA, IDPLANOPREV, SALMANTIDO, SALPARTICIPACAO): atualizar PARTPREVPLAN (:154-188) <a href="regras-de-negocio.html#CONTRIB-RN025">[RS025]</a></li>
+<li>Gravar log de auditoria (GravaLogTotalPrev)</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Selecionar arquivo</td><td>Carregar planilha Excel</td><td>Arquivo .xls, salário alvo</td><td>Valida seleção; aborta se vazio</td><td>Arquivo carregado</td><td>—</td><td><a href="#MSG023">MSG023</a>, <a href="#MSG024">MSG024</a></td><td><code>FAlteraSalPart.dfm</code></td></tr>
+<tr><td>Processar lote</td><td>Atualizar salários</td><td>Linhas da planilha</td><td>UPDATE PARTPREVPLAN SET SALMANTIDO/SALPARTICIPACAO por IDPESSOA/IDPLANOPREV</td><td>Salários atualizados</td><td><a href="regras-de-negocio.html#CONTRIB-RN025">RS025</a></td><td>—</td><td><code>FAlteraSalPart.dfm</code></td></tr>
+<tr><td>Gravar log</td><td>Auditar alteração</td><td>Salários atualizados</td><td>GravaLogTotalPrev</td><td>LOGTOTALPREV gravado</td><td>—</td><td>—</td><td><code>FAlteraSalPart.dfm</code></td></tr>
+</tbody></table></div>
+<p><strong>Regras de negócio da jornada:</strong> <a href="regras-de-negocio.html#CONTRIB-RN025">RS025 (CONTRIB-RN025)</a> — Alteração em lote de salário via Excel atualiza PARTPREVPLAN.</p>
+<p><strong>Dependências:</strong> independente; alimenta dados usados por <a href="#PF-01">JF001</a>. Evidência: <code>CONTRIBUICAOPREV/Fontes/FAlteraSalPart.pas:154-188</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<div class="mermaid">[FAlteraSalPart] --> SelecionarArquivo --> LerExcel(OLE) --> loop(UPDATE PARTPREVPLAN) --> GravaLogTotalPrev --> [PARTPREVPLAN/LOGTOTALPREV]</div>
+</div>
+
+<div class="pf-block" id="PF-05"><h4>JF005 (PF-05) — Tributação — Bitributação / IR Regressivo</h4>
+<p><strong>Objetivo:</strong> calcular saldo de contribuições via bitributação e calcular IRRF regressivo/progressivo.</p>
+<p><strong>Gatilho/Ator:</strong> usuário aciona cálculo em <code>FCalcSalContr.dfm</code>, <code>fCalculoIRRF.dfm</code> ou <code>FCadContribuicaoPortada.dfm</code>.</p>
+<p><strong>Pré-condições:</strong> participante selecionado; opção de IR (regressivo/progressivo) informada; índices cadastrados.</p>
+<p><strong>Pós-condições:</strong> HSTBITRIBUTACAO e BITRIBUTACAO atualizados; PORTABILIDADEPREV com opção de IR registrada.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li>Selecionar participante (FCalcSalContr.pas:450) <a href="#TRT025">[TRT025]</a></li>
+<li>Confirmar cálculo dos saldos (:455)</li>
+<li>Calcular saldo via HSTBITRIBUTACAO/BITRIBUTACAO (:277-330) <a href="regras-de-negocio.html#CONTRIB-RN022">[RS022]</a></li>
+<li>Calcular IRRF (fCalculoIRRF) <a href="regras-de-negocio.html#CONTRIB-RN006">[RS006]</a> <a href="#TRT007">[TRT007]</a></li>
+<li>Registrar opção de IR na portabilidade (FCadContribuicaoPortada.pas:323)</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Selecionar participante</td><td>Identificar participante</td><td>Matrícula/IDPESSOA</td><td>Valida seleção; aborta se vazio</td><td>Participante selecionado</td><td>—</td><td><a href="#MSG025">MSG025</a></td><td><code>FCalcSalContr.dfm</code></td></tr>
+<tr><td>Calcular saldo</td><td>Computar saldo bitributação</td><td>Participante, contribuições</td><td>InserirHSTBITRIBUTACAO; DELETE/INSERT BITRIBUTACAO</td><td>Saldo calculado</td><td><a href="regras-de-negocio.html#CONTRIB-RN022">RS022</a></td><td>—</td><td><code>FCalcSalContr.dfm</code></td></tr>
+<tr><td>Calcular IRRF</td><td>Aplicar IR regressivo/progressivo</td><td>Saldo, opção de IR</td><td>Valida opção de IR; calcula IRRF</td><td>IRRF calculado</td><td><a href="regras-de-negocio.html#CONTRIB-RN006">RS006</a></td><td><a href="#MSG007">MSG007</a></td><td><code>fCalculoIRRF.dfm</code></td></tr>
+</tbody></table></div>
+<p><strong>Regras de negócio da jornada:</strong> <a href="regras-de-negocio.html#CONTRIB-RN006">RS006 (CONTRIB-RN006)</a> — Opção de IR obrigatória; <a href="regras-de-negocio.html#CONTRIB-RN022">RS022 (CONTRIB-RN022)</a> — Cálculo do saldo lê/insere HSTBITRIBUTACAO e BITRIBUTACAO.</p>
+<p><strong>Dependências:</strong> relaciona-se com <a href="#PF-06">JF006</a> (portabilidade). Evidência: <code>CONTRIBUICAOPREV/Fontes/FCalcSalContr.pas:277-330</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<div class="mermaid">[FCalcSalContr] --> SelecionarParticipante --> CalcularSaldo(HSTBITRIBUTACAO/BITRIBUTACAO)
+  --> CalcularIRRF --> RegistrarOpcaoIR --> [HSTBITRIBUTACAO/BITRIBUTACAO/PORTABILIDADEPREV]</div>
+</div>
+
+<div class="pf-block" id="PF-06"><h4>JF006 (PF-06) — Portabilidade e Benefício Saldado/FAB</h4>
+<p><strong>Objetivo:</strong> cadastrar contribuições portadas, calcular benefício saldado e FAB, e processar carga/descarga de arquivos.</p>
+<p><strong>Gatilho/Ator:</strong> usuário aciona cadastro em <code>FCadContribuicaoPortada.dfm</code>, benefício em <code>FBeneficioSaldadoFAB.dfm</code> ou carga em <code>fCargaArquivo.dfm</code>.</p>
+<p><strong>Pré-condições:</strong> participante selecionado; mês de vínculo válido (0–11); ano/mês de referência ≤ cobrança; valor esperado &gt; 0; opção de IR informada.</p>
+<p><strong>Pós-condições:</strong> PORTABILIDADEPREV inserida/atualizada; BENEFSALDFAB e CARGABENEFSALDFAB populados via package Oracle.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li>Selecionar participante (FCadContribuicaoPortada.pas:417)</li>
+<li>Validar mês de vínculo 0–11 (:799) <a href="regras-de-negocio.html#CONTRIB-RN001">[RS001]</a> <a href="#TRT001">[TRT001]</a></li>
+<li>Validar ano/mês referência obrigatório e ≤ cobrança (:1186-1199) <a href="regras-de-negocio.html#CONTRIB-RN002">[RS002]</a> <a href="#TRT002">[TRT002]</a> <a href="#TRT003">[TRT003]</a></li>
+<li>Validar valor esperado &gt; 0 (:1208-1211) <a href="regras-de-negocio.html#CONTRIB-RN003">[RS003]</a> <a href="#TRT004">[TRT004]</a></li>
+<li>Validar opção de IR (:323) <a href="regras-de-negocio.html#CONTRIB-RN006">[RS006]</a> <a href="#TRT007">[TRT007]</a></li>
+<li>Validar arquivo de importação (:1173-1178,1802,1815) <a href="regras-de-negocio.html#CONTRIB-RN008">[RS008]</a> <a href="#TRT009">[TRT009]</a></li>
+<li>Gravar portabilidade (:367) <a href="regras-de-negocio.html#CONTRIB-RN004">[RS004]</a> <a href="regras-de-negocio.html#CONTRIB-RN005">[RS005]</a> <a href="regras-de-negocio.html#CONTRIB-RN007">[RS007]</a></li>
+<li>Calcular benefício saldado/FAB via PCK_BENEFSALDFAB.SP_ATUALIZASALDO (FBeneficioSaldadoFAB)</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Selecionar participante</td><td>Identificar participante</td><td>Matrícula</td><td>Valida seleção</td><td>Participante selecionado</td><td>—</td><td>—</td><td><code>FCadContribuicaoPortada.dfm</code></td></tr>
+<tr><td>Validar mês vínculo</td><td>Confirmar 0–11</td><td>EdtMesReferencia</td><td>Aborta se fora do intervalo</td><td>Mês válido</td><td><a href="regras-de-negocio.html#CONTRIB-RN001">RS001</a></td><td><a href="#MSG001">MSG001</a></td><td><code>FCadContribuicaoPortada.dfm</code></td></tr>
+<tr><td>Validar referência</td><td>Confirmar ano/mês ≤ cobrança</td><td>Ano/mês referência, cobrança</td><td>Aborta se vazio ou &gt; cobrança</td><td>Referência válida</td><td><a href="regras-de-negocio.html#CONTRIB-RN002">RS002</a></td><td><a href="#MSG002">MSG002</a>, <a href="#MSG003">MSG003</a></td><td><code>FCadContribuicaoPortada.dfm</code></td></tr>
+<tr><td>Validar valor</td><td>Confirmar valor &gt; 0</td><td>Valor esperado</td><td>Aborta se ≤ 0</td><td>Valor válido</td><td><a href="regras-de-negocio.html#CONTRIB-RN003">RS003</a></td><td><a href="#MSG004">MSG004</a></td><td><code>FCadContribuicaoPortada.dfm</code></td></tr>
+<tr><td>Validar opção IR</td><td>Confirmar regressivo/progressivo</td><td>RbRegressivo/RbProgressivo</td><td>Aborta se nenhum marcado</td><td>Opção informada</td><td><a href="regras-de-negocio.html#CONTRIB-RN006">RS006</a></td><td><a href="#MSG007">MSG007</a></td><td><code>FCadContribuicaoPortada.dfm</code></td></tr>
+<tr><td>Validar arquivo</td><td>Confirmar Excel válido</td><td>Arquivo importação</td><td>Valida formato e layout</td><td>Arquivo válido</td><td><a href="regras-de-negocio.html#CONTRIB-RN008">RS008</a></td><td><a href="#MSG009">MSG009</a></td><td><code>FCadContribuicaoPortada.dfm</code></td></tr>
+<tr><td>Gravar portabilidade</td><td>Persistir contribuição portada</td><td>Dados validados</td><td>INSERT/UPDATE PORTABILIDADEPREV; bloqueia se recebida/enviada</td><td>Portabilidade gravada</td><td><a href="regras-de-negocio.html#CONTRIB-RN004">RS004</a>, <a href="regras-de-negocio.html#CONTRIB-RN005">RS005</a>, <a href="regras-de-negocio.html#CONTRIB-RN007">RS007</a></td><td><a href="#MSG005">MSG005</a>, <a href="#MSG006">MSG006</a>, <a href="#MSG008">MSG008</a></td><td><code>FCadContribuicaoPortada.dfm</code></td></tr>
+<tr><td>Calcular BS/FAB</td><td>Atualizar benefício saldado</td><td>Portabilidade gravada</td><td>Chama PCK_BENEFSALDFAB.SP_ATUALIZASALDO</td><td>BENEFSALDFAB atualizado</td><td>—</td><td>—</td><td><code>FBeneficioSaldadoFAB.dfm</code></td></tr>
+</tbody></table></div>
+<p><strong>Regras de negócio da jornada:</strong> <a href="regras-de-negocio.html#CONTRIB-RN001">RS001 (CONTRIB-RN001)</a> — Mês vínculo 0–11; <a href="regras-de-negocio.html#CONTRIB-RN002">RS002 (CONTRIB-RN002)</a> — Ano/mês referência obrigatório; <a href="regras-de-negocio.html#CONTRIB-RN003">RS003 (CONTRIB-RN003)</a> — Valor esperado &gt; 0; <a href="regras-de-negocio.html#CONTRIB-RN004">RS004 (CONTRIB-RN004)</a> — Recebida bloqueia alteração; <a href="regras-de-negocio.html#CONTRIB-RN005">RS005 (CONTRIB-RN005)</a> — Enviada bloqueia alteração/exclusão; <a href="regras-de-negocio.html#CONTRIB-RN006">RS006 (CONTRIB-RN006)</a> — Opção de IR obrigatória; <a href="regras-de-negocio.html#CONTRIB-RN007">RS007 (CONTRIB-RN007)</a> — Exclusão exige excluir contribuições; <a href="regras-de-negocio.html#CONTRIB-RN008">RS008 (CONTRIB-RN008)</a> — Importação exige arquivo válido.</p>
+<p><strong>Dependências:</strong> relaciona-se com <a href="#PF-05">JF005</a> (tributação/IR). Evidência: <code>CONTRIBUICAOPREV/Fontes/FCadContribuicaoPortada.pas:367</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<div class="mermaid">[FCadContribuicaoPortada] --> SelecionarParticipante --> ValidarMesVinculo --> ValidarReferencia
+  --> ValidarValor --> ValidarOpcaoIR --> ValidarArquivo --> GravarPortabilidade
+  --> CalcularBSFAB(SP_ATUALIZASALDO) --> [PORTABILIDADEPREV/BENEFSALDFAB]</div>
+</div>
+
+<div class="pf-block" id="PF-07"><h4>JF007 (PF-07) — Provisão para perdas</h4>
+<p><strong>Objetivo:</strong> calcular provisão para perdas de contribuição por faixas parametrizadas, individualmente ou em lote, e emitir relatório.</p>
+<p><strong>Gatilho/Ator:</strong> usuário aciona cálculo em <code>FProvPerdasIndiv.dfm</code>, <code>FProvPerdasLote.dfm</code> ou relatório em <code>FFRelProvPerdas.dfm</code>.</p>
+<p><strong>Pré-condições:</strong> ano/mês de cobrança selecionado; ≥1 patrocinadora; ≥1 plano previdenciário; faixas parametrizadas.</p>
+<p><strong>Pós-condições:</strong> PROVISAOPERDASCONTRIBUICAO populada; relatório emitido.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li>Validar ano/mês cobrança, patrocinadora, plano (FProvPerdasLote.pas:428-437) <a href="regras-de-negocio.html#CONTRIB-RN020">[RS020]</a> <a href="#TRT016">[TRT016]</a> <a href="#TRT017">[TRT017]</a> <a href="#TRT018">[TRT018]</a></li>
+<li>Calcular provisão por faixas parametrizadas (:428-437)</li>
+<li>Gravar PROVISAOPERDASCONTRIBUICAO</li>
+<li>Emitir relatório (FFRelProvPerdas.pas:366,394,398) <a href="regras-de-negocio.html#CONTRIB-RN021">[RS021]</a> <a href="#TRT019">[TRT019]</a> <a href="#TRT020">[TRT020]</a></li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Validar parâmetros lote</td><td>Confirmar ano/mês/patro/plano</td><td>Mês, ano, patro, planos</td><td>raise EValidacao se vazio</td><td>Parâmetros válidos</td><td><a href="regras-de-negocio.html#CONTRIB-RN020">RS020</a></td><td><a href="#MSG016">MSG016</a>, <a href="#MSG017">MSG017</a>, <a href="#MSG018">MSG018</a></td><td><code>FProvPerdasLote.dfm</code></td></tr>
+<tr><td>Calcular provisão</td><td>Computar por faixas</td><td>Parâmetros válidos, faixas</td><td>Calcula provisão por faixa parametrizada</td><td>Provisão calculada</td><td>—</td><td>—</td><td><code>FProvPerdasLote.dfm</code></td></tr>
+<tr><td>Gravar provisão</td><td>Persistir resultado</td><td>Provisão calculada</td><td>INSERT/UPDATE PROVISAOPERDASCONTRIBUICAO</td><td>Provisão gravada</td><td>—</td><td>—</td><td><code>FProvPerdasLote.dfm</code></td></tr>
+<tr><td>Emitir relatório</td><td>Apresentar provisão</td><td>Matrícula, parâmetros, mês</td><td>Valida; gera relatório</td><td>Relatório emitido</td><td><a href="regras-de-negocio.html#CONTRIB-RN021">RS021</a></td><td><a href="#MSG019">MSG019</a>, <a href="#MSG020">MSG020</a></td><td><code>FFRelProvPerdas.dfm</code></td></tr>
+</tbody></table></div>
+<p><strong>Regras de negócio da jornada:</strong> <a href="regras-de-negocio.html#CONTRIB-RN020">RS020 (CONTRIB-RN020)</a> — Provisão em lote exige ano/mês, ≥1 patro, ≥1 plano; <a href="regras-de-negocio.html#CONTRIB-RN021">RS021 (CONTRIB-RN021)</a> — Relatório exige matrícula, ≥1 parâmetro, mês cobrança.</p>
+<p><strong>Dependências:</strong> independente; usa faixas de FAIXASPROVISAOPERDACONTRIB. Evidência: <code>CONTRIBUICAOPREV/Fontes/FProvPerdasLote.pas:428-437</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<div class="mermaid">[FProvPerdasLote] --> ValidarParametros --> CalcularProvisao(Faixas) --> GravarPROVISAOPERDASCONTRIBUICAO
+  --> [FFRelProvPerdas] --> EmitirRelatorio --> [PROVISAOPERDASCONTRIBUICAO]</div>
+</div>
+
+<div class="pf-block" id="PF-08"><h4>JF008 (PF-08) — Tratamento de divergências e inconsistências</h4>
+<p><strong>Objetivo:</strong> comparar contribuições enviadas vs recebidas, identificar divergências e tratá-las manualmente, com opção de desfazer documentos.</p>
+<p><strong>Gatilho/Ator:</strong> usuário aciona tratamento em <code>FDivergContrib.dfm</code>, estatística em <code>FConsEstatDivergContrib.dfm</code> ou desfazimento em <code>FDesfDocContribuicao.dfm</code>.</p>
+<p><strong>Pré-condições:</strong> modo de divergência selecionado; contribuições enviadas e recebidas disponíveis; motivo de tratamento cadastrado.</p>
+<p><strong>Pós-condições:</strong> HSTCONTRIBPREV atualizado; HSTATRASOCONTRIB registrado; LOGTOTALPREV gravado; divergências resolvidas.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li>Selecionar modo de divergência (FDivergContrib.pas:1555,1831) <a href="#TRT026">[TRT026]</a></li>
+<li>Comparar enviado vs recebido, identificar divergências (:2737-2768)</li>
+<li>Informar motivo de tratamento (:4820) <a href="#TRT027">[TRT027]</a></li>
+<li>Tratar divergência (aceitar recebido, ignorar diferença, recalcular, novo mês cobrança)</li>
+<li>Desfazer documentos quando necessário (FDesfDocContribuicao)</li>
+<li>Gravar HSTATRASOCONTRIB e LOGTOTALPREV</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Selecionar modo</td><td>Definir tipo de divergência</td><td>Modo de divergência</td><td>Aborta se não selecionado</td><td>Modo definido</td><td>—</td><td><a href="#MSG026">MSG026</a></td><td><code>FDivergContrib.dfm</code></td></tr>
+<tr><td>Comparar</td><td>Identificar divergências</td><td>Enviado, recebido</td><td>Compara valor esperado vs recebido</td><td>Divergências listadas</td><td>—</td><td>—</td><td><code>FDivergContrib.dfm</code></td></tr>
+<tr><td>Tratar divergência</td><td>Resolver diferença</td><td>Motivo, ação</td><td>Valida motivo; aplica tratamento</td><td>Divergência resolvida</td><td>—</td><td><a href="#MSG027">MSG027</a></td><td><code>FDivergContrib.dfm</code></td></tr>
+<tr><td>Desfazer documento</td><td>Reverter cobrança</td><td>Documento selecionado</td><td>UPDATE HSTCONTRIBPREV; desfaz DOCUMENTO</td><td>Documento desfeito</td><td>—</td><td>—</td><td><code>FDesfDocContribuicao.dfm</code></td></tr>
+</tbody></table></div>
+<p><strong>Regras de negócio da jornada:</strong> — (validações de seleção e motivo inline no form).</p>
+<p><strong>Dependências:</strong> sucede <a href="#PF-02">JF002</a> (recebimento). Evidência: <code>CONTRIBUICAOPREV/Fontes/FDivergContrib.pas:2737-2768</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<div class="mermaid">[FDivergContrib] --> SelecionarModo --> CompararEnviadoRecebido --> TratarDivergencia(motivo)
+  --> DesfazerDocumento --> GravarHSTATRASOCONTRIB --> [HSTCONTRIBPREV/HSTATRASOCONTRIB/LOGTOTALPREV]</div>
+</div>
+
+<div class="pf-block" id="PF-09"><h4>JF009 (PF-09) — Controle individual / Entrada manual</h4>
+<p><strong>Objetivo:</strong> cadastrar e alterar manualmente históricos de contribuição, controlando situação, recebimento e núcleo familiar.</p>
+<p><strong>Gatilho/Ator:</strong> usuário aciona cadastro em <code>FControleIndivContrib.dfm</code>, <code>FCadHstContribuicao.dfm</code> ou <code>FCadContribNucleoFamiliar.dfm</code>.</p>
+<p><strong>Pré-condições:</strong> participante selecionado; mês/ano de cobrança/referência informados; contribuição não recebida/enviada.</p>
+<p><strong>Pós-condições:</strong> HSTCONTRIBPREV inserido/atualizado/excluído; CONTRIBPREVNUCLEO e NUCLEOFAMILIAR atualizados; EVOLFUNCPREV com DATAFINAL ajustada.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li>Validar mês/ano cobrança e motivo (FCadHstContribuicao.pas:1174,1180)</li>
+<li>Validar valor recebido e data conjuntos (:1190,1195) <a href="regras-de-negocio.html#CONTRIB-RN010">[RS010]</a> <a href="#TRT010">[TRT010]</a></li>
+<li>Validar situação coerente com recebimento (:1204,1209) <a href="regras-de-negocio.html#CONTRIB-RN011">[RS011]</a> <a href="#TRT011">[TRT011]</a></li>
+<li>Validar SALCONTRIB e VALOROP1 &gt; 0 (:1225) <a href="regras-de-negocio.html#CONTRIB-RN012">[RS012]</a> <a href="#TRT012">[TRT012]</a></li>
+<li>Atribuir DATAEMISSCOB por situação (:1163) <a href="regras-de-negocio.html#CONTRIB-RN009">[RS009]</a></li>
+<li>Bloquear alteração se recebida/enviada (:1374,1390) <a href="regras-de-negocio.html#CONTRIB-RN004">[RS004]</a> <a href="regras-de-negocio.html#CONTRIB-RN005">[RS005]</a> <a href="regras-de-negocio.html#CONTRIB-RN018">[RS018]</a></li>
+<li>Gravar HSTCONTRIBPREV (:1091) e atualizar EVOLFUNCPREV <a href="regras-de-negocio.html#CONTRIB-RN023">[RS023]</a></li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Validar entrada</td><td>Confirmar mês/ano/motivo</td><td>Mês, ano, motivo</td><td>Aborta se vazio</td><td>Entrada válida</td><td>—</td><td>—</td><td><code>FCadHstContribuicao.dfm</code></td></tr>
+<tr><td>Validar recebimento</td><td>Confirmar valor/data conjuntos</td><td>Valor recebido, data</td><td>Aborta se inconsistente</td><td>Recebimento coerente</td><td><a href="regras-de-negocio.html#CONTRIB-RN010">RS010</a>, <a href="regras-de-negocio.html#CONTRIB-RN011">RS011</a></td><td><a href="#MSG010">MSG010</a>, <a href="#MSG011">MSG011</a></td><td><code>FCadHstContribuicao.dfm</code></td></tr>
+<tr><td>Validar saldo</td><td>Confirmar SALCONTRIB/VALOROP1 &gt; 0</td><td>Saldo contribuição</td><td>Aborta se ≤ 0</td><td>Saldo válido</td><td><a href="regras-de-negocio.html#CONTRIB-RN012">RS012</a></td><td><a href="#MSG012">MSG012</a></td><td><code>FCadHstContribuicao.dfm</code></td></tr>
+<tr><td>Atribuir data emissão</td><td>Definir DATAEMISSCOB por situação</td><td>SITRECEBIMENTO</td><td>Zera se ∈{0,8}; data atual se ∈{1,2}</td><td>Data atribuída</td><td><a href="regras-de-negocio.html#CONTRIB-RN009">RS009</a></td><td>—</td><td><code>FCadHstContribuicao.dfm</code></td></tr>
+<tr><td>Bloquear alteração</td><td>Impedir edição de recebida/enviada</td><td>Situação contribuição</td><td>Aborta se recebida ou enviada</td><td>Alteração bloqueada</td><td><a href="regras-de-negocio.html#CONTRIB-RN004">RS004</a>, <a href="regras-de-negocio.html#CONTRIB-RN005">RS005</a>, <a href="regras-de-negocio.html#CONTRIB-RN018">RS018</a></td><td><a href="#MSG005">MSG005</a>, <a href="#MSG006">MSG006</a></td><td><code>FCadHstContribuicao.dfm</code></td></tr>
+<tr><td>Gravar histórico</td><td>Persistir contribuição</td><td>Dados validados</td><td>INSERT/UPDATE HSTCONTRIBPREV; UPDATE EVOLFUNCPREV.DATAFINAL</td><td>Histórico gravado</td><td><a href="regras-de-negocio.html#CONTRIB-RN023">RS023</a></td><td>—</td><td><code>FCadHstContribuicao.dfm</code></td></tr>
+</tbody></table></div>
+<p><strong>Regras de negócio da jornada:</strong> <a href="regras-de-negocio.html#CONTRIB-RN009">RS009 (CONTRIB-RN009)</a> — DATAEMISSCOB por situação; <a href="regras-de-negocio.html#CONTRIB-RN010">RS010 (CONTRIB-RN010)</a> — Valor/data recebimento conjuntos; <a href="regras-de-negocio.html#CONTRIB-RN011">RS011 (CONTRIB-RN011)</a> — Situação coerente; <a href="regras-de-negocio.html#CONTRIB-RN012">RS012 (CONTRIB-RN012)</a> — Saldo &gt; 0; <a href="regras-de-negocio.html#CONTRIB-RN018">RS018 (CONTRIB-RN018)</a> — Proibida alteração de recebido/enviado; <a href="regras-de-negocio.html#CONTRIB-RN023">RS023 (CONTRIB-RN023)</a> — EVOLFUNCPREV atualiza DATAFINAL.</p>
+<p><strong>Dependências:</strong> relaciona-se com <a href="#PF-01">JF001</a> e <a href="#PF-02">JF002</a>. Evidência: <code>CONTRIBUICAOPREV/Fontes/FCadHstContribuicao.pas:1091</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<div class="mermaid">[FCadHstContribuicao] --> ValidarEntrada --> ValidarRecebimento --> ValidarSaldo
+  --> AtribuirDataEmissao --> BloquearAlteracao --> GravarHSTCONTRIBPREV --> [HSTCONTRIBPREV/EVOLFUNCPREV]</div>
+</div>
+
+<div class="pf-block" id="PF-10"><h4>JF010 (PF-10) — Retroativo e Simulação</h4>
+<p><strong>Objetivo:</strong> simular contribuições para eventos geradores e calcular retroativos em lote com revisão de índices.</p>
+<p><strong>Gatilho/Ator:</strong> usuário aciona simulação em <code>FSimulaContrib.dfm</code>, revisão em <code>FRevisaoIndice.dfm</code> ou retroativo em lote via <code>dmRetroativoLote</code>.</p>
+<p><strong>Pré-condições:</strong> plano previdenciário informado; categoria/patrocinadora/data do evento informados; salário e último mês de contribuição informados.</p>
+<p><strong>Pós-condições:</strong> HSTCONTRIBPREV com recálculos retroativos; HSTATRASOCONTRIB registrado; simulações apresentadas.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li>Validar plano, categoria, patrocinadora, datas, salário (FSimulaContrib.pas:395,402,447,455) <a href="#TRT028">[TRT028]</a></li>
+<li>Localizar participante (:773,1742,2255)</li>
+<li>Simular contribuições por regra de cálculo (:1202,1257)</li>
+<li>Calcular retroativo em lote (dmRetroativoLote)</li>
+<li>Revisar índices (FRevisaoIndice)</li>
+<li>Gravar HSTCONTRIBPREV e HSTATRASOCONTRIB</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Validar parâmetros</td><td>Confirmar plano/categoria/datas/salário</td><td>Plano, categoria, patro, datas, salário</td><td>Aborta se vazio</td><td>Parâmetros válidos</td><td>—</td><td><a href="#MSG028">MSG028</a></td><td><code>FSimulaContrib.dfm</code></td></tr>
+<tr><td>Localizar participante</td><td>Confirmar matrícula</td><td>Matrícula</td><td>Aborta se não encontrado</td><td>Participante localizado</td><td>—</td><td>—</td><td><code>FSimulaContrib.dfm</code></td></tr>
+<tr><td>Simular contribuições</td><td>Calcular por regra</td><td>Parâmetros, participante</td><td>Aplica regra de cálculo; calcula alteradores</td><td>Simulação apresentada</td><td>—</td><td>—</td><td><code>FSimulaContrib.dfm</code></td></tr>
+<tr><td>Calcular retroativo</td><td>Recalcular em lote</td><td>Período, índices</td><td>dmRetroativoLote; revisa índices</td><td>Retroativos calculados</td><td>—</td><td>—</td><td><code>FRevisaoIndice.dfm</code></td></tr>
+<tr><td>Gravar</td><td>Persistir recálculos</td><td>Retroativos calculados</td><td>INSERT/UPDATE HSTCONTRIBPREV; INSERT HSTATRASOCONTRIB</td><td>Recálculos gravados</td><td>—</td><td>—</td><td><code>FSimulaContrib.dfm</code></td></tr>
+</tbody></table></div>
+<p><strong>Regras de negócio da jornada:</strong> — (validações de parâmetros inline no form).</p>
+<p><strong>Dependências:</strong> usa regras de cálculo de contribuição e dmRetroativoLote (externo). Evidência: <code>CONTRIBUICAOPREV/Fontes/FSimulaContrib.pas</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<div class="mermaid">[FSimulaContrib] --> ValidarParametros --> LocalizarParticipante --> SimularContribuicoes
+  --> CalcularRetroativo(dmRetroativoLote) --> RevisarIndices --> Gravar --> [HSTCONTRIBPREV/HSTATRASOCONTRIB]</div>
+</div>
+
+<section id="TRT-section"><div class="section-title">7. Tratamentos (TRT)</div>
+<p>Tratamentos de erro derivados das validações bloqueantes e exceções das regras e do código Delphi. Cada TRT possui Condição, Mensagem e Resultado.</p>
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Condição</th><th>Mensagem</th><th>Resultado</th><th>Regra</th><th>Jornada</th></tr></thead><tbody>
+<tr id="TRT001"><td><strong>TRT001</strong></td><td>Mês de vínculo da portabilidade fora de 0–11</td><td><a href="#MSG001">MSG001</a></td><td>Bloqueia (MessageDlg + Abort)</td><td><a href="regras-de-negocio.html#CONTRIB-RN001">RS001</a></td><td>JF006</td></tr>
+<tr id="TRT002"><td><strong>TRT002</strong></td><td>Ano/mês de referência não informado</td><td><a href="#MSG002">MSG002</a></td><td>Bloqueia (MessageDlg + Abort)</td><td><a href="regras-de-negocio.html#CONTRIB-RN002">RS002</a></td><td>JF006</td></tr>
+<tr id="TRT003"><td><strong>TRT003</strong></td><td>Ano/mês de referência maior que cobrança</td><td><a href="#MSG003">MSG003</a></td><td>Bloqueia (MessageDlg + Abort)</td><td><a href="regras-de-negocio.html#CONTRIB-RN002">RS002</a></td><td>JF006</td></tr>
+<tr id="TRT004"><td><strong>TRT004</strong></td><td>Valor esperado da contribuição ≤ 0</td><td><a href="#MSG004">MSG004</a></td><td>Bloqueia (MessageDlg + Abort)</td><td><a href="regras-de-negocio.html#CONTRIB-RN003">RS003</a></td><td>JF006</td></tr>
+<tr id="TRT005"><td><strong>TRT005</strong></td><td>Contribuição já recebida — alteração bloqueada</td><td><a href="#MSG005">MSG005</a></td><td>Bloqueia alteração</td><td><a href="regras-de-negocio.html#CONTRIB-RN004">RS004</a></td><td>JF006, JF009</td></tr>
+<tr id="TRT006"><td><strong>TRT006</strong></td><td>Contribuição já enviada — alteração bloqueada</td><td><a href="#MSG006">MSG006</a></td><td>Bloqueia alteração/exclusão</td><td><a href="regras-de-negocio.html#CONTRIB-RN005">RS005</a></td><td>JF006, JF009</td></tr>
+<tr id="TRT007"><td><strong>TRT007</strong></td><td>Opção de IR (regressivo/progressivo) não informada</td><td><a href="#MSG007">MSG007</a></td><td>Bloqueia (MessageDlg + Abort)</td><td><a href="regras-de-negocio.html#CONTRIB-RN006">RS006</a></td><td>JF005, JF006</td></tr>
+<tr id="TRT008"><td><strong>TRT008</strong></td><td>Exclusão de portabilidade com contribuições cadastradas</td><td><a href="#MSG008">MSG008</a></td><td>Bloqueia exclusão</td><td><a href="regras-de-negocio.html#CONTRIB-RN007">RS007</a></td><td>JF006</td></tr>
+<tr id="TRT009"><td><strong>TRT009</strong></td><td>Arquivo de importação inválido (formato/layout)</td><td><a href="#MSG009">MSG009</a></td><td>Bloqueia (Abort)</td><td><a href="regras-de-negocio.html#CONTRIB-RN008">RS008</a></td><td>JF006</td></tr>
+<tr id="TRT010"><td><strong>TRT010</strong></td><td>Valor recebido sem data ou data sem valor</td><td><a href="#MSG010">MSG010</a></td><td>Bloqueia (Abort)</td><td><a href="regras-de-negocio.html#CONTRIB-RN010">RS010</a></td><td>JF009</td></tr>
+<tr id="TRT011"><td><strong>TRT011</strong></td><td>Situação incoerente com recebimento</td><td><a href="#MSG011">MSG011</a></td><td>Bloqueia (Abort)</td><td><a href="regras-de-negocio.html#CONTRIB-RN011">RS011</a></td><td>JF009</td></tr>
+<tr id="TRT012"><td><strong>TRT012</strong></td><td>SALCONTRIB/VALOROP1 ≤ 0 em edição</td><td><a href="#MSG012">MSG012</a></td><td>Bloqueia (Abort)</td><td><a href="regras-de-negocio.html#CONTRIB-RN012">RS012</a></td><td>JF009</td></tr>
+<tr id="TRT013"><td><strong>TRT013</strong></td><td>Mês de cobrança não preenchido (preparo)</td><td><a href="#MSG013">MSG013</a></td><td>Bloqueia (MessageDlg + Abort)</td><td><a href="regras-de-negocio.html#CONTRIB-RN013">RS013</a></td><td>JF001</td></tr>
+<tr id="TRT014"><td><strong>TRT014</strong></td><td>Ano de cobrança não preenchido (preparo)</td><td><a href="#MSG014">MSG014</a></td><td>Bloqueia (MessageDlg + Abort)</td><td><a href="regras-de-negocio.html#CONTRIB-RN013">RS013</a></td><td>JF001</td></tr>
+<tr id="TRT015"><td><strong>TRT015</strong></td><td>Tipo de cobrança não selecionado</td><td><a href="#MSG015">MSG015</a></td><td>Bloqueia (MessageDlg + Abort)</td><td><a href="regras-de-negocio.html#CONTRIB-RN013">RS013</a></td><td>JF001</td></tr>
+<tr id="TRT016"><td><strong>TRT016</strong></td><td>Provisão em lote: ano/mês cobrança não selecionado</td><td><a href="#MSG016">MSG016</a></td><td>Bloqueia (raise EValidacao)</td><td><a href="regras-de-negocio.html#CONTRIB-RN020">RS020</a></td><td>JF007</td></tr>
+<tr id="TRT017"><td><strong>TRT017</strong></td><td>Provisão em lote: nenhuma patrocinadora selecionada</td><td><a href="#MSG017">MSG017</a></td><td>Bloqueia (raise EValidacao)</td><td><a href="regras-de-negocio.html#CONTRIB-RN020">RS020</a></td><td>JF007</td></tr>
+<tr id="TRT018"><td><strong>TRT018</strong></td><td>Provisão em lote: nenhum plano selecionado</td><td><a href="#MSG018">MSG018</a></td><td>Bloqueia (raise EValidacao)</td><td><a href="regras-de-negocio.html#CONTRIB-RN020">RS020</a></td><td>JF007</td></tr>
+<tr id="TRT019"><td><strong>TRT019</strong></td><td>Relatório provisão: matrícula não selecionada</td><td><a href="#MSG019">MSG019</a></td><td>Bloqueia (raise EValidacao)</td><td><a href="regras-de-negocio.html#CONTRIB-RN021">RS021</a></td><td>JF007</td></tr>
+<tr id="TRT020"><td><strong>TRT020</strong></td><td>Relatório provisão: parâmetro/mês cobrança não informados</td><td><a href="#MSG020">MSG020</a></td><td>Bloqueia (raise EValidacao)</td><td><a href="regras-de-negocio.html#CONTRIB-RN021">RS021</a></td><td>JF007</td></tr>
+<tr id="TRT021"><td><strong>TRT021</strong></td><td>Recebimento: mês de cobrança não preenchido</td><td><a href="#MSG021">MSG021</a></td><td>Bloqueia (MessageDlg + Abort)</td><td><a href="regras-de-negocio.html#CONTRIB-RN024">RS024</a></td><td>JF002</td></tr>
+<tr id="TRT022"><td><strong>TRT022</strong></td><td>Recebimento: data de recebimento não informada</td><td><a href="#MSG022">MSG022</a></td><td>Bloqueia (MessageDlg + Abort)</td><td><a href="regras-de-negocio.html#CONTRIB-RN024">RS024</a></td><td>JF002</td></tr>
+<tr id="TRT023"><td><strong>TRT023</strong></td><td>Alteração salário: arquivo não selecionado</td><td><a href="#MSG023">MSG023</a></td><td>Bloqueia (MessageDlg)</td><td><a href="regras-de-negocio.html#CONTRIB-RN025">RS025</a></td><td>JF004</td></tr>
+<tr id="TRT024"><td><strong>TRT024</strong></td><td>Alteração salário: salário alvo não selecionado</td><td><a href="#MSG024">MSG024</a></td><td>Bloqueia (MessageDlg)</td><td><a href="regras-de-negocio.html#CONTRIB-RN025">RS025</a></td><td>JF004</td></tr>
+<tr id="TRT025"><td><strong>TRT025</strong></td><td>Cálculo saldo: participante não selecionado</td><td><a href="#MSG025">MSG025</a></td><td>Bloqueia (MessageDlg)</td><td><a href="regras-de-negocio.html#CONTRIB-RN022">RS022</a></td><td>JF005</td></tr>
+<tr id="TRT026"><td><strong>TRT026</strong></td><td>Divergência: modo não selecionado</td><td><a href="#MSG026">MSG026</a></td><td>Bloqueia (MessageDlg)</td><td>—</td><td>JF008</td></tr>
+<tr id="TRT027"><td><strong>TRT027</strong></td><td>Divergência: motivo não preenchido</td><td><a href="#MSG027">MSG027</a></td><td>Bloqueia (MessageDlg)</td><td>—</td><td>JF008</td></tr>
+<tr id="TRT028"><td><strong>TRT028</strong></td><td>Simulação: plano previdenciário não informado</td><td><a href="#MSG028">MSG028</a></td><td>Bloqueia (MessageDlg)</td><td>—</td><td>JF010</td></tr>
+</tbody></table></div>
+</section>
+
+<section id="MSG-section"><div class="section-title">8. Catálogo de Mensagens (MSG)</div>
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Texto da Mensagem</th><th>Jornadas relacionadas</th></tr></thead><tbody>
+<tr id="MSG001"><td><strong>MSG001</strong></td><td>"Mêses de Vinculo Inválido. Informe o mês entre 0 e 11"</td><td>JF006</td></tr>
+<tr id="MSG002"><td><strong>MSG002</strong></td><td>"O Ano/Mês de Referencia deve ser informado"</td><td>JF006</td></tr>
+<tr id="MSG003"><td><strong>MSG003</strong></td><td>"O Ano/Mês de Referencia não pode ser maior que o Ano/Mês de Cobrança"</td><td>JF006</td></tr>
+<tr id="MSG004"><td><strong>MSG004</strong></td><td>"O campo Valor Esperado deve ser maior que zero."</td><td>JF006</td></tr>
+<tr id="MSG005"><td><strong>MSG005</strong></td><td>"Essa Contribuição já foi Recebida, Alteração não permitida"</td><td>JF006, JF009</td></tr>
+<tr id="MSG006"><td><strong>MSG006</strong></td><td>"Essa Contribuição já foi Enviada, Alteração não permitida"</td><td>JF006, JF009</td></tr>
+<tr id="MSG007"><td><strong>MSG007</strong></td><td>"Necessário informar a Opção de IR ."</td><td>JF005, JF006</td></tr>
+<tr id="MSG008"><td><strong>MSG008</strong></td><td>"Para excluir esse registro, exclua o cadastro das contribuições, primeiro."</td><td>JF006</td></tr>
+<tr id="MSG009"><td><strong>MSG009</strong></td><td>"O arquivo deverá ser em formato excel." / "O arquivo não está no layout correto para importação."</td><td>JF006</td></tr>
+<tr id="MSG010"><td><strong>MSG010</strong></td><td>"O valor recebido foi preenchido, porém, a data de recebimento não foi informada." / "A data de recebimento foi informada, porém, o valor recebido não."</td><td>JF009</td></tr>
+<tr id="MSG011"><td><strong>MSG011</strong></td><td>"O recebimento foi informado, porém, a situação da contribuição não se refere a uma contribuição recebida."</td><td>JF009</td></tr>
+<tr id="MSG012"><td><strong>MSG012</strong></td><td>"O Salário e o Percentual de Contribuição, são de preenchimento obrigatório para o plano selecionado."</td><td>JF009</td></tr>
+<tr id="MSG013"><td><strong>MSG013</strong></td><td>"Mês de Cobrança não preenchido."</td><td>JF001</td></tr>
+<tr id="MSG014"><td><strong>MSG014</strong></td><td>"Ano de Cobrança não preenchido."</td><td>JF001</td></tr>
+<tr id="MSG015"><td><strong>MSG015</strong></td><td>"Selecione o Tipo de Cobrança."</td><td>JF001</td></tr>
+<tr id="MSG016"><td><strong>MSG016</strong></td><td>"É necessário selecionar o ano/mês de cobrança das contribuições."</td><td>JF007</td></tr>
+<tr id="MSG017"><td><strong>MSG017</strong></td><td>"É necessário selecionar pelo menos uma patrocinadora."</td><td>JF007</td></tr>
+<tr id="MSG018"><td><strong>MSG018</strong></td><td>"É necessário selecionar pelo menos um plano previdenciário."</td><td>JF007</td></tr>
+<tr id="MSG019"><td><strong>MSG019</strong></td><td>"É necessário selecionar matricula para apresentação do relatório."</td><td>JF007</td></tr>
+<tr id="MSG020"><td><strong>MSG020</strong></td><td>"É necessário selecionar pelo menos um parâmetro de pesquisa..." / "É necessário informar o mês de cobrança."</td><td>JF007</td></tr>
+<tr id="MSG021"><td><strong>MSG021</strong></td><td>"Preencha o mês de cobrança."</td><td>JF002</td></tr>
+<tr id="MSG022"><td><strong>MSG022</strong></td><td>"O campo Data de Recebimento é obrigatório."</td><td>JF002</td></tr>
+<tr id="MSG023"><td><strong>MSG023</strong></td><td>"É necessário selecionar o arquivo para carregar as informações."</td><td>JF004</td></tr>
+<tr id="MSG024"><td><strong>MSG024</strong></td><td>"É necessário selecionar o salário que deseja alterar."</td><td>JF004</td></tr>
+<tr id="MSG025"><td><strong>MSG025</strong></td><td>"Nenhum Participante selecionado. Verifique!"</td><td>JF005</td></tr>
+<tr id="MSG026"><td><strong>MSG026</strong></td><td>"Selecione um Modo de Divergência na Lista de Modos."</td><td>JF008</td></tr>
+<tr id="MSG027"><td><strong>MSG027</strong></td><td>"Motivo para Tratamento de Divergência não preenchido."</td><td>JF008</td></tr>
+<tr id="MSG028"><td><strong>MSG028</strong></td><td>"Informe o Plano Previdenciário."</td><td>JF010</td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">9. Observações Gerais (OBS)</div>
+<ul>
+<li><strong>OBS001:</strong> O módulo CONTRIBUIÇÃO é um sistema desktop Delphi 5 / VCL, operado por usuário humano, com arquitetura híbrida (herança CM framework + DataModules InfoPower com SQL inline nos forms).</li>
+<li><strong>OBS002:</strong> O entry point <code>ContribuicaoPREV.dpr</code> auto-instancia DataModules (<code>dtmAPrev</code>, <code>dtmIntegraCAPCAR</code>, <code>dtmPreparaContrib</code>, <code>dmRetroativoLote</code>) e o form principal <code>frmPrincipal</code> (Caption "Manutenção e Cobrança de Contribuição").</li>
+<li><strong>OBS003:</strong> A evidência de cada regra é classificada como COMPROVADO (no código), INFERIDO (plausível) ou PENDENTE (validar). Esta classificação foi mantida do PFC-21.</li>
+<li><strong>OBS004:</strong> As 28 regras CONTRIB-RN001 a CONTRIB-RN028 existiam desde o PFC-21; 25 são COMPROVADO e 3 (RN026, RN027, RN028) são INFERIDO (dependem de validação adicional — SIGs 24516, 22081, 25044).</li>
+<li><strong>OBS005:</strong> Os fluxogramas representam somente comportamentos comprovados no código-fonte Delphi.</li>
+<li><strong>OBS006:</strong> O módulo usa <code>MsgDlg</code> (wrapper CM em <code>UMensErro.pas</code>) como mecanismo principal de diálogo, além de <code>MessageDlg</code> padrão Delphi e <code>raise EValidacao.CreateVal</code> para validações bloqueantes com foco no controle.</li>
+</ul>
+</section>
+
+<section><div class="section-title">10. Casos de Uso Associados</div>
+<p>Módulos externos dos quais o CONTRIBUIÇÃO depende (detalhe em <a href="integracoes.html">🔗 Integrações</a>):</p>
+<ul>
+<li><strong>CM Framework</strong> (27 units) — forms base, autorização, consultas, relatórios</li>
+<li><strong>CMAdmPrev</strong> (11 units) — integração CAP/CAR, retroativo em lote, conciliação</li>
+<li><strong>CMPrevMT50</strong> — DataModules de entidades previdenciárias centrais (DPLANOPREV, DBENEFICIO)</li>
+<li><strong>CMGLOBALOBJ50</strong> — objetos globais (PlanPrevContabil)</li>
+<li><strong>CMCAPCARUTILOBJ50</strong> — utilitários CAP/CAR (Documento, LanctoDocum)</li>
+<li><strong>FOLHA</strong> — envio/recebimento via folha (FOLHAORIGEM, FLGDESCFOLHA)</li>
+<li><strong>BENEFICIOPREV</strong> — benefícios previdenciários</li>
+<li><strong>IRRF</strong> — cálculo de IRRF (fCalculoIRRF)</li>
+<li><strong>CPAGAR / EMPRESTIMO</strong> — recebimento multi-canal</li>
+<li><strong>Package Oracle PCK_BENEFSALDFAB</strong> — benefício saldado/FAB (SP_ATUALIZASALDO)</li>
+</ul>
+</section>
+
+<section><div class="section-title">11. Tabela/API/Programa</div>
+<p>Entry point: <code>CONTRIBUICAOPREV/Fontes/ContribuicaoPREV.dpr</code>. Tabelas Oracle (schema <code>CM.</code>) e rotinas-chave por jornada (detalhe em <a href="dados.html">🗄️ Dados</a>):</p>
+<div class="table-wrap"><table><thead><tr><th>Jornada</th><th>Tabelas (escrita)</th><th>Rotina-chave (file:linha)</th></tr></thead><tbody>
+<tr><td>JF001</td><td>HSTCONTRIBPREV, CONTRIBPREVPARTP, DOCUMENTO, LANCAMENTO</td><td><code>FPreparaEnvia.pas:2746,5076,6516</code></td></tr>
+<tr><td>JF002</td><td>HSTCONTRIBPREV, DOCUMENTO, LANCTODOCUM</td><td><code>FRecebeContribuicaoNovo.pas:617-622</code></td></tr>
+<tr><td>JF003</td><td>HISTMOVRESERVA, RESERVAPART, RESERVAXPLANO</td><td><code>FAtualizaPorIndice.pas:931</code></td></tr>
+<tr><td>JF004</td><td>PARTPREVPLAN, LOGTOTALPREV</td><td><code>FAlteraSalPart.pas:154-188</code></td></tr>
+<tr><td>JF005</td><td>HSTBITRIBUTACAO, BITRIBUTACAO, PORTABILIDADEPREV</td><td><code>FCalcSalContr.pas:277-330</code></td></tr>
+<tr><td>JF006</td><td>PORTABILIDADEPREV, BENEFSALDFAB, CARGABENEFSALDFAB</td><td><code>FCadContribuicaoPortada.pas:367</code></td></tr>
+<tr><td>JF007</td><td>PROVISAOPERDASCONTRIBUICAO, FAIXASPROVISAOPERDACONTRIB</td><td><code>FProvPerdasLote.pas:428-437</code></td></tr>
+<tr><td>JF008</td><td>HSTCONTRIBPREV, HSTATRASOCONTRIB, LOGTOTALPREV</td><td><code>FDivergContrib.pas:2737-2768</code></td></tr>
+<tr><td>JF009</td><td>HSTCONTRIBPREV, CONTRIBPREVNUCLEO, NUCLEOFAMILIAR, EVOLFUNCPREV</td><td><code>FCadHstContribuicao.pas:1091</code></td></tr>
+<tr><td>JF010</td><td>HSTCONTRIBPREV, HSTATRASOCONTRIB</td><td><code>FSimulaContrib.pas</code></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">12. Telas/Layouts</div>
+<p>Forms Delphi (.dfm) por jornada (detalhe em <a href="arquitetura.html">🏗️ Arquitetura</a>):</p>
+<div class="table-wrap"><table><thead><tr><th>Jornada</th><th>Form(s) (.dfm)</th></tr></thead><tbody>
+<tr><td>JF001</td><td><code>FPreparaEnvia.dfm</code></td></tr>
+<tr><td>JF002</td><td><code>FRecebeContribuicaoNovo.dfm</code>, <code>FRecebeContribEmptmo.dfm</code>, <code>FBaixaContribCAR.dfm</code></td></tr>
+<tr><td>JF003</td><td><code>FAlimReservasReplan.dfm</code>, <code>FAtualizaPorIndice.dfm</code>, <code>FRodaPadraoMovReserva.dfm</code></td></tr>
+<tr><td>JF004</td><td><code>FReajustaSalarioMantido.dfm</code>, <code>FAlteraSalPart.dfm</code></td></tr>
+<tr><td>JF005</td><td><code>FCalcSalContr.dfm</code>, <code>fCalculoIRRF.dfm</code>, <code>FCadContribuicaoPortada.dfm</code></td></tr>
+<tr><td>JF006</td><td><code>FCadContribuicaoPortada.dfm</code>, <code>FBeneficioSaldadoFAB.dfm</code>, <code>fCargaArquivo.dfm</code></td></tr>
+<tr><td>JF007</td><td><code>FProvPerdasIndiv.dfm</code>, <code>FProvPerdasLote.dfm</code>, <code>FFRelProvPerdas.dfm</code></td></tr>
+<tr><td>JF008</td><td><code>FDivergContrib.dfm</code>, <code>FConsEstatDivergContrib.dfm</code>, <code>FDesfDocContribuicao.dfm</code></td></tr>
+<tr><td>JF009</td><td><code>FControleIndivContrib.dfm</code>, <code>FCadHstContribuicao.dfm</code>, <code>FCadContribNucleoFamiliar.dfm</code></td></tr>
+<tr><td>JF010</td><td><code>FSimulaContrib.dfm</code>, <code>FRevisaoIndice.dfm</code></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">13. Visão Consolidada de Jornadas Funcionais</div>
+<div class="table-wrap"><table><thead><tr><th>Jornada</th><th>ID</th><th>Título</th><th>Critério de aceitação (Dado/Quando/Então)</th><th>Mensagens</th><th>Telas</th></tr></thead><tbody>
+<tr><td>JF001</td><td>PF-01</td><td>Preparo e Envio</td><td><strong>Dado</strong> mês/ano/tipo cobrança informados, <strong>Quando</strong> usuário aciona Preparo/Envio, <strong>Então</strong> contribuições elegíveis são enviadas com SITRECEBIMENTO=1</td><td><a href="#MSG013">MSG013</a>, <a href="#MSG014">MSG014</a>, <a href="#MSG015">MSG015</a></td><td>FPreparaEnvia</td></tr>
+<tr><td>JF002</td><td>PF-02</td><td>Recebimento multi-canal</td><td><strong>Dado</strong> contribuições enviadas, <strong>Quando</strong> usuário processa retorno, <strong>Então</strong> documentos são baixados e HSTCONTRIBPREV atualizado</td><td><a href="#MSG021">MSG021</a>, <a href="#MSG022">MSG022</a></td><td>FRecebeContribuicaoNovo</td></tr>
+<tr><td>JF003</td><td>PF-03</td><td>Alimentação de reservas</td><td><strong>Dado</strong> patro/plano/reserva selecionados, <strong>Quando</strong> usuário atualiza por índice, <strong>Então</strong> reservas são recalculadas e HISTMOVRESERVA gravado</td><td>—</td><td>FAtualizaPorIndice</td></tr>
+<tr><td>JF004</td><td>PF-04</td><td>Salário de participação</td><td><strong>Dado</strong> arquivo Excel selecionado, <strong>Quando</strong> usuário processa lote, <strong>Então</strong> PARTPREVPLAN é atualizado</td><td><a href="#MSG023">MSG023</a>, <a href="#MSG024">MSG024</a></td><td>FAlteraSalPart</td></tr>
+<tr><td>JF005</td><td>PF-05</td><td>Tributação / IR</td><td><strong>Dado</strong> participante e opção de IR informados, <strong>Quando</strong> usuário calcula saldo, <strong>Então</strong> bitributação e IRRF são calculados</td><td><a href="#MSG007">MSG007</a>, <a href="#MSG025">MSG025</a></td><td>FCalcSalContr</td></tr>
+<tr><td>JF006</td><td>PF-06</td><td>Portabilidade / BS-FAB</td><td><strong>Dado</strong> participante e dados válidos (mês vínculo, referência, valor, IR), <strong>Quando</strong> usuário grava portabilidade, <strong>Então</strong> PORTABILIDADEPREV e BENEFSALDFAB são persistidos</td><td><a href="#MSG001">MSG001</a>–<a href="#MSG009">MSG009</a></td><td>FCadContribuicaoPortada</td></tr>
+<tr><td>JF007</td><td>PF-07</td><td>Provisão para perdas</td><td><strong>Dado</strong> ano/mês/patro/plano selecionados, <strong>Quando</strong> usuário calcula provisão, <strong>Então</strong> PROVISAOPERDASCONTRIBUICAO é populada</td><td><a href="#MSG016">MSG016</a>–<a href="#MSG020">MSG020</a></td><td>FProvPerdasLote</td></tr>
+<tr><td>JF008</td><td>PF-08</td><td>Divergências</td><td><strong>Dado</strong> contribuições enviadas e recebidas, <strong>Quando</strong> usuário trata divergência, <strong>Então</strong> divergências são resolvidas e auditadas</td><td><a href="#MSG026">MSG026</a>, <a href="#MSG027">MSG027</a></td><td>FDivergContrib</td></tr>
+<tr><td>JF009</td><td>PF-09</td><td>Controle individual</td><td><strong>Dado</strong> participante e contribuição não recebida/enviada, <strong>Quando</strong> usuário cadastra/altera histórico, <strong>Então</strong> HSTCONTRIBPREV é persistido com validações coerentes</td><td><a href="#MSG005">MSG005</a>–<a href="#MSG012">MSG012</a></td><td>FCadHstContribuicao</td></tr>
+<tr><td>JF010</td><td>PF-10</td><td>Retroativo e Simulação</td><td><strong>Dado</strong> plano/categoria/datas/salário informados, <strong>Quando</strong> usuário simula, <strong>Então</strong> simulação e retroativos são calculados</td><td><a href="#MSG028">MSG028</a></td><td>FSimulaContrib</td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">14. Histórico de Versões</div>
+<div class="table-wrap"><table><thead><tr><th>Versão</th><th>Descrição</th><th>Data</th><th>Responsável</th></tr></thead><tbody>
+<tr><td>1.0</td><td>Blueprint AS-IS inicial (PFC-21) — 10 processos, 28 regras, 158 artefatos</td><td>2026-11-09</td><td>Squad Blueprint</td></tr>
+<tr><td>2.0</td><td>Adaptação ao padrão de jornadas funcionais (PFC-27) — 10 jornadas, RS/TRT/MSG, visão consolidada</td><td>2026-11-10</td><td>Squad Blueprint (GLM-5.2)</td></tr>
+</tbody></table></div>
 </section>
 
 </main>
-
 <footer>
-<p>Blueprint AS-IS — PFC-21 — Documentação dos módulos FOLHA, CONTRIBUIÇÃO e BENEFICIOPREV | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-09</p>
+<p>Blueprint AS-IS — PFC-27 (adaptado) — v2.0 — Módulo CONTRIBUIÇÃO | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-10</p>
 </footer>
 </body>
 </html>
