@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contribuição Previdenciária — Diagramas de Fluxo — Blueprint AS-IS</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+
+</head>
+<body>
+<header>
+  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-31 (abas complementares)</div>
+  <h1>🔀 Diagramas de Fluxo — Contribuição Previdenciária</h1>
+  <p>10 fluxogramas dos processos principais (preparo, envio, recebimentos, reservas, bitributação, portabilidade, benefício saldado/FAB, provisão e divergências) com rastreabilidade de linha</p>
+</header>
+<nav>
+  <a href="index.html">📋 Visão Geral</a>
+  <a href="arquitetura.html">🏗️ Arquitetura</a>
+  <a href="inventario.html">📦 Inventário</a>
+  <a href="formularios.html">🧾 Formulários</a>
+  <a href="funcionalidades.html">⚙️ Funcionalidades</a>
+  <a href="rotinas.html">🔧 Procedures</a>
+  <a href="regras-de-negocio.html">📏 Regras</a>
+  <a href="dados.html">🗄️ Dados</a>
+  <a href="relatorios.html">📄 Relatórios</a>
+  <a href="integracoes.html">🔗 Integrações</a>
+  <a href="tratamento-erros.html">⚠️ Erros</a>
+  <a href="diagramas-fluxo.html">🔀 Fluxos</a>
+  <a href="lacunas.html">🔍 Lacunas</a>
+  <a href="controle-cobertura.html">📊 Cobertura</a>
+</nav>
+
+<main>
+<section><div class="section-title">🔀 Diagramas de Fluxo — Como ler</div>
+<p>Fluxos comprovados no código-fonte de <code>CONTRIBUICAOPREV</code>, desenhados como fluxogramas Mermaid. Cada passo indica a unit/método e a linha de origem (L = linha no arquivo citado na evidência). A numeração PF segue a aba <a href="funcionalidades.html">Funcionalidades</a> (PF-01 a PF-10); um mesmo PF pode ter mais de um fluxo.</p>
+<div class="fluxo-legenda"><span>⬭ Início / fim (cápsula)</span><span>▭ Retângulo = passo de processamento</span><span>◇ Losango = decisão / validação</span><span>⛁ Cilindro = leitura ou gravação em tabela / stored procedure</span><span style="color:#f87171">▭ Bloqueio / erro</span></div>
+<div class="note"><strong>Escopo:</strong> stored procedures Oracle (<code>CM.SP_CP_RECEB_PATRO</code>, <code>CM.PCK_BENEFSALDFAB</code> etc.) aparecem como caixas-pretas: apenas a chamada e os parâmetros são comprovados; o corpo da procedure não está no repositório do módulo e não foi inspecionado. Ver <a href="lacunas.html">Lacunas</a>.</div>
+</section>
+
+<section><div class="section-title">🔀 Fluxo PF-01 — Preparo de contribuições</div>
+<pre class="fluxograma">flowchart TD
+  A(["FPreparaEnvia.bbtnEnviarClick (L3491)"]) --> B{"InformacoesOK e PreencheFiltroTela? (L3546, L3558)"}
+  B -- "Não" --> X1(["Exit - MSG001 a MSG004"])
+  B -- "Sim" --> C{"Operação inclui preparo? rgrpTipoOperacao 0 ou 2 (L3594)"}
+  C -- "Não" --> Z(["Segue direto para o envio"])
+  C -- "Sim" --> D["Opcional: atualizar salários dos Mantidos Parciais (L3600)"]
+  D --> E["PreparaContribuicao (L3617, L3724)"]
+  E --> F[("SELECT DISTINCT PLANPREVPATRO, PLANPREV, SITPART, PATRO - FLGINTERNO diferente de PT (L3751-3766)")]
+  F --> G{"Existe preparo do mês anterior? (L3883-3905)"}
+  G -- "Não" --> G2{"Usuário confirma continuar? (L3907)"}
+  G2 -- "Não" --> X2(["Exit"])
+  G2 -- "Sim" --> G3["GravaLogTOTALPREV do mês sem processar (L3916)"]
+  G -- "Sim" --> H{"Envio CCP já encerrado? VerificaFechamento (L3929)"}
+  G3 --> H
+  H -- "Sim" --> H2{"Preparar para o próximo mês? (L3934)"}
+  H2 -- "Não" --> X3(["Exit - preparo encerrado pelo usuário"])
+  H2 -- "Sim" --> H3["ProximoMesAberto (L3945)"]
+  H -- "Não" --> I["Loop por contribuição e participante: GeraHistorico (L4105-4183)"]
+  H3 --> I
+  I --> J[("INSERT ou UPDATE HSTCONTRIBPREV; UPDATE CONTRIBPREVPARTP.ULTMESPREPARO")]
+  J --> K["Commit parcial a cada 800 registros - ictMaxCommit (L4173-4180)"]
+  K --> L["CommitPreparo e EncerraContribLote (L4412-4421)"]
+  L --> M{"Algum problema sem nenhum registro gerado? (L4429-4434)"}
+  M -- "Sim" --> N(["Result False - chamador exibe MSG007 (L3622)"])
+  M -- "Não" --> O(["Result True - segue para o envio se a operação não for só preparo"])
+  class A,O,Z start
+  class X1,X2,X3,N bloq
+  class F,J db
+  classDef start fill:#1e3a5f,stroke:#2dd4bf,color:#e7ecf3
+  classDef bloq fill:#7f1d1d,stroke:#f87171,color:#fecaca
+  classDef db fill:#243044,stroke:#9aa8bc,color:#e7ecf3</pre>
+<p><strong>Evidência:</strong> <code>FPreparaEnvia.pas:3491-3632</code>, <code>FPreparaEnvia.pas:3724-4436</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</section>
+
+<section><div class="section-title">🔀 Fluxo PF-01 — Envio de contribuições (folha ou banco)</div>
+<pre class="fluxograma">flowchart TD
+  A(["bbtnEnviarClick: preparo OK e operação diferente de só preparo (L3632)"]) --> B{"Há devolução FLGDEVOLUCAO = 1 no mês? (L3663-3680)"}
+  B -- "Sim" --> B2{"TestaDispFinanc liberou? (L3684)"}
+  B2 -- "Não" --> X1(["Exit"])
+  B2 -- "Sim" --> C
+  B -- "Não" --> C{"Período contábil do vencimento válido e aberto? (L3693, L3699)"}
+  C -- "Não" --> X2(["MSG008 ou período bloqueado - Exit"])
+  C -- "Sim" --> D["EnviaContribuicaoCcp (L3704, L4510)"]
+  D --> E[("SELECT TIPOPERENVIO FROM PARAMAPREV (L4578)")]
+  E --> F["Para cada lote selecionado (L4847)"]
+  F --> G{"Lote de folha reprovado em ValidaLote? (L4850-4853)"}
+  G -- "Sim" --> G2["Log LOTE NÃO ENVIADO e próximo lote (L4856-4858)"]
+  G -- "Não" --> H{"Desconto em folha e pagador C, ou P com FLGRECECONTPATRO = 1? (L4984-4989)"}
+  H -- "Sim" --> I["EnviaContribuicao - folha / TMPDESC (L4991)"]
+  H -- "Não" --> J{"AdmPREV integrado ao CAR ou CAP? (L5003-5004)"}
+  J -- "Não" --> J2["MsgDlg não integrado; bErro (L5008-5019)"]
+  J -- "Sim" --> K["EnviaContribuicaoBANCO - documento de cobrança (L5024)"]
+  I --> L[("UPDATE HSTCONTRIBPREV SET SITRECEBIMENTO = 1, DATAEMISSCOB = SYSDATE (L5075-5077, L5197-5199)")]
+  K --> L
+  L --> M{"Integrado à contabilidade? (L5136)"}
+  M -- "Sim" --> N["IncluiContabilidade; falha gera MSG010 (L5143-5149)"]
+  M -- "Não" --> P["Commit parcial a cada 800 registros (L5455-5462)"]
+  N --> P
+  J2 --> P
+  G2 --> Q
+  P --> Q{"Nenhum erro? bErro e bAlgumErro (L5558)"}
+  Q -- "Sim" --> R["Opcionais BPD / PGA e baixa de documentos (L5560-5675)"]
+  R --> S(["Envio efetuado com sucesso + Commit (L5678-5680)"])
+  Q -- "Não" --> T(["RollBack + Envio CANCELADO (L5683-5685)"])
+  class A,S start
+  class X1,X2,J2,G2,T bloq
+  class E,L db
+  classDef start fill:#1e3a5f,stroke:#2dd4bf,color:#e7ecf3
+  classDef bloq fill:#7f1d1d,stroke:#f87171,color:#fecaca
+  classDef db fill:#243044,stroke:#9aa8bc,color:#e7ecf3</pre>
+<p><strong>Evidência:</strong> <code>FPreparaEnvia.pas:3632-3704</code>, <code>FPreparaEnvia.pas:4510-5687</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</section>
+
+<section><div class="section-title">🔀 Fluxo PF-02 — Recebimento via folha (stored procedure)</div>
+<pre class="fluxograma">flowchart TD
+  A(["FRecebeContribuicaoNovo.bbtnReceberClick (L904)"]) --> B["Cria TStoredProc em BaseDados (L920-921)"]
+  B --> C{"Tipo de folha - rgrpTipoFolha (L923)"}
+  C -- "0 Patrocinadora" --> D[("CM.SP_CP_RECEB_PATRO: mês de cobrança, data de recebimento, patrocinadora, plano, contribuições, usuário (L925-949)")]
+  C -- "1 Benefício" --> E[("CM.SP_CP_RECEB_ASSIS: mês de cobrança (L954-967)")]
+  D --> F{"Parâmetro de saída pOutERRO preenchido? (L972-974)"}
+  E --> F
+  F -- "Sim" --> G["MsgDlg de aviso e log ERRO ou AVISO (L976-981)"]
+  F -- "Não" --> H["Log dos documentos gerados - pOutDocumento (L985-988)"]
+  G --> I(["Término do processamento e FreeAndNil da SP (L992, L998-999)"])
+  H --> I
+  B -.->|exceção| X1(["MSG014 Erro ao Receber Contribuição (L994-995)"])
+  class A,I start
+  class X1,G bloq
+  class D,E db
+  classDef start fill:#1e3a5f,stroke:#2dd4bf,color:#e7ecf3
+  classDef bloq fill:#7f1d1d,stroke:#f87171,color:#fecaca
+  classDef db fill:#243044,stroke:#9aa8bc,color:#e7ecf3</pre>
+<p><strong>Evidência:</strong> <code>FRecebeContribuicaoNovo.pas:904-1002</code> · <span class="ev ev-comprovado">COMPROVADO</span> (chamada e parâmetros) · corpo das SPs <span class="ev ev-pendente">PENDENTE</span></p>
+<p>No recebimento legado (<code>FRecebeContribuicao.pas</code>), a situação é decidida no Delphi: <code>SITRECEBIMENTO = 2</code> quando esperado = recebido ou diferença ≤ <code>VLRACEITADIVERG</code>, senão <code>3</code> (<code>FRecebeContribuicao.pas:2864-2873</code> na inclusão e <code>:3065-3092</code> na alteração), e a TMPDESC é marcada com <code>SITENVIO = '9'</code> (L1984). Essa unit não é referenciada por nenhuma outra (ver <a href="lacunas.html">Lacunas</a>), por isso o fluxo acima, via SP, é o considerado vigente.</p>
+</section>
+
+<section><div class="section-title">🔀 Fluxo PF-02 — Recebimento via empréstimo (ramo individual)</div>
+<pre class="fluxograma">flowchart TD
+  A(["FRecebeContribEmptmo.btnReceberClick (L658)"]) --> B{"Algum registro selecionado? (L675-677)"}
+  B -- "Não" --> X1(["MsgDlg seleção obrigatória - Exit (L678)"])
+  B -- "Sim" --> C["StartTransaction (L684-686)"]
+  C --> D{"Total analítico igual a VLRCONTRATO do empréstimo? (L692-693)"}
+  D -- "Não" --> X2(["MSG015 - Exit (L694)"])
+  D -- "Sim" --> E[("UPDATE HSTCONTRIBPREV: SITRECEBIMENTO = 2, CODDOCUMENTOPREV = 5, IDCONTRATOEMPTMO (L707-717)")]
+  E --> F[("UPDATE HSTATRASOCONTRIB: VALORRECEBIDO = VALOR (L722-728)")]
+  F --> G["Contabilização: FazerInsertContab e IncluiContabilidade (L762-784)"]
+  G --> H{"iPlnCodigo = -1? (L786)"}
+  H -- "Sim" --> X3(["MsgDlg erros na contabilização - Exit (L787-789)"])
+  H -- "Não" --> I{"Disponibilidade financeira e período contábil OK? (L807-821)"}
+  I -- "Não" --> X4(["Exit"])
+  I -- "Sim" --> J["RealizaIntegracaoPGAIndiv RECEBVIAEMPTMO (L826)"]
+  J --> K{"Erro na integração PGA? (L828)"}
+  K -- "Sim" --> X5(["MsgDlg erros no PGA - Exit (L829-831)"])
+  K -- "Não" --> L[("DELETE DOCUMXDOCUM e ProcessaBaixaDocumento (L852-868)")]
+  L --> M{"Usuário confirma gravar? (L1085)"}
+  M -- "Sim" --> N(["Commit (L1088)"])
+  M -- "Não" --> O(["Rollback (L1092)"])
+  X2 -.-> P(["finally: Rollback se ainda em transação (L1095-1098)"])
+  X3 -.-> P
+  X4 -.-> P
+  X5 -.-> P
+  class A,N start
+  class X1,X2,X3,X4,X5,O,P bloq
+  class E,F,L db
+  classDef start fill:#1e3a5f,stroke:#2dd4bf,color:#e7ecf3
+  classDef bloq fill:#7f1d1d,stroke:#f87171,color:#fecaca
+  classDef db fill:#243044,stroke:#9aa8bc,color:#e7ecf3</pre>
+<p><strong>Evidência:</strong> <code>FRecebeContribEmptmo.pas:658-1100</code> (o ramo em lote, a partir de L870, repete as etapas de baixa, contabilização e PGA) · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</section>
+
+<section><div class="section-title">🔀 Fluxo PF-03 — Atualização de reservas por índice</div>
+<pre class="fluxograma">flowchart TD
+  A(["FAtualizaPorIndice.bbtnEnviarClick (L421)"]) --> B{"Data de atualização preenchida? (L472)"}
+  B -- "Não" --> X1(["MSG023 - Exit (L473)"])
+  B -- "Sim" --> C{"OpcoesOK: patrocinadora, plano e reserva (L482)"}
+  C -- "Não" --> X2(["Exit - MSG020 a MSG022"])
+  C -- "Sim" --> D{"GravaLogTOTALPREV gravou? (L510)"}
+  D -- "Não" --> X3(["MSG024 Operação Interrompida com Erros (L518)"])
+  D -- "Sim" --> E[("RESERVAXPLANO com FLGMODATUALIZACAO = 1 (L538)")]
+  E --> F["Para cada reserva por participante (L631)"]
+  F --> G{"Reserva tem regra IDREGRAPAGTORESE? (L636-637)"}
+  G -- "Sim" --> H["RegraNumerica mês a mês, parando no cancelamento ou falecimento (L704-733)"]
+  G -- "Não" --> I["Valor atualizado = valor × COTVALOR de cada índice (L851-852)"]
+  H --> J[("InsereMovimentoReserva - HISTMOVRESERVA (L728, L854)")]
+  I --> J
+  J --> K[("UPDATE RESERVAPART.DATAULTATUALIZA (L872)")]
+  K --> L{"Erro nesta reserva? (L736-750, L887-901)"}
+  L -- "Sim" --> M["Rollback da reserva e marca bErros"]
+  L -- "Não" --> N["Commit da reserva"]
+  M --> O{"bErros ao final? (L936-937)"}
+  N --> O
+  O -- "Sim" --> P(["Rollback - erros na atualização (L938-939)"])
+  O -- "Não" --> Q(["Commit - Operação realizada com sucesso (L941-942)"])
+  class A,Q start
+  class X1,X2,X3,M,P bloq
+  class E,J,K db
+  classDef start fill:#1e3a5f,stroke:#2dd4bf,color:#e7ecf3
+  classDef bloq fill:#7f1d1d,stroke:#f87171,color:#fecaca
+  classDef db fill:#243044,stroke:#9aa8bc,color:#e7ecf3</pre>
+<p><strong>Evidência:</strong> <code>FAtualizaPorIndice.pas:421-957</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<p>Observação: o log padrão (<code>Sistema.GravaLogOperacoes</code>, L929-933) usa <code>raise</code> dentro de <code>try</code> com <code>Except End;</code> vazio — uma falha nesse log não interrompe nem é exibida.</p>
+</section>
+
+<section><div class="section-title">🔀 Fluxo PF-05 — Bitributação: cálculo do saldo de contribuições</div>
+<pre class="fluxograma">flowchart TD
+  A(["FCalcSalContr.bbtnConfirmarClick (L440)"]) --> B{"Participante selecionado? (L448)"}
+  B -- "Não" --> X1(["MSG035 - Exit (L450)"])
+  B -- "Sim" --> C{"Confirma cálculo dos saldos? (L455)"}
+  C -- "Não" --> X2(["Fim sem cálculo"])
+  C -- "Sim" --> D["Para cada participante marcado: StartTransaction (L482-485)"]
+  D --> E[("DELETE HSTBITRIBUTACAO com OPERACAO = E (L488-490)")]
+  E --> F[("DIP: MIN(DATAPAGAMENTO) em HISTRUBSAL, ignorando evento 352 - Retorno de Aposentado (L496-530)")]
+  F --> G["Fase 1: contribuições recebidas de 1989 a 1995 corrigidas - moedas 557 e 285 (L552-607)"]
+  G --> H{"Ano/mês da DIP (L617, L632)"}
+  H -- "2008/01 a 2012/12" --> I1["Somente recebimentos até 31/12 do ano da DIP (L622-628)"]
+  H -- "≥ 2013/01" --> I2["Todos os recebimentos (L638-640)"]
+  H -- "demais" --> I3["Somente SALDO diferente de zero (L649-653)"]
+  I1 --> J[("InserirHSTBITRIBUTACAO operação E")]
+  I2 --> J
+  I3 --> J
+  J --> K[("Saldo inicial em 2007/12 (L668-680)")]
+  K --> L["Fase 2: saldo × (1 + IPCA-E / 100) desde 01/01/2008 - moeda 285 (L687-728)"]
+  L --> M[("InserirBITRIBUTACAO (L730-734)")]
+  M --> N["Commit por participante (L736-737)"]
+  N --> O(["MSG038 Cálculo(s) efetuado(s) com sucesso (L745)"])
+  D -.->|EDBEngineError| X3(["Rollback (L755-758)"])
+  class A,O start
+  class X1,X2,X3 bloq
+  class E,F,J,K,M db
+  classDef start fill:#1e3a5f,stroke:#2dd4bf,color:#e7ecf3
+  classDef bloq fill:#7f1d1d,stroke:#f87171,color:#fecaca
+  classDef db fill:#243044,stroke:#9aa8bc,color:#e7ecf3</pre>
+<p><strong>Evidência:</strong> <code>FCalcSalContr.pas:440-781</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</section>
+
+<section><div class="section-title">🔀 Fluxo PF-06 — Portabilidade: cadastro e contribuições portadas</div>
+<pre class="fluxograma">flowchart TD
+  A(["FCadContribuicaoPortada.bbtnConfirmarClick (L319)"]) --> B{"Opção de IR regressivo ou progressivo marcada? (L323)"}
+  B -- "Não" --> X1(["MSG040 Necessário informar a Opção de IR (L384)"])
+  B -- "Sim" --> C{"ValicaCampoObrigatoriosPortabilidade (L328, L832)"}
+  C -- "Não" --> X2(["Bloqueia a gravação"])
+  C -- "Sim" --> D{"Inclusão ou alteração? (L331, L340)"}
+  D -- "Inclusão" --> E[("InserePortabilidade: INSERT PORTABILIDADEPREV com SEQPORTABILIDADEPREV.NEXTVAL (L661, L669-670)")]
+  D -- "Alteração" --> F[("AlteraPortabilidade: UPDATE PORTABILIDADEPREV (L559, L567)")]
+  E --> G["CommitTransacao (L354)"]
+  F --> G
+  G --> H(["MSG053 Dados gravados com sucesso (L367)"])
+  D -.->|exceção| X3(["MessageDlg erro na transação e limpa campos (L368-374)"])
+  H --> I["Detalhe: bbtnOkDetClick (L1132)"]
+  I --> J{"ValidaCamposHistorico: referência informada e ≤ cobrança; valor esperado maior que zero (L1186-1212)"}
+  J -- "Não" --> X4(["MSG043, MSG044 ou MSG045 + Abort"])
+  J -- "Sim" --> K[("InsereHistorico: INSERT HSTCONTRIBPREV com IDMOTIVO 3054 (L1045, L1058)")]
+  class A,H start
+  class X1,X2,X3,X4 bloq
+  class E,F,K db
+  classDef start fill:#1e3a5f,stroke:#2dd4bf,color:#e7ecf3
+  classDef bloq fill:#7f1d1d,stroke:#f87171,color:#fecaca
+  classDef db fill:#243044,stroke:#9aa8bc,color:#e7ecf3</pre>
+<p><strong>Evidência:</strong> <code>FCadContribuicaoPortada.pas:319-386</code>, <code>FCadContribuicaoPortada.pas:1132-1215</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</section>
+
+<section><div class="section-title">🔀 Fluxo PF-06 — Benefício Saldado / FAB: alteração e reprocessamento</div>
+<pre class="fluxograma">flowchart TD
+  A(["FBeneficioSaldadoFAB.tbButtonAlterarClick (L840)"]) --> B{"Participante retornado pela pesquisa? (L843)"}
+  B -- "Não" --> X1(["Sem ação"])
+  B -- "Sim" --> C["Abre frmAlteracaoBeneficioSaldadoFAB (L846)"]
+  C --> D[("SELECT CM.PCK_BENEFSALDFAB.FN_CALCULABS(IDPESSOA, SALPART, BNINSS, PBE) FROM DUAL (FAlteracaoBeneficioSaldadoFAB.pas:440-447)")]
+  D --> E["Exec_SP_Atualiza_Benef_Sald_FAB até o último dia do mês corrente (L849, L1016)"]
+  E --> F[("CM.PCK_BENEFSALDFAB.SP_ATUALIZASALDO(pAtualizarTudo, pAtualizarAte, pIdPessoa, pForcaReproc) (L1032-1055)")]
+  F --> G{"ExecProc sem exceção? (L1055-1061)"}
+  G -- "Sim" --> H(["MSG057 Atualização Concluída (L850)"])
+  G -- "Não" --> X2(["MSG058 Ocorreu um erro, a atualização não foi concluída (L852)"])
+  class A,H start
+  class X1,X2 bloq
+  class D,F db
+  classDef start fill:#1e3a5f,stroke:#2dd4bf,color:#e7ecf3
+  classDef bloq fill:#7f1d1d,stroke:#f87171,color:#fecaca
+  classDef db fill:#243044,stroke:#9aa8bc,color:#e7ecf3</pre>
+<p><strong>Evidência:</strong> <code>FBeneficioSaldadoFAB.pas:840-856</code>, <code>FBeneficioSaldadoFAB.pas:1016-1067</code>, <code>FAlteracaoBeneficioSaldadoFAB.pas:420-454</code> · <span class="ev ev-comprovado">COMPROVADO</span> · lógica interna do package <span class="ev ev-pendente">PENDENTE</span></p>
+<p>O desfazer (<code>btnButtonDesfazerClick</code>, L858) chama a mesma rotina com <code>pForcaReproc = 1</code> (L941); o botão Atualizar (<code>btnButtonAtualizarClick</code>, L971) com <code>pForcaReproc = 0</code> (L1002).</p>
+</section>
+
+<section><div class="section-title">🔀 Fluxo PF-07 — Provisão para perdas em lote</div>
+<pre class="fluxograma">flowchart TD
+  A(["FProvPerdasLote.bbtnEnviarClick (L453)"]) --> B{"VerificaPreenchimento: ano/mês, patrocinadora e plano (L421-451)"}
+  B -- "Não" --> X1(["raise EValidacao: MsgDlg e foco no controle (L428-446)"])
+  B -- "Sim" --> C["Processa(false) (L457, L473)"]
+  C --> D[("AbreQryContribuicao: contribuições atrasadas a provisionar (L481, L695)")]
+  D --> E{"Contribuição já provisionada? FLGPROVISIONADO = 1 (L502-503)"}
+  E -- "Sim" --> F["Ignora e passa para a próxima (L505-506)"]
+  E -- "Não" --> G["ProcessaQryIndiceAtual: StartTransaction (L568-574)"]
+  G --> H[("Grava PERCENTUAL, VALORPROV, DIASATRASO, ESTAINADIPLENTE (L576-583)")]
+  H --> I{"IncluiContabilidadeProvPerdas OK? (L585-606)"}
+  I -- "Sim" --> J["Commit e matrícula na lista de sucesso (L610-611, L513)"]
+  I -- "Não" --> K["raise Exception, RollBack e matrícula na lista de erros (L607, L614-624, L515)"]
+  F --> L{"Há mais contribuições? (L491)"}
+  J --> L
+  K --> L
+  L -- "Sim" --> E
+  L -- "Não" --> M["Lista matrículas com sucesso e com erro no memResult (L541-544)"]
+  M --> N(["MSG063 ou MSG064 conforme operacaoOk do último item (L546-549)"])
+  class A,N start
+  class X1,K bloq
+  class D,H db
+  classDef start fill:#1e3a5f,stroke:#2dd4bf,color:#e7ecf3
+  classDef bloq fill:#7f1d1d,stroke:#f87171,color:#fecaca
+  classDef db fill:#243044,stroke:#9aa8bc,color:#e7ecf3</pre>
+<p><strong>Evidência:</strong> <code>FProvPerdasLote.pas:421-627</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</section>
+
+<section><div class="section-title">🔀 Fluxo PF-08 — Tratamento de divergência: cobrança no próximo mês</div>
+<pre class="fluxograma">flowchart TD
+  A(["FDivergContrib.CobraProxMes (L3613)"]) --> B{"Motivo padrão prmIdMotivoDiverg cadastrado? (L3638)"}
+  B -- "Não" --> X1(["MSG072 - Exit (L3640-3642)"])
+  B -- "Sim" --> C["Define o mês da nova cobrança: ProximoAnoMes ou ProximoMesAberto (L3646-3668)"]
+  C --> D["CriticaDataCobrancaSit (L3678-3683)"]
+  D --> E["Para cada registro selecionado na grade analítica (L3728)"]
+  E --> F{"BuscaOpcoes permite o tratamento para a situação e o valor? (L3730-3736)"}
+  F -- "Não" --> G["bErro: tratamento recusado (L3805-3807)"]
+  F -- "Sim" --> H{"Modo 1, opção 3 e ação judicial vigente? (L3745-3755)"}
+  H -- "Sim" --> I["Log ERRO de ação judicial (L3757-3761)"]
+  H -- "Não" --> J{"Cobrança bancária pendente? (L3767)"}
+  J -- "Sim" --> K["Log da mensagem e bErro (L3770-3771)"]
+  J -- "Não" --> L[("InsereHistorico: novo registro em HSTCONTRIBPREV (L3775)")]
+  L --> M[("AtualizaSitRecebimento do registro original (L3789)")]
+  G --> N[("Ao final: INSERT CTRLINTERFACE do lote (L4098-4105)")]
+  I --> N
+  K --> N
+  M --> N
+  N --> O{"bErro? (L4113)"}
+  O -- "Não" --> P(["Result True"])
+  O -- "Sim" --> Q(["Result False - detalhes no memResult"])
+  class A,P start
+  class X1,G,I,K,Q bloq
+  class L,M,N db
+  classDef start fill:#1e3a5f,stroke:#2dd4bf,color:#e7ecf3
+  classDef bloq fill:#7f1d1d,stroke:#f87171,color:#fecaca
+  classDef db fill:#243044,stroke:#9aa8bc,color:#e7ecf3</pre>
+<p><strong>Evidência:</strong> <code>FDivergContrib.pas:3613-4115</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</section>
+</main>
+
+<footer>
+<p>Blueprint AS-IS — PFC-31 — Abas complementares CONTRIBUIÇÃO | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-10</p>
+</footer>
+<script src="../assets/js/mermaid.min.js"></script>
+<script src="../assets/js/fluxogramas.js"></script>
+</body>
+</html>

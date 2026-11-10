@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Folha de Benefícios — Relatórios — Blueprint AS-IS</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<header>
+  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-31</div>
+  <h1>📄 Relatórios e Documentos Gerados — Folha de Benefícios</h1>
+  <p>Forms de parâmetro FPRel*/fPRel*/FParamRel*, DataModules de relatório dRel* (ReportBuilder), relatórios em três camadas e arquivos gerados pelo módulo FOLHA.</p>
+</header>
+<nav>
+  <a href="index.html">📋 Visão Geral</a>
+  <a href="arquitetura.html">🏗️ Arquitetura</a>
+  <a href="inventario.html">📦 Inventário</a>
+  <a href="formularios.html">🧾 Formulários</a>
+  <a href="funcionalidades.html">⚙️ Funcionalidades</a>
+  <a href="rotinas.html">🔧 Procedures</a>
+  <a href="regras-de-negocio.html">📏 Regras</a>
+  <a href="dados.html">🗄️ Dados</a>
+  <a href="relatorios.html">📄 Relatórios</a>
+  <a href="integracoes.html">🔗 Integrações</a>
+  <a href="tratamento-erros.html">⚠️ Erros</a>
+  <a href="diagramas-fluxo.html">🔀 Fluxos</a>
+  <a href="lacunas.html">🔍 Lacunas</a>
+  <a href="controle-cobertura.html">📊 Cobertura</a>
+</nav>
+<main>
+<section><div class="section-title">📄 Visão Geral dos Relatórios</div>
+<p>Os relatórios da folha seguem o padrão <strong>form de parâmetros</strong> (<code>FPRel*</code>, <code>fPRel*</code>, <code>FPrel*</code>, <code>FParamRel*</code>) + <strong>DataModule de relatório</strong> (<code>dRel*</code>) contendo componentes ReportBuilder <code>TppReport</code>. Não há uso de QuickReport (<code>TQuickRep</code>) nem Crystal Reports no módulo. Três relatórios foram migrados para o modelo <strong>três camadas</strong> do framework CM (classe <code>TCmCtrlRptFolha</code>). Esta página consolida o catálogo publicado em <a href="integracoes.html">🔗 Integrações</a> e o complementa com parâmetros extraídos dos DFMs, DataModule usado e arquivos gerados.</p>
+<div class="stats">
+<div class="stat"><div class="n">28</div><div class="l">Forms FPRel*/fPRel*/FPrel*</div></div>
+<div class="stat"><div class="n">16</div><div class="l">Forms FParamRel*</div></div>
+<div class="stat"><div class="n">2</div><div class="l">Relatórios r* (REstorno, rParametrosRubBenef)</div></div>
+<div class="stat"><div class="n">31</div><div class="l">DataModules dRel*</div></div>
+<div class="stat"><div class="n">102</div><div class="l">Componentes TppReport</div></div>
+<div class="stat"><div class="n">44</div><div class="l">DFMs com TppReport</div></div>
+<div class="stat"><div class="n">0</div><div class="l">TQuickRep</div></div>
+<div class="stat"><div class="n">3</div><div class="l">Relatórios três camadas</div></div>
+</div>
+<div class="note"><strong>Critério de contagem:</strong> <code>find FOLHA -iname 'fprel*.pas'</code> (28), <code>-iname '*paramrel*.pas'</code> (16), <code>-iname 'drel*.pas'</code> (31); <code>grep -rai ": TppReport" --include=*.dfm FOLHA | wc -l</code> (102) e <code>grep -rlai</code> (44 arquivos); <code>grep -rlai TQuickRep</code> (0). Há ainda 9 forms de filtro fora do padrão de nome (<code>FFiltro*</code> — 8 — e <code>FRelParamRubricas</code>) que acionam DataModules de relatório/gráfico. O total de “56 relatórios” citado na Visão Geral não foi reproduzido por critério objetivo de nome de arquivo — ver <a href="lacunas.html">🔍 Lacunas</a>.</div>
+</section>
+
+<section><div class="section-title">⚙️ Mecanismo de emissão</div>
+<div class="table-wrap"><table><thead><tr><th>Mecanismo</th><th>Descrição</th><th>Evidência</th><th>Situação</th></tr></thead><tbody>
+<tr><td>Abertura direta pelo menu</td><td><code>TfrmPrincipal</code> abre o form de parâmetros via <code>AbrirForm</code> (ex.: <code>frmPRelDemPag</code>); o form chama o <code>TppReport</code> do DataModule.</td><td><code>FPrincipal.pas:850</code></td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>Relatórios três camadas</td><td><code>AppPadraoPrintReportPadrao</code> trata os <code>IdReports</code> 3281, 2263 e 20128 instanciando <code>TCmCtrlRptFolha</code>.</td><td><code>FPrincipal.pas:1050-1110</code></td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>Despacho por IdReport</td><td><code>TCmCtrlRptFolha.PrintReport</code>: 3281 → <code>TRptEstorno</code> (Relatório de Estorno); 2263 → <code>TDtmRel2ViaCChequeMT</code> (2ª via de contra-cheque); 20128 → <code>TRptParametrosRubBenef</code> (Parametrização das Rubricas de Benefício); demais → “Relatório não implementado”.</td><td><code>uCmCtrlRptFolha.pas:48-84</code>; <code>ReportExists</code> em <code>uCmCtrlRptFolha.pas:87-99</code></td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>Form de parâmetros MT</td><td><code>AppPadraoShowParamReportPadrao</code> cria <code>TfrmPRel2ViaCChequeMT</code> para o IdReport 2263.</td><td><code>FPrincipal.pas:1212-1220</code></td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>Demais forms FPRel*/FParamRel*</td><td>Registrados no <code>Folha.dpr</code> (ex.: <code>FPRelPrevia</code> L58, <code>FParamRelApropContabil</code> L82, <code>fprelpendenciafolha</code> L161); o item de menu que os aciona não foi localizado em <code>FPrincipal.pas</code> por nome de classe — provável cadastro de menu do framework CM.</td><td><code>Folha.dpr:58,82,161</code></td><td><span class="ev ev-inferido">INFERIDO</span></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">📊 Catálogo de Relatórios — forms FPRel*/fPRel*/FPrel* e r*</div>
+<p>Caption extraído da primeira linha <code>Caption =</code> do DFM; DataModule obtido por <code>grep -oi "drel[A-Za-z0-9]+"</code> na unit; parâmetros = captions de <code>TLabel</code>/<code>TCheckBox</code>/<code>TRadioGroup</code>/<code>TGroupBox</code> do DFM. Lin = linhas da unit (<code>wc -l</code>).</p>
+<div class="table-wrap"><table><thead><tr><th>Form / unit</th><th>Relatório (caption)</th><th>DataModule</th><th>Parâmetros (DFM)</th><th>Lin</th><th>Evidência</th></tr></thead><tbody>
+<tr><td><code>FPRelPrevia</code></td><td>Relatório de Pagamentos da Folha de Benefícios</td><td><code>dtmPrevia</code> (dPREVIA, 2 TppReport)</td><td>Matrícula, Nº inscrição, Histórico da folha, Lote, Mês/ano, Folha de manutenção/concessão, Rubricas de resgate, Motivo, Ordem, Agrupar atrasados, Tipo da folha (Definitiva/Inconsistência)</td><td>3159</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><code>FPRelDemPag</code></td><td>Emissão de Demonstrativo de Pagamento</td><td><code>dRelFolha</code></td><td>Histórico da folha, Observações (4×60), Patrocinadora, Plano, Arquivo a ser gerado (padrão <code>C:\ArqCheque.dat</code>), Portador forma de pagamento, Cidade</td><td>1391</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><code>FPRelEntSaiFolha</code></td><td>Parâmetros do Relatório de Entrada e Saída da Folha</td><td><code>dRelEntSaiFolha</code></td><td>Benefício, Ordenação do recebedor, Mês/ano base de comparação, Mês/ano de pagamento, Tratamento, Cor</td><td>1061</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><code>fPRelRubrica</code></td><td>Relatório de Rubricas</td><td><code>dRelRubricas</code></td><td>Plano, Contábil, Rubricas, Patrocinadora, Consolidar, Ordenação do recebedor, Mostra pessoas estornadas</td><td>897</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><code>FPRelBenefaPreparar</code></td><td>Relatório de Benefícios a Preparar</td><td><code>dRelBenefaPreparar</code></td><td>Tipo de folha, Patrocinadora, Plano, Benefícios, Mês/ano de referência, Ordenação, Cor</td><td>484</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><code>FPRelTotSuplemInt</code></td><td>Relatório de Totais de Suplementação Integral</td><td><code>dRelTotSuplemInt</code></td><td>Versão, Patrocinadora, Plano, Consolidar</td><td>482</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><code>fPRelLayout</code></td><td>Relatório de Importações de Convênios</td><td><code>dRelFolha</code></td><td>Rubricas, Layouts/descontos, Ano/mês cobrança, Abono anual, Tipo de relatório, Versão da folha, Origem, Tipo registro</td><td>476</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><code>FPRelContraCheque</code></td><td>Parâmetros para a Emissão de Contra Cheque</td><td><code>dRelContraCheque</code></td><td>Motivo, Versão da folha, Patrocinadora, Plano</td><td>444</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><code>FPRelCredBenef</code></td><td>Relação de Crédito de Beneficiários — analítico</td><td><code>dRelFolha</code> (<code>rpCredBenef</code>)</td><td>Assinaturas, Banco, Agência, Histórico</td><td>396</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><code>FPrelBenConced</code></td><td>Relação de Benefícios Concedidos (caption do DFM <code>fprelbenconced.dfm</code>)</td><td><code>dRelFolha</code> (<code>rpBenConced</code>)</td><td>Mês/ano, Histórico, Filtros, Benefício, Definitiva</td><td>357</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><code>FPRel2ViaCChequeMT</code></td><td>Parâmetros para a Emissão da 2ª Via de Contra Cheque (três camadas, IdReport 2263)</td><td><code>dRel2ViaCChequeMT</code></td><td>—</td><td>340</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><code>REstorno</code></td><td>Relatório de Estorno (três camadas, IdReport 3281)</td><td>próprio (1 TppReport)</td><td>Colunas: Patrocinadora, Plano, Versão, Titular, Inscrição, Recebedor, Data do estorno, Motivo, Matrícula, Mês ref., Rubrica, P/D/I, Valor, Tipo de estorno</td><td>320</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><code>fprelpendenciafolha</code></td><td>Relatório de Rubricas de Desconto Pendentes de Processamento</td><td><code>dRelPendenciaFolha</code></td><td>Versões, Rubricas, Ordem</td><td>297</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><code>FPRelCartasBanco</code></td><td>Relatório de Cartas para Banco</td><td><code>dRelCartasBanco</code></td><td>Versão, Número da carta, Portador forma de pagamento</td><td>250</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><code>rParametrosRubBenef</code></td><td>Relatório de Parametrização das Rubricas de Benefício (três camadas, IdReport 20128)</td><td>próprio (1 TppReport)</td><td>Plano previdenciário, Benefício; colunas Parâmetro, Rubrica, Cód. int/ext, Tipo, Natureza, Linha do informe, IRRF</td><td>249</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><code>FPRelFichaFinancIndiv</code></td><td>Relatório de Ficha Financeira por Versão</td><td><code>dRelFichaFinancIndiv</code></td><td>sem rótulos no DFM</td><td>239</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><code>fpRelValorLiquido</code></td><td>Relatório de Valor Líquido em Determinada Faixa</td><td><code>drelValorLiquido</code></td><td>Faixa de líquido inicial/final, Ordem, Cor</td><td>223</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><code>fPRelArqPagEletr</code></td><td>Relatório de Arquivos de Pagto. Eletrônico</td><td><code>DRelGeral</code></td><td>Caminho dos arquivos, Diretório, Seleção de arquivos</td><td>209</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><code>FPRelAlteracaoBenefPagos</code></td><td>Relatório de Alteração de Benefícios Pagos</td><td><code>dRelAlteracaoBenefPagos</code></td><td>Patrocinadora, Plano, Benefício, Mês/ano atual e anterior</td><td>208</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><code>FPRelPortFormaVersao</code></td><td>Relatório de Portador Forma por Versão</td><td><code>DRelPortFormaVersao</code></td><td>Portador forma de pagamento, Versão da folha</td><td>175</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><code>FPRelPAFavor</code></td><td>Pensão Alimentícia dos Favorecidos</td><td><code>dRelFolha</code> (<code>rpPAFavor</code>)</td><td>Rubrica, Mês/ano da folha</td><td>136</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><code>FPRelCredBenefBan</code></td><td>Relação de Crédito de Beneficiários por banco</td><td><code>dRelFolha</code> (<code>rpCredBenefBan</code>)</td><td>1ª/2ª assinatura, Cor</td><td>132</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><code>fPRelPagtoIndiv</code></td><td>Relatório de Pagamento Individual</td><td><code>dRelPagtoIndiv</code></td><td>1ª/2ª assinatura</td><td>129</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><code>FPRelCredBenefAgen</code></td><td>Relação de Crédito de Beneficiários por agência</td><td><code>dRelFolha</code> (<code>rpCredBenefAgen</code>)</td><td>1ª/2ª assinatura</td><td>124</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><code>FPRelEstruturaRubrica</code></td><td>Relatório de Estrutura Rubrica</td><td><code>dRelEstruturaRubricas</code></td><td>Estrutura de rubrica</td><td>121</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><code>fPRelCadPensao</code></td><td>Relatório de Participantes por Rubrica</td><td><code>dRelFolha</code></td><td>Rubricas, Data final, Cancelados, Pensão alimentícia</td><td>119</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><code>FPRelRubSalariais</code></td><td>Relatório de Rubricas Salariais</td><td><code>dRelRubSalariais</code></td><td>Grupo de rubricas salariais, Tipo, Compõe IR, Compõe pensão alimentícia</td><td>107</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><code>FPrelBenefEncer</code></td><td>Relação de Beneficiários Encerrados</td><td><code>dRelFolha</code> (<code>rpBenEncer</code>)</td><td>Histórico</td><td>104</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><code>FPRelDivergContrib</code></td><td>Relatório de Divergência de Contribuições</td><td><code>dRelDivergContrib</code></td><td>Ordenação, Cor, Lote, Mês/ano de referência para comparação</td><td>100</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><code>FPRelIncBenef</code></td><td>Relação de Inclusões de Benefícios no Mês da Folha</td><td><code>dRelFolha</code></td><td>Histórico</td><td>94</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">🧾 Forms de parâmetro FParamRel* (16)</div>
+<div class="table-wrap"><table><thead><tr><th>Form / unit</th><th>Relatório (caption)</th><th>DataModule</th><th>Parâmetros (DFM)</th><th>Lin</th><th>Evidência</th></tr></thead><tbody>
+<tr><td><code>fParamRelResRubrica</code></td><td>Resumo de Rubricas</td><td><code>dRelResRubrica</code></td><td>Consolidado por versão, Patrocinadora, Consolidar, Plano, Contábil, Ordenação, Mostra estornadas</td><td>1110</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><code>FParamRelRendasAlteradas</code></td><td>Relação de Rendas Alteradas</td><td><code>dRelRendasAlteradas</code></td><td>Patrocinadora, Plano, Base de comparação, Mês/ano base e de pagamento, Percentual, Filtros, Ordenação por valor</td><td>914</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><code>fParamRelFicha</code></td><td>Relatório de Ficha Financeira</td><td><code>dRelFichaFinanc</code></td><td>Mês/ano início e fim, Beneficiário</td><td>305</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><code>fParamRelBenefPendentes</code></td><td>Benefícios Pendentes</td><td><code>dRelFolha</code> (<code>rpBenefPendentes</code>)</td><td>Benefício, Patrocinadora, Mês/ano, Calcula reajuste</td><td>275</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><code>FParamRelaEntSaiFolha</code></td><td>Parâmetro do Relatório de Entradas/Saídas da Folha</td><td><code>dRelFolha</code>, <code>dRelEntSaiFolha</code></td><td>Patrocinadora, Plano, Benefício, Mês/ano de pagamento</td><td>251</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><code>FParamRelPensAlim</code></td><td>Relatório de Pensão Alimentícia por Favorecido</td><td><code>dRelFolha</code> (<code>rpRelPensAlim</code>)</td><td>Patrocinadora</td><td>239</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><code>FParamRelBenefHist</code></td><td>Parâmetros para o Relatório de Benefícios Pagos</td><td><code>dRelbenef</code></td><td>Mês/ano, Tipo do relatório, Benefícios</td><td>216</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><code>FParamRelSuplMaiorMenor</code></td><td>Suplementação Maior / Menor</td><td><code>dRelFolha</code> (<code>rpSupMaiorMenor</code>)</td><td>Mês/ano, Histórico, Ordenação, Patrocinadora</td><td>181</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><code>FParamRelLancnaoProcessados</code></td><td>Lançamentos Não Processados</td><td><code>dRelLancNaoProcessados</code></td><td>Plano, Mês de cobrança, Ano, Mês de referência, Rubrica, Tipo de lançamento</td><td>177</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><code>FParamRelPensBanco</code></td><td>Pensão alimentícia por banco (DFM sem caption)</td><td><code>dRelFolha</code> (<code>rpRelPensBanco</code>)</td><td>Banco, Patrocinadora, Histórico</td><td>172</td><td><span class="ev ev-inferido">INFERIDO</span></td></tr>
+<tr><td><code>FParamRelPreparo</code></td><td>Relatório de Benefícios Preparados</td><td><code>dRelFolhaAtividade</code></td><td>Patrocinadora, Plano, Mês/ano de cobrança, Abono, Ordenação</td><td>154</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><code>FParamRelBenefPgto</code></td><td>Benefícios Pagos por Filial</td><td><code>dRelFolha</code> (<code>rpBenefPgto</code>)</td><td>Patrocinadora, Mês/ano</td><td>140</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><code>FParamRelEstatSuplBenef</code></td><td>Estatística de suplementação (DFM sem caption)</td><td><code>dRelEstatSuplBenef</code></td><td>Mês/ano inicial e final</td><td>133</td><td><span class="ev ev-inferido">INFERIDO</span></td></tr>
+<tr><td><code>FParamrelRubFontePag</code></td><td>Relatório de Rubricas por Fonte Pagadora</td><td><code>DRelGeral</code></td><td>Fonte pagadora</td><td>116</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><code>FParamRelApropContabil</code></td><td>Apropriação Contábil</td><td><code>dRelFolha</code></td><td>Histórico (versão da folha)</td><td>104</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><code>fParamRelBenefRetidos</code></td><td>Benefícios Retidos</td><td><code>dRelBenefRetidos</code></td><td>Patrocinadora</td><td>74</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+</tbody></table></div>
+<p>Adicionalmente, <code>FMapaFolhaBenef</code> (“Mapa da Folha de Beneficio”, WO2511 — parâmetros Mês/ano, Nº folha efetiva, Observações) gera o mapa via <code>Exec_SP_MapaFolhaBenef</code> (<code>fFolhaNormalEfet.pas:8107</code>) — <span class="ev ev-comprovado">COMPROVADO</span>.</p>
+</section>
+
+<section><div class="section-title">📊 DataModules de relatório (ReportBuilder)</div>
+<div class="table-wrap"><table><thead><tr><th>DataModule (DFM)</th><th>Nº TppReport</th><th>Relatórios atendidos</th><th>Evidência</th></tr></thead><tbody>
+<tr><td><code>dRelFolha</code></td><td>21</td><td>rpPAFavor, rpGerAtiv, rpBenEncer, rpRelPensBanco, rpRelPensAlim, rpCredBenef, rpCredBenefAgen, rpBenConced, rpBenefPgto, rpSupMaiorMenor, rpBenefPendentes, rpBenefSituacao, rpCredBenefBan(Aux), ppReportReciboAdiantamento, ppLayout, ppReport1–4</td><td><code>dRelFolha.dfm:303-14651</code> · <span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><code>drelbenef</code>, <code>dRelGeral</code></td><td>3 cada</td><td>Benefícios pagos; arquivos de pagamento eletrônico e rubricas por fonte pagadora</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>Demais <code>dRel*</code> + <code>dPREVIA</code></td><td>1–2 cada</td><td>Um DataModule por relatório (ex.: <code>dRelContraCheque</code>, <code>dRelResRubrica</code>, <code>dRelRendasAlteradas</code>, <code>dRelFolhaAtividade</code> usado por <code>FParamRelPreparo</code>)</td><td><code>grep -c ": TppReport"</code> por DFM · <span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><code>dRelBenefINSS</code>, <code>dRelQtdMensalPartBenef</code>, <code>dRelaQtdPartFolha</code>, <code>dRelaTotSuplBenef</code>, <code>dRelParamRubricas</code></td><td>2 cada</td><td>Acionados por forms de filtro <code>FFiltro*</code>/<code>FRel*</code> (fora do padrão FPRel*): <code>FFiltroRelBenefINSS</code> (Valor Mensal do Benefício de INSS), <code>FFiltroQtdMensalPartBenef</code> (Quantidade de Participantes por Benefício), <code>FFiltroRelaQtdPartFolha</code>, <code>FFiltroRelaTotSupl</code>, <code>FRelParamRubricas</code></td><td><code>grep -rliw</code> do nome do DataModule nas units · <span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">📄 Relatórios embutidos em telas de processo</div>
+<div class="table-wrap"><table><thead><tr><th>Tela</th><th>Nº TppReport</th><th>Conteúdo</th><th>Evidência</th></tr></thead><tbody>
+<tr><td><code>FConciliacaoReembolsoINSS</code></td><td>3</td><td>Conciliação do reembolso INSS: padrão (<code>imprimirRelatorio</code> L1032), analítico (L1664) e sintético (L2258)</td><td><code>FConciliacaoReembolsoINSS.pas:1032-2362</code> · <span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><code>FHistCompSalContri</code></td><td>3</td><td>Histórico de composição salarial / contribuição (IRRF)</td><td><code>FHistCompSalContri.dfm</code> · <span class="ev ev-inferido">INFERIDO</span></td></tr>
+<tr><td><code>FExecGeraDocConvenio</code></td><td>2</td><td>Relatório de repasse a convênios — exige documento único (<code>VerificaPreenchimentoRelat</code> L1240-1261, <code>btnRelatorioClick</code> L2448)</td><td><code>FExecGeraDocConvenio.pas:1240-2549</code> · <span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><code>FRemessaEletronica</code></td><td>2</td><td>Relatórios de movimentos de remessa/retorno (<code>spbImpMovArqGeradoClick</code> L3908, <code>spbImpMovArqRetornoClick</code> L4593)</td><td><code>FRemessaEletronica.pas:3908,4593</code> · <span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><code>UConciliacaoCredito</code>, <code>fBatimentoPrevia</code></td><td>1 cada</td><td>Conciliação de crédito efetuado; batimento da prévia</td><td>DFMs · <span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><code>FFiltroGraficoFolhaBenef</code>, <code>FFiltroGraficoDescontos</code>, <code>FFiltroGraficoQtdPartFolha</code>, <code>FFiltroGraficoSuplDescFolha</code></td><td>1 cada</td><td>Gráficos gerenciais da folha (filtro + relatório)</td><td>DFMs · <span class="ev ev-inferido">INFERIDO</span></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">📤 Arquivos gerados e exportações</div>
+<div class="table-wrap"><table><thead><tr><th>Arquivo / saída</th><th>Formato</th><th>Origem</th><th>Evidência</th></tr></thead><tbody>
+<tr><td>Remessa bancária CNAB 150</td><td>TXT posicional (via <code>TCtrlIntBanco</code>)</td><td>Efetivação — <code>GeraArquivoPagamentoLeiauteCNAB150</code>, chamado em <code>ProcessaArquivobanco</code></td><td><code>fFolhaNormalEfet.pas:9346</code>, <code>:6348</code> · <span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>Remessa CNAB 240 / SIACC</td><td>TXT posicional</td><td><code>GeraArquivoSIACC</code> → <code>GeraArquivoPagamentoleiauteCNAB240</code></td><td><code>fFolhaNormalEfet.pas:9806-9812</code>, <code>:9468</code> · <span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>Remessa avulsa de pagamento</td><td>TXT (diretório <code>PATHARQUIVOREM</code> do portador)</td><td><code>TfrmGeraArquivoRemessa</code> — <code>MontaPagamentoEletronico</code></td><td><code>fGeraArquivoRemessa.pas:445-468</code> · <span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>Remessa da prévia (CEF) e <code>ResumoArquivo.csv</code></td><td>TXT CNAB 240 + CSV</td><td><code>TfrmGeraArquivoRemessaPrevia</code> — <code>MontaArquivoCNAB240</code> (L1409), <code>SaveToCSV</code></td><td><code>fGeraArquivoRemessaPrevia.pas:1299,1517,1733</code> · <span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>Fita de crédito <code>FITACREDITO_ddmmyyyy_hhnnss.Txt</code></td><td>TXT em <code>C:\Planus\Temp\</code></td><td><code>TFrmAberturaFitaCredito.btnPtocessarClick</code></td><td><code>FAberturaFitaCredit.pas:248-253</code> · <span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>Arquivo de convênio (CNAB 240)</td><td>TXT</td><td><code>TfrmExecGeraDocConvenio.GeraArquivoPagamentoleiauteCNAB240</code></td><td><code>FExecGeraDocConvenio.pas:2672</code> · <span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>Exportação para convênio (layout de saída)</td><td>TXT</td><td><code>uExportacao.Processar</code> — <code>ListaExp.SaveToFile</code></td><td><code>uExportacao.pas:483,699</code> · <span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>Saída cadastral por favorecido <code>&lt;favorecido&gt;.txt</code></td><td>TXT</td><td><code>FGeraSaidaCadastral</code></td><td><code>FGeraSaidaCadastral.pas:615</code> · <span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>Contra-cheque para impressão (padrão <code>C:\ArqCheque.dat</code>)</td><td>arquivo de dados</td><td><code>TfrmPRelDemPag.bbtnConfirmarClick</code> — <code>ContraCheque.SaveToFile</code></td><td><code>FPRelDemPag.pas:165-176</code> · <span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>Planilhas de movimento (<code>REMESSA_MOVIMENTO.XLS</code>, <code>ARQGERADOS_MOVIMENTO.XLS</code>, <code>ARQRETORNO_MOVIMENTO.XLS</code>…) e <code>REMESSA_LISTAFAVOREC.CSV</code></td><td>XLS / CSV</td><td><code>TFrmRemessaEletronica</code></td><td><code>FRemessaEletronica.pas:2030,3959,3970,4268,4547,4558,4642</code> · <span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>Gatilhos ETL (<code>Iniciar_Previa.csv</code>, <code>Iniciar_Histrubsal.csv</code>, <code>Iniciar_Retornos.csv</code>, <code>Iniciar_Validacao.csv</code>)</td><td>CSV vazio (sinalização)</td><td>Prévia e efetivação via ETL</td><td><code>FFolhaNormalPrevia.pas:4240</code>, <code>fFolhaNormalEfet.pas:8733-8766</code> · <span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>Logs de processamento (<code>preparofolha.txt</code>, <code>previafolha.txt</code>, <code>LOGFOLHABENEFICIO.TXT</code>, <code>Batimento-Fase1..5.txt</code>)</td><td>TXT</td><td>Preparo, prévia, efetivação, batimento</td><td><code>FPreparo.pas:7098</code>, <code>FFolhaNormalPrevia.pas:2355</code>, <code>fFolhaNormalEfet.pas:1874</code>, <code>fBatimentoPrevia.pas:1764-1768</code> · <span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>Logs de importação (<code>INSERERUBRICAS_*.TXT</code>, <code>IMPORT_HISTORICOBENEFICIO_*.txt</code>)</td><td>TXT em <code>C:\PLANUS\TEMP\</code></td><td>Inserção de rubricas INSS; importação de histórico de benefício</td><td><code>FInsereRubricasINSSFolha.pas:618</code>, <code>FLancHistBenef.pas:611-618</code> · <span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>Carga de contra-cheque no aplicativo (API HTTPS)</td><td>JSON</td><td><code>CargaContraChequeMongo</code> — chamada única está comentada</td><td><code>fFolhaNormalEfet.pas:9844</code>, <code>:9338</code> · <span class="ev ev-pendente">PENDENTE</span></td></tr>
+</tbody></table></div>
+</section>
+</main>
+<footer>
+<p>Blueprint AS-IS — PFC-31 — Abas complementares FOLHA | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-10</p>
+</footer>
+</body>
+</html>

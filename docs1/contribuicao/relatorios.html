@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contribuição Previdenciária — Relatórios — Blueprint AS-IS</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+
+</head>
+<body>
+<header>
+  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-31 (abas complementares)</div>
+  <h1>📄 Relatórios e Documentos Gerados — Contribuição Previdenciária</h1>
+  <p>16 units em Relatorios/, data modules ReportBuilder, demonstrativos por tela, importações e exportações de arquivos</p>
+</header>
+<nav>
+  <a href="index.html">📋 Visão Geral</a>
+  <a href="arquitetura.html">🏗️ Arquitetura</a>
+  <a href="inventario.html">📦 Inventário</a>
+  <a href="formularios.html">🧾 Formulários</a>
+  <a href="funcionalidades.html">⚙️ Funcionalidades</a>
+  <a href="rotinas.html">🔧 Procedures</a>
+  <a href="regras-de-negocio.html">📏 Regras</a>
+  <a href="dados.html">🗄️ Dados</a>
+  <a href="relatorios.html">📄 Relatórios</a>
+  <a href="integracoes.html">🔗 Integrações</a>
+  <a href="tratamento-erros.html">⚠️ Erros</a>
+  <a href="diagramas-fluxo.html">🔀 Fluxos</a>
+  <a href="lacunas.html">🔍 Lacunas</a>
+  <a href="controle-cobertura.html">📊 Cobertura</a>
+</nav>
+
+<main>
+<section><div class="section-title">ℹ️ Sobre esta página</div>
+<p>Consolida os relatórios, consultas, demonstrativos e arquivos gerados/lidos pelo módulo CONTRIBUIÇÃO. A base é a pasta <code>CONTRIBUICAOPREV/Relatorios/</code> (16 units .pas + 16 .dfm), complementada pelos relatórios ReportBuilder embutidos em telas de <code>Fontes/</code> e pelas importações/exportações de arquivos. Os fatos foram conferidos com <code>grep -n</code> nos fontes; as referências seguem o padrão <code>Arquivo.pas:linha</code>. O catálogo resumido anterior permanece em <a href="integracoes.html">Integrações</a>.</p>
+<div class="legend"><span><span class="ev ev-comprovado">COMPROVADO</span> — identificado diretamente no código</span><span><span class="ev ev-inferido">INFERIDO</span> — interpretação plausível a partir de nome/caption/SQL</span><span><span class="ev ev-pendente">PENDENTE</span> — depende de validação adicional</span></div>
+<div class="stats">
+<div class="stat"><div class="n">16</div><div class="l">Units em Relatorios/</div></div>
+<div class="stat"><div class="n">15</div><div class="l">Objetos TppReport (.dfm)</div></div>
+<div class="stat"><div class="n">10</div><div class="l">Units de relatório ausentes (DPR)</div></div>
+<div class="stat"><div class="n">10</div><div class="l">Telas com importação Excel/texto</div></div>
+<div class="stat"><div class="n">8</div><div class="l">Telas que salvam o log de resultado</div></div>
+</div>
+</section>
+
+<section><div class="section-title">📄 Relatórios e Consultas do Módulo (pasta Relatorios/)</div>
+<div class="table-wrap"><table><thead><tr><th>Relatório</th><th>Unit</th><th>Classe / Parent</th><th>Dados exibidos</th><th>Parâmetros</th><th>Evidência</th></tr></thead><tbody>
+<tr><td>Extrato de Poupança</td><td><code>FPRelExtPoup.pas</code> (2173 lin.)</td><td>TfrmPRelExtPoup : TfrmOkCancelar (<code>FPRelExtPoup.pas:147</code>)</td><td>Movimentação e saldos de reserva por mês (HISTMOVRESERVA, RESERVAXPLANO, RESERVAPART, PARTPREVPLAN, SITPART). Saída em arquivo texto: Layout Tipo 1 (<code>GeraTxtLayOut1</code> L519), Layout Tipo 2 (<code>ProcessaLayOutTipo2</code> L829), consulta própria (<code>ProcessaConsultaPropria</code> L1721) e comparação de saldos (<code>bbtnComparaClick</code> L1985)</td><td>Mês/ano de referência inicial e final (obrigatórios, L358-374), origem (<code>rgrpOrigem</code> L385), layout (<code>rgrpLayOut</code> L395), matrícula individual ou planos marcados (L400-412)</td><td><code>FPRelExtPoup.pas:353-428</code> <span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>Demonstrativo / Extrato de Desligamento</td><td><code>FParamRelExtratoDeslig.pas</code> (876 lin.)</td><td>TFrmParamRelExtratoDeslig : TfrmOkCancelar (<code>FParamRelExtratoDeslig.pas:52</code>)</td><td>Simulação de desligamento: elegibilidade (<code>RodaRegraElegibilidade</code> L573), benefício (<code>RodaRegraBeneficio</code> L613), reservas associadas (L830); grava SIMULADESLIG (<code>GravaDados</code> L779, INSERT L788) e exibe o preview “AdmPREV - Demonstrativo de Desligamento” (L280, L553)</td><td>Participante (L172), plano configurado (L184), evento de demissão (L199), reaproveitamento de extrato já calculado (L240)</td><td><code>FParamRelExtratoDeslig.pas:155-560</code> <span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>Relatório Financeiro (parâmetros)</td><td><code>FParamRelFinanc.pas</code> (1211 lin.)</td><td>TParamRelFinanc : TfrmOkCancelar (<code>FParamRelFinanc.pas:33</code>)</td><td>Contribuições, alteradores e lançamentos (HSTCONTRIBPREV, ALTERADORXCONTRIB, LANCTODOCUM, CONTRIBUICAO, PLANPREVCONTABIL). SQL montado em <code>GetSQLImpressao</code> (L317)</td><td>Patrocinadoras, planos, situações e contribuições em check-lists (<code>CarregaCheckList</code> L221); validação em <code>ValidaParametrosDePesquisa</code> (L830); confirmação L937</td><td><code>FParamRelFinanc.pas:317-975</code> <span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>Relatório de Movimento de Contribuições (parâmetros)</td><td><code>FParamRelMovContrib.pas</code> (1341 lin.)</td><td>TParamRelMovContrib : TfrmOkCancelar (<code>FParamRelMovContrib.pas:33</code>)</td><td>Movimento de contribuições por plano/patrocinadora (mesmas tabelas do financeiro); SQL em <code>GetSQLImpressao</code> (L391), com forma de apresentação (<code>rgApresentacaoClick</code> L1322)</td><td>Período por meses (<code>CarregaMeses</code> L942, <code>GetPeriodos</code> L957), data-base (L1328), check-lists de patrocinadora/plano/situação/contribuição; validação L1025; confirmação L1063</td><td><code>FParamRelMovContrib.pas:391-1091</code> <span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>Relatório de Provisões a Constituir</td><td><code>FRelProvConst.pas</code> (2018 lin.)</td><td>TRelProvConst : TfrmOkCancelar (<code>FRelProvConst.pas:35</code>)</td><td>Evolução da provisão matemática a constituir (cabeçalho da unit, L5): HISTMOVRESERVA, RESERVAXPLANO, RESERVAXCONTRIB, PLANPREV. Gera PDF (<code>btGerarPDFClick</code> L679, <code>DeviceType := 'PDFFile'</code> L687) e Excel (<code>btGerarEXCELClick</code> L1060, <code>MontaArquivoExcel</code> L840, <code>MontaArquivoExcelProvisao</code> L1136)</td><td>Plano previdenciário (L417), reserva, faixa de datas (<code>ValidaFaixaDeDatas</code> L329), índice de cotação (<code>VerificaIndiceCotacao</code> L436)</td><td><code>FRelProvConst.pas:679-2018</code> <span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>Configuração de Simulação de Desligamento</td><td><code>FConfSimulaDeslig.pas</code> (393 lin.)</td><td>TFrmConfSimulaDeslig : TfrmCadMestreDetalheCS (<code>FConfSimulaDeslig.pas:35</code>)</td><td>Cadastro mestre-detalhe da configuração (CFGSIMULADESLIG, RESERVADESLIG, EVENTOGERADOR) e desenho do layout <code>rpExtSimDeslig</code> (<code>FConfSimulaDeslig.dfm:850</code>, <code>btnDesenhoClick</code> L324)</td><td>Evento gerador (L240), sequência de impressão (L246), reserva associada (L254)</td><td><code>FConfSimulaDeslig.pas:234-262</code> <span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>Consulta de Eventos</td><td><code>FConsEventosPrev.pas</code> (163 lin.)</td><td>TfrmConsEventosPrev : TfrmOkCancelar (<code>FConsEventosPrev.pas:19</code>)</td><td>Histórico de eventos (EVENTOSPREV), histórico de contribuições do evento (HSTCONTEVENTOSPR), novas contribuições associadas e contribuições suspensas (abas do DFM)</td><td>Participante (patrocinadora, plano, inscrição, matrícula)</td><td><span class="ev ev-comprovado">COMPROVADO</span> (tabelas no SQL; abas pelo caption do DFM)</td></tr>
+<tr><td>Consulta do Histórico de Movimentação de Reservas</td><td><code>FConsHistMovReserva.pas</code> (528 lin.)</td><td>TfrmConsHistMovReserva : TfrmConsultar (<code>FConsHistMovReserva.pas:26</code>)</td><td>HISTMOVRESERVA (valor da movimentação, valor posterior, gerado por), RESERVAXPLANO, EVENTOGERADOR</td><td>Matrícula, nome, CPF, inscrição, filial, patrocinadora, plano, evento, benefício, contribuição, reserva, faixa de datas</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>Log de Operações do TotalPREV</td><td><code>FConsLogTotalPREV.pas</code> (150 lin.)</td><td>TfrmConsLogTotalPREV : TfrmSairAjuda (<code>FConsLogTotalPREV.pas:33</code>)</td><td>LOGTOTALPREV por módulo (MODULO)</td><td>Faixa de datas, módulo, texto da operação (opcional)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>Consulta ao Cadastro de Rubricas</td><td><code>FConsRubricas.pas</code> (86 lin.)</td><td>TfrmConsRubricas : TfrmSairAjuda (<code>FConsRubricas.pas:19</code>)</td><td>Rubrica (PROVDESC) e empresas associadas (PATRO/PESSOA)</td><td>Código e nome da rubrica na fundação</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>Controle de Cobranças e Pagamentos por Lote</td><td><code>FCtrlInterface.pas</code> (183 lin.)</td><td>TfrmCtrlinterface : TfrmSairAjuda (<code>FCtrlInterface.pas:19</code>)</td><td>CTRLINTERFACE: situação do lote (enviado, recebido, emitido, processado pelo módulo de origem)</td><td>Módulo, patrocinadoras, situação do lote</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>Previewer com exportação</td><td><code>FPreviewExpEx.pas</code> (493 lin.)</td><td>TFrmPreviewExpEx : TppCustomPreviewer (<code>FPreviewExpEx.pas:22</code>)</td><td>Visualizador ReportBuilder: impressão (L348), PDF (<code>DeviceType</code> L382/L406), envio por e-mail (<code>btnSendMailClick</code> L418), exportação via QExport3 (<code>btnExportarClick</code> L486), salvar/abrir (L301/L323)</td><td>— (recebe o relatório ativo)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+</tbody></table></div>
+<div class="note"><strong>Observação:</strong> os .dfm de <code>FRelProvConst</code> e <code>FPreviewExpEx</code> estão gravados em formato <strong>binário</strong> (iniciam com byte 0xFF), por isso a leitura de captions e componentes desses dois forms foi parcial. O caption “Relatório de Provisões a Constituir” foi extraído do conteúdo binário. Ver <a href="lacunas.html">Lacunas</a>.</div>
+</section>
+
+<section><div class="section-title">📊 Data Modules de Relatório (ReportBuilder)</div>
+<div class="table-wrap"><table><thead><tr><th>Data Module</th><th>Unit</th><th>Relatório (componente)</th><th>Chamado por</th><th>Evidência</th></tr></thead><tbody>
+<tr><td>TdtmParamRelFinanc : TdtmReports</td><td><code>dParamRelFinanc.pas</code> (668 lin.)</td><td><code>rpRel</code> (<code>dParamRelFinanc.dfm:271</code>); abertura por <code>MostraParam</code> (<code>dParamRelFinanc.pas:271</code>); totais por plano (<code>GetTotalPlano</code> L574)</td><td>FParamRelFinanc</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>TdtmParamRelMovContrib : TdtmReports</td><td><code>dParamRelMovContrib.pas</code> (863 lin.)</td><td><code>rpRel</code> (<code>dParamRelMovContrib.dfm:392</code>); <code>MostraParam</code> (<code>dParamRelMovContrib.pas:341</code>); “Não existem dados a serem apresentados!” (L412); grava o SQL gerado em <code>sqlResult.txt</code> (L398)</td><td>FParamRelMovContrib</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>TdtmRelExtratoDeslig : TdtmReports (<code>dRelExtratoDeslig.pas:25</code>)</td><td><code>dRelExtratoDeslig.pas</code> (86 lin.)</td><td><code>rpExtSimDeslig</code> (<code>dRelExtratoDeslig.dfm:212</code>)</td><td>FParamRelExtratoDeslig (L244, L518)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>TRptProvPerdas : TFrmCmReport</td><td><code>dRelProvPerdas.pas</code> (292 lin.)</td><td><code>rpRelProvPerdas</code> (<code>dRelProvPerdas.dfm:22</code>); <code>AbreQryRelProvPerdas</code> (L127), <code>MostraRelatorio</code> (<code>dRelProvPerdas.pas:245</code>). Dados: PROVISAOPERDASCONTRIBUICAO, CONTRIBUICAO, PESSOA, ELEGPATRO, SITFUNC, PLANPREVCONTABIL</td><td>FFRelProvPerdas (Fontes) — <code>FFRelProvPerdas.pas:304</code> (por matrícula) e <code>:332</code> (outras condições)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">🧾 Relatórios e Demonstrativos Específicos por Tela (Fontes/)</div>
+<div class="table-wrap"><table><thead><tr><th>Tela de origem</th><th>Relatório / demonstrativo</th><th>Descrição</th><th>Evidência</th></tr></thead><tbody>
+<tr><td>FBeneficioSaldadoFAB</td><td><code>rpDemosSald</code>, <code>rpBenefSald</code>, <code>rpFAB</code>, <code>rpHistorico</code></td><td>Demonstrativo de Saldamento (<code>btnDemosSaldamentoClick</code> L719, preview L736); Benefício Saldado, Benefício Saldado e FAB e Histórico de Alterações (<code>tbButonRelatorioClick</code> L959, opções L962/L964/L966)</td><td><code>FBeneficioSaldadoFAB.pas:719-966</code>; <code>FBeneficioSaldadoFAB.dfm:1549,5324,6380,7181</code> <span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>fCargaArquivo</td><td><code>rptSaldoFAB</code></td><td>“Saldo Fundo de Acumulação de Benefícios” (<code>btnSaldoFABClick</code> L966, preview L1001)</td><td><code>fCargaArquivo.pas:1001</code>; <code>fCargaArquivo.dfm:1075</code> <span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>FRecebeContribuicaoNovo</td><td><code>rpArqRetorno</code></td><td>“Arquivo de Retorno da Patrocinadora” com exportação (<code>TFrmPreviewExport.CreateModalPreviewExp</code>, <code>bbtnConfirmarClick</code> L327)</td><td><code>FRecebeContribuicaoNovo.pas:339</code>; <code>FRecebeContribuicaoNovo.dfm:1296</code> <span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>FRecebeContribuicao (legado)</td><td><code>rpResumoCobr</code></td><td>Resumo Mensal de Recebimentos via Interface (FOLHAORIGEM='P') ou via Folha de Benefícios ('B') — <code>bbtnConfirmarClick</code> L6031</td><td><code>FRecebeContribuicao.pas:6060-6069</code>; <code>FRecebeContribuicao.dfm:1691</code> <span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>FRecebeContribEmptmo</td><td><code>rpRelSintetico</code>, <code>rpRelAnalitico</code></td><td>Impressão sintética ou analítica dos contratos/contribuições baixados via empréstimo (<code>bbtnImprimirClick</code> L1395)</td><td><code>FRecebeContribEmptmo.pas:1406,1412</code>; <code>FRecebeContribEmptmo.dfm:1133,1531</code> <span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>FDivergContrib</td><td><code>TppTEnvioEmail</code> + e-mail com imagem</td><td>Modelo de relatório carregado por stream em <code>pmnuCobraImedClick</code> (L5649-5653) e envio de e-mail com imagem anexa pela SP <code>CM.ENVIA_EMAIL_IMGANEXO</code> (<code>EnviaEMailComImgAnexo</code> L9235, L9251). Finalidade (comunicação de cobrança ao participante) <span class="ev ev-inferido">INFERIDO</span></td><td><code>FDivergContrib.pas:5649,9251</code>; <code>FDivergContrib.dfm:3758</code> <span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>FConsEstatDivergContrib</td><td>Gráfico <code>dbChart1</code></td><td>Impressão do gráfico de estatística de divergências (<code>dbChart1.Print</code>) — handler <code>bbtnCancelarClick</code> (L579)</td><td><code>FConsEstatDivergContrib.pas:582</code> <span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>FFRelProvPerdas</td><td>Relatório de Provisão para Perdas</td><td>Filtro por matrícula ou por patrocinadora/plano/contribuições/mês de cobrança; validações por <code>EValidacao</code> (L366, L394, L398); chama <code>RptProvPerdas.MostraRelatorio</code></td><td><code>FFRelProvPerdas.pas:256-343</code> <span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>FPrincipal</td><td>Report padrão 3231</td><td><code>AppPadraoShowParamReportPadrao</code> instancia <code>TfrmPRelHisFuncionalMT</code> quando IdReports=3231 (unit ausente da pasta do módulo); demais relatórios cadastrados passam por <code>ShowReport</code> (<code>AppPadraoPrintReportPadrao</code> L1635-1646)</td><td><code>FPrincipal.pas:1621-1646</code> <span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">🚨 Relatórios referenciados mas ausentes da pasta do módulo</div>
+<p>O <code>ContribuicaoPREV.dpr</code> referencia 10 units em <code>..\Relatorios\</code> que não existem em <code>CONTRIBUICAOPREV/Relatorios/</code>. Arquivos de mesmo nome existem em <code>PARAMPREV/Relatorios/</code> e <code>CM/CMADMPREV/Relatorios/</code> (verificado com <code>find -iname</code>), mas o conteúdo não foi inspecionado (restrição de escopo).</p>
+<div class="table-wrap"><table><thead><tr><th>Unit</th><th>Linha DPR</th><th>Onde existe no repositório</th><th>Situação</th></tr></thead><tbody>
+<tr><td><code>FPRelHisFuncionalMT</code></td><td>84</td><td>PARAMPREV/Relatorios, CADASTROPREV/Relatorios, CENTRALAP/FontesComuns</td><td><span class="ev ev-pendente">PENDENTE</span></td></tr>
+<tr><td><code>dRelatGerencial</code></td><td>85</td><td>PARAMPREV/Relatorios, CM/CMADMPREV/Relatorios, CMCAPCARUTILOBJ50/Reports/Source</td><td><span class="ev ev-pendente">PENDENTE</span></td></tr>
+<tr><td><code>dRelRetroRegional</code></td><td>86</td><td>PARAMPREV/Relatorios, CM/CMADMPREV/Relatorios</td><td><span class="ev ev-pendente">PENDENTE</span></td></tr>
+<tr><td><code>FCfgEtiqueta</code></td><td>87</td><td>PARAMPREV/Relatorios, CM/CMADMPREV/Relatorios</td><td><span class="ev ev-pendente">PENDENTE</span></td></tr>
+<tr><td><code>fEmisEtiq</code></td><td>92</td><td>PARAMPREV/Relatorios, CENTRALAP/FontesComuns, CM/CMADMPREV/Relatorios</td><td><span class="ev ev-pendente">PENDENTE</span></td></tr>
+<tr><td><code>fParamRelGerencial02/03/04</code></td><td>93-95</td><td>PARAMPREV/Relatorios, CM/CMADMPREV/Relatorios</td><td><span class="ev ev-pendente">PENDENTE</span></td></tr>
+<tr><td><code>fParamRelGerencial</code></td><td>96</td><td>PARAMPREV/Relatorios, CM/CMADMPREV/Relatorios</td><td><span class="ev ev-pendente">PENDENTE</span></td></tr>
+<tr><td><code>fPRelConsolidaMovRes</code></td><td>97</td><td>PARAMPREV/Relatorios, CM/CMADMPREV/Relatorios</td><td><span class="ev ev-pendente">PENDENTE</span></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">📥 Importações de Arquivos</div>
+<div class="table-wrap"><table><thead><tr><th>Tela</th><th>Formato / mecanismo</th><th>Descrição</th><th>Evidência</th></tr></thead><tbody>
+<tr><td>FAlteraSalPart</td><td>Excel via OLE (<code>CreateOleObject</code>)</td><td>Alteração em lote do salário de manutenção/participação; modelo em <code>\\Funcef.com.br\arquivos\PLANUS_COARI\Modelos\</code> (<code>btnModeloClick</code> L78-86); leitura em <code>bbtnConfirmarClick</code> (L90, OLE L116)</td><td><code>FAlteraSalPart.pas:82-116</code> <span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>FAlteracaoHistoricoContrib</td><td>Excel via OLE</td><td>Alteração de histórico de contribuição em lote (<code>bbtnConfirmarClick</code> L124, OLE L153; modelo L570)</td><td><code>FAlteracaoHistoricoContrib.pas:120-570</code> <span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>FAlteraHistMovReserva</td><td>Excel via OLE</td><td>Alteração do histórico de reserva em lote (modelo L90; leitura em <code>bbtnConfirmarClick</code> L118, OLE L155)</td><td><code>FAlteraHistMovReserva.pas:86-155</code> <span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>FAssociarContribuicoesDosParticipantesEmLote</td><td>Excel via OLE</td><td>Associação de contribuições em lote (modelo L89; leitura em <code>bbtnConfirmarClick</code> L117, OLE L153)</td><td><code>FAssociarContribuicoesDosParticipantesEmLote.pas:85-153</code> <span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>FCadContribuicaoLote</td><td>Excel via OLE</td><td>Cadastro de contribuições em lote (<code>bbtnConfirmarClick</code> L111, OLE L181)</td><td><code>FCadContribuicaoLote.pas:98-181</code> <span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>FCadContribNucleoFamiliar</td><td>Excel via OLE</td><td>Validação/carga de arquivo do núcleo familiar (<code>ValidaArquivo</code> L560, OLE L626)</td><td><code>FCadContribNucleoFamiliar.pas:510-626</code> <span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>FCadContribuicaoPortada</td><td>Excel via OLE</td><td>Importação de contribuições portadas com validação de formato e layout (<code>validaArquivoImportacao</code> L1573; MSG051 L1802, MSG052 L1815)</td><td><code>FCadContribuicaoPortada.pas:1566-1855</code> <span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>FCadHstContribuicao</td><td>Excel via OLE para StringGrid</td><td>Importação manual de histórico (<code>XlsToStringGrid</code> L906, OLE L924)</td><td><code>FCadHstContribuicao.pas:906-924</code> <span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>fCargaArquivo</td><td>Excel .xlsx via OLE</td><td>Carga do Benefício Saldado/FAB (filtro <code>*.xlsx</code> L229; <code>bbtnProcessarClick</code> L243, OLE L258); validações MSG054-056</td><td><code>fCargaArquivo.pas:229-258,669,828</code> <span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>FAtualizaPorIndice</td><td>Arquivo texto (<code>AssignFile</code>/<code>Reset</code>)</td><td>Lista de matrículas a atualizar (<code>MontaStringMatriculas</code> L1378, L1392-1393)</td><td><code>FAtualizaPorIndice.pas:1392</code> <span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">📤 Exportações e Arquivos Gerados</div>
+<div class="table-wrap"><table><thead><tr><th>Origem</th><th>Formato</th><th>Descrição</th><th>Evidência</th></tr></thead><tbody>
+<tr><td>FPRelExtPoup</td><td>Arquivo texto de layout fixo</td><td>Extrato de poupança (Layout 1: <code>AssignFile</code> L535; Layout 2: L1083; consulta própria: L1739; comparação: L2063). Formatação com <code>Replicate</code>, <code>LeftPad</code>, <code>RightPad</code> (L274-303)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>FRelProvConst</td><td>PDF e Excel</td><td>PDF gravado no caminho de arquivos da empresa (L688; mensagem cita C:\Planus\Temp, L699); Excel por <code>MontaArquivoExcel</code> (L840)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>FPreviewExpEx</td><td>PDF, e-mail e exportação QExport3</td><td>Exportação genérica do relatório em tela (L382-412, L418, L486)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>dParamRelMovContrib</td><td>Texto (<code>sqlResult.txt</code>)</td><td>Grava o SQL gerado no caminho de arquivos da empresa (L398) — artefato de depuração <span class="ev ev-inferido">INFERIDO</span></td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>FAtualizaPorIndice, FSimulaContrib, FReajustaSalarioMantido, FRodaPadraoMovReserva, FProvPerdasIndiv, FRecebeContribuicaoNovo, FControleIndivContrib, FDivergContrib</td><td>Texto (<code>memResult.Lines.SaveToFile</code>)</td><td>Salvam o log de resultado do processamento escolhido pelo usuário</td><td><code>FAtualizaPorIndice.pas:1199</code>, <code>FSimulaContrib.pas:1705</code>, <code>FReajustaSalarioMantido.pas:485</code>, <code>FRodaPadraoMovReserva.pas:245</code>, <code>FProvPerdasIndiv.pas:994</code>, <code>FRecebeContribuicaoNovo.pas:1009</code>, <code>FControleIndivContrib.pas:4971</code>, <code>FDivergContrib.pas:4378</code> <span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+</tbody></table></div>
+<div class="note"><strong>Integrações por stored procedure</strong> (recebimento via folha, benefício saldado/FAB, alimentação rápida de reservas, e-mail) estão catalogadas em <a href="integracoes.html">Integrações</a> e desenhadas em <a href="diagramas-fluxo.html">Fluxos</a>.</div>
+</section>
+</main>
+
+<footer>
+<p>Blueprint AS-IS — PFC-31 — Abas complementares CONTRIBUIÇÃO | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-10</p>
+</footer>
+</body>
+</html>
