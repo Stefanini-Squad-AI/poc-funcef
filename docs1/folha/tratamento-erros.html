@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Folha de Benefícios — Tratamento de Erros — Blueprint AS-IS</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<header>
+  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-22 (enriquecido)</div>
+  <h1>⚠️ Tratamento de Erros e Exceções — Folha de Benefícios</h1>
+  <p>Blocos try/except/finally, mensagens de validação (MSG), tratamentos (TRT) e padrões de erro com rastreabilidade</p>
+</header>
+<nav>
+  <a href="index.html">📋 Visão Geral</a>
+  <a href="arquitetura.html">🏗️ Arquitetura</a>
+  <a href="inventario.html">📦 Inventário</a>
+  <a href="funcionalidades.html">⚙️ Funcionalidades</a>
+  <a href="rotinas.html">🔧 Procedures</a>
+  <a href="regras-de-negocio.html">📏 Regras</a>
+  <a href="dados.html">🗄️ Dados</a>
+  <a href="relatorios.html">📄 Relatórios</a>
+  <a href="integracoes.html">🔗 Integrações</a>
+  <a href="tratamento-erros.html">⚠️ Erros</a>
+  <a href="diagramas-fluxo.html">🔀 Fluxos</a>
+  <a href="lacunas.html">🔍 Lacunas</a>
+  <a href="controle-cobertura.html">📊 Cobertura</a>
+</nav>
+<main>
+<section><div class="section-title">⚠️ Visão Geral</div>
+<p>O módulo FOLHA utiliza três padrões de tratamento de erros: (1) <code>try/except</code> com <code>MessageDlg</code>/<code>ShowMessage</code> para exibir mensagens ao usuário, (2) <code>try/except</code> com <code>RollBack</code>/<code>RollBackTransacao</code> para reverter transações (dominante no motor <code>dFolhaPrevia.pas</code> e na efetivação/estorno), e (3) <code>raise Exception.Create</code> para propagar erros de validação. O motor de cálculo (<code>dFolhaPrevia.pas</code>, 30.856 linhas) concentra o maior número de blocos try/except com commit/StartTransaction por blocos (:4138-4139).</p>
+</section>
+
+<section><div class="section-title">🔄 Padrões de Tratamento Identificados</div>
+<div class="cards-grid">
+<div class="card"><h3>try/except + RollBack</h3><p>Usado em operações de escrita (efetivação, estorno, prévia). O except reverte a transação e exibe MessageDlg. Padrão dominante em <code>fFolhaNormalEfet.pas</code>, <code>festornafolha.pas</code> e <code>dFolhaPrevia.pas</code>.</p></div>
+<div class="card"><h3>try/except + MessageDlg</h3><p>Validações bloqueantes de lote, conta bancária e parâmetros contábeis/financeiros antes da efetivação (TRT007–TRT009).</p></div>
+<div class="card"><h3>raise Exception.Create</h3><p>Cancelamento explícito pelo usuário na prestação de contas INSS: <code>raise Exception 'Operação cancelada pelo usuário'</code> em <code>FPrestacaoContasINSS.pas:3042/4433/6361</code> (TRT016).</p></div>
+<div class="card"><h3>try/finally (cleanup)</h3><p>Liberação de recursos (Free de forms/queries) em operações de importação de convênios e relatórios.</p></div>
+</div>
+</section>
+
+<section><div class="section-title">📋 Tratamentos de Erro (TRT) por Jornada</div>
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Condição</th><th>Mensagem</th><th>Resultado</th><th>Regra</th><th>Jornada</th></tr></thead><tbody>
+<tr><td><strong>TRT001</strong></td><td>Mês/ano de referência não informados</td><td>MSG001</td><td>Bloqueia execução</td><td>FOLHA-RN001</td><td>JF001, JF015</td></tr>
+<tr><td><strong>TRT002</strong></td><td>Layout de entrada/saída ou destino não informados na exportação</td><td>MSG002</td><td>Bloqueia execução</td><td>FOLHA-RN002</td><td>JF011</td></tr>
+<tr><td><strong>TRT003</strong></td><td>Nenhuma versão da folha selecionada</td><td>MSG003</td><td>Bloqueia execução</td><td>FOLHA-RN003</td><td>JF011</td></tr>
+<tr><td><strong>TRT004</strong></td><td>Rubrica de IR sem natureza de rendimento</td><td>MSG004</td><td>Não soma à base de IRRF</td><td>FOLHA-RN004</td><td>JF002, JF008</td></tr>
+<tr><td><strong>TRT005</strong></td><td>Líquido do recebedor negativo após descontos</td><td>MSG005</td><td>Zera líquido e transfere desconto</td><td>FOLHA-RN006</td><td>JF002</td></tr>
+<tr><td><strong>TRT006</strong></td><td>Duplicidade de lote na prévia</td><td>MSG006</td><td>Não regenera benefício</td><td>FOLHA-RN010</td><td>JF001</td></tr>
+<tr><td><strong>TRT007</strong></td><td>Críticas ETL na efetivação</td><td>MSG007</td><td>Aborta efetivação</td><td>FOLHA-RN011</td><td>JF003</td></tr>
+<tr><td><strong>TRT008</strong></td><td>Conta bancária do lote inválida</td><td>MSG008</td><td>Bloqueia efetivação</td><td>FOLHA-RN012</td><td>JF003</td></tr>
+<tr><td><strong>TRT009</strong></td><td>Parâmetros contábeis/financeiros não configurados</td><td>MSG009</td><td>Bloqueia efetivação</td><td>FOLHA-RN013</td><td>JF003, JF006</td></tr>
+<tr><td><strong>TRT010</strong></td><td>Margem de desconto consignável excedida</td><td>MSG010</td><td>Bloqueia/ajusta rubrica</td><td>FOLHA-RN008</td><td>JF002</td></tr>
+<tr><td><strong>TRT011</strong></td><td>Benefício abaixo do mínimo da concessão</td><td>MSG011</td><td>Ajusta ao mínimo</td><td>FOLHA-RN009</td><td>JF002</td></tr>
+<tr><td><strong>TRT012</strong></td><td>Mês/ano/previsão não informados (convênio)</td><td>MSG012</td><td>Bloqueia execução</td><td>FOLHA-RN026</td><td>JF011</td></tr>
+<tr><td><strong>TRT013</strong></td><td>Mês/ano/versão não informados (saída cadastral)</td><td>MSG013</td><td>Bloqueia execução</td><td>FOLHA-RN027</td><td>JF011</td></tr>
+<tr><td><strong>TRT014</strong></td><td>BS/FAB/déficit não informados (cadastro manual)</td><td>MSG014</td><td>Bloqueia cadastro</td><td>FOLHA-RN023</td><td>cadastro</td></tr>
+<tr><td><strong>TRT015</strong></td><td>Rubrica não parametrizada ao inserir INSS</td><td>MSG015</td><td>Aborta inserção</td><td>FOLHA-RN024</td><td>JF010</td></tr>
+<tr><td><strong>TRT016</strong></td><td>Cancelamento pelo usuário na prestação de contas INSS</td><td>MSG016</td><td>Aborta operação</td><td>FOLHA-RN025</td><td>JF010</td></tr>
+</tbody></table></div>
+<p style="margin-top:.5rem">Detalhamento das jornadas em <a href="funcionalidades.html">⚙️ Funcionalidades</a> e das regras em <a href="regras-de-negocio.html">📏 Regras</a>.</p>
+</section>
+
+<section><div class="section-title">📋 Catálogo de Mensagens (MSG)</div>
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Texto da Mensagem</th><th>Jornadas relacionadas</th></tr></thead><tbody>
+<tr><td><strong>MSG001</strong></td><td>"É necessário indicar o Mês/Ano de Referência!"</td><td>JF001, JF015</td></tr>
+<tr><td><strong>MSG002</strong></td><td>"Layout de entrada/saída e destino obrigatórios na exportação"</td><td>JF011</td></tr>
+<tr><td><strong>MSG003</strong></td><td>"Selecione pelo menos uma versão da folha"</td><td>JF011</td></tr>
+<tr><td><strong>MSG004</strong></td><td>"Rubrica sem natureza de rendimento — não soma à base de IRRF"</td><td>JF002, JF008</td></tr>
+<tr><td><strong>MSG005</strong></td><td>"Líquido negativo — valor zerado e desconto excedente transferido"</td><td>JF002</td></tr>
+<tr><td><strong>MSG006</strong></td><td>"Benefício já existe no lote/competência — duplicidade não regenerada"</td><td>JF001</td></tr>
+<tr><td><strong>MSG007</strong></td><td>"Críticas ETL — efetivação abortada"</td><td>JF003</td></tr>
+<tr><td><strong>MSG008</strong></td><td>"Conta bancária do lote inválida"</td><td>JF003</td></tr>
+<tr><td><strong>MSG009</strong></td><td>"Parâmetros contábeis/financeiros do lote não configurados"</td><td>JF003, JF006</td></tr>
+<tr><td><strong>MSG010</strong></td><td>"Margem consignável excedida — rubrica bloqueada/ajustada"</td><td>JF002</td></tr>
+<tr><td><strong>MSG011</strong></td><td>"Benefício abaixo do mínimo — ajustado ao mínimo da concessão"</td><td>JF002</td></tr>
+<tr><td><strong>MSG012</strong></td><td>"Mês/ano/previsão de pagamento obrigatórios para geração de documentos"</td><td>JF011</td></tr>
+<tr><td><strong>MSG013</strong></td><td>"Mês/ano/versão obrigatórios para saída cadastral"</td><td>JF011</td></tr>
+<tr><td><strong>MSG014</strong></td><td>"Valor do BS/FAB/déficit obrigatórios no cadastro manual de histórico"</td><td>cadastro</td></tr>
+<tr><td><strong>MSG015</strong></td><td>"Rubrica não parametrizada: [RUBRICA]"</td><td>JF010</td></tr>
+<tr><td><strong>MSG016</strong></td><td>"Operação cancelada pelo usuário"</td><td>JF010</td></tr>
+</tbody></table></div>
+<p style="margin-top:.5rem">Evidência: mensagens e tratamentos extraídos dos forms Delphi em <code>FOLHA/Fontes</code> com arquivo e linha de origem — <span class="ev ev-comprovado">COMPROVADO</span>.</p>
+</section>
+</main>
+<footer>
+<p>Blueprint AS-IS — PFC-22/PFC-31 (enriquecido) — Módulo FOLHA | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-10</p>
+</footer>
+</body>
+</html>
