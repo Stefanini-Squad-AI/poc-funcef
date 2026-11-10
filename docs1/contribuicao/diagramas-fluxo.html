@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contribuição Previdenciária — Fluxos — Blueprint AS-IS</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<header>
+  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-23 (enriquecido)</div>
+  <h1>🔀 Diagramas de Fluxo de Processos — Contribuição Previdenciária</h1>
+  <p>Fluxos comprovados pelo código com rastreabilidade — desenhados como fluxogramas (caixas e setas)</p>
+</header>
+<nav>
+  <a href="index.html">📋 Visão Geral</a>
+  <a href="arquitetura.html">🏗️ Arquitetura</a>
+  <a href="inventario.html">📦 Inventário</a>
+  <a href="funcionalidades.html">⚙️ Funcionalidades</a>
+  <a href="rotinas.html">🔧 Procedures</a>
+  <a href="regras-de-negocio.html">📏 Regras</a>
+  <a href="dados.html">🗄️ Dados</a>
+  <a href="relatorios.html">📄 Relatórios</a>
+  <a href="integracoes.html">🔗 Integrações</a>
+  <a href="tratamento-erros.html">⚠️ Erros</a>
+  <a href="diagramas-fluxo.html">🔀 Fluxos</a>
+  <a href="lacunas.html">🔍 Lacunas</a>
+  <a href="controle-cobertura.html">📊 Cobertura</a>
+</nav>
+<main>
+<section><div class="section-title">🔀 Fluxo PF-01 — Manutenção e Cobrança (Preparo e Envio)</div>
+<div class="mermaid">flowchart TD
+  S([["FPreparaEnvia — preparo e envio"]]) --> V["Valida mês/ano, tipo cobrança, motivo padrão, data vencimento"]
+  V --> V1{"validações OK?"}
+  V1 -->|problemas| VP["Preparo c/ problemas — MSG007: continuar?"]
+  V1 -->|OK| P["Preparo: seleciona contribuições elegíveis, calcula"]
+  VP -->|sim| P
+  VP -->|não| AB(["Aborta"])
+  P --> E["Envio por lote: lança contabilidade + integra Folha/CaR"]
+  E --> L{"erro no lote?"}
+  L -->|sim| LE["Lote não enviado — MSG009/MSG010; demais seguem"]
+  L -->|não| LE2["Lote enviado"]
+  LE --> C([("HSTCONTRIBPREV, CONTRIBPREVPARTP, DOCUMENTO, LANCTODOCUM")])
+  LE2 --> C</div>
+<p><strong>Evidência:</strong> <code>CONTRIBUICAOPREV/Fontes/FPreparaEnvia.pas:1126-5147</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</section>
+
+<section><div class="section-title">🔀 Fluxo PF-02 — Recebimento por Múltiplos Canais</div>
+<div class="mermaid">flowchart TD
+  S([["FRecebeContribuicaoNovo / FRecebeContribEmptmo / FBaixaContribCAR"]]) --> V["Valida mês cobrança, data recebimento, seleção de contribuições"]
+  V --> D{"canal de recebimento"}
+  D -->|folha| C1["SP_CP_RECEB_PATRO / SP_CP_RECEB_ASSIS — FRecebeContribuicaoNovo.pas:925-967"]
+  D -->|empréstimo| C2["FRecebeContribEmptmo — confere valor em aberto × empréstimo"]
+  D -->|Contas a Receber| C3["FBaixaContribCAR — baixa por matrícula"]
+  D -->|banco| C4["Recebimento bancário"]
+  C1 --> R{"procedure OK?"}
+  C2 --> R
+  C3 --> R
+  C4 --> R
+  R -->|erro| RE["MSG014 — recebimento não concluído; log de resultado"]
+  R -->|OK| E([("HSTCONTRIBPREV atualizada, LANCTODOCUM, contabilização")])</div>
+<p><strong>Evidência:</strong> <code>CONTRIBUICAOPREV/Fontes/FRecebeContribuicaoNovo.pas:301-995</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</section>
+
+<section><div class="section-title">🔀 Fluxo PF-05 — Tributação (Bitributação / IR Regressivo)</div>
+<div class="mermaid">flowchart TD
+  S([["FCalcSalContr — cálculo de saldo"]]) --> V["Valida participante selecionado, índice cadastrado"]
+  V --> V1{"prévia da folha em execução?"}
+  V1 -->|sim| BLOQ["MSG039 — bloqueia cálculo IR regressivo"]
+  V1 -->|não| A["Calcula saldo via HSTBITRIBUTACAO/BITRIBUTACAO"]
+  A --> D{"opção de IR"}
+  D -->|regressivo| R["IR regressivo — fCalculoIRRF"]
+  D -->|progressivo| P["IR progressivo"]
+  R --> E([("BITRIBUTACAO, HSTBITRIBUTACAO atualizadas")])
+  P --> E</div>
+<p><strong>Evidência:</strong> <code>CONTRIBUICAOPREV/Fontes/FCalcSalContr.pas:450-745</code>, <code>fCalculoIRRF.pas:808</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</section>
+
+<section><div class="section-title">🔀 Fluxo PF-06 — Portabilidade e Benefício Saldado/FAB</div>
+<div class="mermaid">flowchart TD
+  S([["FCadContribuicaoPortada / FBeneficioSaldadoFAB"]]) --> V["Valida participante, opção IR, mês vínculo 0-11, ano/mês referência, valor esperado > 0"]
+  V --> D{"operação"}
+  D -->|cadastro/importação| C1["Cadastra contribuição portada (importação Excel — layout válido)"]
+  D -->|carga BS-FAB| C2["fCargaArquivo — valida leiaute e benefício INSS"]
+  D -->|atualização| C3["FBeneficioSaldadoFAB — SP_ATUALIZASALDO / FN_CALCULABS (PCK_BENEFSALDFAB)"]
+  C1 --> E1{"já recebida/enviada?"}
+  E1 -->|sim| BLOQ["Bloqueia alteração/exclusão — MSG046-MSG049"]
+  E1 -->|não| E([("HSTCONTRIBPREV, CONTRIBPREVPARTP, BS/FAB via package Oracle")])
+  C2 --> E
+  C3 --> E</div>
+<p><strong>Evidência:</strong> <code>CONTRIBUICAOPREV/Fontes/FCadContribuicaoPortada.pas</code>, <code>FBeneficioSaldadoFAB.pas:1032</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</section>
+
+<section><div class="section-title">🔀 Fluxo PF-07 — Provisão para Perdas</div>
+<div class="mermaid">flowchart TD
+  S([["FProvPerdasLote / FProvPerdasIndiv"]]) --> D{"modo"}
+  D -->|lote| L["Valida ano/mês cobrança, patrocinadora, plano selecionados"]
+  D -->|individual| I["Valida contribuição selecionada"]
+  L --> P["Cálculo da provisão em lote por patrocinadora/plano/mês"]
+  I --> P2["Cálculo individual da provisão"]
+  P --> R{"erro em matrícula?"}
+  P2 --> R
+  R -->|sim| RE["Conclui demais; lista matrículas c/ erro — MSG064"]
+  R -->|não| E([("provisão para perdas registrada/desfeita")])</div>
+<p><strong>Evidência:</strong> <code>CONTRIBUICAOPREV/Fontes/FProvPerdasLote.pas:428-437</code>, <code>FProvPerdasIndiv.pas:715-815</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</section>
+</main>
+<footer>
+<p>Blueprint AS-IS — PFC-23/PFC-31 (enriquecido) — Módulo CONTRIBUIÇÃO | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-10</p>
+</footer>
+<script src="../assets/js/mermaid.min.js"></script>
+<script src="../assets/js/flowchart-init.js"></script>
+</body>
+</html>

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contribuição Previdenciária — Tratamento de Erros — Blueprint AS-IS</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<header>
+  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-23 (enriquecido)</div>
+  <h1>⚠️ Tratamento de Erros e Exceções — Contribuição Previdenciária</h1>
+  <p>Padrões de erro, tratamentos (TRT) e catálogo de mensagens (MSG) com rastreabilidade</p>
+</header>
+<nav>
+  <a href="index.html">📋 Visão Geral</a>
+  <a href="arquitetura.html">🏗️ Arquitetura</a>
+  <a href="inventario.html">📦 Inventário</a>
+  <a href="funcionalidades.html">⚙️ Funcionalidades</a>
+  <a href="rotinas.html">🔧 Procedures</a>
+  <a href="regras-de-negocio.html">📏 Regras</a>
+  <a href="dados.html">🗄️ Dados</a>
+  <a href="relatorios.html">📄 Relatórios</a>
+  <a href="integracoes.html">🔗 Integrações</a>
+  <a href="tratamento-erros.html">⚠️ Erros</a>
+  <a href="diagramas-fluxo.html">🔀 Fluxos</a>
+  <a href="lacunas.html">🔍 Lacunas</a>
+  <a href="controle-cobertura.html">📊 Cobertura</a>
+</nav>
+<main>
+<section><div class="section-title">⚠️ Visão Geral</div>
+<p>O módulo CONTRIBUIÇÃO utiliza três padrões de tratamento de erros: (1) validações de tela com <code>ShowMessage</code>/<code>MessageDlg</code> que bloqueiam a operação (dominante), (2) <code>Abort</code> (<code>raise EAbort</code>) para interromper silenciosamente a operação após mensagem, e (3) <code>raise EValidacao</code> / <code>raise Exception.Create</code> para propagar erros de validação e falhas de log. Foram catalogados <strong>53 tratamentos de erro (TRT001–TRT053)</strong> e <strong>100 mensagens (MSG001–MSG100)</strong>, todos com arquivo e linha de origem no código.</p>
+</section>
+
+<section><div class="section-title">🔄 Padrões de Tratamento Identificados</div>
+<div class="cards-grid">
+<div class="card"><h3>Validação de tela (MessageDlg/ShowMessage)</h3><p>Crítica comprovada no form que bloqueia a operação (ex.: mês/ano não preenchido, tipo de cobrança não selecionado). Padrão dominante — TRT001–TRT053 em sua maioria.</p></div>
+<div class="card"><h3>Abort (raise EAbort)</h3><p>Interrompe a operação após exibir mensagem, sem propagar exceção. Usado em portabilidade (TRT025–TRT027), entrada manual (TRT044–TRT047) e importação (TRT031).</p></div>
+<div class="card"><h3>EValidacao / Exception.Create</h3><p>Usado em provisão em lote (TRT034 — EValidacao), relatório de provisão (TRT037) e falha de log de auditoria (TRT053 — "Erro ao gravar Log." em <code>FCadHstContribuicao.pas:1091</code>).</p></div>
+<div class="card"><h3>Continue com erros parciais</h3><p>Em recebimento via Contas a Receber (TRT012), reajuste (TRT018) e provisão individual (TRT036): conclui as demais matrículas e lista as com erro no resultado.</p></div>
+</div>
+</section>
+
+<section><div class="section-title">📊 Distribuição de TRT por Jornada</div>
+<div class="table-wrap"><table><thead><tr><th>Jornada</th><th>TRTs</th><th>Principais condições</th></tr></thead><tbody>
+<tr><td>JF001 — Preparo e Envio</td><td>TRT001–TRT006</td><td>Mês/ano, tipo cobrança, motivo padrão, data vencimento, falha de lote/contabilização</td></tr>
+<tr><td>JF002 — Recebimento multi-canal</td><td>TRT007–TRT012</td><td>Mês/data recebimento, seleção, erro de procedure, divergência valor empréstimo, contabilização/PGA</td></tr>
+<tr><td>JF003 — Alimentação de reservas</td><td>TRT013–TRT016</td><td>Patro/plano/reserva, data atualização, erro movimentação, falha procedure alimentação</td></tr>
+<tr><td>JF004 — Salário de participação</td><td>TRT017–TRT019</td><td>Sem participantes, erro ao reajustar, arquivo/tipo não selecionados</td></tr>
+<tr><td>JF005 — Tributação</td><td>TRT020–TRT023</td><td>Sem participante, índice não cadastrado, prévia em execução, opção de IR</td></tr>
+<tr><td>JF006 — Portabilidade / BS-FAB</td><td>TRT024–TRT033</td><td>Participante, meses vínculo, ano/mês referência, valor, já recebida/enviada, importação, carga BS-FAB</td></tr>
+<tr><td>JF007 — Provisão para perdas</td><td>TRT034–TRT037</td><td>Ano/mês/patro/plano, seleção, erro por matrícula, parâmetros de relatório</td></tr>
+<tr><td>JF008 — Divergências</td><td>TRT038–TRT041</td><td>Modo divergência, filtro/valor, motivo padrão, documento não encontrado</td></tr>
+<tr><td>JF009 — Controle individual / Entrada manual</td><td>TRT042–TRT048</td><td>Seleção, já recebida/enviada/cobrada, mês/motivo, valor/data, situação incoerente, núcleo familiar</td></tr>
+<tr><td>JF010 — Retroativo e Simulação</td><td>TRT049–TRT053</td><td>Dados obrigatórios, participante inexistente, datas/cálculo, revisão de índice, falha de log</td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">📋 Catálogo Completo de Tratamentos e Mensagens</div>
+<p>O catálogo completo com <strong>53 TRTs (TRT001–TRT053)</strong> e <strong>100 mensagens (MSG001–MSG100)</strong>, cada um com condição, texto da mensagem, resultado, regra associada, jornada e origem (arquivo:linha), está em <a href="regras-de-negocio.html#TRT-section">📏 Regras → Catálogo de Tratamentos de Erro (TRT)</a> e <a href="regras-de-negocio.html#MSG-section">Catálogo de Mensagens (MSG)</a>.</p>
+<div class="note"><strong>Exemplos de mensagens significativas:</strong> "Mês de Cobrança não preenchido." (<code>FPreparaEnvia.pas:2006</code>), "Essa Contribuição já foi Recebida, Alteração não permitida" (<code>FCadContribuicaoPortada.pas:1222</code>), "Erro ao Receber Contribuição." (<code>FRecebeContribuicaoNovo.pas:995</code>), "Erro ao gravar Log." (<code>FCadHstContribuicao.pas:1091</code>).</div>
+<p style="margin-top:.5rem">Evidência: mensagens e tratamentos extraídos dos forms Delphi em <code>CONTRIBUICAOPREV/Fontes</code> com arquivo e linha de origem — <span class="ev ev-comprovado">COMPROVADO</span>.</p>
+</section>
+</main>
+<footer>
+<p>Blueprint AS-IS — PFC-23/PFC-31 (enriquecido) — Módulo CONTRIBUIÇÃO | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-10</p>
+</footer>
+</body>
+</html>

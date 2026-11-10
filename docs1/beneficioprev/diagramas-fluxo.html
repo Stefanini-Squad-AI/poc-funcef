@@ -10,161 +10,162 @@
 <header>
   <div class="badge">Blueprint AS-IS — Delphi 5</div>
   <h1>🔀 Diagramas de Fluxo de Processos — Benefício Previdenciário</h1>
-  <p>Fluxos comprovados pelo código com rastreabilidade</p>
+  <p>Fluxos comprovados pelo código com rastreabilidade — desenhados como fluxogramas (caixas e setas)</p>
 </header>
 <nav>
   <a href="index.html">📋 Visão Geral</a><a href="arquitetura.html">🏗️ Arquitetura</a><a href="inventario-tecnico.html">📦 Inventário</a><a href="funcionalidades.html">⚙️ Funcionalidades</a><a href="procedures-functions.html">🔧 Procedures</a><a href="regras-de-negocio.html">📏 Regras</a><a href="dados.html">🗄️ Dados</a><a href="relatorios.html">📄 Relatórios</a><a href="integracoes.html">🔗 Integrações</a><a href="tratamento-erros.html">⚠️ Erros</a><a href="diagramas-fluxo.html">🔀 Fluxos</a><a href="lacunas.html">🔍 Lacunas</a><a href="controle-cobertura.html">📊 Cobertura</a>
 </nav>
 <main>
 <section><div class="section-title">🔀 Fluxo PF-01 — Concessão de Benefício</div>
-<div class="mermaid">FPrincipal.mnuBenefConcessaoClick (L1720)
-  │
-  ├─ Mostra frmTipoBenefConcede → usuário escolhe P/B/D
-  │
-  ├─ P → AbreRequerParticip('CO') → CMAdmPrev (motor externo)
-  ├─ B → AbreRequerBfciario('CO') → CMAdmPrev
-  ├─ D → AbreRequerPensionista('CO') → CMAdmPrev
-  │
-  ├─ Mantém IDCALCULO durante todo o processo (SOL 24224)
-  │
-  └─ Persistência: BENEFBFCIARIO, HSTBENEFBFCIARIO,
-     MOVBENEF, PROCESSOBENEF, HSTCONTRIBPREV, TMPDESC
-     + GravaLogTOTALPREV (IdModulo=454)</div>
+<div class="mermaid">flowchart TD
+  S([FPrincipal.mnuBenefConcessaoClick L1720]) --> T["Mostra frmTipoBenefConcede"]
+  T --> D{"escolhe P/B/D?"}
+  D -->|P| P1["AbreRequerParticip 'CO' → CMAdmPrev"]
+  D -->|B| P2["AbreRequerBfciario 'CO' → CMAdmPrev"]
+  D -->|D| P3["AbreRequerPensionista 'CO' → CMAdmPrev"]
+  P1 --> M["Mantém IDCALCULO — SOL 24224"]
+  P2 --> M
+  P3 --> M
+  M --> E[("BENEFBFCIARIO, HSTBENEFBFCIARIO, MOVBENEF, PROCESSOBENEF, HSTCONTRIBPREV, TMPDESC")]
+  E --> L(["GravaLogTOTALPREV IdModulo=454"])</div>
 <p><strong>Evidência:</strong> <code>FPrincipal.pas:1720-1763</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
 </section>
 
 <section><div class="section-title">🔀 Fluxo PF-04 — Desfazer Operações de Benefícios</div>
-<div class="mermaid">FDesfazConcessaoBenefNOVO.bbtnConfirmarClick (L888)
-  │
-  ├─ Seleciona processo (MontaSelect)
-  ├─ Identifica última operação (TIPOMOV de MOVBENEF, exclui TIPOMOV=10)
-  │
-  ├─ Validações:
-  │   ├─ Benefício já pago? → BLOQUEIA (L1531)
-  │   ├─ Prévia existe? → BLOQUEIA (L1442)
-  │   └─ Folha efetivada? → BLOQUEIA (L4530, só desdobramento)
-  │
-  ├─ Dispatch por TIPOMOV:
-  │   ├─ 0/7 (Renovação/Concessão) → DesfazOutrasOperacoes
-  │   ├─ 3/4 (Retenção/Encerramento) → DesfazRetencaoEncerramento
-  │   ├─ 9 (Falecimento) → DesfazOperacoesFalecimentoBenef
-  │   ├─ 5 (Desdobramento) → DesfazDesdobramento
-  │   ├─ 12 (Liberação Retido) → DesfazLiberacaoRetido
-  │   ├─ 13/14 (Revisão) → DesfazRevisaoBeneficio
-  │   ├─ 16 (Reversão Cotas) → DesfazReversao
-  │   ├─ 17 (Alteração Manual) → DesfazOperManual
-  │   └─ else → DesfazOutrasOperacoes
-  │
-  ├─ Commit + GravaLogTOTALPREV
-  └─ ou RollBack + MsgDlg erro</div>
+<div class="mermaid">flowchart TD
+  S([["FDesfazConcessaoBenefNOVO.bbtnConfirmarClick L888"]]) --> A["Seleciona processo — MontaSelect"]
+  A --> B["Identifica última operação — TIPOMOV de MOVBENEF, exclui TIPOMOV=10"]
+  B --> V{"Validações"}
+  V -->|"Benefício já pago"| BLOQ1["BLOQUEIA L1531"]
+  V -->|"Prévia existe"| BLOQ2["BLOQUEIA L1442"]
+  V -->|"Folha efetivada"| BLOQ3["BLOQUEIA L4530 só desdobramento"]
+  V -->|OK| D{"Dispatch por TIPOMOV"}
+  D -->|"0/7 Renovação/Concessão"| D1["DesfazOutrasOperacoes"]
+  D -->|"3/4 Retenção/Encerramento"| D2["DesfazRetencaoEncerramento"]
+  D -->|"9 Falecimento"| D3["DesfazOperacoesFalecimentoBenef"]
+  D -->|"5 Desdobramento"| D4["DesfazDesdobramento"]
+  D -->|"12 Liberação Retido"| D5["DesfazLiberacaoRetido"]
+  D -->|"13/14 Revisão"| D6["DesfazRevisaoBeneficio"]
+  D -->|"16 Reversão Cotas"| D7["DesfazReversao"]
+  D -->|"17 Alteração Manual"| D8["DesfazOperManual"]
+  D -->|else| D1
+  D1 --> R{"erro?"}
+  D2 --> R
+  D3 --> R
+  D4 --> R
+  D5 --> R
+  D6 --> R
+  D7 --> R
+  D8 --> R
+  R -->|não| C(["Commit + GravaLogTOTALPREV"])
+  R -->|sim| RB(["RollBack + MsgDlg erro"])</div>
 <p><strong>Evidência:</strong> <code>FDesfazConcessaoBenefNOVO.pas:888-1324</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
 </section>
 
-<section><div class="section-title">🔀 Fluxo PF-05 — Eventos Previdenciários (menu dinâmico)</div>
-<div class="mermaid">FPrincipal.MontaMenu (L1038)
-  │
-  ├─ SELECT EVENTOGERADOR WHERE FLGINTERNO=? AND IDFUNDACAO=?
-  │
-  ├─ FLGINTERNO → Form aberto:
-  │   ├─ TS (Tempo Serviço) → TfrmEventoAposentaBenef
-  │   ├─ ID (Idade)          → TfrmEventoAposentaBenef
-  │   ├─ IN (Incapacidade)   → TfrmEventoAssistidoBenef
-  │   ├─ FL (Falecimento)    → TfrmEventoMorte [exclui evento 346]
-  │   ├─ AI (INSS Partic.)   → TfrmEventoAssistidoINSS
-  │   ├─ BI (INSS Benefic.)  → TfrmEventoAssistidoINSS
-  │   ├─ DO/AC/OE (Doen/Acid/Outros) → COMENTADOS (inativos)
-  │   └─ RC (Reclusão)       → COMENTADO (inativo)
-  │
-  └─ Evento confirmado:
-      ├─ Grava EVENTOSPREV (INSERT/UPDATE)
-      ├─ Atualiza ELEGPATRO/PARTPREVPLAN (situações)
-      ├─ Suspende contribuições (se não só INSS)
-      └─ GravaLogTOTALPREV</div>
+<section><div class="section-title">🔀 Fluxo PF-05 — Montagem de Menu (Eventos Previdenciários)</div>
+<div class="mermaid">flowchart TD
+  S([["FPrincipal.MontaMenu L1038"]]) --> Q["SELECT EVENTOGERADOR WHERE FLGINTERNO=? AND IDFUNDACAO=?"]
+  Q --> D{"FLGINTERNO → Form aberto"}
+  D -->|"TS Tempo Serviço"| F1["TfrmEventoAposentaBenef"]
+  D -->|"ID Idade"| F1
+  D -->|"IN Incapacidade"| F2["TfrmEventoAssistidoBenef"]
+  D -->|"FL Falecimento"| F3["TfrmEventoMorte — exclui evento 346"]
+  D -->|"AI INSS Partic."| F4["TfrmEventoAssistidoINSS"]
+  D -->|"BI INSS Benefic."| F4
+  D -->|"DO/AC/OE"| F5["COMENTADOS inativos"]
+  D -->|"RC Reclusão"| F5
+  F1 --> E["Evento confirmado"]
+  F2 --> E
+  F3 --> E
+  F4 --> E
+  E --> G1[("Grava EVENTOSPREV INSERT/UPDATE")]
+  G1 --> G2["Atualiza ELEGPATRO/PARTPREVPLAN situações"]
+  G2 --> G3["Suspende contribuições se não só INSS"]
+  G3 --> L(["GravaLogTOTALPREV"])</div>
 <p><strong>Evidência:</strong> <code>FPrincipal.pas:1038-1387</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
 </section>
 
 <section><div class="section-title">🔀 Fluxo PF-08 — Desdobramento de Benefício</div>
-<div class="mermaid">FDesdobramentoBenef.sbtnInserirClick (L1442)
-  │
-  ├─ Seleciona processo + beneficiários (≥1 obrigatório)
-  ├─ Lê FLGAPRESENTABSFAB/FLGAPRESENTADEFICIT (BENEFPLANPREV)
-  │
-  ├─ Validações:
-  │   ├─ ≥1 beneficiário selecionado (L1580)
-  │   ├─ Valor limite c/ autorização (L2636)
-  │   └─ Motivo devolução cadastrado (L1779)
-  │
-  ├─ GeraNumeroProcesso (individual, equacionamento SOL 253577)
-  ├─ Calcula benefício/abono (CalculaBeneficioMinimo)
-  ├─ Reajusta desde DIP original
-  │
-  ├─ Persistência:
-  │   ├─ INSERT BENEFBFCIARIO (L5401)
-  │   ├─ UPDATE HSTBENEFBFCIARIO (L5705)
-  │   ├─ INSERT PROCESSOBENEF (L8998)
-  │   ├─ INSERT CONTROLEDIVIDABENEFICIO (L7776)
-  │   └─ INSERT HSTDIVIDABENEFICIO (L7846)
-  │
-  └─ Commit + MostraDemonstrativoConcessao</div>
+<div class="mermaid">flowchart TD
+  S([["FDesdobramentoBenef.sbtnInserirClick L1442"]]) --> A["Seleciona processo + beneficiários ≥1"]
+  A --> B["Lê FLGAPRESENTABSFAB/FLGAPRESENTADEFICIT — BENEFPLANPREV"]
+  B --> V{"Validações"}
+  V -->|"≥1 beneficiário L1580"| V1["OK"]
+  V -->|"Valor limite s/ autorização L2636"| BLOQ["BLOQUEIA"]
+  V -->|"Motivo devolução não cadastrado L1779"| BLOQ
+  V1 --> G["GeraNumeroProcesso — SOL 253577"]
+  G --> C["CalculaBeneficioMinimo"]
+  C --> R["Reajusta desde DIP original"]
+  R --> P{"Persistência"}
+  P --> P1[("INSERT BENEFBFCIARIO L5401")]
+  P --> P2[("UPDATE HSTBENEFBFCIARIO L5705")]
+  P --> P3[("INSERT PROCESSOBENEF L8998")]
+  P --> P4[("INSERT CONTROLEDIVIDABENEFICIO L7776")]
+  P --> P5[("INSERT HSTDIVIDABENEFICIO L7846")]
+  P1 --> E(["Commit + MostraDemonstrativoConcessao"])
+  P2 --> E
+  P3 --> E
+  P4 --> E
+  P5 --> E</div>
 <p><strong>Evidência:</strong> <code>FDesdobramentoBenef.pas:1442-6280</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
 </section>
 
 <section><div class="section-title">🔀 Fluxo PF-14 — Conciliação INSS com Mantenedoras</div>
-<div class="mermaid">_FConciliacao.bbtnConfirmarClick (L525)
-  │
-  ├─ VerificaINSSImportado (mês/ano já importado?)
-  ├─ Origem do arquivo: INSS / Mantenedora / FUNCEF
-  │
-  ├─ ImportaINSS (L626):
-  │   ├─ Parser: header → detail → rubrica → footer
-  │   ├─ INSERT CONCINSS (L741)
-  │   ├─ INSERT DETCONCINSS c/ rateio por plano (L1646)
-  │   └─ INSERT TEMPCONCINSS (não identificados)
-  │
-  ├─ ImportaMantenedora (L1482):
-  │   └─ INSERT DETCONCINSS (valores da mantenedora)
-  │
-  └─ Resultado:
-      ├─ _FResultConciliacao: divergências NVL(VALORINSS,0)≠NVL(VALORMANT,0)
-      ├─ _FIdentificaINSS: identifica registros não casados
-      └─ _FEncerraConciliacao: gera CR/CP + lançamentos contábeis</div>
+<div class="mermaid">flowchart TD
+  S([["_FConciliacao.bbtnConfirmarClick L525"]]) --> A["VerificaINSSImportado — mês/ano já importado?"]
+  A --> B{"Origem do arquivo"}
+  B -->|INSS| C1["ImportaINSS L626"]
+  B -->|Mantenedora| C2["ImportaMantenedora L1482"]
+  B -->|FUNCEF| C1
+  C1 --> P1["Parser header → detail → rubrica → footer"]
+  P1 --> P2[("INSERT CONCINSS L741")]
+  P2 --> P3[("INSERT DETCONCINSS c/ rateio por plano L1646")]
+  P3 --> P4[("INSERT TEMPCONCINSS não identificados")]
+  C2 --> P5[("INSERT DETCONCINSS valores da mantenedora")]
+  P4 --> R{"Resultado"}
+  P5 --> R
+  R --> R1["_FResultConciliacao: divergências NVL VALORINSS≠VALORMANT"]
+  R --> R2["_FIdentificaINSS: registros não casados"]
+  R --> R3["_FEncerraConciliacao: gera CR/CP + lançamentos contábeis"]</div>
 <p><strong>Evidência:</strong> <code>_FConciliacao.pas:525-1206</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
 </section>
 
-<section><div class="section-title">🔀 Fluxo PF-03 — Simulação / Memória de Cálculo</div>
-<div class="mermaid">FSimulaBeneficio (TfrmSairAjuda, wizard 4 etapas)
-  │
-  ├─ Etapa 1: Seleciona participante (MontaSelect)
-  ├─ Etapa 2: ProcessaEtapa2 (L194)
-  │   ├─ SELECT ELEGPATRO/PARTPREVPLAN (dados de elegibilidade)
-  │   ├─ RegraString(IDRGDATAELEG) → data de elegibilidade
-  │   │   └─ Se data ≤ hoje → "Elegível"; senão "Bloqueado"
-  │   └─ RegraNumerica(IDRGVALORPREV) → valor previsionado
-  ├─ Etapa 3: Exibe resultados (situação + valor)
-  └─ Etapa 4: Apenas leitura (memResult)</div>
+<section><div class="section-title">🔀 Fluxo PF-03 — Simulação de Benefício (Memória de Cálculo)</div>
+<div class="mermaid">flowchart TD
+  S([["FSimulaBeneficio — wizard 4 etapas"]]) --> E1["Etapa 1: Seleciona participante — MontaSelect"]
+  E1 --> E2["Etapa 2: ProcessaEtapa2 L194"]
+  E2 --> Q1[("SELECT ELEGPATRO/PARTPREVPLAN dados de elegibilidade")]
+  Q1 --> R1["RegraString IDRGDATAELEG → data de elegibilidade"]
+  R1 --> D{"data ≤ hoje?"}
+  D -->|sim| D1["Elegível"]
+  D -->|não| D2["Bloqueado"]
+  D1 --> R2["RegraNumerica IDRGVALORPREV → valor previsionado"]
+  D2 --> R2
+  R2 --> E3["Etapa 3: Exibe resultados — situação + valor"]
+  E3 --> E4(["Etapa 4: Apenas leitura — memResult"])</div>
 <p><strong>Evidência:</strong> <code>FSimulaBeneficio.pas:194-262</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
 </section>
 
 <section><div class="section-title">🔀 Fluxo PF-06 — Reajuste de Benefícios</div>
-<div class="mermaid">FReajuesteBenef (TfrmOkCancelar)
-  │
-  ├─ CarregaBeneficios (L401):
-  │   └─ SELECT BENEFICIO JOIN BENEFPLANPREV
-  │      WHERE IDTPPAGTOBENEFIC=1 (vitalício)
-  │        AND NVL(FLGRESGATE,0)=0 (não resgate)
-  │      Exclui espécies 255 e 358 (SOL 225546)
-  │
-  ├─ Fonte pagadora: 0=FUNCEF, 1=INSS
-  ├─ Importa lista de matrículas (Excel, hash CRC32)
-  │
-  ├─ Parametrizacao (L762): INSERT REAJUSTEBENEFICIO
-  ├─ InsertListaBenef (L874): INSERT LISTABENEFICIOREAJUSTE
-  └─ ExeProc (L905): executa stored procedure de reajuste</div>
+<div class="mermaid">flowchart TD
+  S([["FReajuesteBenef — TfrmOKCancelar"]]) --> A["CarregaBeneficios L401"]
+  A --> Q[("SELECT BENEFICIO JOIN BENEFPLANPREV WHERE IDTPPAGTOBENEFIC=1 vitalício AND NVL FLGRESGATE=0 não resgate")]
+  Q --> F["Exclui espécies 255 e 358 — SOL 225546"]
+  F --> O{"Fonte pagadora"}
+  O -->|0| O1["FUNCEF"]
+  O -->|1| O2["INSS"]
+  O1 --> I["Importa lista de matrículas — Excel, hash CRC32"]
+  O2 --> I
+  I --> P[("Parametrizacao L762 — INSERT REAJUSTEBENEFICIO")]
+  P --> L[("InsertListaBenef L874 — INSERT LISTABENEFICIOREAJUSTE")]
+  L --> E(["ExeProc L905 — executa stored procedure de reajuste"])</div>
 <p><strong>Evidência:</strong> <code>FReajuesteBenef.pas:401-953</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
 </section>
 </main>
 <footer>
-<p>Blueprint AS-IS — PFC-24 — Enriquecimento BENEFICIOPREV | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-10</p>
+<p>Blueprint AS-IS — PFC-24/PFC-31 — Enriquecimento BENEFICIOPREV | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-10</p>
 </footer>
+<script src="../assets/js/mermaid.min.js"></script>
+<script src="../assets/js/flowchart-init.js"></script>
 </body>
 </html>

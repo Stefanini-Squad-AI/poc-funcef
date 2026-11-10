@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Folha de Benefícios — Fluxos — Blueprint AS-IS</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<header>
+  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-22 (enriquecido)</div>
+  <h1>🔀 Diagramas de Fluxo de Processos — Folha de Benefícios</h1>
+  <p>Fluxos comprovados pelo código com rastreabilidade — desenhados como fluxogramas (caixas e setas)</p>
+</header>
+<nav>
+  <a href="index.html">📋 Visão Geral</a>
+  <a href="arquitetura.html">🏗️ Arquitetura</a>
+  <a href="inventario.html">📦 Inventário</a>
+  <a href="funcionalidades.html">⚙️ Funcionalidades</a>
+  <a href="rotinas.html">🔧 Procedures</a>
+  <a href="regras-de-negocio.html">📏 Regras</a>
+  <a href="dados.html">🗄️ Dados</a>
+  <a href="relatorios.html">📄 Relatórios</a>
+  <a href="integracoes.html">🔗 Integrações</a>
+  <a href="tratamento-erros.html">⚠️ Erros</a>
+  <a href="diagramas-fluxo.html">🔀 Fluxos</a>
+  <a href="lacunas.html">🔍 Lacunas</a>
+  <a href="controle-cobertura.html">📊 Cobertura</a>
+</nav>
+<main>
+<section><div class="section-title">🔀 Fluxo PF-01 — Preparo da Folha</div>
+<div class="mermaid">flowchart TD
+  S([["FPreparo — botão Preparo"]]) --> A["MontaListaPatro / MontaListaPlano / MontaListaBenef L1030/1042/1075"]
+  A --> B["InicializaProcessoBeneficio L1755 → InicializaContadores L1812"]
+  B --> L{"loop benefícios"}
+  L --> C["PassoProcessoBeneficio L1901 → ExecutaRegraProcessoBeneficio L1943 → IncrementaTotais L1837"]
+  C --> D{"duplicidade lote?"}
+  D -->|sim| D1["Não regenera benefício — TRT006"]
+  D -->|não| L
+  L -->|fim| G["GravaHstBeneficio L2375 → InsereHstBfciario L1383 → GravaProcessoBeneficio L2678"]
+  G --> P["CalculaProRata L2931 → CalculaEnviaContribuicaoPensionista L2958"]
+  P --> E([("HSTBENEFBFCIARIO, PROCESSOBENEF, HSTCONTRIBPREV")])</div>
+<p><strong>Evidência:</strong> <code>FOLHA/Fontes/FPreparo.pas:1015-2958</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</section>
+
+<section><div class="section-title">🔀 Fluxo PF-02 — Prévia (Cálculo da Folha)</div>
+<div class="mermaid">flowchart TD
+  S([["FFolhaNormalPrevia / fFolhaExtra — processar"]]) --> A["ProcessaPrevia L24781 — abre transação L25386"]
+  A --> R{"para cada recebedor"}
+  R --> B["CriaRecebedor L19243 → ProcessaRubricaProvento L24378"]
+  B --> C["ProcessaRubrica L17697 → ExecutaRegraRubrica L16865 → ClassificaRubricaBase L15076"]
+  C --> D["DeterminaBasesIRRF L7180 → CaluloIRRF L13493"]
+  D --> E["VerificaMargemDesconto L7496 → CalculaMargemDesconto L7676"]
+  E --> F["CalculaCPMF L16764 → CalculaBeneficioMinimo L8298 → CalculaCorrecaoBeneficio L8615 → CaluloSalarioFamilia L9555"]
+  F --> G["InsereRubrica L15183 → IncluiPrevia L4096 — commit L4138"]
+  G --> R
+  R -->|fim| H["ProcessaFechamentoRecebedor L23310 → ProcessaRateioRubricas L22816 → ProcessaReinf L19882"]
+  H --> E([("PREVIA, BASEDEPAGAMENTO, BITRIBUTACAO, HSTBITRIBUTACAO, CTRLINTERFACE")])</div>
+<p><strong>Evidência:</strong> <code>FOLHA/Fontes/dFolhaPrevia.pas:4096-25405</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</section>
+
+<section><div class="section-title">🔀 Fluxo PF-03 — Efetivação de Versão de Pagamento</div>
+<div class="mermaid">flowchart TD
+  S([["fFolhaNormalEfet — efetivar (após FSelecionaLoteEF)"]]) --> V["Valida lote, conta bancária, parâmetros contábeis/financeiros"]
+  V --> V1{"críticas?"}
+  V1 -->|conta inválida| BLOQ1["Bloqueia — TRT008"]
+  V1 -->|param CF não config.| BLOQ2["Bloqueia — TRT009"]
+  V1 -->|OK| A["Verifica_Critica_ETL → Executa_ETL L8722 (3 datas pgto)"]
+  A --> ETL{"ETL OK?"}
+  ETL -->|críticas| AB["Aborta — TRT007"]
+  ETL -->|OK| B["VerificaEfeticaoETL L8928 → Monitoramento L9006"]
+  B --> C[("Gera histórico: HSTFOLHABENEF / HSTFOLHABENEFCAP / HISTRUBSAL")]
+  C --> D["atualizaBasePagamento L8328 → atualizaHstCalculoPMPFolha L8405 → atualizaHstPrazoAcumulacaoFolha L8449"]
+  D --> E["processaIRRegressivo L8212 → PreparaContribuicaoPatro L8605"]
+  E --> F["GeraArquivoPagamentoLeiauteCNAB150 L9346 / CNAB240 L9468 → Set*ArqPagamento L9584-9728"]
+  F --> G["GeraArquivoSIACC L9806 → CargaContraChequeMongo L9844"]
+  G --> E([("HSTFOLHABENEF, HSTFOLHABENEFCAP, ARQUIVOPAGTO + CNAB em disco")])</div>
+<p><strong>Evidência:</strong> <code>FOLHA/Fontes/fFolhaNormalEfet.pas:8158-9844</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</section>
+
+<section><div class="section-title">🔀 Fluxo PF-04 — Estorno de Folha</div>
+<div class="mermaid">flowchart TD
+  S([["festornafolha — processar L4576"]]) --> A["VerificaStatusDocumentosVersao L900 → HabilitaEstornoIndividual L939"]
+  A --> B["VerificaTmpDesc L2030 → DesfazRubricaIndividual L1843"]
+  B --> C["GeraAlterador L1183 → GeraCAP L1523 → GeraCAR L1654"]
+  C --> D["GravaMotivoEstorno L1709 → ProcessaCompensacao L1739"]
+  D --> E["Exec_SP_ExcessoDebito L1801 → EstornoFolhaCompleto L2062"]
+  E --> E([("estorna HSTFOLHABENEFCAP, HISTRUBSAL, RUBRICAINDIV, ARQUIVOPAGTO + CAP/CAR")])</div>
+<p><strong>Evidência:</strong> <code>FOLHA/Fontes/festornafolha.pas:624-3013</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</section>
+
+<section><div class="section-title">🔀 Fluxo PF-08 — IRRF (Compensação, Regressivo, Judicial)</div>
+<div class="mermaid">flowchart TD
+  S([["CaluloIRRF — dFolhaPrevia.pas L13493"]]) --> A["DeterminaBasesIRRF L7180 — separa bases FUND/INSS"]
+  A --> B["AtualizaFlgIsento L10302 → VerificaCompensacaoIRRF L10254"]
+  B --> D{"tipo de base"}
+  D -->|"normal"| N["CalculaLancaIRNormal L12380"]
+  D -->|"regressivo 0/1/7"| R["CalculaLancaIRRegressivo L12123"]
+  N --> C["LancaIRCompensado L12005 → LancaRubricaDEP_IDADE_IR L10569 → BuscaOutros_IRMensal L11982"]
+  R --> C
+  C --> E([("Atualiza BITRIBUTACAO / HSTBITRIBUTACAO — transações L15679-16030")])</div>
+<p><strong>Evidência:</strong> <code>FOLHA/Fontes/dFolhaPrevia.pas:7180-13493</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</section>
+
+<section><div class="section-title">🔀 Fluxo PF-10 — Conciliação e Reembolso do INSS</div>
+<div class="mermaid">flowchart TD
+  S([["FPrestacaoContasINSS"]]) --> A["Prestação de contas ao INSS"]
+  A --> B[["FConciliacaoReembolsoINSS — concilia reembolso (5 grades)"]]
+  B --> C[["FManutRubricaReembolsoINSS — manutenção rubricas reembolso/NB"]]
+  C --> D{"rubrica parametrizada?"}
+  D -->|não| BLOQ["Aborta inserção — TRT015"]
+  D -->|sim| E["Retificação — FPrestacaoContasINSSMotivo"]
+  E --> F{"cancelado pelo usuário?"}
+  F -->|sim| EX(["raise Exception 'Operação cancelada' — TRT016"])
+  F -->|não| E2([("reembolso INSS conciliado")])</div>
+<p><strong>Evidência:</strong> <code>FOLHA/Fontes/FPrestacaoContasINSS.pas</code>, <code>FConciliacaoReembolsoINSS.pas</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</section>
+</main>
+<footer>
+<p>Blueprint AS-IS — PFC-22/PFC-31 (enriquecido) — Módulo FOLHA | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-10</p>
+</footer>
+<script src="../assets/js/mermaid.min.js"></script>
+<script src="../assets/js/flowchart-init.js"></script>
+</body>
+</html>
