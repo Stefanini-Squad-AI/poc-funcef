@@ -3,9 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Benefício Previdenciário — Funcionalidades — Blueprint AS-IS</title>
+<title>Benefício Previdenciário — Funcionalidades — Blueprint AS-IS (UC097)</title>
 <link rel="stylesheet" href="../assets/css/style.css">
-
 </head>
 <body>
 <header>
@@ -28,7 +27,17 @@
   <a href="lacunas.html">🔍 Lacunas</a>
   <a href="controle-cobertura.html">📊 Cobertura</a>
 </nav>
+<main>
 
+<section><div class="section-title">1. Identificação</div>
+<div class="table-wrap"><table><tbody>
+<tr><th>Caso de Uso</th><td>Módulo BENEFICIOPREV — Benefício Previdenciário</td></tr>
+<tr><th>Sistema</th><td>CM Contabilidade / FUNCEF (Delphi 5 / VCL / MIDAS / Oracle)</td></tr>
+<tr><th>Tipo</th><td>Sistema Desktop</td></tr>
+<tr><th>Ator</th><td>Usuário operacional (analista de benefícios previdenciários)</td></tr>
+<tr><th>OS - Título</th><td>PFC-28 — Adaptação BENEFICIOPREV (modelo UC097)</td></tr>
+</tbody></table></div>
+</section>
 
 <main>
 <section><div class="section-title">1. Identificação</div>
@@ -746,8 +755,408 @@
 </tbody></table></div>
 </section>
 
-</main>
+<section><div class="section-title">3. Pré-condições</div>
+<ul>
+<li>O módulo BENEFICIOPREV deve estar compilado e disponível (entry point <code>BENEFICIOPREV/Fontes/BeneficioPrev.dpr</code>).</li>
+<li>O banco Oracle (schema <code>CM.</code>) deve estar acessível.</li>
+<li>Os módulos externos CMAdmPrev, CMPrevMT50 e CM Framework devem estar disponíveis.</li>
+<li>Patrocinadoras, planos, participantes e benefícios devem estar cadastrados.</li>
+<li>O usuário deve ter permissão de acesso ao módulo (IdModulo=454).</li>
+</ul>
+</section>
 
+<section><div class="section-title">4. Pós-condições</div>
+<ul>
+<li>As tabelas de benefício (BENEFBFCIARIO, HSTBENEFBFCIARIO, MOVBENEF, PROCESSOBENEF, HSTCONTRIBPREV, etc.) são populadas conforme a jornada executada.</li>
+<li>Os eventos previdenciários são registrados em EVENTOSPREV com auditoria DATAALTERADO.</li>
+<li>Toda operação de negócio é auditada em LOGTOTALPREV (IdModulo=454).</li>
+<li>O isolamento por fundação (IDFUNDACAO) é mantido em toda SQL de negócio.</li>
+</ul>
+</section>
+
+<section><div class="section-title">5. Jornadas Funcionais (JF001–JF018)</div>
+<p>Cada jornada abaixo mapeia um processo original (PF-01 a PF-18) para o formato UC097. O <code>id</code> HTML preserva o código original para manter os links existentes.</p>
+<div class="legend"><span><span class="ev ev-comprovado">COMPROVADO</span> — no código</span><span><span class="ev ev-inferido">INFERIDO</span> — plausível</span><span><span class="ev ev-pendente">PENDENTE</span> — validar</span></div>
+</section>
+
+<div class="pf-block" id="PF-01"><h4>JF001 (PF-01) — Concessão de Benefício</h4>
+<p><strong>Objetivo:</strong> conceder um benefício previdenciário selecionando o titular/beneficiário e acionando o motor externo CMAdmPrev para cálculo.</p>
+<p><strong>Gatilho/Ator:</strong> usuário aciona a concessão em <code>FPrincipal.dfm</code> → <code>fTipoLiberacao.dfm</code>.</p>
+<p><strong>Pré-condições:</strong> módulo compilado; banco Oracle acessível; participante/beneficiário cadastrado; usuário com permissão.</p>
+<p><strong>Pós-condições:</strong> BENEFBFCIARIO, HSTBENEFBFCIARIO, MOVBENEF, PROCESSOBENEF, HSTCONTRIBPREV, TMPDESC populados; benefício concedido.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li>Seleção de tipo (Participante/Beneficiário/Designado) <a href="regras-de-negocio.html#BENEF-RN001">[RS001]</a></li>
+<li>Aciona motor externo CMAdmPrev mantendo IDCALCULO <a href="regras-de-negocio.html#BENEF-RN030">[RS030]</a></li>
+<li>Persiste concessão em BENEFBFCIARIO/HSTBENEFBFCIARIO/MOVBENEF/PROCESSOBENEF <a href="regras-de-negocio.html#BENEF-RN025">[RS025]</a></li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody><tr><td>Selecionar tipo</td><td>Direcionar fluxo de concessão</td><td>Tipo (P/B/D)</td><td>frmTipoBenefConcede → AbreRequer*</td><td>Roteiro definido</td><td><a href="regras-de-negocio.html#BENEF-RN001">RS001</a></td><td>—</td><td><code>fTipoLiberacao.dfm</code></td></tr><tr><td>Acionar motor CMAdmPrev</td><td>Calcular concessão</td><td>Participante, plano, dados</td><td>CMAdmPrev mantém IDCALCULO</td><td>Cálculo executado</td><td><a href="regras-de-negocio.html#BENEF-RN030">RS030</a></td><td>—</td><td><code>FPrincipal.dfm</code></td></tr><tr><td>Persistir concessão</td><td>Gravar benefício concedido</td><td>Resultado do motor</td><td>INSERT BENEFBFCIARIO/HSTBENEFBFCIARIO/MOVBENEF/PROCESSOBENEF</td><td>Benefício concedido</td><td><a href="regras-de-negocio.html#BENEF-RN025">RS025</a></td><td>—</td><td><code>FPrincipal.dfm</code></td></tr></tbody></table></div>
+<p><strong>Regras de negócio da jornada:</strong> <a href="regras-de-negocio.html#BENEF-RN001">RS001</a>, <a href="regras-de-negocio.html#BENEF-RN025">RS025</a>, <a href="regras-de-negocio.html#BENEF-RN030">RS030</a>.</p>
+<p><strong>Dependências:</strong> precede <a href="#PF-02">JF002</a> (manutenção), <a href="#PF-03">JF003</a> (simulação). <strong>Evidência:</strong> <code>BENEFICIOPREV/Fontes/FPrincipal.pas:1720-1763</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<div class="mermaid">[FPrincipal] --> fTipoLiberacao --> CMAdmPrev --> [BENEFBFCIARIO/HSTBENEFBFCIARIO/MOVBENEF/PROCESSOBENEF]</div>
+</div>
+
+<div class="pf-block" id="PF-02"><h4>JF002 (PF-02) — Manutenção de Processos de Benefícios</h4>
+<p><strong>Objetivo:</strong> manter processos de benefícios existentes no mesmo fluxo da concessão, em modo manutenção.</p>
+<p><strong>Gatilho/Ator:</strong> usuário aciona manutenção em <code>FPrincipal.dfm</code> (op='MA').</p>
+<p><strong>Pré-condições:</strong> concessão existente (<a href="#PF-01">JF001</a>); benefício cadastrado.</p>
+<p><strong>Pós-condições:</strong> BENEFBFCIARIO, HSTBENEFBFCIARIO, MOVBENEF, PROCESSOBENEF atualizados; benefício mantido.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li>Abre mesmo formulário da concessão em modo manutenção (op='MA')</li>
+<li>Atualiza dados do processo de benefício <a href="regras-de-negocio.html#BENEF-RN025">[RS025]</a></li>
+<li>Persiste alterações (idem concessão)</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody><tr><td>Abrir manutenção</td><td>Carregar processo existente</td><td>op='MA', benefício</td><td>FPrincipal modo manutenção</td><td>Processo carregado</td><td>—</td><td>—</td><td><code>FPrincipal.dfm</code></td></tr><tr><td>Atualizar processo</td><td>Modificar dados do benefício</td><td>Dados alterados</td><td>UPDATE BENEFBFCIARIO/PROCESSOBENEF</td><td>Benefício mantido</td><td><a href="regras-de-negocio.html#BENEF-RN025">RS025</a></td><td>—</td><td><code>FPrincipal.dfm</code></td></tr></tbody></table></div>
+<p><strong>Regras de negócio da jornada:</strong> <a href="regras-de-negocio.html#BENEF-RN025">RS025</a>.</p>
+<p><strong>Dependências:</strong> sucede <a href="#PF-01">JF001</a> (concessão). <strong>Evidência:</strong> <code>BENEFICIOPREV/Fontes/FPrincipal.pas:2215-2262</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<div class="mermaid">[FPrincipal(MA)] --> carregar --> atualizar --> [BENEFBFCIARIO/PROCESSOBENEF]</div>
+</div>
+
+<div class="pf-block" id="PF-03"><h4>JF003 (PF-03) — Simulação / Memória de Cálculo</h4>
+<p><strong>Objetivo:</strong> simular a elegibilidade e o valor previsionado do benefício e consultar a memória de cálculo.</p>
+<p><strong>Gatilho/Ator:</strong> usuário aciona o wizard em <code>FSimulaBeneficio.dfm</code> ou consulta em <code>FConsMemoriaCalculo.dfm</code>.</p>
+<p><strong>Pré-condições:</strong> participante/plano cadastrados; regras IDRGDATAELEG e IDRGVALORPREV parametrizadas.</p>
+<p><strong>Pós-condições:</strong> apenas leitura (memResult); nenhum dado persistido (consulta DETCALCULO).</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li>Wizard 4 etapas: seleciona patrocinadora/plano/benefício</li>
+<li>Aplica RegraString(IDRGDATAELEG) sobre ELEGPATRO/PARTPREVPLAN <a href="regras-de-negocio.html#BENEF-RN004">[RS004]</a></li>
+<li>Aplica RegraNumerica(IDRGVALORPREV) sobre SQL <a href="regras-de-negocio.html#BENEF-RN005">[RS005]</a></li>
+<li>Exibe resultado (Elegível/Bloqueado, valor estimado) — leitura de DETCALCULO</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody><tr><td>Simular elegibilidade</td><td>Verificar data de elegibilidade</td><td>ELEGPATRO, PARTPREVPLAN</td><td>RegraString(IDRGDATAELEG) → data ≤ date</td><td>'Elegível' ou 'Bloqueado'</td><td><a href="regras-de-negocio.html#BENEF-RN004">RS004</a></td><td>—</td><td><code>FSimulaBeneficio.dfm</code></td></tr><tr><td>Simular valor</td><td>Calcular valor previsionado</td><td>ELEGPATRO, PARTPREVPLAN</td><td>RegraNumerica(IDRGVALORPREV) sobre SQL</td><td>Valor estimado ou 'Indefinido'</td><td><a href="regras-de-negocio.html#BENEF-RN005">RS005</a></td><td>—</td><td><code>FSimulaBeneficio.dfm</code></td></tr><tr><td>Consultar memória</td><td>Exibir memória de cálculo</td><td>IDCALCULO</td><td>Consulta DETCALCULO (leitura)</td><td>memResult exibido</td><td>—</td><td>—</td><td><code>FConsMemoriaCalculo.dfm</code></td></tr></tbody></table></div>
+<p><strong>Regras de negócio da jornada:</strong> <a href="regras-de-negocio.html#BENEF-RN004">RS004</a>, <a href="regras-de-negocio.html#BENEF-RN005">RS005</a>.</p>
+<p><strong>Dependências:</strong> independente; consulta apenas. <strong>Evidência:</strong> <code>BENEFICIOPREV/Fontes/FSimulaBeneficio.pas:194-262</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<div class="mermaid">[FSimulaBeneficio] --> RegraString(IDRGDATAELEG) --> RegraNumerica(IDRGVALORPREV) --> [DETCALCULO(leitura)]</div>
+</div>
+
+<div class="pf-block" id="PF-04"><h4>JF004 (PF-04) — Desfazer Operações de Benefícios</h4>
+<p><strong>Objetivo:</strong> desfazer concessões/manutenções restaurando valores do log, excluindo históricos e reabrendo contribuições.</p>
+<p><strong>Gatilho/Ator:</strong> usuário aciona desfazimento em <code>FDesfazConcessaoBenefNOVO.dfm</code> (6.940 linhas).</p>
+<p><strong>Pré-condições:</strong> benefício concedido (FLGCONCESSAO=1) <a href="regras-de-negocio.html#BENEF-RN010">[RS010]</a>; benefício não pago no período <a href="regras-de-negocio.html#BENEF-RN028">[RS028]</a> <a href="#TRT001">[TRT001]</a>.</p>
+<p><strong>Pós-condições:</strong> concessão desfeita; BENEFBFCIARIO/HSTBENEFBFCIARIO/HSTCONTRIBPREV/CONTRIBPREVPARTP/MOVBENEF/PROCESSOBENEF/TMPDESC/PREVIA revertidos.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li>Roteia por TIPOMOV (0=Renovação, 1=Reabertura, ..., 7=Concessão, ...) <a href="regras-de-negocio.html#BENEF-RN030">[RS030]</a></li>
+<li>Valida FLGCONCESSAO=1 <a href="regras-de-negocio.html#BENEF-RN010">[RS010]</a>; bloqueia se já pago <a href="regras-de-negocio.html#BENEF-RN028">[RS028]</a> <a href="#TRT001">[TRT001]</a></li>
+<li>Restaura VALORATUAL do log (qryLogOcorrencia) <a href="regras-de-negocio.html#BENEF-RN011">[RS011]</a></li>
+<li>Exclui históricos (HSTBENEFBFCIARIO, HSTCONTRIBPREV, HISTMOVRESERVA, HSTPERCGRUPO, TMPDESC, PREVIA) <a href="regras-de-negocio.html#BENEF-RN012">[RS012]</a> <a href="#TRT011">[TRT011]</a></li>
+<li>Reabre vigência da contribuição (DATAFINAL) <a href="regras-de-negocio.html#BENEF-RN013">[RS013]</a></li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody><tr><td>Rotear por TIPOMOV</td><td>Despachar para Desfaz* específico</td><td>TIPOMOV</td><td>case TIPOMOV → Desfaz*</td><td>Roteiro definido</td><td><a href="regras-de-negocio.html#BENEF-RN030">RS030</a></td><td>—</td><td><code>FDesfazConcessaoBenefNOVO.dfm</code></td></tr><tr><td>Validar concessão</td><td>Confirmar FLGCONCESSAO=1</td><td>HSTBENEFBFCIARIO</td><td>Verifica FLGCONCESSAO=1; bloqueia se VLBENEFPGTO>0</td><td>Permite/bloqueia</td><td><a href="regras-de-negocio.html#BENEF-RN010">RS010</a>, <a href="regras-de-negocio.html#BENEF-RN028">RS028</a></td><td><a href="#MSG001">MSG001</a></td><td><code>FDesfazConcessaoBenefNOVO.dfm</code></td></tr><tr><td>Restaurar valor</td><td>Reverter VALORATUAL</td><td>qryLogOcorrencia</td><td>UPDATE BENEFBFCIARIO SET VALORATUAL=VALORATUALANT</td><td>Valor revertido</td><td><a href="regras-de-negocio.html#BENEF-RN011">RS011</a></td><td>—</td><td><code>FDesfazConcessaoBenefNOVO.dfm</code></td></tr><tr><td>Excluir históricos</td><td>Limpar efeitos da concessão</td><td>Múltiplas tabelas</td><td>DELETE HSTBENEFBFCIARIO/HSTCONTRIBPREV/TMPDESC/PREVIA</td><td>Históricos excluídos</td><td><a href="regras-de-negocio.html#BENEF-RN012">RS012</a></td><td><a href="#MSG011">MSG011</a></td><td><code>FDesfazConcessaoBenefNOVO.dfm</code></td></tr><tr><td>Reabrer contribuição</td><td>Restaurar DATAFINAL</td><td>CONTRIBPREVPARTP</td><td>UPDATE CONTRIBPREVPARTP SET DATAFINAL=DATAFINALANT</td><td>Vigência reaberta</td><td><a href="regras-de-negocio.html#BENEF-RN013">RS013</a></td><td>—</td><td><code>FDesfazConcessaoBenefNOVO.dfm</code></td></tr></tbody></table></div>
+<p><strong>Regras de negócio da jornada:</strong> <a href="regras-de-negocio.html#BENEF-RN010">RS010</a>, <a href="regras-de-negocio.html#BENEF-RN011">RS011</a>, <a href="regras-de-negocio.html#BENEF-RN012">RS012</a>, <a href="regras-de-negocio.html#BENEF-RN013">RS013</a>, <a href="regras-de-negocio.html#BENEF-RN028">RS028</a>, <a href="regras-de-negocio.html#BENEF-RN030">RS030</a>.</p>
+<p><strong>Dependências:</strong> desfaz <a href="#PF-01">JF001</a> (concessão), <a href="#PF-08">JF008</a> (desdobramento). <strong>Evidência:</strong> <code>BENEFICIOPREV/Fontes/FDesfazConcessaoBenefNOVO.pas:913-3628</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<div class="mermaid">[FDesfazConcessaoBenefNOVO] --> case TIPOMOV --> valida FLGCONCESSAO --> restaura VALORATUAL --> exclui históricos --> reabre contribuição</div>
+</div>
+
+<div class="pf-block" id="PF-05"><h4>JF005 (PF-05) — Eventos Previdenciários</h4>
+<p><strong>Objetivo:</strong> registrar eventos previdenciários (aposentadoria, falecimento, reclusão, assistido) atualizando situações.</p>
+<p><strong>Gatilho/Ator:</strong> usuário aciona evento em <code>FEventoAposentaBenef.dfm</code>, <code>FEventoMorte.dfm</code>, <code>FEventoReclusao.dfm</code> ou <code>FEventoAssistidoBenef.dfm</code>.</p>
+<p><strong>Pré-condições:</strong> benefício ativo (IDSITBENEFICIO IN (4,6)) <a href="regras-de-negocio.html#BENEF-RN006">[RS006]</a>; evento não em aberto <a href="regras-de-negocio.html#BENEF-RN016">[RS016]</a>.</p>
+<p><strong>Pós-condições:</strong> ELEGPATRO, PARTPREVPLAN, PESSOAFISICA, EVENTOSPREV atualizados; evento registrado.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li>Filtra benefícios ativos (IDSITBENEFICIO IN (4,6)) <a href="regras-de-negocio.html#BENEF-RN006">[RS006]</a></li>
+<li>Verifica evento não em aberto <a href="regras-de-negocio.html#BENEF-RN016">[RS016]</a></li>
+<li>Atualiza ELEGPATRO (tempo serviço/situação), PARTPREVPLAN (situação plano) <a href="regras-de-negocio.html#BENEF-RN018">[RS018]</a></li>
+<li>Falecimento grava PESSOAFISICA.DATAMORTE <a href="regras-de-negocio.html#BENEF-RN018">[RS018]</a>; exige dependentes <a href="regras-de-negocio.html#BENEF-RN035">[RS035]</a></li>
+<li>Insere em EVENTOSPREV e audita DATAALTERADO <a href="regras-de-negocio.html#BENEF-RN019">[RS019]</a></li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody><tr><td>Filtrar benefícios</td><td>Selecionar ativos/manutenção</td><td>BENEFBFCIARIO</td><td>IDSITBENEFICIO IN (4,6)</td><td>Lista filtrada</td><td><a href="regras-de-negocio.html#BENEF-RN006">RS006</a></td><td>—</td><td><code>FEventoMorte.dfm</code></td></tr><tr><td>Validar evento em aberto</td><td>Evitar duplicidade</td><td>EVENTOSPREV</td><td>Verifica evento não confirmado</td><td>Permite/bloqueia</td><td><a href="regras-de-negocio.html#BENEF-RN016">RS016</a></td><td>—</td><td><code>FEventoMorte.dfm</code></td></tr><tr><td>Atualizar situações</td><td>Modificar ELEGPATRO/PARTPREVPLAN</td><td>ELEGPATRO, PARTPREVPLAN</td><td>UPDATE situação/TEMPOSERVTOTAL</td><td>Situações atualizadas</td><td><a href="regras-de-negocio.html#BENEF-RN018">RS018</a></td><td>—</td><td><code>FEventoMorte.dfm</code></td></tr><tr><td>Gravar falecimento</td><td>Registrar data da morte</td><td>PESSOAFISICA</td><td>UPDATE PESSOAFISICA SET DATAMORTE; valida dependentes</td><td>Falecimento registrado</td><td><a href="regras-de-negocio.html#BENEF-RN018">RS018</a>, <a href="regras-de-negocio.html#BENEF-RN035">RS035</a></td><td>—</td><td><code>FEventoMorte.dfm</code></td></tr><tr><td>Persistir evento</td><td>Auditar em EVENTOSPREV</td><td>EVENTOSPREV</td><td>INSERT EVENTOSPREV; UPDATE DATAALTERADO</td><td>Evento rastreável</td><td><a href="regras-de-negocio.html#BENEF-RN019">RS019</a></td><td><a href="#MSG012">MSG012</a></td><td><code>FEventoMorte.dfm</code></td></tr></tbody></table></div>
+<p><strong>Regras de negócio da jornada:</strong> <a href="regras-de-negocio.html#BENEF-RN006">RS006</a>, <a href="regras-de-negocio.html#BENEF-RN016">RS016</a>, <a href="regras-de-negocio.html#BENEF-RN018">RS018</a>, <a href="regras-de-negocio.html#BENEF-RN019">RS019</a>, <a href="regras-de-negocio.html#BENEF-RN035">RS035</a>.</p>
+<p><strong>Dependências:</strong> precede <a href="#PF-09">JF009</a> (reabertura); acionado por menu dinâmico <a href="regras-de-negocio.html#BENEF-RN002">[RS002]</a>. <strong>Evidência:</strong> <code>BENEFICIOPREV/Fontes/FEventoMorte.pas:1332-1618</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<div class="mermaid">[FEvento*] --> filtra IDSITBENEFICIO --> valida evento em aberto --> atualiza ELEGPATRO/PARTPREVPLAN/PESSOAFISICA --> [EVENTOSPREV]</div>
+</div>
+
+<div class="pf-block" id="PF-06"><h4>JF006 (PF-06) — Reajuste de Benefícios</h4>
+<p><strong>Objetivo:</strong> reajustar benefícios vitais não-resgate por plano/fonte aplicando índice e %FRB.</p>
+<p><strong>Gatilho/Ator:</strong> usuário aciona reajuste em <code>FReajuesteBenef.dfm</code> ou <code>FCadReajINSS.dfm</code>.</p>
+<p><strong>Pré-condições:</strong> benefícios vitalícios não-resgate <a href="regras-de-negocio.html#BENEF-RN007">[RS007]</a>; REPLAN excluído <a href="regras-de-negocio.html#BENEF-RN008">[RS008]</a>.</p>
+<p><strong>Pós-condições:</strong> REAJUSTEBENEFICIO, LISTABENEFICIOREAJUSTE, HSTBENEFBFCIARIO, BENEFBFCIARIO atualizados; benefícios reajustados.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li>Seleciona benefícios vitais não-resgate (IDTPPAGTOBENEFIC=1, FLGRESGATE=0) <a href="regras-de-negocio.html#BENEF-RN007">[RS007]</a></li>
+<li>Exclui REPLAN não saldado (255, 358) <a href="regras-de-negocio.html#BENEF-RN008">[RS008]</a></li>
+<li>Distingue fonte pagadora (Funcef=0 / INSS=1) <a href="regras-de-negocio.html#BENEF-RN009">[RS009]</a></li>
+<li>Insere em REAJUSTEBENEFICIO/LISTABENEFICIOREAJUSTE; aplica índice e %FRB</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody><tr><td>Selecionar benefícios</td><td>Filtrar vitalícios não-resgate</td><td>BENEFBFCIARIO</td><td>IDTPPAGTOBENEFIC=1 AND FLGRESGATE=0</td><td>Lista selecionada</td><td><a href="regras-de-negocio.html#BENEF-RN007">RS007</a></td><td>—</td><td><code>FReajuesteBenef.dfm</code></td></tr><tr><td>Excluir REPLAN</td><td>Remover planos não saldados</td><td>BENEFPLANPREV</td><td>IDBENEFICIO NOT IN (255,358)</td><td>REPLAN excluído</td><td><a href="regras-de-negocio.html#BENEF-RN008">RS008</a></td><td>—</td><td><code>FReajuesteBenef.dfm</code></td></tr><tr><td>Distinguir fonte</td><td>Separar por fonte pagadora</td><td>BENEFPLANPREV</td><td>FLGREFERENCIA = FONTEPAGADORA</td><td>Benefícios por fonte</td><td><a href="regras-de-negocio.html#BENEF-RN009">RS009</a></td><td>—</td><td><code>FReajuesteBenef.dfm</code></td></tr><tr><td>Aplicar reajuste</td><td>Calcular e gravar reajuste</td><td>Índice, %FRB</td><td>INSERT REAJUSTEBENEFICIO; aplica índice</td><td>Benefícios reajustados</td><td>—</td><td>—</td><td><code>FReajuesteBenef.dfm</code></td></tr></tbody></table></div>
+<p><strong>Regras de negócio da jornada:</strong> <a href="regras-de-negocio.html#BENEF-RN007">RS007</a>, <a href="regras-de-negocio.html#BENEF-RN008">RS008</a>, <a href="regras-de-negocio.html#BENEF-RN009">RS009</a>.</p>
+<p><strong>Dependências:</strong> independente; atualiza BENEFBFCIARIO. <strong>Evidência:</strong> <code>BENEFICIOPREV/Fontes/FReajuesteBenef.pas:38-113</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<div class="mermaid">[FReajuesteBenef] --> filtra vitalícios --> exclui REPLAN --> distingue fonte --> aplica índice --> [REAJUSTEBENEFICIO/BENEFBFCIARIO]</div>
+</div>
+
+<div class="pf-block" id="PF-07"><h4>JF007 (PF-07) — Reajuste Judicial</h4>
+<p><strong>Objetivo:</strong> reajustar judicialmente benefícios ativos em planos ativos atualizando valor.</p>
+<p><strong>Gatilho/Ator:</strong> usuário aciona reajuste judicial em <code>FReajusteJudicial.dfm</code>.</p>
+<p><strong>Pré-condições:</strong> benefício ativo (IDSITBENEFICIO=1) em plano ativo (FLGDESATIVADO=0) <a href="regras-de-negocio.html#BENEF-RN023">[RS023]</a>.</p>
+<p><strong>Pós-condições:</strong> BENEFBFCIARIO atualizado (VALORATUAL/VALORTOTAL); benefícios reajustados judicialmente.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li>Filtra IDSITBENEFICIO=1 AND FLGDESATIVADO=0 <a href="regras-de-negocio.html#BENEF-RN023">[RS023]</a></li>
+<li>Calcula NovoValor = ValorAnterior + (ValorAnterior * FG * Fator/100) <a href="regras-de-negocio.html#BENEF-RN038">[RS038]</a></li>
+<li>Se Desreajuste, subtrai <a href="regras-de-negocio.html#BENEF-RN038">[RS038]</a></li>
+<li>UPDATE BENEFBFCIARIO SET VALORATUAL/VALORTOTAL</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody><tr><td>Filtrar ativos</td><td>Selecionar benefícios ativos em planos ativos</td><td>BENEFBFCIARIO, BENEFPLANPREV</td><td>IDSITBENEFICIO=1 AND FLGDESATIVADO=0</td><td>Lista filtrada</td><td><a href="regras-de-negocio.html#BENEF-RN023">RS023</a></td><td>—</td><td><code>FReajusteJudicial.dfm</code></td></tr><tr><td>Calcular reajuste</td><td>Aplicar fórmula judicial</td><td>ValorAnterior, FG, Fator</td><td>NovoValor = ValorAnterior + (ValorAnterior*FG*Fator/100)</td><td>Valor calculado</td><td><a href="regras-de-negocio.html#BENEF-RN038">RS038</a></td><td>—</td><td><code>FReajusteJudicial.dfm</code></td></tr><tr><td>Persistir</td><td>Atualizar benefício</td><td>NovoValor</td><td>UPDATE BENEFBFCIARIO SET VALORATUAL/VALORTOTAL</td><td>Benefício reajustado</td><td>—</td><td>—</td><td><code>FReajusteJudicial.dfm</code></td></tr></tbody></table></div>
+<p><strong>Regras de negócio da jornada:</strong> <a href="regras-de-negocio.html#BENEF-RN023">RS023</a>, <a href="regras-de-negocio.html#BENEF-RN038">RS038</a>.</p>
+<p><strong>Dependências:</strong> independente; atualiza BENEFBFCIARIO. <strong>Evidência:</strong> <code>BENEFICIOPREV/Fontes/FReajusteJudicial.pas:99,172</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<div class="mermaid">[FReajusteJudicial] --> filtra ativos --> calcula NovoValor --> [BENEFBFCIARIO]</div>
+</div>
+
+<div class="pf-block" id="PF-08"><h4>JF008 (PF-08) — Desdobramento de Benefício</h4>
+<p><strong>Objetivo:</strong> desdobrar um benefício entre beneficiários criando novo benefício, aplicando regra contábil e gerando dívida.</p>
+<p><strong>Gatilho/Ator:</strong> usuário aciona desdobramento em <code>FDesdobramentoBenef.dfm</code> (9.118 linhas) + <code>FPedeInfRevisao.dfm</code>.</p>
+<p><strong>Pré-condições:</strong> dados de revisão válidos <a href="regras-de-negocio.html#BENEF-RN014">[RS014]</a> <a href="#TRT010">[TRT010]</a>; regra contábil válida <a href="regras-de-negocio.html#BENEF-RN017">[RS017]</a>; valor dentro do limite <a href="regras-de-negocio.html#BENEF-RN032">[RS032]</a> <a href="#TRT003">[TRT003]</a>.</p>
+<p><strong>Pós-condições:</strong> BENEFBFCIARIO, HSTBENEFBFCIARIO, CONTABANCARIA, RUBRICAINDIV, CONTROLEDIVIDABENEFICIO, PROCESSOBENEF populados; benefício desdobrado.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li>Valida dados de revisão (Nº Processo INSS, datas, tipo pagamento) <a href="regras-de-negocio.html#BENEF-RN014">[RS014]</a> <a href="#TRT010">[TRT010]</a></li>
+<li>Valida regra contábil automática (entidade/conta D/C) <a href="regras-de-negocio.html#BENEF-RN017">[RS017]</a></li>
+<li>Verifica limite de valor com autorização <a href="regras-de-negocio.html#BENEF-RN032">[RS032]</a> <a href="#TRT003">[TRT003]</a></li>
+<li>INSERT BENEFBFCIARIO (novo beneficiário) <a href="regras-de-negocio.html#BENEF-RN031">[RS031]</a></li>
+<li>Aplica regra contábil; reajusta desde DIP original; gera dívida</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody><tr><td>Validar revisão</td><td>Confirmar dados obrigatórios</td><td>PROCESSOBENEF</td><td>Valida Nº INSS, datas, tipo pagamento</td><td>Permite/bloqueia</td><td><a href="regras-de-negocio.html#BENEF-RN014">RS014</a></td><td><a href="#MSG010">MSG010</a>, <a href="#MSG014">MSG014</a></td><td><code>FPedeInfRevisao.dfm</code></td></tr><tr><td>Validar regra contábil</td><td>Verificar entidade/conta D/C</td><td>CONTROLEDIVIDABENEFICIO</td><td>Valida regra contábil automática</td><td>Permite/bloqueia</td><td><a href="regras-de-negocio.html#BENEF-RN017">RS017</a></td><td>—</td><td><code>FDesdobramentoBenef.dfm</code></td></tr><tr><td>Verificar limite</td><td>Checar valor com autorização</td><td>BENEFBFCIARIO</td><td>VerificaVALORLimiteBeneficio; iIdUsuarioAutoriza</td><td>Permite/bloqueia</td><td><a href="regras-de-negocio.html#BENEF-RN032">RS032</a></td><td><a href="#MSG003">MSG003</a></td><td><code>FDesdobramentoBenef.dfm</code></td></tr><tr><td>Inserir benefício</td><td>Criar novo beneficiário</td><td>BENEFBFCIARIO</td><td>INSERT BENEFBFCIARIO; GeraNumeroProcesso</td><td>Benefício criado</td><td><a href="regras-de-negocio.html#BENEF-RN031">RS031</a></td><td>—</td><td><code>FDesdobramentoBenef.dfm</code></td></tr><tr><td>Gerar dívida</td><td>Reajustar desde DIP e criar dívida</td><td>CONTROLEDIVIDABENEFICIO</td><td>Aplica regra contábil; reajusta; gera dívida</td><td>Desdobramento concluído</td><td>—</td><td>—</td><td><code>FDesdobramentoBenef.dfm</code></td></tr></tbody></table></div>
+<p><strong>Regras de negócio da jornada:</strong> <a href="regras-de-negocio.html#BENEF-RN014">RS014</a>, <a href="regras-de-negocio.html#BENEF-RN017">RS017</a>, <a href="regras-de-negocio.html#BENEF-RN031">RS031</a>, <a href="regras-de-negocio.html#BENEF-RN032">RS032</a>.</p>
+<p><strong>Dependências:</strong> sucede <a href="#PF-01">JF001</a>; pode ser desfeito por <a href="#PF-04">JF004</a> (RS029). <strong>Evidência:</strong> <code>BENEFICIOPREV/Fontes/FDesdobramentoBenef.pas:5184-5293</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<div class="mermaid">[FDesdobramentoBenef] --> valida revisão --> valida contábil --> verifica limite --> INSERT BENEFBFCIARIO --> gera dívida</div>
+</div>
+
+<div class="pf-block" id="PF-09"><h4>JF009 (PF-09) — Reabertura / Renovação de Benefício</h4>
+<p><strong>Objetivo:</strong> reabrir ou renovar um benefício revertendo situações do processo e do participante.</p>
+<p><strong>Gatilho/Ator:</strong> usuário aciona reabertura em <code>FReaberturaBeneficio.dfm</code> + <code>FReaberturaData.dfm</code>.</p>
+<p><strong>Pré-condições:</strong> benefício não processado pela prévia da folha <a href="regras-de-negocio.html#BENEF-RN039">[RS039]</a>.</p>
+<p><strong>Pós-condições:</strong> PROCESSOBENEF, ELEGPATRO, PARTPREVPLAN, CONTRIBPREVPARTP, EVENTOSPREV, BENEFBFCIARIO atualizados; benefício reaberto.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li>Valida se benefício já foi processado pela prévia <a href="regras-de-negocio.html#BENEF-RN039">[RS039]</a></li>
+<li>UPDATE PROCESSOBENEF.IDSITPROCESSO, ELEGPATRO.IDSITFUNC, PARTPREVPLAN.IDSITPART <a href="regras-de-negocio.html#BENEF-RN020">[RS020]</a></li>
+<li>UPDATE CONTRIBPREVPARTP.DATAFINAL/FLGCOBRA, EVENTOSPREV.DATAVOLTA</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody><tr><td>Validar prévia</td><td>Checar processamento pela folha</td><td>HSTBENEFBFCIARIO</td><td>Verifica MESREFERENCIA = mês pagamento</td><td>Permite/bloqueia</td><td><a href="regras-de-negocio.html#BENEF-RN039">RS039</a></td><td>—</td><td><code>FReaberturaBeneficio.dfm</code></td></tr><tr><td>Reverter situações</td><td>Atualizar processo/participante</td><td>Múltiplas</td><td>UPDATE PROCESSOBENEF/ELEGPATRO/PARTPREVPLAN</td><td>Situações revertidas</td><td><a href="regras-de-negocio.html#BENEF-RN020">RS020</a></td><td>—</td><td><code>FReaberturaBeneficio.dfm</code></td></tr><tr><td>Reabrir contribuição</td><td>Restaurar vigência</td><td>CONTRIBPREVPARTP, EVENTOSPREV</td><td>UPDATE DATAFINAL/FLGCOBRA/DATAVOLTA</td><td>Benefício reaberto</td><td>—</td><td>—</td><td><code>FReaberturaData.dfm</code></td></tr></tbody></table></div>
+<p><strong>Regras de negócio da jornada:</strong> <a href="regras-de-negocio.html#BENEF-RN020">RS020</a>, <a href="regras-de-negocio.html#BENEF-RN039">RS039</a>.</p>
+<p><strong>Dependências:</strong> sucede <a href="#PF-05">JF005</a> (eventos). <strong>Evidência:</strong> <code>BENEFICIOPREV/Fontes/FReaberturaBeneficio.pas:947-2530</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<div class="mermaid">[FReaberturaBeneficio] --> valida prévia --> reverte situações --> reabre contribuição</div>
+</div>
+
+<div class="pf-block" id="PF-10"><h4>JF010 (PF-10) — Liberação de Benefício em Exigência ou Retido</h4>
+<p><strong>Objetivo:</strong> liberar benefício em exigência ou retido, concluindo o processo e ativando o pagamento.</p>
+<p><strong>Gatilho/Ator:</strong> usuário aciona liberação em <code>FCadInicioBenefExigencia.dfm</code> (4.646 linhas).</p>
+<p><strong>Pré-condições:</strong> benefício em exigência/retido; limites de valor e percentual verificados <a href="regras-de-negocio.html#BENEF-RN033">[RS033]</a> <a href="#TRT004">[TRT004]</a> <a href="#TRT005">[TRT005]</a>; benefício selecionado <a href="#TRT006">[TRT006]</a>.</p>
+<p><strong>Pós-condições:</strong> BENEFBFCIARIO, HSTBENEFBFCIARIO, HSTCONTRIBPREV, CONTRIBPREVPARTP, CONTRIBPREVNUCLEO, PROCESSOBENEF, MOVBENEF atualizados; benefício liberado (ativo/pago).</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li>Verifica limites de valor E percentual <a href="regras-de-negocio.html#BENEF-RN033">[RS033]</a> <a href="#TRT004">[TRT004]</a> <a href="#TRT005">[TRT005]</a></li>
+<li>Verifica benefício selecionado <a href="#TRT006">[TRT006]</a></li>
+<li>UPDATE BENEFBFCIARIO (situação/valor/datas), HSTBENEFBFCIARIO, HSTCONTRIBPREV</li>
+<li>UPDATE CONTRIBPREVPARTP.FLGCOBRA, PROCESSOBENEF.IDSITPROCESSO=1 <a href="regras-de-negocio.html#BENEF-RN021">[RS021]</a>, MOVBENEF.DTINICIOLIBERACAO</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody><tr><td>Verificar limites</td><td>Validar valor e percentual</td><td>BENEFBFCIARIO</td><td>VerificaVALORLimiteBeneficio AND VerificaPERCLimiteBeneficio</td><td>Permite/bloqueia</td><td><a href="regras-de-negocio.html#BENEF-RN033">RS033</a></td><td><a href="#MSG004">MSG004</a>, <a href="#MSG005">MSG005</a></td><td><code>FCadInicioBenefExigencia.dfm</code></td></tr><tr><td>Verificar seleção</td><td>Confirmar benefício selecionado</td><td>—</td><td>Valida benefício selecionado</td><td>Permite/bloqueia</td><td>—</td><td><a href="#MSG006">MSG006</a></td><td><code>FCadInicioBenefExigencia.dfm</code></td></tr><tr><td>Atualizar benefício</td><td>Modificar situação/valor/datas</td><td>BENEFBFCIARIO</td><td>UPDATE BENEFBFCIARIO/HSTBENEFBFCIARIO/HSTCONTRIBPREV</td><td>Benefício atualizado</td><td>—</td><td>—</td><td><code>FCadInicioBenefExigencia.dfm</code></td></tr><tr><td>Concluir processo</td><td>Ativar pagamento</td><td>PROCESSOBENEF, MOVBENEF</td><td>UPDATE IDSITPROCESSO=1; DTINICIOLIBERACAO</td><td>Benefício liberado</td><td><a href="regras-de-negocio.html#BENEF-RN021">RS021</a></td><td>—</td><td><code>FCadInicioBenefExigencia.dfm</code></td></tr></tbody></table></div>
+<p><strong>Regras de negócio da jornada:</strong> <a href="regras-de-negocio.html#BENEF-RN021">RS021</a>, <a href="regras-de-negocio.html#BENEF-RN033">RS033</a>.</p>
+<p><strong>Dependências:</strong> sucede <a href="#PF-01">JF001</a>; ativa pagamento. <strong>Evidência:</strong> <code>BENEFICIOPREV/Fontes/FCadInicioBenefExigencia.pas:1256-4283</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<div class="mermaid">[FCadInicioBenefExigencia] --> verifica limites --> verifica seleção --> UPDATE BENEFBFCIARIO --> IDSITPROCESSO=1</div>
+</div>
+
+<div class="pf-block" id="PF-11"><h4>JF011 (PF-11) — Liberação de Benefício Provisório (Adiantamento)</h4>
+<p><strong>Objetivo:</strong> liberar benefício provisório (adiantamento) definindo datas de início.</p>
+<p><strong>Gatilho/Ator:</strong> usuário aciona liberação provisória em <code>FLiberaBeneficioProvisorio.dfm</code>.</p>
+<p><strong>Pré-condições:</strong> benefício provisório cadastrado; data de início informada.</p>
+<p><strong>Pós-condições:</strong> BENEFBFCIARIO, CONTRIBPREVPARTP atualizados; benefício provisório liberado.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li>UPDATE BENEFBFCIARIO SET DATAINICIOFUND</li>
+<li>UPDATE CONTRIBPREVPARTP SET DATAINICIO</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody><tr><td>Liberar provisório</td><td>Definir data de início da fundação</td><td>BENEFBFCIARIO</td><td>UPDATE BENEFBFCIARIO SET DATAINICIOFUND</td><td>Data definida</td><td>—</td><td>—</td><td><code>FLiberaBeneficioProvisorio.dfm</code></td></tr><tr><td>Atualizar contribuição</td><td>Definir data de início da contribuição</td><td>CONTRIBPREVPARTP</td><td>UPDATE CONTRIBPREVPARTP SET DATAINICIO</td><td>Contribuição atualizada</td><td>—</td><td>—</td><td><code>FLiberaBeneficioProvisorio.dfm</code></td></tr></tbody></table></div>
+<p><strong>Regras de negócio da jornada:</strong> —.</p>
+<p><strong>Dependências:</strong> sucede <a href="#PF-01">JF001</a>. <strong>Evidência:</strong> <code>BENEFICIOPREV/Fontes/FLiberaBeneficioProvisorio.pas:491,720</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<div class="mermaid">[FLiberaBeneficioProvisorio] --> UPDATE DATAINICIOFUND --> UPDATE DATAINICIO</div>
+</div>
+
+<div class="pf-block" id="PF-12"><h4>JF012 (PF-12) — Conciliação INSS (mantenedoras/extrato/encerramento)</h4>
+<p><strong>Objetivo:</strong> conciliar INSS com mantenedoras importando arquivos, comparando reembolso×desembolso e encerrando a conciliação.</p>
+<p><strong>Gatilho/Ator:</strong> usuário aciona conciliação em <code>_FConciliacao.dfm</code>, <code>_FExtratoINSS.dfm</code> ou <code>_FEncerraConciliacao.dfm</code>.</p>
+<p><strong>Pré-condições:</strong> arquivo de importação disponível; rubricas INSS associadas <a href="regras-de-negocio.html#BENEF-RN022">[RS022]</a>; mês não fechado <a href="regras-de-negocio.html#BENEF-RN044">[RS044]</a> <a href="#TRT008">[TRT008]</a>.</p>
+<p><strong>Pós-condições:</strong> DETCONCINSS, TEMPCONCINSS, CONCINSS, RUBRICAXINSS, HISTRUBSAL populados; conciliação INSS encerrada.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li>Importa arquivos (até 9 rubricas/linha) <a href="regras-de-negocio.html#BENEF-RN042">[RS042]</a></li>
+<li>Verifica limite de 20 rubricas/mês <a href="regras-de-negocio.html#BENEF-RN043">[RS043]</a> <a href="#TRT015">[TRT015]</a></li>
+<li>Identifica processos; compara reembolso×desembolso</li>
+<li>Valida mês não fechado <a href="regras-de-negocio.html#BENEF-RN044">[RS044]</a> <a href="#TRT008">[TRT008]</a>; rubrica obrigatória <a href="#TRT007">[TRT007]</a></li>
+<li>Encerra conciliação</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody><tr><td>Importar arquivo</td><td>Carregar rubricas INSS</td><td>Arquivo, DETCONCINSS</td><td>Loop i:=0 to 8 (9 rubricas)</td><td>DETCONCINSS populado</td><td><a href="regras-de-negocio.html#BENEF-RN042">RS042</a></td><td>—</td><td><code>_FConciliacao.dfm</code></td></tr><tr><td>Verificar limite rubricas</td><td>Checar máximo 20/mês</td><td>DETCONCINSS</td><td>Contagem > 20 → bloqueia</td><td>Permite/bloqueia</td><td><a href="regras-de-negocio.html#BENEF-RN043">RS043</a></td><td><a href="#MSG015">MSG015</a></td><td><code>_fCompoeValoresRI.dfm</code></td></tr><tr><td>Comparar valores</td><td>Confrontar reembolso×desembolso</td><td>DETCONCINSS, TEMPCONCINSS</td><td>Identifica processos; compara</td><td>Divergências identificadas</td><td>—</td><td>—</td><td><code>_FConciliacao.dfm</code></td></tr><tr><td>Validar mês/rubrica</td><td>Checar mês aberto e rubrica</td><td>DETCONCINSS</td><td>VerificaConcINSS(mês); rubrica obrigatória</td><td>Permite/bloqueia</td><td><a href="regras-de-negocio.html#BENEF-RN044">RS044</a>, <a href="regras-de-negocio.html#BENEF-RN022">RS022</a></td><td><a href="#MSG007">MSG007</a>, <a href="#MSG008">MSG008</a></td><td><code>_fCadEntrManualINSS.dfm</code></td></tr><tr><td>Encerrar conciliação</td><td>Finalizar processo</td><td>CONCINSS</td><td>Encerra conciliação</td><td>Conciliação encerrada</td><td>—</td><td>—</td><td><code>_FEncerraConciliacao.dfm</code></td></tr></tbody></table></div>
+<p><strong>Regras de negócio da jornada:</strong> <a href="regras-de-negocio.html#BENEF-RN022">RS022</a>, <a href="regras-de-negocio.html#BENEF-RN042">RS042</a>, <a href="regras-de-negocio.html#BENEF-RN043">RS043</a>, <a href="regras-de-negocio.html#BENEF-RN044">RS044</a>.</p>
+<p><strong>Dependências:</strong> independente; integra com FOLHA/CONTRIBUICAOPREV. <strong>Evidência:</strong> <code>BENEFICIOPREV/Fontes/_FConciliacao.pas</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<div class="mermaid">[_FConciliacao] --> importa (9 rubricas) --> verifica 20/mês --> compara reembolso×desembolso --> [CONCINSS/DETCONCINSS]</div>
+</div>
+
+<div class="pf-block" id="PF-13"><h4>JF013 (PF-13) — Controle / Histórico de Dívidas de Benefícios</h4>
+<p><strong>Objetivo:</strong> parametrizar e controlar dívidas de benefícios, reajustando dívidas vinculadas a plano REG REPLAN.</p>
+<p><strong>Gatilho/Ator:</strong> usuário aciona controle de dívidas em <code>FParamDividaBenef.dfm</code>.</p>
+<p><strong>Pré-condições:</strong> benefício desdobrado com dívida; plano REG REPLAN cadastrado.</p>
+<p><strong>Pós-condições:</strong> CONTROLEDIVIDABENEFICIO, HSTDIVIDABENEFICIO, PARAMPARCDIVIDABENEFICIO populados; dívidas parametrizadas.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li>INSERT/UPDATE CONTROLEDIVIDABENEFICIO</li>
+<li>Reajusta dívidas vinculadas a plano REG REPLAN</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody><tr><td>Parametrizar dívida</td><td>Configurar controle de dívida</td><td>CONTROLEDIVIDABENEFICIO</td><td>INSERT/UPDATE CONTROLEDIVIDABENEFICIO</td><td>Dívida parametrizada</td><td>—</td><td>—</td><td><code>FParamDividaBenef.dfm</code></td></tr><tr><td>Reajustar dívidas</td><td>Atualizar dívidas REPLAN</td><td>PARAMPARCDIVIDABENEFICIO</td><td>Reajusta dívidas vinculadas a plano REG REPLAN</td><td>Dívidas reajustadas</td><td>—</td><td>—</td><td><code>FParamDividaBenef.dfm</code></td></tr></tbody></table></div>
+<p><strong>Regras de negócio da jornada:</strong> —.</p>
+<p><strong>Dependências:</strong> sucede <a href="#PF-08">JF008</a> (desdobramento gera dívida). <strong>Evidência:</strong> <code>BENEFICIOPREV/Fontes/FDesdobramentoBenef.pas:7776,8130-8337</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<div class="mermaid">[FParamDividaBenef] --> INSERT/UPDATE CONTROLEDIVIDABENEFICIO --> reajusta REPLAN</div>
+</div>
+
+<div class="pf-block" id="PF-14"><h4>JF014 (PF-14) — Alteração de Benefício (individual e em lote)</h4>
+<p><strong>Objetivo:</strong> alterar dados de benefícios individualmente ou em lote via arquivo de matrículas.</p>
+<p><strong>Gatilho/Ator:</strong> usuário aciona alteração em <code>FAlteraBeneficio.dfm</code> ou <code>FAlteraBeneficioLote.dfm</code>.</p>
+<p><strong>Pré-condições:</strong> datas no formato DD/MM/AAAA <a href="regras-de-negocio.html#BENEF-RN015">[RS015]</a> <a href="#TRT009">[TRT009]</a>; arquivo de matrículas (lote) sem duplicidade <a href="regras-de-negocio.html#BENEF-RN041">[RS041]</a>; divergência ≤ 0,02 <a href="regras-de-negocio.html#BENEF-RN040">[RS040]</a>.</p>
+<p><strong>Pós-condições:</strong> BENEFBFCIARIO, HSTBENEFBFCIARIO atualizados; benefícios alterados.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li>Valida formato de data DD/MM/AAAA <a href="regras-de-negocio.html#BENEF-RN015">[RS015]</a> <a href="#TRT009">[TRT009]</a></li>
+<li>Lote: verifica duplicidade via hash CRC32 <a href="regras-de-negocio.html#BENEF-RN041">[RS041]</a>; divergência ≤ 0,02 <a href="regras-de-negocio.html#BENEF-RN040">[RS040]</a></li>
+<li>Atualiza dados do benefício; persiste em BENEFBFCIARIO/HSTBENEFBFCIARIO</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody><tr><td>Validar datas</td><td>Confirmar formato DD/MM/AAAA</td><td>Datas</td><td>CheckDate(Sender,Text)</td><td>Permite/bloqueia</td><td><a href="regras-de-negocio.html#BENEF-RN015">RS015</a></td><td><a href="#MSG009">MSG009</a></td><td><code>FAlteraBeneficio.dfm</code></td></tr><tr><td>Validar lote</td><td>Checar duplicidade e divergência</td><td>Arquivo, BENEFBFCIARIO</td><td>Hash CRC32; ABS(ValorAtual-(BS+FAB))≤0.02</td><td>Permite/rejeita</td><td><a href="regras-de-negocio.html#BENEF-RN040">RS040</a>, <a href="regras-de-negocio.html#BENEF-RN041">RS041</a></td><td>—</td><td><code>FAlteraBeneficioLote.dfm</code></td></tr><tr><td>Atualizar benefício</td><td>Persistir alteração</td><td>BENEFBFCIARIO</td><td>UPDATE BENEFBFCIARIO/HSTBENEFBFCIARIO</td><td>Benefício alterado</td><td>—</td><td><a href="#MSG020">MSG020</a></td><td><code>FAlteraBeneficio.dfm</code></td></tr></tbody></table></div>
+<p><strong>Regras de negócio da jornada:</strong> <a href="regras-de-negocio.html#BENEF-RN015">RS015</a>, <a href="regras-de-negocio.html#BENEF-RN040">RS040</a>, <a href="regras-de-negocio.html#BENEF-RN041">RS041</a>.</p>
+<p><strong>Dependências:</strong> independente; atualiza BENEFBFCIARIO. <strong>Evidência:</strong> <code>BENEFICIOPREV/Fontes/FAlteraBeneficio.pas:249,456</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<div class="mermaid">[FAlteraBeneficio] --> valida datas --> valida lote --> UPDATE BENEFBFCIARIO</div>
+</div>
+
+<div class="pf-block" id="PF-15"><h4>JF015 (PF-15) — Cadastro de Processos INSS (Habilitação)</h4>
+<p><strong>Objetivo:</strong> cadastrar processos INSS (habilitação) sobre benefícios ativos e habilitações concedidas.</p>
+<p><strong>Gatilho/Ator:</strong> usuário aciona cadastro em <code>FCadProcHabINSS.dfm</code> (1.919 linhas).</p>
+<p><strong>Pré-condições:</strong> benefício ativo (IDSITBENEFICIO=1) e habilitação concedida (FLGCONCESSAO=1) <a href="regras-de-negocio.html#BENEF-RN024">[RS024]</a>.</p>
+<p><strong>Pós-condições:</strong> BENEFHABILITA, HISTBENEFHABILITA, DETCONCINSS populados; processos INSS cadastrados.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li>Consulta BENEFHABILITA (FLGCONCESSAO=1) e BENEFBFCIARIO (IDSITBENEFICIO=1) <a href="regras-de-negocio.html#BENEF-RN024">[RS024]</a></li>
+<li>Valida NB não cadastrado <a href="#TRT016">[TRT016]</a></li>
+<li>Cadastra processo INSS</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody><tr><td>Filtrar habilitações</td><td>Selecionar válidas</td><td>BENEFBFCIARIO, BENEFHABILITA</td><td>IDSITBENEFICIO=1; FLGCONCESSAO=1</td><td>Lista filtrada</td><td><a href="regras-de-negocio.html#BENEF-RN024">RS024</a></td><td>—</td><td><code>FCadProcHabINSS.dfm</code></td></tr><tr><td>Validar NB</td><td>Checar duplicidade</td><td>—</td><td>Verifica NB já cadastrado</td><td>Permite/bloqueia</td><td>—</td><td><a href="#MSG016">MSG016</a>, <a href="#MSG018">MSG018</a></td><td><code>FCadProcHabINSS.dfm</code></td></tr><tr><td>Cadastrar processo</td><td>Inserir processo INSS</td><td>BENEFHABILITA</td><td>INSERT BENEFHABILITA/HISTBENEFHABILITA</td><td>Processo cadastrado</td><td>—</td><td>—</td><td><code>FCadProcHabINSS.dfm</code></td></tr></tbody></table></div>
+<p><strong>Regras de negócio da jornada:</strong> <a href="regras-de-negocio.html#BENEF-RN024">RS024</a>.</p>
+<p><strong>Dependências:</strong> precede <a href="#PF-12">JF012</a> (conciliação INSS). <strong>Evidência:</strong> <code>BENEFICIOPREV/Fontes/FCadProcHabINSS.pas:484-631</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<div class="mermaid">[FCadProcHabINSS] --> filtra habilitações --> valida NB --> [BENEFHABILITA/HISTBENEFHABILITA]</div>
+</div>
+
+<div class="pf-block" id="PF-16"><h4>JF016 (PF-16) — Reconstrução / Cancelamento de Evento INSS</h4>
+<p><strong>Objetivo:</strong> reconstruir o histórico do INSS quando inexistente ou cancelar evento excluindo memória de cálculo.</p>
+<p><strong>Gatilho/Ator:</strong> usuário aciona reconstrução em <code>FReconstruirINSS.dfm</code>.</p>
+<p><strong>Pré-condições:</strong> moeda informada <a href="#TRT019">[TRT019]</a>; evento INSS existente.</p>
+<p><strong>Pós-condições:</strong> HISTRUBSAL, EVENTOSPREV atualizados; histórico INSS reconstruído ou evento cancelado.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li>Valida moeda obrigatória <a href="#TRT019">[TRT019]</a></li>
+<li>Reconstrói histórico do INSS quando inexistente</li>
+<li>Cancela evento excluindo memória de cálculo</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody><tr><td>Validar moeda</td><td>Confirmar moeda informada</td><td>—</td><td>Valida moeda obrigatória</td><td>Permite/bloqueia</td><td>—</td><td><a href="#MSG019">MSG019</a></td><td><code>FReconstruirINSS.dfm</code></td></tr><tr><td>Reconstruir histórico</td><td>Recriar histórico INSS</td><td>HISTRUBSAL</td><td>Reconstrói quando inexistente</td><td>Histórico reconstruído</td><td>—</td><td>—</td><td><code>FReconstruirINSS.dfm</code></td></tr><tr><td>Cancelar evento</td><td>Excluir memória de cálculo</td><td>EVENTOSPREV</td><td>Cancela evento; exclui memória</td><td>Evento cancelado</td><td>—</td><td>—</td><td><code>FReconstruirINSS.dfm</code></td></tr></tbody></table></div>
+<p><strong>Regras de negócio da jornada:</strong> —.</p>
+<p><strong>Dependências:</strong> independente; acionado via menu <a href="regras-de-negocio.html#BENEF-RN002">[RS002]</a>. <strong>Evidência:</strong> <code>BENEFICIOPREV/Fontes/FPrincipal.pas:2188-2194</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<div class="mermaid">[FReconstruirINSS] --> valida moeda --> reconstrói/cancela --> [HISTRUBSAL/EVENTOSPREV]</div>
+</div>
+
+<div class="pf-block" id="PF-17"><h4>JF017 (PF-17) — Cálculo Retroativo de Benefícios</h4>
+<p><strong>Objetivo:</strong> recalcular benefícios retroativamente em lote por arquivo de matrículas (delegado ao CMAdmPrev).</p>
+<p><strong>Gatilho/Ator:</strong> usuário aciona cálculo retroativo via <code>frmRetroativoPrev</code> (externo CMAdmPrev).</p>
+<p><strong>Pré-condições:</strong> arquivo de matrículas disponível; CMAdmPrev acessível.</p>
+<p><strong>Pós-condições:</strong> recálculo delegado ao CMAdmPrev (externo); benefícios recalculados retroativamente.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li>Seleciona arquivo de matrículas</li>
+<li>Delega revisão em lote ao CMAdmPrev <a href="regras-de-negocio.html#BENEF-RN025">[RS025]</a></li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody><tr><td>Selecionar matrículas</td><td>Carregar arquivo de lote</td><td>Arquivo</td><td>Leitura do arquivo</td><td>Matrículas carregadas</td><td>—</td><td>—</td><td><code>FPrincipal.dfm</code></td></tr><tr><td>Delegar retroativo</td><td>Recalcular via CMAdmPrev</td><td>Matrículas</td><td>frmRetroativoPrev (CMAdmPrev)</td><td>Benefícios recalculados</td><td><a href="regras-de-negocio.html#BENEF-RN025">RS025</a></td><td>—</td><td><code>FPrincipal.dfm</code></td></tr></tbody></table></div>
+<p><strong>Regras de negócio da jornada:</strong> <a href="regras-de-negocio.html#BENEF-RN025">RS025</a>.</p>
+<p><strong>Dependências:</strong> delegado ao CMAdmPrev (externo). <strong>Evidência:</strong> <code>BENEFICIOPREV/Fontes/FPrincipal.pas:1929-1935</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<div class="mermaid">[FPrincipal] --> frmRetroativoPrev(CMAdmPrev) --> [externo]</div>
+</div>
+
+<div class="pf-block" id="PF-18"><h4>JF018 (PF-18) — Registro de Falecimento de Beneficiário</h4>
+<p><strong>Objetivo:</strong> registrar o falecimento de um beneficiário (delegado a formulário externo).</p>
+<p><strong>Gatilho/Ator:</strong> usuário aciona registro via <code>frmRegFalBenef</code> (externo).</p>
+<p><strong>Pré-condições:</strong> beneficiário cadastrado; formulário externo acessível.</p>
+<p><strong>Pós-condições:</strong> falecimento registrado (delegado/externo).</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li>Aciona <code>frmRegFalBenef</code> (externo)</li>
+<li>Registra falecimento do beneficiário</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody><tr><td>Registrar falecimento</td><td>Delegar registro</td><td>Beneficiário</td><td>frmRegFalBenef (externo)</td><td>Falecimento registrado</td><td>—</td><td>—</td><td><code>FPrincipal.dfm</code></td></tr></tbody></table></div>
+<p><strong>Regras de negócio da jornada:</strong> —.</p>
+<p><strong>Dependências:</strong> delegado (externo); relacionado a <a href="#PF-05">JF005</a> (eventos). <strong>Evidência:</strong> <code>BENEFICIOPREV/Fontes/FPrincipal.pas:2273-2278</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<div class="mermaid">[FPrincipal] --> frmRegFalBenef(externo)</div>
+</div>
+
+<section id="TRT-section"><div class="section-title">7. Tratamentos (TRT)</div><p>Tratamentos de erro derivados exclusivamente das validações e exceções já documentadas no Blueprint AS-IS PFC-24 (atributos de condições/exceções das regras e mensagens de <a href="tratamento-erros.html">tratamento-erros.html</a>). Cada TRT referencia condição, mensagem (MSG), resultado e regra/jornada de origem.</p><div class="table-wrap"><table><thead><tr><th>Código</th><th>Condição</th><th>Mensagem</th><th>Resultado</th><th>Regra</th><th>Jornada</th></tr></thead><tbody><tr id="TRT001"><td><strong>TRT001</strong></td><td>Benefício já foi pago no período (VLBENEFPGTO > 0)</td><td><a href="#MSG001">MSG001</a></td><td>Bloqueia desfazimento</td><td>RS010 (RN028)</td><td>JF004</td></tr><tr id="TRT002"><td><strong>TRT002</strong></td><td>Folha de benefícios já efetivada no desdobramento (FLGENVIADO=1)</td><td><a href="#MSG002">MSG002</a></td><td>Bloqueia desfazimento</td><td>RS010 (RN029)</td><td>JF004, JF008</td></tr><tr id="TRT003"><td><strong>TRT003</strong></td><td>Desdobramento excede valor limite sem autorização</td><td><a href="#MSG003">MSG003</a></td><td>Bloqueia desdobramento</td><td>RS017 (RN032)</td><td>JF008</td></tr><tr id="TRT004"><td><strong>TRT004</strong></td><td>Liberação excede valor limite sem autorização</td><td><a href="#MSG004">MSG004</a></td><td>Bloqueia liberação</td><td>RS033 (RN033)</td><td>JF010</td></tr><tr id="TRT005"><td><strong>TRT005</strong></td><td>Liberação excede percentual limite sem autorização</td><td><a href="#MSG005">MSG005</a></td><td>Bloqueia liberação</td><td>RS033 (RN033)</td><td>JF010</td></tr><tr id="TRT006"><td><strong>TRT006</strong></td><td>Nenhum benefício selecionado para liberação</td><td><a href="#MSG006">MSG006</a></td><td>Bloqueia liberação</td><td>RS021 (RN021)</td><td>JF010</td></tr><tr id="TRT007"><td><strong>TRT007</strong></td><td>Rubrica do INSS não informada</td><td><a href="#MSG007">MSG007</a></td><td>Bloqueia operação</td><td>RS022 (RN022)</td><td>JF012</td></tr><tr id="TRT008"><td><strong>TRT008</strong></td><td>Inserção/alteração em mês fechado (conciliação INSS)</td><td><a href="#MSG008">MSG008</a></td><td>Bloqueia operação</td><td>RS044 (RN044)</td><td>JF012</td></tr><tr id="TRT009"><td><strong>TRT009</strong></td><td>Data fora do formato DD/MM/AAAA</td><td><a href="#MSG009">MSG009</a></td><td>Bloqueia alteração</td><td>RS015 (RN015)</td><td>JF014</td></tr><tr id="TRT010"><td><strong>TRT010</strong></td><td>Data de início de liberação menor que data de início de pagamento</td><td><a href="#MSG010">MSG010</a></td><td>Bloqueia operação</td><td>RS014 (RN014)</td><td>JF008, JF010</td></tr><tr id="TRT011"><td><strong>TRT011</strong></td><td>Erro ao excluir correção monetária no desfazimento</td><td><a href="#MSG011">MSG011</a></td><td>Avisa e aborta</td><td>RS012 (RN012)</td><td>JF004</td></tr><tr id="TRT012"><td><strong>TRT012</strong></td><td>Erro ao gravar log de operação</td><td><a href="#MSG012">MSG012</a></td><td>Propaga exceção (raise exception.Create)</td><td>RS019 (RN019)</td><td>JF005, JF008</td></tr><tr id="TRT013"><td><strong>TRT013</strong></td><td>Erro ao criar datamodule 'TDtmRelatorios'</td><td><a href="#MSG013">MSG013</a></td><td>Avisa (mtError)</td><td>RS026 (RN026)</td><td>JF001</td></tr><tr id="TRT014"><td><strong>TRT014</strong></td><td>Campos obrigatórios não preenchidos (conciliação)</td><td><a href="#MSG014">MSG014</a></td><td>Bloqueia operação</td><td>RS014 (RN014)</td><td>JF012</td></tr><tr id="TRT015"><td><strong>TRT015</strong></td><td>Excesso de rubricas no mesmo mês (&gt; 20)</td><td><a href="#MSG015">MSG015</a></td><td>Bloqueia composição</td><td>RS043 (RN043)</td><td>JF012</td></tr><tr id="TRT016"><td><strong>TRT016</strong></td><td>NB já existe cadastrado (processo INSS)</td><td><a href="#MSG016">MSG016</a></td><td>Bloqueia cadastro</td><td>RS024 (RN024)</td><td>JF015</td></tr><tr id="TRT017"><td><strong>TRT017</strong></td><td>Rubrica do INSS já associada (duplicidade)</td><td><a href="#MSG017">MSG017</a></td><td>Avisa duplicidade</td><td>RS022 (RN022)</td><td>JF012</td></tr><tr id="TRT018"><td><strong>TRT018</strong></td><td>Código já cadastrado (mantenedora)</td><td><a href="#MSG018">MSG018</a></td><td>Bloqueia cadastro</td><td>RS024 (RN024)</td><td>JF015</td></tr><tr id="TRT019"><td><strong>TRT019</strong></td><td>Moeda não informada (reconstrução INSS)</td><td><a href="#MSG019">MSG019</a></td><td>Bloqueia operação</td><td>RS016 (RN016)</td><td>JF016</td></tr><tr id="TRT020"><td><strong>TRT020</strong></td><td>Alteração de benefício concluída</td><td><a href="#MSG020">MSG020</a></td><td>Confirma sucesso (mtInformation)</td><td>RS015 (RN015)</td><td>JF014</td></tr></tbody></table></div></section>
+
+<section id="MSG-section"><div class="section-title">8. Catálogo de Mensagens (MSG)</div><div class="table-wrap"><table><thead><tr><th>Código</th><th>Texto da Mensagem</th><th>Jornadas relacionadas</th></tr></thead><tbody><tr id="MSG001"><td><strong>MSG001</strong></td><td>"Benefício já foi pago no período… não pode ser desfeita"</td><td>JF004</td></tr><tr id="MSG002"><td><strong>MSG002</strong></td><td>"A Folha de Benefícios com os acertos do desdobramento já foi executada. O desdobramento não pode ser desfeito."</td><td>JF004, JF008</td></tr><tr id="MSG003"><td><strong>MSG003</strong></td><td>"Desdobramento não permitido por exceder valor limite e não ter autorização."</td><td>JF008</td></tr><tr id="MSG004"><td><strong>MSG004</strong></td><td>"Liberação não permitida por exceder valor limite e não ter autorização."</td><td>JF010</td></tr><tr id="MSG005"><td><strong>MSG005</strong></td><td>"Liberação não permitida por exceder percentual limite e não ter autorização."</td><td>JF010</td></tr><tr id="MSG006"><td><strong>MSG006</strong></td><td>"Nenhum Benefício selecionado para efetuar a liberação."</td><td>JF010</td></tr><tr id="MSG007"><td><strong>MSG007</strong></td><td>"É necessário indicar a Rubrica do INSS!"</td><td>JF012</td></tr><tr id="MSG008"><td><strong>MSG008</strong></td><td>"Não é possível inserir registros em meses fechados!"</td><td>JF012</td></tr><tr id="MSG009"><td><strong>MSG009</strong></td><td>"Os campos de datas devem estar no formato DD/MM/AAAA!"</td><td>JF014</td></tr><tr id="MSG010"><td><strong>MSG010</strong></td><td>"A data de início de liberação deve ser igual ou maior a data de início de pagamento."</td><td>JF008, JF010</td></tr><tr id="MSG011"><td><strong>MSG011</strong></td><td>"Erro ao Excluir Correção monetária. Verifique."</td><td>JF004</td></tr><tr id="MSG012"><td><strong>MSG012</strong></td><td>"Erro ao gravar Log."</td><td>JF005, JF008</td></tr><tr id="MSG013"><td><strong>MSG013</strong></td><td>"Erro ao criar datamodule 'TDtmRelatorios'..."</td><td>JF001</td></tr><tr id="MSG014"><td><strong>MSG014</strong></td><td>"Faltam Preencher Campos ..."</td><td>JF012</td></tr><tr id="MSG015"><td><strong>MSG015</strong></td><td>"Excesso de rubricas no mesmo mês (20)"</td><td>JF012</td></tr><tr id="MSG016"><td><strong>MSG016</strong></td><td>"NB já existe cadastrado"</td><td>JF015</td></tr><tr id="MSG017"><td><strong>MSG017</strong></td><td>"Rubrica do INSS já associada!"</td><td>JF012</td></tr><tr id="MSG018"><td><strong>MSG018</strong></td><td>"Código já Cadastrado."</td><td>JF015</td></tr><tr id="MSG019"><td><strong>MSG019</strong></td><td>"Informar moeda é obrigatório."</td><td>JF016</td></tr><tr id="MSG020"><td><strong>MSG020</strong></td><td>"Alteração realizada com sucesso!"</td><td>JF014</td></tr></tbody></table></div></section>
+
+<section><div class="section-title">9. Observações Gerais (OBS)</div>
+<ul>
+<li><strong>OBS001:</strong> O módulo BENEFICIOPREV é um sistema desktop Delphi 5 / VCL, operado por usuário humano (diferente do UC097, que é backend puro).</li>
+<li><strong>OBS002:</strong> O motor de cálculo/concessão é externo (CMAdmPrev/UAdmPrev); o BENEFICIOPREV orquestra a UI e a persistência, delegando o cálculo ao motor.</li>
+<li><strong>OBS003:</strong> O arquivo com mais blocos try é <code>FDesfazConcessaoBenefNOVO.pas</code> (91 blocos), refletindo a complexidade do desfazimento por TIPOMOV (RS030).</li>
+<li><strong>OBS004:</strong> A evidência de cada regra é classificada como COMPROVADO (no código), INFERIDO (plausível) ou PENDENTE (validar). Esta classificação foi mantida do PFC-24.</li>
+<li><strong>OBS005:</strong> O menu de eventos é montado dinamicamente por FLGINTERNO (RS002), suportando TS/ID/IN/FL/RC/AI/BI.</li>
+<li><strong>OBS006:</strong> Os fluxogramas Mermaid representam somente comportamentos comprovados no código-fonte.</li>
+<li><strong>OBS007:</strong> O filtro de multi-fundação (IDFUNDACAO) está presente em quase toda SQL de negócio (RS045), garantindo isolamento de dados por fundação.</li>
+</ul>
+</section>
+
+<section><div class="section-title">10. Casos de Uso Associados</div>
+<p>Módulos externos dos quais o BENEFICIOPREV depende (detalhe em <a href="integracoes.html">🔗 Integrações</a>):</p>
+<ul>
+<li><strong>CM Framework</strong> — forms base, splash, consultas, relatórios, autorização</li>
+<li><strong>CMAdmPrev</strong> — motor de cálculo/concessão (DAPrev), retroativo, mantenedora, UF INSS</li>
+<li><strong>CMPrevMT50</strong> — entidades previdenciárias centrais</li>
+<li><strong>CMGLOBALOBJ50</strong> — objetos globais (PlanPrevContabil)</li>
+<li><strong>UAdmPrev</strong> — regras de cálculo/concessão (lib)</li>
+<li><strong>UBeneficio</strong> — regras de negócio de benefício (lib)</li>
+<li><strong>UParticipante</strong> — regras de participante (lib)</li>
+<li><strong>FOLHA</strong> — interface com folha de benefícios (RS039)</li>
+<li><strong>CONTRIBUICAOPREV</strong> — interface com contribuições previdenciárias</li>
+</ul>
+</section>
+
+<section><div class="section-title">11. Tabela/API/Programa</div><p>Entry point: <code>BENEFICIOPREV/Fontes/BeneficioPrev.dpr</code>. Tabelas Oracle (schema <code>CM.</code>) e rotinas-chave por jornada (detalhe em <a href="dados.html">🗄️ Dados</a> e <a href="procedures-functions.html">🔧 Procedures</a>):</p><div class="table-wrap"><table><thead><tr><th>Jornada</th><th>Tabelas (escrita)</th><th>Rotina-chave (file:linha)</th></tr></thead><tbody><tr><td>JF001</td><td>BENEFBFCIARIO, HSTBENEFBFCIARIO, MOVBENEF, PROCESSOBENEF, HSTCONTRIBPREV, TMPDESC</td><td><code>FPrincipal.pas:1720-1763</code></td></tr><tr><td>JF002</td><td>Idem concessão</td><td><code>FPrincipal.pas:2215-2262</code></td></tr><tr><td>JF003</td><td>DETCALCULO (leitura)</td><td><code>FSimulaBeneficio.pas:194-262</code></td></tr><tr><td>JF004</td><td>U/D BENEFBFCIARIO, HSTBENEFBFCIARIO, HSTCONTRIBPREV, CONTRIBPREVPARTP, MOVBENEF, PROCESSOBENEF, TMPDESC, PREVIA</td><td><code>FDesfazConcessaoBenefNOVO.pas:913-3628</code></td></tr><tr><td>JF005</td><td>ELEGPATRO, PARTPREVPLAN, PESSOAFISICA, EVENTOSPREV</td><td><code>FEventoMorte.pas:1332-1618</code></td></tr><tr><td>JF006</td><td>REAJUSTEBENEFICIO, LISTABENEFICIOREAJUSTE, HSTBENEFBFCIARIO, BENEFBFCIARIO</td><td><code>FReajuesteBenef.pas:38-113</code></td></tr><tr><td>JF007</td><td>BENEFBFCIARIO</td><td><code>FReajusteJudicial.pas:99,172</code></td></tr><tr><td>JF008</td><td>BENEFBFCIARIO, HSTBENEFBFCIARIO, CONTABANCARIA, RUBRICAINDIV, CONTROLEDIVIDABENEFICIO, PROCESSOBENEF</td><td><code>FDesdobramentoBenef.pas:5184-5293</code></td></tr><tr><td>JF009</td><td>PROCESSOBENEF, ELEGPATRO, PARTPREVPLAN, CONTRIBPREVPARTP, EVENTOSPREV, BENEFBFCIARIO</td><td><code>FReaberturaBeneficio.pas:947-2530</code></td></tr><tr><td>JF010</td><td>BENEFBFCIARIO, HSTBENEFBFCIARIO, HSTCONTRIBPREV, CONTRIBPREVPARTP, CONTRIBPREVNUCLEO, PROCESSOBENEF, MOVBENEF</td><td><code>FCadInicioBenefExigencia.pas:1256-4283</code></td></tr><tr><td>JF011</td><td>BENEFBFCIARIO, CONTRIBPREVPARTP</td><td><code>FLiberaBeneficioProvisorio.pas:491,720</code></td></tr><tr><td>JF012</td><td>DETCONCINSS, TEMPCONCINSS, CONCINSS, RUBRICAXINSS, HISTRUBSAL</td><td><code>_FConciliacao.pas</code></td></tr><tr><td>JF013</td><td>CONTROLEDIVIDABENEFICIO, HSTDIVIDABENEFICIO, PARAMPARCDIVIDABENEFICIO</td><td><code>FDesdobramentoBenef.pas:7776,8130-8337</code></td></tr><tr><td>JF014</td><td>BENEFBFCIARIO, HSTBENEFBFCIARIO</td><td><code>FAlteraBeneficio.pas:249,456</code></td></tr><tr><td>JF015</td><td>BENEFHABILITA, HISTBENEFHABILITA, DETCONCINSS</td><td><code>FCadProcHabINSS.pas:484-631</code></td></tr><tr><td>JF016</td><td>HISTRUBSAL, EVENTOSPREV</td><td><code>FPrincipal.pas:2188-2194</code></td></tr><tr><td>JF017</td><td>Delegado ao CMAdmPrev (externo)</td><td><code>FPrincipal.pas:1929-1935</code></td></tr><tr><td>JF018</td><td>Delegado (externo)</td><td><code>FPrincipal.pas:2273-2278</code></td></tr></tbody></table></div></section>
+
+<section><div class="section-title">12. Telas/Layouts</div><p>Forms Delphi (.dfm) por jornada:</p><div class="table-wrap"><table><thead><tr><th>Jornada</th><th>Form(s) (.dfm)</th></tr></thead><tbody><tr><td>JF001</td><td><code>FPrincipal.dfm, fTipoLiberacao.dfm</code></td></tr><tr><td>JF002</td><td><code>FPrincipal.dfm</code></td></tr><tr><td>JF003</td><td><code>FSimulaBeneficio.dfm, FConsMemoriaCalculo.dfm</code></td></tr><tr><td>JF004</td><td><code>FDesfazConcessaoBenefNOVO.dfm</code></td></tr><tr><td>JF005</td><td><code>FEventoAposentaBenef.dfm, FEventoMorte.dfm, FEventoReclusao.dfm, FEventoAssistidoBenef.dfm</code></td></tr><tr><td>JF006</td><td><code>FReajuesteBenef.dfm, FCadReajINSS.dfm</code></td></tr><tr><td>JF007</td><td><code>FReajusteJudicial.dfm</code></td></tr><tr><td>JF008</td><td><code>FDesdobramentoBenef.dfm, FPedeInfRevisao.dfm</code></td></tr><tr><td>JF009</td><td><code>FReaberturaBeneficio.dfm, FReaberturaData.dfm</code></td></tr><tr><td>JF010</td><td><code>FCadInicioBenefExigencia.dfm</code></td></tr><tr><td>JF011</td><td><code>FLiberaBeneficioProvisorio.dfm</code></td></tr><tr><td>JF012</td><td><code>_FConciliacao.dfm, _FExtratoINSS.dfm, _FEncerraConciliacao.dfm</code></td></tr><tr><td>JF013</td><td><code>FParamDividaBenef.dfm</code></td></tr><tr><td>JF014</td><td><code>FAlteraBeneficio.dfm, FAlteraBeneficioLote.dfm</code></td></tr><tr><td>JF015</td><td><code>FCadProcHabINSS.dfm</code></td></tr><tr><td>JF016</td><td><code>FReconstruirINSS.dfm</code></td></tr><tr><td>JF017</td><td><code>frmRetroativoPrev (externo CMAdmPrev)</code></td></tr><tr><td>JF018</td><td><code>frmRegFalBenef (externo)</code></td></tr></tbody></table></div></section>
+
+<section><div class="section-title">13. Visão Consolidada de Jornadas Funcionais</div><div class="table-wrap"><table><thead><tr><th>Jornada</th><th>ID</th><th>Título</th><th>Critério de aceitação (Dado/Quando/Então)</th><th>Mensagens</th><th>Telas</th></tr></thead><tbody><tr><td>JF001</td><td>PF-01</td><td>Concessão de Benefício</td><td><strong>Dado</strong> lote e participante cadastrados, <strong>Quando</strong> usuário aciona concessão, <strong>Então</strong> benefício concedido e persistido</td><td>—</td><td>FPrincipal</td></tr><tr><td>JF002</td><td>PF-02</td><td>Manutenção de Processos</td><td><strong>Dado</strong> concessão existente, <strong>Quando</strong> usuário aciona manutenção, <strong>Então</strong> benefício mantido</td><td>—</td><td>FPrincipal</td></tr><tr><td>JF003</td><td>PF-03</td><td>Simulação / Memória de Cálculo</td><td><strong>Dado</strong> participante/plano cadastrados, <strong>Quando</strong> usuário simula, <strong>Então</strong> elegibilidade e valor previsionado exibidos</td><td>—</td><td>FSimulaBeneficio</td></tr><tr><td>JF004</td><td>PF-04</td><td>Desfazer Operações</td><td><strong>Dado</strong> benefício concedido e não pago, <strong>Quando</strong> usuário aciona desfazimento, <strong>Então</strong> concessão desfeita e históricos excluídos</td><td><a href="#MSG001">MSG001</a>, <a href="#MSG011">MSG011</a></td><td>FDesfazConcessaoBenefNOVO</td></tr><tr><td>JF005</td><td>PF-05</td><td>Eventos Previdenciários</td><td><strong>Dado</strong> benefício ativo e evento não em aberto, <strong>Quando</strong> usuário registra evento, <strong>Então</strong> situações atualizadas e evento persistido</td><td><a href="#MSG012">MSG012</a></td><td>FEventoMorte</td></tr><tr><td>JF006</td><td>PF-06</td><td>Reajuste de Benefícios</td><td><strong>Dado</strong> benefícios vitalícios não-resgate, <strong>Quando</strong> usuário aciona reajuste, <strong>Então</strong> benefícios reajustados por fonte</td><td>—</td><td>FReajuesteBenef</td></tr><tr><td>JF007</td><td>PF-07</td><td>Reajuste Judicial</td><td><strong>Dado</strong> benefício ativo em plano ativo, <strong>Quando</strong> usuário aciona reajuste judicial, <strong>Então</strong> valor reajustado conforme fórmula</td><td>—</td><td>FReajusteJudicial</td></tr><tr><td>JF008</td><td>PF-08</td><td>Desdobramento de Benefício</td><td><strong>Dado</strong> dados de revisão e regra contábil válidos, <strong>Quando</strong> usuário desdobra, <strong>Então</strong> novo benefício criado e dívida gerada</td><td><a href="#MSG003">MSG003</a>, <a href="#MSG010">MSG010</a>, <a href="#MSG014">MSG014</a></td><td>FDesdobramentoBenef</td></tr><tr><td>JF009</td><td>PF-09</td><td>Reabertura / Renovação</td><td><strong>Dado</strong> benefício não processado pela prévia, <strong>Quando</strong> usuário reabre, <strong>Então</strong> situações revertidas e benefício reaberto</td><td>—</td><td>FReaberturaBeneficio</td></tr><tr><td>JF010</td><td>PF-10</td><td>Liberação em Exigência/Retido</td><td><strong>Dado</strong> benefício em exigência e limites válidos, <strong>Quando</strong> usuário libera, <strong>Então</strong> benefício ativo/pago (IDSITPROCESSO=1)</td><td><a href="#MSG004">MSG004</a>, <a href="#MSG005">MSG005</a>, <a href="#MSG006">MSG006</a></td><td>FCadInicioBenefExigencia</td></tr><tr><td>JF011</td><td>PF-11</td><td>Liberação Provisória</td><td><strong>Dado</strong> benefício provisório cadastrado, <strong>Quando</strong> usuário libera provisório, <strong>Então</strong> datas de início definidas</td><td>—</td><td>FLiberaBeneficioProvisorio</td></tr><tr><td>JF012</td><td>PF-12</td><td>Conciliação INSS</td><td><strong>Dado</strong> arquivo e rubricas INSS, mês aberto, <strong>Quando</strong> usuário concilia, <strong>Então</strong> conciliação INSS encerrada</td><td><a href="#MSG007">MSG007</a>, <a href="#MSG008">MSG008</a>, <a href="#MSG015">MSG015</a></td><td>_FConciliacao</td></tr><tr><td>JF013</td><td>PF-13</td><td>Controle de Dívidas</td><td><strong>Dado</strong> benefício desdobrado com dívida, <strong>Quando</strong> usuário parametriza, <strong>Então</strong> dívidas parametrizadas</td><td>—</td><td>FParamDividaBenef</td></tr><tr><td>JF014</td><td>PF-14</td><td>Alteração de Benefício</td><td><strong>Dado</strong> datas válidas e lote sem duplicidade, <strong>Quando</strong> usuário altera, <strong>Então</strong> benefícios alterados</td><td><a href="#MSG009">MSG009</a>, <a href="#MSG020">MSG020</a></td><td>FAlteraBeneficio</td></tr><tr><td>JF015</td><td>PF-15</td><td>Cadastro Processos INSS</td><td><strong>Dado</strong> benefício ativo e habilitação concedida, <strong>Quando</strong> usuário cadastra processo, <strong>Então</strong> processo INSS cadastrado</td><td><a href="#MSG016">MSG016</a>, <a href="#MSG018">MSG018</a></td><td>FCadProcHabINSS</td></tr><tr><td>JF016</td><td>PF-16</td><td>Reconstrução / Cancelamento INSS</td><td><strong>Dado</strong> moeda informada, <strong>Quando</strong> usuário reconstrói/cancela, <strong>Então</strong> histórico INSS reconstruído ou evento cancelado</td><td><a href="#MSG019">MSG019</a></td><td>FReconstruirINSS</td></tr><tr><td>JF017</td><td>PF-17</td><td>Cálculo Retroativo</td><td><strong>Dado</strong> arquivo de matrículas, <strong>Quando</strong> usuário aciona retroativo, <strong>Então</strong> benefícios recalculados (CMAdmPrev)</td><td>—</td><td>frmRetroativoPrev</td></tr><tr><td>JF018</td><td>PF-18</td><td>Registro de Falecimento</td><td><strong>Dado</strong> beneficiário cadastrado, <strong>Quando</strong> usuário registra falecimento, <strong>Então</strong> falecimento registrado</td><td>—</td><td>frmRegFalBenef</td></tr></tbody></table></div></section>
+
+<section><div class="section-title">14. Histórico de Versões</div>
+<div class="table-wrap"><table><thead><tr><th>Versão</th><th>Descrição</th><th>Data</th><th>Responsável</th></tr></thead><tbody>
+<tr><td>1.0</td><td>Blueprint AS-IS inicial</td><td>2026-11-09</td><td>Squad Blueprint</td></tr>
+<tr><td>1.1</td><td>Enriquecimento PFC-24 (18 processos, 45 regras, 144 artefatos)</td><td>2026-11-10</td><td>Squad Blueprint</td></tr>
+<tr><td>2.0</td><td>Adaptação ao modelo UC097 (PFC-28) — jornadas funcionais JF001–JF018, RS/TRT/MSG, visão consolidada</td><td>2026-11-10</td><td>Squad Blueprint (GLM-5.2)</td></tr>
+</tbody></table></div>
+</section>
+
+</main>
 <footer>
 <p>Blueprint AS-IS — PFC-24 / PFC-28 — Módulo BENEFICIOPREV organizado em jornadas funcionais | Sistema legado Delphi 5 | pt-BR | Atualizado em 2026-11-10</p>
 </footer>
