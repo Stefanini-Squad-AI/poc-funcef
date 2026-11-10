@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contribuição Previdenciária — Formulários — Blueprint AS-IS</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<header>
+  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-23 (enriquecido)</div>
+  <h1>🧾 Formulários — Contribuição Previdenciária</h1>
+  <p>Fichas detalhadas dos forms do módulo: propósito, campos, botões, grids, eventos e ações do usuário, com referência cruzada .dfm ↔ .pas.</p>
+</header>
+<nav>
+  <a href="index.html">📋 Visão Geral</a>
+  <a href="arquitetura.html">🏗️ Arquitetura</a>
+  <a href="inventario.html">📂 Inventário</a>
+  <a href="formularios.html">🧾 Formulários</a>
+  <a href="funcionalidades.html">⚙️ Processos</a>
+  <a href="rotinas.html">🔧 Rotinas</a>
+  <a href="regras-de-negocio.html">📏 Regras</a>
+  <a href="dados.html">🗄️ Dados</a>
+  <a href="integracoes.html">🔗 Integrações</a>
+</nav>
+<main>
+
+<section><div class="section-title">ℹ️ Sobre esta página</div>
+<p>Cada formulário abaixo tem sua própria seção com: propósito, campos de entrada/saída, botões, grids, filtros, valores default, campos obrigatórios, eventos vinculados e o que acontece em cada ação relevante do usuário. Cada item referencia o componente <code>.dfm</code> e o handler <code>.pas</code>. Evidência: <span class="ev ev-comprovado">COMPROVADO</span> para forms analisados em profundidade; <span class="ev ev-inferido">INFERIDO</span> para forms catalogados pelo Caption/DFM.</p>
+</section>
+
+<section id="FPreparaEnvia"><div class="section-title">FPreparaEnvia — Envio de Contribuições (preparo + envio + desfazer)</div>
+<p><code>FPreparaEnvia.pas</code> (7261 lin) · <code>FPreparaEnvia.dfm</code> · form <code>frmPreparaEnvia</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<h4 style="color:var(--accent)">Propósito</h4>
+<p>Prepara, envia e desfaz contribuições previdenciárias por patrocinadora×plano×situação. É o form mais central do módulo: orquestra cálculo via regra, gravação em HSTCONTRIBPREV, envio para Folha (TMPDESC) ou Banco (CAP/CAR + contabilidade), e integração PGA/BPD.</p>
+<h4 style="color:var(--accent)">Campos de entrada (filtros)</h4>
+<ul>
+<li><code>cmbMesCob</code> + <code>spedAnoCob</code> — mês/ano de cobrança (obrigatório) · <code>FPreparaEnvia.pas:2004-2016</code></li>
+<li><code>rgrpTipoCobranca</code> — 0=Folha, 1=Banco, 2=Relatório/Incentivados, 3=Todas · default 3 · <code>:5809</code></li>
+<li><code>rgrpTipoOperacao</code> — 0=Preparo+Envio, 1=Só Envio, 2=Só Preparo · default 0 · <code>:5820</code></li>
+<li><code>rgrpContribuicoes</code> — 0=Todas, 1=Só geradas por evento · <code>:5883-5888</code></li>
+<li><code>rgrpDataVencimento</code> — 0=Por dia, 1=Por data · default 1 · <code>:5822</code></li>
+<li><code>chklstPatro</code>, <code>chklstPlano</code>, <code>chklstSituacao</code>, <code>chklstContrib</code> — seleção multi · <code>:2075-2156</code></li>
+<li><code>chkApenasMes</code>, <code>chkApenasAtrasadas</code>, <code>chkApenasDevolucoes</code>, <code>chkApenas13</code>, <code>chkPlanoDesativado</code> — flags · default True (exceto 13) · <code>:5809-5823</code></li>
+<li><code>dtVencBoleta</code> — data de vencimento da boleta · <code>:5876</code></li>
+<li><code>CbBpd</code>, <code>CbPga</code>, <code>CbEnvio</code> — flags BPD/PGA/Envio (mutuamente exclusivos BPD↔PGA/Envio) · <code>:6885-6951</code></li>
+</ul>
+<h4 style="color:var(--accent)">Botões e ações</h4>
+<div class="table-wrap"><table><thead><tr><th>Botão</th><th>Handler (.pas)</th><th>Ação</th></tr></thead><tbody>
+<tr><td>Processar</td><td><code>bbtnEnviarClick</code> :3491-3712</td><td>Orquestra: valida → PreparaContribuicao → EnviaContribuicaoCcp</td></tr>
+<tr><td>Desfazer</td><td><code>bbtnDesfazerClick</code> :5897-6666</td><td>Desfaz envio e/ou preparo (coletivo ou individual)</td></tr>
+<tr><td>Salvar</td><td><code>bbtnSalvarClick</code> :5691-5695</td><td>Salva log (memResult) em arquivo</td></tr>
+</tbody></table></div>
+<h4 style="color:var(--accent)">Campos obrigatórios</h4>
+<p>Mês, ano, tipo de cobrança, motivo default (<code>prmIdMotivoContrib</code>). Se cobrança bancária (1 ou 3), exige integração financeira habilitada. · <code>InformacoesOk</code> :1996-2055</p>
+<h4 style="color:var(--accent)">Eventos vinculados</h4>
+<ul><li><code>FormCreate</code> :5699 — carrega patrocinadoras, planos, contribuições; cria controllers</li>
+<li><code>FormShow</code> :5794 — preenche defaults (mês/ano corrente, tipo cobrança=3)</li>
+<li><code>chklstPatroClickCheck</code> :3429 — recarrega planos ao marcar patrocinadora</li>
+<li><code>CbBpdClick</code> :6885 — desmarca PGA/Envio; filtra contribuições por CONTPREVEVENTO</li>
+<li><code>rgrpContribuicoesClick</code> :5883 — força só-envio se "geradas por evento"</li>
+</ul>
+</section>
+
+<section id="FDivergContrib"><div class="section-title">FDivergContrib — Tratamento de Divergência de Contribuição</div>
+<p><code>FDivergContrib.pas</code> (9694 lin) · <code>FDivergContrib.dfm</code> · form <code>frmDivergContrib</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<h4 style="color:var(--accent)">Propósito</h4>
+<p>Identifica e trata divergências entre valor esperado e recebido de contribuições. Oferece 7 modos de seleção (todas, não pagas, a menor, a maior, em atraso, inadimplentes) e 9 tratamentos (cobrar via interface/banco, descontar no próximo benefício, devolver, acrescentar, aporte, ignorar, recalcular patronal).</p>
+<h4 style="color:var(--accent)">Campos de entrada (filtros)</h4>
+<ul>
+<li><code>trvModos</code> — TreeView de modos (0-7 → 0-4,8,9,10) · <code>:1421-1434</code></li>
+<li><code>dblkpcmbPatro</code>/<code>chkPatro</code>, <code>dblkpcmbPlano</code>/<code>chkPlano</code>, <code>dblkpcmbContrib</code>/<code>chkContrib</code> — filtros · <code>:1438-1535</code></li>
+<li><code>edTempo</code>/<code>chkTempo</code>, <code>edValor</code>/<code>chkValor</code> — faixas de tempo/valor</li>
+<li><code>spbtnProcParticip</code>/<code>chkParticipante</code> — participante específico</li>
+<li><code>cmbSituacao</code>/<code>chkSituacao</code> — situação na fundação (AT/MA/MP/AS/CA/IN/CI)</li>
+<li><code>edtMesRef</code>/<code>chkMesRef</code> — mês de referência</li>
+<li><code>cmdtDataReceInicial</code>/<code>cmdtDataReceFinal</code> — período de previsão de recebimento</li>
+<li><code>chkTodasDiverg</code> — alterna label "Em/Até" · <code>:8802-8834</code></li>
+<li><code>chkDivTrat</code> — exclui divergências já tratadas (SITRECEBIMENTO<>4) · <code>:1655</code></li>
+<li><code>CbxTipoCobranca</code>/<code>DbLkcFormaPagamento</code> — tipo/forma de cobrança</li>
+</ul>
+<h4 style="color:var(--accent)">Botões e ações (menu popup)</h4>
+<div class="table-wrap"><table><thead><tr><th>Menu/Botão</th><th>Handler (.pas)</th><th>Tratamento (OpTratDiverg)</th></tr></thead><tbody>
+<tr><td>Consultar Sintético</td><td><code>spbtnDivergSintetClick</code> :2940</td><td>—</td></tr>
+<tr><td>Consultar Analítico</td><td><code>spbtnDivergAnalitClick</code> :2981</td><td>—</td></tr>
+<tr><td>Cobrar no Próximo Mês</td><td><code>pmnuCobraProxClick</code> :4796</td><td>1 — via Interface</td></tr>
+<tr><td>Cobrar Imediatamente</td><td><code>pmnuCobraImedClick</code> :5077</td><td>2 — via Banco</td></tr>
+<tr><td>Descontar no Próximo Benefício</td><td><code>DescontarnoProximoBeneficio1Click</code> :5796</td><td>3</td></tr>
+<tr><td>Devolver no Próximo Mês</td><td><code>pmnuDevolveProxClick</code> :5941</td><td>4 — via Interface</td></tr>
+<tr><td>Devolver Imediatamente</td><td><code>pmnuDevolveImedClick</code> :6062</td><td>5 — via Banco</td></tr>
+<tr><td>Acrescentar no Próximo Benefício</td><td><code>AcrescentarnoProximoBeneficio1Click</code> :6946</td><td>6</td></tr>
+<tr><td>Adicionar como Aporte</td><td><code>pmnuAdiconarDifClick</code> :7357</td><td>7</td></tr>
+<tr><td>Ignorar Diferença</td><td><code>pmnuDevolveIgnoraClick</code> :7431</td><td>8/9</td></tr>
+<tr><td>Recalcular Patronais</td><td><code>pmnuRecalcularPatronaisClick</code> :8714</td><td>—</td></tr>
+<tr><td>Verificar Devedores</td><td><code>VerificarParticipantesDevedores1Click</code> :8534</td><td>—</td></tr>
+</tbody></table></div>
+<h4 style="color:var(--accent)">Grids</h4>
+<ul><li><code>dbgrdDivergSintet</code> — divergências agrupadas (3 grid) · <code>:4490</code></li>
+<li><code>dbgrdDivergAnalit</code> — divergências registro a registro (3 grid) · <code>:4663</code></li>
+</ul>
+<h4 style="color:var(--accent)">Valores default</h4>
+<p>Mês/ano corrente em <code>FormCreate</code> :2703-2812. <code>sTipOperEnvio</code> de PARAMAPREV em <code>FormShow</code> :8689-8712.</p>
+</section>
+
+<section id="FControleIndivContrib"><div class="section-title">FControleIndivContrib — Controle Individual de Contribuições</div>
+<p><code>FControleIndivContrib.pas</code> (5800 lin) · form <code>frmControleIndivContrib</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<h4 style="color:var(--accent)">Propósito</h4>
+<p>Permite visualizar e operar contribuições de um participante individualmente: enviar para cobrança bancária, alterar, cancelar (desfazer envio), devolver, estornar reserva e gerenciar alteradores. Baixa automaticamente contribuições do CAR ao carregar o titular.</p>
+<h4 style="color:var(--accent)">Campos de entrada</h4>
+<ul>
+<li>Seleção de participante via <code>MontaSelectPart</code> (titular ou dependente) · <code>:5198-5356</code></li>
+<li><code>cmbSituacao</code> — 17 filtros de situação (mapeia SITRECEBIMENTO + FLGDEVOLUCAO) · <code>:4381-4400</code></li>
+<li><code>meAnoMesCobranca</code>, <code>meAnoMesReferencia</code> — período</li>
+<li><code>dtPrevista</code>, <code>edValorPrev</code> — data/valor previsto</li>
+<li><code>rgrpDescBanco</code> — desconto em folha vs banco</li>
+<li><code>dblkpcmbPortForma</code> — portador/forma de pagamento</li>
+<li><code>rgrpRetiraReserva</code> — opção de retirar reserva ao devolver</li>
+<li><code>edMotivo</code>, <code>dblkpcmbMotivoCancel</code> — motivo de cancelamento</li>
+</ul>
+<h4 style="color:var(--accent)">Botões e ações</h4>
+<div class="table-wrap"><table><thead><tr><th>Botão</th><th>Handler (.pas)</th><th>Ação</th></tr></thead><tbody>
+<tr><td>Enviar</td><td><code>tbButtonEnviarClick</code> :1385-2125</td><td>Envia selecionadas para CAP/CAR + contabilização + PGA</td></tr>
+<tr><td>Alterar</td><td><code>tbButtonAlterarClick</code> :2127-2247</td><td>Altera contribuição (bloqueia se recebida)</td></tr>
+<tr><td>Cancelar</td><td><code>tbButtonCancelarClick</code> :2277-2492</td><td>Desfaz envio (bloqueia se baixado/enviado)</td></tr>
+<tr><td>Devolver</td><td><code>tbButonDevolverClick</code> :3210-3329</td><td>Prepara devolução (exige ValorRecebido>0)</td></tr>
+<tr><td>Estornar</td><td><code>tbButonEstornarClick</code> :3958-4011</td><td>Estorna contribuição da reserva</td></tr>
+<tr><td>Inserir/Alterar Alterador</td><td><code>bbtnOkAlteradorClick</code> :2709-2909</td><td>Gerencia alteradores (HSTATRASOCONTRIB)</td></tr>
+</tbody></table></div>
+<h4 style="color:var(--accent)">Grid</h4>
+<p><code>dbgrdContribuicao</code> (2 grids) — mostra contribuições com NOMESITUACAO, SOMAALTERADORES, TOTALESPERADO, TOTALRECEBIDO. Coloração por SITRECEBIMENTO: 1=azul, 2=verde, 3=vermelho · <code>:3191-3208</code></p>
+</section>
+
+<section id="FRecebeContribuicao"><div class="section-title">FRecebeContribuicao — Recebimento via Folha (legado)</div>
+<p><code>FRecebeContribuicao.pas</code> (7803 lin) · form <code>frmRecebeContribuicao</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<h4 style="color:var(--accent)">Propósito</h4>
+<p>Recebe contribuições descontadas em folha de pagamento. Lê TMPDESC (rubricas descontadas), compara valor esperado vs recebido, atualiza HSTCONTRIBPREV com SITRECEBIMENTO 2 (OK) ou 3 (divergência), gera contribuições patronais e contabiliza via CAR/CAP.</p>
+<h4 style="color:var(--accent)">Campos de entrada</h4>
+<ul><li><code>chklstPatro</code>, <code>chklstPlano</code> — seleção multi · <li><code>cmbMesCob</code>/<code>spedAnoCob</code> — mês/ano cobrança (obrigatório)</li>
+<li><code>dtRecebimento</code> — data de recebimento (obrigatório)</li>
+<li><code>rgrpTipoFolha</code> — 0=Patrocinadora, 1=Benefício</li>
+<li><code>chkIntegra</code>, <code>chkIntegraLocal</code>, <code>chkDocDia</code> — flags de integração</li>
+<li><code>dblkpcmbLote</code> — lote específico</li>
+</ul>
+<h4 style="color:var(--accent)">Botões</h4>
+<div class="table-wrap"><table><thead><tr><th>Botão</th><th>Handler (.pas)</th><th>Ação</th></tr></thead><tbody>
+<tr><td>Receber</td><td><code>bbtnReceberClick</code> :3581-4190</td><td>Orquestra recebimento por patrocinadora</td></tr>
+<tr><td>Desfazer</td><td><code>bbtnDesfazerClick</code> :5824-5887</td><td>Abre frmDesfDocContribuicao (desfazer documento)</td></tr>
+<tr><td>Confirmar</td><td><code>bbtnConfirmarClick</code></td><td>Abre arquivo de retorno (preview)</td></tr>
+</tbody></table></div>
+</section>
+
+<section id="FRecebeContribuicaoNovo"><div class="section-title">FRecebeContribuicaoNovo — Recebimento via Folha (novo, SP Oracle)</h4>
+<p><code>FRecebeContribuicaoNovo.pas</code> (1087 lin) · form <code>frmRecebeContribuicaoNovo</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<h4 style="color:var(--accent)">Propósito</h4>
+<p>Versão nova do recebimento via folha que delega o processamento a stored procedures Oracle: <code>CM.SP_CP_RECEB_PATRO</code> (folha patrocinadora) ou <code>CM.SP_CP_RECEB_ASSIS</code> (benefício). Monta arquivo de retorno em RETORNOHSTCONTRIBPATRO.</p>
+<h4 style="color:var(--accent)">Botões</h4>
+<div class="table-wrap"><table><thead><tr><th>Botão</th><th>Handler (.pas)</th><th>Ação</th></tr></thead><tbody>
+<tr><td>Receber</td><td><code>bbtnReceberClick</code> :904-1002</td><td>Chama SP Oracle (SP_CP_RECEB_PATRO ou SP_CP_RECEB_ASSIS)</td></tr>
+<tr><td>Desfazer</td><td><code>bbtnDesfazerClick</code> :282-324</td><td>Abre frmDesfDocContribuicao</td></tr>
+<tr><td>Incluir/Excluir</td><td><code>btnIncluirClick</code> :800 / <code>btnExcluirClick</code> :741</td><td>Inclui/exclui da RETORNOHSTCONTRIBPATRO</td></tr>
+</tbody></table></div>
+</section>
+
+<section id="FRecebeContribEmptmo"><div class="section-title">FRecebeContribEmptmo — Recebimento via Empréstimo</div>
+<p><code>FRecebeContribEmptmo.pas</code> (1844 lin) · form <code>frmRecebeContribEmptmo</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<h4 style="color:var(--accent)">Propósito</h4>
+<p>Recebe contribuições via contrato de empréstimo (integralização de reservas, IDTIPOCONTREMPTMO=21). Baixa contribuições marcando SITRECEBIMENTO=2, CODDOCUMENTOPREV=5, IDCONTRATOEMPTMO, contabiliza e integra PGA.</p>
+<h4 style="color:var(--accent)">Campos de entrada</h4>
+<ul><li>Matrícula (via MontaSelect) ou faixa de datas</li>
+<li><code>rgFiltrar</code> — 0=Abertas, 1=Baixadas</li>
+<li>TabSheet1 (sintética — contratos) / TabSheet2 (analítica — contribuições)</li>
+</ul>
+<h4 style="color:var(--accent)">Botões</h4>
+<div class="table-wrap"><table><thead><tr><th>Botão</th><th>Handler (.pas)</th><th>Ação</th></tr></thead><tbody>
+<tr><td>Receber</td><td><code>btnReceberClick</code> :658-1106</td><td>Baixa via empréstimo (individual ou lote); exige valor contribuições = valor empréstimo</td></tr>
+<tr><td>Desfazer</td><td><code>btnDesfazerClick</code> :1215-1388</td><td>Desfaz recebimento (exclui PGA/contabilidade, zera HSTCONTRIBPREV)</td></tr>
+<tr><td>Visualizar</td><td><code>btnVisualizarClick</code> :499</td><td>Preview do relatório</td></tr>
+</tbody></table></div>
+</section>
+
+<section id="FBeneficioSaldadoFAB"><div class="section-title">FBeneficioSaldadoFAB — Benefício Saldado e FAB</div>
+<p><code>FBeneficioSaldadoFAB.pas</code> (1345 lin) · form <code>frmBeneficioSaldadoFAB</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<h4 style="color:var(--accent)">Propósito</h4>
+<p>Calcula e exibe o Benefício Saldado e o FAB (Fator de Ajuste de Benefício) de um participante. O cálculo é feito via package Oracle <code>CM.PCK_BENEFSALDFAB.FN_CALCULABS</code> e <code>SP_ATUALIZASALDO</code>. Permite alterar SALPART/BINSS, atualizar e desfazer.</p>
+<h4 style="color:var(--accent)">Fórmula (demonstrativo)</h4>
+<div class="note"><code>BS = (SALPART × 1,015^i − BINSS) × (IDC − IDADE) / TS</code> · onde IDC = 53 (M) ou 48 (F) se maior · <code>FBeneficioSaldadoFAB.pas:1272-1285</code></div>
+<h4 style="color:var(--accent)">Botões</h4>
+<div class="table-wrap"><table><thead><tr><th>Botão</th><th>Handler (.pas)</th><th>Ação</th></tr></thead><tbody>
+<tr><td>Procurar</td><td><code>bbtnProcurarClick</code> :751</td><td>Seleciona participante, abre queries</td></tr>
+<tr><td>Alterar</td><td><code>tbButtonAlterarClick</code> :840</td><td>Abre alteração modal + SP_ATUALIZASALDO</td></tr>
+<tr><td>Atualizar</td><td><code>btnButtonAtualizarClick</code> :971</td><td>SP_ATUALIZASALDO(pAtualizarTudo=0)</td></tr>
+<tr><td>Desfazer</td><td><code>btnButtonDesfazerClick</code> :858</td><td>SP_ATUALIZASALDO(pForcaReproc=1)</td></tr>
+<tr><td>Demonstrativo</td><td><code>btnDemosSaldamentoClick</code> :719</td><td>Preview do relatório de saldamento</td></tr>
+</tbody></table></div>
+</section>
+
+<section id="FCalcSalContr"><div class="section-title">FCalcSalContr — Cálculo do Saldo de Contribuições (Bitributação)</div>
+<p><code>FCalcSalContr.pas</code> (1625 lin) · form <code>FrmCalcSalContr</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<h4 style="color:var(--accent)">Propósito</h4>
+<p>Calcula o saldo de contribuições para bitributação. Fase 1: soma contribuições 1989-1995 corrigidas (moeda 557). Fase 2: aplica IPCA-E (moeda 285) mês a mês desde 2008/01 e subtrai saídas. Grava em HSTBITRIBUTACAO e BITRIBUTACAO.</p>
+<h4 style="color:var(--accent)">Fórmulas</h4>
+<ul><li>Fase 1: <code>VALORREAL = VALORRECEBIDO × COTVALOR(moeda 557)</code> · <code>:558-581</code></li>
+<li>Fase 2: <code>saldo = saldo × (COTVALOR_IPCAE / 100 + 1)</code> · <code>:695</code></li>
+<li>Saldo final: <code>saldo = saldo + SALDO(OPERACAO='S')</code> · <code>:725</code></li>
+</ul>
+</section>
+
+<section id="fCalculoIRRF"><div class="section-title">fCalculoIRRF — Cálculos IR Regressivo</div>
+<p><code>fCalculoIRRF.pas</code> (1889 lin) · form <code>FrmCalculoIRRF</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<h4 style="color:var(--accent)">Propósito</h4>
+<p>Calcula o IR regressivo (prazo de acumulação e prazo médio ponderado) para participantes dos planos 66 e 74. Delega o cálculo a <code>ctrlCalculoIRRF.ProcessaPrazoAcumulacao</code> e <code>ProcessaCalcMedioPonderado</code>.</p>
+<h4 style="color:var(--accent)">Fórmula</h4>
+<p><code>IRRF = (VLRVALOR × PERCENTUALIR) / 100</code> · <code>fCalculoIRRF.pas:884</code></p>
+<h4 style="color:var(--accent)">Restrições</h4>
+<p>Plano IN (66, 74) · IDPESSOA = IDTITULAR · exige tipo de resgate · opção IR (regressivo/progressivo) · <code>:1172</code>, <code>:1865</code></p>
+</section>
+
+<section id="FProvPerdasLote"><div class="section-title">FProvPerdasLote / FProvPerdasIndiv — Provisão para Perdas</div>
+<p><code>FProvPerdasLote.pas</code> (1107 lin) · <code>FProvPerdasIndiv.pas</code> (1030 lin) · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<h4 style="color:var(--accent)">Propósito</h4>
+<p>Calcula provisão para perdas de contribuições atrasadas (SITRECEBIMENTO IN (0,1) com registro pai SITRECEBIMENTO=4). A provisão é <code>VALORPROV = (TOTALESPERADO / 100) × PERCENTUAL</code> conforme faixa de dias de atraso (FAIXASPROVISAOPERDACONTRIB). Grava em PROVISAOPERDASCONTRIBUICAO e contabiliza.</p>
+<h4 style="color:var(--accent)">Campos (Lote)</h4>
+<ul><li><code>chklstPatro</code>, <code>chklstPlano</code> — seleção · <li>Mês/ano de referência (obrigatório) · <code>:421-451</code></li>
+</ul>
+</section>
+
+<section id="FCadHstContribuicao"><div class="section-title">FCadHstContribuicao — Cadastro Manual do Histórico de Contribuições</div>
+<p><code>FCadHstContribuicao.pas</code> (3491 lin) · form <code>frmCadHstContribuicao</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<h4 style="color:var(--accent)">Propósito</h4>
+<p>Cadastro manual e importação (Excel) do histórico de contribuições (HSTCONTRIBPREV). Permite alterar, excluir, receber tudo, contabilizar e excluir importação. Valida consistência recebido×data×situação e regra WO4557 (facultativa < normal exige observação).</p>
+<h4 style="color:var(--accent)">Botões</h4>
+<div class="table-wrap"><table><thead><tr><th>Botão</th><th>Handler (.pas)</th><th>Ação</th></tr></thead><tbody>
+<tr><td>Confirmar</td><td><code>bbtnConfirmarClick</code> :2158-2384</td><td>Aplica alterações, AtualizaULTMESPREPARO</td></tr>
+<tr><td>Importar Excel</td><td><code>BBtnImportaClick</code> :2704-2821</td><td>Importa planilha via OLE para HSTCONTRIBPREV</td></tr>
+<tr><td>Contabilizar</td><td><code>BBtnContabilizaClick</code> :2823-3187</td><td>Baixa (SIT=2), contabiliza, gera PGA</td></tr>
+<tr><td>Receber Tudo</td><td><code>tbtnReceberTudoClick</code> :1815-1891</td><td>Marca todas como recebidas (SIT=2)</td></tr>
+<tr><td>Excluir Importação</td><td><code>btnExcluirArquivoClick</code> :3347-3415</td><td>Exclui importação se FLGCALCRESERVA=0</td></tr>
+</tbody></table></div>
+</section>
+
+<section id="FCadContribuicaoPortada"><div class="section-title">FCadContribuicaoPortada — Cadastro de Contribuições Portadas</div>
+<p><code>FCadContribuicaoPortada.pas</code> (2037 lin) · form <code>frmCadContribuicaoPortada</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<h4 style="color:var(--accent)">Propósito</h4>
+<p>Cadastra contribuições portadas de outra entidade (PORTABILIDADEPREV). Exige opção IR (regressivo/progressivo), tempo de vínculo, CNPB/CNPJ da entidade de origem. Permite inserir histórico manualmente ou via arquivo Excel (IDMOTIVO=3054, CODPORTFORMA=10).</p>
+<h4 style="color:var(--accent)">Validações</h4>
+<ul><li>Opção IR obrigatória · <code>:323-384</code></li>
+<li>Tempo de vínculo > 0; meses 0-11 · <code>:842-903</code>, <code>:797</code></li>
+<li>Referência ≤ cobrança · <code>:1194</code></li>
+<li>Valor esperado > 0 se FLGDEVOLUCAO=0 · <code>:1206</code></li>
+<li>Exclusão bloqueada se tem histórico · <code>:500-521</code></li>
+</ul>
+</section>
+
+<section id="FAtualizaPorIndice"><div class="section-title">FAtualizaPorIndice — Atualização de Reservas por Índice</div>
+<p><code>FAtualizaPorIndice.pas</code> (1529 lin) · form <code>frmAtualizaPorIndice</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<h4 style="color:var(--accent)">Propósito</h4>
+<p>Atualiza reservas de participantes aplicando índice de correção (COTACAOMOEDA) mês a mês. Se a reserva tem regra de cálculo, usa RegraNumerica; senão itera índices: <code>dValorAtualizado = dValorAtualizado × COTVALOR</code>. Insere movimentos em HISTMOVRESERVA e atualiza RESERVAPART.</p>
+<h4 style="color:var(--accent)">Filtros</h4>
+<ul><li>Patrocinadora, plano, reserva, situação (obrigatórios) · <code>:293-338</code></li>
+<li>Data de atualização (obrigatória) · <code>:472-476</code></li>
+<li>Individual (seleção) ou lista (arquivo de matrículas) · <code>:1358</code></li>
+</ul>
+</section>
+
+<section id="FPrincipal"><div class="section-title">FPrincipal — Form Principal (menu)</div>
+<p><code>FPrincipal.pas</code> (2099 lin) · form <code>frmPrincipal</code> · Caption "Manutenção e Cobrança de Contribuição" · <span class="ev ev-inferido">INFERIDO</span></p>
+<p>Form principal MDI herdado de TfrmCMPrincipal. Contém o menu de navegação para todos os forms do módulo. Criado em <code>ContribuicaoPREV.dpr:159</code>.</p>
+</section>
+
+<section><div class="section-title">📋 Demais forms (catalogados)</div>
+<p>Os forms abaixo estão catalogados no <a href="inventario.html">inventário</a> com Caption e contagem de componentes. Análise profunda pendente para os marcados <span class="ev ev-inferido">INFERIDO</span>.</p>
+<div class="cards-grid">
+<a class="card" href="inventario.html" style="display:block;color:inherit"><h3>FCadContribNucleoFamiliar</h3><p>Cadastro de Contribuições por Núcleo Familiar — 941 lin</p></a>
+<a class="card" href="inventario.html" style="display:block;color:inherit"><h3>FCadContribuicaoLote</h3><p>Cadastro de Contribuições em Lote — 576 lin</p></a>
+<a class="card" href="inventario.html" style="display:block;color:inherit"><h3>FSimulaContrib</h3><p>Simulação de Contribuição — 2475 lin</p></a>
+<a class="card" href="inventario.html" style="display:block;color:inherit"><h3>FTransferenciaSaldoCota</h3><p>Transferência de Saldo de Cota — 1711 lin</p></a>
+<a class="card" href="inventario.html" style="display:block;color:inherit"><h3>FEventoManutParcial</h3><p>Evento Manutenção Parcial — 1596 lin</p></a>
+<a class="card" href="inventario.html" style="display:block;color:inherit"><h3>FVerificacaoInconsistencia</h3><p>Verificação de Inconsistências — 1465 lin</p></a>
+<a class="card" href="inventario.html" style="display:block;color:inherit"><h3>FHistorico?ContribuicaoEmAtraso</h3><p>Histórico de Contribuição em Atraso — 721 lin</p></a>
+<a class="card" href="inventario.html" style="display:block;color:inherit"><h3>FReajustaSalarioMantido</h3><p>Reajusta Salário de Manutenção — 727 lin</p></a>
+<a class="card" href="inventario.html" style="display:block;color:inherit"><h3>FRodaPadraoMovReserva</h3><p>Movimentação Padrão de Reserva — 786 lin</p></a>
+<a class="card" href="inventario.html" style="display:block;color:inherit"><h3>FRegularizaInadimplencia</h3><p>Regularização de Inadimplência — 506 lin</p></a>
+<a class="card" href="inventario.html" style="display:block;color:inherit"><h3>FAssociarContribuicoesDosParticipantesEmLote</h3><p>Associar Contribuições em Lote — 627 lin</p></a>
+<a class="card" href="inventario.html" style="display:block;color:inherit"><h3>FGeraContnId</h3><p>Contribuições não Identificadas — 333 lin</p></a>
+<a class="card" href="inventario.html" style="display:block;color:inherit"><h3>FCancelaBoleta</h3><p>Cancelamento de Cobrança Bancária — 320 lin</p></a>
+<a class="card" href="inventario.html" style="display:block;color:inherit"><h3>FDesfDocContribuicao</h3><p>Interface do Desfazer Documento — 297 lin</p></a>
+</div>
+</section>
+
+</main>
+<footer>
+<p>Blueprint AS-IS — PFC-23 (enriquecido) — Módulo CONTRIBUIÇÃO | Sistema legado Delphi 5 | pt3-BR | Gerado em 2026-11-10</p>
+</footer>
+</body>
+</html>
