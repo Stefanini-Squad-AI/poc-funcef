@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contribuição Previdenciária — Tratamento de Erros — Blueprint AS-IS</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+
+</head>
+<body>
+<header>
+  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-31 (abas complementares)</div>
+  <h1>⚠️ Tratamento de Erros — Contribuição Previdenciária</h1>
+  <p>Padrões de tratamento de exceções, contagem de blocos try por arquivo e mensagens de validação com referência Arquivo:linha</p>
+</header>
+<nav>
+  <a href="index.html">📋 Visão Geral</a>
+  <a href="arquitetura.html">🏗️ Arquitetura</a>
+  <a href="inventario.html">📦 Inventário</a>
+  <a href="formularios.html">🧾 Formulários</a>
+  <a href="funcionalidades.html">⚙️ Funcionalidades</a>
+  <a href="rotinas.html">🔧 Procedures</a>
+  <a href="regras-de-negocio.html">📏 Regras</a>
+  <a href="dados.html">🗄️ Dados</a>
+  <a href="relatorios.html">📄 Relatórios</a>
+  <a href="integracoes.html">🔗 Integrações</a>
+  <a href="tratamento-erros.html">⚠️ Erros</a>
+  <a href="diagramas-fluxo.html">🔀 Fluxos</a>
+  <a href="lacunas.html">🔍 Lacunas</a>
+  <a href="controle-cobertura.html">📊 Cobertura</a>
+</nav>
+
+<main>
+<section><div class="section-title">⚠️ Visão Geral do Tratamento de Erros</div>
+<p>O tratamento de erros do módulo CONTRIBUIÇÃO segue quatro padrões principais: (1) <strong>validação de tela</strong> com <code>MsgDlg</code>/<code>MessageDlg</code> seguida de <code>Exit</code> ou <code>Abort</code>; (2) <strong><code>try/except</code> com <code>Rollback</code></strong> da transação do <code>dtmBaseDados.dbBaseDados</code>; (3) <strong>acúmulo de erros no log de resultado</strong> (<code>memResult</code>, mensagens “[ERRO]”/“[AVISO]”) sem interromper o lote, com decisão de commit/rollback ao final; e (4) <strong><code>raise</code></strong> de exceções (<code>Exception.Create</code>, <code>EValidacao.CreateVal</code>) — em boa parte dos casos de log, a exceção é <strong>silenciada</strong> por um <code>except</code> vazio logo em seguida. O arquivo com mais blocos <code>try</code> é <code>FDivergContrib.pas</code> (59).</p>
+<div class="stats">
+<div class="stat"><div class="n">472</div><div class="l">Linhas com <code>try</code></div></div>
+<div class="stat"><div class="n">387</div><div class="l">Linhas com <code>except</code></div></div>
+<div class="stat"><div class="n">79</div><div class="l">Linhas com <code>finally</code></div></div>
+<div class="stat"><div class="n">183</div><div class="l">Referências a Rollback</div></div>
+<div class="stat"><div class="n">49</div><div class="l">Linhas com <code>raise</code></div></div>
+<div class="stat"><div class="n">58</div><div class="l"><code>except</code> vazios (21 arquivos)</div></div>
+<div class="stat"><div class="n">658</div><div class="l">Linhas com MsgDlg/MessageDlg</div></div>
+<div class="stat"><div class="n">57</div><div class="l">Units com ao menos um <code>try</code> (de 80)</div></div>
+</div>
+<div class="note"><strong>Critério de contagem</strong> (sobre os 80 .pas de <code>CONTRIBUICAOPREV</code>): <code>grep -aiwc try|except|finally|raise</code> (linhas que contêm a palavra), <code>grep -aic rollback</code>, <code>grep -aic 'msgdlg\|messagedlg'</code>. “except vazio” = linha contendo apenas <code>except</code> seguida (ignorando linhas em branco) de <code>end;</code>, ou <code>except end;</code>/<code>except;</code> na mesma linha. São contagens textuais — podem incluir trechos comentados.</div>
+</section>
+
+<section><div class="section-title">📊 Distribuição de Blocos try por Arquivo</div>
+<p>Arquivos com 5 ou mais linhas <code>try</code> (e os demais citados nesta página). Os 57 arquivos com <code>try</code> somam 472 linhas; os não listados têm de 1 a 4 cada.</p>
+<div class="table-wrap"><table><thead><tr><th>Arquivo</th><th>try</th><th>except</th><th>finally</th><th>Rollback</th><th>raise</th><th>except vazio</th><th>Padrão dominante</th></tr></thead><tbody>
+<tr><td><code>Fontes/FDivergContrib.pas</code></td><td>59</td><td>51</td><td>8</td><td>17</td><td>4</td><td>15</td><td>try/except + Rollback; erros acumulados no memResult como “[ERRO ]” (63 ocorrências) e processamento continua; 15 except vazios</td></tr>
+<tr><td><code>Fontes/FRecebeContribuicao.pas</code></td><td>48</td><td>40</td><td>1</td><td>2</td><td>4</td><td>5</td><td>try/except com registro “[ERRO ]” no memResult (38 ocorrências) + <code>Continue</code> para o próximo recebimento</td></tr>
+<tr><td><code>Fontes/FPreparaEnvia.pas</code></td><td>40</td><td>37</td><td>3</td><td>9</td><td>1</td><td>1</td><td>Log de lote “[ERRO] LOTE Nº … LOTE NÃO ENVIADO” (L4856); commit parcial a cada 800 registros; Rollback geral se houve erro (L5683)</td></tr>
+<tr><td><code>Fontes/FControleIndivContrib.pas</code></td><td>39</td><td>34</td><td>5</td><td>13</td><td>4</td><td>10</td><td>try/except + Rollback + MsgDlg; 4 gravações de log com raise silenciado (L2006, L3133, L3543, L3938)</td></tr>
+<tr><td><code>Fontes/FVerificacaoInconsistencia.pas</code></td><td>35</td><td>35</td><td>0</td><td>30</td><td>0</td><td>0</td><td>try/except com Rollback (30 referências) e MsgDlg “Erro ao abrir query.” (<code>FVerificacaoInconsistencia.pas:503</code>, <code>:598</code>)</td></tr>
+<tr><td><code>Fontes/FCadHstContribuicao.pas</code></td><td>26</td><td>24</td><td>2</td><td>9</td><td>4</td><td>6</td><td>Validações com Abort (MSG083-MSG090) + try/except com Rollback; <code>except;</code> vazio (L2352, L3404)</td></tr>
+<tr><td><code>Fontes/FEventoManutParcial.pas</code></td><td>14</td><td>15</td><td>0</td><td>6</td><td>2</td><td>2</td><td>try/except + Rollback; log silenciado (<code>FEventoManutParcial.pas:712</code>)</td></tr>
+<tr><td><code>Fontes/FPrincipal.pas</code></td><td>13</td><td>7</td><td>6</td><td>0</td><td>0</td><td>0</td><td>try/except em <code>CriaDataModule</code> (L1732) com MessageDlg “Erro ao criar datamodule …” (L1747); try/finally em relatórios (L1641)</td></tr>
+<tr><td><code>Fontes/fCargaArquivo.pas</code></td><td>10</td><td>5</td><td>5</td><td>5</td><td>0</td><td>0</td><td>try/finally para liberar o objeto Excel OLE; Rollback em erro de carga</td></tr>
+<tr><td><code>Fontes/FAtualizaPorIndice.pas</code></td><td>10</td><td>10</td><td>0</td><td>8</td><td>1</td><td>1</td><td>Rollback/StartTransaction por reserva (L739, L890, L914) e commit final condicionado a <code>bErros</code> (L936-943)</td></tr>
+<tr><td><code>Fontes/FAlteracaoHistoricoContrib.pas</code></td><td>9</td><td>9</td><td>0</td><td>1</td><td>0</td><td>0</td><td>try/except por linha da planilha</td></tr>
+<tr><td><code>Fontes/fCalculoIRRF.pas</code></td><td>9</td><td>4</td><td>5</td><td>11</td><td>0</td><td>0</td><td>try/finally + Rollback quando em transação (L513, L547, L558)</td></tr>
+<tr><td><code>Fontes/FCadContribuicaoPortada.pas</code></td><td>8</td><td>6</td><td>2</td><td>1</td><td>0</td><td>0</td><td>try/except com MessageDlg “Ocorreu um erro ao efetuar a transação.” + <code>e.Message</code> (L368-370); Abort nas validações</td></tr>
+<tr><td><code>Fontes/FCadAlteraPdv.pas</code></td><td>7</td><td>7</td><td>0</td><td>6</td><td>1</td><td>1</td><td>—</td></tr>
+<tr><td><code>Fontes/FCadHstContribuicaoBeneficiario.pas</code></td><td>7</td><td>7</td><td>0</td><td>2</td><td>2</td><td>2</td><td>—</td></tr>
+<tr><td><code>Fontes/FSimulaContrib.pas</code></td><td>7</td><td>7</td><td>0</td><td>0</td><td>0</td><td>0</td><td>—</td></tr>
+<tr><td><code>Fontes/FCalcSalContr.pas</code></td><td>7</td><td>5</td><td>3</td><td>2</td><td>0</td><td>0</td><td>try/except <code>on E: EDBEngineError</code> com Rollback (L754-758); commit por participante (L737)</td></tr>
+<tr><td><code>Fontes/FTransferenciaSaldoCota.pas</code></td><td>7</td><td>2</td><td>5</td><td>4</td><td>0</td><td>1</td><td>—</td></tr>
+<tr><td><code>Relatorios/FPreviewExpEx.pas</code></td><td>7</td><td>1</td><td>6</td><td>0</td><td>0</td><td>1</td><td>—</td></tr>
+<tr><td><code>Fontes/FBaixaContribCAR.pas</code></td><td>6</td><td>5</td><td>1</td><td>1</td><td>1</td><td>1</td><td>—</td></tr>
+<tr><td><code>Fontes/FBeneficioSaldadoFAB.pas</code></td><td>6</td><td>4</td><td>1</td><td>2</td><td>0</td><td>0</td><td>—</td></tr>
+<tr><td><code>Fontes/FReajustaSalarioMantido.pas</code></td><td>5</td><td>4</td><td>1</td><td>5</td><td>1</td><td>0</td><td>—</td></tr>
+<tr><td><code>Fontes/FCadContribNucleoFamiliar.pas</code></td><td>5</td><td>4</td><td>1</td><td>3</td><td>2</td><td>1</td><td>—</td></tr>
+<tr><td><code>Fontes/FRecebeContribuicaoNovo.pas</code></td><td>5</td><td>3</td><td>2</td><td>2</td><td>0</td><td>0</td><td>—</td></tr>
+<tr><td><code>Fontes/FRecebeContribEmptmo.pas</code></td><td>5</td><td>2</td><td>3</td><td>4</td><td>0</td><td>0</td><td>—</td></tr>
+<tr><td><code>Relatorios/FRelProvConst.pas</code></td><td>5</td><td>1</td><td>4</td><td>0</td><td>0</td><td>0</td><td>—</td></tr>
+<tr><td><code>Fontes/FProvPerdasLote.pas</code></td><td>3</td><td>3</td><td>0</td><td>1</td><td>5</td><td>0</td><td>raise EValidacao.CreateVal (L428-437) + transação por contribuição com raise/Rollback (L568-626)</td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">📋 Mensagens de Validação e Erro Significativas</div>
+<p>Seleção do catálogo MSG (ver <a href="regras-de-negocio.html#MSG-section">Regras → Catálogo de Mensagens</a>), com a linha conferida no fonte (<code>CONTRIBUICAOPREV/Fontes/</code>).</p>
+<div class="table-wrap"><table><thead><tr><th>Mensagem</th><th>Arquivo:linha</th><th>Tipo / tratamento</th><th>Evidência</th></tr></thead><tbody>
+<tr><td>“Mês de Cobrança não preenchido.” (MSG001)</td><td><code>FPreparaEnvia.pas:2006</code></td><td>MsgDlg + bloqueio do preparo</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>“Ocorreram problemas no preparo. Deseja processar envio mesmo assim ?” (MSG007)</td><td><code>FPreparaEnvia.pas:3622</code></td><td>Confirmação — usuário decide continuar</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>“Data de Vencimento não Informada.” (MSG008)</td><td><code>FPreparaEnvia.pas:3695</code></td><td>MsgDlg mtError + Exit</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>“[ERRO] LOTE Nº … - LOTE NÃO ENVIADO” (MSG009)</td><td><code>FPreparaEnvia.pas:4856</code></td><td>Log no memResult; lote ignorado (<code>continue</code>)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>“[ERRO] ERRO NA INCLUSÃO DO LANÇAMENTO NA CONTABILIDADE …” (MSG010)</td><td><code>FPreparaEnvia.pas:5147</code></td><td>Log + <code>bAlgumErro</code> → Rollback do envio (L5683)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>“Erro ao Receber Contribuição.” (MSG014)</td><td><code>FRecebeContribuicaoNovo.pas:995</code></td><td>try/except em torno da SP de recebimento</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>“O valor das contribuições em aberto não corresponde ao valor do empréstimo. …” (MSG015)</td><td><code>FRecebeContribEmptmo.pas:694</code></td><td>MsgDlg + Exit; Rollback no <code>finally</code> (L1096-1097)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>“Ocorreram erros na contabilização, o processo será cancelado.”</td><td><code>FRecebeContribEmptmo.pas:787</code></td><td>MsgDlg + cancelamento</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>“Ocorreram erros na integração com o PGA, o processo será cancelado.”</td><td><code>FRecebeContribEmptmo.pas:829</code></td><td>MsgDlg + Exit (rollback no finally)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>“Operação Interrompida com Erros.” (MSG024)</td><td><code>FAtualizaPorIndice.pas:518</code></td><td>Falha ao gravar log TOTALPREV interrompe a operação</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>“Alimentação com erro!” (MSG027)</td><td><code>FAlimReservasReplan.pas:110</code></td><td>Retorno da SP de alimentação rápida</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>“Ocorreu um erro ao reajustar o salário do participante. Deseja continuar …?” (MSG031)</td><td><code>FReajustaSalarioMantido.pas:353</code></td><td>Confirmação por participante</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>“Índice não cadastrado.” (MSG037)</td><td><code>FCalcSalContr.pas:612</code></td><td>MsgDlg informativa — o cálculo prossegue</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>“A funcionalidade de Prévia está sendo executada! …” (MSG039)</td><td><code>fCalculoIRRF.pas:808</code></td><td>Bloqueio do cálculo de IR regressivo</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>“Mêses de Vinculo Inválido. Informe o mês entre 0 e 11” (MSG042)</td><td><code>FCadContribuicaoPortada.pas:799</code></td><td>MessageDlg + Abort</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>“Essa Contribuição já foi Recebida, Alteração não permitida” (MSG046)</td><td><code>FCadContribuicaoPortada.pas:1222</code></td><td>MessageDlg + Abort</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>“O arquivo não está no layout correto para importação.” (MSG052)</td><td><code>FCadContribuicaoPortada.pas:1815</code></td><td>Validação de importação</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>“Inconsistência no benefício INSS para a matrícula …” (MSG056)</td><td><code>fCargaArquivo.pas:341</code></td><td>MsgDlg dentro de except</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>“Ocorreu um erro, a atualização não foi concluída.” (MSG058)</td><td><code>FBeneficioSaldadoFAB.pas:852</code></td><td>Resultado False da SP (except em L1059-1060)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>“É necessário selecionar pelo menos uma patrocinadora.” (MSG060)</td><td><code>FProvPerdasLote.pas:434</code></td><td><code>raise EValidacao.CreateVal</code> + foco no controle (L440-446)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>“Processo finalizado com erros. Verifique a aba Resultados.” (MSG064)</td><td><code>FProvPerdasIndiv.pas:815</code>; <code>FProvPerdasLote.pas:549</code></td><td>Lista de matrículas com erro no memResult</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>“É necessário selecionar matricula para apresentação do relatório.” (MSG065)</td><td><code>FFRelProvPerdas.pas:366</code></td><td><code>raise EValidacao.CreateVal</code></td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>“Para o Recálculo Patronal o período selecionado só pode conter um mês.” (MSG070)</td><td><code>FDivergContrib.pas:2186</code></td><td>MsgDlg + bloqueio</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>“Motivo padrão para tratamento de divergência não cadastrado. Verique.” (MSG072)</td><td><code>FDivergContrib.pas:3640</code></td><td>MsgDlg mtError + Exit no início de <code>CobraProxMes</code></td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>“Código do Documento não encontrado.” (MSG074)</td><td><code>FDesfDocContribuicao.pas:85</code></td><td>MsgDlg</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>“Não é possível alterar registro já recebido! Operação Cancelada!” (MSG079)</td><td><code>FControleIndivContrib.pas:2142</code></td><td>MsgDlg + cancelamento</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>“O valor recebido foi preenchido, porém, a data de recebimento não foi informada. …” (MSG085)</td><td><code>FCadHstContribuicao.pas:1190</code></td><td>MsgDlg + Abort</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>“Esta contribuição já foi cobrada, não podendo mais ser alterada.” (MSG090)</td><td><code>FCadHstContribuicao.pas:1374</code></td><td>MsgDlg</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>“Erro no cálculo dos alteradores.” (MSG097)</td><td><code>FSimulaContrib.pas:1332</code></td><td>Interrompe a simulação</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>“A data de revisão deverá ser maior que 31/08/2006.” (MSG099)</td><td><code>FRevisaoIndice.pas:65</code></td><td>Bloqueio da revisão</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>“Erro ao criar datamodule "TDtmRelatorios". …”</td><td><code>FPrincipal.pas:1747</code></td><td>MessageDlg mtError com <code>E.Message</code></td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>“Ocorreu um erro ao efetuar a transação.” + <code>e.Message</code></td><td><code>FCadContribuicaoPortada.pas:370</code></td><td>MessageDlg mtError; cancela e limpa campos</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>“Erro ao gravar Log.” (MSG100)</td><td>21 ocorrências — ex.: <code>FAtualizaPorIndice.pas:931</code>, <code>FControleIndivContrib.pas:2006</code>, <code>FDivergContrib.pas:5019</code>, <code>FCadHstContribuicao.pas:1091</code>, <code>FPRelExtPoup.pas:421</code></td><td><code>raise Exception.Create</code> — em 20 das 21 ocorrências seguido de <code>Except End;</code> vazio (exceção descartada)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">🔄 Padrões de Tratamento Identificados</div>
+<div class="cards-grid">
+<div class="card"><h3>Validação de tela + Exit/Abort</h3><p>Críticas de preenchimento com <code>MsgDlg</code>/<code>MessageDlg</code> seguidas de <code>Exit</code> ou <code>Abort</code> (56 linhas com <code>Abort</code>). Ex.: <code>FPreparaEnvia.InformacoesOk</code> (L1996), <code>FCadContribuicaoPortada.ValidaCamposHistorico</code> (L1168-1215), <code>FCadHstContribuicao.pas:1174-1225</code>.</p></div>
+<div class="card"><h3>try/except + Rollback por item</h3><p>Transação aberta por contribuição/reserva/participante; erro causa <code>Rollback</code> e o loop segue. Ex.: <code>FProvPerdasLote.ProcessaQryIndiceAtual</code> (L568-626: <code>Raise Exception.Create(sMsgErro)</code> → <code>RollBack</code>), <code>FAtualizaPorIndice.pas:736-750</code>, <code>FCalcSalContr.pas:754-758</code>.</p></div>
+<div class="card"><h3>Log de resultado + decisão final</h3><p>Erros gravados no <code>memResult</code> (“[ERRO]”, “[AVISO]”) e sinalizados em <code>bErro</code>/<code>bAlgumErro</code>; ao final, commit ou rollback geral. Ex.: <code>FPreparaEnvia.EnviaContribuicaoCcp</code> (L5558 e L5678-5686), <code>FRecebeContribuicao.RecebeContribuicao</code> (L1840-1869).</p></div>
+<div class="card"><h3>raise EValidacao.CreateVal</h3><p>Validação com indicação do controle visual a focar (15 ocorrências em 4 arquivos): <code>FProvPerdasLote</code> (L428-437, tratada em L439-447), <code>FFRelProvPerdas</code> (L366-398), <code>FCadContribNucleoFamiliar</code>, <code>FParamRelFinanc</code>.</p></div>
+<div class="card"><h3>try/finally (liberação de recursos)</h3><p>79 linhas com <code>finally</code>: liberação de <code>TStoredProc</code> (<code>FRecebeContribuicaoNovo.pas:998-1000</code>, <code>FBeneficioSaldadoFAB.pas:1063-1066</code>), do Excel OLE (<code>fCargaArquivo.pas:505</code>) e rollback de segurança (<code>FRecebeContribEmptmo.pas:1095-1098</code>).</p></div>
+<div class="card"><h3>except silenciado</h3><p>58 <code>except</code> vazios em 21 arquivos (15 em <code>FDivergContrib.pas</code>, 10 em <code>FControleIndivContrib.pas</code>). Inclui o padrão <code>raise Exception.Create('Erro ao gravar Log.')</code> + <code>Except End;</code> (20 ocorrências), em que a falha de log não é reportada. Também <code>FCadContribuicaoPortada.bbtnOkDetClick</code> (L1158-1163) engole as exceções de <code>Abort</code>. <span class="ev ev-pendente">PENDENTE</span> — confirmar se intencional.</p></div>
+<div class="card"><h3>Resultado booleano de SP</h3><p>Chamadas a stored procedures encapsuladas em funções que retornam <code>False</code> no <code>except</code> (<code>FBeneficioSaldadoFAB.Exec_SP_Atualiza_Benef_Sald_FAB</code>, L1059-1060) ou leem o parâmetro de saída <code>pOutERRO</code> (<code>FRecebeContribuicaoNovo.pas:972-983</code>).</p></div>
+<div class="card"><h3>Mensagem final dependente do último item</h3><p>Em <code>FProvPerdasLote.Processa</code>, <code>operacaoOk</code> é reiniciado a cada contribuição (L493) e a mensagem final (L546-549) reflete apenas o último item processado; a lista de matrículas com erro, porém, é sempre exibida (L544). <span class="ev ev-inferido">INFERIDO</span> — possível inconsistência de mensagem.</p></div>
+</div>
+</section>
+</main>
+
+<footer>
+<p>Blueprint AS-IS — PFC-31 — Abas complementares CONTRIBUIÇÃO | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-10</p>
+</footer>
+</body>
+</html>

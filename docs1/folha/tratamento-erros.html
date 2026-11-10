@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Folha de Benefícios — Tratamento de Erros — Blueprint AS-IS</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<header>
+  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-31</div>
+  <h1>⚠️ Tratamento de Erros e Exceções — Folha de Benefícios</h1>
+  <p>Blocos try/except/finally, transações com commit/rollback, mensagens de validação e padrões de tratamento com rastreabilidade Arquivo:linha.</p>
+</header>
+<nav>
+  <a href="index.html">📋 Visão Geral</a>
+  <a href="arquitetura.html">🏗️ Arquitetura</a>
+  <a href="inventario.html">📦 Inventário</a>
+  <a href="formularios.html">🧾 Formulários</a>
+  <a href="funcionalidades.html">⚙️ Funcionalidades</a>
+  <a href="rotinas.html">🔧 Procedures</a>
+  <a href="regras-de-negocio.html">📏 Regras</a>
+  <a href="dados.html">🗄️ Dados</a>
+  <a href="relatorios.html">📄 Relatórios</a>
+  <a href="integracoes.html">🔗 Integrações</a>
+  <a href="tratamento-erros.html">⚠️ Erros</a>
+  <a href="diagramas-fluxo.html">🔀 Fluxos</a>
+  <a href="lacunas.html">🔍 Lacunas</a>
+  <a href="controle-cobertura.html">📊 Cobertura</a>
+</nav>
+<main>
+<section><div class="section-title">⚠️ Visão Geral</div>
+<p>O módulo FOLHA combina quatro estilos de tratamento: (1) <strong>validação prévia com <code>MsgDlg</code> + <code>Exit</code></strong> nas telas de processamento (preparo, prévia, efetivação, remessa); (2) <strong><code>raise EValidacao.CreateVal</code></strong> com foco no controle inválido (exportação/convênios); (3) <strong>transações com <code>Commit</code>/<code>Rollback</code></strong> em blocos <code>try/except</code> ou <code>try/finally</code> (estorno, prestação de contas INSS, documentos de convênio); e (4) no motor de cálculo <code>dFolhaPrevia.pas</code>, <strong>registro do erro no memo de resultado (<code>ExibeMensagem</code>) e continuação do laço</strong>, sem rollback explícito. Exceções silenciadas (<code>except</code> vazio) são frequentes, sobretudo em gravação de log em arquivo e liberação de objetos.</p>
+<div class="stats">
+<div class="stat"><div class="n">1.479</div><div class="l">Linhas <code>try</code> (119 arq.)</div></div>
+<div class="stat"><div class="n">1.174</div><div class="l">Linhas <code>except</code></div></div>
+<div class="stat"><div class="n">311</div><div class="l">Linhas <code>finally</code></div></div>
+<div class="stat"><div class="n">186</div><div class="l"><code>raise</code> (95 arq.)</div></div>
+<div class="stat"><div class="n">154</div><div class="l"><code>Rollback</code> (51 arq.)</div></div>
+<div class="stat"><div class="n">875</div><div class="l"><code>MsgDlg(</code> (116 arq.)</div></div>
+<div class="stat"><div class="n">139</div><div class="l"><code>except</code> vazio (34 arq.)</div></div>
+<div class="stat"><div class="n">23</div><div class="l"><code>EValidacao.CreateVal</code> (5 arq.)</div></div>
+</div>
+<div class="note"><strong>Critério (reprodutível):</strong> sobre <code>FOLHA/**/*.pas</code> (300 arquivos): <code>grep -aciE "^\s*try\b"</code>, <code>"^\s*except\b"</code>, <code>"^\s*finally\b"</code>, <code>"\braise\b"</code>, <code>"rollback"</code>, <code>"MsgDlg\("</code>, <code>"EValidacao\.CreateVal"</code> (somatório por arquivo). Outros contadores: <code>MessageDlg(</code> 63 (17 arq.), <code>ShowMessage(</code> 130 (44 arq.), <code>ExibeMensagem(</code> 636 (8 arq.), <code>TratarErro(</code> 23 (5 arq.), <code>Abort;</code> 47 (14 arq.), <code>GravaLogOperacoes(</code> 79 (76 arq.). “except vazio” = linha <code>except</code> imediatamente seguida (ignorando linhas em branco) de <code>end</code>/<code>end;</code>. As contagens por padrão textual incluem eventuais ocorrências em comentários e strings.</div>
+</section>
+
+<section><div class="section-title">📊 Distribuição de blocos try por arquivo (20 maiores)</div>
+<div class="table-wrap"><table><thead><tr><th>Arquivo</th><th>Pasta</th><th>try</th><th>except</th><th>finally</th><th>Rollback</th><th>raise</th><th>except vazio</th><th>MsgDlg/MessageDlg/ShowMessage</th><th>ExibeMensagem/TratarErro</th><th>Padrão dominante</th></tr></thead><tbody>
+<tr><td><code>dFolhaPrevia.pas</code></td><td>Fontes</td><td>233</td><td>143</td><td>93</td><td>0</td><td>0</td><td>29</td><td>5</td><td>168</td><td>try/except → <code>ExibeMensagem</code> no memo e segue para o próximo recebedor; commit por blocos</td></tr>
+<tr><td><code>FPreparo.pas</code></td><td>Fontes</td><td>123</td><td>112</td><td>12</td><td>1</td><td>1</td><td>15</td><td>5</td><td>12</td><td>try/except por benefício com <code>qryPrinc.Next</code>; <code>TratarErro</code>; log em arquivo com except vazio</td></tr>
+<tr><td><code>UFolhaBenef.pas</code></td><td>CMFbObj50/Source</td><td>85</td><td>85</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>except atribui valor padrão ao parâmetro (fallback)</td></tr>
+<tr><td><code>fFolhaNormalEfet.pas</code></td><td>Fontes</td><td>78</td><td>50</td><td>28</td><td>3</td><td>1</td><td>2</td><td>12</td><td>325</td><td>frameProgresso.ExibeMensagem + <code>ProcessamentoOK := false</code></td></tr>
+<tr><td><code>FFolhaNormalPrevia.pas</code></td><td>Fontes</td><td>51</td><td>26</td><td>25</td><td>5</td><td>1</td><td>5</td><td>41</td><td>2</td><td>MsgDlg + Exit na validação; memResult + <code>continue</code> por lote</td></tr>
+<tr><td><code>FPrestacaoContasINSS.pas</code></td><td>Fontes</td><td>50</td><td>43</td><td>7</td><td>5</td><td>37</td><td>0</td><td>64</td><td>0</td><td>raise de cancelamento → except com RollBack + MsgDlg</td></tr>
+<tr><td><code>_UContribuicaoPrev.pas</code></td><td>Fontes</td><td>45</td><td>45</td><td>0</td><td>0</td><td>0</td><td>5</td><td>2</td><td>0</td><td>não classificado</td></tr>
+<tr><td><code>UContribuicaoPrevFB.pas</code></td><td>Fontes</td><td>45</td><td>45</td><td>0</td><td>0</td><td>0</td><td>5</td><td>2</td><td>0</td><td>não classificado (variante de <code>_UContribuicaoPrev</code>)</td></tr>
+<tr><td><code>fImportaTxt.pas</code></td><td>Fontes</td><td>39</td><td>35</td><td>4</td><td>1</td><td>1</td><td>5</td><td>15</td><td>1</td><td>não classificado</td></tr>
+<tr><td><code>UConciliacaoCredito.pas</code></td><td>Fontes</td><td>35</td><td>22</td><td>13</td><td>5</td><td>1</td><td>3</td><td>76</td><td>0</td><td>MsgDlg + Rollback</td></tr>
+<tr><td><code>uDesfazerPreparo.pas</code></td><td>Fontes</td><td>33</td><td>28</td><td>5</td><td>5</td><td>1</td><td>6</td><td>4</td><td>1</td><td>não classificado</td></tr>
+<tr><td><code>FRemessaEletronica.pas</code></td><td>Fontes</td><td>33</td><td>29</td><td>4</td><td>8</td><td>14</td><td>0</td><td>9</td><td>0</td><td>raise + Rollback</td></tr>
+<tr><td><code>fTratamentoConvenio.pas</code></td><td>Fontes</td><td>29</td><td>27</td><td>2</td><td>2</td><td>2</td><td>7</td><td>9</td><td>0</td><td>não classificado</td></tr>
+<tr><td><code>UFuncoesFolha.pas</code></td><td>Fontes</td><td>29</td><td>18</td><td>11</td><td>1</td><td>0</td><td>0</td><td>2</td><td>0</td><td>não classificado</td></tr>
+<tr><td><code>FExecGeraDocConvenio.pas</code></td><td>Fontes</td><td>28</td><td>17</td><td>11</td><td>5</td><td>9</td><td>4</td><td>24</td><td>0</td><td>EValidacao + RollBackTransacao/CommitTransacao</td></tr>
+<tr><td><code>festornafolha.pas</code></td><td>Fontes</td><td>25</td><td>13</td><td>12</td><td>6</td><td>1</td><td>1</td><td>8</td><td>115</td><td>try/finally com commit se Result, senão rollback</td></tr>
+<tr><td><code>FCadHstBeneficio.pas</code></td><td>Fontes</td><td>23</td><td>20</td><td>3</td><td>3</td><td>7</td><td>4</td><td>11</td><td>0</td><td>não classificado</td></tr>
+<tr><td><code>uBeneficioFolha.pas</code></td><td>Fontes</td><td>17</td><td>16</td><td>1</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>não classificado</td></tr>
+<tr><td><code>fFolhaExtra.pas</code></td><td>Fontes</td><td>17</td><td>17</td><td>0</td><td>10</td><td>0</td><td>1</td><td>28</td><td>0</td><td>MsgDlg + Rollback</td></tr>
+<tr><td><code>FCadRubricaIndiv.pas</code></td><td>Fontes</td><td>16</td><td>16</td><td>0</td><td>0</td><td>5</td><td>8</td><td>18</td><td>5</td><td>except vazio frequente</td></tr>
+</tbody></table></div>
+<p>Contagens numéricas: <span class="ev ev-comprovado">COMPROVADO</span> (comandos acima). Coluna “Padrão dominante”: derivada da leitura dos trechos citados nesta página para os arquivos centrais; para os marcados “não classificado” apenas as contagens foram apuradas (<span class="ev ev-pendente">PENDENTE</span>).</p>
+</section>
+
+<section><div class="section-title">📋 Mensagens de validação e erro significativas</div>
+<div class="table-wrap"><table><thead><tr><th>Mensagem (literal do código)</th><th>Arquivo:linha</th><th>Mecanismo</th><th>Efeito</th><th>Evidência</th></tr></thead><tbody>
+<tr><td>"A Regra de Verificação da Folha impede que o Preparo prossiga."</td><td><code>FPreparo.pas:6981</code></td><td>MsgDlg (mtInformation)</td><td>Exit — bloqueia preparo</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>"O Motivo [padrão] para a Geração da Folha de Benefícios deverá ser preenchido…"</td><td><code>FPreparo.pas:6991</code>, <code>FFolhaNormalPrevia.pas:1959</code></td><td>MsgDlg</td><td>Exit</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>"Nada a ser processado com a seleção escolhida."</td><td><code>FPreparo.pas:7147</code></td><td>MsgDlg</td><td>Informativo</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>"Não foi possível gravar o log."</td><td><code>FPreparo.pas:5157</code>, <code>festornafolha.pas:4592</code>, <code>FExportaTxT.pas:234</code>, <code>fGeraArquivoRemessa.pas:376</code></td><td>raise Exception.Create</td><td>Aborta a operação antes do processamento</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>"Já existe um processo ETL em execução."</td><td><code>FFolhaNormalPrevia.pas:1865</code></td><td>MsgDlg</td><td>Exit</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>"Nenhum lote selecionado."</td><td><code>FFolhaNormalPrevia.pas:1913</code></td><td>MsgDlg</td><td>Exit</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>"Previsão de pagamento informada menor que a data atual."</td><td><code>FFolhaNormalPrevia.pas:1931</code></td><td>MsgDlg</td><td>Exit + foco no campo</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>"Não existe informação no Mês para a Prévia. Rodar o Preparo."</td><td><code>FFolhaNormalPrevia.pas:1939</code></td><td>MsgDlg (mtError)</td><td>Exit</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>"Mês de Referência não preenchido."</td><td><code>FFolhaNormalPrevia.pas:1989</code></td><td>MsgDlg (mtError)</td><td>Exit</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>"Erro no processamento (1) … (5)." / "Erro no processamento. Operação será abortada."</td><td><code>dFolhaPrevia.pas:25237-25397</code>, <code>dFolhaPrevia.pas:25410</code></td><td>ExibeMensagem no memo</td><td>Por recebedor: registra e segue; geral: <code>Result := false</code></td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>"A Disponibilidade esta bloqueada."</td><td><code>fFolhaNormalEfet.pas:2080</code></td><td>MsgDlg</td><td>Bloqueia efetivação</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>"A Regra de Verificação da Folha impede que a Efetivação prossiga."</td><td><code>fFolhaNormalEfet.pas:2311</code></td><td>MsgDlg</td><td>Exit</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>"Erro nos Parametros Contábeis !!!"</td><td><code>fFolhaNormalEfet.pas:4841</code>, <code>:5025</code></td><td>frameProgresso.ExibeMensagem</td><td>Falha na planilha contábil</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>"Erro ao executar ETL: …"</td><td><code>fFolhaNormalEfet.pas:8796</code></td><td>except → ExibeMensagem</td><td><code>ProcessamentoOK := false</code></td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>"O Documento não pode ser Alterado, Excluído ou Inserido Motivo: …"</td><td><code>festornafolha.pas:4602</code></td><td>MsgDlg</td><td>Exit — disponibilidade financeira</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>"Estorno não é possível pois lançamentos temporários processados nesta versão foram baixados pelo sistema de origem."</td><td><code>festornafolha.pas:2098-2100</code></td><td>frameProgresso.ExibeMensagem</td><td>Exit</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>"Estorno Completo interrompido por erro."</td><td><code>festornafolha.pas:2375</code></td><td>finally</td><td>Rollback (<code>L2376</code>)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>"Preencha o Histórico da Folha de Benefício"</td><td><code>fGeraArquivoRemessa.pas:350</code></td><td>MsgDlg (mtError)</td><td>Exit</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>"Erro no processo de geração do Arquivo de Remessa de Pagamento"</td><td><code>fGeraArquivoRemessa.pas:480</code></td><td>except → MsgDlg</td><td>Registra <code>E.Message</code> no memo</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>"É necessário indicar o Layout de Entrada!" / "…Layout de Saída!" / "…destino para gravação do Arquivo de Retorno!"</td><td><code>FExportaTxT.pas:514</code>, <code>:517</code>, <code>:522</code></td><td>raise EValidacao.CreateVal</td><td>MsgDlg mtWarning + foco (<code>L527-529</code>)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>"É necessário indicar a Previsão de Pagamento!" / "…selecionar pelo menos uma versão da Folha!"</td><td><code>FExecGeraDocConvenio.pas:1220</code>, <code>:1223</code></td><td>raise EValidacao.CreateVal</td><td>MsgDlg + Exit</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>"Necessário selecionar ao menos uma opção de geração."</td><td><code>FExecGeraDocConvenio.pas:1446</code></td><td>MsgDlg</td><td>Exit</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>"É necessário indicar o Mês de Referência!" / "…Ano de Referência!"</td><td><code>FExecAbateReserva.pas:139</code>, <code>:142</code></td><td>raise EValidacao.CreateVal</td><td>Bloqueia abatimento (RS001)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>"Rubrica não parametrizada: …"</td><td><code>FInsereRubricasINSSFolha.pas:550</code></td><td>raise Exception.Create</td><td>Aborta inserção (RS024)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>"Operação cancelada pelo usuário"</td><td><code>FPrestacaoContasINSS.pas:3042</code>, <code>:4433</code>, <code>:6361</code></td><td>raise Exception.Create</td><td>except: RollBack (<code>L3065</code>) + MsgDlg (<code>L3067</code>)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>"Erro ao retificar prestação de contas. Mensagem: …"</td><td><code>FPrestacaoContasINSS.pas:3069</code></td><td>MsgDlg (mtError)</td><td>Após RollBack</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+</tbody></table></div>
+<p>O catálogo funcional de tratamentos e mensagens (<code>TRT001–TRT016</code>, <code>MSG001–MSG016</code>) está em <a href="funcionalidades.html#TRT-section">⚙️ Funcionalidades — Tratamentos</a> e <a href="funcionalidades.html#MSG-section">Mensagens</a>. Parte dos textos daquele catálogo é paráfrase; os literais acima são os textos reais do código (ver <a href="lacunas.html">🔍 Lacunas</a>).</p>
+</section>
+
+<section><div class="section-title">🔄 Padrões de tratamento identificados</div>
+<div class="cards-grid">
+<div class="card"><h3>Validação + MsgDlg + Exit</h3><p>Checagens sequenciais no início do clique de processamento; a primeira falha mostra <code>MsgDlg</code> e sai. Ex.: <code>FFolhaNormalPrevia.pas:1865-2013</code>, <code>fGeraArquivoRemessa.pas:348-371</code>, <code>FPreparo.pas:6977-6993</code>. <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+<div class="card"><h3>raise EValidacao.CreateVal</h3><p>Função <code>VerificaPreenchimento*</code> levanta <code>EValidacao</code> com o controle visual; o <code>except on ev : EValidacao</code> exibe a mensagem e dá foco. Ex.: <code>FExportaTxT.pas:502-535</code>, <code>FExecGeraDocConvenio.pas:1208-1236</code>, <code>FExecAbateReserva.pas:135-142</code>. <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+<div class="card"><h3>try/finally com Commit ou Rollback</h3><p>O resultado booleano decide no <code>finally</code>: <code>Commit</code> se <code>Result</code>, senão <code>Rollback</code>. Ex.: <code>festornafolha.pas:2365-2378</code>. <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+<div class="card"><h3>try/except + RollBack + MsgDlg</h3><p>Cancelamento é sinalizado com <code>raise</code> e tratado no <code>except</code> com <code>RollBack</code> e mensagem diferenciada. Ex.: <code>FPrestacaoContasINSS.pas:3061-3074</code>; <code>RollBackTransacao</code> em <code>FExecGeraDocConvenio.pas:1492,1536,1551</code>. <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+<div class="card"><h3>Registro no memo e continuação</h3><p>No motor, cada etapa do recebedor tem <code>try/except</code> que chama <code>ExibeMensagem</code> (memo + monitoramento) e avança <code>qryPrevia</code>; não há <code>Rollback</code> em <code>dFolhaPrevia.pas</code> (0 ocorrências) — commits por bloco (RS022). Ex.: <code>dFolhaPrevia.pas:25233-25290</code>, <code>ExibeMensagem</code> em <code>dFolhaPrevia.pas:19415</code>. <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+<div class="card"><h3>except que pula o registro</h3><p>No laço do preparo, qualquer exceção apenas avança para o próximo benefício (<code>except qryPrinc.next; end</code>), sem mensagem nem contagem de erro. <code>FPreparo.pas:6051-6053</code>. <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+<div class="card"><h3>except vazio (silenciado)</h3><p>139 ocorrências em 34 arquivos. Casos típicos: gravação de log em caminho de rede fixo (<code>FPreparo.pas:7101-7104</code>), liberação de objetos (<code>dFolhaPrevia.pas:6082</code>), escrita no memo (<code>dFolhaPrevia.pas:19423</code>). Maiores incidências: <code>dFolhaPrevia.pas</code> (29), <code>FPreparo.pas</code> (15), <code>FCadRubricaIndiv.pas</code> (8). <span class="ev ev-pendente">PENDENTE</span> — avaliar se intencional.</p></div>
+<div class="card"><h3>except como valor padrão</h3><p>Leitura de parâmetros do módulo em que a falha atribui um default (ex.: <code>SistemaFolha.IDRUBCPMFPAINSS := 0</code>). <code>UFolhaBenef.pas:122-151</code> (85 try / 85 except, nenhuma mensagem). <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+<div class="card"><h3>Log de operação obrigatório</h3><p><code>Sistema.GravaLogOperacoes</code> antes do processamento (79 chamadas em 76 arquivos); falha gera <code>raise</code> “Não foi possível gravar o log.”. <code>TratarErro</code> (23 usos) é rotina do framework externo a FOLHA. <span class="ev ev-comprovado">COMPROVADO</span> / implementação <span class="ev ev-pendente">PENDENTE</span></p></div>
+</div>
+</section>
+</main>
+<footer>
+<p>Blueprint AS-IS — PFC-31 — Abas complementares FOLHA | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-10</p>
+</footer>
+</body>
+</html>

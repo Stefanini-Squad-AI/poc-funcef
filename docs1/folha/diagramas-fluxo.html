@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Folha de Benefícios — Diagramas de Fluxo — Blueprint AS-IS</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<header>
+  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-31</div>
+  <h1>🔀 Diagramas de Fluxo de Processos — Folha de Benefícios</h1>
+  <p>10 fluxogramas dos processos centrais da folha, reconstruídos a partir do código-fonte de FOLHA com unit/método e linha de origem em cada passo.</p>
+</header>
+<nav>
+  <a href="index.html">📋 Visão Geral</a>
+  <a href="arquitetura.html">🏗️ Arquitetura</a>
+  <a href="inventario.html">📦 Inventário</a>
+  <a href="formularios.html">🧾 Formulários</a>
+  <a href="funcionalidades.html">⚙️ Funcionalidades</a>
+  <a href="rotinas.html">🔧 Procedures</a>
+  <a href="regras-de-negocio.html">📏 Regras</a>
+  <a href="dados.html">🗄️ Dados</a>
+  <a href="relatorios.html">📄 Relatórios</a>
+  <a href="integracoes.html">🔗 Integrações</a>
+  <a href="tratamento-erros.html">⚠️ Erros</a>
+  <a href="diagramas-fluxo.html">🔀 Fluxos</a>
+  <a href="lacunas.html">🔍 Lacunas</a>
+  <a href="controle-cobertura.html">📊 Cobertura</a>
+</nav>
+<main>
+<section><div class="section-title">🔀 Como ler os fluxogramas</div>
+<p>Os fluxos abaixo partem das cadeias resumidas em <a href="funcionalidades.html">⚙️ Funcionalidades</a> (JF001–JF018) e foram enriquecidos com passos, decisões e mensagens verificados por <code>grep -n</code> nos fontes de <code>FOLHA/</code>. Cada nó traz o método e a linha (<code>L1234</code>) do arquivo indicado na evidência; quando há encadeamento, o formato <code>L2363 → L4461</code> indica linha da chamada → linha da implementação.</p>
+<div class="fluxo-legenda"><span>⬭ Início / fim</span><span>▭ Retângulo = passo de processamento</span><span>◇ Losango = decisão / validação</span><span>⛁ Cilindro = leitura ou gravação em tabela / arquivo</span><span style="color:#f87171">▭ Bloqueio / erro</span></div>
+<div class="legend"><span><span class="ev ev-comprovado">COMPROVADO</span> — passos e linhas verificados no código</span><span><span class="ev ev-inferido">INFERIDO</span> — encadeamento deduzido</span><span><span class="ev ev-pendente">PENDENTE</span> — validar</span></div>
+<div class="note"><strong>Escopo:</strong> os componentes externos (<code>TCtrlIntBanco</code>, <code>UCtrlLancamento</code>, <code>TCtrlDocumento</code>, <code>CtrlFinanc</code>) aparecem apenas como chamadas de interface; sua implementação está fora de <code>FOLHA/</code> e não foi inspecionada (ver <a href="lacunas.html">🔍 Lacunas</a>).</div>
+</section>
+
+<section id="FX-01"><div class="section-title">🔀 Fluxo PF-01 — Preparo da Folha</div>
+<pre class="fluxograma">flowchart TD
+  A(["FPreparo.bbtnPreparoClick (L6916)"]) --> B["UPDATE de teste em HSTBENEFBFCIARIO (L6928-6938)"]
+  B --> B1{"UPDATE gerou exceção?"}
+  B1 -- "Sim" --> X0["TratarErro e Exit (L6942)"]
+  B1 -- "Não" --> C["AtualizaDadosLote (L6951)"]
+  C --> D{"VerificaFolha fase 1 permite? (L6977)"}
+  D -- "Não" --> X1["MsgDlg: Regra de Verificação da Folha impede que o Preparo prossiga (L6981)"]
+  D -- "Sim" --> E{"Motivo padrão prmIDMOTIVOFOLHABEN informado? (L6989)"}
+  E -- "Não" --> X2["MsgDlg: Motivo padrão deverá ser preenchido (L6991)"]
+  E -- "Sim" --> F[("SELECT CONTPLANPATRO, CONTPREV, PATRO em qryContaContrib")]
+  F --> G["DeterminaPatroSel, DeterminaPlanoSel, DeterminaBenefSel (L7038-7040)"]
+  G --> H["ProcessaBeneficios (L7070 → L5107)"]
+  H --> H1["StartTransaction + GravaLogOperacoes Preparo da Folha (L5155-5159)"]
+  H1 --> H2["Loop qryPrinc: PassoProcessoBeneficio (L6026 → L1901)"]
+  H2 --> H3{"ExecutaRegraProcessoBeneficio OK? (L6027 → L1943)"}
+  H3 -- "Não" --> H4["Conta iBenefErro e passa ao próximo (L6029-6031)"]
+  H3 -- "Sim" --> H5["GravaProcessoBeneficio (L6033 → L2678) chama GravaHstBeneficio (L2696 → L2375)"]
+  H5 --> DB1[("HSTBENEFBFCIARIO · PROCESSOBENEF · HSTCONTRIBPREV")]
+  DB1 --> H6["ProximoProcessoBeneficio (L6050)"]
+  H4 --> H2
+  H6 --> H2
+  H2 --> I{"ProcessaBeneficios retornou True?"}
+  I -- "Não" --> X3["MsgDlg: Nada a ser processado com a seleção escolhida (L7147)"]
+  I -- "Sim" --> J["AtualizaLote + executa ListaSQL (L7072-7086)"]
+  J --> K{"Commit parcial ativo?"}
+  K -- "Sim" --> L["Commit e grava preparofolha.txt (L7094-7098)"]
+  K -- "Não" --> M["Exibe btnCommit para commit manual (L7144)"]
+  L --> Z(["MsgDlg: Término do Preparo de Benefícios (L7142)"])
+  M --> Z
+  class A,Z start
+  class X0,X1,X2,X3 bloq
+  class F,DB1 db
+  classDef start fill:#1e3a5f,stroke:#2dd4bf,color:#e7ecf3
+  classDef bloq fill:#7f1d1d,stroke:#f87171,color:#fecaca
+  classDef db fill:#243044,stroke:#9aa8bc,color:#e7ecf3</pre>
+<p><strong>Evidência:</strong> <code>FPreparo.pas:6916-7166</code>, <code>FPreparo.pas:5107-5159</code>, <code>FPreparo.pas:6023-6054</code>, <code>FPreparo.pas:1901-1919</code> (commit a cada 300 registros quando há commit parcial) · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</section>
+
+<section id="FX-02"><div class="section-title">🔀 Fluxo PF-02 — Prévia: orquestração pela tela</div>
+<pre class="fluxograma">flowchart TD
+  A(["FFolhaNormalPrevia.bbtnPreparoClick (L1846)"]) --> V0{"Já existe processo ETL em execução?"}
+  V0 -- "Sim" --> X0["MsgDlg: Já existe um processo ETL em execução (L1865)"]
+  V0 -- "Não" --> V1{"Algum lote selecionado?"}
+  V1 -- "Não" --> X1["MsgDlg: Nenhum lote selecionado (L1913)"]
+  V1 -- "Sim" --> V2{"Previsão de pagamento menor que a data atual? (L1929)"}
+  V2 -- "Sim" --> X2["MsgDlg: Previsão de pagamento informada menor que a data atual (L1931)"]
+  V2 -- "Não" --> V3{"Existe preparo no mês? (L1937)"}
+  V3 -- "Não" --> X3["MsgDlg: Não existe informação no Mês para a Prévia. Rodar o Preparo (L1939)"]
+  V3 -- "Sim" --> V4{"VerificaFolha fase 2 permite? (L1947)"}
+  V4 -- "Não" --> X4["MsgDlg: Regra de Verificação impede que a Prévia prossiga (L1949)"]
+  V4 -- "Sim" --> V5{"Motivo padrão, mês de abono, mês e ano de referência e data da folha preenchidos? (L1957-2013)"}
+  V5 -- "Não" --> X5["MsgDlg de campo obrigatório e Exit"]
+  V5 -- "Sim" --> L1["StartTransaction + GravaLogOperacoes Processamento da Prévia Normal (L2472-2481)"]
+  L1 --> L2["Loop qryPreparosAnt por lote"]
+  L2 --> V6{"Prévia do lote incompleta? GetCtrlInterface = 1 (L2869)"}
+  V6 -- "Sim" --> V7{"Usuário escolhe (L2872)"}
+  V7 -- "Sim: continuar" --> P1["ApagaPreviaEfetivacaoPessoa a partir do último titular"]
+  V7 -- "Não: refazer" --> P2["ApagaPreviaEfetivacao do lote"]
+  V7 -- "Cancelar" --> Z0(["Exit (L2900)"])
+  V6 -- "Não" --> P2
+  P1 --> V8{"Modo ETL marcado?"}
+  P2 --> V8
+  V8 -- "Sim" --> E1["ProcessaPreviaETL (L2992 → L4693)"]
+  V8 -- "Não" --> E2["dtmFolhaPrevia.ProcessaPrevia (L2998 → dFolhaPrevia.pas L24781)"]
+  E2 --> DB1[("PREVIA · BASEDEPAGAMENTO · BITRIBUTACAO · CTRLINTERFACE")]
+  E1 --> R1["Registra resultado no memo e grava log em arquivo"]
+  DB1 --> R1
+  R1 --> Z(["Commit (L3079 / L3164)"])
+  class A,Z,Z0 start
+  class X0,X1,X2,X3,X4,X5 bloq
+  class DB1 db
+  classDef start fill:#1e3a5f,stroke:#2dd4bf,color:#e7ecf3
+  classDef bloq fill:#7f1d1d,stroke:#f87171,color:#fecaca
+  classDef db fill:#243044,stroke:#9aa8bc,color:#e7ecf3</pre>
+<p><strong>Evidência:</strong> <code>FFolhaNormalPrevia.pas:1846-3164</code> (validações L1865-2013, prévia incompleta L2869-2900, chamada do motor L2998) · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</section>
+
+<section id="FX-03"><div class="section-title">🔀 Fluxo PF-02 / PF-08 — Motor: ProcessaPrevia, fechamento do recebedor e IRRF</div>
+<pre class="fluxograma">flowchart TD
+  A(["TdtmFolhaPrevia.ProcessaPrevia (L24781)"]) --> B["StartTransaction se não houver transação aberta (L24890)"]
+  B --> C["Loop qryPrevia: quebra por fundação, titular e recebedor"]
+  C --> D["ProcessaFechamentoRecebedor do recebedor anterior (L25233 → L23310)"]
+  D --> D1["ProcessaRubrica: TMPDESC e RUBRICAINDIV (L23407)"]
+  D1 --> D2["ExecutaRegraRubrica false e true (L23434 / L23447)"]
+  D2 --> D3["DeterminaBasesIRRF (L23460 → L7180)"]
+  D3 --> D4["CalculoIRRF (L23504 → L13493)"]
+  D4 --> I1["LancaRubricaDEP_IDADE_IR por tipo de base (L13537-13553)"]
+  I1 --> I2{"TIPOOPCAOIR = 2, opção pelo regime regressivo? (L13593)"}
+  I2 -- "Sim" --> I3["CalculaLancaIRRegressivo tipo 0 vitalício, 1 abono, 7 reserva (L14191-14414 → L12123)"]
+  I2 -- "Não" --> I4["CalculaLancaIRNormal (L14002 → L12380) com LancaIRCompensado (L12658)"]
+  I3 --> D5["CalculoSalarioFamilia (L23531 → L9555)"]
+  I4 --> D5
+  D5 --> D6["VerificaMargemDesconto 1 (L23557 → L7496)"]
+  D6 --> D7{"Recebedor duplicado? TemRecebedorDuplicado (L23663)"}
+  D7 -- "Sim" --> D8["ibloqueiaprevia = 3, prévia do recebedor bloqueada (L23666)"]
+  D7 -- "Não" --> D9{"Prévia bloqueada? ibloqueiaprevia diferente de 0 (L23674)"}
+  D8 --> D9
+  D9 -- "Não" --> D10["ProcessaRateioRubricas (L23684 → L22816) e rateio REINF (L23705)"]
+  D10 --> D11["EfetivaRubricas (L23721 → L6195)"]
+  D11 --> DB1[("PREVIA · BASEDEPAGAMENTO · BITRIBUTACAO")]
+  DB1 --> D12["ProcessaReinf (L23793 → L19882)"]
+  D9 -- "Sim" --> D13["LimpaDados (L23808)"]
+  D12 --> D13
+  D13 --> E["ProcessaRubricaProvento do registro corrente (L25280 → L24378)"]
+  E --> F{"Exceção em fechamento ou rubrica?"}
+  F -- "Sim" --> X1["ExibeMensagem: Erro no processamento 1 a 5, registra e segue (L25237-25397)"]
+  F -- "Não" --> G{"Fim de qryPrevia?"}
+  X1 --> G
+  G -- "Não" --> C
+  G -- "Sim" --> H(["Commit final (L25405)"])
+  B -. "exceção geral" .-> X2["ExibeMensagem: Erro no processamento. Operação será abortada, Result False (L25410)"]
+  class A,H start
+  class X1,X2,D8 bloq
+  class DB1 db
+  classDef start fill:#1e3a5f,stroke:#2dd4bf,color:#e7ecf3
+  classDef bloq fill:#7f1d1d,stroke:#f87171,color:#fecaca
+  classDef db fill:#243044,stroke:#9aa8bc,color:#e7ecf3</pre>
+<p><strong>Evidência:</strong> <code>dFolhaPrevia.pas:24781-25420</code>, <code>dFolhaPrevia.pas:23310-23808</code>, <code>dFolhaPrevia.pas:13493-14922</code> · <span class="ev ev-comprovado">COMPROVADO</span>. Observação: o nome real das rotinas é <code>CalculoIRRF</code> e <code>CalculoSalarioFamilia</code> (as páginas anteriores grafam “CaluloIRRF”/“CaluloSalarioFamilia”). O motor não executa <code>Rollback</code> explícito (0 ocorrências em <code>dFolhaPrevia.pas</code>); erros por recebedor são registrados e o laço prossegue.</p>
+</section>
+
+<section id="FX-04"><div class="section-title">🔀 Fluxo PF-03 — Efetivação de Versão de Pagamento</div>
+<pre class="fluxograma">flowchart TD
+  A(["TfrmFolhaNormalEfet.Processa (L1978)"]) --> V1{"Disponibilidade financeira bloqueada?"}
+  V1 -- "Sim" --> X1["MsgDlg: A Disponibilidade esta bloqueada (L2080)"]
+  V1 -- "Não" --> V2{"Linhas por página do contra-cheque informadas?"}
+  V2 -- "Não" --> X2["MsgDlg: Número de linhas do contra-cheque não informado (L2088)"]
+  V2 -- "Sim" --> V3{"Rubricas de RRA com data diferente e usuário recusa? (L2155)"}
+  V3 -- "Sim" --> X3["Interrompe a efetivação"]
+  V3 -- "Não" --> E1["Executa_ETL de validação, tipo 3 (L2197 → L8722)"]
+  E1 --> L1["Loop dos lotes marcados (L2220)"]
+  L1 --> C1["AtualizaParametrosCF (L2239 → L2840)"]
+  C1 --> C2["ValidaContaBancaria (L2245 → L3149)"]
+  C2 --> C3["ValidaParametrosCF e VerificaPreviaProcessada (L2284-2286)"]
+  C3 --> V4{"ProcessamentoOK e opção Só verificar desmarcada? (L2304)"}
+  V4 -- "Não" --> Z0(["Encerra apenas com a verificação"])
+  V4 -- "Sim" --> V5{"VerificaFolha fase 3 permite? (L2309)"}
+  V5 -- "Não" --> X4["MsgDlg: Regra de Verificação impede que a Efetivação prossiga (L2311)"]
+  V5 -- "Sim" --> V6{"FlgVerificaParm = 1 e usuário não confirma? (L2322)"}
+  V6 -- "Sim" --> X5["Exit sem efetivar"]
+  V6 -- "Não" --> P1["ProcessaFaseHistrubsal (L2361 → L3880)"]
+  P1 --> DB1[("HISTRUBSAL")]
+  DB1 --> P2["ProcessaContabilizacao (L2363 → L4461)"]
+  P2 --> P3["ProcessaDocumentos (L2365 → L5394)"]
+  P3 --> P4["ProcessaArquivobanco (L2367 → L6229): CNAB 150 ou SIACC (L6348-6351)"]
+  P4 --> P5["ProcessaRetornos ou ProcessaRetornos_ETL (L2370-2372)"]
+  P5 --> P6["PreparaContribuicaoPatro (L2380 → L8605)"]
+  P6 --> P7["GravaHstFolhaBenef com _EfetivadoOK (L2401 → L3699)"]
+  P7 --> DB2[("HSTFOLHABENEF · HSTFOLHABENEFCAP · ARQUIVOPAGTO")]
+  DB2 --> P8["processaIRRegressivo (L2648-2667 → L8212)"]
+  P8 --> P9["Exec_SP_ExcessoDebito (L2689) e Exec_SP_MapaFolhaBenef (L2732)"]
+  P9 --> Z(["Versão efetivada"])
+  class A,Z,Z0 start
+  class X1,X2,X3,X4,X5 bloq
+  class DB1,DB2 db
+  classDef start fill:#1e3a5f,stroke:#2dd4bf,color:#e7ecf3
+  classDef bloq fill:#7f1d1d,stroke:#f87171,color:#fecaca
+  classDef db fill:#243044,stroke:#9aa8bc,color:#e7ecf3</pre>
+<p><strong>Evidência:</strong> <code>fFolhaNormalEfet.pas:1978-2806</code>, <code>fFolhaNormalEfet.pas:6229-6351</code>, <code>fFolhaNormalEfet.pas:8722-8800</code> · <span class="ev ev-comprovado">COMPROVADO</span>. <span class="ev ev-pendente">PENDENTE</span>: a checagem do status da ETL de validação (<code>L2200-2209</code>) e a chamada de <code>Verifica_Critica_ETL</code> (<code>L8780-8788</code>) estão dentro de blocos comentados <code>{ }</code>; a regra RS011 (críticas ETL abortam a efetivação) deve ser revalidada.</p>
+</section>
+
+<section id="FX-05"><div class="section-title">🔀 Fluxo PF-04 — Estorno de Folha</div>
+<pre class="fluxograma">flowchart TD
+  A(["TfrmEstornaFolha.bbtnProcessarClick (L4576)"]) --> V1{"Usuário confirma o estorno? (L4587)"}
+  V1 -- "Não" --> Z0(["Exit"])
+  V1 -- "Sim" --> L1["StartTransaction + GravaLogOperacoes Estorno de pagamento (L4590-4595)"]
+  L1 --> V2{"CtrlFinanc.TestaDispFinanc permite? (L4600)"}
+  V2 -- "Não" --> X1["MsgDlg: O Documento não pode ser Alterado, Excluído ou Inserido (L4602)"]
+  V2 -- "Sim" --> T{"Tipo de estorno"}
+  T -- "Individual" --> I1{"ioperacao mod 10 (L4629)"}
+  I1 -- "1" --> I2["EstornoPagamentoPendente (L2384)"]
+  I1 -- "2" --> I3["EstornoErroProcesso (L2455)"]
+  I1 -- "3" --> I4["EstornoNovoCAP (L2911)"]
+  I1 -- "4" --> I5["EstornoReprocessamento (L3013)"]
+  I1 -- "5" --> I6["AlterarFormaPagamento (L3308)"]
+  T -- "Completo" --> C0["EstornoFolhaCompleto (L4612 → L2062)"]
+  C0 --> V3{"Versão da folha válida? (L2085)"}
+  V3 -- "Não" --> X2["Erro na versão da Folha (L2087)"]
+  V3 -- "Sim" --> V4{"VerificaTmpDesc: TMPDESC ainda não baixada? (L2095)"}
+  V4 -- "Não" --> X3["Estorno não é possível: lançamentos temporários baixados na origem (L2098-2101)"]
+  V4 -- "Sim" --> C1["StartTransaction e GravaMotivoEstorno (L2135-2139)"]
+  C1 --> C2["ProcessaCompensacao (L2177 → L1739)"]
+  C2 --> C3[("UPDATE HISTRUBSAL e HSTBENEFBFCIARIO (L2214-2232)")]
+  C3 --> V5{"Versão efetivada?"}
+  V5 -- "Sim" --> C4["DesfazRubricaIndividual (L2238-2240 → L1843)"]
+  V5 -- "Não" --> C5
+  C4 --> C5[("DELETE HSTFOLHABENEFCAP (L2245)")]
+  C5 --> C6["processaIRRegressivo (L2336)"]
+  C6 --> C7[("DELETE HISTRUBSAL e LOTEXHSTFOLHABENEF (L2344-2349)")]
+  C7 --> C8[("UPDATE HSTFOLHABENEF SET FLGESTADO = 2 (L2352)")]
+  C8 --> C9["EstornaMapaFolhaBenef (L2360 → L4767)"]
+  C9 --> R{"Result = True?"}
+  R -- "Sim" --> OK(["Commit: Término Estorno Completo com sucesso (L2370-2371)"])
+  R -- "Não" --> ER(["Rollback: Estorno Completo interrompido por erro (L2375-2376)"])
+  class A,OK,Z0 start
+  class X1,X2,X3,ER bloq
+  class C3,C5,C7,C8 db
+  classDef start fill:#1e3a5f,stroke:#2dd4bf,color:#e7ecf3
+  classDef bloq fill:#7f1d1d,stroke:#f87171,color:#fecaca
+  classDef db fill:#243044,stroke:#9aa8bc,color:#e7ecf3</pre>
+<p><strong>Evidência:</strong> <code>festornafolha.pas:4576-4644</code>, <code>festornafolha.pas:2062-2382</code>; códigos de operação documentados no próprio fonte (<code>L4616-4626</code>, gravados em <code>MOTIVOESTORNOFB.TIPOESTORNO</code>) · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</section>
+
+<section id="FX-06"><div class="section-title">🔀 Fluxo PF-05 — Remessa Bancária (geração de arquivo de pagamento)</div>
+<pre class="fluxograma">flowchart TD
+  A(["TfrmGeraArquivoRemessa.bbtnProcessarClick (L342)"]) --> V1{"Histórico da folha preenchido? (L348)"}
+  V1 -- "Não" --> X1["MsgDlg: Preencha o Histórico da Folha de Benefício (L350)"]
+  V1 -- "Sim" --> V2{"Conta caixa x forma de pagamento selecionada? (L357)"}
+  V2 -- "Não" --> X2["MsgDlg: Preencha o(s) Contas Caixa x Forma de Pagamento (L359)"]
+  V2 -- "Sim" --> V3{"Data de previsão informada? (L366)"}
+  V3 -- "Não" --> X3["MsgDlg: Preencha a Data de previsão de pagamento (L368)"]
+  V3 -- "Sim" --> L1["GravaLogOperacoes Geração de arquivo bancário (L375)"]
+  L1 --> L2["Loop portadores marcados em cdsPortador (L385-387)"]
+  L2 --> L3["Loop recebedores: AlimentaQryDocTxt (L429-433 → L173)"]
+  L3 --> L4["TCtrlIntBanco.Create e Initialize (L438-441)"]
+  L4 --> L5["Define diretório PATHARQUIVOREM do portador (L445-450)"]
+  L5 --> V4{"VerficaDadosEmpresa e ValidaRemessa OK? (L454-456)"}
+  V4 -- "Não" --> X4["mmResult: Erro na geração do arquivo de remessa (L473)"]
+  V4 -- "Sim" --> G1["MontaPagamentoEletronico (L468)"]
+  G1 --> F1[("Arquivo de remessa em disco")]
+  L4 -. "exceção" .-> X5["MsgDlg: Erro no processo de geração do Arquivo de Remessa (L480)"]
+  F1 --> Z(["Commit se houver transação (L507-508)"])
+  X4 --> Z
+  class A,Z start
+  class X1,X2,X3,X4,X5 bloq
+  class F1 db
+  classDef start fill:#1e3a5f,stroke:#2dd4bf,color:#e7ecf3
+  classDef bloq fill:#7f1d1d,stroke:#f87171,color:#fecaca
+  classDef db fill:#243044,stroke:#9aa8bc,color:#e7ecf3</pre>
+<p><strong>Evidência:</strong> <code>fGeraArquivoRemessa.pas:342-509</code> · <span class="ev ev-comprovado">COMPROVADO</span>. No fluxo de efetivação a geração equivalente ocorre em <code>fFolhaNormalEfet.pas:9346</code> (CNAB 150) e <code>fFolhaNormalEfet.pas:9468</code> (CNAB 240); o layout interno do arquivo é montado por <code>TCtrlIntBanco</code>, componente externo a FOLHA (<span class="ev ev-pendente">PENDENTE</span>).</p>
+</section>
+
+<section id="FX-07"><div class="section-title">🔀 Fluxo PF-06 — Apropriação Contábil (planilha contábil da versão)</div>
+<pre class="fluxograma">flowchart TD
+  A(["Efetivação: Processa (L2363) ou regeração confirmada (L2565 → L2620)"]) --> B["ProcessaContabilizacao (L4461)"]
+  B --> V1{"HSTFOLHABENEF da versão encontrado?"}
+  V1 -- "Não" --> X1["frameProgresso: Não encontrou HSTFOLHABENEF e Exit (L4483-4486)"]
+  V1 -- "Sim" --> V2{"É regeração?"}
+  V2 -- "Sim" --> R1["ctrlLancamento.ExcluiLancaContab da planilha atual (L4506)"]
+  R1 --> V3{"Exclusão OK?"}
+  V3 -- "Não" --> X2["Erro na exclusão da planilha corrente, para regeração (L4509)"]
+  V3 -- "Sim" --> Q1
+  V2 -- "Não" --> Q1[("SELECT HISTRUBSAL, HSTFOLHABENEF, PROVDESC, PLANPREVCONTABIL, PERFILINVEST (L4543)")]
+  Q1 --> I1["ctrlLancamento.InsereLancaContab por conta (L4808)"]
+  I1 --> V4{"Lançamento aceito?"}
+  V4 -- "Não" --> X3["Erro nos Parametros Contábeis e MessageInfo (L4841-4843)"]
+  V4 -- "Sim" --> P2["Planilha em partida dobrada da HISTRUBSAL (L4880) com InsereLancaContab (L4992)"]
+  P2 --> Z(["Planilha contábil gerada via UCtrlLancamento"])
+  class A,Z start
+  class X1,X2,X3 bloq
+  class Q1 db
+  classDef start fill:#1e3a5f,stroke:#2dd4bf,color:#e7ecf3
+  classDef bloq fill:#7f1d1d,stroke:#f87171,color:#fecaca
+  classDef db fill:#243044,stroke:#9aa8bc,color:#e7ecf3</pre>
+<p><strong>Evidência:</strong> <code>fFolhaNormalEfet.pas:4461-5394</code>, <code>fFolhaNormalEfet.pas:2565-2620</code> · <span class="ev ev-comprovado">COMPROVADO</span>. A tabela física onde <code>UCtrlLancamento</code> persiste os lançamentos é externa a FOLHA (<span class="ev ev-pendente">PENDENTE</span>). O relatório de conferência é emitido por <code>FParamRelApropContabil</code> (ver <a href="relatorios.html">📄 Relatórios</a>).</p>
+</section>
+
+<section id="FX-08"><div class="section-title">🔀 Fluxo PF-10 — Conciliação e Reembolso do INSS (consulta e impressão)</div>
+<pre class="fluxograma">flowchart TD
+  A(["TfrmConciliacaoReembolsoINSS.btnProcurarClick (L672)"]) --> B["MSBenef.Executar: pesquisa do benefício (L677)"]
+  B --> V1{"Benefício selecionado? (L678)"}
+  V1 -- "Não" --> Z0(["Sem ação"])
+  V1 -- "Sim" --> C["consultar True (L681 → L972)"]
+  C --> C1["consultarPessoa (L980 → L687)"]
+  C1 --> C2["consultarRubricas (L981 → L1226)"]
+  C2 --> C3["consultarTotais (L984 → L2362)"]
+  C3 --> C4["consultarAnalitico (L985 → L1453)"]
+  C4 --> C5["consultarDesembolsoFUNCEF (L986 → L808)"]
+  C5 --> C6["consultarReembolsoINSS (L987 → L1842)"]
+  C6 --> C7["AtualizaRubFolha (L988 → L653)"]
+  C7 --> DB1[("ESTRUTURAXRUBRICA · PROVDESC · RUBRICAXINSS · HISTRUBSAL · BENEFBFCIARIO")]
+  DB1 --> V2{"Usuário solicita impressão?"}
+  V2 -- "Analítico / padrão" --> P1["btnImprimirClick (L2125): imprimirRelatorio (L1032) ou imprimirRelatorioAnalitico (L1664)"]
+  V2 -- "Sintético" --> P2["btnImprimirSinteticoClick (L2118): imprimirRelatorioSintetico (L2258)"]
+  P1 --> Z(["Relatório ReportBuilder: 3 TppReport no DFM"])
+  P2 --> Z
+  class A,Z,Z0 start
+  class DB1 db
+  classDef start fill:#1e3a5f,stroke:#2dd4bf,color:#e7ecf3
+  classDef db fill:#243044,stroke:#9aa8bc,color:#e7ecf3</pre>
+<p><strong>Evidência:</strong> <code>FConciliacaoReembolsoINSS.pas:653-2620</code>; tabelas por <code>grep -o "FROM [A-Z_]+"</code> no mesmo arquivo · <span class="ev ev-comprovado">COMPROVADO</span>. A escolha entre <code>imprimirRelatorio</code> e <code>imprimirRelatorioAnalitico</code> dentro de <code>btnImprimirClick</code> é <span class="ev ev-inferido">INFERIDO</span>. A retificação da prestação de contas (<code>FPrestacaoContasINSS.pas:3042</code> raise de cancelamento → <code>L3065</code> RollBack → <code>L3067/3069</code> MsgDlg) está descrita em <a href="tratamento-erros.html">⚠️ Erros</a>.</p>
+</section>
+
+<section id="FX-09"><div class="section-title">🔀 Fluxo PF-11 — Exportação de arquivo para convênio (TXT)</div>
+<pre class="fluxograma">flowchart TD
+  A(["TfrmExportaTXT.bbtnConfirmarClick (L223)"]) --> L1["StartTransaction + GravaLogOperacoes Exportação arquivo para convênio (L232-236)"]
+  L1 --> V0{"Log gravado?"}
+  V0 -- "Não" --> X0["raise Exception: Não foi possível gravar o log (L234)"]
+  V0 -- "Sim" --> V1["VerificaPreenchimento (L247 → L502)"]
+  V1 --> V2{"Ano, mês, layout de entrada, layout de saída e destino informados? (L507-522)"}
+  V2 -- "Não" --> X1["raise EValidacao.CreateVal e MsgDlg mtWarning (L508-527)"]
+  V2 -- "Sim" --> P1["MontaFiltro das rubricas selecionadas (L259)"]
+  P1 --> P2["uExportacao.Processar (L272 → uExportacao.pas L81)"]
+  P2 --> DB1[("LAYOUTXCOLUNAS e consultas de descontos e CTRLINTERFACE")]
+  DB1 --> V3{"Há dados para exportar?"}
+  V3 -- "Não" --> X2["ShowMessage: As informações solicitadas não foram encontradas (uExportacao.pas L706)"]
+  V3 -- "Sim" --> F1[("ListaExp.SaveToFile no destino escolhido (uExportacao.pas L483 / L699)")]
+  F1 --> Z(["MsgDlg: Geração de Arquivo de Saida de Dados Terminada (L294)"])
+  class A,Z start
+  class X0,X1,X2 bloq
+  class DB1,F1 db
+  classDef start fill:#1e3a5f,stroke:#2dd4bf,color:#e7ecf3
+  classDef bloq fill:#7f1d1d,stroke:#f87171,color:#fecaca
+  classDef db fill:#243044,stroke:#9aa8bc,color:#e7ecf3</pre>
+<p><strong>Evidência:</strong> <code>FExportaTxT.pas:223-298</code>, <code>FExportaTxT.pas:502-535</code>, <code>uExportacao.pas:81-836</code> · <span class="ev ev-comprovado">COMPROVADO</span>. A condição exata que leva a <code>L483</code> versus <code>L699</code> em <code>uExportacao.pas</code> não foi detalhada (<span class="ev ev-inferido">INFERIDO</span>).</p>
+</section>
+
+<section id="FX-10"><div class="section-title">🔀 Fluxo PF-11 — Geração de documentos e arquivos para entidades conveniadas</div>
+<pre class="fluxograma">flowchart TD
+  A(["TfrmExecGeraDocConvenio.btnConfirmarClick (L1425)"]) --> V1{"Alguma opção de geração marcada? (L1444)"}
+  V1 -- "Não" --> X1["MsgDlg: Necessário selecionar ao menos uma opção de geração (L1446)"]
+  V1 -- "Sim" --> V2{"Documento com arquivo e VerificaPlanoPatro falha? (L1459-1461)"}
+  V2 -- "Sim" --> X2["Abort"]
+  V2 -- "Não" --> T1["StartTransacao (L1469)"]
+  T1 --> V3{"Gerar com arquivo e ainda não existe documento? (L1473-1475)"}
+  V3 -- "Sim" --> G1["GeraDocumentoComArquivo via TCtrlDocumento (L1489 → L1730)"]
+  G1 --> V4{"Documento gerado?"}
+  V4 -- "Não" --> X3["RollBackTransacao e Exit (L1492-1493)"]
+  V4 -- "Sim" --> G2["GeraArquivo via TCtrlIntBanco (L1511 → L1637)"]
+  V3 -- "Não" --> V5
+  G2 --> V5{"Gerar sem arquivo?"}
+  V5 -- "Sim" --> G3["GeraDocumentoSemArquivo (L1533 → L2212)"]
+  G3 --> V6{"Gerado?"}
+  V6 -- "Não" --> X4["RollBackTransacao e Exit (L1536-1537)"]
+  V6 -- "Sim" --> V7
+  V5 -- "Não" --> V7{"Erro de arquivo, documento já existente ou erro com arquivo? (L1550)"}
+  V7 -- "Sim" --> R1(["RollBackTransacao (L1551)"])
+  V7 -- "Não" --> R2(["CommitTransacao (L1553)"])
+  R1 --> M["MsgDlg com resumo da geração (L1625)"]
+  R2 --> M
+  class A,R2 start
+  class X1,X2,X3,X4,R1 bloq
+  classDef start fill:#1e3a5f,stroke:#2dd4bf,color:#e7ecf3
+  classDef bloq fill:#7f1d1d,stroke:#f87171,color:#fecaca</pre>
+<p><strong>Evidência:</strong> <code>FExecGeraDocConvenio.pas:1425-1637</code>; validações de filtro em <code>FExecGeraDocConvenio.pas:1208-1236</code> (mês, ano, previsão, versão — RS026) · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</section>
+
+<section><div class="section-title">📋 Rastreabilidade fluxo × jornada × regra</div>
+<div class="table-wrap"><table><thead><tr><th>Fluxo</th><th>Jornada</th><th>Regras relacionadas</th><th>Arquivo principal</th></tr></thead><tbody>
+<tr><td><a href="#FX-01">PF-01 Preparo</a></td><td><a href="funcionalidades.html#PF-01">JF001</a></td><td><a href="regras-de-negocio.html#FOLHA-RN010">RS010</a></td><td><code>FPreparo.pas</code></td></tr>
+<tr><td><a href="#FX-02">PF-02 Prévia (tela)</a></td><td><a href="funcionalidades.html#PF-02">JF002</a></td><td><a href="regras-de-negocio.html#FOLHA-RN022">RS022</a></td><td><code>FFolhaNormalPrevia.pas</code></td></tr>
+<tr><td><a href="#FX-03">PF-02/PF-08 Motor e IRRF</a></td><td><a href="funcionalidades.html#PF-08">JF008</a></td><td><a href="regras-de-negocio.html#FOLHA-RN004">RS004</a>, <a href="regras-de-negocio.html#FOLHA-RN015">RS015</a>, <a href="regras-de-negocio.html#FOLHA-RN017">RS017</a>, <a href="regras-de-negocio.html#FOLHA-RN018">RS018</a>, <a href="regras-de-negocio.html#FOLHA-RN019">RS019</a></td><td><code>dFolhaPrevia.pas</code></td></tr>
+<tr><td><a href="#FX-04">PF-03 Efetivação</a></td><td><a href="funcionalidades.html#PF-03">JF003</a></td><td><a href="regras-de-negocio.html#FOLHA-RN011">RS011</a>, <a href="regras-de-negocio.html#FOLHA-RN012">RS012</a>, <a href="regras-de-negocio.html#FOLHA-RN013">RS013</a></td><td><code>fFolhaNormalEfet.pas</code></td></tr>
+<tr><td><a href="#FX-05">PF-04 Estorno</a></td><td><a href="funcionalidades.html#PF-04">JF004</a></td><td>validações inline</td><td><code>festornafolha.pas</code></td></tr>
+<tr><td><a href="#FX-06">PF-05 Remessa</a></td><td><a href="funcionalidades.html#PF-05">JF005</a></td><td>—</td><td><code>fGeraArquivoRemessa.pas</code></td></tr>
+<tr><td><a href="#FX-07">PF-06 Apropriação contábil</a></td><td><a href="funcionalidades.html#PF-06">JF006</a></td><td><a href="regras-de-negocio.html#FOLHA-RN013">RS013</a></td><td><code>fFolhaNormalEfet.pas</code></td></tr>
+<tr><td><a href="#FX-08">PF-10 Conciliação INSS</a></td><td><a href="funcionalidades.html#PF-10">JF010</a></td><td><a href="regras-de-negocio.html#FOLHA-RN025">RS025</a></td><td><code>FConciliacaoReembolsoINSS.pas</code></td></tr>
+<tr><td><a href="#FX-09">PF-11 Exportação convênio</a></td><td><a href="funcionalidades.html#PF-11">JF011</a></td><td><a href="regras-de-negocio.html#FOLHA-RN002">RS002</a></td><td><code>FExportaTxT.pas</code></td></tr>
+<tr><td><a href="#FX-10">PF-11 Documentos convênio</a></td><td><a href="funcionalidades.html#PF-11">JF011</a></td><td><a href="regras-de-negocio.html#FOLHA-RN026">RS026</a></td><td><code>FExecGeraDocConvenio.pas</code></td></tr>
+</tbody></table></div>
+</section>
+</main>
+<footer>
+<p>Blueprint AS-IS — PFC-31 — Abas complementares FOLHA | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-10</p>
+</footer>
+<script src="../assets/js/mermaid.min.js"></script>
+<script src="../assets/js/fluxogramas.js"></script>
+</body>
+</html>
