@@ -136,8 +136,10 @@ def copy_base(path, stems):
     return None
 
 
-def count_module(key):
-    cfg = MODULES[key]
+def count_module(key, cfg=None):
+    """Conta os fontes Delphi 5 dos diretórios do módulo. `cfg` permite reuso por outras
+    ferramentas (ex.: PFC-26) com {"nome": ..., "dirs": [...]}; padrão = MODULES[key]."""
+    cfg = cfg or MODULES[key]
     files, others = [], {}
     for d in cfg["dirs"]:
         for p in sorted((ROOT / d).rglob("*"), key=lambda x: str(x).lower()):
