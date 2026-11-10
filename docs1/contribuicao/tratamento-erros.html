@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contribuição Previdenciária — Tratamento de Erros — Blueprint AS-IS</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<header>
+  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-23 (enriquecido)</div>
+  <h1>⚠️ Tratamento de Erros e Exceções — Contribuição Previdenciária</h1>
+  <p>346 blocos try, 53 mensagens de validação/erro — com rastreabilidade arquivo:linha</p>
+</header>
+<nav>
+  <a href="index.html">📋 Visão Geral</a>
+  <a href="arquitetura.html">🏗️ Arquitetura</a>
+  <a href="inventario-tecnico.html">📦 Inventário</a>
+  <a href="funcionalidades.html">⚙️ Funcionalidades</a>
+  <a href="procedures-functions.html">🔧 Procedures</a>
+  <a href="regras-de-negocio.html">📏 Regras</a>
+  <a href="dados.html">🗄️ Dados</a>
+  <a href="relatorios.html">📄 Relatórios</a>
+  <a href="integracoes.html">🔗 Integrações</a>
+  <a href="tratamento-erros.html">⚠️ Erros</a>
+  <a href="diagramas-fluxo.html">🔀 Fluxos</a>
+  <a href="lacunas.html">🔍 Lacunas</a>
+  <a href="controle-cobertura.html">📊 Cobertura</a>
+</nav>
+<main>
+<section><div class="section-title">⚠️ Visão Geral</div>
+<p>O módulo CONTRIBUIÇÃO utiliza três padrões de tratamento de erros: (1) <code>try/except</code> com <code>MessageDlg</code>/<code>ShowMessage</code>, (2) <code>try/except</code> com <code>RollBack</code> para reverter transações, e (3) <code>raise exception.Create</code> para propagar erros. Foram contabilizados <strong>346 blocos try</strong> e <strong>53 ocorrências de MessageDlg/ShowMessage/raise exception.Create</strong>. O arquivo com mais blocos try é <code>FDivergContrib.pas</code> (56 blocos).</p>
+</section>
+
+<section><div class="section-title">📊 Distribuição de Blocos try por Arquivo</div>
+<div class="table-wrap"><table><thead><tr><th>Arquivo</th><th>Blocos try</th><th>Padrão dominante</th></tr></thead><tbody>
+<tr><td>FDivergContrib.pas</td><td>56</td><td>try/except + MsgDlg em tratamento de divergências</td></tr>
+<tr><td>FRecebeContribuicao.pas</td><td>43</td><td>try/except + RollBack em recebimento</td></tr>
+<tr><td>FPreparaEnvia.pas</td><td>34</td><td>try/except + RollBack em preparo/envio</td></tr>
+<tr><td>FControleIndivContrib.pas</td><td>33</td><td>try/except + MsgDlg em controle individual</td></tr>
+<tr><td>FCadHstContribuicao.pas</td><td>23</td><td>try/except + MsgDlg em cadastro manual</td></tr>
+<tr><td>FPrincipal.pas</td><td>13</td><td>try/except em CriaDataModule + try/finally em login</td></tr>
+<tr><td>FEventoManutParcial.pas</td><td>13</td><td>try/except + MostrarErro(E)</td></tr>
+<tr><td>FAlteracaoHistoricoContrib.pas</td><td>9</td><td>try/except + MsgDlg validação</td></tr>
+</tbody></table></div>
+<p><strong>Evidência:</strong> <code>grep -c 'try' CONTRIBUICAOPREV/Fontes/*.pas</code> — <span class="ev ev-comprovado">COMPROVADO</span></p>
+</section>
+
+<section><div class="section-title">📋 Mensagens de Validação Significativas</div>
+<div class="table-wrap"><table><thead><tr><th>Mensagem</th><th>Arquivo:linha</th><th>Tipo</th><th>Evidência</th></tr></thead><tbody>
+<tr><td>"ERRO AO REALIZAR INTEGRAÇÃO COM O PGA"</td><td>FPreparaEnvia.pas:5662</td><td>MessageDlg (mtError)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>"Erro ao gravar Log."</td><td>FDivergContrib.pas:5019</td><td>raise exception.Create</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>"Contribuição já recebida — não pode ser alterada"</td><td>FPreparaEnvia.pas</td><td>MsgDlg (CONTRIB-RN004)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>"Contribuição já enviada — não pode ser alterada/excluída"</td><td>FPreparaEnvia.pas</td><td>MsgDlg (CONTRIB-RN005)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>"Boleta enviada bloqueia desfazimento"</td><td>FPreparaEnvia.pas</td><td>MsgDlg (CONTRIB-RN077)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>"Valor esperado deve ser maior que zero"</td><td>FPreparaEnvia.pas</td><td>MsgDlg (CONTRIB-RN003)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>"Documento pendente bloqueia tratamento"</td><td>FDivergContrib.pas</td><td>MsgDlg (CONTRIB-RN049)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>"Mês de referência obrigatório"</td><td>FPreparaEnvia.pas</td><td>MsgDlg (CONTRIB-RN002)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">🔄 Padrões de Tratamento Identificados</div>
+<div class="cards-grid">
+<div class="card"><h3>try/except + RollBack</h3><p>Usado em operações de escrita (preparo, envio, recebimento, divergências). O except reverte a transação e exibe MessageDlg. Padrão dominante em FPreparaEnvia.pas e FRecebeContribuicao.pas.</p></div>
+<div class="card"><h3>try/except + MsgDlg</h3><p>Usado em validações de situação, valor e divergência. O except exibe MessageDlg e aborta. Padrão dominante em FDivergContrib.pas.</p></div>
+<div class="card"><h3>raise exception.Create</h3><p>Usado para erros de log: "Erro ao gravar Log." em FDivergContrib.pas:5019 e outros.</p></div>
+<div class="card"><h3>try/finally (cleanup)</h3><p>Usado em FPrincipal (login, CriaDataModule) para garantir liberação de recursos (Free de forms/queries).</p></div>
+</div>
+</section>
+</main>
+<footer>
+<p>Blueprint AS-IS — PFC-31 — Módulo CONTRIBUIÇÃO | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-10</p>
+</footer>
+</body>
+</html>

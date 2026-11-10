@@ -3,25 +3,29 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Folha de Benefícios — Inventário — Blueprint AS-IS</title>
+<title>Folha de Benefícios — Inventário Técnico — Blueprint AS-IS</title>
 <link rel="stylesheet" href="../assets/css/style.css">
 </head>
 <body>
 <header>
   <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-22 (enriquecido)</div>
-  <h1>📂 Inventário de Artefatos — Folha de Benefícios</h1>
+  <h1>📂 Inventário Técnico de Artefatos — Folha de Benefícios</h1>
   <p>100% dos artefatos Delphi do módulo FOLHA: units, forms, DataModules, DBObjects, CtrlObjects, packages e configuração.</p>
 </header>
 <nav>
   <a href="index.html">📋 Visão Geral</a>
   <a href="arquitetura.html">🏗️ Arquitetura</a>
-  <a href="inventario.html">📂 Inventário</a>
-  <a href="formularios.html">🧾 Formulários</a>
-  <a href="funcionalidades.html">⚙️ Processos</a>
-  <a href="rotinas.html">🔧 Rotinas</a>
+  <a href="inventario-tecnico.html">📦 Inventário</a>
+  <a href="funcionalidades.html">⚙️ Funcionalidades</a>
+  <a href="procedures-functions.html">🔧 Procedures</a>
   <a href="regras-de-negocio.html">📏 Regras</a>
   <a href="dados.html">🗄️ Dados</a>
+  <a href="relatorios.html">📄 Relatórios</a>
   <a href="integracoes.html">🔗 Integrações</a>
+  <a href="tratamento-erros.html">⚠️ Erros</a>
+  <a href="diagramas-fluxo.html">🔀 Fluxos</a>
+  <a href="lacunas.html">🔍 Lacunas</a>
+  <a href="controle-cobertura.html">📊 Cobertura</a>
 </nav>
 <main>
 <section><div class="section-title">📊 Totais do módulo (valores reais)</div>
@@ -383,6 +387,193 @@
 <p>O form principal <code>FPrincipal.pas</code> (1.976 lin) herda de <code>frmCMPrincipal</code> (framework CM). O DPR cria, em ordem: <code>frmPrincipal</code>, <code>frmAguarde</code>, <code>dtmLookFolha</code>, <code>dtmAPrev</code>, <code>dtmFolha</code>, <code>dtmIntegracao</code>, <code>dtmIntegraCAPCAR</code>, <code>dtmContabil</code>, <code>dtmRelParamRubricas</code>, <code>DtmAutorizacao</code>, <code>frmProgresso</code>, <code>frmPRelEstruturaRubrica</code>, <code>frmMsg</code>, <code>FrmGeraLstIndivResul</code>. O DataModule do motor (<code>dtmFolhaPrevia</code>) é instanciado sob demanda (linha 312 comentada — refatoração WO19556). Evidência: <code>FOLHA/Fontes/Folha.dpr:302-319</code> — <span class="ev ev-comprovado">COMPROVADO</span>.</p>
 </section>
 
+
+
+<section><div class="section-title">🧾 Formulários-chave (detalhamento)</div>
+
+
+<section><div class="section-title">🧾 Formulários-chave por área funcional</div>
+<p>Cada ficha abaixo foi obtida do par <code>.dfm</code> (componentes visuais) + <code>.pas</code> (eventos/rotinas). Contagens de componentes (btn=botões, grid=grades, edit=campos, label=rótulos, combo=listas) extraídas do DFM. Eventos e rotinas com <code>arquivo:linha</code>. O inventário completo (211 forms) está em <a href="inventario-tecnico.html">📦 Inventário</a>.</p>
+<div class="legend"><span><span class="ev ev-comprovado">COMPROVADO</span> — lido do DFM/PAS</span><span><span class="ev ev-inferido">INFERIDO</span> — interpretado do contexto</span></div>
+</section>
+
+<section><div class="section-title">⚙️ Cálculo e Processamento</div>
+
+<div class="pf-block" id="form-FPreparo"><h4>FPreparo — Preparo da Folha de Benefícios</h4>
+<p><strong>Arquivo:</strong> <code>FOLHA/Fontes/FPreparo.pas</code> (10.384 lin) + <code>FPreparo.dfm</code> · Caption: "Preparo da Folha de Benefícios"</p>
+<p><strong>Propósito:</strong> selecionar patrocinadoras, planos e benefícios e executar o preparo (reajuste/eventos) antes da prévia. É a porta de entrada do ciclo da folha.</p>
+<p><strong>Componentes (DFM):</strong> 11 botões (TBitBtn), 1 grade (TwwDBGrid), 10 rótulos. Componentes-chave: <code>chklstPatro</code> (checklist patrocinadoras), <code>chklstPlano</code> (checklist planos), <code>rdgTpFolha</code> (tipo de folha), <code>cmbLote</code> (lote), <code>grdBenef</code> (grade de benefícios).</p>
+<p><strong>Campos de entrada:</strong> tipo de folha (normal/extra/13º), lote, patrocinadoras selecionadas, planos selecionados, benefícios filtrados, mês/ano de referência.</p>
+<p><strong>Botões e eventos → rotinas:</strong></p>
+<ul>
+<li><code>bbtnSalvarClick</code> → <code>AtualizaLote</code> (<code>FPreparo.pas:1321</code>)</li>
+<li><code>bbtnPreparoClick</code> → <code>MontaListaPatro</code> (:1030) → <code>MontaListaPlano</code> (:1042) → <code>MontaListaBenef</code> (:1075) → <code>InicializaProcessoBeneficio</code> (:1755) → <code>PassoProcessoBeneficio</code> (:1901) → <code>ExecutaRegraProcessoBeneficio</code> (:1943) → <code>GravaHstBeneficio</code> (:2375) → <code>CalculaProRata</code> (:2931) → <code>CalculaEnviaContribuicaoPensionista</code> (:2958)</li>
+<li><code>chklstPatroClickCheck</code> (:1135) / <code>chklstPlanoClickCheck</code> (:1141) → repopula listas dependentes</li>
+<li><code>rdgTpFolhaClick</code> (:1323) → <code>FiltraBenefMesPorTipoFolha</code> (:1661)</li>
+<li><code>cmbLoteChange</code> (:1360) → <code>AtualizaDadosLote</code> (:1330)</li>
+<li><code>btnCommitClick</code> (:9473) → commit da transação</li>
+</ul>
+<p><strong>Saídas:</strong> benefícios selecionados/reajustados gravados em HSTBENEFBFCIARIO, PROCESSOBENEF, HSTCONTRIBPREV. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+
+<div class="pf-block" id="form-FFolhaNormalPrevia"><h4>FFolhaNormalPrevia — Prévia da Folha de Benefícios</h4>
+<p><strong>Arquivo:</strong> <code>FOLHA/Fontes/FFolhaNormalPrevia.pas</code> (5.060 lin) + <code>FFolhaNormalPrevia.dfm</code> · Caption: "Prévia da Folha de Benefícios"</p>
+<p><strong>Propósito:</strong> disparar o cálculo da prévia (chama o motor <code>dFolhaPrevia.pas</code>) com parâmetros de lote, mês/ano, abono, ETL e modo automático.</p>
+<p><strong>Componentes (DFM):</strong> 15 botões, 3 grades, 1 combo. Componentes-chave: <code>chkResgate</code>, <code>chkResgateParcelado</code>, <code>chkPreviaGeral</code>, <code>chkDivideLista</code>, <code>chkModoAuto</code>, <code>chkETL</code>, <code>btnApagaPrevia</code>, <code>btnRefresh</code>, <code>BtnAtualizaNumDep</code>.</p>
+<p><strong>Botões e eventos → rotinas:</strong></p>
+<ul>
+<li><code>chkResgateClick</code> (<code>FFolhaNormalPrevia.pas:3352</code>) — habilita opções de resgate</li>
+<li><code>chkResgateParceladoClick</code> (:3373) — resgate parcelado</li>
+<li><code>BtnAtualizaNumDepClick</code> (:3386) — atualiza nº de dependentes</li>
+<li><code>BtnApagaPreviaClick</code> (:3577) — exclui prévia existente (reprocessamento)</li>
+<li><code>ChkPreviaGeralClick</code> (:3702) — prévia geral vs. individual</li>
+<li><code>chkDivideListaClick</code> (:4138) — divide lista de execução</li>
+<li><code>chkModoAutoClick</code> (:4282) — modo automático</li>
+<li><code>chkETLClick</code> (:4385) — habilita ETL de efetivação</li>
+<li><code>btnRefreshClick</code> (:4832) — atualiza tela</li>
+</ul>
+<p><strong>Rotina central acionada:</strong> <code>TdtmFolhaPrevia.ProcessaPrevia</code> (<code>dFolhaPrevia.pas:24781</code>). <strong>Saídas:</strong> PREVIA, BASEDEPAGAMENTO, BITRIBUTACAO. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+
+<div class="pf-block" id="form-fFolhaNormalEfet"><h4>fFolhaNormalEfet — Efetivação de Versão de Pagamento</h4>
+<p><strong>Arquivo:</strong> <code>FOLHA/Fontes/fFolhaNormalEfet.pas</code> (9.975 lin) + <code>fFolhaNormalEfet.dfm</code> · Caption: "Efetivação de Versão de Pagamento"</p>
+<p><strong>Propósito:</strong> validar lote, conta bancária e parâmetros contábeis/financeiros, executar ETL, gerar histórico definitivo (HSTFOLHABENEF) e arquivos de pagamento CNAB.</p>
+<p><strong>Componentes (DFM):</strong> 4 botões, 1 grade, 2 edits, 11 rótulos, 1 combo.</p>
+<p><strong>Rotinas-chave (com file:line):</strong></p>
+<ul>
+<li><code>Executa_ETL</code> (<code>fFolhaNormalEfet.pas:8722</code>) — executa ETL de efetivação (3 datas de pagamento)</li>
+<li><code>VerificaEfeticaoETL</code> (:8928) — verifica status da ETL</li>
+<li><code>RetornaDiretorioETL</code> (:8898) — diretório de ETL por funcionalidade/rotina</li>
+<li><code>Monitoramento</code> (:9006) — monitora execução/erro</li>
+<li><code>processaIRRegressivo</code> (:8212) — processa IR regressivo pós-efetivação</li>
+<li><code>atualizaBasePagamento</code> (:8328) — atualiza BASEDEPAGAMENTO</li>
+<li><code>atualizaHstCalculoPMPFolha</code> (:8405) — histórico de cálculo PMP</li>
+<li><code>atualizaHstPrazoAcumulacaoFolha</code> (:8449) — prazo de acumulação</li>
+<li><code>PreparaContribuicaoPatro</code> (:8605) — prepara contribuição da patrocinadora</li>
+<li><code>PossuiPerfil</code> (:8676) — verifica perfil do lote/histórico</li>
+<li><code>GeraArquivoPagamentoLeiauteCNAB150</code> (:9346) — gera remessa CNAB 150</li>
+<li><code>GeraArquivoPagamentoleiauteCNAB240</code> (:9468) — gera remessa CNAB 240</li>
+<li><code>SetDocumentoArqPagamento</code> / <code>SetFavorecidoArqPagamento</code> / <code>SetRegistrosArquivoPagamento</code> / <code>SetStatusDocArquivoPagamento</code> / <code>SetTarifaBancariaArqPagamento</code> (:9584-9728) — montagem do ARQUIVOPAGTO</li>
+<li><code>GeraArquivoSIACC</code> (:9806) / <code>RecuperaValorSIACC</code> (:9829) — SIACC</li>
+<li><code>CargaContraChequeMongo</code> (:9844) — carga de contra-cheque em MongoDB <span class="ev ev-inferido">INFERIDO</span></li>
+<li><code>Exec_SP_ExcessoDebito</code> (:8158) — stored procedure de excesso de débito</li>
+</ul>
+<p><strong>Saídas:</strong> HSTFOLHABENEF, HSTFOLHABENEFCAP, ARQUIVOPAGTO, arquivos CNAB. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+
+<div class="pf-block" id="form-festornafolha"><h4>festornafolha — Estorno de Folha de Benefícios</h4>
+<p><strong>Arquivo:</strong> <code>FOLHA/Fontes/festornafolha.pas</code> (5.277 lin) + <code>festornafolha.dfm</code> · Caption: "Estorno de Folha de Benefícios"</p>
+<p><strong>Propósito:</strong> estornar folha individual ou por lote, preservando histórico; gera CAP/CAR (contas a pagar/receber), desfaz rubrica individual e trata compensação.</p>
+<p><strong>Componentes (DFM):</strong> 3 botões, 4 grades, 2 edits, 46 rótulos.</p>
+<p><strong>Botões e eventos → rotinas:</strong></p>
+<ul>
+<li><code>bbtnProcessarClick</code> (<code>festornafolha.pas:4576</code>) → orquestra estorno</li>
+<li><code>bbtnOutroClick</code> (:4541) — novo estorno</li>
+</ul>
+<p><strong>Rotinas-chave:</strong> <code>VerificaFornec</code> (:624), <code>VerificaCliente</code> (:633), <code>AchaContaLiquido</code> (:642), <code>AbreCAPrecebedor</code> (:715), <code>AbreQryCAP</code> (:816), <code>VerificaStatusDocumentosVersao</code> (:900), <code>HabilitaEstornoIndividual</code> (:939), <code>GeraAlterador</code> (:1183), <code>GeraCAP</code> (:1523), <code>GeraCAR</code> (:1654), <code>GravaMotivoEstorno</code> (:1709), <code>ProcessaCompensacao</code> (:1739), <code>Exec_SP_ExcessoDebito</code> (:1801), <code>DesfazRubricaIndividual</code> (:1843), <code>VerificaTmpDesc</code> (:2030), <code>EstornoFolhaCompleto</code> (:2062), <code>EstornoPagamentoPendente</code> (:2384), <code>EstornoErroProcesso</code> (:2455), <code>EstornoNovoCAP</code> (:2911), <code>EstornoReprocessamento</code> (:3013).</p>
+<p><strong>Saídas:</strong> estorna HSTFOLHABENEFCAP, HISTRUBSAL, RUBRICAINDIV, ARQUIVOPAGTO; gera CAP/CAR. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+
+<div class="pf-block" id="form-fGeraArquivoRemessa"><h4>fGeraArquivoRemessa — Geração de Arquivo de Remessa de Pagamento</h4>
+<p><strong>Arquivo:</strong> <code>FOLHA/Fontes/fGeraArquivoRemessa.pas</code> (818 lin) + <code>fGeraArquivoRemessa.dfm</code> · Caption: "Geração de Arquivo de Remessa de Pagamento"</p>
+<p><strong>Propósito:</strong> gerar arquivo de remessa bancária (CNAB) a partir de versão de pagamento efetivada.</p>
+<p><strong>Componentes (DFM):</strong> 6 botões, 1 grade, 2 edits, 4 rótulos.</p>
+<p><strong>Botões e eventos:</strong> <code>bbtnProcessarClick</code> (<code>fGeraArquivoRemessa.pas:342</code>) → geração; <code>bbtnOutroClick</code> (:511); <code>btnEscolheDirClick</code> (:547) → seleciona diretório de saída.</p>
+<p><strong>Saídas:</strong> arquivo de remessa em disco + ARQUIVOPAGTO. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+
+<div class="pf-block" id="form-FRemessaEletronica"><h4>FRemessaEletronica — Remessa Eletrônica</h4>
+<p><strong>Arquivo:</strong> <code>FOLHA/Fontes/FRemessaEletronica.pas</code> (5.719 lin) + <code>FRemessaEletronica.dfm</code> · Caption: "Remessa Eletrônica"</p>
+<p><strong>Propósito:</strong> gestão de remessa eletrônica de pagamento (fita de crédito) com múltiplas grades de detalhe.</p>
+<p><strong>Componentes (DFM):</strong> 7 botões, <strong>12 grades</strong>, 19 edits, 30 rótulos, 2 combos — o form com mais grades do módulo.</p>
+<p><strong>Botões:</strong> <code>btnLimparFCClick</code> (<code>FRemessaEletronica.pas:5705</code>) — limpa fita de crédito.</p>
+<p><strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+
+<div class="pf-block" id="form-FPrestacaoContasINSS"><h4>FPrestacaoContasINSS — Prestação de Contas do INSS</h4>
+<p><strong>Arquivo:</strong> <code>FOLHA/Fontes/FPrestacaoContasINSS.pas</code> (6.481 lin) + <code>FPrestacaoContasINSS.dfm</code></p>
+<p><strong>Propósito:</strong> prestação de contas ao INSS (reembolso, retificação, conciliação).</p>
+<p><strong>Componentes (DFM):</strong> 7 botões, 3 edits, 7 rótulos, 2 combos.</p>
+<p><strong>Tratamento de exceção:</strong> <code>raise Exception.Create('Operação cancelada pelo usuário')</code> em :3042, :4433, :6361 — aborta operação por cancelamento. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+
+<div class="pf-block" id="form-FConciliacaoReembolsoINSS"><h4>FConciliacaoReembolsoINSS — Conciliação do Reembolso do INSS</h4>
+<p><strong>Arquivo:</strong> <code>FOLHA/Fontes/FConciliacaoReembolsoINSS.pas</code> (2.620 lin) + <code>FConciliacaoReembolsoINSS.dfm</code> · Caption: "Conciliação do Reembolso do INSS"</p>
+<p><strong>Componentes (DFM):</strong> 4 botões, 5 grades, 10 edits, 19 rótulos. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+
+<div class="pf-block" id="form-fTratamentoConvenio"><h4>fTratamentoConvenio — Tratamento de Convênio</h4>
+<p><strong>Arquivo:</strong> <code>FOLHA/Fontes/fTratamentoConvenio.pas</code> (4.476 lin) + <code>fTratamentoConvenio.dfm</code> · Caption: "Tratamento de Convênio"</p>
+<p><strong>Componentes (DFM):</strong> 2 botões, 1 combo, 2 rótulos. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+
+<div class="pf-block" id="form-fImportaTxt"><h4>fImportaTxt — Importação de Convênios</h4>
+<p><strong>Arquivo:</strong> <code>FOLHA/Fontes/fImportaTxt.pas</code> (4.078 lin) + <code>fImportaTxt.dfm</code> · Caption: "Importação de Convênios"</p>
+<p><strong>Componentes (DFM):</strong> 4 botões, 1 grade, 1 edit, 11 rótulos, 2 combos. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+
+</section>
+
+<section><div class="section-title">🔍 Consultas</div>
+<div class="pf-block"><h4>FConsultaPrevia — Consulta Prévia da Folha de Benefícios</h4><p><code>FOLHA/Fontes/FConsultaPrevia.pas</code> (2.563 lin). Permite consultar a prévia gerada por recebedor/rubrica antes da efetivação. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+<div class="pf-block"><h4>FConsultaHistorico — Consulta o Histórico da Folha de Benefícios</h4><p><code>FOLHA/Fontes/FConsultaHistorico.pas</code> (695 lin). Consulta o histórico pós-efetivação. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+<div class="pf-block"><h4>fConsultaGlobalPrevia — Consulta Global da Prévia</h4><p><code>FOLHA/Fontes/fConsultaGlobalPrevia.pas</code> (366 lin). Visão global consolidada da prévia. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+<div class="pf-block"><h4>fConsultaParametrizacaoPrevia — Consulta Parametrização Contábil/Financeira da Prévia</h4><p><code>FOLHA/Fontes/fConsultaParametrizacaoPrevia.pas</code> (172 lin). <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+<div class="pf-block"><h4>fVisaoGerencial — Visão Gerencial da Folha de Benefícios</h4><p><code>FOLHA/Fontes/fVisaoGerencial.pas</code> (350 lin). Painel gerencial consolidado. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+<div class="pf-block"><h4>fConsHstCompensaIR — Consulta do Histórico de Compensação IRRF</h4><p><code>FOLHA/Fontes/fConsHstCompensaIR.pas</code> (140 lin). <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+<div class="pf-block"><h4>FConsultaEstorno — Consulta a Estornos</h4><p><code>FOLHA/Fontes/FConsultaEstorno.pas</code> (400 lin). <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+</section>
+
+<section><div class="section-title">📝 Cadastros e Parametrização</div>
+<div class="pf-block"><h4>FCadRubricaIndiv — Rubricas Individuais</h4><p><code>FOLHA/Fontes/FCadRubricaIndiv.pas</code> (3.672 lin). Componentes: 5 botões, 2 grades, 11 edits, 36 rótulos, 3 combos. Cadastro de rubricas individuais por recebedor (lançamento individual). <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+<div class="pf-block"><h4>FCadHstBeneficio — Cadastro Manual do Histórico de Benefícios</h4><p><code>FOLHA/Fontes/FCadHstBeneficio.pas</code> (3.412 lin). Inserção manual de histórico. Validações: <code>raise EValidacao</code> em :3007/:3012 (Valor BS Atual/Total), :3016/:3020 (FAB Atual/Total), :3025 (Base de Cálculo do Déficit) — <strong>campos obrigatórios</strong>. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+<div class="pf-block"><h4>FParametroFolha — Parâmetros Globais do Sistema</h4><p><code>FOLHA/Fontes/FParametroFolha.pas</code> (3.008 lin). Componentes: 2 botões, 70 rótulos, 6 combos — form de parametrização mais extenso. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+<div class="pf-block"><h4>FCadProvento — Rubricas Salariais</h4><p><code>FOLHA/Fontes/FCadProvento.pas</code> (1.339 lin). Cadastro de rubricas de provento/desconto (PROVDESC). <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+<div class="pf-block"><h4>FAssocRubricaPlano — Associação de Rubricas por Plano</h4><p><code>FOLHA/Fontes/FAssocRubricaPlano.pas</code> (963 lin). Associa rubricas a planos (RUBRICAXPLANO). <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+<div class="pf-block"><h4>FCadLayoutDesconto — Cadastro de Layout de Arquivos de Entrada</h4><p><code>FOLHA/Fontes/FCadLayoutDesconto.pas</code> (1.321 lin). Layout de importação de convênios. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+<div class="pf-block"><h4>FEstruturaCalculo — Cadastro de Estruturas de Cálculo</h4><p><code>FOLHA/Fontes/FEstruturaCalculo.pas</code> (673 lin). <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+<div class="pf-block"><h4>FCadDepJudicial — Ação Judicial de Imposto de Renda</h4><p><code>FOLHA/Fontes/FCadDepJudicial.pas</code> (2.556 lin). Cadastro de ações judiciais de IR. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+<div class="pf-block"><h4>FCadExcessoesIR — Informações para Benefícios em Manutenção (exceções IR)</h4><p><code>FOLHA/Fontes/FCadExcessoesIR.pas</code> (1.457 lin). Exceções de IR por benefício. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+</section>
+
+<section><div class="section-title">💰 IRRF, Pensão Alimentícia e Retroativos</div>
+<div class="pf-block"><h4>FCadCompensaIRRF — Compensação de IRRF</h4><p><code>FOLHA/Fontes/FCadCompensaIRRF.pas</code> (449 lin). <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+<div class="pf-block"><h4>FHistCompSalContri — Histórico de Compensação de Saldo de Contribuições</h4><p><code>FOLHA/Fontes/FHistCompSalContri.pas</code> (2.835 lin). <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+<div class="pf-block"><h4>fCadRubXPensaoAlimenticia — Cadastro de Rubricas Incidentes na Pensão Alimentícia</h4><p><code>FOLHA/Fontes/fCadRubXPensaoAlimenticia.pas</code> (255 lin). <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+<div class="pf-block"><h4>FReajustaPercPensao — Atualização de Pensão Alimentícia para Beneficiários</h4><p><code>FOLHA/Fontes/FReajustaPercPensao.pas</code> (164 lin). Reajuste de percentual de pensão. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+<div class="pf-block"><h4>FInformaSalRetroEv — Informa Salários Retroativos (Ativo)</h4><p><code>FOLHA/Fontes/FInformaSalRetroEv.pas</code> (184 lin). Informação manual de salários retroativos. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+</section>
+
+<section><div class="section-title">🏦 Remessa, Fita de Crédito e Convênios</div>
+<div class="pf-block"><h4>FAberturaFitaCredit — Abertura da Fita de Crédito por Plano</h4><p><code>FOLHA/Fontes/FAberturaFitaCredit.pas</code> (1.344 lin). Abertura de fita de crédito por plano. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+<div class="pf-block"><h4>fGeraArquivoRemessaPrevia — Simula geração de Arquivo de Pagamento da Prévia</h4><p><code>FOLHA/Fontes/fGeraArquivoRemessaPrevia.pas</code> (2.895 lin). Simulação de remessa a partir da prévia. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+<div class="pf-block"><h4>FExecGeraDocConvenio — Geração de Documentos e Arquivos para Entidades Conveniadas</h4><p><code>FOLHA/Fontes/FExecGeraDocConvenio.pas</code> (2.901 lin). Validações obrigatórias: <code>raise EValidacao</code> em :1214 (mês), :1217 (ano), :1220 (previsão de pagamento), :1223/:1248 (selecionar versão da folha), :1254/:1261/:2627 (mensagens de contexto). <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+<div class="pf-block"><h4>FExportaTxT — Tela de Exportação</h4><p><code>FOLHA/Fontes/FExportaTxT.pas</code> (539 lin). Validações: <code>raise EValidacao</code> em :508 (ano), :511 (mês), :514 (layout de entrada), :517 (layout de saída), :522 (destino do arquivo de retorno); <code>raise Exception</code> em :234 (gravação de log). <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+</section>
+
+<section><div class="section-title">📊 Mapa, Conferência e Batimento</div>
+<div class="pf-block"><h4>FMapaFolhaBenef — Mapa da Folha de Benefício</h4><p><code>FOLHA/Fontes/FMapaFolhaBenef.pas</code> (209 lin). Geração do mapa da folha (WO2511). <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+<div class="pf-block"><h4>fConferenciaPrevia — Conferência da Prévia</h4><p><code>FOLHA/Fontes/fConferenciaPrevia.pas</code> (761 lin). Conferência antes da efetivação. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+<div class="pf-block"><h4>fBatimentoPrevia — Batimento de Líquido da Folha</h4><p><code>FOLHA/Fontes/fBatimentoPrevia.pas</code> (1.773 lin). Batimento de líquido entre prévia e referência. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+</section>
+
+<section><div class="section-title">⚰️ Encerramento e Adiantamento</div>
+<div class="pf-block"><h4>FEncerramentoPorFalecimento — Encerramento de Benefícios</h4><p><code>FOLHA/Fontes/FEncerramentoPorFalecimento.pas</code> (4.883 lin). Encerramento por falecimento. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+<div class="pf-block"><h4>FAdiantamentoExtraFolha — Insere Adiantamento Extra Folha</h4><p><code>FOLHA/Fontes/FAdiantamentoExtraFolha.pas</code> (824 lin). <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+<div class="pf-block"><h4>FExecAbateReserva — Abatimento de Reservas para Benefícios Pagos</h4><p><code>FOLHA/Fontes/FExecAbateReserva.pas</code> (887 lin). Validações obrigatórias: <code>raise EValidacao</code> em :139 (mês de referência) e :142 (ano de referência). <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+</section>
+
+<section><div class="section-title">📋 Observações de escopo</div>
+<ul>
+<li>Os 211 forms estão totalmente listados em <a href="inventario-tecnico.html">📦 Inventário</a>; esta página detalha os forms-chave com evidência direta do DFM/PAS.</li>
+<li>Forms sem <code>.pas</code> pareado (ex.: <code>fparambenefsituacao</code>, <code>fprelbenconced</code>, <code>FfinancHabitacional___</code>) estão marcados <span class="ev ev-pendente">PENDENTE</span> — mecanismo de build não confirmado.</li>
+<li>Units com prefixo <code>_</code> (<code>_UAdmPrev</code>, <code>_FAbertFechaLote</code>, etc.) são variantes paralelas — <span class="ev ev-inferido">INFERIDO</span>.</li>
+<li>Nenhum form de módulo externo (CONTRIBUIÇÃO, BENEFICIOPREV, IRRF, PROCJUD) foi aberto — isolamento de escopo.</li>
+</ul>
+</section>
+
+
+</section>
 </main>
 <footer>
 <p>Blueprint AS-IS — PFC-22 (enriquecido) — Módulo FOLHA | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-09</p>
