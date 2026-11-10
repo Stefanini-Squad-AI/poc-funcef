@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Folha de Benefícios — Rotinas — Blueprint AS-IS</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<header>
+  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-22 (enriquecido)</div>
+  <h1>🔧 Rotinas — Folha de Benefícios</h1>
+  <p>Análise profunda dos procedimentos/funções relevantes, com file:linha, parâmetros, blocos de processamento, SQL, cálculos, dados alterados e cadeia de chamadas.</p>
+</header>
+<nav>
+  <a href="index.html">📋 Visão Geral</a>
+  <a href="arquitetura.html">🏗️ Arquitetura</a>
+  <a href="inventario.html">📂 Inventário</a>
+  <a href="formularios.html">🧾 Formulários</a>
+  <a href="funcionalidades.html">⚙️ Processos</a>
+  <a href="rotinas.html">🔧 Rotinas</a>
+  <a href="regras-de-negocio.html">📏 Regras</a>
+  <a href="dados.html">🗄️ Dados</a>
+  <a href="integracoes.html">🔗 Integrações</a>
+</nav>
+<main>
+
+<section><div class="section-title">🔧 Motor de cálculo — dFolhaPrevia.pas (30.856 linhas)</div>
+<p>O DataModule <code>TdtmFolhaPrevia</code> (instanciado sob demanda — refatoração WO19556, <code>Folha.dpr:312</code>) concentra o motor de cálculo da prévia. Contém 3 classes principais: <code>TdtmFolhaPrevia</code> (DataModule), <code>TobjRecebedor</code> (processa um recebedor/titular) e <code>TobjRubrica</code> (processa uma rubrica). Abaixo, as rotinas-chave com assinatura, parâmetros, blocos lógicos, SQL/cálculos, dados alterados e cadeia de chamadas — todas com <code>file:linha</code> real.</p>
+<div class="legend"><span><span class="ev ev-comprovado">COMPROVADO</span> — assinatura/blocos lidos do código</span><span><span class="ev ev-inferido">INFERIDO</span> — comportamento inferido</span></div>
+</section>
+
+<section><div class="section-title">⚡ Orquestração da prévia</div>
+
+<div class="rule-block" id="rot-ProcessaPrevia"><div class="rule-id">TdtmFolhaPrevia.ProcessaPrevia — dFolhaPrevia.pas:24781</div>
+<p><strong>Assinatura:</strong> <code>function ProcessaPrevia(bTrataLoteIndependente, bIndividual: boolean; var bErroInserePrevia: boolean; iIdLista: integer): boolean;</code></p>
+<p><strong>Parâmetros:</strong> <code>bTrataLoteIndependente</code> (in, boolean) — lote independente; <code>bIndividual</code> (in) — prévia individual; <code>bErroInserePrevia</code> (out) — sinaliza erro de inserção (SIG 80669); <code>iIdLista</code> (in) — id da lista de execução (WO19556). <strong>Retorno:</strong> boolean (sucesso).</p>
+<p><strong>Blocos lógicos:</strong></p>
+<ol>
+<li>Zera contador <code>iQTDPessoaProcessada</code> (127985 Renato Visoni).</li>
+<li>Limpa <code>qryIdoso</code> (SOL205224 — controle de idosos).</li>
+<li>Para cada recebedor da lista: cria recebedor via <code>CriaRecebedor</code> (:19243) → <code>ProcessaRubricaProvento</code> (:24378) → <code>ProcessaFechamentoRecebedor</code> (:23310).</li>
+<li>Trata abono, IR regressivo (lista <code>listaPartIRRegressivo</code> — SOL 151061), data de cálculo (SOL 252347 — projeto de melhoria da folha).</li>
+<li>Controle transacional: <code>StartTransaction</code> (:25386) / <code>Commit</code> (:25383, :25405) em <code>dtmBaseDados.dbBaseDados</code>.</li>
+</ol>
+<p><strong>Dados alterados:</strong> PREVIA, BASEDEPAGAMENTO, BITRIBUTACAO, HSTBITRIBUTACAO, CTRLINTERFACE. <strong>SQL:</strong> monta <code>ssql</code> por concatenação (presente em :24786). <strong>Cadeia:</strong> CriaRecebedor → ProcessaRubricaProvento → ProcessaFechamentoRecebedor → (TobjRecebedor) ProcessaRubrica → ExecutaRegraRubrica → InsereRubrica → IncluiPrevia. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+
+<div class="rule-block" id="rot-CriaRecebedor"><div class="rule-id">TdtmFolhaPrevia.CriaRecebedor — dFolhaPrevia.pas:19243</div>
+<p><strong>Assinatura:</strong> <code>function CriaRecebedor(ainumeroprocesso, aiidpessjur, ...): TobjRecebedor;</code></p>
+<p><strong>Propósito:</strong> instanciar e carregar o objeto recebedor (titular/beneficiário/plano) a partir do processo corrente. <strong>Cadeia:</strong> → <code>BuscaBeneficiariosResponsavel</code> (:19218) → <code>AvaliaDadoBancario</code> (:19115). <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+
+<div class="rule-block" id="rot-ProcessaRubricaProvento"><div class="rule-id">TdtmFolhaPrevia.ProcessaRubricaProvento — dFolhaPrevia.pas:24378</div>
+<p><strong>Propósito:</strong> orquestra o processamento de rubricas de provento do recebedor. <strong>Cadeia:</strong> → <code>BuscaDadosRubrica</code> (:24767) → <code>ResolveRubrica</code> (:23890) → <code>ProcessaRubrica</code> (:17697). <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+
+<div class="rule-block" id="rot-ProcessaFechamentoRecebedor"><div class="rule-id">TdtmFolhaPrevia.ProcessaFechamentoRecebedor — dFolhaPrevia.pas:23310</div>
+<p><strong>Propósito:</strong> fechamento do recebedor após processar todas as rubricas (consolidação, rateio, REINF). <strong>Cadeia:</strong> → <code>ProcessaRateioRubricas</code> (:22816) → <code>ProcessaReinf</code> (:19882) → <code>ProcessaRateioRubricasReinf</code> (:19765). <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+
+</section>
+
+<section><div class="section-title">🧮 Processamento de rubricas</div>
+
+<div class="rule-block" id="rot-ProcessaRubrica"><div class="rule-id">TobjRecebedor.ProcessaRubrica — dFolhaPrevia.pas:17697</div>
+<p><strong>Assinatura:</strong> <code>procedure ProcessaRubrica;</code> (método de instância sobre o recebedor corrente)</p>
+<p><strong>Variáveis locais:</strong> <code>lik, lij, liidmotivo, liocorparcial, lii</code> (inteiros); <code>lsmes, lsdatainicio, lsdatafinal, lsmesini, lsmesfim, sdttmpdesc</code> (strings); <code>lbinsere</code> (boolean); <code>liddesconto, iIdRubrica, iIdRubProventoPA</code> (inteiros); <code>scoddarf</code> (código DARF do provento).</p>
+<p><strong>Blocos lógicos:</strong></p>
+<ol>
+<li>Determina intervalo de datas (<code>lsdatainicio</code>/<code>lsdatafinal</code>) e mês de referência.</li>
+<li>Para cada rubrica do recebedor: resolve a rubrica → decide inserção (<code>lbinsere</code>) → calcula valor → classifica em base → insere.</li>
+<li>Trata provento de PA (antecipação) e código DARF para DARF de provento.</li>
+</ol>
+<p><strong>Cadeia:</strong> → <code>ExecutaRegraRubrica</code> (:16865) → <code>ClassificaRubricaBase</code> (:15076) → <code>AlocaBase</code> (:15010) → <code>InsereRubrica</code> (:15183). <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+
+<div class="rule-block" id="rot-ExecutaRegraRubrica"><div class="rule-id">TobjRecebedor.ExecutaRegraRubrica — dFolhaPrevia.pas:16865</div>
+<p><strong>Assinatura:</strong> <code>procedure ExecutaRegraRubrica(aflgPA: boolean);</code></p>
+<p><strong>Propósito:</strong> executa o algoritmo/regra de cálculo (ALGREGRA) associado à rubrica, considerando se é provento de PA. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+
+<div class="rule-block" id="rot-InsereRubrica"><div class="rule-id">TobjRecebedor.InsereRubrica — dFolhaPrevia.pas:15183</div>
+<p><strong>Assinatura:</strong> <code>function InsereRubrica(aiidpessoa, aiidfavorecido, aiidbeneficio, aiidrubrica, aiflgdesconto, aiflgespecial, aiidmotivo: integer; aeseqrubrica: extended; aicodmoeda, aiidregracalculo, ...): boolean;</code></p>
+<p><strong>Parâmetros:</strong> idpessoa, idfavorecido, idbeneficio, idrubrica, flag desconto, flag especial, idmotivo, sequência da rubrica (extended), código da moeda, id da regra de cálculo, etc. <strong>Propósito:</strong> inserir/atualizar a rubrica calculada na prévia (PREVIA/BASEDEPAGAMENTO). <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+
+<div class="rule-block" id="rot-IncluiPrevia"><div class="rule-id">TobjRubrica.IncluiPrevia — dFolhaPrevia.pas:4096</div>
+<p><strong>Assinatura:</strong> <code>function IncluiPrevia(aiidpessjur, aiidpatro, aiidplanoprevglobal, aiidplanoorigemglobal, aiidplanocontabilglobal, aiidtitular, aiidresponsavel, aiIdRecebePgto, aiidlote, aiseqproposta, ...): boolean;</code></p>
+<p><strong>Propósito:</strong> gravar a linha de prévia (PREVIA) com todos os identificadores (pessoa jurídica, patrocinadora, plano prev./origem/contábil, titular, responsável, recebedor, lote, seq. proposta). <strong>Transação:</strong> <code>Commit</code> (:4138) + <code>StartTransaction</code> (:4139) em <code>dtmBaseDados.dbBaseDados</code>. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+
+<div class="rule-block" id="rot-ClassificaRubricaBase"><div class="rule-id">TobjRecebedor.ClassificaRubricaBase — dFolhaPrevia.pas:15076</div>
+<p><strong>Propósito:</strong> classificar a rubrica em uma base de cálculo (IRRF, INSS, salário-família, reserva, etc.) e alocar na base correspondente via <code>AlocaBase</code> (:15010). <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+
+</section>
+
+<section><div class="section-title">💰 IRRF (Imposto de Renda)</div>
+
+<div class="rule-block" id="rot-CalculoIRRF"><div class="rule-id">TobjRecebedor.CalculoIRRF — dFolhaPrevia.pas:13493</div>
+<p><strong>Assinatura:</strong> <code>procedure CalculoIRRF;</code></p>
+<p><strong>Variáveis locais:</strong> <code>lstipodesc</code> (string); <code>lrBaseIRMes, lrValorIRMes, lrSaldoComp, lrproventoir, lrdescontoir</code> (real); <code>lscoddarf</code> (string); <code>liidrubir</code> (inteiro); <code>lsnomebase</code> (string); <code>lifontepagadora</code> (inteiro); <code>liidplanoprevbase, liidplanocontabilbase, liidplanoorigembase</code> (SIG 66634); <code>bOpcaoIRRegressivo, bNaoEstaIsento</code> (SOL 253413); <code>rPrazoMP, rPercentualIRRF, rPercentualIRRFResgateReg, rTotalProvIRRF, rTotalDescIRRF</code> (real).</p>
+<p><strong>Blocos lógicos:</strong></p>
+<ol>
+<li>Determina bases de IR (proventos que somam à base) por tipo de base e fonte pagadora.</li>
+<li>Verifica isenção (<code>AtualizaFlgIsento</code> :10302) e compensação (<code>VerificaCompensacaoIRRF</code> :10254).</li>
+<li>Decide entre IR normal (<code>CalculaLancaIRNormal</code> :12380 / <code>CalculaLancaIRNormalTotal</code> :13011) e IR regressivo (<code>CalculaLancaIRRegressivo</code> :12123 / <code>CalculaLancaIRRegressivoValor</code> :12254) conforme opção do plano.</li>
+<li>Lança IR compensado (<code>LancaIRCompensado</code> :12005) e rubrica de dep. idade IR (<code>LancaRubricaDEP_IDADE_IR</code> :10569).</li>
+<li>Atualiza BITRIBUTACAO/HSTBITRIBUTACAO (transações em :15679/:15697, :15880/:15888, :15974/:15997, :16016/:16025).</li>
+</ol>
+<p><strong>Dados alterados:</strong> BITRIBUTACAO, HSTBITRIBUTACAO, HSTDEDIDADEBITRIB, PREVIA. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+
+<div class="rule-block" id="rot-DeterminaBasesIRRF"><div class="rule-id">TobjRecebedor.DeterminaBasesIRRF — dFolhaPrevia.pas:7180</div>
+<p><strong>Variáveis:</strong> <code>lii</code> (inteiro); <code>oBaseFUND, oBaseINSS</code> (TObjBase); <code>oRub</code> (TObjRubrica). <strong>Propósito:</strong> separar as bases de IR por fonte (FUND/INSS) para cálculo subsequente. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+
+<div class="rule-block" id="rot-CalculaLancaIRNormal"><div class="rule-id">TobjRecebedor.CalculaLancaIRNormal — dFolhaPrevia.pas:12380</div>
+<p><strong>Propósito:</strong> cálculo e lançamento do IR normal (tabela progressiva). Comentário: edilaine SIG70584/125782. <strong>Cadeia:</strong> → <code>BuscaOutros_IRMensal</code> (:11982). <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+
+<div class="rule-block" id="rot-CalculaLancaIRRegressivo"><div class="rule-id">TobjRecebedor.CalculaLancaIRRegressivo — dFolhaPrevia.pas:12123</div>
+<p><strong>Assinatura:</strong> <code>procedure CalculaLancaIRRegressivo(aiTipoBase, {0-vitalicio,1-abono,7-reserva} ...);</code></p>
+<p><strong>Propósito:</strong> cálculo de IR regressivo por tipo de base (0=vitalício, 1=abono, 7=reserva). <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+
+<div class="rule-block" id="rot-VerificaCompensacaoIRRF"><div class="rule-id">TobjRecebedor.VerificaCompensacaoIRRF — dFolhaPrevia.pas:10254</div>
+<p><strong>Propósito:</strong> verificar e retornar o valor de compensação de IRRF disponível. <strong>Retorno:</strong> real. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+
+</section>
+
+<section><div class="section-title">📉 CPMF, margem, benefício mínimo, correção e salário-família</div>
+
+<div class="rule-block" id="rot-CalculaCPMF"><div class="rule-id">TobjRecebedor.CalculaCPMF — dFolhaPrevia.pas:16764</div>
+<p><strong>Assinatura:</strong> <code>function CalculaCPMF(arvalor: real): real;</code></p>
+<p><strong>Fórmula (código direto):</strong> <code>result := arvalor * (prmPercCPMF - 1);</code></p>
+<p><strong>Variáveis:</strong> <code>arvalor</code> = valor base sobre o qual incide o CPMF; <code>prmPercCPMF</code> = percentual global do CPMF (parâmetro do sistema). O fator <code>(prmPercCPMF - 1)</code> produz o desconto proporcional. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> — fórmula literal em :16766.</p>
+</div>
+
+<div class="rule-block" id="rot-VerificaMargemDesconto"><div class="rule-id">TobjRecebedor.VerificaMargemDesconto — dFolhaPrevia.pas:7496</div>
+<p><strong>Assinatura:</strong> <code>procedure VerificaMargemDesconto(aiPasso: integer);</code></p>
+<p><strong>Variáveis:</strong> <code>lii</code> (inteiro); <code>objrub</code> (TObjRubrica). <strong>Propósito:</strong> verificar, para cada rubrica de desconto, se a margem consignável é respeitada (passo a passo). <strong>Cadeia:</strong> → <code>VerificaMargemDescontoRubrica</code> (:7440) → <code>CalculaMargemDesconto</code> (:7676) → <code>DeterminaTipoMargem</code> (:14922). <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+
+<div class="rule-block" id="rot-CalculaMargemDesconto"><div class="rule-id">TobjRecebedor.CalculaMargemDesconto — dFolhaPrevia.pas:7676</div>
+<p><strong>Assinatura:</strong> <code>procedure CalculaMargemDesconto(var pMargem: Real);</code></p>
+<p><strong>Propósito:</strong> calcular a margem de desconto disponível (saída por referência em <code>pMargem</code>). <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+
+<div class="rule-block" id="rot-CalculaBeneficioMinimo"><div class="rule-id">TobjRecebedor.CalculaBeneficioMinimo — dFolhaPrevia.pas:8298</div>
+<p><strong>Assinatura:</strong> <code>function CalculaBeneficioMinimo: real;</code></p>
+<p><strong>Variáveis:</strong> <code>liidcalculo, linumbenef</code> (inteiros); <code>lrvalorprev, lrvalorbenefmin, lrvalorprevmin, lrvalorregra</code> (real); <code>lspercentual</code> (decimal); <code>lssql, lsvalor, lsvalorregra, lsvalortotal</code> (strings). <strong>Propósito:</strong> garantir o benefício mínimo por concessão — se o valor previado ficar abaixo do mínimo, ajusta. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+
+<div class="rule-block" id="rot-CalculaCorrecaoBeneficio"><div class="rule-id">TobjRecebedor.CalculaCorrecaoBeneficio — dFolhaPrevia.pas:8615</div>
+<p><strong>Assinatura:</strong> <code>procedure CalculaCorrecaoBeneficio(asDataPagamento: string);</code></p>
+<p><strong>Propósito:</strong> aplicar correção/alterador ao benefício conforme a data de pagamento. <strong>Cadeia:</strong> → <code>CalculaAlterador</code> (:8920) → <code>DeterminaRubricaCorrecao</code> (:9013) → <code>InsereRubricaAlterador</code> (:9022) → <code>CalculaCorrecaoTmpDesc</code> (:9122). <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+
+<div class="rule-block" id="rot-CalculoSalarioFamilia"><div class="rule-id">TobjRecebedor.CalculoSalarioFamilia — dFolhaPrevia.pas:9555</div>
+<p><strong>Propósito:</strong> cálculo do salário-família. <strong>Cadeia:</strong> → <code>DeterminabaseSalariofamilia</code> (:7160). <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+
+<div class="rule-block" id="rot-CalculaCPMFSobrePensao"><div class="rule-id">TobjRecebedor.CalculaCPMFSobrePensao — dFolhaPrevia.pas:7048</div>
+<p><strong>Assinatura:</strong> <code>procedure CalculaCPMFSobrePensao(rParm: Real);</code></p>
+<p><strong>Propósito:</strong> aplicar CPMF sobre o valor da pensão alimentícia. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+
+</section>
+
+<section><div class="section-title">🏦 Rateio, REINF e bases</div>
+
+<div class="rule-block" id="rot-ProcessaRateioRubricas"><div class="rule-id">TobjRecebedor.ProcessaRateioRubricas — dFolhaPrevia.pas:22816</div>
+<p><strong>Propósito:</strong> ratear rubricas entre planos quando o recebedor possui proporção multiplano. <strong>Cadeia:</strong> → <code>VerificaProporcaoPlanos</code> (:19640). <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+
+<div class="rule-block" id="rot-ProcessaReinf"><div class="rule-id">TobjRecebedor.ProcessaReinf — dFolhaPrevia.pas:19882</div>
+<p><strong>Assinatura:</strong> <code>function ProcessaReinf(var bErroInserePrevia: boolean): Boolean;</code></p>
+<p><strong>Propósito:</strong> processar REINF (eSocial) — rateio de rubricas REINF conforme plano progressivo/regressivo. <strong>Cadeia:</strong> → <code>ProcessaRateioRubricasReinf</code> (:19765) → <code>VerificaProporcaoPlanos</code> (:19640, wo20725). <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+
+<div class="rule-block" id="rot-ValorBase"><div class="rule-id">TobjRecebedor.ValorBase — dFolhaPrevia.pas:8121</div>
+<p><strong>Assinatura:</strong> <code>function ValorBase(aitipobase: integer; asmesref: string; ...): real;</code></p>
+<p><strong>Propósito:</strong> apurar o valor de uma base de cálculo por tipo e mês de referência. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+
+</section>
+
+<section><div class="section-title">🔁 Efetivação — fFolhaNormalEfet.pas (9.975 linhas)</div>
+
+<div class="rule-block" id="rot-Executa_ETL"><div class="rule-id">TfrmFolhaNormalEfet.Executa_ETL — fFolhaNormalEfet.pas:8722</div>
+<p><strong>Assinatura:</strong> <code>procedure Executa_ETL(pLote: String; pIdhstfolhabenef: Integer; pDtPgto_0, pDtPgto_1, pDtPgto_2: TDatetime; ...);</code></p>
+<p><strong>Parâmetros:</strong> lote, id do histórico da folha de benefício, e 3 datas de pagamento (0, 1, 2). <strong>Propósito:</strong> executar a ETL de efetivação (extração/carga) para o lote. <strong>Cadeia:</strong> → <code>RetornaDiretorioETL</code> (:8898) → <code>VerificaEfeticaoETL</code> (:8928) → <code>Monitoramento</code> (:9006). <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+
+<div class="rule-block" id="rot-GeraArquivoPagamentoCNAB"><div class="rule-id">TfrmFolhaNormalEfet.GeraArquivoPagamentoLeiauteCNAB150 / CNAB240 — fFolhaNormalEfet.pas:9346 / :9468</div>
+<p><strong>Propósito:</strong> gerar arquivo de pagamento nos leiautes CNAB 150 e CNAB 240. <strong>Cadeia:</strong> → <code>SetDocumentoArqPagamento</code> (:9584) → <code>SetFavorecidoArqPagamento</code> (:9618) → <code>SetRegistrosArquivoPagamento</code> (:9661) → <code>SetStatusDocArquivoPagamento</code> (:9705) → <code>SetTarifaBancariaArqPagamento</code> (:9728). <strong>Dados alterados:</strong> ARQUIVOPAGTO + arquivo em disco. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+
+<div class="rule-block" id="rot-atualizaBasePagamento"><div class="rule-id">TfrmFolhaNormalEfet.atualizaBasePagamento — fFolhaNormalEfet.pas:8328</div>
+<p><strong>Assinatura:</strong> <code>procedure atualizaBasePagamento(psMes, pIdLote: String; piIdHstFolhaBenef: Integer);</code></p>
+<p><strong>Propósito:</strong> atualizar BASEDEPAGAMENTO após efetivação (mês, lote, histórico). <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+
+</section>
+
+<section><div class="section-title">↩️ Estorno — festornafolha.pas (5.277 linhas)</div>
+
+<div class="rule-block" id="rot-EstornoFolhaCompleto"><div class="rule-id">TfrmEstornaFolha.EstornoFolhaCompleto — festornafolha.pas:2062</div>
+<p><strong>Propósito:</strong> estorno completo da folha (individual ou lote). <strong>Cadeia:</strong> → <code>VerificaStatusDocumentosVersao</code> (:900) → <code>VerificaTmpDesc</code> (:2030) → <code>DesfazRubricaIndividual</code> (:1843) → <code>GeraAlterador</code> (:1183) → <code>GeraCAP</code> (:1523) → <code>GeraCAR</code> (:1654) → <code>GravaMotivoEstorno</code> (:1709) → <code>ProcessaCompensacao</code> (:1739) → <code>Exec_SP_ExcessoDebito</code> (:1801). <strong>Dados alterados:</strong> HSTFOLHABENEFCAP, HISTRUBSAL, RUBRICAINDIV, ARQUIVOPAGTO, CAP/CAR. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+
+<div class="rule-block" id="rot-DesfazRubricaIndividual"><div class="rule-id">TfrmEstornaFolha.DesfazRubricaIndividual — festornafolha.pas:1843</div>
+<p><strong>Assinatura:</strong> <code>function DesfazRubricaIndividual(bcompleto: boolean): boolean;</code></p>
+<p><strong>Propósito:</strong> desfazer rubricas individuais (RUBRICAINDIV) no estorno, total ou parcial. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+
+</section>
+
+<section><div class="section-title">🧭 Preparo — FPreparo.pas (10.384 linhas)</div>
+
+<div class="rule-block" id="rot-InicializaProcessoBeneficio"><div class="rule-id">TfrmPreparo.InicializaProcessoBeneficio — FPreparo.pas:1755</div>
+<p><strong>Assinatura:</strong> <code>function InicializaProcessoBeneficio(ssql: string): boolean;</code></p>
+<p><strong>Propósito:</strong> inicializar o processo de benefício a partir de SQL de seleção. <strong>Cadeia:</strong> → <code>InicializaContadores</code> (:1812) → <code>PassoProcessoBeneficio</code> (:1901). <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+
+<div class="rule-block" id="rot-GravaHstBeneficio"><div class="rule-id">TfrmPreparo.GrvHstBeneficio — FPreparo.pas:2375</div>
+<p><strong>Propósito:</strong> gravar histórico de benefício (HSTBENEFBFCIARIO) no preparo. <strong>Cadeia:</strong> → <code>InsereHstBfciario</code> (:1383) → <code>GravaResultadoProcessoBeneficio</code> (:1851) → <code>GravaProcessoBeneficio</code> (:2678). <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+
+<div class="rule-block" id="rot-CalculaProRata"><div class="rule-id">TfrmPreparo.CalculaProRata — FPreparo.pas:2931</div>
+<p><strong>Assinatura:</strong> <code>function CalculaProRata(asdatafinal: string): real;</code></p>
+<p><strong>Propósito:</strong> cálculo pro-rata conforme data final (encerramento/início no mês). <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+
+</section>
+
+<section><div class="section-title">📐 Funções compartilhadas — UFuncoesFolha.pas (3.813 linhas)</div>
+<p>Unidade de funções de cálculo compartilhadas, referenciada pelo motor (<code>dFolhaPrevia.pas</code> → <code>UFuncoesFolha</code>, confirmado em <code>arquitetura.html</code>). Contém rotinas utilitárias de arredondamento, conversão de cotas, cálculo de dígito verificador (complementar a <code>uCalcDv.pas</code>:491 lin) e formatação. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> (referência confirmada); detalhamento linha-a-linha classificado <span class="ev ev-pendente">PENDENTE</span> por volume.</p>
+</section>
+
+<section><div class="section-title">📋 Observações</div>
+<ul>
+<li>As assinaturas e variáveis acima foram lidas diretamente do código (<code>sed</code> sobre as linhas indicadas) — <span class="ev ev-comprovado">COMPROVADO</span>.</li>
+<li>O motor <code>dFolhaPrevia.pas</code> contém 298 ocorrências de SQL (INSERT/UPDATE/DELETE/SELECT) e 17 pontos de <code>Commit</code>/<code>StartTransaction</code> em <code>dtmBaseDados.dbBaseDados</code> — transações confirmadas em :4138, :6468, :15679, :15880, :15974, :16016, :24890, :25383, :25405.</li>
+<li>Rotinas de módulos externos (IRRF/, PROCJUD/, CONTRIBUIÇÃO) não foram abertas — apenas registradas como chamadas em <a href="integracoes.html">🔗 Integrações</a>.</li>
+</ul>
+</section>
+
+</main>
+<footer>
+<p>Blueprint AS-IS — PFC-22 (enriquecido) — Módulo FOLHA | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-09</p>
+</footer>
+</body>
+</html>

@@ -3,35 +3,207 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Folha de Benefícios — Funcionalidades — Blueprint AS-IS</title>
+<title>Folha de Benefícios — Processos — Blueprint AS-IS</title>
 <link rel="stylesheet" href="../assets/css/style.css">
-
 </head>
 <body>
 <header>
-  <div class="badge">Blueprint AS-IS — Delphi 5</div>
-  <h1>⚔️ Funcionalidades — Folha de Benefícios</h1>
-  <p>12 processos funcionais com entradas, processamento, regras, saídas e persistência</p>
+  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-22 (enriquecido)</div>
+  <h1>⚙️ Processos Funcionais — Folha de Benefícios</h1>
+  <p>12 processos com objetivo, gatilho, pré-condições, entradas, passo-a-passo, validações, regras, cálculos, saídas, mensagens, exceções, resultado e fluxograma.</p>
 </header>
 <nav>
   <a href="index.html">📋 Visão Geral</a>
   <a href="arquitetura.html">🏗️ Arquitetura</a>
-  <a href="funcionalidades.html">⚙️ Funcionalidades</a>
+  <a href="inventario.html">📂 Inventário</a>
+  <a href="formularios.html">🧾 Formulários</a>
+  <a href="funcionalidades.html">⚙️ Processos</a>
+  <a href="rotinas.html">🔧 Rotinas</a>
   <a href="regras-de-negocio.html">📏 Regras</a>
   <a href="dados.html">🗄️ Dados</a>
   <a href="integracoes.html">🔗 Integrações</a>
 </nav>
-
-
 <main>
+
 <section><div class="section-title">⚔️ Processos Funcionais — Folha de Benefícios (12 processos)</div>
-<div class="pf-block" id="PF-01"><h4>PF-01 — Preparo da Folha</h4><p><strong>Forms de entrada:</strong> <code>FPreparo.dfm</code>, <code>FPreparoSP.dfm</code>, <code>fConsultaPreparo.dfm</code></p><p><strong>Lógica de processamento:</strong> MontaListaPatro/Plano/Benef → InicializaProcessoBeneficio → PassoProcessoBeneficio → ExecutaRegraProcessoBeneficio → GravaHstBeneficio → CalculaProRata → CalculaEnviaContribuicaoPensionista</p><p><strong>Saídas:</strong> Benefícios selecionados e reajustados prontos para prévia</p><p><strong>Persistência (tabelas escritas):</strong> HSTBENEFBFCIARIO, PROCESSOBENEF, HSTCONTRIBPREV, PREPAROCONTRIB</p><p><strong>Evidência:</strong> <code>FOLHA/Fontes/FPreparo.pas:1015-2958</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div><div class="pf-block" id="PF-02"><h4>PF-02 — Prévia (Cálculo da Folha)</h4><p><strong>Forms de entrada:</strong> <code>FFolhaNormalPrevia.dfm</code>, <code>fFolhaExtra.dfm</code>, <code>FPagamentoPendente.dfm</code></p><p><strong>Lógica de processamento:</strong> dFolhaPrevia.pas (30.856 lin): ProcessaRubrica → ExecutaRegraRubrica → DeterminaBasesIRRF → CalculoIRRF → VerificaMargemDesconto → CalculaCPMF → CalculaBeneficioMinimo → CalculaCorrecaoBeneficio → CalculoSalarioFamilia → IncluiPrevia</p><p><strong>Saídas:</strong> Prévia de pagamento por recebedor/rubrica</p><p><strong>Persistência (tabelas escritas):</strong> PREVIA, BASEDEPAGAMENTO, BITRIBUTACAO, HSTBITRIBUTACAO, HSTDEDIDADEBITRIB, CTRLINTERFACE</p><p><strong>Evidência:</strong> <code>FOLHA/Fontes/dFolhaPrevia.pas:4096-19963</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div><div class="pf-block" id="PF-03"><h4>PF-03 — Efetivação de Versão de Pagamento</h4><p><strong>Forms de entrada:</strong> <code>fFolhaNormalEfet.dfm</code>, <code>FSelecionaLoteEF.dfm</code></p><p><strong>Lógica de processamento:</strong> ValidaProcessar → ValidaContaBancaria → ValidaParametrosCF → Verifica_Critica_ETL → Processa → ObtemParametroCF → AtualizaParametrosCF; desativa rubricas individuais automaticamente</p><p><strong>Saídas:</strong> Histórico de pagamento definitivo</p><p><strong>Persistência (tabelas escritas):</strong> HSTFOLHABENEF, HSTFOLHABENEFCAP, HISTRUBSAL, LOTEXHSTFOLHABENEF, RUBRICAINDIV, ARQUIVOPAGTO</p><p><strong>Evidência:</strong> <code>FOLHA/Fontes/fFolhaNormalEfet.pas:1588-2806</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div><div class="pf-block" id="PF-04"><h4>PF-04 — Estorno de Folha</h4><p><strong>Forms de entrada:</strong> <code>festornafolha.dfm</code>, <code>FConsultaEstorno.dfm</code></p><p><strong>Lógica de processamento:</strong> Refaz documento do estorno individual; grava log (linha 4592)</p><p><strong>Saídas:</strong> Estorno de pagamento</p><p><strong>Persistência (tabelas escritas):</strong> MOTIVOESTORNOFB (insert); DELETE de HISTRUBSAL, HSTFOLHABENEFCAP, LOTEXHSTFOLHABENEF, ARQUIVOPAGTO</p><p><strong>Evidência:</strong> <code>FOLHA/Fontes/festornafolha.pas:4592</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div><div class="pf-block" id="PF-05"><h4>PF-05 — Pagamento / Fita de Crédito / Remessa Bancária</h4><p><strong>Forms de entrada:</strong> <code>FAberturaFitaCredit.dfm</code>, <code>fGeraArquivoRemessa.dfm</code>, <code>FRemessaEletronica.dfm</code></p><p><strong>Lógica de processamento:</strong> Geração de arquivos de remessa bancária a partir do histórico efetivado; batimento de retorno</p><p><strong>Saídas:</strong> Arquivos de remessa bancária; demonstrativos</p><p><strong>Persistência (tabelas escritas):</strong> ARQUIVOPAGTO, TARIFAARQPAGTO, ARQUIVODERETORNOCAIXA, BATIMENTOFOLHA</p><p><strong>Evidência:</strong> <code>FOLHA/Fontes/fGeraArquivoRemessa.pas</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div><div class="pf-block" id="PF-06"><h4>PF-06 — Apropriação Contábil</h4><p><strong>Forms de entrada:</strong> <code>FParamRelApropContabil.dfm</code>, <code>FAcertaParamContabilFinanc.dfm</code></p><p><strong>Lógica de processamento:</strong> dContabil.pas {dtmContabil}; dFolhaPrevia.InstanciaDtmLocal acopla contabilidade ao cálculo</p><p><strong>Saídas:</strong> Lançamentos contábeis (crédito/débito, centro de custo)</p><p><strong>Persistência (tabelas escritas):</strong> Integração contábil externa; parâmetros em PLANPREVCONTABIL, CONTPREV, CONTPLANPATRO</p><p><strong>Evidência:</strong> <code>FOLHA/Fontes/dContabil.pas</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div><div class="pf-block" id="PF-07"><h4>PF-07 — Pensão Alimentícia</h4><p><strong>Forms de entrada:</strong> <code>FReajustaPercPensao.dfm</code>, <code>fCadRubXPensaoAlimenticia.dfm</code>, <code>FCadAlimentados.dfm</code></p><p><strong>Lógica de processamento:</strong> uReajustaPercPensao.pas; ProcessaRubricasConsignatario (dFolhaPrevia:7708); ProcessaFavorecidos (16769)</p><p><strong>Saídas:</strong> Percentuais atualizados; rubricas de pensão calculadas</p><p><strong>Persistência (tabelas escritas):</strong> RUBXPENSAOALIM, RUBRICAINDIV, ALIMENTADOS, PREVIA</p><p><strong>Evidência:</strong> <code>FOLHA/Fontes/dFolhaPrevia.pas:7708</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div><div class="pf-block" id="PF-08"><h4>PF-08 — IRRF (Compensação, Exceções, Ação Judicial)</h4><p><strong>Forms de entrada:</strong> <code>FCadCompensaIRRF.dfm</code>, <code>FCadExcessoesIR.dfm</code>, <code>FCadDepJudicial.dfm</code></p><p><strong>Lógica de processamento:</strong> CalculoIRRF (13493), CalculaLancaIRNormal/Regressivo/Judicial, LancaIRCompensado, VerificaCompensacaoIRRF</p><p><strong>Saídas:</strong> Cálculo de IR; compensação</p><p><strong>Persistência (tabelas escritas):</strong> COMPENSAIRRF, HSTCOMPENSAIRRF, BITRIBUTACAO, HSTBITRIBUTACAO, PROCJUD</p><p><strong>Evidência:</strong> <code>FOLHA/Fontes/dFolhaPrevia.pas:10254-13493</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div><div class="pf-block" id="PF-09"><h4>PF-09 — Retroativos / Salários Retroativos</h4><p><strong>Forms de entrada:</strong> <code>FInformaSalRetroEv.dfm</code></p><p><strong>Lógica de processamento:</strong> Informação manual de salários retroativos para reprocessamento</p><p><strong>Saídas:</strong> Salários retroativos incorporados ao cálculo</p><p><strong>Persistência (tabelas escritas):</strong> BENEFRETROATIVO, BENEFRETROXPESS, HISTRUBSAL</p><p><strong>Evidência:</strong> <code>FOLHA/Fontes/FInformaSalRetroEv.dfm; FOLHA/DBObjects/uDbBenefretroativo.pas</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div><div class="pf-block" id="PF-10"><h4>PF-10 — Conciliação INSS / Reembolso</h4><p><strong>Forms de entrada:</strong> <code>FConciliacaoReembolsoINSS.dfm</code>, <code>FPrestacaoContasINSS.dfm</code>, <code>FInsereRubricasINSSFolha.dfm</code></p><p><strong>Lógica de processamento:</strong> FPrestacaoContasINSS.pas (6.361+ lin): conciliação mensal, prestação de contas, retificação, contabilização</p><p><strong>Saídas:</strong> Conciliação INSS, reembolso/desembolso</p><p><strong>Persistência (tabelas escritas):</strong> DETCONCINSS, HSTCONTRIBPREV, RUBRICAINDIV, TMPDESC</p><p><strong>Evidência:</strong> <code>FOLHA/Fontes/FPrestacaoContasINSS.pas:3042-6361</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div><div class="pf-block" id="PF-11"><h4>PF-11 — Importação/Exportação de Convênios</h4><p><strong>Forms de entrada:</strong> <code>fImportaTxt.dfm</code>, <code>FExportaTxT.dfm</code>, <code>FExecGeraDocConvenio.dfm</code></p><p><strong>Lógica de processamento:</strong> Importação (layout entrada) → TMPDESC; exportação (layout saída); geração de saída cadastral</p><p><strong>Saídas:</strong> Lançamentos importados; arquivos de exportação</p><p><strong>Persistência (tabelas escritas):</strong> TMPDESC, DOCUMENTO, LANCTODOCUM, ARQUIVOXDOCUM, ARQUIVOPAGTO</p><p><strong>Evidência:</strong> <code>FOLHA/Fontes/FExportaTxT.pas:234-522</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div><div class="pf-block" id="PF-12"><h4>PF-12 — Regularização de Pagamentos</h4><p><strong>Forms de entrada:</strong> <code>UCadastroEventoRegularizacao.dfm</code>, <code>UConciliacaoCredito.dfm</code>, <code>ULancEventoRegularizacao.dfm</code></p><p><strong>Lógica de processamento:</strong> Cadastro e lançamento de eventos de regularização; conciliação de crédito efetuado</p><p><strong>Saídas:</strong> Regularizações de pagamento aplicadas</p><p><strong>Persistência (tabelas escritas):</strong> HSTREGULARIZACAOFOLHA</p><p><strong>Evidência:</strong> <code>FOLHA/Fontes/UCadastroEventoRegularizacao.pas</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+<p>Cada processo abaixo foi encontrado no código-fonte do módulo (forms + rotinas + SQL). Os fluxogramas representam somente comportamentos comprovados. Detalhamento de rotinas em <a href="rotinas.html">🔧 Rotinas</a> e de regras em <a href="regras-de-negocio.html">📏 Regras</a>.</p>
+</section>
+
+<div class="pf-block" id="PF-01"><h4>PF-01 — Preparo da Folha</h4>
+<p><strong>Objetivo:</strong> selecionar patrocinadoras/planos/benefícios e aplicar reajustes/eventos antes da prévia.</p>
+<p><strong>Gatilho:</strong> usuário aciona o botão Preparo em <code>FPreparo.dfm</code>.</p>
+<p><strong>Pré-condições:</strong> lote aberto; patrocinadoras/planos cadastrados; benefícios ativos.</p>
+<p><strong>Entradas:</strong> tipo de folha, lote, patrocinadoras, planos, benefícios, mês/ano.</p>
+<p><strong>Passo-a-passo:</strong></p>
+<ol>
+<li><code>MontaListaPatro</code> → <code>MontaListaPlano</code> → <code>MontaListaBenef</code> (FPreparo.pas:1030/1042/1075)</li>
+<li><code>InicializaProcessoBeneficio</code> (:1755) → <code>InicializaContadores</code> (:1812)</li>
+<li>Loop: <code>PassoProcessoBeneficio</code> (:1901) → <code>ExecutaRegraProcessoBeneficio</code> (:1943) → <code>IncrementaTotais</code> (:1837)</li>
+<li><code>GravaHstBeneficio</code> (:2375) → <code>InsereHstBfciario</code> (:1383) → <code>GravaProcessoBeneficio</code> (:2678)</li>
+<li><code>CalculaProRata</code> (:2931) → <code>CalculaEnviaContribuicaoPensionista</code> (:2958)</li>
+</ol>
+<p><strong>Validações:</strong> tipo de folha selecionado; listas não vazias. <strong>Regras:</strong> FOLHA-RN010 (duplicidade de lotes). <strong>Saídas:</strong> HSTBENEFBFCIARIO, PROCESSOBENEF, HSTCONTRIBPREV. <strong>Resultado:</strong> benefícios preparados para prévia. <strong>Evidência:</strong> <code>FOLHA/Fontes/FPreparo.pas:1015-2958</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<div class="mermaid">[FPreparo] --> MontaListas --> InicializaProcessoBeneficio
+  --> loop(PassoProcessoBeneficio --> ExecutaRegra --> GravaHstBeneficio)
+  --> CalculaProRata --> CalculaEnviaContribuicaoPensionista --> [HSTBENEFBFCIARIO/PROCESSOBENEF]</div>
+</div>
+
+<div class="pf-block" id="PF-02"><h4>PF-02 — Prévia (Cálculo da Folha)</h4>
+<p><strong>Objetivo:</strong> calcular a prévia de pagamento por recebedor/rubrica (motor central).</p>
+<p><strong>Gatilho:</strong> botão processar em <code>FFolhaNormalPrevia.dfm</code> ou <code>fFolhaExtra.dfm</code>.</p>
+<p><strong>Pré-condições:</strong> preparo concluído (PF-01); lote com benefícios preparados; parâmetros globais em <code>FParametroFolha</code>.</p>
+<p><strong>Entradas:</strong> lote, mês/ano, abono, modo automático, ETL, divide lista, prévia geral/individual.</p>
+<p><strong>Passo-a-passo (motor dFolhaPrevia.pas):</strong></p>
+<ol>
+<li><code>ProcessaPrevia</code> (:24781) — orquestra; abre transação (:25386)</li>
+<li>Para cada recebedor: <code>CriaRecebedor</code> (:19243) → <code>ProcessaRubricaProvento</code> (:24378)</li>
+<li><code>ProcessaRubrica</code> (:17697) → <code>ExecutaRegraRubrica</code> (:16865) → <code>ClassificaRubricaBase</code> (:15076)</li>
+<li><code>DeterminaBasesIRRF</code> (:7180) → <code>CaluloIRRF</code> (:13493)</li>
+<li><code>VerificaMargemDesconto</code> (:7496) → <code>CalculaMargemDesconto</code> (:7676)</li>
+<li><code>CalculaCPMF</code> (:16764) → <code>CalculaBeneficioMinimo</code> (:8298) → <code>CalculaCorrecaoBeneficio</code> (:8615) → <code>CaluloSalarioFamilia</code> (:9555)</li>
+<li><code>InsereRubrica</code> (:15183) → <code>IncluiPrevia</code> (:4096) — commit (:4138)</li>
+<li><code>ProcessaFechamentoRecebedor</code> (:23310) → <code>ProcessaRateioRubricas</code> (:22816) → <code>ProcessaReinf</code> (:19882)</li>
+</ol>
+<p><strong>Validações:</strong> margem consignável (FOLHA-RN008); benefício mínimo (RN009); líquido negativo (RN006). <strong>Cálculos:</strong> CPMF (RN007), IRRF normal/regressivo, salário-família, correção. <strong>Saídas:</strong> PREVIA, BASEDEPAGAMENTO, BITRIBUTACAO, HSTBITRIBUTACAO, CTRLINTERFACE. <strong>Resultado:</strong> prévia pronta para conferência/efetivação. <strong>Evidência:</strong> <code>FOLHA/Fontes/dFolhaPrevia.pas:4096-25405</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<div class="mermaid">[FFolhaNormalPrevia] --> ProcessaPrevia(:24781)
+  --> CriaRecebedor --> ProcessaRubricaProvento
+  --> ProcessaRubrica --> ExecutaRegraRubrica --> ClassificaRubricaBase
+  --> DeterminaBasesIRRF --> CaluloIRRF
+  --> VerificaMargemDesconto --> CalculaCPMF --> CalculaBeneficioMinimo
+  --> CalculaCorrecaoBeneficio --> CaluloSalarioFamilia
+  --> InsereRubrica --> IncluiPrevia --> Commit
+  --> ProcessaFechamentoRecebedor --> ProcessaReinf --> [PREVIA/BASEDEPAGAMENTO/BITRIBUTACAO]</div>
+</div>
+
+<div class="pf-block" id="PF-03"><h4>PF-03 — Efetivação de Versão de Pagamento</h4>
+<p><strong>Objetivo:</strong> consolidar a prévia em histórico definitivo e gerar arquivos de pagamento.</p>
+<p><strong>Gatilho:</strong> botão efetivar em <code>fFolhaNormalEfet.dfm</code> após seleção de lote (<code>FSelecionaLoteEF</code>).</p>
+<p><strong>Pré-condições:</strong> prévia conferida (PF-02); lote selecionado; conta bancária e parâmetros contábeis/financeiros válidos.</p>
+<p><strong>Passo-a-passo (fFolhaNormalEfet.pas):</strong></p>
+<ol>
+<li>Valida lote, conta bancária (RN012), parâmetros contábeis/financeiros (RN013)</li>
+<li><code>Verifica_Critica_ETL</code> → <code>Executa_ETL</code> (:8722) com 3 datas de pagamento</li>
+<li><code>VerificaEfeticaoETL</code> (:8928) → <code>Monitoramento</code> (:9006)</li>
+<li>Gera histórico: HSTFOLHABENEF / HSTFOLHABENEFCAP / HISTRUBSAL</li>
+<li><code>atualizaBasePagamento</code> (:8328) → <code>atualizaHstCalculoPMPFolha</code> (:8405) → <code>atualizaHstPrazoAcumulacaoFolha</code> (:8449)</li>
+<li><code>processaIRRegressivo</code> (:8212) → <code>PreparaContribuicaoPatro</code> (:8605)</li>
+<li><code>GeraArquivoPagamentoLeiauteCNAB150</code> (:9346) / <code>CNAB240</code> (:9468) → <code>Set*ArqPagamento</code> (:9584-9728)</li>
+<li><code>GeraArquivoSIACC</code> (:9806) / <code>CargaContraChequeMongo</code> (:9844)</li>
+</ol>
+<p><strong>Validações:</strong> críticas ETL abortam (RN011); conta bancária do lote (RN012); parâmetros CF (RN013). <strong>Saídas:</strong> HSTFOLHABENEF, HSTFOLHABENEFCAP, ARQUIVOPAGTO, arquivos CNAB em disco. <strong>Resultado:</strong> versão de pagamento efetivada. <strong>Evidência:</strong> <code>FOLHA/Fontes/fFolhaNormalEfet.pas:8158-9844</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<div class="mermaid">[fFolhaNormalEfet] --> Valida(Lote/Conta/ParamCF) --> Executa_ETL
+  --> VerificaEfeticaoETL --> [HSTFOLHABENEF/HSTFOLHABENEFCAP]
+  --> atualizaBasePagamento --> processaIRRegressivo
+  --> GeraArquivoCNAB150|CNAB240 --> [ARQUIVOPAGTO + arquivo CNAB]
+  --> GeraArquivoSIACC --> CargaContraChequeMongo</div>
+</div>
+
+<div class="pf-block" id="PF-04"><h4>PF-04 — Estorno de Folha</h4>
+<p><strong>Objetivo:</strong> desfazer folha individual ou por lote preservando histórico.</p>
+<p><strong>Gatilho:</strong> botão processar em <code>festornafolha.dfm</code> (:4576).</p>
+<p><strong>Pré-condições:</strong> versão efetivada; usuário com permissão; motivo de estorno informado.</p>
+<p><strong>Passo-a-passo (festornafolha.pas):</strong></p>
+<ol>
+<li><code>VerificaStatusDocumentosVersao</code> (:900) → <code>HabilitaEstornoIndividual</code> (:939)</li>
+<li><code>VerificaTmpDesc</code> (:2030) → <code>DesfazRubricaIndividual</code> (:1843)</li>
+<li><code>GeraAlterador</code> (:1183) → <code>GeraCAP</code> (:1523) → <code>GeraCAR</code> (:1654)</li>
+<li><code>GravaMotivoEstorno</code> (:1709) → <code>ProcessaCompensacao</code> (:1739)</li>
+<li><code>Exec_SP_ExcessoDebito</code> (:1801) → <code>EstornoFolhaCompleto</code> (:2062)</li>
+</ol>
+<p><strong>Exceções:</strong> estorno de pagamento pendente (:2384), erro de processo (:2455), novo CAP (:2911), reprocessamento (:3013). <strong>Saídas:</strong> estorna HSTFOLHABENEFCAP, HISTRUBSAL, RUBRICAINDIV, ARQUIVOPAGTO; gera CAP/CAR. <strong>Evidência:</strong> <code>FOLHA/Fontes/festornafolha.pas:624-3013</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<div class="mermaid">[festornafolha] --> VerificaStatus --> DesfazRubricaIndividual
+  --> GeraAlterador --> GeraCAP --> GeraCAR --> GravaMotivoEstorno
+  --> ProcessaCompensacao --> Exec_SP_ExcessoDebito --> EstornoFolhaCompleto
+  --> [estorna HSTFOLHABENEFCAP/HISTRUBSAL/RUBRICAINDIV + CAP/CAR]</div>
+</div>
+
+<div class="pf-block" id="PF-05"><h4>PF-05 — Pagamento / Fita de Crédito / Remessa Bancária</h4>
+<p><strong>Objetivo:</strong> gerar arquivos de remessa (CNAB), simular e bater retorno.</p>
+<p><strong>Gatilho:</strong> <code>fGeraArquivoRemessa.dfm</code> (bbtnProcessarClick :342), <code>FAberturaFitaCredit.dfm</code>, <code>FRemessaEletronica.dfm</code>, <code>fGeraArquivoRemessaPrevia.dfm</code>.</p>
+<p><strong>Pré-condições:</strong> versão efetivada (PF-03); conta bancária/portador configurados; leiaute CNAB selecionado.</p>
+<p><strong>Passo-a-passo:</strong> abertura da fita por plano → seleção de versão → geração do arquivo CNAB (150/240) → gravação em disco + ARQUIVOPAGTO → simulação (prévia) → batimento de retorno (SOL 207789/KINTANA 554287).</p>
+<p><strong>Saídas:</strong> arquivo de remessa em disco, ARQUIVOPAGTO. <strong>Evidência:</strong> <code>FOLHA/Fontes/fGeraArquivoRemessa.pas:342</code>, <code>fGeraArquivoRemessaPrevia.pas</code>, <code>FRemessaEletronica.pas</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<div class="mermaid">[FAberturaFitaCredit] --> [fGeraArquivoRemessa] --> GeraArquivoCNAB150|CNAB240
+  --> [arquivo disco + ARQUIVOPAGTO] --> (simulação) --> BatimentoRetorno</div>
+</div>
+
+<div class="pf-block" id="PF-06"><h4>PF-06 — Apropriação Contábil</h4>
+<p><strong>Objetivo:</strong> gerar lançamentos contábeis a partir das rubricas previadas/efetivadas.</p>
+<p><strong>Gatilho:</strong> <code>FParamRelApropContabil.dfm</code> (Apropriação Contábil).</p>
+<p><strong>Pré-condições:</strong> prévia ou efetivação existente; plano de contas vinculado (PLANPREVCONTABIL).</p>
+<p><strong>Passo-a-passo:</strong> apura rubricas por plano contábil → <code>InstanciaDtmLocal</code> (<code>dFolhaPrevia.pas:19438</code>) instancia <code>dContabil.pas</code> → gera lançamentos contábeis. <strong>Saídas:</strong> lançamentos contábeis (tabela destino não identificada em FOLHA/ — <span class="ev ev-pendente">PENDENTE</span>). <strong>Evidência:</strong> <code>dFolhaPrevia.pas:19438</code>, <code>dContabil.pas</code> · <span class="ev ev-comprovado">COMPROVADO</span> (chamada); destino <span class="ev ev-pendente">PENDENTE</span></p>
+<div class="mermaid">[FParamRelApropContabil] --> apuraRubricasPorPlanoContabil
+  --> InstanciaDtmLocal(dContabil) --> [lançamentos contábeis]</div>
+</div>
+
+<div class="pf-block" id="PF-07"><h4>PF-07 — Pensão Alimentícia</h4>
+<p><strong>Objetivo:</strong> reajustar percentual e processar rubricas incidentes na pensão.</p>
+<p><strong>Gatilho:</strong> <code>FReajustaPercPensao.dfm</code>, <code>fCadRubXPensaoAlimenticia.dfm</code>, <code>FPRelPAFavor.dfm</code>.</p>
+<p><strong>Passo-a-passo:</strong> atualiza percentual (<code>uReajustaPercPensao.pas</code>) → identifica rubricas incidentes (fCadRubXPensaoAlimenticia) → na prévia, <code>CalculaCPMFSobrePensao</code> (<code>dFolhaPrevia.pas:7048</code>) aplica CPMF sobre a pensão. <strong>Regras:</strong> FOLHA-RN014 (rubricas incidentes). <strong>Evidência:</strong> <code>FOLHA/Fontes/uReajustaPercPensao.pas</code>, <code>dFolhaPrevia.pas:7048</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<div class="mermaid">[FReajustaPensao] --> uReajustaPercPensao --> [rubricas incidentes]
+  --> (na prévia) CalculaCPMFSobrePensao(:7048) --> [desconto de pensão]</div>
+</div>
+
+<div class="pf-block" id="PF-08"><h4>PF-08 — IRRF (Compensação, Exceções, Ação Judicial)</h4>
+<p><strong>Objetivo:</strong> calcular IR normal, regressivo, abono, judicial; compensar IR.</p>
+<p><strong>Gatilho:</strong> cálculo automático na prévia (PF-02) + cadastros <code>FCadExcessoesIR</code>, <code>FCadDepJudicial</code>, <code>FCadCompensaIRRF</code>, <code>FHistCompSalContri</code>.</p>
+<p><strong>Passo-a-passo (dentro de CaluloIRRF, dFolhaPrevia.pas:13493):</strong></p>
+<ol>
+<li><code>DeterminaBasesIRRF</code> (:7180) separa bases FUND/INSS</li>
+<li><code>AtualizaFlgIsento</code> (:10302) → <code>VerificaCompensacaoIRRF</code> (:10254)</li>
+<li>Decisão: IR normal (<code>CalculaLancaIRNormal</code> :12380) ou regressivo (<code>CalculaLancaIRRegressivo</code> :12123, tipo 0=vitalício/1=abono/7=reserva)</li>
+<li><code>LancaIRCompensado</code> (:12005) → <code>LancaRubricaDEP_IDADE_IR</code> (:10569) → <code>BuscaOutros_IRMensal</code> (:11982)</li>
+<li>Atualiza BITRIBUTACAO/HSTBITRIBUTACAO (transações :15679-16030)</li>
+</ol>
+<p><strong>Regras:</strong> FOLHA-RN004 (natureza de rendimento), RN005 (proventos somam à base), RN015 (IR regressivo por tipo). <strong>Saídas:</strong> BITRIBUTACAO, HSTBITRIBUTACAO, HSTDEDIDADEBITRIB. <strong>Evidência:</strong> <code>dFolhaPrevia.pas:7180-13493</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<div class="mermaid">[CaluloIRRF] --> DeterminaBasesIRRF --> AtualizaFlgIsento --> VerificaCompensacaoIRRF
+  --> {IR normal|IR regressivo(0/1/7)} --> LancaIRCompensado --> LancaRubricaDEP_IDADE_IR
+  --> [BITRIBUTACAO/HSTBITRIBUTACAO]</div>
+</div>
+
+<div class="pf-block" id="PF-09"><h4>PF-09 — Retroativos</h4>
+<p><strong>Objetivo:</strong> processar salários/diferenças retroativas.</p>
+<p><strong>Gatilho:</strong> <code>FInformaSalRetroEv.dfm</code> (Informa Salários Retroativos) + <code>uDbBenefretroativo.pas</code>/<code>uDbBenefretroxpess.pas</code>.</p>
+<p><strong>Passo-a-passo:</strong> informar salário retroativo → recalcular diferenças → na prévia, <code>CalculaCorrecaoTmpDesc</code> (<code>dFolhaPrevia.pas:9122</code>) aplica correção sobre TMPDESC. <strong>Saídas:</strong> BENEFRETROATIVO, BENEFRETROXPESS, TMPDESC. <strong>Evidência:</strong> <code>FOLHA/Fontes/FInformaSalRetroEv.pas</code>, <code>dFolhaPrevia.pas:9122</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<div class="mermaid">[FInformaSalRetroEv] --> [BENEFRETROATIVO/BENEFRETROXPESS]
+  --> (na prévia) CalculaCorrecaoTmpDesc(:9122) --> [TMPDESC]</div>
+</div>
+
+<div class="pf-block" id="PF-10"><h4>PF-10 — Conciliação e Reembolso do INSS</h4>
+<p><strong>Objetivo:</strong> prestar contas ao INSS, conciliar reembolso e retificar.</p>
+<p><strong>Gatilho:</strong> <code>FPrestacaoContasINSS.dfm</code>, <code>FConciliacaoReembolsoINSS.dfm</code>, <code>FManutRubricaReembolsoINSS.dfm</code>.</p>
+<p><strong>Passo-a-passo:</strong> prestação de contas → conciliação de reembolso (5 grades) → manutenção de rubricas de reembolso/NB → retificação (motivo em <code>FPrestacaoContasINSSMotivo</code>). <strong>Exceções:</strong> <code>raise Exception 'Operação cancelada pelo usuário'</code> em FPrestacaoContasINSS.pas:3042/4433/6361. <strong>Evidência:</strong> <code>FOLHA/Fontes/FPrestacaoContasINSS.pas</code>, <code>FConciliacaoReembolsoINSS.pas</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<div class="mermaid">[FPrestacaoContasINSS] --> [FConciliacaoReembolsoINSS] --> [FManutRubricaReembolsoINSS]
+  --> retificação(FPrestacaoContasINSSMotivo) --> {cancelado? Exception}</div>
+</div>
+
+<div class="pf-block" id="PF-11"><h4>PF-11 — Convênio (Importação/Exportação)</h4>
+<p><strong>Objetivo:</strong> importar/exportar convênios e gerar documentos para entidades conveniadas.</p>
+<p><strong>Gatilho:</strong> <code>fImportaTxt.dfm</code>, <code>fTratamentoConvenio.dfm</code>, <code>FExportaTxT.dfm</code>, <code>FExecGeraDocConvenio.dfm</code>.</p>
+<p><strong>Pré-condições:</strong> mês/ano, layout de entrada/saída, destino informados (RN002).</p>
+<p><strong>Passo-a-passo:</strong> importa TXT (layout de entrada) → tratamento de convênio → exporta (layout de saída) → gera documentos/arquivos para entidades. <strong>Validações:</strong> RN002 (layout/destino), RN003 (versão da folha). <strong>Evidência:</strong> <code>FOLHA/Fontes/fImportaTxt.pas</code>, <code>FExportaTxT.pas:508-522</code>, <code>FExecGeraDocConvenio.pas:1214-1261</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<div class="mermaid">[fImportaTxt] --> [fTratamentoConvenio] --> [FExportaTxT] --> [FExecGeraDocConvenio] --> [arquivos p/ entidades]</div>
+</div>
+
+<div class="pf-block" id="PF-12"><h4>PF-12 — Regularização de Pagamentos</h4>
+<p><strong>Objetivo:</strong> regularizar pagamentos (eventos de regularização) e conciliar crédito efetuado.</p>
+<p><strong>Gatilho:</strong> <code>UCadastroEventoRegularizacao.dfm</code>, <code>ULancEventoRegularizacao.dfm</code>, <code>UConciliacaoCredito.dfm</code>.</p>
+<p><strong>Passo-a-passo:</strong> cadastrar eventos de regularização → lançar eventos → conciliar crédito efetuado (UConciliacaoCredito, 4.050 lin). <strong>Evidência:</strong> <code>FOLHA/Fontes/UConciliacaoCredito.pas</code>, <code>UCadastroEventoRegularizacao.pas</code>, <code>ULancEventoRegularizacao.pas</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<div class="mermaid">[UCadastroEventoRegularizacao] --> [ULancEventoRegularizacao] --> [UConciliacaoCredito] --> [crédito conciliado]</div>
+</div>
+
+<section><div class="section-title">➕ Processos adicionais identificados no código</div>
+<div class="pf-block"><h4>PF-A — Encerramento por Falecimento</h4><p><code>FEncerramentoPorFalecimento.pas</code> (4.883 lin) — encerra benefícios por falecimento (cálculo pro-rata final). <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+<div class="pf-block"><h4>PF-B — Adiantamento Extra Folha</h4><p><code>FAdiantamentoExtraFolha.pas</code> (824 lin) — insere adiantamento extra. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+<div class="pf-block"><h4>PF-C — Abatimento de Reservas</h4><p><code>FExecAbateReserva.pas</code> (887 lin) — abate reservas para benefícios pagos. Validações obrigatórias: mês/ano (RN001). <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+<div class="pf-block"><h4>PF-D — Mapa da Folha</h4><p><code>FMapaFolhaBenef.pas</code> (209 lin) — geração do mapa da folha de benefício (WO2511). <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+<div class="pf-block"><h4>PF-E — Conferência e Batimento</h4><p><code>fConferenciaPrevia.pas</code> (761 lin) + <code>fBatimentoPrevia.pas</code> (1.773 lin) — conferência da prévia e batimento de líquido. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+<div class="pf-block"><h4>PF-F — Financiamento Habitacional</h4><p><code>FfinancHabitacional.pas</code> (1.654 lin) — financiamento habitacional (rubrica de desconto). <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p></div>
 </section>
 
 </main>
-
 <footer>
-<p>Blueprint AS-IS — PFC-21 — Documentação dos módulos FOLHA, CONTRIBUIÇÃO e BENEFICIOPREV | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-09</p>
+<p>Blueprint AS-IS — PFC-22 (enriquecido) — Módulo FOLHA | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-09</p>
 </footer>
 </body>
 </html>
