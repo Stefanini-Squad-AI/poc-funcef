@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contribuição Previdenciária — UC202 – Receber Contribuições e Tratar Divergências — Blueprint AS-IS</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<header>
+  <div class="badge">Blueprint AS-IS — PFC-32 — Processos Funcionais</div>
+  <h1>UC202 – Receber Contribuições e Tratar Divergências</h1>
+  <p>Caso de uso do módulo Contribuição Previdenciária: 2 jornada(s) funcional(is) e 7 regra(s) de negócio descritas dentro de cada jornada.</p>
+</header>
+<nav>
+  <a href="index.html">📋 Visão Geral</a>
+  <a href="arquitetura.html">🏗️ Arquitetura</a>
+  <a href="inventario-tecnico.html">📦 Inventário</a>
+  <a href="funcionalidades.html">⚙️ Processos Funcionais</a>
+  <a href="procedures-functions.html">🔧 Procedures</a>
+  <a href="dados.html">🗄️ Dados</a>
+  <a href="relatorios.html">📄 Relatórios</a>
+  <a href="integracoes.html">🔗 Integrações</a>
+  <a href="tratamento-erros.html">⚠️ Erros</a>
+  <a href="diagramas-fluxo.html">🔀 Fluxos</a>
+  <a href="lacunas.html">🔍 Lacunas</a>
+  <a href="controle-cobertura.html">📊 Cobertura</a>
+</nav>
+<main>
+
+<a class="back-btn" href="funcionalidades.html">← Voltar à lista de Casos de Uso (Processos Funcionais)</a>
+<div class="breadcrumb"><a href="index.html">Contribuição Previdenciária</a> › <a href="funcionalidades.html">Processos Funcionais</a> › UC202</div>
+
+<section><div class="section-title">1. Identificação</div>
+<div class="table-wrap"><table><tbody>
+<tr><th>Caso de Uso</th><td><strong>UC202 – Receber Contribuições e Tratar Divergências</strong></td></tr>
+<tr><th>Módulo</th><td>CONTRIBUIÇÃO — Contribuição Previdenciária</td></tr>
+<tr><th>Sistema</th><td>CM Contabilidade / FUNCEF (Delphi 5 / VCL / MIDAS / Oracle)</td></tr>
+<tr><th>Tipo</th><td>Sistema Desktop</td></tr>
+<tr><th>Ator</th><td>Usuário operacional (analista de arrecadação / contribuições previdenciárias)</td></tr>
+<tr><th>Jornadas</th><td><a href="#PF-02">JF002 — Recebimento por múltiplos canais</a>, <a href="#PF-08">JF008 — Tratamento de divergências e inconsistências</a></td></tr>
+<tr><th>Regras de negócio</th><td>7 regra(s) CONTRIB-RN, descritas na íntegra dentro de cada jornada</td></tr>
+<tr><th>OS - Título</th><td>PFC-32 — Lista de UC (Processos Funcionais organizados em Casos de Uso)</td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">2. Descrição Resumida</div>
+<p>Recebimento das contribuições pelos diversos canais e tratamento das divergências entre valor esperado e recebido. Este caso de uso reúne 2 jornada(s) funcional(is) do módulo Contribuição Previdenciária:</p>
+<ul>
+<li><a href="#PF-02"><strong>JF002 — Recebimento por múltiplos canais</strong></a>: Registrar o recebimento das contribuições cobradas (via folha, empréstimo ou Contas a Receber), baixando contribuições e documentos.</li>
+<li><a href="#PF-08"><strong>JF008 — Tratamento de divergências e inconsistências</strong></a>: Comparar contribuições enviadas e recebidas, identificar e tratar divergências, desfazer documentos e consultar estatísticas de divergência.</li>
+</ul>
+</section>
+
+<section><div class="section-title">3. Pré-condições</div>
+<p><strong>Gerais do módulo:</strong></p>
+<ul>
+<li>Módulo disponível (entry point <code>CONTRIBUICAOPREV/Fontes/ContribuicaoPREV.dpr</code>) e usuário com permissão de acesso às telas.</li>
+<li>Banco Oracle acessível e parâmetros do módulo carregados (motivo padrão de cobrança, motivo padrão de tratamento de divergência).</li>
+<li>Patrocinadoras, planos previdenciários, contribuições (CONTRIBUICAO) e participantes (PARTPREVPLAN, CONTRIBPREVPARTP) cadastrados.</li>
+<li>Integrações configuradas quando a jornada as usa: Folha, Contas a Receber/CAP, Contabilidade, PGA (ver <a href="integracoes.html">🔗 Integrações</a>).</li>
+<li>Período contábil aberto para as datas usadas em lançamentos.</li>
+</ul>
+<p><strong>Por jornada:</strong></p>
+<ul>
+<li><a href="#PF-02">JF002</a>: Contribuições enviadas (<a href="uc201.html#PF-01">JF001</a>) com SITRECEBIMENTO = 1; retorno do canal disponível; período contábil aberto.</li>
+<li><a href="#PF-08">JF008</a>: Contribuições enviadas (<a href="uc201.html#PF-01">JF001</a>) e retornos processados (<a href="#PF-02">JF002</a>); motivo padrão de tratamento cadastrado.</li>
+</ul>
+</section>
+
+<section><div class="section-title">4. Pós-condições</div>
+<ul>
+<li><a href="#PF-02">JF002</a>: HSTCONTRIBPREV com VALORRECEBIDO, DATARECEBIMENTO e situação de recebida; DOCUMENTO e LANCTODOCUM baixados; lançamentos contábeis gerados.</li>
+<li><a href="#PF-08">JF008</a>: HSTCONTRIBPREV ajustado; HSTATRASOCONTRIB atualizado; LOGTOTALPREV gravado; documentos desfeitos quando solicitado.</li>
+</ul>
+</section>
+
+<section><div class="section-title">5. Jornadas Funcionais (JF002, JF008)</div>
+<p>Cada jornada traz objetivo, ator/gatilho, pré e pós-condições, sequência operacional, ações práticas, <strong>regras de negócio da jornada</strong> (texto completo de cada regra), tratamentos e mensagens.</p>
+<div class="legend"><span><span class="ev ev-comprovado">COMPROVADO</span> — no código</span><span><span class="ev ev-inferido">INFERIDO</span> — plausível</span><span><span class="ev ev-pendente">PENDENTE</span> — validar</span></div>
+</section>
+
+<div class="pf-block" id="PF-02"><h4>JF002 (PF-02) — Recebimento por múltiplos canais</h4>
+<p><strong>Objetivo:</strong> Registrar o recebimento das contribuições cobradas (via folha, empréstimo ou Contas a Receber), baixando contribuições e documentos.</p>
+<p><strong>Ator / gatilho:</strong> Analista de arrecadação, nas telas <em>Recebimento de Contribuições via Folha</em>, <em>Recebimento de Contribuições Via Empréstimo</em> e <em>Receber Contribuições do Contas a Receber</em>.</p>
+<p><strong>Pré-condições:</strong> Contribuições enviadas (<a href="uc201.html#PF-01">JF001</a>) com SITRECEBIMENTO = 1; retorno do canal disponível; período contábil aberto.</p>
+<p><strong>Pós-condições:</strong> HSTCONTRIBPREV com VALORRECEBIDO, DATARECEBIMENTO e situação de recebida; DOCUMENTO e LANCTODOCUM baixados; lançamentos contábeis gerados.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li>Via folha: informar o mês de cobrança e a data de recebimento. [<a href="#TRT007">TRT007</a>]</li>
+<li>O sistema seleciona as contribuições a receber (enviadas e não recebidas, ou recebidas com data, de origem diferente de 'B' e descontadas em folha). [<a href="#CONTRIB-RN024">RS024</a>]</li>
+<li>Selecionar as contribuições da lista e processar o recebimento. [<a href="#TRT008">TRT008</a>] [<a href="#TRT009">TRT009</a>]</li>
+<li>Com “Efetuar apenas integração” e “Documentos distintos por dia” marcadas, os documentos do CaR são gerados por data de recebimento gravada. [<a href="#CONTRIB-RN028">RS028</a>]</li>
+<li>Via empréstimo: consultar, selecionar registros e baixar; o valor em aberto deve igualar o do empréstimo. [<a href="#TRT010">TRT010</a>] [<a href="#TRT011">TRT011</a>]</li>
+<li>Via Contas a Receber: baixar as contribuições por matrícula e conferir a lista de resultado. [<a href="#TRT012">TRT012</a>]</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Informar parâmetros do recebimento via folha</td><td>Delimitar a competência recebida</td><td>Mês de cobrança, data de recebimento</td><td>Valida obrigatórios</td><td>Parâmetros aceitos</td><td>—</td><td><a href="#MSG011">MSG011</a>, <a href="#MSG012">MSG012</a></td><td><code>FRecebeContribuicaoNovo.dfm</code></td></tr>
+<tr><td>Selecionar contribuições a receber</td><td>Montar a lista de recebimento</td><td>Parâmetros aceitos</td><td>Filtra por SITRECEBIMENTO/VALORRECEBIDO/DATARECEBIMENTO/FOLHAORIGEM/FLGDESCFOLHA</td><td>Lista para baixa</td><td><a href="#CONTRIB-RN024">RS024</a></td><td><a href="#MSG013">MSG013</a></td><td><code>FRecebeContribuicaoNovo.dfm</code></td></tr>
+<tr><td>Processar recebimento via folha</td><td>Baixar contribuições e documentos</td><td>Contribuições selecionadas</td><td>Executa a procedure de recebimento; erros vão para o log; com as opções de integração, gera documento CaR por data de recebimento</td><td>HSTCONTRIBPREV/DOCUMENTO/LANCTODOCUM atualizados</td><td><a href="#CONTRIB-RN024">RS024</a>, <a href="#CONTRIB-RN028">RS028</a></td><td><a href="#MSG014">MSG014</a></td><td><code>FRecebeContribuicaoNovo.dfm</code></td></tr>
+<tr><td>Baixar via empréstimo</td><td>Quitar contribuições com crédito de empréstimo</td><td>Registros selecionados</td><td>Confere valor em aberto × empréstimo; contabiliza e integra com o PGA</td><td>Contribuições baixadas</td><td>—</td><td><a href="#MSG015">MSG015</a>, <a href="#MSG016">MSG016</a>, <a href="#MSG017">MSG017</a></td><td><code>FRecebeContribEmptmo.dfm</code></td></tr>
+<tr><td>Baixar via Contas a Receber</td><td>Refletir baixas do CaR</td><td>Contribuições a receber do CaR</td><td>Baixa por matrícula; registra erros na lista de resultado</td><td>Contribuições baixadas</td><td>—</td><td><a href="#MSG018">MSG018</a>, <a href="#MSG019">MSG019</a></td><td><code>FBaixaContribCAR.dfm</code></td></tr>
+</tbody></table></div>
+<div class="jf-rules">
+<p><strong>Regras de negócio da jornada:</strong> 5 regra(s) — texto completo abaixo.</p>
+<div class="rule-block" id="CONTRIB-RN024"><div class="rule-id">RS024 (CONTRIB-RN024) — Filtro de recebimento via folha</div>
+<div class="rule-desc">O recebimento via folha considera as contribuições enviadas e ainda sem valor recebido, ou as já recebidas com data, desde que não sejam de origem 'B' e sejam descontadas em folha.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>SITRECEBIMENTO</code> — [obrigatório] — 1 (com VALORRECEBIDO = 0) ou 2/3 (com DATARECEBIMENTO)</li>
+<li><code>FOLHAORIGEM</code> — [obrigatório] — ≠ 'B'</li>
+<li><code>FLGDESCFOLHA</code> — [obrigatório] — = 1</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT009">TRT009</a> → <a href="#MSG014">MSG014</a> → Mensagem exibida e registrada no log de resultado; recebimento não concluído</p>
+<p><strong>Jornada:</strong> <a href="#PF-02">JF002</a></p>
+<p><strong>Descrição original:</strong> Recebimento via folha seleciona contribuições com SITRECEBIMENTO=1 e VALORRECEBIDO=0, ou SITRECEBIMENTO∈{2,3} com DATARECEBIMENTO não nulo, FOLHAORIGEM&lt;&gt;'B' e FLGDESCFOLHA=1.</p>
+<p><strong>Condições:</strong> Processamento de retorno</p>
+<p><strong>Dados envolvidos:</strong> HSTCONTRIBPREV</p>
+<p><strong>Resultado/Exceção:</strong> Filtro SQL</p>
+<div class="rule-origin">📂 Origem: <code>CONTRIBUICAOPREV/Fontes/FRecebeContribuicaoNovo.pas:617-622</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<div class="rule-block" id="CONTRIB-RN028"><div class="rule-id">RS028 (CONTRIB-RN028) — Documentos CaR por data de recebimento</div>
+<div class="rule-desc">No recebimento via folha, quando “Efetuar apenas integração” e “Documentos distintos por dia” estão marcadas, os documentos do Contas a Receber são gerados por data de recebimento gravada, e não pela data da tela.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>“Efetuar apenas integração”</code> — [obrigatório] — marcada</li>
+<li><code>“Documentos distintos por dia”</code> — [obrigatório] — marcada</li>
+<li><code>DATARECEBIMENTO</code> — [obrigatório] — agrupa os documentos</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> não se aplica — regra de seleção/cálculo, sem mensagem ao usuário.</p>
+<p><strong>Jornada:</strong> <a href="#PF-02">JF002</a></p>
+<p><strong>Descrição original:</strong> Geração de documentos CaR por data de recebimento gravada quando 'Efetuar apenas integração' + 'Documentos distintos por dia'.</p>
+<p><strong>Condições:</strong> 'Efetuar apenas integração' + 'Documentos distintos por dia'</p>
+<p><strong>Dados envolvidos:</strong> DOCUMENTO</p>
+<p><strong>Resultado/Exceção:</strong> Geração por data de recebimento</p>
+<div class="rule-origin">📂 Origem: <code>CONTRIBUICAOPREV/Fontes/ContribuicaoPREV.dpr:222-225 (SIG 25044)</code> | Evidência: <span class="ev ev-inferido">INFERIDO</span></div></div>
+<div class="rule-block" id="CONTRIB-RN032">
+<div class="rule-id">CONTRIB-RN032 — Divergência aceita por margem (VLRACEITADIVERG)</div>
+<p><strong>Descrição:</strong> Se |VALORESPERADO − VALORRECEBIDO| ≤ VLRACEITADIVERG (margem de aceitação), a contribuição é considerada recebida corretamente (SITRECEBIMENTO=2); senão, divergência não tratada (SITRECEBIMENTO=3).</p>
+<p><strong>Fórmula:</strong> <code>SITRECEBIMENTO = 2 se |esperado − recebido| ≤ VLRACEITADIVERG, senão 3</code></p>
+<p><strong>Dados:</strong> HSTCONTRIBPREV.VALORESPERADO, VALORRECEBIDO; CONTPREV.VLRACEITADIVERG</p>
+<p><strong>Rotina:</strong> <code>FRecebeContribuicao.IncluiHSTCONTRIBPREV</code> · <strong>Arquivo:</strong> <code>FRecebeContribuicao.pas:2871-2873, 3079-3091</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+<div class="rule-block" id="CONTRIB-RN045">
+<div class="rule-id">CONTRIB-RN045 — Recebimento via empréstimo exige valor igual ao contrato</div>
+<p><strong>Descrição:</strong> No recebimento via empréstimo (IDTIPOCONTREMPTMO=21, integralização de reservas), o valor das contribuições em aberto deve ser igual ao valor do contrato (VLRCONTRATO). Se diferente, aborta.</p>
+<p><strong>Condições:</strong> SUM(VALORESPERADO contribuições abertas) = VLRCONTRATO.</p>
+<p><strong>Dados:</strong> CONTRATOEMPTMO.VLRCONTRATO, HSTCONTRIBPREV.VALORESPERADO</p>
+<p><strong>Rotina:</strong> <code>FRecebeContribEmptmo.btnReceberClick</code> · <strong>Arquivo:</strong> <code>FRecebeContribEmptmo.pas:693-697</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+<div class="rule-block" id="CONTRIB-RN046">
+<div class="rule-id">CONTRIB-RN046 — Três inadimplências consecutivas disparam evento de inadimplência</div>
+<p><strong>Descrição:</strong> Se o titular tem ≥ 3 inadimplências consecutivas (via SQL analítico DENSE_RANK/LAG sobre HSTCONTRIBPREV), o sistema dispara AjustaEventoInadimplencia.</p>
+<p><strong>Condições:</strong> COUNT(consecutivas WHERE VALORRECEBIDO < VALORESPERADO) >= 3, excluindo quem tem EVENTOSPREV com DATAVOLTA NOT NULL e IDEVENTOGERADOR=274.</p>
+<p><strong>Dados:</strong> HSTCONTRIBPREV, DEPENTIT, PARTPREVPLAN, SITPART, EVENTOSPREV</p>
+<p><strong>Rotina:</strong> <code>FBaixaContribCAR.titularTemMaisDe3InadConsecutivas</code> · <strong>Arquivo:</strong> <code>FBaixaContribCAR.pas:726-849</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+</div>
+
+<p><strong>Tratamentos de erro:</strong> <a href="#TRT007">TRT007</a>, <a href="#TRT008">TRT008</a>, <a href="#TRT009">TRT009</a>, <a href="#TRT010">TRT010</a>, <a href="#TRT011">TRT011</a>, <a href="#TRT012">TRT012</a></p>
+<p><strong>Mensagens:</strong> <a href="#MSG011">MSG011</a>, <a href="#MSG012">MSG012</a>, <a href="#MSG013">MSG013</a>, <a href="#MSG014">MSG014</a>, <a href="#MSG015">MSG015</a>, <a href="#MSG016">MSG016</a>, <a href="#MSG017">MSG017</a>, <a href="#MSG018">MSG018</a>, <a href="#MSG019">MSG019</a></p>
+<p><strong>Telas:</strong> Recebimento de Contribuições via Folha (<code>FRecebeContribuicaoNovo.dfm</code>), Recebimento de Contribuições Via Empréstimo (<code>FRecebeContribEmptmo.dfm</code>), Receber Contribuições do Contas a Receber (<code>FBaixaContribCAR.dfm</code>)</p>
+<p><strong>Dependências:</strong> Sucede <a href="uc201.html#PF-01">JF001</a>; precede <a href="uc203.html#PF-03">JF003</a> (alimentação de reservas) e <a href="#PF-08">JF008</a> (divergências).</p>
+<div class="note note-info"><p><strong>Registro original do processo PF-02</strong></p><p><strong>Forms de entrada:</strong> <code>FRecebeContribuicaoNovo.dfm</code>, <code>FRecebeContribEmptmo.dfm</code>, <code>FBaixaContribCAR.dfm</code></p><p><strong>Lógica de processamento:</strong> Lê arquivo de retorno, faz match por SITRECEBIMENTO/VALORRECEBIDO/DATARECEBIMENTO/FOLHAORIGEM/FLGDESCFOLHA, baixa documentos</p><p><strong>Saídas:</strong> Contribuições baixadas, documentos baixados</p><p><strong>Persistência (tabelas escritas):</strong> HSTCONTRIBPREV (U), DOCUMENTO (U), LANCTODOCUM (U)</p><p><strong>Evidência:</strong> <code>CONTRIBUICAOPREV/Fontes/FRecebeContribuicaoNovo.pas:617-622</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+</div>
+
+<div class="pf-block" id="PF-08"><h4>JF008 (PF-08) — Tratamento de divergências e inconsistências</h4>
+<p><strong>Objetivo:</strong> Comparar contribuições enviadas e recebidas, identificar e tratar divergências, desfazer documentos e consultar estatísticas de divergência.</p>
+<p><strong>Ator / gatilho:</strong> Analista de arrecadação, nas telas <em>Tratamento de Divergência de Contribuição</em>, <em>Consulta de Estatística de Massa</em> e <em>Interface do Desfazer Documento</em>.</p>
+<p><strong>Pré-condições:</strong> Contribuições enviadas (<a href="uc201.html#PF-01">JF001</a>) e retornos processados (<a href="#PF-02">JF002</a>); motivo padrão de tratamento cadastrado.</p>
+<p><strong>Pós-condições:</strong> HSTCONTRIBPREV ajustado; HSTATRASOCONTRIB atualizado; LOGTOTALPREV gravado; documentos desfeitos quando solicitado.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li>Selecionar o modo de divergência e informar os filtros (patrocinadora, plano, contribuição, faixas, participante, mês de referência). [<a href="#TRT038">TRT038</a>] [<a href="#TRT039">TRT039</a>]</li>
+<li>O sistema compara enviado × recebido e verifica baixas no CAP/CAR.</li>
+<li>Tratar as divergências: gera documentos e lançamentos e atualiza HSTATRASOCONTRIB. [<a href="#TRT040">TRT040</a>] [<a href="#TRT053">TRT053</a>]</li>
+<li>Desfazer documento: informar o código do documento e processar. [<a href="#TRT041">TRT041</a>]</li>
+<li>Consultar a estatística de divergências.</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Filtrar divergências</td><td>Localizar contribuições divergentes</td><td>Modo de divergência + filtros</td><td>Valida o modo e o valor de cada filtro escolhido</td><td>Lista de divergências</td><td>—</td><td><a href="#MSG068">MSG068</a>, <a href="#MSG069">MSG069</a>, <a href="#MSG071">MSG071</a>, <a href="#MSG070">MSG070</a></td><td><code>FDivergContrib.dfm</code></td></tr>
+<tr><td>Tratar divergência</td><td>Regularizar enviado × recebido</td><td>Divergências selecionadas</td><td>Exige motivo padrão; gera documentos/lançamentos; grava HSTATRASOCONTRIB e log</td><td>Divergências resolvidas</td><td>—</td><td><a href="#MSG072">MSG072</a>, <a href="#MSG100">MSG100</a></td><td><code>FDivergContrib.dfm</code></td></tr>
+<tr><td>Desfazer documento</td><td>Reverter documento de contribuição</td><td>Código do documento</td><td>Valida existência e desfaz</td><td>Documento desfeito</td><td>—</td><td><a href="#MSG073">MSG073</a>, <a href="#MSG074">MSG074</a>, <a href="#MSG075">MSG075</a></td><td><code>FDesfDocContribuicao.dfm</code></td></tr>
+<tr><td>Consultar estatística</td><td>Acompanhar volume de divergências</td><td>Parâmetros da consulta</td><td>Exibe a estatística de massa</td><td>Estatística exibida</td><td>—</td><td><a href="#MSG076">MSG076</a></td><td><code>FConsEstatDivergContrib.dfm</code></td></tr>
+</tbody></table></div>
+<div class="jf-rules">
+<p><strong>Regras de negócio da jornada:</strong> 3 regra(s) — texto completo abaixo.</p>
+<div class="rule-block">
+<div class="rule-id">CONTRIB-RN032 — Divergência aceita por margem (VLRACEITADIVERG)</div>
+<p><strong>Descrição:</strong> Se |VALORESPERADO − VALORRECEBIDO| ≤ VLRACEITADIVERG (margem de aceitação), a contribuição é considerada recebida corretamente (SITRECEBIMENTO=2); senão, divergência não tratada (SITRECEBIMENTO=3).</p>
+<p><strong>Fórmula:</strong> <code>SITRECEBIMENTO = 2 se |esperado − recebido| ≤ VLRACEITADIVERG, senão 3</code></p>
+<p><strong>Dados:</strong> HSTCONTRIBPREV.VALORESPERADO, VALORRECEBIDO; CONTPREV.VLRACEITADIVERG</p>
+<p><strong>Rotina:</strong> <code>FRecebeContribuicao.IncluiHSTCONTRIBPREV</code> · <strong>Arquivo:</strong> <code>FRecebeContribuicao.pas:2871-2873, 3079-3091</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+<div class="rule-block" id="CONTRIB-RN037">
+<div class="rule-id">CONTRIB-RN037 — Tratamento de divergência por modo (9 tratamentos)</div>
+<p><strong>Descrição:</strong> O tratamento de divergência tem 9 opções (OPTRATDIVERG): 1=Cobrar via Interface, 2=Cobrar via Banco, 3=Descontar no Próximo Benefício, 4=Devolver via Interface, 5=Devolver via Banco, 6=Acrescentar no Próximo Benefício, 7=Adicionar como Aporte, 8=Ignorar (não recalculou patronal), 9=Ignorar (já recalculou patronal).</p>
+<p><strong>Condições:</strong> Cada modo valida situação do participante (AT/MA/MP/AS) e direção da divergência (pagou a maior/menor).</p>
+<p><strong>Dados:</strong> HSTCONTRIBPREV.OPTRATDIVERG, SITRECEBIMENTO, FLGDEVOLUCAO</p>
+<p><strong>Rotina:</strong> <code>FDivergContrib.BuscaOpcoes</code> · <strong>Arquivo:</strong> <code>FDivergContrib.pas:4534-4623, 619-631</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+<div class="rule-block" id="CONTRIB-RN038">
+<div class="rule-id">CONTRIB-RN038 — Ação judicial vigente impede cobrança</div>
+<p><strong>Descrição:</strong> Se o beneficiário possui ação judicial de déficit vigente (ANOMESFIMACAO ≥ mês atual), não gera cobrança nem desconto no próximo benefício.</p>
+<p><strong>Condições:</strong> ANOMESFIMACAO >= FormatDateTime('YYYY/MM', Date) em CONTRIBPARTPACJUDDEFICIT ou CONTRIBNUCLEOACJUDDEFICIT.</p>
+<p><strong>Dados:</strong> CONTRIBPARTPACJUDDEFICIT, CONTRIBNUCLEOACJUDDEFICIT, MOTIVO</p>
+<p><strong>Rotina:</strong> <code>FDivergContrib.ExisteAcaoJudicialVigente</code> · <strong>Arquivo:</strong> <code>FDivergContrib.pas:9394-9473</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+</div>
+
+<p><strong>Tratamentos de erro:</strong> <a href="#TRT038">TRT038</a>, <a href="#TRT039">TRT039</a>, <a href="#TRT040">TRT040</a>, <a href="#TRT041">TRT041</a>, <a href="#TRT053">TRT053</a></p>
+<p><strong>Mensagens:</strong> <a href="#MSG068">MSG068</a>, <a href="#MSG069">MSG069</a>, <a href="#MSG070">MSG070</a>, <a href="#MSG071">MSG071</a>, <a href="#MSG072">MSG072</a>, <a href="#MSG073">MSG073</a>, <a href="#MSG074">MSG074</a>, <a href="#MSG075">MSG075</a>, <a href="#MSG076">MSG076</a>, <a href="#MSG100">MSG100</a></p>
+<p><strong>Telas:</strong> Tratamento de Divergência de Contribuição (<code>FDivergContrib.dfm</code>), Consulta de Estatística de Massa (<code>FConsEstatDivergContrib.dfm</code>), Interface do Desfazer Documento (<code>FDesfDocContribuicao.dfm</code>)</p>
+<p><strong>Dependências:</strong> Sucede <a href="uc201.html#PF-01">JF001</a> e <a href="#PF-02">JF002</a>; é o caminho indicado pelo sistema para corrigir contribuições bloqueadas em <a href="uc208.html#PF-09">JF009</a>.</p>
+<div class="note note-info"><p><strong>Registro original do processo PF-08</strong></p><p><strong>Forms de entrada:</strong> <code>FDivergContrib.dfm</code>, <code>FConsEstatDivergContrib.dfm</code>, <code>FDesfDocContribuicao.dfm</code></p><p><strong>Lógica de processamento:</strong> Compara enviado vs recebido, identifica divergências, tratamento manual, desfaz documentos</p><p><strong>Saídas:</strong> Divergências resolvidas, logs</p><p><strong>Persistência (tabelas escritas):</strong> HSTCONTRIBPREV (U), HSTATRASOCONTRIB (I/U/D), LOGTOTALPREV (I)</p><p><strong>Evidência:</strong> <code>CONTRIBUICAOPREV/Fontes/FDivergContrib.pas:2737-2768</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+</div>
+
+<section id="TRT-section"><div class="section-title">6. Tratamentos (TRT)</div>
+<p>Validações bloqueantes, confirmações e falhas de processamento encontradas nos forms do módulo. Cada tratamento traz a condição, a mensagem exibida e o resultado.</p>
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Condição</th><th>Mensagem</th><th>Resultado</th><th>Regra</th><th>Jornada</th></tr></thead><tbody>
+<tr id="TRT007"><td><strong>TRT007</strong></td><td>Mês de cobrança ou data de recebimento não informados (recebimento via folha)</td><td><a href="#MSG011">MSG011</a>, <a href="#MSG012">MSG012</a></td><td>Bloqueia o recebimento</td><td>validação de tela</td><td><a href="#PF-02">JF002</a></td></tr>
+<tr id="TRT008"><td><strong>TRT008</strong></td><td>Nenhuma contribuição selecionada para receber</td><td><a href="#MSG013">MSG013</a></td><td>Não processa</td><td>validação de tela</td><td><a href="#PF-02">JF002</a></td></tr>
+<tr id="TRT009"><td><strong>TRT009</strong></td><td>Procedure de recebimento retorna erro</td><td><a href="#MSG014">MSG014</a></td><td>Mensagem exibida e registrada no log de resultado; recebimento não concluído</td><td><a href="#CONTRIB-RN024">RS024</a></td><td><a href="#PF-02">JF002</a></td></tr>
+<tr id="TRT010"><td><strong>TRT010</strong></td><td>Valor das contribuições em aberto diferente do valor do empréstimo</td><td><a href="#MSG015">MSG015</a></td><td>Impede a baixa</td><td>validação de tela</td><td><a href="#PF-02">JF002</a></td></tr>
+<tr id="TRT011"><td><strong>TRT011</strong></td><td>Erro na contabilização ou na integração com o PGA (recebimento via empréstimo)</td><td><a href="#MSG016">MSG016</a>, <a href="#MSG017">MSG017</a></td><td>Cancela o processo</td><td>validação de tela</td><td><a href="#PF-02">JF002</a></td></tr>
+<tr id="TRT012"><td><strong>TRT012</strong></td><td>Baixa via Contas a Receber com erro em alguma matrícula</td><td><a href="#MSG018">MSG018</a></td><td>Conclui as demais e lista as matrículas com erro no resultado</td><td>validação de tela</td><td><a href="#PF-02">JF002</a></td></tr>
+<tr id="TRT038"><td><strong>TRT038</strong></td><td>Modo de divergência não selecionado</td><td><a href="#MSG068">MSG068</a></td><td>Bloqueia a consulta/tratamento</td><td>validação de tela</td><td><a href="#PF-08">JF008</a></td></tr>
+<tr id="TRT039"><td><strong>TRT039</strong></td><td>Filtro escolhido sem valor informado (ou datas inválidas)</td><td><a href="#MSG069">MSG069</a>, <a href="#MSG071">MSG071</a>, <a href="#MSG070">MSG070</a></td><td>Bloqueia a consulta</td><td>validação de tela</td><td><a href="#PF-08">JF008</a></td></tr>
+<tr id="TRT040"><td><strong>TRT040</strong></td><td>Motivo padrão para tratamento de divergência não cadastrado</td><td><a href="#MSG072">MSG072</a></td><td>Bloqueia o tratamento</td><td>validação de tela</td><td><a href="#PF-08">JF008</a></td></tr>
+<tr id="TRT041"><td><strong>TRT041</strong></td><td>Código do documento não informado ou não encontrado no desfazer documento</td><td><a href="#MSG073">MSG073</a>, <a href="#MSG074">MSG074</a></td><td>Não desfaz</td><td>validação de tela</td><td><a href="#PF-08">JF008</a></td></tr>
+<tr id="TRT053"><td><strong>TRT053</strong></td><td>Falha ao gravar o log de auditoria</td><td><a href="#MSG100">MSG100</a></td><td>Exceção; a transação em curso não é concluída</td><td>validação de tela</td><td><a href="uc203.html#PF-03">JF003</a>, <a href="uc204.html#PF-04">JF004</a>, <a href="#PF-08">JF008</a>, <a href="uc208.html#PF-09">JF009</a></td></tr>
+</tbody></table></div>
+</section>
+
+<section id="MSG-section"><div class="section-title">7. Mensagens (MSG)</div>
+<p>Textos transcritos do código-fonte (grafia original mantida). Trechos variáveis aparecem entre &lt; &gt;; “(…)” indica continuação da mensagem no código.</p>
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Texto da mensagem</th><th>Tipo</th><th>Origem (CONTRIBUICAOPREV/Fontes/)</th><th>Jornadas</th></tr></thead><tbody>
+<tr id="MSG011"><td><strong>MSG011</strong></td><td>“Preencha o mês de cobrança.”</td><td>Erro</td><td><code>FRecebeContribuicaoNovo.pas:301</code></td><td><a href="#PF-02">JF002</a></td></tr>
+<tr id="MSG012"><td><strong>MSG012</strong></td><td>“O campo Data de Recebimento é obrigatório.”</td><td>Erro</td><td><code>FRecebeContribuicaoNovo.pas:313</code></td><td><a href="#PF-02">JF002</a></td></tr>
+<tr id="MSG013"><td><strong>MSG013</strong></td><td>“Nenhuma contribuição foi selecionada.”</td><td>Alerta</td><td><code>FRecebeContribuicaoNovo.pas:752</code></td><td><a href="#PF-02">JF002</a></td></tr>
+<tr id="MSG014"><td><strong>MSG014</strong></td><td>“Erro ao Receber Contribuição.”</td><td>Erro</td><td><code>FRecebeContribuicaoNovo.pas:995</code></td><td><a href="#PF-02">JF002</a></td></tr>
+<tr id="MSG015"><td><strong>MSG015</strong></td><td>“O valor das contribuições em aberto não corresponde ao valor do empréstimo. Não é possível fazer a baixa.”</td><td>Informação</td><td><code>FRecebeContribEmptmo.pas:694</code></td><td><a href="#PF-02">JF002</a></td></tr>
+<tr id="MSG016"><td><strong>MSG016</strong></td><td>“Ocorreram erros na contabilização, o processo será cancelado.”</td><td>Informação</td><td><code>FRecebeContribEmptmo.pas:787</code></td><td><a href="#PF-02">JF002</a></td></tr>
+<tr id="MSG017"><td><strong>MSG017</strong></td><td>“Ocorreram erros na integração com o PGA, o processo será cancelado.”</td><td>Informação</td><td><code>FRecebeContribEmptmo.pas:829</code></td><td><a href="#PF-02">JF002</a></td></tr>
+<tr id="MSG018"><td><strong>MSG018</strong></td><td>“Baixa das contribuições efetuada com problemas. Verifique a lista de resultado.”</td><td>Informação</td><td><code>FBaixaContribCAR.pas:460</code></td><td><a href="#PF-02">JF002</a></td></tr>
+<tr id="MSG019"><td><strong>MSG019</strong></td><td>“Baixa das contribuições efetuada com sucesso.”</td><td>Sucesso</td><td><code>FBaixaContribCAR.pas:478</code></td><td><a href="#PF-02">JF002</a></td></tr>
+<tr id="MSG068"><td><strong>MSG068</strong></td><td>“Selecione um Modo de Divergência na Lista de Modos.”</td><td>Erro</td><td><code>FDivergContrib.pas:1555,1831,4133</code></td><td><a href="#PF-08">JF008</a></td></tr>
+<tr id="MSG069"><td><strong>MSG069</strong></td><td>“A Patrocinadora deve ser informada para o filtro desejado. (mesmo padrão para Plano, Contribuição, Faixa/Tempo/Valor de Divergência, Participante, Situação e Mês de Referência)”</td><td>Erro</td><td><code>FDivergContrib.pas:1443-1527</code></td><td><a href="#PF-08">JF008</a></td></tr>
+<tr id="MSG070"><td><strong>MSG070</strong></td><td>“Para o Recálculo Patronal o período selecionado só pode conter um mês.”</td><td>Informação</td><td><code>FDivergContrib.pas:2186</code></td><td><a href="#PF-08">JF008</a></td></tr>
+<tr id="MSG071"><td><strong>MSG071</strong></td><td>“É necessário informar a data inicial e a final.”</td><td>Informação</td><td><code>FDivergContrib.pas:2951,2993</code></td><td><a href="#PF-08">JF008</a></td></tr>
+<tr id="MSG072"><td><strong>MSG072</strong></td><td>“Motivo padrão para tratamento de divergência não cadastrado. Verique.”</td><td>Erro</td><td><code>FDivergContrib.pas:3640</code></td><td><a href="#PF-08">JF008</a></td></tr>
+<tr id="MSG073"><td><strong>MSG073</strong></td><td>“Preencha o Código do Documento.”</td><td>Erro</td><td><code>FDesfDocContribuicao.pas:79</code></td><td><a href="#PF-08">JF008</a></td></tr>
+<tr id="MSG074"><td><strong>MSG074</strong></td><td>“Código do Documento não encontrado.”</td><td>Erro</td><td><code>FDesfDocContribuicao.pas:85,240</code></td><td><a href="#PF-08">JF008</a></td></tr>
+<tr id="MSG075"><td><strong>MSG075</strong></td><td>“Processamento efetuado com sucesso”</td><td>Sucesso</td><td><code>FDesfDocContribuicao.pas:231,263</code></td><td><a href="#PF-08">JF008</a></td></tr>
+<tr id="MSG076"><td><strong>MSG076</strong></td><td>“Estatística não disponível”</td><td>Informação</td><td><code>FConsEstatDivergContrib.pas:638</code></td><td><a href="#PF-08">JF008</a></td></tr>
+<tr id="MSG100"><td><strong>MSG100</strong></td><td>“Erro ao gravar Log.”</td><td>Erro (exceção)</td><td><code>FCadHstContribuicao.pas:1091; FAtualizaPorIndice.pas:931; FDivergContrib.pas:5019; FControleIndivContrib.pas:2006; FCadContribNucleoFamiliar.pas:236</code></td><td><a href="uc203.html#PF-03">JF003</a>, <a href="uc204.html#PF-04">JF004</a>, <a href="#PF-08">JF008</a>, <a href="uc208.html#PF-09">JF009</a></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">8. Tabela/API/Programa</div>
+<div class="table-wrap"><table><thead><tr><th>Jornada</th><th>Tabelas (escrita)</th><th>Rotinas (CONTRIBUICAOPREV/Fontes/)</th></tr></thead><tbody>
+<tr><td><a href="#PF-02">JF002</a></td><td>HSTCONTRIBPREV (U), DOCUMENTO (U), LANCTODOCUM (U)</td><td><code>FRecebeContribuicaoNovo.pas:301-995; FRecebeContribEmptmo.pas:694-1085; FBaixaContribCAR.pas:402-478</code></td></tr>
+<tr><td><a href="#PF-08">JF008</a></td><td>HSTCONTRIBPREV (U), HSTATRASOCONTRIB (I/U/D), LOGTOTALPREV (I)</td><td><code>FDivergContrib.pas:1443-6764; FDesfDocContribuicao.pas:79-263</code></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">9. Telas/Layouts</div>
+<div class="table-wrap"><table><thead><tr><th>Jornada</th><th>Tela (título)</th><th>Form (.dfm)</th></tr></thead><tbody>
+<tr><td><a href="#PF-02">JF002</a></td><td>Recebimento de Contribuições via Folha<br>Recebimento de Contribuições Via Empréstimo<br>Receber Contribuições do Contas a Receber</td><td><code>FRecebeContribuicaoNovo.dfm</code><br><code>FRecebeContribEmptmo.dfm</code><br><code>FBaixaContribCAR.dfm</code></td></tr>
+<tr><td><a href="#PF-08">JF008</a></td><td>Tratamento de Divergência de Contribuição<br>Consulta de Estatística de Massa<br>Interface do Desfazer Documento</td><td><code>FDivergContrib.dfm</code><br><code>FConsEstatDivergContrib.dfm</code><br><code>FDesfDocContribuicao.dfm</code></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">10. Visão Consolidada das Jornadas</div>
+<div class="table-wrap"><table><thead><tr><th>Item</th><th>Jornada</th><th>Título</th><th>Critério de aceitação</th><th>Regras</th><th>Mensagens</th><th>Telas</th></tr></thead><tbody>
+<tr><td>[US] CONTRIB-JF002</td><td><a href="#PF-02">JF002</a></td><td>Recebimento por múltiplos canais</td><td><strong>Dado</strong> contribuições enviadas no mês, <strong>Quando</strong> o analista processa o retorno de um canal de recebimento, <strong>Então</strong> as contribuições são baixadas com valor e data de recebimento, ou os erros ficam listados no resultado.</td><td><a href="#CONTRIB-RN024">RS024</a>, <a href="#CONTRIB-RN028">RS028</a></td><td><a href="#MSG011">MSG011</a>, <a href="#MSG012">MSG012</a>, <a href="#MSG013">MSG013</a>, <a href="#MSG014">MSG014</a>, <a href="#MSG015">MSG015</a>, <a href="#MSG016">MSG016</a>, <a href="#MSG017">MSG017</a>, <a href="#MSG018">MSG018</a>, <a href="#MSG019">MSG019</a></td><td>Recebimento de Contribuições via Folha<br>Recebimento de Contribuições Via Empréstimo<br>Receber Contribuições do Contas a Receber</td></tr>
+<tr><td>[US] CONTRIB-JF008</td><td><a href="#PF-08">JF008</a></td><td>Tratamento de divergências e inconsistências</td><td><strong>Dado</strong> contribuições enviadas com recebimento divergente, <strong>Quando</strong> o analista seleciona um modo de divergência e trata os registros, <strong>Então</strong> as divergências são regularizadas e o log é gravado; sem modo selecionado o sistema bloqueia.</td><td>—</td><td><a href="#MSG068">MSG068</a>, <a href="#MSG069">MSG069</a>, <a href="#MSG070">MSG070</a>, <a href="#MSG071">MSG071</a>, <a href="#MSG072">MSG072</a>, <a href="#MSG073">MSG073</a>, <a href="#MSG074">MSG074</a>, <a href="#MSG075">MSG075</a>, <a href="#MSG076">MSG076</a>, <a href="#MSG100">MSG100</a></td><td>Tratamento de Divergência de Contribuição<br>Consulta de Estatística de Massa<br>Interface do Desfazer Documento</td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">11. Critérios de Aceitação por Regra</div>
+<div class="table-wrap"><table><thead><tr><th>Regra</th><th>Jornada</th><th>Critério de aceitação</th></tr></thead><tbody>
+<tr><td><a href="#CONTRIB-RN024">RS024 (CONTRIB-RN024)</a></td><td><a href="#PF-02">JF002</a></td><td><strong>Dado</strong> procedure de recebimento retorna erro, <strong>Quando</strong> o usuário tenta gravar/processar, <strong>Então</strong> o sistema exibe <a href="#MSG014">MSG014</a> e mensagem exibida e registrada no log de resultado; recebimento não concluído.</td></tr>
+<tr><td><a href="#CONTRIB-RN028">RS028 (CONTRIB-RN028)</a></td><td><a href="#PF-02">JF002</a></td><td><strong>Dado</strong> a condição “'Efetuar apenas integração' + 'Documentos distintos por dia'”, <strong>Quando</strong> a jornada é executada, <strong>Então</strong> no recebimento via folha, quando “Efetuar apenas integração” e “Documentos distintos por dia” estão marcadas, os documentos do Contas a Receber são gerados por data de recebimento gravada, e não pela data da tela.</td></tr>
+</tbody></table></div>
+</section>
+
+<p><a class="back-btn" href="funcionalidades.html">← Voltar à lista de Casos de Uso (Processos Funcionais)</a></p>
+</main>
+<footer>
+<p>Blueprint AS-IS — PFC-32 — Processos Funcionais organizados em Casos de Uso — Módulo CONTRIBUIÇÃO | Sistema legado Delphi 5 | pt-BR | Atualizado em 2026-11-10</p>
+</footer>
+</body>
+</html>

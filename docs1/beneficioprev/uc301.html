@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Benefício Previdenciário — UC301 – Conceder e Manter Processos de Benefício — Blueprint AS-IS</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<header>
+  <div class="badge">Blueprint AS-IS — PFC-32 — Processos Funcionais</div>
+  <h1>UC301 – Conceder e Manter Processos de Benefício</h1>
+  <p>Caso de uso do módulo Benefício Previdenciário: 3 jornada(s) funcional(is) e 7 regra(s) de negócio descritas dentro de cada jornada.</p>
+</header>
+<nav>
+  <a href="index.html">📋 Visão Geral</a>
+  <a href="arquitetura.html">🏗️ Arquitetura</a>
+  <a href="inventario-tecnico.html">📦 Inventário</a>
+  <a href="funcionalidades.html">⚙️ Processos Funcionais</a>
+  <a href="procedures-functions.html">🔧 Procedures</a>
+  <a href="dados.html">🗄️ Dados</a>
+  <a href="relatorios.html">📄 Relatórios</a>
+  <a href="integracoes.html">🔗 Integrações</a>
+  <a href="tratamento-erros.html">⚠️ Erros</a>
+  <a href="diagramas-fluxo.html">🔀 Fluxos</a>
+  <a href="lacunas.html">🔍 Lacunas</a>
+  <a href="controle-cobertura.html">📊 Cobertura</a>
+</nav>
+<main>
+
+<a class="back-btn" href="funcionalidades.html">← Voltar à lista de Casos de Uso (Processos Funcionais)</a>
+<div class="breadcrumb"><a href="index.html">Benefício Previdenciário</a> › <a href="funcionalidades.html">Processos Funcionais</a> › UC301</div>
+
+<section><div class="section-title">1. Identificação</div>
+<div class="table-wrap"><table><tbody>
+<tr><th>Caso de Uso</th><td><strong>UC301 – Conceder e Manter Processos de Benefício</strong></td></tr>
+<tr><th>Módulo</th><td>BENEFICIOPREV — Benefício Previdenciário</td></tr>
+<tr><th>Sistema</th><td>CM Contabilidade / FUNCEF (Delphi 5 / VCL / MIDAS / Oracle)</td></tr>
+<tr><th>Tipo</th><td>Sistema Desktop</td></tr>
+<tr><th>Ator</th><td>Usuário operacional (analistas de concessão e manutenção de benefícios, eventos previdenciários, reajuste e conciliação INSS)</td></tr>
+<tr><th>Jornadas</th><td><a href="#PF-01">JF001 — Concessão de Benefício</a>, <a href="#PF-02">JF002 — Manutenção de Processos de Benefícios</a>, <a href="#PF-03">JF003 — Simulação / Memória de Cálculo</a></td></tr>
+<tr><th>Regras de negócio</th><td>7 regra(s) BENEF-RN, descritas na íntegra dentro de cada jornada</td></tr>
+<tr><th>OS - Título</th><td>PFC-32 — Lista de UC (Processos Funcionais organizados em Casos de Uso)</td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">2. Descrição Resumida</div>
+<p>Concessão do benefício previdenciário, manutenção dos processos de benefício e simulação / memória de cálculo. Este caso de uso reúne 3 jornada(s) funcional(is) do módulo Benefício Previdenciário:</p>
+<ul>
+<li><a href="#PF-01"><strong>JF001 — Concessão de Benefício</strong></a>: Conceder um benefício previdenciário ao participante, beneficiário ou designado, com cálculo feito pelo motor externo CMAdmPrev.</li>
+<li><a href="#PF-02"><strong>JF002 — Manutenção de Processos de Benefícios</strong></a>: Manter processos de benefícios já existentes, pela mesma entrada da concessão em modo manutenção.</li>
+<li><a href="#PF-03"><strong>JF003 — Simulação / Memória de Cálculo</strong></a>: Simular a elegibilidade e o valor previsto dos benefícios de um participante, sem gravar dados, e consultar a memória de cálculo.</li>
+</ul>
+</section>
+
+<section><div class="section-title">3. Pré-condições</div>
+<p><strong>Gerais do módulo:</strong></p>
+<ul>
+<li>Módulo disponível (entry point <code>BENEFICIOPREV/Fontes/BeneficioPrev.dpr</code>) e usuário com permissão de acesso às telas.</li>
+<li>Banco Oracle acessível; parâmetros do módulo carregados (PARAMAPREV, tipo de previdência, fundação do usuário).</li>
+<li>Participantes, planos (PARTPREVPLAN), elegibilidade (ELEGPATRO), benefícios e eventos geradores (EVENTOGERADOR) cadastrados.</li>
+<li>Componentes externos disponíveis quando a jornada os usa: CMAdmPrev (cálculo/concessão/retroativo), bibliotecas UAdmPrev/UBeneficio, Folha de Benefícios (ver <a href="integracoes.html">🔗 Integrações</a>).</li>
+</ul>
+<p><strong>Por jornada:</strong></p>
+<ul>
+<li><a href="#PF-01">JF001</a>: Participante com plano (PARTPREVPLAN) e dados de elegibilidade (ELEGPATRO); motor CMAdmPrev disponível.</li>
+<li><a href="#PF-02">JF002</a>: Processo de benefício existente (PROCESSOBENEF).</li>
+<li><a href="#PF-03">JF003</a>: Participante com plano e regras de data de elegibilidade e de valor previsionado cadastradas no benefício.</li>
+</ul>
+</section>
+
+<section><div class="section-title">4. Pós-condições</div>
+<ul>
+<li><a href="#PF-01">JF001</a>: Benefício concedido em BENEFBFCIARIO, com histórico (HSTBENEFBFCIARIO), movimento (MOVBENEF), processo (PROCESSOBENEF), contribuições e descontos atualizados (HSTCONTRIBPREV, TMPDESC).</li>
+<li><a href="#PF-02">JF002</a>: Benefício e históricos atualizados nas mesmas tabelas da concessão.</li>
+<li><a href="#PF-03">JF003</a>: Nenhuma gravação; resultado exibido na tela (memResult).</li>
+</ul>
+</section>
+
+<section><div class="section-title">5. Jornadas Funcionais (JF001, JF002, JF003)</div>
+<p>Cada jornada traz objetivo, ator/gatilho, pré e pós-condições, sequência operacional, ações práticas, <strong>regras de negócio da jornada</strong> (texto completo de cada regra), tratamentos e mensagens.</p>
+<div class="legend"><span><span class="ev ev-comprovado">COMPROVADO</span> — no código</span><span><span class="ev ev-inferido">INFERIDO</span> — plausível</span><span><span class="ev ev-pendente">PENDENTE</span> — validar</span></div>
+</section>
+
+<div class="pf-block" id="PF-01"><h4>JF001 (PF-01) — Concessão de Benefício</h4>
+<p><strong>Objetivo:</strong> Conceder um benefício previdenciário ao participante, beneficiário ou designado, com cálculo feito pelo motor externo CMAdmPrev.</p>
+<p><strong>Ator / gatilho:</strong> Analista de concessão de benefícios, no menu da tela principal.</p>
+<p><strong>Pré-condições:</strong> Participante com plano (PARTPREVPLAN) e dados de elegibilidade (ELEGPATRO); motor CMAdmPrev disponível.</p>
+<p><strong>Pós-condições:</strong> Benefício concedido em BENEFBFCIARIO, com histórico (HSTBENEFBFCIARIO), movimento (MOVBENEF), processo (PROCESSOBENEF), contribuições e descontos atualizados (HSTCONTRIBPREV, TMPDESC).</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li>Acionar a concessão no menu e escolher o tipo: participante titular, beneficiário direto ou beneficiário designado/herdeiro. [<a href="#BENEF-RN001">RS001</a>]</li>
+<li>O sistema abre o requerimento do tipo escolhido.</li>
+<li>O cálculo e a concessão são executados pelo CMAdmPrev, com o mesmo IDCALCULO do início ao fim.</li>
+<li>Informar a data de início de liberação na tela Liberação de Benefício. [<a href="#TRT002">TRT002</a>]</li>
+<li>O sistema grava o benefício, o histórico, o movimento e o processo, e registra a operação no log. [<a href="#BENEF-RN025">RS025</a>]</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Escolher o tipo de benefício</td><td>Definir o requerimento a abrir</td><td>Tipo P, B ou D</td><td>Abre o requerimento do tipo escolhido</td><td>Requerimento aberto</td><td><a href="#BENEF-RN001">RS001</a></td><td>—</td><td><code>FPrincipal.dfm</code></td></tr>
+<tr><td>Calcular e conceder</td><td>Gerar o benefício</td><td>Requerimento preenchido</td><td>Delega o cálculo ao CMAdmPrev mantendo o IDCALCULO</td><td>Benefício, histórico, movimento e processo gravados</td><td><a href="#BENEF-RN001">RS001</a>, <a href="#BENEF-RN025">RS025</a></td><td>—</td><td><code>FPrincipal.dfm</code></td></tr>
+<tr><td>Informar a data de início de liberação</td><td>Definir o início do pagamento</td><td>Data de início de liberação</td><td>A crítica contra a data de início de pagamento está comentada no código</td><td>Liberação registrada</td><td>—</td><td><a href="#MSG002">MSG002</a></td><td><code>fTipoLiberacao.dfm</code></td></tr>
+</tbody></table></div>
+<div class="jf-rules">
+<p><strong>Regras de negócio da jornada:</strong> 1 regra(s) — texto completo abaixo.</p>
+<div class="rule-block" id="BENEF-RN001"><div class="rule-id">RS001 (BENEF-RN001) — Tipo de benefício direciona o fluxo</div>
+<div class="rule-desc">Ao conceder ou manter um benefício, o usuário escolhe para quem o processo será tratado — participante titular, beneficiário direto ou beneficiário designado/herdeiro — e o sistema abre o requerimento correspondente.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li>Tipo de benefício desejado (<code>rgrpTipo</code> → P/B/D) — [obrigatório] — define o requerimento aberto</li>
+<li><code>IDCALCULO</code> — [condicional] — mantido durante todo o processo quando já existe cálculo</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> — (regra de seleção/cálculo, sem crítica ao usuário)</p>
+<p><strong>Jornada:</strong> <a href="#PF-01">JF001</a>, <a href="#PF-02">JF002</a></p>
+<p><strong>Descrição original:</strong> Seleção de tipo de benefício (Participante/Beneficiário/Designado) direciona o fluxo de concessão.</p>
+<p><strong>Condições:</strong> Usuário escolhe P/B/D</p><p><strong>Dados envolvidos:</strong> frmTipoBenefConcede</p><p><strong>Resultado/Exceção:</strong> Direciona para AbreRequerParticip/Bfciario/Pensionista</p>
+<div class="rule-origin">📂 Origem: <code>BENEFICIOPREV/Fontes/FPrincipal.pas:1689-1761</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<p><strong>Regras transversais do módulo</strong> (valem para todas as jornadas, inclusive esta): 4 regra(s) — texto completo abaixo.</p>
+<div class="rule-block" id="BENEF-RN025"><div class="rule-id">RS025 (BENEF-RN025) — Operações auditadas no log do TotalPREV</div>
+<div class="rule-desc">As operações de negócio do módulo são registradas no log do TotalPREV com módulo, usuário, descrição e data.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>IDMODULO</code> — [obrigatório] — = 454</li>
+<li><code>IDUSUARIO</code> — [obrigatório]</li>
+<li><code>DESCOPERACAO</code> — [obrigatório]</li>
+<li><code>DATA</code> — [obrigatório] — SYSDATE</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="uc303.html#TRT010">TRT010</a> → <a href="uc303.html#MSG008">MSG008</a> → Levanta exceção “Erro ao gravar Log.”; em FEventoMorte, FEventoReclusao, FCadReajINSS e FCadContribParticipante ela é capturada por um except vazio e a operação segue sem log; em FDesdobramentoBenef cai no except externo da transação (:6325-6331)</p>
+<p><strong>Jornada:</strong> Transversal (todas)</p>
+<p><strong>Nota de verificação:</strong> Em vários forms a falha do log é engolida por um except vazio (ver TRT010).</p>
+<p><strong>Descrição original:</strong> Toda operação de negócio é auditada em LOGTOTALPREV (IdModulo=454).</p>
+<p><strong>Condições:</strong> INSERT INTO LOGTOTALPREV(IDMODULO=454, IDUSUARIO, DESCOPERACAO, DATA=SYSDATE)</p><p><strong>Dados envolvidos:</strong> LOGTOTALPREV</p><p><strong>Resultado/Exceção:</strong> Log de operações do TotalPREV</p>
+<div class="rule-origin">📂 Origem: <code>BENEFICIOPREV/Fontes/UModulo.pas:64-88</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<div class="rule-block" id="BENEF-RN026"><div class="rule-id">RS026 (BENEF-RN026) — Instituto troca a nomenclatura das telas</div>
+<div class="rule-desc">Quando a entidade é um instituto de previdência, as telas trocam “Fundação” por “Instituto”, “Patrocinadora” por “Entidade” e “Plano” por “Regime”.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>prmFLGTIPOPREVIDENC</code> — [obrigatório] — 'I' ativa a troca</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> — (regra de seleção/cálculo, sem crítica ao usuário)</p>
+<p><strong>Jornada:</strong> Transversal (todas)</p>
+<p><strong>Descrição original:</strong> Instituto previdenciário (FLGTIPOPREVIDENC='I') substitui captions: Fundação→Instituto, Patrocinadora→Entidade, Plano→Regime.</p>
+<p><strong>Condições:</strong> prmFLGTIPOPREVIDENC = 'I'</p><p><strong>Dados envolvidos:</strong> TLabel, TMenuItem, TGroupBox, TCheckBox, TPanel</p><p><strong>Resultado/Exceção:</strong> Captions alterados em runtime</p>
+<div class="rule-origin">📂 Origem: <code>BENEFICIOPREV/Fontes/FPrincipal.pas:598-775</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<div class="rule-block" id="BENEF-RN027"><div class="rule-id">RS027 (BENEF-RN027) — Integração contábil por parâmetro</div>
+<div class="rule-desc">A integração com a contabilidade só é ativada quando o parâmetro de integração contábil está ligado.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>PARAMAPREV.FLGINTCONTAB</code> — [obrigatório] — 1 = integra</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> — (regra de seleção/cálculo, sem crítica ao usuário)</p>
+<p><strong>Jornada:</strong> Transversal (todas)</p>
+<p><strong>Descrição original:</strong> Integração contábil ativada quando PARAMAPREV.FLGINTCONTAB=1.</p>
+<p><strong>Condições:</strong> FLGINTCONTAB = 1</p><p><strong>Dados envolvidos:</strong> PARAMAPREV, IntegraBack.Contabilidade</p><p><strong>Resultado/Exceção:</strong> Contabilidade='S' ou 'N'</p>
+<div class="rule-origin">📂 Origem: <code>BENEFICIOPREV/Fontes/FPrincipal.pas:928-930</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<div class="rule-block" id="BENEF-RN045"><div class="rule-id">RS045 (BENEF-RN045) — Dados isolados por fundação</div>
+<div class="rule-desc">As consultas de negócio filtram os dados pela fundação do usuário.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>IDFUNDACAO</code> — [obrigatório] — fundação da sessão</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> — (regra de seleção/cálculo, sem crítica ao usuário)</p>
+<p><strong>Jornada:</strong> Transversal (todas)</p>
+<p><strong>Descrição original:</strong> Filtro de multi-fundação (IDFUNDACAO) presente em quase toda SQL de negócio e MontaSelect.</p>
+<p><strong>Condições:</strong> IDFUNDACAO = iIdFundacao em SELECTs</p><p><strong>Dados envolvidos:</strong> PATRO, PARTPREVPLAN, EVENTOGERADOR</p><p><strong>Resultado/Exceção:</strong> Isolamento de dados por fundação</p>
+<div class="rule-origin">📂 Origem: <code>BENEFICIOPREV/Fontes/FPrincipal.pas:566-567</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+</div>
+
+<p><strong>Tratamentos de erro:</strong> <a href="#TRT002">TRT002</a></p>
+<p><strong>Mensagens:</strong> <a href="#MSG002">MSG002</a></p>
+<p><strong>Telas:</strong> Concessão e Manut de Benefícios Previdenciários (<code>FPrincipal.dfm</code>), Liberação de Benefício (<code>fTipoLiberacao.dfm</code>)</p>
+<p><strong>Dependências:</strong> Usa a simulação (<a href="#PF-03">JF003</a>) como apoio; precede a liberação (<a href="uc306.html#PF-10">JF010</a>, <a href="uc306.html#PF-11">JF011</a>), o desdobramento (<a href="uc305.html#PF-08">JF008</a>), a alteração (<a href="uc307.html#PF-14">JF014</a>) e o desfazimento (<a href="uc302.html#PF-04">JF004</a>).</p>
+<div class="note note-info"><p><strong>Registro original do processo PF-01</strong></p><p><strong>Forms de entrada:</strong> <code>FPrincipal.dfm</code> → <code>fTipoLiberacao.dfm</code></p><p><strong>Lógica de processamento:</strong> Seleção de tipo (Participante/Beneficiário/Designado); chama motor externo CMAdmPrev; mantém IDCALCULO durante todo o processo</p><p><strong>Saídas:</strong> Benefício concedido</p><p><strong>Persistência (tabelas escritas):</strong> BENEFBFCIARIO, HSTBENEFBFCIARIO, MOVBENEF, PROCESSOBENEF, HSTCONTRIBPREV, TMPDESC</p><p><strong>Evidência:</strong> <code>BENEFICIOPREV/Fontes/FPrincipal.pas:1720-1763</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+</div>
+
+<div class="pf-block" id="PF-02"><h4>JF002 (PF-02) — Manutenção de Processos de Benefícios</h4>
+<p><strong>Objetivo:</strong> Manter processos de benefícios já existentes, pela mesma entrada da concessão em modo manutenção.</p>
+<p><strong>Ator / gatilho:</strong> Analista de benefícios, no menu Manutenção de Processos de Benefícios da tela principal.</p>
+<p><strong>Pré-condições:</strong> Processo de benefício existente (PROCESSOBENEF).</p>
+<p><strong>Pós-condições:</strong> Benefício e históricos atualizados nas mesmas tabelas da concessão.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li>Acionar a manutenção de processos (modo 'MA') e escolher o tipo de benefício. [<a href="#BENEF-RN001">RS001</a>]</li>
+<li>O sistema abre o requerimento do processo existente e delega o cálculo ao CMAdmPrev.</li>
+<li>Confirmar as alterações; o sistema grava benefício, histórico e movimento e registra o log. [<a href="#BENEF-RN025">RS025</a>]</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Abrir a manutenção do processo</td><td>Alterar um benefício existente</td><td>Tipo de benefício e processo</td><td>Abre o requerimento em modo manutenção</td><td>Processo em edição</td><td><a href="#BENEF-RN001">RS001</a></td><td>—</td><td><code>FPrincipal.dfm</code></td></tr>
+<tr><td>Confirmar a manutenção</td><td>Gravar a alteração</td><td>Dados do requerimento</td><td>Delega o cálculo ao CMAdmPrev</td><td>Benefício mantido</td><td><a href="#BENEF-RN025">RS025</a></td><td>—</td><td><code>FPrincipal.dfm</code></td></tr>
+</tbody></table></div>
+<div class="jf-rules">
+<p><strong>Regras de negócio da jornada:</strong> 1 regra(s) — texto completo abaixo.</p>
+<div class="rule-block"><div class="rule-id">RS001 (BENEF-RN001) — Tipo de benefício direciona o fluxo</div>
+<div class="rule-desc">Ao conceder ou manter um benefício, o usuário escolhe para quem o processo será tratado — participante titular, beneficiário direto ou beneficiário designado/herdeiro — e o sistema abre o requerimento correspondente.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li>Tipo de benefício desejado (<code>rgrpTipo</code> → P/B/D) — [obrigatório] — define o requerimento aberto</li>
+<li><code>IDCALCULO</code> — [condicional] — mantido durante todo o processo quando já existe cálculo</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> — (regra de seleção/cálculo, sem crítica ao usuário)</p>
+<p><strong>Jornada:</strong> <a href="#PF-01">JF001</a>, <a href="#PF-02">JF002</a></p>
+<p><strong>Descrição original:</strong> Seleção de tipo de benefício (Participante/Beneficiário/Designado) direciona o fluxo de concessão.</p>
+<p><strong>Condições:</strong> Usuário escolhe P/B/D</p><p><strong>Dados envolvidos:</strong> frmTipoBenefConcede</p><p><strong>Resultado/Exceção:</strong> Direciona para AbreRequerParticip/Bfciario/Pensionista</p>
+<div class="rule-origin">📂 Origem: <code>BENEFICIOPREV/Fontes/FPrincipal.pas:1689-1761</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<p><strong>Regras transversais do módulo</strong> (valem também para esta jornada; texto completo na primeira jornada deste caso de uso): <a href="#BENEF-RN025">RS025 (BENEF-RN025) — Operações auditadas no log do TotalPREV</a>, <a href="#BENEF-RN026">RS026 (BENEF-RN026) — Instituto troca a nomenclatura das telas</a>, <a href="#BENEF-RN027">RS027 (BENEF-RN027) — Integração contábil por parâmetro</a>, <a href="#BENEF-RN045">RS045 (BENEF-RN045) — Dados isolados por fundação</a>.</p>
+</div>
+
+<p><strong>Tratamentos de erro:</strong> —</p>
+<p><strong>Mensagens:</strong> —</p>
+<p><strong>Telas:</strong> Concessão e Manut de Benefícios Previdenciários (<code>FPrincipal.dfm</code>)</p>
+<p><strong>Dependências:</strong> Sucede <a href="#PF-01">JF001</a>.</p>
+<div class="note note-info"><p><strong>Registro original do processo PF-02</strong></p><p><strong>Forms de entrada:</strong> <code>FPrincipal.dfm</code> (op='MA')</p><p><strong>Lógica de processamento:</strong> Mesma entrada da concessão, modo manutenção</p><p><strong>Saídas:</strong> Benefício mantido</p><p><strong>Persistência (tabelas escritas):</strong> Idem concessão</p><p><strong>Evidência:</strong> <code>BENEFICIOPREV/Fontes/FPrincipal.pas:2215-2262</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+</div>
+
+<div class="pf-block" id="PF-03"><h4>JF003 (PF-03) — Simulação / Memória de Cálculo</h4>
+<p><strong>Objetivo:</strong> Simular a elegibilidade e o valor previsto dos benefícios de um participante, sem gravar dados, e consultar a memória de cálculo.</p>
+<p><strong>Ator / gatilho:</strong> Analista de benefícios ou atendimento, na tela Simulação de Benefício.</p>
+<p><strong>Pré-condições:</strong> Participante com plano e regras de data de elegibilidade e de valor previsionado cadastradas no benefício.</p>
+<p><strong>Pós-condições:</strong> Nenhuma gravação; resultado exibido na tela (memResult).</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li>Abrir a simulação (assistente em 4 etapas) e selecionar participante, plano e benefícios.</li>
+<li>O sistema calcula a data de elegibilidade de cada benefício e mostra “Elegível” ou “Bloqueado”. [<a href="#BENEF-RN004">RS004</a>]</li>
+<li>O sistema calcula o valor previsionado ou mostra “Indefinido”. [<a href="#BENEF-RN005">RS005</a>]</li>
+<li>Consultar a memória de cálculo (DETCALCULO), se necessário.</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Selecionar participante e benefícios</td><td>Definir o que simular</td><td>Participante, plano, benefícios</td><td>Lista os benefícios do plano</td><td>Benefícios selecionados</td><td>—</td><td>—</td><td><code>FSimulaBeneficio.dfm</code></td></tr>
+<tr><td>Executar a simulação</td><td>Conhecer elegibilidade e valor</td><td>Benefícios selecionados</td><td>Aplica a regra de data e a regra numérica</td><td>Situação e valor previsto exibidos</td><td><a href="#BENEF-RN004">RS004</a>, <a href="#BENEF-RN005">RS005</a></td><td>—</td><td><code>FSimulaBeneficio.dfm</code></td></tr>
+<tr><td>Consultar memória de cálculo</td><td>Ver o detalhe do cálculo</td><td>Cálculo existente</td><td>Lê DETCALCULO</td><td>Memória exibida</td><td>—</td><td>—</td><td><code>FConsMemoriaCalculo.dfm (externo)</code></td></tr>
+</tbody></table></div>
+<div class="jf-rules">
+<p><strong>Regras de negócio da jornada:</strong> 2 regra(s) — texto completo abaixo.</p>
+<div class="rule-block" id="BENEF-RN004"><div class="rule-id">RS004 (BENEF-RN004) — Elegibilidade por data na simulação</div>
+<div class="rule-desc">Na simulação, a data de elegibilidade é obtida pela regra de data do benefício; se essa data já chegou, o benefício aparece como “Elegível”, senão como “Bloqueado”.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li>Regra de data de elegibilidade (<code>IDRGDATAELEG</code>) — [condicional] — sem regra, o benefício é tratado como elegível</li>
+<li>Dados do participante (<code>ELEGPATRO</code>, <code>PARTPREVPLAN</code>) — [obrigatório]</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> — (regra de seleção/cálculo, sem crítica ao usuário)</p>
+<p><strong>Jornada:</strong> <a href="#PF-03">JF003</a></p>
+<p><strong>Nota de verificação:</strong> Sem <code>IDRGDATAELEG</code> o código atribui “Elegível” diretamente (FSimulaBeneficio.pas:243).</p>
+<p><strong>Descrição original:</strong> Simulação: elegibilidade por data via regra string.</p>
+<p><strong>Condições:</strong> RegraString(IDRGDATAELEG) → data ≤ date</p><p><strong>Dados envolvidos:</strong> ELEGPATRO, PARTPREVPLAN</p><p><strong>Resultado/Exceção:</strong> 'Elegível' ou 'Bloqueado'</p>
+<div class="rule-origin">📂 Origem: <code>BENEFICIOPREV/Fontes/FSimulaBeneficio.pas:235-239</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<div class="rule-block" id="BENEF-RN005"><div class="rule-id">RS005 (BENEF-RN005) — Valor previsionado por regra numérica</div>
+<div class="rule-desc">Na simulação, o valor previsto do benefício é calculado pela regra numérica cadastrada; sem regra, o valor aparece como “Indefinido”.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li>Regra de valor previsionado (<code>IDRGVALORPREV</code>) — [condicional] — sem regra → “Indefinido”</li>
+<li>Dados do participante (<code>ELEGPATRO</code>, <code>PARTPREVPLAN</code>) — [obrigatório]</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> — (regra de seleção/cálculo, sem crítica ao usuário)</p>
+<p><strong>Jornada:</strong> <a href="#PF-03">JF003</a></p>
+<p><strong>Descrição original:</strong> Simulação: valor previsionado por regra numérica.</p>
+<p><strong>Condições:</strong> RegraNumerica(IDRGVALORPREV) sobre SQL</p><p><strong>Dados envolvidos:</strong> ELEGPATRO, PARTPREVPLAN</p><p><strong>Resultado/Exceção:</strong> Valor estimado ou 'Indefinido'</p>
+<div class="rule-origin">📂 Origem: <code>BENEFICIOPREV/Fontes/FSimulaBeneficio.pas:246-249</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<p><strong>Regras transversais do módulo</strong> (valem também para esta jornada; texto completo na primeira jornada deste caso de uso): <a href="#BENEF-RN025">RS025 (BENEF-RN025) — Operações auditadas no log do TotalPREV</a>, <a href="#BENEF-RN026">RS026 (BENEF-RN026) — Instituto troca a nomenclatura das telas</a>, <a href="#BENEF-RN027">RS027 (BENEF-RN027) — Integração contábil por parâmetro</a>, <a href="#BENEF-RN045">RS045 (BENEF-RN045) — Dados isolados por fundação</a>.</p>
+</div>
+
+<p><strong>Tratamentos de erro:</strong> —</p>
+<p><strong>Mensagens:</strong> —</p>
+<p><strong>Telas:</strong> Simulação de Benefício (<code>FSimulaBeneficio.dfm</code>), Memória de cálculo (form não localizado em BENEFICIOPREV/Fontes) (<code>FConsMemoriaCalculo.dfm</code>)</p>
+<p><strong>Dependências:</strong> Apoia <a href="#PF-01">JF001</a>.</p>
+<div class="note note-info"><p><strong>Registro original do processo PF-03</strong></p><p><strong>Forms de entrada:</strong> <code>FSimulaBeneficio.dfm</code>, <code>FConsMemoriaCalculo.dfm</code></p><p><strong>Lógica de processamento:</strong> Wizard 4 etapas; aplica RegraString(IDRGDATAELEG) e RegraNumerica(IDRGVALORPREV) sobre ELEGPATRO/PARTPREVPLAN</p><p><strong>Saídas:</strong> Apenas leitura (memResult)</p><p><strong>Persistência (tabelas escritas):</strong> Consulta DETCALCULO (leitura)</p><p><strong>Evidência:</strong> <code>BENEFICIOPREV/Fontes/FSimulaBeneficio.pas:194-262</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+</div>
+
+<section id="TRT-section"><div class="section-title">6. Tratamentos (TRT)</div>
+<p>Cada tratamento traz a condição, a mensagem exibida, o resultado e a regra/jornada de origem. Foram derivados apenas das validações e exceções documentadas no AS-IS (regras e aba <a href="tratamento-erros.html">⚠️ Erros</a>). “validação de tela” = crítica documentada sem regra BENEF-RN correspondente; “validação técnica” = falha técnica tratada pelo form.</p>
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Condição</th><th>Mensagem</th><th>Resultado</th><th>Regra</th><th>Jornada</th></tr></thead><tbody>
+<tr id="TRT001"><td><strong>TRT001</strong></td><td>Falha ao criar o datamodule de relatórios ao abrir uma tela pelo menu principal (<code>CriaDataModule</code>)</td><td><a href="#MSG001">MSG001</a></td><td>Exibe o erro técnico e orienta contatar o suporte (try/except)</td><td>validação técnica</td><td>Transversal (todas)</td></tr>
+<tr id="TRT002"><td><strong>TRT002</strong></td><td>Data de início de liberação anterior à data de início de pagamento</td><td><a href="#MSG002">MSG002</a></td><td><strong>Inativo no código atual</strong>: a crítica está comentada (fTipoLiberacao.pas:154-181); quando ativa, impedia o fechamento da tela (CanClose := False)</td><td>validação de tela</td><td><a href="#PF-01">JF001</a></td></tr>
+</tbody></table></div>
+</section>
+
+<section id="MSG-section"><div class="section-title">7. Mensagens (MSG)</div>
+<p>Textos conferidos no código-fonte (grafia original mantida). Trechos variáveis aparecem entre &lt; &gt;.</p>
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Texto da mensagem</th><th>Tipo</th><th>Origem (BENEFICIOPREV/Fontes/)</th><th>Jornadas</th></tr></thead><tbody>
+<tr id="MSG001"><td><strong>MSG001</strong></td><td>“Erro ao criar datamodule "TDtmRelatorios". Mensagem de erro : &lt;mensagem da exceção&gt; Favor contatar o suporte da CM.”</td><td>Erro</td><td><code>FPrincipal.pas:790-793 (também FEventoMorte.pas:2228, FEventoAssistidoINSS.pas:1893)</code></td><td>Transversal (todas)</td></tr>
+<tr id="MSG002"><td><strong>MSG002</strong></td><td>“A data de início de liberação deve ser igual ou maior a data de início de pagamento.”<br><em>Inativa: trecho comentado (<code>{ … }</code> em fTipoLiberacao.pas:154-181).</em></td><td>Erro</td><td><code>fTipoLiberacao.pas:157</code></td><td><a href="#PF-01">JF001</a></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">8. Tabela/API/Programa</div>
+<div class="table-wrap"><table><thead><tr><th>Jornada</th><th>Tabelas (escrita)</th><th>Rotinas (BENEFICIOPREV/Fontes/)</th></tr></thead><tbody>
+<tr><td><a href="#PF-01">JF001</a></td><td>BENEFBFCIARIO, HSTBENEFBFCIARIO, MOVBENEF, PROCESSOBENEF, HSTCONTRIBPREV, TMPDESC</td><td><code>FPrincipal.pas:1689-1763</code></td></tr>
+<tr><td><a href="#PF-02">JF002</a></td><td>Idem concessão (BENEFBFCIARIO, HSTBENEFBFCIARIO, MOVBENEF, PROCESSOBENEF, HSTCONTRIBPREV, TMPDESC)</td><td><code>FPrincipal.pas:2215-2262</code></td></tr>
+<tr><td><a href="#PF-03">JF003</a></td><td>Somente leitura (DETCALCULO, ELEGPATRO, PARTPREVPLAN)</td><td><code>FSimulaBeneficio.pas:194-262</code></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">9. Telas/Layouts</div>
+<div class="table-wrap"><table><thead><tr><th>Jornada</th><th>Tela (título)</th><th>Form (.dfm)</th></tr></thead><tbody>
+<tr><td><a href="#PF-01">JF001</a></td><td>Concessão e Manut de Benefícios Previdenciários<br>Liberação de Benefício</td><td><code>FPrincipal.dfm</code><br><code>fTipoLiberacao.dfm</code></td></tr>
+<tr><td><a href="#PF-02">JF002</a></td><td>Concessão e Manut de Benefícios Previdenciários</td><td><code>FPrincipal.dfm</code></td></tr>
+<tr><td><a href="#PF-03">JF003</a></td><td>Simulação de Benefício<br>Memória de cálculo (form não localizado em BENEFICIOPREV/Fontes)</td><td><code>FSimulaBeneficio.dfm</code><br><code>FConsMemoriaCalculo.dfm</code></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">10. Visão Consolidada das Jornadas</div>
+<div class="table-wrap"><table><thead><tr><th>Item</th><th>Jornada</th><th>Título</th><th>Critério de aceitação</th><th>Regras</th><th>Mensagens</th><th>Telas</th></tr></thead><tbody>
+<tr><td>[US] BENEF-JF001</td><td><a href="#PF-01">JF001</a></td><td>Concessão de Benefício</td><td><strong>Dado</strong> um participante com plano e elegibilidade, <strong>Quando</strong> o analista escolhe o tipo de benefício e conclui o requerimento, <strong>Então</strong> o benefício é concedido pelo CMAdmPrev e gravado com histórico, movimento e processo.</td><td><a href="#BENEF-RN001">RS001</a></td><td><a href="#MSG002">MSG002</a></td><td>Concessão e Manut de Benefícios Previdenciários<br>Liberação de Benefício</td></tr>
+<tr><td>[US] BENEF-JF002</td><td><a href="#PF-02">JF002</a></td><td>Manutenção de Processos de Benefícios</td><td><strong>Dado</strong> um processo de benefício existente, <strong>Quando</strong> o analista abre a manutenção e confirma, <strong>Então</strong> o benefício é recalculado pelo CMAdmPrev e os registros são atualizados.</td><td><a href="#BENEF-RN001">RS001</a></td><td>—</td><td>Concessão e Manut de Benefícios Previdenciários</td></tr>
+<tr><td>[US] BENEF-JF003</td><td><a href="#PF-03">JF003</a></td><td>Simulação / Memória de Cálculo</td><td><strong>Dado</strong> um participante com benefícios que têm regras de elegibilidade e valor, <strong>Quando</strong> o analista executa a simulação, <strong>Então</strong> cada benefício aparece como “Elegível” ou “Bloqueado” com o valor previsto (ou “Indefinido”), sem gravação.</td><td><a href="#BENEF-RN004">RS004</a>, <a href="#BENEF-RN005">RS005</a></td><td>—</td><td>Simulação de Benefício<br>Memória de cálculo (form não localizado em BENEFICIOPREV/Fontes)</td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">11. Critérios de Aceitação por Regra</div>
+<div class="table-wrap"><table><thead><tr><th>Regra</th><th>Jornada</th><th>Critério de aceitação</th></tr></thead><tbody>
+<tr><td><a href="#BENEF-RN001">RS001 (BENEF-RN001)</a></td><td><a href="#PF-01">JF001</a>, <a href="#PF-02">JF002</a></td><td><strong>Dado</strong> o analista acionou a concessão ou a manutenção, <strong>Quando</strong> escolhe participante, beneficiário direto ou designado, <strong>Então</strong> o sistema abre o requerimento correspondente ao tipo escolhido.</td></tr>
+<tr><td><a href="#BENEF-RN004">RS004 (BENEF-RN004)</a></td><td><a href="#PF-03">JF003</a></td><td><strong>Dado</strong> um benefício com regra de data de elegibilidade, <strong>Quando</strong> a simulação é executada, <strong>Então</strong> o benefício aparece como “Elegível” se a data calculada for até hoje, ou “Bloqueado” caso contrário.</td></tr>
+<tr><td><a href="#BENEF-RN005">RS005 (BENEF-RN005)</a></td><td><a href="#PF-03">JF003</a></td><td><strong>Dado</strong> um benefício com ou sem regra de valor previsionado, <strong>Quando</strong> a simulação é executada, <strong>Então</strong> o valor calculado pela regra é exibido, ou “Indefinido” sem regra.</td></tr>
+<tr><td><a href="#BENEF-RN025">RS025 (BENEF-RN025)</a></td><td>Transversal (todas)</td><td><strong>Dado</strong> falha ao gravar o log de operações (<code>Sistema.GravaLogOperacoes</code> retorna falso), <strong>Quando</strong> o usuário executa a operação, <strong>Então</strong> o sistema exibe <a href="uc303.html#MSG008">MSG008</a> e levanta exceção “Erro ao gravar Log.”; em FEventoMorte, FEventoReclusao, FCadReajINSS e FCadContribParticipante ela é capturada por um except vazio e a operação segue sem log; em FDesdobramentoBenef cai no except externo da transação (:6325-6331).</td></tr>
+<tr><td><a href="#BENEF-RN026">RS026 (BENEF-RN026)</a></td><td>Transversal (todas)</td><td><strong>Dado</strong> a entidade configurada como instituto (FLGTIPOPREVIDENC = 'I'), <strong>Quando</strong> uma tela é aberta, <strong>Então</strong> os rótulos trocam Fundação/Patrocinadora/Plano por Instituto/Entidade/Regime.</td></tr>
+<tr><td><a href="#BENEF-RN027">RS027 (BENEF-RN027)</a></td><td>Transversal (todas)</td><td><strong>Dado</strong> FLGINTCONTAB = 1 em PARAMAPREV, <strong>Quando</strong> o módulo é iniciado, <strong>Então</strong> a integração contábil é ativada (Contabilidade = 'S'); com outro valor, fica desativada.</td></tr>
+<tr><td><a href="#BENEF-RN045">RS045 (BENEF-RN045)</a></td><td>Transversal (todas)</td><td><strong>Dado</strong> um usuário de uma fundação, <strong>Quando</strong> qualquer consulta de negócio é feita, <strong>Então</strong> só os dados da fundação do usuário (IDFUNDACAO) são retornados.</td></tr>
+</tbody></table></div>
+</section>
+
+<p><a class="back-btn" href="funcionalidades.html">← Voltar à lista de Casos de Uso (Processos Funcionais)</a></p>
+</main>
+<footer>
+<p>Blueprint AS-IS — PFC-32 — Processos Funcionais organizados em Casos de Uso — Módulo BENEFICIOPREV | Sistema legado Delphi 5 | pt-BR | Atualizado em 2026-11-10</p>
+</footer>
+</body>
+</html>

@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Benefício Previdenciário — UC303 – Registrar Eventos Previdenciários e Falecimento — Blueprint AS-IS</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<header>
+  <div class="badge">Blueprint AS-IS — PFC-32 — Processos Funcionais</div>
+  <h1>UC303 – Registrar Eventos Previdenciários e Falecimento</h1>
+  <p>Caso de uso do módulo Benefício Previdenciário: 2 jornada(s) funcional(is) e 13 regra(s) de negócio descritas dentro de cada jornada.</p>
+</header>
+<nav>
+  <a href="index.html">📋 Visão Geral</a>
+  <a href="arquitetura.html">🏗️ Arquitetura</a>
+  <a href="inventario-tecnico.html">📦 Inventário</a>
+  <a href="funcionalidades.html">⚙️ Processos Funcionais</a>
+  <a href="procedures-functions.html">🔧 Procedures</a>
+  <a href="dados.html">🗄️ Dados</a>
+  <a href="relatorios.html">📄 Relatórios</a>
+  <a href="integracoes.html">🔗 Integrações</a>
+  <a href="tratamento-erros.html">⚠️ Erros</a>
+  <a href="diagramas-fluxo.html">🔀 Fluxos</a>
+  <a href="lacunas.html">🔍 Lacunas</a>
+  <a href="controle-cobertura.html">📊 Cobertura</a>
+</nav>
+<main>
+
+<a class="back-btn" href="funcionalidades.html">← Voltar à lista de Casos de Uso (Processos Funcionais)</a>
+<div class="breadcrumb"><a href="index.html">Benefício Previdenciário</a> › <a href="funcionalidades.html">Processos Funcionais</a> › UC303</div>
+
+<section><div class="section-title">1. Identificação</div>
+<div class="table-wrap"><table><tbody>
+<tr><th>Caso de Uso</th><td><strong>UC303 – Registrar Eventos Previdenciários e Falecimento</strong></td></tr>
+<tr><th>Módulo</th><td>BENEFICIOPREV — Benefício Previdenciário</td></tr>
+<tr><th>Sistema</th><td>CM Contabilidade / FUNCEF (Delphi 5 / VCL / MIDAS / Oracle)</td></tr>
+<tr><th>Tipo</th><td>Sistema Desktop</td></tr>
+<tr><th>Ator</th><td>Usuário operacional (analistas de concessão e manutenção de benefícios, eventos previdenciários, reajuste e conciliação INSS)</td></tr>
+<tr><th>Jornadas</th><td><a href="#PF-05">JF005 — Eventos Previdenciários</a>, <a href="#PF-18">JF018 — Registro de Falecimento de Beneficiário</a></td></tr>
+<tr><th>Regras de negócio</th><td>13 regra(s) BENEF-RN, descritas na íntegra dentro de cada jornada</td></tr>
+<tr><th>OS - Título</th><td>PFC-32 — Lista de UC (Processos Funcionais organizados em Casos de Uso)</td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">2. Descrição Resumida</div>
+<p>Registro dos eventos geradores (aposentadoria, falecimento, reclusão, assistido) e do falecimento de beneficiário. Este caso de uso reúne 2 jornada(s) funcional(is) do módulo Benefício Previdenciário:</p>
+<ul>
+<li><a href="#PF-05"><strong>JF005 — Eventos Previdenciários</strong></a>: Registrar eventos previdenciários (aposentadoria, falecimento, reclusão, assistido temporário, aposentadoria exclusiva do INSS) e atualizar as situações do participante.</li>
+<li><a href="#PF-18"><strong>JF018 — Registro de Falecimento de Beneficiário</strong></a>: Registrar o falecimento de um beneficiário, pelo componente externo.</li>
+</ul>
+</section>
+
+<section><div class="section-title">3. Pré-condições</div>
+<p><strong>Gerais do módulo:</strong></p>
+<ul>
+<li>Módulo disponível (entry point <code>BENEFICIOPREV/Fontes/BeneficioPrev.dpr</code>) e usuário com permissão de acesso às telas.</li>
+<li>Banco Oracle acessível; parâmetros do módulo carregados (PARAMAPREV, tipo de previdência, fundação do usuário).</li>
+<li>Participantes, planos (PARTPREVPLAN), elegibilidade (ELEGPATRO), benefícios e eventos geradores (EVENTOGERADOR) cadastrados.</li>
+<li>Componentes externos disponíveis quando a jornada os usa: CMAdmPrev (cálculo/concessão/retroativo), bibliotecas UAdmPrev/UBeneficio, Folha de Benefícios (ver <a href="integracoes.html">🔗 Integrações</a>).</li>
+</ul>
+<p><strong>Por jornada:</strong></p>
+<ul>
+<li><a href="#PF-05">JF005</a>: Eventos geradores cadastrados para a fundação; participante com plano; para falecimento, dependente elegível cadastrado.</li>
+<li><a href="#PF-18">JF018</a>: Beneficiário com benefício; componente <code>frmRegFalBenef</code> disponível.</li>
+</ul>
+</section>
+
+<section><div class="section-title">4. Pós-condições</div>
+<ul>
+<li><a href="#PF-05">JF005</a>: Evento gravado em EVENTOSPREV; ELEGPATRO, PARTPREVPLAN e PESSOAFISICA atualizados conforme o evento.</li>
+<li><a href="#PF-18">JF018</a>: Falecimento registrado (persistência no componente externo).</li>
+</ul>
+</section>
+
+<section><div class="section-title">5. Jornadas Funcionais (JF005, JF018)</div>
+<p>Cada jornada traz objetivo, ator/gatilho, pré e pós-condições, sequência operacional, ações práticas, <strong>regras de negócio da jornada</strong> (texto completo de cada regra), tratamentos e mensagens.</p>
+<div class="legend"><span><span class="ev ev-comprovado">COMPROVADO</span> — no código</span><span><span class="ev ev-inferido">INFERIDO</span> — plausível</span><span><span class="ev ev-pendente">PENDENTE</span> — validar</span></div>
+</section>
+
+<div class="pf-block" id="PF-05"><h4>JF005 (PF-05) — Eventos Previdenciários</h4>
+<p><strong>Objetivo:</strong> Registrar eventos previdenciários (aposentadoria, falecimento, reclusão, assistido temporário, aposentadoria exclusiva do INSS) e atualizar as situações do participante.</p>
+<p><strong>Ator / gatilho:</strong> Analista de benefícios, nas telas de evento acessadas pelo menu de eventos.</p>
+<p><strong>Pré-condições:</strong> Eventos geradores cadastrados para a fundação; participante com plano; para falecimento, dependente elegível cadastrado.</p>
+<p><strong>Pós-condições:</strong> Evento gravado em EVENTOSPREV; ELEGPATRO, PARTPREVPLAN e PESSOAFISICA atualizados conforme o evento.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li>Escolher o evento no menu, montado a partir do cadastro de eventos geradores. [<a href="#BENEF-RN002">RS002</a>] [<a href="#BENEF-RN003">RS003</a>]</li>
+<li>Procurar o participante; se houver evento em aberto, o sistema exige confirmar ou cancelar. [<a href="#BENEF-RN016">RS016</a>] [<a href="#TRT007">TRT007</a>]</li>
+<li>O sistema considera os benefícios nas situações 4 ou 6. [<a href="#BENEF-RN006">RS006</a>]</li>
+<li>No falecimento, o sistema exige dependente elegível e grava a data da morte e o tempo de serviço. [<a href="#BENEF-RN035">RS035</a>] [<a href="#TRT008">TRT008</a>] [<a href="#BENEF-RN018">RS018</a>]</li>
+<li>Na aposentadoria exclusiva do INSS, grava o evento 129 ou 130; na invalidez, marca a pessoa como inválida. [<a href="#BENEF-RN036">RS036</a>] [<a href="#BENEF-RN037">RS037</a>]</li>
+<li>O sistema grava o evento com a data da alteração e registra o log. [<a href="#BENEF-RN019">RS019</a>] [<a href="#TRT009">TRT009</a>] [<a href="#TRT010">TRT010</a>]</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Escolher o evento</td><td>Definir o tipo de evento</td><td>Item do menu de eventos</td><td>Menu montado por FLGINTERNO/IDFUNDACAO</td><td>Tela do evento aberta</td><td><a href="#BENEF-RN002">RS002</a>, <a href="#BENEF-RN003">RS003</a></td><td>—</td><td><code>FPrincipal.dfm</code></td></tr>
+<tr><td>Procurar o participante</td><td>Localizar quem sofre o evento</td><td>Matrícula ou nome</td><td>Bloqueia se houver evento em aberto; filtra benefícios 4/6</td><td>Participante carregado</td><td><a href="#BENEF-RN016">RS016</a>, <a href="#BENEF-RN006">RS006</a></td><td><a href="#MSG006">MSG006</a></td><td><code>FEventoReclusao.dfm, FEventoMorte.dfm</code></td></tr>
+<tr><td>Registrar falecimento</td><td>Gravar a morte e preparar a pensão</td><td>Data da morte</td><td>Exige dependente elegível; grava DATAMORTE e tempo de serviço</td><td>Falecimento registrado</td><td><a href="#BENEF-RN035">RS035</a>, <a href="#BENEF-RN018">RS018</a></td><td><a href="#MSG007">MSG007</a></td><td><code>FEventoMorte.dfm</code></td></tr>
+<tr><td>Registrar evento INSS</td><td>Gravar aposentadoria INSS ou invalidez</td><td>Grupo AI, BI ou IN</td><td>Grava evento 129/130 ou FLGINVALIDO = 1</td><td>Evento INSS registrado</td><td><a href="#BENEF-RN036">RS036</a>, <a href="#BENEF-RN037">RS037</a></td><td>—</td><td><code>FEventoAssistidoINSS.dfm</code></td></tr>
+<tr><td>Confirmar o evento</td><td>Persistir o evento</td><td>Dados do evento</td><td>Insere EVENTOSPREV, atualiza DATAALTERADO e grava log</td><td>Evento gravado</td><td><a href="#BENEF-RN019">RS019</a>, <a href="uc301.html#BENEF-RN025">RS025</a></td><td><a href="#MSG008">MSG008</a>, <a href="#MSG009">MSG009</a></td><td><code>FEventoAposentaBenef.dfm, FEventoMorte.dfm, FEventoReclusao.dfm, FEventoAssistidoBenef.dfm</code></td></tr>
+</tbody></table></div>
+<div class="jf-rules">
+<p><strong>Regras de negócio da jornada:</strong> 9 regra(s) — texto completo abaixo.</p>
+<div class="rule-block" id="BENEF-RN002"><div class="rule-id">RS002 (BENEF-RN002) — Menu de eventos montado pelo cadastro</div>
+<div class="rule-desc">Os eventos previdenciários oferecidos no menu vêm do cadastro de eventos geradores da fundação, agrupados pelo tipo interno do evento.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>EVENTOGERADOR.FLGINTERNO</code> — [obrigatório] — grupo do evento (ex.: FL, AI, BI, IN)</li>
+<li><code>IDFUNDACAO</code> — [obrigatório] — fundação do usuário</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> — (regra de seleção/cálculo, sem crítica ao usuário)</p>
+<p><strong>Jornada:</strong> <a href="#PF-05">JF005</a></p>
+<p><strong>Descrição original:</strong> Menu de Eventos é montado dinamicamente por FLGINTERNO lendo EVENTOGERADOR.</p>
+<p><strong>Condições:</strong> SELECT EVENTOGERADOR WHERE FLGINTERNO=? AND IDFUNDACAO=?</p><p><strong>Dados envolvidos:</strong> EVENTOGERADOR</p><p><strong>Resultado/Exceção:</strong> Itens de menu criados em runtime</p>
+<div class="rule-origin">📂 Origem: <code>BENEFICIOPREV/Fontes/FPrincipal.pas:1038-1387</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<div class="rule-block" id="BENEF-RN003"><div class="rule-id">RS003 (BENEF-RN003) — Falecimento não oferece o evento 346</div>
+<div class="rule-desc">No grupo de eventos de Falecimento, o evento gerador 346 não aparece no menu.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>FLGINTERNO</code> — [obrigatório] — = 'FL'</li>
+<li><code>IDEVENTOGERADOR</code> — [obrigatório] — ≠ 346</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> — (regra de seleção/cálculo, sem crítica ao usuário)</p>
+<p><strong>Jornada:</strong> <a href="#PF-05">JF005</a></p>
+<p><strong>Descrição original:</strong> Evento Falecimento (FL) exclui o evento gerador 346 do menu.</p>
+<p><strong>Condições:</strong> FLGINTERNO='FL' AND IDEVENTOGERADOR <> 346</p><p><strong>Dados envolvidos:</strong> EVENTOGERADOR</p><p><strong>Resultado/Exceção:</strong> 346 não aparece no menu FL</p>
+<div class="rule-origin">📂 Origem: <code>BENEFICIOPREV/Fontes/FPrincipal.pas:1214</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<div class="rule-block" id="BENEF-RN006"><div class="rule-id">RS006 (BENEF-RN006) — Eventos consideram só benefícios nas situações 4 e 6</div>
+<div class="rule-desc">Nos eventos de aposentadoria e morte, entram apenas os benefícios nas situações 4 ou 6.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>BENEFBFCIARIO.IDSITBENEFICIO</code> — [obrigatório] — 4 ou 6</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> — (regra de seleção/cálculo, sem crítica ao usuário)</p>
+<p><strong>Jornada:</strong> <a href="#PF-05">JF005</a></p>
+<p><strong>Descrição original:</strong> Eventos de aposentadoria/morte só consideram benefícios com IDSITBENEFICIO IN (4,6).</p>
+<p><strong>Condições:</strong> IDSITBENEFICIO = 4 OR = 6</p><p><strong>Dados envolvidos:</strong> BENEFBFCIARIO</p><p><strong>Resultado/Exceção:</strong> Filtra benefícios ativos/em manutenção</p>
+<div class="rule-origin">📂 Origem: <code>BENEFICIOPREV/Fontes/FEventoAposentaBenef.pas:64</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<div class="rule-block" id="BENEF-RN016"><div class="rule-id">RS016 (BENEF-RN016) — Evento em aberto bloqueia nova procura</div>
+<div class="rule-desc">Enquanto um evento está em edição, o usuário não pode procurar outro participante sem antes confirmar ou cancelar o evento.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li>Evento em gravação (<code>uBeneficio.bGravaEvento</code>) — [obrigatório] — verdadeiro bloqueia</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT007">TRT007</a> → <a href="#MSG006">MSG006</a> → Bloqueia a nova procura (Abort); o usuário deve confirmar ou cancelar o evento</p>
+<p><strong>Jornada:</strong> <a href="#PF-05">JF005</a></p>
+<p><strong>Nota de verificação:</strong> O mesmo bloqueio existe no evento Falecimento (FEventoMorte.pas:520).</p>
+<p><strong>Descrição original:</strong> Evento em aberto bloqueia nova procura.</p>
+<p><strong>Condições:</strong> Evento já registrado sem confirmação</p><p><strong>Dados envolvidos:</strong> EVENTOSPREV</p><p><strong>Resultado/Exceção:</strong> MsgDlg('Evento em aberto…') + Abort</p>
+<div class="rule-origin">📂 Origem: <code>BENEFICIOPREV/Fontes/FEventoReclusao.pas:245-246</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<div class="rule-block" id="BENEF-RN018"><div class="rule-id">RS018 (BENEF-RN018) — Falecimento grava data da morte e tempo de serviço</div>
+<div class="rule-desc">No evento Falecimento, o sistema registra a data da morte da pessoa e atualiza o tempo de serviço total.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>PESSOAFISICA.DATAMORTE</code> — [obrigatório]</li>
+<li><code>ELEGPATRO.TEMPOSERVTOTAL</code> — [obrigatório]</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> — (regra de seleção/cálculo, sem crítica ao usuário)</p>
+<p><strong>Jornada:</strong> <a href="#PF-05">JF005</a></p>
+<p><strong>Descrição original:</strong> Evento Falecimento grava data da morte e tempo de serviço.</p>
+<p><strong>Condições:</strong> UPDATE PESSOAFISICA SET DATAMORTE; UPDATE ELEGPATRO SET TEMPOSERVTOTAL</p><p><strong>Dados envolvidos:</strong> PESSOAFISICA, ELEGPATRO</p><p><strong>Resultado/Exceção:</strong> Atualiza situação do falecido</p>
+<div class="rule-origin">📂 Origem: <code>BENEFICIOPREV/Fontes/FEventoMorte.pas:1332,1474</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<div class="rule-block" id="BENEF-RN019"><div class="rule-id">RS019 (BENEF-RN019) — Eventos são registrados e auditados</div>
+<div class="rule-desc">Todo evento previdenciário é gravado no histórico de eventos com a data da alteração.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>EVENTOSPREV</code> — [obrigatório] — registro do evento</li>
+<li><code>DATAALTERADO</code> — [obrigatório] — data atual</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> — (regra de seleção/cálculo, sem crítica ao usuário)</p>
+<p><strong>Jornada:</strong> <a href="#PF-05">JF005</a></p>
+<p><strong>Descrição original:</strong> Eventos persistem em EVENTOSPREV e auditam DATAALTERADO.</p>
+<p><strong>Condições:</strong> INSERT INTO EVENTOSPREV; UPDATE SET DATAALTERADO=today</p><p><strong>Dados envolvidos:</strong> EVENTOSPREV</p><p><strong>Resultado/Exceção:</strong> Rastreabilidade do evento</p>
+<div class="rule-origin">📂 Origem: <code>BENEFICIOPREV/Fontes/FEventoMorte.pas:1588,1618</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<div class="rule-block" id="BENEF-RN035"><div class="rule-id">RS035 (BENEF-RN035) — Falecimento exige dependente elegível</div>
+<div class="rule-desc">O evento Falecimento só prossegue se o participante tiver dependente elegível a benefício com cadastro ativo.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>BFCIARIOTITPLAN</code> — [obrigatório] — beneficiário do titular no plano</li>
+<li><code>DEPENTIT.DATACANCELA</code> — [obrigatório] — nula</li>
+<li><code>BENEFICIO.IDEVENTOGERADOR</code> — [obrigatório] — do evento escolhido</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT008">TRT008</a> → <a href="#MSG007">MSG007</a> → Interrompe o evento (Exit) e orienta usar o Cadastro de Dependentes/Beneficiários</p>
+<p><strong>Jornada:</strong> <a href="#PF-05">JF005</a></p>
+<p><strong>Nota de verificação:</strong> Mensagem em FEventoMorte.pas:1030-1031.</p>
+<p><strong>Descrição original:</strong> Evento Falecimento exige dependentes elegíveis para requerer benefício.</p>
+<p><strong>Condições:</strong> SELECT BFCIARIOTITPLAN WHERE DATACANCELA IS NULL</p><p><strong>Dados envolvidos:</strong> BFCIARIOTITPLAN, DEPENTIT, BENEFICIO</p><p><strong>Resultado/Exceção:</strong> Bloqueia se não há dependentes</p>
+<div class="rule-origin">📂 Origem: <code>BENEFICIOPREV/Fontes/FEventoMorte.pas:1002-1035</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<div class="rule-block" id="BENEF-RN036"><div class="rule-id">RS036 (BENEF-RN036) — Eventos de aposentadoria exclusiva do INSS</div>
+<div class="rule-desc">No evento assistido INSS, o grupo AI grava o evento 129 (aposentadoria INSS do participante) e o grupo BI grava o evento 130 (aposentadoria INSS do beneficiário).</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>FLGINTERNO</code> — [obrigatório] — 'AI' → 129; 'BI' → 130</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> — (regra de seleção/cálculo, sem crítica ao usuário)</p>
+<p><strong>Jornada:</strong> <a href="#PF-05">JF005</a></p>
+<p><strong>Nota de verificação:</strong> Tela: Evento Aposentadoria Exclusiva do INSS (<code>FEventoAssistidoINSS.dfm</code>).</p>
+<p><strong>Descrição original:</strong> Evento Assistido INSS (AI/BI): evento 129=aposentadoria INSS participante, 130=aposentadoria INSS beneficiário.</p>
+<p><strong>Condições:</strong> FLGINTERNO='AI' → evento 129; 'BI' → evento 130</p><p><strong>Dados envolvidos:</strong> EVENTOSPREV</p><p><strong>Resultado/Exceção:</strong> Grava evento específico INSS</p>
+<div class="rule-origin">📂 Origem: <code>BENEFICIOPREV/Fontes/FEventoAssistidoINSS.pas:764-767</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<div class="rule-block" id="BENEF-RN037"><div class="rule-id">RS037 (BENEF-RN037) — Evento de invalidez marca a pessoa como inválida</div>
+<div class="rule-desc">No evento INSS de invalidez, a pessoa passa a ser marcada como inválida.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>FLGINTERNO</code> — [obrigatório] — = 'IN'</li>
+<li><code>PESSOA.FLGINVALIDO</code> — [obrigatório] — recebe 1</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> — (regra de seleção/cálculo, sem crítica ao usuário)</p>
+<p><strong>Jornada:</strong> <a href="#PF-05">JF005</a></p>
+<p><strong>Descrição original:</strong> Evento INSS (IN/Invalidez) grava FLGINVALIDO=1 em PESSOA.</p>
+<p><strong>Condições:</strong> FLGINTERNO='IN'</p><p><strong>Dados envolvidos:</strong> PESSOA, PESSOAFISICA</p><p><strong>Resultado/Exceção:</strong> UPDATE PESSOA SET FLGINVALIDO=1</p>
+<div class="rule-origin">📂 Origem: <code>BENEFICIOPREV/Fontes/FEventoAssistidoINSS.pas:942-957</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<p><strong>Regras transversais do módulo</strong> (valem para todas as jornadas, inclusive esta): 4 regra(s) — texto completo abaixo.</p>
+<div class="rule-block" id="BENEF-RN025"><div class="rule-id">RS025 (BENEF-RN025) — Operações auditadas no log do TotalPREV</div>
+<div class="rule-desc">As operações de negócio do módulo são registradas no log do TotalPREV com módulo, usuário, descrição e data.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>IDMODULO</code> — [obrigatório] — = 454</li>
+<li><code>IDUSUARIO</code> — [obrigatório]</li>
+<li><code>DESCOPERACAO</code> — [obrigatório]</li>
+<li><code>DATA</code> — [obrigatório] — SYSDATE</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT010">TRT010</a> → <a href="#MSG008">MSG008</a> → Levanta exceção “Erro ao gravar Log.”; em FEventoMorte, FEventoReclusao, FCadReajINSS e FCadContribParticipante ela é capturada por um except vazio e a operação segue sem log; em FDesdobramentoBenef cai no except externo da transação (:6325-6331)</p>
+<p><strong>Jornada:</strong> Transversal (todas)</p>
+<p><strong>Nota de verificação:</strong> Em vários forms a falha do log é engolida por um except vazio (ver TRT010).</p>
+<p><strong>Descrição original:</strong> Toda operação de negócio é auditada em LOGTOTALPREV (IdModulo=454).</p>
+<p><strong>Condições:</strong> INSERT INTO LOGTOTALPREV(IDMODULO=454, IDUSUARIO, DESCOPERACAO, DATA=SYSDATE)</p><p><strong>Dados envolvidos:</strong> LOGTOTALPREV</p><p><strong>Resultado/Exceção:</strong> Log de operações do TotalPREV</p>
+<div class="rule-origin">📂 Origem: <code>BENEFICIOPREV/Fontes/UModulo.pas:64-88</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<div class="rule-block" id="BENEF-RN026"><div class="rule-id">RS026 (BENEF-RN026) — Instituto troca a nomenclatura das telas</div>
+<div class="rule-desc">Quando a entidade é um instituto de previdência, as telas trocam “Fundação” por “Instituto”, “Patrocinadora” por “Entidade” e “Plano” por “Regime”.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>prmFLGTIPOPREVIDENC</code> — [obrigatório] — 'I' ativa a troca</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> — (regra de seleção/cálculo, sem crítica ao usuário)</p>
+<p><strong>Jornada:</strong> Transversal (todas)</p>
+<p><strong>Descrição original:</strong> Instituto previdenciário (FLGTIPOPREVIDENC='I') substitui captions: Fundação→Instituto, Patrocinadora→Entidade, Plano→Regime.</p>
+<p><strong>Condições:</strong> prmFLGTIPOPREVIDENC = 'I'</p><p><strong>Dados envolvidos:</strong> TLabel, TMenuItem, TGroupBox, TCheckBox, TPanel</p><p><strong>Resultado/Exceção:</strong> Captions alterados em runtime</p>
+<div class="rule-origin">📂 Origem: <code>BENEFICIOPREV/Fontes/FPrincipal.pas:598-775</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<div class="rule-block" id="BENEF-RN027"><div class="rule-id">RS027 (BENEF-RN027) — Integração contábil por parâmetro</div>
+<div class="rule-desc">A integração com a contabilidade só é ativada quando o parâmetro de integração contábil está ligado.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>PARAMAPREV.FLGINTCONTAB</code> — [obrigatório] — 1 = integra</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> — (regra de seleção/cálculo, sem crítica ao usuário)</p>
+<p><strong>Jornada:</strong> Transversal (todas)</p>
+<p><strong>Descrição original:</strong> Integração contábil ativada quando PARAMAPREV.FLGINTCONTAB=1.</p>
+<p><strong>Condições:</strong> FLGINTCONTAB = 1</p><p><strong>Dados envolvidos:</strong> PARAMAPREV, IntegraBack.Contabilidade</p><p><strong>Resultado/Exceção:</strong> Contabilidade='S' ou 'N'</p>
+<div class="rule-origin">📂 Origem: <code>BENEFICIOPREV/Fontes/FPrincipal.pas:928-930</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<div class="rule-block" id="BENEF-RN045"><div class="rule-id">RS045 (BENEF-RN045) — Dados isolados por fundação</div>
+<div class="rule-desc">As consultas de negócio filtram os dados pela fundação do usuário.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>IDFUNDACAO</code> — [obrigatório] — fundação da sessão</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> — (regra de seleção/cálculo, sem crítica ao usuário)</p>
+<p><strong>Jornada:</strong> Transversal (todas)</p>
+<p><strong>Descrição original:</strong> Filtro de multi-fundação (IDFUNDACAO) presente em quase toda SQL de negócio e MontaSelect.</p>
+<p><strong>Condições:</strong> IDFUNDACAO = iIdFundacao em SELECTs</p><p><strong>Dados envolvidos:</strong> PATRO, PARTPREVPLAN, EVENTOGERADOR</p><p><strong>Resultado/Exceção:</strong> Isolamento de dados por fundação</p>
+<div class="rule-origin">📂 Origem: <code>BENEFICIOPREV/Fontes/FPrincipal.pas:566-567</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+</div>
+
+<p><strong>Tratamentos de erro:</strong> <a href="#TRT007">TRT007</a>, <a href="#TRT008">TRT008</a>, <a href="#TRT009">TRT009</a>, <a href="#TRT010">TRT010</a></p>
+<p><strong>Mensagens:</strong> <a href="#MSG006">MSG006</a>, <a href="#MSG007">MSG007</a>, <a href="#MSG008">MSG008</a>, <a href="#MSG009">MSG009</a></p>
+<p><strong>Telas:</strong> Evento Aposentadoria (<code>FEventoAposentaBenef.dfm</code>), Evento Falecimento (<code>FEventoMorte.dfm</code>), Evento Reclusão (<code>FEventoReclusao.dfm</code>), Evento Assistido Temporário (<code>FEventoAssistidoBenef.dfm</code>), Evento Aposentadoria Exclusiva do INSS (<code>FEventoAssistidoINSS.dfm</code>)</p>
+<p><strong>Dependências:</strong> Precede a concessão de benefícios decorrentes do evento (<a href="uc301.html#PF-01">JF001</a>) e o registro de falecimento de beneficiário (<a href="#PF-18">JF018</a>).</p>
+<div class="note note-info"><p><strong>Registro original do processo PF-05</strong></p><p><strong>Forms de entrada:</strong> <code>FEventoAposentaBenef.dfm</code>, <code>FEventoMorte.dfm</code>, <code>FEventoReclusao.dfm</code>, <code>FEventoAssistidoBenef.dfm</code></p><p><strong>Lógica de processamento:</strong> Atualiza ELEGPATRO (tempo serviço/situação), PARTPREVPLAN (situação plano), PESSOAFISICA.DATAMORTE; insere em EVENTOSPREV</p><p><strong>Saídas:</strong> Evento registrado, situações atualizadas</p><p><strong>Persistência (tabelas escritas):</strong> ELEGPATRO, PARTPREVPLAN, PESSOAFISICA, EVENTOSPREV</p><p><strong>Evidência:</strong> <code>BENEFICIOPREV/Fontes/FEventoMorte.pas:1332-1618</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+</div>
+
+<div class="pf-block" id="PF-18"><h4>JF018 (PF-18) — Registro de Falecimento de Beneficiário</h4>
+<p><strong>Objetivo:</strong> Registrar o falecimento de um beneficiário, pelo componente externo.</p>
+<p><strong>Ator / gatilho:</strong> Analista de benefícios, pela opção do menu principal.</p>
+<p><strong>Pré-condições:</strong> Beneficiário com benefício; componente <code>frmRegFalBenef</code> disponível.</p>
+<p><strong>Pós-condições:</strong> Falecimento registrado (persistência no componente externo).</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li>Acionar o registro de falecimento de beneficiário no menu; o sistema abre o form externo.</li>
+<li>Informar os dados do falecimento (processamento externo).</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Registrar falecimento de beneficiário</td><td>Encerrar o benefício do beneficiário falecido</td><td>Beneficiário e data</td><td>Delegado ao componente externo</td><td>Falecimento registrado</td><td>—</td><td>—</td><td><code>frmRegFalBenef (externo)</code></td></tr>
+</tbody></table></div>
+<div class="jf-rules">
+<p><strong>Regras de negócio da jornada:</strong> nenhuma regra BENEF-RN específica desta jornada; as validações estão nos tratamentos (TRT) do caso de uso.</p>
+<p><strong>Regras transversais do módulo</strong> (valem também para esta jornada; texto completo na primeira jornada deste caso de uso): <a href="#BENEF-RN025">RS025 (BENEF-RN025) — Operações auditadas no log do TotalPREV</a>, <a href="#BENEF-RN026">RS026 (BENEF-RN026) — Instituto troca a nomenclatura das telas</a>, <a href="#BENEF-RN027">RS027 (BENEF-RN027) — Integração contábil por parâmetro</a>, <a href="#BENEF-RN045">RS045 (BENEF-RN045) — Dados isolados por fundação</a>.</p>
+</div>
+
+<p><strong>Tratamentos de erro:</strong> —</p>
+<p><strong>Mensagens:</strong> —</p>
+<p><strong>Telas:</strong> Registro de falecimento de beneficiário (externo) (<code>frmRegFalBenef</code>)</p>
+<p><strong>Dependências:</strong> Complementa <a href="#PF-05">JF005</a> (falecimento do participante).</p>
+<div class="note note-info"><p><strong>Registro original do processo PF-18</strong></p><p><strong>Forms de entrada:</strong> <code>frmRegFalBenef</code> (externo)</p><p><strong>Lógica de processamento:</strong> Registra falecimento de beneficiário (delegado)</p><p><strong>Saídas:</strong> Falecimento registrado</p><p><strong>Persistência (tabelas escritas):</strong> Delegado (externo)</p><p><strong>Evidência:</strong> <code>BENEFICIOPREV/Fontes/FPrincipal.pas:2273-2278</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+</div>
+
+<section id="TRT-section"><div class="section-title">6. Tratamentos (TRT)</div>
+<p>Cada tratamento traz a condição, a mensagem exibida, o resultado e a regra/jornada de origem. Foram derivados apenas das validações e exceções documentadas no AS-IS (regras e aba <a href="tratamento-erros.html">⚠️ Erros</a>). “validação de tela” = crítica documentada sem regra BENEF-RN correspondente; “validação técnica” = falha técnica tratada pelo form.</p>
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Condição</th><th>Mensagem</th><th>Resultado</th><th>Regra</th><th>Jornada</th></tr></thead><tbody>
+<tr id="TRT001"><td><strong>TRT001</strong></td><td>Falha ao criar o datamodule de relatórios ao abrir uma tela pelo menu principal (<code>CriaDataModule</code>)</td><td><a href="#MSG001">MSG001</a></td><td>Exibe o erro técnico e orienta contatar o suporte (try/except)</td><td>validação técnica</td><td>Transversal (todas)</td></tr>
+<tr id="TRT007"><td><strong>TRT007</strong></td><td>Evento ainda em aberto ao procurar outro participante</td><td><a href="#MSG006">MSG006</a></td><td>Bloqueia a nova procura (Abort); o usuário deve confirmar ou cancelar o evento</td><td><a href="#BENEF-RN016">RS016 (BENEF-RN016)</a></td><td><a href="#PF-05">JF005</a></td></tr>
+<tr id="TRT008"><td><strong>TRT008</strong></td><td>Participante sem dependente elegível a benefício no evento Falecimento</td><td><a href="#MSG007">MSG007</a></td><td>Interrompe o evento (Exit) e orienta usar o Cadastro de Dependentes/Beneficiários</td><td><a href="#BENEF-RN035">RS035 (BENEF-RN035)</a></td><td><a href="#PF-05">JF005</a></td></tr>
+<tr id="TRT009"><td><strong>TRT009</strong></td><td>Erro de banco ao consultar ou gravar dados do evento</td><td><a href="#MSG009">MSG009</a></td><td>Mostra a mensagem da exceção (MostrarErro) e interrompe a operação</td><td>validação técnica</td><td><a href="#PF-05">JF005</a></td></tr>
+<tr id="TRT010"><td><strong>TRT010</strong></td><td>Falha ao gravar o log de operações (<code>Sistema.GravaLogOperacoes</code> retorna falso)</td><td><a href="#MSG008">MSG008</a></td><td>Levanta exceção “Erro ao gravar Log.”; em FEventoMorte, FEventoReclusao, FCadReajINSS e FCadContribParticipante ela é capturada por um except vazio e a operação segue sem log; em FDesdobramentoBenef cai no except externo da transação (:6325-6331)</td><td><a href="uc301.html#BENEF-RN025">RS025 (BENEF-RN025)</a></td><td><a href="#PF-05">JF005</a>, <a href="uc304.html#PF-06">JF006</a>, <a href="uc305.html#PF-08">JF008</a></td></tr>
+</tbody></table></div>
+</section>
+
+<section id="MSG-section"><div class="section-title">7. Mensagens (MSG)</div>
+<p>Textos conferidos no código-fonte (grafia original mantida). Trechos variáveis aparecem entre &lt; &gt;.</p>
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Texto da mensagem</th><th>Tipo</th><th>Origem (BENEFICIOPREV/Fontes/)</th><th>Jornadas</th></tr></thead><tbody>
+<tr id="MSG001"><td><strong>MSG001</strong></td><td>“Erro ao criar datamodule "TDtmRelatorios". Mensagem de erro : &lt;mensagem da exceção&gt; Favor contatar o suporte da CM.”</td><td>Erro</td><td><code>FPrincipal.pas:790-793 (também FEventoMorte.pas:2228, FEventoAssistidoINSS.pas:1893)</code></td><td>Transversal (todas)</td></tr>
+<tr id="MSG006"><td><strong>MSG006</strong></td><td>“Evento em aberto confirme "OK" ou "Cancelar" para fazer nova procura.”</td><td>Informação</td><td><code>FEventoReclusao.pas:245 (também FEventoMorte.pas:520)</code></td><td><a href="#PF-05">JF005</a></td></tr>
+<tr id="MSG007"><td><strong>MSG007</strong></td><td>“Este Participante não possui nenhum dependente elegível a benefício cadastrado. Para cadastrar, utilize o Cadastro de Dependentes/Beneficiários.”</td><td>Informação</td><td><code>FEventoMorte.pas:1030-1031</code></td><td><a href="#PF-05">JF005</a></td></tr>
+<tr id="MSG008"><td><strong>MSG008</strong></td><td>“Erro ao gravar Log.”</td><td>Erro (exceção)</td><td><code>FEventoMorte.pas:1441; FEventoReclusao.pas:855; FCadReajINSS.pas:162; FDesdobramentoBenef.pas:6316; FCadContribParticipante.pas:934</code></td><td><a href="#PF-05">JF005</a>, <a href="uc304.html#PF-06">JF006</a>, <a href="uc305.html#PF-08">JF008</a></td></tr>
+<tr id="MSG009"><td><strong>MSG009</strong></td><td>“&lt;mensagem da exceção de banco de dados&gt; (exibida por <code>MostrarErro(E)</code>)”<br><em>Texto dinâmico.</em></td><td>Erro (exceção)</td><td><code>FEventoMorte.pas:1022 (padrão try/except + MostrarErro(E) em FEventoMorte, FEventoAposentaBenef, FEventoReclusao, FEventoAssistidoBenef, FEventoAssistidoINSS)</code></td><td><a href="#PF-05">JF005</a></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">8. Tabela/API/Programa</div>
+<div class="table-wrap"><table><thead><tr><th>Jornada</th><th>Tabelas (escrita)</th><th>Rotinas (BENEFICIOPREV/Fontes/)</th></tr></thead><tbody>
+<tr><td><a href="#PF-05">JF005</a></td><td>ELEGPATRO, PARTPREVPLAN, PESSOAFISICA, PESSOA, EVENTOSPREV</td><td><code>FEventoMorte.pas:1002-1035, 1332-1618; FEventoReclusao.pas:240-247; FEventoAposentaBenef.pas:64; FEventoAssistidoINSS.pas:764-767, 942-957</code></td></tr>
+<tr><td><a href="#PF-18">JF018</a></td><td>Delegado (externo)</td><td><code>FPrincipal.pas:2273-2278</code></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">9. Telas/Layouts</div>
+<div class="table-wrap"><table><thead><tr><th>Jornada</th><th>Tela (título)</th><th>Form (.dfm)</th></tr></thead><tbody>
+<tr><td><a href="#PF-05">JF005</a></td><td>Evento Aposentadoria<br>Evento Falecimento<br>Evento Reclusão<br>Evento Assistido Temporário<br>Evento Aposentadoria Exclusiva do INSS</td><td><code>FEventoAposentaBenef.dfm</code><br><code>FEventoMorte.dfm</code><br><code>FEventoReclusao.dfm</code><br><code>FEventoAssistidoBenef.dfm</code><br><code>FEventoAssistidoINSS.dfm</code></td></tr>
+<tr><td><a href="#PF-18">JF018</a></td><td>Registro de falecimento de beneficiário (externo)</td><td><code>frmRegFalBenef</code></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">10. Visão Consolidada das Jornadas</div>
+<div class="table-wrap"><table><thead><tr><th>Item</th><th>Jornada</th><th>Título</th><th>Critério de aceitação</th><th>Regras</th><th>Mensagens</th><th>Telas</th></tr></thead><tbody>
+<tr><td>[US] BENEF-JF005</td><td><a href="#PF-05">JF005</a></td><td>Eventos Previdenciários</td><td><strong>Dado</strong> um participante com dependente elegível, <strong>Quando</strong> o analista registra o evento Falecimento, <strong>Então</strong> a data da morte e o tempo de serviço são gravados e o evento é registrado em EVENTOSPREV; sem dependente elegível o sistema exibe <a href="#MSG007">MSG007</a> e não prossegue.</td><td><a href="#BENEF-RN002">RS002</a>, <a href="#BENEF-RN003">RS003</a>, <a href="#BENEF-RN006">RS006</a>, <a href="#BENEF-RN016">RS016</a>, <a href="#BENEF-RN018">RS018</a>, <a href="#BENEF-RN019">RS019</a>, <a href="#BENEF-RN035">RS035</a>, <a href="#BENEF-RN036">RS036</a>, <a href="#BENEF-RN037">RS037</a></td><td><a href="#MSG006">MSG006</a>, <a href="#MSG007">MSG007</a>, <a href="#MSG008">MSG008</a>, <a href="#MSG009">MSG009</a></td><td>Evento Aposentadoria<br>Evento Falecimento<br>Evento Reclusão<br>Evento Assistido Temporário<br>Evento Aposentadoria Exclusiva do INSS</td></tr>
+<tr><td>[US] BENEF-JF018</td><td><a href="#PF-18">JF018</a></td><td>Registro de Falecimento de Beneficiário</td><td><strong>Dado</strong> um beneficiário falecido, <strong>Quando</strong> o analista registra o falecimento, <strong>Então</strong> o componente externo grava o registro.</td><td>—</td><td>—</td><td>Registro de falecimento de beneficiário (externo)</td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">11. Critérios de Aceitação por Regra</div>
+<div class="table-wrap"><table><thead><tr><th>Regra</th><th>Jornada</th><th>Critério de aceitação</th></tr></thead><tbody>
+<tr><td><a href="#BENEF-RN002">RS002 (BENEF-RN002)</a></td><td><a href="#PF-05">JF005</a></td><td><strong>Dado</strong> eventos geradores cadastrados para a fundação, <strong>Quando</strong> o menu de eventos é montado, <strong>Então</strong> aparecem os eventos do grupo (FLGINTERNO) e da fundação do usuário.</td></tr>
+<tr><td><a href="#BENEF-RN003">RS003 (BENEF-RN003)</a></td><td><a href="#PF-05">JF005</a></td><td><strong>Dado</strong> o grupo de eventos Falecimento (FL), <strong>Quando</strong> o menu é montado, <strong>Então</strong> o evento gerador 346 não é listado.</td></tr>
+<tr><td><a href="#BENEF-RN006">RS006 (BENEF-RN006)</a></td><td><a href="#PF-05">JF005</a></td><td><strong>Dado</strong> benefícios do participante em várias situações, <strong>Quando</strong> um evento de aposentadoria ou morte é registrado, <strong>Então</strong> só os benefícios nas situações 4 ou 6 são considerados.</td></tr>
+<tr><td><a href="#BENEF-RN016">RS016 (BENEF-RN016)</a></td><td><a href="#PF-05">JF005</a></td><td><strong>Dado</strong> evento ainda em aberto ao procurar outro participante, <strong>Quando</strong> o usuário executa a operação, <strong>Então</strong> o sistema exibe <a href="#MSG006">MSG006</a> e bloqueia a nova procura (Abort); o usuário deve confirmar ou cancelar o evento.</td></tr>
+<tr><td><a href="#BENEF-RN018">RS018 (BENEF-RN018)</a></td><td><a href="#PF-05">JF005</a></td><td><strong>Dado</strong> um participante com dependente elegível, <strong>Quando</strong> o evento Falecimento é confirmado, <strong>Então</strong> DATAMORTE e TEMPOSERVTOTAL são gravados.</td></tr>
+<tr><td><a href="#BENEF-RN019">RS019 (BENEF-RN019)</a></td><td><a href="#PF-05">JF005</a></td><td><strong>Dado</strong> um evento confirmado, <strong>Quando</strong> a gravação é concluída, <strong>Então</strong> o evento é inserido em EVENTOSPREV com DATAALTERADO igual à data atual.</td></tr>
+<tr><td><a href="#BENEF-RN025">RS025 (BENEF-RN025)</a></td><td>Transversal (todas)</td><td><strong>Dado</strong> falha ao gravar o log de operações (<code>Sistema.GravaLogOperacoes</code> retorna falso), <strong>Quando</strong> o usuário executa a operação, <strong>Então</strong> o sistema exibe <a href="#MSG008">MSG008</a> e levanta exceção “Erro ao gravar Log.”; em FEventoMorte, FEventoReclusao, FCadReajINSS e FCadContribParticipante ela é capturada por um except vazio e a operação segue sem log; em FDesdobramentoBenef cai no except externo da transação (:6325-6331).</td></tr>
+<tr><td><a href="#BENEF-RN026">RS026 (BENEF-RN026)</a></td><td>Transversal (todas)</td><td><strong>Dado</strong> a entidade configurada como instituto (FLGTIPOPREVIDENC = 'I'), <strong>Quando</strong> uma tela é aberta, <strong>Então</strong> os rótulos trocam Fundação/Patrocinadora/Plano por Instituto/Entidade/Regime.</td></tr>
+<tr><td><a href="#BENEF-RN027">RS027 (BENEF-RN027)</a></td><td>Transversal (todas)</td><td><strong>Dado</strong> FLGINTCONTAB = 1 em PARAMAPREV, <strong>Quando</strong> o módulo é iniciado, <strong>Então</strong> a integração contábil é ativada (Contabilidade = 'S'); com outro valor, fica desativada.</td></tr>
+<tr><td><a href="#BENEF-RN035">RS035 (BENEF-RN035)</a></td><td><a href="#PF-05">JF005</a></td><td><strong>Dado</strong> participante sem dependente elegível a benefício no evento Falecimento, <strong>Quando</strong> o usuário executa a operação, <strong>Então</strong> o sistema exibe <a href="#MSG007">MSG007</a> e interrompe o evento (Exit) e orienta usar o Cadastro de Dependentes/Beneficiários.</td></tr>
+<tr><td><a href="#BENEF-RN036">RS036 (BENEF-RN036)</a></td><td><a href="#PF-05">JF005</a></td><td><strong>Dado</strong> um evento assistido INSS do grupo AI ou BI, <strong>Quando</strong> o evento é gravado, <strong>Então</strong> o evento registrado é o 129 (AI) ou o 130 (BI).</td></tr>
+<tr><td><a href="#BENEF-RN037">RS037 (BENEF-RN037)</a></td><td><a href="#PF-05">JF005</a></td><td><strong>Dado</strong> um evento INSS do grupo IN, <strong>Quando</strong> o evento é gravado, <strong>Então</strong> PESSOA.FLGINVALIDO passa a 1.</td></tr>
+<tr><td><a href="#BENEF-RN045">RS045 (BENEF-RN045)</a></td><td>Transversal (todas)</td><td><strong>Dado</strong> um usuário de uma fundação, <strong>Quando</strong> qualquer consulta de negócio é feita, <strong>Então</strong> só os dados da fundação do usuário (IDFUNDACAO) são retornados.</td></tr>
+</tbody></table></div>
+</section>
+
+<p><a class="back-btn" href="funcionalidades.html">← Voltar à lista de Casos de Uso (Processos Funcionais)</a></p>
+</main>
+<footer>
+<p>Blueprint AS-IS — PFC-32 — Processos Funcionais organizados em Casos de Uso — Módulo BENEFICIOPREV | Sistema legado Delphi 5 | pt-BR | Atualizado em 2026-11-10</p>
+</footer>
+</body>
+</html>

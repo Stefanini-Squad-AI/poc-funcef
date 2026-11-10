@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Folha de Benefícios — UC102 – Pagar Benefícios e Gerar Remessa Bancária — Blueprint AS-IS</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<header>
+  <div class="badge">Blueprint AS-IS — PFC-32 — Processos Funcionais</div>
+  <h1>UC102 – Pagar Benefícios e Gerar Remessa Bancária</h1>
+  <p>Caso de uso do módulo Folha de Benefícios: 2 jornada(s) funcional(is) e 1 regra(s) de negócio descritas dentro de cada jornada.</p>
+</header>
+<nav>
+  <a href="index.html">📋 Visão Geral</a>
+  <a href="arquitetura.html">🏗️ Arquitetura</a>
+  <a href="inventario-tecnico.html">📦 Inventário</a>
+  <a href="funcionalidades.html">⚙️ Processos Funcionais</a>
+  <a href="procedures-functions.html">🔧 Procedures</a>
+  <a href="dados.html">🗄️ Dados</a>
+  <a href="relatorios.html">📄 Relatórios</a>
+  <a href="integracoes.html">🔗 Integrações</a>
+  <a href="tratamento-erros.html">⚠️ Erros</a>
+  <a href="diagramas-fluxo.html">🔀 Fluxos</a>
+  <a href="lacunas.html">🔍 Lacunas</a>
+  <a href="controle-cobertura.html">📊 Cobertura</a>
+</nav>
+<main>
+
+<a class="back-btn" href="funcionalidades.html">← Voltar à lista de Casos de Uso (Processos Funcionais)</a>
+<div class="breadcrumb"><a href="index.html">Folha de Benefícios</a> › <a href="funcionalidades.html">Processos Funcionais</a> › UC102</div>
+
+<section><div class="section-title">1. Identificação</div>
+<div class="table-wrap"><table><tbody>
+<tr><th>Caso de Uso</th><td><strong>UC102 – Pagar Benefícios e Gerar Remessa Bancária</strong></td></tr>
+<tr><th>Módulo</th><td>FOLHA — Folha de Benefícios</td></tr>
+<tr><th>Sistema</th><td>CM Contabilidade / FUNCEF (Delphi 5 / VCL / MIDAS / Oracle)</td></tr>
+<tr><th>Tipo</th><td>Sistema Desktop</td></tr>
+<tr><th>Ator</th><td>Usuário operacional (analista de folha, financeiro, contábil)</td></tr>
+<tr><th>Jornadas</th><td><a href="#PF-05">JF005 — Pagamento / Fita de Crédito / Remessa Bancária</a>, <a href="#PF-12">JF012 — Regularização de Pagamentos</a></td></tr>
+<tr><th>Regras de negócio</th><td>1 regra(s) FOLHA-RN, descritas na íntegra dentro de cada jornada</td></tr>
+<tr><th>OS - Título</th><td>PFC-32 — Lista de UC (Processos Funcionais organizados em Casos de Uso)</td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">2. Descrição Resumida</div>
+<p>Geração dos arquivos de pagamento (CNAB/SIACC), batimento do retorno bancário e regularização de pagamentos não creditados. Este caso de uso reúne 2 jornada(s) funcional(is) do módulo Folha de Benefícios:</p>
+<ul>
+<li><a href="#PF-05"><strong>JF005 — Pagamento / Fita de Crédito / Remessa Bancária</strong></a>: gerar arquivos de remessa (CNAB), simular e bater retorno.</li>
+<li><a href="#PF-12"><strong>JF012 — Regularização de Pagamentos</strong></a>: regularizar pagamentos (eventos de regularização) e conciliar crédito efetuado.</li>
+</ul>
+</section>
+
+<section><div class="section-title">3. Pré-condições</div>
+<p><strong>Gerais do módulo:</strong></p>
+<ul>
+<li>O módulo FOLHA deve estar compilado e disponível (entry point <code>FOLHA/Fontes/Folha.dpr</code>).</li>
+<li>O banco Oracle (schema <code>CM.</code>) deve estar acessível.</li>
+<li>Os parâmetros globais da folha devem estar carregados (<code>FParametroFolha</code>).</li>
+<li>Patrocinadoras, planos e benefícios devem estar cadastrados.</li>
+<li>O usuário deve ter permissão de acesso ao módulo.</li>
+</ul>
+<p><strong>Por jornada:</strong></p>
+<ul>
+<li><a href="#PF-05">JF005</a>: versão efetivada (<a href="uc101.html#PF-03">JF003</a>); conta bancária/portador configurados; leiaute CNAB selecionado.</li>
+<li><a href="#PF-12">JF012</a>: —</li>
+</ul>
+</section>
+
+<section><div class="section-title">4. Pós-condições</div>
+<ul>
+<li><a href="#PF-05">JF005</a>: arquivo de remessa em disco, ARQUIVOPAGTO atualizado.</li>
+<li><a href="#PF-12">JF012</a>: eventos de regularização lançados; crédito conciliado.</li>
+</ul>
+</section>
+
+<section><div class="section-title">5. Jornadas Funcionais (JF005, JF012)</div>
+<p>Cada jornada traz objetivo, ator/gatilho, pré e pós-condições, sequência operacional, ações práticas, <strong>regras de negócio da jornada</strong> (texto completo de cada regra), tratamentos e mensagens.</p>
+<div class="legend"><span><span class="ev ev-comprovado">COMPROVADO</span> — no código</span><span><span class="ev ev-inferido">INFERIDO</span> — plausível</span><span><span class="ev ev-pendente">PENDENTE</span> — validar</span></div>
+</section>
+
+<div class="pf-block" id="PF-05"><h4>JF005 (PF-05) — Pagamento / Fita de Crédito / Remessa Bancária</h4>
+<p><strong>Objetivo:</strong> gerar arquivos de remessa (CNAB), simular e bater retorno.</p>
+<p><strong>Gatilho/Ator:</strong> <code>fGeraArquivoRemessa.dfm</code>, <code>FAberturaFitaCredit.dfm</code>, <code>FRemessaEletronica.dfm</code>, <code>fGeraArquivoRemessaPrevia.dfm</code>.</p>
+<p><strong>Pré-condições:</strong> versão efetivada (<a href="uc101.html#PF-03">JF003</a>); conta bancária/portador configurados; leiaute CNAB selecionado.</p>
+<p><strong>Pós-condições:</strong> arquivo de remessa em disco, ARQUIVOPAGTO atualizado.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li>Abertura da fita por plano</li>
+<li>Seleção de versão</li>
+<li>Geração do arquivo CNAB (150/240)</li>
+<li>Gravação em disco + ARQUIVOPAGTO</li>
+<li>Simulação (prévia)</li>
+<li>Batimento de retorno (SOL 207789/KINTANA 554287)</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Abrir fita por plano</td><td>Iniciar fita de crédito</td><td>Plano, versão</td><td>FAberturaFitaCredit</td><td>Fita aberta</td><td>—</td><td>—</td><td><code>FAberturaFitaCredit.dfm</code></td></tr>
+<tr><td>Gerar remessa CNAB</td><td>Produzir arquivo de remessa</td><td>Versão, leiaute CNAB</td><td>fGeraArquivoRemessa → CNAB150/CNAB240</td><td>Arquivo em disco + ARQUIVOPAGTO</td><td>—</td><td>—</td><td><code>fGeraArquivoRemessa.dfm</code></td></tr>
+<tr><td>Simular e bater retorno</td><td>Simular pagamento e conciliar retorno</td><td>Arquivo de remessa</td><td>Simulação (prévia) → batimento de retorno</td><td>Retorno conciliado</td><td>—</td><td>—</td><td><code>FRemessaEletronica.dfm</code></td></tr>
+</tbody></table></div>
+<div class="jf-rules">
+<p><strong>Regras de negócio da jornada:</strong> nenhuma regra FOLHA-RN específica desta jornada; as validações estão nos tratamentos (TRT) do caso de uso.</p>
+</div>
+
+<p><strong>Dependências:</strong> sucede <a href="uc101.html#PF-03">JF003</a>. Evidência: <code>FOLHA/Fontes/fGeraArquivoRemessa.pas:342</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<div class="mermaid">graph LR
+  n0["FAberturaFitaCredit"] --> n1["fGeraArquivoRemessa"] --> n2["GeraArquivoCNAB150|CNAB240"] --> n3["arquivo disco + ARQUIVOPAGTO"] --> n4["(simulação)"] --> n5["BatimentoRetorno"]</div>
+</div>
+
+<div class="pf-block" id="PF-12"><h4>JF012 (PF-12) — Regularização de Pagamentos</h4>
+<p><strong>Objetivo:</strong> regularizar pagamentos (eventos de regularização) e conciliar crédito efetuado.</p>
+<p><strong>Gatilho/Ator:</strong> <code>UCadastroEventoRegularizacao.dfm</code>, <code>ULancEventoRegularizacao.dfm</code>, <code>UConciliacaoCredito.dfm</code>.</p>
+<p><strong>Pós-condições:</strong> eventos de regularização lançados; crédito conciliado.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li>Cadastrar eventos de regularização</li>
+<li>Lançar eventos</li>
+<li>Conciliar crédito efetuado (UConciliacaoCredito, 4.050 lin)</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Cadastrar eventos</td><td>Registrar eventos de regularização</td><td>Tipo de evento</td><td>UCadastroEventoRegularizacao</td><td>Eventos cadastrados</td><td>—</td><td>—</td><td><code>UCadastroEventoRegularizacao.dfm</code></td></tr>
+<tr><td>Lançar eventos</td><td>Aplicar eventos de regularização</td><td>Eventos cadastrados</td><td>ULancEventoRegularizacao</td><td>Eventos lançados</td><td>—</td><td>—</td><td><code>ULancEventoRegularizacao.dfm</code></td></tr>
+<tr><td>Conciliar crédito</td><td>Conciliar crédito efetuado</td><td>Crédito</td><td>UConciliacaoCredito</td><td>Crédito conciliado</td><td>—</td><td>—</td><td><code>UConciliacaoCredito.dfm</code></td></tr>
+</tbody></table></div>
+<div class="jf-rules">
+<p><strong>Regras de negócio da jornada:</strong> 1 regra(s) — texto completo abaixo.</p>
+<div class="rule-block" id="FOLHA-RN023"><div class="rule-id">RS023 (FOLHA-RN023) — Cadastro manual de histórico exige BS/FAB/déficit</div>
+<p><strong>Descrição:</strong> o cadastro manual de histórico de benefício exige Valor do BS Atual/Total, FAB Atual/Total e Base de Cálculo do Déficit informados.</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>ValorBSAtual</code> — [obrigatório] — valor do BS atual</li>
+<li><code>ValorBSTotal</code> — [obrigatório] — valor do BS total</li>
+<li><code>FABAtual</code> — [obrigatório] — FAB atual</li>
+<li><code>FABTotal</code> — [obrigatório] — FAB total</li>
+<li><code>BaseCalcDeficit</code> — [obrigatório] — base de cálculo do déficit</li>
+</ul>
+<p><strong>Exceção:</strong> <code>raise EValidacao</code> em :3007/:3012 (BS), :3016/:3020 (FAB), :3025 (déficit).</p>
+<p><strong>Tratamento (TRT):</strong> <a href="#TRT014">TRT014</a> → <a href="#MSG014">MSG014</a> → Bloqueia cadastro</p>
+<p><strong>Rotina:</strong> validação inline em <code>FCadHstBeneficio</code>. <strong>Origem:</strong> <code>FOLHA/Fontes/FCadHstBeneficio.pas:3007-3025</code>. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> · <strong>Severidade:</strong> alta · <strong>Jornada:</strong> cadastro · <strong>Relacionadas:</strong> —</p>
+</div>
+</div>
+
+<p><strong>Dependências:</strong> —. Evidência: <code>FOLHA/Fontes/UConciliacaoCredito.pas</code>, <code>UCadastroEventoRegularizacao.pas</code>, <code>ULancEventoRegularizacao.pas</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<div class="mermaid">graph LR
+  n0["UCadastroEventoRegularizacao"] --> n1["ULancEventoRegularizacao"] --> n2["UConciliacaoCredito"] --> n3["crédito conciliado"]</div>
+</div>
+
+<section id="TRT-section"><div class="section-title">6. Tratamentos (TRT)</div>
+<p>Tratamentos de erro derivados das validações bloqueantes e exceções das regras. Cada TRT possui Condição, Mensagem e Resultado.</p>
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Condição</th><th>Mensagem</th><th>Resultado</th><th>Regra</th><th>Jornada</th></tr></thead><tbody>
+<tr id="TRT014"><td><strong>TRT014</strong></td><td>BS/FAB/déficit não informados (cadastro manual)</td><td><a href="#MSG014">MSG014</a></td><td>Bloqueia cadastro</td><td><a href="#FOLHA-RN023">RS023</a></td><td>cadastro</td></tr>
+</tbody></table></div>
+</section>
+
+<section id="MSG-section"><div class="section-title">7. Mensagens (MSG)</div>
+
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Texto da Mensagem</th><th>Jornadas relacionadas</th></tr></thead><tbody>
+<tr id="MSG014"><td><strong>MSG014</strong></td><td>"Valor do BS/FAB/déficit obrigatórios no cadastro manual de histórico"</td><td>cadastro</td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">8. Tabela/API/Programa</div>
+<div class="table-wrap"><table><thead><tr><th>Jornada</th><th>Tabelas (escrita)</th><th>Rotina-chave (file:linha)</th></tr></thead><tbody>
+<tr><td>JF005</td><td>ARQUIVOPAGTO</td><td><code>fGeraArquivoRemessa.pas:342</code></td></tr>
+<tr><td>JF012</td><td>crédito conciliado</td><td><code>UConciliacaoCredito.pas</code></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">9. Telas/Layouts</div>
+<div class="table-wrap"><table><thead><tr><th>Jornada</th><th>Form(s) (.dfm)</th></tr></thead><tbody>
+<tr><td>JF005</td><td><code>fGeraArquivoRemessa.dfm</code>, <code>FAberturaFitaCredit.dfm</code>, <code>FRemessaEletronica.dfm</code></td></tr>
+<tr><td>JF012</td><td><code>UCadastroEventoRegularizacao.dfm</code>, <code>UConciliacaoCredito.dfm</code></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">10. Visão Consolidada das Jornadas</div>
+<div class="table-wrap"><table><thead><tr><th>Jornada</th><th>ID</th><th>Título</th><th>Critério de aceitação (Dado/Quando/Então)</th><th>Mensagens</th><th>Telas</th></tr></thead><tbody>
+<tr><td>JF005</td><td>PF-05</td><td>Remessa Bancária</td><td><strong>Dado</strong> versão efetivada, <strong>Quando</strong> usuário gera remessa, <strong>Então</strong> arquivo CNAB é gerado e retorno conciliado</td><td>—</td><td>fGeraArquivoRemessa</td></tr>
+<tr><td>JF012</td><td>PF-12</td><td>Regularização</td><td><strong>Dado</strong> eventos de regularização cadastrados, <strong>Quando</strong> usuário lança eventos, <strong>Então</strong> crédito é conciliado</td><td>—</td><td>UConciliacaoCredito</td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">11. Critérios de Aceitação por Regra</div>
+<div class="table-wrap"><table><thead><tr><th>Regra</th><th>ID</th><th>Título</th><th>Critério de aceitação (Dado/Quando/Então)</th><th>Mensagens</th><th>Telas</th></tr></thead><tbody>
+<tr><td>RS023</td><td>FOLHA-RN023</td><td>BS/FAB/déficit</td><td><strong>Dado</strong> cadastro manual, <strong>Quando</strong> BS/FAB/déficit não informados, <strong>Então</strong> bloqueia</td><td><a href="#MSG014">MSG014</a></td><td>FCadHstBeneficio</td></tr>
+</tbody></table></div>
+</section>
+
+<p><a class="back-btn" href="funcionalidades.html">← Voltar à lista de Casos de Uso (Processos Funcionais)</a></p>
+</main>
+<footer>
+<p>Blueprint AS-IS — PFC-32 — Processos Funcionais organizados em Casos de Uso — Módulo FOLHA | Sistema legado Delphi 5 | pt-BR | Atualizado em 2026-11-10</p>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+<script src="../assets/js/mermaid-init.js"></script>
+</body>
+</html>

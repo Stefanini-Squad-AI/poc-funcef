@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Folha de Benefícios — UC106 – Processar Convênios e Financiamento Habitacional — Blueprint AS-IS</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<header>
+  <div class="badge">Blueprint AS-IS — PFC-32 — Processos Funcionais</div>
+  <h1>UC106 – Processar Convênios e Financiamento Habitacional</h1>
+  <p>Caso de uso do módulo Folha de Benefícios: 2 jornada(s) funcional(is) e 4 regra(s) de negócio descritas dentro de cada jornada.</p>
+</header>
+<nav>
+  <a href="index.html">📋 Visão Geral</a>
+  <a href="arquitetura.html">🏗️ Arquitetura</a>
+  <a href="inventario-tecnico.html">📦 Inventário</a>
+  <a href="funcionalidades.html">⚙️ Processos Funcionais</a>
+  <a href="procedures-functions.html">🔧 Procedures</a>
+  <a href="dados.html">🗄️ Dados</a>
+  <a href="relatorios.html">📄 Relatórios</a>
+  <a href="integracoes.html">🔗 Integrações</a>
+  <a href="tratamento-erros.html">⚠️ Erros</a>
+  <a href="diagramas-fluxo.html">🔀 Fluxos</a>
+  <a href="lacunas.html">🔍 Lacunas</a>
+  <a href="controle-cobertura.html">📊 Cobertura</a>
+</nav>
+<main>
+
+<a class="back-btn" href="funcionalidades.html">← Voltar à lista de Casos de Uso (Processos Funcionais)</a>
+<div class="breadcrumb"><a href="index.html">Folha de Benefícios</a> › <a href="funcionalidades.html">Processos Funcionais</a> › UC106</div>
+
+<section><div class="section-title">1. Identificação</div>
+<div class="table-wrap"><table><tbody>
+<tr><th>Caso de Uso</th><td><strong>UC106 – Processar Convênios e Financiamento Habitacional</strong></td></tr>
+<tr><th>Módulo</th><td>FOLHA — Folha de Benefícios</td></tr>
+<tr><th>Sistema</th><td>CM Contabilidade / FUNCEF (Delphi 5 / VCL / MIDAS / Oracle)</td></tr>
+<tr><th>Tipo</th><td>Sistema Desktop</td></tr>
+<tr><th>Ator</th><td>Usuário operacional (analista de folha, financeiro, contábil)</td></tr>
+<tr><th>Jornadas</th><td><a href="#PF-11">JF011 — Convênio (Importação/Exportação)</a>, <a href="#PF-F">JF018 — Financiamento Habitacional</a></td></tr>
+<tr><th>Regras de negócio</th><td>4 regra(s) FOLHA-RN, descritas na íntegra dentro de cada jornada</td></tr>
+<tr><th>OS - Título</th><td>PFC-32 — Lista de UC (Processos Funcionais organizados em Casos de Uso)</td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">2. Descrição Resumida</div>
+<p>Importação/exportação de arquivos de convênio e desconto de financiamento habitacional na folha. Este caso de uso reúne 2 jornada(s) funcional(is) do módulo Folha de Benefícios:</p>
+<ul>
+<li><a href="#PF-11"><strong>JF011 — Convênio (Importação/Exportação)</strong></a>: importar/exportar convênios e gerar documentos para entidades conveniadas.</li>
+<li><a href="#PF-F"><strong>JF018 — Financiamento Habitacional</strong></a>: processar financiamento habitacional (rubrica de desconto).</li>
+</ul>
+</section>
+
+<section><div class="section-title">3. Pré-condições</div>
+<p><strong>Gerais do módulo:</strong></p>
+<ul>
+<li>O módulo FOLHA deve estar compilado e disponível (entry point <code>FOLHA/Fontes/Folha.dpr</code>).</li>
+<li>O banco Oracle (schema <code>CM.</code>) deve estar acessível.</li>
+<li>Os parâmetros globais da folha devem estar carregados (<code>FParametroFolha</code>).</li>
+<li>Patrocinadoras, planos e benefícios devem estar cadastrados.</li>
+<li>O usuário deve ter permissão de acesso ao módulo.</li>
+</ul>
+<p><strong>Por jornada:</strong></p>
+<ul>
+<li><a href="#PF-11">JF011</a>: mês/ano, layout de entrada/saída, destino informados <a href="#FOLHA-RN002">[RS002]</a> <a href="#TRT002">[TRT002]</a>.</li>
+<li><a href="#PF-F">JF018</a>: —</li>
+</ul>
+</section>
+
+<section><div class="section-title">4. Pós-condições</div>
+<ul>
+<li><a href="#PF-11">JF011</a>: arquivos de convênio importados/exportados; documentos gerados para entidades.</li>
+<li><a href="#PF-F">JF018</a>: —</li>
+</ul>
+</section>
+
+<section><div class="section-title">5. Jornadas Funcionais (JF011, JF018)</div>
+<p>Cada jornada traz objetivo, ator/gatilho, pré e pós-condições, sequência operacional, ações práticas, <strong>regras de negócio da jornada</strong> (texto completo de cada regra), tratamentos e mensagens.</p>
+<div class="legend"><span><span class="ev ev-comprovado">COMPROVADO</span> — no código</span><span><span class="ev ev-inferido">INFERIDO</span> — plausível</span><span><span class="ev ev-pendente">PENDENTE</span> — validar</span></div>
+</section>
+
+<div class="pf-block" id="PF-11"><h4>JF011 (PF-11) — Convênio (Importação/Exportação)</h4>
+<p><strong>Objetivo:</strong> importar/exportar convênios e gerar documentos para entidades conveniadas.</p>
+<p><strong>Gatilho/Ator:</strong> <code>fImportaTxt.dfm</code>, <code>fTratamentoConvenio.dfm</code>, <code>FExportaTxT.dfm</code>, <code>FExecGeraDocConvenio.dfm</code>.</p>
+<p><strong>Pré-condições:</strong> mês/ano, layout de entrada/saída, destino informados <a href="#FOLHA-RN002">[RS002]</a> <a href="#TRT002">[TRT002]</a>.</p>
+<p><strong>Pós-condições:</strong> arquivos de convênio importados/exportados; documentos gerados para entidades.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li>Importa TXT (layout de entrada)</li>
+<li>Tratamento de convênio</li>
+<li>Exporta (layout de saída) <a href="#FOLHA-RN002">[RS002]</a> <a href="#FOLHA-RN003">[RS003]</a> <a href="#TRT003">[TRT003]</a></li>
+<li>Gera documentos/arquivos para entidades <a href="#FOLHA-RN026">[RS026]</a> <a href="#FOLHA-RN027">[RS027]</a> <a href="#TRT012">[TRT012]</a> <a href="#TRT013">[TRT013]</a></li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Importar TXT</td><td>Importar dados de convênio</td><td>Layout de entrada, mês/ano</td><td>fImportaTxt</td><td>Dados importados</td><td>—</td><td>—</td><td><code>fImportaTxt.dfm</code></td></tr>
+<tr><td>Tratar convênio</td><td>Processar dados do convênio</td><td>Dados importados</td><td>fTratamentoConvenio</td><td>Convênio tratado</td><td>—</td><td>—</td><td><code>fTratamentoConvenio.dfm</code></td></tr>
+<tr><td>Exportar</td><td>Exportar com layout de saída</td><td>Layout saída, destino, versão</td><td>FExportaTxT</td><td>Arquivo exportado</td><td><a href="#FOLHA-RN002">RS002</a>, <a href="#FOLHA-RN003">RS003</a></td><td><a href="#MSG002">MSG002</a>, <a href="#MSG003">MSG003</a></td><td><code>FExportaTxT.dfm</code></td></tr>
+<tr><td>Gerar documentos</td><td>Produzir documentos para entidades</td><td>Mês/ano/previsão/versão</td><td>FExecGeraDocConvenio → FGeraSaidaCadastral</td><td>Documentos gerados</td><td><a href="#FOLHA-RN026">RS026</a>, <a href="#FOLHA-RN027">RS027</a></td><td><a href="#MSG012">MSG012</a>, <a href="#MSG013">MSG013</a></td><td><code>FExecGeraDocConvenio.dfm</code></td></tr>
+</tbody></table></div>
+<div class="jf-rules">
+<p><strong>Regras de negócio da jornada:</strong> 4 regra(s) — texto completo abaixo.</p>
+<div class="rule-block" id="FOLHA-RN002"><div class="rule-id">RS002 (FOLHA-RN002) — Layout de entrada/saída e destino obrigatórios na exportação</div>
+<p><strong>Descrição:</strong> a exportação exige ano, mês, layout de entrada, layout de saída e destino informados.</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>edAno</code> — [obrigatório] — inteiro positivo</li>
+<li><code>cboxMes</code> — [obrigatório] — domínio: 1–12</li>
+<li><code>dblcmbLayout</code> — [obrigatório] — identificador do layout de entrada</li>
+<li><code>dblcmblayoutsaida</code> — [obrigatório] — identificador do layout de saída</li>
+<li><code>destino</code> — [obrigatório] — caminho/identificador de destino</li>
+<li><code>TMPDESC</code> — [condicional] — dados temporários de descritivo</li>
+</ul>
+<p><strong>Condição:</strong> edAno, cboxMes, dblcmbLayout, dblcmblayoutsaida, destino não informados → bloqueia.</p>
+<p><strong>Exceção:</strong> <code>raise EValidacao</code> em :508/:511/:514/:517/:522; <code>raise Exception</code> em :234 (falha ao gravar log).</p>
+<p><strong>Tratamento (TRT):</strong> <a href="#TRT002">TRT002</a> → <a href="#MSG002">MSG002</a> → Bloqueia execução</p>
+<p><strong>Rotina:</strong> validação inline. <strong>Origem:</strong> <code>FOLHA/Fontes/FExportaTxT.pas:508-522</code>. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> · <strong>Severidade:</strong> alta · <strong>Jornada:</strong> <a href="#PF-11">JF011</a> · <strong>Relacionadas:</strong> <a href="#FOLHA-RN003">RS003</a></p>
+</div>
+<div class="rule-block" id="FOLHA-RN003"><div class="rule-id">RS003 (FOLHA-RN003) — Seleção mínima de versão da folha</div>
+<p><strong>Descrição:</strong> a geração de documentos/arquivos para convênios exige pelo menos uma versão da folha selecionada.</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>molVersaoPagto.lstVersao</code> — [obrigatório] — pelo menos 1 item selecionado</li>
+<li><code>LOTEXHSTFOLHABENEF</code> — [condicional] — lote/versão da folha</li>
+</ul>
+<p><strong>Condição:</strong> nenhuma versão selecionada em molVersaoPagto.lstVersao → bloqueia.</p>
+<p><strong>Exceção:</strong> <code>raise EValidacao</code> em :1223/:1248/:1254/:1261/:2627.</p>
+<p><strong>Tratamento (TRT):</strong> <a href="#TRT003">TRT003</a> → <a href="#MSG003">MSG003</a> → Bloqueia execução</p>
+<p><strong>Rotina:</strong> validação inline. <strong>Origem:</strong> <code>FOLHA/Fontes/FExecGeraDocConvenio.pas:1214-1261</code>. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> · <strong>Severidade:</strong> alta · <strong>Jornada:</strong> <a href="#PF-11">JF011</a> · <strong>Relacionadas:</strong> <a href="#FOLHA-RN002">RS002</a></p>
+</div>
+<div class="rule-block" id="FOLHA-RN026"><div class="rule-id">RS026 (FOLHA-RN026) — Geração de documentos para convênios exige mês/ano/previsão</div>
+<p><strong>Descrição:</strong> a geração de documentos/arquivos para entidades conveniadas exige mês, ano e previsão de pagamento informados (além da versão — <a href="#FOLHA-RN003">RS003</a>).</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>mês</code> — [obrigatório] — domínio: 1–12</li>
+<li><code>ano</code> — [obrigatório] — inteiro positivo</li>
+<li><code>previsão de pagamento</code> — [obrigatório] — identificador da previsão</li>
+</ul>
+<p><strong>Exceção:</strong> <code>raise EValidacao</code> em :1214 (mês), :1217 (ano), :1220 (previsão).</p>
+<p><strong>Tratamento (TRT):</strong> <a href="#TRT012">TRT012</a> → <a href="#MSG012">MSG012</a> → Bloqueia execução</p>
+<p><strong>Origem:</strong> <code>FOLHA/Fontes/FExecGeraDocConvenio.pas:1214-1220</code>. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> · <strong>Severidade:</strong> alta · <strong>Jornada:</strong> <a href="#PF-11">JF011</a> · <strong>Relacionadas:</strong> <a href="#FOLHA-RN003">RS003</a></p>
+</div>
+<div class="rule-block" id="FOLHA-RN027"><div class="rule-id">RS027 (FOLHA-RN027) — Saída cadastral de entidades exige mês/ano/versão</div>
+<p><strong>Descrição:</strong> a geração de saída cadastral para entidades exige mês, ano e pelo menos uma versão da folha.</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>mês</code> — [obrigatório] — domínio: 1–12</li>
+<li><code>ano</code> — [obrigatório] — inteiro positivo</li>
+<li><code>versão da folha</code> — [obrigatório] — pelo menos 1 selecionada</li>
+</ul>
+<p><strong>Exceção:</strong> <code>raise EValidacao</code> em :763 (mês), :766 (ano), :769 (versão).</p>
+<p><strong>Tratamento (TRT):</strong> <a href="#TRT013">TRT013</a> → <a href="#MSG013">MSG013</a> → Bloqueia execução</p>
+<p><strong>Origem:</strong> <code>FOLHA/Fontes/FGeraSaidaCadastral.pas:763-769</code>. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> · <strong>Severidade:</strong> alta · <strong>Jornada:</strong> <a href="#PF-11">JF011</a> · <strong>Relacionadas:</strong> <a href="#FOLHA-RN003">RS003</a></p>
+</div>
+</div>
+
+<p><strong>Dependências:</strong> —. Evidência: <code>FOLHA/Fontes/fImportaTxt.pas</code>, <code>FExportaTxT.pas:508-522</code>, <code>FExecGeraDocConvenio.pas:1214-1261</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<div class="mermaid">graph LR
+  n0["fImportaTxt"] --> n1["fTratamentoConvenio"] --> n2["FExportaTxT"] --> n3["FExecGeraDocConvenio"] --> n4["arquivos p/ entidades"]</div>
+</div>
+
+<div class="pf-block" id="PF-F"><h4>JF018 (PF-F) — Financiamento Habitacional</h4>
+<p><strong>Objetivo:</strong> processar financiamento habitacional (rubrica de desconto).</p>
+<p><strong>Gatilho/Ator:</strong> <code>FfinancHabitacional.dfm</code> (1.654 lin).</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li>Selecionar financiamento habitacional</li>
+<li>Processar rubrica de desconto</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Processar financiamento</td><td>Aplicar rubrica de desconto habitacional</td><td>Benefício, financiamento</td><td>FfinancHabitacional</td><td>Rubrica de desconto aplicada</td><td>—</td><td>—</td><td><code>FfinancHabitacional.dfm</code></td></tr>
+</tbody></table></div>
+<div class="jf-rules">
+<p><strong>Regras de negócio da jornada:</strong> nenhuma regra FOLHA-RN específica desta jornada; as validações estão nos tratamentos (TRT) do caso de uso.</p>
+</div>
+<p><strong>Evidência:</strong> <code>FOLHA/Fontes/FfinancHabitacional.pas</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+
+</div>
+
+<section id="TRT-section"><div class="section-title">6. Tratamentos (TRT)</div>
+<p>Tratamentos de erro derivados das validações bloqueantes e exceções das regras. Cada TRT possui Condição, Mensagem e Resultado.</p>
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Condição</th><th>Mensagem</th><th>Resultado</th><th>Regra</th><th>Jornada</th></tr></thead><tbody>
+<tr id="TRT002"><td><strong>TRT002</strong></td><td>Layout de entrada/saída ou destino não informados na exportação</td><td><a href="#MSG002">MSG002</a></td><td>Bloqueia execução</td><td><a href="#FOLHA-RN002">RS002</a></td><td>JF011</td></tr>
+<tr id="TRT003"><td><strong>TRT003</strong></td><td>Nenhuma versão da folha selecionada</td><td><a href="#MSG003">MSG003</a></td><td>Bloqueia execução</td><td><a href="#FOLHA-RN003">RS003</a></td><td>JF011</td></tr>
+<tr id="TRT012"><td><strong>TRT012</strong></td><td>Mês/ano/previsão não informados (convênio)</td><td><a href="#MSG012">MSG012</a></td><td>Bloqueia execução</td><td><a href="#FOLHA-RN026">RS026</a></td><td>JF011</td></tr>
+<tr id="TRT013"><td><strong>TRT013</strong></td><td>Mês/ano/versão não informados (saída cadastral)</td><td><a href="#MSG013">MSG013</a></td><td>Bloqueia execução</td><td><a href="#FOLHA-RN027">RS027</a></td><td>JF011</td></tr>
+</tbody></table></div>
+</section>
+
+<section id="MSG-section"><div class="section-title">7. Mensagens (MSG)</div>
+
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Texto da Mensagem</th><th>Jornadas relacionadas</th></tr></thead><tbody>
+<tr id="MSG002"><td><strong>MSG002</strong></td><td>"Layout de entrada/saída e destino obrigatórios na exportação"</td><td>JF011</td></tr>
+<tr id="MSG003"><td><strong>MSG003</strong></td><td>"Selecione pelo menos uma versão da folha"</td><td>JF011</td></tr>
+<tr id="MSG012"><td><strong>MSG012</strong></td><td>"Mês/ano/previsão de pagamento obrigatórios para geração de documentos"</td><td>JF011</td></tr>
+<tr id="MSG013"><td><strong>MSG013</strong></td><td>"Mês/ano/versão obrigatórios para saída cadastral"</td><td>JF011</td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">8. Tabela/API/Programa</div>
+<div class="table-wrap"><table><thead><tr><th>Jornada</th><th>Tabelas (escrita)</th><th>Rotina-chave (file:linha)</th></tr></thead><tbody>
+<tr><td>JF011</td><td>convênio (import/export)</td><td><code>FExportaTxT.pas:508-522</code></td></tr>
+<tr><td>JF018</td><td>financiamento habitacional</td><td><code>FfinancHabitacional.pas</code></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">9. Telas/Layouts</div>
+<div class="table-wrap"><table><thead><tr><th>Jornada</th><th>Form(s) (.dfm)</th></tr></thead><tbody>
+<tr><td>JF011</td><td><code>fImportaTxt.dfm</code>, <code>FExportaTxT.dfm</code>, <code>FExecGeraDocConvenio.dfm</code></td></tr>
+<tr><td>JF018</td><td><code>FfinancHabitacional.dfm</code></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">10. Visão Consolidada das Jornadas</div>
+<div class="table-wrap"><table><thead><tr><th>Jornada</th><th>ID</th><th>Título</th><th>Critério de aceitação (Dado/Quando/Então)</th><th>Mensagens</th><th>Telas</th></tr></thead><tbody>
+<tr><td>JF011</td><td>PF-11</td><td>Convênio</td><td><strong>Dado</strong> mês/ano e layout informados, <strong>Quando</strong> usuário exporta, <strong>Então</strong> arquivos para entidades são gerados</td><td><a href="#MSG002">MSG002</a>, <a href="#MSG003">MSG003</a>, <a href="#MSG012">MSG012</a>, <a href="#MSG013">MSG013</a></td><td>FExportaTxT</td></tr>
+<tr><td>JF018</td><td>PF-F</td><td>Financiamento Habitacional</td><td><strong>Dado</strong> financiamento habitacional, <strong>Quando</strong> usuário processa, <strong>Então</strong> rubrica de desconto é aplicada</td><td>—</td><td>FfinancHabitacional</td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">11. Critérios de Aceitação por Regra</div>
+<div class="table-wrap"><table><thead><tr><th>Regra</th><th>ID</th><th>Título</th><th>Critério de aceitação (Dado/Quando/Então)</th><th>Mensagens</th><th>Telas</th></tr></thead><tbody>
+<tr><td>RS002</td><td>FOLHA-RN002</td><td>Layout/destino obrigatórios</td><td><strong>Dado</strong> exportação, <strong>Quando</strong> layout/destino não informados, <strong>Então</strong> bloqueia com MSG002</td><td><a href="#MSG002">MSG002</a></td><td>FExportaTxT</td></tr>
+<tr><td>RS003</td><td>FOLHA-RN003</td><td>Versão da folha selecionada</td><td><strong>Dado</strong> geração de documentos, <strong>Quando</strong> nenhuma versão selecionada, <strong>Então</strong> bloqueia com MSG003</td><td><a href="#MSG003">MSG003</a></td><td>FExecGeraDocConvenio</td></tr>
+<tr><td>RS026</td><td>FOLHA-RN026</td><td>Mês/ano/previsão (convênio)</td><td><strong>Dado</strong> geração de documentos, <strong>Quando</strong> mês/ano/previsão não informados, <strong>Então</strong> bloqueia</td><td><a href="#MSG012">MSG012</a></td><td>FExecGeraDocConvenio</td></tr>
+<tr><td>RS027</td><td>FOLHA-RN027</td><td>Mês/ano/versão (saída cadastral)</td><td><strong>Dado</strong> saída cadastral, <strong>Quando</strong> mês/ano/versão não informados, <strong>Então</strong> bloqueia</td><td><a href="#MSG013">MSG013</a></td><td>FGeraSaidaCadastral</td></tr>
+</tbody></table></div>
+</section>
+
+<p><a class="back-btn" href="funcionalidades.html">← Voltar à lista de Casos de Uso (Processos Funcionais)</a></p>
+</main>
+<footer>
+<p>Blueprint AS-IS — PFC-32 — Processos Funcionais organizados em Casos de Uso — Módulo FOLHA | Sistema legado Delphi 5 | pt-BR | Atualizado em 2026-11-10</p>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+<script src="../assets/js/mermaid-init.js"></script>
+</body>
+</html>

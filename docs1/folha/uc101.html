@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Folha de Benefícios — UC101 – Processar a Folha de Benefícios — Blueprint AS-IS</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<header>
+  <div class="badge">Blueprint AS-IS — PFC-32 — Processos Funcionais</div>
+  <h1>UC101 – Processar a Folha de Benefícios</h1>
+  <p>Caso de uso do módulo Folha de Benefícios: 4 jornada(s) funcional(is) e 21 regra(s) de negócio descritas dentro de cada jornada.</p>
+</header>
+<nav>
+  <a href="index.html">📋 Visão Geral</a>
+  <a href="arquitetura.html">🏗️ Arquitetura</a>
+  <a href="inventario-tecnico.html">📦 Inventário</a>
+  <a href="funcionalidades.html">⚙️ Processos Funcionais</a>
+  <a href="procedures-functions.html">🔧 Procedures</a>
+  <a href="dados.html">🗄️ Dados</a>
+  <a href="relatorios.html">📄 Relatórios</a>
+  <a href="integracoes.html">🔗 Integrações</a>
+  <a href="tratamento-erros.html">⚠️ Erros</a>
+  <a href="diagramas-fluxo.html">🔀 Fluxos</a>
+  <a href="lacunas.html">🔍 Lacunas</a>
+  <a href="controle-cobertura.html">📊 Cobertura</a>
+</nav>
+<main>
+
+<a class="back-btn" href="funcionalidades.html">← Voltar à lista de Casos de Uso (Processos Funcionais)</a>
+<div class="breadcrumb"><a href="index.html">Folha de Benefícios</a> › <a href="funcionalidades.html">Processos Funcionais</a> › UC101</div>
+
+<section><div class="section-title">1. Identificação</div>
+<div class="table-wrap"><table><tbody>
+<tr><th>Caso de Uso</th><td><strong>UC101 – Processar a Folha de Benefícios</strong></td></tr>
+<tr><th>Módulo</th><td>FOLHA — Folha de Benefícios</td></tr>
+<tr><th>Sistema</th><td>CM Contabilidade / FUNCEF (Delphi 5 / VCL / MIDAS / Oracle)</td></tr>
+<tr><th>Tipo</th><td>Sistema Desktop</td></tr>
+<tr><th>Ator</th><td>Usuário operacional (analista de folha, financeiro, contábil)</td></tr>
+<tr><th>Jornadas</th><td><a href="#PF-01">JF001 — Preparo da Folha</a>, <a href="#PF-02">JF002 — Prévia (Cálculo da Folha)</a>, <a href="#PF-03">JF003 — Efetivação de Versão de Pagamento</a>, <a href="#PF-04">JF004 — Estorno de Folha</a></td></tr>
+<tr><th>Regras de negócio</th><td>21 regra(s) FOLHA-RN, descritas na íntegra dentro de cada jornada</td></tr>
+<tr><th>OS - Título</th><td>PFC-32 — Lista de UC (Processos Funcionais organizados em Casos de Uso)</td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">2. Descrição Resumida</div>
+<p>Ciclo principal da folha: preparo dos benefícios, cálculo da prévia, efetivação da versão de pagamento e estorno. Este caso de uso reúne 4 jornada(s) funcional(is) do módulo Folha de Benefícios:</p>
+<ul>
+<li><a href="#PF-01"><strong>JF001 — Preparo da Folha</strong></a>: selecionar patrocinadoras/planos/benefícios e aplicar reajustes/eventos antes da prévia.</li>
+<li><a href="#PF-02"><strong>JF002 — Prévia (Cálculo da Folha)</strong></a>: calcular a prévia de pagamento por recebedor/rubrica (motor central).</li>
+<li><a href="#PF-03"><strong>JF003 — Efetivação de Versão de Pagamento</strong></a>: consolidar a prévia em histórico definitivo e gerar arquivos de pagamento.</li>
+<li><a href="#PF-04"><strong>JF004 — Estorno de Folha</strong></a>: desfazer folha individual ou por lote preservando histórico.</li>
+</ul>
+</section>
+
+<section><div class="section-title">3. Pré-condições</div>
+<p><strong>Gerais do módulo:</strong></p>
+<ul>
+<li>O módulo FOLHA deve estar compilado e disponível (entry point <code>FOLHA/Fontes/Folha.dpr</code>).</li>
+<li>O banco Oracle (schema <code>CM.</code>) deve estar acessível.</li>
+<li>Os parâmetros globais da folha devem estar carregados (<code>FParametroFolha</code>).</li>
+<li>Patrocinadoras, planos e benefícios devem estar cadastrados.</li>
+<li>O usuário deve ter permissão de acesso ao módulo.</li>
+</ul>
+<p><strong>Por jornada:</strong></p>
+<ul>
+<li><a href="#PF-01">JF001</a>: lote aberto; patrocinadoras/planos cadastrados; benefícios ativos.</li>
+<li><a href="#PF-02">JF002</a>: preparo concluído (<a href="#PF-01">JF001</a>); lote com benefícios preparados; parâmetros globais em <code>FParametroFolha</code>.</li>
+<li><a href="#PF-03">JF003</a>: prévia conferida (<a href="#PF-02">JF002</a>); lote selecionado; conta bancária e parâmetros contábeis/financeiros válidos.</li>
+<li><a href="#PF-04">JF004</a>: versão efetivada (<a href="#PF-03">JF003</a>); usuário com permissão; motivo de estorno informado.</li>
+</ul>
+</section>
+
+<section><div class="section-title">4. Pós-condições</div>
+<ul>
+<li><a href="#PF-01">JF001</a>: HSTBENEFBFCIARIO, PROCESSOBENEF, HSTCONTRIBPREV populados; benefícios preparados para prévia.</li>
+<li><a href="#PF-02">JF002</a>: PREVIA, BASEDEPAGAMENTO, BITRIBUTACAO, HSTBITRIBUTACAO, CTRLINTERFACE populados; prévia pronta para conferência/efetivação.</li>
+<li><a href="#PF-03">JF003</a>: HSTFOLHABENEF, HSTFOLHABENEFCAP, ARQUIVOPAGTO populados; arquivos CNAB em disco; versão de pagamento efetivada.</li>
+<li><a href="#PF-04">JF004</a>: HSTFOLHABENEFCAP, HISTRUBSAL, RUBRICAINDIV, ARQUIVOPAGTO estornados; CAP/CAR gerados.</li>
+</ul>
+</section>
+
+<section><div class="section-title">5. Jornadas Funcionais (JF001, JF002, JF003, JF004)</div>
+<p>Cada jornada traz objetivo, ator/gatilho, pré e pós-condições, sequência operacional, ações práticas, <strong>regras de negócio da jornada</strong> (texto completo de cada regra), tratamentos e mensagens.</p>
+<div class="legend"><span><span class="ev ev-comprovado">COMPROVADO</span> — no código</span><span><span class="ev ev-inferido">INFERIDO</span> — plausível</span><span><span class="ev ev-pendente">PENDENTE</span> — validar</span></div>
+</section>
+
+<div class="pf-block" id="PF-01"><h4>JF001 (PF-01) — Preparo da Folha</h4>
+<p><strong>Objetivo:</strong> selecionar patrocinadoras/planos/benefícios e aplicar reajustes/eventos antes da prévia.</p>
+<p><strong>Gatilho/Ator:</strong> usuário aciona o botão Preparo em <code>FPreparo.dfm</code>.</p>
+<p><strong>Pré-condições:</strong> lote aberto; patrocinadoras/planos cadastrados; benefícios ativos.</p>
+<p><strong>Pós-condições:</strong> HSTBENEFBFCIARIO, PROCESSOBENEF, HSTCONTRIBPREV populados; benefícios preparados para prévia.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li><code>MontaListaPatro</code> → <code>MontaListaPlano</code> → <code>MontaListaBenef</code> (FPreparo.pas:1030/1042/1075)</li>
+<li><code>InicializaProcessoBeneficio</code> (:1755) → <code>InicializaContadores</code> (:1812)</li>
+<li>Loop: <code>PassoProcessoBeneficio</code> (:1901) → <code>ExecutaRegraProcessoBeneficio</code> (:1943) → <code>IncrementaTotais</code> (:1837) <a href="#FOLHA-RN010">[RS010]</a> <a href="#TRT006">[TRT006]</a></li>
+<li><code>GravaHstBeneficio</code> (:2375) → <code>InsereHstBfciario</code> (:1383) → <code>GravaProcessoBeneficio</code> (:2678)</li>
+<li><code>CalculaProRata</code> (:2931) → <code>CalculaEnviaContribuicaoPensionista</code> (:2958)</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Montar listas</td><td>Selecionar patro/planos/benefícios</td><td>Tipo folha, lote, patro, planos, benefícios, mês/ano</td><td>Popula chklstPatro, chklstPlano, grdBenef</td><td>Listas preenchidas</td><td>—</td><td>—</td><td><code>FPreparo.dfm</code></td></tr>
+<tr><td>Inicializar processo</td><td>Preparar contadores e estado</td><td>Listas montadas</td><td>InicializaProcessoBeneficio + contadores</td><td>Pronto para loop</td><td>—</td><td>—</td><td><code>FPreparo.dfm</code></td></tr>
+<tr><td>Processar benefícios (loop)</td><td>Aplicar regras e gravar histórico</td><td>Benefícios selecionados</td><td>PassoProcessoBeneficio → ExecutaRegra → IncrementaTotais</td><td>Benefícios processados</td><td><a href="#FOLHA-RN010">RS010</a></td><td><a href="#MSG006">MSG006</a></td><td><code>FPreparo.dfm</code></td></tr>
+<tr><td>Gravar histórico</td><td>Persistir benefícios preparados</td><td>Benefícios processados</td><td>GravaHstBeneficio → InsereHstBfciario → GravaProcessoBeneficio</td><td>HSTBENEFBFCIARIO/PROCESSOBENEF gravados</td><td>—</td><td>—</td><td><code>FPreparo.dfm</code></td></tr>
+<tr><td>Calcular pro-rata</td><td>Pró-rata e contribuição de pensionista</td><td>Benefícios gravados</td><td>CalculaProRata → CalculaEnviaContribuicaoPensionista</td><td>HSTCONTRIBPREV gravado</td><td>—</td><td>—</td><td><code>FPreparo.dfm</code></td></tr>
+</tbody></table></div>
+<div class="jf-rules">
+<p><strong>Regras de negócio da jornada:</strong> 2 regra(s) — texto completo abaixo.</p>
+<div class="rule-block" id="FOLHA-RN001"><div class="rule-id">RS001 (FOLHA-RN001) — Mês/ano de referência obrigatórios</div>
+<p><strong>Descrição:</strong> antes de processar qualquer operação que dependa de competência, o mês e o ano de referência devem estar preenchidos.</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>cboMes</code> — [obrigatório] — domínio: 1–12</li>
+<li><code>DBspnAno</code> — [obrigatório] — domínio: inteiro positivo (ex.: 2026)</li>
+<li><code>BASEDEPAGAMENTO.mês/ano</code> — [obrigatório] — gravado com os valores informados</li>
+</ul>
+<p><strong>Categoria:</strong> validação de entrada · <strong>Gatilho:</strong> abertura de processamento por competência</p>
+<p><strong>Condição:</strong> se cboMes vazio OU DBspnAno vazio → bloqueia. <strong>Fórmula:</strong> n/a (validação de nulo).</p>
+<p><strong>Exceção:</strong> <code>raise EValidacao.CreateVal('É necessário indicar o Mês/Ano de Referência!', controle)</code>.</p>
+<p><strong>Tratamento (TRT):</strong> <a href="#TRT001">TRT001</a> → <a href="#MSG001">MSG001</a> → Bloqueia execução</p>
+<p><strong>Rotina:</strong> validação inline no form. <strong>Origem:</strong> <code>FOLHA/Fontes/FExecAbateReserva.pas:139,142</code>. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> · <strong>Severidade:</strong> alta (bloqueante) · <strong>Jornada:</strong> <a href="#PF-01">JF001</a>, <a href="uc107.html#PF-C">JF015</a> · <strong>Relacionadas:</strong> —</p>
+</div>
+<div class="rule-block" id="FOLHA-RN010"><div class="rule-id">RS010 (FOLHA-RN010) — Duplicidade de lotes na prévia</div>
+<p><strong>Descrição:</strong> evitar geração de benefício em duplicidade quando o mesmo lote é processado mais de uma vez.</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>HSTBENEFBFCIARIO</code> — [obrigatório] — histórico de benefícios (verificação de duplicidade)</li>
+<li><code>PROCESSOBENEF</code> — [obrigatório] — processo de benefício corrente</li>
+<li><code>lote</code> — [obrigatório] — identificador do lote</li>
+<li><code>competência</code> — [obrigatório] — mês/ano de referência</li>
+</ul>
+<p><strong>Condição:</strong> benefício já presente no histórico para o lote/competência → não regera.</p>
+<p><strong>Tratamento (TRT):</strong> <a href="#TRT006">TRT006</a> → <a href="#MSG006">MSG006</a> → Não regenera benefício</p>
+<p><strong>Rotina:</strong> <code>TfrmPreparo.InsereHstBfciario</code>. <strong>Origem:</strong> <code>FOLHA/Fontes/FPreparo.pas:126,1383</code>. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> · <strong>Severidade:</strong> alta · <strong>Jornada:</strong> <a href="#PF-01">JF001</a> · <strong>Relacionadas:</strong> —</p>
+</div>
+</div>
+
+<p><strong>Dependências:</strong> precede <a href="#PF-02">JF002</a> (prévia). Evidência: <code>FOLHA/Fontes/FPreparo.pas:1015-2958</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<div class="mermaid">graph LR
+  n0["FPreparo"] --> n1["MontaListas"] --> n2["InicializaProcessoBeneficio"] --> n3["loop(PassoProcessoBeneficio"] --> n4["ExecutaRegra"] --> n5["GravaHstBeneficio)"] --> n6["CalculaProRata"] --> n7["CalculaEnviaContribuicaoPensionista"] --> n8["HSTBENEFBFCIARIO/PROCESSOBENEF"]</div>
+</div>
+
+<div class="pf-block" id="PF-02"><h4>JF002 (PF-02) — Prévia (Cálculo da Folha)</h4>
+<p><strong>Objetivo:</strong> calcular a prévia de pagamento por recebedor/rubrica (motor central).</p>
+<p><strong>Gatilho/Ator:</strong> botão processar em <code>FFolhaNormalPrevia.dfm</code> ou <code>fFolhaExtra.dfm</code>.</p>
+<p><strong>Pré-condições:</strong> preparo concluído (<a href="#PF-01">JF001</a>); lote com benefícios preparados; parâmetros globais em <code>FParametroFolha</code>.</p>
+<p><strong>Pós-condições:</strong> PREVIA, BASEDEPAGAMENTO, BITRIBUTACAO, HSTBITRIBUTACAO, CTRLINTERFACE populados; prévia pronta para conferência/efetivação.</p>
+<p><strong>Sequência operacional (motor dFolhaPrevia.pas):</strong></p>
+<ol>
+<li><code>ProcessaPrevia</code> (:24781) — orquestra; abre transação (:25386) <a href="#FOLHA-RN022">[RS022]</a></li>
+<li>Para cada recebedor: <code>CriaRecebedor</code> (:19243) → <code>ProcessaRubricaProvento</code> (:24378) <a href="#FOLHA-RN029">[RS029]</a></li>
+<li><code>ProcessaRubrica</code> (:17697) → <code>ExecutaRegraRubrica</code> (:16865) → <code>ClassificaRubricaBase</code> (:15076)</li>
+<li><code>DeterminaBasesIRRF</code> (:7180) → <code>CaluloIRRF</code> (:13493) <a href="#FOLHA-RN004">[RS004]</a> <a href="#FOLHA-RN005">[RS005]</a> <a href="#FOLHA-RN015">[RS015]</a> <a href="#FOLHA-RN017">[RS017]</a></li>
+<li><code>VerificaMargemDesconto</code> (:7496) → <code>CalculaMargemDesconto</code> (:7676) <a href="#FOLHA-RN008">[RS008]</a> <a href="#TRT010">[TRT010]</a></li>
+<li><code>CalculaCPMF</code> (:16764) → <code>CalculaBeneficioMinimo</code> (:8298) → <code>CalculaCorrecaoBeneficio</code> (:8615) → <code>CaluloSalarioFamilia</code> (:9555) <a href="#FOLHA-RN007">[RS007]</a> <a href="#FOLHA-RN009">[RS009]</a> <a href="#FOLHA-RN020">[RS020]</a> <a href="#FOLHA-RN021">[RS021]</a> <a href="#TRT011">[TRT011]</a></li>
+<li><code>InsereRubrica</code> (:15183) → <code>IncluiPrevia</code> (:4096) — commit (:4138) <a href="#FOLHA-RN006">[RS006]</a> <a href="#TRT005">[TRT005]</a></li>
+<li><code>ProcessaFechamentoRecebedor</code> (:23310) → <code>ProcessaRateioRubricas</code> (:22816) → <code>ProcessaReinf</code> (:19882) <a href="#FOLHA-RN018">[RS018]</a> <a href="#FOLHA-RN019">[RS019]</a></li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Orquestrar prévia</td><td>Processar lote completo</td><td>Lote, mês/ano, modo automático</td><td>ProcessaPrevia abre transação e itera recebedores</td><td>Prévia calculada</td><td><a href="#FOLHA-RN022">RS022</a></td><td>—</td><td><code>FFolhaNormalPrevia.dfm</code></td></tr>
+<tr><td>Criar recebedor</td><td>Instanciar objeto por recebedor</td><td>ID do recebedor</td><td>CriaRecebedor; avalia dado bancário</td><td>Recebedor válido</td><td><a href="#FOLHA-RN029">RS029</a></td><td>—</td><td><code>FFolhaNormalPrevia.dfm</code></td></tr>
+<tr><td>Processar rubrica</td><td>Classificar e calcular rubrica</td><td>Rubrica, provento</td><td>ProcessaRubrica → ExecutaRegraRubrica → ClassificaRubricaBase</td><td>Rubrica classificada</td><td>—</td><td>—</td><td><code>FFolhaNormalPrevia.dfm</code></td></tr>
+<tr><td>Calcular IRRF</td><td>Determinar bases e calcular IR</td><td>Bases de provento</td><td>DeterminaBasesIRRF → CaluloIRRF</td><td>BITRIBUTACAO atualizada</td><td><a href="#FOLHA-RN004">RS004</a>, <a href="#FOLHA-RN005">RS005</a>, <a href="#FOLHA-RN015">RS015</a>, <a href="#FOLHA-RN017">RS017</a></td><td><a href="#MSG004">MSG004</a></td><td><code>FFolhaNormalPrevia.dfm</code></td></tr>
+<tr><td>Verificar margem</td><td>Validar desconto consignável</td><td>Renda, descontos, perc. margem</td><td>VerificaMargemDesconto → CalculaMargemDesconto</td><td>Rubrica bloqueada/ajustada se exceder</td><td><a href="#FOLHA-RN008">RS008</a></td><td><a href="#MSG010">MSG010</a></td><td><code>FFolhaNormalPrevia.dfm</code></td></tr>
+<tr><td>Calcular CPMF/benef. mín./correção/sal. família</td><td>Aplicar cálculos complementares</td><td>Valores base</td><td>CalculaCPMF → CalculaBeneficioMinimo → CalculaCorrecaoBeneficio → CaluloSalarioFamilia</td><td>Rubricas complementares inseridas</td><td><a href="#FOLHA-RN007">RS007</a>, <a href="#FOLHA-RN009">RS009</a>, <a href="#FOLHA-RN020">RS020</a>, <a href="#FOLHA-RN021">RS021</a></td><td><a href="#MSG011">MSG011</a></td><td><code>FFolhaNormalPrevia.dfm</code></td></tr>
+<tr><td>Inserir rubrica e gravar prévia</td><td>Persistir com commit por blocos</td><td>Rubrica calculada</td><td>InsereRubrica → IncluiPrevia → Commit</td><td>PREVIA gravada</td><td><a href="#FOLHA-RN006">RS006</a>, <a href="#FOLHA-RN022">RS022</a></td><td><a href="#MSG005">MSG005</a></td><td><code>FFolhaNormalPrevia.dfm</code></td></tr>
+<tr><td>Fechar recebedor e ratear</td><td>Rateio multiplano e REINF</td><td>Proporção planos</td><td>ProcessaFechamentoRecebedor → ProcessaRateioRubricas → ProcessaReinf</td><td>Rateio e REINF processados</td><td><a href="#FOLHA-RN018">RS018</a>, <a href="#FOLHA-RN019">RS019</a></td><td>—</td><td><code>FFolhaNormalPrevia.dfm</code></td></tr>
+</tbody></table></div>
+<div class="jf-rules">
+<p><strong>Regras de negócio da jornada:</strong> 16 regra(s) — texto completo abaixo.</p>
+<div class="rule-block" id="FOLHA-RN004"><div class="rule-id">RS004 (FOLHA-RN004) — Rubrica de IR exige natureza de rendimento</div>
+<p><strong>Descrição:</strong> toda rubrica que compõe a base de IRRF deve ter natureza de rendimento informada.</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>PROVDESC.natureza</code> — [obrigatório] — domínio: código de natureza de rendimento</li>
+<li><code>PROVDESC.FLGIRRF</code> — [obrigatório] — indica se rubrica compõe base de IR (S/N)</li>
+<li><code>BITRIBUTACAO</code> — [condicional] — tributação calculada</li>
+</ul>
+<p><strong>Condição:</strong> rubrica marcada como base de IR sem natureza de rendimento → não soma à base.</p>
+<p><strong>Tratamento (TRT):</strong> <a href="#TRT004">TRT004</a> → <a href="#MSG004">MSG004</a> → Não soma à base de IRRF</p>
+<p><strong>Rotina:</strong> <code>TobjRecebedor.DeterminaBasesIRRF</code>. <strong>Origem:</strong> <code>FOLHA/Fontes/dFolhaPrevia.pas:7180</code>. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> · <strong>Severidade:</strong> média · <strong>Jornada:</strong> <a href="#PF-02">JF002</a>, <a href="uc104.html#PF-08">JF008</a> · <strong>Relacionadas:</strong> <a href="#FOLHA-RN005">RS005</a></p>
+</div>
+<div class="rule-block" id="FOLHA-RN005"><div class="rule-id">RS005 (FOLHA-RN005) — Proventos somam à base de IRRF</div>
+<p><strong>Descrição:</strong> os proventos tributáveis são acumulados na base de IRRF por fonte pagadora e tipo de base.</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>PREVIA.VALORPROVENTO</code> — [obrigatório] — valor do provento</li>
+<li><code>BITRIBUTACAO</code> — [obrigatório] — base de IRRF por fonte/tipo</li>
+<li><code>fonte</code> — [obrigatório] — fonte pagadora</li>
+<li><code>tipo</code> — [obrigatório] — domínio: normal, regressivo</li>
+</ul>
+<p><strong>Fórmula:</strong> <code>BaseIRRF[fonte,tipo] = Σ proventos tributáveis</code>.</p>
+<p><strong>Rotina:</strong> <code>DeterminaBasesIRRF</code> → <code>AlocaBase</code>. <strong>Origem:</strong> <code>FOLHA/Fontes/dFolhaPrevia.pas:7180,15010</code>. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> · <strong>Severidade:</strong> alta · <strong>Jornada:</strong> <a href="uc104.html#PF-08">JF008</a> · <strong>Relacionadas:</strong> <a href="#FOLHA-RN004">RS004</a>, <a href="#FOLHA-RN015">RS015</a></p>
+</div>
+<div class="rule-block" id="FOLHA-RN006"><div class="rule-id">RS006 (FOLHA-RN006) — Líquido negativo zera e transfere desconto</div>
+<p><strong>Descrição:</strong> quando o líquido do recebedor fica negativo após descontos, o valor é zerado e o desconto excedente é transferido/tratado.</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>lrvalorliquido</code> — [obrigatório] — valor líquido calculado</li>
+<li><code>lrvalordesc</code> — [obrigatório] — total de descontos</li>
+<li><code>excedente</code> — [condicional] — desconto excedente transferido</li>
+</ul>
+<p><strong>Condição:</strong> <code>if lrvalorliquido - lrvalordesc &lt; 0</code> → ação de zera/transfere. <strong>Fórmula:</strong> <code>líquido = proventos − descontos; se líquido &lt; 0 → líquido := 0 (e excedente tratado)</code>.</p>
+<p><strong>Tratamento (TRT):</strong> <a href="#TRT005">TRT005</a> → <a href="#MSG005">MSG005</a> → Zera líquido e transfere desconto</p>
+<p><strong>Rotina:</strong> <code>TobjRecebedor.EfetivaRubricas</code> / processamento de líquido. <strong>Origem:</strong> <code>FOLHA/Fontes/dFolhaPrevia.pas:7269</code> (e :8000). <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> · <strong>Severidade:</strong> alta · <strong>Jornada:</strong> <a href="#PF-02">JF002</a> · <strong>Relacionadas:</strong> <a href="#FOLHA-RN008">RS008</a></p>
+</div>
+<div class="rule-block" id="FOLHA-RN007"><div class="rule-id">RS007 (FOLHA-RN007) — CPMF = valor × (percCPMF − 1)</div>
+<p><strong>Descrição:</strong> o CPMF é calculado sobre o valor base pelo fator <code>(prmPercCPMF − 1)</code>.</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>arvalor</code> — [obrigatório] — valor base (parâmetro de entrada)</li>
+<li><code>prmPercCPMF</code> — [obrigatório] — percentual global do CPMF (parâmetro do sistema)</li>
+<li><code>CPMF</code> — [opcional] — resultado calculado</li>
+</ul>
+<p><strong>Fórmula:</strong> <code>CPMF = arvalor × (prmPercCPMF − 1)</code>.</p>
+<p><strong>Rotina:</strong> <code>TobjRecebedor.CalculaCPMF</code>. <strong>Origem:</strong> <code>FOLHA/Fontes/dFolhaPrevia.pas:16764-16766</code>. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> (fórmula literal) · <strong>Severidade:</strong> média · <strong>Jornada:</strong> <a href="#PF-02">JF002</a> · <strong>Relacionadas:</strong> <a href="uc104.html#FOLHA-RN016">RS016</a></p>
+</div>
+<div class="rule-block" id="FOLHA-RN008"><div class="rule-id">RS008 (FOLHA-RN008) — Margem de desconto consignável</div>
+<p><strong>Descrição:</strong> o total de descontos consignáveis não pode ultrapassar a margem disponível do recebedor; rubricas que excedem são bloqueadas/ajustadas.</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>rliquidototal</code> — [obrigatório] — líquido total do recebedor</li>
+<li><code>renda</code> — [obrigatório] — renda do recebedor</li>
+<li><code>percMargem</code> — [obrigatório] — percentual de margem consignável</li>
+<li><code>descontosConsignaveis</code> — [obrigatório] — soma dos descontos consignáveis</li>
+<li><code>margemDisponivel</code> — [condicional] — margem restante</li>
+</ul>
+<p><strong>Condição:</strong> <code>if rliquidototal &lt;= 0.009</code> → margem esgotada. <strong>Fórmula:</strong> <code>margemDisponivel = renda × percMargem − Σ descontosConsignaveis</code>.</p>
+<p><strong>Tratamento (TRT):</strong> <a href="#TRT010">TRT010</a> → <a href="#MSG010">MSG010</a> → Bloqueia/ajusta rubrica</p>
+<p><strong>Rotina:</strong> <code>VerificaMargemDesconto</code> → <code>CalculaMargemDesconto</code> → <code>DeterminaTipoMargem</code>. <strong>Origem:</strong> <code>FOLHA/Fontes/dFolhaPrevia.pas:7496,7440,7676,14922</code>. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> · <strong>Severidade:</strong> alta · <strong>Jornada:</strong> <a href="#PF-02">JF002</a> · <strong>Relacionadas:</strong> <a href="#FOLHA-RN006">RS006</a></p>
+</div>
+<div class="rule-block" id="FOLHA-RN009"><div class="rule-id">RS009 (FOLHA-RN009) — Benefício mínimo por concessão</div>
+<p><strong>Descrição:</strong> se o valor previado ficar abaixo do benefício mínimo da concessão, o valor é ajustado ao mínimo.</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>valorPrev</code> — [obrigatório] — valor previado</li>
+<li><code>valorBenefMin</code> — [obrigatório] — benefício mínimo (regra/concessão)</li>
+<li><code>lspercentual</code> — [opcional] — percentual decimal</li>
+</ul>
+<p><strong>Condição:</strong> <code>valorPrev &lt; valorBenefMin</code> → ajusta. <strong>Fórmula:</strong> <code>valorPrev = max(valorPrev, valorBenefMin)</code>.</p>
+<p><strong>Tratamento (TRT):</strong> <a href="#TRT011">TRT011</a> → <a href="#MSG011">MSG011</a> → Ajusta ao mínimo</p>
+<p><strong>Rotina:</strong> <code>TobjRecebedor.CalculaBeneficioMinimo</code>. <strong>Origem:</strong> <code>FOLHA/Fontes/dFolhaPrevia.pas:8298</code>. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> · <strong>Severidade:</strong> média · <strong>Jornada:</strong> <a href="#PF-02">JF002</a> · <strong>Relacionadas:</strong> —</p>
+</div>
+<div class="rule-block" id="FOLHA-RN015"><div class="rule-id">RS015 (FOLHA-RN015) — IR regressivo por tipo de base (0/1/7)</div>
+<p><strong>Descrição:</strong> o IR regressivo é calculado conforme o tipo de base: 0=vitalício, 1=abono, 7=reserva.</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>aiTipoBase</code> — [obrigatório] — domínio fechado: 0 (vitalício), 1 (abono), 7 (reserva)</li>
+<li><code>base por tipo</code> — [obrigatório] — base de IR apurada por tipo</li>
+<li><code>tabela regressiva</code> — [obrigatório] — tabela de IR regressiva</li>
+</ul>
+<p><strong>Condição:</strong> plano com opção de IR regressivo → <code>CalculaLancaIRRegressivo(aiTipoBase)</code>. <strong>Fórmula:</strong> apura base por tipo → aplica tabela regressiva → lanca rubrica de IR.</p>
+<p><strong>Rotina:</strong> <code>CalculaLancaIRRegressivo</code> / <code>CalculaLancaIRRegressivoValor</code>. <strong>Origem:</strong> <code>FOLHA/Fontes/dFolhaPrevia.pas:12123,12254</code>. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> · <strong>Severidade:</strong> alta · <strong>Jornada:</strong> <a href="uc104.html#PF-08">JF008</a> · <strong>Relacionadas:</strong> <a href="#FOLHA-RN005">RS005</a></p>
+</div>
+<div class="rule-block" id="FOLHA-RN017"><div class="rule-id">RS017 (FOLHA-RN017) — Compensação de IRRF respeita saldo</div>
+<p><strong>Descrição:</strong> a compensação de IRRF só lanca até o saldo de compensação disponível.</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>valorIRRF</code> — [obrigatório] — valor de IRRF a compensar</li>
+<li><code>saldoComp</code> — [obrigatório] — saldo de compensação disponível</li>
+<li><code>valorCompensado</code> — [opcional] — valor efetivamente compensado</li>
+</ul>
+<p><strong>Fórmula:</strong> <code>valorCompensado = min(valorIRRF, saldoComp)</code>.</p>
+<p><strong>Rotina:</strong> <code>VerificaCompensacaoIRRF</code> → <code>LancaIRCompensado</code>. <strong>Origem:</strong> <code>FOLHA/Fontes/dFolhaPrevia.pas:10254,12005</code>. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> · <strong>Severidade:</strong> média · <strong>Jornada:</strong> <a href="uc104.html#PF-08">JF008</a> · <strong>Relacionadas:</strong> <a href="#FOLHA-RN005">RS005</a>, <a href="#FOLHA-RN015">RS015</a></p>
+</div>
+<div class="rule-block" id="FOLHA-RN018"><div class="rule-id">RS018 (FOLHA-RN018) — Rateio de rubricas entre planos (proporção)</div>
+<p><strong>Descrição:</strong> quando o recebedor possui proporção multiplano (progressivo/regressivo), as rubricas são rateadas.</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>VerificaProporcaoPlanos</code> — [obrigatório] — resultado: progressivo/regressivo</li>
+<li><code>rubricas</code> — [obrigatório] — rubricas a ratear</li>
+<li><code>proporcao</code> — [condicional] — proporção por plano</li>
+</ul>
+<p><strong>Condição:</strong> <code>VerificaProporcaoPlanos</code> retorna progressivo/regressivo → rateia.</p>
+<p><strong>Rotina:</strong> <code>ProcessaRateioRubricas</code> / <code>ProcessaRateioRubricasReinf</code>. <strong>Origem:</strong> <code>FOLHA/Fontes/dFolhaPrevia.pas:22816,19765,19640</code>. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> · <strong>Severidade:</strong> média · <strong>Jornada:</strong> <a href="#PF-02">JF002</a> · <strong>Relacionadas:</strong> <a href="#FOLHA-RN019">RS019</a></p>
+</div>
+<div class="rule-block" id="FOLHA-RN019"><div class="rule-id">RS019 (FOLHA-RN019) — REINF (eSocial) rateado por plano</div>
+<p><strong>Descrição:</strong> o processamento REINF rateia rubricas conforme proporção progressivo/regressivo do plano.</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>rubricas REINF</code> — [obrigatório] — rubricas sujeitas a REINF</li>
+<li><code>proporcao plano</code> — [obrigatório] — progressivo/regressivo</li>
+</ul>
+<p><strong>Rotina:</strong> <code>ProcessaReinf</code> → <code>ProcessaRateioRubricasReinf</code>. <strong>Origem:</strong> <code>FOLHA/Fontes/dFolhaPrevia.pas:19882,19765</code>. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> · <strong>Severidade:</strong> média · <strong>Jornada:</strong> <a href="#PF-02">JF002</a> · <strong>Relacionadas:</strong> <a href="#FOLHA-RN018">RS018</a></p>
+</div>
+<div class="rule-block" id="FOLHA-RN020"><div class="rule-id">RS020 (FOLHA-RN020) — Correção/alterador do benefício por data de pagamento</div>
+<p><strong>Descrição:</strong> a correção do benefício é aplicada conforme a data de pagamento, determinando a rubrica de correção e o alterador.</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>dataPagamento</code> — [obrigatório] — data de pagamento</li>
+<li><code>rubricaCorrecao</code> — [condicional] — rubrica de correção determinada</li>
+<li><code>alterador</code> — [condicional] — alterador calculado</li>
+</ul>
+<p><strong>Rotina:</strong> <code>CalculaCorrecaoBeneficio</code> → <code>CalculaAlterador</code> → <code>DeterminaRubricaCorrecao</code> → <code>InsereRubricaAlterador</code> → <code>CalculaCorrecaoTmpDesc</code>. <strong>Origem:</strong> <code>FOLHA/Fontes/dFolhaPrevia.pas:8615,8920,9013,9022,9122</code>. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> · <strong>Severidade:</strong> média · <strong>Jornada:</strong> <a href="#PF-02">JF002</a>, <a href="uc107.html#PF-09">JF009</a> · <strong>Relacionadas:</strong> —</p>
+</div>
+<div class="rule-block" id="FOLHA-RN021"><div class="rule-id">RS021 (FOLHA-RN021) — Salário-família sobre base específica</div>
+<p><strong>Descrição:</strong> o salário-família é calculado sobre a base determinada para tal fim.</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>baseSalarioFamilia</code> — [obrigatório] — base determinada para salário-família</li>
+<li><code>valorSalarioFamilia</code> — [opcional] — valor calculado</li>
+</ul>
+<p><strong>Rotina:</strong> <code>CaluloSalarioFamilia</code> → <code>DeterminabaseSalariofamilia</code>. <strong>Origem:</strong> <code>FOLHA/Fontes/dFolhaPrevia.pas:9555,7160</code>. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> · <strong>Severidade:</strong> média · <strong>Jornada:</strong> <a href="#PF-02">JF002</a> · <strong>Relacionadas:</strong> —</p>
+</div>
+<div class="rule-block" id="FOLHA-RN022"><div class="rule-id">RS022 (FOLHA-RN022) — Transação da prévia com commit/StartTransaction por blocos</div>
+<p><strong>Descrição:</strong> a prévia grava em transações Oracle com commit e início de nova transação em blocos.</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>dtmBaseDados.dbBaseDados</code> — [obrigatório] — conexão Oracle</li>
+<li><code>lote de prévia</code> — [obrigatório] — bloco a gravar</li>
+</ul>
+<p><strong>Condição:</strong> após gravar lote de prévia → <code>Commit</code> + <code>StartTransaction</code>.</p>
+<p><strong>Rotina:</strong> <code>IncluiPrevia</code> / <code>ProcessaPrevia</code>. <strong>Origem:</strong> <code>FOLHA/Fontes/dFolhaPrevia.pas:4138-4139,6468-6471,24890,25383-25405</code>. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> · <strong>Severidade:</strong> alta · <strong>Jornada:</strong> <a href="#PF-02">JF002</a> · <strong>Relacionadas:</strong> —</p>
+</div>
+<div class="rule-block" id="FOLHA-RN028"><div class="rule-id">RS028 (FOLHA-RN028) — Arredondamento do líquido por base</div>
+<p><strong>Descrição:</strong> o líquido é arredondado conforme a base de cálculo (casas decimais do parâmetro).</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>líquido</code> — [obrigatório] — valor líquido a arredondar</li>
+<li><code>casas decimais</code> — [obrigatório] — definido pelo parâmetro da base</li>
+</ul>
+<p><strong>Rotina:</strong> <code>CalculaArredondamento</code> / <code>CalculaArredondamentoLiquido</code>. <strong>Origem:</strong> <code>FOLHA/Fontes/dFolhaPrevia.pas:6777,6794</code>. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> · <strong>Severidade:</strong> baixa · <strong>Jornada:</strong> <a href="#PF-02">JF002</a> · <strong>Relacionadas:</strong> —</p>
+</div>
+<div class="rule-block" id="FOLHA-RN029"><div class="rule-id">RS029 (FOLHA-RN029) — Avaliação de dado bancário do recebedor</div>
+<p><strong>Descrição:</strong> antes de processar, o dado bancário do recebedor é avaliado (banco/agência/conta).</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>banco</code> — [obrigatório] — código do banco</li>
+<li><code>agência</code> — [obrigatório] — código da agência</li>
+<li><code>conta</code> — [obrigatório] — número da conta</li>
+</ul>
+<p><strong>Rotina:</strong> <code>AvaliaDadoBancario</code>. <strong>Origem:</strong> <code>FOLHA/Fontes/dFolhaPrevia.pas:19115</code>. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> · <strong>Severidade:</strong> média · <strong>Jornada:</strong> <a href="#PF-02">JF002</a> · <strong>Relacionadas:</strong> <a href="#FOLHA-RN012">RS012</a></p>
+</div>
+<div class="rule-block" id="FOLHA-RN030"><div class="rule-id">RS030 (FOLHA-RN030) — Controle de interface (CTRLINTERFACE) por situação/lote</div>
+<p><strong>Descrição:</strong> o motor grava/atualiza CTRLINTERFACE com a situação da prévia e o lote corrente.</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>CTRLINTERFACE.situação</code> — [obrigatório] — situação da prévia</li>
+<li><code>CTRLINTERFACE.lote</code> — [obrigatório] — lote corrente</li>
+</ul>
+<p><strong>Rotina:</strong> <code>SetCtrlInterface</code> / <code>GetCtrlInterface</code>. <strong>Origem:</strong> <code>FOLHA/Fontes/dFolhaPrevia.pas:19492,19505</code>. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> · <strong>Severidade:</strong> média · <strong>Jornada:</strong> <a href="#PF-02">JF002</a> · <strong>Relacionadas:</strong> —</p>
+</div>
+</div>
+
+<p><strong>Dependências:</strong> sucede <a href="#PF-01">JF001</a>; precede <a href="#PF-03">JF003</a>, <a href="uc103.html#PF-06">JF006</a>. Evidência: <code>FOLHA/Fontes/dFolhaPrevia.pas:4096-25405</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<div class="mermaid">graph LR
+  n0["FFolhaNormalPrevia"] --> n1["ProcessaPrevia(:24781)"] --> n2["CriaRecebedor"] --> n3["ProcessaRubricaProvento"] --> n4["ProcessaRubrica"] --> n5["ExecutaRegraRubrica"] --> n6["ClassificaRubricaBase"] --> n7["DeterminaBasesIRRF"] --> n8["CaluloIRRF"] --> n9["VerificaMargemDesconto"] --> n10["CalculaCPMF"] --> n11["CalculaBeneficioMinimo"] --> n12["CalculaCorrecaoBeneficio"] --> n13["CaluloSalarioFamilia"] --> n14["InsereRubrica"] --> n15["IncluiPrevia"] --> n16["Commit"] --> n17["ProcessaFechamentoRecebedor"] --> n18["ProcessaReinf"] --> n19["PREVIA/BASEDEPAGAMENTO/BITRIBUTACAO"]</div>
+</div>
+
+<div class="pf-block" id="PF-03"><h4>JF003 (PF-03) — Efetivação de Versão de Pagamento</h4>
+<p><strong>Objetivo:</strong> consolidar a prévia em histórico definitivo e gerar arquivos de pagamento.</p>
+<p><strong>Gatilho/Ator:</strong> botão efetivar em <code>fFolhaNormalEfet.dfm</code> após seleção de lote (<code>FSelecionaLoteEF</code>).</p>
+<p><strong>Pré-condições:</strong> prévia conferida (<a href="#PF-02">JF002</a>); lote selecionado; conta bancária e parâmetros contábeis/financeiros válidos.</p>
+<p><strong>Pós-condições:</strong> HSTFOLHABENEF, HSTFOLHABENEFCAP, ARQUIVOPAGTO populados; arquivos CNAB em disco; versão de pagamento efetivada.</p>
+<p><strong>Sequência operacional (fFolhaNormalEfet.pas):</strong></p>
+<ol>
+<li>Valida lote, conta bancária <a href="#FOLHA-RN012">[RS012]</a> <a href="#TRT008">[TRT008]</a>, parâmetros contábeis/financeiros <a href="#FOLHA-RN013">[RS013]</a> <a href="#TRT009">[TRT009]</a></li>
+<li><code>Verifica_Critica_ETL</code> → <code>Executa_ETL</code> (:8722) com 3 datas de pagamento <a href="#FOLHA-RN011">[RS011]</a> <a href="#TRT007">[TRT007]</a></li>
+<li><code>VerificaEfeticaoETL</code> (:8928) → <code>Monitoramento</code> (:9006)</li>
+<li>Gera histórico: HSTFOLHABENEF / HSTFOLHABENEFCAP / HISTRUBSAL</li>
+<li><code>atualizaBasePagamento</code> (:8328) → <code>atualizaHstCalculoPMPFolha</code> (:8405) → <code>atualizaHstPrazoAcumulacaoFolha</code> (:8449)</li>
+<li><code>processaIRRegressivo</code> (:8212) → <code>PreparaContribuicaoPatro</code> (:8605) <a href="#FOLHA-RN015">[RS015]</a></li>
+<li><code>GeraArquivoPagamentoLeiauteCNAB150</code> (:9346) / <code>CNAB240</code> (:9468) → <code>Set*ArqPagamento</code> (:9584-9728)</li>
+<li><code>GeraArquivoSIACC</code> (:9806) / <code>CargaContraChequeMongo</code> (:9844)</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Validar lote e conta</td><td>Verificar pré-requisitos da efetivação</td><td>Lote, conta bancária, parâmetros CF</td><td>ValidaContaBancaria + ValidaParametrosCF</td><td>Lote válido para efetivação</td><td><a href="#FOLHA-RN012">RS012</a>, <a href="#FOLHA-RN013">RS013</a></td><td><a href="#MSG008">MSG008</a>, <a href="#MSG009">MSG009</a></td><td><code>fFolhaNormalEfet.dfm</code></td></tr>
+<tr><td>Executar ETL</td><td>Processar ETL com 3 datas de pagamento</td><td>Lote validado</td><td>Verifica_Critica_ETL → Executa_ETL → VerificaEfeticaoETL</td><td>ETL executada ou abortada</td><td><a href="#FOLHA-RN011">RS011</a></td><td><a href="#MSG007">MSG007</a></td><td><code>fFolhaNormalEfet.dfm</code></td></tr>
+<tr><td>Gerar histórico</td><td>Consolidar prévia em histórico definitivo</td><td>ETL OK</td><td>Gera HSTFOLHABENEF / HSTFOLHABENEFCAP / HISTRUBSAL</td><td>Histórico gravado</td><td>—</td><td>—</td><td><code>fFolhaNormalEfet.dfm</code></td></tr>
+<tr><td>Atualizar base de pagamento</td><td>Atualizar base, PMP e prazo de acumulação</td><td>Histórico gerado</td><td>atualizaBasePagamento → atualizaHstCalculoPMPFolha → atualizaHstPrazoAcumulacaoFolha</td><td>BASEDEPAGAMENTO atualizada</td><td>—</td><td>—</td><td><code>fFolhaNormalEfet.dfm</code></td></tr>
+<tr><td>Processar IR regressivo</td><td>Calcular IR regressivo e contribuição patro</td><td>Histórico</td><td>processaIRRegressivo → PreparaContribuicaoPatro</td><td>IR e contribuição processados</td><td><a href="#FOLHA-RN015">RS015</a></td><td>—</td><td><code>fFolhaNormalEfet.dfm</code></td></tr>
+<tr><td>Gerar arquivos CNAB</td><td>Produzir remessa bancária</td><td>Versão efetivada</td><td>GeraArquivoCNAB150/CNAB240 → Set*ArqPagamento</td><td>ARQUIVOPAGTO + arquivo CNAB em disco</td><td>—</td><td>—</td><td><code>fFolhaNormalEfet.dfm</code></td></tr>
+<tr><td>Gerar SIACC e contra-cheque</td><td>Produzir SIACC e carga Mongo</td><td>Arquivos CNAB gerados</td><td>GeraArquivoSIACC → CargaContraChequeMongo</td><td>SIACC e contra-cheque gerados</td><td>—</td><td>—</td><td><code>fFolhaNormalEfet.dfm</code></td></tr>
+</tbody></table></div>
+<div class="jf-rules">
+<p><strong>Regras de negócio da jornada:</strong> 4 regra(s) — texto completo abaixo.</p>
+<div class="rule-block" id="FOLHA-RN011"><div class="rule-id">RS011 (FOLHA-RN011) — Críticas ETL abortam efetivação</div>
+<p><strong>Descrição:</strong> se a ETL de efetivação retornar críticas, a efetivação é abortada.</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>Verifica_Critica_ETL</code> — [obrigatório] — resultado da verificação de críticas</li>
+<li><code>Executa_ETL</code> — [condicional] — execução da ETL (3 datas de pagamento)</li>
+</ul>
+<p><strong>Condição:</strong> <code>Verifica_Critica_ETL</code> com erro → aborta.</p>
+<p><strong>Tratamento (TRT):</strong> <a href="#TRT007">TRT007</a> → <a href="#MSG007">MSG007</a> → Aborta efetivação</p>
+<p><strong>Rotina:</strong> <code>Executa_ETL</code> → <code>VerificaEfeticaoETL</code> → <code>Monitoramento</code>. <strong>Origem:</strong> <code>FOLHA/Fontes/fFolhaNormalEfet.pas:8722,8928,9006</code>. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> · <strong>Severidade:</strong> alta (bloqueante) · <strong>Jornada:</strong> <a href="#PF-03">JF003</a> · <strong>Relacionadas:</strong> <a href="#FOLHA-RN012">RS012</a>, <a href="#FOLHA-RN013">RS013</a></p>
+</div>
+<div class="rule-block" id="FOLHA-RN012"><div class="rule-id">RS012 (FOLHA-RN012) — Conta bancária do lote validada</div>
+<p><strong>Descrição:</strong> a efetivação exige conta bancária válida associada ao lote.</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>CONTABANCARIA</code> — [obrigatório] — conta bancária associada ao lote</li>
+<li><code>BANCOPORTFORMA</code> — [obrigatório] — banco/portador/forma</li>
+<li><code>lote</code> — [obrigatório] — identificador do lote</li>
+</ul>
+<p><strong>Condição:</strong> <code>ValidaContaBancaria</code> falha → bloqueia.</p>
+<p><strong>Tratamento (TRT):</strong> <a href="#TRT008">TRT008</a> → <a href="#MSG008">MSG008</a> → Bloqueia efetivação</p>
+<p><strong>Rotina:</strong> <code>ValidaContaBancaria</code>. <strong>Origem:</strong> <code>FOLHA/Fontes/fFolhaNormalEfet.pas</code>. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> · <strong>Severidade:</strong> alta · <strong>Jornada:</strong> <a href="#PF-03">JF003</a> · <strong>Relacionadas:</strong> <a href="#FOLHA-RN013">RS013</a></p>
+</div>
+<div class="rule-block" id="FOLHA-RN013"><div class="rule-id">RS013 (FOLHA-RN013) — Parâmetros contábeis/financeiros do lote</div>
+<p><strong>Descrição:</strong> a efetivação exige parâmetros contábeis e financeiros do lote configurados.</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>PLANPREVCONTABIL</code> — [obrigatório] — plano de contas previdenciário/contábil</li>
+<li><code>parâmetros CF do lote</code> — [obrigatório] — parâmetros contábeis e financeiros</li>
+</ul>
+<p><strong>Condição:</strong> <code>ValidaParametrosCF</code> falha → bloqueia.</p>
+<p><strong>Tratamento (TRT):</strong> <a href="#TRT009">TRT009</a> → <a href="#MSG009">MSG009</a> → Bloqueia efetivação</p>
+<p><strong>Rotina:</strong> <code>ValidaParametrosCF</code> / <code>ObtemParametroCF</code>. <strong>Origem:</strong> <code>FOLHA/Fontes/fFolhaNormalEfet.pas</code> + <code>FAcertaParamContabilFinanc.pas</code>. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> · <strong>Severidade:</strong> alta · <strong>Jornada:</strong> <a href="#PF-03">JF003</a>, <a href="uc103.html#PF-06">JF006</a> · <strong>Relacionadas:</strong> <a href="#FOLHA-RN012">RS012</a></p>
+</div>
+<div class="rule-block"><div class="rule-id">RS015 (FOLHA-RN015) — IR regressivo por tipo de base (0/1/7)</div>
+<p><strong>Descrição:</strong> o IR regressivo é calculado conforme o tipo de base: 0=vitalício, 1=abono, 7=reserva.</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>aiTipoBase</code> — [obrigatório] — domínio fechado: 0 (vitalício), 1 (abono), 7 (reserva)</li>
+<li><code>base por tipo</code> — [obrigatório] — base de IR apurada por tipo</li>
+<li><code>tabela regressiva</code> — [obrigatório] — tabela de IR regressiva</li>
+</ul>
+<p><strong>Condição:</strong> plano com opção de IR regressivo → <code>CalculaLancaIRRegressivo(aiTipoBase)</code>. <strong>Fórmula:</strong> apura base por tipo → aplica tabela regressiva → lanca rubrica de IR.</p>
+<p><strong>Rotina:</strong> <code>CalculaLancaIRRegressivo</code> / <code>CalculaLancaIRRegressivoValor</code>. <strong>Origem:</strong> <code>FOLHA/Fontes/dFolhaPrevia.pas:12123,12254</code>. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> · <strong>Severidade:</strong> alta · <strong>Jornada:</strong> <a href="uc104.html#PF-08">JF008</a> · <strong>Relacionadas:</strong> <a href="#FOLHA-RN005">RS005</a></p>
+</div>
+</div>
+
+<p><strong>Dependências:</strong> sucede <a href="#PF-02">JF002</a>; precede <a href="uc102.html#PF-05">JF005</a>. Evidência: <code>FOLHA/Fontes/fFolhaNormalEfet.pas:8158-9844</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<div class="mermaid">graph LR
+  n0["fFolhaNormalEfet"] --> n1["Valida(Lote/Conta/ParamCF)"] --> n2["Executa_ETL"] --> n3["VerificaEfeticaoETL"] --> n4["HSTFOLHABENEF/HSTFOLHABENEFCAP"] --> n5["atualizaBasePagamento"] --> n6["processaIRRegressivo"] --> n7["GeraArquivoCNAB150|CNAB240"] --> n8["ARQUIVOPAGTO + arquivo CNAB"] --> n9["GeraArquivoSIACC"] --> n10["CargaContraChequeMongo"]</div>
+</div>
+
+<div class="pf-block" id="PF-04"><h4>JF004 (PF-04) — Estorno de Folha</h4>
+<p><strong>Objetivo:</strong> desfazer folha individual ou por lote preservando histórico.</p>
+<p><strong>Gatilho/Ator:</strong> botão processar em <code>festornafolha.dfm</code> (:4576).</p>
+<p><strong>Pré-condições:</strong> versão efetivada (<a href="#PF-03">JF003</a>); usuário com permissão; motivo de estorno informado.</p>
+<p><strong>Pós-condições:</strong> HSTFOLHABENEFCAP, HISTRUBSAL, RUBRICAINDIV, ARQUIVOPAGTO estornados; CAP/CAR gerados.</p>
+<p><strong>Sequência operacional (festornafolha.pas):</strong></p>
+<ol>
+<li><code>VerificaStatusDocumentosVersao</code> (:900) → <code>HabilitaEstornoIndividual</code> (:939)</li>
+<li><code>VerificaTmpDesc</code> (:2030) → <code>DesfazRubricaIndividual</code> (:1843)</li>
+<li><code>GeraAlterador</code> (:1183) → <code>GeraCAP</code> (:1523) → <code>GeraCAR</code> (:1654)</li>
+<li><code>GravaMotivoEstorno</code> (:1709) → <code>ProcessaCompensacao</code> (:1739)</li>
+<li><code>Exec_SP_ExcessoDebito</code> (:1801) → <code>EstornoFolhaCompleto</code> (:2062)</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Verificar status</td><td>Confirmar que a versão pode ser estornada</td><td>Versão efetivada</td><td>VerificaStatusDocumentosVersao → HabilitaEstornoIndividual</td><td>Estorno habilitado</td><td>—</td><td>—</td><td><code>festornafolha.dfm</code></td></tr>
+<tr><td>Desfazer rubrica individual</td><td>Reverter rubrica individual</td><td>Rubrica, TMPDESC</td><td>VerificaTmpDesc → DesfazRubricaIndividual</td><td>Rubrica desfeita</td><td>—</td><td>—</td><td><code>festornafolha.dfm</code></td></tr>
+<tr><td>Gerar CAP/CAR</td><td>Produzir alterador e documentos de estorno</td><td>Dados do estorno</td><td>GeraAlterador → GeraCAP → GeraCAR</td><td>CAP/CAR gerados</td><td>—</td><td>—</td><td><code>festornafolha.dfm</code></td></tr>
+<tr><td>Gravar motivo e compensar</td><td>Registrar motivo e processar compensação</td><td>Motivo do estorno</td><td>GravaMotivoEstorno → ProcessaCompensacao</td><td>Compensação processada</td><td>—</td><td>—</td><td><code>festornafolha.dfm</code></td></tr>
+<tr><td>Estorno completo</td><td>Executar estorno e excesso de débito</td><td>Compensação OK</td><td>Exec_SP_ExcessoDebito → EstornoFolhaCompleto</td><td>Folha estornada</td><td>—</td><td>—</td><td><code>festornafolha.dfm</code></td></tr>
+</tbody></table></div>
+<p><strong>Exceções:</strong> estorno de pagamento pendente (:2384), erro de processo (:2455), novo CAP (:2911), reprocessamento (:3013).</p>
+<div class="jf-rules">
+<p><strong>Regras de negócio da jornada:</strong> nenhuma regra FOLHA-RN específica desta jornada; as validações estão nos tratamentos (TRT) do caso de uso.</p>
+</div>
+
+<p><strong>Dependências:</strong> sucede <a href="#PF-03">JF003</a>. Evidência: <code>FOLHA/Fontes/festornafolha.pas:624-3013</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<div class="mermaid">graph LR
+  n0["festornafolha"] --> n1["VerificaStatus"] --> n2["DesfazRubricaIndividual"] --> n3["GeraAlterador"] --> n4["GeraCAP"] --> n5["GeraCAR"] --> n6["GravaMotivoEstorno"] --> n7["ProcessaCompensacao"] --> n8["Exec_SP_ExcessoDebito"] --> n9["EstornoFolhaCompleto"] --> n10["estorna HSTFOLHABENEFCAP/HISTRUBSAL/RUBRICAINDIV + CAP/CAR"]</div>
+</div>
+
+<section id="TRT-section"><div class="section-title">6. Tratamentos (TRT)</div>
+<p>Tratamentos de erro derivados das validações bloqueantes e exceções das regras. Cada TRT possui Condição, Mensagem e Resultado.</p>
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Condição</th><th>Mensagem</th><th>Resultado</th><th>Regra</th><th>Jornada</th></tr></thead><tbody>
+<tr id="TRT001"><td><strong>TRT001</strong></td><td>Mês/ano de referência não informados</td><td><a href="#MSG001">MSG001</a></td><td>Bloqueia execução</td><td><a href="#FOLHA-RN001">RS001</a></td><td>JF001, JF015</td></tr>
+<tr id="TRT004"><td><strong>TRT004</strong></td><td>Rubrica de IR sem natureza de rendimento</td><td><a href="#MSG004">MSG004</a></td><td>Não soma à base de IRRF</td><td><a href="#FOLHA-RN004">RS004</a></td><td>JF002, JF008</td></tr>
+<tr id="TRT005"><td><strong>TRT005</strong></td><td>Líquido do recebedor negativo após descontos</td><td><a href="#MSG005">MSG005</a></td><td>Zera líquido e transfere desconto</td><td><a href="#FOLHA-RN006">RS006</a></td><td>JF002</td></tr>
+<tr id="TRT006"><td><strong>TRT006</strong></td><td>Duplicidade de lote na prévia</td><td><a href="#MSG006">MSG006</a></td><td>Não regenera benefício</td><td><a href="#FOLHA-RN010">RS010</a></td><td>JF001</td></tr>
+<tr id="TRT007"><td><strong>TRT007</strong></td><td>Críticas ETL na efetivação</td><td><a href="#MSG007">MSG007</a></td><td>Aborta efetivação</td><td><a href="#FOLHA-RN011">RS011</a></td><td>JF003</td></tr>
+<tr id="TRT008"><td><strong>TRT008</strong></td><td>Conta bancária do lote inválida</td><td><a href="#MSG008">MSG008</a></td><td>Bloqueia efetivação</td><td><a href="#FOLHA-RN012">RS012</a></td><td>JF003</td></tr>
+<tr id="TRT009"><td><strong>TRT009</strong></td><td>Parâmetros contábeis/financeiros não configurados</td><td><a href="#MSG009">MSG009</a></td><td>Bloqueia efetivação</td><td><a href="#FOLHA-RN013">RS013</a></td><td>JF003, JF006</td></tr>
+<tr id="TRT010"><td><strong>TRT010</strong></td><td>Margem de desconto consignável excedida</td><td><a href="#MSG010">MSG010</a></td><td>Bloqueia/ajusta rubrica</td><td><a href="#FOLHA-RN008">RS008</a></td><td>JF002</td></tr>
+<tr id="TRT011"><td><strong>TRT011</strong></td><td>Benefício abaixo do mínimo da concessão</td><td><a href="#MSG011">MSG011</a></td><td>Ajusta ao mínimo</td><td><a href="#FOLHA-RN009">RS009</a></td><td>JF002</td></tr>
+</tbody></table></div>
+</section>
+
+<section id="MSG-section"><div class="section-title">7. Mensagens (MSG)</div>
+
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Texto da Mensagem</th><th>Jornadas relacionadas</th></tr></thead><tbody>
+<tr id="MSG001"><td><strong>MSG001</strong></td><td>"É necessário indicar o Mês/Ano de Referência!"</td><td>JF001, JF015</td></tr>
+<tr id="MSG004"><td><strong>MSG004</strong></td><td>"Rubrica sem natureza de rendimento — não soma à base de IRRF"</td><td>JF002, JF008</td></tr>
+<tr id="MSG005"><td><strong>MSG005</strong></td><td>"Líquido negativo — valor zerado e desconto excedente transferido"</td><td>JF002</td></tr>
+<tr id="MSG006"><td><strong>MSG006</strong></td><td>"Benefício já existe no lote/competência — duplicidade não regenerada"</td><td>JF001</td></tr>
+<tr id="MSG007"><td><strong>MSG007</strong></td><td>"Críticas ETL — efetivação abortada"</td><td>JF003</td></tr>
+<tr id="MSG008"><td><strong>MSG008</strong></td><td>"Conta bancária do lote inválida"</td><td>JF003</td></tr>
+<tr id="MSG009"><td><strong>MSG009</strong></td><td>"Parâmetros contábeis/financeiros do lote não configurados"</td><td>JF003, JF006</td></tr>
+<tr id="MSG010"><td><strong>MSG010</strong></td><td>"Margem consignável excedida — rubrica bloqueada/ajustada"</td><td>JF002</td></tr>
+<tr id="MSG011"><td><strong>MSG011</strong></td><td>"Benefício abaixo do mínimo — ajustado ao mínimo da concessão"</td><td>JF002</td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">8. Tabela/API/Programa</div>
+<div class="table-wrap"><table><thead><tr><th>Jornada</th><th>Tabelas (escrita)</th><th>Rotina-chave (file:linha)</th></tr></thead><tbody>
+<tr><td>JF001</td><td>HSTBENEFBFCIARIO, PROCESSOBENEF, HSTCONTRIBPREV</td><td><code>FPreparo.pas:1015-2958</code></td></tr>
+<tr><td>JF002</td><td>PREVIA, BASEDEPAGAMENTO, BITRIBUTACAO, HSTBITRIBUTACAO, CTRLINTERFACE</td><td><code>dFolhaPrevia.pas:4096-25405</code></td></tr>
+<tr><td>JF003</td><td>HSTFOLHABENEF, HSTFOLHABENEFCAP, ARQUIVOPAGTO</td><td><code>fFolhaNormalEfet.pas:8158-9844</code></td></tr>
+<tr><td>JF004</td><td>HSTFOLHABENEFCAP, HISTRUBSAL, RUBRICAINDIV, ARQUIVOPAGTO</td><td><code>festornafolha.pas:624-3013</code></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">9. Telas/Layouts</div>
+<div class="table-wrap"><table><thead><tr><th>Jornada</th><th>Form(s) (.dfm)</th></tr></thead><tbody>
+<tr><td>JF001</td><td><code>FPreparo.dfm</code></td></tr>
+<tr><td>JF002</td><td><code>FFolhaNormalPrevia.dfm</code>, <code>fFolhaExtra.dfm</code></td></tr>
+<tr><td>JF003</td><td><code>fFolhaNormalEfet.dfm</code>, <code>FSelecionaLoteEF.dfm</code></td></tr>
+<tr><td>JF004</td><td><code>festornafolha.dfm</code></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">10. Visão Consolidada das Jornadas</div>
+<div class="table-wrap"><table><thead><tr><th>Jornada</th><th>ID</th><th>Título</th><th>Critério de aceitação (Dado/Quando/Então)</th><th>Mensagens</th><th>Telas</th></tr></thead><tbody>
+<tr><td>JF001</td><td>PF-01</td><td>Preparo da Folha</td><td><strong>Dado</strong> lote aberto e benefícios ativos, <strong>Quando</strong> usuário aciona Preparo, <strong>Então</strong> benefícios são preparados para prévia</td><td><a href="#MSG006">MSG006</a></td><td>FPreparo</td></tr>
+<tr><td>JF002</td><td>PF-02</td><td>Prévia (Cálculo)</td><td><strong>Dado</strong> preparo concluído, <strong>Quando</strong> usuário processa prévia, <strong>Então</strong> PREVIA é calculada com IRRF, margem, CPMF e benefício mínimo</td><td><a href="#MSG004">MSG004</a>, <a href="#MSG005">MSG005</a>, <a href="#MSG010">MSG010</a>, <a href="#MSG011">MSG011</a></td><td>FFolhaNormalPrevia</td></tr>
+<tr><td>JF003</td><td>PF-03</td><td>Efetivação</td><td><strong>Dado</strong> prévia conferida e lote selecionado, <strong>Quando</strong> usuário efetiva, <strong>Então</strong> histórico definitivo e arquivos CNAB são gerados</td><td><a href="#MSG007">MSG007</a>, <a href="#MSG008">MSG008</a>, <a href="#MSG009">MSG009</a></td><td>fFolhaNormalEfet</td></tr>
+<tr><td>JF004</td><td>PF-04</td><td>Estorno</td><td><strong>Dado</strong> versão efetivada, <strong>Quando</strong> usuário estorna, <strong>Então</strong> folha é desfeita e CAP/CAR gerados</td><td>—</td><td>festornafolha</td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">11. Critérios de Aceitação por Regra</div>
+<div class="table-wrap"><table><thead><tr><th>Regra</th><th>ID</th><th>Título</th><th>Critério de aceitação (Dado/Quando/Então)</th><th>Mensagens</th><th>Telas</th></tr></thead><tbody>
+<tr><td>RS001</td><td>FOLHA-RN001</td><td>Mês/ano obrigatórios</td><td><strong>Dado</strong> processamento por competência, <strong>Quando</strong> mês/ano não informados, <strong>Então</strong> bloqueia com MSG001</td><td><a href="#MSG001">MSG001</a></td><td>FExecAbateReserva</td></tr>
+<tr><td>RS004</td><td>FOLHA-RN004</td><td>Natureza de rendimento</td><td><strong>Dado</strong> rubrica de IR, <strong>Quando</strong> sem natureza, <strong>Então</strong> não soma à base</td><td><a href="#MSG004">MSG004</a></td><td>FFolhaNormalPrevia</td></tr>
+<tr><td>RS005</td><td>FOLHA-RN005</td><td>Proventos somam à base</td><td><strong>Dado</strong> proventos tributáveis, <strong>Quando</strong> DeterminaBasesIRRF, <strong>Então</strong> base de IRRF acumulada</td><td>—</td><td>FFolhaNormalPrevia</td></tr>
+<tr><td>RS006</td><td>FOLHA-RN006</td><td>Líquido negativo</td><td><strong>Dado</strong> líquido &lt; 0, <strong>Quando</strong> EfetivaRubricas, <strong>Então</strong> zera e transfere desconto</td><td><a href="#MSG005">MSG005</a></td><td>FFolhaNormalPrevia</td></tr>
+<tr><td>RS007</td><td>FOLHA-RN007</td><td>CPMF</td><td><strong>Dado</strong> valor base, <strong>Quando</strong> CalculaCPMF, <strong>Então</strong> CPMF = valor × (percCPMF − 1)</td><td>—</td><td>FFolhaNormalPrevia</td></tr>
+<tr><td>RS008</td><td>FOLHA-RN008</td><td>Margem consignável</td><td><strong>Dado</strong> descontos consignáveis, <strong>Quando</strong> excede margem, <strong>Então</strong> bloqueia/ajusta rubrica</td><td><a href="#MSG010">MSG010</a></td><td>FFolhaNormalPrevia</td></tr>
+<tr><td>RS009</td><td>FOLHA-RN009</td><td>Benefício mínimo</td><td><strong>Dado</strong> valor previado &lt; mínimo, <strong>Quando</strong> CalculaBeneficioMinimo, <strong>Então</strong> ajusta ao mínimo</td><td><a href="#MSG011">MSG011</a></td><td>FFolhaNormalPrevia</td></tr>
+<tr><td>RS010</td><td>FOLHA-RN010</td><td>Duplicidade de lotes</td><td><strong>Dado</strong> lote já processado, <strong>Quando</strong> InsereHstBfciario, <strong>Então</strong> não regenera benefício</td><td><a href="#MSG006">MSG006</a></td><td>FPreparo</td></tr>
+<tr><td>RS011</td><td>FOLHA-RN011</td><td>Críticas ETL</td><td><strong>Dado</strong> ETL com críticas, <strong>Quando</strong> Verifica_Critica_ETL, <strong>Então</strong> aborta efetivação</td><td><a href="#MSG007">MSG007</a></td><td>fFolhaNormalEfet</td></tr>
+<tr><td>RS012</td><td>FOLHA-RN012</td><td>Conta bancária válida</td><td><strong>Dado</strong> efetivação, <strong>Quando</strong> conta bancária inválida, <strong>Então</strong> bloqueia</td><td><a href="#MSG008">MSG008</a></td><td>fFolhaNormalEfet</td></tr>
+<tr><td>RS013</td><td>FOLHA-RN013</td><td>Parâmetros CF</td><td><strong>Dado</strong> efetivação, <strong>Quando</strong> parâmetros CF não configurados, <strong>Então</strong> bloqueia</td><td><a href="#MSG009">MSG009</a></td><td>fFolhaNormalEfet</td></tr>
+<tr><td>RS015</td><td>FOLHA-RN015</td><td>IR regressivo (0/1/7)</td><td><strong>Dado</strong> plano com IR regressivo, <strong>Quando</strong> CalculaLancaIRRegressivo(tipo), <strong>Então</strong> IR lançado conforme tipo</td><td>—</td><td>FFolhaNormalPrevia</td></tr>
+<tr><td>RS017</td><td>FOLHA-RN017</td><td>Compensação de IRRF</td><td><strong>Dado</strong> saldo de compensação, <strong>Quando</strong> LancaIRCompensado, <strong>Então</strong> compensa até o saldo</td><td>—</td><td>FFolhaNormalPrevia</td></tr>
+<tr><td>RS018</td><td>FOLHA-RN018</td><td>Rateio entre planos</td><td><strong>Dado</strong> proporção multiplano, <strong>Quando</strong> ProcessaRateioRubricas, <strong>Então</strong> rubricas rateadas</td><td>—</td><td>FFolhaNormalPrevia</td></tr>
+<tr><td>RS019</td><td>FOLHA-RN019</td><td>REINF rateado</td><td><strong>Dado</strong> rubricas REINF, <strong>Quando</strong> ProcessaReinf, <strong>Então</strong> rateado por plano</td><td>—</td><td>FFolhaNormalPrevia</td></tr>
+<tr><td>RS020</td><td>FOLHA-RN020</td><td>Correção/alterador</td><td><strong>Dado</strong> data de pagamento, <strong>Quando</strong> CalculaCorrecaoBeneficio, <strong>Então</strong> correção e alterador aplicados</td><td>—</td><td>FFolhaNormalPrevia</td></tr>
+<tr><td>RS021</td><td>FOLHA-RN021</td><td>Salário-família</td><td><strong>Dado</strong> base específica, <strong>Quando</strong> CaluloSalarioFamilia, <strong>Então</strong> salário-família calculado</td><td>—</td><td>FFolhaNormalPrevia</td></tr>
+<tr><td>RS022</td><td>FOLHA-RN022</td><td>Transação por blocos</td><td><strong>Dado</strong> lote de prévia, <strong>Quando</strong> IncluiPrevia, <strong>Então</strong> commit + StartTransaction</td><td>—</td><td>FFolhaNormalPrevia</td></tr>
+<tr><td>RS028</td><td>FOLHA-RN028</td><td>Arredondamento do líquido</td><td><strong>Dado</strong> líquido calculado, <strong>Quando</strong> CalculaArredondamentoLiquido, <strong>Então</strong> arredondado conforme base</td><td>—</td><td>FFolhaNormalPrevia</td></tr>
+<tr><td>RS029</td><td>FOLHA-RN029</td><td>Dado bancário avaliado</td><td><strong>Dado</strong> recebedor, <strong>Quando</strong> AvaliaDadoBancario, <strong>Então</strong> banco/agência/conta validados</td><td>—</td><td>FFolhaNormalPrevia</td></tr>
+<tr><td>RS030</td><td>FOLHA-RN030</td><td>CTRLINTERFACE</td><td><strong>Dado</strong> prévia processada, <strong>Quando</strong> SetCtrlInterface, <strong>Então</strong> situação/lote gravados</td><td>—</td><td>FFolhaNormalPrevia</td></tr>
+</tbody></table></div>
+</section>
+
+<p><a class="back-btn" href="funcionalidades.html">← Voltar à lista de Casos de Uso (Processos Funcionais)</a></p>
+</main>
+<footer>
+<p>Blueprint AS-IS — PFC-32 — Processos Funcionais organizados em Casos de Uso — Módulo FOLHA | Sistema legado Delphi 5 | pt-BR | Atualizado em 2026-11-10</p>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+<script src="../assets/js/mermaid-init.js"></script>
+</body>
+</html>

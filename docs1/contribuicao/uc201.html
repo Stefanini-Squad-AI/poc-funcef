@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contribuição Previdenciária — UC201 – Preparar e Enviar a Cobrança de Contribuições — Blueprint AS-IS</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<header>
+  <div class="badge">Blueprint AS-IS — PFC-32 — Processos Funcionais</div>
+  <h1>UC201 – Preparar e Enviar a Cobrança de Contribuições</h1>
+  <p>Caso de uso do módulo Contribuição Previdenciária: 1 jornada(s) funcional(is) e 14 regra(s) de negócio descritas dentro de cada jornada.</p>
+</header>
+<nav>
+  <a href="index.html">📋 Visão Geral</a>
+  <a href="arquitetura.html">🏗️ Arquitetura</a>
+  <a href="inventario-tecnico.html">📦 Inventário</a>
+  <a href="funcionalidades.html">⚙️ Processos Funcionais</a>
+  <a href="procedures-functions.html">🔧 Procedures</a>
+  <a href="dados.html">🗄️ Dados</a>
+  <a href="relatorios.html">📄 Relatórios</a>
+  <a href="integracoes.html">🔗 Integrações</a>
+  <a href="tratamento-erros.html">⚠️ Erros</a>
+  <a href="diagramas-fluxo.html">🔀 Fluxos</a>
+  <a href="lacunas.html">🔍 Lacunas</a>
+  <a href="controle-cobertura.html">📊 Cobertura</a>
+</nav>
+<main>
+
+<a class="back-btn" href="funcionalidades.html">← Voltar à lista de Casos de Uso (Processos Funcionais)</a>
+<div class="breadcrumb"><a href="index.html">Contribuição Previdenciária</a> › <a href="funcionalidades.html">Processos Funcionais</a> › UC201</div>
+
+<section><div class="section-title">1. Identificação</div>
+<div class="table-wrap"><table><tbody>
+<tr><th>Caso de Uso</th><td><strong>UC201 – Preparar e Enviar a Cobrança de Contribuições</strong></td></tr>
+<tr><th>Módulo</th><td>CONTRIBUIÇÃO — Contribuição Previdenciária</td></tr>
+<tr><th>Sistema</th><td>CM Contabilidade / FUNCEF (Delphi 5 / VCL / MIDAS / Oracle)</td></tr>
+<tr><th>Tipo</th><td>Sistema Desktop</td></tr>
+<tr><th>Ator</th><td>Usuário operacional (analista de arrecadação / contribuições previdenciárias)</td></tr>
+<tr><th>Jornadas</th><td><a href="#PF-01">JF001 — Manutenção e cobrança de contribuições (Preparo e Envio)</a></td></tr>
+<tr><th>Regras de negócio</th><td>14 regra(s) CONTRIB-RN, descritas na íntegra dentro de cada jornada</td></tr>
+<tr><th>OS - Título</th><td>PFC-32 — Lista de UC (Processos Funcionais organizados em Casos de Uso)</td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">2. Descrição Resumida</div>
+<p>Seleção, cálculo, preparo e envio das contribuições do mês para cobrança (folha, Contas a Receber ou banco). Este caso de uso reúne 1 jornada(s) funcional(is) do módulo Contribuição Previdenciária:</p>
+<ul>
+<li><a href="#PF-01"><strong>JF001 — Manutenção e cobrança de contribuições (Preparo e Envio)</strong></a>: Selecionar as contribuições do mês de cobrança, calcular os valores, gerar o histórico de cobrança e enviá-las para cobrança (folha, Contas a Receber ou banco), com integração contábil.</li>
+</ul>
+</section>
+
+<section><div class="section-title">3. Pré-condições</div>
+<p><strong>Gerais do módulo:</strong></p>
+<ul>
+<li>Módulo disponível (entry point <code>CONTRIBUICAOPREV/Fontes/ContribuicaoPREV.dpr</code>) e usuário com permissão de acesso às telas.</li>
+<li>Banco Oracle acessível e parâmetros do módulo carregados (motivo padrão de cobrança, motivo padrão de tratamento de divergência).</li>
+<li>Patrocinadoras, planos previdenciários, contribuições (CONTRIBUICAO) e participantes (PARTPREVPLAN, CONTRIBPREVPARTP) cadastrados.</li>
+<li>Integrações configuradas quando a jornada as usa: Folha, Contas a Receber/CAP, Contabilidade, PGA (ver <a href="integracoes.html">🔗 Integrações</a>).</li>
+<li>Período contábil aberto para as datas usadas em lançamentos.</li>
+</ul>
+<p><strong>Por jornada:</strong></p>
+<ul>
+<li><a href="#PF-01">JF001</a>: Mês/ano e tipo de cobrança definidos; motivo padrão de cobrança parametrizado; participantes com contribuições em CONTRIBPREVPARTP; período contábil aberto para a data de vencimento.</li>
+</ul>
+</section>
+
+<section><div class="section-title">4. Pós-condições</div>
+<ul>
+<li><a href="#PF-01">JF001</a>: HSTCONTRIBPREV gravado com SITRECEBIMENTO = 1; CONTRIBPREVPARTP.ULTMESPREPARO atualizado; DOCUMENTO e LANCAMENTO gerados; lotes de cobrança disponíveis.</li>
+</ul>
+</section>
+
+<section><div class="section-title">5. Jornadas Funcionais (JF001)</div>
+<p>Cada jornada traz objetivo, ator/gatilho, pré e pós-condições, sequência operacional, ações práticas, <strong>regras de negócio da jornada</strong> (texto completo de cada regra), tratamentos e mensagens.</p>
+<div class="legend"><span><span class="ev ev-comprovado">COMPROVADO</span> — no código</span><span><span class="ev ev-inferido">INFERIDO</span> — plausível</span><span><span class="ev ev-pendente">PENDENTE</span> — validar</span></div>
+</section>
+
+<div class="pf-block" id="PF-01"><h4>JF001 (PF-01) — Manutenção e cobrança de contribuições (Preparo e Envio)</h4>
+<p><strong>Objetivo:</strong> Selecionar as contribuições do mês de cobrança, calcular os valores, gerar o histórico de cobrança e enviá-las para cobrança (folha, Contas a Receber ou banco), com integração contábil.</p>
+<p><strong>Ator / gatilho:</strong> Analista de arrecadação, na tela <em>Envio de Contribuições</em>.</p>
+<p><strong>Pré-condições:</strong> Mês/ano e tipo de cobrança definidos; motivo padrão de cobrança parametrizado; participantes com contribuições em CONTRIBPREVPARTP; período contábil aberto para a data de vencimento.</p>
+<p><strong>Pós-condições:</strong> HSTCONTRIBPREV gravado com SITRECEBIMENTO = 1; CONTRIBPREVPARTP.ULTMESPREPARO atualizado; DOCUMENTO e LANCAMENTO gerados; lotes de cobrança disponíveis.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li>Informar mês/ano de cobrança e tipo de cobrança. [<a href="#TRT001">TRT001</a>] [<a href="#TRT002">TRT002</a>]</li>
+<li>O sistema verifica o motivo padrão de cobrança e a integração com Contas a Receber e Contabilidade. [<a href="#TRT003">TRT003</a>]</li>
+<li>O sistema seleciona as contribuições elegíveis: último mês preparado anterior ao mês de cobrança; contribuições ENVIA BASE incluem atrasos; opção “apenas calculadas por evento/novas inscrições” filtra as de evento. [<a href="#CONTRIB-RN013">RS013</a>] [<a href="#CONTRIB-RN017">RS017</a>] [<a href="#CONTRIB-RN027">RS027</a>]</li>
+<li>Confirmar as opções; o sistema prepara (calcula valores e grava HSTCONTRIBPREV) e questiona se o plano contábil difere do previdenciário. [<a href="#CONTRIB-RN026">RS026</a>] [<a href="#TRT005">TRT005</a>]</li>
+<li>Informar a data de vencimento; o sistema valida o período contábil. [<a href="#TRT004">TRT004</a>]</li>
+<li>Enviar: integração com Folha/CaR/Contabilidade; contribuições enviadas recebem SITRECEBIMENTO = 1. [<a href="#CONTRIB-RN014">RS014</a>] [<a href="#TRT006">TRT006</a>]</li>
+<li>O sistema atualiza o último mês preparado do participante. [<a href="#CONTRIB-RN016">RS016</a>]</li>
+<li>Fluxo alternativo — Desfazer: contribuições voltam a SITRECEBIMENTO = 0 e o documento/data de emissão são limpos. [<a href="#CONTRIB-RN015">RS015</a>]</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Informar parâmetros da cobrança</td><td>Definir competência e canal</td><td>Mês, ano, tipo de cobrança, patrocinadoras/planos</td><td>Valida campos obrigatórios e motivo padrão</td><td>Parâmetros aceitos</td><td>—</td><td><a href="#MSG001">MSG001</a>, <a href="#MSG002">MSG002</a>, <a href="#MSG003">MSG003</a>, <a href="#MSG004">MSG004</a>, <a href="#MSG005">MSG005</a></td><td><code>FPreparaEnvia.dfm</code></td></tr>
+<tr><td>Selecionar contribuições elegíveis</td><td>Montar a base da cobrança</td><td>Parâmetros aceitos</td><td>Filtra por ULTMESPREPARO &lt; mês de cobrança; inclui atrasos se FLGTPVLR = 'B'; filtra por evento se a opção estiver marcada</td><td>Lista de contribuições a preparar</td><td><a href="#CONTRIB-RN013">RS013</a>, <a href="#CONTRIB-RN017">RS017</a>, <a href="#CONTRIB-RN027">RS027</a></td><td>—</td><td><code>FPreparaEnvia.dfm</code></td></tr>
+<tr><td>Preparar contribuições</td><td>Calcular e registrar a cobrança</td><td>Contribuições elegíveis; confirmação do usuário</td><td>Calcula valores e insere HSTCONTRIBPREV; questiona plano contábil divergente</td><td>Lotes preparados</td><td><a href="#CONTRIB-RN026">RS026</a></td><td><a href="#MSG006">MSG006</a>, <a href="#MSG007">MSG007</a></td><td><code>FPreparaEnvia.dfm</code></td></tr>
+<tr><td>Enviar lotes</td><td>Integrar com Folha/CaR/Contabilidade</td><td>Lotes preparados; data de vencimento</td><td>Valida período contábil; gera DOCUMENTO/LANCAMENTO; marca SITRECEBIMENTO = 1</td><td>Contribuições enviadas</td><td><a href="#CONTRIB-RN014">RS014</a></td><td><a href="#MSG008">MSG008</a>, <a href="#MSG009">MSG009</a>, <a href="#MSG010">MSG010</a></td><td><code>FPreparaEnvia.dfm</code></td></tr>
+<tr><td>Atualizar controle de preparo</td><td>Evitar novo preparo da mesma competência</td><td>Lote concluído</td><td>UPDATE CONTRIBPREVPARTP.ULTMESPREPARO</td><td>Último mês preparado atualizado</td><td><a href="#CONTRIB-RN016">RS016</a></td><td>—</td><td><code>FPreparaEnvia.dfm</code></td></tr>
+<tr><td>Desfazer preparo/envio</td><td>Reverter uma cobrança</td><td>Contribuições preparadas/enviadas</td><td>UPDATE SITRECEBIMENTO = 0, CODDOCUMENTOPREV = NULL, DATAEMISSCOB = NULL</td><td>Contribuições voltam a pendentes</td><td><a href="#CONTRIB-RN015">RS015</a></td><td>—</td><td><code>FPreparaEnvia.dfm</code></td></tr>
+</tbody></table></div>
+<div class="jf-rules">
+<p><strong>Regras de negócio da jornada:</strong> 14 regra(s) — texto completo abaixo.</p>
+<div class="rule-block" id="CONTRIB-RN013"><div class="rule-id">RS013 (CONTRIB-RN013) — Preparo filtra pelo último mês preparado</div>
+<div class="rule-desc">Só entram no preparo as contribuições do participante cujo último mês preparado é anterior ao mês de cobrança, o que impede preparar duas vezes a mesma competência.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>CONTRIBPREVPARTP.ULTMESPREPARO</code> — [obrigatório] — AAAA/MM &lt; mês de cobrança</li>
+<li><code>mês/ano de cobrança (tela)</code> — [obrigatório] — competência AAAA/MM</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> não se aplica — regra de seleção/cálculo, sem mensagem ao usuário.</p>
+<p><strong>Jornada:</strong> <a href="#PF-01">JF001</a></p>
+<p><strong>Descrição original:</strong> Preparo só processa contribuições com ULTMESPREPARO &lt; mês cobrança.</p>
+<p><strong>Condições:</strong> Filtro de seleção</p>
+<p><strong>Dados envolvidos:</strong> CONTRIBPREVPARTP.ULTMESPREPARO</p>
+<p><strong>Resultado/Exceção:</strong> Contribuições elegíveis</p>
+<div class="rule-origin">📂 Origem: <code>CONTRIBUICAOPREV/Fontes/FPreparaEnvia.pas:2330,2466</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<div class="rule-block" id="CONTRIB-RN014"><div class="rule-id">RS014 (CONTRIB-RN014) — Envio marca a contribuição como enviada</div>
+<div class="rule-desc">Depois da integração com folha ou Contas a Receber, a contribuição passa para a situação “enviada” (1).</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>HSTCONTRIBPREV.SITRECEBIMENTO</code> — [obrigatório] — passa para 1</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT006">TRT006</a> → <a href="#MSG009">MSG009</a>, <a href="#MSG010">MSG010</a> → O lote com erro não é enviado; os demais seguem; o erro fica no log de resultado</p>
+<p><strong>Jornada:</strong> <a href="#PF-01">JF001</a></p>
+<p><strong>Descrição original:</strong> Envio marca SITRECEBIMENTO = 1.</p>
+<p><strong>Condições:</strong> Após integração folha/CaR</p>
+<p><strong>Dados envolvidos:</strong> HSTCONTRIBPREV</p>
+<p><strong>Resultado/Exceção:</strong> UPDATE SET SITRECEBIMENTO = 1</p>
+<div class="rule-origin">📂 Origem: <code>CONTRIBUICAOPREV/Fontes/FPreparaEnvia.pas:5076,5198</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<div class="rule-block" id="CONTRIB-RN015"><div class="rule-id">RS015 (CONTRIB-RN015) — Desfazer preparo reinicia a situação</div>
+<div class="rule-desc">Desfazer o preparo devolve a contribuição à situação “não enviada” (0) e limpa o documento de cobrança e a data de emissão.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>SITRECEBIMENTO</code> — [obrigatório] — volta a 0</li>
+<li><code>CODDOCUMENTOPREV</code> — [obrigatório] — NULL</li>
+<li><code>DATAEMISSCOB</code> — [obrigatório] — NULL</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> não se aplica — regra de seleção/cálculo, sem mensagem ao usuário.</p>
+<p><strong>Jornada:</strong> <a href="#PF-01">JF001</a></p>
+<p><strong>Descrição original:</strong> Desfazer preparo retorna SITRECEBIMENTO=0 e limpa CODDOCUMENTOPREV/DATAEMISSCOB.</p>
+<p><strong>Condições:</strong> Desfazimento</p>
+<p><strong>Dados envolvidos:</strong> HSTCONTRIBPREV</p>
+<p><strong>Resultado/Exceção:</strong> UPDATE SET SITRECEBIMENTO=0, CODDOCUMENTOPREV=NULL</p>
+<div class="rule-origin">📂 Origem: <code>CONTRIBUICAOPREV/Fontes/FPreparaEnvia.pas:6318</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<div class="rule-block" id="CONTRIB-RN016"><div class="rule-id">RS016 (CONTRIB-RN016) — Atualiza o último mês preparado</div>
+<div class="rule-desc">Ao concluir o lote, o sistema registra no participante o mês preparado, que passa a ser o controle da regra RS013.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>CONTRIBPREVPARTP.ULTMESPREPARO</code> — [obrigatório] — recebe o mês de cobrança processado</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> não se aplica — regra de seleção/cálculo, sem mensagem ao usuário.</p>
+<p><strong>Jornada:</strong> <a href="#PF-01">JF001</a></p>
+<p><strong>Descrição original:</strong> Após preparo, atualiza ULTMESPREPARO em CONTRIBPREVPARTP.</p>
+<p><strong>Condições:</strong> Conclusão do lote</p>
+<p><strong>Dados envolvidos:</strong> CONTRIBPREVPARTP</p>
+<p><strong>Resultado/Exceção:</strong> UPDATE SET ULTMESPREPARO=...</p>
+<div class="rule-origin">📂 Origem: <code>CONTRIBUICAOPREV/Fontes/FPreparaEnvia.pas:6516</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<div class="rule-block" id="CONTRIB-RN017"><div class="rule-id">RS017 (CONTRIB-RN017) — Envio de base inclui contribuições em atraso</div>
+<div class="rule-desc">Contribuições parametrizadas como “envia base” também levam ao envio as contribuições em atraso com valor.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>CONTRIBUICAO.FLGTPVLR</code> — [obrigatório] — 'B' = ENVIA BASE</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> não se aplica — regra de seleção/cálculo, sem mensagem ao usuário.</p>
+<p><strong>Jornada:</strong> <a href="#PF-01">JF001</a></p>
+<p><strong>Descrição original:</strong> Tipo de envio FLGTPVLR='B' (ENVIA BASE) considera também contribuições em atraso.</p>
+<p><strong>Condições:</strong> FLGTPVLR='B'</p>
+<p><strong>Dados envolvidos:</strong> CONTRIBUICAO.FLGTPVLR</p>
+<p><strong>Resultado/Exceção:</strong> Inclusão no lote</p>
+<div class="rule-origin">📂 Origem: <code>CONTRIBUICAOPREV/Fontes/ContribuicaoPREV.dpr:303-306</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<div class="rule-block" id="CONTRIB-RN026"><div class="rule-id">RS026 (CONTRIB-RN026) — Divergência de plano contábil questiona o usuário</div>
+<div class="rule-desc">No envio de cobrança, se o plano contábil previdenciário for diferente do plano previdenciário, o usuário é perguntado se deseja alterá-lo.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>PLANPREVCONTABIL</code> — [obrigatório] — plano contábil associado</li>
+<li><code>plano previdenciário</code> — [obrigatório] — comparado ao contábil</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> não se aplica — regra de seleção/cálculo, sem mensagem ao usuário.</p>
+<p><strong>Jornada:</strong> <a href="#PF-01">JF001</a></p>
+<p><strong>Nota de verificação:</strong> Texto da pergunta não localizado no código atual; mantida a classificação INFERIDO.</p>
+<p><strong>Descrição original:</strong> Plano contábil previdenciário ≠ plano previdenciário questiona usuário sobre alteração.</p>
+<p><strong>Condições:</strong> Plano contábil ≠ plano prev</p>
+<p><strong>Dados envolvidos:</strong> PLANPREVCONTABIL</p>
+<p><strong>Resultado/Exceção:</strong> Questiona usuário</p>
+<div class="rule-origin">📂 Origem: <code>CONTRIBUICAOPREV/Fontes/ContribuicaoPREV.dpr:331-335 (SIG 24516)</code> | Evidência: <span class="ev ev-inferido">INFERIDO</span></div></div>
+<div class="rule-block" id="CONTRIB-RN027"><div class="rule-id">RS027 (CONTRIB-RN027) — Filtro de envio por evento</div>
+<div class="rule-desc">Com a opção “Enviar apenas as calculadas por evento ou novas inscrições”, o envio (e o desfazer) consideram só contribuições oriundas de evento.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>opção “apenas calculadas por evento/novas inscrições”</code> — [opcional] — marcada/desmarcada</li>
+<li><code>HSTCONTRIBPREV (origem evento)</code> — [condicional] — filtrado quando a opção está marcada</li>
+<li><code>FLGCONCESSAO</code> — [condicional] — parâmetro incluído na pendência 22081</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> não se aplica — regra de seleção/cálculo, sem mensagem ao usuário.</p>
+<p><strong>Jornada:</strong> <a href="#PF-01">JF001</a></p>
+<p><strong>Descrição original:</strong> Envio com opção 'apenas calculadas por evento/novas inscrições' filtra contribuições oriundas de evento.</p>
+<p><strong>Condições:</strong> Opção 'apenas calculadas por evento'</p>
+<p><strong>Dados envolvidos:</strong> HSTCONTRIBPREV</p>
+<p><strong>Resultado/Exceção:</strong> Filtro de contribuições</p>
+<div class="rule-origin">📂 Origem: <code>CONTRIBUICAOPREV/Fontes/ContribuicaoPREV.dpr:336-341 (SIG 22081)</code> | Evidência: <span class="ev ev-inferido">INFERIDO</span></div></div>
+<div class="rule-block" id="CONTRIB-RN031">
+<div class="rule-id">CONTRIB-RN031 — Boleta enviada ao banco bloqueia desfazer (EMISBLOQ='S')</div>
+<p><strong>Descrição:</strong> Se o documento tem EMISBLOQ='S' (boleta já enviada ao banco), não permite desfazer o preparo/envio.</p>
+<p><strong>Condições:</strong> DOCUMENTO.EMISBLOQ = 'S'.</p>
+<p><strong>Dados:</strong> DOCUMENTO.EMISBLOQ</p>
+<p><strong>Resultado:</strong> Desfazer bloqueado.</p>
+<p><strong>Rotina:</strong> <code>FPreparaEnvia.bbtnDesfazerClick</code> · <strong>Arquivo:</strong> <code>FPreparaEnvia.pas:6214-6229</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+<div class="rule-block" id="CONTRIB-RN033">
+<div class="rule-id">CONTRIB-RN033 — Tipo de valor da contribuição (FLGTPVLR: B/V/E)</div>
+<p><strong>Descrição:</strong> O campo FLGTPVLR define o comportamento: 'B' = só envia base de cálculo (valor=0); 'V' = envia valor calculado; vazio/'E' = envia valor. Se FLGTPVLR in ('B','N') e FLGDESCFOLHA=1, o valor esperado é zerado (só base).</p>
+<p><strong>Condições:</strong> FLGTPVLR in ('B','N') e FLGDESCFOLHA=1 → sValEsperado := '0'.</p>
+<p><strong>Dados:</strong> CONTRIBUICAO.FLGTPVLR, HSTCONTRIBPREV.FLGDESCFOLHA</p>
+<p><strong>Rotina:</strong> <code>FPreparaEnvia.GeraHistorico</code> · <strong>Arquivo:</strong> <code>FPreparaEnvia.pas:3121-3124</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+<div class="rule-block" id="CONTRIB-RN034">
+<div class="rule-id">CONTRIB-RN034 — Mês 13º usa salário SALPARTIC13</div>
+<p><strong>Descrição:</strong> Quando o mês de referência é '13', o salário da regra de cálculo usa SALPARTIC13 em vez de VALORPROVENTO. Exceção SIG62812: plano 66/pj 1 não usa SALPARTIC13.</p>
+<p><strong>Fórmula:</strong> <code>sSalarioRegra = SALPARTIC13 se mês='13' (e não plano 66/pj 1), senão VALORPROVENTO</code></p>
+<p><strong>Dados:</strong> CONTRIBPREVPARTP.SALPARTIC13, VALORPROVENTO</p>
+<p><strong>Rotina:</strong> <code>FPreparaEnvia.MontaSQLParaRegraCalculo</code> · <strong>Arquivo:</strong> <code>FPreparaEnvia.pas:1188-1196, 1809-1812</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+<div class="rule-block" id="CONTRIB-RN035">
+<div class="rule-id">CONTRIB-RN035 — Contribuição associada (FLGPAGADOR='E' usa CONTRIBPREVPATRO)</div>
+<p><strong>Descrição:</strong> Ao calcular contribuição com associadas, se FLGPAGADOR='E' (patrocinadora), busca valor em CONTRIBPREVPATRO; senão em CONTRIBPREVPARTP (participante).</p>
+<p><strong>Condições:</strong> FLGPAGADOR = 'E' → tabela CONTRIBPREVPATRO; senão CONTRIBPREVPARTP.</p>
+<p><strong>Dados:</strong> CONTRIBUICAO.FLGPAGADOR, CONTRIBPREVPATRO, CONTRIBPREVPARTP</p>
+<p><strong>Rotina:</strong> <code>FPreparaEnvia.MontaSQLParaRegraCalculo</code> · <strong>Arquivo:</strong> <code>FPreparaEnvia.pas:1281-1289</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+<div class="rule-block" id="CONTRIB-RN036">
+<div class="rule-id">CONTRIB-RN036 — Encerramento de contribuição (DATAFINAL = ULTMESPREPARO → FLGCOBRA=0)</div>
+<p><strong>Descrição:</strong> Ao encerrar o lote, contribuições cuja DATAFINAL = ULTMESPREPARO têm FLGCOBRA setado para 0 (não cobra mais).</p>
+<p><strong>Condições:</strong> DATAFINAL IS NOT NULL AND TO_CHAR(DATAFINAL,'YYYY/MM') = ULTMESPREPARO AND FLGCOBRA=1.</p>
+<p><strong>Dados:</strong> CONTRIBPREVPARTP.DATAFINAL, ULTMESPREPARO, FLGCOBRA</p>
+<p><strong>Rotina:</strong> <code>FPreparaEnvia.EncerraContribLote</code> · <strong>Arquivo:</strong> <code>FPreparaEnvia.pas:1963-1977</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+<div class="rule-block" id="CONTRIB-RN047">
+<div class="rule-id">CONTRIB-RN047 — BPD mutuamente exclusivo com PGA e Envio</div>
+<p><strong>Descrição:</strong> Ao marcar CbBpd (Benefício Proporcional Diferido), CbPga e CbEnvio são desmarcados. BPD filtra contribuições por CONTPREVEVENTO com ideventogerador=17.</p>
+<p><strong>Condições:</strong> CbBpd.Checked → CbPga=False, CbEnvio=False.</p>
+<p><strong>Rotina:</strong> <code>FPreparaEnvia.CbBpdClick</code> · <strong>Arquivo:</strong> <code>FPreparaEnvia.pas:6885-6920</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+<div class="rule-block" id="CONTRIB-RN048">
+<div class="rule-id">CONTRIB-RN048 — Commit parcial a cada 800 registros (ictMaxCommit)</div>
+<p><strong>Descrição:</strong> Durante o preparo e envio, o commit é aplicado parcialmente a cada 800 registros (constante ictMaxCommit=800) para evitar transações muito longas.</p>
+<p><strong>Fórmula:</strong> <code>if iNumReg mod ictMaxCommit = 0 then CommitPreparo</code></p>
+<p><strong>Rotina:</strong> <code>FPreparaEnvia.PreparaContribuicao</code> · <strong>Arquivo:</strong> <code>FPreparaEnvia.pas:664, 4173-4180</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+</div>
+
+<p><strong>Tratamentos de erro:</strong> <a href="#TRT001">TRT001</a>, <a href="#TRT002">TRT002</a>, <a href="#TRT003">TRT003</a>, <a href="#TRT004">TRT004</a>, <a href="#TRT005">TRT005</a>, <a href="#TRT006">TRT006</a></p>
+<p><strong>Mensagens:</strong> <a href="#MSG001">MSG001</a>, <a href="#MSG002">MSG002</a>, <a href="#MSG003">MSG003</a>, <a href="#MSG004">MSG004</a>, <a href="#MSG005">MSG005</a>, <a href="#MSG006">MSG006</a>, <a href="#MSG007">MSG007</a>, <a href="#MSG008">MSG008</a>, <a href="#MSG009">MSG009</a>, <a href="#MSG010">MSG010</a></p>
+<p><strong>Telas:</strong> Envio de Contribuições (<code>FPreparaEnvia.dfm</code>)</p>
+<p><strong>Dependências:</strong> Precede <a href="uc202.html#PF-02">JF002</a> (recebimento) e <a href="uc202.html#PF-08">JF008</a> (divergências).</p>
+<div class="note note-info"><p><strong>Registro original do processo PF-01</strong></p><p><strong>Forms de entrada:</strong> <code>FPreparaEnvia.dfm</code></p><p><strong>Lógica de processamento:</strong> Seleciona contribuições (ULTMESPREPARO &lt; mês cobrança), calcula valores, insere em HSTCONTRIBPREV, integra com Folha/CaR/Contabilidade, atualiza SITRECEBIMENTO=1 e ULTMESPREPARO</p><p><strong>Saídas:</strong> Lotes de cobrança, documentos CaR</p><p><strong>Persistência (tabelas escritas):</strong> HSTCONTRIBPREV (I/U), CONTRIBPREVPARTP (U), DOCUMENTO (I/U), LANCAMENTO (I)</p><p><strong>Evidência:</strong> <code>CONTRIBUICAOPREV/Fontes/FPreparaEnvia.pas:2746,5076,6516</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+</div>
+
+<section id="TRT-section"><div class="section-title">6. Tratamentos (TRT)</div>
+<p>Validações bloqueantes, confirmações e falhas de processamento encontradas nos forms do módulo. Cada tratamento traz a condição, a mensagem exibida e o resultado.</p>
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Condição</th><th>Mensagem</th><th>Resultado</th><th>Regra</th><th>Jornada</th></tr></thead><tbody>
+<tr id="TRT001"><td><strong>TRT001</strong></td><td>Mês ou ano de cobrança não preenchidos no preparo</td><td><a href="#MSG001">MSG001</a>, <a href="#MSG002">MSG002</a></td><td>Bloqueia o preparo</td><td>validação de tela</td><td><a href="#PF-01">JF001</a></td></tr>
+<tr id="TRT002"><td><strong>TRT002</strong></td><td>Tipo de cobrança não selecionado</td><td><a href="#MSG003">MSG003</a></td><td>Bloqueia o preparo</td><td>validação de tela</td><td><a href="#PF-01">JF001</a></td></tr>
+<tr id="TRT003"><td><strong>TRT003</strong></td><td>Motivo padrão de cobrança não parametrizado</td><td><a href="#MSG004">MSG004</a></td><td>Bloqueia o preparo e orienta a usar a tela de Parâmetros do Módulo</td><td>validação de tela</td><td><a href="#PF-01">JF001</a></td></tr>
+<tr id="TRT004"><td><strong>TRT004</strong></td><td>Data de vencimento não informada ou período contábil bloqueado</td><td><a href="#MSG008">MSG008</a></td><td>Interrompe o envio</td><td>validação de tela</td><td><a href="#PF-01">JF001</a></td></tr>
+<tr id="TRT005"><td><strong>TRT005</strong></td><td>Preparo concluído com problemas</td><td><a href="#MSG007">MSG007</a></td><td>Usuário decide se o envio continua</td><td>validação de tela</td><td><a href="#PF-01">JF001</a></td></tr>
+<tr id="TRT006"><td><strong>TRT006</strong></td><td>Falha ao enviar um lote ou ao lançar na contabilidade</td><td><a href="#MSG009">MSG009</a>, <a href="#MSG010">MSG010</a></td><td>O lote com erro não é enviado; os demais seguem; o erro fica no log de resultado</td><td><a href="#CONTRIB-RN014">RS014</a></td><td><a href="#PF-01">JF001</a></td></tr>
+</tbody></table></div>
+</section>
+
+<section id="MSG-section"><div class="section-title">7. Mensagens (MSG)</div>
+<p>Textos transcritos do código-fonte (grafia original mantida). Trechos variáveis aparecem entre &lt; &gt;; “(…)” indica continuação da mensagem no código.</p>
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Texto da mensagem</th><th>Tipo</th><th>Origem (CONTRIBUICAOPREV/Fontes/)</th><th>Jornadas</th></tr></thead><tbody>
+<tr id="MSG001"><td><strong>MSG001</strong></td><td>“Mês de Cobrança não preenchido.”</td><td>Erro</td><td><code>FPreparaEnvia.pas:2006</code></td><td><a href="#PF-01">JF001</a></td></tr>
+<tr id="MSG002"><td><strong>MSG002</strong></td><td>“Ano de Cobrança não preenchido.”</td><td>Erro</td><td><code>FPreparaEnvia.pas:2013</code></td><td><a href="#PF-01">JF001</a></td></tr>
+<tr id="MSG003"><td><strong>MSG003</strong></td><td>“Selecione o Tipo de Cobrança.”</td><td>Erro</td><td><code>FPreparaEnvia.pas:2020</code></td><td><a href="#PF-01">JF001</a></td></tr>
+<tr id="MSG004"><td><strong>MSG004</strong></td><td>“O Motivo[default] para Cobrança de Contribuições Previdenciárias deverá ser preenchido. Utilize a tela de Parâmetros do Modulo.”</td><td>Informação</td><td><code>FPreparaEnvia.pas:2028</code></td><td><a href="#PF-01">JF001</a></td></tr>
+<tr id="MSG005"><td><strong>MSG005</strong></td><td>“O sistema AdmPREV não está integrado com o Contas a Receber. (…)”</td><td>Alerta</td><td><code>FPreparaEnvia.pas:2037,2044</code></td><td><a href="#PF-01">JF001</a></td></tr>
+<tr id="MSG006"><td><strong>MSG006</strong></td><td>“Confirma as opções apresentadas para a cobrança ?”</td><td>Confirmação</td><td><code>FPreparaEnvia.pas:1126</code></td><td><a href="#PF-01">JF001</a></td></tr>
+<tr id="MSG007"><td><strong>MSG007</strong></td><td>“Ocorreram problemas no preparo. Deseja processar envio mesmo assim ?”</td><td>Confirmação</td><td><code>FPreparaEnvia.pas:3622</code></td><td><a href="#PF-01">JF001</a></td></tr>
+<tr id="MSG008"><td><strong>MSG008</strong></td><td>“Data de Vencimento não Informada.”</td><td>Erro</td><td><code>FPreparaEnvia.pas:3695</code></td><td><a href="#PF-01">JF001</a></td></tr>
+<tr id="MSG009"><td><strong>MSG009</strong></td><td>“[ERRO] LOTE Nº &lt;lote&gt; : &lt;erro&gt;- LOTE NÃO ENVIADO”</td><td>Log de processamento</td><td><code>FPreparaEnvia.pas:4856</code></td><td><a href="#PF-01">JF001</a></td></tr>
+<tr id="MSG010"><td><strong>MSG010</strong></td><td>“[ERRO] ERRO NA INCLUSÃO DO LANÇAMENTO NA CONTABILIDADE : &lt;erro&gt;”</td><td>Log de processamento</td><td><code>FPreparaEnvia.pas:5147</code></td><td><a href="#PF-01">JF001</a></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">8. Tabela/API/Programa</div>
+<div class="table-wrap"><table><thead><tr><th>Jornada</th><th>Tabelas (escrita)</th><th>Rotinas (CONTRIBUICAOPREV/Fontes/)</th></tr></thead><tbody>
+<tr><td><a href="#PF-01">JF001</a></td><td>HSTCONTRIBPREV (I/U), CONTRIBPREVPARTP (U), DOCUMENTO (I/U), LANCAMENTO (I)</td><td><code>FPreparaEnvia.pas:2006-6516</code></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">9. Telas/Layouts</div>
+<div class="table-wrap"><table><thead><tr><th>Jornada</th><th>Tela (título)</th><th>Form (.dfm)</th></tr></thead><tbody>
+<tr><td><a href="#PF-01">JF001</a></td><td>Envio de Contribuições</td><td><code>FPreparaEnvia.dfm</code></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">10. Visão Consolidada das Jornadas</div>
+<div class="table-wrap"><table><thead><tr><th>Item</th><th>Jornada</th><th>Título</th><th>Critério de aceitação</th><th>Regras</th><th>Mensagens</th><th>Telas</th></tr></thead><tbody>
+<tr><td>[US] CONTRIB-JF001</td><td><a href="#PF-01">JF001</a></td><td>Manutenção e cobrança de contribuições (Preparo e Envio)</td><td><strong>Dado</strong> contribuições cadastradas e motivo padrão parametrizado, <strong>Quando</strong> o analista prepara e envia a cobrança do mês, <strong>Então</strong> as contribuições ficam com SITRECEBIMENTO = 1, os documentos são gerados e o último mês preparado é atualizado.</td><td><a href="#CONTRIB-RN013">RS013</a>, <a href="#CONTRIB-RN014">RS014</a>, <a href="#CONTRIB-RN015">RS015</a>, <a href="#CONTRIB-RN016">RS016</a>, <a href="#CONTRIB-RN017">RS017</a>, <a href="#CONTRIB-RN026">RS026</a>, <a href="#CONTRIB-RN027">RS027</a></td><td><a href="#MSG001">MSG001</a>, <a href="#MSG002">MSG002</a>, <a href="#MSG003">MSG003</a>, <a href="#MSG004">MSG004</a>, <a href="#MSG005">MSG005</a>, <a href="#MSG006">MSG006</a>, <a href="#MSG007">MSG007</a>, <a href="#MSG008">MSG008</a>, <a href="#MSG009">MSG009</a>, <a href="#MSG010">MSG010</a></td><td>Envio de Contribuições</td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">11. Critérios de Aceitação por Regra</div>
+<div class="table-wrap"><table><thead><tr><th>Regra</th><th>Jornada</th><th>Critério de aceitação</th></tr></thead><tbody>
+<tr><td><a href="#CONTRIB-RN013">RS013 (CONTRIB-RN013)</a></td><td><a href="#PF-01">JF001</a></td><td><strong>Dado</strong> a condição “Filtro de seleção”, <strong>Quando</strong> a jornada é executada, <strong>Então</strong> só entram no preparo as contribuições do participante cujo último mês preparado é anterior ao mês de cobrança, o que impede preparar duas vezes a mesma competência.</td></tr>
+<tr><td><a href="#CONTRIB-RN014">RS014 (CONTRIB-RN014)</a></td><td><a href="#PF-01">JF001</a></td><td><strong>Dado</strong> falha ao enviar um lote ou ao lançar na contabilidade, <strong>Quando</strong> o usuário tenta gravar/processar, <strong>Então</strong> o sistema exibe <a href="#MSG009">MSG009</a>, <a href="#MSG010">MSG010</a> e o lote com erro não é enviado; os demais seguem; o erro fica no log de resultado.</td></tr>
+<tr><td><a href="#CONTRIB-RN015">RS015 (CONTRIB-RN015)</a></td><td><a href="#PF-01">JF001</a></td><td><strong>Dado</strong> a condição “Desfazimento”, <strong>Quando</strong> a jornada é executada, <strong>Então</strong> desfazer o preparo devolve a contribuição à situação “não enviada” (0) e limpa o documento de cobrança e a data de emissão.</td></tr>
+<tr><td><a href="#CONTRIB-RN016">RS016 (CONTRIB-RN016)</a></td><td><a href="#PF-01">JF001</a></td><td><strong>Dado</strong> a condição “Conclusão do lote”, <strong>Quando</strong> a jornada é executada, <strong>Então</strong> ao concluir o lote, o sistema registra no participante o mês preparado, que passa a ser o controle da regra RS013.</td></tr>
+<tr><td><a href="#CONTRIB-RN017">RS017 (CONTRIB-RN017)</a></td><td><a href="#PF-01">JF001</a></td><td><strong>Dado</strong> a condição “FLGTPVLR='B'”, <strong>Quando</strong> a jornada é executada, <strong>Então</strong> contribuições parametrizadas como “envia base” também levam ao envio as contribuições em atraso com valor.</td></tr>
+<tr><td><a href="#CONTRIB-RN026">RS026 (CONTRIB-RN026)</a></td><td><a href="#PF-01">JF001</a></td><td><strong>Dado</strong> a condição “Plano contábil ≠ plano prev”, <strong>Quando</strong> a jornada é executada, <strong>Então</strong> no envio de cobrança, se o plano contábil previdenciário for diferente do plano previdenciário, o usuário é perguntado se deseja alterá-lo.</td></tr>
+<tr><td><a href="#CONTRIB-RN027">RS027 (CONTRIB-RN027)</a></td><td><a href="#PF-01">JF001</a></td><td><strong>Dado</strong> a condição “Opção 'apenas calculadas por evento'”, <strong>Quando</strong> a jornada é executada, <strong>Então</strong> com a opção “Enviar apenas as calculadas por evento ou novas inscrições”, o envio (e o desfazer) consideram só contribuições oriundas de evento.</td></tr>
+</tbody></table></div>
+</section>
+
+<p><a class="back-btn" href="funcionalidades.html">← Voltar à lista de Casos de Uso (Processos Funcionais)</a></p>
+</main>
+<footer>
+<p>Blueprint AS-IS — PFC-32 — Processos Funcionais organizados em Casos de Uso — Módulo CONTRIBUIÇÃO | Sistema legado Delphi 5 | pt-BR | Atualizado em 2026-11-10</p>
+</footer>
+</body>
+</html>
