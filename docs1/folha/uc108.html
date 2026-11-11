@@ -50,6 +50,28 @@
 <li><a href="#PF-D"><strong>JF016 — Mapa da Folha</strong></a>: gerar mapa da folha de benefício (WO2511).</li>
 <li><a href="#PF-E"><strong>JF017 — Conferência e Batimento</strong></a>: conferir a prévia e bater líquido.</li>
 </ul>
+<p><strong>Necessidade de negócio:</strong> antes de a folha ser efetivada (gravada como definitiva e enviada para pagamento), a área de folha precisa ter certeza de que o cálculo está correto e completo. No ciclo mensal (preparo → prévia → conferência → efetivação → pagamento/contabilização), este caso de uso cobre a <strong>conferência</strong> e a consulta da folha. Fazem parte dele: (1) o checklist “Conferência da Prévia”, em que o analista registra, para cada lote de pagamento, quais verificações foram feitas (preparo, convênios, rubricas individuais, relatórios conferidos etc.); (2) a ferramenta “Batimento de Líquido da Folha”, que compara a prévia ou uma versão de pagamento com uma tabela de comparação informada pelo usuário e aponta pessoas e rubricas divergentes; e (3) o “Mapa da Folha de Beneficio”, que, para uma folha (versão) do mês, confere se todas as rubricas têm coluna de mapa parametrizada e executa a procedure do banco que gera o mapa.</p>
+<p><strong>Quem inicia:</strong> sempre o usuário. A Conferência da Prévia fica no menu “Cálculos da Folha › Conferência da Prévia” (<code>FPrincipal.dfm</code>; <code>FPrincipal.pas:1230-1233</code>). O Mapa da Folha fica em “Cálculos da Folha › Mapa da Folha de Benefício” (<code>FPrincipal.pas:1672-1676</code>). O mapa também pode ser gerado durante a efetivação, se o usuário marcar a opção “Executar Mapa da Folha de Benefício.” (<code>fFolhaNormalEfet.dfm:813</code>; <code>fFolhaNormalEfet.pas:2721-2741</code>). Para a tela de Batimento (<code>fBatimentoPrevia</code>) não foi encontrada nenhuma opção de menu nem chamada no módulo <span class="ev ev-pendente">PENDENTE</span>.</p>
+<p><strong>Resultado esperado:</strong> na conferência, o lote fica com o checklist preenchido (respostas, usuário e data gravados no controle do lote), o que o libera para a efetivação. No batimento, o resultado são arquivos-texto com as divergências encontradas. No mapa, a procedure do mapa é executada para a versão escolhida, e o resultado aparece no campo “Observações”.</p>
+<p><strong>Termos, siglas e componentes citados nesta página</strong> — explicados na primeira vez em que aparecem; a coluna “Fonte” indica onde a explicação foi conferida no repositório:</p>
+<div class="table-wrap"><table><thead><tr><th>Termo</th><th>O que significa</th><th>Fonte</th></tr></thead><tbody>
+<tr><td><strong>Prévia</strong></td><td>Cálculo provisório da folha, feito antes da efetivação. Fica na tabela PREVIA e pode ser conferido e refeito.</td><td><a href="uc101.html#PF-02">JF002</a>; <a href="dados.html">🗄️ Dados</a></td></tr>
+<tr><td><strong>Lote de pagamento / CTRLINTERFACE</strong></td><td>Cada execução de folha (normal, extra, abono etc.) é controlada como um lote na tabela CTRLINTERFACE. Para cada lote, a tabela guarda o mês de referência, a descrição, o tipo de folha (FLGTIPOFOLHA), se é concessão (FLGCONCESSAO), se já voltou para a base temporária (FLGVOLTATMP) e as respostas do checklist (RESPCHKLIST, USUCHKLIST, DTCHKLIST).</td><td><code>fConferenciaPrevia.dfm:775-846</code></td></tr>
+<tr><td><strong>Tipo do lote</strong></td><td>Rótulo mostrado na conferência a partir de FLGTIPOFOLHA: 0 = “Folha Normal Manut.” ou “Folha Normal Concessão”; 1 = “Pagamento Pendente”; 2 = “Folha Extra”; 3 = “Folha de Abono”; 4 = “Folha de Antec. Abono”; 5 = “Exclusões Efetivação”; 6 = “Reprocessamento”.</td><td><code>fConferenciaPrevia.pas:350-408</code></td></tr>
+<tr><td><strong>Estado do lote</strong></td><td>“Para Efetivar” quando FLGVOLTATMP = 0 e “Efetivado” nos demais casos. Lotes efetivados só podem ser consultados (o botão passa a se chamar “Consultar”).</td><td><code>fConferenciaPrevia.pas:409-441</code></td></tr>
+<tr><td><strong>Checklist (RESPCHKLIST)</strong></td><td>Sequência de respostas gravada no lote: o primeiro caractere “1” indica checklist preenchido, e cada caractere seguinte guarda a resposta de uma pergunta. Para perguntas de Sim/Não: 0 = Não obriga, 1 = Sim, 2 = Não. Para perguntas de conferência: 0 = Não obriga, 3 = Completo, 4 = Por Amostragem, 5 = Sem Conferência. “I” marca uma pergunta que não se aplica ao tipo de lote.</td><td><code>fConferenciaPrevia.pas:549-584, 644</code></td></tr>
+<tr><td><strong>Bloqueio do lote na efetivação</strong></td><td>Na tela de efetivação, o lote aparece como “Bloqueado” enquanto o primeiro caractere de RESPCHKLIST não for “1”, e como “Liberado” depois que o checklist é preenchido. O estorno da folha limpa o checklist.</td><td><code>fFolhaNormalEfet.pas:1340, 1607-1608</code>; <code>festornafolha.pas:2312, 2322</code></td></tr>
+<tr><td><strong>TMPDESC</strong></td><td>Tabela de lançamentos temporários (descontos e créditos) que a prévia deve processar. A conferência mostra os lançamentos do mês com FLGDESCFOLHA = 'B' e sem lote de prévia (LOTEPREVIA nulo) para pessoas que estão na prévia do lote, ou seja, lançamentos que a prévia não processou.</td><td><code>fConferenciaPrevia.dfm:872-907</code></td></tr>
+<tr><td><strong>Versão de pagamento / HSTFOLHABENEF</strong></td><td>Cada folha efetivada de um mês é registrada como uma versão em HSTFOLHABENEF (identificada por IDHSTFOLHABENEF). O Mapa da Folha e o Batimento (origem “Versões de Pagamento”) trabalham sobre versões.</td><td><code>FMapaFolhaBenef.dfm:255-264</code>; <a href="dados.html">🗄️ Dados</a></td></tr>
+<tr><td><strong>HISTRUBSAL</strong></td><td>Histórico das rubricas pagas ou descontadas em cada versão efetivada.</td><td><a href="dados.html">🗄️ Dados</a></td></tr>
+<tr><td><strong>Rubrica / PROVDESC</strong></td><td>Rubrica é um código de provento ou desconto, cadastrado em PROVDESC. O campo PROVDESC.IDCOLUNAMAPA diz em qual coluna do mapa da folha a rubrica é totalizada.</td><td><code>FMapaFolhaBenef.dfm:278-293</code></td></tr>
+<tr><td><strong>Coluna do mapa (COLUNAMAPA)</strong></td><td>Cadastro das colunas do mapa da folha, mantido na tela “Coluna do mapa de folha” (menu “Coluna do Mapa da Folha”).</td><td><code>fColMapaFolha.dfm:4</code>; <code>FPrincipal.pas:1631</code>; <a href="dados.html">🗄️ Dados</a></td></tr>
+<tr><td><strong>SP_FB_MAPAFOLHABENEF / _V2</strong></td><td>Procedures armazenadas no banco que geram o mapa da folha. A tela chama <code>CM.SP_FB_MAPAFOLHABENEF_V2</code> com o parâmetro pIdVersao. A efetivação chama <code>SP_FB_MAPAFOLHABENEF</code> sem parâmetro de versão. As duas devolvem a mensagem pOutERRO. O código das procedures não está no repositório.</td><td><code>FMapaFolhaBenef.pas:135-141</code>; <code>fFolhaNormalEfet.pas:8107-8131</code></td></tr>
+<tr><td><strong>WO2511</strong></td><td>Identificador da solicitação de mudança que criou a funcionalidade Mapa da Folha (comentário no código).</td><td><code>FPrincipal.pas:472, 1675</code></td></tr>
+<tr><td><strong>Batimento / tabela de comparação (“legado”)</strong></td><td>Comparação, pessoa a pessoa e rubrica a rubrica, entre a prévia (ou versões de pagamento) e uma tabela cujo nome o usuário digita (“Tabela de Comparação”). Nos arquivos de resultado, essa tabela é chamada de “legado”.</td><td><code>fBatimentoPrevia.pas:311-1091</code>; <code>fBatimentoPrevia.dfm:328</code></td></tr>
+<tr><td><strong>Líquido</strong></td><td>Soma dos proventos menos a soma dos descontos de cada pessoa. No batimento, é calculado como SUM(proventos) − SUM(descontos) com base em PROVDESC.FLGDESCONTO.</td><td><code>fBatimentoPrevia.pas:931-990</code></td></tr>
+<tr><td><strong>Consignatários</strong></td><td>Entidades que recebem descontos em folha (convênios). A opção “Ignora consignatários” restringe a comparação pelo indicador FLGPENSAOALIM.</td><td><code>fBatimentoPrevia.dfm:367</code>; <code>fBatimentoPrevia.pas:340-341</code></td></tr>
+</tbody></table></div>
 </section>
 
 <section><div class="section-title">3. Pré-condições</div>
@@ -61,10 +83,16 @@
 <li>Patrocinadoras, planos e benefícios devem estar cadastrados.</li>
 <li>O usuário deve ter permissão de acesso ao módulo.</li>
 </ul>
+<p><strong>O que as pré-condições gerais significam na prática:</strong> a folha precisa estar instalada e conectada ao banco, com os parâmetros e os cadastros básicos prontos. Além disso, as duas jornadas dependem de dados que outras etapas do ciclo produzem. A conferência precisa de um lote com prévia calculada (<a href="uc101.html#PF-02">JF002</a>). O mapa precisa de uma versão de folha registrada para o mês e do cadastro de colunas do mapa, com cada rubrica associada a uma coluna.</p>
 <p><strong>Por jornada:</strong></p>
 <ul>
 <li><a href="#PF-D">JF016</a>: —</li>
 <li><a href="#PF-E">JF017</a>: —</li>
+</ul>
+<p><strong>Pré-condições por jornada, em termos de negócio:</strong></p>
+<ul>
+<li><a href="#PF-D">JF016</a>: a versão anterior não registrou pré-condições. Pelo código: existe ao menos uma folha em HSTFOLHABENEF para o mês e ano informados, e todas as rubricas dessa versão (módulo 18, exceto as com FLGDESCONTO = 2) têm coluna de mapa (PROVDESC.IDCOLUNAMAPA) preenchida. Sem isso, o botão “Processar” não é habilitado (<code>FMapaFolhaBenef.pas:96-120</code>).</li>
+<li><a href="#PF-E">JF017</a>: a versão anterior não registrou pré-condições. Pelo código: para a conferência, o lote precisa ser do tipo 'B' com FLGIDATMP = 1 (filtro da pesquisa de lotes, <code>fConferenciaPrevia.dfm:806-817</code>), e o checklist só pode ser alterado enquanto o lote estiver “Para Efetivar”. Para o batimento, é preciso existir no banco a tabela de comparação cujo nome o usuário digita, com as colunas IDTITULAR, IDRESPONSAVEL, IDRUBRICA e VALORPROVENTO usadas nas consultas (<code>fBatimentoPrevia.pas:337-1000</code>). Não há documentação de quem gera essa tabela <span class="ev ev-pendente">PENDENTE</span>.</li>
 </ul>
 </section>
 
@@ -73,20 +101,29 @@
 <li><a href="#PF-D">JF016</a>: —</li>
 <li><a href="#PF-E">JF017</a>: —</li>
 </ul>
+<p><strong>Resultado de negócio de cada jornada:</strong></p>
+<ul>
+<li><a href="#PF-D">JF016</a> — <em>conclusão com sucesso:</em> a procedure do mapa é executada para a versão escolhida, a tela mostra “Mapa da Folha de Benenficio executado com Sucesso” e registra o início e o fim do processamento em “Observações” (<code>FMapaFolhaBenef.pas:122-175</code>). As tabelas gravadas pela procedure e o formato do mapa não são visíveis no repositório <span class="ev ev-pendente">PENDENTE</span>. <em>Interrupções:</em> se a procedure devolver em pOutERRO um texto diferente de 'OK', o texto aparece numa caixa de aviso e é registrado como “[ERRO ]”. Se ocorrer uma exceção, aparece “Erro ao executar o Mapa da Folha de Benenficio.”. Nos dois casos, o botão “Processar” é desabilitado de novo.</li>
+<li><a href="#PF-E">JF017</a> — <em>conclusão com sucesso (conferência):</em> o lote recebe RESPCHKLIST = '1' + respostas, além do usuário e da data/hora do preenchimento (<code>fConferenciaPrevia.pas:644-646</code>). Com isso, o lote aparece como “Liberado” na efetivação (<a href="uc109.html#PF-03">JF003</a>; <code>fFolhaNormalEfet.pas:1340, 1607-1608</code>). <em>Conclusão com sucesso (batimento):</em> a mensagem “Batimentos selecionados concluídos. Verifique os arquivos de resultado.” aparece, e os arquivos de cada fase (por padrão <code>C:\Batimento-Fase1.txt</code> a <code>Fase5</code>) ficam gravados (<code>fBatimentoPrevia.pas:849-1091</code>). <em>Interrupções:</em> na conferência, se alguma pergunta visível ficar sem resposta, aparece “Resposta não preenchida.” e nada é gravado (<code>fConferenciaPrevia.pas:609-650</code>). No batimento, não há tratamento específico de erro: as falhas de SQL dependem das rotinas genéricas <code>FazQuery</code>/<code>ExecutarQuery</code> <span class="ev ev-pendente">PENDENTE</span>.</li>
+</ul>
 </section>
 
 <section><div class="section-title">5. Jornadas Funcionais (JF016, JF017)</div>
 <p>Cada jornada traz objetivo, ator/gatilho, pré e pós-condições, sequência operacional, ações práticas, <strong>regras de negócio da jornada</strong> (texto completo de cada regra), tratamentos e mensagens.</p>
+<p><strong>Como as jornadas deste caso de uso se relacionam:</strong> as duas jornadas ficam entre o cálculo da prévia (<a href="uc101.html#PF-02">JF002</a>) e o pagamento. A conferência (JF017) acontece <em>antes</em> da efetivação (<a href="uc109.html#PF-03">JF003</a>) e libera o lote para ser efetivado. O mapa da folha (JF016) trabalha sobre uma versão de folha já registrada em HSTFOLHABENEF e pode ser gerado pelo menu ou durante a própria efetivação. As duas jornadas são independentes entre si. Em cada passo, o rótulo “Usuário” ou “Sistema” indica quem executa a ação.</p>
 <div class="legend"><span><span class="ev ev-comprovado">COMPROVADO</span> — no código</span><span><span class="ev ev-inferido">INFERIDO</span> — plausível</span><span><span class="ev ev-pendente">PENDENTE</span> — validar</span></div>
 </section>
 
 <div class="pf-block" id="PF-D"><h4>JF016 (PF-D) — Mapa da Folha</h4>
 <p><strong>Objetivo:</strong> gerar mapa da folha de benefício (WO2511).</p>
+<p><strong>Necessidade de negócio:</strong> o mapa da folha consolida os valores de uma folha efetivada em colunas definidas pela entidade (cada rubrica é associada a uma coluna do mapa). Antes de gerar o mapa, o sistema garante que nenhuma rubrica da folha fique fora dele: se alguma rubrica não tiver coluna parametrizada, o processamento é bloqueado. O uso posterior do mapa (relatório gerencial, conciliação ou contabilização) não está descrito no repositório <span class="ev ev-pendente">PENDENTE</span>.</p>
 <p><strong>Gatilho/Ator:</strong> <code>FMapaFolhaBenef.dfm</code> (209 lin).</p>
+<p><strong>Pré-condições:</strong> não documentadas na versão anterior. <strong>Em termos de negócio:</strong> deve existir uma folha (versão em HSTFOLHABENEF) no mês e ano informados, e todas as rubricas dessa versão devem ter coluna do mapa parametrizada (<code>FMapaFolhaBenef.dfm:278-293</code>). A procedure <code>CM.SP_FB_MAPAFOLHABENEF_V2</code> precisa existir no banco.</p>
+<p><strong>Pós-condições:</strong> não documentadas na versão anterior. <strong>Em termos de negócio:</strong> a procedure é executada para a versão escolhida e o resultado (“OK” ou a mensagem de erro) é mostrado ao usuário. O conteúdo gerado pela procedure não está no repositório <span class="ev ev-pendente">PENDENTE</span>.</p>
 <p><strong>Sequência operacional:</strong></p>
 <ol>
-<li>Selecionar parâmetros do mapa</li>
-<li>Gerar mapa da folha</li>
+<li><strong>Usuário:</strong> Abre “Cálculos da Folha › Mapa da Folha de Benefício” e informa “Mês e Ano”. O mês vem pré-selecionado com o mês anterior ao atual (<code>FMapaFolhaBenef.pas:90</code>). Ao sair do campo Ano, o sistema lista em “Nº Folha Efetiva” as folhas (HSTFOLHABENEF) com esse mês de referência (<code>FMapaFolhaBenef.pas:177-190</code>). Se o usuário abre a lista sem mês e ano, aparece “Preencha o mês inicialmente.” (<code>FMapaFolhaBenef.pas:192-201</code>).<br><em>Passo técnico original:</em> Selecionar parâmetros do mapa</li>
+<li><strong>Usuário:</strong> Escolhe a folha e clica em “Verificar”. <strong>Sistema:</strong> procura, na folha escolhida, rubricas sem coluna de mapa (PROVDESC.IDCOLUNAMAPA nulo, módulo 18, FLGDESCONTO diferente de 2). Se não encontra, mostra “Mapa da Folha de Beneficio autorizado para Processamento. Todas as rubricas estão parametrizadas.” e habilita “Processar”. Se encontra, mostra “Foram encontradas Rubricas sem parametrizações. Processamento não autorizado.” e mantém “Processar” desabilitado (<code>FMapaFolhaBenef.pas:96-120</code>). Clicar em “Processar” executa <code>CM.SP_FB_MAPAFOLHABENEF_V2</code> com a versão escolhida e mostra o resultado (<code>FMapaFolhaBenef.pas:122-175</code>).<br><em>Passo técnico original:</em> Gerar mapa da folha</li>
 </ol>
 <p><strong>Ações práticas:</strong></p>
 <div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
@@ -96,16 +133,27 @@
 <p><strong>Regras de negócio da jornada:</strong> nenhuma regra FOLHA-RN específica desta jornada; as validações estão nos tratamentos (TRT) do caso de uso.</p>
 </div>
 <p><strong>Evidência:</strong> <code>FOLHA/Fontes/FMapaFolhaBenef.pas</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
-
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span> — informações que o repositório não comprova ou que divergem entre fontes. O texto existente foi mantido; os itens abaixo dependem de validação humana.</p>
+<ul>
+<li>O código das procedures <code>CM.SP_FB_MAPAFOLHABENEF_V2</code> (tela) e <code>SP_FB_MAPAFOLHABENEF</code> (efetivação) não está no repositório. Não é possível dizer quais tabelas o mapa grava nem qual é o seu formato.</li>
+<li>A efetivação chama a versão sem parâmetro (<code>fFolhaNormalEfet.pas:8116</code>), e a tela chama a versão “_V2” com pIdVersao. É preciso confirmar se as duas produzem o mesmo resultado e para qual versão a chamada da efetivação vale.</li>
+<li>A lista “Nº Folha Efetiva” lê todas as linhas de HSTFOLHABENEF do mês, sem filtro de estado nem de fundação (<code>FMapaFolhaBenef.dfm:255-260</code>). Assim, uma folha não efetivada ou de outra fundação também pode ser escolhida.</li>
+<li>A consulta de verificação inclui a tabela RUBRICAXPLANO sem condição de junção (<code>FMapaFolhaBenef.dfm:283-293</code>). Isso não muda o resultado por causa do DISTINCT, mas é preciso confirmar se faltava algum filtro por plano.</li>
+<li>Em janeiro, o mês pré-selecionado é calculado como <code>AMonth - 2</code> = −1 (<code>FMapaFolhaBenef.pas:90</code>). O comportamento da tela nesse caso não foi verificado.</li>
+</ul>
+</div>
 </div>
 
 <div class="pf-block" id="PF-E"><h4>JF017 (PF-E) — Conferência e Batimento</h4>
 <p><strong>Objetivo:</strong> conferir a prévia e bater líquido.</p>
+<p><strong>Necessidade de negócio:</strong> a efetivação torna a folha definitiva e leva ao pagamento. Por isso, a entidade exige que, para cada lote, o analista declare quais verificações fez antes de efetivar. As perguntas incluem: preparo executado, convênios importados, rubricas individuais mantidas, prévia final executada e conferência dos relatórios de folha, de entradas e saídas, de resumo de rubricas, de créditos por banco e de pensão alimentícia. As perguntas exibidas dependem do tipo do lote. Enquanto o checklist não é preenchido, o lote fica “Bloqueado” para efetivação. O batimento de líquido é um apoio técnico: compara a folha calculada com uma tabela de referência para encontrar diferenças de pessoas, de líquido e de rubricas.</p>
 <p><strong>Gatilho/Ator:</strong> <code>fConferenciaPrevia.dfm</code> (761 lin) + <code>fBatimentoPrevia.dfm</code> (1.773 lin).</p>
+<p><strong>Pré-condições:</strong> não documentadas na versão anterior. <strong>Em termos de negócio:</strong> para a conferência, deve existir um lote de prévia (CTRLINTERFACE tipo 'B', FLGIDATMP = 1) ainda não efetivado, para que as respostas possam ser alteradas. Para o batimento, é preciso ter os lotes de prévia ou as versões de pagamento a comparar e uma tabela de comparação existente no banco.</p>
+<p><strong>Pós-condições:</strong> não documentadas na versão anterior. <strong>Em termos de negócio:</strong> o checklist fica gravado no lote, com usuário e data, e o lote é liberado para a efetivação. O batimento gera arquivos-texto de divergências e pode atualizar as tabelas auxiliares BATIMENTOFOLHA, RUBRICASCMXLEGADO, DIVERGENCIAFOLHA e LISTAFOLHABENEF/LISTAFOLHABENEFDET (<code>fBatimentoPrevia.pas:621-648, 1226, 1526-1530, 1678-1686</code>).</p>
 <p><strong>Sequência operacional:</strong></p>
 <ol>
-<li>Conferir prévia</li>
-<li>Bater líquido</li>
+<li><strong>Usuário:</strong> Abre “Cálculos da Folha › Conferência da Prévia”, pesquisa e escolhe o lote em “Selecione o Lote de Pagamento”. <strong>Sistema:</strong> mostra o lote, o mês de referência, o tipo do lote, o estado (“Para Efetivar” ou “Efetivado”) e quem preencheu o checklist e quando. Exibe apenas as perguntas que se aplicam ao tipo do lote (<code>fConferenciaPrevia.pas:310-475</code>). Para folhas dos tipos 0, 3, 4, 5 e 6, procura lançamentos de TMPDESC do mês não processados pela prévia para pessoas do lote. Se encontra, mostra a aba “Lançamentos Temporários” e a mensagem “Existem registros na Tmpdesc não processados pela Prévia neste lote. Favor verificar o grid com as informações para correção se necessário.” (<code>fConferenciaPrevia.pas:479-496</code>). <strong>Usuário:</strong> responde a cada pergunta (Não obriga / Sim / Não ou Não obriga / Completo / Por Amostragem / Sem Conferência) e confirma. <strong>Sistema:</strong> exige resposta em todas as perguntas visíveis (“Resposta não preenchida.”) e grava RESPCHKLIST, USUCHKLIST e DTCHKLIST no lote (<code>fConferenciaPrevia.pas:587-651</code>; <code>fConferenciaPrevia.dfm:775-783</code>).<br><em>Passo técnico original:</em> Conferir prévia</li>
+<li><strong>Usuário:</strong> Na tela “Batimento de Líquido da Folha”, escolhe a origem (“Lotes de Prévia” ou “Versões de Pagamento”), informa a “Tabela de Comparação” e a “Diferença Máxima R$”, marca as fases desejadas (1. Prévia → Tabela; 2. Tabela → Prévia; 3. Batimento de Líquidos; 4. Batimento de Rubricas; 5. Análise Individual de Rubricas) e confirma. <strong>Sistema:</strong> fase 1 lista as pessoas que estão na prévia e não estão na tabela; fase 2, o inverso; fase 3, as pessoas cujo líquido difere mais que o limite informado; fase 4 gera o analítico de rubricas das pessoas da fase 3; fase 5 compara rubrica a rubrica e grava as diferenças em BATIMENTOFOLHA. Cada fase grava o seu arquivo-texto, e ao final aparece “Batimentos selecionados concluídos. Verifique os arquivos de resultado.” (<code>fBatimentoPrevia.pas:311-1091</code>).<br><em>Passo técnico original:</em> Bater líquido</li>
 </ol>
 <p><strong>Ações práticas:</strong></p>
 <div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
@@ -116,7 +164,16 @@
 <p><strong>Regras de negócio da jornada:</strong> nenhuma regra FOLHA-RN específica desta jornada; as validações estão nos tratamentos (TRT) do caso de uso.</p>
 </div>
 <p><strong>Evidência:</strong> <code>FOLHA/Fontes/fConferenciaPrevia.pas</code>, <code>fBatimentoPrevia.pas</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
-
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span> — informações que o repositório não comprova ou que divergem entre fontes. O texto existente foi mantido; os itens abaixo dependem de validação humana.</p>
+<ul>
+<li>A unidade <code>fBatimentoPrevia</code> não aparece no <code>Folha.dpr</code> nem no menu (<code>FPrincipal.pas</code>), e nenhuma outra unidade a chama. É preciso confirmar se o batimento ainda faz parte do processo da folha ou se era uma ferramenta de comparação com um sistema anterior (os arquivos chamam a tabela de comparação de “legado”).</li>
+<li>A Visão Consolidada (seção 10) indica <code>fBatimentoPrevia</code> como tela desta jornada, mas a tela acessível pelo menu é <code>fConferenciaPrevia</code>. Na Conferência da Prévia não existe “bater líquido”: ela é um checklist.</li>
+<li>O batimento monta o SQL com o nome de tabela e o valor de diferença digitados pelo usuário, sem validação (<code>fBatimentoPrevia.pas:337-1000</code>), e grava por padrão na raiz do disco C:. É preciso confirmar com a área de TI se essa ferramenta pode ser usada em produção.</li>
+<li>O significado de negócio de FLGIDATMP, FLGDESCFOLHA = 'B' e LOTEPREVIA nulo foi deduzido apenas dos filtros das consultas. Falta confirmar com a área de negócio.</li>
+<li>A efetivação só exige o checklist quando é usada a opção de seleção 0 e a caixa “verificar” não está marcada (<code>fFolhaNormalEfet.pas:1597-1615</code>). Nas outras opções, o lote é processado mesmo bloqueado. É preciso confirmar se esse é o comportamento esperado.</li>
+<li>A tela não confere se as respostas são “Sim”/“Completo”. Um checklist respondido com “Não” ou “Sem Conferência” também libera o lote, porque só o primeiro caractere “1” é avaliado.</li>
+</ul>
+</div>
 </div>
 
 <section id="TRT-section"><div class="section-title">6. Tratamentos (TRT)</div>

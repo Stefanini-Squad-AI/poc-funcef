@@ -49,6 +49,24 @@
 <ul>
 <li><a href="#PF-C"><strong>JF015 — Abatimento de Reservas</strong></a>: abater reservas para benefícios pagos.</li>
 </ul>
+<p><strong>Necessidade de negócio:</strong> cada participante tem saldos de reserva no plano (RESERVAPART), e alguns benefícios são pagos a partir dessas reservas. Quando a folha paga um desses benefícios, o valor pago precisa ser descontado (abatido) da reserva correspondente, para que o saldo reflita o que ainda resta. O abatimento também precisa ficar registrado no histórico de movimentação da reserva. No ciclo mensal (preparo → prévia → conferência → efetivação → pagamento), este processo vem depois do pagamento. Ele trata os benefícios do mês informado que já estão ligados a uma folha processada (HSTBENEFBFCIARIO com IDHSTFOLHABENEF preenchido) e que ainda não foram abatidos (FLGALIMRESERVA = 0) (<code>FExecAbateReserva.pas:182-225</code>). No mesmo processamento, o sistema atualiza o valor de IR utilizado e os prazos de acumulação de quem optou pela tributação regressiva (<code>FExecAbateReserva.pas:300-306, 364-440</code>).</p>
+<p><strong>Quem inicia:</strong> o usuário, pelo menu “Cálculos da Folha” → “Abatimento de Reservas para Benefícios Pagos” (<code>FPrincipal.dfm:339-341</code>; <code>FPrincipal.pas:1347-1351</code>). Nenhum disparo automático foi encontrado.</p>
+<p><strong>Resultado esperado:</strong> o saldo de cada reserva atingida é atualizado, o movimento é registrado no histórico de reservas (HISTMOVRESERVA), e o benefício passa a FLGALIMRESERVA = 1, para não ser abatido de novo. A aba “Processados” lista o que foi abatido (matrícula, mês de cobrança, mês de referência, plano, patrocinadora e valor), e a aba “Ocorrências” lista os erros (<code>FExecAbateReserva.dfm:201, 233</code>).</p>
+<p><strong>Termos, siglas e componentes citados nesta página</strong> — explicados na primeira vez em que aparecem; a coluna “Fonte” indica onde a explicação foi conferida no repositório:</p>
+<div class="table-wrap"><table><thead><tr><th>Termo</th><th>O que significa</th><th>Fonte</th></tr></thead><tbody>
+<tr><td><strong>Reserva (RESERVAPART)</strong></td><td>Saldo de cada tipo de reserva do participante no plano, por patrocinadora, plano, pessoa, proposta e tipo de reserva (campo VALORRESERVA). Desde a pendência 20442, o saldo pode ficar negativo.</td><td><code>FExecAbateReserva.pas:20-24, 709-716</code></td></tr>
+<tr><td><strong>BENEFRESERVA</strong></td><td>Ligação entre o benefício e os tipos de reserva dos quais ele é abatido. Define a ordem de abatimento (NUMORDEM) e, opcionalmente, uma regra de abatimento (IDREGRAABATERESE).</td><td><code>FExecAbateReserva.pas:519-550</code>; <a href="dados.html">🗄️ Dados</a></td></tr>
+<tr><td><strong>RESERVAXPLANO</strong></td><td>Tipos de reserva de cada plano, com o índice de reajuste usado para converter valores em cotas.</td><td><code>FExecAbateReserva.pas:519-540, 575-590</code></td></tr>
+<tr><td><strong>Cotas / índice de reajuste</strong></td><td>As reservas são controladas em cotas. Sem regra de abatimento, o valor pago é dividido pelo índice de reajuste da reserva na data de referência (último dia do mês informado) para obter as cotas a abater.</td><td><code>FExecAbateReserva.pas:180, 575-590</code></td></tr>
+<tr><td><strong>Regra de abatimento</strong></td><td>Fórmula parametrizada (motor de regras, RegraNumerica) que, quando cadastrada em BENEFRESERVA, calcula o valor a abater no lugar da conversão pelo índice.</td><td><code>FExecAbateReserva.pas:592-660</code></td></tr>
+<tr><td><strong>HSTBENEFBFCIARIO / FLGALIMRESERVA</strong></td><td>Histórico mensal do benefício pago (valor VLBENEFPGTO, mês, data de efetivação do pagamento). O indicador FLGALIMRESERVA = 1 marca que o benefício já foi abatido da reserva.</td><td><code>FExecAbateReserva.pas:182-225</code>; <code>FExecAbateReserva.dfm:473-478</code></td></tr>
+<tr><td><strong>Devolução (FLGDEVOLUCAO)</strong></td><td>Lançamento de devolução de benefício. Entra com sinal negativo na soma. Se o total do benefício ficar negativo, o valor é devolvido (creditado) à reserva em vez de abatido.</td><td><code>FExecAbateReserva.pas:184, 506-511, 702-706</code></td></tr>
+<tr><td><strong>HISTMOVRESERVA</strong></td><td>Histórico de movimentação das reservas. Cada abatimento grava uma linha nele pela rotina AlimentaHistorico.</td><td><code>FExecAbateReserva.pas:736-760</code>; <code>UMovReservaFB.pas:284, 491</code></td></tr>
+<tr><td><strong>IR / IRRF e prazo de acumulação</strong></td><td>IRRF é o imposto de renda retido na fonte. Depois de cada abatimento, o sistema atualiza o valor de IR utilizado (AtualizaValorIRFinal). Ao final, recalcula o prazo de acumulação, usado na tabela regressiva de IRRF, dos participantes com opção de tributação regressiva (TIPOOPCAOIR = 2) e benefício ativo.</td><td><code>FExecAbateReserva.pas:3-18, 300-306, 370-440</code></td></tr>
+<tr><td><strong>Abatimento de TODAS as reservas com regra</strong></td><td>Parâmetro da folha “Efetua abatimento das reservas para TODAS que tiverem regra parametrizada e APENAS estas”. Quando ligado, só as reservas com regra são abatidas, e todas elas recebem o valor integral. Quando desligado, o valor vai sendo abatido reserva por reserva, na ordem, até se esgotar.</td><td><code>FParametroFolha.dfm:4118-4127</code>; <code>FExecAbateReserva.pas:543-545, 675-698</code></td></tr>
+<tr><td><strong>Mês/ano de referência</strong></td><td>Competência informada na tela (“Referência (mês/ano)”). O sistema seleciona os benefícios pagos nesse mês (HSTBENEFBFCIARIO.MES).</td><td><code>FExecAbateReserva.dfm:112</code>; <code>FExecAbateReserva.pas:179, 193-194</code></td></tr>
+<tr><td><strong>BASEDEPAGAMENTO</strong></td><td>Base de pagamento da folha, citada no campo de dados da regra RS001. Nesta tela não foi encontrada gravação em BASEDEPAGAMENTO (ver “Pontos a validar”).</td><td>Regra <a href="#FOLHA-RN001">RS001</a></td></tr>
+</tbody></table></div>
 </section>
 
 <section><div class="section-title">3. Pré-condições</div>
@@ -60,9 +78,14 @@
 <li>Patrocinadoras, planos e benefícios devem estar cadastrados.</li>
 <li>O usuário deve ter permissão de acesso ao módulo.</li>
 </ul>
+<p><strong>O que as pré-condições gerais significam na prática:</strong> além do acesso ao módulo e ao banco, os parâmetros da folha definem a forma de abatimento (parâmetro “Efetua abatimento das reservas para TODAS que tiverem regra parametrizada e APENAS estas”, <code>FParametroFolha.dfm:4118-4127</code>) e o motivo de movimentação usado no histórico da reserva (prmIDMotivoFolhaBen, <code>FExecAbateReserva.pas:288</code>). Cada benefício a abater precisa estar ligado aos tipos de reserva do plano (BENEFRESERVA, RESERVAXPLANO), e o participante precisa ter a reserva correspondente (RESERVAPART). Sem isso, o benefício não é selecionado (<code>FExecAbateReserva.pas:204-221</code>).</p>
 <p><strong>Por jornada:</strong></p>
 <ul>
 <li><a href="#PF-C">JF015</a>: mês/ano de referência informados <a href="#FOLHA-RN001">[RS001]</a> <a href="#TRT001">[TRT001]</a>.</li>
+</ul>
+<p><strong>Pré-condições por jornada, em termos de negócio:</strong></p>
+<ul>
+<li><a href="#PF-C">JF015</a>: o usuário precisa escolher o mês, e o ano precisa ser 1970 ou posterior. Caso contrário, o sistema mostra “É necessário indicar o Mês de Referência!” ou “É necessário indicar o Ano de Referência!” (<code>FExecAbateReserva.pas:139, 142</code>). A matrícula é opcional: sem ela, todos os benefícios do mês são processados (<code>FExecAbateReserva.pas:197-198</code>). Os benefícios do mês já precisam ter sido pagos em uma folha processada (IDHSTFOLHABENEF preenchido) e ainda não podem ter sido abatidos.</li>
 </ul>
 </section>
 
@@ -70,21 +93,29 @@
 <ul>
 <li><a href="#PF-C">JF015</a>: —</li>
 </ul>
+<p><strong>Resultado de negócio de cada jornada:</strong></p>
+<ul>
+<li><a href="#PF-C">JF015</a> — <em>conclusão com sucesso:</em> a versão anterior não registrava pós-condição. Pelo código, cada benefício processado reduz o saldo das reservas ligadas a ele, ou aumenta esse saldo quando o total do mês é uma devolução (RESERVAPART.VALORRESERVA). O movimento é gravado em HISTMOVRESERVA, o valor de IR utilizado é atualizado, e o benefício fica marcado com FLGALIMRESERVA = 1. Depois, os prazos de acumulação da tributação regressiva são atualizados (<code>FExecAbateReserva.pas:276-316, 433-440, 709-760</code>). <em>Interrupções:</em> cada benefício é tratado em uma transação própria. Um erro desfaz só esse benefício e é registrado na aba “Ocorrências” com a mensagem da falha (<code>FExecAbateReserva.pas:327-354</code>). O usuário pode interromper o processamento pela janela de progresso (“Processo interrompido pelo usuário.”), e os benefícios já processados permanecem abatidos (<code>FExecAbateReserva.pas:262-272</code>).</li>
+</ul>
 </section>
 
 <section><div class="section-title">5. Jornadas Funcionais (JF015)</div>
 <p>Cada jornada traz objetivo, ator/gatilho, pré e pós-condições, sequência operacional, ações práticas, <strong>regras de negócio da jornada</strong> (texto completo de cada regra), tratamentos e mensagens.</p>
+<p><strong>Como as jornadas deste caso de uso se relacionam:</strong> este caso de uso tem uma única jornada. Ela usa os benefícios já pagos pela folha do mês, gravados no histórico de benefícios, e por isso depende de uma folha processada antes. A relação exata com a efetivação (<a href="uc109.html#PF-03">JF003</a>) está <span class="ev ev-inferido">INFERIDO</span>. Em cada passo, o rótulo “Usuário” ou “Sistema” indica quem executa a ação.</p>
 <div class="legend"><span><span class="ev ev-comprovado">COMPROVADO</span> — no código</span><span><span class="ev ev-inferido">INFERIDO</span> — plausível</span><span><span class="ev ev-pendente">PENDENTE</span> — validar</span></div>
 </section>
 
 <div class="pf-block" id="PF-C"><h4>JF015 (PF-C) — Abatimento de Reservas</h4>
 <p><strong>Objetivo:</strong> abater reservas para benefícios pagos.</p>
+<p><strong>Necessidade de negócio:</strong> o valor de um benefício pago a partir das reservas do participante precisa sair do saldo dessas reservas. Sem isso, o saldo ficaria maior do que o realmente disponível. Os mesmos dados também alimentam o controle do imposto de renda da tributação regressiva.</p>
 <p><strong>Gatilho/Ator:</strong> <code>FExecAbateReserva.dfm</code> (887 lin).</p>
 <p><strong>Pré-condições:</strong> mês/ano de referência informados <a href="#FOLHA-RN001">[RS001]</a> <a href="#TRT001">[TRT001]</a>.</p>
+<p><strong>Em termos de negócio:</strong> o usuário escolheu o mês e o ano (1970 ou posterior) da competência a tratar. Opcionalmente, escolheu um único participante pela matrícula. Existem benefícios pagos nesse mês, ainda não abatidos e ligados a tipos de reserva do participante.</p>
+<p><strong>Pós-condições:</strong> não documentadas na versão anterior. <strong>Em termos de negócio:</strong> pelo código, ficam atualizados os saldos de reserva (RESERVAPART), o histórico de movimentação (HISTMOVRESERVA), o valor de IR utilizado e os prazos de acumulação, e o benefício fica marcado como abatido (FLGALIMRESERVA = 1) (<code>FExecAbateReserva.pas:300-316, 709-760</code>). A formalização dessa pós-condição está <span class="ev ev-pendente">PENDENTE</span>.</p>
 <p><strong>Sequência operacional:</strong></p>
 <ol>
-<li>Validar mês/ano de referência <a href="#FOLHA-RN001">[RS001]</a> <a href="#TRT001">[TRT001]</a></li>
-<li>Abater reservas para benefícios pagos</li>
+<li><strong>Usuário:</strong> Na tela “Abatimento de Reservas para Benefícios Pagos”, o usuário informa a “Referência (mês/ano)” e, opcionalmente, busca um participante pela matrícula. Em seguida, avança o assistente. O sistema confere o mês e o ano e, se faltar algum, mostra a mensagem correspondente e devolve o foco ao campo (<code>FExecAbateReserva.pas:131-158</code>).<br><em>Passo técnico original:</em> Validar mês/ano de referência <a href="#FOLHA-RN001">[RS001]</a> <a href="#TRT001">[TRT001]</a></li>
+<li><strong>Sistema:</strong> O sistema soma, por benefício, o valor pago no mês, descontando as devoluções. Depois, percorre as reservas ligadas ao benefício na ordem de BENEFRESERVA. Para cada uma, converte o valor em cotas pelo índice de reajuste do último dia do mês, ou calcula o valor pela regra de abatimento quando ela existir. Em seguida, atualiza o saldo em RESERVAPART e grava o movimento em HISTMOVRESERVA. Com o parâmetro de “TODAS as reservas com regra” desligado, o que excede o saldo de uma reserva passa para a próxima. Depois de cada benefício, atualiza o valor de IR utilizado, confirma a transação e marca o benefício com FLGALIMRESERVA = 1. Ao final, recalcula os prazos de acumulação dos participantes com tributação regressiva (<code>FExecAbateReserva.pas:162-455, 463-780</code>).<br><em>Passo técnico original:</em> Abater reservas para benefícios pagos</li>
 </ol>
 <p><strong>Ações práticas:</strong></p>
 <div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
@@ -110,6 +141,13 @@
 </div>
 <p><strong>Evidência:</strong> <code>FOLHA/Fontes/FExecAbateReserva.pas:139,142</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
 
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span> — informações que o repositório não comprova ou que divergem entre fontes. O texto existente foi mantido; os itens abaixo dependem de validação humana.</p><ul>
+<li>O texto de RS001/<a href="#MSG001">MSG001</a> (“É necessário indicar o Mês/Ano de Referência!”) difere das mensagens reais desta tela: “É necessário indicar o Mês de Referência!” e “É necessário indicar o Ano de Referência!”. A crítica do ano verifica se ele é menor que 1970, e não se está vazio (<code>FExecAbateReserva.pas:139, 142</code>). A regra também cita gravação em BASEDEPAGAMENTO, que não ocorre nesta tela.</li>
+<li>A marcação FLGALIMRESERVA = 1 é executada depois do CommitTransacao do benefício (<code>FExecAbateReserva.pas:308-316</code>). Se essa atualização falhar, a reserva já terá sido abatida sem a marcação, e o benefício poderia ser abatido de novo em outra execução <span class="ev ev-inferido">INFERIDO</span>.</li>
+<li>Quando a regra de abatimento retorna valor menor ou igual a zero, a mensagem de alerta é montada, mas o benefício é dado como processado com sucesso. Como a mensagem só é exibida em caso de falha, o alerta não aparece em “Ocorrências” (<code>FExecAbateReserva.pas:637-645</code>).</li>
+<li>A atualização dos prazos de acumulação não respeita o participante escolhido na tela: ela processa todos os participantes com tributação regressiva e benefício ativo (<code>FExecAbateReserva.pas:370-390</code>).</li>
+<li>A versão anterior não registra pós-condição, diagrama nem dependência desta jornada. A ordem em relação à efetivação da folha e ao fechamento do mês precisa ser confirmada.</li>
+</ul></div>
 </div>
 
 <section id="TRT-section"><div class="section-title">6. Tratamentos (TRT)</div>

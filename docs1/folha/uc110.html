@@ -49,6 +49,21 @@
 <ul>
 <li><a href="#PF-A"><strong>JF013 — Encerramento por Falecimento</strong></a>: encerrar benefícios por falecimento (cálculo pro-rata final).</li>
 </ul>
+<p><strong>Necessidade de negócio:</strong> quando um assistido morre, seus benefícios precisam parar de ser pagos. Os valores do período depois do falecimento ou ainda pendentes (por exemplo, abono anual proporcional) precisam ser acertados com os herdeiros ou devolvidos. O registro do óbito é feito fora desta tela: a pessoa só aparece aqui se tiver um evento previdenciário de falecimento (EVENTOSPREV com evento gerador 4 ou 130) ou um movimento de benefício do tipo 9 (MOVBENEF) e se tiver benefício já encerrado (data final preenchida) e ainda sem acerto (<code>FEncerramentoPorFalecimento.pas:454-525</code>). Esta tela reúne essas pessoas em uma <strong>lista</strong> e associa a lista a um <strong>lote de concessão</strong> aberto. O processamento do acerto é feito por uma procedure do banco (<code>CM.PCK_FB_ENCERRAFALECIDO.SP_PROCESSAR</code>, <code>FEncerramentoPorFalecimento.dfm:1014-1016</code>), cujo código não está no repositório. Também é possível desfazer o que foi lançado para a lista.</p>
+<p><strong>Quem inicia:</strong> o usuário (analista de folha), pelo menu <em>Cálculos da Folha › Encerramento por Falecimento</em> (<code>FPrincipal.dfm:400-402</code>; <code>FPrincipal.pas:1565-1569</code>), que abre a tela “Encerramento de Benefícios” (<code>FEncerramentoPorFalecimento.dfm:5</code>). Segundo o histórico do código, esse menu é habilitado pelo controle de permissões (<code>FPrincipal.pas:31-32</code>). Nada é disparado automaticamente.</p>
+<p><strong>Resultado esperado:</strong> as pessoas selecionadas ficam registradas em uma lista de encerramento (ENCERRAFALECIDO_LISTA / ENCERRAFALECIDO_LISTADET) vinculada ao lote escolhido. A procedure de processamento devolve uma mensagem de resultado, exibida ao usuário, e a situação de cada pessoa na grade passa a “Processado” ou “Falha ao processar”. O conteúdo exato dos lançamentos gerados pela procedure não pode ser confirmado no repositório <span class="ev ev-pendente">PENDENTE</span>.</p>
+<p><strong>Termos, siglas e componentes citados nesta página</strong> — explicados na primeira vez em que aparecem; a coluna “Fonte” indica onde a explicação foi conferida no repositório:</p>
+<div class="table-wrap"><table><thead><tr><th>Termo</th><th>O que significa</th><th>Fonte</th></tr></thead><tbody>
+<tr><td><strong>Encerramento por falecimento</strong></td><td>Acerto final dos benefícios de uma pessoa falecida cujo benefício já tem data final. Nesta tela, o sistema seleciona as pessoas, monta a lista e chama o processamento no banco.</td><td><code>FEncerramentoPorFalecimento.pas:731-866</code></td></tr>
+<tr><td><strong>Pro-rata</strong></td><td>Fração do valor mensal proporcional aos dias do mês. O texto original desta jornada cita um “cálculo pro-rata final”, mas não há cálculo pro-rata no código da tela: se ele existir, fica dentro da procedure do banco <span class="ev ev-pendente">PENDENTE</span>. A rotina de pro-rata conhecida da Folha é a do preparo.</td><td><a href="procedures-functions.html#rot-CalculaProRata">🔧 Procedures</a></td></tr>
+<tr><td><strong>EVENTOSPREV / evento gerador 4 e 130</strong></td><td>Eventos previdenciários registrados para a pessoa. A tela considera apenas os eventos geradores 4 e 130, que por isso correspondem a falecimento <span class="ev ev-inferido">INFERIDO</span>. A data do evento, a data de inclusão e o usuário que incluiu aparecem na grade.</td><td><code>FEncerramentoPorFalecimento.pas:455-470</code></td></tr>
+<tr><td><strong>MOVBENEF (tipo 9)</strong></td><td>Movimento do benefício. Movimentos do tipo 9 também colocam a pessoa na lista de candidatas; o significado do tipo 9 não é descrito no código <span class="ev ev-pendente">PENDENTE</span>.</td><td><code>FEncerramentoPorFalecimento.pas:465-470</code></td></tr>
+<tr><td><strong>BENEFBFCIARIO</strong></td><td>Cadastro do benefício do beneficiário. Só entram pessoas com benefício que já tem data final (DATAFINAL preenchida), ainda sem acerto (FLGACERTO = 0) e que não seja pecúlio nem resgate.</td><td><code>FEncerramentoPorFalecimento.pas:509-518</code>; <a href="dados.html">🗄️ Dados</a></td></tr>
+<tr><td><strong>Lista de encerramento</strong> (ENCERRAFALECIDO_LISTA / ENCERRAFALECIDO_LISTADET)</td><td>Agrupamento das pessoas processadas de uma vez. O cabeçalho guarda o nome informado pelo usuário, o lote, o usuário, a data e a situação; o detalhe guarda uma linha por pessoa, com matrícula, nome, data da morte e dados do evento. Listas de desfazimento recebem o nome “LISTA DESFAZIMENTO - n” e apontam para a lista original.</td><td><code>FEncerramentoPorFalecimento.pas:3600-3723</code></td></tr>
+<tr><td><strong>Lote de concessão</strong> / <strong>CTRLINTERFACE</strong></td><td>Lote ao qual os lançamentos do encerramento são associados. A tela “Selecione o Lote para Pagamento ...” oferece apenas lotes de CTRLINTERFACE de benefícios (TIPO = 'B'), já preparados, de concessão (FLGCONCESSAO = 1) e ainda não efetivados (FLGIDATMP = 0).</td><td><code>FSelecionaLoteEF.pas:47-70</code>; <code>FSelecionaLoteEF.dfm</code> (qryLotesAbertos)</td></tr>
+<tr><td><strong>PCK_FB_ENCERRAFALECIDO</strong></td><td>Pacote de procedures Oracle chamado pela tela: SP_PROCESSAR (processa a lista), SP_DESFAZERENCERRAMENTO (desfaz) e SP_AJUSTASITUACAOLISTA (ajusta a situação). Cada uma devolve um código e uma mensagem de resultado. O código-fonte do pacote não está no repositório.</td><td><code>FEncerramentoPorFalecimento.dfm:1014-1116</code></td></tr>
+<tr><td><strong>Situação da pessoa na lista</strong></td><td>Valor exibido na grade: “Não Processado” (0), “Processado” (1) ou “Falha ao processar” (3). Pessoas com situações diferentes não podem ser marcadas juntas.</td><td><code>FEncerramentoPorFalecimento.pas:495, 4321-4360</code></td></tr>
+</tbody></table></div>
 </section>
 
 <section><div class="section-title">3. Pré-condições</div>
@@ -64,27 +79,40 @@
 <ul>
 <li><a href="#PF-A">JF013</a>: —</li>
 </ul>
+<p><strong>Pré-condições por jornada, em termos de negócio:</strong></p>
+<ul>
+<li><a href="#PF-A">JF013</a>: a versão anterior não documentou pré-condições. Pelo código: (1) o falecimento já precisa estar registrado, como evento previdenciário de falecimento ou movimento de benefício tipo 9, com data da morte na pessoa física; (2) o benefício da pessoa já precisa ter data final e estar sem acerto; (3) precisa existir pelo menos um lote de concessão aberto, ou o sistema avisa “Não existe lote de concessão aberto no momento. Verifique.” (<code>FSelecionaLoteEF.pas:57-63</code>). Quem encerra o benefício (preenche a data final) antes desta tela não está evidenciado aqui <span class="ev ev-pendente">PENDENTE</span>.</li>
+</ul>
 </section>
 
 <section><div class="section-title">4. Pós-condições</div>
 <ul>
 <li><a href="#PF-A">JF013</a>: —</li>
 </ul>
+<p><strong>Resultado de negócio de cada jornada:</strong></p>
+<ul>
+<li><a href="#PF-A">JF013</a> — <em>conclusão com sucesso:</em> a lista e as pessoas ficam gravadas (ENCERRAFALECIDO_LISTA / ENCERRAFALECIDO_LISTADET) e a transação é confirmada. Em seguida, a procedure SP_PROCESSAR é executada para a lista e o lote, e a mensagem que ela devolve é mostrada ao usuário (<code>FEncerramentoPorFalecimento.pas:796-834, 3756-3819</code>). A grade é recarregada com a situação de cada pessoa. Que tabelas de benefício, folha ou rubrica a procedure altera não está no repositório <span class="ev ev-pendente">PENDENTE</span>, nem se o lote de concessão escolhido segue depois pelo fluxo normal de prévia e efetivação. <em>Interrupções:</em> sem pessoas marcadas, aparece “Selecione a(s) pessoa(s) que deve(m) ser processada(s).”. Se o usuário responder “Não” à confirmação ou não escolher lote, nada é gravado. Se a procedure devolver código negativo, a mensagem dela é exibida como erro; uma exceção gera “houve um erro na execução da rotina”. Falhas ao gravar a lista mostram “Erro ao inserir o controle da Lista.” ou “Erro ao inserir o detalhe da Lista.”, mas o fluxo continua (<code>FEncerramentoPorFalecimento.pas:3652-3656, 3718-3722</code>). O que foi lançado pode ser revertido pelo botão “Desfazer”.</li>
+</ul>
 </section>
 
 <section><div class="section-title">5. Jornadas Funcionais (JF013)</div>
 <p>Cada jornada traz objetivo, ator/gatilho, pré e pós-condições, sequência operacional, ações práticas, <strong>regras de negócio da jornada</strong> (texto completo de cada regra), tratamentos e mensagens.</p>
+<p><strong>Como as jornadas deste caso de uso se relacionam:</strong> este caso de uso tem uma única jornada, que pode ser executada em dois sentidos: processar (encerrar) ou desfazer o encerramento de uma lista já processada. Ela depende de registros feitos antes, fora da Folha (evento de falecimento e encerramento do benefício), e de um lote de concessão aberto. Em cada passo, o rótulo “Usuário” ou “Sistema” indica quem executa a ação.</p>
 <div class="legend"><span><span class="ev ev-comprovado">COMPROVADO</span> — no código</span><span><span class="ev ev-inferido">INFERIDO</span> — plausível</span><span><span class="ev ev-pendente">PENDENTE</span> — validar</span></div>
 </section>
 
 <div class="pf-block" id="PF-A"><h4>JF013 (PF-A) — Encerramento por Falecimento</h4>
 <p><strong>Objetivo:</strong> encerrar benefícios por falecimento (cálculo pro-rata final).</p>
+<p><strong>Necessidade de negócio:</strong> fazer, em lote, o acerto final dos benefícios de pessoas falecidas cujo benefício já foi encerrado, sem precisar tratar cada caso manualmente, e poder desfazer o acerto se ele tiver sido feito errado.</p>
 <p><strong>Gatilho/Ator:</strong> <code>FEncerramentoPorFalecimento.dfm</code> (4.883 lin).</p>
+<p><strong>Pré-condições:</strong> não documentadas na versão anterior. <strong>Em termos de negócio:</strong> o falecimento já está registrado (evento gerador 4 ou 130, ou movimento tipo 9), o benefício já tem data final e está sem acerto, e existe um lote de concessão aberto. Outras condições que a procedure do banco possa verificar não estão no repositório <span class="ev ev-pendente">PENDENTE</span>.</p>
+<p><strong>Pós-condições:</strong> não documentadas na versão anterior. <strong>Em termos de negócio:</strong> a lista fica gravada e processada pela procedure SP_PROCESSAR, e cada pessoa fica com a situação “Processado” ou “Falha ao processar”. Os lançamentos efetivos gerados estão dentro da procedure <span class="ev ev-pendente">PENDENTE</span>.</p>
 <p><strong>Sequência operacional:</strong></p>
 <ol>
-<li>Selecionar benefício a encerrar</li>
-<li>Calcular pro-rata final</li>
-<li>Encerrar benefício</li>
+<li><strong>Usuário:</strong> abre a tela e escolhe como localizar as pessoas. Na aba “Data”, informa a data de início e a data de fim e escolhe se o filtro usa a “Data Inclusão do Evento”, a “Data Evento” ou a “Data Morte”; na aba “Pessoa”, procura um titular específico; na aba “Lista”, escolhe uma lista já criada (<code>FEncerramentoPorFalecimento.dfm:85-479</code>). No filtro por data, o sistema exige as duas datas e que a data fim não seja anterior à data início (mensagens “Data de início do período não informada.”, “Data final do período não informada.”, “A data fim deve ser maior ou igual a data início.”, <code>FEncerramentoPorFalecimento.pas:352-372</code>).</li>
+<li><strong>Usuário:</strong> na grade, marca as <em>pessoas</em> (não benefícios individuais) a processar; pode usar “Marcar Todos” e “Desmarcar Todos”. A grade mostra matrícula, nome, data de falecimento, dados do evento e situação. O sistema impede misturar pessoas com situações diferentes na mesma lista (“Beneficiários com situações diferentes não podem ser incluídos em uma mesma lista.”) e habilita “Processar” ou “Desfazer” conforme a situação (<code>FEncerramentoPorFalecimento.pas:4309-4370, 4741-4777</code>).<br><em>Passo técnico original:</em> Selecionar benefício a encerrar</li>
+<li><strong>Sistema:</strong> ao clicar em “Processar”, pede confirmação (“Deseja encerrar o(s) benefício(s) dos participantes selecionados?”). Se for uma lista nova, abre a escolha do lote de concessão e pede o nome da lista (“Informe o nome da lista”). Depois grava o cabeçalho e uma linha por pessoa e confirma a transação (<code>FEncerramentoPorFalecimento.pas:770-828, 3600-3723</code>). Não há cálculo pro-rata no código da tela; o cálculo, se existir, é feito pela procedure do banco <span class="ev ev-pendente">PENDENTE</span>.<br><em>Passo técnico original:</em> Calcular pro-rata final</li>
+<li><strong>Sistema:</strong> executa a procedure <code>CM.PCK_FB_ENCERRAFALECIDO.SP_PROCESSAR</code> com a lista e o lote, mostra a mensagem que ela devolve e recarrega a grade com a situação de cada pessoa. Se a lista já existia, reaproveita o lote gravado nela e apenas reexecuta a procedure (<code>FEncerramentoPorFalecimento.pas:839-864, 3756-3819</code>). Pelo botão “Desfazer”, após a confirmação “Esta ação excluirá todos os lançamentos feitos para estes beneficiários através desta rotina de encerramento.”, o sistema cria uma lista de desfazimento e executa <code>SP_DESFAZERENCERRAMENTO</code> (<code>FEncerramentoPorFalecimento.pas:4074-4201</code>).<br><em>Passo técnico original:</em> Encerrar benefício</li>
 </ol>
 <p><strong>Ações práticas:</strong></p>
 <div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
@@ -94,6 +122,18 @@
 <p><strong>Regras de negócio da jornada:</strong> nenhuma regra FOLHA-RN específica desta jornada; as validações estão nos tratamentos (TRT) do caso de uso.</p>
 </div>
 <p><strong>Evidência:</strong> <code>FOLHA/Fontes/FEncerramentoPorFalecimento.pas</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span> — informações que o repositório não comprova ou que divergem entre fontes. O texto existente foi mantido; os itens abaixo dependem de validação humana.</p>
+<ul>
+<li>O processamento real fica no pacote Oracle <code>CM.PCK_FB_ENCERRAFALECIDO</code> (SP_PROCESSAR, SP_DESFAZERENCERRAMENTO, SP_AJUSTASITUACAOLISTA), cujo código não está em <code>FOLHA/DBObjects</code> nem em outra pasta do repositório. Os cálculos, as tabelas alteradas e as validações internas não podem ser comprovados.</li>
+<li>O “cálculo pro-rata final” do objetivo não aparece no código da tela. As rotinas Delphi de acerto (<code>processarAcerto</code> e as de abono anual Funcef, INSS, taxa administrativa e ação judicial, <code>FEncerramentoPorFalecimento.pas:1008-3580</code>) estão no fonte, mas as chamadas a elas foram comentadas (<code>:808, :4133</code>), o que sugere código legado sem uso <span class="ev ev-inferido">INFERIDO</span>.</li>
+<li>A seção 8 cita a tabela “encerramento”. As tabelas efetivamente gravadas pela tela são ENCERRAFALECIDO_LISTA e ENCERRAFALECIDO_LISTADET.</li>
+<li>A contagem “4.883 lin” corresponde ao <code>.pas</code>; o <code>.dfm</code> tem cerca de 1.125 linhas.</li>
+<li>Existe uma rotina de reprocessamento (<code>BtnReprocClick</code>, <code>:3985</code>), mas o botão <code>BtnReproc</code> não está no <code>.dfm</code>, então ela não pode ser acionada pela tela <span class="ev ev-inferido">INFERIDO</span>.</li>
+<li>Significado dos eventos geradores 4 e 130 e do movimento de benefício tipo 9, e quem os registra (provavelmente o módulo Benefício Previdenciário) <span class="ev ev-inferido">INFERIDO</span>.</li>
+<li>Se o usuário cancelar a janela “Informe o nome da lista”, a lista é gravada com nome vazio (<code>InputBox</code>, <code>:3618</code>).</li>
+<li>Não há TRT nem MSG catalogados para esta jornada, embora a tela tenha várias mensagens literais (citadas acima).</li>
+</ul>
+</div>
 
 </div>
 
