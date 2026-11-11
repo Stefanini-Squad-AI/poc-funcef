@@ -45,30 +45,30 @@
 </section>
 
 <section><div class="section-title">2. Descrição Resumida</div>
-<p>Manutenção do salário de participação, evolução funcional e alteração de salários em lote. Este caso de uso reúne 1 jornada(s) funcional(is) do módulo Contribuição Previdenciária:</p>
+<p>O salário de participação (SALPARTICIPACAO) é o salário usado como base para o cálculo das contribuições previdenciárias do participante. O salário mantido (SALMANTIDO) é o salário de manutenção do participante no plano. Neste caso de uso, o analista de cadastro previdenciário reajusta o salário de manutenção dos participantes ativos (aplicando um índice de correção) e altera em lote, por planilha Excel, o salário mantido e/ou o salário de participação. Quando o participante troca de cargo/função (evolução funcional), o sistema encerra o registro anterior na véspera do início do novo. O resultado é que a base salarial usada no cálculo de contribuições em <a href="uc201.html#PF-01">UC201</a> fica atualizada. Este caso de uso reúne 1 jornada(s) funcional(is) do módulo Contribuição Previdenciária:</p>
 <ul>
-<li><a href="#PF-04"><strong>JF004 — Salário de participação / manutenção</strong></a>: Reajustar o salário de manutenção dos participantes mantidos e alterar em lote, por planilha Excel, o salário mantido e o salário de participação.</li>
+<li><a href="#PF-04"><strong>JF004 — Salário de participação / manutenção</strong></a>: O analista reajusta o salário de manutenção dos participantes mantidos e altera em lote, por planilha Excel, o salário mantido e o salário de participação.</li>
 </ul>
 </section>
 
 <section><div class="section-title">3. Pré-condições</div>
 <p><strong>Gerais do módulo:</strong></p>
 <ul>
-<li>Módulo disponível (entry point <code>CONTRIBUICAOPREV/Fontes/ContribuicaoPREV.dpr</code>) e usuário com permissão de acesso às telas.</li>
-<li>Banco Oracle acessível e parâmetros do módulo carregados (motivo padrão de cobrança, motivo padrão de tratamento de divergência).</li>
+<li>Módulo disponível (entry point <code>CONTRIBUICAOPREV/Fontes/ContribuicaoPREV.dpr</code>) e usuário com permissão de acesso às telas — o sistema é desktop (Delphi 5 / VCL) e exige login e permissão.</li>
+<li>Banco Oracle acessível e parâmetros do módulo carregados.</li>
 <li>Patrocinadoras, planos previdenciários, contribuições (CONTRIBUICAO) e participantes (PARTPREVPLAN, CONTRIBPREVPARTP) cadastrados.</li>
-<li>Integrações configuradas quando a jornada as usa: Folha, Contas a Receber/CAP, Contabilidade, PGA (ver <a href="integracoes.html">🔗 Integrações</a>).</li>
+<li>Integrações configuradas quando a jornada as usa: Folha, Contas a Receber/CAP, Contabilidade/PGA — ver <a href="integracoes.html">🔗 Integrações</a>.</li>
 <li>Período contábil aberto para as datas usadas em lançamentos.</li>
 </ul>
 <p><strong>Por jornada:</strong></p>
 <ul>
-<li><a href="#PF-04">JF004</a>: Participantes com plano (PARTPREVPLAN); para o lote, planilha com IDPESSOA, IDPLANOPREV, SALMANTIDO e SALPARTICIPACAO.</li>
+<li><a href="#PF-04">JF004</a>: Participantes com plano (PARTPREVPLAN) cadastrados; para a alteração em lote, uma planilha Excel no layout esperado, contendo as colunas IDPESSOA (identificador do participante), IDPLANOPREV (plano previdenciário), SALMANTIDO (salário de manutenção) e SALPARTICIPACAO (salário de participação).</li>
 </ul>
 </section>
 
 <section><div class="section-title">4. Pós-condições</div>
 <ul>
-<li><a href="#PF-04">JF004</a>: PARTPREVPLAN atualizado; LOGTOTALPREV gravado.</li>
+<li><a href="#PF-04">JF004</a>: O cadastro de participante por plano (PARTPREVPLAN) é atualizado com os novos valores de salário mantido (SALMANTIDO) e/ou salário de participação (SALPARTICIPACAO); o log de auditoria (LOGTOTALPREV) é gravado registrando a alteração. A base salarial fica atualizada para o cálculo de contribuições em <a href="uc201.html#PF-01">UC201</a>.</li>
 </ul>
 </section>
 
@@ -78,17 +78,17 @@
 </section>
 
 <div class="pf-block" id="PF-04"><h4>JF004 (PF-04) — Salário de participação / manutenção</h4>
-<p><strong>Objetivo:</strong> Reajustar o salário de manutenção dos participantes mantidos e alterar em lote, por planilha Excel, o salário mantido e o salário de participação.</p>
+<p><strong>Objetivo:</strong> Reajustar o salário de manutenção dos participantes mantidos (aplicando um índice de correção) e alterar em lote, por planilha Excel, o salário mantido (SALMANTIDO) e/ou o salário de participação (SALPARTICIPACAO, a base de cálculo das contribuições). Quando o participante troca de cargo/função, o sistema encerra o registro de evolução funcional anterior na véspera do início do novo. O resultado é que a base salarial usada no cálculo de contribuições fica atualizada.</p>
 <p><strong>Ator / gatilho:</strong> Analista de cadastro previdenciário, nas telas <em>Reajusta Salário de Manutenção</em> e <em>Alterar Salário de Manutenção e Participação</em>.</p>
-<p><strong>Pré-condições:</strong> Participantes com plano (PARTPREVPLAN); para o lote, planilha com IDPESSOA, IDPLANOPREV, SALMANTIDO e SALPARTICIPACAO.</p>
-<p><strong>Pós-condições:</strong> PARTPREVPLAN atualizado; LOGTOTALPREV gravado.</p>
+<p><strong>Pré-condições:</strong> Participantes com plano (PARTPREVPLAN) cadastrados; para o lote, planilha Excel com IDPESSOA, IDPLANOPREV, SALMANTIDO e SALPARTICIPACAO.</p>
+<p><strong>Pós-condições:</strong> PARTPREVPLAN é atualizado com os novos salários; o log de auditoria (LOGTOTALPREV) é gravado.</p>
 <p><strong>Sequência operacional:</strong></p>
 <ol>
-<li>Reajuste: informar as opções e selecionar os participantes mantidos. [<a href="#TRT017">TRT017</a>]</li>
-<li>Processar o reajuste; em caso de erro em um participante, o usuário decide se continua. [<a href="#TRT018">TRT018</a>]</li>
-<li>Conferir o resultado e confirmar a efetivação. [<a href="#TRT053">TRT053</a>]</li>
-<li>Alteração em lote: selecionar o arquivo Excel e quais salários alterar (mantido e/ou participação). [<a href="#CONTRIB-RN025">RS025</a>] [<a href="#TRT019">TRT019</a>]</li>
-<li>O sistema atualiza PARTPREVPLAN e grava o log de auditoria. [<a href="#CONTRIB-RN025">RS025</a>]</li>
+<li><strong>Reajuste:</strong> <strong>o analista</strong> informa as opções de seleção e seleciona os participantes mantidos. [<a href="#TRT017">TRT017</a>]</li>
+<li><strong>O analista</strong> processa o reajuste; <strong>o sistema</strong> aplica o índice ao salário de manutenção. Em caso de erro em um participante, <strong>o sistema</strong> pergunta se o analista deseja continuar com os demais. [<a href="#TRT018">TRT018</a>]</li>
+<li><strong>O analista</strong> confere o resultado e confirma a efetivação; <strong>o sistema</strong> grava o log de auditoria. [<a href="#TRT053">TRT053</a>]</li>
+<li><strong>Alteração em lote:</strong> <strong>o analista</strong> seleciona o arquivo Excel e quais salários alterar (mantido e/ou participação); <strong>o sistema</strong> lê a planilha via OLE (Object Linking and Embedding, tecnologia de integração com o Excel). [<a href="#CONTRIB-RN025">RS025</a>] [<a href="#TRT019">TRT019</a>]</li>
+<li><strong>O sistema</strong> atualiza o salário em PARTPREVPLAN e grava o log de auditoria. [<a href="#CONTRIB-RN025">RS025</a>]</li>
 </ol>
 <p><strong>Ações práticas:</strong></p>
 <div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>

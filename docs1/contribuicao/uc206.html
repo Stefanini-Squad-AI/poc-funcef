@@ -45,30 +45,30 @@
 </section>
 
 <section><div class="section-title">2. Descrição Resumida</div>
-<p>Registro de contribuições portadas de outros planos e alteração do Benefício Saldado / FAB. Este caso de uso reúne 1 jornada(s) funcional(is) do módulo Contribuição Previdenciária:</p>
+<p>Quando um participante transfere contribuições de um plano previdenciário anterior para o plano atual (<strong>portabilidade</strong>), o fundo precisa registrar essa transferência. O analista de cadastro previdenciário cadastra a portabilidade (informando os meses de vínculo no plano anterior e a opção de IR — regressivo ou progressivo), inclui as contribuições portadas manualmente ou por importação de planilha Excel, e pode alterá-las ou excluí-las enquanto não tiverem sido enviadas ou recebidas. Além disso, o analista calcula o <strong>Benefício Saldado</strong> (BS) e o <strong>FAB</strong> (Fundo de Amortização Básico) — valores que representam o benefício do participante calculados pela package Oracle PCK_BENEFSALDFAB — e pode importar arquivos com valores de BS/FAB. Este caso de uso reúne 1 jornada(s) funcional(is) do módulo Contribuição Previdenciária:</p>
 <ul>
-<li><a href="#PF-06"><strong>JF006 — Portabilidade e Benefício Saldado/FAB</strong></a>: Cadastrar portabilidades e contribuições portadas, calcular o benefício saldado e o FAB e fazer carga/descarga dos arquivos correspondentes.</li>
+<li><a href="#PF-06"><strong>JF006 — Portabilidade e Benefício Saldado/FAB</strong></a>: O analista cadastra portabilidades e contribuições portadas, calcula o benefício saldado e o FAB e faz carga/descarga dos arquivos correspondentes.</li>
 </ul>
 </section>
 
 <section><div class="section-title">3. Pré-condições</div>
 <p><strong>Gerais do módulo:</strong></p>
 <ul>
-<li>Módulo disponível (entry point <code>CONTRIBUICAOPREV/Fontes/ContribuicaoPREV.dpr</code>) e usuário com permissão de acesso às telas.</li>
-<li>Banco Oracle acessível e parâmetros do módulo carregados (motivo padrão de cobrança, motivo padrão de tratamento de divergência).</li>
+<li>Módulo disponível (entry point <code>CONTRIBUICAOPREV/Fontes/ContribuicaoPREV.dpr</code>) e usuário com permissão de acesso às telas — o sistema é desktop (Delphi 5 / VCL) e exige login e permissão.</li>
+<li>Banco Oracle acessível e parâmetros do módulo carregados.</li>
 <li>Patrocinadoras, planos previdenciários, contribuições (CONTRIBUICAO) e participantes (PARTPREVPLAN, CONTRIBPREVPARTP) cadastrados.</li>
-<li>Integrações configuradas quando a jornada as usa: Folha, Contas a Receber/CAP, Contabilidade, PGA (ver <a href="integracoes.html">🔗 Integrações</a>).</li>
+<li>Integrações configuradas quando a jornada as usa: Folha, Contas a Receber/CAP, Contabilidade/PGA — ver <a href="integracoes.html">🔗 Integrações</a>.</li>
 <li>Período contábil aberto para as datas usadas em lançamentos.</li>
 </ul>
 <p><strong>Por jornada:</strong></p>
 <ul>
-<li><a href="#PF-06">JF006</a>: Participante cadastrado; para importação, planilha Excel no layout esperado.</li>
+<li><a href="#PF-06">JF006</a>: O participante está cadastrado; para a importação de contribuições portadas, uma planilha Excel no layout esperado; para o cálculo do Benefício Saldado/FAB, a package Oracle PCK_BENEFSALDFAB disponível.</li>
 </ul>
 </section>
 
 <section><div class="section-title">4. Pós-condições</div>
 <ul>
-<li><a href="#PF-06">JF006</a>: PORTABILIDADEPREV, BENEFSALDFAB e CARGABENEFSALDFAB atualizados; contribuições portadas registradas.</li>
+<li><a href="#PF-06">JF006</a>: A portabilidade (PORTABILIDADEPREV) é gravada com os dados do vínculo anterior e a opção de IR; as contribuições portadas são registradas no histórico (HSTCONTRIBPREV); o Benefício Saldado e o FAB (BENEFSALDFAB) são calculados e atualizados; os arquivos de carga (CARGABENEFSALDFAB) são importados; as contribuições portadas ficam registradas.</li>
 </ul>
 </section>
 
@@ -78,18 +78,18 @@
 </section>
 
 <div class="pf-block" id="PF-06"><h4>JF006 (PF-06) — Portabilidade e Benefício Saldado/FAB</h4>
-<p><strong>Objetivo:</strong> Cadastrar portabilidades e contribuições portadas, calcular o benefício saldado e o FAB e fazer carga/descarga dos arquivos correspondentes.</p>
+<p><strong>Objetivo:</strong> Cadastrar a portabilidade (transferência de contribuições de um plano anterior) e as contribuições portadas, calcular o Benefício Saldado (BS) e o FAB (Fundo de Amortização Básico) via package Oracle, e importar arquivos com valores de BS/FAB. O BS é calculado pela fórmula <code>BS = (SALPART × 1,015^i − BINSS) × (IDC − IDADE) / TS</code>, onde SALPART é o salário de participação, BINSS é o benefício do INSS, IDC é a idade comparativa (53 para homens, 48 para mulheres), IDADE é a idade do participante e TS é o tempo de serviço. O resultado é que a portabilidade e as contribuições portadas ficam registradas e o BS/FAB fica calculado.</p>
 <p><strong>Ator / gatilho:</strong> Analista de cadastro previdenciário, nas telas <em>Cadastro de Contribuições Portadas</em>, <em>Benefício Saldado e FAB</em> e <em>Benefício Saldado e FAB - Carga de Arquivo</em>.</p>
 <p><strong>Pré-condições:</strong> Participante cadastrado; para importação, planilha Excel no layout esperado.</p>
 <p><strong>Pós-condições:</strong> PORTABILIDADEPREV, BENEFSALDFAB e CARGABENEFSALDFAB atualizados; contribuições portadas registradas.</p>
 <p><strong>Sequência operacional:</strong></p>
 <ol>
-<li>Selecionar o participante e informar os dados da portabilidade (meses de vínculo 0–11, opção de IR). [<a href="#CONTRIB-RN001">RS001</a>] [<a href="uc205.html#CONTRIB-RN006">RS006</a>] [<a href="#TRT024">TRT024</a>] [<a href="#TRT025">TRT025</a>] [<a href="#TRT023">TRT023</a>]</li>
-<li>Incluir contribuições portadas manualmente (referência obrigatória e não posterior à cobrança; valor esperado &gt; 0) ou importar planilha. [<a href="#CONTRIB-RN002">RS002</a>] [<a href="#CONTRIB-RN003">RS003</a>] [<a href="#CONTRIB-RN008">RS008</a>] [<a href="#TRT026">TRT026</a>] [<a href="#TRT027">TRT027</a>] [<a href="#TRT031">TRT031</a>]</li>
-<li>Alterar/excluir contribuição portada: bloqueado se já recebida ou enviada. [<a href="#CONTRIB-RN004">RS004</a>] [<a href="#CONTRIB-RN005">RS005</a>] [<a href="#TRT028">TRT028</a>] [<a href="#TRT029">TRT029</a>]</li>
-<li>Excluir portabilidade: exige excluir antes as contribuições. [<a href="#CONTRIB-RN007">RS007</a>] [<a href="#TRT030">TRT030</a>]</li>
-<li>Benefício saldado/FAB: atualizar ou reprocessar via PCK_BENEFSALDFAB.SP_ATUALIZASALDO. [<a href="#TRT033">TRT033</a>]</li>
-<li>Carga de arquivo de BS/FAB: selecionar arquivo, conferir leiaute e importar. [<a href="#TRT032">TRT032</a>]</li>
+<li><strong>O analista</strong> seleciona o participante e informa os dados da portabilidade (meses de vínculo no plano anterior — de 0 a 11, completando os anos informados — e a opção de IR: regressivo ou progressivo). [<a href="#CONTRIB-RN001">RS001</a>] [<a href="uc205.html#CONTRIB-RN006">RS006</a>] [<a href="#TRT024">TRT024</a>] [<a href="#TRT025">TRT025</a>] [<a href="#TRT023">TRT023</a>]</li>
+<li><strong>O analista</strong> inclui contribuições portadas manualmente (ano/mês de referência obrigatório e não posterior ao de cobrança; valor esperado &gt; 0) ou importa uma planilha Excel. [<a href="#CONTRIB-RN002">RS002</a>] [<a href="#CONTRIB-RN003">RS003</a>] [<a href="#CONTRIB-RN008">RS008</a>] [<a href="#TRT026">TRT026</a>] [<a href="#TRT027">TRT027</a>] [<a href="#TRT031">TRT031</a>]</li>
+<li><strong>Alterar/excluir contribuição portada:</strong> <strong>o analista</strong> pode alterar ou excluir; <strong>o sistema</strong> bloqueia se a contribuição já foi recebida ou enviada. [<a href="#CONTRIB-RN004">RS004</a>] [<a href="#CONTRIB-RN005">RS005</a>] [<a href="#TRT028">TRT028</a>] [<a href="#TRT029">TRT029</a>]</li>
+<li><strong>Excluir portabilidade:</strong> <strong>o analista</strong> só pode excluir a portabilidade depois de excluir todas as contribuições portadas dela. [<a href="#CONTRIB-RN007">RS007</a>] [<a href="#TRT030">TRT030</a>]</li>
+<li><strong>Benefício saldado/FAB:</strong> <strong>o analista</strong> atualiza ou reprocessa o BS/FAB; <strong>o sistema</strong> executa a package Oracle PCK_BENEFSALDFAB.SP_ATUALIZASALDO. [<a href="#TRT033">TRT033</a>]</li>
+<li><strong>Carga de arquivo de BS/FAB:</strong> <strong>o analista</strong> seleciona o arquivo, <strong>o sistema</strong> confere o leiaute e importa. [<a href="#TRT032">TRT032</a>]</li>
 </ol>
 <p><strong>Ações práticas:</strong></p>
 <div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>

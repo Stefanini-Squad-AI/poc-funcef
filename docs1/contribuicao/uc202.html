@@ -45,33 +45,33 @@
 </section>
 
 <section><div class="section-title">2. Descrição Resumida</div>
-<p>Recebimento das contribuições pelos diversos canais e tratamento das divergências entre valor esperado e recebido. Este caso de uso reúne 2 jornada(s) funcional(is) do módulo Contribuição Previdenciária:</p>
+<p>Depois de as contribuições terem sido enviadas para cobrança em <a href="uc201.html#PF-01">UC201</a>, o fundo precisa registrar o que foi efetivamente recebido e tratar as diferenças entre o valor esperado e o valor recebido. Neste caso de uso, o analista de arrecadação processa o retorno dos canais de cobrança (folha de pagamento, empréstimo ou Contas a Receber) e o sistema baixa as contribuições e os documentos correspondentes. Quando o valor recebido difere do esperado além da margem de aceitação (VLRACEITADIVERG), o analista trata a divergência escolhendo um dos nove modos de tratamento (cobrar novamente, devolver, descontar no próximo benefício, ignorar, etc.). O sistema também pode desfazer documentos de cobrança e consultar estatísticas de divergência. Este caso de uso reúne 2 jornada(s) funcional(is) do módulo Contribuição Previdenciária:</p>
 <ul>
-<li><a href="#PF-02"><strong>JF002 — Recebimento por múltiplos canais</strong></a>: Registrar o recebimento das contribuições cobradas (via folha, empréstimo ou Contas a Receber), baixando contribuições e documentos.</li>
-<li><a href="#PF-08"><strong>JF008 — Tratamento de divergências e inconsistências</strong></a>: Comparar contribuições enviadas e recebidas, identificar e tratar divergências, desfazer documentos e consultar estatísticas de divergência.</li>
+<li><a href="#PF-02"><strong>JF002 — Recebimento por múltiplos canais</strong></a>: O analista registra o recebimento das contribuições cobradas (via folha, empréstimo ou Contas a Receber), e o sistema baixa as contribuições e os documentos, registrando o valor e a data de recebimento.</li>
+<li><a href="#PF-08"><strong>JF008 — Tratamento de divergências e inconsistências</strong></a>: O analista compara as contribuições enviadas e recebidas, identifica e trata as divergências (diferença entre valor esperado e recebido), desfaz documentos quando necessário e consulta estatísticas de divergência.</li>
 </ul>
 </section>
 
 <section><div class="section-title">3. Pré-condições</div>
 <p><strong>Gerais do módulo:</strong></p>
 <ul>
-<li>Módulo disponível (entry point <code>CONTRIBUICAOPREV/Fontes/ContribuicaoPREV.dpr</code>) e usuário com permissão de acesso às telas.</li>
-<li>Banco Oracle acessível e parâmetros do módulo carregados (motivo padrão de cobrança, motivo padrão de tratamento de divergência).</li>
+<li>Módulo disponível (entry point <code>CONTRIBUICAOPREV/Fontes/ContribuicaoPREV.dpr</code>) e usuário com permissão de acesso às telas — o sistema é desktop (Delphi 5 / VCL) e exige login e permissão.</li>
+<li>Banco Oracle acessível e parâmetros do módulo carregados — o motivo padrão de cobrança e o motivo padrão de tratamento de divergência devem estar parametrizados.</li>
 <li>Patrocinadoras, planos previdenciários, contribuições (CONTRIBUICAO) e participantes (PARTPREVPLAN, CONTRIBPREVPARTP) cadastrados.</li>
-<li>Integrações configuradas quando a jornada as usa: Folha, Contas a Receber/CAP, Contabilidade, PGA (ver <a href="integracoes.html">🔗 Integrações</a>).</li>
+<li>Integrações configuradas quando a jornada as usa: Folha, Contas a Receber/CAP (CMAdmPrev), Contabilidade/PGA (Plano de Gestão Atuarial) — ver <a href="integracoes.html">🔗 Integrações</a>.</li>
 <li>Período contábil aberto para as datas usadas em lançamentos.</li>
 </ul>
 <p><strong>Por jornada:</strong></p>
 <ul>
-<li><a href="#PF-02">JF002</a>: Contribuições enviadas (<a href="uc201.html#PF-01">JF001</a>) com SITRECEBIMENTO = 1; retorno do canal disponível; período contábil aberto.</li>
-<li><a href="#PF-08">JF008</a>: Contribuições enviadas (<a href="uc201.html#PF-01">JF001</a>) e retornos processados (<a href="#PF-02">JF002</a>); motivo padrão de tratamento cadastrado.</li>
+<li><a href="#PF-02">JF002</a>: As contribuições já foram enviadas em <a href="uc201.html#PF-01">JF001</a> com SITRECEBIMENTO = 1; o retorno do canal de cobrança (arquivo de retorno da folha, dados do empréstimo ou baixas do CaR) está disponível; o período contábil está aberto para a data de recebimento.</li>
+<li><a href="#PF-08">JF008</a>: As contribuições já foram enviadas (<a href="uc201.html#PF-01">JF001</a>) e os retornos já foram processados (<a href="#PF-02">JF002</a>); o motivo padrão de tratamento de divergência está cadastrado, pois o sistema o exige ao gerar documentos de regularização.</li>
 </ul>
 </section>
 
 <section><div class="section-title">4. Pós-condições</div>
 <ul>
-<li><a href="#PF-02">JF002</a>: HSTCONTRIBPREV com VALORRECEBIDO, DATARECEBIMENTO e situação de recebida; DOCUMENTO e LANCTODOCUM baixados; lançamentos contábeis gerados.</li>
-<li><a href="#PF-08">JF008</a>: HSTCONTRIBPREV ajustado; HSTATRASOCONTRIB atualizado; LOGTOTALPREV gravado; documentos desfeitos quando solicitado.</li>
+<li><a href="#PF-02">JF002</a>: O histórico de contribuições (HSTCONTRIBPREV) passa a conter o valor efetivamente recebido (VALORRECEBIDO), a data de recebimento (DATARECEBIMENTO) e a situação de recebida (SITRECEBIMENTO ≥ 2); os documentos de cobrança (DOCUMENTO) e seus lançamentos (LANCTODOCUM) são baixados no Contas a Receber; os lançamentos contábeis do recebimento são gerados na contabilidade/PGA.</li>
+<li><a href="#PF-08">JF008</a>: O histórico de contribuições (HSTCONTRIBPREV) é ajustado conforme o modo de tratamento escolhido (cobrar novamente, devolver, descontar no próximo benefício, etc.); o histórico de alterações (HSTATRASOCONTRIB) é atualizado com a regularização; o log de operações (LOGTOTALPREV) é gravado; os documentos desfeitos são revertidos quando solicitado.</li>
 </ul>
 </section>
 
@@ -81,18 +81,18 @@
 </section>
 
 <div class="pf-block" id="PF-02"><h4>JF002 (PF-02) — Recebimento por múltiplos canais</h4>
-<p><strong>Objetivo:</strong> Registrar o recebimento das contribuições cobradas (via folha, empréstimo ou Contas a Receber), baixando contribuições e documentos.</p>
+<p><strong>Objetivo:</strong> Registrar o recebimento das contribuições que foram cobradas, processando o retorno de cada canal (folha de pagamento, empréstimo ou Contas a Receber). O sistema baixa as contribuições com o valor e a data de recebimento e baixa os documentos correspondentes, gerando os lançamentos contábeis. O resultado é que cada contribuição recebida passa a ter VALORRECEBIDO, DATARECEBIMENTO e SITRECEBIMENTO ≥ 2.</p>
 <p><strong>Ator / gatilho:</strong> Analista de arrecadação, nas telas <em>Recebimento de Contribuições via Folha</em>, <em>Recebimento de Contribuições Via Empréstimo</em> e <em>Receber Contribuições do Contas a Receber</em>.</p>
-<p><strong>Pré-condições:</strong> Contribuições enviadas (<a href="uc201.html#PF-01">JF001</a>) com SITRECEBIMENTO = 1; retorno do canal disponível; período contábil aberto.</p>
-<p><strong>Pós-condições:</strong> HSTCONTRIBPREV com VALORRECEBIDO, DATARECEBIMENTO e situação de recebida; DOCUMENTO e LANCTODOCUM baixados; lançamentos contábeis gerados.</p>
+<p><strong>Pré-condições:</strong> As contribuições já foram enviadas em <a href="uc201.html#PF-01">JF001</a> com SITRECEBIMENTO = 1; o retorno do canal está disponível; o período contábil está aberto.</p>
+<p><strong>Pós-condições:</strong> O histórico (HSTCONTRIBPREV) contém VALORRECEBIDO, DATARECEBIMENTO e situação de recebida; os documentos (DOCUMENTO) e lançamentos (LANCTODOCUM) são baixados; os lançamentos contábeis são gerados.</p>
 <p><strong>Sequência operacional:</strong></p>
 <ol>
-<li>Via folha: informar o mês de cobrança e a data de recebimento. [<a href="#TRT007">TRT007</a>]</li>
-<li>O sistema seleciona as contribuições a receber (enviadas e não recebidas, ou recebidas com data, de origem diferente de 'B' e descontadas em folha). [<a href="#CONTRIB-RN024">RS024</a>]</li>
-<li>Selecionar as contribuições da lista e processar o recebimento. [<a href="#TRT008">TRT008</a>] [<a href="#TRT009">TRT009</a>]</li>
-<li>Com “Efetuar apenas integração” e “Documentos distintos por dia” marcadas, os documentos do CaR são gerados por data de recebimento gravada. [<a href="#CONTRIB-RN028">RS028</a>]</li>
-<li>Via empréstimo: consultar, selecionar registros e baixar; o valor em aberto deve igualar o do empréstimo. [<a href="#TRT010">TRT010</a>] [<a href="#TRT011">TRT011</a>]</li>
-<li>Via Contas a Receber: baixar as contribuições por matrícula e conferir a lista de resultado. [<a href="#TRT012">TRT012</a>]</li>
+<li><strong>Recebimento via folha:</strong> <strong>o analista</strong> informa o mês de cobrança e a data de recebimento. [<a href="#TRT007">TRT007</a>]</li>
+<li><strong>O sistema</strong> seleciona as contribuições a receber: enviadas e ainda sem valor recebido, ou já recebidas com data, desde que não sejam de origem 'B' (benefício) e sejam descontadas em folha (FLGDESCFOLHA = 1, flag que indica desconto em folha: 0 = banco, 1 = folha). [<a href="#CONTRIB-RN024">RS024</a>]</li>
+<li><strong>O analista</strong> seleciona as contribuições da lista e processa o recebimento. [<a href="#TRT008">TRT008</a>] [<a href="#TRT009">TRT009</a>]</li>
+<li>Com as opções "Efetuar apenas integração" e "Documentos distintos por dia" marcadas, <strong>o sistema</strong> gera os documentos do CaR agrupados por data de recebimento gravada, e não pela data informada na tela. [<a href="#CONTRIB-RN028">RS028</a>]</li>
+<li><strong>Recebimento via empréstimo:</strong> <strong>o analista</strong> consulta os registros, seleciona e baixa; o valor das contribuições em aberto deve ser igual ao valor do contrato de empréstimo. [<a href="#TRT010">TRT010</a>] [<a href="#TRT011">TRT011</a>]</li>
+<li><strong>Recebimento via Contas a Receber:</strong> <strong>o analista</strong> baixa as contribuições por matrícula e confere a lista de resultado; <strong>o sistema</strong> conclui as baixas bem-sucedidas e lista as matrículas com erro. [<a href="#TRT012">TRT012</a>]</li>
 </ol>
 <p><strong>Ações práticas:</strong></p>
 <div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
@@ -165,17 +165,17 @@
 </div>
 
 <div class="pf-block" id="PF-08"><h4>JF008 (PF-08) — Tratamento de divergências e inconsistências</h4>
-<p><strong>Objetivo:</strong> Comparar contribuições enviadas e recebidas, identificar e tratar divergências, desfazer documentos e consultar estatísticas de divergência.</p>
+<p><strong>Objetivo:</strong> Comparar as contribuições enviadas com as recebidas, identificar as divergências (diferença entre o valor esperado e o valor recebido) e tratá-las. O analista escolhe um dos nove modos de tratamento (OPTRATDIVERG: cobrar via interface/banco, descontar no próximo benefício, devolver via interface/banco, acrescentar no próximo benefício, adicionar como aporte, ou ignorar). O sistema gera os documentos e lançamentos de regularização, atualiza o histórico de alterações e permite desfazer documentos e consultar estatísticas de divergência.</p>
 <p><strong>Ator / gatilho:</strong> Analista de arrecadação, nas telas <em>Tratamento de Divergência de Contribuição</em>, <em>Consulta de Estatística de Massa</em> e <em>Interface do Desfazer Documento</em>.</p>
-<p><strong>Pré-condições:</strong> Contribuições enviadas (<a href="uc201.html#PF-01">JF001</a>) e retornos processados (<a href="#PF-02">JF002</a>); motivo padrão de tratamento cadastrado.</p>
-<p><strong>Pós-condições:</strong> HSTCONTRIBPREV ajustado; HSTATRASOCONTRIB atualizado; LOGTOTALPREV gravado; documentos desfeitos quando solicitado.</p>
+<p><strong>Pré-condições:</strong> As contribuições já foram enviadas (<a href="uc201.html#PF-01">JF001</a>) e os retornos já foram processados (<a href="#PF-02">JF002</a>); o motivo padrão de tratamento de divergência está cadastrado.</p>
+<p><strong>Pós-condições:</strong> O histórico (HSTCONTRIBPREV) é ajustado conforme o modo de tratamento; o histórico de alterações (HSTATRASOCONTRIB) é atualizado; o log (LOGTOTALPREV) é gravado; os documentos são desfeitos quando solicitado.</p>
 <p><strong>Sequência operacional:</strong></p>
 <ol>
-<li>Selecionar o modo de divergência e informar os filtros (patrocinadora, plano, contribuição, faixas, participante, mês de referência). [<a href="#TRT038">TRT038</a>] [<a href="#TRT039">TRT039</a>]</li>
-<li>O sistema compara enviado × recebido e verifica baixas no CAP/CAR.</li>
-<li>Tratar as divergências: gera documentos e lançamentos e atualiza HSTATRASOCONTRIB. [<a href="#TRT040">TRT040</a>] [<a href="#TRT053">TRT053</a>]</li>
-<li>Desfazer documento: informar o código do documento e processar. [<a href="#TRT041">TRT041</a>]</li>
-<li>Consultar a estatística de divergências.</li>
+<li><strong>O analista</strong> seleciona o modo de divergência e informa os filtros (patrocinadora, plano, contribuição, faixas, participante, mês de referência). [<a href="#TRT038">TRT038</a>] [<a href="#TRT039">TRT039</a>]</li>
+<li><strong>O sistema</strong> compara o valor enviado com o valor recebido e verifica as baixas no CAP/CaR. Se a diferença estiver dentro da margem de aceitação (VLRACEITADIVERG), a contribuição é considerada recebida corretamente; senão, fica como divergência não tratada. [<a href="#CONTRIB-RN032">CONTRIB-RN032</a>]</li>
+<li><strong>O analista</strong> trata as divergências escolhendo o modo de tratamento; <strong>o sistema</strong> gera os documentos e lançamentos correspondentes e atualiza o histórico de alterações (HSTATRASOCONTRIB). [<a href="#TRT040">TRT040</a>] [<a href="#TRT053">TRT053</a>]</li>
+<li><strong>Desfazer documento:</strong> <strong>o analista</strong> informa o código do documento e processa; <strong>o sistema</strong> reverte o documento. [<a href="#TRT041">TRT041</a>]</li>
+<li><strong>Consultar estatística:</strong> <strong>o analista</strong> consulta o volume de divergências; <strong>o sistema</strong> exibe a estatística de massa.</li>
 </ol>
 <p><strong>Ações práticas:</strong></p>
 <div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
