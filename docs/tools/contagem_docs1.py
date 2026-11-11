@@ -469,7 +469,7 @@ def render_inventario(res):
     o.append(summary_table(rows, grand))
     diff = grand["total"] - sum(t["total"] for _, t in rows)
     o.append(f'<div class="note-info">Conferência: soma das quatro linhas acima = {fmt(sum(t["total"] for _, t in rows))} linhas; total geral = {fmt(grand["total"])} linhas; diferença = {diff}. '
-             'As linhas por arquivo já publicadas (por exemplo, a coluna “Linhas .pas” do <a href="../folha/inventario.html">inventário da FOLHA</a>) não foram alteradas; esta seção só acrescenta os totais.</div>')
+             'As linhas por arquivo já publicadas (por exemplo, a coluna “Linhas .pas” do <a href="../folha/inventario-tecnico.html">inventário da FOLHA</a>) não foram alteradas; esta seção só acrescenta os totais.</div>')
 
     # Conciliação com o inventário de artefatos (que inclui .dof/.cfg e não exclui cópias)
     o.append('<p>Conciliação das linhas de módulo com o inventário de artefatos acima: o inventário conta também <code>.dof</code> e <code>.cfg</code> (configuração, sem código) e não exclui cópias, duplicatas nem DFM binário.</p>')
