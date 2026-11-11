@@ -6,6 +6,9 @@ Uso (a partir da raiz do repositório):
     python3 -B docs/tools/uso_efetivo_dependencias.py --write    # (re)gera o estudo e a seção do docs1
     python3 -B docs/tools/uso_efetivo_dependencias.py --check    # falha se os arquivos estiverem desatualizados
 
+PFC-46: a seção do inventário inclui o quadro "Linhas únicas das dependências por quem as usa" (só um módulo,
+dois módulos, três módulos), cuja soma é o total usado das dependências, e a conciliação com as colunas por módulo.
+
 Saídas:
   * Analise_linhas_dependencias.md (raiz do repositório) — estudo completo;
   * docs1/visao-geral/inventario.html e docs1/index.html — seção "Linhas de Código" (PFC-45): só o código a
@@ -667,7 +670,7 @@ def aggregate(res, runs, units):
              "total": sum(f["total"] for f in g["files"]), "code": sum(f["code"] for f in g["files"]),
              "n": len(g["files"]), "units": 0, "routines": 0,
              "ref_units": {k: 0 for k in KEYS}, "ref_routines": {k: 0 for k in KEYS},
-             "eff": {k: [0, 0] for k in KEYS + ["all"]}, "files": []}
+             "eff": {k: [0, 0] for k in KEYS + ["all"]}, "groups": {}, "files": []}
         any_unit = {k: False for k in KEYS}
         pas = [f for f in g["files"] if f["ext"] == ".pas"]
         others = [f for f in g["files"] if f["ext"] != ".pas"]
@@ -688,6 +691,12 @@ def aggregate(res, runs, units):
                     d["ref_routines"][k] += sum(1 for i in used[k] if u.segs[i]["kind"] == "routine")
             if used:
                 used["all"] = set().union(*used.values())
+            groups = {}  # PFC-46: linhas únicas por conjunto de módulos que as usam (segmentos são disjuntos)
+            if used:
+                add_group(groups, tuple(k for k in KEYS if k in used), u.lines["S"])
+                for i in used["all"]:
+                    if i in u.lines:
+                        add_group(groups, tuple(k for k in KEYS if i in used.get(k, ())), u.lines[i])
             eff = {}
             for k, idx in used.items():
                 lines = list(u.lines["S"])
@@ -696,7 +705,7 @@ def aggregate(res, runs, units):
                         lines[0] += u.lines[i][0]
                         lines[1] += u.lines[i][1]
                 eff[k] = lines
-            d["files"].append({"path": f["path"], "total": f["total"], "code": f["code"], "eff": eff,
+            d["files"].append({"path": f["path"], "total": f["total"], "code": f["code"], "eff": eff, "groups": groups,
                                "routines": sum(1 for s in u.segs if s["kind"] == "routine"),
                                "ref": len([i for i in used.get("all", ()) if u.segs[i]["kind"] == "routine"])})
         for f in others:
@@ -706,14 +715,18 @@ def aggregate(res, runs, units):
             else:  # .dpk: entra se alguma unit do pacote é usada pelo módulo
                 flags = dict(any_unit)
             eff = {k: [f["total"], f["code"]] for k in KEYS if flags[k]}
+            groups = {}
             if eff:
                 eff["all"] = [f["total"], f["code"]]
-            d["files"].append({"path": f["path"], "total": f["total"], "code": f["code"], "eff": eff,
+                add_group(groups, tuple(k for k in KEYS if flags[k]), eff["all"])
+            d["files"].append({"path": f["path"], "total": f["total"], "code": f["code"], "eff": eff, "groups": groups,
                                "routines": 0, "ref": 0})
         for f in d["files"]:
             for k, (t, c) in f["eff"].items():
                 d["eff"][k][0] += t
                 d["eff"][k][1] += c
+            for g, tc in f["groups"].items():
+                add_group(d["groups"], g, tc)
         d["category"], d["why"] = READINESS.get(lbl, ("?", ""))
         deps.append(d)
     return deps
@@ -721,6 +734,15 @@ def aggregate(res, runs, units):
 
 KEYS = ["contribuicao", "folha", "beneficioprev"]
 NOMES = ["CONTRIBUIÇÃO", "FOLHA", "BENEFICIOPREV"]
+
+
+def add_group(groups, key, lines):
+    """Soma [total, código] no grupo `key` (tupla dos módulos, na ordem de KEYS, que usam essas linhas)."""
+    if not key or not (lines[0] or lines[1]):
+        return
+    acc = groups.setdefault(key, [0, 0])
+    acc[0] += lines[0]
+    acc[1] += lines[1]
 
 
 def sums(deps):
@@ -1013,7 +1035,36 @@ def migration(res, deps):
     unused = [d["label"] for d in deps if d["eff"]["all"][0] == 0]
     inside = [g["name"] for g in res["deps"] if not g["files"]]
     return {"mods": mods, "mod": mod, "used": used, "dep": dep, "total": total, "per_mod": per_mod,
-            "unused": unused, "inside": inside}
+            "unused": unused, "inside": inside, "share": sharing(used)}
+
+
+def sharing(used):
+    """PFC-46: linhas únicas das dependências usadas, separadas pela quantidade de módulos que as usam.
+    Cada linha usada entra em exatamente um grupo; a soma dos grupos é o total usado (sem dupla contagem)."""
+    groups = {}
+    for d in used:
+        for g, tc in d["groups"].items():
+            add_group(groups, g, tc)
+    key = dict(zip(NOMES, KEYS))
+
+    def tot(sel):
+        return {"total": sum(v[0] for g, v in groups.items() if sel(g)),
+                "code": sum(v[1] for g, v in groups.items() if sel(g))}
+    only = {n: tot(lambda g, k=key[n]: g == (k,)) for n in ORDER}
+    pairs = []
+    for i, a in enumerate(ORDER):
+        for b in ORDER[i + 1:]:
+            pk = {key[a], key[b]}
+            pairs.append(((a, b), tot(lambda g, pk=pk: len(g) == 2 and set(g) == pk)))
+    two = tot(lambda g: len(g) == 2)
+    three = tot(lambda g: len(g) == 3)
+    unique = tot(lambda g: True)
+    per_mod = {n: {"total": sum(d["eff"][key[n]][0] for d in used), "code": sum(d["eff"][key[n]][1] for d in used)}
+               for n in ORDER}
+    col_sum = {k: sum(per_mod[n][k] for n in ORDER) for k in ("total", "code")}
+    repeated = {k: col_sum[k] - unique[k] for k in ("total", "code")}
+    return {"groups": groups, "only": only, "pairs": pairs, "two": two, "three": three, "unique": unique,
+            "per_mod": per_mod, "col_sum": col_sum, "repeated": repeated}
 
 
 def validate_migration(M):
@@ -1027,6 +1078,26 @@ def validate_migration(M):
             errors.append(f"PFC-45: dependências listadas ({k}) não somam a linha de dependências usadas")
     if any(d["eff"]["all"][0] <= 0 for d in M["used"]):
         errors.append("PFC-45: dependência sem linha usada listada")
+    # PFC-46: linhas únicas por grupo de uso
+    S = M["share"]
+    key = dict(zip(NOMES, KEYS))
+    for k in ("total", "code"):
+        rows = sum(S["only"][n][k] for n in ORDER) + S["two"][k] + S["three"][k]
+        if rows != S["unique"][k] or S["unique"][k] != M["dep"][k]:
+            errors.append(f"PFC-46: linhas únicas ({k}) não somam o total das dependências usadas: "
+                          f"{rows} / {S['unique'][k]} != {M['dep'][k]}")
+        if sum(p[1][k] for p in S["pairs"]) != S["two"][k]:
+            errors.append(f"PFC-46: pares de módulos ({k}) não somam a linha de dois módulos")
+        for n in ORDER:
+            mine = sum(v[0 if k == "total" else 1] for g, v in S["groups"].items() if key[n] in g)
+            if mine != S["per_mod"][n][k]:
+                errors.append(f"PFC-46: grupos com {n} ({k}) = {mine} != linhas usadas por {n} = {S['per_mod'][n][k]}")
+        if S["repeated"][k] != S["two"][k] + 2 * S["three"][k]:
+            errors.append(f"PFC-46: linhas repetidas ({k}) não conciliam com os grupos")
+    for d in M["used"]:
+        for i in (0, 1):
+            if sum(v[i] for v in d["groups"].values()) != d["eff"]["all"][i]:
+                errors.append(f"PFC-46: {d['label']}: grupos não somam a união dos três módulos")
     return errors
 
 
@@ -1038,6 +1109,34 @@ def summary_table(M):
                   fmt(M["dep"]["total"]), fmt(M["dep"]["code"])]))
     o.append(row(["Total a migrar", fmt(M["total"]["total"]), fmt(M["total"]["code"])], strong=True))
     o.append("</tbody></table></div>")
+    return "\n".join(o)
+
+
+def unique_table(M):
+    """PFC-46: linhas únicas das dependências usadas, por quem as usa, com a conciliação com as colunas por módulo."""
+    S = M["share"]
+    o = [f'<h3 id="linhas-unicas-dependencias" style="margin-top:1.5rem">Linhas únicas das dependências por quem as usa ({len(M["used"])} dependências)</h3>',
+         '<div class="table-wrap"><table><thead><tr><th>Parcela</th><th>Linhas totais</th><th>Linhas de código</th></tr></thead><tbody>']
+    for n in ORDER:
+        o.append(row([f"Usadas só pela {n}" if n != "BENEFICIOPREV" else f"Usadas só pelo {n}",
+                      fmt(S["only"][n]["total"]), fmt(S["only"][n]["code"])]))
+    o.append(row(["Compartilhadas por exatamente dois módulos", fmt(S["two"]["total"]), fmt(S["two"]["code"])]))
+    o.append(row(["Compartilhadas pelos três módulos", fmt(S["three"]["total"]), fmt(S["three"]["code"])]))
+    o.append(row(["Total de linhas únicas das dependências", fmt(S["unique"]["total"]), fmt(S["unique"]["code"])], strong=True))
+    o.append("</tbody></table></div>")
+    pairs = "; ".join(f"{a} + {b}: {fmt(v['total'])} linhas ({fmt(v['code'])} de código)" for (a, b), v in S["pairs"])
+    cols = " + ".join(fmt(S["per_mod"][n]["total"]) for n in ORDER)
+    cols_c = " + ".join(fmt(S["per_mod"][n]["code"]) for n in ORDER)
+    o.append('<div class="note-info">Cada linha usada das dependências entra em um único grupo, conforme os módulos que a usam; '
+             f'o total de linhas únicas é o mesmo da linha “Dependências diretas — só a parte usada pelos três módulos” '
+             f'({fmt(M["dep"]["total"])} linhas, {fmt(M["dep"]["code"])} de código). '
+             f'<strong>Conciliação:</strong> a soma das colunas por módulo do quadro anterior ({cols} = {fmt(S["col_sum"]["total"])} linhas; '
+             f'{cols_c} = {fmt(S["col_sum"]["code"])} linhas de código) menos o total de linhas únicas dá '
+             f'<strong>{fmt(S["repeated"]["total"])} linhas ({fmt(S["repeated"]["code"])} de código) que aparecem repetidas entre os módulos</strong>: '
+             'cada linha compartilhada por dois módulos aparece uma vez a mais e cada linha compartilhada pelos três aparece duas vezes a mais '
+             f'({fmt(S["two"]["total"])} + 2 × {fmt(S["three"]["total"])} = {fmt(S["repeated"]["total"])}). '
+             f'Detalhe das linhas compartilhadas por dois módulos — {pairs}. '
+             '<span class="ev ev-comprovado">COMPROVADO</span>: gerado e conferido por <code>docs/tools/uso_efetivo_dependencias.py</code>.</div>')
     return "\n".join(o)
 
 
@@ -1079,6 +1178,7 @@ def render_html(res, deps):
              f'“Linhas usadas (3 módulos)”, {fmt(M["dep"]["total"])} linhas. “—” = o módulo não usa a dependência. '
              f'Não aparecem: {", ".join(f"<code>{esc(x)}</code>" for x in M["unused"])} (nenhuma linha usada) e '
              f'{", ".join(f"<code>{esc(x)}</code>" for x in M["inside"])} (ficam dentro da pasta FOLHA e já estão na linha FOLHA).</div>')
+    o.append(unique_table(M))
     o.append('<p><strong>Critério da contagem:</strong> linhas físicas (código + comentários + linhas vazias) dos fontes Delphi 5 '
              '<code>.pas</code>, <code>.dfm</code>, <code>.dpr</code> e <code>.dpk</code>, com as regras do PFC-18 (sem DFM binário, cópias, backups e duplicatas); '
              '“linhas de código” exclui comentários e linhas vazias. Módulos = pastas inteiras <code>FOLHA/</code>, <code>CONTRIBUICAOPREV/</code> e '
@@ -1140,6 +1240,11 @@ def main():
     for d in deps:
         print(f"  {d['label']:<26} total={d['total']:>7} efetivo={d['eff']['all'][0]:>7} "
               + " ".join(f"{k}={d['eff'][k][0]}" for k in KEYS) + f" [{d['category']}]")
+    S = M["share"]
+    print("PFC-46 — linhas únicas das dependências: "
+          + " ".join(f"só {n}={S['only'][n]['total']}/{S['only'][n]['code']}" for n in ORDER)
+          + f" dois={S['two']['total']}/{S['two']['code']} três={S['three']['total']}/{S['three']['code']}"
+          f" total={S['unique']['total']}/{S['unique']['code']} repetidas={S['repeated']['total']}/{S['repeated']['code']}")
     print(f"PFC-45 — a migrar: módulos={M['mod']['total']}/{M['mod']['code']} dependências usadas "
           f"({len(M['used'])})={M['dep']['total']}/{M['dep']['code']} total={M['total']['total']}/{M['total']['code']}")
     outputs = {STUDY: render_md(res, runs, deps)}
@@ -1159,7 +1264,7 @@ def main():
         print("ERROS DE VALIDAÇÃO:\n  " + "\n  ".join(errors))
         return 1
     print("Validação OK: 31 dependências; linha de base = PFC-26; linhas por arquivo idênticas ao PFC-26; "
-          "efetivas ≤ totais; soma das categorias = total efetivo; tabela a migrar = soma das linhas (PFC-45).")
+          "efetivas ≤ totais; soma das categorias = total efetivo; tabela a migrar = soma das linhas (PFC-45); linhas únicas por grupo de uso = total usado (PFC-46).")
     if args.check and stale:
         print("Arquivos desatualizados: " + ", ".join(stale))
         return 1
