@@ -45,9 +45,9 @@
 </section>
 
 <section><div class="section-title">2. Descrição Resumida</div>
-<p>Simulação de contribuições, cálculo retroativo em lote e revisão do índice do benefício saldado/FAB. Este caso de uso reúne 1 jornada(s) funcional(is) do módulo Contribuição Previdenciária:</p>
+<p>O fundo precisa projetar contribuições para cenários hipotéticos (simulação), calcular diferenças retroativas em lote (recálculos de períodos anteriores) e revisar o índice do benefício saldado/FAB. Este caso de uso reúne 1 jornada(s) funcional(is) do módulo Contribuição Previdenciária:</p>
 <ul>
-<li><a href="#PF-10"><strong>JF010 — Retroativo e Simulação</strong></a>: Simular contribuições a partir de um evento gerador, calcular retroativos em lote e revisar o índice do benefício saldado/FAB.</li>
+<li><a href="#PF-10"><strong>JF010 — Retroativo e Simulação</strong></a>: O analista simula contribuições a partir de um evento gerador, calcula retroativos em lote e revisa o índice do benefício saldado/FAB.</li>
 </ul>
 <div class="note note-info"><p><strong>Origem:</strong> até o PFC-32 esta jornada fazia parte do <a href="uc208.html">UC208</a>. No PFC-35 ela foi separada em caso de uso próprio, sem alteração do texto da jornada.</p></div>
 </section>
@@ -55,21 +55,21 @@
 <section><div class="section-title">3. Pré-condições</div>
 <p><strong>Gerais do módulo:</strong></p>
 <ul>
-<li>Módulo disponível (entry point <code>CONTRIBUICAOPREV/Fontes/ContribuicaoPREV.dpr</code>) e usuário com permissão de acesso às telas.</li>
-<li>Banco Oracle acessível e parâmetros do módulo carregados (motivo padrão de cobrança, motivo padrão de tratamento de divergência).</li>
+<li>Módulo disponível (entry point <code>CONTRIBUICAOPREV/Fontes/ContribuicaoPREV.dpr</code>) e usuário com permissão de acesso às telas — o sistema é desktop (Delphi 5 / VCL) e exige login e permissão.</li>
+<li>Banco Oracle acessível e parâmetros do módulo carregados.</li>
 <li>Patrocinadoras, planos previdenciários, contribuições (CONTRIBUICAO) e participantes (PARTPREVPLAN, CONTRIBPREVPARTP) cadastrados.</li>
-<li>Integrações configuradas quando a jornada as usa: Folha, Contas a Receber/CAP, Contabilidade, PGA (ver <a href="integracoes.html">🔗 Integrações</a>).</li>
+<li>Integrações configuradas quando a jornada as usa: Folha, Contas a Receber/CAP, Contabilidade/PGA — ver <a href="integracoes.html">🔗 Integrações</a>.</li>
 <li>Período contábil aberto para as datas usadas em lançamentos.</li>
 </ul>
 <p><strong>Por jornada:</strong></p>
 <ul>
-<li><a href="#PF-10">JF010</a>: Plano e categorias de evento gerador cadastrados; regras de cálculo parametrizadas; para eventos de participante, matrícula existente.</li>
+<li><a href="#PF-10">JF010</a>: Plano e categorias de evento gerador cadastrados (um evento gerador é um evento que dispara o cálculo de contribuições, como admissão, demissão ou alteração salarial); regras de cálculo parametrizadas; para eventos de participante, a matrícula deve existir.</li>
 </ul>
 </section>
 
 <section><div class="section-title">4. Pós-condições</div>
 <ul>
-<li><a href="#PF-10">JF010</a>: Simulação exibida; HSTCONTRIBPREV e HSTATRASOCONTRIB gravados no retroativo; índice revisado.</li>
+<li><a href="#PF-10">JF010</a>: A simulação é exibida na tela; no cálculo retroativo em lote, o histórico de contribuições (HSTCONTRIBPREV) e o histórico de alterações (HSTATRASOCONTRIB) são gravados com as diferenças retroativas; o índice do benefício saldado/FAB é revisado.</li>
 </ul>
 </section>
 
@@ -79,16 +79,16 @@
 </section>
 
 <div class="pf-block" id="PF-10"><h4>JF010 (PF-10) — Retroativo e Simulação</h4>
-<p><strong>Objetivo:</strong> Simular contribuições a partir de um evento gerador, calcular retroativos em lote e revisar o índice do benefício saldado/FAB.</p>
+<p><strong>Objetivo:</strong> Simular contribuições a partir de um evento gerador (evento que dispara o cálculo, como admissão, demissão ou alteração salarial), calcular retroativos em lote (diferenças de contribuições de períodos anteriores que precisam ser recalculadas) e revisar o índice do benefício saldado/FAB (Fundo de Amortização Básico). O resultado é que a simulação é exibida, os retroativos são gravados e o índice é atualizado.</p>
 <p><strong>Ator / gatilho:</strong> Analista previdenciário, nas telas <em>Simulação de Contribuição</em> e <em>Benefício Saldado e FAB - Revisão de Índice</em>; retroativo em lote via <code>dmRetroativoLote</code> (externo).</p>
 <p><strong>Pré-condições:</strong> Plano e categorias de evento gerador cadastrados; regras de cálculo parametrizadas; para eventos de participante, matrícula existente.</p>
 <p><strong>Pós-condições:</strong> Simulação exibida; HSTCONTRIBPREV e HSTATRASOCONTRIB gravados no retroativo; índice revisado.</p>
 <p><strong>Sequência operacional:</strong></p>
 <ol>
-<li>Informar os dados da simulação (plano, categoria do evento gerador, datas, salário, patrocinadora). [<a href="#TRT049">TRT049</a>]</li>
-<li>O sistema verifica o participante e as contribuições da categoria e aplica as regras de cálculo. [<a href="#TRT050">TRT050</a>] [<a href="#TRT051">TRT051</a>]</li>
-<li>Revisão de índice: informar a data de revisão (posterior a 31/08/2006) e processar. [<a href="#TRT052">TRT052</a>] [<a href="#TRT033">TRT033</a>]</li>
-<li>Retroativo em lote: executado pelo componente externo <code>dmRetroativoLote</code>.</li>
+<li><strong>O analista</strong> informa os dados da simulação (plano, categoria do evento gerador, datas, salário, patrocinadora). [<a href="#TRT049">TRT049</a>]</li>
+<li><strong>O sistema</strong> verifica o participante e as contribuições da categoria e aplica as regras de cálculo, projetando as contribuições do evento. [<a href="#TRT050">TRT050</a>] [<a href="#TRT051">TRT051</a>]</li>
+<li><strong>Revisão de índice:</strong> <strong>o analista</strong> informa a data de revisão (posterior a 31/08/2006) e processa; <strong>o sistema</strong> atualiza o índice do benefício saldado/FAB. [<a href="#TRT052">TRT052</a>] [<a href="#TRT033">TRT033</a>]</li>
+<li><strong>Retroativo em lote:</strong> executado pelo componente externo <code>dmRetroativoLote</code>, que calcula as diferenças retroativas e grava no histórico.</li>
 </ol>
 <p><strong>Ações práticas:</strong></p>
 <div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>

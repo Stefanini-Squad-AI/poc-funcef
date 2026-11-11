@@ -45,30 +45,30 @@
 </section>
 
 <section><div class="section-title">2. Descrição Resumida</div>
-<p>Seleção, cálculo, preparo e envio das contribuições do mês para cobrança (folha, Contas a Receber ou banco). Este caso de uso reúne 1 jornada(s) funcional(is) do módulo Contribuição Previdenciária:</p>
+<p>O fundo de pensão cobra mensalmente as contribuições devidas pelos participantes dos planos previdenciários. Neste caso de uso, o analista de arrecadação escolhe o mês e o tipo de cobrança, e o sistema seleciona as contribuições ainda não preparadas para essa competência, calcula os valores devidos e registra o histórico de cobrança. Em seguida, o analista confirma o envio e informa a data de vencimento; o sistema envia as contribuições ao canal escolhido — desconto em folha de pagamento, Contas a Receber (CaR, o módulo CMAdmPrev que gestiona documentos a receber) ou banco — e gera os lançamentos contábeis correspondentes. Ao final, cada contribuição enviada fica marcada como "enviada" (SITRECEBIMENTO = 1, o campo que acompanha o ciclo de cobrança: 0 = não enviada, 1 = enviada, 2 ou mais = recebida) e fica disponível para o recebimento em <a href="uc202.html#PF-02">UC202</a>. Este caso de uso reúne 1 jornada(s) funcional(is) do módulo Contribuição Previdenciária:</p>
 <ul>
-<li><a href="#PF-01"><strong>JF001 — Manutenção e cobrança de contribuições (Preparo e Envio)</strong></a>: Selecionar as contribuições do mês de cobrança, calcular os valores, gerar o histórico de cobrança e enviá-las para cobrança (folha, Contas a Receber ou banco), com integração contábil.</li>
+<li><a href="#PF-01"><strong>JF001 — Manutenção e cobrança de contribuições (Preparo e Envio)</strong></a>: O analista seleciona as contribuições do mês de cobrança, o sistema calcula os valores e gera o histórico de cobrança, e o analista envia-as para cobrança (folha, Contas a Receber ou banco), com integração contábil.</li>
 </ul>
 </section>
 
 <section><div class="section-title">3. Pré-condições</div>
 <p><strong>Gerais do módulo:</strong></p>
 <ul>
-<li>Módulo disponível (entry point <code>CONTRIBUICAOPREV/Fontes/ContribuicaoPREV.dpr</code>) e usuário com permissão de acesso às telas.</li>
-<li>Banco Oracle acessível e parâmetros do módulo carregados (motivo padrão de cobrança, motivo padrão de tratamento de divergência).</li>
-<li>Patrocinadoras, planos previdenciários, contribuições (CONTRIBUICAO) e participantes (PARTPREVPLAN, CONTRIBPREVPARTP) cadastrados.</li>
-<li>Integrações configuradas quando a jornada as usa: Folha, Contas a Receber/CAP, Contabilidade, PGA (ver <a href="integracoes.html">🔗 Integrações</a>).</li>
-<li>Período contábil aberto para as datas usadas em lançamentos.</li>
+<li>Módulo disponível (entry point <code>CONTRIBUICAOPREV/Fontes/ContribuicaoPREV.dpr</code>) e usuário com permissão de acesso às telas — o sistema é desktop (Delphi 5 / VCL) e exige login e permissão.</li>
+<li>Banco Oracle acessível e parâmetros do módulo carregados — o motivo padrão de cobrança e o motivo padrão de tratamento de divergência devem estar parametrizados, pois o sistema os usa ao gerar documentos e registrar divergências.</li>
+<li>Patrocinadoras, planos previdenciários, contribuições (CONTRIBUICAO) e participantes (PARTPREVPLAN, CONTRIBPREVPARTP) cadastrados — sem cadastro de contribuição por participante, não há o que preparar.</li>
+<li>Integrações configuradas quando a jornada as usa: Folha, Contas a Receber/CAP (CMAdmPrev), Contabilidade/PGA (Plano de Gestão Atuarial, o módulo de lançamentos contábeis) — ver <a href="integracoes.html">🔗 Integrações</a>.</li>
+<li>Período contábil aberto para as datas usadas em lançamentos — o sistema valida se o período contábil da data de vencimento está aberto antes de gerar lançamentos.</li>
 </ul>
 <p><strong>Por jornada:</strong></p>
 <ul>
-<li><a href="#PF-01">JF001</a>: Mês/ano e tipo de cobrança definidos; motivo padrão de cobrança parametrizado; participantes com contribuições em CONTRIBPREVPARTP; período contábil aberto para a data de vencimento.</li>
+<li><a href="#PF-01">JF001</a>: O mês/ano e o tipo de cobrança (folha, CaR ou banco) já definidos; o motivo padrão de cobrança parametrizado; participantes com contribuições cadastradas em CONTRIBPRE: o campo ULTMESPREPARO registra até que mês cada participante já foi preparado, e só entram no preparo as contribuições cujo último mês preparado é anterior ao mês de cobrança; período contábil aberto para a data de vencimento informada.</li>
 </ul>
 </section>
 
 <section><div class="section-title">4. Pós-condições</div>
 <ul>
-<li><a href="#PF-01">JF001</a>: HSTCONTRIBPREV gravado com SITRECEBIMENTO = 1; CONTRIBPREVPARTP.ULTMESPREPARO atualizado; DOCUMENTO e LANCAMENTO gerados; lotes de cobrança disponíveis.</li>
+<li><a href="#PF-01">JF001</a>: O histórico de cobrança (HSTCONTRIBPREV) é gravado com a situação de recebimento marcada como "enviada" (SITRECEBIMENTO = 1) para cada contribuição enviada; o campo ULTMESPREPARO do participante em CONTRIBPREVPARTP é atualizado para o mês processado, impedindo que a mesma competência seja preparada duas vezes; os documentos de cobrança (DOCUMENTO) e os lançamentos contábeis (LANCAMENTO) são gerados no CaR e na contabilidade; os lotes de cobrança ficam disponíveis para o recebimento em <a href="uc202.html#PF-02">UC202</a>.</li>
 </ul>
 </section>
 
@@ -78,20 +78,20 @@
 </section>
 
 <div class="pf-block" id="PF-01"><h4>JF001 (PF-01) — Manutenção e cobrança de contribuições (Preparo e Envio)</h4>
-<p><strong>Objetivo:</strong> Selecionar as contribuições do mês de cobrança, calcular os valores, gerar o histórico de cobrança e enviá-las para cobrança (folha, Contas a Receber ou banco), com integração contábil.</p>
-<p><strong>Ator / gatilho:</strong> Analista de arrecadação, na tela <em>Envio de Contribuições</em>.</p>
-<p><strong>Pré-condições:</strong> Mês/ano e tipo de cobrança definidos; motivo padrão de cobrança parametrizado; participantes com contribuições em CONTRIBPREVPARTP; período contábil aberto para a data de vencimento.</p>
-<p><strong>Pós-condições:</strong> HSTCONTRIBPREV gravado com SITRECEBIMENTO = 1; CONTRIBPREVPARTP.ULTMESPREPARO atualizado; DOCUMENTO e LANCAMENTO gerados; lotes de cobrança disponíveis.</p>
+<p><strong>Objetivo:</strong> Permitir ao analista de arrecadação selecionar as contribuições devidas no mês de cobrança, calcular os valores, gerar o histórico de cobrança e enviar as contribuições ao canal escolhido (folha de pagamento, Contas a Receber ou banco), com a respectiva integração contábil. O resultado é que as contribuições ficam marcadas como "enviadas" e disponíveis para recebimento.</p>
+<p><strong>Ator / gatilho:</strong> Analista de arrecadação (usuário operacional), na tela <em>Envio de Contribuições</em> (<code>FPreparaEnvia.dfm</code>).</p>
+<p><strong>Pré-condições:</strong> O mês/ano e o tipo de cobrança (folha, CaR ou banco) já definidos; o motivo padrão de cobrança parametrizado; participantes com contribuições em CONTRIBPREVPARTP cujo último mês preparado é anterior ao mês de cobrança; período contábil aberto para a data de vencimento.</p>
+<p><strong>Pós-condições:</strong> O histórico de cobrança (HSTCONTRIBPREV) é gravado com SITRECEBIMENTO = 1; o campo ULTMESPREPARO do participante é atualizado para o mês processado; os documentos (DOCUMENTO) e lançamentos contábeis (LANCAMENTO) são gerados; os lotes de cobrança ficam disponíveis para recebimento.</p>
 <p><strong>Sequência operacional:</strong></p>
 <ol>
-<li>Informar mês/ano de cobrança e tipo de cobrança. [<a href="#TRT001">TRT001</a>] [<a href="#TRT002">TRT002</a>]</li>
-<li>O sistema verifica o motivo padrão de cobrança e a integração com Contas a Receber e Contabilidade. [<a href="#TRT003">TRT003</a>]</li>
-<li>O sistema seleciona as contribuições elegíveis: último mês preparado anterior ao mês de cobrança; contribuições ENVIA BASE incluem atrasos; opção “apenas calculadas por evento/novas inscrições” filtra as de evento. [<a href="#CONTRIB-RN013">RS013</a>] [<a href="#CONTRIB-RN017">RS017</a>] [<a href="#CONTRIB-RN027">RS027</a>]</li>
-<li>Confirmar as opções; o sistema prepara (calcula valores e grava HSTCONTRIBPREV) e questiona se o plano contábil difere do previdenciário. [<a href="#CONTRIB-RN026">RS026</a>] [<a href="#TRT005">TRT005</a>]</li>
-<li>Informar a data de vencimento; o sistema valida o período contábil. [<a href="#TRT004">TRT004</a>]</li>
-<li>Enviar: integração com Folha/CaR/Contabilidade; contribuições enviadas recebem SITRECEBIMENTO = 1. [<a href="#CONTRIB-RN014">RS014</a>] [<a href="#TRT006">TRT006</a>]</li>
-<li>O sistema atualiza o último mês preparado do participante. [<a href="#CONTRIB-RN016">RS016</a>]</li>
-<li>Fluxo alternativo — Desfazer: contribuições voltam a SITRECEBIMENTO = 0 e o documento/data de emissão são limpos. [<a href="#CONTRIB-RN015">RS015</a>]</li>
+<li><strong>O analista</strong> informa o mês/ano de cobrança e o tipo de cobrança (folha, Contas a Receber ou banco). [<a href="#TRT001">TRT001</a>] [<a href="#TRT002">TRT002</a>]</li>
+<li><strong>O sistema</strong> verifica se o motivo padrão de cobrança está parametrizado e se a integração com Contas a Receber e Contabilidade está ativa. [<a href="#TRT003">TRT003</a>]</li>
+<li><strong>O sistema</strong> seleciona as contribuições elegíveis: contribuições cujo último mês preparado (ULTMESPREPARO) é anterior ao mês de cobrança; contribuições parametrizadas como "ENVIA BASE" (FLGTPVLR = 'B', tipo de valor que envia só a base de cálculo) incluem também as contribuições em atraso com valor; se a opção "apenas calculadas por evento/novas inscrições" estiver marcada, o sistema filtra só as contribuições oriundas de evento. [<a href="#CONTRIB-RN013">RS013</a>] [<a href="#CONTRIB-RN017">RS017</a>] [<a href="#CONTRIB-RN027">RS027</a>]</li>
+<li><strong>O analista</strong> confirma as opções; <strong>o sistema</strong> prepara as contribuições (calcula os valores e grava o histórico em HSTCONTRIBPREV) e, se o plano contábil previdenciário for diferente do plano previdenciário, questiona o analista se deseja alterá-lo. [<a href="#CONTRIB-RN026">RS026</a>] [<a href="#TRT005">TRT005</a>]</li>
+<li><strong>O analista</strong> informa a data de vencimento; <strong>o sistema</strong> valida se o período contábil dessa data está aberto. [<a href="#TRT004">TRT004</a>]</li>
+<li><strong>O sistema</strong> envia as contribuições: integra com Folha/CaR/Contabilidade (PGA) e marca as contribuições enviadas com SITRECEBIMENTO = 1. [<a href="#CONTRIB-RN014">RS014</a>] [<a href="#TRT006">TRT006</a>]</li>
+<li><strong>O sistema</strong> atualiza o campo ULTMESPREPARO do participante com o mês processado, impedindo novo preparo da mesma competência. [<a href="#CONTRIB-RN016">RS016</a>]</li>
+<li><strong>Fluxo alternativo — Desfazer:</strong> <strong>o analista</strong> pode desfazer o preparo/envio; <strong>o sistema</strong> devolve as contribuições a SITRECEBIMENTO = 0 e limpa o documento de cobrança e a data de emissão. Contribuições cuja boleta já foi enviada ao banco (EMISBLOQ = 'S') não podem ser desfeitas. [<a href="#CONTRIB-RN015">RS015</a>]</li>
 </ol>
 <p><strong>Ações práticas:</strong></p>
 <div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
