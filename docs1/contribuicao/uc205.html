@@ -49,6 +49,9 @@
 <ul>
 <li><a href="#PF-05"><strong>JF005 — Tributação — Bitributação / IR Regressivo</strong></a>: Calcular o saldo de contribuições para bitributação, calcular o IR regressivo e registrar a opção de IR na portabilidade.</li>
 </ul>
+<p><strong>Finalidade de negócio:</strong> As contribuições previdenciárias têm natureza tributária: podem ser deduzidas do Imposto de Renda na fase de contribuição (regime regressivo) ou na fase de benefício (regime progressivo). A bitributação é o cálculo do saldo de contribuições que separa as parcelas tributadas e não tributadas, para apurar o que será devido de IR quando o benefício for pago. O IR regressivo é o cálculo do imposto sobre benefícios com alíquota decrescente conforme o tempo de acumulação. A opção de IR (regressivo ou progressivo) deve ser registrada na portabilidade (<a href="uc206.html">UC206</a>). Este caso de uso calcula o saldo para bitributação, apura o IR regressivo e registra a opção de IR.</p>
+<p><strong>Ator / gatilho:</strong> Analista de tributação, ao calcular os saldos de bitributação, processar o IR regressivo ou registrar a opção de IR na portabilidade.</p>
+<p><strong>Resultado esperado:</strong> Saldos de bitributação (HSTBITRIBUTACAO, BITRIBUTACAO) calculados; IRRF apurado; opção de IR gravada na portabilidade.</p>
 </section>
 
 <section><div class="section-title">3. Pré-condições</div>
@@ -64,22 +67,26 @@
 <ul>
 <li><a href="#PF-05">JF005</a>: Participantes com histórico de contribuições; índices cadastrados; prévia da folha de benefícios fora de execução (para o IR regressivo).</li>
 </ul>
+<p><strong>Por que estas pré-condições:</strong> O cálculo do saldo de bitributação precisa do histórico de contribuições do participante (HSTCONTRIBPREV) e dos índices de correção cadastrados (para atualizar saldos antigos pela moeda 557 e IPCA-E — <a href="#CONTRIB-RN040">RS040</a>). O cálculo do IR regressivo é bloqueado enquanto a prévia da folha de benefícios estiver em execução (validação <a href="#TRT022">TRT022</a>), para evitar inconsistência entre os cálculos.</p>
 </section>
 
 <section><div class="section-title">4. Pós-condições</div>
 <ul>
 <li><a href="#PF-05">JF005</a>: HSTBITRIBUTACAO e BITRIBUTACAO atualizados; IRRF calculado; opção de IR gravada em PORTABILIDADEPREV.</li>
 </ul>
+<p><strong>Significado de negócio:</strong> O histórico de bitributação (HSTBITRIBUTACAO) e o saldo (BITRIBUTACAO) passam a refletir o saldo de contribuições separado por natureza tributária, permitindo apurar o IR devido na fase de benefício. O IRRF é calculado para os planos elegíveis (66 e 74 — <a href="#CONTRIB-RN041">RS041</a>). A opção de IR (regressivo ou progressivo) fica registrada em PORTABILIDADEPREV, definindo o regime tributário do participante.</p>
 </section>
 
 <section><div class="section-title">5. Jornadas Funcionais (JF005)</div>
 <p>Cada jornada traz objetivo, ator/gatilho, pré e pós-condições, sequência operacional, ações práticas, <strong>regras de negócio da jornada</strong> (texto completo de cada regra), tratamentos e mensagens.</p>
 <div class="legend"><span><span class="ev ev-comprovado">COMPROVADO</span> — no código</span><span><span class="ev ev-inferido">INFERIDO</span> — plausível</span><span><span class="ev ev-pendente">PENDENTE</span> — validar</span></div>
+<p><strong>Contexto da jornada:</strong> JF005 tem três frentes: (1) cálculo do saldo de bitributação — o analista seleciona os participantes e confirma; o sistema exclui o histórico anterior e recalcula o saldo por participante (<a href="#CONTRIB-RN022">RS022</a>), corrigindo contribuições de 1989–1995 pela moeda 557 e, a partir de 2008/01, pelo IPCA-E (moeda 285) — <a href="#CONTRIB-RN040">RS040</a>; (2) IR regressivo — informada a data de pagamento, o sistema processa todos os planos 66 e 74 (<a href="#CONTRIB-RN041">RS041</a>), bloqueado se a prévia da folha estiver em execução; (3) opção de IR na portabilidade — o participante deve escolher regressivo ou progressivo (<a href="#CONTRIB-RN006">RS006</a>).</p>
 </section>
 
 <div class="pf-block" id="PF-05"><h4>JF005 (PF-05) — Tributação — Bitributação / IR Regressivo</h4>
 <p><strong>Objetivo:</strong> Calcular o saldo de contribuições para bitributação, calcular o IR regressivo e registrar a opção de IR na portabilidade.</p>
 <p><strong>Ator / gatilho:</strong> Analista de tributação, nas telas <em>Cálculo do Saldo de Contribuições - Bitributação</em>, <em>Cálculos IR Regressivo</em> e <em>Cadastro de Contribuições Portadas</em>.</p>
+<p><strong>Explicação:</strong> A bitributação separa as contribuições tributadas das não tributadas para apurar o IR devido na fase de benefício. O cálculo do saldo recalcula por participante: o histórico anterior é excluído e um novo é gravado (<a href="#CONTRIB-RN022">RS022</a>), com correção das contribuições de 1989–1995 pela moeda 557 e, a partir de 2008/01, pelo IPCA-E (moeda 285): <code>saldo = saldo × (COTVALOR/100 + 1)</code>, subtraindo saídas (<a href="#CONTRIB-RN040">RS040</a>). O IR regressivo calcula o imposto sobre benefícios com alíquota decrescente pelo tempo de acumulação, restrito aos planos 66 e 74 (<a href="#CONTRIB-RN041">RS041</a>), e é bloqueado enquanto a prévia da folha está em execução. Na portabilidade, a opção de IR (regressivo ou progressivo) é obrigatória (<a href="#CONTRIB-RN006">RS006</a>) e define o regime tributário do participante.</p>
 <p><strong>Pré-condições:</strong> Participantes com histórico de contribuições; índices cadastrados; prévia da folha de benefícios fora de execução (para o IR regressivo).</p>
 <p><strong>Pós-condições:</strong> HSTBITRIBUTACAO e BITRIBUTACAO atualizados; IRRF calculado; opção de IR gravada em PORTABILIDADEPREV.</p>
 <p><strong>Sequência operacional:</strong></p>

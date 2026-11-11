@@ -50,6 +50,9 @@
 <li><a href="#PF-09"><strong>JF009 — Controle individual / Entrada manual</strong></a>: Consultar e manter individualmente as contribuições de um participante e cadastrar/alterar manualmente o histórico de contribuições, inclusive por núcleo familiar.</li>
 </ul>
 <div class="note note-info"><p><strong>Revisão PFC-35:</strong> a simulação de contribuições, o cálculo de retroativos e a revisão de índice do BS/FAB foram separados no <a href="uc209.html">UC209 – Simular Contribuições e Calcular Retroativos</a>.</p></div>
+<p><strong>Finalidade de negócio:</strong> Nem toda contribuição segue o fluxo automático de preparo e envio (<a href="uc201.html">UC201</a>); há situações em que o analista precisa consultar a situação individual de uma contribuição, corrigir dados pontualmente, registrar manualmente um histórico (por exemplo, recebimento direto, ajuste de situação) ou associar contribuições a um núcleo familiar. Este caso de uso permite consultar e manter individualmente as contribuições de um participante, cadastrar/alterar manualmente o histórico (com validações de coerência entre valor, data e situação) e cadastrar contribuições por núcleo familiar. Contribuições já recebidas ou enviadas não podem ser alteradas diretamente — o caminho é Desfazer ou Tratamento de Divergência (<a href="uc202.html#PF-08">UC202 / JF008</a>).</p>
+<p><strong>Ator / gatilho:</strong> Analista de arrecadação, ao consultar ou corrigir individualmente uma contribuição, ao registrar manualmente um histórico ou ao associar contribuições a um núcleo familiar.</p>
+<p><strong>Resultado esperado:</strong> Histórico de contribuições (HSTCONTRIBPREV) consultado/alterado/incluído; contribuições por núcleo familiar (CONTRIBPREVNUCLEO, NUCLEOFAMILIAR) gravadas; rastro de alteração (HSTATRASOCONTRIB) e log de auditoria coerentes.</p>
 </section>
 
 <section><div class="section-title">3. Pré-condições</div>
@@ -65,22 +68,26 @@
 <ul>
 <li><a href="#PF-09">JF009</a>: Participante cadastrado; motivos de alteração cadastrados.</li>
 </ul>
+<p><strong>Por que estas pré-condições:</strong> O controle individual precisa de um participante cadastrado para localizar suas contribuições. Os motivos de alteração precisam estar cadastrados para que toda entrada manual tenha um motivo que justifique a alteração (rastreabilidade — validação <a href="#TRT044">TRT044</a>).</p>
 </section>
 
 <section><div class="section-title">4. Pós-condições</div>
 <ul>
 <li><a href="#PF-09">JF009</a>: HSTCONTRIBPREV, CONTRIBPREVNUCLEO e NUCLEOFAMILIAR atualizados; HSTATRASOCONTRIB coerente com o recebimento; log gravado.</li>
 </ul>
+<p><strong>Significado de negócio:</strong> O histórico de contribuições (HSTCONTRIBPREV) reflete as alterações manuais — situação, valor recebido, data de recebimento, salário e percentual — com a data de emissão ajustada pela situação (<a href="#CONTRIB-RN009">RS009</a>). As contribuições por núcleo familiar (CONTRIBPREVNUCLEO, NUCLEOFAMILIAR) associam contribuições aos membros do núcleo. O rastro de alteração (HSTATRASOCONTRIB) e o log de auditoria (LOGTOTALPREV) registram quem alterou, o quê e o porquê (motivo), garantindo rastreabilidade das intervenções manuais.</p>
 </section>
 
 <section><div class="section-title">5. Jornadas Funcionais (JF009)</div>
 <p>Cada jornada traz objetivo, ator/gatilho, pré e pós-condições, sequência operacional, ações práticas, <strong>regras de negócio da jornada</strong> (texto completo de cada regra), tratamentos e mensagens.</p>
 <div class="legend"><span><span class="ev ev-comprovado">COMPROVADO</span> — no código</span><span><span class="ev ev-inferido">INFERIDO</span> — plausível</span><span><span class="ev ev-pendente">PENDENTE</span> — validar</span></div>
+<p><strong>Contexto da jornada:</strong> JF009 percorre: (1) consulta — seleciona participante e contribuição; (2) alteração — bloqueada se recebida ou enviada (<a href="#CONTRIB-RN018">RS018</a>, <a href="#CONTRIB-RN029">RS029</a>), orientando usar Desfazer ou Divergência; (3) entrada manual do histórico — meses de cobrança/referência e motivo; (4) recebimento — valor e data juntos (<a href="#CONTRIB-RN010">RS010</a>) e situação coerente (<a href="#CONTRIB-RN011">RS011</a>), com data de emissão ajustada pela situação (<a href="#CONTRIB-RN009">RS009</a>); (5) planos 66 e 74 — salário e percentual &gt; 0 (<a href="#CONTRIB-RN012">RS012</a>); (6) TMPDESC não verificada para não enviadas (<a href="#CONTRIB-RN019">RS019</a>); (7) núcleo familiar — seleciona contribuição e grava. Documento baixado no CaR não pode ser desfeito (<a href="#CONTRIB-RN030">RS030</a>).</p>
 </section>
 
 <div class="pf-block" id="PF-09"><h4>JF009 (PF-09) — Controle individual / Entrada manual</h4>
 <p><strong>Objetivo:</strong> Consultar e manter individualmente as contribuições de um participante e cadastrar/alterar manualmente o histórico de contribuições, inclusive por núcleo familiar.</p>
 <p><strong>Ator / gatilho:</strong> Analista de arrecadação, nas telas <em>Controle Individual de Contribuições</em>, <em>Cadastro Manual do Histórico de Contribuições</em> e <em>Cadastro de Contribuições por Núcleo Familiar</em>.</p>
+<p><strong>Explicação:</strong> O controle individual permite consultar e corrigir contribuições de um participante específico. A alteração é bloqueada se a contribuição já foi recebida (SITRECEBIMENTO &gt; 1 — <a href="#CONTRIB-RN029">RS029</a>) ou enviada à folha/CaR (<a href="#CONTRIB-RN018">RS018</a>); o sistema orienta usar Desfazer ou Tratamento de Divergência. A entrada manual do histórico exige meses de cobrança/referência e motivo; o recebimento exige valor e data juntos (<a href="#CONTRIB-RN010">RS010</a>) e situação coerente (<a href="#CONTRIB-RN011">RS011</a>); a data de emissão é ajustada pela situação (<a href="#CONTRIB-RN009">RS009</a>). Para os planos contábeis 66 e 74, salário e percentual devem ser &gt; 0 (<a href="#CONTRIB-RN012">RS012</a>). A TMPDESC (desconto temporário) só é verificada para contribuições já enviadas (<a href="#CONTRIB-RN019">RS019</a>). O núcleo familiar associa contribuições aos membros do núcleo. Documento baixado no CaR (STATUS='2') não pode ser desfeito (<a href="#CONTRIB-RN030">RS030</a>).</p>
 <p><strong>Pré-condições:</strong> Participante cadastrado; motivos de alteração cadastrados.</p>
 <p><strong>Pós-condições:</strong> HSTCONTRIBPREV, CONTRIBPREVNUCLEO e NUCLEOFAMILIAR atualizados; HSTATRASOCONTRIB coerente com o recebimento; log gravado.</p>
 <p><strong>Sequência operacional:</strong></p>

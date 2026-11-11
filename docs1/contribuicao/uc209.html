@@ -50,6 +50,9 @@
 <li><a href="#PF-10"><strong>JF010 — Retroativo e Simulação</strong></a>: Simular contribuições a partir de um evento gerador, calcular retroativos em lote e revisar o índice do benefício saldado/FAB.</li>
 </ul>
 <div class="note note-info"><p><strong>Origem:</strong> até o PFC-32 esta jornada fazia parte do <a href="uc208.html">UC208</a>. No PFC-35 ela foi separada em caso de uso próprio, sem alteração do texto da jornada.</p></div>
+<p><strong>Finalidade de negócio:</strong> Em um fundo de pensão, há situações em que é preciso projetar contribuições sem efetivamente gravá-las — por exemplo, simular o impacto de um evento gerador (admissão, demissão, alteração salarial) sobre as contribuições de um participante. Também há casos em que contribuições passadas precisam ser recalculadas retroativamente em lote (por exemplo, quando um índice ou percentual foi corrigido após o cálculo original). E o índice do benefício saldado/FAB pode precisar de revisão. Este caso de uso simula contribuições a partir de um evento gerador, calcula retroativos em lote (via componente externo <code>dmRetroativoLote</code>) e revisa o índice do benefício saldado/FAB.</p>
+<p><strong>Ator / gatilho:</strong> Analista previdenciário, ao simular um evento gerador, ao processar retroativos em lote ou ao revisar o índice do benefício saldado/FAB.</p>
+<p><strong>Resultado esperado:</strong> Simulação de contribuições exibida; retroativos em lote calculados e gravados (HSTCONTRIBPREV, HSTATRASOCONTRIB); índice do benefício saldado/FAB revisado.</p>
 </section>
 
 <section><div class="section-title">3. Pré-condições</div>
@@ -65,22 +68,26 @@
 <ul>
 <li><a href="#PF-10">JF010</a>: Plano e categorias de evento gerador cadastrados; regras de cálculo parametrizadas; para eventos de participante, matrícula existente.</li>
 </ul>
+<p><strong>Por que estas pré-condições:</strong> A simulação precisa de um plano e das categorias de evento gerador cadastradas para saber quais eventos simular; as regras de cálculo parametrizadas definem como calcular o valor projetado; para eventos de participante (não genéricos), a matrícula precisa existir, pois a simulação só é permitida para participantes reais (validação <a href="#TRT050">TRT050</a>). A revisão de índice exige data posterior a 31/08/2006 (validação <a href="#TRT052">TRT052</a>).</p>
 </section>
 
 <section><div class="section-title">4. Pós-condições</div>
 <ul>
 <li><a href="#PF-10">JF010</a>: Simulação exibida; HSTCONTRIBPREV e HSTATRASOCONTRIB gravados no retroativo; índice revisado.</li>
 </ul>
+<p><strong>Significado de negócio:</strong> A simulação apenas projeta e exibe as contribuições do evento — não grava definitivamente, servindo para análise de impacto. O retroativo em lote grava as diferenças retroativas no histórico (HSTCONTRIBPREV) e no rastro de alteração (HSTATRASOCONTRIB), efetivando o recálculo de competências passadas. A revisão de índice atualiza o índice do benefício saldado/FAB, complementando <a href="uc206.html#PF-06">UC206 / JF006</a>.</p>
 </section>
 
 <section><div class="section-title">5. Jornadas Funcionais (JF010)</div>
 <p>Cada jornada traz objetivo, ator/gatilho, pré e pós-condições, sequência operacional, ações práticas, <strong>regras de negócio da jornada</strong> (texto completo de cada regra), tratamentos e mensagens.</p>
 <div class="legend"><span><span class="ev ev-comprovado">COMPROVADO</span> — no código</span><span><span class="ev ev-inferido">INFERIDO</span> — plausível</span><span><span class="ev ev-pendente">PENDENTE</span> — validar</span></div>
+<p><strong>Contexto da jornada:</strong> JF010 tem três frentes: (1) simulação — o analista informa plano, categoria do evento gerador, datas, salário, patrocinadora e função; o sistema verifica o participante, seleciona as contribuições da categoria e aplica as regras de cálculo e alteradores, exibindo o resultado projetado; (2) revisão de índice do BS/FAB — informada a data de revisão (posterior a 31/08/2006), o sistema atualiza o índice; (3) retroativo em lote — executado pelo componente externo <code>dmRetroativoLote</code>, que recalcula contribuições passadas e grava as diferenças. As validações são tratamentos de tela (TRT049–TRT052).</p>
 </section>
 
 <div class="pf-block" id="PF-10"><h4>JF010 (PF-10) — Retroativo e Simulação</h4>
 <p><strong>Objetivo:</strong> Simular contribuições a partir de um evento gerador, calcular retroativos em lote e revisar o índice do benefício saldado/FAB.</p>
 <p><strong>Ator / gatilho:</strong> Analista previdenciário, nas telas <em>Simulação de Contribuição</em> e <em>Benefício Saldado e FAB - Revisão de Índice</em>; retroativo em lote via <code>dmRetroativoLote</code> (externo).</p>
+<p><strong>Explicação:</strong> A simulação projeta contribuições a partir de um evento gerador (admissão, demissão, alteração salarial, etc.) sem gravá-las — serve para análise de impacto. O analista informa plano, categoria do evento, datas, salário, patrocinadora e função; o sistema valida os obrigatórios conforme a categoria, verifica o participante (a simulação só é permitida para matrículas existentes — <a href="#TRT050">TRT050</a>), seleciona as contribuições da categoria e aplica as regras de cálculo e alteradores. A revisão de índice do benefício saldado/FAB exige data de revisão posterior a 31/08/2006 (<a href="#TRT052">TRT052</a>), complementando <a href="uc206.html#PF-06">UC206 / JF006</a>. O retroativo em lote é executado pelo componente externo <code>dmRetroativoLote</code>, que recalcula contribuições de competências passadas e grava as diferenças em HSTCONTRIBPREV e HSTATRASOCONTRIB.</p>
 <p><strong>Pré-condições:</strong> Plano e categorias de evento gerador cadastrados; regras de cálculo parametrizadas; para eventos de participante, matrícula existente.</p>
 <p><strong>Pós-condições:</strong> Simulação exibida; HSTCONTRIBPREV e HSTATRASOCONTRIB gravados no retroativo; índice revisado.</p>
 <p><strong>Sequência operacional:</strong></p>

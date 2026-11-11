@@ -49,6 +49,9 @@
 <ul>
 <li><a href="#PF-06"><strong>JF006 — Portabilidade e Benefício Saldado/FAB</strong></a>: Cadastrar portabilidades e contribuições portadas, calcular o benefício saldado e o FAB e fazer carga/descarga dos arquivos correspondentes.</li>
 </ul>
+<p><strong>Finalidade de negócio:</strong> A portabilidade permite que um participante traga contribuições acumuladas em outro plano de previdência para o plano da FUNCEF, consolidando seu saldo. O Benefício Saldado (BS) é uma modalidade de benefício que paga o participante com base no saldo acumulado; o FAB (Fundo de Adicional de Benefício) é um complemento. Este caso de uso cadastra a portabilidade (vínculo com o plano de origem, meses de vínculo, opção de IR), registra as contribuições portadas (manualmente ou via importação de planilha), calcula o Benefício Saldado e o FAB via package Oracle <code>PCK_BENEFSALDFAB</code> e faz carga/descarga de arquivos de BS/FAB.</p>
+<p><strong>Ator / gatilho:</strong> Analista de cadastro previdenciário, ao receber uma portabilidade de outro plano, ao calcular/reprocessar o benefício saldado ou ao carregar arquivo de BS/FAB.</p>
+<p><strong>Resultado esperado:</strong> Portabilidade e contribuições portadas registradas (PORTABILIDADEPREV); benefício saldado e FAB calculados (BENEFSALDFAB); arquivo de carga processado (CARGABENEFSALDFAB).</p>
 </section>
 
 <section><div class="section-title">3. Pré-condições</div>
@@ -64,22 +67,26 @@
 <ul>
 <li><a href="#PF-06">JF006</a>: Participante cadastrado; para importação, planilha Excel no layout esperado.</li>
 </ul>
+<p><strong>Por que estas pré-condições:</strong> A portabilidade precisa de um participante já cadastrado no plano de destino. A importação de contribuições portadas exige planilha Excel no layout esperado (formato e colunas), validada por <a href="#CONTRIB-RN008">RS008</a>. A opção de IR (regressivo/progressivo) é obrigatória (<a href="#CONTRIB-RN006">RS006</a>) e compartilhada com <a href="uc205.html#PF-05">UC205</a>. O tempo de vínculo e os meses complementares (0–11) definem o tempo total de contribuição portada (<a href="#CONTRIB-RN001">RS001</a>, <a href="#CONTRIB-RN044">RS044</a>).</p>
 </section>
 
 <section><div class="section-title">4. Pós-condições</div>
 <ul>
 <li><a href="#PF-06">JF006</a>: PORTABILIDADEPREV, BENEFSALDFAB e CARGABENEFSALDFAB atualizados; contribuições portadas registradas.</li>
 </ul>
+<p><strong>Significado de negócio:</strong> A portabilidade (PORTABILIDADEPREV) registra o vínculo do participante com o plano de origem, os meses de vínculo e a opção de IR. As contribuições portadas ficam no histórico (HSTCONTRIBPREV) e não podem ser alteradas/excluídas após enviadas ou recebidas (<a href="#CONTRIB-RN004">RS004</a>, <a href="#CONTRIB-RN005">RS005</a>). O Benefício Saldado e o FAB (BENEFSALDFAB) são calculados pela package Oracle <code>PCK_BENEFSALDFAB</code> (<a href="#CONTRIB-RN039">RS039</a>). A carga de arquivo (CARGABENEFSALDFAB) registra os valores importados de BS/FAB.</p>
 </section>
 
 <section><div class="section-title">5. Jornadas Funcionais (JF006)</div>
 <p>Cada jornada traz objetivo, ator/gatilho, pré e pós-condições, sequência operacional, ações práticas, <strong>regras de negócio da jornada</strong> (texto completo de cada regra), tratamentos e mensagens.</p>
 <div class="legend"><span><span class="ev ev-comprovado">COMPROVADO</span> — no código</span><span><span class="ev ev-inferido">INFERIDO</span> — plausível</span><span><span class="ev ev-pendente">PENDENTE</span> — validar</span></div>
+<p><strong>Contexto da jornada:</strong> JF006 percorre: (1) cadastro da portabilidade — participante, meses de vínculo 0–11 (<a href="#CONTRIB-RN001">RS001</a>) e opção de IR (<a href="#CONTRIB-RN006">RS006</a>); (2) inclusão de contribuições portadas — manualmente (referência obrigatória e ≤ cobrança, valor &gt; 0 — <a href="#CONTRIB-RN002">RS002</a>, <a href="#CONTRIB-RN003">RS003</a>) ou via importação de planilha (<a href="#CONTRIB-RN008">RS008</a>); (3) alteração/exclusão — bloqueado se recebida ou enviada (<a href="#CONTRIB-RN004">RS004</a>, <a href="#CONTRIB-RN005">RS005</a>); (4) exclusão de portabilidade — exige excluir antes as contribuições (<a href="#CONTRIB-RN007">RS007</a>); (5) benefício saldado/FAB — atualização/reprocessamento via <code>PCK_BENEFSALDFAB.SP_ATUALIZASALDO</code> (<a href="#CONTRIB-RN039">RS039</a>); (6) carga de arquivo de BS/FAB — selecionar, conferir leiaute e importar.</p>
 </section>
 
 <div class="pf-block" id="PF-06"><h4>JF006 (PF-06) — Portabilidade e Benefício Saldado/FAB</h4>
 <p><strong>Objetivo:</strong> Cadastrar portabilidades e contribuições portadas, calcular o benefício saldado e o FAB e fazer carga/descarga dos arquivos correspondentes.</p>
 <p><strong>Ator / gatilho:</strong> Analista de cadastro previdenciário, nas telas <em>Cadastro de Contribuições Portadas</em>, <em>Benefício Saldado e FAB</em> e <em>Benefício Saldado e FAB - Carga de Arquivo</em>.</p>
+<p><strong>Explicação:</strong> A portabilidade traz contribuições de outro plano para a FUNCEF. O cadastro exige participante, meses de vínculo (0–11, pois completam os anos informados — <a href="#CONTRIB-RN001">RS001</a>), opção de IR (<a href="#CONTRIB-RN006">RS006</a>) e tempo de vínculo &gt; 0 (<a href="#CONTRIB-RN044">RS044</a>). As contribuições portadas podem ser incluídas manualmente — com ano/mês de referência obrigatório e não posterior à cobrança (<a href="#CONTRIB-RN002">RS002</a>) e valor esperado &gt; 0 (<a href="#CONTRIB-RN003">RS003</a>) — ou importadas de planilha Excel (<a href="#CONTRIB-RN008">RS008</a>). Após recebidas ou enviadas, não podem ser alteradas/excluídas (<a href="#CONTRIB-RN004">RS004</a>, <a href="#CONTRIB-RN005">RS005</a>). A exclusão da portabilidade exige excluir antes as contribuições (<a href="#CONTRIB-RN007">RS007</a>). O Benefício Saldado é calculado pela função Oracle <code>CM.PCK_BENEFSALDFAB.FN_CALCULABS</code> (<a href="#CONTRIB-RN039">RS039</a>) e atualizado via <code>SP_ATUALIZASALDO</code>. A carga de arquivo de BS/FAB valida seleção, leiaute e benefício INSS.</p>
 <p><strong>Pré-condições:</strong> Participante cadastrado; para importação, planilha Excel no layout esperado.</p>
 <p><strong>Pós-condições:</strong> PORTABILIDADEPREV, BENEFSALDFAB e CARGABENEFSALDFAB atualizados; contribuições portadas registradas.</p>
 <p><strong>Sequência operacional:</strong></p>
