@@ -49,6 +49,18 @@
 <ul>
 <li><a href="#PF-06"><strong>JF006 — Apropriação Contábil</strong></a>: gerar lançamentos contábeis a partir das rubricas previadas/efetivadas.</li>
 </ul>
+<p><strong>Necessidade de negócio:</strong> depois que a folha é previada (<a href="uc101.html#PF-02">JF002</a>) ou efetivada (<a href="uc109.html#PF-03">JF003</a>), seus valores precisam ser refletidos na contabilidade da entidade. Esta jornada transforma as rubricas da folha em lançamentos contábeis (débito/crédito) no plano de contas vinculado, para que a contabilidade registre o impacto financeiro do pagamento de benefícios.</p>
+<p><strong>Quem inicia:</strong> o usuário operacional (analista de folha/contábil), na tela de Apropriação Contábil (<code>FParamRelApropContabil.dfm</code>). A jornada não é disparada automaticamente.</p>
+<p><strong>Resultado esperado:</strong> os lançamentos contábeis são gerados a partir das rubricas previadas/efetivadas e registrados no plano de contas vinculado (PLANPREVCONTABIL).</p>
+<p><strong>Termos, siglas e componentes citados nesta página</strong> — explicados na primeira vez em que aparecem; a coluna "Fonte" indica onde a explicação foi conferida no repositório:</p>
+<div class="table-wrap"><table><thead><tr><th>Termo</th><th>O que significa</th><th>Fonte</th></tr></thead><tbody>
+<tr><td><strong>Apropriação contábil</strong></td><td>Geração de lançamentos contábeis a partir dos valores da folha.</td><td><code>FParamRelApropContabil.dfm</code></td></tr>
+<tr><td><strong>Plano de contas</strong></td><td>Estrutura contábil que recebe os lançamentos.</td><td><a href="dados.html">🗄️ Dados</a></td></tr>
+<tr><td><strong>PLANPREVCONTABIL</strong></td><td>Plano de contas previdenciário/contábil vinculado ao plano.</td><td><a href="#FOLHA-RN013">RS013</a></td></tr>
+<tr><td><strong>dContabil.pas</strong></td><td>Módulo de dados da contabilidade, instanciado pelo motor da folha.</td><td><code>dFolhaPrevia.pas:19438</code></td></tr>
+<tr><td><strong>Lançamento contábil</strong></td><td>Registro de débito/crédito no plano de contas.</td><td><a href="dados.html">🗄️ Dados</a></td></tr>
+<tr><td><strong>Parâmetros contábeis/financeiros</strong></td><td>Configuração do lote que define como a folha é apropriada na contabilidade.</td><td><a href="#FOLHA-RN013">RS013</a></td></tr>
+</tbody></table></div>
 </section>
 
 <section><div class="section-title">3. Pré-condições</div>
@@ -60,9 +72,14 @@
 <li>Patrocinadoras, planos e benefícios devem estar cadastrados.</li>
 <li>O usuário deve ter permissão de acesso ao módulo.</li>
 </ul>
+<p><strong>O que as pré-condições gerais significam na prática:</strong> o módulo FOLHA precisa estar compilado e o banco Oracle acessível. Os parâmetros globais da folha (<code>FParametroFolha</code>) devem estar carregados, e patrocinadoras, planos e benefícios já cadastrados. O usuário precisa ter permissão de acesso ao módulo.</p>
 <p><strong>Por jornada:</strong></p>
 <ul>
 <li><a href="#PF-06">JF006</a>: prévia ou efetivação existente; plano de contas vinculado (PLANPREVCONTABIL).</li>
+</ul>
+<p><strong>Pré-condições por jornada, em termos de negócio:</strong></p>
+<ul>
+<li><a href="#PF-06">JF006</a>: já existe uma prévia ou uma efetivação da folha com valores a apropriar, e o plano de contas previdenciário/contábil (PLANPREVCONTABIL) está vinculado ao plano, com os parâmetros contábeis e financeiros do lote configurados (<a href="#FOLHA-RN013">RS013</a>).</li>
 </ul>
 </section>
 
@@ -70,23 +87,31 @@
 <ul>
 <li><a href="#PF-06">JF006</a>: lançamentos contábeis gerados (tabela destino PENDENTE).</li>
 </ul>
+<p><strong>Resultado de negócio de cada jornada:</strong></p>
+<ul>
+<li><a href="#PF-06">JF006</a> — os lançamentos contábeis são gerados a partir das rubricas da prévia ou da folha efetivada e registrados no plano de contas vinculado. A tabela destino dos lançamentos é <span class="ev ev-pendente">PENDENTE</span> (não confirmada no repositório).</li>
+</ul>
 </section>
 
 <section><div class="section-title">5. Jornadas Funcionais (JF006)</div>
 <p>Cada jornada traz objetivo, ator/gatilho, pré e pós-condições, sequência operacional, ações práticas, <strong>regras de negócio da jornada</strong> (texto completo de cada regra), tratamentos e mensagens.</p>
+<p><strong>Como as jornadas deste caso de uso se relacionam:</strong> a JF006 (apropriação contábil) sucede a prévia (<a href="uc101.html#PF-02">JF002</a>) ou a efetivação (<a href="uc109.html#PF-03">JF003</a>) da folha, consumindo os valores das rubricas para produzir lançamentos contábeis. É iniciada pelo usuário na tela de Apropriação Contábil. Em cada passo, o rótulo "Usuário" ou "Sistema" indica quem executa a ação.</p>
 <div class="legend"><span><span class="ev ev-comprovado">COMPROVADO</span> — no código</span><span><span class="ev ev-inferido">INFERIDO</span> — plausível</span><span><span class="ev ev-pendente">PENDENTE</span> — validar</span></div>
 </section>
 
 <div class="pf-block" id="PF-06"><h4>JF006 (PF-06) — Apropriação Contábil</h4>
 <p><strong>Objetivo:</strong> gerar lançamentos contábeis a partir das rubricas previadas/efetivadas.</p>
-<p><strong>Gatilho/Ator:</strong> <code>FParamRelApropContabil.dfm</code> (Apropriação Contábil).</p>
+<p><strong>Necessidade de negócio:</strong> os valores calculados na folha (prévia ou efetivada) precisam ser refletidos na contabilidade da entidade. Esta jornada apura as rubricas por plano contábil e gera os lançamentos contábeis correspondentes (débito/crédito) no plano de contas vinculado.</p>
+<p><strong>Ator / gatilho:</strong> <code>FParamRelApropContabil.dfm</code> (Apropriação Contábil).</p>
 <p><strong>Pré-condições:</strong> prévia ou efetivação existente; plano de contas vinculado (PLANPREVCONTABIL).</p>
+<p><strong>Em termos de negócio:</strong> já existe uma prévia ou uma efetivação com valores a apropriar, e o plano de contas previdenciário/contábil está vinculado ao plano com os parâmetros contábeis e financeiros do lote configurados (<a href="#FOLHA-RN013">RS013</a>).</p>
 <p><strong>Pós-condições:</strong> lançamentos contábeis gerados (tabela destino PENDENTE).</p>
+<p><strong>Em termos de negócio:</strong> os lançamentos contábeis (débito/crédito) são gerados no plano de contas a partir das rubricas da folha. A tabela destino dos lançamentos é <span class="ev ev-pendente">PENDENTE</span>.</p>
 <p><strong>Sequência operacional:</strong></p>
 <ol>
-<li>Apurar rubricas por plano contábil</li>
-<li><code>InstanciaDtmLocal</code> (<code>dFolhaPrevia.pas:19438</code>) instancia <code>dContabil.pas</code></li>
-<li>Gerar lançamentos contábeis</li>
+<li><strong>Sistema:</strong> Apurar rubricas por plano contábil<br>O sistema coleta as rubricas previadas/efetivadas agrupadas por plano contábil (<code>FParamRelApropContabil.dfm</code>).</li>
+<li><strong>Sistema:</strong> <code>InstanciaDtmLocal</code> (<code>dFolhaPrevia.pas:19438</code>) instancia <code>dContabil.pas</code><br>O motor da folha instancia o módulo de dados da contabilidade para gerar os lançamentos.</li>
+<li><strong>Sistema:</strong> Gerar lançamentos contábeis<br>O <code>dContabil</code> produz os lançamentos contábeis (débito/crédito) no plano de contas vinculado.</li>
 </ol>
 <p><strong>Ações práticas:</strong></p>
 <div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
@@ -108,9 +133,20 @@
 </div>
 </div>
 
+<p><strong>Tratamentos de erro:</strong> <a href="uc109.html#TRT009">TRT009</a></p>
+<p><strong>Mensagens:</strong> <a href="#MSG009">MSG009</a></p>
+<p><strong>Telas:</strong> Apropriação Contábil (<code>FParamRelApropContabil.dfm</code>)</p>
 <p><strong>Dependências:</strong> sucede <a href="uc101.html#PF-02">JF002</a> ou <a href="uc109.html#PF-03">JF003</a>. Evidência: <code>dFolhaPrevia.pas:19438</code>, <code>dContabil.pas</code> · <span class="ev ev-comprovado">COMPROVADO</span> (chamada); destino <span class="ev ev-pendente">PENDENTE</span></p>
 <div class="mermaid">graph LR
   n0["FParamRelApropContabil"] --> n1["apuraRubricasPorPlanoContabil"] --> n2["InstanciaDtmLocal(dContabil)"] --> n3["lançamentos contábeis"]</div>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span> — informações que o repositório não comprova ou que divergem entre fontes. O texto existente foi mantido; os itens abaixo dependem de validação humana.</p>
+<ul>
+<li>Tabela destino dos lançamentos contábeis: marcada como PENDENTE no repositório; não foi confirmada.</li>
+<li>Regras internas de <code>dContabil.pas</code> (mapeamento rubrica → conta contábil): o módulo de dados da contabilidade não foi analisado em detalhe.</li>
+<li>Conteúdo e formato dos lançamentos gerados (lote, histórico, contrapartida): não há documentação detalhada no repositório.</li>
+</ul>
+</div>
+<div class="note note-info"><p><strong>Registro original do processo PF-06</strong></p><p><strong>Forms de entrada:</strong> <code>FParamRelApropContabil.dfm</code></p><p><strong>Lógica de processamento:</strong> Apura rubricas por plano contábil → InstanciaDtmLocal(dContabil) → gera lançamentos contábeis</p><p><strong>Saídas:</strong> Lançamentos contábeis gerados</p><p><strong>Persistência (tabelas escritas):</strong> PENDENTE (tabela destino não confirmada)</p><p><strong>Evidência:</strong> <code>dFolhaPrevia.pas:19438</code>, <code>dContabil.pas</code> · <span class="ev ev-comprovado">COMPROVADO</span> (chamada); destino <span class="ev ev-pendente">PENDENTE</span></p></div>
 </div>
 
 <section id="TRT-section"><div class="section-title">6. Tratamentos (TRT)</div>

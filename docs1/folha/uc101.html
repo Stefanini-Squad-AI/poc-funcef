@@ -50,6 +50,30 @@
 <li><a href="#PF-01"><strong>JF001 — Preparo da Folha</strong></a>: selecionar patrocinadoras/planos/benefícios e aplicar reajustes/eventos antes da prévia.</li>
 <li><a href="#PF-02"><strong>JF002 — Prévia (Cálculo da Folha)</strong></a>: calcular a prévia de pagamento por recebedor/rubrica (motor central).</li>
 </ul>
+<p><strong>Necessidade de negócio:</strong> todo mês a entidade precisa pagar benefícios a seus recebedores (participantes, beneficiários e pensionistas). Antes de pagar, é preciso preparar os benefícios que entrarão na folha (selecionar patrocinadoras, planos e benefícios, aplicar reajustes e eventos) e depois calcular a prévia — o demonstrativo de proventos e descontos por recebedor e rubrica, sem ainda consolidar em histórico definitivo. A prévia permite conferir, ajustar e só então efetivar. Este caso de uso cobre essas duas etapas: o preparo (JF001) e o cálculo da prévia (JF002), que é o coração do módulo, executado pelo motor <code>dFolhaPrevia.pas</code> (30.856 linhas).</p>
+<p><strong>Quem inicia:</strong> sempre o usuário operacional (analista de folha), pelos botões de Preparo (<code>FPreparo.dfm</code>) e de processar prévia (<code>FFolhaNormalPrevia.dfm</code> ou <code>fFolhaExtra.dfm</code>). Nenhuma das duas jornadas é disparada automaticamente.</p>
+<p><strong>Resultado esperado:</strong> no preparo, os benefícios ficam selecionados e com histórico/processo gravados, prontos para a prévia. Na prévia, a tabela <code>PREVIA</code> é populada com uma linha por recebedor/rubrica/competência, com IRRF, margem consignável, CPMF, benefício mínimo, correção e salário-família calculados — pronta para conferência e efetivação (<a href="uc109.html#PF-03">JF003</a>).</p>
+<p><strong>Termos, siglas e componentes citados nesta página</strong> — explicados na primeira vez em que aparecem; a coluna “Fonte” indica onde a explicação foi conferida no repositório:</p>
+<div class="table-wrap"><table><thead><tr><th>Termo</th><th>O que significa</th><th>Fonte</th></tr></thead><tbody>
+<tr><td><strong>Prévia</strong></td><td>Cálculo da folha antes da efetivação. Produz o demonstrativo de proventos e descontos por recebedor/rubrica, gravado na tabela PREVIA, sem consolidar em histórico definitivo. Permite conferir e ajustar antes de efetivar.</td><td><a href="dados.html">🗄️ Dados</a> (PREVIA); <code>dFolhaPrevia.pas:4096</code></td></tr>
+<tr><td><strong>Recebedor</strong></td><td>Pessoa que recebe o benefício na folha — participante titular, beneficiário ou pensionista. O motor processa a prévia iterando recebedor por recebedor (<code>CriaRecebedor</code>).</td><td><code>dFolhaPrevia.pas:19243</code></td></tr>
+<tr><td><strong>Rubrica</strong></td><td>Cada provento ou desconto da folha (ex.: benefício, IRRF, pensão, CPMF). Catalogada em PROVDESC. A prévia calcula uma linha por recebedor/rubrica.</td><td><a href="dados.html">🗄️ Dados</a> (PROVDESC)</td></tr>
+<tr><td><strong>dFolhaPrevia.pas</strong></td><td>Motor central de cálculo da prévia (30.856 linhas). Concentra a lógica em 3 classes: TdtmFolhaPrevia, TobjRecebedor e TobjRubrica. Orquestra o cálculo por recebedor, rubrica, IRRF, margem, CPMF, benefício mínimo, correção e salário-família.</td><td><a href="funcionalidades.html">⚙️ Processos Funcionais</a> (OBS002)</td></tr>
+<tr><td><strong>PREVIA</strong></td><td>Tabela onde a prévia é gravada: uma linha por recebedor/rubrica/competência (chave IDLOTE+IDPESSOA+IDRUBRICA+IDPLANOPREV). 57 campos, incluindo valor do provento, fonte pagadora e flags de IR/desconto.</td><td><a href="dados.html">🗄️ Dados</a> (PREVIA)</td></tr>
+<tr><td><strong>BASEDEPAGAMENTO</strong></td><td>Base de pagamento da folha. Atualizada durante a prévia e a efetivação com os valores apurados por competência.</td><td><a href="dados.html">🗄️ Dados</a>; <code>dFolhaPrevia.pas:27387</code></td></tr>
+<tr><td><strong>BITRIBUTACAO / HSTBITRIBUTACAO</strong></td><td>Base de tributação de IRRF por fonte pagadora e tipo (normal/regressivo) e seu histórico. Atualizadas durante o cálculo do IR na prévia.</td><td><a href="dados.html">🗄️ Dados</a>; <code>dFolhaPrevia.pas:16002,15945</code></td></tr>
+<tr><td><strong>CTRLINTERFACE</strong></td><td>Tabela de controle de interface. O motor grava/atualiza a situação da prévia e o lote corrente, permitindo acompanhar o progresso do processamento.</td><td><a href="dados.html">🗄️ Dados</a>; <a href="#FOLHA-RN030">RS030</a></td></tr>
+<tr><td><strong>HSTBENEFBFCIARIO</strong></td><td>Histórico do benefício do beneficiário (auditoria). Populado no preparo com os benefícios selecionados para a prévia.</td><td><a href="dados.html">🗄️ Dados</a></td></tr>
+<tr><td><strong>PROCESSOBENEF</strong></td><td>Processo de benefício corrente. Criado/atualizado no preparo para cada benefício processado.</td><td><a href="dados.html">🗄️ Dados</a>; <code>FPreparo.pas:2678</code></td></tr>
+<tr><td><strong>HSTCONTRIBPREV</strong></td><td>Histórico das contribuições previdenciárias. Atualizado no preparo ao calcular pró-rata e contribuição de pensionista.</td><td><a href="dados.html">🗄️ Dados</a></td></tr>
+<tr><td><strong>TMPDESC</strong></td><td>Tabela temporária de descontos do lote. Usada no preparo e na correção de retroativos.</td><td><a href="dados.html">🗄️ Dados</a>; <code>dFolhaPrevia.pas:4160,9122</code></td></tr>
+<tr><td><strong>IRRF</strong></td><td>Imposto de Renda Retido na Fonte. Calculado na prévia sobre a base de proventos tributáveis, por fonte pagadora e tipo (normal ou regressivo). Detalhado em <a href="uc104.html">UC104</a>.</td><td><a href="uc104.html">UC104</a>; <a href="#FOLHA-RN004">RS004</a>, <a href="#FOLHA-RN005">RS005</a></td></tr>
+<tr><td><strong>CPMF</strong></td><td>Contribuição Provisória sobre Movimentação Financeira. Calculada sobre o valor base pelo fator (percCPMF − 1).</td><td><a href="#FOLHA-RN007">RS007</a></td></tr>
+<tr><td><strong>Margem consignável</strong></td><td>Limite percentual da renda do recebedor até o qual descontos consignáveis podem ser tomados. Rubricas que excedem a margem são bloqueadas ou ajustadas.</td><td><a href="#FOLHA-RN008">RS008</a></td></tr>
+<tr><td><strong>REINF (eSocial)</strong></td><td>Evento previdenciário do eSocial. O processamento REINF rateia rubricas conforme a proporção progressivo/regressivo do plano.</td><td><a href="#FOLHA-RN019">RS019</a></td></tr>
+<tr><td><strong>Competência (mês/ano de referência)</strong></td><td>Mês e ano de referência da folha. Obrigatórios antes de qualquer processamento por competência.</td><td><a href="#FOLHA-RN001">RS001</a></td></tr>
+<tr><td><strong>FParametroFolha</strong></td><td>Parâmetros globais da folha, carregados na inicialização do módulo. Incluem percentuais (CPMF, margem), bases de cálculo e configurações de arredondamento.</td><td><a href="funcionalidades.html">⚙️ Processos Funcionais</a> (pré-condições gerais)</td></tr>
+</tbody></table></div>
 </section>
 
 <section><div class="section-title">3. Pré-condições</div>
@@ -61,10 +85,16 @@
 <li>Patrocinadoras, planos e benefícios devem estar cadastrados.</li>
 <li>O usuário deve ter permissão de acesso ao módulo.</li>
 </ul>
+<p><strong>O que as pré-condições gerais significam na prática:</strong> o analista de folha precisa ter acesso ao módulo FOLHA e o banco Oracle (schema <code>CM.</code>) precisa estar acessível. Ao iniciar, o sistema carrega os parâmetros globais da folha (<code>FParametroFolha</code>), que definem percentuais (CPMF, margem consignável), bases de cálculo e configurações de arredondamento. Os cadastros básicos — patrocinadoras, planos e benefícios — já devem existir, normalmente criados nos módulos de cadastro previdenciário. Sem esses cadastros, não há benefícios para preparar nem recebedores para calcular.</p>
 <p><strong>Por jornada:</strong></p>
 <ul>
 <li><a href="#PF-01">JF001</a>: lote aberto; patrocinadoras/planos cadastrados; benefícios ativos.</li>
 <li><a href="#PF-02">JF002</a>: preparo concluído (<a href="#PF-01">JF001</a>); lote com benefícios preparados; parâmetros globais em <code>FParametroFolha</code>.</li>
+</ul>
+<p><strong>Pré-condições por jornada, em termos de negócio:</strong></p>
+<ul>
+<li><a href="#PF-01">JF001</a>: já existe um lote aberto para a competência (mês/ano) e os benefícios que entrarão na folha estão ativos e vinculados a patrocinadoras e planos cadastrados. O preparo seleciona quais desses benefícios serão processados.</li>
+<li><a href="#PF-02">JF002</a>: o preparo (JF001) já foi concluído, de modo que o lote contém benefícios preparados com histórico gravado. Os parâmetros globais da folha (<code>FParametroFolha</code>) estão carregados, porque o cálculo da prévia depende deles (percentuais de CPMF, margem, bases de IRRF, arredondamento).</li>
 </ul>
 </section>
 
@@ -73,25 +103,35 @@
 <li><a href="#PF-01">JF001</a>: HSTBENEFBFCIARIO, PROCESSOBENEF, HSTCONTRIBPREV populados; benefícios preparados para prévia.</li>
 <li><a href="#PF-02">JF002</a>: PREVIA, BASEDEPAGAMENTO, BITRIBUTACAO, HSTBITRIBUTACAO, CTRLINTERFACE populados; prévia pronta para conferência/efetivação.</li>
 </ul>
+<p><strong>Resultado de negócio de cada jornada:</strong></p>
+<ul>
+<li><a href="#PF-01">JF001</a> — os benefícios selecionados ficam preparados para a prévia: o histórico (HSTBENEFBFCIARIO), o processo (PROCESSOBENEF) e as contribuições (HSTCONTRIBPREV) são gravados. O pró-rata e a contribuição de pensionista são calculados. A duplicidade de lotes é evitada (<a href="#FOLHA-RN010">RS010</a>).</li>
+<li><a href="#PF-02">JF002</a> — a prévia é calculada e gravada em PREVIA com uma linha por recebedor/rubrica. O IRRF (normal e regressivo), a margem consignável, o CPMF, o benefício mínimo, a correção e o salário-família são calculados. A base de pagamento (BASEDEPAGAMENTO), a tributação (BITRIBUTACAO/HSTBITRIBUTACAO) e o controle de interface (CTRLINTERFACE) são atualizados. A prévia fica pronta para conferência (<a href="uc108.html#PF-E">JF017</a>) e efetivação (<a href="uc109.html#PF-03">JF003</a>).</li>
+</ul>
 </section>
 
 <section><div class="section-title">5. Jornadas Funcionais (JF001, JF002)</div>
 <p>Cada jornada traz objetivo, ator/gatilho, pré e pós-condições, sequência operacional, ações práticas, <strong>regras de negócio da jornada</strong> (texto completo de cada regra), tratamentos e mensagens.</p>
+<p><strong>Como as jornadas deste caso de uso se relacionam:</strong> o preparo (JF001) sempre precede a prévia (JF002). O preparo seleciona os benefícios e grava o histórico; a prévia usa esses benefícios preparados para calcular proventos e descontos. As duas são iniciadas pelo usuário em telas diferentes (Preparo e Prévia). Em cada passo, o rótulo “Usuário” ou “Sistema” indica quem executa a ação.</p>
 <div class="legend"><span><span class="ev ev-comprovado">COMPROVADO</span> — no código</span><span><span class="ev ev-inferido">INFERIDO</span> — plausível</span><span><span class="ev ev-pendente">PENDENTE</span> — validar</span></div>
 </section>
 
 <div class="pf-block" id="PF-01"><h4>JF001 (PF-01) — Preparo da Folha</h4>
 <p><strong>Objetivo:</strong> selecionar patrocinadoras/planos/benefícios e aplicar reajustes/eventos antes da prévia.</p>
-<p><strong>Gatilho/Ator:</strong> usuário aciona o botão Preparo em <code>FPreparo.dfm</code>.</p>
+<p><strong>Necessidade de negócio:</strong> antes de calcular a prévia, é preciso definir o escopo da folha: quais patrocinadoras, planos e benefícios entrarão no processamento da competência. O preparo monta essas listas, inicializa o processo de benefício, processa cada benefício aplicando regras, grava o histórico e calcula o pró-rata e a contribuição de pensionista. Sem o preparo, a prévia não sabe quais benefícios calcular.</p>
+<p><strong>Ator / gatilho:</strong> usuário operacional (analista de folha), acionando o botão Preparo em <code>FPreparo.dfm</code>.</p>
 <p><strong>Pré-condições:</strong> lote aberto; patrocinadoras/planos cadastrados; benefícios ativos.</p>
+<p><strong>Em termos de negócio:</strong> já existe um lote aberto para a competência e os benefícios que podem entrar na folha estão ativos e cadastrados. O preparo vai selecionar, dentre esses, os que serão processados.</p>
 <p><strong>Pós-condições:</strong> HSTBENEFBFCIARIO, PROCESSOBENEF, HSTCONTRIBPREV populados; benefícios preparados para prévia.</p>
+<p><strong>Em termos de negócio:</strong> os benefícios selecionados têm histórico e processo gravados e ficam prontos para o cálculo da prévia (JF002). A duplicidade de lotes é evitada: se o mesmo lote já foi processado, o benefício não é regenerado (<a href="#FOLHA-RN010">RS010</a>).</p>
 <p><strong>Sequência operacional:</strong></p>
 <ol>
-<li><code>MontaListaPatro</code> → <code>MontaListaPlano</code> → <code>MontaListaBenef</code> (FPreparo.pas:1030/1042/1075)</li>
-<li><code>InicializaProcessoBeneficio</code> (:1755) → <code>InicializaContadores</code> (:1812)</li>
-<li>Loop: <code>PassoProcessoBeneficio</code> (:1901) → <code>ExecutaRegraProcessoBeneficio</code> (:1943) → <code>IncrementaTotais</code> (:1837) <a href="#FOLHA-RN010">[RS010]</a> <a href="#TRT006">[TRT006]</a></li>
-<li><code>GravaHstBeneficio</code> (:2375) → <code>InsereHstBfciario</code> (:1383) → <code>GravaProcessoBeneficio</code> (:2678)</li>
-<li><code>CalculaProRata</code> (:2931) → <code>CalculaEnviaContribuicaoPensionista</code> (:2958)</li>
+<li><strong>Usuário:</strong> Informar tipo de folha, lote, mês/ano e selecionar patrocinadoras, planos e benefícios.<br>O usuário preenche os parâmetros na tela de preparo e marca os itens nas listas de patrocinadoras, planos e benefícios.</li>
+<li><strong>Sistema:</strong> Montar as listas de patrocinadoras, planos e benefícios selecionados.<br><code>MontaListaPatro</code> → <code>MontaListaPlano</code> → <code>MontaListaBenef</code> populam as listas na tela (<code>FPreparo.pas:1030/1042/1075</code>).</li>
+<li><strong>Sistema:</strong> Inicializar o processo de benefício e os contadores.<br><code>InicializaProcessoBeneficio</code> (:1755) → <code>InicializaContadores</code> (:1812) preparam o estado para o loop de processamento.</li>
+<li><strong>Sistema:</strong> Processar cada benefício em loop, aplicando regras e incrementando totais. [<a href="#FOLHA-RN010">RS010</a>]<br><code>PassoProcessoBeneficio</code> (:1901) → <code>ExecutaRegraProcessoBeneficio</code> (:1943) → <code>IncrementaTotais</code> (:1837). A duplicidade de lote é verificada em <code>InsereHstBfciario</code> <a href="#TRT006">[TRT006]</a>.</li>
+<li><strong>Sistema:</strong> Gravar o histórico e o processo de cada benefício.<br><code>GravaHstBeneficio</code> (:2375) → <code>InsereHstBfciario</code> (:1383) → <code>GravaProcessoBeneficio</code> (:2678) persistem em HSTBENEFBFCIARIO e PROCESSOBENEF.</li>
+<li><strong>Sistema:</strong> Calcular pró-rata e contribuição de pensionista.<br><code>CalculaProRata</code> (:2931) → <code>CalculaEnviaContribuicaoPensionista</code> (:2958) gravam em HSTCONTRIBPREV.</li>
 </ol>
 <p><strong>Ações práticas:</strong></p>
 <div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
@@ -132,26 +172,39 @@
 </div>
 </div>
 
+<p><strong>Tratamentos de erro:</strong> <a href="#TRT001">TRT001</a> (mês/ano não informados), <a href="#TRT006">TRT006</a> (duplicidade de lote)</p>
+<p><strong>Mensagens:</strong> <a href="#MSG001">MSG001</a>, <a href="#MSG006">MSG006</a></p>
+<p><strong>Telas:</strong> Preparo da Folha (<code>FPreparo.dfm</code>)</p>
 <p><strong>Dependências:</strong> precede <a href="#PF-02">JF002</a> (prévia). Evidência: <code>FOLHA/Fontes/FPreparo.pas:1015-2958</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
 <div class="mermaid">graph LR
   n0["FPreparo"] --> n1["MontaListas"] --> n2["InicializaProcessoBeneficio"] --> n3["loop(PassoProcessoBeneficio"] --> n4["ExecutaRegra"] --> n5["GravaHstBeneficio)"] --> n6["CalculaProRata"] --> n7["CalculaEnviaContribuicaoPensionista"] --> n8["HSTBENEFBFCIARIO/PROCESSOBENEF"]</div>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span> — informações que o repositório não comprova ou que divergem entre fontes. O texto existente foi mantido; os itens abaixo dependem de validação humana.</p>
+<ul>
+<li>Quais reajustes e eventos específicos são aplicados no preparo antes da prévia: o código processa benefícios em loop aplicando regras (<code>ExecutaRegraProcessoBeneficio</code>), mas o catálogo detalhado de reajustes/eventos possíveis não está documentado nesta jornada.</li>
+<li>Critérios de seleção padrão de patrocinadoras/planos/benefícios ao abrir a tela de preparo: não confirmado se todas vêm pré-marcadas ou nenhuma.</li>
+</ul>
+</div>
+<div class="note note-info"><p><strong>Registro original do processo PF-01</strong></p><p><strong>Forms de entrada:</strong> <code>FPreparo.dfm</code></p><p><strong>Lógica de processamento:</strong> Monta listas (patro/planos/benefícios) → inicializa processo → loop de processamento aplicando regras → grava histórico e processo → calcula pró-rata e contribuição de pensionista</p><p><strong>Saídas:</strong> Benefícios preparados para prévia</p><p><strong>Persistência (tabelas escritas):</strong> HSTBENEFBFCIARIO, PROCESSOBENEF, HSTCONTRIBPREV</p><p><strong>Evidência:</strong> <code>FOLHA/Fontes/FPreparo.pas:1015-2958</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
 </div>
 
 <div class="pf-block" id="PF-02"><h4>JF002 (PF-02) — Prévia (Cálculo da Folha)</h4>
 <p><strong>Objetivo:</strong> calcular a prévia de pagamento por recebedor/rubrica (motor central).</p>
-<p><strong>Gatilho/Ator:</strong> botão processar em <code>FFolhaNormalPrevia.dfm</code> ou <code>fFolhaExtra.dfm</code>.</p>
+<p><strong>Necessidade de negócio:</strong> com os benefícios preparados, é preciso calcular quanto cada recebedor vai receber: proventos, descontos (IRRF, pensão, CPMF, margem consignável), correção, benefício mínimo e salário-família. Esse cálculo é o núcleo do módulo e é feito pelo motor <code>dFolhaPrevia.pas</code>, que percorre recebedor por recebedor e rubrica por rubrica. O resultado é a prévia — um demonstrativo que pode ser conferido e ajustado antes de virar histórico definitivo (efetivação).</p>
+<p><strong>Ator / gatilho:</strong> usuário operacional (analista de folha), acionando o botão processar em <code>FFolhaNormalPrevia.dfm</code> (folha normal) ou <code>fFolhaExtra.dfm</code> (folha extra).</p>
 <p><strong>Pré-condições:</strong> preparo concluído (<a href="#PF-01">JF001</a>); lote com benefícios preparados; parâmetros globais em <code>FParametroFolha</code>.</p>
+<p><strong>Em termos de negócio:</strong> o preparo já selecionou e preparou os benefícios. Os parâmetros globais da folha (percentuais de CPMF, margem, bases de IRRF, arredondamento) estão carregados, porque o cálculo depende deles.</p>
 <p><strong>Pós-condições:</strong> PREVIA, BASEDEPAGAMENTO, BITRIBUTACAO, HSTBITRIBUTACAO, CTRLINTERFACE populados; prévia pronta para conferência/efetivação.</p>
+<p><strong>Em termos de negócio:</strong> a prévia está calculada e gravada: cada recebedor/rubrica tem seu valor em PREVIA, a base de pagamento e a tributação estão atualizadas, e o controle de interface registra a situação. A prévia pode ser conferida (<a href="uc108.html#PF-E">JF017</a>) e então efetivada (<a href="uc109.html#PF-03">JF003</a>).</p>
 <p><strong>Sequência operacional (motor dFolhaPrevia.pas):</strong></p>
 <ol>
-<li><code>ProcessaPrevia</code> (:24781) — orquestra; abre transação (:25386) <a href="#FOLHA-RN022">[RS022]</a></li>
-<li>Para cada recebedor: <code>CriaRecebedor</code> (:19243) → <code>ProcessaRubricaProvento</code> (:24378) <a href="#FOLHA-RN029">[RS029]</a></li>
-<li><code>ProcessaRubrica</code> (:17697) → <code>ExecutaRegraRubrica</code> (:16865) → <code>ClassificaRubricaBase</code> (:15076)</li>
-<li><code>DeterminaBasesIRRF</code> (:7180) → <code>CaluloIRRF</code> (:13493) <a href="#FOLHA-RN004">[RS004]</a> <a href="#FOLHA-RN005">[RS005]</a> <a href="#FOLHA-RN015">[RS015]</a> <a href="#FOLHA-RN017">[RS017]</a></li>
-<li><code>VerificaMargemDesconto</code> (:7496) → <code>CalculaMargemDesconto</code> (:7676) <a href="#FOLHA-RN008">[RS008]</a> <a href="#TRT010">[TRT010]</a></li>
-<li><code>CalculaCPMF</code> (:16764) → <code>CalculaBeneficioMinimo</code> (:8298) → <code>CalculaCorrecaoBeneficio</code> (:8615) → <code>CaluloSalarioFamilia</code> (:9555) <a href="#FOLHA-RN007">[RS007]</a> <a href="#FOLHA-RN009">[RS009]</a> <a href="#FOLHA-RN020">[RS020]</a> <a href="#FOLHA-RN021">[RS021]</a> <a href="#TRT011">[TRT011]</a></li>
-<li><code>InsereRubrica</code> (:15183) → <code>IncluiPrevia</code> (:4096) — commit (:4138) <a href="#FOLHA-RN006">[RS006]</a> <a href="#TRT005">[TRT005]</a></li>
-<li><code>ProcessaFechamentoRecebedor</code> (:23310) → <code>ProcessaRateioRubricas</code> (:22816) → <code>ProcessaReinf</code> (:19882) <a href="#FOLHA-RN018">[RS018]</a> <a href="#FOLHA-RN019">[RS019]</a></li>
+<li><strong>Usuário:</strong> Acionar o processamento da prévia, informando lote, mês/ano e modo.<br>O usuário dispara o cálculo na tela de prévia. O motor <code>ProcessaPrevia</code> (:24781) orquestra o processamento e abre transação Oracle (:25386) [<a href="#FOLHA-RN022">RS022</a>].</li>
+<li><strong>Sistema:</strong> Para cada recebedor, criar o objeto e processar os proventos. [<a href="#FOLHA-RN029">RS029</a>]<br><code>CriaRecebedor</code> (:19243) instancia o recebedor e avalia o dado bancário; <code>ProcessaRubricaProvento</code> (:24378) processa os proventos do recebedor.</li>
+<li><strong>Sistema:</strong> Para cada rubrica, classificar e executar a regra.<br><code>ProcessaRubrica</code> (:17697) → <code>ExecutaRegraRubrica</code> (:16865) → <code>ClassificaRubricaBase</code> (:15076) determinam a base da rubrica e aplicam a regra de cálculo.</li>
+<li><strong>Sistema:</strong> Determinar as bases de IRRF e calcular o imposto. [<a href="#FOLHA-RN004">RS004</a>, <a href="#FOLHA-RN005">RS005</a>, <a href="#FOLHA-RN015">RS015</a>, <a href="#FOLHA-RN017">RS017</a>]<br><code>DeterminaBasesIRRF</code> (:7180) apura as bases por fonte/tipo; <code>CaluloIRRF</code> (:13493) calcula o IR normal ou regressivo e a compensação.</li>
+<li><strong>Sistema:</strong> Verificar a margem de desconto consignável. [<a href="#FOLHA-RN008">RS008</a>]<br><code>VerificaMargemDesconto</code> (:7496) → <code>CalculaMargemDesconto</code> (:7676) bloqueiam ou ajustam rubricas que excedem a margem <a href="#TRT010">[TRT010]</a>.</li>
+<li><strong>Sistema:</strong> Calcular CPMF, benefício mínimo, correção e salário-família. [<a href="#FOLHA-RN007">RS007</a>, <a href="#FOLHA-RN009">RS009</a>, <a href="#FOLHA-RN020">RS020</a>, <a href="#FOLHA-RN021">RS021</a>]<br><code>CalculaCPMF</code> (:16764) → <code>CalculaBeneficioMinimo</code> (:8298) → <code>CalculaCorrecaoBeneficio</code> (:8615) → <code>CaluloSalarioFamilia</code> (:9555) aplicam os cálculos complementares <a href="#TRT011">[TRT011]</a>.</li>
+<li><strong>Sistema:</strong> Inserir a rubrica e gravar a prévia com commit por blocos. [<a href="#FOLHA-RN006">RS006</a>, <a href="#FOLHA-RN022">RS022</a>]<br><code>InsereRubrica</code> (:15183) → <code>IncluiPrevia</code> (:4096) gravam em PREVIA; commit (:4138) + StartTransaction para o próximo bloco <a href="#TRT005">[TRT005]</a>.</li>
+<li><strong>Sistema:</strong> Fechar o recebedor, ratear rubricas entre planos e processar REINF. [<a href="#FOLHA-RN018">RS018</a>, <a href="#FOLHA-RN019">RS019</a>]<br><code>ProcessaFechamentoRecebedor</code> (:23310) → <code>ProcessaRateioRubricas</code> (:22816) → <code>ProcessaReinf</code> (:19882) fazem o rateio multiplano e o REINF (eSocial).</li>
 </ol>
 <p><strong>Ações práticas:</strong></p>
 <div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
@@ -340,9 +393,19 @@
 </div>
 </div>
 
+<p><strong>Tratamentos de erro:</strong> <a href="#TRT004">TRT004</a> (rubrica de IR sem natureza), <a href="#TRT005">TRT005</a> (líquido negativo), <a href="#TRT010">TRT010</a> (margem excedida), <a href="#TRT011">TRT011</a> (benefício abaixo do mínimo)</p>
+<p><strong>Mensagens:</strong> <a href="#MSG004">MSG004</a>, <a href="#MSG005">MSG005</a>, <a href="#MSG010">MSG010</a>, <a href="#MSG011">MSG011</a></p>
+<p><strong>Telas:</strong> Prévia da Folha Normal (<code>FFolhaNormalPrevia.dfm</code>), Folha Extra (<code>fFolhaExtra.dfm</code>)</p>
 <p><strong>Dependências:</strong> sucede <a href="#PF-01">JF001</a>; precede <a href="uc109.html#PF-03">JF003</a>, <a href="uc103.html#PF-06">JF006</a>. Evidência: <code>FOLHA/Fontes/dFolhaPrevia.pas:4096-25405</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
 <div class="mermaid">graph LR
   n0["FFolhaNormalPrevia"] --> n1["ProcessaPrevia(:24781)"] --> n2["CriaRecebedor"] --> n3["ProcessaRubricaProvento"] --> n4["ProcessaRubrica"] --> n5["ExecutaRegraRubrica"] --> n6["ClassificaRubricaBase"] --> n7["DeterminaBasesIRRF"] --> n8["CaluloIRRF"] --> n9["VerificaMargemDesconto"] --> n10["CalculaCPMF"] --> n11["CalculaBeneficioMinimo"] --> n12["CalculaCorrecaoBeneficio"] --> n13["CaluloSalarioFamilia"] --> n14["InsereRubrica"] --> n15["IncluiPrevia"] --> n16["Commit"] --> n17["ProcessaFechamentoRecebedor"] --> n18["ProcessaReinf"] --> n19["PREVIA/BASEDEPAGAMENTO/BITRIBUTACAO"]</div>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span> — informações que o repositório não comprova ou que divergem entre fontes. O texto existente foi mantido; os itens abaixo dependem de validação humana.</p>
+<ul>
+<li>Estratégia de rollback em caso de erro durante o cálculo: o motor faz commit por blocos, mas rollback explícito não foi identificado em <code>dFolhaPrevia.pas</code>. Em caso de exceção, a transação corrente permanece aberta <span class="ev ev-pendente">PENDENTE</span>.</li>
+<li>Ordem exata de aplicação das rubricas complementares (CPMF, benefício mínimo, correção, salário-família) e eventuais interdependências entre elas: o código as chama em sequência, mas o efeito de uma sobre a base da próxima não está detalhado.</li>
+</ul>
+</div>
+<div class="note note-info"><p><strong>Registro original do processo PF-02</strong></p><p><strong>Forms de entrada:</strong> <code>FFolhaNormalPrevia.dfm</code>, <code>fFolhaExtra.dfm</code></p><p><strong>Lógica de processamento:</strong> ProcessaPrevia orquestra; para cada recebedor: cria recebedor, processa rubricas (classifica, executa regra), determina bases de IRRF e calcula IR, verifica margem, calcula CPMF/benefício mínimo/correção/salário-família, insere rubrica e grava prévia (commit por blocos), fecha recebedor com rateio e REINF</p><p><strong>Saídas:</strong> Prévia calculada (PREVIA)</p><p><strong>Persistência (tabelas escritas):</strong> PREVIA, BASEDEPAGAMENTO, BITRIBUTACAO, HSTBITRIBUTACAO, CTRLINTERFACE</p><p><strong>Evidência:</strong> <code>FOLHA/Fontes/dFolhaPrevia.pas:4096-25405</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
 </div>
 
 <section id="TRT-section"><div class="section-title">6. Tratamentos (TRT)</div>

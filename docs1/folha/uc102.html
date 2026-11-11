@@ -50,6 +50,24 @@
 <li><a href="#PF-05"><strong>JF005 — Pagamento / Fita de Crédito / Remessa Bancária</strong></a>: gerar arquivos de remessa (CNAB), simular e bater retorno.</li>
 <li><a href="#PF-12"><strong>JF012 — Regularização de Pagamentos</strong></a>: regularizar pagamentos (eventos de regularização) e conciliar crédito efetuado.</li>
 </ul>
+<p><strong>Necessidade de negócio:</strong> depois que a folha é efetivada (<a href="uc109.html#PF-03">JF003</a>), o pagamento dos benefícios precisa ser enviado ao banco por meio de arquivos no padrão CNAB (JF005). Quando o banco devolve o retorno, o sistema concilia o que foi creditado. Pagamentos não creditados ou devolvidos são tratados pela regularização (JF012), que cadastra eventos corretivos e concilia o crédito efetuado.</p>
+<p><strong>Quem inicia:</strong> o usuário operacional (analista de folha/financeiro), nas telas de geração de remessa (<code>fGeraArquivoRemessa.dfm</code>, <code>FAberturaFitaCredit.dfm</code>, <code>FRemessaEletronica.dfm</code>) e nas telas de regularização (<code>UCadastroEventoRegularizacao.dfm</code>, <code>ULancEventoRegularizacao.dfm</code>, <code>UConciliacaoCredito.dfm</code>). Nenhuma das jornadas é disparada automaticamente.</p>
+<p><strong>Resultado esperado:</strong> na JF005, um arquivo de remessa CNAB é gravado em disco e a tabela <code>ARQUIVOPAGTO</code> é atualizada; o retorno bancário é conciliado. Na JF012, eventos de regularização são lançados e o crédito é conciliado.</p>
+<p><strong>Termos, siglas e componentes citados nesta página</strong> — explicados na primeira vez em que aparecem; a coluna "Fonte" indica onde a explicação foi conferida no repositório:</p>
+<div class="table-wrap"><table><thead><tr><th>Termo</th><th>O que significa</th><th>Fonte</th></tr></thead><tbody>
+<tr><td><strong>CNAB</strong></td><td>Padrão bancário para troca de arquivos de pagamento — 150 ou 240 posições.</td><td><a href="dados.html">🗄️ Dados</a></td></tr>
+<tr><td><strong>SIACC</strong></td><td>Sistema de Aplicações de Crédito Comercial.</td><td><a href="integracoes.html">🔗 Integrações</a></td></tr>
+<tr><td><strong>ARQUIVOPAGTO</strong></td><td>Tabela de controle de arquivos de pagamento gerados.</td><td><a href="dados.html">🗄️ Dados</a></td></tr>
+<tr><td><strong>Remessa bancária</strong></td><td>Arquivo enviado ao banco com ordens de pagamento.</td><td><code>fGeraArquivoRemessa.pas:342</code></td></tr>
+<tr><td><strong>Retorno bancário</strong></td><td>Arquivo recebido do banco com status dos pagamentos.</td><td><code>FRemessaEletronica.dfm</code></td></tr>
+<tr><td><strong>Batimento</strong></td><td>Conciliação entre remessa enviada e retorno recebido.</td><td>SOL 207789/KINTANA 554287</td></tr>
+<tr><td><strong>Regularização de pagamentos</strong></td><td>Tratamento de pagamentos não creditados/devolvidos.</td><td><code>UCadastroEventoRegularizacao.dfm</code></td></tr>
+<tr><td><strong>Evento de regularização</strong></td><td>Evento que corrige um pagamento problemático.</td><td><code>ULancEventoRegularizacao.dfm</code></td></tr>
+<tr><td><strong>Conciliação de crédito</strong></td><td>Verificação de crédito efetuado contra o esperado.</td><td><code>UConciliacaoCredito.pas</code></td></tr>
+<tr><td><strong>BS</strong></td><td>Benefício Suplementar.</td><td><a href="#FOLHA-RN023">RS023</a></td></tr>
+<tr><td><strong>FAB</strong></td><td>Fator de Ajuste de Benefício.</td><td><a href="#FOLHA-RN023">RS023</a></td></tr>
+<tr><td><strong>Déficit</strong></td><td>Base de cálculo do déficit.</td><td><a href="#FOLHA-RN023">RS023</a></td></tr>
+</tbody></table></div>
 </section>
 
 <section><div class="section-title">3. Pré-condições</div>
@@ -61,10 +79,16 @@
 <li>Patrocinadoras, planos e benefícios devem estar cadastrados.</li>
 <li>O usuário deve ter permissão de acesso ao módulo.</li>
 </ul>
+<p><strong>O que as pré-condições gerais significam na prática:</strong> o módulo FOLHA precisa estar compilado e o banco Oracle acessível para que qualquer jornada execute. Os parâmetros globais da folha (<code>FParametroFolha</code>) devem estar carregados, e patrocinadoras, planos e benefícios já cadastrados. O usuário precisa ter permissão de acesso ao módulo.</p>
 <p><strong>Por jornada:</strong></p>
 <ul>
 <li><a href="#PF-05">JF005</a>: versão efetivada (<a href="uc109.html#PF-03">JF003</a>); conta bancária/portador configurados; leiaute CNAB selecionado.</li>
 <li><a href="#PF-12">JF012</a>: —</li>
+</ul>
+<p><strong>Pré-condições por jornada, em termos de negócio:</strong></p>
+<ul>
+<li><a href="#PF-05">JF005</a>: a folha já foi efetivada (<a href="uc109.html#PF-03">JF003</a>), de modo que existem valores a pagar; a conta bancária e o portador estão configurados e o leiaute CNAB (150 ou 240) foi selecionado.</li>
+<li><a href="#PF-12">JF012</a>: existem pagamentos a regularizar (não creditados ou devolvidos) e crédito a conciliar; não há pré-condição específica documentada no repositório.</li>
 </ul>
 </section>
 
@@ -73,26 +97,35 @@
 <li><a href="#PF-05">JF005</a>: arquivo de remessa em disco, ARQUIVOPAGTO atualizado.</li>
 <li><a href="#PF-12">JF012</a>: eventos de regularização lançados; crédito conciliado.</li>
 </ul>
+<p><strong>Resultado de negócio de cada jornada:</strong></p>
+<ul>
+<li><a href="#PF-05">JF005</a> — o arquivo de remessa CNAB é gerado em disco e a tabela <code>ARQUIVOPAGTO</code> é atualizada; a simulação e o batimento de retorno conciliam o pagamento contra o retorno bancário.</li>
+<li><a href="#PF-12">JF012</a> — os eventos de regularização são cadastrados e lançados, corrigindo pagamentos problemáticos, e o crédito efetuado é conciliado.</li>
+</ul>
 </section>
 
 <section><div class="section-title">5. Jornadas Funcionais (JF005, JF012)</div>
 <p>Cada jornada traz objetivo, ator/gatilho, pré e pós-condições, sequência operacional, ações práticas, <strong>regras de negócio da jornada</strong> (texto completo de cada regra), tratamentos e mensagens.</p>
+<p><strong>Como as jornadas deste caso de uso se relacionam:</strong> a JF005 (remessa bancária) sucede a efetivação da folha (<a href="uc109.html#PF-03">JF003</a>) e produz o arquivo enviado ao banco. A JF012 (regularização) trata pagamentos que não foram creditados ou foram devolvidos, consumindo o resultado da JF005. Ambas são iniciadas pelo usuário em telas próprias. Em cada passo, o rótulo "Usuário" ou "Sistema" indica quem executa a ação.</p>
 <div class="legend"><span><span class="ev ev-comprovado">COMPROVADO</span> — no código</span><span><span class="ev ev-inferido">INFERIDO</span> — plausível</span><span><span class="ev ev-pendente">PENDENTE</span> — validar</span></div>
 </section>
 
 <div class="pf-block" id="PF-05"><h4>JF005 (PF-05) — Pagamento / Fita de Crédito / Remessa Bancária</h4>
 <p><strong>Objetivo:</strong> gerar arquivos de remessa (CNAB), simular e bater retorno.</p>
-<p><strong>Gatilho/Ator:</strong> <code>fGeraArquivoRemessa.dfm</code>, <code>FAberturaFitaCredit.dfm</code>, <code>FRemessaEletronica.dfm</code>, <code>fGeraArquivoRemessaPrevia.dfm</code>.</p>
+<p><strong>Necessidade de negócio:</strong> após a efetivação da folha, os valores a pagar precisam ser transmitidos ao banco em um arquivo no padrão CNAB. Esta jornada produz esse arquivo, permite simular o pagamento antes do envio e concilia o retorno bancário contra a remessa enviada.</p>
+<p><strong>Ator / gatilho:</strong> <code>fGeraArquivoRemessa.dfm</code>, <code>FAberturaFitaCredit.dfm</code>, <code>FRemessaEletronica.dfm</code>, <code>fGeraArquivoRemessaPrevia.dfm</code>.</p>
 <p><strong>Pré-condições:</strong> versão efetivada (<a href="uc109.html#PF-03">JF003</a>); conta bancária/portador configurados; leiaute CNAB selecionado.</p>
+<p><strong>Em termos de negócio:</strong> a folha já foi efetivada, há valores a pagar, a conta bancária e o portador estão configurados e o leiaute CNAB (150/240) foi escolhido.</p>
 <p><strong>Pós-condições:</strong> arquivo de remessa em disco, ARQUIVOPAGTO atualizado.</p>
+<p><strong>Em termos de negócio:</strong> o arquivo de remessa CNAB existe em disco e está registrado em <code>ARQUIVOPAGTO</code>; o retorno bancário foi conciliado.</p>
 <p><strong>Sequência operacional:</strong></p>
 <ol>
-<li>Abertura da fita por plano</li>
-<li>Seleção de versão</li>
-<li>Geração do arquivo CNAB (150/240)</li>
-<li>Gravação em disco + ARQUIVOPAGTO</li>
-<li>Simulação (prévia)</li>
-<li>Batimento de retorno (SOL 207789/KINTANA 554287)</li>
+<li><strong>Usuário:</strong> Abertura da fita por plano<br>O usuário abre a fita de crédito pelo plano em <code>FAberturaFitaCredit.dfm</code>.</li>
+<li><strong>Usuário:</strong> Seleção de versão<br>O usuário seleciona a versão efetivada que será paga.</li>
+<li><strong>Sistema:</strong> Geração do arquivo CNAB (150/240)<br>O sistema produz o arquivo de remessa no leiaute CNAB selecionado via <code>fGeraArquivoRemessa</code>.</li>
+<li><strong>Sistema:</strong> Gravação em disco + ARQUIVOPAGTO<br>O arquivo é gravado em disco e registrado em <code>ARQUIVOPAGTO</code> (<code>fGeraArquivoRemessa.pas:342</code>).</li>
+<li><strong>Usuário:</strong> Simulação (prévia)<br>O usuário pode simular o pagamento antes do envio efetivo (<code>fGeraArquivoRemessaPrevia.dfm</code>).</li>
+<li><strong>Sistema:</strong> Batimento de retorno (SOL 207789/KINTANA 554287)<br>O sistema concilia o retorno bancário contra a remessa enviada em <code>FRemessaEletronica.dfm</code>.</li>
 </ol>
 <p><strong>Ações práticas:</strong></p>
 <div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
@@ -104,20 +137,33 @@
 <p><strong>Regras de negócio da jornada:</strong> nenhuma regra FOLHA-RN específica desta jornada; as validações estão nos tratamentos (TRT) do caso de uso.</p>
 </div>
 
+<p><strong>Tratamentos de erro:</strong> —</p>
+<p><strong>Mensagens:</strong> —</p>
+<p><strong>Telas:</strong> Abertura de Fita de Crédito (<code>FAberturaFitaCredit.dfm</code>), Geração de Arquivo de Remessa (<code>fGeraArquivoRemessa.dfm</code>), Remessa Eletrônica (<code>FRemessaEletronica.dfm</code>), Geração de Arquivo de Remessa Prévia (<code>fGeraArquivoRemessaPrevia.dfm</code>)</p>
 <p><strong>Dependências:</strong> sucede <a href="uc109.html#PF-03">JF003</a>. Evidência: <code>FOLHA/Fontes/fGeraArquivoRemessa.pas:342</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
 <div class="mermaid">graph LR
   n0["FAberturaFitaCredit"] --> n1["fGeraArquivoRemessa"] --> n2["GeraArquivoCNAB150|CNAB240"] --> n3["arquivo disco + ARQUIVOPAGTO"] --> n4["(simulação)"] --> n5["BatimentoRetorno"]</div>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span> — informações que o repositório não comprova ou que divergem entre fontes. O texto existente foi mantido; os itens abaixo dependem de validação humana.</p>
+<ul>
+<li>Detalhes do leiaute CNAB 150/240 e quais campos são preenchidos: não há mapeamento de campos documentado no repositório.</li>
+<li>Comportamento do batimento de retorno quando há divergência entre remessa e retorno: não há TRT nem mensagem catalogados para esse caso.</li>
+<li>Conteúdo exato da simulação (prévia) e em que difere da geração efetiva: <code>fGeraArquivoRemessaPrevia</code> não foi analisado em detalhe.</li>
+</ul>
+</div>
+<div class="note note-info"><p><strong>Registro original do processo PF-05</strong></p><p><strong>Forms de entrada:</strong> <code>FAberturaFitaCredit.dfm</code>, <code>fGeraArquivoRemessa.dfm</code>, <code>FRemessaEletronica.dfm</code>, <code>fGeraArquivoRemessaPrevia.dfm</code></p><p><strong>Lógica de processamento:</strong> Abre fita por plano → seleciona versão → gera CNAB 150/240 → grava em disco + ARQUIVOPAGTO → simulação → batimento de retorno</p><p><strong>Saídas:</strong> Arquivo de remessa em disco; retorno conciliado</p><p><strong>Persistência (tabelas escritas):</strong> ARQUIVOPAGTO</p><p><strong>Evidência:</strong> <code>FOLHA/Fontes/fGeraArquivoRemessa.pas:342</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
 </div>
 
 <div class="pf-block" id="PF-12"><h4>JF012 (PF-12) — Regularização de Pagamentos</h4>
 <p><strong>Objetivo:</strong> regularizar pagamentos (eventos de regularização) e conciliar crédito efetuado.</p>
-<p><strong>Gatilho/Ator:</strong> <code>UCadastroEventoRegularizacao.dfm</code>, <code>ULancEventoRegularizacao.dfm</code>, <code>UConciliacaoCredito.dfm</code>.</p>
+<p><strong>Necessidade de negócio:</strong> quando um pagamento não é creditado ou é devolvido pelo banco, a folha precisa corrigir essa situação. Esta jornada cadastra e lança eventos de regularização que corrigem o pagamento problemático e concilia o crédito efetuado contra o esperado.</p>
+<p><strong>Ator / gatilho:</strong> <code>UCadastroEventoRegularizacao.dfm</code>, <code>ULancEventoRegularizacao.dfm</code>, <code>UConciliacaoCredito.dfm</code>.</p>
 <p><strong>Pós-condições:</strong> eventos de regularização lançados; crédito conciliado.</p>
+<p><strong>Em termos de negócio:</strong> os pagamentos problemáticos ficam corrigidos por eventos de regularização e o crédito efetuado é conciliado.</p>
 <p><strong>Sequência operacional:</strong></p>
 <ol>
-<li>Cadastrar eventos de regularização</li>
-<li>Lançar eventos</li>
-<li>Conciliar crédito efetuado (UConciliacaoCredito, 4.050 lin)</li>
+<li><strong>Usuário:</strong> Cadastrar eventos de regularização<br>O usuário cadastra os tipos de evento de regularização em <code>UCadastroEventoRegularizacao.dfm</code>.</li>
+<li><strong>Usuário:</strong> Lançar eventos<br>O usuário lança os eventos cadastrados sobre os pagamentos a regularizar em <code>ULancEventoRegularizacao.dfm</code>.</li>
+<li><strong>Sistema:</strong> Conciliar crédito efetuado (UConciliacaoCredito, 4.050 lin)<br>O sistema concilia o crédito efetuado contra o esperado em <code>UConciliacaoCredito</code>.</li>
 </ol>
 <p><strong>Ações práticas:</strong></p>
 <div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
@@ -143,9 +189,20 @@
 </div>
 </div>
 
+<p><strong>Tratamentos de erro:</strong> <a href="#TRT014">TRT014</a></p>
+<p><strong>Mensagens:</strong> <a href="#MSG014">MSG014</a></p>
+<p><strong>Telas:</strong> Cadastro de Evento de Regularização (<code>UCadastroEventoRegularizacao.dfm</code>), Lançamento de Evento de Regularização (<code>ULancEventoRegularizacao.dfm</code>), Conciliação de Crédito (<code>UConciliacaoCredito.dfm</code>)</p>
 <p><strong>Dependências:</strong> —. Evidência: <code>FOLHA/Fontes/UConciliacaoCredito.pas</code>, <code>UCadastroEventoRegularizacao.pas</code>, <code>ULancEventoRegularizacao.pas</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
 <div class="mermaid">graph LR
   n0["UCadastroEventoRegularizacao"] --> n1["ULancEventoRegularizacao"] --> n2["UConciliacaoCredito"] --> n3["crédito conciliado"]</div>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span> — informações que o repositório não comprova ou que divergem entre fontes. O texto existente foi mantido; os itens abaixo dependem de validação humana.</p>
+<ul>
+<li>Tipos de evento de regularização suportados e seus efeitos sobre o pagamento: não há catálogo documentado no repositório.</li>
+<li>Regras de conciliação de crédito em <code>UConciliacaoCredito</code> (4.050 linhas): não foram analisadas em detalhe.</li>
+<li>Quais pagamentos são elegíveis para regularização (não creditados, devolvidos, parciais): não há critério documentado.</li>
+</ul>
+</div>
+<div class="note note-info"><p><strong>Registro original do processo PF-12</strong></p><p><strong>Forms de entrada:</strong> <code>UCadastroEventoRegularizacao.dfm</code>, <code>ULancEventoRegularizacao.dfm</code>, <code>UConciliacaoCredito.dfm</code></p><p><strong>Lógica de processamento:</strong> Cadastra eventos de regularização → lança eventos → concilia crédito efetuado</p><p><strong>Saídas:</strong> Eventos de regularização lançados; crédito conciliado</p><p><strong>Persistência (tabelas escritas):</strong> crédito conciliado</p><p><strong>Evidência:</strong> <code>FOLHA/Fontes/UConciliacaoCredito.pas</code>, <code>UCadastroEventoRegularizacao.pas</code>, <code>ULancEventoRegularizacao.pas</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
 </div>
 
 <section id="TRT-section"><div class="section-title">6. Tratamentos (TRT)</div>

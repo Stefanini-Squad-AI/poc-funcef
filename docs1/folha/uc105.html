@@ -49,6 +49,19 @@
 <ul>
 <li><a href="#PF-10"><strong>JF010 — Conciliação e Reembolso do INSS</strong></a>: prestar contas ao INSS, conciliar reembolso e retificar.</li>
 </ul>
+<p><strong>Necessidade de negócio:</strong> a entidade paga benefícios que, em alguns casos, são de responsabilidade do INSS. Para receber de volta esses valores, a entidade precisa prestar contas ao INSS (informar o que pagou por conta dele), conciliar o reembolso recebido e, quando preciso, retificar uma prestação de contas já enviada. Este caso de uso cobre esse ciclo de prestação de contas, conciliação, manutenção de rubricas de reembolso e retificação.</p>
+<p><strong>Quem inicia:</strong> sempre o usuário operacional, pelas telas de prestação de contas, conciliação de reembolso e manutenção de rubricas de reembolso do INSS (<code>FPrestacaoContasINSS.dfm</code>, <code>FConciliacaoReembolsoINSS.dfm</code>, <code>FManutRubricaReembolsoINSS.dfm</code>). Não há disparo automático.</p>
+<p><strong>Resultado esperado:</strong> a prestação de contas ao INSS é registrada, o reembolso é conciliado nas 5 grades, as rubricas de reembolso/NB ficam parametrizadas e, quando aplicável, a retificação é registrada com motivo. Se uma rubrica não parametrizada for usada, a inserção é abortada (<a href="#FOLHA-RN024">RS024</a>); se o usuário cancelar, a operação é abortada (<a href="#FOLHA-RN025">RS025</a>).</p>
+<p><strong>Termos, siglas e componentes citados nesta página</strong> — explicados na primeira vez em que aparecem; a coluna “Fonte” indica onde a explicação foi conferida no repositório:</p>
+<div class="table-wrap"><table><thead><tr><th>Termo</th><th>O que significa</th><th>Fonte</th></tr></thead><tbody>
+<tr><td><strong>INSS</strong></td><td>Instituto Nacional do Seguro Social — paga benefícios por conta da entidade em alguns casos, e a entidade presta contas e recebe reembolso.</td><td><a href="dados.html">🗄️ Dados</a></td></tr>
+<tr><td><strong>Prestação de contas ao INSS</strong></td><td>Relatório/envio de valores pagos por conta do INSS para receber reembolso.</td><td><code>FPrestacaoContasINSS.pas</code></td></tr>
+<tr><td><strong>Reembolso do INSS</strong></td><td>Valor que o INSS repassa à entidade pelos benefícios pagos por sua conta.</td><td><a href="dados.html">🗄️ Dados</a></td></tr>
+<tr><td><strong>Conciliação de reembolso</strong></td><td>Verificação de que o reembolso recebido corresponde ao esperado.</td><td><code>FConciliacaoReembolsoINSS.pas</code></td></tr>
+<tr><td><strong>Rubrica de reembolso</strong></td><td>Rubrica que representa o valor de reembolso do INSS na folha.</td><td><code>FManutRubricaReembolsoINSS.pas</code></td></tr>
+<tr><td><strong>Retificação</strong></td><td>Correção de uma prestação de contas já enviada, com motivo.</td><td><code>FPrestacaoContasINSSMotivo</code></td></tr>
+<tr><td><strong>NB</strong></td><td>Número do Benefício do INSS.</td><td><a href="dados.html">🗄️ Dados</a></td></tr>
+</tbody></table></div>
 </section>
 
 <section><div class="section-title">3. Pré-condições</div>
@@ -60,9 +73,14 @@
 <li>Patrocinadoras, planos e benefícios devem estar cadastrados.</li>
 <li>O usuário deve ter permissão de acesso ao módulo.</li>
 </ul>
+<p><strong>O que as pré-condições gerais significam na prática:</strong> o módulo FOLHA precisa estar compilado e acessível, com o banco Oracle (schema <code>CM.</code>) disponível e os parâmetros globais da folha carregados. Os cadastros básicos (patrocinadoras, planos e benefícios) já devem existir. O usuário precisa ter permissão de acesso ao módulo para operar as telas de prestação de contas, conciliação e manutenção de rubricas de reembolso do INSS.</p>
 <p><strong>Por jornada:</strong></p>
 <ul>
 <li><a href="#PF-10">JF010</a>: —</li>
+</ul>
+<p><strong>Pré-condições por jornada, em termos de negócio:</strong></p>
+<ul>
+<li><a href="#PF-10">JF010</a>: não há pré-condições específicas além das gerais do módulo. A jornada parte dos cadastros básicos da folha e das rubricas de INSS já parametrizadas para prestar contas, conciliar o reembolso, manter rubricas de reembolso/NB e retificar.</li>
 </ul>
 </section>
 
@@ -70,23 +88,30 @@
 <ul>
 <li><a href="#PF-10">JF010</a>: prestação de contas e reembolso do INSS conciliados.</li>
 </ul>
+<p><strong>Resultado de negócio de cada jornada:</strong></p>
+<ul>
+<li><a href="#PF-10">JF010</a> — a prestação de contas ao INSS fica registrada, o reembolso é conciliado nas 5 grades e as rubricas de reembolso/NB ficam atualizadas. Quando aplicável, a retificação é registrada com motivo. Se uma rubrica não parametrizada for usada, a inserção é abortada (<a href="#FOLHA-RN024">RS024</a>); se o usuário cancelar, a operação é abortada (<a href="#FOLHA-RN025">RS025</a>).</li>
+</ul>
 </section>
 
 <section><div class="section-title">5. Jornadas Funcionais (JF010)</div>
 <p>Cada jornada traz objetivo, ator/gatilho, pré e pós-condições, sequência operacional, ações práticas, <strong>regras de negócio da jornada</strong> (texto completo de cada regra), tratamentos e mensagens.</p>
+<p><strong>Como as jornadas deste caso de uso se relacionam:</strong> este caso de uso tem uma única jornada (JF010) que percorre o ciclo completo de prestação de contas, conciliação de reembolso, manutenção de rubricas e retificação. O rótulo “Usuário” ou “Sistema” indica quem executa cada passo.</p>
 <div class="legend"><span><span class="ev ev-comprovado">COMPROVADO</span> — no código</span><span><span class="ev ev-inferido">INFERIDO</span> — plausível</span><span><span class="ev ev-pendente">PENDENTE</span> — validar</span></div>
 </section>
 
 <div class="pf-block" id="PF-10"><h4>JF010 (PF-10) — Conciliação e Reembolso do INSS</h4>
 <p><strong>Objetivo:</strong> prestar contas ao INSS, conciliar reembolso e retificar.</p>
-<p><strong>Gatilho/Ator:</strong> <code>FPrestacaoContasINSS.dfm</code>, <code>FConciliacaoReembolsoINSS.dfm</code>, <code>FManutRubricaReembolsoINSS.dfm</code>.</p>
+<p><strong>Necessidade de negócio:</strong> a entidade paga benefícios que, em alguns casos, são de responsabilidade do INSS. Para receber de volta esses valores, é preciso prestar contas ao INSS, conciliar o reembolso recebido, manter as rubricas de reembolso parametrizadas e, quando preciso, retificar uma prestação de contas já enviada com motivo.</p>
+<p><strong>Ator / gatilho:</strong> <code>FPrestacaoContasINSS.dfm</code>, <code>FConciliacaoReembolsoINSS.dfm</code>, <code>FManutRubricaReembolsoINSS.dfm</code>.</p>
 <p><strong>Pós-condições:</strong> prestação de contas e reembolso do INSS conciliados.</p>
+<p><strong>Em termos de negócio:</strong> a prestação de contas ao INSS fica registrada, o reembolso é conciliado e as rubricas de reembolso/NB ficam atualizadas. A retificação, quando aplicável, é registrada com motivo.</p>
 <p><strong>Sequência operacional:</strong></p>
 <ol>
-<li>Prestação de contas</li>
-<li>Conciliação de reembolso (5 grades)</li>
-<li>Manutenção de rubricas de reembolso/NB</li>
-<li>Retificação (motivo em <code>FPrestacaoContasINSSMotivo</code>)</li>
+<li><strong>Usuário:</strong> Prestação de contas<br>O usuário aciona a tela <code>FPrestacaoContasINSS.dfm</code> para prestar contas ao INSS pelos benefícios pagos por conta dele.</li>
+<li><strong>Sistema:</strong> Conciliação de reembolso (5 grades)<br>O sistema abre <code>FConciliacaoReembolsoINSS.dfm</code> com 5 grades para conciliar o reembolso recebido contra o esperado.</li>
+<li><strong>Usuário:</strong> Manutenção de rubricas de reembolso/NB<br>O usuário mantém as rubricas de reembolso e os números de benefício (NB) em <code>FManutRubricaReembolsoINSS.dfm</code>. [<a href="#FOLHA-RN024">RS024</a>]</li>
+<li><strong>Usuário:</strong> Retificação (motivo em <code>FPrestacaoContasINSSMotivo</code>)<br>O usuário retifica uma prestação de contas já enviada, informando o motivo. [<a href="#FOLHA-RN025">RS025</a>]</li>
 </ol>
 <p><strong>Ações práticas:</strong></p>
 <div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
@@ -121,9 +146,20 @@
 </div>
 </div>
 
+<p><strong>Tratamentos de erro:</strong> <a href="#TRT015">TRT015</a>, <a href="#TRT016">TRT016</a></p>
+<p><strong>Mensagens:</strong> <a href="#MSG015">MSG015</a>, <a href="#MSG016">MSG016</a></p>
+<p><strong>Telas:</strong> Prestação de Contas INSS (<code>FPrestacaoContasINSS.dfm</code>), Conciliação de Reembolso INSS (<code>FConciliacaoReembolsoINSS.dfm</code>), Manutenção de Rubricas de Reembolso INSS (<code>FManutRubricaReembolsoINSS.dfm</code>)</p>
 <p><strong>Dependências:</strong> —. Evidência: <code>FOLHA/Fontes/FPrestacaoContasINSS.pas</code>, <code>FConciliacaoReembolsoINSS.pas</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
 <div class="mermaid">graph LR
   n0["FPrestacaoContasINSS"] --> n1["FConciliacaoReembolsoINSS"] --> n2["FManutRubricaReembolsoINSS"] --> n3["retificação(FPrestacaoContasINSSMotivo)"] --> n4["{cancelado? Exception}"]</div>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span> — informações que o repositório não comprova ou que divergem entre fontes. O texto existente foi mantido; os itens abaixo dependem de validação humana.</p>
+<ul>
+<li>O detalhamento das 5 grades de conciliação de reembolso não está documentado no repositório: falta confirmar quais rubricas e NBs cada grade trata.</li>
+<li>O fluxo de retificação (quando e por quem é disparado) não está detalhado no código analisado.</li>
+<li>A integração com o INSS (envio/recebimento de arquivos) não foi verificada no repositório.</li>
+</ul>
+</div>
+<div class="note note-info"><p><strong>Registro original do processo PF-10</strong></p><p><strong>Forms de entrada:</strong> <code>FPrestacaoContasINSS.dfm</code>, <code>FConciliacaoReembolsoINSS.dfm</code>, <code>FManutRubricaReembolsoINSS.dfm</code></p><p><strong>Lógica de processamento:</strong> Prestação de contas → conciliação de reembolso (5 grades) → manutenção de rubricas de reembolso/NB → retificação com motivo</p><p><strong>Saídas:</strong> Prestação de contas e reembolso conciliados</p><p><strong>Persistência (tabelas escritas):</strong> reembolso INSS</p><p><strong>Evidência:</strong> <code>FOLHA/Fontes/FPrestacaoContasINSS.pas</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
 </div>
 
 <section id="TRT-section"><div class="section-title">6. Tratamentos (TRT)</div>

@@ -50,6 +50,22 @@
 <li><a href="#PF-11"><strong>JF011 — Convênio (Importação/Exportação)</strong></a>: importar/exportar convênios e gerar documentos para entidades conveniadas.</li>
 <li><a href="#PF-F"><strong>JF018 — Financiamento Habitacional</strong></a>: processar financiamento habitacional (rubrica de desconto).</li>
 </ul>
+<p><strong>Necessidade de negócio:</strong> a entidade mantém convênios com entidades externas (empréstimos, consignados) cujos descontos são aplicados em folha. É preciso importar os arquivos enviados pelas entidades conveniadas, tratá-los, exportar arquivos de retorno com layout de saída e gerar documentos para essas entidades. Além disso, o financiamento habitacional gera descontos em folha que precisam ser processados. Este caso de uso cobre a importação/exportação de convênios e o processamento do financiamento habitacional.</p>
+<p><strong>Quem inicia:</strong> sempre o usuário operacional, pelas telas de importação de convênio, tratamento, exportação, geração de documentos (<code>fImportaTxt.dfm</code>, <code>fTratamentoConvenio.dfm</code>, <code>FExportaTxT.dfm</code>, <code>FExecGeraDocConvenio.dfm</code>) e pela tela de financiamento habitacional (<code>FfinancHabitacional.dfm</code>). Não há disparo automático.</p>
+<p><strong>Resultado esperado:</strong> na JF011, os arquivos de convênio são importados e exportados e os documentos são gerados para as entidades conveniadas. Na JF018, a rubrica de desconto do financiamento habitacional é aplicada na folha. As validações bloqueantes (RS002, RS003, RS026, RS027) impedem a execução quando layout, destino, versão da folha, mês/ano ou previsão não estão informados.</p>
+<p><strong>Termos, siglas e componentes citados nesta página</strong> — explicados na primeira vez em que aparecem; a coluna “Fonte” indica onde a explicação foi conferida no repositório:</p>
+<div class="table-wrap"><table><thead><tr><th>Termo</th><th>O que significa</th><th>Fonte</th></tr></thead><tbody>
+<tr><td><strong>Convênio</strong></td><td>Acordo com entidade externa para desconto em folha — ex.: empréstimos, consignados.</td><td><a href="dados.html">🗄️ Dados</a></td></tr>
+<tr><td><strong>Importação de convênio</strong></td><td>Leitura de arquivo enviado pela entidade conveniada com os descontos a aplicar.</td><td><code>fImportaTxt.pas</code></td></tr>
+<tr><td><strong>Exportação de convênio</strong></td><td>Geração de arquivo para a entidade conveniada com os descontos aplicados.</td><td><code>FExportaTxT.pas</code></td></tr>
+<tr><td><strong>Layout de entrada/saída</strong></td><td>Formato do arquivo de importação/exportação.</td><td><code>FExportaTxT.pas</code></td></tr>
+<tr><td><strong>Entidade conveniada</strong></td><td>Entidade externa que envia/recebe arquivos de desconto.</td><td><a href="dados.html">🗄️ Dados</a></td></tr>
+<tr><td><strong>Documentos para convênios</strong></td><td>Arquivos gerados para entidades conveniadas.</td><td><code>FExecGeraDocConvenio.pas</code></td></tr>
+<tr><td><strong>Saída cadastral</strong></td><td>Arquivo com dados cadastrais para entidade.</td><td><code>FGeraSaidaCadastral.pas</code></td></tr>
+<tr><td><strong>Financiamento habitacional</strong></td><td>Empréstimo para habitação descontado em folha.</td><td><code>FfinancHabitacional.pas</code></td></tr>
+<tr><td><strong>Versão da folha</strong></td><td>Versão de pagamento selecionada para geração de documentos.</td><td><a href="dados.html">🗄️ Dados</a></td></tr>
+<tr><td><strong>TMPDESC</strong></td><td>Tabela temporária de descontos.</td><td><a href="dados.html">🗄️ Dados</a></td></tr>
+</tbody></table></div>
 </section>
 
 <section><div class="section-title">3. Pré-condições</div>
@@ -61,10 +77,16 @@
 <li>Patrocinadoras, planos e benefícios devem estar cadastrados.</li>
 <li>O usuário deve ter permissão de acesso ao módulo.</li>
 </ul>
+<p><strong>O que as pré-condições gerais significam na prática:</strong> o módulo FOLHA precisa estar compilado e acessível, com o banco Oracle (schema <code>CM.</code>) disponível e os parâmetros globais da folha carregados. Os cadastros básicos (patrocinadoras, planos e benefícios) já devem existir. O usuário precisa ter permissão de acesso ao módulo para operar as telas de importação/exportação de convênios, geração de documentos e financiamento habitacional.</p>
 <p><strong>Por jornada:</strong></p>
 <ul>
 <li><a href="#PF-11">JF011</a>: mês/ano, layout de entrada/saída, destino informados <a href="#FOLHA-RN002">[RS002]</a> <a href="#TRT002">[TRT002]</a>.</li>
 <li><a href="#PF-F">JF018</a>: —</li>
+</ul>
+<p><strong>Pré-condições por jornada, em termos de negócio:</strong></p>
+<ul>
+<li><a href="#PF-11">JF011</a>: o usuário precisa informar mês/ano, layout de entrada/saída e destino para a exportação (<a href="#FOLHA-RN002">RS002</a>), e selecionar pelo menos uma versão da folha para a geração de documentos (<a href="#FOLHA-RN003">RS003</a>).</li>
+<li><a href="#PF-F">JF018</a>: não há pré-condições específicas além das gerais do módulo. A jornada parte dos cadastros básicos da folha para processar o financiamento habitacional.</li>
 </ul>
 </section>
 
@@ -73,24 +95,33 @@
 <li><a href="#PF-11">JF011</a>: arquivos de convênio importados/exportados; documentos gerados para entidades.</li>
 <li><a href="#PF-F">JF018</a>: —</li>
 </ul>
+<p><strong>Resultado de negócio de cada jornada:</strong></p>
+<ul>
+<li><a href="#PF-11">JF011</a> — os arquivos de convênio são importados e exportados com layout de saída, e os documentos/saída cadastral são gerados para as entidades conveniadas. As validações bloqueantes (<a href="#FOLHA-RN002">RS002</a>, <a href="#FOLHA-RN003">RS003</a>, <a href="#FOLHA-RN026">RS026</a>, <a href="#FOLHA-RN027">RS027</a>) impedem a execução quando os dados obrigatórios não estão informados.</li>
+<li><a href="#PF-F">JF018</a> — a rubrica de desconto do financiamento habitacional é aplicada na folha do benefício.</li>
+</ul>
 </section>
 
 <section><div class="section-title">5. Jornadas Funcionais (JF011, JF018)</div>
 <p>Cada jornada traz objetivo, ator/gatilho, pré e pós-condições, sequência operacional, ações práticas, <strong>regras de negócio da jornada</strong> (texto completo de cada regra), tratamentos e mensagens.</p>
+<p><strong>Como as jornadas deste caso de uso se relacionam:</strong> a JF011 trata o ciclo de importação, tratamento, exportação e geração de documentos de convênios. A JF018 processa o financiamento habitacional, aplicando a rubrica de desconto na folha. As duas jornadas são independentes e iniciadas pelo usuário em telas distintas. O rótulo “Usuário” ou “Sistema” indica quem executa cada passo.</p>
 <div class="legend"><span><span class="ev ev-comprovado">COMPROVADO</span> — no código</span><span><span class="ev ev-inferido">INFERIDO</span> — plausível</span><span><span class="ev ev-pendente">PENDENTE</span> — validar</span></div>
 </section>
 
 <div class="pf-block" id="PF-11"><h4>JF011 (PF-11) — Convênio (Importação/Exportação)</h4>
 <p><strong>Objetivo:</strong> importar/exportar convênios e gerar documentos para entidades conveniadas.</p>
-<p><strong>Gatilho/Ator:</strong> <code>fImportaTxt.dfm</code>, <code>fTratamentoConvenio.dfm</code>, <code>FExportaTxT.dfm</code>, <code>FExecGeraDocConvenio.dfm</code>.</p>
+<p><strong>Necessidade de negócio:</strong> as entidades conveniadas enviam arquivos com descontos a aplicar na folha e esperam receber arquivos de retorno com os descontos aplicados e documentos gerados. Esta jornada faz a importação, o tratamento, a exportação com layout de saída e a geração de documentos para as entidades conveniadas.</p>
+<p><strong>Ator / gatilho:</strong> <code>fImportaTxt.dfm</code>, <code>fTratamentoConvenio.dfm</code>, <code>FExportaTxT.dfm</code>, <code>FExecGeraDocConvenio.dfm</code>.</p>
 <p><strong>Pré-condições:</strong> mês/ano, layout de entrada/saída, destino informados <a href="#FOLHA-RN002">[RS002]</a> <a href="#TRT002">[TRT002]</a>.</p>
+<p><strong>Em termos de negócio:</strong> o usuário precisa informar mês/ano, layout de entrada/saída e destino para a exportação, e selecionar pelo menos uma versão da folha para a geração de documentos.</p>
 <p><strong>Pós-condições:</strong> arquivos de convênio importados/exportados; documentos gerados para entidades.</p>
+<p><strong>Em termos de negócio:</strong> os arquivos de convênio ficam importados e exportados, e os documentos/saída cadastral são gerados para as entidades conveniadas.</p>
 <p><strong>Sequência operacional:</strong></p>
 <ol>
-<li>Importa TXT (layout de entrada)</li>
-<li>Tratamento de convênio</li>
-<li>Exporta (layout de saída) <a href="#FOLHA-RN002">[RS002]</a> <a href="#FOLHA-RN003">[RS003]</a> <a href="#TRT003">[TRT003]</a></li>
-<li>Gera documentos/arquivos para entidades <a href="#FOLHA-RN026">[RS026]</a> <a href="#FOLHA-RN027">[RS027]</a> <a href="#TRT012">[TRT012]</a> <a href="#TRT013">[TRT013]</a></li>
+<li><strong>Usuário:</strong> Importa TXT (layout de entrada)<br>O usuário importa o arquivo de convênio enviado pela entidade conveniada em <code>fImportaTxt.dfm</code>.</li>
+<li><strong>Sistema:</strong> Tratamento de convênio<br>O sistema trata os dados importados em <code>fTratamentoConvenio.dfm</code>.</li>
+<li><strong>Usuário:</strong> Exporta (layout de saída) <a href="#FOLHA-RN002">[RS002]</a> <a href="#FOLHA-RN003">[RS003]</a> <a href="#TRT003">[TRT003]</a><br>O usuário exporta o arquivo com layout de saída em <code>FExportaTxT.dfm</code>, exigindo ano, mês, layout e destino informados.</li>
+<li><strong>Sistema:</strong> Gera documentos/arquivos para entidades <a href="#FOLHA-RN026">[RS026]</a> <a href="#FOLHA-RN027">[RS027]</a> <a href="#TRT012">[TRT012]</a> <a href="#TRT013">[TRT013]</a><br>O sistema gera documentos e saída cadastral para as entidades conveniadas em <code>FExecGeraDocConvenio.dfm</code> e <code>FGeraSaidaCadastral.pas</code>.</li>
 </ol>
 <p><strong>Ações práticas:</strong></p>
 <div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
@@ -155,18 +186,30 @@
 </div>
 </div>
 
+<p><strong>Tratamentos de erro:</strong> <a href="#TRT002">TRT002</a>, <a href="#TRT003">TRT003</a>, <a href="#TRT012">TRT012</a>, <a href="#TRT013">TRT013</a></p>
+<p><strong>Mensagens:</strong> <a href="#MSG002">MSG002</a>, <a href="#MSG003">MSG003</a>, <a href="#MSG012">MSG012</a>, <a href="#MSG013">MSG013</a></p>
+<p><strong>Telas:</strong> Importação de Convênio (<code>fImportaTxt.dfm</code>), Tratamento de Convênio (<code>fTratamentoConvenio.dfm</code>), Exportação (<code>FExportaTxT.dfm</code>), Geração de Documentos (<code>FExecGeraDocConvenio.dfm</code>)</p>
 <p><strong>Dependências:</strong> —. Evidência: <code>FOLHA/Fontes/fImportaTxt.pas</code>, <code>FExportaTxT.pas:508-522</code>, <code>FExecGeraDocConvenio.pas:1214-1261</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
 <div class="mermaid">graph LR
   n0["fImportaTxt"] --> n1["fTratamentoConvenio"] --> n2["FExportaTxT"] --> n3["FExecGeraDocConvenio"] --> n4["arquivos p/ entidades"]</div>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span> — informações que o repositório não comprova ou que divergem entre fontes. O texto existente foi mantido; os itens abaixo dependem de validação humana.</p>
+<ul>
+<li>Os layouts de entrada/saída específicos de cada convênio não estão documentados no repositório: falta confirmar o formato dos campos.</li>
+<li>O conteúdo dos documentos gerados para entidades conveniadas não está detalhado no código analisado.</li>
+<li>A relação entre a saída cadastral (<code>FGeraSaidaCadastral</code>) e as entidades conveniadas não foi verificada no repositório.</li>
+</ul>
+</div>
+<div class="note note-info"><p><strong>Registro original do processo PF-11</strong></p><p><strong>Forms de entrada:</strong> <code>fImportaTxt.dfm</code>, <code>fTratamentoConvenio.dfm</code>, <code>FExportaTxT.dfm</code>, <code>FExecGeraDocConvenio.dfm</code></p><p><strong>Lógica de processamento:</strong> Importa TXT → tratamento de convênio → exportação com layout de saída → geração de documentos/saída cadastral para entidades</p><p><strong>Saídas:</strong> Arquivos de convênio importados/exportados; documentos gerados para entidades</p><p><strong>Persistência (tabelas escritas):</strong> convênio (import/export), TMPDESC</p><p><strong>Evidência:</strong> <code>FOLHA/Fontes/FExportaTxT.pas:508-522</code>, <code>FExecGeraDocConvenio.pas:1214-1261</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
 </div>
 
 <div class="pf-block" id="PF-F"><h4>JF018 (PF-F) — Financiamento Habitacional</h4>
 <p><strong>Objetivo:</strong> processar financiamento habitacional (rubrica de desconto).</p>
-<p><strong>Gatilho/Ator:</strong> <code>FfinancHabitacional.dfm</code> (1.654 lin).</p>
+<p><strong>Necessidade de negócio:</strong> beneficiários com financiamento habitacional têm descontos em folha. Esta jornada aplica a rubrica de desconto correspondente ao financiamento habitacional na folha do benefício.</p>
+<p><strong>Ator / gatilho:</strong> <code>FfinancHabitacional.dfm</code> (1.654 lin).</p>
 <p><strong>Sequência operacional:</strong></p>
 <ol>
-<li>Selecionar financiamento habitacional</li>
-<li>Processar rubrica de desconto</li>
+<li><strong>Usuário:</strong> Selecionar financiamento habitacional<br>O usuário seleciona o financiamento habitacional a processar em <code>FfinancHabitacional.dfm</code>.</li>
+<li><strong>Sistema:</strong> Processar rubrica de desconto<br>O sistema aplica a rubrica de desconto do financiamento habitacional na folha.</li>
 </ol>
 <p><strong>Ações práticas:</strong></p>
 <div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
@@ -175,7 +218,17 @@
 <div class="jf-rules">
 <p><strong>Regras de negócio da jornada:</strong> nenhuma regra FOLHA-RN específica desta jornada; as validações estão nos tratamentos (TRT) do caso de uso.</p>
 </div>
+<p><strong>Tratamentos de erro:</strong> —</p>
+<p><strong>Mensagens:</strong> —</p>
+<p><strong>Telas:</strong> Financiamento Habitacional (<code>FfinancHabitacional.dfm</code>)</p>
 <p><strong>Evidência:</strong> <code>FOLHA/Fontes/FfinancHabitacional.pas</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span> — informações que o repositório não comprova ou que divergem entre fontes. O texto existente foi mantido; os itens abaixo dependem de validação humana.</p>
+<ul>
+<li>A lógica de processamento do financiamento habitacional não está detalhada no repositório além da aplicação da rubrica de desconto.</li>
+<li>As validações específicas do form <code>FfinancHabitacional</code> não foram verificadas no código analisado.</li>
+</ul>
+</div>
+<div class="note note-info"><p><strong>Registro original do processo PF-F</strong></p><p><strong>Forms de entrada:</strong> <code>FfinancHabitacional.dfm</code></p><p><strong>Lógica de processamento:</strong> Selecionar financiamento habitacional → processar rubrica de desconto</p><p><strong>Saídas:</strong> Rubrica de desconto aplicada</p><p><strong>Persistência (tabelas escritas):</strong> financiamento habitacional</p><p><strong>Evidência:</strong> <code>FOLHA/Fontes/FfinancHabitacional.pas</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
 
 </div>
 

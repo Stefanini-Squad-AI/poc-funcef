@@ -50,6 +50,26 @@
 <li><a href="#PF-03"><strong>JF003 — Efetivação de Versão de Pagamento</strong></a>: consolidar a prévia em histórico definitivo e gerar arquivos de pagamento.</li>
 <li><a href="#PF-04"><strong>JF004 — Estorno de Folha</strong></a>: desfazer folha individual ou por lote preservando histórico.</li>
 </ul>
+<p><strong>Necessidade de negócio:</strong> depois de conferir a prévia, a folha precisa virar pagamento. A efetivação (JF003) consolida a prévia em histórico definitivo, gera os arquivos bancários (CNAB), o SIACC e o contra-cheque. Se a folha efetivada tiver erro, o estorno (JF004) a desfaz preservando o histórico de auditoria e gerando CAP/CAR.</p>
+<p><strong>Quem inicia:</strong> o usuário operacional (analista de folha), no botão efetivar de <code>fFolhaNormalEfet</code> (JF003) ou no botão processar de <code>festornafolha</code> (JF004). Nenhuma das duas jornadas é disparada automaticamente.</p>
+<p><strong>Resultado esperado:</strong> na efetivação, a versão de pagamento fica efetivada com histórico, arquivos CNAB/SIACC e contra-cheque gerados. No estorno, a folha é desfeita e CAP/CAR são gerados, preservando o histórico.</p>
+<p><strong>Termos, siglas e componentes citados nesta página</strong> — explicados na primeira vez em que aparecem; a coluna "Fonte" indica onde a explicação foi conferida no repositório:</p>
+<div class="table-wrap"><table><thead><tr><th>Termo</th><th>O que significa</th><th>Fonte</th></tr></thead><tbody>
+<tr><td><strong>Efetivação</strong></td><td>Consolidação da prévia em histórico definitivo — transforma a prévia em folha oficial.</td><td><code>fFolhaNormalEfet.pas</code></td></tr>
+<tr><td><strong>ETL</strong></td><td>Extração, Transformação e Carga — processo de validação e consolidação da efetivação.</td><td><code>fFolhaNormalEfet.pas:8722</code></td></tr>
+<tr><td><strong>HSTFOLHABENEF</strong></td><td>Histórico da folha de benefício — registro definitivo da folha efetivada.</td><td><a href="dados.html">🗄️ Dados</a></td></tr>
+<tr><td><strong>HSTFOLHABENEFCAP</strong></td><td>Histórico da folha de benefício com CAP — complemento do histórico.</td><td><a href="dados.html">🗄️ Dados</a></td></tr>
+<tr><td><strong>ARQUIVOPAGTO</strong></td><td>Tabela de controle de arquivos de pagamento gerados.</td><td><a href="dados.html">🗄️ Dados</a></td></tr>
+<tr><td><strong>CNAB</strong></td><td>Padrão bancário para arquivos de pagamento — 150 ou 240 posições.</td><td><code>fFolhaNormalEfet.pas:9346,9468</code></td></tr>
+<tr><td><strong>SIACC</strong></td><td>Sistema de Aplicações de Crédito Comercial — arquivo gerado na efetivação.</td><td><code>fFolhaNormalEfet.pas:9806</code></td></tr>
+<tr><td><strong>Contra-cheque</strong></td><td>Demonstrativo individual do recebedor, carregado em MongoDB.</td><td><code>fFolhaNormalEfet.pas:9844</code></td></tr>
+<tr><td><strong>Estorno</strong></td><td>Desfazimento de uma folha já efetivada, preservando histórico de auditoria.</td><td><code>festornafolha.pas</code></td></tr>
+<tr><td><strong>CAP</strong></td><td>Comprovante de Ajuste de Pagamento.</td><td><code>festornafolha.pas:1523</code></td></tr>
+<tr><td><strong>CAR</strong></td><td>Comprovante de Ajuste de Recebimento.</td><td><code>festornafolha.pas:1654</code></td></tr>
+<tr><td><strong>Motivo de estorno</strong></td><td>Justificativa registrada ao desfazer a folha.</td><td><code>festornafolha.pas:1709</code></td></tr>
+<tr><td><strong>Compensação</strong></td><td>Processamento de compensação durante o estorno.</td><td><code>festornafolha.pas:1739</code></td></tr>
+<tr><td><strong>Excesso de débito</strong></td><td>Stored procedure executada no estorno para tratar excesso de débito.</td><td><code>festornafolha.pas:1801</code></td></tr>
+</tbody></table></div>
 </section>
 
 <section><div class="section-title">3. Pré-condições</div>
@@ -61,10 +81,16 @@
 <li>Patrocinadoras, planos e benefícios devem estar cadastrados.</li>
 <li>O usuário deve ter permissão de acesso ao módulo.</li>
 </ul>
+<p><strong>O que as pré-condições gerais significam na prática:</strong> o módulo FOLHA precisa estar compilado e acessível, com o banco Oracle (schema <code>CM.</code>) disponível e os parâmetros globais da folha (<code>FParametroFolha</code>) carregados. Os cadastros básicos (patrocinadoras, planos e benefícios) já devem existir, e o usuário precisa ter permissão de acesso ao módulo.</p>
 <p><strong>Por jornada:</strong></p>
 <ul>
 <li><a href="#PF-03">JF003</a>: prévia conferida (<a href="uc101.html#PF-02">JF002</a>); lote selecionado; conta bancária e parâmetros contábeis/financeiros válidos.</li>
 <li><a href="#PF-04">JF004</a>: versão efetivada (<a href="#PF-03">JF003</a>); usuário com permissão; motivo de estorno informado.</li>
+</ul>
+<p><strong>Pré-condições por jornada, em termos de negócio:</strong></p>
+<ul>
+<li><a href="#PF-03">JF003</a>: a prévia já foi conferida e o lote selecionado; a conta bancária do lote e os parâmetros contábeis/financeiros estão válidos, caso contrário a efetivação é bloqueada.</li>
+<li><a href="#PF-04">JF004</a>: a versão de pagamento já foi efetivada (JF003); o usuário tem permissão de estorno e informa um motivo justificando o desfazimento.</li>
 </ul>
 </section>
 
@@ -73,28 +99,37 @@
 <li><a href="#PF-03">JF003</a>: HSTFOLHABENEF, HSTFOLHABENEFCAP, ARQUIVOPAGTO populados; arquivos CNAB em disco; versão de pagamento efetivada.</li>
 <li><a href="#PF-04">JF004</a>: HSTFOLHABENEFCAP, HISTRUBSAL, RUBRICAINDIV, ARQUIVOPAGTO estornados; CAP/CAR gerados.</li>
 </ul>
+<p><strong>Resultado de negócio de cada jornada:</strong></p>
+<ul>
+<li><a href="#PF-03">JF003</a> — a prévia vira histórico definitivo (HSTFOLHABENEF, HSTFOLHABENEFCAP), os arquivos de pagamento CNAB e SIACC são gerados em disco, o contra-cheque é carregado em MongoDB e a versão de pagamento fica efetivada.</li>
+<li><a href="#PF-04">JF004</a> — a folha efetivada é desfeita (HSTFOLHABENEFCAP, HISTRUBSAL, RUBRICAINDIV, ARQUIVOPAGTO estornados), os comprovantes CAP/CAR são gerados e o histórico de auditoria é preservado.</li>
+</ul>
 </section>
 
 <section><div class="section-title">5. Jornadas Funcionais (JF003, JF004)</div>
 <p>Cada jornada traz objetivo, ator/gatilho, pré e pós-condições, sequência operacional, ações práticas, <strong>regras de negócio da jornada</strong> (texto completo de cada regra), tratamentos e mensagens.</p>
+<p><strong>Como as jornadas deste caso de uso se relacionam:</strong> a efetivação (JF003) consolida a prévia em pagamento definitivo; o estorno (JF004) desfaz uma folha já efetivada. O estorno só faz sentido depois da efetivação. As duas são iniciadas pelo usuário em telas distintas do módulo FOLHA.</p>
 <div class="legend"><span><span class="ev ev-comprovado">COMPROVADO</span> — no código</span><span><span class="ev ev-inferido">INFERIDO</span> — plausível</span><span><span class="ev ev-pendente">PENDENTE</span> — validar</span></div>
 </section>
 
 <div class="pf-block" id="PF-03"><h4>JF003 (PF-03) — Efetivação de Versão de Pagamento</h4>
 <p><strong>Objetivo:</strong> consolidar a prévia em histórico definitivo e gerar arquivos de pagamento.</p>
-<p><strong>Gatilho/Ator:</strong> botão efetivar em <code>fFolhaNormalEfet.dfm</code> após seleção de lote (<code>FSelecionaLoteEF</code>).</p>
+<p><strong>Necessidade de negócio:</strong> depois que a prévia é conferida, a folha precisa se tornar oficial. A efetivação consolida a prévia em histórico definitivo, gera os arquivos bancários (CNAB 150/240), o arquivo SIACC e carrega o contra-cheque em MongoDB para que o pagamento possa ser enviado ao banco.</p>
+<p><strong>Ator / gatilho:</strong> botão efetivar em <code>fFolhaNormalEfet.dfm</code> após seleção de lote (<code>FSelecionaLoteEF</code>).</p>
 <p><strong>Pré-condições:</strong> prévia conferida (<a href="uc101.html#PF-02">JF002</a>); lote selecionado; conta bancária e parâmetros contábeis/financeiros válidos.</p>
+<p><strong>Em termos de negócio:</strong> a prévia já foi conferida e o lote selecionado. A conta bancária do lote e os parâmetros contábeis/financeiros precisam estar válidos; caso contrário, a efetivação é bloqueada (<a href="#FOLHA-RN012">RS012</a>, <a href="#FOLHA-RN013">RS013</a>).</p>
 <p><strong>Pós-condições:</strong> HSTFOLHABENEF, HSTFOLHABENEFCAP, ARQUIVOPAGTO populados; arquivos CNAB em disco; versão de pagamento efetivada.</p>
+<p><strong>Em termos de negócio:</strong> a versão de pagamento está efetivada: a prévia virou histórico definitivo, os arquivos CNAB e SIACC foram gerados e o contra-cheque foi carregado em MongoDB.</p>
 <p><strong>Sequência operacional (fFolhaNormalEfet.pas):</strong></p>
 <ol>
-<li>Valida lote, conta bancária <a href="#FOLHA-RN012">[RS012]</a> <a href="#TRT008">[TRT008]</a>, parâmetros contábeis/financeiros <a href="#FOLHA-RN013">[RS013]</a> <a href="#TRT009">[TRT009]</a></li>
-<li><code>Verifica_Critica_ETL</code> → <code>Executa_ETL</code> (:8722) com 3 datas de pagamento <a href="#FOLHA-RN011">[RS011]</a> <a href="#TRT007">[TRT007]</a></li>
-<li><code>VerificaEfeticaoETL</code> (:8928) → <code>Monitoramento</code> (:9006)</li>
-<li>Gera histórico: HSTFOLHABENEF / HSTFOLHABENEFCAP / HISTRUBSAL</li>
-<li><code>atualizaBasePagamento</code> (:8328) → <code>atualizaHstCalculoPMPFolha</code> (:8405) → <code>atualizaHstPrazoAcumulacaoFolha</code> (:8449)</li>
-<li><code>processaIRRegressivo</code> (:8212) → <code>PreparaContribuicaoPatro</code> (:8605) <a href="#FOLHA-RN015">[RS015]</a></li>
-<li><code>GeraArquivoPagamentoLeiauteCNAB150</code> (:9346) / <code>CNAB240</code> (:9468) → <code>Set*ArqPagamento</code> (:9584-9728)</li>
-<li><code>GeraArquivoSIACC</code> (:9806) / <code>CargaContraChequeMongo</code> (:9844)</li>
+<li><strong>Usuário:</strong> Valida lote, conta bancária <a href="#FOLHA-RN012">[RS012]</a> <a href="#TRT008">[TRT008]</a>, parâmetros contábeis/financeiros <a href="#FOLHA-RN013">[RS013]</a> <a href="#TRT009">[TRT009]</a><br>O sistema valida o lote selecionado, a conta bancária associada e os parâmetros contábeis/financeiros antes de iniciar a efetivação.</li>
+<li><strong>Sistema:</strong> <code>Verifica_Critica_ETL</code> → <code>Executa_ETL</code> (:8722) com 3 datas de pagamento <a href="#FOLHA-RN011">[RS011]</a> <a href="#TRT007">[TRT007]</a><br>A ETL de efetivação é executada com três datas de pagamento; críticas abortam a efetivação.</li>
+<li><strong>Sistema:</strong> <code>VerificaEfeticaoETL</code> (:8928) → <code>Monitoramento</code> (:9006)<br>O sistema verifica o resultado da ETL e monitora o processamento.</li>
+<li><strong>Sistema:</strong> Gera histórico: HSTFOLHABENEF / HSTFOLHABENEFCAP / HISTRUBSAL<br>A prévia é consolidada em histórico definitivo nas tabelas de histórico da folha.</li>
+<li><strong>Sistema:</strong> <code>atualizaBasePagamento</code> (:8328) → <code>atualizaHstCalculoPMPFolha</code> (:8405) → <code>atualizaHstPrazoAcumulacaoFolha</code> (:8449)<br>A base de pagamento, o cálculo de PMP e o prazo de acumulação são atualizados.</li>
+<li><strong>Sistema:</strong> <code>processaIRRegressivo</code> (:8212) → <code>PreparaContribuicaoPatro</code> (:8605) <a href="#FOLHA-RN015">[RS015]</a><br>O IR regressivo é calculado por tipo de base e a contribuição patronal é preparada.</li>
+<li><strong>Sistema:</strong> <code>GeraArquivoPagamentoLeiauteCNAB150</code> (:9346) / <code>CNAB240</code> (:9468) → <code>Set*ArqPagamento</code> (:9584-9728)<br>Os arquivos de pagamento CNAB (150 ou 240 posições) são gerados e registrados em ARQUIVOPAGTO.</li>
+<li><strong>Sistema:</strong> <code>GeraArquivoSIACC</code> (:9806) / <code>CargaContraChequeMongo</code> (:9844)<br>O arquivo SIACC é gerado e o contra-cheque é carregado em MongoDB.</li>
 </ol>
 <p><strong>Ações práticas:</strong></p>
 <div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
@@ -155,23 +190,37 @@
 </div>
 </div>
 
+<p><strong>Tratamentos de erro:</strong> <a href="#TRT007">TRT007</a>, <a href="#TRT008">TRT008</a>, <a href="#TRT009">TRT009</a></p>
+<p><strong>Mensagens:</strong> <a href="#MSG007">MSG007</a>, <a href="#MSG008">MSG008</a>, <a href="#MSG009">MSG009</a></p>
+<p><strong>Telas:</strong> Efetivação de Folha Normal (<code>fFolhaNormalEfet.dfm</code>), Seleção de Lote (<code>FSelecionaLoteEF.dfm</code>)</p>
 <p><strong>Dependências:</strong> sucede <a href="uc101.html#PF-02">JF002</a>; precede <a href="uc102.html#PF-05">JF005</a>. Evidência: <code>FOLHA/Fontes/fFolhaNormalEfet.pas:8158-9844</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
 <div class="mermaid">graph LR
   n0["fFolhaNormalEfet"] --> n1["Valida(Lote/Conta/ParamCF)"] --> n2["Executa_ETL"] --> n3["VerificaEfeticaoETL"] --> n4["HSTFOLHABENEF/HSTFOLHABENEFCAP"] --> n5["atualizaBasePagamento"] --> n6["processaIRRegressivo"] --> n7["GeraArquivoCNAB150|CNAB240"] --> n8["ARQUIVOPAGTO + arquivo CNAB"] --> n9["GeraArquivoSIACC"] --> n10["CargaContraChequeMongo"]</div>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span> — informações que o repositório não comprova ou que divergem entre fontes. O texto existente foi mantido; os itens abaixo dependem de validação humana.</p>
+<ul>
+<li>Conteúdo e formato exatos dos arquivos CNAB 150 e 240 gerados: leiautes não detalhados no repositório.</li>
+<li>Estrutura da carga de contra-cheque em MongoDB (<code>CargaContraChequeMongo</code>): não analisada no repositório.</li>
+<li>Comportamento quando a ETL é abortada por críticas: o texto indica aborto, mas o estado intermediário gravado não é documentado.</li>
+</ul>
+</div>
+<div class="note note-info"><p><strong>Registro original do processo PF-03</strong></p><p><strong>Forms de entrada:</strong> <code>fFolhaNormalEfet.dfm</code>, <code>FSelecionaLoteEF.dfm</code></p><p><strong>Lógica de processamento:</strong> Valida lote/conta/parâmetros CF; executa ETL com 3 datas de pagamento; gera histórico (HSTFOLHABENEF/HSTFOLHABENEFCAP/HISTRUBSAL); atualiza base de pagamento, PMP e prazo de acumulação; processa IR regressivo e contribuição patro; gera arquivos CNAB 150/240; gera SIACC e carga de contra-cheque em MongoDB</p><p><strong>Saídas:</strong> Versão de pagamento efetivada; arquivos CNAB e SIACC em disco; contra-cheque em MongoDB</p><p><strong>Persistência (tabelas escritas):</strong> HSTFOLHABENEF, HSTFOLHABENEFCAP, HISTRUBSAL, ARQUIVOPAGTO, BASEDEPAGAMENTO</p><p><strong>Evidência:</strong> <code>FOLHA/Fontes/fFolhaNormalEfet.pas:8158-9844</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
 </div>
 
 <div class="pf-block" id="PF-04"><h4>JF004 (PF-04) — Estorno de Folha</h4>
 <p><strong>Objetivo:</strong> desfazer folha individual ou por lote preservando histórico.</p>
-<p><strong>Gatilho/Ator:</strong> botão processar em <code>festornafolha.dfm</code> (:4576).</p>
+<p><strong>Necessidade de negócio:</strong> quando uma folha já efetivada contém erro ou precisa ser revertida, o estorno desfaz a folha preservando o histórico de auditoria. O estorno pode ser individual ou por lote, gera comprovantes de ajuste (CAP/CAR) e registra o motivo do desfazimento.</p>
+<p><strong>Ator / gatilho:</strong> botão processar em <code>festornafolha.dfm</code> (:4576).</p>
 <p><strong>Pré-condições:</strong> versão efetivada (<a href="#PF-03">JF003</a>); usuário com permissão; motivo de estorno informado.</p>
+<p><strong>Em termos de negócio:</strong> a folha já foi efetivada (JF003) e o usuário tem permissão para estornar. O motivo do estorno deve ser informado para auditoria.</p>
 <p><strong>Pós-condições:</strong> HSTFOLHABENEFCAP, HISTRUBSAL, RUBRICAINDIV, ARQUIVOPAGTO estornados; CAP/CAR gerados.</p>
+<p><strong>Em termos de negócio:</strong> a folha é desfeita, os comprovantes CAP/CAR são gerados e o histórico de auditoria é preservado com o motivo do estorno.</p>
 <p><strong>Sequência operacional (festornafolha.pas):</strong></p>
 <ol>
-<li><code>VerificaStatusDocumentosVersao</code> (:900) → <code>HabilitaEstornoIndividual</code> (:939)</li>
-<li><code>VerificaTmpDesc</code> (:2030) → <code>DesfazRubricaIndividual</code> (:1843)</li>
-<li><code>GeraAlterador</code> (:1183) → <code>GeraCAP</code> (:1523) → <code>GeraCAR</code> (:1654)</li>
-<li><code>GravaMotivoEstorno</code> (:1709) → <code>ProcessaCompensacao</code> (:1739)</li>
-<li><code>Exec_SP_ExcessoDebito</code> (:1801) → <code>EstornoFolhaCompleto</code> (:2062)</li>
+<li><strong>Sistema:</strong> <code>VerificaStatusDocumentosVersao</code> (:900) → <code>HabilitaEstornoIndividual</code> (:939)<br>O sistema verifica o status dos documentos da versão e habilita o estorno individual.</li>
+<li><strong>Sistema:</strong> <code>VerificaTmpDesc</code> (:2030) → <code>DesfazRubricaIndividual</code> (:1843)<br>O sistema verifica os descontos temporários e desfaz a rubrica individual.</li>
+<li><strong>Sistema:</strong> <code>GeraAlterador</code> (:1183) → <code>GeraCAP</code> (:1523) → <code>GeraCAR</code> (:1654)<br>O sistema gera o alterador e os comprovantes de ajuste de pagamento (CAP) e de recebimento (CAR).</li>
+<li><strong>Sistema:</strong> <code>GravaMotivoEstorno</code> (:1709) → <code>ProcessaCompensacao</code> (:1739)<br>O sistema grava o motivo do estorno e processa a compensação.</li>
+<li><strong>Sistema:</strong> <code>Exec_SP_ExcessoDebito</code> (:1801) → <code>EstornoFolhaCompleto</code> (:2062)<br>O sistema executa a stored procedure de excesso de débito e conclui o estorno da folha.</li>
 </ol>
 <p><strong>Ações práticas:</strong></p>
 <div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
@@ -186,9 +235,20 @@
 <p><strong>Regras de negócio da jornada:</strong> nenhuma regra FOLHA-RN específica desta jornada; as validações estão nos tratamentos (TRT) do caso de uso.</p>
 </div>
 
+<p><strong>Tratamentos de erro:</strong> —</p>
+<p><strong>Mensagens:</strong> —</p>
+<p><strong>Telas:</strong> Estorno de Folha (<code>festornafolha.dfm</code>)</p>
 <p><strong>Dependências:</strong> sucede <a href="#PF-03">JF003</a>. Evidência: <code>FOLHA/Fontes/festornafolha.pas:624-3013</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
 <div class="mermaid">graph LR
   n0["festornafolha"] --> n1["VerificaStatus"] --> n2["DesfazRubricaIndividual"] --> n3["GeraAlterador"] --> n4["GeraCAP"] --> n5["GeraCAR"] --> n6["GravaMotivoEstorno"] --> n7["ProcessaCompensacao"] --> n8["Exec_SP_ExcessoDebito"] --> n9["EstornoFolhaCompleto"] --> n10["estorna HSTFOLHABENEFCAP/HISTRUBSAL/RUBRICAINDIV + CAP/CAR"]</div>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span> — informações que o repositório não comprova ou que divergem entre fontes. O texto existente foi mantido; os itens abaixo dependem de validação humana.</p>
+<ul>
+<li>Regras de negócio específicas do estorno: nenhuma regra FOLHA-RN está catalogada para esta jornada; as validações estão nas exceções listadas.</li>
+<li>Comportamento das exceções (estorno de pagamento pendente, erro de processo, novo CAP, reprocessamento): condições exatas de disparo não detalhadas no repositório.</li>
+<li>Efeito do estorno sobre arquivos CNAB já gerados e enviados ao banco: não documentado.</li>
+</ul>
+</div>
+<div class="note note-info"><p><strong>Registro original do processo PF-04</strong></p><p><strong>Forms de entrada:</strong> <code>festornafolha.dfm</code></p><p><strong>Lógica de processamento:</strong> Verifica status e habilita estorno individual; desfaz rubrica individual; gera alterador, CAP e CAR; grava motivo de estorno e processa compensação; executa SP de excesso de débito e estorno completo</p><p><strong>Saídas:</strong> Folha estornada; CAP/CAR gerados; histórico preservado</p><p><strong>Persistência (tabelas escritas):</strong> HSTFOLHABENEFCAP, HISTRUBSAL, RUBRICAINDIV, ARQUIVOPAGTO</p><p><strong>Evidência:</strong> <code>FOLHA/Fontes/festornafolha.pas:624-3013</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
 </div>
 
 <section id="TRT-section"><div class="section-title">6. Tratamentos (TRT)</div>

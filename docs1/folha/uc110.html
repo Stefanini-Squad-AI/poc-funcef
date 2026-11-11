@@ -49,6 +49,15 @@
 <ul>
 <li><a href="#PF-A"><strong>JF013 — Encerramento por Falecimento</strong></a>: encerrar benefícios por falecimento (cálculo pro-rata final).</li>
 </ul>
+<p><strong>Necessidade de negócio:</strong> quando um recebedor de benefício falece, a folha precisa encerrar o benefício calculando o valor proporcional aos dias até a data do falecimento (pro-rata final). Esse encerramento finaliza o pagamento do benefício de forma correta.</p>
+<p><strong>Quem inicia:</strong> o usuário operacional (analista de folha), na tela de encerramento por falecimento do módulo FOLHA. A jornada não é disparada automaticamente.</p>
+<p><strong>Resultado esperado:</strong> o benefício do recebedor falecido é encerrado com o cálculo pro-rata final, encerrando o pagamento a partir da data do falecimento.</p>
+<p><strong>Termos, siglas e componentes citados nesta página</strong> — explicados na primeira vez em que aparecem; a coluna "Fonte" indica onde a explicação foi conferida no repositório:</p>
+<div class="table-wrap"><table><thead><tr><th>Termo</th><th>O que significa</th><th>Fonte</th></tr></thead><tbody>
+<tr><td><strong>Encerramento por falecimento</strong></td><td>Finalização do benefício quando o recebedor falece.</td><td><code>FEncerramentoPorFalecimento.dfm</code></td></tr>
+<tr><td><strong>Pro-rata final</strong></td><td>Cálculo proporcional dos dias até a data do falecimento.</td><td><code>FEncerramentoPorFalecimento.pas</code></td></tr>
+<tr><td><strong>Data de falecimento</strong></td><td>Data que define o encerramento do benefício.</td><td><code>FEncerramentoPorFalecimento.dfm</code></td></tr>
+</tbody></table></div>
 </section>
 
 <section><div class="section-title">3. Pré-condições</div>
@@ -60,9 +69,14 @@
 <li>Patrocinadoras, planos e benefícios devem estar cadastrados.</li>
 <li>O usuário deve ter permissão de acesso ao módulo.</li>
 </ul>
+<p><strong>O que as pré-condições gerais significam na prática:</strong> o módulo FOLHA precisa estar compilado e acessível, com o banco Oracle (schema <code>CM.</code>) disponível e os parâmetros globais da folha (<code>FParametroFolha</code>) carregados. Os cadastros básicos (patrocinadoras, planos e benefícios) já devem existir, e o usuário precisa ter permissão de acesso ao módulo.</p>
 <p><strong>Por jornada:</strong></p>
 <ul>
 <li><a href="#PF-A">JF013</a>: —</li>
+</ul>
+<p><strong>Pré-condições por jornada, em termos de negócio:</strong></p>
+<ul>
+<li><a href="#PF-A">JF013</a>: não há pré-condição específica documentada; depende de o benefício estar ativo e a data de falecimento ser informada.</li>
 </ul>
 </section>
 
@@ -70,21 +84,27 @@
 <ul>
 <li><a href="#PF-A">JF013</a>: —</li>
 </ul>
+<p><strong>Resultado de negócio de cada jornada:</strong></p>
+<ul>
+<li><a href="#PF-A">JF013</a> — o benefício do recebedor falecido é encerrado com o cálculo pro-rata final, finalizando o pagamento a partir da data do falecimento.</li>
+</ul>
 </section>
 
 <section><div class="section-title">5. Jornadas Funcionais (JF013)</div>
 <p>Cada jornada traz objetivo, ator/gatilho, pré e pós-condições, sequência operacional, ações práticas, <strong>regras de negócio da jornada</strong> (texto completo de cada regra), tratamentos e mensagens.</p>
+<p><strong>Como as jornadas deste caso de uso se relacionam:</strong> este caso de uso tem uma única jornada (JF013), iniciada pelo usuário na tela de encerramento por falecimento do módulo FOLHA.</p>
 <div class="legend"><span><span class="ev ev-comprovado">COMPROVADO</span> — no código</span><span><span class="ev ev-inferido">INFERIDO</span> — plausível</span><span><span class="ev ev-pendente">PENDENTE</span> — validar</span></div>
 </section>
 
 <div class="pf-block" id="PF-A"><h4>JF013 (PF-A) — Encerramento por Falecimento</h4>
 <p><strong>Objetivo:</strong> encerrar benefícios por falecimento (cálculo pro-rata final).</p>
-<p><strong>Gatilho/Ator:</strong> <code>FEncerramentoPorFalecimento.dfm</code> (4.883 lin).</p>
+<p><strong>Necessidade de negócio:</strong> quando um recebedor de benefício falece, o pagamento precisa ser encerrado corretamente. O cálculo pro-rata final apura o valor proporcional aos dias até a data do falecimento, garantindo que o recebedor receba o que é devido até o óbito.</p>
+<p><strong>Ator / gatilho:</strong> <code>FEncerramentoPorFalecimento.dfm</code> (4.883 lin).</p>
 <p><strong>Sequência operacional:</strong></p>
 <ol>
-<li>Selecionar benefício a encerrar</li>
-<li>Calcular pro-rata final</li>
-<li>Encerrar benefício</li>
+<li><strong>Usuário:</strong> Selecionar benefício a encerrar.<br>O usuário seleciona o benefício do recebedor falecido na tela <code>FEncerramentoPorFalecimento</code>.</li>
+<li><strong>Sistema:</strong> Calcular pro-rata final.<br>O sistema apura o valor proporcional aos dias até a data do falecimento.</li>
+<li><strong>Sistema:</strong> Encerrar benefício.<br>O sistema finaliza o benefício, encerrando o pagamento a partir da data do falecimento.</li>
 </ol>
 <p><strong>Ações práticas:</strong></p>
 <div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
@@ -93,7 +113,18 @@
 <div class="jf-rules">
 <p><strong>Regras de negócio da jornada:</strong> nenhuma regra FOLHA-RN específica desta jornada; as validações estão nos tratamentos (TRT) do caso de uso.</p>
 </div>
+<p><strong>Tratamentos de erro:</strong> —</p>
+<p><strong>Mensagens:</strong> —</p>
+<p><strong>Telas:</strong> Encerramento por Falecimento (<code>FEncerramentoPorFalecimento.dfm</code>)</p>
 <p><strong>Evidência:</strong> <code>FOLHA/Fontes/FEncerramentoPorFalecimento.pas</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span> — informações que o repositório não comprova ou que divergem entre fontes. O texto existente foi mantido; os itens abaixo dependem de validação humana.</p>
+<ul>
+<li>Fórmula exata do cálculo pro-rata final: não detalhada no repositório.</li>
+<li>Tabelas gravadas no encerramento e efeito sobre o histórico da folha: não documentados.</li>
+<li>Validações sobre a data de falecimento (consistência com cadastro do recebedor): não detalhadas.</li>
+</ul>
+</div>
+<div class="note note-info"><p><strong>Registro original do processo PF-A</strong></p><p><strong>Forms de entrada:</strong> <code>FEncerramentoPorFalecimento.dfm</code></p><p><strong>Lógica de processamento:</strong> Seleção do benefício; cálculo pro-rata final até a data do falecimento; encerramento do benefício</p><p><strong>Saídas:</strong> Benefício encerrado com pro-rata final</p><p><strong>Persistência (tabelas escritas):</strong> encerramento (tabelas não especificadas no repositório)</p><p><strong>Evidência:</strong> <code>FOLHA/Fontes/FEncerramentoPorFalecimento.pas</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
 
 </div>
 

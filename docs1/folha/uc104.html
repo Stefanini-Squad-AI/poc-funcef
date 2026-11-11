@@ -50,6 +50,25 @@
 <li><a href="#PF-07"><strong>JF007 — Pensão Alimentícia</strong></a>: reajustar percentual e processar rubricas incidentes na pensão.</li>
 <li><a href="#PF-08"><strong>JF008 — IRRF (Compensação, Exceções, Ação Judicial)</strong></a>: calcular IR normal, regressivo, abono, judicial; compensar IR.</li>
 </ul>
+<p><strong>Necessidade de negócio:</strong> a folha de benefícios precisa descontar valores legais dos benefícios pagos: pensão alimentícia (JF007) e imposto de renda (JF008). A pensão alimentícia é um desconto judicial a favor de alimentandos, cujo percentual pode ser reajustado e cujo cálculo envolve identificar quais rubricas incidem sobre ela e aplicar CPMF. O IRRF é calculado conforme a tabela progressiva (normal) ou regressiva (por tipo de base), com compensação de IR já retido, exceções e ações judiciais. Ambas as jornadas são integradas no cálculo da prévia (<a href="uc101.html#PF-02">JF002</a>).</p>
+<p><strong>Quem inicia:</strong> para a JF007, o usuário operacional nas telas de reajuste de percentual de pensão (<code>FReajustaPercPensao.dfm</code>) e cadastro de rubricas incidentes (<code>fCadRubXPensaoAlimenticia.dfm</code>). Para a JF008, o cálculo é automático na prévia (<a href="uc101.html#PF-02">JF002</a>), com cadastros de exceções, dependentes judiciais e compensação feitos pelo usuário em telas próprias (<code>FCadExcessoesIR</code>, <code>FCadDepJudicial</code>, <code>FCadCompensaIRRF</code>).</p>
+<p><strong>Resultado esperado:</strong> na JF007, o percentual de pensão é atualizado e o desconto de pensão é calculado na prévia (com CPMF). Na JF008, o IRRF é calculado (normal ou regressivo), compensado e persistido em BITRIBUTACAO/HSTBITRIBUTACAO/HSTDEDIDADEBITRIB.</p>
+<p><strong>Termos, siglas e componentes citados nesta página</strong> — explicados na primeira vez em que aparecem; a coluna "Fonte" indica onde a explicação foi conferida no repositório:</p>
+<div class="table-wrap"><table><thead><tr><th>Termo</th><th>O que significa</th><th>Fonte</th></tr></thead><tbody>
+<tr><td><strong>Pensão alimentícia</strong></td><td>Desconto judicial a favor de alimentandos.</td><td><code>FReajustaPercPensao.dfm</code></td></tr>
+<tr><td><strong>Rubrica incidente</strong></td><td>Rubrica que compõe a base sobre a qual a pensão incide.</td><td><a href="#FOLHA-RN014">RS014</a></td></tr>
+<tr><td><strong>CPMF sobre pensão</strong></td><td>Contribuição provisória sobre o valor da pensão.</td><td><a href="#FOLHA-RN016">RS016</a></td></tr>
+<tr><td><strong>IRRF</strong></td><td>Imposto de Renda Retido na Fonte.</td><td><code>dFolhaPrevia.pas:13493</code></td></tr>
+<tr><td><strong>IR normal</strong></td><td>Cálculo de IR pela tabela progressiva.</td><td><code>dFolhaPrevia.pas:12380</code></td></tr>
+<tr><td><strong>IR regressivo</strong></td><td>Cálculo de IR pela tabela regressiva, por tipo de base: 0=vitalício, 1=abono, 7=reserva.</td><td><a href="#FOLHA-RN015">RS015</a></td></tr>
+<tr><td><strong>Compensação de IRRF</strong></td><td>Abatimento de IR já retido em meses anteriores, limitado ao saldo de compensação.</td><td><a href="#FOLHA-RN017">RS017</a></td></tr>
+<tr><td><strong>Exceções de IR</strong></td><td>Casos especiais de isenção ou tributação diferenciada.</td><td><code>FCadExcessoesIR.dfm</code></td></tr>
+<tr><td><strong>Ação judicial</strong></td><td>Processo judicial que afeta o cálculo de IR.</td><td><code>FCadDepJudicial.dfm</code></td></tr>
+<tr><td><strong>BITRIBUTACAO</strong></td><td>Base de tributação de IRRF por fonte pagadora e tipo.</td><td><a href="dados.html">🗄️ Dados</a></td></tr>
+<tr><td><strong>HSTBITRIBUTACAO</strong></td><td>Histórico da base de tributação.</td><td><a href="dados.html">🗄️ Dados</a></td></tr>
+<tr><td><strong>HSTDEDIDADEBITRIB</strong></td><td>Histórico de dependentes/idade/IR.</td><td><a href="dados.html">🗄️ Dados</a></td></tr>
+<tr><td><strong>Natureza de rendimento</strong></td><td>Classificação da rubrica para fins de IR.</td><td><a href="uc101.html#FOLHA-RN004">RS004</a></td></tr>
+</tbody></table></div>
 </section>
 
 <section><div class="section-title">3. Pré-condições</div>
@@ -61,10 +80,16 @@
 <li>Patrocinadoras, planos e benefícios devem estar cadastrados.</li>
 <li>O usuário deve ter permissão de acesso ao módulo.</li>
 </ul>
+<p><strong>O que as pré-condições gerais significam na prática:</strong> o módulo FOLHA precisa estar compilado e o banco Oracle acessível. Os parâmetros globais da folha (<code>FParametroFolha</code>) devem estar carregados, e patrocinadoras, planos e benefícios já cadastrados. O usuário precisa ter permissão de acesso ao módulo.</p>
 <p><strong>Por jornada:</strong></p>
 <ul>
 <li><a href="#PF-07">JF007</a>: —</li>
 <li><a href="#PF-08">JF008</a>: —</li>
+</ul>
+<p><strong>Pré-condições por jornada, em termos de negócio:</strong></p>
+<ul>
+<li><a href="#PF-07">JF007</a>: o participante tem beneficiários alimentandos cadastrados e rubricas incidentes na pensão parametrizadas; não há pré-condição específica documentada no repositório.</li>
+<li><a href="#PF-08">JF008</a>: a prévia da folha está em cálculo (<a href="uc101.html#PF-02">JF002</a>) e as rubricas têm natureza de rendimento informada (<a href="uc101.html#FOLHA-RN004">RS004</a>); não há pré-condição específica documentada no repositório.</li>
 </ul>
 </section>
 
@@ -73,22 +98,30 @@
 <li><a href="#PF-07">JF007</a>: percentual de pensão atualizado; desconto de pensão calculado na prévia.</li>
 <li><a href="#PF-08">JF008</a>: BITRIBUTACAO, HSTBITRIBUTACAO, HSTDEDIDADEBITRIB atualizados.</li>
 </ul>
+<p><strong>Resultado de negócio de cada jornada:</strong></p>
+<ul>
+<li><a href="#PF-07">JF007</a> — o percentual de pensão alimentícia é atualizado e, no cálculo da prévia, o desconto de pensão é calculado com CPMF aplicado sobre o valor da pensão.</li>
+<li><a href="#PF-08">JF008</a> — o IRRF é calculado (normal ou regressivo conforme o tipo de base), compensado até o saldo disponível e persistido nas tabelas BITRIBUTACAO, HSTBITRIBUTACAO e HSTDEDIDADEBITRIB.</li>
+</ul>
 </section>
 
 <section><div class="section-title">5. Jornadas Funcionais (JF007, JF008)</div>
 <p>Cada jornada traz objetivo, ator/gatilho, pré e pós-condições, sequência operacional, ações práticas, <strong>regras de negócio da jornada</strong> (texto completo de cada regra), tratamentos e mensagens.</p>
+<p><strong>Como as jornadas deste caso de uso se relacionam:</strong> a JF007 (pensão alimentícia) e a JF008 (IRRF) são ambas integradas no cálculo da prévia (<a href="uc101.html#PF-02">JF002</a>). A JF007 é disparada pelo usuário nas telas de reajuste e cadastro de rubricas incidentes, e o cálculo do CPMF sobre a pensão acontece na prévia. A JF008 é executada automaticamente dentro do cálculo da prévia (<code>CaluloIRRF</code>). Em cada passo, o rótulo "Usuário" ou "Sistema" indica quem executa a ação.</p>
 <div class="legend"><span><span class="ev ev-comprovado">COMPROVADO</span> — no código</span><span><span class="ev ev-inferido">INFERIDO</span> — plausível</span><span><span class="ev ev-pendente">PENDENTE</span> — validar</span></div>
 </section>
 
 <div class="pf-block" id="PF-07"><h4>JF007 (PF-07) — Pensão Alimentícia</h4>
 <p><strong>Objetivo:</strong> reajustar percentual e processar rubricas incidentes na pensão.</p>
-<p><strong>Gatilho/Ator:</strong> <code>FReajustaPercPensao.dfm</code>, <code>fCadRubXPensaoAlimenticia.dfm</code>, <code>FPRelPAFavor.dfm</code>.</p>
+<p><strong>Necessidade de negócio:</strong> beneficiários alimentandos recebem um desconto judicial sobre o benefício do participante. O percentual pode mudar e nem toda rubrica incide sobre a pensão. Esta jornada permite reajustar o percentual, cadastrar quais rubricas incidem e, na prévia, aplicar o CPMF sobre o valor da pensão.</p>
+<p><strong>Ator / gatilho:</strong> <code>FReajustaPercPensao.dfm</code>, <code>fCadRubXPensaoAlimenticia.dfm</code>, <code>FPRelPAFavor.dfm</code>.</p>
 <p><strong>Pós-condições:</strong> percentual de pensão atualizado; desconto de pensão calculado na prévia.</p>
+<p><strong>Em termos de negócio:</strong> o percentual de pensão alimentícia fica atualizado e, no cálculo da prévia, o desconto de pensão é calculado com CPMF aplicado sobre o valor da pensão.</p>
 <p><strong>Sequência operacional:</strong></p>
 <ol>
-<li>Atualizar percentual (<code>uReajustaPercPensao.pas</code>)</li>
-<li>Identificar rubricas incidentes (fCadRubXPensaoAlimenticia) <a href="#FOLHA-RN014">[RS014]</a></li>
-<li>Na prévia, <code>CalculaCPMFSobrePensao</code> (<code>dFolhaPrevia.pas:7048</code>) aplica CPMF sobre a pensão <a href="#FOLHA-RN016">[RS016]</a></li>
+<li><strong>Usuário:</strong> Atualizar percentual (<code>uReajustaPercPensao.pas</code>)<br>O usuário reajusta o percentual de pensão alimentícia na tela <code>FReajustaPercPensao.dfm</code>.</li>
+<li><strong>Usuário:</strong> Identificar rubricas incidentes (fCadRubXPensaoAlimenticia) <a href="#FOLHA-RN014">[RS014]</a><br>O usuário cadastra quais rubricas incidem sobre a pensão em <code>fCadRubXPensaoAlimenticia.dfm</code>.</li>
+<li><strong>Sistema:</strong> Na prévia, <code>CalculaCPMFSobrePensao</code> (<code>dFolhaPrevia.pas:7048</code>) aplica CPMF sobre a pensão <a href="#FOLHA-RN016">[RS016]</a><br>Durante o cálculo da prévia, o sistema aplica o CPMF sobre o valor da pensão alimentícia.</li>
 </ol>
 <p><strong>Ações práticas:</strong></p>
 <div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
@@ -121,22 +154,35 @@
 </div>
 </div>
 
+<p><strong>Tratamentos de erro:</strong> —</p>
+<p><strong>Mensagens:</strong> —</p>
+<p><strong>Telas:</strong> Reajuste de Percentual de Pensão (<code>FReajustaPercPensao.dfm</code>), Cadastro de Rubricas × Pensão Alimentícia (<code>fCadRubXPensaoAlimenticia.dfm</code>), Relatório de Pensão Alimentícia a Favor (<code>FPRelPAFavor.dfm</code>)</p>
 <p><strong>Dependências:</strong> integrada a <a href="uc101.html#PF-02">JF002</a>. Evidência: <code>FOLHA/Fontes/uReajustaPercPensao.pas</code>, <code>dFolhaPrevia.pas:7048</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
 <div class="mermaid">graph LR
   n0["FReajustaPensao"] --> n1["uReajustaPercPensao"] --> n2["rubricas incidentes"] --> n3["(na prévia) CalculaCPMFSobrePensao(:7048)"] --> n4["desconto de pensão"]</div>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span> — informações que o repositório não comprova ou que divergem entre fontes. O texto existente foi mantido; os itens abaixo dependem de validação humana.</p>
+<ul>
+<li>Critério para aplicar ou não o CPMF sobre a pensão (em quais condições): a regra RS016 diz "quando aplicável", mas o critério exato não está documentado.</li>
+<li>Conteúdo e comportamento da tela <code>FPRelPAFavor.dfm</code>: não foi analisada em detalhe.</li>
+<li>Como o percentual reajustado interage com múltiplos alimentandos: não há documentação sobre a distribuição entre beneficiários.</li>
+</ul>
+</div>
+<div class="note note-info"><p><strong>Registro original do processo PF-07</strong></p><p><strong>Forms de entrada:</strong> <code>FReajustaPercPensao.dfm</code>, <code>fCadRubXPensaoAlimenticia.dfm</code>, <code>FPRelPAFavor.dfm</code></p><p><strong>Lógica de processamento:</strong> Reajusta percentual → identifica rubricas incidentes (RS014) → na prévia, CalculaCPMFSobrePensao aplica CPMF (RS016)</p><p><strong>Saídas:</strong> Percentual de pensão atualizado; desconto de pensão calculado na prévia</p><p><strong>Persistência (tabelas escritas):</strong> PREVIA (pensão)</p><p><strong>Evidência:</strong> <code>FOLHA/Fontes/uReajustaPercPensao.pas</code>, <code>dFolhaPrevia.pas:7048</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
 </div>
 
 <div class="pf-block" id="PF-08"><h4>JF008 (PF-08) — IRRF (Compensação, Exceções, Ação Judicial)</h4>
 <p><strong>Objetivo:</strong> calcular IR normal, regressivo, abono, judicial; compensar IR.</p>
-<p><strong>Gatilho/Ator:</strong> cálculo automático na prévia (<a href="uc101.html#PF-02">JF002</a>) + cadastros <code>FCadExcessoesIR</code>, <code>FCadDepJudicial</code>, <code>FCadCompensaIRRF</code>, <code>FHistCompSalContri</code>.</p>
+<p><strong>Necessidade de negócio:</strong> o imposto de renda retido na fonte (IRRF) deve ser calculado sobre os proventos tributáveis da folha. O cálculo pode seguir a tabela progressiva (normal) ou a regressiva (por tipo de base: vitalício, abono, reserva). IR já retido em meses anteriores pode ser compensado até o saldo disponível. Exceções e ações judiciais podem alterar a tributação. Esta jornada executa todo esse cálculo dentro da prévia.</p>
+<p><strong>Ator / gatilho:</strong> cálculo automático na prévia (<a href="uc101.html#PF-02">JF002</a>) + cadastros <code>FCadExcessoesIR</code>, <code>FCadDepJudicial</code>, <code>FCadCompensaIRRF</code>, <code>FHistCompSalContri</code>.</p>
 <p><strong>Pós-condições:</strong> BITRIBUTACAO, HSTBITRIBUTACAO, HSTDEDIDADEBITRIB atualizados.</p>
+<p><strong>Em termos de negócio:</strong> o IRRF é calculado (normal ou regressivo conforme o tipo de base), compensado até o saldo disponível e persistido nas tabelas BITRIBUTACAO, HSTBITRIBUTACAO e HSTDEDIDADEBITRIB.</p>
 <p><strong>Sequência operacional (dentro de CaluloIRRF, dFolhaPrevia.pas:13493):</strong></p>
 <ol>
-<li><code>DeterminaBasesIRRF</code> (:7180) separa bases FUND/INSS <a href="uc101.html#FOLHA-RN004">[RS004]</a> <a href="uc101.html#FOLHA-RN005">[RS005]</a> <a href="#TRT004">[TRT004]</a></li>
-<li><code>AtualizaFlgIsento</code> (:10302) → <code>VerificaCompensacaoIRRF</code> (:10254) <a href="uc101.html#FOLHA-RN017">[RS017]</a></li>
-<li>Decisão: IR normal (<code>CalculaLancaIRNormal</code> :12380) ou regressivo (<code>CalculaLancaIRRegressivo</code> :12123, tipo 0=vitalício/1=abono/7=reserva) <a href="uc101.html#FOLHA-RN015">[RS015]</a></li>
-<li><code>LancaIRCompensado</code> (:12005) → <code>LancaRubricaDEP_IDADE_IR</code> (:10569) → <code>BuscaOutros_IRMensal</code> (:11982)</li>
-<li>Atualiza BITRIBUTACAO/HSTBITRIBUTACAO (transações :15679-16030)</li>
+<li><strong>Sistema:</strong> <code>DeterminaBasesIRRF</code> (:7180) separa bases FUND/INSS <a href="uc101.html#FOLHA-RN004">[RS004]</a> <a href="uc101.html#FOLHA-RN005">[RS005]</a> <a href="#TRT004">[TRT004]</a><br>O sistema determina as bases de IRRF por fonte pagadora e tipo, separando bases FUND/INSS e acumulando os proventos tributáveis.</li>
+<li><strong>Sistema:</strong> <code>AtualizaFlgIsento</code> (:10302) → <code>VerificaCompensacaoIRRF</code> (:10254) <a href="uc101.html#FOLHA-RN017">[RS017]</a><br>O sistema atualiza o flag de isenção e verifica se há saldo de compensação de IRRF disponível.</li>
+<li><strong>Sistema:</strong> Decisão: IR normal (<code>CalculaLancaIRNormal</code> :12380) ou regressivo (<code>CalculaLancaIRRegressivo</code> :12123, tipo 0=vitalício/1=abono/7=reserva) <a href="uc101.html#FOLHA-RN015">[RS015]</a><br>O sistema decide entre cálculo progressivo (normal) ou regressivo conforme o tipo de base do plano.</li>
+<li><strong>Sistema:</strong> <code>LancaIRCompensado</code> (:12005) → <code>LancaRubricaDEP_IDADE_IR</code> (:10569) → <code>BuscaOutros_IRMensal</code> (:11982)<br>O sistema compensa o IR até o saldo, lança rubricas de dependentes por idade e busca outros IR mensais.</li>
+<li><strong>Sistema:</strong> Atualiza BITRIBUTACAO/HSTBITRIBUTACAO (transações :15679-16030)<br>O sistema persiste a tributação calculada nas tabelas de base e histórico.</li>
 </ol>
 <p><strong>Ações práticas:</strong></p>
 <div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
@@ -196,9 +242,21 @@
 </div>
 </div>
 
+<p><strong>Tratamentos de erro:</strong> <a href="#TRT004">TRT004</a></p>
+<p><strong>Mensagens:</strong> <a href="#MSG004">MSG004</a></p>
+<p><strong>Telas:</strong> Exceções de IR (<code>FCadExcessoesIR.dfm</code>), Dependentes Judiciais (<code>FCadDepJudicial.dfm</code>), Compensação de IRRF (<code>FCadCompensaIRRF.dfm</code>), Histórico de Compensação de Saldo de Contribuinte (<code>FHistCompSalContri.dfm</code>), Prévia da Folha Normal (<code>FFolhaNormalPrevia.dfm</code>)</p>
 <p><strong>Dependências:</strong> executada dentro de <a href="uc101.html#PF-02">JF002</a>. Evidência: <code>dFolhaPrevia.pas:7180-13493</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
 <div class="mermaid">graph LR
   n0["CaluloIRRF"] --> n1["DeterminaBasesIRRF"] --> n2["AtualizaFlgIsento"] --> n3["VerificaCompensacaoIRRF"] --> n4["{IR normal|IR regressivo(0/1/7)}"] --> n5["LancaIRCompensado"] --> n6["LancaRubricaDEP_IDADE_IR"] --> n7["BITRIBUTACAO/HSTBITRIBUTACAO"]</div>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span> — informações que o repositório não comprova ou que divergem entre fontes. O texto existente foi mantido; os itens abaixo dependem de validação humana.</p>
+<ul>
+<li>Tabela de IR progressiva e regressiva usada no cálculo: não há referência à tabela de alíquotas documentada no repositório.</li>
+<li>Conteúdo e comportamento das exceções de IR (<code>FCadExcessoesIR</code>) e como afetam o cálculo: não foi analisado em detalhe.</li>
+<li>Como ações judiciais (<code>FCadDepJudicial</code>) alteram o cálculo de IR: o fluxo de integração não está documentado.</li>
+<li>Conteúdo da tabela HSTDEDIDADEBITRIB e quando é escrita: referenciada nas pós-condições, mas a rotina de gravação não foi confirmada.</li>
+</ul>
+</div>
+<div class="note note-info"><p><strong>Registro original do processo PF-08</strong></p><p><strong>Forms de entrada:</strong> <code>FFolhaNormalPrevia.dfm</code>, <code>FCadExcessoesIR.dfm</code>, <code>FCadDepJudicial.dfm</code>, <code>FCadCompensaIRRF.dfm</code>, <code>FHistCompSalContri.dfm</code></p><p><strong>Lógica de processamento:</strong> Dentro de CaluloIRRF: DeterminaBasesIRRF → AtualizaFlgIsento → VerificaCompensacaoIRRF → IR normal ou regressivo (0/1/7) → LancaIRCompensado → LancaRubricaDEP_IDADE_IR → atualiza BITRIBUTACAO/HSTBITRIBUTACAO</p><p><strong>Saídas:</strong> IRRF calculado, compensado e persistido</p><p><strong>Persistência (tabelas escritas):</strong> BITRIBUTACAO, HSTBITRIBUTACAO, HSTDEDIDADEBITRIB</p><p><strong>Evidência:</strong> <code>dFolhaPrevia.pas:7180-13493</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
 </div>
 
 <section><div class="section-title">5.1 Tabela de decisão — cálculo de IRRF (RS004/RS005/RS015/RS017)</div>

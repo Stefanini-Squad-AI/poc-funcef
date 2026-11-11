@@ -49,6 +49,15 @@
 <ul>
 <li><a href="#PF-C"><strong>JF015 — Abatimento de Reservas</strong></a>: abater reservas para benefícios pagos.</li>
 </ul>
+<p><strong>Necessidade de negócio:</strong> as reservas são provisões matemáticas que garantem o pagamento de benefícios futuros. Conforme os benefícios são pagos, as reservas precisa ser abatida para refletir o compromisso reduzido. O abatimento é feito por competência (mês/ano de referência).</p>
+<p><strong>Quem inicia:</strong> o usuário operacional (analista de folha), na tela de abatimento de reservas do módulo FOLHA. A jornada não é disparada automaticamente.</p>
+<p><strong>Resultado esperado:</strong> as reservas são abatidas conforme os benefícios pagos na competência informada.</p>
+<p><strong>Termos, siglas e componentes citados nesta página</strong> — explicados na primeira vez em que aparecem; a coluna "Fonte" indica onde a explicação foi conferida no repositório:</p>
+<div class="table-wrap"><table><thead><tr><th>Termo</th><th>O que significa</th><th>Fonte</th></tr></thead><tbody>
+<tr><td><strong>Reserva</strong></td><td>Provisão matemática que garante o pagamento de benefícios futuros.</td><td><a href="dados.html">🗄️ Dados</a></td></tr>
+<tr><td><strong>Abatimento de reservas</strong></td><td>Redução das reservas conforme os benefícios são pagos.</td><td><code>FExecAbateReserva.dfm</code></td></tr>
+<tr><td><strong>Competência</strong></td><td>Mês/ano de referência do processamento.</td><td><code>FExecAbateReserva.pas:139,142</code></td></tr>
+</tbody></table></div>
 </section>
 
 <section><div class="section-title">3. Pré-condições</div>
@@ -60,9 +69,14 @@
 <li>Patrocinadoras, planos e benefícios devem estar cadastrados.</li>
 <li>O usuário deve ter permissão de acesso ao módulo.</li>
 </ul>
+<p><strong>O que as pré-condições gerais significam na prática:</strong> o módulo FOLHA precisa estar compilado e acessível, com o banco Oracle (schema <code>CM.</code>) disponível e os parâmetros globais da folha (<code>FParametroFolha</code>) carregados. Os cadastros básicos (patrocinadoras, planos e benefícios) já devem existir, e o usuário precisa ter permissão de acesso ao módulo.</p>
 <p><strong>Por jornada:</strong></p>
 <ul>
 <li><a href="#PF-C">JF015</a>: mês/ano de referência informados <a href="#FOLHA-RN001">[RS001]</a> <a href="#TRT001">[TRT001]</a>.</li>
+</ul>
+<p><strong>Pré-condições por jornada, em termos de negócio:</strong></p>
+<ul>
+<li><a href="#PF-C">JF015</a>: o mês e o ano de referência (competência) devem estar informados; sem eles, a execução é bloqueada (<a href="#FOLHA-RN001">RS001</a>).</li>
 </ul>
 </section>
 
@@ -70,21 +84,28 @@
 <ul>
 <li><a href="#PF-C">JF015</a>: —</li>
 </ul>
+<p><strong>Resultado de negócio de cada jornada:</strong></p>
+<ul>
+<li><a href="#PF-C">JF015</a> — as reservas são abatidas conforme os benefícios pagos na competência informada.</li>
+</ul>
 </section>
 
 <section><div class="section-title">5. Jornadas Funcionais (JF015)</div>
 <p>Cada jornada traz objetivo, ator/gatilho, pré e pós-condições, sequência operacional, ações práticas, <strong>regras de negócio da jornada</strong> (texto completo de cada regra), tratamentos e mensagens.</p>
+<p><strong>Como as jornadas deste caso de uso se relacionam:</strong> este caso de uso tem uma única jornada (JF015), iniciada pelo usuário na tela de abatimento de reservas do módulo FOLHA.</p>
 <div class="legend"><span><span class="ev ev-comprovado">COMPROVADO</span> — no código</span><span><span class="ev ev-inferido">INFERIDO</span> — plausível</span><span><span class="ev ev-pendente">PENDENTE</span> — validar</span></div>
 </section>
 
 <div class="pf-block" id="PF-C"><h4>JF015 (PF-C) — Abatimento de Reservas</h4>
 <p><strong>Objetivo:</strong> abater reservas para benefícios pagos.</p>
-<p><strong>Gatilho/Ator:</strong> <code>FExecAbateReserva.dfm</code> (887 lin).</p>
+<p><strong>Necessidade de negócio:</strong> as reservas são provisões matemáticas que garantem o pagamento de benefícios futuros. Conforme os benefícios são pagos, as reservas precisa ser abatida para refletir o compromisso reduzido. O abatimento é feito por competência (mês/ano de referência).</p>
+<p><strong>Ator / gatilho:</strong> <code>FExecAbateReserva.dfm</code> (887 lin).</p>
 <p><strong>Pré-condições:</strong> mês/ano de referência informados <a href="#FOLHA-RN001">[RS001]</a> <a href="#TRT001">[TRT001]</a>.</p>
+<p><strong>Em termos de negócio:</strong> o mês e o ano de referência (competência) devem estar informados; sem eles, a execução é bloqueada (<a href="#FOLHA-RN001">RS001</a>).</p>
 <p><strong>Sequência operacional:</strong></p>
 <ol>
-<li>Validar mês/ano de referência <a href="#FOLHA-RN001">[RS001]</a> <a href="#TRT001">[TRT001]</a></li>
-<li>Abater reservas para benefícios pagos</li>
+<li><strong>Sistema:</strong> Validar mês/ano de referência <a href="#FOLHA-RN001">[RS001]</a> <a href="#TRT001">[TRT001]</a><br>O sistema valida se o mês e o ano de referência foram informados; se não, bloqueia a execução.</li>
+<li><strong>Sistema:</strong> Abater reservas para benefícios pagos.<br>O sistema reduz as reservas conforme os benefícios pagos na competência informada.</li>
 </ol>
 <p><strong>Ações práticas:</strong></p>
 <div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
@@ -108,7 +129,17 @@
 <p><strong>Rotina:</strong> validação inline no form. <strong>Origem:</strong> <code>FOLHA/Fontes/FExecAbateReserva.pas:139,142</code>. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> · <strong>Severidade:</strong> alta (bloqueante) · <strong>Jornada:</strong> <a href="uc101.html#PF-01">JF001</a>, <a href="#PF-C">JF015</a> · <strong>Relacionadas:</strong> —</p>
 </div>
 </div>
+<p><strong>Tratamentos de erro:</strong> <a href="#TRT001">TRT001</a></p>
+<p><strong>Mensagens:</strong> <a href="#MSG001">MSG001</a></p>
+<p><strong>Telas:</strong> Abatimento de Reservas (<code>FExecAbateReserva.dfm</code>)</p>
 <p><strong>Evidência:</strong> <code>FOLHA/Fontes/FExecAbateReserva.pas:139,142</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span> — informações que o repositório não comprova ou que divergem entre fontes. O texto existente foi mantido; os itens abaixo dependem de validação humana.</p>
+<ul>
+<li>Critério de abatimento das reservas (fórmula atuarial e base de cálculo): não detalhado no repositório.</li>
+<li>Tabelas de reservas lidas e gravadas no abatimento: não especificadas no repositório.</li>
+</ul>
+</div>
+<div class="note note-info"><p><strong>Registro original do processo PF-C</strong></p><p><strong>Forms de entrada:</strong> <code>FExecAbateReserva.dfm</code></p><p><strong>Lógica de processamento:</strong> Valida mês/ano de referência (obrigatórios); abate reservas dos benefícios pagos na competência</p><p><strong>Saídas:</strong> Reservas abatidas dos benefícios pagos</p><p><strong>Persistência (tabelas escritas):</strong> reservas abatidas (tabelas não especificadas no repositório)</p><p><strong>Evidência:</strong> <code>FOLHA/Fontes/FExecAbateReserva.pas:139,142</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
 
 </div>
 

@@ -50,6 +50,17 @@
 <li><a href="#PF-D"><strong>JF016 — Mapa da Folha</strong></a>: gerar mapa da folha de benefício (WO2511).</li>
 <li><a href="#PF-E"><strong>JF017 — Conferência e Batimento</strong></a>: conferir a prévia e bater líquido.</li>
 </ul>
+<p><strong>Necessidade de negócio:</strong> antes de efetivar a folha, a área de folha precisa consolidar os valores calculados em um mapa e conferi-los contra referências, para garantir que o líquido a pagar está correto. O mapa da folha (JF016) dá a visão consolidada por rubrica e recebedor; a conferência e o batimento (JF017) são a checagem manual antes de a versão virar pagamento.</p>
+<p><strong>Quem inicia:</strong> o usuário operacional (analista de folha), nas telas de mapa e de conferência/batimento do módulo FOLHA. Nenhuma das duas jornadas é disparada automaticamente.</p>
+<p><strong>Resultado esperado:</strong> o mapa da folha é gerado para a competência e o líquido previado é conferido e batido com valores de referência, liberando a prévia para a efetivação.</p>
+<p><strong>Termos, siglas e componentes citados nesta página</strong> — explicados na primeira vez em que aparecem; a coluna "Fonte" indica onde a explicação foi conferida no repositório:</p>
+<div class="table-wrap"><table><thead><tr><th>Termo</th><th>O que significa</th><th>Fonte</th></tr></thead><tbody>
+<tr><td><strong>Mapa da folha</strong></td><td>Relatório consolidado da folha com totais por rubrica e por recebedor, usado para conferência antes da efetivação.</td><td><a href="relatorios.html">📄 Relatórios</a></td></tr>
+<tr><td><strong>WO2511</strong></td><td>Identificador do relatório do mapa da folha de benefício.</td><td><a href="relatorios.html">📄 Relatórios</a></td></tr>
+<tr><td><strong>Conferência da prévia</strong></td><td>Revisão manual dos valores calculados na prévia antes de efetivar a folha.</td><td><code>fConferenciaPrevia.dfm</code></td></tr>
+<tr><td><strong>Batimento</strong></td><td>Comparação do líquido previado com valores de referência, para validar o cálculo.</td><td><code>fBatimentoPrevia.dfm</code></td></tr>
+<tr><td><strong>Líquido</strong></td><td>Valor final a receber pelo recebedor: proventos menos descontos.</td><td><a href="dados.html">🗄️ Dados</a></td></tr>
+</tbody></table></div>
 </section>
 
 <section><div class="section-title">3. Pré-condições</div>
@@ -61,10 +72,16 @@
 <li>Patrocinadoras, planos e benefícios devem estar cadastrados.</li>
 <li>O usuário deve ter permissão de acesso ao módulo.</li>
 </ul>
+<p><strong>O que as pré-condições gerais significam na prática:</strong> o módulo FOLHA precisa estar compilado e acessível, com o banco Oracle (schema <code>CM.</code>) disponível e os parâmetros globais da folha (<code>FParametroFolha</code>) carregados. Os cadastros básicos (patrocinadoras, planos e benefícios) já devem existir, e o usuário precisa ter permissão de acesso ao módulo.</p>
 <p><strong>Por jornada:</strong></p>
 <ul>
 <li><a href="#PF-D">JF016</a>: —</li>
 <li><a href="#PF-E">JF017</a>: —</li>
+</ul>
+<p><strong>Pré-condições por jornada, em termos de negócio:</strong></p>
+<ul>
+<li><a href="#PF-D">JF016</a>: não há pré-condição específica documentada; basta a folha da competência ter sido calculada para que o mapa possa ser gerado.</li>
+<li><a href="#PF-E">JF017</a>: não há pré-condição específica documentada; depende de a prévia já ter sido calculada para conferência e batimento.</li>
 </ul>
 </section>
 
@@ -73,20 +90,27 @@
 <li><a href="#PF-D">JF016</a>: —</li>
 <li><a href="#PF-E">JF017</a>: —</li>
 </ul>
+<p><strong>Resultado de negócio de cada jornada:</strong></p>
+<ul>
+<li><a href="#PF-D">JF016</a> — o mapa da folha é gerado, consolidando os totais por rubrica e recebedor para a competência selecionada.</li>
+<li><a href="#PF-E">JF017</a> — a prévia é conferida e o líquido é batido com valores de referência, validando o cálculo antes da efetivação.</li>
+</ul>
 </section>
 
 <section><div class="section-title">5. Jornadas Funcionais (JF016, JF017)</div>
 <p>Cada jornada traz objetivo, ator/gatilho, pré e pós-condições, sequência operacional, ações práticas, <strong>regras de negócio da jornada</strong> (texto completo de cada regra), tratamentos e mensagens.</p>
+<p><strong>Como as jornadas deste caso de uso se relacionam:</strong> o mapa da folha (JF016) dá a visão consolidada que apoia a conferência; a conferência e o batimento (JF017) são a checagem que precede a efetivação (UC109). As duas são iniciadas pelo usuário nas telas do módulo FOLHA.</p>
 <div class="legend"><span><span class="ev ev-comprovado">COMPROVADO</span> — no código</span><span><span class="ev ev-inferido">INFERIDO</span> — plausível</span><span><span class="ev ev-pendente">PENDENTE</span> — validar</span></div>
 </section>
 
 <div class="pf-block" id="PF-D"><h4>JF016 (PF-D) — Mapa da Folha</h4>
 <p><strong>Objetivo:</strong> gerar mapa da folha de benefício (WO2511).</p>
-<p><strong>Gatilho/Ator:</strong> <code>FMapaFolhaBenef.dfm</code> (209 lin).</p>
+<p><strong>Necessidade de negócio:</strong> a área de folha precisa de uma visão consolidada da folha de benefício — totais por rubrica e por recebedor — para conferir os valores antes de efetivar o pagamento. O mapa da folha (WO2511) produz essa visão.</p>
+<p><strong>Ator / gatilho:</strong> <code>FMapaFolhaBenef.dfm</code> (209 lin).</p>
 <p><strong>Sequência operacional:</strong></p>
 <ol>
-<li>Selecionar parâmetros do mapa</li>
-<li>Gerar mapa da folha</li>
+<li><strong>Usuário:</strong> Selecionar parâmetros do mapa.<br>O usuário informa os parâmetros de geração do mapa da folha na tela <code>FMapaFolhaBenef</code>.</li>
+<li><strong>Sistema:</strong> Gerar mapa da folha.<br>O sistema consolida os totais por rubrica e recebedor e produz o mapa da folha (WO2511).</li>
 </ol>
 <p><strong>Ações práticas:</strong></p>
 <div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
@@ -95,17 +119,28 @@
 <div class="jf-rules">
 <p><strong>Regras de negócio da jornada:</strong> nenhuma regra FOLHA-RN específica desta jornada; as validações estão nos tratamentos (TRT) do caso de uso.</p>
 </div>
+<p><strong>Tratamentos de erro:</strong> —</p>
+<p><strong>Mensagens:</strong> —</p>
+<p><strong>Telas:</strong> Mapa da Folha de Benefício (<code>FMapaFolhaBenef.dfm</code>)</p>
 <p><strong>Evidência:</strong> <code>FOLHA/Fontes/FMapaFolhaBenef.pas</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span> — informações que o repositório não comprova ou que divergem entre fontes. O texto existente foi mantido; os itens abaixo dependem de validação humana.</p>
+<ul>
+<li>Parâmetros exatos aceitos pelo mapa da folha e critério de consolidação dos totais: não detalhados no repositório.</li>
+<li>Formato de saída do mapa (WO2511) e se é apenas tela ou também arquivo: confirmar com a área de folha.</li>
+</ul>
+</div>
+<div class="note note-info"><p><strong>Registro original do processo PF-D</strong></p><p><strong>Forms de entrada:</strong> <code>FMapaFolhaBenef.dfm</code></p><p><strong>Lógica de processamento:</strong> Seleção de parâmetros do mapa; consolida totais por rubrica/recebedor</p><p><strong>Saídas:</strong> Mapa da folha (WO2511)</p><p><strong>Persistência (tabelas escritas):</strong> — (relatório, sem gravação)</p><p><strong>Evidência:</strong> <code>FOLHA/Fontes/FMapaFolhaBenef.pas</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
 
 </div>
 
 <div class="pf-block" id="PF-E"><h4>JF017 (PF-E) — Conferência e Batimento</h4>
 <p><strong>Objetivo:</strong> conferir a prévia e bater líquido.</p>
-<p><strong>Gatilho/Ator:</strong> <code>fConferenciaPrevia.dfm</code> (761 lin) + <code>fBatimentoPrevia.dfm</code> (1.773 lin).</p>
+<p><strong>Necessidade de negócio:</strong> antes de efetivar a folha, a área precisa revisar os valores calculados na prévia e comparar o líquido previado com valores de referência, para garantir que o cálculo está correto. A conferência e o batimento são essa checagem.</p>
+<p><strong>Ator / gatilho:</strong> <code>fConferenciaPrevia.dfm</code> (761 lin) + <code>fBatimentoPrevia.dfm</code> (1.773 lin).</p>
 <p><strong>Sequência operacional:</strong></p>
 <ol>
-<li>Conferir prévia</li>
-<li>Bater líquido</li>
+<li><strong>Usuário:</strong> Conferir prévia.<br>O usuário revisa os valores calculados na prévia na tela <code>fConferenciaPrevia</code>.</li>
+<li><strong>Usuário:</strong> Bater líquido.<br>O usuário compara o líquido previado com valores de referência na tela <code>fBatimentoPrevia</code> para validar o cálculo.</li>
 </ol>
 <p><strong>Ações práticas:</strong></p>
 <div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
@@ -115,7 +150,17 @@
 <div class="jf-rules">
 <p><strong>Regras de negócio da jornada:</strong> nenhuma regra FOLHA-RN específica desta jornada; as validações estão nos tratamentos (TRT) do caso de uso.</p>
 </div>
+<p><strong>Tratamentos de erro:</strong> —</p>
+<p><strong>Mensagens:</strong> —</p>
+<p><strong>Telas:</strong> Conferência da Prévia (<code>fConferenciaPrevia.dfm</code>), Batimento da Prévia (<code>fBatimentoPrevia.dfm</code>)</p>
 <p><strong>Evidência:</strong> <code>FOLHA/Fontes/fConferenciaPrevia.pas</code>, <code>fBatimentoPrevia.pas</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span> — informações que o repositório não comprova ou que divergem entre fontes. O texto existente foi mantido; os itens abaixo dependem de validação humana.</p>
+<ul>
+<li>Origem dos valores de referência usados no batimento do líquido: não detalhada no repositório.</li>
+<li>Critério de aprovação/reprovação do batimento e seu efeito sobre a efetivação: confirmar com a área de folha.</li>
+</ul>
+</div>
+<div class="note note-info"><p><strong>Registro original do processo PF-E</strong></p><p><strong>Forms de entrada:</strong> <code>fConferenciaPrevia.dfm</code>, <code>fBatimentoPrevia.dfm</code></p><p><strong>Lógica de processamento:</strong> Conferência manual da prévia; batimento do líquido previado com valores de referência</p><p><strong>Saídas:</strong> Prévia conferida e líquido validado</p><p><strong>Persistência (tabelas escritas):</strong> — (conferência, sem gravação de histórico)</p><p><strong>Evidência:</strong> <code>FOLHA/Fontes/fConferenciaPrevia.pas</code>, <code>fBatimentoPrevia.pas</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
 
 </div>
 

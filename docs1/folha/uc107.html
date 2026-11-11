@@ -47,8 +47,21 @@
 <section><div class="section-title">2. Descrição Resumida</div>
 <p>Processar salários/diferenças retroativas. Este caso de uso reúne 1 jornada(s) funcional(is) do módulo Folha de Benefícios:</p>
 <ul>
-<li><a href="#PF-09"><strong>JF009 — Retroativos</strong></a>: processar salários/diferenças retroativas.</li>
+<li><a href="#PF-09"><strong>JF009 — Retroativos</strong></a>: processar salários/diferença retroativas.</li>
 </ul>
+<p><strong>Necessidade de negócio:</strong> quando um salário ou benefício é corrigido retroativamente, a diferença relativa a períodos passados precisa ser paga no mês corrente. Esta jornada permite informar salários retroativos, recalcular as diferenças e, na prévia da folha, aplicar a correção sobre a tabela temporária de descontos (TMPDESC). O caso de uso é integrado à jornada de prévia da folha (JF002).</p>
+<p><strong>Quem inicia:</strong> sempre o usuário operacional, pela tela de informação de salário retroativo (<code>FInformaSalRetroEv.dfm</code>). A correção sobre TMPDESC é aplicada automaticamente na prévia da folha pela rotina <code>CalculaCorrecaoTmpDesc</code> (<code>dFolhaPrevia.pas:9122</code>).</p>
+<p><strong>Resultado esperado:</strong> os valores retroativos são gravados em BENEFRETROATIVO e BENEFRETROXPESS, e na prévia da folha a tabela temporária de descontos (TMPDESC) é corrigida com a correção e o alterador calculados conforme a data de pagamento (<a href="uc101.html#FOLHA-RN020">RS020</a>).</p>
+<p><strong>Termos, siglas e componentes citados nesta página</strong> — explicados na primeira vez em que aparecem; a coluna “Fonte” indica onde a explicação foi conferida no repositório:</p>
+<div class="table-wrap"><table><thead><tr><th>Termo</th><th>O que significa</th><th>Fonte</th></tr></thead><tbody>
+<tr><td><strong>Retroativo</strong></td><td>Diferença de valor referente a período passado, paga no mês corrente.</td><td><a href="dados.html">🗄️ Dados</a></td></tr>
+<tr><td><strong>Salário retroativo</strong></td><td>Salário informado retroativamente que gera diferença a pagar.</td><td><code>FInformaSalRetroEv.pas</code></td></tr>
+<tr><td><strong>BENEFRETROATIVO</strong></td><td>Tabela de benefícios retroativos.</td><td><a href="dados.html">🗄️ Dados</a></td></tr>
+<tr><td><strong>BENEFRETROXPESS</strong></td><td>Tabela de benefícios retroativos por pessoa.</td><td><a href="dados.html">🗄️ Dados</a></td></tr>
+<tr><td><strong>TMPDESC</strong></td><td>Tabela temporária de descontos, corrigida com o retroativo.</td><td><a href="dados.html">🗄️ Dados</a></td></tr>
+<tr><td><strong>Correção de benefício</strong></td><td>Ajuste do valor do benefício conforme data de pagamento.</td><td><code>dFolhaPrevia.pas:9122</code></td></tr>
+<tr><td><strong>Alterador</strong></td><td>Fator de alteração aplicado ao benefício.</td><td><code>dFolhaPrevia.pas:8920</code></td></tr>
+</tbody></table></div>
 </section>
 
 <section><div class="section-title">3. Pré-condições</div>
@@ -60,9 +73,14 @@
 <li>Patrocinadoras, planos e benefícios devem estar cadastrados.</li>
 <li>O usuário deve ter permissão de acesso ao módulo.</li>
 </ul>
+<p><strong>O que as pré-condições gerais significam na prática:</strong> o módulo FOLHA precisa estar compilado e acessível, com o banco Oracle (schema <code>CM.</code>) disponível e os parâmetros globais da folha carregados. Os cadastros básicos (patrocinadoras, planos e benefícios) já devem existir. O usuário precisa ter permissão de acesso ao módulo para informar salários retroativos e disparar o recálculo de diferenças.</p>
 <p><strong>Por jornada:</strong></p>
 <ul>
 <li><a href="#PF-09">JF009</a>: —</li>
+</ul>
+<p><strong>Pré-condições por jornada, em termos de negócio:</strong></p>
+<ul>
+<li><a href="#PF-09">JF009</a>: não há pré-condições específicas além das gerais do módulo. A jornada parte dos cadastros básicos da folha para informar salários retroativos e recalcular diferenças. A correção sobre TMPDESC é aplicada na prévia da folha (JF002).</li>
 </ul>
 </section>
 
@@ -70,22 +88,29 @@
 <ul>
 <li><a href="#PF-09">JF009</a>: BENEFRETROATIVO, BENEFRETROXPESS, TMPDESC atualizados.</li>
 </ul>
+<p><strong>Resultado de negócio de cada jornada:</strong></p>
+<ul>
+<li><a href="#PF-09">JF009</a> — os valores retroativos ficam gravados em BENEFRETROATIVO e BENEFRETROXPESS, e na prévia da folha a tabela temporária de descontos (TMPDESC) é corrigida com a correção e o alterador calculados conforme a data de pagamento (<a href="uc101.html#FOLHA-RN020">RS020</a>).</li>
+</ul>
 </section>
 
 <section><div class="section-title">5. Jornadas Funcionais (JF009)</div>
 <p>Cada jornada traz objetivo, ator/gatilho, pré e pós-condições, sequência operacional, ações práticas, <strong>regras de negócio da jornada</strong> (texto completo de cada regra), tratamentos e mensagens.</p>
+<p><strong>Como as jornadas deste caso de uso se relacionam:</strong> este caso de uso tem uma única jornada (JF009) que informa salários retroativos, recalcula diferenças e, na prévia da folha, aplica a correção sobre TMPDESC. A jornada é integrada à prévia da folha (JF002 do UC101). O rótulo “Usuário” ou “Sistema” indica quem executa cada passo.</p>
 <div class="legend"><span><span class="ev ev-comprovado">COMPROVADO</span> — no código</span><span><span class="ev ev-inferido">INFERIDO</span> — plausível</span><span><span class="ev ev-pendente">PENDENTE</span> — validar</span></div>
 </section>
 
 <div class="pf-block" id="PF-09"><h4>JF009 (PF-09) — Retroativos</h4>
 <p><strong>Objetivo:</strong> processar salários/diferenças retroativas.</p>
-<p><strong>Gatilho/Ator:</strong> <code>FInformaSalRetroEv.dfm</code> + <code>uDbBenefretroativo.pas</code>/<code>uDbBenefretroxpess.pas</code>.</p>
+<p><strong>Necessidade de negócio:</strong> quando um salário ou benefício é corrigido retroativamente, a diferença relativa a períodos passados precisa ser paga no mês corrente. Esta jornada permite informar os valores retroativos e recalcular as diferenças, com correção aplicada na prévia da folha.</p>
+<p><strong>Ator / gatilho:</strong> <code>FInformaSalRetroEv.dfm</code> + <code>uDbBenefretroativo.pas</code>/<code>uDbBenefretroxpess.pas</code>.</p>
 <p><strong>Pós-condições:</strong> BENEFRETROATIVO, BENEFRETROXPESS, TMPDESC atualizados.</p>
+<p><strong>Em termos de negócio:</strong> os valores retroativos ficam gravados e, na prévia da folha, a tabela temporária de descontos (TMPDESC) é corrigida com a correção e o alterador calculados conforme a data de pagamento (<a href="uc101.html#FOLHA-RN020">RS020</a>).</p>
 <p><strong>Sequência operacional:</strong></p>
 <ol>
-<li>Informar salário retroativo</li>
-<li>Recalcular diferenças</li>
-<li>Na prévia, <code>CalculaCorrecaoTmpDesc</code> (<code>dFolhaPrevia.pas:9122</code>) aplica correção sobre TMPDESC <a href="uc101.html#FOLHA-RN020">[RS020]</a></li>
+<li><strong>Usuário:</strong> Informar salário retroativo<br>O usuário informa o salário retroativo em <code>FInformaSalRetroEv.dfm</code>, gravando em BENEFRETROATIVO/BENEFRETROXPESS.</li>
+<li><strong>Sistema:</strong> Recalcular diferenças<br>O sistema recalcula as diferenças retroativas a partir dos valores informados.</li>
+<li><strong>Sistema:</strong> Na prévia, <code>CalculaCorrecaoTmpDesc</code> (<code>dFolhaPrevia.pas:9122</code>) aplica correção sobre TMPDESC <a href="uc101.html#FOLHA-RN020">[RS020]</a><br>Na prévia da folha, a rotina CalculaCorrecaoTmpDesc aplica a correção e o alterador sobre a tabela temporária de descontos (TMPDESC).</li>
 </ol>
 <p><strong>Ações práticas:</strong></p>
 <div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
@@ -106,9 +131,19 @@
 </div>
 </div>
 
+<p><strong>Tratamentos de erro:</strong> —</p>
+<p><strong>Mensagens:</strong> —</p>
+<p><strong>Telas:</strong> Informação de Salário Retroativo (<code>FInformaSalRetroEv.dfm</code>), Prévia da Folha (<code>FFolhaNormalPrevia.dfm</code>)</p>
 <p><strong>Dependências:</strong> integrada a <a href="uc101.html#PF-02">JF002</a>. Evidência: <code>FOLHA/Fontes/FInformaSalRetroEv.pas</code>, <code>dFolhaPrevia.pas:9122</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
 <div class="mermaid">graph LR
   n0["FInformaSalRetroEv"] --> n1["BENEFRETROATIVO/BENEFRETROXPESS"] --> n2["(na prévia) CalculaCorrecaoTmpDesc(:9122)"] --> n3["TMPDESC"]</div>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span> — informações que o repositório não comprova ou que divergem entre fontes. O texto existente foi mantido; os itens abaixo dependem de validação humana.</p>
+<ul>
+<li>O cálculo do alterador e da rubrica de correção não está detalhado além das rotinas citadas (<code>CalculaCorrecaoBeneficio</code>, <code>CalculaAlterador</code>, <code>DeterminaRubricaCorrecao</code>).</li>
+<li>A integração com JF002 (prévia da folha) não foi verificada no repositório além da chamada de <code>CalculaCorrecaoTmpDesc</code>.</li>
+</ul>
+</div>
+<div class="note note-info"><p><strong>Registro original do processo PF-09</strong></p><p><strong>Forms de entrada:</strong> <code>FInformaSalRetroEv.dfm</code></p><p><strong>Lógica de processamento:</strong> Informar salário retroativo → recalcular diferenças → na prévia, CalculaCorrecaoTmpDesc aplica correção sobre TMPDESC</p><p><strong>Saídas:</strong> BENEFRETROATIVO, BENEFRETROXPESS, TMPDESC atualizados</p><p><strong>Persistência (tabelas escritas):</strong> BENEFRETROATIVO, BENEFRETROXPESS, TMPDESC</p><p><strong>Evidência:</strong> <code>FOLHA/Fontes/FInformaSalRetroEv.pas</code>, <code>dFolhaPrevia.pas:9122</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
 </div>
 
 <section id="TRT-section"><div class="section-title">6. Tratamentos (TRT)</div>
