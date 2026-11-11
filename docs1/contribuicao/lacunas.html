@@ -8,7 +8,7 @@
 </head>
 <body>
 <header>
-  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-23 (enriquecido)</div>
+  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-23 / PFC-42 (enriquecido)</div>
   <h1>🔍 Lacunas e Pontos Pendentes — Contribuição Previdenciária</h1>
   <p>Itens não comprovados, dependências externas não analisadas e artefatos pendentes</p>
 </header>
@@ -75,6 +75,36 @@
 </tbody></table></div>
 <div class="note"><p><strong>JF015:</strong> o card PFC-38 cita a jornada JF015, mas ela não existe neste módulo, que usa JF001–JF010; JF015 aparece apenas na documentação de Folha e de Benefício Previdenciário. Todas as 10 jornadas do módulo foram revisadas. <span class="ev ev-pendente">PENDENTE</span> — confirmar com o solicitante.</p></div>
 <div class="note"><p><strong>Siglas sem expansão no repositório:</strong> PGA, BPD (a expansão “Benefício Proporcional Diferido” aparece só no texto de regra, não no código), REPLAN, CCP, AdmPREV, CNPB, PBE, VP, GIP, IRFBS e os códigos internos de evento (IP, RM, DM, MP, PD). A sigla FAB foi confirmada no código: “Fundo de Acumulação de Benefícios” (<code>FBeneficioSaldadoFAB.dfm:6836</code>). <span class="ev ev-pendente">PENDENTE</span>.</p></div>
+</section>
+
+<section id="pfc42-leigo"><div class="section-title">📖 Para o leigo — O que ainda não sabemos sobre o sistema (enriquecido — PFC-42)</div>
+<p>Esta aba é como uma <strong>lista de dúvidas</strong> sobre o módulo CONTRIBUIÇÃO. Mesmo após a análise do código, há coisas que <strong>não foi possível confirmar</strong>.</p>
+<p><strong>Tipos de lacuna</strong> encontradas:</p>
+<ul>
+<li><strong>Units de relatório ausentes</strong> — 10 units referenciadas no projeto mas não existem na pasta do módulo. Provavelmente são relatórios compartilhados ou removidos, mas isso não foi confirmado.</li>
+<li><strong>Dependências externas não analisadas</strong> — o CONTRIBUIÇÃO conversa com FOLHA, BENEFICIOPREV, IRRF e CMPrevMT50, mas a implementação interna desses interlocutores não foi inspecionada.</li>
+<li><strong>Stored procedures Oracle</strong> — SP_CP_RECEB_PATRO/ASSIS e PCK_BENEFSALDFAB são invocadas, mas sua implementação interna no banco não foi inspecionada.</li>
+<li><strong>try/except silenciado</strong> — algumas rotinas têm o except vazio. Pode ser intencional ou bug.</li>
+<li><strong>Pontos a validar nos casos de uso (PFC-38)</strong> — cada jornada recebeu um bloco "🔎 Pontos a validar" com informações que o repositório não comprova e divergências entre o texto da documentação e o código-fonte.</li>
+</ul>
+<p>Cada lacuna é marcada com um selo de evidência: <span class="ev ev-comprovado">COMPROVADO</span>, <span class="ev ev-inferido">INFERIDO</span> ou <span class="ev ev-pendente">PENDENTE</span>. Isso ajuda a saber o quanto confiar em cada informação.</p>
+</section>
+
+<section id="pfc42-analista"><div class="section-title">💼 Para o analista de negócios — Riscos de negócio por informação faltante (enriquecido — PFC-42)</div>
+<p><strong>Riscos que exigem atenção</strong> (lacunas com potencial de impacto de negócio):</p>
+<ul>
+<li><strong>Units de relatório ausentes (10)</strong> — se forem necessárias em runtime, o módulo pode falhar ao acessar certos relatórios. <strong>Risco:</strong> indisponibilidade de relatórios gerenciais.</li>
+<li><strong>Stored procedures Oracle (SP_CP_RECEB_PATRO/ASSIS)</strong> — recebimento de contribuições via folha. <strong>Risco:</strong> se a procedure tiver comportamentos não documentados, o recebimento pode falhar ou gravar valores errados.</li>
+<li><strong>CMPrevMT50 (1.395 refs)</strong> — referenciado massivamente mas não inspecionado. <strong>Risco:</strong> mudanças no CMPrevMT50 podem afetar o CONTRIBUIÇÃO em dezenas de pontos sem que a equipe do CONTRIBUIÇÃO saiba.</li>
+<li><strong>Siglas sem expansão (PGA, BPD, REPLAN, CCP, CNPB, PBE, VP, GIP, IRFBS)</strong> — termos técnicos sem significado confirmado no código. <strong>Risco:</strong> interpretação errada de regras de negócio que usam essas siglas.</li>
+<li><strong>Pontos a validar nos casos de uso (PFC-38)</strong> — divergências entre documentação e código (ex.: CONTRIB-RN040 soma onde o texto diz subtrai; commits a cada 800 registros podem deixar envio parcial). <strong>Risco:</strong> decisões baseadas em documentação incorreta.</li>
+</ul>
+<p><strong>Recomendações para o analista:</strong></p>
+<ul>
+<li>Confirmar com o DBA o comportamento das stored procedures SP_CP_RECEB_PATRO/ASSIS e PCK_BENEFSALDFAB.</li>
+<li>Esclarecer as siglas não expandidas com a área de negócio (especialmente as que aparecem em regras de cálculo: BPD, IRFBS, REPLAN).</li>
+<li>Revisar os pontos a validar do PFC-38 com a equipe técnica antes de assumir qualquer premissa para migração ou reescrita.</li>
+</ul>
 </section>
 </main>
 <footer>

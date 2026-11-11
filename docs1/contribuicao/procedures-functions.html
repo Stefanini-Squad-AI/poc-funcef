@@ -8,7 +8,7 @@
 </head>
 <body>
 <header>
-  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-23 (enriquecido)</div>
+  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-23 / PFC-42 (enriquecido)</div>
   <h1>🔧 Procedures, Functions e Métodos — Contribuição Previdenciária</h1>
   <p>Catálogo de procedures e functions relevantes com identificação, parâmetros, blocos de processamento, regras aplicadas, resultados e efeitos no banco.</p>
 </header>
@@ -280,6 +280,33 @@
 <tr><td><a href="uc208.html#PF-09">PF-09 Controle Individual</a></td><td>FControleIndivContrib</td><td>tbButtonEnviarClick, bbtnOKDesfazerClick, ProcessaAlteracao, ProcessaDevolucao</td><td>HSTCONTRIBPREV, HSTATRASOCONTRIB, DOCUMENTO, CONTABCONTFUND, TMPDESC</td></tr>
 <tr><td><a href="uc209.html#PF-10">PF-10 Cadastro Manual</a></td><td>FCadHstContribuicao, FCadHstContribuicaoBeneficiario</td><td>bbtnConfirmarClick, BBtnImportaClick, BBtnContabilizaClick</td><td>HSTCONTRIBPREV, HSTATRASOCONTRIB, TMPDESC, IMPORTACAOHSTCONTRIB</td></tr>
 </tbody></table></div>
+</section>
+
+<section id="pfc42-leigo"><div class="section-title">📖 Para o leigo — As "receitas" internas do programa (enriquecido — PFC-42)</div>
+<p>Esta aba descreve as <strong>"receitas"</strong> (procedures e functions) que o módulo CONTRIBUIÇÃO executa por dentro. Cada receita tem nome, ingredientes (parâmetros), modo de fazer e resultado.</p>
+<p><strong>As receitas mais importantes</strong> (organizadas por processo de negócio):</p>
+<ul>
+<li><strong>PreparaContribuicao</strong> (FPreparaEnvia.pas:3724) — a "receita-mestra" do preparo: para cada patrocinadora × plano × situação, calcula e grava no histórico todas as contribuições devidas. Faz commit parcial a cada 800 registros para não sobrecarregar o banco.</li>
+<li><strong>RecebeContribuicao</strong> (FRecebeContribuicao.pas:1581) — recebe as contribuições por múltiplos canais (folha, empréstimo, banco). Compara o valor esperado com o recebido e marca a situação (recebida, divergente, pendente).</li>
+<li><strong>bbtnEnviarClick</strong> (FAtualizaPorIndice.pas:421) — atualiza as reservas por índice de correção, iterando mês a mês e aplicando a cota do índice.</li>
+<li><strong>bbtnConfirmarClick</strong> (FCalcSalContr.pas:440) — calcula o saldo de contribuições para bitributação: soma as contribuições de 1989-1995 corrigidas e o saldo de 2007/12, iterando o IPCA-E.</li>
+<li><strong>Exec_SP_Atualiza_Benef_Sald_FAB</strong> (FBeneficioSaldadoFAB.pas:1016) — chama a procedure Oracle <code>PCK_BENEFSALDFAB.SP_ATUALIZASALDO</code> para atualizar o saldo do benefício saldado/FAB.</li>
+<li><strong>Processa</strong> (FProvPerdasLote.pas:473) — calcula a provisão para perdas: para cada contribuição atrasada, aplica o percentual da faixa de dias de atraso.</li>
+</ul>
+<p>O <strong>mapa de rastreabilidade</strong> (tabela acima) liga cada processo de negócio (PF-01 a PF-10) ao form, à rotina principal e às tabelas que ela manipula. Isso permite a um desenvolvedor ir direto ao ponto certo do código.</p>
+</section>
+
+<section id="pfc42-analista"><div class="section-title">💼 Para o analista de negócios — Regras críticas e pontos de decisão (enriquecido — PFC-42)</div>
+<p><strong>Regras de negócio vivas no código</strong> (impacto financeiro direto):</p>
+<ul>
+<li><strong>CONTRIB-RN003</strong> (valor esperado > 0) — impede cobrança de valor zero/negativo. Proteção contra erro paramétrico.</li>
+<li><strong>CONTRIB-RN004/RN005</strong> (recebida/enviada bloqueia alteração) — uma vez processada, a contribuição não pode ser alterada. Garante integridade do histórico.</li>
+<li><strong>CONTRIB-RN077</strong> (boleta enviada bloqueia desfazimento) — documento de cobrança já enviado não pode ser desfeito sem cancelamento formal.</li>
+<li><strong>Bitributação</strong> — soma das contribuições de 1989-1995 corrigidas pela moeda 557, iterando IPCA-E a partir de 2008/01. <strong>Impacto:</strong> define o saldo tributável; erros de índice ou período geram passivo tributário.</li>
+<li><strong>Provisão para perdas</strong> — VALORPROV = TOTALESPERADO/100 × PERCENTUAL(faixa dias). <strong>Impacto:</strong> afeta o resultado contábil; percentuais errados super/subestimam a provisão.</li>
+</ul>
+<p><strong>Commit parcial a cada 800 registros</strong> (PreparaContribuicao:4173) — o envio é gravado parcialmente. Se o processo for interrompido, parte das contribuições estará enviada e parte não. <strong>Risco:</strong> o envio fica em estado parcial; recomenda-se verificar o estado após falhas e implementar retomada ou estorno.</p>
+<p><strong>Procedures Oracle críticas:</strong> SP_CP_RECEB_PATRO/ASSIS (recebimento via folha) e PCK_BENEFSALDFAB.SP_ATUALIZASALDO (benefício saldado). São pontos de acoplamento com o banco — mudanças no Oracle podem afetar o resultado sem que o código Delphi seja alterado. Recomenda-se versionar e testar as procedures junto com o código.</p>
 </section>
 
 </main>

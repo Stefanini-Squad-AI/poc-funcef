@@ -8,7 +8,7 @@
 </head>
 <body>
 <header>
-  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-22 (enriquecido)</div>
+  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-22 / PFC-42 (enriquecido)</div>
   <h1>🔀 Diagramas de Fluxo de Processos — Folha de Benefícios</h1>
   <p>Fluxos comprovados pelo código com rastreabilidade — renderizados via Mermaid.js</p>
 </header>
@@ -136,6 +136,35 @@
   C --> D[("CONCINSS / DETCONCINSS")]
 </div>
 <p><strong>Evidência:</strong> <code>FOLHA/Fontes/FConciliacaoReembolsoINSS.pas</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</section>
+
+<section id="pfc42-leigo"><div class="section-title">📖 Para o leigo — O passo a passo dos processos (enriquecido — PFC-42)</div>
+<p>Esta aba mostra o <strong>"passo a passo"</strong> dos principais processos do módulo FOLHA, como uma receita ilustrada. Cada fluxo é um diagrama que mostra, em ordem, o que o sistema faz desde o início até o fim do processo.</p>
+<p><strong>Os fluxos documentados</strong> (todos com rastreabilidade ao código):</p>
+<ul>
+<li><strong>PF-01 — Preparo da Folha</strong>: seleciona patrocinadoras, planos e benefícios → inicializa o processo → para cada benefício, grava histórico e calcula pro-rata → guarda na tabela de histórico.</li>
+<li><strong>PF-02 — Prévia (Cálculo)</strong>: o motor percorre cada recebedor → processa rubricas de provento → aplica regras → classifica em bases → insere na prévia → faz rateio e REINF → grava na base de pagamento.</li>
+<li><strong>PF-03 — Efetivação</strong>: valida lote/conta/parâmetros → executa ETL → gera arquivo CNAB 150 ou 240 → atualiza base de pagamento → gera arquivo SIACC → grava histórico definitivo.</li>
+<li><strong>PF-04 — Estorno</strong>: verifica status → desfaz rubrica individual → gera alterador → gera CAP/CAR → grava motivo → processa compensação.</li>
+<li><strong>PF-05 — Remessa Bancária</strong>: abre fita de crédito → gera arquivo CNAB (150 ou 240 conforme leiaute) → seta documento, favorecido e registros → grava na tabela de arquivos de pagamento.</li>
+<li><strong>PF-08 — IRRF</strong>: determina bases → atualiza flag de isento → verifica compensação → decide entre IR normal ou regressivo → lança IR compensado → grava na bitributação.</li>
+</ul>
+<p>Cada caixa no diagrama é uma <strong>rotina do código</strong> (com o nome e a linha onde está). As setas mostram a ordem de execução. Os cilindros representam <strong>tabelas do banco</strong> que são lidas ou gravadas.</p>
+</section>
+
+<section id="pfc42-analista"><div class="section-title">💼 Para o analista de negócios — Gargalos e pontos de decisão (enriquecido — PFC-42)</div>
+<p><strong>Pontos de decisão de negócio</strong> (onde o sistema escolhe um caminho com impacto financeiro):</p>
+<ul>
+<li><strong>PF-02: classificação de rubrica em base</strong> — decide se a rubrica incide em IR, INSS, FGTS etc. Classificação errada gera cálculo tributário incorreto.</li>
+<li><strong>PF-05: leiaute CNAB 150 vs 240</strong> — a escolha do leiaute depende do banco/convênio. Usar o leiaute errado faz o banco rejeitar a remessa.</li>
+<li><strong>PF-08: IR normal vs regressivo</strong> — a opção tributária do beneficiário define se o IR é calculado pela tabela progressiva ou pela regressiva. Erro aqui gera imposto errado e possível passivo tributário.</li>
+</ul>
+<p><strong>Gargalos potenciais</strong> (pontos onde o volume pode impactar o tempo de processamento):</p>
+<ul>
+<li><strong>PF-02 (Prévia)</strong> — processa beneficiário por beneficiário, rubrica por rubrica. Para grandes volumes (50 mil+ beneficiários), o cálculo pode levar horas. O commit parcial a cada N registros ajuda, mas uma falha no meio exige reprocessamento.</li>
+<li><strong>PF-03 (Efetivação)</strong> — a geração do CNAB e do SIACC é sequencial. Se um arquivo falha, o outro pode já ter sido gerado — exige tratamento cuidadoso de retomada.</li>
+</ul>
+<p><strong>Dependências entre fluxos:</strong> PF-03 (efetivação) só roda após PF-02 (prévia). PF-04 (estorno) só roda após PF-03. PF-05 (remessa) depende de PF-03. Isso significa que <strong>um erro em um fluxo inicial bloqueia os subsequentes</strong> — a ordem de execução é rígida e deve ser respeitada no planejamento operacional.</p>
 </section>
 </main>
 <footer>

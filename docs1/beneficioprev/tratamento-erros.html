@@ -8,7 +8,7 @@
 </head>
 <body>
 <header>
-  <div class="badge">Blueprint AS-IS — Delphi 5</div>
+  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-24 / PFC-42 (enriquecido)</div>
   <h1>⚠️ Tratamento de Erros e Exceções — Benefício Previdenciário</h1>
   <p>Blocos try/except/finally, mensagens de validação e erros com rastreabilidade</p>
 </header>
@@ -75,6 +75,30 @@
 <div class="card"><h3>try/finally (cleanup)</h3><p>Usado em FPrincipal (AppPadraoAfterLogin, AppPadraoPrintReportPadrao), FReconstruirINSS, FAlteraBeneficioLote para garantir liberação de recursos (Free de forms/queries).</p></div>
 <div class="card"><h3>try/except silenciado</h3><p>Em _FAssocRubINSS (ExecSQL) e FReajuesteBenef (IncluirNovaLista) — except vazio, erros ignorados. <span class="ev ev-pendente">PENDENTE</span> — verificar se intencional.</p></div>
 </div>
+</section>
+
+<section id="pfc42-leigo"><div class="section-title">📖 Para o leigo — Como o sistema lida com problemas (enriquecido — PFC-42)</div>
+<p>Esta aba mostra como o módulo BENEFICIOPREV reage quando <strong>algo dá errado</strong>. Pense num motorista de ônibus: se aparece um buraco na rua, ele pode desviar (mostrar mensagem e seguir), voltar para a garagem (desfazer a operação) ou ligar para a central (propagar o erro). O sistema faz o mesmo.</p>
+<p><strong>Os comportamentos principais</strong> quando há um erro:</p>
+<ul>
+<li><strong>Mostrar mensagem e seguir</strong> (<code>try/except + MessageDlg</code>) — o sistema avisa o usuário ("Benefício já foi pago no período... não pode ser desfeita") e interrompe aquela operação, mas o programa continua rodando.</li>
+<li><strong>Desfazer a operação</strong> (<code>try/except + RollBack</code>) — reverte tudo o que já tinha feito no banco (rollback) para não deixar dados pela metade, e avisa o usuário. Usado no desfazimento, liberação e reabertura.</li>
+<li><strong>Propagar o erro</strong> (<code>raise exception.Create</code> / <code>raise EValidacao.CreateVal</code>) — "joga" o erro para cima. Usado em erros críticos (falha ao gravar log) e em validação de campos obrigatórios.</li>
+</ul>
+<p><strong>Quantidade:</strong> o arquivo com mais tratamentos é <code>FDesfazConcessaoBenefNOVO.pas</code> (91 blocos try) — faz sentido, pois o desfazimento é onde mais coisas podem dar errado (benefício já pago, prévia existe, folha efetivada, tipo de movimento inválido etc.).</p>
+</section>
+
+<section id="pfc42-analista"><div class="section-title">💼 Para o analista de negócios — Pontos de falha de negócio (enriquecido — PFC-42)</div>
+<p><strong>Mensagens que indicam impacto de negócio direto</strong> (o usuário as vê e precisa agir):</p>
+<ul>
+<li><strong>"Benefício já foi pago no período… não pode ser desfeita"</strong> (FDesfazConcessaoBenefNOVO.pas:1531) — tentativa de desfazer benefício já pago. <strong>Ação:</strong> não é possível desfazer; avaliar estorno na folha.</li>
+<li><strong>"A Folha de Benefícios com os acertos do desdobramento já foi executada. O desdobramento não pode ser desfeito."</strong> (FDesfazConcessaoBenefNOVO.pas:4530) — desdobramento já pago. <strong>Ação:</strong> não é possível desfazer; avaliar correção manual.</li>
+<li><strong>"Desdobramento não permitido por exceder valor limite e não ter autorização."</strong> (FDesdobramentoBenef.pas:2650) — desdobramento acima do limite sem autorização. <strong>Ação:</strong> obter autorização prévia.</li>
+<li><strong>"Liberação não permitida por exceder valor limite e não ter autorização."</strong> (FCadInicioBenefExigencia.pas:1589) — liberação acima do limite. <strong>Ação:</strong> obter autorização prévia.</li>
+<li><strong>"É necessário indicar a Rubrica do INSS!"</strong> (_fCadEntrManualINSS.pas:314) — entrada manual de INSS sem rubrica. <strong>Ação:</strong> selecionar a rubrica do INSS.</li>
+</ul>
+<p><strong>Concentração de risco:</strong> o desfazimento (FDesfazConcessaoBenefNOVO.pas, 91 blocos try) é a área de maior complexidade. Erros silenciados aqui podem mascarar desfazimentos incompletos, levando a benefícios em estado inconsistente. Recomenda-se auditar os except vazios e monitorar desfazimentos.</p>
+<p><strong>Validações de bloqueio críticas:</strong> o desfazimento verifica se o benefício já foi pago (L1531), se a folha foi efetivada (L4530) e se a prévia existe (L1442) antes de prosseguir. Essas validações protegem a integridade financeira — impedem desfazer operações que já têm impacto no pagamento.</p>
 </section>
 </main>
 <footer>

@@ -9,7 +9,7 @@
 </head>
 <body>
 <header>
-  <div class="badge">Blueprint AS-IS — Delphi 5</div>
+  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-24 / PFC-42 (enriquecido)</div>
   <h1>Benefício Previdenciário</h1>
   <p>Concessão, manutenção e desfazimento de benefícios previdenciários, eventos geradores (aposentadoria, falecimento, reclusão, assistido), reajustes, conciliação INSS, desdobramento e controle de dívidas.</p>
 </header>
@@ -45,6 +45,41 @@
 
 <section><div class="section-title">🗄️ Modelo de Dados (resumo)</div>
 <p>25 entidades/tabelas centrais mapeadas. A listagem completa de campos permanece no código.</p><div class="table-wrap"><table class=""><thead><tr><th>Entidade / Tabela</th><th>Papel funcional</th><th>Evidência</th></tr></thead><tbody><tr><td><code>BENEFBFCIARIO</code></td><td>Beneficiário — núcleo: valor, situação, processo, plano (82 refs)</td><td><code>BENEFICIOPREV/Fontes (SQL inline)</code></td></tr><tr><td><code>HSTBENEFBFCIARIO</code></td><td>Histórico de beneficiário (mês, valor prev, lote) (42 refs)</td><td><code>BENEFICIOPREV/Fontes/FDesfazConcessaoBenefNOVO.pas:1717</code></td></tr><tr><td><code>PROCESSOBENEF</code></td><td>Processo de benefício (NUMEROPROCESSO, IDSITPROCESSO)</td><td><code>BENEFICIOPREV/Fontes/FDesfazConcessaoBenefNOVO.pas:3057</code></td></tr><tr><td><code>BENEFHABILITA</code></td><td>Habilitação de benefício INSS (FLGCONCESSAO)</td><td><code>BENEFICIOPREV/Fontes/FCadProcHabINSS.pas:484</code></td></tr><tr><td><code>MOVBENEF</code></td><td>Movimento de benefício (DIB, data final, retenção)</td><td><code>BENEFICIOPREV/Fontes/FDesfazConcessaoBenefNOVO.pas:2350</code></td></tr><tr><td><code>EVENTOGERADOR</code></td><td>Catálogo de eventos por FLGINTERNO (TS/ID/IN/FL/RC/AI/BI)</td><td><code>BENEFICIOPREV/Fontes/FPrincipal.pas:1038</code></td></tr><tr><td><code>EVENTOSPREV</code></td><td>Eventos previdenciários registrados</td><td><code>BENEFICIOPREV/Fontes/FEventoMorte.pas:1588</code></td></tr><tr><td><code>DETCONCINSS</code></td><td>Detalhe de conciliação INSS (mantenedora × beneficiário)</td><td><code>BENEFICIOPREV/Fontes/_FConciliacao.pas</code></td></tr><tr><td><code>TEMPCONCINSS</code></td><td>Temporário de conciliação INSS</td><td><code>BENEFICIOPREV/Fontes/_FConciliacao.pas</code></td></tr><tr><td><code>RUBRICAXINSS</code></td><td>Associação rubrica × INSS</td><td><code>BENEFICIOPREV/Fontes/_FAssocRubINSS.pas</code></td></tr><tr><td><code>BFCIARIOTITPLAN</code></td><td>Vínculo beneficiário × titular × plano</td><td><code>BENEFICIOPREV/Fontes (SQL inline)</code></td></tr><tr><td><code>CONTROLEDIVIDABENEFICIO</code></td><td>Controle de dívida de benefício</td><td><code>BENEFICIOPREV/Fontes/FDesdobramentoBenef.pas:7776</code></td></tr></tbody></table></div><p style="margin-top:1rem">+ 13 entidades adicionais. <a href="dados.html">Modelo de dados completo →</a></p>
+</section>
+
+<section id="pfc42-leigo"><div class="section-title">📖 Para o leigo — O que é este módulo (enriquecido — PFC-42)</div>
+<p>Em palavras simples: este módulo cuida dos <strong>benefícios previdenciários</strong> — ou seja, ele concede, mantém e desfaz os benefícios que os participantes recebem (aposentadoria, pensão por morte, reclusão, assistido temporário). Pense num <strong>cartório de benefícios</strong>: é aqui que se "concede" o benefício (dá entrada e aprova), se "mantém" (reajusta, altera dados) e se "desfaz" (cancela uma concessão errada).</p>
+<p><strong>O que o módulo faz, passo a passo:</strong></p>
+<ol>
+<li><strong>Concessão</strong> — recebe o requerimento, verifica a elegibilidade, calcula o valor do benefício (chamando o motor externo CMAdmPrev) e concede.</li>
+<li><strong>Manutenção</strong> — altera dados do benefício (valor, recebedor, situação) ao longo do tempo.</li>
+<li><strong>Simulação</strong> — simula o cálculo de um benefício sem efetivá-lo, para o participante saber quanto receberia.</li>
+<li><strong>Desfazimento</strong> — desfaz uma concessão ou operação anterior (restaura valores, exclui históricos, reabre contribuições).</li>
+<li><strong>Eventos previdenciários</strong> — registra eventos que disparam ou encerram benefícios: aposentadoria, falecimento, reclusão, assistido temporário.</li>
+<li><strong>Reajuste</strong> — reajusta benefícios por índice (fundação, INSS) ou por decisão judicial.</li>
+<li><strong>Desdobramento</strong> — divide um benefício em vários (ex.: pensão por morte para múltiplos herdeiros), aplicando regra contábil e gerando dívida.</li>
+<li><strong>Conciliação INSS</strong> — concilia valores com o INSS e mantenedoras, importando arquivos e identificando divergências.</li>
+</ol>
+<p>O módulo tem <strong>144 artefatos</strong> Delphi 5. O motor de cálculo/concessão reside no pacote externo <strong>CMAdmPrev</strong> — o BENEFICIOPREV atua principalmente como orquestrador de telas, eventos e manutenção. Toda operação é auditada em <code>LOGTOTALPREV</code> (IdModulo=454).</p>
+</section>
+
+<section id="pfc42-analista"><div class="section-title">💼 Para o analista de negócios — Pontos de negócio (enriquecido — PFC-42)</div>
+<p><strong>Valor de negócio:</strong> Este módulo é a "porta de entrada" dos benefícios. Sem concessão, não há beneficiário; sem manutenção, o benefício fica desatualizado; sem desfazimento, erros não podem ser corrigidos. É o módulo que materializa a promessa do fundo: pagar o benefício devido ao participante.</p>
+<p><strong>Indicadores-chave para acompanhar:</strong></p>
+<ul>
+<li><strong>Benefícios concedidos por período</strong> — volume de novas concessões; base para projeção de despesa.</li>
+<li><strong>Benefícios ativos por tipo</strong> (aposentadoria, pensão, reclusão, assistido) — distribuição da carteira.</li>
+<li><strong>Valor da folha de benefícios</strong> — o total pago mensalmente; depende das concessões e reajustes feitos aqui.</li>
+<li><strong>Desfazimentos por período</strong> — indica erros operacionais ou correções; volume alto sinaliza problema de qualidade.</li>
+<li><strong>Conciliação INSS</strong> — divergências entre valores repassados e reembolsados; impacto no fluxo de caixa.</li>
+</ul>
+<p><strong>Regras de negócio críticas</strong> (impacto direto no benefício):</p>
+<ul>
+<li><strong>BENEF-RN007</strong> (reajuste só benefícios vitalícios) — garante que apenas benefícios não-resgate sejam reajustados. Erro aqui reajusta benefícios indevidos.</li>
+<li><strong>BENEF-RN010</strong> (desfazimento só concedidos) — impede desfazer benefícios em outros estados. Protege integridade.</li>
+<li><strong>BENEF-RN011</strong> (desfazimento restaura valor) — garante que o desfazimento devolve o benefício ao estado anterior. Crítico para correção de erros.</li>
+</ul>
+<p><strong>Dependências críticas:</strong> o módulo depende do CMAdmPrev (motor de cálculo/concessão — 40 refs a UAdmPrev), CMPrevMT50 (entidades previdenciárias), UBeneficio (regras de benefício — 19 refs) e interface com FOLHA/CONTRIBUIÇÃO. Uma indisponibilidade do CMAdmPrev impede novas concessões.</p>
 </section>
 
 </div>

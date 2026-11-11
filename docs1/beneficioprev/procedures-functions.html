@@ -8,7 +8,7 @@
 </head>
 <body>
 <header>
-  <div class="badge">Blueprint AS-IS — Delphi 5</div>
+  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-24 / PFC-42 (enriquecido)</div>
   <h1>🔧 Procedures, Functions e Métodos — Benefício Previdenciário</h1>
   <p>2307 declarações identificadas — métodos relevantes com parâmetros, regras, chamadas e rastreabilidade</p>
 </header>
@@ -124,6 +124,33 @@
 <tr><td>TCtrlPCS</td><td><code>ListaCargo</code></td><td>SELECT DISTINCT CARGOEXT, NIVEL, CARGOXNIVEL por patrocinadora</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
 <tr><td>TCtrlPCS</td><td><code>ListaModoFuncao</code></td><td>Lista modos de função (PCS)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
 </tbody></table></div>
+</section>
+
+<section id="pfc42-leigo"><div class="section-title">📖 Para o leigo — As "receitas" internas do programa (enriquecido — PFC-42)</div>
+<p>Esta aba descreve as <strong>"receitas"</strong> (procedures e functions) que o módulo BENEFICIOPREV executa por dentro. São <strong>2.307 declarações</strong> no total, mas apenas as mais relevantes (com lógica de negócio significativa) estão detalhadas aqui.</p>
+<p><strong>As receitas mais importantes</strong> (organizadas por área):</p>
+<ul>
+<li><strong>GravaLogTOTALPREV</strong> (UModulo.pas:64) — a "receita de auditoria": toda operação de negócio chama esta rotina para registrar quem fez o quê e quando. Garante rastreabilidade.</li>
+<li><strong>MontaMenu</strong> (FPrincipal.pas:1038) — monta o menu de Eventos dinamicamente, lendo a tabela EVENTOGERADOR e criando um item para cada evento ativo (aposentadoria, falecimento, reclusão etc.).</li>
+<li><strong>mnuBenefConcessaoClick</strong> (FPrincipal.pas:1720) — o fluxo de concessão: mostra a seleção de tipo (Participante/Beneficiário/Pensionista), chama o motor externo CMAdmPrev e concede o benefício.</li>
+<li><strong>bbtnConfirmarClick</strong> (FDesfazConcessaoBenefNOVO.pas:888) — o desfazimento: seleciona o processo, identifica a última operação, valida (benefício já pago? prévia existe? folha efetivada?) e desfaz conforme o tipo de movimento.</li>
+<li><strong>ProcessaEtapa2</strong> (FSimulaBeneficio.pas:194) — a simulação: seleciona participante, aplica regra de elegibilidade (data) e regra de valor (numérica), e exibe o resultado sem efetivar.</li>
+<li><strong>CarregaBeneficios</strong> (FReajuesteBenef.pas:401) — o reajuste: seleciona benefícios vitalícios não-resgate, exclui espécies específicas, importa lista de matrículas (Excel) e aplica o índice.</li>
+</ul>
+<p>Cada receita tem <strong>rastreabilidade</strong>: ao lado dela há o nome do arquivo e o número da linha onde ela começa no código. Isso permite a um desenvolvedor ir direto ao ponto certo.</p>
+</section>
+
+<section id="pfc42-analista"><div class="section-title">💼 Para o analista de negócios — Regras críticas e pontos de decisão (enriquecido — PFC-42)</div>
+<p><strong>Regras de negócio vivas no código</strong> (impacto direto no benefício do participante):</p>
+<ul>
+<li><strong>BENEF-RN001</strong> (tipo de benefício direciona fluxo) — decide se a concessão é de participante, beneficiário ou pensionista. Erro aqui encaminha para o fluxo errado.</li>
+<li><strong>BENEF-RN002</strong> (menu de eventos dinâmico por FLGINTERNO) — controla quais eventos estão disponíveis no menu. Eventos inativos (DO/AC/RC/OE) não aparecem.</li>
+<li><strong>BENEF-RN004/RN005</strong> (elegibilidade por data / valor previsionado por regra) — definem se o participante tem direito e quanto receberia. Erros aqui concedem benefício indevido ou negam benefício devido.</li>
+<li><strong>BENEF-RN007</strong> (reajuste só benefícios vitalícios) — garante que apenas benefícios não-resgate sejam reajustados.</li>
+<li><strong>BENEF-RN010/RN011</strong> (desfazimento só concedidos / restaura valor) — garantem que o desfazimento só ocorra em benefícios concedidos e devolva ao estado anterior. Crítico para correção de erros.</li>
+</ul>
+<p><strong>Validações de bloqueio no desfazimento</strong> (FDesfazConcessaoBenefNOVO.pas): "Benefício já foi pago no período" (L1531), "Folha já executada" (L4530), "Prévia existe" (L1442). Essas validações impedem desfazer operações que já têm impacto financeiro — proteger a integridade do pagamento.</p>
+<p><strong>Dependência do CMAdmPrev</strong> (40 refs a UAdmPrev): a maioria das regras de cálculo e concessão está no CMAdmPrev, não no BENEFICIOPREV. Isso significa que <strong>mudanças na regra de cálculo</strong> devem ser feitas no CMAdmPrev. O BENEFICIOPREV orquestra o fluxo de telas e chama as rotinas do CMAdmPrev.</p>
 </section>
 </main>
 <footer>

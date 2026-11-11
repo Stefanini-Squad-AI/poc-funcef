@@ -8,7 +8,7 @@
 </head>
 <body>
 <header>
-  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-22 (enriquecido)</div>
+  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-22 / PFC-42 (enriquecido)</div>
   <h1>🔧 Procedures, Functions e Métodos — Folha de Benefícios</h1>
   <p>Análise profunda dos procedimentos/funções relevantes, com file:linha, parâmetros, blocos de processamento, SQL, cálculos, dados alterados e cadeia de chamadas.</p>
 </header>
@@ -250,6 +250,33 @@
 <li>O motor <code>dFolhaPrevia.pas</code> contém 298 ocorrências de SQL (INSERT/UPDATE/DELETE/SELECT) e 17 pontos de <code>Commit</code>/<code>StartTransaction</code> em <code>dtmBaseDados.dbBaseDados</code> — transações confirmadas em :4138, :6468, :15679, :15880, :15974, :16016, :24890, :25383, :25405.</li>
 <li>Rotinas de módulos externos (IRRF/, PROCJUD/, CONTRIBUIÇÃO) não foram abertas — apenas registradas como chamadas em <a href="integracoes.html">🔗 Integrações</a>.</li>
 </ul>
+</section>
+
+<section id="pfc42-leigo"><div class="section-title">📖 Para o leigo — As "receitas" internas do programa (enriquecido — PFC-42)</div>
+<p>Esta aba descreve as <strong>"receitas"</strong> (procedures e functions) que o programa executa por dentro. Pense numa receita de bolo: ela tem um nome, ingredientes (parâmetros), um modo de fazer (blocos de processamento) e um resultado (o bolo). Aqui é a mesma coisa, só que em vez de bolo, o resultado é um cálculo de folha, um desconto ou um arquivo bancário.</p>
+<p><strong>As receitas mais importantes</strong> do módulo FOLHA ficam no motor <code>dFolhaPrevia.pas</code> (30.856 linhas). As principais são:</p>
+<ul>
+<li><strong>ProcessaPrevia</strong> — a "receita-mestra": orquestra o cálculo de toda a folha, beneficiário por beneficiário, rubrica por rubrica.</li>
+<li><strong>CriaRecebedor</strong> — prepara o objeto do beneficiário (titular, plano, dados bancários) antes de calcular.</li>
+<li><strong>ProcessaRubrica</strong> — para cada item de provento/desconto, decide se aplica, calcula o valor e classifica na base correta.</li>
+<li><strong>ExecutaRegraRubrica</strong> — aplica a regra de negócio da rubrica (por exemplo, "desconto só até a margem de 30%").</li>
+<li><strong>InsereRubrica</strong> — grava o resultado calculado na tabela de prévia.</li>
+<li><strong>CalculoIRRF</strong> — calcula o imposto de renda (normal ou regressivo), verificando compensação e isenção.</li>
+</ul>
+<p>Cada receita tem <strong>rastreabilidade</strong>: ao lado dela há o nome do arquivo e o número da linha onde ela começa no código (ex.: <code>dFolhaPrevia.pas:24781</code>). Isso permite a um desenvolvedor ir direto ao ponto certo do código para inspecionar ou alterar a regra.</p>
+</section>
+
+<section id="pfc42-analista"><div class="section-title">💼 Para o analista de negócios — Regras críticas e pontos de decisão (enriquecido — PFC-42)</div>
+<p><strong>Regras de negócio vivas no motor de cálculo</strong> (impacto direto no valor pago ao beneficiário):</p>
+<ul>
+<li><strong>FOLHA-RN006</strong> (líquido negativo) — quando descontos superam o provento, o líquido é zerado e o desconto excedente é transferido. <strong>Impacto:</strong> beneficiário recebe zero; pode gerar reclamação e necessidade de ajuste manual.</li>
+<li><strong>FOLHA-RN007</strong> (CPMF) — cálculo do CPMF como valor × (percCPMF − 1). <strong>Impacto:</strong> desconto financeiro sobre o pagamento; mudanças na alíquota afetam o líquido de todos os beneficiários.</li>
+<li><strong>FOLHA-RN008</strong> (margem de desconto consignável) — bloqueia descontos que ultrapassam a margem. <strong>Impacto:</strong> empréstimos consignados e pensões podem ser parcialmente bloqueados.</li>
+<li><strong>FOLHA-RN015</strong> (IR regressivo por tipo 0/1/7) — define a tributação do IR. <strong>Impacto:</strong> mudanças de legislação tributária exigem atualização das tabelas e reprocessamento.</li>
+<li><strong>FOLHA-RN019</strong> (REINF rateado por plano) — distribui a contribuição REINF entre planos. <strong>Impacto:</strong> obrigações acessórias (eSocial/REINF) podem ser geradas incorretamente se o rateio estiver errado.</li>
+</ul>
+<p><strong>Pontos de transação (commit/rollback):</strong> o motor tem 17 pontos de commit. Isso significa que, em caso de erro no meio do processamento, parte da folha pode estar gravada e parte não — o estorno (PF-04) existe justamente para corrigir essas situações. Para o analista, é importante saber que <strong>uma folha interrompida pode deixar o mês em estado inconsistente</strong>, exigindo verificação antes de prosseguir.</p>
+<p><strong>Dependências de cálculo externo:</strong> o motor chama rotinas de IRRF (cálculo de imposto), CONTRIBUIÇÃO (contribuição previdenciária) e PROCJUD (processo judicial). Uma alteração nessas rotinas externas pode mudar o resultado da folha sem que o FOLHA seja modificado — recomenda-se testes de regressão integrados sempre que houver mudança nesses módulos.</p>
 </section>
 
 </main>

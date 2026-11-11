@@ -8,7 +8,7 @@
 </head>
 <body>
 <header>
-  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-22 (enriquecido)</div>
+  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-22 / PFC-42 (enriquecido)</div>
   <h1>🏗️ Arquitetura — Folha de Benefícios</h1>
   <p>Camadas, padrão de acesso a dados, packages internos e inventário de forms por área</p>
 </header>
@@ -119,6 +119,27 @@
 
 <section><div class="section-title">⚙️ Entry point e inicialização</div>
 <p><code>Folha.dpr:302</code> define <code>Application.Title := 'Folha de Benefícios'</code>. Criação de forms/DataModules em ordem (:305-319): frmPrincipal, frmAguarde, dtmLookFolha, dtmAPrev, dtmFolha, dtmIntegracao, dtmIntegraCAPCAR, dtmContabil, dtmRelParamRubricas, DtmAutorizacao, frmProgresso, frmPRelEstruturaRubrica, frmMsg, FrmGeraLstIndivResul. O motor <code>dtmFolhaPrevia</code> é instanciado sob demanda (linha 312 comentada — WO19556). Evidência: <span class="ev ev-comprovado">COMPROVADO</span></p>
+</section>
+
+<section id="pfc42-leigo"><div class="section-title">📖 Para o leigo — Como o programa é organizado (enriquecido — PFC-42)</div>
+<p>Imagine este módulo como uma <strong>empresa com vários departamentos</strong>, cada um numa pasta diferente do computador. A arquitetura descreve como esses departamentos se organizam e conversam entre si.</p>
+<p><strong>As quatro "camadas" do programa</strong> (do mais visível ao mais interno):</p>
+<ul>
+<li><strong>Telas (Apresentação)</strong> — são as janelas que o usuário vê e clica (formulários de preparo, prévia, efetivação, estorno etc.). Existem cerca de 219 telas neste módulo.</li>
+<li><strong>Controle</strong> — a "gerência intermediária" que coordena o que as telas pedem e repassa para a camada de dados. Aqui ficam objetos de negócio como <code>TFolhaBenef</code>.</li>
+<li><strong>Acesso a Dados</strong> — o "almoxarife" que vai ao banco de dados Oracle buscar e gravar informações. Há 41 unidades, uma para cada tabela principal.</li>
+<li><strong>Framework base</strong> — a "infraestrutura" compartilhada (o CM Framework), com telas padrão, autorização, consultas e relatórios herdados por todos os módulos da suíte.</li>
+</ul>
+<p><strong>O motor de cálculo</strong> (<code>dFolhaPrevia.pas</code>, com 30.856 linhas) é um "departamento" à parte: ele só é chamado quando realmente necessário (instanciado sob demanda), para não pesar o programa ao abrir. É nele que mora a inteligência dos cálculos da folha.</p>
+<p><strong>Packages internos</strong> são como "sub-empresas" dentro do módulo: <code>CMFbComum50</code> (código comum), <code>CMFbObj50</code> (objetos de negócio da folha) e <code>CMFolhaObjMt</code> (geração de 2ª via de contra-cheque em paralelo, usando múltiplas threads).</p>
+</section>
+
+<section id="pfc42-analista"><div class="section-title">💼 Para o analista de negócios — Impacto e risco de mudança (enriquecido — PFC-42)</div>
+<p><strong>Concentração de risco:</strong> A inteligência de cálculo está toda num único arquivo (<code>dFolhaPrevia.pas</code>, 30.856 linhas). Isso significa que <strong>qualquer alteração de regra de negócio</strong> (nova rubrica, mudança de IRRF, alteração de margem) precisa ser feita e testada neste arquivo — é o ponto de maior risco do módulo.</p>
+<p><strong>Dependências externas críticas:</strong> O módulo depende do CM Framework (27+ units), CMPrevMT50 (rubricas e beneficiários compartilhados), CMAdmPrev (UF × INSS) e de outros módulos (CONTRIBUIÇÃO, BENEFICIOPREV, IRRF, PROCJUD). Uma mudança no framework ou nos módulos vizinhos pode impactar o pagamento da folha.</p>
+<p><strong>Multi-thread (2ª via de contra-cheque):</strong> O package <code>CMFolhaObjMt</code> gera a segunda via do contra-cheque em paralelo, o que acelera a operação em grandes volumes — relevante para o SLA de fechamento mensal.</p>
+<p><strong>Refatoração pendente (WO19556):</strong> O motor de cálculo foi refatorado para ser instanciado sob demanda (linha 312 do DPR comentada). Isso reduz o consumo de memória ao abrir o sistema, mas indica que há dívida técnica sendo paga gradualmente.</p>
+<p><strong>Implicação para manutenção:</strong> por ser o maior dos três módulos (528 artefatos), qualquer evolução aqui tem esforço e risco maiores. Recomenda-se cobrir alterações com testes de regressão sobre os processos PF-01 a PF-12, especialmente os que envolvem cálculo de IRRF e margem de desconto.</p>
 </section>
 
 </main>

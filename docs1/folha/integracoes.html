@@ -8,7 +8,7 @@
 </head>
 <body>
 <header>
-  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-22 (enriquecido)</div>
+  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-22 / PFC-42 (enriquecido)</div>
   <h1>🔗 Integrações — Folha de Benefícios</h1>
   <p>Dependências externas (referências de interface), dependências internas, catálogo de relatórios e arquivos gerados.</p>
 </header>
@@ -116,6 +116,42 @@
 <li><strong>Documentos para entidades conveniadas:</strong> <code>FExecGeraDocConvenio</code>.</li>
 <li><strong>Mapa da folha:</strong> <code>FMapaFolhaBenef</code> (WO2511).</li>
 </ul>
+</section>
+
+<section id="pfc42-leigo"><div class="section-title">📖 Para o leigo — Como o módulo conversa com outros sistemas (enriquecido — PFC-42)</div>
+<p>Esta aba mostra com quais <strong>outros sistemas</strong> o módulo FOLHA conversa. Pense no módulo como uma pessoa no telefone: ele liga para vários "interlocutores" para conseguir fazer seu trabalho. Cada interlocutor é uma dependência externa.</p>
+<p><strong>Com quem o FOLHA precisa falar</strong> para pagar a folha:</p>
+<ul>
+<li><strong>CM Framework</strong> — a "biblioteca padrão" da suíte CM. Fornece as telas básicas, o sistema de autorização, as consultas padrão e o mecanismo de relatórios. É como a "linguagem comum" que todos os módulos da suíte usam.</li>
+<li><strong>CMPrevMT50</strong> — o "cadastro previdenciário central". Tem as rubricas, os beneficiários e os planos compartilhados entre módulos.</li>
+<li><strong>CMAdmPrev</strong> — fornece o cadastro de UF × INSS (qual alíquota do INSS aplica-se a cada estado).</li>
+<li><strong>BENEFICIOPREV</strong> — o módulo que concede e mantém benefícios. O FOLHA precisa saber quem são os beneficiários ativos.</li>
+<li><strong>CONTRIBUIÇÃO</strong> — o módulo que calcula contribuições previdenciárias. O FOLHA usa esses valores como desconto na folha.</li>
+<li><strong>IRRF</strong> — o módulo de imposto de renda. Fornece as tabelas e o cálculo do IR a descontar.</li>
+<li><strong>PROCJUD</strong> — processo judicial. Usado quando há decisões judiciais sobre IRRF que afetam o desconto.</li>
+<li><strong>Banco de dados Oracle</strong> — onde tudo é gravado. O FOLHA acessa o schema <code>CM.</code> para ler e escrever.</li>
+<li><strong>Bancos (CNAB 150/240)</strong> — para onde o FOLHA envia a remessa de pagamentos e de onde recebe o retorno (quem recebeu, quem devolveu).</li>
+<li><strong>MongoDB</strong> — base NoSQL onde o contra-cheque é carregado para consulta pelo portal do participante.</li>
+</ul>
+<p>Algumas dependências estão marcadas como <span class="ev ev-pendente">PENDENTE</span> (não esclarecidas) ou <span class="ev ev-inferido">INFERIDO</span> (deduzida do contexto). Isso significa que o FOLHA referencia esses módulos, mas a documentação não confirmou exatamente o que eles fazem.</p>
+</section>
+
+<section id="pfc42-analista"><div class="section-title">💼 Para o analista de negócios — Dependências críticas de negócio (enriquecido — PFC-42)</div>
+<p><strong>Dependências que podem parar o pagamento</strong> (indisponibilidade aqui impede o ciclo de folha):</p>
+<ul>
+<li><strong>Oracle</strong> — sem banco de dados, nenhum cálculo ou persistência é possível. É a dependência mais crítica.</li>
+<li><strong>CMPrevMT50 (rubricas e beneficiários)</strong> — sem o cadastro de rubricas e beneficiários, o motor não sabe o que calcular nem para quem.</li>
+<li><strong>BENEFICIOPREV</strong> — sem a lista de benefícios ativos, o preparo da folha não seleciona recebedores.</li>
+<li><strong>IRRF</strong> — sem as tabelas de IR, o cálculo do imposto falha (ou usa valores desatualizados).</li>
+</ul>
+<p><strong>Dependências de saída</strong> (afetam a integração com sistemas externos):</p>
+<ul>
+<li><strong>CNAB 150/240 → bancos</strong> — se a remessa não for gerada ou for gerada com erro, o banco não paga. O formato é padronizado, mas mudanças de leiaute bancário exigem atualização do FOLHA.</li>
+<li><strong>SIACC → contabilidade</strong> — se o arquivo contábil não for gerado, o fechamento contábil do mês fica pendente.</li>
+<li><strong>MongoDB → portal do participante</strong> — se a carga falhar, o participante não consegue consultar seu contra-cheque online.</li>
+</ul>
+<p><strong>Dependências não esclarecidas</strong> (risco de conhecimento): <code>ModFol</code> e <code>SistJurCons</code> estão marcados PENDENTE. Para o analista, isso significa que <strong>há pontos de integração cujo impacto não foi totalmente avaliado</strong> — recomenda-se esclarecer antes de assumir dependências para migração ou substituição do sistema.</p>
+<p><strong>Acoplamento entre módulos:</strong> o FOLHA, CONTRIBUIÇÃO e BENEFICIOPREV são fortemente acoplados (referenciam-se mutuamente). Uma mudança em um pode exigir re teste dos três. Para uma eventual migração, considere os três como um bloco coeso.</p>
 </section>
 
 </main>

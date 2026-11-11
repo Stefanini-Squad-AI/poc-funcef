@@ -9,7 +9,7 @@
 </head>
 <body>
 <header>
-  <div class="badge">Blueprint AS-IS — Delphi 5</div>
+  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-24 / PFC-42 (enriquecido)</div>
   <h1>🔗 Integrações — Benefício Previdenciário</h1>
   <p>Dependências externas (referências de interface) e internas, classificadas por tipo</p>
 </header>
@@ -36,6 +36,39 @@
 
 <section><div class="section-title">🗺 Dependências Internas do Módulo</div>
 <div class="table-wrap"><table class=""><thead><tr><th>Origem</th><th>Destino</th><th>Natureza</th><th>Evidência</th></tr></thead><tbody><tr><td>Fontes/ (forms)</td><td>DBObjects/ (uDbEvolfuncprev, uDbHistrubsal)</td><td>Acesso a dados local (2 entidades)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr><tr><td>Fontes/ (forms)</td><td>CtrlObjects/ (uCtrlEvolFuncPrev, uCtrlPCS)</td><td>Controle de evolução funcional e listas PCS</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr><tr><td>Fontes/ (forms)</td><td>Relatorios/</td><td>Relatórios do próprio módulo (14 units)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr><tr><td>FPrincipal.pas</td><td>EVENTOGERADOR (tabela)</td><td>Menu dinâmico montado por FLGINTERNO em runtime</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr><tr><td>UModulo.pas</td><td>LOGTOTALPREV (tabela)</td><td>Auditoria de operações (GravaLogTOTALPREV, IdModulo=454)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr></tbody></table></div>
+</section>
+
+<section id="pfc42-leigo"><div class="section-title">📖 Para o leigo — Como o módulo conversa com outros sistemas (enriquecido — PFC-42)</div>
+<p>Esta aba mostra com quais <strong>outros sistemas</strong> o módulo BENEFICIOPREV conversa. Pense no módulo como uma pessoa no telefone: ele liga para vários "interlocutores" para conseguir fazer seu trabalho.</p>
+<p><strong>Com quem o BENEFICIOPREV precisa falar</strong> para conceder e manter benefícios:</p>
+<ul>
+<li><strong>CM Framework</strong> — a "biblioteca padrão" da suíte CM (20+ units). Fornece telas básicas, autorização, consultas e relatórios.</li>
+<li><strong>CMAdmPrev</strong> (8 units) — o <strong>motor de cálculo/concessão</strong>. É aqui que mora a inteligência de cálculo do benefício. O BENEFICIOPREV orquestra as telas, mas quem calcula é o CMAdmPrev.</li>
+<li><strong>CMPrevMT50</strong> — DataModules de entidades previdenciárias centrais (planos, beneficiários).</li>
+<li><strong>UAdmPrev</strong> (40 refs) — regras de cálculo e concessão: PreparaBeneficioConcedido, VerificaVALORLimiteBeneficio, CalculaBeneficioAPagarNoMes etc.</li>
+<li><strong>UBeneficio</strong> (19 refs) — regras de benefício: CalculaBeneficioMinimo etc.</li>
+<li><strong>UParticipante</strong> (10 refs) — regras de participante.</li>
+<li><strong>UMovReserva</strong> (3 refs) — movimentação de reservas.</li>
+<li><strong>UIntegraBack</strong> — integração contábil/financeira (contabilidade, financeiro, plano de contas).</li>
+<li><strong>FOLHA / CONTRIBUIÇÃO</strong> — interface com a folha de benefícios e as contribuições. O BENEFICIOPREV fornece os beneficiários que o FOLHA paga.</li>
+<li><strong>Oracle</strong> — banco de dados (schema CM.). Onde tudo é gravado.</li>
+</ul>
+</section>
+
+<section id="pfc42-analista"><div class="section-title">💼 Para o analista de negócios — Dependências críticas de negócio (enriquecido — PFC-42)</div>
+<p><strong>Dependências que podem parar a concessão</strong> (indisponibilidade aqui impede novas concessões):</p>
+<ul>
+<li><strong>CMAdmPrev (motor de cálculo)</strong> — sem o CMAdmPrev, não é possível conceder, manter ou simular benefícios. É a dependência mais crítica.</li>
+<li><strong>UAdmPrev (40 refs)</strong> — as regras de cálculo e concessão estão aqui. Sem estas regras, o benefício não pode ser calculado.</li>
+<li><strong>Oracle</strong> — sem banco, nenhuma operação é possível.</li>
+<li><strong>CMPrevMT50</strong> — sem o cadastro de planos e beneficiários, a concessão não sabe para quem conceder nem em qual plano.</li>
+</ul>
+<p><strong>Dependências de saída</strong> (afetam a integração com sistemas externos):</p>
+<ul>
+<li><strong>UIntegraBack → contabilidade/financeiro</strong> — se a integração contábil falhar, o lançamento da concessão não é contabilizado.</li>
+<li><strong>FOLHA</strong> — o BENEFICIOPREV fornece os beneficiários que o FOLHA paga. Se o BENEFICIOPREV conceder/alterar/desfazer errado, o FOLHA pagará errado.</li>
+</ul>
+<p><strong>Acoplamento entre módulos:</strong> o BENEFICIOPREV, FOLHA e CONTRIBUIÇÃO são fortemente acoplados. O BENEFICIOPREV concede o benefício, a CONTRIBUIÇÃO calcula as contribuições que sustentam o benefício, e o FOLHA paga. Uma mudança em qualquer um dos três pode exigir re teste dos demais. Para uma eventual migração, considere os três como um bloco coeso.</p>
 </section>
 
 </main>

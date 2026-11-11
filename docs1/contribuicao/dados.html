@@ -9,7 +9,7 @@
 </head>
 <body>
 <header>
-  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-23 (enriquecido)</div>
+  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-23 / PFC-42 (enriquecido)</div>
   <h1>🗄️ Modelo de Dados — Contribuição Previdenciária</h1>
   <p>60+ entidades/tabelas mapeadas com campos, CRUD, rotinas acessantes e matriz de rastreabilidade. Enriquecido em PFC-23 por varredura de SQL no código-fonte.</p>
 </header>
@@ -144,6 +144,35 @@
 <tr><td><code>FLGPARCELAMENTO</code></td><td>Flag de parcelamento</td><td>0/1</td></tr>
 <tr><td><code>IDMOTIVO</code></td><td>Motivo (FK MOTIVO)</td><td>Inteiro</td></tr>
 </tbody></table></div>
+</section>
+
+<section id="pfc42-leigo"><div class="section-title">📖 Para o leigo — Onde as informações ficam guardadas (enriquecido — PFC-42)</div>
+<p>Esta aba descreve as <strong>"gavetas"</strong> onde o módulo CONTRIBUIÇÃO guarda suas informações. No banco Oracle, cada gaveta é uma <strong>tabela</strong> com um nome.</p>
+<p><strong>As tabelas mais importantes</strong> para entender as contribuições:</p>
+<ul>
+<li><strong>HSTCONTRIBPREV</strong> — o histórico de contribuições: cada linha registra uma contribuição devida, enviada ou recebida, com valor, data, situação e patrocinadora. É a tabela central do módulo (187 referências no código).</li>
+<li><strong>CONTRIBPREVPARTP</strong> — a contribuição por participante: define quais contribuições cada participante deve pagar, com o último mês preparado (ULTMESPREPARO).</li>
+<li><strong>CONTRIBUICAO</strong> — a definição das contribuições: catálogo de tipos de contribuição (normal, retroativa, portada etc.) com suas características.</li>
+<li><strong>CONTPREV</strong> — as contas previdenciárias: onde o dinheiro das contribuições é contabilizado (77 referências).</li>
+<li><strong>RESERVAPART / RESERVAXPLANO</strong> — as reservas do participante: quanto cada um acumulou, por plano, atualizadas pela alimentação de reservas.</li>
+<li><strong>HISTMOVRESERVA</strong> — o histórico de movimentação de reservas: registra cada atualização de reserva (auditoria).</li>
+<li><strong>DOCUMENTO / LANCTODOCUM</strong> — os documentos de cobrança (CAP/CAR) e seus lançamentos: os "boletos" gerados para cobrar as contribuições.</li>
+<li><strong>BITRIBUTACAO / HSTBITRIBUTACAO</strong> — a bitributação e seu histórico: saldos de contribuições usados no cálculo do IR regressivo.</li>
+</ul>
+<p>Ao todo são <strong>35 entidades/tabelas centrais</strong> mapeadas. A listagem completa de campos permanece no código-fonte, mas os campos-chave e os relacionamentos estão documentados aqui.</p>
+</section>
+
+<section id="pfc42-analista"><div class="section-title">💼 Para o analista de negócios — Dados críticos para o negócio (enriquecido — PFC-42)</div>
+<p><strong>Dados de maior valor de negócio</strong> (perda ou inconsistência aqui tem impacto financeiro direto):</p>
+<ul>
+<li><strong>HSTCONTRIBPREV.SITRECEBIMENTO</strong> — situação do recebimento (0=pendente, 1=enviada, 2=recebida, 3=divergente). Controla todo o fluxo de cobrança. Erros aqui fazem contribuições serem recebidas em duplicidade ou perdidas.</li>
+<li><strong>HSTCONTRIBPREV.VALORPROVENTO / VALORRECEBIDO</strong> — valor esperado vs. valor recebido. Divergências indicam inadimplência ou erro de cálculo.</li>
+<li><strong>RESERVAPART / RESERVAXPLANO</strong> — reservas matemáticas. Base para o cálculo do benefício e para a posição financeira do fundo. Erros aqui afetam o valor do benefício futuro.</li>
+<li><strong>BITRIBUTACAO</strong> — saldo de contribuições para tributação. Base para o IR regressivo. Erros aqui geram passivo tributário.</li>
+</ul>
+<p><strong>Integridade referencial crítica:</strong> HSTCONTRIBPREV referencia CONTRIBPREVPARTP (contribuição por participante), DOCUMENTO (cobrança) e CONTRIBUICAO (definição). Se um documento de cobrança for excluído sem desfazer o histórico, a contribuição fica órfã. O desfazimento (PF-08/09) existe para corrigir essas situações.</p>
+<p><strong>Volume e performance:</strong> HSTCONTRIBPREV cresce mês a mês (uma linha por participante × contribuição × competência). Para uma entidade com 30 mil participantes e 3 contribuições médias, são 90 mil linhas por mês. Consultas de histórico e relatórios devem considerar esse volume.</p>
+<p><strong>Auditoria:</strong> HSTATRASOCONTRIB registra alterações de contribuição (quem alterou, quando, o que mudou). HISTMOVRESERVA registra alterações de reserva. Ambas são fontes primárias de rastreabilidade para auditoria interna e externa.</p>
 </section>
 
 </main>

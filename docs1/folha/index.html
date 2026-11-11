@@ -8,7 +8,7 @@
 </head>
 <body>
 <header>
-  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-22 (enriquecido)</div>
+  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-22 / PFC-42 (enriquecido)</div>
   <h1>Folha de Benefícios</h1>
   <p>Processamento da folha de benefícios com prévia, efetivação, pagamento, apropriação contábil, conciliação INSS e tratamentos especiais (pensão alimentícia, IRRF, retroativos).</p>
 </header>
@@ -76,6 +76,38 @@
 <tr><td><code>BASEDEPAGAMENTO</code></td><td>Base de pagamento por recebedor/rubrica</td><td><code>dFolhaPrevia.pas:27387</code></td></tr>
 <tr><td><code>HSTFOLHABENEF</code></td><td>Histórico da folha (efetivação)</td><td><code>fFolhaNormalEfet.pas</code></td></tr>
 </tbody></table></div>
+</section>
+
+<section id="pfc42-leigo"><div class="section-title">📖 Para o leigo — O que é este módulo (enriquecido — PFC-42)</div>
+<p>Em palavras simples: este módulo é o <strong>"pagador de benefícios"</strong> do sistema. Ele calcula quanto cada beneficiário deve receber num mês, aplica descontos (imposto de renda, pensão alimentícia, contribuições), gera o arquivo que o banco usa para depositar o dinheiro na conta de cada um e guarda tudo no histórico para fins de auditoria.</p>
+<p>Pense numa <strong>folha de pagamento</strong> de uma empresa comum, mas voltada para <strong>benefícios previdenciários</strong> (aposentadorias, pensões). O módulo percorre estas etapas, mês a mês:</p>
+<ol>
+<li><strong>Preparo</strong> — seleciona quem tem direito a receber naquele mês.</li>
+<li><strong>Prévia</strong> — calcula o valor de cada um, aplicando rubricas (itens de provento e desconto), imposto de renda, margem de desconto consignável e benefício mínimo.</li>
+<li><strong>Efetivação</strong> — transforma a prévia em pagamento definitivo, gera o arquivo bancário (CNAB 150/240) e o arquivo contábil (SIACC).</li>
+<li><strong>Pagamento</strong> — envia a remessa ao banco e concilia o retorno (quem recebeu, quem voltou).</li>
+<li><strong>Estorno</strong> — permite desfazer uma folha já efetivada quando algo deu errado.</li>
+</ol>
+<p>O "motor" que faz os cálculos é um único arquivo de código gigante (<code>dFolhaPrevia.pas</code>, com mais de 30 mil linhas). É ali que mora a inteligência do módulo: para cada beneficiário, ele decide quais rubricas se aplicam, calcula o imposto de renda (normal ou regressivo), verifica a margem de desconto e grava o resultado.</p>
+<p><strong>Tratamentos especiais</strong> incluem pensão alimentícia (desconto direto aos favorecidos), IRRF com compensação/judicial/regressivo, pagamentos retroativos e conciliação do INSS (reembolso de valores pagos à mantenedora).</p>
+</section>
+
+<section id="pfc42-analista"><div class="section-title">💼 Para o analista de negócios — Pontos de negócio (enriquecido — PFC-42)</div>
+<p><strong>Valor de negócio:</strong> Este módulo é o coração financeiro do pagamento de benefícios. Qualquer indisponibilidade ou erro de cálculo aqui impede o pagamento mensal aos beneficiários — impacto direto no SLA operacional e na imagem da entidade perante os participantes.</p>
+<p><strong>Indicadores-chave para acompanhar:</strong></p>
+<ul>
+<li><strong>Quantidade de beneficiários pagos por competência</strong> — mede o volume operacional e serve de base para dimensionamento de equipe e infraestrutura.</li>
+<li><strong>Valor líquido total pago</strong> — o principal número que vai à contabilidade e ao tesouro; divergências aqui geram ajustes contábeis e financeiros.</li>
+<li><strong>Conciliação bancária</strong> — diferença entre o valor remessado (CNAB) e o valor efetivamente creditado pelo banco; pendências aqui indicam beneficiários não pagos ou pagamentos devolvidos.</li>
+<li><strong>Conciliação INSS</strong> — diferença entre o valor repassado ao INSS e o valor reembolsado; relevante para o fluxo de caixa da entidade.</li>
+</ul>
+<p><strong>Riscos de negócio mapeados no código:</strong></p>
+<ul>
+<li><strong>Margem de desconto excedida</strong> (FOLHA-RN008) — descontos consignados que ultrapassam a margem do beneficiário são bloqueados; impacto direto em empréstimos consignados e pensões.</li>
+<li><strong>Líquido negativo</strong> (FOLHA-RN006) — quando os descontos superam o provento, o sistema zera o líquido e transfere o desconto; o beneficiário recebe zero, o que pode gerar reclamações.</li>
+<li><strong>IRRF regressivo</strong> (FOLHA-RN015) — opção tributária que pode zerar o imposto; mudanças de legislação aqui exigem atualização das tabelas.</li>
+</ul>
+<p><strong>Dependências críticas:</strong> o módulo depende do BENEFICIOPREV (cadastro de beneficiários), CONTRIBUIÇÃO (cálculo de contribuições previdenciárias) e IRRF (tabelas de imposto de renda). Uma alteração em qualquer um desses pode afetar o líquido pago. A integração com MongoDB (carga de contra-cheque) e a geração de CNAB/SIACC são pontos de interface com sistemas externos (bancos e contabilidade).</p>
 </section>
 
 </div>

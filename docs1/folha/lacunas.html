@@ -8,7 +8,7 @@
 </head>
 <body>
 <header>
-  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-22 (enriquecido)</div>
+  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-22 / PFC-42 (enriquecido)</div>
   <h1>🔍 Lacunas e Pontos Pendentes — Folha de Benefícios</h1>
   <p>Itens não comprovados, dependências externas não analisadas e artefatos pendentes</p>
 </header>
@@ -63,6 +63,33 @@
 <div class="card"><h3>Stored procedure de excesso de débito</h3><p><code>Exec_SP_ExcessoDebito</code> (festornafolha.pas:1801) executa uma SP cujo nome não foi extraído. <span class="ev ev-pendente">PENDENTE</span>.</p></div>
 <div class="card"><h3>CMFolhaObjMt (multi-thread)</h3><td>Forms multi-thread para 2ª via de contra-cheque não abertos. <span class="ev ev-inferido">INFERIDO</span>.</p></div>
 </div>
+</section>
+
+<section id="pfc42-leigo"><div class="section-title">📖 Para o leigo — O que ainda não sabemos sobre o sistema (enriquecido — PFC-42)</div>
+<p>Esta aba é como uma <strong>lista de dúvidas</strong> sobre o módulo FOLHA. Mesmo após a análise do código, há coisas que <strong>não foi possível confirmar</strong> — seja porque o código é muito grande para analisar linha a linha, seja porque depende de outros sistemas que não foram inspecionados.</p>
+<p><strong>Tipos de lacuna</strong> (dúvidas) encontradas:</p>
+<ul>
+<li><strong>Artefatos pendentes</strong> — arquivos que existem no repositório mas cuja função exata não foi confirmada. Ex.: o motor de cálculo tem 30.856 linhas; as rotinas-chave foram documentadas, mas o detalhe de todas as 7.088 declarações não — é trabalho demais para fazer à mão.</li>
+<li><strong>Dependências externas não analisadas</strong> — o FOLHA conversa com outros módulos (CONTRIBUIÇÃO, BENEFICIOPREV, IRRF, PROCJUD) e com o banco Oracle. A implementação interna desses interlocutores não foi inspecionada — sabemos que o FOLHA os chama, mas não exatamente o que eles fazem por dentro.</li>
+<li><strong>Itens não comprovados</strong> — comportamentos que parecem fazer sentido (inferidos) mas não foram verificados no código. Ex.: alguns blocos de tratamento de erro têm o <code>except</code> vazio — pode ser intencional ou pode ser um bug.</li>
+</ul>
+<p>Cada lacuna é marcada com um <strong>selo de evidência</strong>: <span class="ev ev-comprovado">COMPROVADO</span> (confirmado no código), <span class="ev ev-inferido">INFERIDO</span> (plausível mas não confirmado) ou <span class="ev ev-pendente">PENDENTE</span> (depende de validação adicional). Isso ajuda a saber o quanto confiar em cada informação.</p>
+</section>
+
+<section id="pfc42-analista"><div class="section-title">💼 Para o analista de negócios — Riscos de negócio por informação faltante (enriquecido — PFC-42)</div>
+<p><strong>Riscos que exigem atenção</strong> (lacunas com potencial de impacto de negócio):</p>
+<ul>
+<li><strong>Stored procedure de excesso de débito</strong> (<code>Exec_SP_ExcessoDebito</code>, festornafolha.pas:1801) — uma procedure do banco é executada no estorno, mas seu nome e conteúdo não foram extraídos. <strong>Risco:</strong> o estorno pode ter comportamentos não documentados que afetam o saldo do beneficiário.</li>
+<li><strong>try/except silenciado</strong> — erros capturados e ignorados podem mascarar falhas de negócio (ex.: gravação que falha silenciosamente). <strong>Risco:</strong> dados inconsistentes sem alerta operacional.</li>
+<li><strong>Dependências externas (CONTRIBUIÇÃO, BENEFICIOPREV, IRRF)</strong> — o FOLHA depende desses módulos para calcular a folha, mas suas implementações internas não foram inspecionadas. <strong>Risco:</strong> mudanças nesses módulos podem afetar o FOLHA sem que a equipe do FOLHA saiba.</li>
+<li><strong>MongoDB (carga de contra-cheque)</strong> — a integração com MongoDB é inferida, não confirmada. <strong>Risco:</strong> se a carga falhar, o portal do participante pode ficar desatualizado sem alerta.</li>
+</ul>
+<p><strong>Recomendações para o analista:</strong></p>
+<ul>
+<li>Priorizar a verificação dos <code>except</code> vazios no motor de cálculo — são os pontos onde falhas silenciosas podem causar maior impacto financeiro.</li>
+<li>Documentar a stored procedure de excesso de débito com o DBA, pois ela afeta o estorno (processo de correção de folha).</li>
+<li>Estabelecer um acordo de mudança (change management) com as equipes de CONTRIBUIÇÃO, BENEFICIOPREV e IRRF, pois alterações nesses módulos podem impactar o cálculo da folha.</li>
+</ul>
 </section>
 </main>
 <footer>

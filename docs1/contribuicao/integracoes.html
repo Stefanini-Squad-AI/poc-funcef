@@ -9,7 +9,7 @@
 </head>
 <body>
 <header>
-  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-23 (enriquecido)</div>
+  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-23 / PFC-42 (enriquecido)</div>
   <h1>🔗 Integrações — Contribuição Previdenciária</h1>
   <p>Dependências externas (referências de interface) e internas, classificadas por tipo. Catálogo de 16 relatórios. Enriquecido em PFC-23.</p>
 </header>
@@ -80,6 +80,38 @@
 <tr><td><code>CM.ENVIA_EMAIL_IMGANEXO</code></td><td>SP</td><td>FDivergContrib.pas:9265</td><td>Envia e-mail com imagem anexa</td></tr>
 <tr><td><code>StrProcAlimenta</code></td><td>SP</td><td>FAlimReservasReplan.pas:92-99</td><td>Alimentação rápida de reservas Replan</td></tr>
 </tbody></table></div>
+</section>
+
+<section id="pfc42-leigo"><div class="section-title">📖 Para o leigo — Como o módulo conversa com outros sistemas (enriquecido — PFC-42)</div>
+<p>Esta aba mostra com quais <strong>outros sistemas</strong> o módulo CONTRIBUIÇÃO conversa. Pense no módulo como uma pessoa no telefone: ele liga para vários "interlocutores" para conseguir fazer seu trabalho.</p>
+<p><strong>Com quem o CONTRIBUIÇÃO precisa falar</strong> para cobrar e receber contribuições:</p>
+<ul>
+<li><strong>CM Framework</strong> — a "biblioteca padrão" da suíte CM (27 units). Fornece telas básicas, autorização, consultas e relatórios.</li>
+<li><strong>CMAdmPrev</strong> (11 units) — integração CAP/CAR (documentos de cobrança), retroativo em lote, conciliação. É o módulo "administrativo" previdenciário.</li>
+<li><strong>CMPrevMT50</strong> — DataModules de entidades previdenciárias centrais (planos, beneficiários). Referenciado massivamente (1.395 refs a DPLANOPREV).</li>
+<li><strong>FOLHA</strong> — envio e recebimento de contribuições via folha de pagamento (73 refs a FOLHAORIGEM, 182 refs a FLGDESCFOLHA). É o canal principal de recebimento.</li>
+<li><strong>BENEFICIOPREV</strong> — benefícios previdenciários (via DBENEFICIO). Necessário para saber qual benefício a contribuição sustenta.</li>
+<li><strong>IRRF</strong> — cálculo de IRRF (36 refs). Usado na tributação de saldos de contribuição.</li>
+<li><strong>Oracle</strong> — banco de dados (schema CM.). Onde tudo é gravado. Inclui packages (PCK_BENEFSALDFAB) e stored procedures (SP_CP_RECEB_PATRO/ASSIS).</li>
+</ul>
+<p>Algumas dependências estão marcadas como <span class="ev ev-inferido">INFERIDO</span> (deduzida do contexto) — o módulo as referencia, mas a documentação não confirmou exatamente o que fazem por dentro.</p>
+</section>
+
+<section id="pfc42-analista"><div class="section-title">💼 Para o analista de negócios — Dependências críticas de negócio (enriquecido — PFC-42)</div>
+<p><strong>Dependências que podem parar a cobrança</strong> (indisponibilidade aqui impede o ciclo de contribuição):</p>
+<ul>
+<li><strong>Oracle</strong> — sem banco, nenhum cálculo ou persistência é possível. Inclui as procedures SP_CP_RECEB_PATRO/ASSIS (recebimento via folha) e PCK_BENEFSALDFAB (benefício saldado).</li>
+<li><strong>CMPrevMT50 (planos e beneficiários)</strong> — sem o cadastro de planos, o preparo não sabe quais contribuições calcular.</li>
+<li><strong>FOLHA</strong> — o canal principal de recebimento (desconto em folha). Se o FOLHA estiver indisponível, as contribuições não são descontadas.</li>
+<li><strong>CMAdmPrev</strong> — integração CAP/CAR (cobrança bancária). Sem ele, não é possível gerar documentos de cobrança.</li>
+</ul>
+<p><strong>Procedures Oracle críticas</strong> (pontos de acoplamento com o banco):</p>
+<ul>
+<li><strong>SP_CP_RECEB_PATRO/ASSIS</strong> — recebimento de contribuições via folha (patrocinadora/assistido). Mudanças no Oracle podem afetar o recebimento sem que o código Delphi seja alterado.</li>
+<li><strong>PCK_BENEFSALDFAB.SP_ATUALIZASALDO</strong> — atualiza saldo de benefício saldado/FAB. Erro aqui afeta o cálculo do benefício saldado.</li>
+<li><strong>PCK_BENEFSALDFAB.FN_CALCULABS</strong> — calcula benefício saldado. Função chamada na alteração de benefício saldado FAB.</li>
+</ul>
+<p><strong>Acoplamento entre módulos:</strong> o CONTRIBUIÇÃO, FOLHA e BENEFICIOPREV são fortemente acoplados. O CONTRIBUIÇÃO envia contribuições para o FOLHA descontar, e o BENEFICIOPREV usa o saldo de contribuições para calcular benefícios. Uma mudança em qualquer um dos três pode exigir re teste dos demais. Para uma eventual migração, considere os três como um bloco coeso.</p>
 </section>
 
 </main>

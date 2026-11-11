@@ -9,7 +9,7 @@
 </head>
 <body>
 <header>
-  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-23 (enriquecido)</div>
+  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-23 / PFC-42 (enriquecido)</div>
   <h1>Contribuição Previdenciária</h1>
   <p>Manutenção, cobrança e recebimento de contribuições previdenciárias por múltiplos canais, alimentação de reservas, tributação (bitributação/IR regressivo), portabilidade, benefício saldado/FAB e provisão para perdas.</p>
 </header>
@@ -45,6 +45,39 @@
 
 <section><div class="section-title">🗄️ Modelo de Dados (resumo)</div>
 <p>35 entidades/tabelas centrais mapeadas. A listagem completa de campos permanece no código.</p><div class="table-wrap"><table class=""><thead><tr><th>Entidade / Tabela</th><th>Papel funcional</th><th>Evidência</th></tr></thead><tbody><tr><td><code>HSTCONTRIBPREV</code></td><td>Histórico de contribuições (entidade central, 187 refs)</td><td><code>CONTRIBUICAOPREV/Fontes/FPreparaEnvia.pas:2855</code></td></tr><tr><td><code>CONTRIBPREVPARTP</code></td><td>Contribuição por participante (contém ULTMESPREPARO)</td><td><code>CONTRIBUICAOPREV/Fontes/FPreparaEnvia.pas:2466</code></td></tr><tr><td><code>CONTRIBUICAO</code></td><td>Definição de contribuições (FLGTPVLR)</td><td><code>CONTRIBUICAOPREV/Fontes/ContribuicaoPREV.dpr:303</code></td></tr><tr><td><code>CONTPREV</code></td><td>Contas previdenciárias (77 refs)</td><td><code>CONTRIBUICAOPREV/Fontes (SQL inline)</code></td></tr><tr><td><code>HSTATRASOCONTRIB</code></td><td>Histórico de alterações de contribuição (auditoria)</td><td><code>CONTRIBUICAOPREV/Fontes/FAlteracaoHistoricoContrib.pas</code></td></tr><tr><td><code>HISTMOVRESERVA</code></td><td>Histórico de movimentação de reservas</td><td><code>CONTRIBUICAOPREV/Fontes/FAlteraHistMovReserva.pas</code></td></tr><tr><td><code>RESERVAPART</code></td><td>Reserva do participante</td><td><code>CONTRIBUICAOPREV/Fontes (SQL inline)</code></td></tr><tr><td><code>RESERVAXPLANO</code></td><td>Reserva por plano</td><td><code>CONTRIBUICAOPREV/Fontes (SQL inline)</code></td></tr><tr><td><code>DOCUMENTO</code></td><td>Documentos (CAP/CAR) de cobrança</td><td><code>CONTRIBUICAOPREV/Fontes/FControleIndivContrib.pas</code></td></tr><tr><td><code>LANCTODOCUM</code></td><td>Lançamento x documento</td><td><code>CONTRIBUICAOPREV/Fontes (SQL inline)</code></td></tr><tr><td><code>HSTBITRIBUTACAO</code></td><td>Histórico de bitributação</td><td><code>CONTRIBUICAOPREV/Fontes/FCalcSalContr.pas:277</code></td></tr><tr><td><code>BITRIBUTACAO</code></td><td>Bitributação (saldo)</td><td><code>CONTRIBUICAOPREV/Fontes/FCalcSalContr.pas:330</code></td></tr></tbody></table></div><p style="margin-top:1rem">+ 23 entidades adicionais. <a href="dados.html">Modelo de dados completo →</a></p>
+</section>
+
+<section id="pfc42-leigo"><div class="section-title">📖 Para o leigo — O que é este módulo (enriquecido — PFC-42)</div>
+<p>Em palavras simples: este módulo cuida das <strong>contribuições previdenciárias</strong> — os valores que os participantes e as patrocinadoras pagam para sustentar o fundo de pensão. Pense numa <strong>conta de luz</strong>: a empresa gera a fatura (cobra), o cliente paga (recebe) e o valor é contabilizado. Aqui é parecido, mas com contribuições previdenciárias.</p>
+<p><strong>O que o módulo faz, passo a passo:</strong></p>
+<ol>
+<li><strong>Manutenção e cobrança</strong> — prepara as contribuições devidas por cada participante/patrocinadora e envia a cobrança (gera boletos, documentos CAP/CAR ou desconta em folha).</li>
+<li><strong>Recebimento multi-canal</strong> — recebe as contribuições por vários caminhos: desconto em folha, empréstimo, contas a receber ou pagamento direto no banco.</li>
+<li><strong>Alimentação de reservas</strong> — atualiza as reservas matemáticas dos participantes com base nos valores recebidos e nos índices de correção.</li>
+<li><strong>Salário de participação</strong> — mantém e reajusta o salário de participação (base de cálculo das contribuições).</li>
+<li><strong>Tributação</strong> — calcula bitributação e IR regressivo sobre os saldos de contribuição.</li>
+<li><strong>Portabilidade e benefício saldado/FAB</strong> — trata contribuições portadas de outros fundos e calcula o benefício saldado (FAB) via procedure Oracle.</li>
+<li><strong>Provisão para perdas</strong> — calcula a provisão para perdas (contribuições atrasadas que podem não ser recebidas).</li>
+</ol>
+<p>O módulo tem <strong>158 artefatos</strong> Delphi 5 e cerca de 85 mil linhas de código. A arquitetura é híbrida: herda telas do framework CM, mas tem muito SQL emb"embutido" diretamente nos forms (baixa separação de camadas).</p>
+</section>
+
+<section id="pfc42-analista"><div class="section-title">💼 Para o analista de negócios — Pontos de negócio (enriquecido — PFC-42)</div>
+<p><strong>Valor de negócio:</strong> Este módulo garante que o fundo de pensão receba as contribuições que sustentam os benefícios pagos. Sem contribuições recebidas, não há fluxo de caixa para pagar benefícios — é a "entrada" que financia a "saída" (folha de benefícios).</p>
+<p><strong>Indicadores-chave para acompanhar:</strong></p>
+<ul>
+<li><strong>Taxa de inadimplência</strong> — contribuições enviadas mas não recebidas dentro do prazo. Impacta a provisão para perdas e o fluxo de caixa.</li>
+<li><strong>Saldo de contribuições a receber</strong> — valores devidos mas ainda não recebidos. RelevantDA para a posição financeira do fundo.</li>
+<li><strong>Volume de recebimento por canal</strong> — quanto entra via folha, empréstimo, contas a receber ou banco. Ajuda a otimizar canais e identificar gargalos.</li>
+<li><strong>Provisão para perdas</strong> — valor provisionado para contribuições que provavelmente não serão recebidas. Impacta o resultado contábil.</li>
+</ul>
+<p><strong>Regras de negócio críticas</strong> (impacto financeiro direto):</p>
+<ul>
+<li><strong>CONTRIB-RN003</strong> (valor esperado > 0) — impede cobrança de valor zero ou negativo. Bloqueio protege contra erro paramétrico.</li>
+<li><strong>CONTRIB-RN004/RN005</strong> (recebida/enviada bloqueia alteração) — uma vez recebida ou enviada, a contribuição não pode ser alterada. Garante integridade do histórico e da auditoria.</li>
+<li><strong>Bitributação / IR regressivo</strong> — define a tributação dos saldos de contribuição. Mudanças de legislação aqui exigem reprocessamento e podem gerar passivo tributário.</li>
+</ul>
+<p><strong>Dependências críticas:</strong> o módulo depende do FOLHA (envio/recebimento via folha — 182 refs de FLGDESCFOLHA), BENEFICIOPREV (benefícios), IRRF (cálculo de IR) e de packages Oracle (PCK_BENEFSALDFAB para benefício saldado, SP_CP_RECEB_PATRO/ASSIS para recebimento via folha). Uma indisponibilidade do Oracle ou do FOLHA pode impedir o ciclo de cobrança.</p>
 </section>
 
 </div>

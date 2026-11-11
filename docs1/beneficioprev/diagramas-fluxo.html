@@ -8,7 +8,7 @@
 </head>
 <body>
 <header>
-  <div class="badge">Blueprint AS-IS — Delphi 5</div>
+  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-24 / PFC-42 (enriquecido)</div>
   <h1>🔀 Diagramas de Fluxo de Processos — Benefício Previdenciário</h1>
   <p>Fluxos comprovados pelo código com rastreabilidade</p>
 </header>
@@ -148,6 +148,36 @@
   J --> K["ExeProc (L905)"]
   K --> L[("Stored procedure de reajuste")]</div>
 <p><strong>Evidência:</strong> <code>FReajuesteBenef.pas:401-953</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</section>
+
+<section id="pfc42-leigo"><div class="section-title">📖 Para o leigo — O passo a passo dos processos (enriquecido — PFC-42)</div>
+<p>Esta aba mostra o <strong>"passo a passo"</strong> dos principais processos do módulo BENEFICIOPREV, como uma receita ilustrada. Cada fluxo é um diagrama que mostra, em ordem, o que o sistema faz do início ao fim.</p>
+<p><strong>Os fluxos documentados</strong> (todos com rastreabilidade ao código):</p>
+<ul>
+<li><strong>PF-01 — Concessão de Benefício</strong>: usuário escolhe o tipo (Participante/Beneficiário/Pensionista) → o sistema chama o motor externo CMAdmPrev → o motor calcula o benefício → grava beneficiário, histórico, processo e movimento → registra auditoria.</li>
+<li><strong>PF-04 — Desfazer Operações</strong>: seleciona o processo → identifica a última operação → valida (já pago? prévia existe? folha efetivada?) → conforme o tipo de movimento, desfaz (renovação, retenção, encerramento, falecimento, desdobramento, liberação, revisão, reversão, alteração manual) → commit + auditoria.</li>
+<li><strong>PF-05 — Eventos Previdenciários</strong>: o menu é montado dinamicamente lendo EVENTOGERADOR → usuário escolhe o evento (aposentadoria, falecimento, reclusão, assistido) → o sistema grava o evento → atualiza elegibilidade → suspende contribuições.</li>
+<li><strong>PF-08 — Desdobramento</strong>: seleciona processo e beneficiários → valida (≥1 beneficiário, valor limite, motivo) → gera número de processo → calcula benefício/abono → reajusta desde DIP original → grava beneficiário, histórico, processo e dívida → commit + demonstrativo.</li>
+<li><strong>PF-14 — Conciliação INSS</strong>: importa arquivo do INSS/mantenedora → parser (header, detail, rubrica, footer) → grava conciliação e detalhe com rateio → importa mantenedora → identifica divergências → encerra conciliação (CR/CP + contábil).</li>
+<li><strong>PF-03 — Simulação</strong>: wizard de 4 etapas → seleciona participante → aplica regra de elegibilidade (data) → aplica regra de valor (numérica) → exibe resultado (apenas leitura).</li>
+<li><strong>PF-06 — Reajuste</strong>: carrega benefícios vitalícios não-resgate → exclui espécies específicas → importa lista de matrículas (Excel) → parametriza → grava reajuste → chama stored procedure.</li>
+</ul>
+</section>
+
+<section id="pfc42-analista"><div class="section-title">💼 Para o analista de negócios — Gargalos e pontos de decisão (enriquecido — PFC-42)</div>
+<p><strong>Pontos de decisão de negócio</strong> (onde o sistema escolhe um caminho com impacto no benefício):</p>
+<ul>
+<li><strong>PF-01: tipo de benefício (P/B/D)</strong> — decide se a concessão é de participante, beneficiário ou pensionista. Erro aqui encaminha para o fluxo errado.</li>
+<li><strong>PF-04: TIPOMOV</strong> — o desfazimento decide qual operação desfazer conforme o tipo de movimento (0/7=renovação/concessão, 3/4=retenção/encerramento, 9=falecimento, 5=desdobramento, 12=liberação, 13/14=revisão, 16=reversão, 17=alteração manual). Erro aqui desfaz a operação errada.</li>
+<li><strong>PF-05: FLGINTERNO</strong> — decide qual form de evento abrir (TS=aposentadoria, FL=falecimento, RC=reclusão, IN/AI/BI=assistido). Eventos inativos (DO/AC/OE/RC) estão comentados.</li>
+<li><strong>PF-06: IDTPPAGTOBENEFIC=1 (vitalício)</strong> — só reajusta benefícios vitalícios não-resgate. Erro aqui reajusta benefícios indevidos.</li>
+</ul>
+<p><strong>Gargalos potenciais</strong> (pontos onde o volume pode impactar o tempo):</p>
+<ul>
+<li><strong>PF-06 (Reajuste)</strong> — importa lista de matrículas via Excel com validação e hash CRC32. Para grandes volumes, a importação pode ser lenta. Erros de importação (células vazias, formatos incorretos) podem gerar reajustes errados.</li>
+<li><strong>PF-14 (Conciliação INSS)</strong> — parser de arquivo do INSS linha a linha. Arquivos grandes podem levar tempo; falha no parser exige reimportação.</li>
+</ul>
+<p><strong>Dependências entre fluxos:</strong> PF-04 (desfazimento) só roda após PF-01 (concessão). PF-08 (desdobramento) depende de PF-01. PF-06 (reajuste) depende de PF-01. Uma falha na concessão bloqueia os fluxos subsequentes.</p>
 </section>
 </main>
 <footer>

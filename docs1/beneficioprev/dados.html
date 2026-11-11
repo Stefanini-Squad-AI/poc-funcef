@@ -9,7 +9,7 @@
 </head>
 <body>
 <header>
-  <div class="badge">Blueprint AS-IS — Delphi 5</div>
+  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-24 / PFC-42 (enriquecido)</div>
   <h1>🗄️ Modelo de Dados — Benefício Previdenciário</h1>
   <p>25 entidades mapeadas com CRUD e relacionamentos</p>
 </header>
@@ -57,6 +57,35 @@
 
 <section><div class="section-title">✎ Operações CRUD por Tabela-Chave</div>
 <div class="table-wrap"><table class=""><thead><tr><th>Tabela</th><th>INSERT</th><th>UPDATE</th><th>DELETE</th><th>Origem</th></tr></thead><tbody><tr><td>BENEFBFCIARIO</td><td>✅ (desdobramento)</td><td>✅ (desfaz/reaj/exig)</td><td>✅ (desfaz)</td><td>FDesdobramentoBenef, FDesfazConcessaoBenefNOVO, FReajusteJudicial</td></tr><tr><td>HSTBENEFBFCIARIO</td><td>—</td><td>✅ (desfaz/desdobr)</td><td>✅ (desfaz/exig)</td><td>FDesfazConcessaoBenefNOVO, FDesdobramentoBenef</td></tr><tr><td>HSTCONTRIBPREV</td><td>—</td><td>✅ (desfaz/desdobr)</td><td>✅ (desfaz/exig)</td><td>FDesfazConcessaoBenefNOVO, FDesdobramentoBenef</td></tr><tr><td>CONTRIBPREVPARTP</td><td>—</td><td>✅ (desfaz/reab/exig)</td><td>—</td><td>FDesfazConcessaoBenefNOVO, FReaberturaBeneficio</td></tr><tr><td>MOVBENEF</td><td>—</td><td>✅ (desfaz/exig)</td><td>—</td><td>FDesfazConcessaoBenefNOVO, FCadInicioBenefExigencia</td></tr><tr><td>PROCESSOBENEF</td><td>✅ (desdobr)</td><td>✅ (desfaz/reab/exig)</td><td>✅ (desfaz)</td><td>FDesfazConcessaoBenefNOVO, FReaberturaBeneficio</td></tr><tr><td>EVENTOSPREV</td><td>✅ (eventos)</td><td>✅ (desfaz/reab)</td><td>—</td><td>FEventoMorte, FEventoAssistidoBenef, FEventoReclusao</td></tr><tr><td>PARTPREVPLAN</td><td>—</td><td>✅ (eventos/reab)</td><td>—</td><td>FEventoMorte, FEventoAssistidoBenef, FReaberturaBeneficio</td></tr><tr><td>ELEGPATRO</td><td>—</td><td>✅ (eventos/reab)</td><td>—</td><td>FEventoMorte, FEventoAssistidoBenef, FEventoReclusao</td></tr><tr><td>TMPDESC</td><td>—</td><td>✅ (desfaz)</td><td>✅ (desfaz)</td><td>FDesfazConcessaoBenefNOVO</td></tr><tr><td>PREVIA</td><td>—</td><td>—</td><td>✅ (desfaz)</td><td>FDesfazConcessaoBenefNOVO</td></tr><tr><td>CONTROLEDIVIDABENEFICIO</td><td>✅ (desdobr)</td><td>✅ (desdobr)</td><td>—</td><td>FDesdobramentoBenef</td></tr><tr><td>LOGTOTALPREV</td><td>✅ (UModulo)</td><td>—</td><td>—</td><td>UModulo.pas:64-88 (todas operações)</td></tr></tbody></table></div>
+</section>
+
+<section id="pfc42-leigo"><div class="section-title">📖 Para o leigo — Onde as informações ficam guardadas (enriquecido — PFC-42)</div>
+<p>Esta aba descreve as <strong>"gavetas"</strong> onde o módulo BENEFICIOPREV guarda suas informações. No banco Oracle, cada gaveta é uma <strong>tabela</strong> com um nome.</p>
+<p><strong>As tabelas mais importantes</strong> para entender os benefícios:</p>
+<ul>
+<li><strong>BENEFBFCIARIO</strong> — o cadastro do beneficiário: quem é, qual o plano, qual o valor do benefício, quando começou (DIB), qual a situação (ativo, encerrado, suspenso). É a "ficha" de cada beneficiário (82 referências no código).</li>
+<li><strong>HSTBENEFBFCIARIO</strong> — o histórico do beneficiário: registra todas as alterações de valor, situação e lote. É o "diário" do benefício, para auditoria.</li>
+<li><strong>PROCESSOBENEF</strong> — o processo de benefício: cada benefício tem um número de processo, com situação e eventos associados.</li>
+<li><strong>MOVBENEF</strong> — o movimento do benefício: registra cada operação (concessão, retenção, encerramento, desdobramento, revisão) com data e tipo. É o "extrato" de operações.</li>
+<li><strong>EVENTOGERADOR</strong> — o catálogo de eventos geradores: aposentadoria (TS/ID), invalidez (IN), falecimento (FL), reclusão (RC), assistido (AI/BI). O menu de eventos é montado a partir desta tabela.</li>
+<li><strong>EVENTOSPREV</strong> — os eventos previdenciários registrados: cada evento disparado (ex.: falecimento do titular) é gravado aqui.</li>
+<li><strong>DETCONCINSS / CONCINSS</strong> — conciliação INSS: detalhe e cabeçalho da conciliação com mantenedoras.</li>
+<li><strong>CONTROLEDIVIDABENEFICIO</strong> — controle de dívida do benefício: usado no desdobramento (divisão do benefício entre herdeiros).</li>
+</ul>
+<p>Ao todo são <strong>25 entidades/tabelas centrais</strong> mapeadas. A tabela <strong>LOGTOTALPREV</strong> registra toda operação de negócio para auditoria (quem, quando, o que fez).</p>
+</section>
+
+<section id="pfc42-analista"><div class="section-title">💼 Para o analista de negócios — Dados críticos para o negócio (enriquecido — PFC-42)</div>
+<p><strong>Dados de maior valor de negócio</strong> (perda ou inconsistência aqui tem impacto direto no benefício):</p>
+<ul>
+<li><strong>BENEFBFCIARIO.VALOR / DATACONCESSAO / DATAENCERRAMENTO</strong> — valor e período do benefício. Erros aqui geram pagamento indevido ou omissão.</li>
+<li><strong>BENEFBFCIARIO.IDSITBENEFICIO</strong> — situação do benefício (ativo, encerrado, suspenso). Erro aqui faz o benefício ser pago quando não deveria (ou vice-versa).</li>
+<li><strong>MOVBENEF.TIPOMOV</strong> — tipo de movimento (0=renovação, 3=retenção, 4=encerramento, 9=falecimento, 5=desdobramento etc.). O desfazimento usa este campo para saber qual operação desfazer.</li>
+<li><strong>PROCESSOBENEF.IDSITPROCESSO</strong> — situação do processo. Define se o processo está aberto, concedido, encerrado. Erro aqui bloqueia ou permite operações indevidas.</li>
+</ul>
+<p><strong>Integridade referencial crítica:</strong> BENEFBFCIARIO referencia PESSOA (titular), PATRO (patrocinadora), BENEFPLANPREV (plano), PROCESSOBENEF (processo), SITBENEFICIO (situação). Se qualquer desses cadastros for alterado/excluído, o benefício pode ficar inconsistente. O desfazimento existe para corrigir essas situações.</p>
+<p><strong>Auditoria (LOGTOTALPREV):</strong> toda operação de negócio (concessão, manutenção, desfazimento, evento) é registrada com data, usuário e descrição. É a fonte primária de rastreabilidade para auditoria interna e externa — relevante para conformidade e investigação de incidentes.</p>
+<p><strong>Impacto no pagamento:</strong> os dados deste módulo alimentam o FOLHA (módulo de pagamento). Se o benefício for concedido/alterado/desfeito errado aqui, o FOLHA pagará errado. A consistência entre BENEFICIOPREV e FOLHA é crítica.</p>
 </section>
 
 </main>

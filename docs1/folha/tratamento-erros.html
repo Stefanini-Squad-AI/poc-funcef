@@ -8,7 +8,7 @@
 </head>
 <body>
 <header>
-  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-22 (enriquecido)</div>
+  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-22 / PFC-42 (enriquecido)</div>
   <h1>⚠️ Tratamento de Erros e Exceções — Folha de Benefícios</h1>
   <p>1157 blocos try, 163 mensagens de validação/erro — com rastreabilidade arquivo:linha</p>
 </header>
@@ -69,6 +69,31 @@
 <div class="card"><h3>try/finally (cleanup)</h3><p>Usado em FPreparo, fImportaTxt e fFolhaNormalEfet para garantir liberação de queries/forms (Free) mesmo em caso de exceção.</p></div>
 <div class="card"><h3>try/except silenciado</h3><p>Em algumas rotinas utilitárias o except é vazio ou apenas loga. <span class="ev ev-pendente">PENDENTE</span> — verificar se intencional.</p></div>
 </div>
+</section>
+
+<section id="pfc42-leigo"><div class="section-title">📖 Para o leigo — Como o sistema lida com problemas (enriquecido — PFC-42)</div>
+<p>Esta aba mostra como o módulo FOLHA reage quando <strong>algo dá errado</strong>. Pense num motorista de ônibus: se aparece um buraco na rua, ele pode desviar (mostrar uma mensagem e seguir), pode voltar para a garagem (desfazer a operação) ou pode ligar para a central (propagar o erro para alguém resolver). O sistema faz o mesmo.</p>
+<p><strong>Os três comportamentos principais</strong> quando há um erro:</p>
+<ul>
+<li><strong>Mostrar mensagem e seguir</strong> (<code>try/except + MessageDlg</code>) — o sistema exibe uma janela avisando o usuário ("Margem de desconto excedida") e interrompe aquela operação, mas o programa continua rodando. É o caso mais comum.</li>
+<li><strong>Desfazer a operação</strong> (<code>try/except + RollBack</code>) — quando o erro acontece no meio de uma gravação no banco, o sistema reverte tudo o que já tinha feito (rollback) para não deixar os dados pela metade, e avisa o usuário. É usado nas operações de prévia, efetivação e estorno.</li>
+<li><strong>Propagar o erro</strong> (<code>raise exception.Create</code>) — o sistema "joga" o erro para cima, para quem chamou a rotina tratar. Usado em erros críticos, como falha ao gravar log.</li>
+</ul>
+<p><strong>Quantidade:</strong> o módulo tem <strong>1.157 blocos de tratamento de erro</strong> (try) e <strong>163 mensagens</strong> de validação/erro. O arquivo com mais tratamentos é o motor de cálculo <code>dFolhaPrevia.pas</code> (233 blocos) — o que faz sentido, pois é onde mais coisas podem dar errado (cálculo de rubrica, margem, IRRF, gravação etc.).</p>
+<p>Alguns erros têm o <strong>except vazio</strong> (silenciado) — o sistema captura o erro mas não faz nada. Isso pode ser intencional (o erro é esperado e irrelevante) ou pode ser um bug escondido. Estão marcados como <span class="ev ev-pendente">PENDENTE</span> para verificação.</p>
+</section>
+
+<section id="pfc42-analista"><div class="section-title">💼 Para o analista de negócios — Pontos de falha de negócio (enriquecido — PFC-42)</div>
+<p><strong>Mensagens que indicam impacto de negócio direto</strong> (o usuário final as vê e precisa agir):</p>
+<ul>
+<li><strong>"Margem de desconto excedida"</strong> (dFolhaPrevia.pas:7496) — um desconto consignado foi bloqueado. <strong>Ação:</strong> verificar se a margem do beneficiário está correta ou se o desconto deve ser renegotiado.</li>
+<li><strong>"Valor líquido negativo — desconto transferido"</strong> (FOLHA-RN006) — o beneficiário receberia valor negativo; o sistema zerou e transferiu o desconto. <strong>Ação:</strong> revisar rubricas de desconto daquele beneficiário.</li>
+<li><strong>"Lote já efetivado"</strong> (fFolhaNormalEfet.pas) — tentativa de efetivar uma folha já paga. <strong>Ação:</strong> usar o estorno (PF-04) se necessário, ou escolher outra competência.</li>
+<li><strong>"Prévia não encontrada para o período"</strong> (FFolhaNormalPrevia.pas) — tentativa de efetivar sem prévia calculada. <strong>Ação:</strong> calcular a prévia primeiro.</li>
+<li><strong>"Falha na geração do CNAB"</strong> (fFolhaNormalEfet.pas:9346) — o arquivo bancário não foi gerado. <strong>Ação:</strong> verificar configuração de leiaute e permissões de pasta; sem o arquivo, o banco não paga.</li>
+</ul>
+<p><strong>Risco do try/except silenciado:</strong> erros capturados e ignorados podem mascarar problemas reais (ex.: falha de gravação que o usuário não percebe). Para o analista, isso significa que <strong>algumas falhas podem estar ocorrendo sem reportar</strong> — recomenda-se auditar os except vazios, especialmente no motor de cálculo e na efetivação.</p>
+<p><strong>Resiliência operacional:</strong> o padrão dominante (try/except + RollBack) garante que o banco não fique inconsistente em caso de erro. No entanto, uma folha interrompida no meio pode deixar a competência em estado parcial — o estorno existe para corrigir. Recomenda-se sempre verificar o estado da competência após uma falha antes de prosseguir.</p>
 </section>
 </main>
 <footer>

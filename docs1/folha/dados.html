@@ -8,7 +8,7 @@
 </head>
 <body>
 <header>
-  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-22 (enriquecido)</div>
+  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-22 / PFC-42 (enriquecido)</div>
   <h1>🗄️ Modelo de Dados — Folha de Benefícios</h1>
   <p>41 tabelas mapeadas (DBObjects) com campos-chave, relacionamentos, CRUD, transações e commit/rollback.</p>
 </header>
@@ -174,6 +174,33 @@
 <li><strong>Stored procedures:</strong> <code>Exec_SP_ExcessoDebito</code> (fFolhaNormalEfet.pas:8158, festornafolha.pas:1801) — SP de excesso de débito. <span class="ev ev-comprovado">COMPROVADO</span></li>
 <li><strong>Views:</strong> nenhuma view identificada nos DBObjects (acesso direto a tabelas). <span class="ev ev-pendente">PENDENTE</span> — views externas não confirmadas.</li>
 </ul>
+</section>
+
+<section id="pfc42-leigo"><div class="section-title">📖 Para o leigo — Onde as informações ficam guardadas (enriquecido — PFC-42)</div>
+<p>Esta aba descreve as <strong>"gavetas"</strong> onde o módulo FOLHA guarda suas informações. No banco de dados Oracle, cada gaveta é uma <strong>tabela</strong> com um nome. Pense numa planilha de Excel: cada tabela é uma aba, e cada campo (coluna) guarda um tipo de informação.</p>
+<p><strong>As tabelas mais importantes</strong> para entender o pagamento da folha:</p>
+<ul>
+<li><strong>PREVIA</strong> — guarda o cálculo da folha antes de virar pagamento definitivo. Tem 57 campos: quem recebe, qual rubrica, qual o valor, em que mês, etc. É a "rascunho" da folha.</li>
+<li><strong>BENEFBFCIARIO</strong> — o cadastro do benefício do beneficiário: quando começou, qual o plano, qual o valor, qual a forma de pagamento. É a "ficha" de cada beneficiário.</li>
+<li><strong>PROVDESC</strong> — o catálogo de rubricas: cada rubrica é um item de provento (ex.: "salário") ou desconto (ex.: "IRRF", "pensão alimentícia"). Tem 45 campos que dizem se incide IR, INSS, FGTS, se tem margem consignável etc.</li>
+<li><strong>HSTBENEFBFCIARIO</strong> — o histórico do benefício: registra todas as alterações (quem mudou, quando, o que mudou). É o "diário" do benefício, para auditoria.</li>
+<li><strong>BASEDEPAGAMENTO</strong> — a base de pagamento por recebedor e rubrica: consolida o que foi pago para conciliação e relatórios.</li>
+<li><strong>HSTFOLHABENEF</strong> — o histórico da folha após a efetivação: o registro definitivo de que a folha daquele mês foi paga.</li>
+</ul>
+<p>Cada tabela tem operações de <strong>CRUD</strong> (Criar, Ler, Atualizar, Apagar). Por exemplo, a tabela PREVIA é criada durante o cálculo, lida nas consultas, atualizada em reprocessamentos e apagada quando o usuário descarta a prévia. As transações usam <strong>commit</strong> (confirma) e <strong>rollback</strong> (desfaz) para garantir que o banco não fique inconsistente se algo der errado no meio.</p>
+</section>
+
+<section id="pfc42-analista"><div class="section-title">💼 Para o analista de negócios — Dados críticos para o negócio (enriquecido — PFC-42)</div>
+<p><strong>Dados de maior valor de negócio</strong> (perda ou inconsistência aqui tem impacto financeiro direto):</p>
+<ul>
+<li><strong>PREVIA.VALORPROVENTO / VALORRECEBIDO</strong> — o valor calculado e o valor efetivamente recebido. Divergências indicam pagamentos incorretos.</li>
+<li><strong>BENEFBFCIARIO.DATACONCESSAO / DATAENCERRAMENTO</strong> — definem o período de pagamento do benefício. Datas erradas geram pagamentos indevidos ou omissões.</li>
+<li><strong>PROVDESC.FLGMARGEMCONSIG / FLGDESCPENSAO</strong> — flags que controlam margem consignável e pensão alimentícia. Configuração errada aqui afeta todos os beneficiários que usam a rubrica.</li>
+<li><strong>HSTFOLHABENEF</strong> — o histórico definitivo da folha. É a base para auditoria, prestação de contas e reabertura de competências.</li>
+</ul>
+<p><strong>Integridade referencial crítica:</strong> a prévia (PREVIA) referencia beneficiário (BENEFBFCIARIO), rubrica (PROVDESC), plano (BENEFPLANPREV) e lote. Se qualquer desses cadastros for alterado/excluído após o cálculo, a prévia pode ficar órfã ou inconsistente. O estorno (PF-04) e o reprocessamento existem para corrigir essas situações.</p>
+<p><strong>Volume e performance:</strong> a tabela PREVIA cresce mês a mês (uma linha por recebedor × rubrica × competência). Para uma entidade com 50 mil beneficiários e 10 rubricas médias, são 500 mil linhas por mês. Consultas de histórico e relatórios devem considerar esse volume ao definir janelas de tempo.</p>
+<p><strong>Auditoria:</strong> a tabela HSTBENEFBFCIARIO registra quem alterou o benefício e quando. Para fins de conformidade, é a fonte primária de rastreabilidade de mudanças — relevante para auditorias internas e externas.</p>
 </section>
 
 </main>

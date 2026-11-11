@@ -8,7 +8,7 @@
 </head>
 <body>
 <header>
-  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-23 (enriquecido)</div>
+  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-23 / PFC-42 (enriquecido)</div>
   <h1>⚠️ Tratamento de Erros e Exceções — Contribuição Previdenciária</h1>
   <p>346 blocos try, 53 mensagens de validação/erro — com rastreabilidade arquivo:linha</p>
 </header>
@@ -65,6 +65,31 @@
 <div class="card"><h3>raise exception.Create</h3><p>Usado para erros de log: "Erro ao gravar Log." em FDivergContrib.pas:5019 e outros.</p></div>
 <div class="card"><h3>try/finally (cleanup)</h3><p>Usado em FPrincipal (login, CriaDataModule) para garantir liberação de recursos (Free de forms/queries).</p></div>
 </div>
+</section>
+
+<section id="pfc42-leigo"><div class="section-title">📖 Para o leigo — Como o sistema lida com problemas (enriquecido — PFC-42)</div>
+<p>Esta aba mostra como o módulo CONTRIBUIÇÃO reage quando <strong>algo dá errado</strong>. Pense num motorista de ônibus: se aparece um buraco na rua, ele pode desviar (mostrar mensagem e seguir), voltar para a garagem (desfazer a operação) ou ligar para a central (propagar o erro). O sistema faz o mesmo.</p>
+<p><strong>Os três comportamentos principais</strong> quando há um erro:</p>
+<ul>
+<li><strong>Mostrar mensagem e seguir</strong> (<code>try/except + MessageDlg</code>) — o sistema avisa o usuário ("Contribuição já recebida — não pode ser alterada") e interrompe aquela operação, mas o programa continua rodando.</li>
+<li><strong>Desfazer a operação</strong> (<code>try/except + RollBack</code>) — reverte tudo o que já tinha feito no banco (rollback) para não deixar dados pela metade, e avisa o usuário. Usado no preparo, envio e recebimento.</li>
+<li><strong>Propagar o erro</strong> (<code>raise exception.Create</code>) — "joga" o erro para cima, para quem chamou a rotina tratar. Usado em erros críticos, como falha ao gravar log.</li>
+</ul>
+<p><strong>Quantidade:</strong> o módulo tem <strong>346 blocos de tratamento de erro</strong> (try) e <strong>53 mensagens</strong> de validação/erro. O arquivo com mais tratamentos é <code>FDivergContrib.pas</code> (56 blocos) — faz sentido, pois o tratamento de divergências é onde mais coisas podem dar errado (valor divergente, documento pendente, situação inconsistente etc.).</p>
+</section>
+
+<section id="pfc42-analista"><div class="section-title">💼 Para o analista de negócios — Pontos de falha de negócio (enriquecido — PFC-42)</div>
+<p><strong>Mensagens que indicam impacto de negócio direto</strong> (o usuário as vê e precisa agir):</p>
+<ul>
+<li><strong>"Contribuição já recebida — não pode ser alterada"</strong> (CONTRIB-RN004) — tentativa de alterar contribuição já recebida. <strong>Ação:</strong> usar o desfazimento (PF-08/09) se necessário.</li>
+<li><strong>"Contribuição já enviada — não pode ser alterada/excluída"</strong> (CONTRIB-RN005) — tentativa de alterar contribuição já enviada para cobrança. <strong>Ação:</strong> cancelar o documento de cobrança primeiro.</li>
+<li><strong>"Boleta enviada bloqueia desfazimento"</strong> (CONTRIB-RN077) — documento já enviado não pode ser desfeito. <strong>Ação:</strong> cancelar formalmente a cobrança.</li>
+<li><strong>"Valor esperado deve ser maior que zero"</strong> (CONTRIB-RN003) — contribuição com valor zero ou negativo. <strong>Ação:</strong> revisar o cadastro da contribuição.</li>
+<li><strong>"Documento pendente bloqueia tratamento"</strong> (CONTRIB-RN049) — divergência com documento pendente. <strong>Ação:</strong> regularizar o documento antes de tratar a divergência.</li>
+<li><strong>"ERRO AO REALIZAR INTEGRAÇÃO COM O PGA"</strong> (FPreparaEnvia.pas:5662) — falha na integração com o PGA. <strong>Ação:</strong> verificar conectividade e parâmetros da integração.</li>
+</ul>
+<p><strong>Concentração de risco:</strong> o tratamento de divergências (FDivergContrib.pas, 56 blocos try) é a área de maior complexidade e risco. Erros silenciados aqui podem mascarar divergências não resolvidas, levando a saldos incorretos. Recomenda-se auditar os except vazios e monitorar divergências pendentes.</p>
+<p><strong>Resiliência operacional:</strong> o padrão dominante (try/except + RollBack) garante que o banco não fique inconsistente. No entanto, o commit parcial a cada 800 registros no envio (PreparaContribuicao:4173) significa que uma interrupção pode deixar o envio parcial — recomenda-se verificar o estado após falhas.</p>
 </section>
 </main>
 <footer>

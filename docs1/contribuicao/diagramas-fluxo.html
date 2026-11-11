@@ -8,7 +8,7 @@
 </head>
 <body>
 <header>
-  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-23 (enriquecido)</div>
+  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-23 / PFC-42 (enriquecido)</div>
   <h1>🔀 Diagramas de Fluxo de Processos — Contribuição Previdenciária</h1>
   <p>Fluxos comprovados pelo código com rastreabilidade — renderizados via Mermaid.js</p>
 </header>
@@ -115,6 +115,36 @@
   D --> E[("PROVISAOPERDASCONTRIBUICAO<br/>CONTABCONTFUND")]
 </div>
 <p><strong>Evidência:</strong> <code>FProvPerdasLote.pas:473-558</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+</section>
+
+<section id="pfc42-leigo"><div class="section-title">📖 Para o leigo — O passo a passo dos processos (enriquecido — PFC-42)</div>
+<p>Esta aba mostra o <strong>"passo a passo"</strong> dos principais processos do módulo CONTRIBUIÇÃO, como uma receita ilustrada. Cada fluxo é um diagrama que mostra, em ordem, o que o sistema faz do início ao fim.</p>
+<p><strong>Os fluxos documentados</strong> (todos com rastreabilidade ao código):</p>
+<ul>
+<li><strong>PF-01 — Preparo e Envio</strong>: seleciona patrocinadora × plano × situação → para cada combinação, gera histórico de contribuições → envia para cobrança (folha ou banco, conforme FLGDESCFOLHA) → marca como enviada.</li>
+<li><strong>PF-02 — Recebimento multi-canal</strong>: seleciona contribuições enviadas → para cada uma, compara valor esperado com recebido → marca situação (recebida, divergente, pendente) → cobra a patrocinadora/participante se divergente.</li>
+<li><strong>PF-03 — Alimentação de reservas</strong>: seleciona reservas por plano → aplica regra numérica ou itera índices de correção → insere movimento de reserva → atualiza saldo.</li>
+<li><strong>PF-05 — Bitributação / IR regressivo</strong>: exclui histórico anterior → soma contribuições de 1989-1995 corrigidas (moeda 557) → calcula saldo de 2007/12 iterando IPCA-E → grava bitributação.</li>
+<li><strong>PF-06 — Portabilidade e benefício saldado/FAB</strong>: insere contribuição portada → insere histórico → chama procedure Oracle para atualizar saldo do benefício saldado.</li>
+<li><strong>PF-07 — Provisão para perdas</strong>: seleciona contribuições atrasadas → calcula provisão (valor esperado × percentual da faixa de dias) → contabiliza a provisão.</li>
+<li><strong>PF-08 — Tratamento de divergências</strong>: exibe divergências sintéticas → cobra próximo mês ou trata via banco → valida situação × modo → insere histórico.</li>
+</ul>
+<p>Cada caixa no diagrama é uma <strong>rotina do código</strong> (com nome e linha). As setas mostram a ordem de execução. Os cilindros representam <strong>tabelas do banco</strong> lidas ou gravadas.</p>
+</section>
+
+<section id="pfc42-analista"><div class="section-title">💼 Para o analista de negócios — Gargalos e pontos de decisão (enriquecido — PFC-42)</div>
+<p><strong>Pontos de decisão de negócio</strong> (onde o sistema escolhe um caminho com impacto financeiro):</p>
+<ul>
+<li><strong>PF-01: FLGDESCFOLHA=1?</strong> — decide se a contribuição é descontada em folha (TMPDESC) ou cobrada via banco (CAP/CAR). A escolha errada faz a contribuição não ser descontada ou ser cobrada em duplicidade.</li>
+<li><strong>PF-02: Esperado = Recebido?</strong> — decide se a contribuição é marcada como recebida (situação 2) ou divergente (situação 3). Divergências não tratadas acumulam inadimplência.</li>
+<li><strong>PF-05: moeda 557 (IPCA-E)</strong> — o índice de correção das contribuições de 1989-1995. Erro de índice gera saldo tributário errado.</li>
+</ul>
+<p><strong>Gargalos potenciais</strong> (pontos onde o volume pode impactar o tempo):</p>
+<ul>
+<li><strong>PF-01 (Preparo e Envio)</strong> — processa patrocinadora × plano × situação × participante. Para grandes volumes, o cálculo pode levar horas. O commit parcial a cada 800 registros ajuda, mas uma falha no meio exige reprocessamento.</li>
+<li><strong>PF-05 (Bitributação)</strong> — itera mês a mês a partir de 2008/01 com IPCA-E. Para participantes com longa história, o número de iterações é alto.</li>
+</ul>
+<p><strong>Dependências entre fluxos:</strong> PF-02 (recebimento) só roda após PF-01 (envio). PF-03 (reservas) depende de PF-02. PF-07 (provisão) depende de PF-02 (apenas contribuições recebidas/divergentes). Uma falha em um fluxo inicial bloqueia os subsequentes — a ordem de execução é rígida.</p>
 </section>
 </main>
 <footer>

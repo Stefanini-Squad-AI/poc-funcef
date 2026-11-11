@@ -8,7 +8,7 @@
 </head>
 <body>
 <header>
-  <div class="badge">Blueprint AS-IS — Delphi 5</div>
+  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-24 / PFC-42 (enriquecido)</div>
   <h1>🔍 Lacunas e Pontos Pendentes — Benefício Previdenciário</h1>
   <p>Itens não comprovados, dependências externas não analisadas e artefatos pendentes</p>
 </header>
@@ -75,6 +75,38 @@
 <div class="card"><h3>FConsCargoFuncao._pas/_dfm</h3><p>Arquivo com extensão ._pas/._dff (prefixo underscore) em Relatorios/ — desabilitado/excluído da compilação. <span class="ev ev-comprovado">COMPROVADO</span></p></div>
 <div class="card"><h3>Stored procedure de reajuste</h3><p>FReajuesteBenef.ExeProc (L905) executa uma stored procedure cujo nome não foi extraído nesta análise. <span class="ev ev-pendente">PENDENTE</span> — identificar nome da procedure.</p></div>
 </div>
+</section>
+
+<section id="pfc42-leigo"><div class="section-title">📖 Para o leigo — O que ainda não sabemos sobre o sistema (enriquecido — PFC-42)</div>
+<p>Esta aba é como uma <strong>lista de dúvidas</strong> sobre o módulo BENEFICIOPREV. Mesmo após a análise do código, há coisas que <strong>não foi possível confirmar</strong>.</p>
+<p><strong>Tipos de lacuna</strong> encontradas:</p>
+<ul>
+<li><strong>Artefatos pendentes (50)</strong> — arquivos que existem no repositório mas cuja função exata não foi confirmada (responsabilidade inferida do nome/caption). Inclui forms auxiliares (FSeleciona*, FPedeInf*), variantes com underscore (_FConciliacao, _FDesfazConcessaoBenefNOVO) e arquivos de configuração.</li>
+<li><strong>Dependências externas não analisadas</strong> — o BENEFICIOPREV conversa com CMAdmPrev (motor de cálculo), CMPrevMT50, UAdmPrev, UBeneficio, UParticipante, UMovReserva, UIntegraBack, FOLHA e CONTRIBUIÇÃO. A implementação interna desses interlocutores não foi inspecionada.</li>
+<li><strong>DPR dessincronizado</strong> — o projeto referencia units sem prefixo (FConciliacao) mas o filesystem tem versões com underscore (_FConciliacao.pas). A compilação real provavelmente usa os arquivos _.</li>
+<li><strong>Eventos inativos (DO/AC/RC/OE)</strong> — Doença, Acidente, Reclusão e Outros Eventos estão comentados no código. Não podem ser registrados via menu.</li>
+<li><strong>try/except silenciado</strong> — em _FAssocRubINSS e FReajuesteBenef o except é vazio. Pode ser intencional ou bug.</li>
+<li><strong>Arquivos duplicados</strong> — FConsHistPagBeneficio.pas e FConsHistfPagBeneficio.pas (note o 'f' extra) parecem ser versões duplicadas. DRelatorioHistPagBenef.pas e DReelatorioHistPagBenef.pas (typo "DReelatorio") também.</li>
+</ul>
+<p>Cada lacuna é marcada com um selo de evidência: <span class="ev ev-comprovado">COMPROVADO</span>, <span class="ev ev-inferido">INFERIDO</span> ou <span class="ev ev-pendente">PENDENTE</span>.</p>
+</section>
+
+<section id="pfc42-analista"><div class="section-title">💼 Para o analista de negócios — Riscos de negócio por informação faltante (enriquecido — PFC-42)</div>
+<p><strong>Riscos que exigem atenção</strong> (lacunas com potencial de impacto de negócio):</p>
+<ul>
+<li><strong>DPR dessincronizado</strong> — risco de compilar contra versões erradas de units. <strong>Impacto:</strong> comportamento diferente do esperado em produção. Recomenda-se alinhar o DPR com o filesystem.</li>
+<li><strong>Eventos inativos (DO/AC/RC/OE)</strong> — Doença, Acidente, Reclusão e Outros Eventos não estão disponíveis no menu. <strong>Impacto:</strong> se houver demanda de negócio para esses eventos, não podem ser registrados. Recomenda-se confirmar com a área de negócio se são necessários.</li>
+<li><strong>Arquivos duplicados</strong> — versões duplicadas (FConsHistPagBeneficio vs FConsHistfPagBeneficio; DRelatorioHistPagBenef vs DReelatorioHistPagBenef). <strong>Impacto:</strong> risco de usar a versão errada. Recomenda-se confirmar qual é a versão ativa e remover a duplicata.</li>
+<li><strong>Stored procedure de reajuste</strong> (FReajuesteBenef.ExeProc L905) — procedure executada no reajuste, mas nome não extraído. <strong>Impacto:</strong> o reajuste pode ter comportamentos não documentados. Recomenda-se identificar com o DBA.</li>
+<li><strong>Dependência do CMAdmPrev (40 refs a UAdmPrev)</strong> — motor de cálculo/concessão não inspecionado. <strong>Impacto:</strong> mudanças no CMAdmPrev podem afetar o BENEFICIOPREV sem que a equipe saiba.</li>
+</ul>
+<p><strong>Recomendações para o analista:</strong></p>
+<ul>
+<li>Alinhar o DPR com o filesystem antes de grandes evoluções.</li>
+<li>Confirmar com a área de negócio se os eventos inativos (DO/AC/RC/OE) são necessários.</li>
+<li>Identificar e remover arquivos duplicados, confirmando qual é a versão ativa.</li>
+<li>Estabelecer um acordo de mudança com a equipe do CMAdmPrev, pois alterações no motor de cálculo podem impactar concessões.</li>
+</ul>
 </section>
 </main>
 <footer>
