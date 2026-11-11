@@ -8,7 +8,7 @@
 </head>
 <body>
 <header>
-  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-22 (enriquecido)</div>
+  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-22 (enriquecido) · PFC-42 (abas técnicas enriquecidas)</div>
   <h1>Folha de Benefícios</h1>
   <p>Processamento da folha de benefícios com prévia, efetivação, pagamento, apropriação contábil, conciliação INSS e tratamentos especiais (pensão alimentícia, IRRF, retroativos).</p>
 </header>
@@ -29,11 +29,53 @@
 
 <main class="layout-2">
 <div class="main-col">
+
+<!-- PFC-42: enriquecimento em linguagem simples -->
+<section id="pfc42-leigo"><div class="section-title">💡 Em linguagem simples (enriquecido — PFC-42)</div>
+<div class="note-info">
+<p><strong>O que esta aba mostra:</strong> o “cartão de visita” do módulo FOLHA (Folha de Benefícios). É o programa que, todo mês, calcula e paga os benefícios previdenciários (aposentadorias, pensões, abonos) dos assistidos da entidade. Ele faz para os benefícios o que um departamento de pessoal faz com salários: junta os valores a pagar e a descontar, calcula impostos, gera o arquivo para o banco, o contracheque e a contabilização.</p>
+<p><strong>Por que isso importa:</strong> é por este módulo que o dinheiro sai da entidade para os assistidos. Um cálculo errado aqui vira pagamento errado, imposto retido errado ou lançamento contábil errado. Por isso o módulo é grande (300 arquivos de código) e tem muitas conferências antes de a folha ficar definitiva.</p>
+<p><strong>Como ler esta página:</strong> a coluna da esquerda resume o que o módulo faz, os processos, as regras e as principais tabelas. A coluna da direita traz a “ficha técnica” (tecnologia, quantidade de arquivos, dependências). Os selos indicam o grau de certeza: <span class="ev ev-comprovado">COMPROVADO</span> (lido no código), <span class="ev ev-inferido">INFERIDO</span> (dedução plausível) e <span class="ev ev-pendente">PENDENTE</span> (precisa de validação humana). Os blocos “👔 Para o analista de negócios” destacam o que interessa a quem define regras e processos.</p>
+</div>
+<p><strong>Termos usados nesta página</strong> — explicados na ordem em que aparecem; a coluna “Fonte” mostra onde a explicação foi conferida.</p>
+<div class="table-wrap"><table><thead><tr><th>Termo técnico</th><th>Em linguagem simples</th><th>Fonte</th></tr></thead><tbody>
+<tr><td><strong>Folha de benefícios</strong></td><td>Lista mensal de tudo o que cada assistido vai receber e ter descontado, como um holerite coletivo.</td><td><code>Folha.dpr:302</code> (título “Folha de Benefícios”)</td></tr>
+<tr><td><strong>Recebedor / assistido</strong></td><td>Pessoa que recebe o pagamento: o titular do benefício ou um favorecido (por exemplo, quem recebe pensão alimentícia).</td><td><code>dFolhaPrevia.pas:19243</code> (CriaRecebedor)</td></tr>
+<tr><td><strong>Rubrica</strong></td><td>Cada “linha” do contracheque: um tipo de provento (crédito) ou de desconto. O catálogo fica na tabela PROVDESC.</td><td><a href="dados.html">🗄️ Dados</a></td></tr>
+<tr><td><strong>Preparo</strong></td><td>Primeira etapa do mês: escolhe quais patrocinadoras, planos e benefícios entram na folha e atualiza o histórico dos benefícios.</td><td><code>FPreparo.pas:1755</code></td></tr>
+<tr><td><strong>Prévia</strong></td><td>Cálculo provisório (um “rascunho”) da folha. Pode ser conferido, apagado e refeito quantas vezes for preciso.</td><td><code>dFolhaPrevia.pas:24781</code></td></tr>
+<tr><td><strong>Efetivação</strong></td><td>Transforma uma versão da prévia na folha definitiva: grava o histórico, gera os arquivos de pagamento e a contabilização.</td><td><code>fFolhaNormalEfet.pas</code></td></tr>
+<tr><td><strong>Estorno</strong></td><td>Desfaz, total ou parcialmente, uma folha já efetivada (por exemplo, um pagamento indevido).</td><td><code>festornafolha.pas:2062</code></td></tr>
+<tr><td><strong>Lote</strong></td><td>Pacote de cálculos de uma prévia. É a “caixa” que agrupa o que foi calculado junto.</td><td><code>FAbertFechaLoteFB.dfm</code> (Abertura e Fechamento de Lote)</td></tr>
+<tr><td><strong>CNAB / remessa bancária</strong></td><td>Padrão de arquivo combinado com os bancos. O sistema gera o arquivo com os créditos e o banco faz os depósitos.</td><td><code>fFolhaNormalEfet.pas:9346, 9468</code></td></tr>
+<tr><td><strong>IRRF</strong></td><td>Imposto de Renda Retido na Fonte: o imposto que a entidade desconta do benefício e repassa à Receita Federal.</td><td><code>dFolhaPrevia.pas:13493</code></td></tr>
+<tr><td><strong>REINF</strong></td><td>Obrigação acessória enviada à Receita (família eSocial) com informações de rendimentos e retenções.</td><td><code>dFolhaPrevia.pas:19882</code></td></tr>
+<tr><td><strong>Patrocinadora / plano</strong></td><td>Patrocinadora é a empresa que patrocina o plano previdenciário; plano é o conjunto de regras de benefício ao qual o participante pertence.</td><td><code>FPreparo.pas</code> (seleção de patrocinadoras/planos)</td></tr>
+<tr><td><strong>Delphi 5 / Oracle</strong></td><td>Delphi 5 é a ferramenta (de 1999) com que o programa foi escrito; Oracle é o banco de dados onde as informações ficam guardadas.</td><td><a href="arquitetura.html">🏗️ Arquitetura</a></td></tr>
+<tr><td><strong>Motor de cálculo</strong></td><td>Parte do programa que faz as contas da prévia. Fica num único arquivo muito grande, <code>dFolhaPrevia.pas</code> (30.856 linhas).</td><td><code>dFolhaPrevia.pas</code></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">🗓️ O ciclo mensal da folha, passo a passo (PFC-42)</div>
+<p>O menu “Cálculos da Folha” da tela principal lista as etapas na ordem em que o usuário as executa (<code>FPrincipal.dfm:220-401</code>) <span class="ev ev-comprovado">COMPROVADO</span>. Em linguagem simples:</p>
+<ol>
+<li><strong>Preparar</strong> — escolher quem entra na folha do mês e atualizar o histórico de cada benefício (menus “Preparo” e “Preparo - SP”).</li>
+<li><strong>Calcular a prévia</strong> — o motor de cálculo monta, para cada recebedor, todas as rubricas, o imposto e os descontos.</li>
+<li><strong>Conferir</strong> — o usuário confere a prévia (tela “Conferência da Prévia”) e pode gerar uma simulação do arquivo bancário. Se algo estiver errado, apaga e recalcula.</li>
+<li><strong>Efetivar</strong> — a versão aprovada vira a folha oficial (“Efetivação de Versão de Pagamento”).</li>
+<li><strong>Pagar e informar</strong> — gerar a remessa bancária (ou remessa eletrônica), o contracheque e os arquivos para entidades conveniadas.</li>
+<li><strong>Corrigir, se preciso</strong> — estornar, regularizar pagamentos ou tratar casos especiais (falecimento, benefícios provisórios anulados).</li>
+</ol>
+<p>Uma comparação útil: a prévia é o “rascunho a lápis” da folha; a efetivação é a “versão passada a caneta”. Enquanto é rascunho, pode ser apagada sem deixar rastro financeiro.</p>
+</section>
+
 <section><div class="section-title">📋 Visão Geral do Módulo (enriquecido — PFC-22)</div>
 <p>Este Blueprint foi <strong>enriquecido</strong> em PFC-22 a partir de nova investigação do código-fonte do módulo FOLHA (não apenas revisão do PFC-21). Foram adicionados: inventário completo de 528 artefatos, fichas por formulário, análise profunda do motor de cálculo <code>dFolhaPrevia.pas</code> (30.856 lin), 30 regras de negócio com 14 atributos, 12+ processos com fluxogramas, modelo de dados com campos/CRUD/transações e catálogo de 56 relatórios.</p>
 <p><strong>Contexto de Negócio:</strong> integra a suíte CM Contabilidade / FUNCEF e apoia processos operacionais/financeiros/previdenciários.</p>
 <p><strong>Responsabilidades:</strong></p>
 <ul><li>Processamento da folha de benefícios (preparo, prévia, efetivação, estorno)</li><li>Pagamento e fita de crédito (remessa bancária CNAB 150/240, conciliação de retorno)</li><li>Apropriação contábil da folha</li><li>Tratamentos especiais: pensão alimentícia, IRRF (compensação, ação judicial, regressivo), retroativos</li><li>Conciliação e reembolso do INSS</li><li>Importação/exportação de convênios</li><li>Regularização de pagamentos</li><li>REINF (eSocial) e rateio multiplano</li></ul>
+
+<p><strong>💡 Em outras palavras:</strong> o módulo FOLHA é a “máquina de pagar benefícios” da entidade. Cada responsabilidade da lista acima corresponde a uma área de negócio: cálculo da folha (Benefícios), pagamento (Tesouraria e bancos), apropriação contábil (Contabilidade), imposto e REINF (área Tributária/Fiscal), INSS e convênios (relacionamento com órgãos e entidades externas).</p>
 </section>
 
 <section><div class="section-title">📊 Indicadores do enriquecimento</div>
@@ -47,6 +89,8 @@
 <div class="stat"><div class="n">56</div><div class="l">Relatórios</div></div>
 <div class="stat"><div class="n">9</div><div class="l">Páginas Blueprint</div></div>
 </div>
+
+<p><strong>💡 Em outras palavras:</strong> os números mostram o tamanho do sistema. São 300 arquivos de programação e 219 telas ou módulos de dados. Só o motor de cálculo tem 30.856 linhas, um volume que exige leitura especializada. Os números de regras (30), processos (18) e relatórios (56) são o que já foi catalogado nesta documentação, não necessariamente tudo o que existe no código.</p>
 </section>
 
 <section><div class="section-title">⚔️ Processos Funcionais</div>
@@ -59,12 +103,22 @@
 <a class="card" href="uc102.html#PF-05" style="display:block;color:inherit"><h3>PF-05 — Remessa Bancária</h3><p>CNAB, simulação, batimento de retorno.</p></a>
 <a class="card" href="uc104.html#PF-08" style="display:block;color:inherit"><h3>PF-08 — IRRF</h3><p>Normal, regressivo (0/1/7), compensação, judicial.</p></a>
 </div>
+
+<p><strong>💡 Em outras palavras:</strong> cada cartão leva a um processo de negócio detalhado na aba Processos Funcionais. Os seis cartões acima são as etapas que mais movimentam dinheiro: preparar, calcular, efetivar, estornar, pagar no banco e calcular o imposto.</p>
 </section>
 
 <section><div class="section-title">📏 Regras de Negócio (resumo)</div>
 <p>30 regras (25 base + 5 recém-descobertas), cada uma com 14 atributos. O texto completo de cada regra está dentro das jornadas dos casos de uso, em <a href="funcionalidades.html">⚙️ Processos Funcionais</a>.</p>
 <div class="legend"><span><span class="ev ev-comprovado">COMPROVADO</span> — no código</span><span><span class="ev ev-inferido">INFERIDO</span> — plausível</span><span><span class="ev ev-pendente">PENDENTE</span> — validar</span></div>
 <ul><li><a href="uc101.html#FOLHA-RN001"><strong>FOLHA-RN001</strong></a> — Mês/ano de referência obrigatórios</li><li><a href="uc101.html#FOLHA-RN006"><strong>FOLHA-RN006</strong></a> — Líquido negativo zera e transfere desconto</li><li><a href="uc101.html#FOLHA-RN007"><strong>FOLHA-RN007</strong></a> — CPMF = valor × (percCPMF − 1)</li><li><a href="uc101.html#FOLHA-RN008"><strong>FOLHA-RN008</strong></a> — Margem de desconto consignável</li><li><a href="uc101.html#FOLHA-RN015"><strong>FOLHA-RN015</strong></a> — IR regressivo por tipo (0/1/7)</li><li><a href="uc101.html#FOLHA-RN019"><strong>FOLHA-RN019</strong></a> — REINF rateado por plano (novo)</li></ul>
+
+<p><strong>💡 Em outras palavras:</strong> regra de negócio é uma instrução que o sistema segue sempre, sem perguntar. Exemplos desta lista: se os descontos forem maiores que os créditos, o líquido não pode ficar negativo (RN006); os descontos consignados não podem passar de um limite (margem consignável, RN008); e quem optou pela tabela regressiva do imposto tem o IR calculado de forma diferente (RN015).</p>
+
+<div class="note pfc42-ba"><p><strong>👔 Para o analista de negócios</strong></p><ul>
+<li>A regra da CPMF (RN007) continua no código: a função <code>CalculaCPMF</code> aplica <code>valor × (percCPMF − 1)</code> (<code>dFolhaPrevia.pas:16764-16766</code>) e é chamada no cálculo do INSS consignado (<code>dFolhaPrevia.pas:6937, 7749</code>) <span class="ev ev-comprovado">COMPROVADO</span>. A CPMF foi extinta em 2007. Se o parâmetro estiver em 1, o resultado é zero <span class="ev ev-inferido">INFERIDO</span>. Vale confirmar com a área responsável que o parâmetro está neutralizado em produção.</li>
+<li>Margem consignável e líquido negativo protegem o assistido: o sistema impede que os descontos “comam” o benefício inteiro. Mudanças nessas regras têm impacto direto em reclamações, ações judiciais e convênios.</li>
+<li>IR regressivo × progressivo é escolha do participante e muda o valor líquido. Qualquer erro de cadastro dessa opção altera o imposto retido e o informe de rendimentos.</li>
+</ul></div>
 </section>
 
 <section><div class="section-title">🗄️ Modelo de Dados (resumo)</div>
@@ -76,6 +130,30 @@
 <tr><td><code>BASEDEPAGAMENTO</code></td><td>Base de pagamento por recebedor/rubrica</td><td><code>dFolhaPrevia.pas:27387</code></td></tr>
 <tr><td><code>HSTFOLHABENEF</code></td><td>Histórico da folha (efetivação)</td><td><code>fFolhaNormalEfet.pas</code></td></tr>
 </tbody></table></div>
+
+<p><strong>💡 Em outras palavras:</strong> pense no banco de dados como um arquivo de planilhas. PREVIA é a planilha do rascunho do mês; BENEFBFCIARIO é a ficha de cada benefício concedido; PROVDESC é a lista de tipos de crédito e desconto; BASEDEPAGAMENTO guarda a base usada para pagar cada recebedor; HSTFOLHABENEF é a “capa” de cada folha processada. Mais detalhes em <a href="dados.html">🗄️ Dados</a>.</p>
+</section>
+
+
+<div class="note"><p><strong>🔎 Ponto a validar</strong> <span class="ev ev-pendente">PENDENTE</span> — o quadro lateral informa “Distribuído: MIDAS/DataSnap”. Nos 219 arquivos .dfm do módulo não foram encontrados componentes de conexão a servidor remoto (TDCOMConnection/TSocketConnection). Há 11 TClientDataSet e 12 TDataSetProvider, o que sugere uso local, em memória <span class="ev ev-inferido">INFERIDO</span>. Ver <a href="arquitetura.html">🏗️ Arquitetura</a>.</p></div>
+
+<section id="pfc42-analista"><div class="section-title">👔 Para o analista de negócios — síntese (PFC-42)</div>
+<div class="note pfc42-ba">
+<p>O módulo FOLHA concentra o processo mais sensível da entidade: o pagamento mensal dos benefícios. Ele começa na seleção de quem será pago (preparo), passa por um cálculo provisório revisável (prévia) e termina na folha definitiva (efetivação), que gera pagamento bancário, contracheque, imposto retido e contabilização.</p>
+<p>As regras de cálculo estão espalhadas em três lugares: nas telas Delphi (por exemplo, <code>FPreparo.pas</code>, 10.384 linhas), no motor <code>dFolhaPrevia.pas</code> e em procedimentos gravados no banco Oracle (stored procedures, ver <a href="procedures-functions.html">🔧 Procedures</a>). Isso pesa em qualquer projeto de modernização ou auditoria.</p>
+<p><strong>Áreas de negócio envolvidas</strong></p><ul>
+<li>Benefícios (cálculo e manutenção), Tesouraria (bancos e remessas), Contabilidade (apropriação contábil), Tributário (IRRF, DARF, REINF), Contas a Pagar/Receber (estorno gera CAP/CAR — <code>festornafolha.pas:1523, 1654</code>), Atendimento (contracheque) e Jurídico (pensão alimentícia, ações judiciais de IR).</li>
+</ul>
+<p><strong>Decisões e validações recomendadas</strong></p><ul>
+<li>Existem dois caminhos de preparo no menu: “Preparo” (lógica nas telas Delphi) e “Preparo - SP” (lógica na procedure <code>CM.SP_FB_PREPARO_FOLHA_BENEF</code>, <code>FPreparoSP.dfm:854</code>) <span class="ev ev-comprovado">COMPROVADO</span>. Qual deles é o oficial? Se os dois estiverem em uso, os resultados precisam ser iguais.</li>
+<li>Confirmar com a área tributária se a CPMF (RN007) está neutralizada e se pode ser retirada das regras de um sistema futuro.</li>
+<li>A efetivação é bloqueada quando há lançamento sem perfil de investimento cadastrado (<code>fFolhaNormalEfet.pas:2345-2349</code>) <span class="ev ev-comprovado">COMPROVADO</span>. Quem é o responsável por esse cadastro, e qual é o prazo para tê-lo pronto antes da folha?</li>
+</ul>
+<p><strong>Perguntas para o responsável de negócio</strong></p><ul>
+<li>Qual é o calendário oficial do ciclo (preparo → prévia → conferência → efetivação → remessa) e quem aprova cada passagem?</li>
+<li>Quais relatórios são obrigatórios na conferência antes da efetivação?</li>
+</ul>
+</div>
 </section>
 
 </div>
@@ -104,7 +182,7 @@
 </main>
 
 <footer>
-<p>Blueprint AS-IS — PFC-22 (enriquecido) — Módulo FOLHA | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-09</p>
+<p>Blueprint AS-IS — PFC-22 (enriquecido) — Módulo FOLHA | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-09 | Abas técnicas enriquecidas — PFC-42</p>
 </footer>
 </body>
 </html>

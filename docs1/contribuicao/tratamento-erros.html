@@ -8,7 +8,7 @@
 </head>
 <body>
 <header>
-  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-23 (enriquecido)</div>
+  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-23 (enriquecido) · PFC-42 (abas técnicas enriquecidas)</div>
   <h1>⚠️ Tratamento de Erros e Exceções — Contribuição Previdenciária</h1>
   <p>346 blocos try, 53 mensagens de validação/erro — com rastreabilidade arquivo:linha</p>
 </header>
@@ -27,8 +27,37 @@
   <a href="controle-cobertura.html">📊 Cobertura</a>
 </nav>
 <main>
+<!-- PFC-42: enriquecimento em linguagem simples -->
+<section id="pfc42-leigo"><div class="section-title">💡 Em linguagem simples (enriquecido — PFC-42)</div>
+<div class="note-info">
+<p><strong>O que esta aba mostra:</strong> como o módulo reage quando algo dá errado: dados faltando, valor inválido, falha no banco de dados ou numa integração. Mostra os “padrões de reação” do código e as mensagens mais importantes que o usuário pode ver.</p>
+<p><strong>Por que isso importa:</strong> um erro mal tratado pode deixar dados pela metade (parte gravada, parte não) ou passar despercebido. Para o negócio, isso significa contribuições com status errado, cobranças em duplicidade ou lacunas na trilha de auditoria.</p>
+<p><strong>Como ler esta página:</strong> a tabela de distribuição mostra onde há mais “redes de proteção” no código (blocos try). As mensagens mostram o que o usuário vê. Os cartões explicam cada padrão. Abaixo, os números conferidos nesta revisão e os pontos de atenção.</p>
+</div>
+<p><strong>Números conferidos nesta revisão</strong> (contagem direta nos .pas de Fontes, Relatorios, DBObjects e CtrlObjects):</p>
+<div class="table-wrap"><table><thead><tr><th>Item</th><th>Quantidade</th><th>O que significa</th><th>Evidência</th></tr></thead><tbody>
+<tr><td>Chamadas <code>MsgDlg(</code></td><td>622</td><td>Avisos ao usuário pelo padrão do framework CM — o meio de mensagem mais usado.</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>Chamadas <code>MessageDlg(</code></td><td>33</td><td>Avisos pelo padrão nativo do Delphi.</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>Chamadas <code>ShowMessage(</code></td><td>11</td><td>Avisos simples.</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><code>raise exception.Create</code></td><td>28</td><td>Alarmes de erro disparados pelo código.</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>Texto “Erro ao gravar Log”</td><td>21</td><td>Tentativas de avisar falha na gravação do log de operações.</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>Blocos <code>except … end</code> vazios (Fontes + Relatorios)</td><td>64</td><td>Erros “engolidos” sem aviso. Maiores concentrações: FDivergContrib (16), FControleIndivContrib (10), FCadHstContribuicao (6), FRecebeContribuicao (5).</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+</tbody></table></div>
+<p><strong>Termos usados nesta página</strong> — explicados de forma simples:</p>
+<div class="table-wrap"><table><thead><tr><th>Termo técnico</th><th>Em linguagem simples</th><th>Fonte</th></tr></thead><tbody>
+<tr><td><strong>try / except</strong></td><td>Uma “rede de proteção”: o sistema tenta fazer algo (try) e, se der errado, executa um plano B (except), como mostrar uma mensagem.</td><td><code>FAtualizaPorIndice.pas:929-933</code></td></tr>
+<tr><td><strong>Commit / Rollback</strong></td><td>Commit = “salvar definitivamente” no banco. Rollback = “desfazer tudo desde o último salvamento”, como um Ctrl+Z do banco de dados.</td><td><code>FPreparaEnvia.pas:4174-4180, 5663</code></td></tr>
+<tr><td><strong>MsgDlg / MessageDlg / ShowMessage</strong></td><td>Comandos que abrem uma janela de aviso para o usuário. MsgDlg é a versão do framework CM, a mais usada neste módulo.</td><td><code>FAtualizaPorIndice.pas:294</code></td></tr>
+<tr><td><strong>raise exception.Create</strong></td><td>Comando que “dispara um alarme” de erro para ser tratado por quem chamou a rotina.</td><td><code>FAtualizaPorIndice.pas:931</code></td></tr>
+<tr><td><strong>except vazio</strong></td><td>Uma rede de proteção que “engole” o erro sem avisar ninguém: o sistema segue como se nada tivesse acontecido.</td><td><code>FAtualizaPorIndice.pas:929-933</code></td></tr>
+<tr><td><strong>try / finally</strong></td><td>Garante que uma “arrumação” (fechar consultas, liberar memória) aconteça mesmo se der erro no meio.</td><td>Cartão “try/finally”</td></tr>
+<tr><td><strong>Log de operações (GravaLogOperacoes)</strong></td><td>Registro de quem executou qual operação, usado para auditoria.</td><td><code>FAtualizaPorIndice.pas:930</code></td></tr>
+</tbody></table></div>
+</section>
 <section><div class="section-title">⚠️ Visão Geral</div>
 <p>O módulo CONTRIBUIÇÃO utiliza três padrões de tratamento de erros: (1) <code>try/except</code> com <code>MessageDlg</code>/<code>ShowMessage</code>, (2) <code>try/except</code> com <code>RollBack</code> para reverter transações, e (3) <code>raise exception.Create</code> para propagar erros. Foram contabilizados <strong>346 blocos try</strong> e <strong>53 ocorrências de MessageDlg/ShowMessage/raise exception.Create</strong>. O arquivo com mais blocos try é <code>FDivergContrib.pas</code> (56 blocos).</p>
+<p><strong>💡 Em outras palavras:</strong> o código usa três reações principais a erros: avisar o usuário, desfazer o que estava sendo gravado (rollback) ou disparar um alarme para a rotina que chamou. O ideal é que toda operação que grava dados tenha as duas primeiras juntas.</p>
+<div class="note"><p><strong>🔎 Ponto a validar</strong> <span class="ev ev-pendente">PENDENTE</span> — o total de “53 ocorrências de MessageDlg/ShowMessage/raise” não inclui <code>MsgDlg</code>, o comando de mensagem do framework CM usado 622 vezes no módulo (ver tabela acima). A contagem de “346 blocos try” também difere de uma contagem de linhas que começam com <code>try</code> (462). É preciso padronizar o critério.</p></div>
 </section>
 
 <section><div class="section-title">📊 Distribuição de Blocos try por Arquivo</div>
@@ -43,6 +72,7 @@
 <tr><td>FAlteracaoHistoricoContrib.pas</td><td>9</td><td>try/except + MsgDlg validação</td></tr>
 </tbody></table></div>
 <p><strong>Evidência:</strong> <code>grep -c 'try' CONTRIBUICAOPREV/Fontes/*.pas</code> — <span class="ev ev-comprovado">COMPROVADO</span></p>
+<p><strong>💡 Em outras palavras:</strong> as telas com mais redes de proteção são justamente as que mais gravam dados: divergências, recebimento, preparo/envio e controle individual. Muitas redes de proteção não significam que todas funcionam bem — algumas estão vazias (ver tabela de números acima).</p>
 </section>
 
 <section><div class="section-title">📋 Mensagens de Validação Significativas</div>
@@ -56,6 +86,12 @@
 <tr><td>"Documento pendente bloqueia tratamento"</td><td>FDivergContrib.pas</td><td>MsgDlg (CONTRIB-RN049)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
 <tr><td>"Mês de referência obrigatório"</td><td>FPreparaEnvia.pas</td><td>MsgDlg (CONTRIB-RN002)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
 </tbody></table></div>
+<p><strong>💡 Em outras palavras:</strong> estas são mensagens que o usuário pode ver. As de validação (mês obrigatório, valor maior que zero) impedem a operação antes de começar; as de erro (integração com o PGA) aparecem quando algo falha no meio.</p>
+<div class="note pfc42-ba"><p><strong>👔 Para o analista de negócios</strong></p><ul>
+<li>Mensagens são um bom insumo para manuais e treinamento: cada uma indica uma regra (ex.: “Preencha pelo menos uma patrocinadora para esta operação.”, <code>FAtualizaPorIndice.pas:294</code>) <span class="ev ev-comprovado">COMPROVADO</span>.</li>
+<li>Alguns avisos de erro oferecem botão de ajuda (<code>mbHelp</code>), por exemplo “Operação Interrompida com Erros.” (<code>FAtualizaPorIndice.pas:518</code>) <span class="ev ev-comprovado">COMPROVADO</span>. Verifique se o conteúdo de ajuda existe e está atualizado.</li>
+<li>Telas de importação controlam acesso com a mensagem “Você não tem permissão para acessar esta tela.” (<code>FAlteraHistMovReserva.pas:471</code>) <span class="ev ev-comprovado">COMPROVADO</span>.</li>
+</ul></div>
 </section>
 
 <section><div class="section-title">🔄 Padrões de Tratamento Identificados</div>
@@ -65,10 +101,30 @@
 <div class="card"><h3>raise exception.Create</h3><p>Usado para erros de log: "Erro ao gravar Log." em FDivergContrib.pas:5019 e outros.</p></div>
 <div class="card"><h3>try/finally (cleanup)</h3><p>Usado em FPrincipal (login, CriaDataModule) para garantir liberação de recursos (Free de forms/queries).</p></div>
 </div>
+<p><strong>💡 Em outras palavras:</strong> os cartões resumem as “receitas” de tratamento de erro. O padrão mais seguro é o “try/except + RollBack”: se algo falha, tudo o que foi feito naquela operação é desfeito, evitando dados pela metade.</p>
+<div class="note"><p><strong>🔎 Ponto a validar</strong> <span class="ev ev-pendente">PENDENTE</span> — o cartão “raise exception.Create” diz que “Erro ao gravar Log.” é propagado ao chamador. Em pelo menos um caso o alarme é disparado dentro de um <code>try … except end</code> vazio e, portanto, é descartado: <code>FAtualizaPorIndice.pas:929-933</code>. O mesmo padrão aparece nas telas citadas na lacuna TRT053/MSG100 do UC208 (aba 🔍 Lacunas). Confirmar se a falha de log deve bloquear a operação.</p></div>
+<div class="note"><p><strong>🔎 Ponto a validar</strong> <span class="ev ev-pendente">PENDENTE</span> — no envio de e-mail de “Contribuições não recolhidas”, o código marca o e-mail como enviado dentro do bloco de erro, com o comentário “quando envia o e-mail sem erros, cai nesse exception” (<code>FDivergContrib.pas:9146-9147</code>). Ou seja, o sucesso é detectado por uma exceção — se houver uma falha real, ela também pode ser registrada como “enviado”.</p></div>
+</section>
+<section id="pfc42-analista"><div class="section-title">👔 Para o analista de negócios — síntese (PFC-42)</div>
+<div class="note pfc42-ba">
+<p>Do ponto de vista de negócio, o tratamento de erros do CONTRIBUIÇÃO tem três riscos principais:</p>
+<ul>
+<li><strong>Erros silenciosos:</strong> 64 blocos de erro vazios podem esconder falhas — inclusive na gravação do log de auditoria <span class="ev ev-comprovado">COMPROVADO</span>.</li>
+<li><strong>Gravação parcial:</strong> o preparo e o envio salvam em blocos de 800 registros (<code>FPreparaEnvia.pas:4174-4180, 5456</code>) <span class="ev ev-comprovado">COMPROVADO</span>; um erro no meio não desfaz os blocos já salvos.</li>
+<li><strong>Sucesso “por exceção”:</strong> o envio de e-mail considera sucesso o caminho de erro (<code>FDivergContrib.pas:9146-9147</code>) <span class="ev ev-comprovado">COMPROVADO</span>.</li>
+<li><strong>Mensagens como regras:</strong> o texto das mensagens é uma boa fonte para confirmar regras de negócio com os usuários.</li>
+</ul>
+<p><strong>Perguntas para levar ao responsável de negócio:</strong></p>
+<ol>
+<li>Falhas na gravação do log de operações devem impedir a conclusão da operação?</li>
+<li>Há procedimento definido para identificar e corrigir um preparo ou envio que parou no meio?</li>
+<li>Como a área confirma hoje que os e-mails de contribuições não recolhidas foram realmente entregues?</li>
+</ol>
+</div>
 </section>
 </main>
 <footer>
-<p>Blueprint AS-IS — PFC-31 — Módulo CONTRIBUIÇÃO | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-10</p>
+<p>Blueprint AS-IS — PFC-31 — Módulo CONTRIBUIÇÃO | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-10 | Abas técnicas enriquecidas — PFC-42</p>
 </footer>
 </body>
 </html>

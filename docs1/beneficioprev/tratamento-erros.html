@@ -8,7 +8,7 @@
 </head>
 <body>
 <header>
-  <div class="badge">Blueprint AS-IS — Delphi 5</div>
+  <div class="badge">Blueprint AS-IS — Delphi 5 · PFC-42 (abas técnicas enriquecidas)</div>
   <h1>⚠️ Tratamento de Erros e Exceções — Benefício Previdenciário</h1>
   <p>Blocos try/except/finally, mensagens de validação e erros com rastreabilidade</p>
 </header>
@@ -16,8 +16,20 @@
   <a href="index.html">📋 Visão Geral</a><a href="arquitetura.html">🏗️ Arquitetura</a><a href="inventario-tecnico.html">📦 Inventário</a><a href="funcionalidades.html">⚙️ Processos Funcionais</a><a href="procedures-functions.html">🔧 Procedures</a><a href="dados.html">🗄️ Dados</a><a href="relatorios.html">📄 Relatórios</a><a href="integracoes.html">🔗 Integrações</a><a href="tratamento-erros.html">⚠️ Erros</a><a href="diagramas-fluxo.html">🔀 Fluxos</a><a href="lacunas.html">🔍 Lacunas</a><a href="controle-cobertura.html">📊 Cobertura</a>
 </nav>
 <main>
+<!-- PFC-42: enriquecimento em linguagem simples -->
+<section id="pfc42-leigo"><div class="section-title">💡 Em linguagem simples (enriquecido — PFC-42)</div>
+<div class="note-info">
+<p><strong>O que esta aba mostra:</strong> como o módulo reage quando algo dá errado — dado inválido digitado pelo usuário, regra de negócio violada ou falha técnica no banco — e quais mensagens ele mostra.</p>
+<p><strong>Por que isso importa:</strong> um bom tratamento de erro impede que um benefício fique “pela metade” (por exemplo, valor alterado sem histórico). Já um erro “engolido” sem aviso pode gerar divergência que só aparece meses depois, na folha ou na auditoria.</p>
+<p><strong>Como ler esta página:</strong> a distribuição mostra onde há mais pontos de proteção no código; a tabela de mensagens mostra o que o usuário vê na tela; os cartões explicam cada estratégia de tratamento. Os blocos “Para o analista de negócios” destacam as mensagens que representam regras de negócio.</p>
+</div>
+<p><strong>Termos usados nesta página</strong> — explicados de forma simples:</p>
+<div class="table-wrap"><table><thead><tr><th>Termo técnico</th><th>Em linguagem simples</th><th>Fonte</th></tr></thead><tbody><tr><td><strong>try / except</strong></td><td>“Tente fazer isto; se der erro, faça aquilo.” É a forma de o programa capturar um problema e decidir o que fazer.</td><td><code>FReajuesteBenef.pas:916-933</code> <span class="ev ev-comprovado">COMPROVADO</span></td></tr><tr><td><strong>try / finally</strong></td><td>“Faça isto e, dando certo ou errado, limpe a mesa no final” (fechar telas, liberar memória).</td><td><code>_FConciliacao.pas:602-615</code> <span class="ev ev-comprovado">COMPROVADO</span></td></tr><tr><td><strong>RollBack</strong></td><td>Desfaz todas as gravações feitas desde o início da transação, como se nada tivesse acontecido.</td><td><code>FCadInicioBenefExigencia.pas:1588</code> <span class="ev ev-comprovado">COMPROVADO</span></td></tr><tr><td><strong>raise exception</strong></td><td>O programa “levanta a mão”: interrompe o que está fazendo e avisa quem o chamou de que houve erro.</td><td><code>FDesdobramentoBenef.pas:6315-6316</code> <span class="ev ev-comprovado">COMPROVADO</span></td></tr><tr><td><strong>except vazio (silenciado)</strong></td><td>O erro é capturado e ignorado: o usuário não é avisado e o processo continua.</td><td><code>_FAssocRubINSS.pas:244-247</code> <span class="ev ev-comprovado">COMPROVADO</span></td></tr><tr><td><strong>MessageDlg / MsgDlg / ShowMessage</strong></td><td>Janelas de mensagem exibidas ao usuário (erro, aviso, confirmação).</td><td><code>FDesfazConcessaoBenefNOVO.pas:1531</code> <span class="ev ev-comprovado">COMPROVADO</span></td></tr><tr><td><strong>EValidacao</strong></td><td>Tipo de erro de validação do framework que, além da mensagem, posiciona o cursor no campo com problema.</td><td><code>_fCadEntrManualINSS.pas:326</code> <span class="ev ev-comprovado">COMPROVADO</span></td></tr><tr><td><strong>EDBEngineError</strong></td><td>Erro vindo do banco de dados (por exemplo, chave duplicada, tabela travada).</td><td><code>FReajuesteBenef.pas:928</code> <span class="ev ev-comprovado">COMPROVADO</span></td></tr></tbody></table></div>
+</section>
+
 <section><div class="section-title">⚠️ Visão Geral</div>
 <p>O módulo utiliza três padrões de tratamento de erros: (1) <code>try/except</code> com <code>MessageDlg</code>/<code>ShowMessage</code> para exibir mensagens ao usuário, (2) <code>try/except</code> com <code>RollBack</code> para reverter transações, e (3) <code>raise exception.Create</code> / <code>raise EValidacao.CreateVal</code> para propagar erros de validação. O arquivo com mais blocos try é <code>FDesfazConcessaoBenefNOVO.pas</code> (91 blocos).</p>
+<p><strong>💡 Em outras palavras:</strong> o programa se protege de três formas: avisando o usuário, desfazendo gravações quando algo falha no meio do caminho e interrompendo a operação quando uma regra é violada.</p>
 </section>
 
 <section><div class="section-title">📊 Distribuição de Blocos try por Arquivo</div>
@@ -39,6 +51,7 @@
 <tr><td>_FEncerraConciliacao.pas</td><td>6</td><td>try/except + MsgDlg validação</td></tr>
 <tr><td>FReajuesteBenef.pas</td><td>6</td><td>try/except + RollBackTransacao</td></tr>
 </tbody></table></div>
+<p><strong>💡 Em outras palavras:</strong> os arquivos com mais blocos de proteção são justamente os de maior risco: desfazimento, desdobramento, conciliação INSS e eventos. Isso é coerente — são as operações que gravam em várias tabelas ao mesmo tempo.</p>
 </section>
 
 <section><div class="section-title">📋 Mensagens de Validação Significativas</div>
@@ -64,6 +77,7 @@
 <tr><td>"Informar moeda é obrigatório."</td><td>FReconstruirINSS.pas:270</td><td>MsgDlg</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
 <tr><td>"Alteração realizada com sucesso!"</td><td>FAlteraBeneficio.pas:456</td><td>MessageDlg (mtInformation)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
 </tbody></table></div>
+<p><strong>💡 Em outras palavras:</strong> as mensagens são a “voz” das regras de negócio. Muitas delas não são erros técnicos, e sim limites impostos pelo negócio (alçada de valor, meses fechados, benefício já pago).</p><div class="note pfc42-ba"><p><strong>👔 Para o analista de negócios</strong></p><ul><li>Mensagens que representam <strong>regras de negócio</strong> (e devem virar requisitos em qualquer novo sistema): “Benefício já foi pago no período… não pode ser desfeita”; “A Folha de Benefícios com os acertos do desdobramento já foi executada…”; “…exceder valor limite e não ter autorização”; “…exceder percentual limite e não ter autorização”; “Não é possível inserir registros em meses fechados!”; “Excesso de rubricas no mesmo mês (20)”; “NB já existe cadastrado”; “Periodo mínimo de pesquisa se inicia em 1997/05” (<code>_FExtratoINSS.pas:1438</code>) {C}.</li><li>Mensagens de controle de importação: “O arquivo do INSS para o mês desejado já foi importado. Deseja reprocessar este mês sem apagar o que foi importado?” (<code>_FConciliacao.pas:548-553</code>) <span class="ev ev-comprovado">COMPROVADO</span> e “Arquivo já Importado” na alteração em lote (<code>FAlteraBeneficioLote.pas:442</code>) <span class="ev ev-comprovado">COMPROVADO</span>. São proteções contra processamento em dobro.</li></ul></div>
 </section>
 
 <section><div class="section-title">🔄 Padrões de Tratamento Identificados</div>
@@ -75,10 +89,14 @@
 <div class="card"><h3>try/finally (cleanup)</h3><p>Usado em FPrincipal (AppPadraoAfterLogin, AppPadraoPrintReportPadrao), FReconstruirINSS, FAlteraBeneficioLote para garantir liberação de recursos (Free de forms/queries).</p></div>
 <div class="card"><h3>try/except silenciado</h3><p>Em _FAssocRubINSS (ExecSQL) e FReajuesteBenef (IncluirNovaLista) — except vazio, erros ignorados. <span class="ev ev-pendente">PENDENTE</span> — verificar se intencional.</p></div>
 </div>
+<p><strong>💡 Em outras palavras:</strong> cada cartão é uma “estratégia” de reação a erros. A mais segura é “try/except + RollBack” (desfaz tudo); a mais arriscada é o “except silenciado” (ignora o erro).</p><div class="note"><p><strong>🔎 Ponto a validar</strong> <span class="ev ev-pendente">PENDENTE</span> — o cartão “raise exception.Create” sugere que a falha ao gravar o log interrompe a operação. Isso só ocorre em parte das telas: em <code>FDesdobramentoBenef.pas:6315-6319</code> e <code>FCadContribParticipante.pas:718-723</code> o erro é levantado antes do commit; já em <code>FEventoMorte.pas:1439-1443</code>, <code>FEventoReclusao.pas:853-857</code> e <code>FCadReajINSS.pas:160-164</code> o <code>raise</code> está dentro de um <code>Try … Except End;</code> vazio, ou seja, a falha no log é ignorada <span class="ev ev-comprovado">COMPROVADO</span>. Na rotina do próprio módulo, <code>GravaLogTOTALPREV</code>, a falha também é ignorada (<code>UModulo.pas:81-84</code>) <span class="ev ev-comprovado">COMPROVADO</span>.</p></div><div class="note"><p><strong>🔎 Ponto a validar</strong> <span class="ev ev-pendente">PENDENTE</span> — a lista de excepts vazios pode ser ampliada: além de <code>_FAssocRubINSS.pas</code> (3 pontos: 244-247, 261-264, 282-285) e <code>FReajuesteBenef.pas</code> (inclusão em LISTAFOLHABENEFDET, 608-611), o reajuste trata apenas erros do banco (<code>on E:EDBEngineError</code>, <code>FReajuesteBenef.pas:927-933</code>) <span class="ev ev-comprovado">COMPROVADO</span>; outros tipos de erro não são capturados nesse ponto.</p></div><div class="note pfc42-ba"><p><strong>👔 Para o analista de negócios</strong></p><ul><li>Política de auditoria inconsistente: em algumas telas, se o log não puder ser gravado, a operação é cancelada; em outras, a operação segue sem log. O negócio deve decidir qual comportamento é o correto (bloquear ou permitir sem trilha).</li><li>Após registrar um falecimento, a tela confirma a transação e já abre outra imediatamente (<code>FEventoMorte.pas:1446-1457</code>) <span class="ev ev-comprovado">COMPROVADO</span>. Transações abertas por muito tempo podem travar registros para outros usuários <span class="ev ev-inferido">INFERIDO</span>.</li></ul></div>
+</section>
+<section id="pfc42-analista"><div class="section-title">👔 Para o analista de negócios — síntese (PFC-42)</div>
+<div class="note pfc42-ba"><p>O módulo tem boa proteção nas operações de maior risco (desfazimento, liberação, desdobramento), com desfazimento automático das gravações quando algo falha. Os pontos fracos são os erros ignorados silenciosamente e a política desigual para falhas de log.</p><p><strong>O que merece atenção:</strong></p><ul><li>Erros ignorados na associação de rubricas INSS (<code>_FAssocRubINSS.pas</code>) e na montagem da lista do reajuste (<code>FReajuesteBenef.pas:608-611</code>) <span class="ev ev-comprovado">COMPROVADO</span> — podem gerar conciliação ou reajuste incompletos sem aviso.</li><li>Falha de log tratada de formas diferentes conforme a tela.</li><li>Mensagens de erro técnico do banco (MostrarErro) são exibidas como chegam, sem tradução para o usuário.</li></ul><p><strong>Perguntas para levar ao gestor do processo:</strong></p><ol><li>Uma operação de benefício pode ser concluída sem registro de auditoria? Em quais casos?</li><li>Quais mensagens de regra de negócio listadas acima ainda são válidas e quais devem mudar?</li><li>Há registros de incidentes de reajuste ou conciliação incompletos que possam ter origem nos erros ignorados?</li></ol></div>
 </section>
 </main>
 <footer>
-<p>Blueprint AS-IS — PFC-24 — Enriquecimento BENEFICIOPREV | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-10</p>
+<p>Blueprint AS-IS — PFC-24 — Enriquecimento BENEFICIOPREV | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-10 | Abas técnicas enriquecidas — PFC-42</p>
 </footer>
 </body>
 </html>

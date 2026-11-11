@@ -8,7 +8,7 @@
 </head>
 <body>
 <header>
-  <div class="badge">Blueprint AS-IS — Delphi 5</div>
+  <div class="badge">Blueprint AS-IS — Delphi 5 · PFC-42 (abas técnicas enriquecidas)</div>
   <h1>🔀 Diagramas de Fluxo de Processos — Benefício Previdenciário</h1>
   <p>Fluxos comprovados pelo código com rastreabilidade</p>
 </header>
@@ -16,6 +16,31 @@
   <a href="index.html">📋 Visão Geral</a><a href="arquitetura.html">🏗️ Arquitetura</a><a href="inventario-tecnico.html">📦 Inventário</a><a href="funcionalidades.html">⚙️ Processos Funcionais</a><a href="procedures-functions.html">🔧 Procedures</a><a href="dados.html">🗄️ Dados</a><a href="relatorios.html">📄 Relatórios</a><a href="integracoes.html">🔗 Integrações</a><a href="tratamento-erros.html">⚠️ Erros</a><a href="diagramas-fluxo.html">🔀 Fluxos</a><a href="lacunas.html">🔍 Lacunas</a><a href="controle-cobertura.html">📊 Cobertura</a>
 </nav>
 <main>
+<!-- PFC-42: enriquecimento em linguagem simples -->
+<section id="pfc42-leigo"><div class="section-title">💡 Em linguagem simples (enriquecido — PFC-42)</div>
+<div class="note-info">
+<p><strong>O que esta aba mostra:</strong> desenhos (fluxogramas) que mostram, passo a passo, como o sistema executa os principais processos: concessão, desfazimento, eventos, desdobramento, conciliação INSS, simulação e reajuste.</p>
+<p><strong>Por que isso importa:</strong> um fluxograma permite entender um processo em minutos, sem ler código. Ele também ajuda a identificar pontos de decisão (onde o sistema bloqueia ou desvia) e onde os dados são gravados.</p>
+<p><strong>Como ler esta página:</strong> retângulos são passos; losangos são decisões (perguntas com resposta sim/não ou por tipo); cilindros são gravações no banco de dados. Os nomes técnicos entre parênteses (por exemplo “L1720”) indicam a linha do código onde o passo está. Logo abaixo há um fluxo-resumo do ciclo de vida do benefício, em linguagem simples.</p>
+</div>
+<p><strong>Termos usados nesta página</strong> — explicados de forma simples:</p>
+<div class="table-wrap"><table><thead><tr><th>Termo técnico</th><th>Em linguagem simples</th><th>Fonte</th></tr></thead><tbody><tr><td><strong>Fluxograma (Mermaid)</strong></td><td>Desenho gerado automaticamente a partir de um texto; cada seta é “depois disso, acontece aquilo”.</td><td>—</td></tr><tr><td><strong>P / B / D</strong></td><td>Tipo de pessoa escolhido na concessão: Participante, Beneficiário ou Dependente/pensionista.</td><td><code>FPrincipal.pas:1720-1763</code> <span class="ev ev-comprovado">COMPROVADO</span></td></tr><tr><td><strong>Modo CO / MA / SI</strong></td><td>Concessão, Manutenção e Simulação — a mesma tela de requerimento aberta com três finalidades.</td><td><code>FPrincipal.pas:1673-1805</code> <span class="ev ev-comprovado">COMPROVADO</span></td></tr><tr><td><strong>DIP</strong></td><td>Data de Início do Pagamento do benefício.</td><td><code>FDesdobramentoBenef.pas</code> (reajuste desde a DIP) <span class="ev ev-inferido">INFERIDO</span></td></tr><tr><td><strong>Wizard</strong></td><td>Tela em etapas (“próximo”, “próximo”…), como um assistente de instalação.</td><td><code>FSimulaBeneficio.pas</code> <span class="ev ev-comprovado">COMPROVADO</span></td></tr><tr><td><strong>RegraString / RegraNumerica</strong></td><td>Fórmulas cadastradas em tabela (motor de regras URegra) que devolvem uma data ou um valor — por exemplo, a data em que a pessoa fica elegível.</td><td><code>FSimulaBeneficio.pas:194-262</code> <span class="ev ev-comprovado">COMPROVADO</span></td></tr><tr><td><strong>Evento 346</strong></td><td>Um evento de falecimento específico que é retirado do menu e tratado à parte na tela de falecimento.</td><td><code>FPrincipal.pas:1214</code>; <code>FEventoMorte.pas:631, 740, 776</code> <span class="ev ev-comprovado">COMPROVADO</span></td></tr></tbody></table></div>
+<p><strong>Ciclo de vida do benefício — visão simplificada</strong> (síntese das jornadas; detalhes nos fluxos abaixo) <span class="ev ev-inferido">INFERIDO</span>:</p>
+<div class="mermaid">graph LR
+  A["Fato da vida: aposentadoria, invalidez, falecimento"] --> B["Concessão: cálculo pelo motor CMAdmPrev"]
+  B --> C["Benefício ativo (BENEFBFCIARIO)"]
+  C --> D["Pagamento mensal no módulo FOLHA"]
+  C --> E["Manutenção: reajuste, alteração, revisão"]
+  E --> C
+  C --> F["Retenção / exigência"]
+  F --> G["Liberação (com alçada)"]
+  G --> C
+  C --> H["Desdobramento entre beneficiários"]
+  C --> I["Desfazer a última operação, se ainda não paga"]
+  D --> J["Conciliação com o INSS"]
+  J --> K["Contas a Receber + contabilidade"]</div>
+</section>
+
 <section><div class="section-title">🔀 Fluxo PF-01 — Concessão de Benefício</div>
 <div class="mermaid">graph TD
   A["FPrincipal.mnuBenefConcessaoClick (L1720)"]
@@ -29,6 +54,7 @@
   F --> G
   G --> H[("BENEFBFCIARIO, HSTBENEFBFCIARIO,<br/>MOVBENEF, PROCESSOBENEF,<br/>HSTCONTRIBPREV, TMPDESC<br/>+ GravaLogTOTALPREV")]</div>
 <p><strong>Evidência:</strong> <code>FPrincipal.pas:1720-1763</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<p><strong>💡 Em outras palavras:</strong> o usuário escolhe se o pedido é de um participante, beneficiário ou pensionista; o sistema abre a tela de requerimento do pacote CMAdmPrev em modo concessão, que calcula e grava o benefício, o processo, o movimento e o histórico.</p><div class="note pfc42-ba"><p><strong>👔 Para o analista de negócios</strong></p><ul><li>A concessão em si (cálculo e gravação) está fora deste módulo (CMAdmPrev). Requisitos sobre regras de cálculo da concessão precisam ser levantados nesse componente.</li></ul></div>
 </section>
 
 <section><div class="section-title">🔀 Fluxo PF-04 — Desfazer Operações de Benefícios</div>
@@ -52,6 +78,7 @@
   I --> Q["Commit + GravaLogTOTALPREV"]
   Q --> R[("BENEFBFCIARIO/HSTBENEFBFCIARIO<br/>HSTCONTRIBPREV/MOVBENEF")]</div>
 <p><strong>Evidência:</strong> <code>FDesfazConcessaoBenefNOVO.pas:888-1324</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<p><strong>💡 Em outras palavras:</strong> para desfazer, o sistema identifica a última operação do processo e verifica três travas: benefício já pago, prévia de folha existente e folha de desdobramento já executada. Passando, chama a rotina de reversão própria daquele tipo de operação e grava o log.</p><div class="note pfc42-ba"><p><strong>👔 Para o analista de negócios</strong></p><ul><li>Este fluxo é a principal ferramenta de correção de erros operacionais. As três travas garantem que nada já pago seja “apagado”; o que já foi pago precisa de outro tratamento (acerto financeiro).</li></ul></div>
 </section>
 
 <section><div class="section-title">🔀 Fluxo PF-05 — Eventos Previdenciários (menu dinâmico)</div>
@@ -74,6 +101,7 @@
   K --> L["Suspende contribuições"]
   L --> M[("EVENTOSPREV + GravaLogTOTALPREV")]</div>
 <p><strong>Evidência:</strong> <code>FPrincipal.pas:1038-1387</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<p><strong>💡 Em outras palavras:</strong> o menu de eventos é montado a partir de um cadastro. Cada tipo de evento abre uma tela específica que grava o evento, atualiza a situação do participante e suspende contribuições quando aplicável.</p><div class="note pfc42-ba"><p><strong>👔 Para o analista de negócios</strong></p><ul><li>Como o menu vem de uma tabela, a área de negócio pode incluir novos eventos de um tipo existente sem programação. Mas tipos novos (um código FLGINTERNO diferente) exigem alteração no programa (<code>FPrincipal.pas:1099-1385</code>) <span class="ev ev-comprovado">COMPROVADO</span>.</li></ul></div>
 </section>
 
 <section><div class="section-title">🔀 Fluxo PF-08 — Desdobramento de Benefício</div>
@@ -96,6 +124,7 @@
   M --> N[("INSERT CONTROLEDIVIDABENEFICIO (L7776)")]
   N --> O["Commit + MostraDemonstrativoConcessao"]</div>
 <p><strong>Evidência:</strong> <code>FDesdobramentoBenef.pas:1442-6280</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<p><strong>💡 Em outras palavras:</strong> para dividir um benefício entre beneficiários, o sistema exige pelo menos um beneficiário, verifica a alçada de valor, gera processos individuais, calcula cada parte (respeitando o mínimo), reajusta desde a data original e registra dívida quando há diferença.</p>
 </section>
 
 <section><div class="section-title">🔀 Fluxo PF-14 — Conciliação INSS com Mantenedoras</div>
@@ -114,6 +143,7 @@
   K --> L["_FIdentificaINSS: não casados"]
   L --> M["_FEncerraConciliacao: CR/CP + contábil"]</div>
 <p><strong>Evidência:</strong> <code>_FConciliacao.pas:525-1206</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<p><strong>💡 Em outras palavras:</strong> a conciliação importa o arquivo do INSS e os dados das mantenedoras, aponta divergências e processos não identificados e, ao final, encerra o mês gerando documentos financeiros e contábeis.</p><div class="note"><p><strong>🔎 Ponto a validar</strong> <span class="ev ev-pendente">PENDENTE</span> — o título deste fluxo cita “PF-14”, mas na aba 📋 Visão Geral a Conciliação INSS é a jornada JF012 (PF-12) e PF-14 é “Alteração de Benefício”. O código descrito (<code>_FConciliacao.pas:525-1206</code>) <span class="ev ev-comprovado">COMPROVADO</span> corresponde à conciliação; o rótulo do título parece trocado.</p></div>
 </section>
 
 <section><div class="section-title">🔀 Fluxo PF-03 — Simulação / Memória de Cálculo</div>
@@ -131,6 +161,7 @@
   I --> J["Etapa 3: Exibe resultados"]
   J --> K["Etapa 4: Apenas leitura"]</div>
 <p><strong>Evidência:</strong> <code>FSimulaBeneficio.pas:194-262</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<p><strong>💡 Em outras palavras:</strong> a simulação é um assistente em quatro etapas: escolhe-se a pessoa, o sistema calcula a data de elegibilidade e o valor previsto por fórmulas cadastradas, e mostra o resultado sem gravar nada definitivo.</p>
 </section>
 
 <section><div class="section-title">🔀 Fluxo PF-06 — Reajuste de Benefícios</div>
@@ -148,10 +179,14 @@
   J --> K["ExeProc (L905)"]
   K --> L[("Stored procedure de reajuste")]</div>
 <p><strong>Evidência:</strong> <code>FReajuesteBenef.pas:401-953</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<p><strong>💡 Em outras palavras:</strong> o reajuste em massa seleciona os benefícios elegíveis (vitalícios, não resgate, por fonte pagadora), grava os parâmetros e a lista e chama uma rotina no banco que aplica o índice.</p><div class="note"><p><strong>🔎 Ponto a validar</strong> <span class="ev ev-pendente">PENDENTE</span> — o passo “Exclui espécies 255 e 358” confere com a consulta por plano (<code>BPP.IDBENEFICIO NOT IN (255,358)</code>, <code>FReajuesteBenef.pas:100</code>) <span class="ev ev-comprovado">COMPROVADO</span>. Já na consulta “todos os benefícios” o filtro é por <em>plano</em> (<code>BPP.IDPLANOPREV NOT IN (255,358)</code> e <code>IN (2,66,74)</code>, <code>FReajuesteBenef.pas:110-111</code>) <span class="ev ev-comprovado">COMPROVADO</span>. A diferença entre filtrar por benefício e por plano precisa ser confirmada.</p></div>
+</section>
+<section id="pfc42-analista"><div class="section-title">👔 Para o analista de negócios — síntese (PFC-42)</div>
+<div class="note pfc42-ba"><p>Os fluxos mostram que o módulo é orientado a <strong>eventos e correções</strong>: concede a partir de um fato, mantém por reajustes e alterações e corrige por desfazimento. Os pontos de decisão (losangos) são, na maioria, regras de negócio de proteção financeira.</p><p><strong>O que merece atenção:</strong></p><ul><li>Pontos de decisão que bloqueiam o usuário (já pago, prévia existente, alçada) são regras críticas e devem ser preservados.</li><li>Concessão e reajuste dependem de componentes fora do módulo (CMAdmPrev e stored procedure).</li><li>Rótulos de fluxo (PF-14) não batem com a numeração das jornadas — usar o título do processo como referência.</li></ul><p><strong>Perguntas para levar ao gestor do processo:</strong></p><ol><li>Os fluxos representam o processo como ele é executado hoje pela área?</li><li>Há passos manuais fora do sistema (planilhas, conferências) entre as etapas mostradas?</li><li>Quem aprova as alçadas de liberação e desdobramento no dia a dia?</li></ol></div>
 </section>
 </main>
 <footer>
-<p>Blueprint AS-IS — PFC-24 — Enriquecimento BENEFICIOPREV | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-10</p>
+<p>Blueprint AS-IS — PFC-24 — Enriquecimento BENEFICIOPREV | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-10 | Abas técnicas enriquecidas — PFC-42</p>
 </footer>
 <script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
 <script src="../assets/js/mermaid-init.js"></script>

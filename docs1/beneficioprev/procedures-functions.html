@@ -8,7 +8,7 @@
 </head>
 <body>
 <header>
-  <div class="badge">Blueprint AS-IS — Delphi 5</div>
+  <div class="badge">Blueprint AS-IS — Delphi 5 · PFC-42 (abas técnicas enriquecidas)</div>
   <h1>🔧 Procedures, Functions e Métodos — Benefício Previdenciário</h1>
   <p>2307 declarações identificadas — métodos relevantes com parâmetros, regras, chamadas e rastreabilidade</p>
 </header>
@@ -27,15 +27,28 @@
   <a href="controle-cobertura.html">📊 Cobertura</a>
 </nav>
 <main>
+<!-- PFC-42: enriquecimento em linguagem simples -->
+<section id="pfc42-leigo"><div class="section-title">💡 Em linguagem simples (enriquecido — PFC-42)</div>
+<div class="note-info">
+<p><strong>O que esta aba mostra:</strong> as principais “rotinas” do módulo — pedaços de código com nome próprio que executam uma tarefa (por exemplo, “desfazer desdobramento” ou “gerar Contas a Receber”). Para cada uma: onde está, o que faz e quais tabelas altera.</p>
+<p><strong>Por que isso importa:</strong> é aqui que a regra de negócio realmente acontece. Saber qual rotina grava em qual tabela permite avaliar o impacto de uma mudança, explicar um valor estranho ao participante ou planejar testes.</p>
+<p><strong>Como ler esta página:</strong> cada tabela agrupa as rotinas de uma tela ou tema. “Linhas” indica onde a rotina começa e termina no arquivo; “Tabelas escritas” mostra o que ela altera no banco. Se você não é técnico, foque nas colunas “Descrição” e “Tabelas escritas” e nos blocos “Em outras palavras”.</p>
+</div>
+<p><strong>Termos usados nesta página</strong> — explicados de forma simples:</p>
+<div class="table-wrap"><table><thead><tr><th>Termo técnico</th><th>Em linguagem simples</th><th>Fonte</th></tr></thead><tbody><tr><td><strong>Procedure / function</strong></td><td>Rotina com nome próprio. A function devolve uma resposta (por exemplo, verdadeiro/falso); a procedure só executa.</td><td><code>UModulo.pas:64</code> (function GravaLogTOTALPREV : boolean) <span class="ev ev-comprovado">COMPROVADO</span></td></tr><tr><td><strong>…Click (ex.: bbtnConfirmarClick)</strong></td><td>Rotina disparada quando o usuário clica num botão da tela — geralmente o “Confirmar”. Costuma ser o ponto de partida do processo.</td><td><code>FDesfazConcessaoBenefNOVO.pas:888</code> <span class="ev ev-comprovado">COMPROVADO</span></td></tr><tr><td><strong>Dispatcher</strong></td><td>Rotina que só decide “para quem passar a tarefa”, conforme o tipo da operação.</td><td><code>FDesfazConcessaoBenefNOVO.pas:1146-1329</code> <span class="ev ev-comprovado">COMPROVADO</span></td></tr><tr><td><strong>TIPOMOV</strong></td><td>Código do tipo de movimento do benefício (concessão, retenção, encerramento, desdobramento, falecimento, liberação, revisão, reversão, alteração manual…). Usado para saber qual foi a última operação feita.</td><td><code>FDesfazConcessaoBenefNOVO.pas:761-787</code> <span class="ev ev-comprovado">COMPROVADO</span></td></tr><tr><td><strong>Stored procedure</strong></td><td>Rotina que roda dentro do banco de dados Oracle, não no programa. Aqui, o reajuste em massa é executado por uma delas.</td><td><code>FReajuesteBenef.dfm:1071-1073</code> (<code>CM.SP_BF_REAJUSTE_BENEF</code>) <span class="ev ev-comprovado">COMPROVADO</span></td></tr><tr><td><strong>BS / FAB / Déficit</strong></td><td>Parcelas que compõem o valor do benefício e que o sistema guarda separadamente (valor anterior e atual) para poder restaurar em caso de desfazimento.</td><td><code>FDesfazConcessaoBenefNOVO.pas:5184-5201</code> <span class="ev ev-comprovado">COMPROVADO</span></td></tr><tr><td><strong>Benefício mínimo</strong></td><td>Valor mínimo garantido de benefício; se o cálculo der menos, o sistema eleva ao mínimo.</td><td><code>FDesdobramentoBenef.pas:6610-6697</code> <span class="ev ev-comprovado">COMPROVADO</span></td></tr><tr><td><strong>Modo dual cliente/servidor</strong></td><td>A mesma rotina pode rodar no computador do usuário ou num servidor de aplicação, conforme a configuração.</td><td><code>CtrlObjects/uCtrlEvolFuncPrev.pas</code> <span class="ev ev-comprovado">COMPROVADO</span></td></tr></tbody></table></div>
+</section>
+
 <section><div class="section-title">🔧 Visão Geral</div>
 <p>Foram identificadas <strong>2307 declarações</strong> de procedures/functions nos 73 arquivos .pas do módulo (incluindo declarações de interface e implementação). Esta página detalha os métodos mais relevantes — aqueles que contêm lógica de negócio significativa — com parâmetros, regras aplicadas, chamadas externas e rastreabilidade real.</p>
 <div class="legend"><span><span class="ev ev-comprovado">COMPROVADO</span> — linha verificada no código</span><span><span class="ev ev-inferido">INFERIDO</span> — inferido do contexto</span></div>
+<p><strong>💡 Em outras palavras:</strong> 2.307 é a contagem bruta de nomes de rotinas (incluindo repetições de declaração). A página não lista todas: foca nas que mudam dinheiro, situação do benefício ou histórico.</p>
 </section>
 
 <section><div class="section-title">📋 UModulo.pas — Auditoria (TModulo)</div>
 <div class="table-wrap"><table><thead><tr><th>Método</th><th>Linhas</th><th>Parâmetros</th><th>Retorno</th><th>Descrição</th><th>Evidência</th></tr></thead><tbody>
 <tr><td><code>GravaLogTOTALPREV</code></td><td>64–88</td><td>psDescOperacao: string</td><td>boolean</td><td>INSERT INTO LOGTOTALPREV (IDLOGTOTALPREV, IDMODULO=454, DESCOPERACAO, IDUSUARIO, SYSDATE). Chamado por toda operação de negócio para auditoria.</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
 </tbody></table></div>
+<p><strong>💡 Em outras palavras:</strong> esta rotina grava “quem fez o quê e quando” na tabela de log. Se a gravação falhar, a rotina apenas retorna falso, sem avisar o usuário (<code>UModulo.pas:81-84</code>) {C}.</p><div class="note"><p><strong>🔎 Ponto a validar</strong> <span class="ev ev-pendente">PENDENTE</span> — a descrição “Chamado por toda operação de negócio para auditoria” não se confirma: a rotina é chamada diretamente apenas em FDesfazConcessaoBenefNOVO, _FDesfazConcessaoBenefNOVO, FAlteraBeneficio e FCadContribParticipante (busca por <code>GravaLogTotalPrev</code> em <code>BENEFICIOPREV/</code>) <span class="ev ev-comprovado">COMPROVADO</span>. Telas como FEventoMorte, FDesdobramentoBenef, FLiberaBeneficioProvisorio e _FConciliacao usam <code>GravaLogOperacoes</code>, rotina externa ao módulo <span class="ev ev-inferido">INFERIDO</span>.</p></div><div class="note pfc42-ba"><p><strong>👔 Para o analista de negócios</strong></p><ul><li>Para auditoria, a trilha “quem desfez/alterou o benefício” é confiável nas telas de desfazimento e alteração. Para as demais operações, é preciso confirmar onde GravaLogOperacoes grava e se a consulta “Log de Operações do TotalPREV” enxerga esses registros.</li></ul></div>
 </section>
 
 <section><div class="section-title">📋 FPrincipal.pas — Form Principal (TfrmPrincipal)</div>
@@ -52,6 +65,7 @@
 <tr><td><code>AbreFormEventoTS/ID/IN</code></td><td>1436–1501</td><td>Abre TfrmEventoAposentaBenef (TS/ID) ou TfrmEventoAssistidoBenef (IN)</td><td>FEventoAposentaBenef/FEventoAssistidoBenef</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
 <tr><td><code>AbreFormEventoAI/BI</code></td><td>1565–1601</td><td>Abre TfrmEventoAssistidoINSS (AI/BI)</td><td>FEventoAssistidoINSS</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
 </tbody></table></div>
+<p><strong>💡 Em outras palavras:</strong> a tela principal faz a “recepção”: confere a situação da empresa e as integrações ativas, troca os nomes das telas quando a instalação é de um Instituto, monta o menu de eventos e encaminha o usuário para concessão (CO), manutenção (MA) ou simulação (SI) do tipo de pessoa escolhido (participante, beneficiário ou pensionista).</p>
 </section>
 
 <section><div class="section-title">📋 FDesfazConcessaoBenefNOVO.pas — Desfazimento (TfrmDesfazConcessaoBeneficioNOVO)</div>
@@ -64,6 +78,7 @@
 <tr><td><code>DesfazOperacoesFalecimentoBenef</code></td><td>4065–4145</td><td>Reverte falecimento (TIPOMOV=9): limpa PESSOAFISICA.DATAMORTE, exclui MOVBENEF</td><td>PESSOAFISICA, MOVBENEF, EVENTOSPREV</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
 <tr><td><code>AtribuiValorAnterior</code></td><td>5184–5206</td><td>Restaura BS/FAB/Deficit anteriores; pensão Reg/Replan = 50% + 10%/dependente, máx 80% (WO18367)</td><td>BENEFBFCIARIO</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
 </tbody></table></div>
+<p><strong>💡 Em outras palavras:</strong> o desfazimento olha a <strong>última operação</strong> registrada para o processo (o TIPOMOV do movimento mais recente) e chama a rotina específica para reverter aquele tipo. Na prática, desfaz-se uma operação de cada vez, da mais recente para a mais antiga (<code>FDesfazConcessaoBenefNOVO.pas:761-812</code>) {I}.</p><div class="note"><p><strong>🔎 Ponto a validar</strong> <span class="ev ev-pendente">PENDENTE</span> — a linha de <code>AtribuiValorAnterior</code> diz que a rotina aplica “pensão Reg/Replan = 50% + 10%/dependente, máx 80%”. No código (<code>FDesfazConcessaoBenefNOVO.pas:5184-5201</code>) a rotina apenas lê os valores anteriores gravados (VALORATUAL, VLRBSTOTALANT, VLRFABTOTALANT, FABTITULARANT, BSTITULARANT, VLRTOTALTITULARANT) <span class="ev ev-comprovado">COMPROVADO</span>; não há cálculo de percentual de pensão. A regra de 50%+10% precisa ser localizada em outro ponto.</p></div><div class="note pfc42-ba"><p><strong>👔 Para o analista de negócios</strong></p><ul><li>Bloqueios que protegem o caixa: não se desfaz uma operação se o benefício já foi pago no período (<code>FDesfazConcessaoBenefNOVO.pas:1529-1531</code>), se existe prévia de folha para o lote (<code>FDesfazConcessaoBenefNOVO.pas:1440-1442</code>) ou, no desdobramento, se a folha com os acertos já foi executada (<code>FDesfazConcessaoBenefNOVO.pas:4528-4531</code>) <span class="ev ev-comprovado">COMPROVADO</span>.</li><li>Quando o pagamento já aconteceu, a correção deixa de ser “desfazer” e passa a ser um acerto financeiro (devolução, dívida, compensação). Esse caminho alternativo deve ser mapeado com a área.</li></ul></div>
 </section>
 
 <section><div class="section-title">📋 FDesdobramentoBenef.pas — Desdobramento (TfrmDesdobramentoBenef)</div>
@@ -74,6 +89,7 @@
 <tr><td><code>CalculaBeneficioMinimoLocal</code></td><td>6610–6697</td><td>Wrapper de CalculaBeneficioMinimo (UBeneficio) para aplicar benefício mínimo</td><td>—</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
 <tr><td><code>MostraDemonstrativoConcessao</code></td><td>6714–7091</td><td>Constrói e exibe demonstrativo de concessão</td><td>—</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
 </tbody></table></div>
+<p><strong>💡 Em outras palavras:</strong> o desdobramento cria um novo processo individual para cada beneficiário, calcula a parte de cada um (respeitando o benefício mínimo), reajusta desde a data de início do pagamento original e, se houver diferença paga a maior, registra uma dívida a ser descontada.</p><div class="note pfc42-ba"><p><strong>👔 Para o analista de negócios</strong></p><ul><li>Se o novo valor ultrapassar o limite configurado e não houver usuário autorizador, o desdobramento é recusado (<code>FDesdobramentoBenef.pas:2636-2650</code>) <span class="ev ev-comprovado">COMPROVADO</span>. Os limites são verificados pela rotina externa VerificaVALORLimiteBeneficio (UAdmPrev) <span class="ev ev-comprovado">COMPROVADO</span>; a parametrização desses limites é externa ao módulo.</li></ul></div>
 </section>
 
 <section><div class="section-title">📋 FCadInicioBenefExigencia.pas — Liberação Retido (TfrmCadInicioBenefExigencia)</div>
@@ -83,6 +99,7 @@
 <tr><td><code>GravarHSTBENEFBFCIARIO</code></td><td>4385–4568</td><td>Insert HSTBENEFBFCIARIO com todos os valores do benefício</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
 <tr><td><code>AjustaAbonoPago</code></td><td>4304–4385</td><td>Ajusta abono antecipado já pago (pro-rata, SIG121019)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
 </tbody></table></div>
+<p><strong>💡 Em outras palavras:</strong> ao liberar um benefício que estava retido (por exemplo, aguardando documentação), o sistema refaz o cálculo de todos os meses desde a data de liberação até hoje, gravando um histórico por mês e ajustando o abono anual já pago.</p><div class="note pfc42-ba"><p><strong>👔 Para o analista de negócios</strong></p><ul><li>Liberação também tem dupla alçada: por <strong>valor</strong> (<code>FCadInicioBenefExigencia.pas:1575-1589</code>) e por <strong>percentual</strong> (<code>FCadInicioBenefExigencia.pas:1593-1608</code>) <span class="ev ev-comprovado">COMPROVADO</span>. Em caso de recusa, toda a transação é desfeita (RollBack em <code>FCadInicioBenefExigencia.pas:1588</code>) <span class="ev ev-comprovado">COMPROVADO</span>.</li></ul></div>
 </section>
 
 <section><div class="section-title">📋 Eventos Previdenciários — Métodos Comuns</div>
@@ -93,6 +110,7 @@
 <tr><td>FEventoAssistidoINSS.pas</td><td><code>AtualizaTempoContribuicaoBenefBfCiario</code></td><td>2018–2081</td><td>UPDATE BENEFBFCIARIO SET TEMPOSERVICO (SOL 249379)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
 <tr><td>FEventoAssistidoINSS.pas</td><td><code>EventoEfetivado</code></td><td>2117–2256</td><td>Trata evento efetivado; permite novo se benefício encerrado (SOL 157501)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
 </tbody></table></div>
+<p><strong>💡 Em outras palavras:</strong> ao registrar um evento (aposentadoria, falecimento etc.), o sistema atualiza a situação do participante no plano e na patrocinadora, grava o evento e, quando aplicável, suspende as contribuições.</p>
 </section>
 
 <section><div class="section-title">📋 Reajuste e Reabertura — Métodos Relevantes</div>
@@ -103,6 +121,7 @@
 <tr><td>FReaberturaBeneficio.pas</td><td><code>sbtnAlteraDataClick</code></td><td>569–1683</td><td>Reabertura/renovação/prorrogação: valida folha, atualiza benefício, prepara contribuições, gera demonstrativo</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
 <tr><td>FReaberturaBeneficio.pas</td><td><code>AtualizaContribuicoes</code></td><td>2507–2560</td><td>UPDATE CONTRIBPREVPARTP SET FLGCOBRA para assistido e ativo</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
 </tbody></table></div>
+<p><strong>💡 Em outras palavras:</strong> o reajuste geral funciona em três passos: grava os parâmetros (índice, período, fonte pagadora), grava a lista de benefícios escolhidos e, por fim, pede ao banco que execute a stored procedure <code>CM.SP_BF_REAJUSTE_BENEF</code> passando o código do reajuste (<code>FReajuesteBenef.pas:905-935</code>; <code>FReajuesteBenef.dfm:1073</code>) <span class="ev ev-comprovado">COMPROVADO</span>. O cálculo do novo valor acontece dentro do banco, fora do código Delphi.</p><div class="note pfc42-ba"><p><strong>👔 Para o analista de negócios</strong></p><ul><li>A regra de quem recebe reajuste está no texto SQL: só benefícios de pagamento vitalício (<code>IDTPPAGTOBENEFIC = 1</code>), que não são de resgate, excluindo os benefícios 255 e 358, filtrados pela fonte pagadora (0 = FUNCEF, 1 = INSS) (<code>FReajuesteBenef.pas:92-103</code>) <span class="ev ev-comprovado">COMPROVADO</span>. Na opção “todos”, os planos ficam restritos a 2, 66 e 74 (<code>FReajuesteBenef.pas:106-114</code>) <span class="ev ev-comprovado">COMPROVADO</span>.</li><li>Como o cálculo está na stored procedure, a regra de arredondamento e de aplicação do índice não pode ser lida no repositório; é preciso obter o código da procedure no banco.</li></ul></div>
 </section>
 
 <section><div class="section-title">📋 Conciliação INSS — Métodos Relevantes</div>
@@ -114,6 +133,7 @@
 <tr><td>_FComparaReembDesemb.pas</td><td><code>ConsultasReembolso</code></td><td>180–827</td><td>15+ queries de reembolso (concessão, revisão, glosa, PAB, CPMF, pensão alimentícia) com DECODE por prefixo de rubrica</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
 <tr><td>_fCompoeValoresRI.pas</td><td><code>btnOkAlteracaoClick</code></td><td>641–900</td><td>Insert/update DETCONCINSS com ajuste manual entre planos/meses (FLGMANUAL=4)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
 </tbody></table></div>
+<p><strong>💡 Em outras palavras:</strong> a conciliação lê o arquivo enviado pelo INSS (cabeçalho, detalhes, rubricas, rodapé), guarda os valores por beneficiário e por plano, permite ajustes manuais e, no encerramento, gera documentos de Contas a Receber e lançamentos contábeis.</p><div class="note pfc42-ba"><p><strong>👔 Para o analista de negócios</strong></p><ul><li>O encerramento é em duas etapas: o processamento grava os lançamentos dentro de uma transação aberta, e só quando o usuário responde “Confirma lançamentos?” a transação é confirmada; se responder “Não”, tudo é desfeito (<code>_FEncerraConciliacao.pas:544-552</code>) <span class="ev ev-comprovado">COMPROVADO</span>. É um ponto de controle (revisão antes de efetivar) que deve ser preservado num novo sistema.</li><li>O ajuste manual permite no máximo 20 rubricas no mesmo mês (<code>_fCompoeValoresRI.pas:862-863</code>) <span class="ev ev-comprovado">COMPROVADO</span>.</li></ul></div>
 </section>
 
 <section><div class="section-title">📋 CtrlObjects — Camada de Controle</div>
@@ -124,10 +144,14 @@
 <tr><td>TCtrlPCS</td><td><code>ListaCargo</code></td><td>SELECT DISTINCT CARGOEXT, NIVEL, CARGOXNIVEL por patrocinadora</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
 <tr><td>TCtrlPCS</td><td><code>ListaModoFuncao</code></td><td>Lista modos de função (PCS)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
 </tbody></table></div>
+<p><strong>💡 Em outras palavras:</strong> esta é a pequena parte do módulo organizada no padrão do framework: consultas de cargos, funções e rubricas salariais e a gravação da evolução funcional do participante.</p>
+</section>
+<section id="pfc42-analista"><div class="section-title">👔 Para o analista de negócios — síntese (PFC-42)</div>
+<div class="note pfc42-ba"><p>As rotinas confirmam que o módulo concentra três tipos de operação sensível: <strong>reversões</strong> (desfazimento), <strong>recálculos</strong> (liberação, desdobramento, reajuste) e <strong>integração financeira</strong> (encerramento da conciliação INSS).</p><p><strong>O que merece atenção:</strong></p><ul><li>Parte da regra está fora do repositório: o reajuste em massa roda na stored procedure <code>CM.SP_BF_REAJUSTE_BENEF</code> <span class="ev ev-comprovado">COMPROVADO</span> e os limites de alçada estão em UAdmPrev <span class="ev ev-comprovado">COMPROVADO</span>.</li><li>A trilha de auditoria não é uniforme (LOGTOTALPREV direto em 4 telas; GravaLogOperacoes nas demais) <span class="ev ev-comprovado">COMPROVADO</span>.</li><li>O desfazimento trabalha sempre sobre a última operação; desfazer algo antigo exige desfazer tudo o que veio depois.</li></ul><p><strong>Perguntas para levar ao gestor do processo:</strong></p><ol><li>Quem é o dono da stored procedure de reajuste e onde está documentada a fórmula aplicada?</li><li>Como são definidos e revisados os limites de valor e percentual que exigem autorização?</li><li>Quando um desfazimento é bloqueado por pagamento já feito, qual é o procedimento operacional de acerto?</li></ol></div>
 </section>
 </main>
 <footer>
-<p>Blueprint AS-IS — PFC-24 — Enriquecimento BENEFICIOPREV | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-10</p>
+<p>Blueprint AS-IS — PFC-24 — Enriquecimento BENEFICIOPREV | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-10 | Abas técnicas enriquecidas — PFC-42</p>
 </footer>
 </body>
 </html>
