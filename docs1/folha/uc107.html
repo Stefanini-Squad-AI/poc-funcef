@@ -49,6 +49,24 @@
 <ul>
 <li><a href="#PF-09"><strong>JF009 — Retroativos</strong></a>: processar salários/diferenças retroativas.</li>
 </ul>
+<p><strong>Necessidade de negócio:</strong> quando um valor que deveria ter sido considerado em meses anteriores só é conhecido depois (por exemplo, um salário de participação de um mês passado, ou um lançamento de desconto que ficou pendente e é cobrado em mês posterior), a folha precisa tratar a diferença no mês corrente, inclusive com a correção do valor pelo tempo decorrido. Este caso de uso reúne o que o repositório mostra sobre esse tratamento: (1) a tela “Informa Salários Retroativos (Ativo)”, que mostra, mês a mês, o salário de participação de um participante num intervalo de datas e exige que todos os meses tenham valor; e (2) a rotina da prévia (cálculo da folha, <a href="uc101.html#PF-02">JF002</a>) que, quando a entidade liga a correção de benefícios, gera rubricas de correção (“alteradores”) para lançamentos de meses anteriores ao mês de cobrança. No ciclo mensal da folha (preparo → prévia → conferência → efetivação → pagamento/contabilização), esse tratamento acontece dentro da prévia; não há etapa própria de efetivação para retroativos.</p>
+<p><strong>Quem inicia:</strong> a correção na prévia é automática: é executada pelo sistema durante o cálculo da prévia para cada recebedor (chamada em <code>dFolhaPrevia.pas:23421</code>, dentro de <code>ProcessaFechamentoRecebedor</code>), sem ação específica do usuário além de rodar a prévia. A tela “Informa Salários Retroativos (Ativo)” (<code>FInformaSalRetroEv.dfm:4</code>) é aberta pela função <code>AbreTelaInformaSalariosRetro</code> (<code>FInformaSalRetroEv.pas:46-78</code>), chamada por outra rotina; no código do módulo FOLHA não foi encontrada nenhuma opção de menu nem rotina que a chame <span class="ev ev-pendente">PENDENTE</span>.</p>
+<p><strong>Resultado esperado:</strong> na prévia, cada lançamento elegível recebe, além do valor original, uma rubrica de correção (de atraso ou de devolução) calculada pela regra parametrizada, que passa a compor o líquido do recebedor na prévia. Na tela de salários retroativos, o resultado é uma grade “Participante / Mês Referência / Salário Participação” devolvida à rotina que abriu a tela; a tela em si não grava nada no banco (<code>FInformaSalRetroEv.pas:109-126</code>).</p>
+<p><strong>Termos, siglas e componentes citados nesta página</strong> — explicados na primeira vez em que aparecem; a coluna “Fonte” indica onde a explicação foi conferida no repositório:</p>
+<div class="table-wrap"><table><thead><tr><th>Termo</th><th>O que significa</th><th>Fonte</th></tr></thead><tbody>
+<tr><td><strong>Retroativo</strong></td><td>Valor que se refere a um mês anterior ao mês em que está sendo pago ou cobrado. Nesta página aparece de duas formas: salário de participação de meses passados (tela FInformaSalRetroEv) e lançamentos de meses anteriores ao mês de cobrança corrigidos na prévia.</td><td><code>FInformaSalRetroEv.pas:128-181</code>; <code>dFolhaPrevia.pas:9147-9148</code></td></tr>
+<tr><td><strong>Prévia</strong></td><td>Cálculo provisório da folha do mês, feito antes da efetivação, que pode ser conferido e refeito. O resultado fica na tabela PREVIA.</td><td><a href="uc101.html#PF-02">JF002</a>; <a href="dados.html">🗄️ Dados</a></td></tr>
+<tr><td><strong>Recebedor</strong></td><td>Pessoa que recebe valores na folha (titular ou beneficiário). Na prévia, cada recebedor é tratado como um objeto próprio (<code>TObjRecebedor</code>), e a correção é feita recebedor a recebedor.</td><td><code>dFolhaPrevia.pas:9122</code></td></tr>
+<tr><td><strong>Rubrica</strong></td><td>Código de provento ou desconto da folha (tabela PROVDESC). Cada valor pago ou descontado é uma rubrica.</td><td><a href="dados.html">🗄️ Dados</a></td></tr>
+<tr><td><strong>TMPDESC</strong></td><td>Tabela de lançamentos temporários (descontos e créditos a processar) que a prévia lê para cada recebedor. Os lançamentos de meses anteriores lidos dela são os candidatos à correção.</td><td><a href="dados.html">🗄️ Dados</a>; <code>dFolhaPrevia.pas:23407</code></td></tr>
+<tr><td><strong>Alterador / rubrica de correção</strong></td><td>Ajuste calculado por uma regra parametrizada (código do alterador + regra de cálculo) que gera uma rubrica “normal” (atraso) ou de “devolução”, conforme o sinal do valor calculado. Para benefícios, a parametrização vem da tabela ALTERADORXBENEF; para contribuições, de ALTERADORXCONTRIB e HSTATRASOCONTRIB.</td><td><code>dFolhaPrevia.dfm:572-581</code>; <code>dFolhaPrevia.pas:9162-9228, 9383-9431</code></td></tr>
+<tr><td><strong>FLGCORRIGEBENEF</strong></td><td>Parâmetro da entidade (tabela PARAMAPREV) que liga a correção. Só com valor 1 a prévia executa a correção dos lançamentos.</td><td><code>UAdmPrevFolha.pas:582</code>; <code>dFolhaPrevia.pas:9138</code></td></tr>
+<tr><td><strong>Mês de cobrança × mês de referência</strong></td><td>Mês de cobrança é o mês da folha em que o valor está sendo processado. Mês de referência é o mês a que o valor se refere. A correção só vale para lançamentos com mês de referência anterior ao mês de cobrança.</td><td><code>dFolhaPrevia.pas:9147-9148</code></td></tr>
+<tr><td><strong>HISTRUBSAL</strong></td><td>Histórico das rubricas e salários efetivados. A tela de salários retroativos lê dela o salário de participação (VALORPROVENTO) já registrado para cada mês.</td><td><code>FInformaSalRetroEv.dfm:66-75</code>; <a href="dados.html">🗄️ Dados</a></td></tr>
+<tr><td><strong>BENEFRETROATIVO / BENEFRETROXPESS</strong></td><td>Tabelas com objetos de acesso em <code>FOLHA/DBObjects</code>. BENEFRETROATIVO guarda, por benefício e plano, as regras de primeiro e último pagamento, de cálculo e de cálculo do abono, o motivo e as contas contábeis do retroativo. BENEFRETROXPESS guarda, por pessoa, os dados “anteriores” e “posteriores” do benefício (DIB, data de início no INSS, valores do INSS informado e calculado, percentual de concessão, prazo máximo, indicador de provisório e número do processo no INSS). Nenhuma tela ou rotina do módulo FOLHA usa esses objetos.</td><td><code>uDbBenefretroativo.pas:23-76</code>; <code>uDbBenefretroxpess.pas:23-84</code></td></tr>
+<tr><td><strong>DIB</strong></td><td>Data de início do benefício (campos DIBANT/DIBPOS em BENEFRETROXPESS).</td><td><code>uDbBenefretroxpess.pas:83-84</code></td></tr>
+<tr><td><strong>INSS</strong></td><td>Instituto Nacional do Seguro Social. Em BENEFRETROXPESS aparecem dados do benefício do INSS (data de início, valores e número do processo).</td><td><code>uDbBenefretroxpess.pas:63-82</code></td></tr>
+</tbody></table></div>
 </section>
 
 <section><div class="section-title">3. Pré-condições</div>
@@ -60,9 +78,14 @@
 <li>Patrocinadoras, planos e benefícios devem estar cadastrados.</li>
 <li>O usuário deve ter permissão de acesso ao módulo.</li>
 </ul>
+<p><strong>O que as pré-condições gerais significam na prática:</strong> o módulo da folha precisa estar instalado e conectado ao banco Oracle, e os parâmetros da folha e da entidade precisam estar cadastrados. Para esta jornada, o parâmetro que importa é FLGCORRIGEBENEF da tabela PARAMAPREV: só com valor 1 a correção de lançamentos de meses anteriores é executada na prévia (<code>UAdmPrevFolha.pas:582</code>; <code>dFolhaPrevia.pas:9138</code>). Também precisam existir as patrocinadoras, os planos e os benefícios, porque a correção é procurada pela combinação plano × benefício (ou plano × contribuição).</p>
 <p><strong>Por jornada:</strong></p>
 <ul>
 <li><a href="#PF-09">JF009</a>: —</li>
+</ul>
+<p><strong>Pré-condições por jornada, em termos de negócio:</strong></p>
+<ul>
+<li><a href="#PF-09">JF009</a>: a versão anterior não registrou pré-condições. O código mostra o seguinte. (a) Para a correção na prévia: FLGCORRIGEBENEF = 1; existir uma prévia em cálculo; o recebedor não ser tratado como recebedor de pensão alimentícia (a chamada é pulada quando <code>brecebedorpa</code> é verdadeiro, <code>dFolhaPrevia.pas:23420-23421</code>); e existir parametrização de alterador ativa (FLGCOBRA = 1) para o plano e o benefício em ALTERADORXBENEF. (b) Para a tela de salários retroativos: a rotina que chama a tela precisa informar a rubrica de salário, o período (data inicial e final), a pessoa e a patrocinadora. O significado exato de <code>brecebedorpa</code> não foi confirmado <span class="ev ev-pendente">PENDENTE</span>.</li>
 </ul>
 </section>
 
@@ -70,28 +93,37 @@
 <ul>
 <li><a href="#PF-09">JF009</a>: BENEFRETROATIVO, BENEFRETROXPESS, TMPDESC atualizados.</li>
 </ul>
+<p><strong>Resultado de negócio de cada jornada:</strong></p>
+<ul>
+<li><a href="#PF-09">JF009</a> — <em>conclusão com sucesso:</em> na prévia, os lançamentos de meses anteriores passam a ter, ao lado do valor original, uma rubrica de correção (atraso ou devolução) incluída na lista de rubricas do recebedor, com origem 3 (<code>dFolhaPrevia.pas:9247-9295</code>). Esse resultado segue para a conferência (<a href="uc108.html#PF-E">JF017</a>) e, depois, para a efetivação (<a href="uc109.html#PF-03">JF003</a>). O código lido grava as rubricas de correção na lista de rubricas da prévia. Não foi encontrada gravação de TMPDESC, BENEFRETROATIVO ou BENEFRETROXPESS nesta jornada, o que diverge da pós-condição acima <span class="ev ev-pendente">PENDENTE</span>. <em>Interrupções:</em> na prévia, os problemas não interrompem o cálculo. Eles são registrados nas mensagens da prévia, por exemplo “Rubrica de correção não parametrizada (da HstAtrasoContrib)”, “Valor da HstAtrasoContrib lançado zero” e “Erro ao gravar rubrica de Correção da HstAtrasoContrib …” (<code>dFolhaPrevia.pas:9317-9342</code>). Uma exceção geral da rotina gera a mensagem “Erro no processamento (INT3).” (<code>dFolhaPrevia.pas:23422-23426</code>). Na tela de salários retroativos, se algum mês estiver sem salário, aparece “Existe salário não informado” e a tela não é confirmada (<code>FInformaSalRetroEv.pas:113-120</code>).</li>
+</ul>
 </section>
 
 <section><div class="section-title">5. Jornadas Funcionais (JF009)</div>
 <p>Cada jornada traz objetivo, ator/gatilho, pré e pós-condições, sequência operacional, ações práticas, <strong>regras de negócio da jornada</strong> (texto completo de cada regra), tratamentos e mensagens.</p>
+<p><strong>Como as jornadas deste caso de uso se relacionam:</strong> este caso de uso tem uma única jornada (JF009), que não funciona sozinha. A correção dos retroativos roda dentro do cálculo da prévia (<a href="uc101.html#PF-02">JF002</a>, UC101) e usa a mesma regra RS020. O resultado é conferido em <a href="uc108.html#PF-E">JF017</a> antes da efetivação (<a href="uc109.html#PF-03">JF003</a>). Em cada passo, o rótulo “Usuário” ou “Sistema” indica quem executa a ação.</p>
 <div class="legend"><span><span class="ev ev-comprovado">COMPROVADO</span> — no código</span><span><span class="ev ev-inferido">INFERIDO</span> — plausível</span><span><span class="ev ev-pendente">PENDENTE</span> — validar</span></div>
 </section>
 
 <div class="pf-block" id="PF-09"><h4>JF009 (PF-09) — Retroativos</h4>
 <p><strong>Objetivo:</strong> processar salários/diferenças retroativas.</p>
+<p><strong>Necessidade de negócio:</strong> valores de meses passados que só entram na folha num mês posterior (lançamentos pendentes ou cobranças em atraso) precisam ser corrigidos para que nem o recebedor nem a entidade percam com a demora. A rotina de correção da prévia faz isso: para cada lançamento com mês de referência anterior ao mês de cobrança, calcula o alterador parametrizado e inclui a rubrica de correção correspondente. A tela de salários retroativos serve para informar ou conferir o salário de participação de cada mês de um período passado.</p>
 <p><strong>Gatilho/Ator:</strong> <code>FInformaSalRetroEv.dfm</code> + <code>uDbBenefretroativo.pas</code>/<code>uDbBenefretroxpess.pas</code>.</p>
+<p><strong>Pré-condições:</strong> não documentadas na versão anterior. <strong>Em termos de negócio:</strong> o código só sustenta as condições técnicas da correção: parâmetro FLGCORRIGEBENEF = 1 (<code>dFolhaPrevia.pas:9138</code>), lançamento do tipo 'P' com mês de referência anterior ao mês de cobrança (<code>dFolhaPrevia.pas:9147-9148</code>) e alterador ativo para o plano e o benefício, ou para o plano e a contribuição (<code>dFolhaPrevia.dfm:572-581</code>). Não há documentação de qual evento de negócio (por exemplo, reajuste ou revisão) dá origem a esses lançamentos <span class="ev ev-pendente">PENDENTE</span>.</p>
 <p><strong>Pós-condições:</strong> BENEFRETROATIVO, BENEFRETROXPESS, TMPDESC atualizados.</p>
+<p><strong>Em termos de negócio:</strong> o que o código comprova é a inclusão de rubricas de correção (atraso ou devolução) na prévia do recebedor, que entram no líquido calculado. A atualização de BENEFRETROATIVO e BENEFRETROXPESS não foi encontrada em nenhuma rotina do módulo: os objetos de acesso existem, mas nenhuma unidade da FOLHA os usa <span class="ev ev-pendente">PENDENTE</span>.</p>
 <p><strong>Sequência operacional:</strong></p>
 <ol>
-<li>Informar salário retroativo</li>
-<li>Recalcular diferenças</li>
-<li>Na prévia, <code>CalculaCorrecaoTmpDesc</code> (<code>dFolhaPrevia.pas:9122</code>) aplica correção sobre TMPDESC <a href="uc101.html#FOLHA-RN020">[RS020]</a></li>
+<li><strong>Usuário:</strong> Na tela “Informa Salários Retroativos (Ativo)”, confere ou digita o salário de participação de cada mês do período. A grade mostra o nome do participante, o mês de referência e o salário já registrado em HISTRUBSAL para a rubrica de salário informada (0,00 quando não existe). Com Shift+seta para baixo, o valor da linha anterior é copiado para a linha seguinte. Ao confirmar, se algum mês estiver vazio ou com 0,00, aparece “Existe salário não informado” e a tela continua aberta. Com tudo preenchido, a grade é devolvida a quem abriu a tela, sem gravação no banco (<code>FInformaSalRetroEv.pas:80-181</code>).<br><em>Passo técnico original:</em> Informar salário retroativo</li>
+<li><strong>Sistema:</strong> O recálculo das diferenças a partir dos salários informados é feito pela rotina que abriu a tela. No módulo FOLHA não foi encontrada essa rotina: a única chamada a <code>AbreTelaInformaSalariosRetro</code> no repositório está no módulo de contribuição (<code>CONTRIBUICAOPREV/Fontes/FSimulaContrib.pas:937</code>) <span class="ev ev-pendente">PENDENTE</span>.<br><em>Passo técnico original:</em> Recalcular diferenças</li>
+<li><strong>Sistema:</strong> Durante a prévia, depois de processar os lançamentos externos do recebedor (TMPDESC e rubricas individuais), o sistema percorre suas rubricas. Para cada lançamento do tipo 'P' com mês de referência anterior ao mês de cobrança, há dois casos. Se o lançamento é de contribuição, o sistema busca primeiro os valores de atraso já calculados (HSTATRASOCONTRIB); se não encontra, usa a parametrização de ALTERADORXCONTRIB. Se é de benefício, usa a parametrização de ALTERADORXBENEF (atraso quando o lançamento é crédito; devolução quando é desconto). Em todos os casos, calcula o alterador e inclui a rubrica de correção “normal” ou “de devolução”, conforme o sinal do valor. Uma lista de controle impede que a mesma correção de contribuição seja incluída duas vezes (<code>dFolhaPrevia.pas:9138-9431</code>).<br><em>Passo técnico original:</em> Na prévia, <code>CalculaCorrecaoTmpDesc</code> (<code>dFolhaPrevia.pas:9122</code>) aplica correção sobre TMPDESC <a href="uc101.html#FOLHA-RN020">[RS020]</a></li>
 </ol>
 <p><strong>Ações práticas:</strong></p>
 <div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
 <tr><td>Informar salário retroativo</td><td>Registrar valores retroativos</td><td>Salário retroativo, benefício</td><td>FInformaSalRetroEv → BENEFRETROATIVO/BENEFRETROXPESS</td><td>Valores retroativos gravados</td><td>—</td><td>—</td><td><code>FInformaSalRetroEv.dfm</code></td></tr>
 <tr><td>Aplicar correção na prévia</td><td>Corrigir TMPDESC com retroativo</td><td>Valores retroativos</td><td>CalculaCorrecaoTmpDesc (:9122)</td><td>TMPDESC corrigido</td><td><a href="uc101.html#FOLHA-RN020">RS020</a></td><td>—</td><td><code>FFolhaNormalPrevia.dfm</code></td></tr>
 </tbody></table></div>
+<p><strong>Onde as regras se aplicam:</strong> RS020 (abaixo) é a regra de correção por alterador. Nesta jornada ela se aplica no passo 3 (rotina <code>CalculaCorrecaoTmpDesc</code>). Na prévia normal (<a href="uc101.html#PF-02">JF002</a>), a mesma família de rotinas é usada por <code>CalculaCorrecaoBeneficio</code>, chamada com a data de pagamento (<code>dFolhaPrevia.pas:24552</code>).</p>
 <div class="jf-rules">
 <p><strong>Regras de negócio da jornada:</strong> 1 regra(s) — texto completo abaixo.</p>
 <div class="rule-block" id="FOLHA-RN020"><div class="rule-id">RS020 (FOLHA-RN020) — Correção/alterador do benefício por data de pagamento</div>
@@ -109,6 +141,16 @@
 <p><strong>Dependências:</strong> integrada a <a href="uc101.html#PF-02">JF002</a>. Evidência: <code>FOLHA/Fontes/FInformaSalRetroEv.pas</code>, <code>dFolhaPrevia.pas:9122</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
 <div class="mermaid">graph LR
   n0["FInformaSalRetroEv"] --> n1["BENEFRETROATIVO/BENEFRETROXPESS"] --> n2["(na prévia) CalculaCorrecaoTmpDesc(:9122)"] --> n3["TMPDESC"]</div>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span> — informações que o repositório não comprova ou que divergem entre fontes. O texto existente foi mantido; os itens abaixo dependem de validação humana.</p>
+<ul>
+<li>O fluxo “FInformaSalRetroEv → BENEFRETROATIVO/BENEFRETROXPESS” (diagrama e Ações práticas) não foi comprovado. A tela não grava em nenhuma tabela: ela só lê HISTRUBSAL e ELEGPATRO e devolve uma grade (<code>FInformaSalRetroEv.pas:109-181</code>). <code>uDbBenefretroativo</code> e <code>uDbBenefretroxpess</code> não são usados por nenhuma unidade da FOLHA.</li>
+<li>A unidade <code>FInformaSalRetroEv</code> não aparece no <code>Folha.dpr</code> nem no menu (<code>FPrincipal.pas</code>), e nenhuma unidade da FOLHA a chama. Cópias da mesma tela existem em CMADMPREV, INTERFACEPREV e CENTRALAP. É preciso confirmar se esta tela faz parte, de fato, do processo da folha.</li>
+<li><code>CalculaCorrecaoTmpDesc</code> inclui rubricas de correção na lista de rubricas do recebedor na prévia. Não foi encontrada atualização (UPDATE) de TMPDESC nesta rotina, o que diverge de “aplica correção sobre TMPDESC” e “TMPDESC corrigido”.</li>
+<li>O significado do tipo de lançamento 'P' (<code>sflgtipodesc = 'P'</code>) não está documentado. Também não está documentado se a correção de lançamentos de meses anteriores corresponde ao que o negócio chama de “retroativo”.</li>
+<li>A tela de salários retroativos copia a mesma linha de ELEGPATRO (<code>qryParticip</code>) a cada mês, mas não usa o resultado. Confirmar se falta alguma regra de cargo/nível (<code>FInformaSalRetroEv.pas:171-174</code>).</li>
+<li>A Ações práticas indica a tela <code>FFolhaNormalPrevia.dfm</code> para a correção. A correção é executada no data module <code>dFolhaPrevia</code>, chamado pelo cálculo da prévia, e não tem controle próprio nessa tela.</li>
+</ul>
+</div>
 </div>
 
 <section id="TRT-section"><div class="section-title">6. Tratamentos (TRT)</div>

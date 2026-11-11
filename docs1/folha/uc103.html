@@ -49,6 +49,24 @@
 <ul>
 <li><a href="#PF-06"><strong>JF006 — Apropriação Contábil</strong></a>: gerar lançamentos contábeis a partir das rubricas previadas/efetivadas.</li>
 </ul>
+<p><strong>Necessidade de negócio:</strong> todo benefício pago e todo desconto retido na folha precisam ser registrados na contabilidade da entidade, na conta e no centro de custo corretos de cada plano. Para isso, cada rubrica precisa ter sua parametrização contábil e financeira, chamada no código de “CF”: conta de crédito, conta de débito, centro de custo, subconta, centro de responsabilidade, tipo de desembolso e unidade de negócio. No ciclo mensal (preparo → prévia → conferência → efetivação → pagamento/contabilização), essa parametrização é conferida já na prévia. O sistema lista as rubricas sem parâmetros, para que o problema seja corrigido antes da efetivação (<code>dContabil.pas:1868-1880</code>; <code>FFolhaNormalPrevia.pas:3128-3131</code>). Na efetivação, o sistema gera a planilha contábil com os lançamentos de apropriação (<code>fFolhaNormalEfet.pas:2363, 4461-4530</code>). O catálogo de regras resume isso assim: “A folha efetivada gera apropriação contábil, cuja parametrização contábil/financeira pode ser conferida ainda na prévia” (RN065 em <a href="../../docs/business-rules-catalog.html">catálogo de regras</a>).</p>
+<p><strong>Quem inicia:</strong> o usuário abre a tela “Apropriação Contábil” (<code>FParamRelApropContabil.dfm:4</code>). Ela é uma tela de parâmetros de relatório, aberta pelo mecanismo de relatórios do módulo (<code>dRelFolha.pas:1056-1070</code>; <a href="relatorios.html">📄 Relatórios</a>). O caminho exato de menu não foi localizado <span class="ev ev-pendente">PENDENTE</span>. A conferência dos parâmetros contábeis acontece automaticamente durante o cálculo da prévia (<a href="uc101.html#PF-02">JF002</a>). A geração da planilha contábil acontece automaticamente durante a efetivação (<a href="uc109.html#PF-03">JF003</a>), sem ação separada do usuário.</p>
+<p><strong>Resultado esperado:</strong> na prévia, o usuário recebe a lista de rubricas cujos parâmetros contábeis e financeiros estão incompletos ou inválidos. Na efetivação, a planilha contábil fica registrada e o código dela fica gravado no histórico da folha (HSTFOLHABENEF), o que permite regerá-la depois. Na tela “Apropriação Contábil”, o código atual apenas grava o log e confere se um histórico foi escolhido (ver “Pontos a validar”).</p>
+<p><strong>Termos, siglas e componentes citados nesta página</strong> — explicados na primeira vez em que aparecem; a coluna “Fonte” indica onde a explicação foi conferida no repositório:</p>
+<div class="table-wrap"><table><thead><tr><th>Termo</th><th>O que significa</th><th>Fonte</th></tr></thead><tbody>
+<tr><td><strong>Apropriação contábil</strong></td><td>Registro contábil dos valores da folha: proventos, descontos e líquido, nas contas de cada plano. Na efetivação, aparece como “Geração de contabilização de lançamentos de apropriação em partida simples”.</td><td><code>fFolhaNormalEfet.pas:4527</code></td></tr>
+<tr><td><strong>Rubrica</strong></td><td>Cada tipo de provento ou desconto da folha (catálogo PROVDESC). Os valores pagos por rubrica ficam em HISTRUBSAL (folha efetivada) ou em PREVIA (cálculo provisório).</td><td><a href="dados.html">🗄️ Dados</a>; RN064 em <a href="../../docs/business-rules-catalog.html">catálogo de regras</a></td></tr>
+<tr><td><strong>Prévia / efetivação</strong></td><td>A prévia é o cálculo provisório da folha, que pode ser conferido e desfeito (<a href="uc101.html#PF-02">JF002</a>). A efetivação transforma uma versão da prévia na folha definitiva (<a href="uc109.html#PF-03">JF003</a>).</td><td>RN063 em <a href="../../docs/business-rules-catalog.html">catálogo de regras</a></td></tr>
+<tr><td><strong>Histórico da folha (HSTFOLHABENEF)</strong></td><td>Cabeçalho de cada folha processada. A tela “Apropriação Contábil” lista os históricos com FLGESTADO diferente de 2. Na efetivação, o código da planilha contábil gerada fica gravado nesse histórico.</td><td><code>FParamRelApropContabil.dfm:75-78</code>; <code>fFolhaNormalEfet.pas:4498-4502</code></td></tr>
+<tr><td><strong>PLANPREVCONTABIL (plano contábil)</strong></td><td>Cadastro dos planos previdenciários contábeis. O sistema informa “Plano previdenciário contábil inativo” ou “… inexistente (vide tabela PLANPREVCONTABIL …)” quando o plano da rubrica não está apto.</td><td><code>dContabil.pas:1002-1013</code></td></tr>
+<tr><td><strong>Parâmetros CF (contábeis e financeiros)</strong></td><td>Conjunto de dados contábeis e financeiros de cada rubrica: conta de crédito (PLACONTAC), conta de débito (PLACONTAD), centro de custo, subconta, centro de responsabilidade, tipo de desembolso (CODTIPRECDES) e unidade de negócio (UNIDNEGOC). Quando a entidade usa provisão de abono anual, há também as contas de provisão. Os parâmetros são buscados primeiro na patrocinadora (BENEFPLANPATRO) e, se estiverem vazios, no plano (BENEFPLANPREV).</td><td><code>dContabil.pas:583-620, 917-989</code></td></tr>
+<tr><td><strong>Lote</strong></td><td>Conjunto de cálculos de uma prévia, controlado em CTRLINTERFACE. A regra RS013 fala dos “parâmetros CF do lote” validados na efetivação.</td><td><code>fFolhaNormalEfet.pas:3388-3440</code></td></tr>
+<tr><td><strong>dContabil (dtmContabil)</strong></td><td>Módulo de dados contábil da Folha. Ele busca e valida os parâmetros CF, guarda a lista dos que não foram validados e a exibe no resultado da prévia. Não foi encontrada nele gravação de lançamentos.</td><td><code>dContabil.pas:583, 917, 1868</code>; <a href="inventario-tecnico.html">📦 Inventário</a></td></tr>
+<tr><td><strong>InstanciaDtmLocal</strong></td><td>Rotina do motor da prévia (dtmFolhaPrevia) que apenas associa ao motor a instância do módulo contábil criada pela tela da prévia (dtmContabilPrevia).</td><td><code>dFolhaPrevia.pas:19438-19442</code>; <code>FFolhaNormalPrevia.pas:2446, 3399</code></td></tr>
+<tr><td><strong>Planilha contábil / tctrlLancamento</strong></td><td>Conjunto de lançamentos contábeis da folha efetivada. É gravado pelo componente externo tctrlLancamento (unit uCtrlLancamento, chamada InsereLancaContab). Esse componente não está no repositório.</td><td><code>fFolhaNormalEfet.pas:774, 893, 4506, 8005</code></td></tr>
+<tr><td><strong>Partida simples / partida dobrada</strong></td><td>Duas formas de montar os lançamentos, escolhidas pelo parâmetro da folha flgpartidadobrada. Com 0, o sistema gera lançamentos em partida simples, apurando o líquido. Com outro valor, gera os lançamentos em partida dobrada a partir de HISTRUBSAL.</td><td><code>fFolhaNormalEfet.pas:4520-4527, 4878-4880</code></td></tr>
+<tr><td><strong>Provisão de abono anual</strong></td><td>Lançamentos de provisão do abono anual, gerados em partida dobrada quando a entidade usa essa provisão (parâmetro FlgUsaProvisaoAbono).</td><td><code>fFolhaNormalEfet.pas:5264-5378</code>; <code>dContabil.pas:965-985</code></td></tr>
+</tbody></table></div>
 </section>
 
 <section><div class="section-title">3. Pré-condições</div>
@@ -60,9 +78,14 @@
 <li>Patrocinadoras, planos e benefícios devem estar cadastrados.</li>
 <li>O usuário deve ter permissão de acesso ao módulo.</li>
 </ul>
+<p><strong>O que as pré-condições gerais significam na prática:</strong> além do acesso ao módulo e ao banco, os parâmetros da folha definem como a contabilização é montada: em partida simples ou dobrada (flgpartidadobrada) e com ou sem provisão de abono anual (FlgUsaProvisaoAbono) (<code>fFolhaNormalEfet.pas:4520</code>; <code>dContabil.pas:965</code>). As patrocinadoras, os planos e os benefícios precisam ter seus parâmetros contábeis e financeiros cadastrados (BENEFPLANPATRO / BENEFPLANPREV), porque é deles que o sistema obtém as contas de cada rubrica (<code>dContabil.pas:583-620</code>).</p>
 <p><strong>Por jornada:</strong></p>
 <ul>
 <li><a href="#PF-06">JF006</a>: prévia ou efetivação existente; plano de contas vinculado (PLANPREVCONTABIL).</li>
+</ul>
+<p><strong>Pré-condições por jornada, em termos de negócio:</strong></p>
+<ul>
+<li><a href="#PF-06">JF006</a>: a conferência de parâmetros só acontece quando uma prévia é calculada. A planilha contábil só é gerada quando uma versão é efetivada. O plano contábil de cada rubrica precisa existir e estar ativo em PLANPREVCONTABIL. Cada rubrica precisa ter conta de crédito e conta de débito válidas no plano de contas, centro de responsabilidade ativo e tipo de desembolso (<code>dContabil.pas:917-989, 1002-1013</code>).</li>
 </ul>
 </section>
 
@@ -70,23 +93,32 @@
 <ul>
 <li><a href="#PF-06">JF006</a>: lançamentos contábeis gerados (tabela destino PENDENTE).</li>
 </ul>
+<p><strong>Resultado de negócio de cada jornada:</strong></p>
+<ul>
+<li><a href="#PF-06">JF006</a> — <em>conclusão com sucesso:</em> na efetivação, a planilha contábil da folha é gerada pelo componente de lançamentos, e o código dela fica no histórico da folha. A planilha pode ser regerada depois, porque o sistema exclui a planilha corrente e gera outra (<code>fFolhaNormalEfet.pas:2620, 4504-4512</code>). Na prévia, o usuário vê a seção “INFORMAÇÕES SOBRE PARÂMETROS CONTÁBEIS E FINANCEIROS”, que lista os parâmetros que não foram validados (<code>dContabil.pas:1876-1878</code>). <em>Interrupções:</em> na efetivação, um parâmetro inválido exibe “Erro na Integração Contábil/Financeira.” com a rubrica afetada (<code>fFolhaNormalEfet.pas:3435-3440</code>). Se a exclusão da planilha falhar na regeração, o sistema exibe “Erro na exclusão da planilha corrente, para regeração.” (<code>fFolhaNormalEfet.pas:4509</code>). A tabela onde os lançamentos ficam gravados continua <span class="ev ev-pendente">PENDENTE</span>.</li>
+</ul>
 </section>
 
 <section><div class="section-title">5. Jornadas Funcionais (JF006)</div>
 <p>Cada jornada traz objetivo, ator/gatilho, pré e pós-condições, sequência operacional, ações práticas, <strong>regras de negócio da jornada</strong> (texto completo de cada regra), tratamentos e mensagens.</p>
+<p><strong>Como as jornadas deste caso de uso se relacionam:</strong> este caso de uso tem uma única jornada. Ela se apoia em duas jornadas de outros casos de uso: a prévia (<a href="uc101.html#PF-02">JF002</a>), onde a parametrização contábil é conferida, e a efetivação (<a href="uc109.html#PF-03">JF003</a>), onde a planilha contábil é gerada. Em cada passo, o rótulo “Usuário” ou “Sistema” indica quem executa a ação.</p>
 <div class="legend"><span><span class="ev ev-comprovado">COMPROVADO</span> — no código</span><span><span class="ev ev-inferido">INFERIDO</span> — plausível</span><span><span class="ev ev-pendente">PENDENTE</span> — validar</span></div>
 </section>
 
 <div class="pf-block" id="PF-06"><h4>JF006 (PF-06) — Apropriação Contábil</h4>
 <p><strong>Objetivo:</strong> gerar lançamentos contábeis a partir das rubricas previadas/efetivadas.</p>
+<p><strong>Necessidade de negócio:</strong> a contabilidade precisa receber, a cada folha efetivada, os valores pagos e retidos nas contas contábeis corretas de cada plano. Se uma rubrica estiver sem conta, a contabilização sai incompleta. Por isso o sistema confere a parametrização já na prévia, antes de a folha se tornar definitiva.</p>
 <p><strong>Gatilho/Ator:</strong> <code>FParamRelApropContabil.dfm</code> (Apropriação Contábil).</p>
 <p><strong>Pré-condições:</strong> prévia ou efetivação existente; plano de contas vinculado (PLANPREVCONTABIL).</p>
+<p><strong>Em termos de negócio:</strong> existe uma prévia calculada ou uma versão em efetivação. O plano contábil está ativo, e as rubricas têm contas de crédito e de débito, centro de custo, centro de responsabilidade e tipo de desembolso parametrizados.</p>
 <p><strong>Pós-condições:</strong> lançamentos contábeis gerados (tabela destino PENDENTE).</p>
+<p><strong>Em termos de negócio:</strong> a planilha contábil da folha efetivada existe e está associada ao histórico da folha. Na prévia, a lista de parâmetros pendentes fica visível no resultado do processamento.</p>
 <p><strong>Sequência operacional:</strong></p>
 <ol>
-<li>Apurar rubricas por plano contábil</li>
-<li><code>InstanciaDtmLocal</code> (<code>dFolhaPrevia.pas:19438</code>) instancia <code>dContabil.pas</code></li>
-<li>Gerar lançamentos contábeis</li>
+<li><strong>Usuário:</strong> Na tela “Apropriação Contábil”, o usuário escolhe o histórico da folha e confirma. O sistema grava o log “Emissão: Apropriação Contábil”. Se nenhum histórico tiver sido escolhido, mostra “A Patrocinadora é obrigatória !” (<code>FParamRelApropContabil.pas:49-71</code>). Nenhum processamento adicional existe depois dessa conferência (ver “Pontos a validar”).<br><em>Passo técnico original:</em> passo acrescentado; não consta da versão anterior.</li>
+<li><strong>Sistema:</strong> Para cada rubrica, o sistema busca os parâmetros contábeis e financeiros, primeiro na patrocinadora (BENEFPLANPATRO) e depois no plano (BENEFPLANPREV) (<code>dContabil.pas:583-620</code>). Na prévia, valida esses parâmetros com ValidaCF (<code>dFolhaPrevia.pas:4361</code>). Na efetivação, soma os valores de HISTRUBSAL por plano contábil (PLANPREVCONTABIL), conta e centro de custo para montar os lançamentos (<code>fFolhaNormalEfet.pas:4527-4560</code>).<br><em>Passo técnico original:</em> Apurar rubricas por plano contábil</li>
+<li><strong>Sistema:</strong> Antes de calcular a prévia, a tela da prévia faz o motor de cálculo usar a instância do módulo contábil que ela mesma criou (dtmContabilPrevia). Isso faz a conferência contábil acompanhar a prévia em execução (<code>FFolhaNormalPrevia.pas:2446, 3399</code>). A rotina só associa as instâncias: ela não gera lançamentos (<code>dFolhaPrevia.pas:19438-19442</code>).<br><em>Passo técnico original:</em> <code>InstanciaDtmLocal</code> (<code>dFolhaPrevia.pas:19438</code>) instancia <code>dContabil.pas</code></li>
+<li><strong>Sistema:</strong> Na prévia, o sistema exibe a seção “INFORMAÇÕES SOBRE PARÂMETROS CONTÁBEIS E FINANCEIROS” com a patrocinadora, o plano e a rubrica de cada parâmetro não validado (<code>dContabil.pas:1868-1900</code>). Na efetivação, gera a planilha contábil pelo componente externo tctrlLancamento (InsereLancaContab), em partida simples ou dobrada, e também a provisão de abono anual quando aplicável (<code>fFolhaNormalEfet.pas:4461-5380</code>).<br><em>Passo técnico original:</em> Gerar lançamentos contábeis</li>
 </ol>
 <p><strong>Ações práticas:</strong></p>
 <div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
@@ -111,6 +143,13 @@
 <p><strong>Dependências:</strong> sucede <a href="uc101.html#PF-02">JF002</a> ou <a href="uc109.html#PF-03">JF003</a>. Evidência: <code>dFolhaPrevia.pas:19438</code>, <code>dContabil.pas</code> · <span class="ev ev-comprovado">COMPROVADO</span> (chamada); destino <span class="ev ev-pendente">PENDENTE</span></p>
 <div class="mermaid">graph LR
   n0["FParamRelApropContabil"] --> n1["apuraRubricasPorPlanoContabil"] --> n2["InstanciaDtmLocal(dContabil)"] --> n3["lançamentos contábeis"]</div>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span> — informações que o repositório não comprova ou que divergem entre fontes. O texto existente foi mantido; os itens abaixo dependem de validação humana.</p><ul>
+<li>A tela “Apropriação Contábil” (FParamRelApropContabil), indicada como gatilho, não gera relatório nem lançamento no código atual. Depois de gravar o log e conferir o histórico, o bloco <code>If bFaz Then … end;</code> está vazio (<code>FParamRelApropContabil.pas:69-71</code>). A mensagem fala em “Patrocinadora”, mas o campo conferido é o histórico da folha. É preciso confirmar se a funcionalidade foi descontinuada ou se o relatório é emitido por outro caminho.</li>
+<li>A geração efetiva dos lançamentos ocorre na efetivação (<code>fFolhaNormalEfet.pas:2363, 4461</code>), pelo componente tctrlLancamento (unit uCtrlLancamento). Esse componente não existe no repositório, e por isso a tabela de destino continua desconhecida. O catálogo de regras (RN065) cita a tabela CONTABFOLHA, mas no código da Folha ela só aparece em um comentário (<code>FfinancHabitacional.pas:686</code>).</li>
+<li>O texto da mensagem MSG009 (“Parâmetros contábeis/financeiros do lote não configurados”) não foi encontrado literalmente no código. As mensagens reais são “Erro na Integração Contábil/Financeira.” e textos por campo, como “Conta Crédito (PlacontaC) não parametrizada” e “Tipo de Desembolso não parametrizado” (<code>fFolhaNormalEfet.pas:3435</code>; <code>dContabil.pas:864-990</code>).</li>
+<li>Não ficou comprovado se, na prévia, uma rubrica sem parâmetro contábil impede o cálculo ou apenas aparece na lista do resultado (<code>dFolhaPrevia.pas:4330-4361</code>) <span class="ev ev-inferido">INFERIDO</span>: apenas aparece na lista.</li>
+<li>A dependência “sucede JF002 ou JF003” deve ser lida assim: na prévia (JF002), só há conferência de parâmetros; os lançamentos são gerados apenas na efetivação (JF003).</li>
+</ul></div>
 </div>
 
 <section id="TRT-section"><div class="section-title">6. Tratamentos (TRT)</div>

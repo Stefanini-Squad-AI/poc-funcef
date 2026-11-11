@@ -49,6 +49,25 @@
 <ul>
 <li><a href="#PF-10"><strong>JF010 — Conciliação e Reembolso do INSS</strong></a>: prestar contas ao INSS, conciliar reembolso e retificar.</li>
 </ul>
+<p><strong>Necessidade de negócio:</strong> a entidade paga alguns benefícios por conta do INSS e depois é reembolsada pelo INSS desses valores. O módulo mantém um menu próprio, “Reembolso do INSS”, para esse controle (<code>FPrincipal.dfm:640-753</code>). Todo mês é preciso comparar o que a entidade desembolsou na folha (“Desembolso Funcef”) com o que o INSS reembolsou (“Reembolso INSS”) para cada número de benefício (NB), apurando a diferença e a glosa. Depois, a entidade presta contas ao INSS com relatórios e arquivos por órgão/UF, e retifica a prestação quando necessário. O vínculo com o ciclo mensal da folha se dá pelo mês de competência do reembolso, marcado nas rubricas da folha (HISTRUBSAL), no histórico de benefícios e nas rubricas individuais. Os valores de acerto podem voltar para a folha como rubricas individuais. O catálogo de regras registra que “o reembolso do INSS é conciliado a partir de arquivos importados” (RN070 em <a href="../../docs/business-rules-catalog.html">catálogo de regras</a>).</p>
+<p><strong>Quem inicia:</strong> sempre o usuário, pelo menu “Reembolso do INSS” (<code>FPrincipal.dfm:640</code>). As opções usadas aqui são: “Manutenção de Rubricas do Reembolso do INSS e NB” (:743-745), “Conciliação do Reembolso do INSS” (:747-749), “Prestação de Contas do INSS” (:751-753) e “Insere Rubricas do INSS na Folha” (:714-716), que é onde a regra RS024 se aplica. Nenhuma dessas telas é disparada automaticamente.</p>
+<p><strong>Resultado esperado:</strong> as rubricas pagas ficam marcadas com o mês de competência do reembolso. O usuário consegue ver, por NB e período, o desembolso, o reembolso, a diferença e a glosa, e imprimir os relatórios analítico e sintético. A prestação de contas do mês fica gerada (PRESTACAOCONTASINSS), com arquivos registrados (ARQUIVOPRESTACAOCONTASINSS), e depois efetivada, enviada por e-mail e, se preciso, retificada com o motivo registrado (PRESTACAOCONTASINSSRET).</p>
+<p><strong>Termos, siglas e componentes citados nesta página</strong> — explicados na primeira vez em que aparecem; a coluna “Fonte” indica onde a explicação foi conferida no repositório:</p>
+<div class="table-wrap"><table><thead><tr><th>Termo</th><th>O que significa</th><th>Fonte</th></tr></thead><tbody>
+<tr><td><strong>INSS</strong></td><td>Instituto Nacional do Seguro Social, a previdência oficial. Aqui, ele é o órgão que reembolsa a entidade pelos benefícios pagos por conta dele.</td><td><code>FPrincipal.dfm:640-753</code></td></tr>
+<tr><td><strong>Reembolso / desembolso</strong></td><td>Desembolso é o que a entidade pagou na folha (“Desembolso Funcef”). Reembolso é o que o INSS devolveu (“Reembolso INSS”). A conciliação mostra também a “Diferença” e a “Glosa”.</td><td><code>FConciliacaoReembolsoINSS.dfm:520, 585, 726-750</code></td></tr>
+<tr><td><strong>Glosa</strong></td><td>Valor recusado pelo INSS no reembolso. A prestação de contas calcula a glosa por NB e mês (retornaValorGlosa). A definição normativa não aparece no repositório <span class="ev ev-inferido">INFERIDO</span>.</td><td><code>FPrestacaoContasINSS.pas:5217</code></td></tr>
+<tr><td><strong>NB (número do benefício do INSS)</strong></td><td>Número do benefício no INSS, guardado em BENEFBFCIARIO.NUMPROCINSS. É a chave de pesquisa da conciliação. Se ele não for encontrado, o sistema mostra “NB não encontrado”.</td><td><code>FConciliacaoReembolsoINSS.pas:687-730</code></td></tr>
+<tr><td><strong>Mantenedora</strong></td><td>Entidade que mantém o benefício. A conciliação pode ser restrita a “Apenas reembolso p/ mantenedora Funcef”.</td><td><code>FConciliacaoReembolsoINSS.dfm:100, 350</code></td></tr>
+<tr><td><strong>Mês de competência do reembolso (MESCOMPREEM)</strong></td><td>Mês do INSS ao qual um pagamento da folha se refere. É gravado em HISTRUBSAL, em HSTBENEFBFCIARIO (fonte pagadora 2) e em RUBRICAINDIV pela tela de manutenção de rubricas.</td><td><code>FManutRubricaReembolsoINSS.pas:625-720</code></td></tr>
+<tr><td><strong>Rubrica</strong></td><td>Tipo de provento ou desconto da folha. Na conciliação, o usuário pode filtrar as “Rubricas Desembolso” e as “Rubricas Reembolso” e inibir as rubricas de pensão alimentícia.</td><td><code>FConciliacaoReembolsoINSS.dfm:333, 645, 680</code></td></tr>
+<tr><td><strong>HISTRUBSAL / HSTBENEFBFCIARIO / RUBRICAINDIV</strong></td><td>Histórico das rubricas pagas, histórico mensal do benefício e rubricas individuais programadas para a próxima folha, respectivamente.</td><td><a href="dados.html">🗄️ Dados</a></td></tr>
+<tr><td><strong>DETCONCINSS</strong></td><td>Detalhe da conciliação do INSS, de onde a tela “Inserção das Rubricas INSS na Folha” lê os valores a lançar como rubricas individuais.</td><td><code>FInsereRubricasINSSFolha.pas:143</code>; RN070 em <a href="../../docs/business-rules-catalog.html">catálogo de regras</a></td></tr>
+<tr><td><strong>Prestação de contas (PRESTACAOCONTASINSS)</strong></td><td>Registro mensal, por órgão/UF e espécie, dos valores reembolsados, desembolsados, glosados e das diferenças. É marcado como efetivado (PRESTACAOCONTASEFETIVADA = 1) ou retificado (FLGRETIFICADA).</td><td><code>FPrestacaoContasINSS.pas:1238-1260, 2906-2910</code></td></tr>
+<tr><td><strong>ENVIOPRESTACAOCONTASINSS / ARQUIVOPRESTACAOCONTASINSS</strong></td><td>Controle dos envios e dos arquivos de prestação de contas gerados para cada órgão do INSS.</td><td><code>FPrestacaoContasINSS.pas:1174, 4797</code></td></tr>
+<tr><td><strong>Retificação (PRESTACAOCONTASINSSRET)</strong></td><td>Nova geração de uma prestação de contas já feita. Exige um motivo, informado na tela “Prestação de Contas do INSS - Motivo da Retificação”. Os lançamentos retificados ficam registrados em PRESTACAOCONTASINSSRET.</td><td><code>FPrestacaoContasINSS.pas:2952-3040, 6204-6280</code>; <code>FPrestacaoContasINSSMotivo.dfm:4</code></td></tr>
+<tr><td><strong>Espécie / DIB</strong></td><td>Espécie é o código do tipo de benefício (CODBENEFICIO). DIB é a data de início do benefício (DATAINICIO). Ambos são exibidos na conciliação.</td><td><code>FConciliacaoReembolsoINSS.pas:700-725</code>; <code>FConciliacaoReembolsoINSS.dfm:108-116</code></td></tr>
+</tbody></table></div>
 </section>
 
 <section><div class="section-title">3. Pré-condições</div>
@@ -60,9 +79,14 @@
 <li>Patrocinadoras, planos e benefícios devem estar cadastrados.</li>
 <li>O usuário deve ter permissão de acesso ao módulo.</li>
 </ul>
+<p><strong>O que as pré-condições gerais significam na prática:</strong> o usuário precisa ter acesso ao menu “Reembolso do INSS”. Os beneficiários precisam ter o NB do INSS registrado no benefício (BENEFBFCIARIO.NUMPROCINSS), porque é por ele que a conciliação pesquisa (<code>FConciliacaoReembolsoINSS.pas:687-730</code>). A prestação de contas consulta os órgãos do INSS cadastrados e, se não houver nada a prestar, mostra “Não existe prestação de contas a ser gerada.” (<code>FPrestacaoContasINSS.pas:6334-6338</code>).</p>
 <p><strong>Por jornada:</strong></p>
 <ul>
 <li><a href="#PF-10">JF010</a>: —</li>
+</ul>
+<p><strong>Pré-condições por jornada, em termos de negócio:</strong></p>
+<ul>
+<li><a href="#PF-10">JF010</a>: a versão anterior não registrava pré-condição. Pelo código: a conciliação exige um NB existente e um período entre maio/1997 e o período final informado (<code>FConciliacaoReembolsoINSS.pas:919-968</code>). A prestação de contas exige nome, CPF e cargo do responsável e uma das opções de relatório: “Prévia”, “Efetivação” ou “Retificado” (<code>FPrestacaoContasINSS.pas:1460-1486</code>). A efetivação exige prestação e arquivos já gerados para o período (<code>FPrestacaoContasINSS.pas:2885-2899</code>). A origem dos dados de reembolso (importação dos arquivos do INSS) está fora desta jornada e não foi documentada <span class="ev ev-pendente">PENDENTE</span>.</li>
 </ul>
 </section>
 
@@ -70,23 +94,31 @@
 <ul>
 <li><a href="#PF-10">JF010</a>: prestação de contas e reembolso do INSS conciliados.</li>
 </ul>
+<p><strong>Resultado de negócio de cada jornada:</strong></p>
+<ul>
+<li><a href="#PF-10">JF010</a> — <em>conclusão com sucesso:</em> a prestação de contas do mês fica gerada e efetivada (“Prestação de contas efetivada com sucesso.”) e pode ser enviada por e-mail pelo Outlook aos órgãos do INSS (<code>FPrestacaoContasINSS.pas:2918, 4681-4700</code>). As diferenças entre desembolso e reembolso ficam visíveis nos relatórios da conciliação. Os acertos podem ser lançados na folha como rubricas individuais (“Lançamentos efetuados com sucesso.”) (<code>FInsereRubricasINSSFolha.pas:630</code>). <em>Interrupções:</em> um erro na geração exibe “Erro ao gerar prestação de contas.” e desfaz a transação (<code>FPrestacaoContasINSS.pas:6375-6383</code>). Sem motivo, a retificação não prossegue (“Motivo não informado.”, <code>FPrestacaoContasINSSMotivo.pas:53-55</code>). O cancelamento pelo usuário (<a href="#TRT016">TRT016</a>) depende de um sinal que o código nunca liga (ver “Pontos a validar”).</li>
+</ul>
 </section>
 
 <section><div class="section-title">5. Jornadas Funcionais (JF010)</div>
 <p>Cada jornada traz objetivo, ator/gatilho, pré e pós-condições, sequência operacional, ações práticas, <strong>regras de negócio da jornada</strong> (texto completo de cada regra), tratamentos e mensagens.</p>
+<p><strong>Como as jornadas deste caso de uso se relacionam:</strong> este caso de uso tem uma única jornada, composta por várias telas do menu “Reembolso do INSS”. A manutenção de rubricas marca o mês de competência do reembolso. A conciliação compara desembolso e reembolso. A prestação de contas gera, efetiva, envia e retifica o resultado mensal. A inserção de rubricas INSS leva os acertos de volta à folha, que é calculada na prévia (<a href="uc101.html#PF-02">JF002</a>). Em cada passo, o rótulo “Usuário” ou “Sistema” indica quem executa a ação.</p>
 <div class="legend"><span><span class="ev ev-comprovado">COMPROVADO</span> — no código</span><span><span class="ev ev-inferido">INFERIDO</span> — plausível</span><span><span class="ev ev-pendente">PENDENTE</span> — validar</span></div>
 </section>
 
 <div class="pf-block" id="PF-10"><h4>JF010 (PF-10) — Conciliação e Reembolso do INSS</h4>
 <p><strong>Objetivo:</strong> prestar contas ao INSS, conciliar reembolso e retificar.</p>
+<p><strong>Necessidade de negócio:</strong> a entidade precisa recuperar do INSS os valores que pagou por conta dele e demonstrar, mês a mês, o que foi pago, o que foi reembolsado, as diferenças e as glosas. Para isso, os pagamentos da folha precisam estar associados ao mês de competência do INSS, e a prestação de contas precisa poder ser refeita com justificativa.</p>
 <p><strong>Gatilho/Ator:</strong> <code>FPrestacaoContasINSS.dfm</code>, <code>FConciliacaoReembolsoINSS.dfm</code>, <code>FManutRubricaReembolsoINSS.dfm</code>.</p>
+<p><strong>Pré-condições:</strong> não documentadas na versão anterior. <strong>Em termos de negócio:</strong> pelo código, os beneficiários têm NB do INSS registrado, existem dados de reembolso para o período e o usuário informa os dados do responsável pela prestação de contas (nome, CPF, cargo e, para envio, e-mail) (<code>FPrestacaoContasINSS.pas:1460-1486, 1807-1853</code>). A formalização dessas condições está <span class="ev ev-pendente">PENDENTE</span>.</p>
 <p><strong>Pós-condições:</strong> prestação de contas e reembolso do INSS conciliados.</p>
+<p><strong>Em termos de negócio:</strong> a prestação de contas do período está registrada e efetivada (PRESTACAOCONTASINSS), com os arquivos de envio registrados. As rubricas pagas estão marcadas com o mês de competência do reembolso. Uma retificação deixa o histórico dos lançamentos retificados e o motivo informado.</p>
 <p><strong>Sequência operacional:</strong></p>
 <ol>
-<li>Prestação de contas</li>
-<li>Conciliação de reembolso (5 grades)</li>
-<li>Manutenção de rubricas de reembolso/NB</li>
-<li>Retificação (motivo em <code>FPrestacaoContasINSSMotivo</code>)</li>
+<li><strong>Usuário:</strong> Na tela “Prestação de Contas do INSS”, o usuário informa o período do reembolso (mês/ano inicial e final), o tipo de relatório (analítico ou sintético), os dados do responsável e a opção “Prévia”, “Efetivação” ou “Retificado”, e clica em “Gera Prestação”. O sistema apaga a prestação existente no período e gera uma nova, a partir da prévia ou da efetivação. Com “Gerar somente relatório(s)” marcado, apenas emite o relatório (<code>FPrestacaoContasINSS.pas:1452-1500, 6321-6416</code>). Depois, o usuário usa “Gerar Arquivo” (liberado só na opção Efetivação com relatório analítico), “Efetivar” e “Enviar”. “Efetivar” pede confirmação e grava PRESTACAOCONTASEFETIVADA = 1. “Enviar” exige e-mail válido e envia pelo Outlook (<code>FPrestacaoContasINSS.pas:1807-1853, 2877-2936</code>).<br><em>Passo técnico original:</em> Prestação de contas</li>
+<li><strong>Usuário:</strong> Na tela “Conciliação do Reembolso do INSS”, o usuário busca o beneficiário pelo NB e informa o período inicial e final. O período mínimo é “1997/05”, o mês não pode passar de 12 e o período final deve ser maior que o inicial (<code>FConciliacaoReembolsoINSS.pas:919-968</code>). O sistema exibe nas grades a conciliação mensal, o desembolso, o reembolso e as rubricas de desembolso e de reembolso, com os totais de desembolso, reembolso, diferença e glosa. Ele permite filtrar rubricas, inibir as de pensão alimentícia, restringir à mantenedora Funcef e imprimir os relatórios analítico e sintético. Nenhuma gravação foi encontrada nessa tela (<code>FConciliacaoReembolsoINSS.dfm:460-793</code>).<br><em>Passo técnico original:</em> Conciliação de reembolso (5 grades)</li>
+<li><strong>Usuário:</strong> Na tela “Manutenção de Rubricas do Reembolso do INSS e NB”, o usuário escolhe um beneficiário (aba “Individual”) ou uma lista de processamento (aba “Lista”), as rubricas e o “Mês de competência do Reembolso do INSS”. Também escolhe onde aplicar: “Histórico de Rubricas Salariais”, “Histórico de Beneficios” e/ou “Rubricas Individuais”. Depois de confirmar (“Deseja efetivar a operação ?”), o sistema atualiza o campo MESCOMPREEM em HISTRUBSAL, em HSTBENEFBFCIARIO (só fonte pagadora 2) e em RUBRICAINDIV (<code>FManutRubricaReembolsoINSS.pas:602-745, 1006-1205</code>).<br><em>Passo técnico original:</em> Manutenção de rubricas de reembolso/NB</li>
+<li><strong>Usuário:</strong> Para retificar, o usuário escolhe a opção “Retificado” e clica em “Gera Prestação”. O botão “Retificar” existe, mas está invisível na tela. O sistema pede confirmação e abre a tela de motivo, onde o motivo é obrigatório (“Motivo não informado.”). Em seguida, registra os lançamentos que serão retificados, apaga a prestação do período e a gera de novo a partir da efetivação (<code>FPrestacaoContasINSS.pas:1488-1492, 2952-3060</code>; <code>FPrestacaoContasINSSMotivo.pas:50-59</code>).<br><em>Passo técnico original:</em> Retificação (motivo em <code>FPrestacaoContasINSSMotivo</code>)</li>
 </ol>
 <p><strong>Ações práticas:</strong></p>
 <div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
@@ -96,6 +128,7 @@
 <tr><td>Retificar</td><td>Retificar com motivo</td><td>Motivo de retificação</td><td>FPrestacaoContasINSSMotivo</td><td>Retificação registrada</td><td><a href="#FOLHA-RN025">RS025</a></td><td><a href="#MSG016">MSG016</a></td><td><code>FPrestacaoContasINSS.dfm</code></td></tr>
 </tbody></table></div>
 <p><strong>Exceções:</strong> <code>raise Exception 'Operação cancelada pelo usuário'</code> em FPrestacaoContasINSS.pas:3042/4433/6361 <a href="#TRT016">[TRT016]</a>.</p>
+<p><strong>Onde as regras se aplicam:</strong> RS024 vale na tela “Inserção das Rubricas INSS na Folha”, aberta pelo menu “Insere Rubricas do INSS na Folha”. Antes de processar, essa tela já interrompe com “Existem rubricas não parametrizadas. Favor verificar.” se alguma rubrica não tiver a rubrica de folha associada (IDPROVENTOINSS) (<code>FInsereRubricasINSSFolha.pas:517-523</code>). A exceção da regra fica como segunda proteção (:550). RS025 vale na geração e na retificação da prestação de contas.</p>
 <div class="jf-rules">
 <p><strong>Regras de negócio da jornada:</strong> 2 regra(s) — texto completo abaixo.</p>
 <div class="rule-block" id="FOLHA-RN024"><div class="rule-id">RS024 (FOLHA-RN024) — Rubrica não parametrizada aborta inserção INSS</div>
@@ -124,6 +157,13 @@
 <p><strong>Dependências:</strong> —. Evidência: <code>FOLHA/Fontes/FPrestacaoContasINSS.pas</code>, <code>FConciliacaoReembolsoINSS.pas</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
 <div class="mermaid">graph LR
   n0["FPrestacaoContasINSS"] --> n1["FConciliacaoReembolsoINSS"] --> n2["FManutRubricaReembolsoINSS"] --> n3["retificação(FPrestacaoContasINSSMotivo)"] --> n4["{cancelado? Exception}"]</div>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span> — informações que o repositório não comprova ou que divergem entre fontes. O texto existente foi mantido; os itens abaixo dependem de validação humana.</p><ul>
+<li>RS025 / <a href="#TRT016">TRT016</a>: o sinal <code>bCancelarOperacao</code> só recebe o valor False (<code>FPrestacaoContasINSS.pas:1458</code>) e não é ligado em nenhum outro ponto do arquivo. O botão “Cancelar” apenas limpa os campos (<code>:4584-4615</code>). Assim, a exceção “Operação cancelada pelo usuário” (:3042, :4433, :6361) não parece alcançável no código atual.</li>
+<li>A sequência original começa pela prestação de contas e termina na manutenção de rubricas. Pela dependência dos dados, a ordem provável é a inversa: marcar a competência → conciliar → prestar contas → retificar <span class="ev ev-inferido">INFERIDO</span>.</li>
+<li>Na versão atual, a efetivação atualiza apenas o mês inicial do período (<code>WHERE MESREFERENCIA = mês inicial</code>; o filtro pelo mês final está comentado) (<code>FPrestacaoContasINSS.pas:2906-2910</code>). É preciso confirmar se, por regra, a prestação é sempre mensal.</li>
+<li>A importação dos arquivos do INSS e as demais telas do menu “Reembolso do INSS” (“Conciliação Mensal”, “Resultado da Importação dos Arquivos do RI”, “Fechamento de Reembolso” etc.) não fazem parte desta jornada e não estão documentadas. A sigla “RI” não está expandida no repositório.</li>
+<li>As mensagens de validação desta jornada (por exemplo, “É necessário informar o CPF do responsável.”) não estão catalogadas como TRT/MSG.</li>
+</ul></div>
 </div>
 
 <section id="TRT-section"><div class="section-title">6. Tratamentos (TRT)</div>

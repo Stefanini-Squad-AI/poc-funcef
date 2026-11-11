@@ -49,6 +49,19 @@
 <ul>
 <li><a href="#PF-B"><strong>JF014 — Adiantamento Extra Folha</strong></a>: inserir adiantamento extra.</li>
 </ul>
+<p><strong>Necessidade de negócio:</strong> às vezes a fundação precisa pagar um valor fora do cálculo normal da folha a um grupo de pessoas, por exemplo um adiantamento. Em vez de lançar caso a caso, o usuário fornece um arquivo-texto com a lista de matrículas, e o sistema insere uma linha de rubrica na prévia (tabela PREVIA) de um lote de <em>Folha Extra</em> para cada matrícula. O valor é o mesmo para todos ou vem do arquivo. Essas linhas seguem depois o caminho normal do lote: conferência e efetivação (<a href="uc109.html#PF-03">JF003</a>) (<code>FAdiantamentoExtraFolha.pas:157-207, 387-793</code>). A funcionalidade foi criada pela demanda “Insere Adiantamento Extra Folha” (comentário de cabeçalho, <code>FAdiantamentoExtraFolha.pas:21-25</code>).</p>
+<p><strong>Quem inicia:</strong> o usuário, pelo menu “Cálculos da Folha › Prévia › Insere Adiantamento Extra Folha” (<code>FPrincipal.dfm:285-287</code>; <code>FPrincipal.pas:1517-1521</code>), que abre a tela “Insere Adiantamento Extra Folha” (<code>FAdiantamentoExtraFolha.dfm:4</code>). Nada é executado automaticamente.</p>
+<p><strong>Resultado esperado:</strong> para cada matrícula válida do arquivo, uma linha da rubrica escolhida é gravada na PREVIA do lote de Folha Extra selecionado, com motivo 3007, a conta bancária e o portador/forma de pagamento. As linhas são gravadas só se o usuário confirmar no final; senão tudo é desfeito (<code>FAdiantamentoExtraFolha.pas:681-740, 757-761</code>).</p>
+<p><strong>Termos, siglas e componentes citados nesta página</strong> — explicados na primeira vez em que aparecem; a coluna “Fonte” indica onde a explicação foi conferida no repositório:</p>
+<div class="table-wrap"><table><thead><tr><th>Termo</th><th>O que significa</th><th>Fonte</th></tr></thead><tbody>
+<tr><td><strong>Adiantamento extra folha</strong></td><td>Lançamento de uma rubrica de pagamento para uma lista de pessoas num lote de Folha Extra, fora do cálculo normal da prévia.</td><td><code>FAdiantamentoExtraFolha.pas:681-740</code></td></tr>
+<tr><td><strong>Lote</strong> / <strong>CTRLINTERFACE</strong></td><td>Lote de pagamento da folha. A tela só oferece lotes de benefícios (TIPO = 'B') do mês/ano de cobrança escolhido, de Folha Extra (FLGTIPOFOLHA = 2), com prévia marcada como processada (FLGIDATMP = 1) e ainda não fechados pela efetivação (FLGVOLTATMP = 0). Sem lote assim, a lista mostra “Inexistente” e os campos ficam bloqueados.</td><td><code>FAdiantamentoExtraFolha.pas:157-207, 352-370</code>; <code>FFolhaNormalPrevia.pas:821-828</code>; <code>fFolhaNormalEfet.pas:3688-3697</code></td></tr>
+<tr><td><strong>PREVIA</strong></td><td>Tabela das rubricas calculadas e ainda não pagas de cada lote. É nela que o adiantamento é gravado.</td><td><a href="dados.html">🗄️ Dados</a></td></tr>
+<tr><td><strong>Rubrica</strong></td><td>Provento ou desconto da folha (cadastro PROVDESC). O usuário escolhe a rubrica numa lista com código, descrição e tipo (Provento, Desconto ou Informativa).</td><td><code>FAdiantamentoExtraFolha.dfm</code> (qryRubrica)</td></tr>
+<tr><td><strong>Portador/forma de pagamento</strong></td><td>Banco/forma pela qual o valor será pago (tabela PORTADORFORMA), escolhida em “Portador Forma:”. Também é usada para definir o favorecido do documento.</td><td><code>FAdiantamentoExtraFolha.dfm</code> (qryPortadorForma); <code>FAdiantamentoExtraFolha.pas:512-524</code></td></tr>
+<tr><td><strong>Mês de cobrança / mês de referência</strong></td><td>Mês de cobrança: mês/ano do lote, gravado como MES e MESCOBRANCA na PREVIA. Mês de referência: sugerido pela tela a partir da data de hoje e de uma contagem de dias úteis. No código atual, o mês de referência é montado mas não é gravado na PREVIA.</td><td><code>FAdiantamentoExtraFolha.pas:251-342, 564-568, 704</code></td></tr>
+<tr><td><strong>Parâmetros contábeis/financeiros</strong></td><td>Conta contábil e centro de custo/responsabilidade da rubrica, buscados para a patrocinadora 91008 e o plano do recebedor (<code>PegaParamCF</code>). Valor positivo usa a conta de débito; valor negativo, a de crédito.</td><td><code>FAdiantamentoExtraFolha.pas:656-679</code></td></tr>
+</tbody></table></div>
 </section>
 
 <section><div class="section-title">3. Pré-condições</div>
@@ -60,9 +73,14 @@
 <li>Patrocinadoras, planos e benefícios devem estar cadastrados.</li>
 <li>O usuário deve ter permissão de acesso ao módulo.</li>
 </ul>
+<p><strong>O que as pré-condições gerais significam na prática:</strong> o usuário precisa ter acesso ao menu “Cálculos da Folha” e o banco precisa estar acessível. As matrículas do arquivo precisam existir no cadastro de dependentes/titulares (DEPENTIT), e a rubrica e o portador/forma de pagamento precisam estar cadastrados.</p>
 <p><strong>Por jornada:</strong></p>
 <ul>
 <li><a href="#PF-B">JF014</a>: —</li>
+</ul>
+<p><strong>Pré-condições por jornada, em termos de negócio:</strong></p>
+<ul>
+<li><a href="#PF-B">JF014</a>: a versão anterior não documentou pré-condições. Pelo código, é preciso existir um lote de Folha Extra aberto (prévia processada e ainda não efetivado) no mês de cobrança escolhido. Também é preciso um arquivo-texto com uma matrícula por linha (posições 1–7), o código do plano contábil (posições 10–11) e, opcionalmente, o valor (posições 12–23, em centavos). Cada recebedor precisa ter conta bancária do tipo 2 (<code>FAdiantamentoExtraFolha.pas:157-207, 462, 497, 528-534, 575-620</code>). O significado de “conta tipo 2” e a regra de negócio para escolher quem recebe o adiantamento não estão documentados no código <span class="ev ev-pendente">PENDENTE</span>.</li>
 </ul>
 </section>
 
@@ -70,20 +88,28 @@
 <ul>
 <li><a href="#PF-B">JF014</a>: —</li>
 </ul>
+<p><strong>Resultado de negócio de cada jornada:</strong></p>
+<ul>
+<li><a href="#PF-B">JF014</a> — <em>conclusão com sucesso:</em> para cada matrícula válida, uma linha da rubrica escolhida é inserida na PREVIA do lote, com motivo 3007, valor (fixo ou do arquivo), dados bancários, plano, perfil de investimento, favorecido e parâmetros contábeis. A data de pagamento é a prevista do lote. O lote fica com FLGIDATMP = 1. A área de observações mostra o início e o término do processo, e aparece a mensagem “Operação concluída com sucesso.”. O lote segue para a efetivação (<a href="uc109.html#PF-03">JF003</a>). <em>Interrupções:</em> matrículas não cadastradas ou duplicadas são puladas e listadas na tela (“Matrícula não cadastrada: …”, “Matrícula com mais de uma ocorrêcia no cadastro: …”). Matrículas sem dados bancários são puladas e gravadas no arquivo <code>SaidaLogErro.txt</code>. Se o usuário responder “Não” a “Confirma Processamento?”, nada é gravado. Em erro inesperado aparece “Não foi possível concluir a operação.” com o detalhe (<code>FAdiantamentoExtraFolha.pas:481-488, 626-631, 757-793</code>).</li>
+</ul>
 </section>
 
 <section><div class="section-title">5. Jornadas Funcionais (JF014)</div>
 <p>Cada jornada traz objetivo, ator/gatilho, pré e pós-condições, sequência operacional, ações práticas, <strong>regras de negócio da jornada</strong> (texto completo de cada regra), tratamentos e mensagens.</p>
+<p><strong>Como as jornadas deste caso de uso se relacionam:</strong> este caso de uso tem uma única jornada. Ela alimenta a PREVIA de um lote de Folha Extra já aberto (<a href="uc101.html">UC101</a>), e o pagamento acontece quando esse lote é efetivado (<a href="uc109.html#PF-03">JF003</a>). Em cada passo, o rótulo “Usuário” ou “Sistema” indica quem executa a ação.</p>
 <div class="legend"><span><span class="ev ev-comprovado">COMPROVADO</span> — no código</span><span><span class="ev ev-inferido">INFERIDO</span> — plausível</span><span><span class="ev ev-pendente">PENDENTE</span> — validar</span></div>
 </section>
 
 <div class="pf-block" id="PF-B"><h4>JF014 (PF-B) — Adiantamento Extra Folha</h4>
 <p><strong>Objetivo:</strong> inserir adiantamento extra.</p>
+<p><strong>Necessidade de negócio:</strong> pagar de uma só vez uma rubrica (por exemplo, um adiantamento) a uma lista de pessoas, dentro de um lote de Folha Extra, sem recalcular a folha e sem digitar cada lançamento.</p>
 <p><strong>Gatilho/Ator:</strong> <code>FAdiantamentoExtraFolha.dfm</code> (824 lin).</p>
+<p><strong>Pré-condições:</strong> não documentadas na versão anterior. <strong>Em termos de negócio:</strong> pelo código, é preciso existir um lote de Folha Extra aberto no mês de cobrança, um arquivo de matrículas no leiaute esperado e recebedores com dados bancários. A regra de negócio que define quem tem direito ao adiantamento não está no sistema: depende de quem monta o arquivo <span class="ev ev-pendente">PENDENTE</span>.</p>
+<p><strong>Pós-condições:</strong> não documentadas na versão anterior. <strong>Em termos de negócio:</strong> pelo código, cada matrícula válida do arquivo recebe uma linha da rubrica escolhida na PREVIA do lote de Folha Extra (motivo 3007), e o lote fica marcado com FLGIDATMP = 1. Assim, o adiantamento passa a fazer parte da prévia, que segue para conferência e efetivação como qualquer outro lote (<a href="uc109.html#PF-03">JF003</a>). O detalhamento e as interrupções estão em “Resultado de negócio de cada jornada” (seção 4) e em “Pontos a validar” <span class="ev ev-pendente">PENDENTE</span>.</p>
 <p><strong>Sequência operacional:</strong></p>
 <ol>
-<li>Informar dados do adiantamento</li>
-<li>Inserir adiantamento extra</li>
+<li><strong>Usuário:</strong> Escolhe o “Mês e Ano de Cobrança”, o “Lote” (só aparecem lotes de Folha Extra abertos, e a “Previsão de Pagto” é preenchida com a data do lote), o “Mês e Ano de Referencia”, a “Rubrica:” e o “Portador Forma:”. Seleciona o arquivo em “Lista de Matrículas:” e informa um “Valor Rubrica” fixo ou marca “Usa Valor Informado no Arquivo de Entrada”.<br>Se o lote for “Inexistente”, os campos de valor e arquivo ficam bloqueados (<code>FAdiantamentoExtraFolha.pas:157-207, 352-385</code>; <code>FAdiantamentoExtraFolha.dfm:24-316</code>).<br><em>Passo técnico original:</em> Informar dados do adiantamento</li>
+<li><strong>Usuário / Sistema:</strong> O usuário clica em “Processar” e confirma “Confirma tratamento do arquivo?”. Sem arquivo e sem valor, o sistema avisa “O nome do arquivo de entrada deve ser preenchido ou informar valor fixo.”. Sem valor e sem a opção de usar o valor do arquivo, avisa “O Valor deve ser preenchido, ou deve ser marcada a opção "Usa valor arquivo".”. Depois, para cada linha do arquivo, o sistema localiza a matrícula, busca a conta bancária e o plano do benefício ativo (ou, na falta dele, de uma pessoa com o parâmetro 77 = 'S', usando os planos fixos 74/75). Calcula a próxima sequência da rubrica e insere a linha na PREVIA. No fim pergunta “Confirma Processamento?” e grava (commit) ou desfaz (rollback) tudo (<code>FAdiantamentoExtraFolha.pas:221-237, 387-793</code>).<br><em>Passo técnico original:</em> Inserir adiantamento extra</li>
 </ol>
 <p><strong>Ações práticas:</strong></p>
 <div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
@@ -93,6 +119,13 @@
 <p><strong>Regras de negócio da jornada:</strong> nenhuma regra FOLHA-RN específica desta jornada; as validações estão nos tratamentos (TRT) do caso de uso.</p>
 </div>
 <p><strong>Evidência:</strong> <code>FOLHA/Fontes/FAdiantamentoExtraFolha.pas</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span> — informações que o repositório não comprova ou que divergem entre fontes. O texto existente foi mantido; os itens abaixo dependem de validação humana.</p><ul>
+<li>A seção 8 cita a tabela “adiantamento”, mas o código grava na PREVIA e atualiza CTRLINTERFACE (FLGIDATMP = 1). Não há tabela própria de adiantamento (<code>FAdiantamentoExtraFolha.pas:555-560, 681-740</code>).</li>
+<li>A tela aceita só valor fixo, sem arquivo (<code>FAdiantamentoExtraFolha.pas:224</code>), mas o processamento sempre tenta abrir o arquivo de entrada (<code>:418-421</code>). Confirmar se o lançamento sem arquivo funciona.</li>
+<li>A mensagem “Operação concluída com sucesso.” aparece mesmo quando o usuário responde “Não” e a transação é desfeita (<code>FAdiantamentoExtraFolha.pas:757-769</code>).</li>
+<li>Valores fixos no código: patrocinadora/IDPATRO 91008, IDPESSJUR 1, motivo 3007, planos 74/75 no caso alternativo, parâmetro de pessoa 77 e defaults contábeis '0110002'/'0403'. Também é usada a variável <code>lRefCF</code> mesmo quando <code>PegaParamCF</code> não encontra parametrização. O significado de negócio desses valores não está documentado (<code>FAdiantamentoExtraFolha.pas:575-620, 656-679, 702</code>).</li>
+<li>Não há regra FOLHA-RN, TRT ou MSG catalogados para esta jornada. As mensagens reais estão citadas acima.</li>
+</ul></div>
 
 </div>
 
