@@ -9,7 +9,7 @@
 </head>
 <body>
 <header>
-  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-23 (enriquecido)</div>
+  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-23 (enriquecido) · PFC-42 (abas técnicas enriquecidas)</div>
   <h1>🔗 Integrações — Contribuição Previdenciária</h1>
   <p>Dependências externas (referências de interface) e internas, classificadas por tipo. Catálogo de 16 relatórios. Enriquecido em PFC-23.</p>
 </header>
@@ -30,12 +30,44 @@
 
 
 <main>
+<!-- PFC-42: enriquecimento em linguagem simples -->
+<section id="pfc42-leigo"><div class="section-title">💡 Em linguagem simples (enriquecido — PFC-42)</div>
+<div class="note-info">
+<p><strong>O que esta aba mostra:</strong> com quem o módulo CONTRIBUIÇÃO “conversa”: outros módulos da suíte (Folha, Financeiro, Contabilidade, Benefícios, IRRF), o banco de dados Oracle, componentes de terceiros e programas como Excel e e-mail.</p>
+<p><strong>Por que isso importa:</strong> nenhum processo de contribuição termina dentro do próprio módulo. A cobrança passa pela Folha ou pelo Financeiro, o dinheiro vai para a contabilidade e para as reservas. Se uma dessas conversas falha, o problema aparece em outro lugar.</p>
+<p><strong>Como ler esta página:</strong> a primeira tabela lista cada parceiro, o tipo de ligação e a finalidade. Depois, há as dependências internas, o catálogo de relatórios e os procedimentos guardados no banco. Abaixo, um resumo leigo dos principais “canais de conversa”.</p>
+</div>
+<p><strong>Os principais canais de conversa, em linguagem simples:</strong></p>
+<ul>
+<li><strong>Folha de pagamento</strong> — a Contribuição deixa na tabela de passagem TMPDESC o que deve ser descontado; a Folha devolve o que descontou e, ao processar o retorno, a Contribuição marca a linha como tratada (SITENVIO = 9) (<code>FRecebeContribuicao.pas:1658, 1984</code>) <span class="ev ev-comprovado">COMPROVADO</span>. No recebimento atual, o usuário escolhe entre “Folha da Patrocinadora” e “Folha de Benefícios”, e cada opção chama um procedimento Oracle diferente (<code>FRecebeContribuicaoNovo.dfm:819-825</code>; <code>FRecebeContribuicaoNovo.pas:925, 954</code>) <span class="ev ev-comprovado">COMPROVADO</span>.</li>
+<li><strong>Financeiro (Contas a Receber / banco)</strong> — quando não há desconto em folha, o envio gera documentos de cobrança e dá baixa via controle de baixas (<code>CtrlBaixaRecXPag.ProcessaBaixaDocumento</code>, <code>FPreparaEnvia.pas:5646-5653</code>) <span class="ev ev-comprovado">COMPROVADO</span>.</li>
+<li><strong>Contabilidade</strong> — no envio, o sistema chama a contabilização (<code>IncluiContabilidade</code>, <code>FPreparaEnvia.pas:5143</code>) e grava a ligação contribuição × plano contábil em CONTABCONTFUND (<code>FPreparaEnvia.pas:5171</code>) <span class="ev ev-comprovado">COMPROVADO</span>.</li>
+<li><strong>E-mail</strong> — o aviso de “Contribuições não recolhidas” ao participante era enviado pelo Outlook; esse trecho foi comentado e o envio passou a ser feito pelo banco de dados (<code>FDivergContrib.pas:9107-9118, 9139</code>) <span class="ev ev-comprovado">COMPROVADO</span>. A imagem do e-mail é gerada antes numa pasta local <code>c:\planus\temp</code> (<code>FDivergContrib.pas:9103</code>) <span class="ev ev-comprovado">COMPROVADO</span>.</li>
+<li><strong>Excel</strong> — várias telas de importação em lote leem planilhas abrindo o Excel do usuário (OLE) <span class="ev ev-comprovado">COMPROVADO</span>.</li>
+</ul>
+<p><strong>Termos usados nesta página</strong> — explicados de forma simples:</p>
+<div class="table-wrap"><table><thead><tr><th>Termo técnico</th><th>Em linguagem simples</th><th>Fonte</th></tr></thead><tbody>
+<tr><td><strong>CAP / CAR</strong></td><td>Contas a Pagar / Contas a Receber — os módulos financeiros. Quando a contribuição não é descontada em folha, vira um documento a receber (boleto/cobrança bancária).</td><td><code>ContribuicaoPREV.dpr:155</code> (dtmIntegraCAPCAR)</td></tr>
+<tr><td><strong>Stored procedure / package</strong></td><td>Um programa guardado dentro do próprio banco de dados. O sistema só “aperta o botão” e o banco faz o trabalho.</td><td><code>FRecebeContribuicaoNovo.pas:925-967</code></td></tr>
+<tr><td><strong>PGA</strong></td><td>Sigla usada no código para uma integração financeira executada no envio (“FINALIZAR AS BAIXAS DO PGA”). O significado da sigla não está escrito no código.</td><td><code>FPreparaEnvia.pas:5642-5662</code></td></tr>
+<tr><td><strong>OLE Automation</strong></td><td>Forma de o sistema “abrir e controlar” outro programa do Windows, como o Excel, para ler ou gerar planilhas.</td><td><code>FAlteraSalPart.pas</code> (Excel.Application)</td></tr>
+<tr><td><strong>Framework CM</strong></td><td>Conjunto de peças comuns a toda a suíte (telas base, login, consultas, relatórios). É o “alicerce” sobre o qual o módulo foi construído.</td><td><code>ContribuicaoPREV.dpr</code></td></tr>
+<tr><td><strong>InfoPower / ReportBuilder</strong></td><td>Componentes comprados de terceiros: o InfoPower fornece grades e consultas; o ReportBuilder, os relatórios.</td><td>Tabela desta página</td></tr>
+</tbody></table></div>
+</section>
 <section><div class="section-title">🔗 Integrações e Dependências — Contribuição Previdenciária</div>
 <p>Dependências externas registradas apenas como referências de interface (nome do módulo/unit/procedure e tipo de dependência). A implementação interna de módulos não autorizados não foi investigada (isolamento de escopo).</p><div class="table-wrap"><table class=""><thead><tr><th>Unidade/Módulo externo</th><th>Tipo</th><th>Path/Origem</th><th>Finalidade (quando comprovada)</th><th>Evidência</th></tr></thead><tbody><tr><td>CM Framework (27 units)</td><td>Framework</td><td><code>..\..\Cm\Forms\Source\</code></td><td>Forms base, splash, consultas, relatórios, autorização</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr><tr><td>CMAdmPrev (11 units)</td><td>Outro módulo</td><td><code>..\..\Cm\CMAdmPrev\</code></td><td>Integração CAP/CAR, retroativo em lote, conciliação inst/resg/port</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr><tr><td>CMPrevMT50</td><td>Outro módulo</td><td>Referenciado massivamente (DPLANOPREV: 1395 refs, DBENEFICIO: 156)</td><td>DataModules de entidades previdenciárias centrais</td><td><span class="ev ev-inferido">INFERIDO</span></td></tr><tr><td>CMGLOBALOBJ50</td><td>Outro módulo</td><td>Referenciado por nome</td><td>Objetos globais CM (PlanPrevContabil)</td><td><span class="ev ev-inferido">INFERIDO</span></td></tr><tr><td>CMCAPCARUTILOBJ50</td><td>Outro módulo</td><td>Integrado via DIntegraCAPCAR</td><td>Utilitários CAP/CAR (Documento, LanctoDocum)</td><td><span class="ev ev-inferido">INFERIDO</span></td></tr><tr><td>FOLHA</td><td>Outro módulo</td><td>FOLHAORIGEM (73 refs), FLGDESCFOLHA (182 refs)</td><td>Integração com Folha de Pagamento (envio/recebimento)</td><td><span class="ev ev-inferido">INFERIDO</span></td></tr><tr><td>BENEFICIOPREV</td><td>Outro módulo</td><td>Via DBENEFICIO</td><td>Benefícios previdenciários</td><td><span class="ev ev-inferido">INFERIDO</span></td></tr><tr><td>IRRF</td><td>Outro módulo</td><td>fCalculoIRRF, FrmCalculoIRRF (36 refs)</td><td>Cálculo de IRRF</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr><tr><td>PARAMPREV</td><td>Outro módulo</td><td>Via PARAMAPREV</td><td>Parâmetros previdenciários</td><td><span class="ev ev-inferido">INFERIDO</span></td></tr><tr><td>CPAGAR</td><td>Outro módulo</td><td>Via DocPagar (13 refs)</td><td>Contas a Pagar</td><td><span class="ev ev-inferido">INFERIDO</span></td></tr><tr><td>EMPRESTIMO</td><td>Outro módulo</td><td>Via iGrupoRegra em UModulo.pas:23</td><td>Recebimento via empréstimo</td><td><span class="ev ev-inferido">INFERIDO</span></td></tr><tr><td>MontaSelect (706 refs)</td><td>Componente</td><td>Builder de SELECT dinâmicas</td><td>Construção de cláusulas SQL</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr><tr><td>InfoPower/Woll2Woll</td><td>Componente 3rd-party</td><td>TwwQuery (62), Wwdatsrc (52), wwdblook (28)</td><td>Query/datasource/lookup</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr><tr><td>ReportBuilder (pp*)</td><td>Componente 3rd-party</td><td>ppReport (37 refs)</td><td>Relatórios</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr><tr><td>ComObj (OLE Automation)</td><td>Library (Delphi)</td><td>CreateOleObject('Excel.Application')</td><td>Leitura/geração de planilhas Excel</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr><tr><td>URegra (8 refs)</td><td>Framework</td><td>Motor de regras de cálculo</td><td>Engine de regras</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr><tr><td>MIDAS/DataSnap</td><td>Infraestrutura</td><td>SConnect, MConnect, DBClient</td><td>Conexões distribuidas</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr><tr><td>Oracle</td><td>Banco de dados</td><td>schema CM., sequences, PCK_BENEFSALDFAB</td><td>Persistência + package stored</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr></tbody></table></div><div class="note">Finalidades marcadas <span class="ev ev-inferido">INFERIDO</span> ou <span class="ev ev-pendente">PENDENTE</span> não puderam ser determinadas sem violar o escopo; registradas como "não esclarecida" quando aplicável.</div>
+<p><strong>💡 Em outras palavras:</strong> cada linha é um “parceiro” do módulo. Os itens marcados como Framework/Componente são peças técnicas; os marcados como “Outro módulo” são áreas de negócio com as quais a Contribuição troca informação (Folha, Benefícios, IRRF, Contas a Pagar, Empréstimo). Itens <span class="ev ev-inferido">INFERIDO</span> foram deduzidos pelo nome usado no código.</p>
+<div class="note pfc42-ba"><p><strong>👔 Para o analista de negócios</strong></p><ul>
+<li>Cada integração é uma <strong>dependência entre áreas</strong>: a Folha precisa processar o desconto e devolver o retorno no prazo; o Financeiro precisa baixar documentos; a Contabilidade recebe lançamentos. Mapear o responsável de cada lado é essencial para tratar incidentes.</li>
+<li>Se a baixa no Financeiro falhar, o envio mostra “Erro no processamento das Baixas” com o detalhe (<code>FPreparaEnvia.pas:5646-5654</code>) <span class="ev ev-comprovado">COMPROVADO</span>; se a integração com o PGA falhar, o envio é desfeito com Rollback (<code>FPreparaEnvia.pas:5662-5663</code>) <span class="ev ev-comprovado">COMPROVADO</span>. A operação precisa saber o que fazer em cada caso.</li>
+<li>O envio de e-mail depende de uma pasta local fixa (<code>c:\planus\temp</code>) no computador do usuário (<code>FDivergContrib.pas:9103, 9152</code>) <span class="ev ev-comprovado">COMPROVADO</span> — um ponto frágil se a estação não tiver essa pasta.</li>
+</ul></div>
 </section>
 
 <section><div class="section-title">🗺 Dependências Internas do Módulo</div>
 <div class="table-wrap"><table class=""><thead><tr><th>Origem</th><th>Destino</th><th>Natureza</th><th>Evidência</th></tr></thead><tbody><tr><td>Fontes/ (forms)</td><td>DBObjects/ (uDbEvolfuncprev, uDbHistrubsal)</td><td>Acesso a dados local (2 entidades)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr><tr><td>Fontes/ (forms)</td><td>CtrlObjects/ (uCtrlEvolFuncPrev, uCtrlPCS)</td><td>Controle de evolução funcional e listas PCS</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr><tr><td>Fontes/ (forms)</td><td>Relatorios/</td><td>Relatórios do próprio módulo (16 units)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr><tr><td>CtrlObjects/</td><td>DBObjects/</td><td>uCtrlEvolFuncPrev uses uDbEvolfuncprev, uDbHistrubsal</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr><tr><td>FPreparaEnvia.pas</td><td>DPreparaContrib.pas (DataModule)</td><td>DataModule de preparo de contribuições</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr></tbody></table></div>
+<p><strong>💡 Em outras palavras:</strong> é a mesma visão da aba 🏗️ Arquitetura: como as peças do próprio módulo se chamam entre si.</p>
 </section>
 
 <section><div class="section-title">📊 Catálogo de Relatórios (PFC-23)</div>
@@ -55,6 +87,7 @@
 <tr><td>Consulta de Rubricas</td><td><code>FConsRubricas</code></td><td>86</td><td>Consulta ao cadastro de rubricas</td><td>Plano, rubrica</td></tr>
 <tr><td>Controle de Cobranças por Lote</td><td><code>FCtrlInterface</code></td><td>183</td><td>Controle de cobranças e pagamentos por lote</td><td>Lote, período</td></tr>
 </tbody></table></div>
+<p><strong>💡 Em outras palavras:</strong> repetição do catálogo da aba 📄 Relatórios, mantida aqui para mostrar que os relatórios também dependem de componentes externos (ReportBuilder) e, em alguns casos, de relatórios de outros módulos.</p>
 </section>
 
 <section><div class="section-title">🚨 Units Pendente — referenciadas no DPR mas ausentes (gaps)</div>
@@ -80,12 +113,31 @@
 <tr><td><code>CM.ENVIA_EMAIL_IMGANEXO</code></td><td>SP</td><td>FDivergContrib.pas:9265</td><td>Envia e-mail com imagem anexa</td></tr>
 <tr><td><code>StrProcAlimenta</code></td><td>SP</td><td>FAlimReservasReplan.pas:92-99</td><td>Alimentação rápida de reservas Replan</td></tr>
 </tbody></table></div>
+<p><strong>💡 Em outras palavras:</strong> estas são regras que moram dentro do banco de dados. O módulo só as aciona. Para conhecer a regra completa, é preciso ler o código do banco — e, no caso de <code>CM.Sp_Cp_Receb_Patro</code>, ele está no repositório: <code>SCRIPT/SIG33372/04_Script_SIG33372_DDL (Sp_Cp_Receb_Patro).txt</code>, com 3.942 linhas <span class="ev ev-comprovado">COMPROVADO</span>. O número SIG33372 coincide com o comentário da chamada no menu (<code>FPrincipal.pas:893</code>) <span class="ev ev-comprovado">COMPROVADO</span>.</p>
+<div class="note"><p><strong>🔎 Ponto a validar</strong> <span class="ev ev-pendente">PENDENTE</span> — confirmar se o script em <code>SCRIPT/SIG33372</code> corresponde à versão instalada em produção e localizar o código-fonte de <code>CM.SP_CP_RECEB_ASSIS</code> e do pacote <code>CM.PCK_BENEFSALDFAB</code>, que não foram encontrados nesta análise.</p></div>
 </section>
 
+<section id="pfc42-analista"><div class="section-title">👔 Para o analista de negócios — síntese (PFC-42)</div>
+<div class="note pfc42-ba">
+<p>O CONTRIBUIÇÃO depende de várias áreas para fechar o ciclo da contribuição:</p>
+<ul>
+<li><strong>Folha (patrocinadora e benefícios):</strong> desconto e retorno via TMPDESC e procedimentos Oracle.</li>
+<li><strong>Financeiro (CAP/CAR) e PGA:</strong> documentos de cobrança e baixas; falhas desfazem o envio ou exigem conferência.</li>
+<li><strong>Contabilidade:</strong> lançamentos gerados no envio e na provisão para perdas.</li>
+<li><strong>Tecnologia local:</strong> Excel e pasta <code>c:\planus\temp</code> no computador do usuário.</li>
+</ul>
+<p><strong>Perguntas para levar ao responsável de negócio:</strong></p>
+<ol>
+<li>Quem é o ponto focal na Folha, no Financeiro e na Contabilidade para incidentes de integração com a Contribuição?</li>
+<li>Existe calendário acordado entre Contribuição e Folha (data de envio, data de retorno)?</li>
+<li>O aviso por e-mail de contribuições não recolhidas ainda é usado? Quem define o texto e o remetente?</li>
+</ol>
+</div>
+</section>
 </main>
 
 <footer>
-<p>Blueprint AS-IS — PFC-21 / PFC-23 (enriquecido) — Módulo CONTRIBUIÇÃO | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-10</p>
+<p>Blueprint AS-IS — PFC-21 / PFC-23 (enriquecido) — Módulo CONTRIBUIÇÃO | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-10 | Abas técnicas enriquecidas — PFC-42</p>
 </footer>
 </body>
 </html>

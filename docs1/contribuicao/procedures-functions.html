@@ -8,7 +8,7 @@
 </head>
 <body>
 <header>
-  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-23 (enriquecido)</div>
+  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-23 (enriquecido) · PFC-42 (abas técnicas enriquecidas)</div>
   <h1>🔧 Procedures, Functions e Métodos — Contribuição Previdenciária</h1>
   <p>Catálogo de procedures e functions relevantes com identificação, parâmetros, blocos de processamento, regras aplicadas, resultados e efeitos no banco.</p>
 </header>
@@ -27,6 +27,25 @@
   <a href="controle-cobertura.html">📊 Cobertura</a>
 </nav>
 <main>
+<!-- PFC-42: enriquecimento em linguagem simples -->
+<section id="pfc42-leigo"><div class="section-title">💡 Em linguagem simples (enriquecido — PFC-42)</div>
+<div class="note-info">
+<p><strong>O que esta aba mostra:</strong> as principais “receitas” do módulo — as rotinas de código que fazem o trabalho pesado (calcular, enviar, receber, desfazer). Para cada uma: onde está, o que recebe, os passos e o que grava no banco de dados.</p>
+<p><strong>Por que isso importa:</strong> é aqui que as regras de negócio ganham forma concreta. Quando alguém pergunta “o que exatamente acontece quando clico em Enviar?”, a resposta está nestas rotinas.</p>
+<p><strong>Como ler esta página:</strong> cada bloco tem o nome da rotina e o arquivo:linha. “Parâmetros” são os ingredientes que a rotina recebe; “Processamento” é o modo de preparo; “Efeitos BD” é o que fica gravado no banco (INSERT = incluir, UPDATE = alterar, DELETE = apagar). Depois de cada grupo, “💡 Em outras palavras” resume o que a rotina significa para o negócio.</p>
+</div>
+<p><strong>Termos usados nesta página</strong> — explicados de forma simples:</p>
+<div class="table-wrap"><table><thead><tr><th>Termo técnico</th><th>Em linguagem simples</th><th>Fonte</th></tr></thead><tbody>
+<tr><td><strong>Procedure / function</strong></td><td>Uma sequência de passos com nome próprio, como uma receita. A function devolve um resultado (ex.: “deu certo”/“não deu”); a procedure só executa.</td><td><code>FPreparaEnvia.pas:3724</code></td></tr>
+<tr><td><strong>Parâmetro</strong></td><td>Informação que a rotina precisa receber para trabalhar, como o mês de referência ou o código do participante.</td><td><code>FPreparaEnvia.pas:2952-3214</code></td></tr>
+<tr><td><strong>Regra de cálculo (RegraNumerica)</strong></td><td>Fórmula cadastrada que diz como calcular o valor de cada contribuição (ex.: percentual sobre o salário). O sistema monta os dados e a fórmula devolve o valor.</td><td><code>FPreparaEnvia.pas:1153-1562</code></td></tr>
+<tr><td><strong>Lote (CTRLINTERFACE)</strong></td><td>Um “pacote” de cobranças processadas juntas, com número próprio, para permitir acompanhar e desfazer o processamento em bloco.</td><td><code>FPreparaEnvia.pas:4684-4814</code></td></tr>
+<tr><td><strong>HSTCONTRIBPREV</strong></td><td>O “livro-caixa” das contribuições: uma linha por contribuição devida (quem, qual plano, qual mês, quanto se esperava, quanto chegou e em que situação está).</td><td><code>FPreparaEnvia.pas:2611-2884</code></td></tr>
+<tr><td><strong>TMPDESC</strong></td><td>Tabela de “passagem” entre a Contribuição e a Folha: a contribuição deixa ali o valor a descontar e a folha devolve ali o que foi efetivamente descontado.</td><td><code>FRecebeContribuicao.pas:1658, 1984</code></td></tr>
+<tr><td><strong>Commit parcial</strong></td><td>Salvar o trabalho em pedaços (aqui, a cada 800 registros) em vez de tudo no fim, para não sobrecarregar o banco.</td><td><code>FPreparaEnvia.pas:665, 4174-4180</code></td></tr>
+<tr><td><strong>Commit / Rollback</strong></td><td>Commit = “salvar definitivamente” no banco. Rollback = “desfazer tudo desde o último salvamento”, como um Ctrl+Z do banco de dados.</td><td><code>FPreparaEnvia.pas:4174-4180, 5663</code></td></tr>
+</tbody></table></div>
+</section>
 
 <section><div class="section-title">ℹ️ Sobre esta página</div>
 <p>Cada rotina abaixo tem: nome, unit/arquivo, localização (linha), propósito, parâmetros (nome:tipo:direção), blocos de processamento, regras aplicadas, resultados e efeitos no banco de dados. Evidência: <span class="ev ev-comprovado">COMPROVADO</span> — extraído diretamente do código-fonte.</p>
@@ -97,6 +116,12 @@
 <p><strong>Regras:</strong> CONTRIB-RN073 (mês 13→12), CONTRIB-RN074-080 (condições de desfazer), CONTRIB-RN077 (boleta enviada bloqueia)</p>
 <p><strong>Efeitos BD:</strong> DELETE TMPDESC, UPDATE/DELETE HSTCONTRIBPREV, DELETE HSTATRASOCONTRIB, DELETE HISTRUBSAL, DELETE CONTABCONTFUND, DELETE CTRLINTERFACE, UPDATE CONTRIBPREVPARTP</p>
 </div>
+<p><strong>💡 Em outras palavras:</strong> <em>PreparaContribuicao</em> é o “cálculo do mês”: para cada patrocinadora, plano e situação do participante, aplica a fórmula de cada contribuição e grava o valor devido no livro-caixa. <em>EnviaContribuicaoCcp</em> é o “despacho”: pega o que foi preparado e ainda não enviado (situação 0 ou 8, <code>FPreparaEnvia.pas:4712</code>) <span class="ev ev-comprovado">COMPROVADO</span> e manda para a folha ou para o banco. <em>bbtnDesfazerClick</em> é o “desfazer”: apaga o preparo/envio enquanto nada foi recebido.</p>
+<div class="note pfc42-ba"><p><strong>👔 Para o analista de negócios</strong></p><ul>
+<li><strong>Regra de canal (folha × banco):</strong> a contribuição vai para desconto em folha quando o indicador de desconto em folha é 1 <em>e</em> o pagador é o próprio contribuinte (“C”), ou é a patrocinadora (“P”) com o indicador FLGRECECONTPATRO = 1. Nos demais casos, vira cobrança bancária (<code>FPreparaEnvia.pas:4984-4999</code>) <span class="ev ev-comprovado">COMPROVADO</span>. O significado exato das letras “C”/“P” é <span class="ev ev-inferido">INFERIDO</span>.</li>
+<li><strong>Preparo em blocos:</strong> o preparo salva a cada 800 registros (<code>FPreparaEnvia.pas:665, 4174-4180</code>) e o envio também (<code>FPreparaEnvia.pas:5456</code>) <span class="ev ev-comprovado">COMPROVADO</span>. Se o processo cair no meio, parte do mês já ficou gravada — a operação deve saber usar o “desfazer” antes de reprocessar.</li>
+<li><strong>Falha na integração com o PGA desfaz o envio:</strong> se a integração falhar, o sistema mostra “ERRO AO REALIZAR INTEGRAÇÃO COM O PGA” e executa Rollback (<code>FPreparaEnvia.pas:5662-5663</code>) <span class="ev ev-comprovado">COMPROVADO</span>.</li>
+</ul></div>
 </section>
 
 <section><div class="section-title">⚙️ FDivergContrib.pas — Tratamento de Divergências</div>
@@ -146,6 +171,7 @@
 <p><strong>Regras:</strong> CONTRIB-RN53-56 (condições de inadimplência)</p>
 <p><strong>Efeitos BD:</strong> UPDATE PARTPREVPLAN.FLGDEVEPREVIDENC</p>
 </div>
+<p><strong>💡 Em outras palavras:</strong> estas rotinas tratam o que “não bateu”: contribuições pagas a mais, a menos ou não pagas. Cada opção de tratamento (cobrar no mês seguinte, tratar via banco, aceitar a diferença etc.) grava um novo registro no histórico, para que a decisão fique documentada.</p>
 </section>
 
 <section><div class="section-title">⚙️ FControleIndivContrib.pas — Controle Individual</div>
@@ -169,6 +195,7 @@
 <p><strong>Processamento:</strong> Abre qryTitular/qryContaBancaria/qryPendente → AbreQryContribuicao → loop: skip se SITRECEBIMENTO=2/3 → BaixaContribCAR → se ≥3 inadimplências → AjustaEventoInadimplencia → Commit</p>
 <p><strong>Regras:</strong> CONTRIB-RN03 (skip recebidas), CONTRIB-RN24 (3 inadimplências)</p>
 </div>
+<p><strong>💡 Em outras palavras:</strong> é o “balcão de atendimento” de um participante: permite ver todas as contribuições dele, reenviar, desfazer, alterar ou devolver uma a uma. Por exemplo, ao reenviar, a situação volta para 1 = “enviada e não recebida” (<code>FControleIndivContrib.pas:1738-1741</code>) <span class="ev ev-comprovado">COMPROVADO</span>.</p>
 </section>
 
 <section><div class="section-title">⚙️ FRecebeContribuicao.pas — Recebimento via Folha</div>
@@ -185,6 +212,8 @@
 <p><strong>Regras:</strong> CONTRIB-RN16-18 (situação por margem de aceitação)</p>
 <p><strong>Efeitos BD:</strong> INSERT HSTCONTRIBPREV, INSERT CONTRIBPREVPARTP (se DATAINICIO vazio)</p>
 </div>
+<p><strong>💡 Em outras palavras:</strong> esta rotina compara o valor esperado com o valor descontado na folha. Se forem iguais, a contribuição fica “recebida corretamente” (2). Se a diferença for menor ou igual à tolerância cadastrada na contribuição (campo VLRACEITADIVERG), o sistema também aceita como 2; acima disso, marca “recebida com divergência” (3) (<code>FRecebeContribuicao.pas:3058-3092</code>) <span class="ev ev-comprovado">COMPROVADO</span>.</p>
+<div class="note"><p><strong>🔎 Ponto a validar</strong> <span class="ev ev-pendente">PENDENTE</span> — o comentário do código diz que, dentro da tolerância, a situação seria 5 (“divergente tratado”), mas o comando grava 2 (<code>FRecebeContribuicao.pas:3063</code> × <code>3080-3084</code>). Além disso, esta tela <strong>não está no projeto</strong> (<code>ContribuicaoPREV.dpr:128</code> inclui só <code>FRecebeContribuicaoNovo</code>), e o procedimento usado pela tela nova (<code>SCRIPT/SIG33372/04_Script_SIG33372_DDL (Sp_Cp_Receb_Patro).txt</code>) não menciona VLRACEITADIVERG. Confirmar se a tolerância de divergência ainda é aplicada no recebimento atual.</p></div>
 </section>
 
 <section><div class="section-title">⚙️ FBeneficioSaldadoFAB.pas — Benefício Saldado/FAB</div>
@@ -199,6 +228,7 @@
 <p><strong>Propósito:</strong> Calcula BS via package Oracle.</p>
 <p><strong>Efeitos BD:</strong> SELECT <code>CM.PCK_BENEFSALDFAB.FN_CALCULABS(IDPESSOA, SALPART, BNINSS, PBE)</code> FROM DUAL</p>
 </div>
+<p><strong>💡 Em outras palavras:</strong> a tela apenas pede ao banco de dados que recalcule o saldo do Benefício Saldado/FAB — o cálculo em si está no pacote Oracle CM.PCK_BENEFSALDFAB (<code>FBeneficioSaldadoFAB.pas:1032</code>) <span class="ev ev-comprovado">COMPROVADO</span>. Antes de executar, o sistema pede confirmação (“Deseja atualizar o BS-FAB?”, <code>FBeneficioSaldadoFAB.pas:975</code>) <span class="ev ev-comprovado">COMPROVADO</span>.</p>
 </section>
 
 <section><div class="section-title">⚙️ FCalcSalContr.pas — Bitributação</div>
@@ -209,6 +239,10 @@
 <p><strong>Regras:</strong> CONTRIB-RN20 (flgativo se saldo>0 e DIP≥2013/01)</p>
 <p><strong>Efeitos BD:</strong> DELETE/INSERT HSTBITRIBUTACAO, INSERT/UPDATE BITRIBUTACAO</p>
 </div>
+<p><strong>💡 Em outras palavras:</strong> esta rotina calcula a parte das contribuições que já foi tributada no passado, para que não seja tributada de novo no benefício. Ela soma as contribuições recebidas entre 01/01/1989 e 31/12/1995 (<code>FCalcSalContr.pas:408</code>) <span class="ev ev-comprovado">COMPROVADO</span>, corrige esse valor e, a partir de 2008/01, atualiza pelo IPCA-E (moeda 285, conforme comentário em <code>FCalcSalContr.pas:18-20</code>) <span class="ev ev-comprovado">COMPROVADO</span>. A ligação com a legislação de IR do período é <span class="ev ev-inferido">INFERIDO</span>.</p>
+<div class="note pfc42-ba"><p><strong>👔 Para o analista de negócios</strong></p><ul>
+<li>O resultado da bitributação afeta o imposto de renda do participante no momento do benefício ou resgate. Qualquer mudança de índice, período ou regra precisa de validação da área tributária/jurídica.</li>
+</ul></div>
 </section>
 
 <section><div class="section-title">⚙️ FProvPerdasLote.pas / FProvPerdasIndiv.pas — Provisão para Perdas</div>
@@ -219,6 +253,10 @@
 <p><strong>Regras:</strong> CONTRIB-RN27 (filtros de contribuições atrasadas), CONTRIB-RN28 (seleção obrigatória)</p>
 <p><strong>Efeitos BD:</strong> INSERT PROVISAOPERDASCONTRIBUICAO, INSERT CONTABCONTFUND (contabilidade da provisão)</p>
 </div>
+<p><strong>💡 Em outras palavras:</strong> a provisão para perdas é uma reserva contábil para contribuições que provavelmente não serão pagas. O valor provisionado é o total esperado multiplicado pelo percentual de uma faixa (<code>(TOTALESPERADO / 100) × PERCENTUAL</code>), e a faixa depende dos dias de atraso, contados da primeira data de inadimplência até hoje (<code>FProvPerdasLote.pas:845-848, 905</code>; <code>FProvPerdasIndiv.pas:545-549, 605</code>) <span class="ev ev-comprovado">COMPROVADO</span>.</p>
+<div class="note pfc42-ba"><p><strong>👔 Para o analista de negócios</strong></p><ul>
+<li>As faixas e percentuais ficam na tabela FAIXASPROVISAOPERDACONTRIB (<code>FProvPerdasLote.pas:857</code>) <span class="ev ev-comprovado">COMPROVADO</span>. Elas são um parâmetro contábil de negócio: quem altera, com que aprovação e com que periodicidade deve ser definido pela área contábil.</li>
+</ul></div>
 </section>
 
 <section><div class="section-title">⚙️ FAtualizaPorIndice.pas — Atualização por Índice</div>
@@ -229,6 +267,7 @@
 <p><strong>Regras:</strong> CONTRIB-RN42-45 (validações de seleção e participante)</p>
 <p><strong>Efeitos BD:</strong> INSERT HISTMOVRESERVA, UPDATE RESERVAPART.VALORRESERVA, UPDATE RESERVAPART.DATAULTATUALIZA</p>
 </div>
+<p><strong>💡 Em outras palavras:</strong> esta rotina “corrige” as reservas dos participantes por um índice (ou por uma fórmula, quando existir), mês a mês, e grava cada movimento no extrato da reserva. O desfazer apaga as atualizações feitas até a data indicada, após confirmação do usuário (<code>FAtualizaPorIndice.pas:989</code>) <span class="ev ev-comprovado">COMPROVADO</span>.</p>
 </section>
 
 <section><div class="section-title">⚙️ FCadContribuicaoPortada.pas — Portabilidade</div>
@@ -244,6 +283,7 @@
 <p><strong>Regras:</strong> CONTRIB-RN34 (IDMOTIVO=3054, CODPORTFORMA=10), CONTRIB-RN35-37 (validações de referência/valor)</p>
 <p><strong>Efeitos BD:</strong> INSERT HSTCONTRIBPREV (IDMOTIVO=3054, SITRECEBIMENTO=0, FLGMANUAL=2, FOLHAORIGEM='C', CODPORTFORMA=10)</p>
 </div>
+<p><strong>💡 Em outras palavras:</strong> portabilidade é quando o participante traz para este plano o dinheiro acumulado em outra entidade. A rotina registra a portabilidade e cria as linhas correspondentes no livro-caixa de contribuições, já como “não enviado” (situação 0, <code>FCadContribuicaoPortada.pas:1090</code>) <span class="ev ev-comprovado">COMPROVADO</span>.</p>
 </section>
 
 <section><div class="section-title">⚙️ DBObjects e CtrlObjects</div>
@@ -265,6 +305,7 @@
 <div class="rule-id">uCtrlPCS.pas (189 lin) — TCmControlObject</div>
 <p><strong>Propósito:</strong> Controle de listas PCS (controle de processos/sessões).</p>
 </div>
+<p><strong>💡 Em outras palavras:</strong> são peças de apoio. Duas leem e gravam uma tabela específica (evolução funcional e rubricas salariais); duas coordenam regras e podem trabalhar no computador do usuário ou num servidor remoto.</p>
 </section>
 
 <section><div class="section-title">🗺️ Mapa de rastreabilidade Feature → Form → Rotina → SQL → Tabela</div>
@@ -280,11 +321,29 @@
 <tr><td><a href="uc208.html#PF-09">PF-09 Controle Individual</a></td><td>FControleIndivContrib</td><td>tbButtonEnviarClick, bbtnOKDesfazerClick, ProcessaAlteracao, ProcessaDevolucao</td><td>HSTCONTRIBPREV, HSTATRASOCONTRIB, DOCUMENTO, CONTABCONTFUND, TMPDESC</td></tr>
 <tr><td><a href="uc209.html#PF-10">PF-10 Cadastro Manual</a></td><td>FCadHstContribuicao, FCadHstContribuicaoBeneficiario</td><td>bbtnConfirmarClick, BBtnImportaClick, BBtnContabilizaClick</td><td>HSTCONTRIBPREV, HSTATRASOCONTRIB, TMPDESC, IMPORTACAOHSTCONTRIB</td></tr>
 </tbody></table></div>
+<p><strong>💡 Em outras palavras:</strong> este mapa liga cada processo de negócio à tela, à rotina e às tabelas envolvidas. É a forma mais rápida de responder “se eu mudar este processo, o que mais pode ser afetado?”.</p>
 </section>
 
+<section id="pfc42-analista"><div class="section-title">👔 Para o analista de negócios — síntese (PFC-42)</div>
+<div class="note pfc42-ba">
+<p>As rotinas mostram onde estão as regras com maior impacto financeiro:</p>
+<ul>
+<li><strong>Preparo/Envio</strong> (FPreparaEnvia): valor devido, canal de cobrança, contabilização e integração com PGA.</li>
+<li><strong>Recebimento</strong>: conferência esperado × recebido e tolerância de divergência — com ponto a validar sobre qual tela/procedimento está ativo.</li>
+<li><strong>Provisão para perdas</strong>: percentual por faixa de dias de atraso, parametrizado em tabela.</li>
+<li><strong>Bitributação</strong>: período 1989–1995 e índice IPCA-E desde 2008/01, com efeito no IR do participante.</li>
+</ul>
+<p><strong>Perguntas para levar ao responsável de negócio:</strong></p>
+<ol>
+<li>A tolerância de divergência (VLRACEITADIVERG) ainda é uma regra vigente? Qual valor é usado por contribuição?</li>
+<li>Quem mantém as faixas de provisão para perdas e qual é a política contábil por trás delas?</li>
+<li>Em caso de falha no meio do preparo mensal, qual é o procedimento operacional padrão?</li>
+</ol>
+</div>
+</section>
 </main>
 <footer>
-<p>Blueprint AS-IS — PFC-23 (enriquecido) — Módulo CONTRIBUIÇÃO | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-10</p>
+<p>Blueprint AS-IS — PFC-23 (enriquecido) — Módulo CONTRIBUIÇÃO | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-10 | Abas técnicas enriquecidas — PFC-42</p>
 </footer>
 </body>
 </html>

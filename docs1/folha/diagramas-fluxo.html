@@ -8,7 +8,7 @@
 </head>
 <body>
 <header>
-  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-22 (enriquecido)</div>
+  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-22 (enriquecido) · PFC-42 (abas técnicas enriquecidas)</div>
   <h1>🔀 Diagramas de Fluxo de Processos — Folha de Benefícios</h1>
   <p>Fluxos comprovados pelo código com rastreabilidade — renderizados via Mermaid.js</p>
 </header>
@@ -27,6 +27,40 @@
   <a href="controle-cobertura.html">📊 Cobertura</a>
 </nav>
 <main>
+
+<!-- PFC-42: enriquecimento em linguagem simples -->
+<section id="pfc42-leigo"><div class="section-title">💡 Em linguagem simples (enriquecido — PFC-42)</div>
+<div class="note-info">
+<p><strong>O que esta aba mostra:</strong> os fluxogramas dos principais processos da folha: a sequência de rotinas que o sistema executa em cada etapa, do preparo ao estorno.</p>
+<p><strong>Por que isso importa:</strong> um fluxograma mostra a ordem das coisas e onde estão as decisões. Ajuda a entender o que acontece por trás de um clique e onde um problema pode surgir.</p>
+<p><strong>Como ler esta página:</strong> leia cada diagrama como um mapa de metrô, de cima para baixo. Retângulo é um passo; losango é uma decisão; cilindro é uma tabela onde o dado fica guardado. O número depois de “!” é a linha do código onde o passo está (ex.: “!1755” = linha 1.755). Abaixo de cada diagrama há um parágrafo “💡 Em outras palavras” com o mesmo fluxo em linguagem comum. Primeiro, o ciclo completo em versão simplificada:</p>
+</div>
+<p><strong>Termos usados nesta página</strong> — símbolos e termos.</p>
+<div class="table-wrap"><table><thead><tr><th>Termo técnico</th><th>Em linguagem simples</th><th>Fonte</th></tr></thead><tbody>
+<tr><td><strong>Retângulo</strong></td><td>Um passo (rotina) executado pelo sistema.</td><td>—</td></tr>
+<tr><td><strong>Losango { }</strong></td><td>Decisão: o caminho depende de uma condição (ex.: leiaute CNAB 150 ou 240).</td><td>—</td></tr>
+<tr><td><strong>Cilindro [( )]</strong></td><td>Tabela do banco de dados onde o resultado é gravado.</td><td>—</td></tr>
+<tr><td><strong>!NNNN</strong></td><td>Número da linha no arquivo de código indicado em “Evidência”.</td><td>—</td></tr>
+<tr><td><strong>ETL</strong></td><td>Rotina externa que copia a folha efetivada para o histórico definitivo.</td><td><code>fFolhaNormalEfet.pas:8722</code></td></tr>
+<tr><td><strong>CAP / CAR</strong></td><td>Títulos de Contas a Pagar e a Receber gerados pelo estorno.</td><td><code>festornafolha.pas:1523, 1654</code></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">🗺️ O ciclo mensal em uma só imagem (PFC-42)</div>
+<div class="mermaid">graph LR
+  A["1. Preparo<br/>quem entra na folha"] --> B["2. Prévia<br/>cálculo provisório"]
+  B --> C{"3. Conferência<br/>está correto?"}
+  C -->|"não"| D["Apagar prévia<br/>e recalcular"]
+  D --> B
+  C -->|"sim"| E["4. Efetivação<br/>folha oficial"]
+  E --> F["5. Pagamento<br/>arquivo ao banco"]
+  E --> G["Contabilização"]
+  E --> H["Contracheque"]
+  F --> I{"Problema após o pagamento?"}
+  I -->|"sim"| J["6. Estorno<br/>CAP/CAR"]
+</div><p>Simplificação dos fluxos abaixo, baseada na ordem do menu “Cálculos da Folha” (<code>FPrincipal.dfm:220-401</code>) <span class="ev ev-comprovado">COMPROVADO</span>; a apresentação em etapas é didática <span class="ev ev-inferido">INFERIDO</span>.</p>
+</section>
+
 <section><div class="section-title">🔀 Fluxo PF-01 — Preparo da Folha</div>
 <div class="mermaid">graph TD
   A["FPreparo.sbtnInserirClick"] --> B["MontaListas<br/>patro/planos/benefícios"]
@@ -37,6 +71,8 @@
   F --> G[("HSTBENEFBFCIARIO")]
 </div>
 <p><strong>Evidência:</strong> <code>FPreparo.pas:1755-2931</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+
+<p><strong>💡 Em outras palavras:</strong> o usuário escolhe patrocinadoras, planos e benefícios; o sistema percorre cada benefício, grava o histórico do mês e calcula valores proporcionais para quem começou ou terminou no meio do mês. Existe um caminho alternativo, “Preparo - SP”, que faz o preparo dentro do banco de dados (<code>FPreparoSP.dfm:854</code>) <span class="ev ev-comprovado">COMPROVADO</span>.</p>
 </section>
 
 <section><div class="section-title">🔀 Fluxo PF-02 — Prévia (Cálculo)</div>
@@ -55,6 +91,8 @@
   L --> M[("PREVIA / BASEDEPAGAMENTO<br/>BITRIBUTACAO")]
 </div>
 <p><strong>Evidência:</strong> <code>dFolhaPrevia.pas:24781-25405</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+
+<p><strong>💡 Em outras palavras:</strong> para cada recebedor, o sistema monta a ficha, calcula as rubricas de crédito, aplica a regra de cada rubrica, classifica-a nas bases (IR, INSS…), grava na prévia e, ao final, faz o fechamento (rateio entre planos e REINF). O resultado fica no “rascunho” (PREVIA) e nas bases de pagamento e de imposto.</p>
 </section>
 
 <section><div class="section-title">🔀 Fluxo PF-03 — Efetivação</div>
@@ -72,6 +110,8 @@
   J --> K[("HSTFOLHABENEF / ARQUIVOPAGTO")]
 </div>
 <p><strong>Evidência:</strong> <code>fFolhaNormalEfet.pas:8328-9806</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+
+<p><strong>💡 Em outras palavras:</strong> a efetivação valida o lote, a conta bancária e os parâmetros contábeis; verifica perfil de investimento (se faltar, para); pede ao ETL externo que grave a folha definitiva e espera a resposta; em seguida, gera o arquivo de pagamento. Pela forma de pagamento, sai CNAB 150 ou SIACC, este em leiaute CNAB 240 (<code>fFolhaNormalEfet.pas:6347-6351</code>) <span class="ev ev-comprovado">COMPROVADO</span>. O diagrama mostra CNAB 150 e CNAB 240 lado a lado; no código, o SIACC reaproveita o gerador CNAB 240 (<code>:9806-9811</code>).</p>
 </section>
 
 <section><div class="section-title">🔀 Fluxo PF-04 — Estorno</div>
@@ -88,6 +128,8 @@
   J --> K[("HSTFOLHABENEFCAP / RUBRICAINDIV<br/>ARQUIVOPAGTO")]
 </div>
 <p><strong>Evidência:</strong> <code>festornafolha.pas:1843-2062</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+
+<p><strong>💡 Em outras palavras:</strong> o estorno confere a situação dos documentos, desfaz as rubricas individuais, gera os ajustes (alterador), cria os títulos de Contas a Pagar e a Receber, grava o motivo, trata compensações e executa a procedure <code>CM.SP_FB_EXCESSODEBITO_ESTORNAR</code> (<code>festornafolha.pas:1810</code>). Se o recebedor tiver favorecidos de pensão alimentícia, o sistema avisa que eles também devem ser estornados (<code>festornafolha.pas:4496</code>) <span class="ev ev-comprovado">COMPROVADO</span>.</p>
 </section>
 
 <section><div class="section-title">🔀 Fluxo PF-05 — Remessa Bancária</div>
@@ -103,6 +145,8 @@
   H --> I[("ARQUIVOPAGTO + arquivo em disco")]
 </div>
 <p><strong>Evidência:</strong> <code>fFolhaNormalEfet.pas:9346-9728</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+
+<p><strong>💡 Em outras palavras:</strong> o arquivo de remessa é o “envelope” enviado ao banco com todos os créditos. O sistema escolhe o leiaute, preenche documento, favorecido e registros, e grava o controle em ARQUIVOPAGTO. Só entram recebedores com líquido de pelo menos R$ 0,01 e sem estorno (<code>fFolhaNormalEfet.pas:6330, 6340</code>) <span class="ev ev-comprovado">COMPROVADO</span>.</p>
 </section>
 
 <section><div class="section-title">🔀 Fluxo PF-08 — IRRF</div>
@@ -118,6 +162,8 @@
   H --> I[("BITRIBUTACAO / HSTBITRIBUTACAO<br/>PREVIA")]
 </div>
 <p><strong>Evidência:</strong> <code>dFolhaPrevia.pas:7180-13493</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+
+<p><strong>💡 Em outras palavras:</strong> o imposto é calculado sobre as bases montadas na prévia. O sistema verifica isenção e compensação, aplica a tabela progressiva ou regressiva conforme a opção do participante e grava as bases de tributação.</p>
 </section>
 
 <section><div class="section-title">🔀 Fluxo PF-06 — Apropriação Contábil</div>
@@ -127,6 +173,10 @@
   C --> D[("CONTABCONTFUND")]
 </div>
 <p><strong>Evidência:</strong> <code>dFolhaPrevia.pas:19438</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+
+<p><strong>💡 Em outras palavras:</strong> a contabilização registra na contabilidade o que foi pago e descontado. Na prévia, o sistema só confere se as rubricas têm conta contábil. Os lançamentos são gerados na efetivação.</p>
+
+<div class="note"><p><strong>🔎 Ponto a validar</strong> <span class="ev ev-pendente">PENDENTE</span> — o cilindro <code>CONTABCONTFUND</code> não aparece em nenhum <code>.pas</code> do FOLHA <span class="ev ev-comprovado">COMPROVADO</span>. Segundo a análise do caso de uso (<a href="uc103.html#PF-06">JF006</a>), os lançamentos são gravados por um componente externo (<code>tctrlLancamento</code>), e a tabela de destino continua desconhecida.</p></div>
 </section>
 
 <section><div class="section-title">🔀 Fluxo PF-09 — Conciliação INSS</div>
@@ -136,10 +186,43 @@
   C --> D[("CONCINSS / DETCONCINSS")]
 </div>
 <p><strong>Evidência:</strong> <code>FOLHA/Fontes/FConciliacaoReembolsoINSS.pas</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+
+<p><strong>💡 Em outras palavras:</strong> a conciliação do INSS confere o que a entidade pagou em nome do INSS e o que deve ser reembolsado, e programa as rubricas de acerto. O menu tem um grupo próprio, “Reembolso do INSS” (<code>FPrincipal.dfm:641</code>) <span class="ev ev-comprovado">COMPROVADO</span>.</p>
 </section>
+
+<section><div class="section-title">🔀 Fluxo complementar — espera pelo ETL na efetivação (PFC-42)</div>
+<div class="mermaid">graph TD
+  A["Efetivação"] --> B["Grava pedido em ETL_FOLHA_EFETIVACAO"]
+  B --> C["Lê pasta do ETL em PARAMETLPLANUS"]
+  C --> D["Cria arquivo-gatilho Iniciar_Histrubsal.csv"]
+  D --> E{"ETL terminou?"}
+  E -->|"ainda não"| W["Espera 10 s"]
+  W --> E
+  E -->|"falha F"| X["Erro inclusão da rubrica na Histrubsal + alerta"]
+  E -->|"ok"| G["Segue para arquivo bancário"]
+</div><p><strong>Evidência:</strong> <code>fFolhaNormalEfet.pas:4107-4121, 8722-8775, 8839, 8908, 8937</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<p><strong>💡 Em outras palavras:</strong> na efetivação, a folha não é gravada pelo próprio programa: ele deixa um “bilhete” (arquivo-gatilho) numa pasta para a rotina de ETL e fica perguntando, a cada 10 segundos, se o trabalho terminou. Se o ETL avisar falha, a efetivação é interrompida e a equipe de monitoramento é avisada.</p>
+
+<div class="note pfc42-ba"><p><strong>👔 Para o analista de negócios</strong></p><ul>
+<li>A espera não tem limite de tempo no código (<code>fFolhaNormalEfet.pas:8772-8775</code>) <span class="ev ev-comprovado">COMPROVADO</span>. Num dia de folha, uma parada do ETL deixa a efetivação aguardando. Defina um tempo máximo aceitável e um plano de contingência.</li>
+</ul></div>
+
+</section>
+
+<section id="pfc42-analista"><div class="section-title">👔 Para o analista de negócios — síntese (PFC-42)</div>
+<div class="note pfc42-ba">
+<p>Os fluxos mostram que a folha é uma linha de montagem: preparo → prévia → conferência → efetivação → pagamento, com o estorno como caminho de correção. Os pontos de decisão mais relevantes para o negócio são a conferência (humana), o perfil de investimento (bloqueio automático), o ETL (dependência externa) e a escolha do leiaute bancário.</p>
+<p><strong>Validações sugeridas</strong></p><ul>
+<li>Confirmar com a área contábil onde os lançamentos da folha são gravados (PF-06).</li>
+<li>Confirmar se o “Preparo - SP” substitui o preparo tradicional ou se convive com ele.</li>
+<li>Formalizar quem aprova a passagem da conferência para a efetivação.</li>
+</ul>
+</div>
+</section>
+
 </main>
 <footer>
-<p>Blueprint AS-IS — PFC-31 — Módulo FOLHA | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-10</p>
+<p>Blueprint AS-IS — PFC-31 — Módulo FOLHA | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-10 | Abas técnicas enriquecidas — PFC-42</p>
 </footer>
 <script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
 <script src="../assets/js/mermaid-init.js"></script>

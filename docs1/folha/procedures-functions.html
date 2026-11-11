@@ -8,7 +8,7 @@
 </head>
 <body>
 <header>
-  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-22 (enriquecido)</div>
+  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-22 (enriquecido) · PFC-42 (abas técnicas enriquecidas)</div>
   <h1>🔧 Procedures, Functions e Métodos — Folha de Benefícios</h1>
   <p>Análise profunda dos procedimentos/funções relevantes, com file:linha, parâmetros, blocos de processamento, SQL, cálculos, dados alterados e cadeia de chamadas.</p>
 </header>
@@ -28,9 +28,38 @@
 </nav>
 <main>
 
+<!-- PFC-42: enriquecimento em linguagem simples -->
+<section id="pfc42-leigo"><div class="section-title">💡 Em linguagem simples (enriquecido — PFC-42)</div>
+<div class="note-info">
+<p><strong>O que esta aba mostra:</strong> as principais “receitas” do código: as rotinas que fazem o cálculo da prévia, o imposto, os descontos, a efetivação, o estorno e o preparo. Para cada rotina, a página mostra o nome, o arquivo, a linha, o que recebe, o que devolve e quais outras rotinas ela aciona.</p>
+<p><strong>Por que isso importa:</strong> é aqui que as regras de negócio viram conta. Quando alguém pergunta “por que o líquido deu esse valor?”, a resposta está numa destas rotinas.</p>
+<p><strong>Como ler esta página:</strong> cada bloco começa com o nome da rotina e o local no código (<code>arquivo.pas:linha</code>). “Assinatura” é a lista de dados de entrada; “cadeia” é a sequência de rotinas que ela chama, como uma receita que manda “fazer o molho da página 12”. O motor trata <strong>um recebedor por vez</strong>: monta o recebedor, calcula cada rubrica, separa as bases de imposto, calcula o IR, confere margem e mínimos e grava o resultado na prévia.</p>
+</div>
+<p><strong>Termos usados nesta página</strong> — vocabulário de programação e de folha usado nesta aba.</p>
+<div class="table-wrap"><table><thead><tr><th>Termo técnico</th><th>Em linguagem simples</th><th>Fonte</th></tr></thead><tbody>
+<tr><td><strong>Procedure / function</strong></td><td>Rotina, um bloco de código com um nome que executa uma tarefa. A function devolve um resultado; a procedure só executa.</td><td><code>dFolhaPrevia.pas</code></td></tr>
+<tr><td><strong>Parâmetro / retorno</strong></td><td>Parâmetro é o dado que a rotina recebe; retorno é a resposta que ela devolve.</td><td><code>dFolhaPrevia.pas:24781</code> (ProcessaPrevia)</td></tr>
+<tr><td><strong>Classe / objeto (TobjRecebedor, TobjRubrica)</strong></td><td>“Molde” e “ficha preenchida”. Cada recebedor e cada rubrica vira uma ficha na memória enquanto é calculado.</td><td><code>dFolhaPrevia.pas:19243, 4096</code></td></tr>
+<tr><td><strong>Commit / StartTransaction</strong></td><td>Commit é “salvar de vez” no banco; StartTransaction abre um novo pacote de alterações.</td><td><code>dFolhaPrevia.pas:4138-4139</code></td></tr>
+<tr><td><strong>SQL inline (concatenação)</strong></td><td>Comando ao banco montado juntando pedaços de texto dentro do código.</td><td><code>dFolhaPrevia.pas:24786</code></td></tr>
+<tr><td><strong>Stored procedure</strong></td><td>Rotina guardada no banco Oracle e chamada pelo programa. Ver a tabela “Procedures no banco”, no fim da página.</td><td><code>fFolhaNormalEfet.pas:8686</code></td></tr>
+<tr><td><strong>Base de cálculo</strong></td><td>Soma das rubricas que servem de base para um imposto ou desconto (base de IR, base de INSS, etc.).</td><td><code>dFolhaPrevia.pas:15076</code> (ClassificaRubricaBase)</td></tr>
+<tr><td><strong>IR progressivo × regressivo</strong></td><td>Duas formas de tributar o benefício. Na progressiva, a alíquota cresce com o valor; na regressiva, cai com o tempo de acumulação. Quem escolhe é o participante.</td><td><code>dFolhaPrevia.pas:12123, 12380</code></td></tr>
+<tr><td><strong>Margem consignável</strong></td><td>Limite máximo de descontos (empréstimos, convênios) que pode ser tirado do benefício.</td><td><code>dFolhaPrevia.pas:7496, 7676</code></td></tr>
+<tr><td><strong>Benefício mínimo</strong></td><td>Valor mínimo garantido. Se o cálculo der menos, o sistema complementa.</td><td><code>dFolhaPrevia.pas:8298</code></td></tr>
+<tr><td><strong>Pro-rata</strong></td><td>Pagamento proporcional aos dias do mês, quando o benefício começa ou termina no meio do mês.</td><td><code>FPreparo.pas:2931</code></td></tr>
+<tr><td><strong>Alterador / correção</strong></td><td>Ajuste de valor (correção ou reajuste) aplicado conforme a data de pagamento.</td><td><code>dFolhaPrevia.pas:8615, 8920</code></td></tr>
+<tr><td><strong>Rateio multiplano</strong></td><td>Divisão de um valor entre planos, quando o recebedor tem benefício em mais de um plano.</td><td><code>dFolhaPrevia.pas:22816</code></td></tr>
+<tr><td><strong>CPMF</strong></td><td>Antiga contribuição sobre movimentação financeira, extinta em 2007. A fórmula continua no código.</td><td><code>dFolhaPrevia.pas:16764-16766</code></td></tr>
+</tbody></table></div>
+</section>
+
+
 <section><div class="section-title">🔧 Motor de cálculo — dFolhaPrevia.pas (30.856 linhas)</div>
 <p>O DataModule <code>TdtmFolhaPrevia</code> (instanciado sob demanda — refatoração WO19556, <code>Folha.dpr:312</code>) concentra o motor de cálculo da prévia. Contém 3 classes principais: <code>TdtmFolhaPrevia</code> (DataModule), <code>TobjRecebedor</code> (processa um recebedor/titular) e <code>TobjRubrica</code> (processa uma rubrica). Abaixo, as rotinas-chave com assinatura, parâmetros, blocos lógicos, SQL/cálculos, dados alterados e cadeia de chamadas — todas com <code>file:linha</code> real.</p>
 <div class="legend"><span><span class="ev ev-comprovado">COMPROVADO</span> — assinatura/blocos lidos do código</span><span><span class="ev ev-inferido">INFERIDO</span> — comportamento inferido</span></div>
+
+<p><strong>💡 Em outras palavras:</strong> o motor é uma grande calculadora com três tipos de ficha: a do processamento inteiro (TdtmFolhaPrevia), a de cada recebedor (TobjRecebedor) e a de cada rubrica (TobjRubrica). Ele é carregado só quando a prévia é processada. A tela da prévia cria o motor e o módulo contábil logo antes do cálculo (<code>FFolhaNormalPrevia.pas:2441-2446</code>) <span class="ev ev-comprovado">COMPROVADO</span>.</p>
 </section>
 
 <section><div class="section-title">⚡ Orquestração da prévia</div>
@@ -62,6 +91,8 @@
 <p><strong>Propósito:</strong> fechamento do recebedor após processar todas as rubricas (consolidação, rateio, REINF). <strong>Cadeia:</strong> → <code>ProcessaRateioRubricas</code> (:22816) → <code>ProcessaReinf</code> (:19882) → <code>ProcessaRateioRubricasReinf</code> (:19765). <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p>
 </div>
 
+
+<p><strong>💡 Em outras palavras:</strong> esta rotina é o “maestro” da prévia. Ela percorre a lista de recebedores e, para cada um, monta a ficha, calcula todas as rubricas e faz o fechamento (rateio entre planos e REINF). A cada bloco processado, salva o resultado no banco. Antes de tudo, a tela da prévia confere se o usuário pode executar o cálculo (<code>ValidaUsuarioFolha</code>, <code>FFolhaNormalPrevia.pas:1873-1880</code>); se não puder, a prévia não roda <span class="ev ev-comprovado">COMPROVADO</span>.</p>
 </section>
 
 <section><div class="section-title">🧮 Processamento de rubricas</div>
@@ -97,6 +128,8 @@
 <p><strong>Propósito:</strong> classificar a rubrica em uma base de cálculo (IRRF, INSS, salário-família, reserva, etc.) e alocar na base correspondente via <code>AlocaBase</code> (:15010). <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p>
 </div>
 
+
+<p><strong>💡 Em outras palavras:</strong> para cada rubrica do recebedor, o motor descobre qual regra de cálculo usar (cadastrada em ALGREGRA), calcula o valor, decide em qual base de imposto ou desconto a rubrica entra e grava a linha na prévia. É como preencher, linha a linha, o contracheque de cada pessoa.</p>
 </section>
 
 <section><div class="section-title">💰 IRRF (Imposto de Renda)</div>
@@ -132,6 +165,13 @@
 <p><strong>Propósito:</strong> verificar e retornar o valor de compensação de IRRF disponível. <strong>Retorno:</strong> real. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p>
 </div>
 
+
+<p><strong>💡 Em outras palavras:</strong> o imposto é calculado depois das rubricas. O motor soma o que é tributável, verifica isenções e compensações (valores de IR a devolver ou abater) e aplica a tabela escolhida pelo participante: progressiva (normal) ou regressiva. A regressiva é separada por tipo de base: 0 = vitalício, 1 = abono, 7 = reserva <span class="ev ev-comprovado">COMPROVADO</span>.</p>
+
+<div class="note pfc42-ba"><p><strong>👔 Para o analista de negócios</strong></p><ul>
+<li>O IR retido aqui alimenta DARF, informe de rendimentos e REINF. Um erro de cadastro (opção de regime, isenção por moléstia grave, compensação judicial) se propaga para todas essas obrigações.</li>
+<li>A opção pelo regime regressivo é, pela legislação, irretratável. Por isso a regra no sistema deve ser estável e auditável (contexto legal; não verificado no código) <span class="ev ev-inferido">INFERIDO</span>.</li>
+</ul></div>
 </section>
 
 <section><div class="section-title">📉 CPMF, margem, benefício mínimo, correção e salário-família</div>
@@ -171,6 +211,14 @@
 <p><strong>Propósito:</strong> aplicar CPMF sobre o valor da pensão alimentícia. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p>
 </div>
 
+
+<p><strong>💡 Em outras palavras:</strong> esta seção junta as regras de proteção e ajuste do valor. A <strong>margem</strong> limita os descontos; o <strong>benefício mínimo</strong> garante um piso; a <strong>correção</strong> aplica reajustes conforme a data de pagamento; o <strong>salário-família</strong> acrescenta a cota devida. A <strong>CPMF</strong> é uma regra antiga ainda presente no código.</p>
+
+<div class="note pfc42-ba"><p><strong>👔 Para o analista de negócios</strong></p><ul>
+<li>A CPMF continua sendo chamada no cálculo do INSS consignado (<code>dFolhaPrevia.pas:6937, 7749</code>) <span class="ev ev-comprovado">COMPROVADO</span>. Se o parâmetro <code>prmPercCPMF</code> estiver em 1, o valor resultante é zero <span class="ev ev-inferido">INFERIDO</span>. Confirme com a área tributária e documente essa regra como “desativada por parâmetro”.</li>
+<li>A margem consignável define quanto pode ser descontado por convênios e empréstimos. Mudanças nela afetam diretamente as entidades consignatárias e o relacionamento com o assistido.</li>
+<li>Quando o líquido daria negativo, o sistema registra “Valor líquido negativo. Será atribuído zero” (<code>dFolhaPrevia.pas:17343</code>) <span class="ev ev-comprovado">COMPROVADO</span>. Vale definir com o negócio o que acontece com a diferença não descontada.</li>
+</ul></div>
 </section>
 
 <section><div class="section-title">🏦 Rateio, REINF e bases</div>
@@ -189,6 +237,8 @@
 <p><strong>Propósito:</strong> apurar o valor de uma base de cálculo por tipo e mês de referência. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p>
 </div>
 
+
+<p><strong>💡 Em outras palavras:</strong> quando uma pessoa recebe por mais de um plano, os valores são divididos (rateados) na proporção de cada plano. O mesmo rateio vale para as informações da REINF, a declaração enviada à Receita Federal.</p>
 </section>
 
 <section><div class="section-title">🔁 Efetivação — fFolhaNormalEfet.pas (9.975 linhas)</div>
@@ -207,6 +257,8 @@
 <p><strong>Propósito:</strong> atualizar BASEDEPAGAMENTO após efetivação (mês, lote, histórico). <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p>
 </div>
 
+
+<p><strong>💡 Em outras palavras:</strong> na efetivação, a prévia aprovada vira folha oficial. A tela registra o pedido para uma rotina de ETL externa e espera a conclusão (consultando a cada 10 segundos, <code>fFolhaNormalEfet.pas:8772-8775</code>) <span class="ev ev-comprovado">COMPROVADO</span>. Depois, gera os arquivos de pagamento: CNAB 150 ou, quando a forma de pagamento está marcada para arquivo (<code>FLGARQUIVO = 'S'</code>), o arquivo SIACC em leiaute CNAB 240 (<code>fFolhaNormalEfet.pas:6347-6351, 9806-9811</code>) <span class="ev ev-comprovado">COMPROVADO</span>. Só entram no arquivo bancário recebedores com líquido de pelo menos R$ 0,01 e sem estorno (<code>fFolhaNormalEfet.pas:6330, 6340</code>) <span class="ev ev-comprovado">COMPROVADO</span>.</p>
 </section>
 
 <section><div class="section-title">↩️ Estorno — festornafolha.pas (5.277 linhas)</div>
@@ -220,6 +272,8 @@
 <p><strong>Propósito:</strong> desfazer rubricas individuais (RUBRICAINDIV) no estorno, total ou parcial. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p>
 </div>
 
+
+<p><strong>💡 Em outras palavras:</strong> o estorno desfaz uma folha já paga, no todo ou em parte. Ele desfaz rubricas individuais, gera os títulos de Contas a Pagar e a Receber (CAP/CAR), grava o motivo e chama a procedure <code>CM.SP_FB_EXCESSODEBITO_ESTORNAR</code> (<code>festornafolha.pas:1810</code>) <span class="ev ev-comprovado">COMPROVADO</span>.</p>
 </section>
 
 <section><div class="section-title">🧭 Preparo — FPreparo.pas (10.384 linhas)</div>
@@ -238,10 +292,14 @@
 <p><strong>Propósito:</strong> cálculo pro-rata conforme data final (encerramento/início no mês). <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p>
 </div>
 
+
+<p><strong>💡 Em outras palavras:</strong> o preparo escolhe quem entra na folha, grava o histórico de cada benefício e calcula valores proporcionais (pro-rata) para quem começou ou terminou no meio do mês. Existe uma versão alternativa do preparo feita no banco (<code>CM.SP_FB_PREPARO_FOLHA_BENEF</code>), com 8 tipos: normal do mês; abono anual FUNCEF e INSS; antecipação do abono FUNCEF; antecipação do abono INSS; resgate parcelado; desfazer preparo; e abono anual só de uma fonte pagadora, FUNCEF ou INSS (<code>__SCRIPTS__/2024/11/WO14701/WO14701_Script_DDL_01_SP Preparo Folha.sql:6-13</code>) <span class="ev ev-comprovado">COMPROVADO</span>.</p>
 </section>
 
 <section><div class="section-title">📐 Funções compartilhadas — UFuncoesFolha.pas (3.813 linhas)</div>
 <p>Unidade de funções de cálculo compartilhadas, referenciada pelo motor (<code>dFolhaPrevia.pas</code> → <code>UFuncoesFolha</code>, confirmado em <code>arquitetura.html</code>). Contém rotinas utilitárias de arredondamento, conversão de cotas, cálculo de dígito verificador (complementar a <code>uCalcDv.pas</code>:491 lin) e formatação. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> (referência confirmada); detalhamento linha-a-linha classificado <span class="ev ev-pendente">PENDENTE</span> por volume.</p>
+
+<p><strong>💡 Em outras palavras:</strong> é a “caixa de utilidades” da folha: arredondamentos, conversões e formatação. Também guarda a rotina que apaga a prévia pela procedure <code>CM.SP_APAGAPREVIA</code> (<code>UFuncoesFolha.pas:1295, 1350</code>) e a validação do usuário da folha (<code>UFuncoesFolha.pas:3551-3560</code>) <span class="ev ev-comprovado">COMPROVADO</span>.</p>
 </section>
 
 <section><div class="section-title">📋 Observações</div>
@@ -252,9 +310,34 @@
 </ul>
 </section>
 
+
+<section><div class="section-title">🗃️ Procedures no banco Oracle chamadas pelo módulo (PFC-42)</div>
+<p>Além das rotinas Delphi acima, o FOLHA aciona rotinas guardadas no próprio banco. Nelas também há regra de negócio, mas o código delas, em geral, não está nos fontes Delphi. A lista foi obtida pela busca de <code>StoredProcName</code> em <code>FOLHA/**/*.pas</code> e <code>*.dfm</code> <span class="ev ev-comprovado">COMPROVADO</span>. A finalidade marcada <span class="ev ev-inferido">INFERIDO</span> foi deduzida do nome e da rotina que faz a chamada.</p>
+<div class="table-wrap"><table><thead><tr><th>Procedure</th><th>O que faz (linguagem simples)</th><th>Onde é chamada</th><th>Evidência</th></tr></thead><tbody><tr><td><code>CM.SP_FB_PREPARO_FOLHA_BENEF</code></td><td>Preparo da folha feito no banco (menu “Preparo - SP”), com 8 tipos de preparo.</td><td><code>FPreparoSP.dfm:854</code></td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr><tr><td><code>CM.SP_APAGAPREVIA</code></td><td>Apaga a prévia de um lote para recalcular ou na efetivação (rotina ApagaPreviaEfetivacao).</td><td><code>UFuncoesFolha.pas:1295, 1350, 1696, 2075</code></td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr><tr><td><code>CM.SP_APAGA_PREVIA_AUXILIAR</code></td><td>Apaga dados auxiliares da prévia.</td><td><code>UFuncoesFolha.pas:1379, 1723</code></td><td><span class="ev ev-inferido">INFERIDO</span></td></tr><tr><td><code>CM.PR_VALIDA_USUARIO_FOLHA</code></td><td>Valida se o usuário pode processar a prévia; se não puder, a prévia é interrompida.</td><td><code>UFuncoesFolha.pas:3560; FFolhaNormalPrevia.pas:1873</code></td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr><tr><td><code>CM.SP_FB_CALCULO_RUBRICA</code></td><td>Monta a estrutura de cálculo das rubricas do mês de cobrança (ExecEstruturaCalculo).</td><td><code>FFolhaNormalPrevia.pas:3709-3717</code></td><td><span class="ev ev-inferido">INFERIDO</span></td></tr><tr><td><code>SP_FB_RETORNA_DARF_INFORME</code></td><td>Devolve o código de DARF / informe de rendimentos de um plano e pessoa.</td><td><code>dFolhaPrevia.pas:29224</code></td><td><span class="ev ev-inferido">INFERIDO</span></td></tr><tr><td><code>SP_FB_RETORNA_NATUREZA_REINF</code></td><td>Devolve a natureza do rendimento para a REINF.</td><td><code>dFolhaPrevia.pas:30023</code></td><td><span class="ev ev-inferido">INFERIDO</span></td></tr><tr><td><code>CM.SP_FB_CHECKLIST_EFETIVACAO</code></td><td>Checklist da efetivação: verifica perfil de investimento; quando devolve OUT_FLGINTERROMPE > 0, registra erro e a efetivação não segue.</td><td><code>fFolhaNormalEfet.pas:8676-8701</code></td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr><tr><td><code>CM.SP_FB_EXCESSODEBITO</code></td><td>Trata excesso de débito na efetivação; só roda se a opção “Excesso de Débito” for marcada na tela.</td><td><code>fFolhaNormalEfet.pas:2677-2712, 8172</code></td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr><tr><td><code>SP_FB_MAPAFOLHABENEF / CM.SP_FB_MAPAFOLHABENEF_V2</code></td><td>Gera o mapa da folha: na efetivação, se a opção for marcada; e na tela “Mapa da Folha de Benefício”.</td><td><code>fFolhaNormalEfet.pas:2721-2741, 8116; FMapaFolhaBenef.pas:135</code></td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr><tr><td><code>CM.SP_FB_EXCESSODEBITO_ESTORNAR</code></td><td>Desfaz o tratamento de excesso de débito no estorno.</td><td><code>festornafolha.pas:1801-1810</code></td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr><tr><td><code>CM.SP_FB_ATUALIZAHSTBI</code></td><td>Atualiza o histórico das bases de tributação (ao desfazer o preparo e no cadastro manual de histórico).</td><td><code>uDesfazerPreparo.pas:1843; FCadHstBeneficio.pas:1953</code></td><td><span class="ev ev-inferido">INFERIDO</span></td></tr><tr><td><code>CM.SP_FB_ATUALIZA_SALDO_BITRIB</code></td><td>Atualiza o saldo das bases de tributação (histórico de compensação).</td><td><code>FHistCompSalContri.pas:1436</code></td><td><span class="ev ev-inferido">INFERIDO</span></td></tr><tr><td><code>CM.PCK_FB_ENCERRAFALECIDO (SP_PROCESSAR, SP_DESFAZERENCERRAMENTO, SP_AJUSTASITUACAOLISTA)</code></td><td>Encerramento de benefícios por falecimento: processar, desfazer e ajustar a situação da lista.</td><td><code>FEncerramentoPorFalecimento.dfm:1016, 1091, 1114</code></td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr></tbody></table></div>
+<div class="note"><p><strong>🔎 Ponto a validar</strong> <span class="ev ev-pendente">PENDENTE</span> — a página <a href="dados.html">🗄️ Dados</a> e a aba Lacunas tratam o nome da procedure de excesso de débito como não extraído. O nome está no código: <code>CM.SP_FB_EXCESSODEBITO</code> (<code>fFolhaNormalEfet.pas:8172</code>) e <code>CM.SP_FB_EXCESSODEBITO_ESTORNAR</code> (<code>festornafolha.pas:1810</code>). O código-fonte PL/SQL dessas procedures não foi localizado no repositório. Dentre as listadas acima, só foi encontrado o script de <code>CM.SP_FB_PREPARO_FOLHA_BENEF</code>.</p></div>
+
+</section>
+
+<section id="pfc42-analista"><div class="section-title">👔 Para o analista de negócios — síntese (PFC-42)</div>
+<div class="note pfc42-ba">
+<p>Esta aba mostra onde o valor de cada benefício é efetivamente calculado. O motor processa um recebedor por vez e aplica, nesta ordem: regras das rubricas → bases de imposto → IRRF → margem consignável e líquido mínimo → rateio entre planos e REINF.</p>
+<p><strong>Regras de negócio relevantes identificadas</strong></p><ul>
+<li>Prévia só roda para usuário validado (<code>FFolhaNormalPrevia.pas:1873-1880</code>).</li>
+<li>Efetivação bloqueada se houver lançamento sem perfil de investimento (<code>fFolhaNormalEfet.pas:2345-2349, 8676-8701</code>).</li>
+<li>Arquivo bancário só com líquido ≥ R$ 0,01 e sem estorno (<code>fFolhaNormalEfet.pas:6330, 6340</code>).</li>
+<li>Excesso de débito e mapa da folha são etapas <em>opcionais</em> da efetivação, marcadas pelo operador (<code>fFolhaNormalEfet.pas:2677, 2721</code>). Quem decide quando marcar?</li>
+</ul>
+<p><strong>Pontos para validar com o negócio</strong></p><ul>
+<li>Regra da CPMF: confirmar a neutralização e remover do escopo futuro.</li>
+<li>Destino da diferença quando o líquido daria negativo.</li>
+<li>Onde está o código oficial das stored procedures e quem o mantém.</li>
+</ul>
+</div>
+</section>
+
 </main>
 <footer>
-<p>Blueprint AS-IS — PFC-22 (enriquecido) — Módulo FOLHA | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-09</p>
+<p>Blueprint AS-IS — PFC-22 (enriquecido) — Módulo FOLHA | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-09 | Abas técnicas enriquecidas — PFC-42</p>
 </footer>
 </body>
 </html>

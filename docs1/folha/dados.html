@@ -8,7 +8,7 @@
 </head>
 <body>
 <header>
-  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-22 (enriquecido)</div>
+  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-22 (enriquecido) · PFC-42 (abas técnicas enriquecidas)</div>
   <h1>🗄️ Modelo de Dados — Folha de Benefícios</h1>
   <p>41 tabelas mapeadas (DBObjects) com campos-chave, relacionamentos, CRUD, transações e commit/rollback.</p>
 </header>
@@ -28,8 +28,37 @@
 </nav>
 <main>
 
+<!-- PFC-42: enriquecimento em linguagem simples -->
+<section id="pfc42-leigo"><div class="section-title">💡 Em linguagem simples (enriquecido — PFC-42)</div>
+<div class="note-info">
+<p><strong>O que esta aba mostra:</strong> onde e como o módulo FOLHA guarda as informações: quais tabelas existem, quais campos cada uma tem, quem cria, altera ou apaga registros e como o sistema garante que uma gravação não fique pela metade.</p>
+<p><strong>Por que isso importa:</strong> os dados são o “patrimônio” da folha: quem recebe, quanto, em que conta, com quais descontos e impostos. Qualquer relatório, auditoria ou migração depende de saber o que cada tabela significa.</p>
+<p><strong>Como ler esta página:</strong> imagine o banco de dados como um arquivo de planilhas. Cada <em>tabela</em> é uma planilha, cada <em>campo</em> é uma coluna e cada <em>registro</em> é uma linha. A <em>chave</em> é a combinação de colunas que identifica uma linha sem repetição, como um CPF. Os nomes dos campos seguem um padrão: <code>ID…</code> é identificador, <code>COD…</code> é código, <code>FLG…</code> é marcador sim/não ou situação, <code>DATA…</code> é data e <code>VALOR…</code> é valor em dinheiro.</p>
+</div>
+<p><strong>Termos usados nesta página</strong> — termos de banco de dados explicados.</p>
+<div class="table-wrap"><table><thead><tr><th>Termo técnico</th><th>Em linguagem simples</th><th>Fonte</th></tr></thead><tbody>
+<tr><td><strong>Tabela / campo / registro</strong></td><td>Planilha / coluna / linha.</td><td><code>FOLHA/DBObjects/uDb*.pas</code></td></tr>
+<tr><td><strong>Chave primária</strong></td><td>Conjunto de campos que identifica uma linha de forma única. Ex.: a prévia é identificada por lote + pessoa + rubrica + plano.</td><td><code>uDbPrevia.pas</code> (CreateCmDbField … True,True)</td></tr>
+<tr><td><strong>CRUD</strong></td><td>As quatro operações básicas: Criar (INSERT), Ler (SELECT), Alterar (UPDATE) e Apagar (DELETE).</td><td>—</td></tr>
+<tr><td><strong>Transação</strong></td><td>Pacote de alterações tratado como “tudo ou nada”.</td><td><code>dFolhaPrevia.pas:4138-4139</code></td></tr>
+<tr><td><strong>Commit / rollback</strong></td><td>Commit confirma o pacote no banco; rollback desfaz tudo o que ainda não foi confirmado.</td><td><code>FFolhaNormalPrevia.pas:2475</code></td></tr>
+<tr><td><strong>SQL inline</strong></td><td>Comando ao banco escrito direto no código, montado juntando pedaços de texto.</td><td><code>dFolhaPrevia.pas:24786</code></td></tr>
+<tr><td><strong>Sequence / DUAL</strong></td><td>Gerador de números únicos do Oracle (a “máquina de senhas”).</td><td><code>fFolhaNormalEfet.pas:2016</code> (<code>CHECKLIST_IDHSTFOLHABENEF.NEXTVAL</code>)</td></tr>
+<tr><td><strong>Stored procedure</strong></td><td>Rotina guardada no banco e chamada pelo sistema.</td><td><code>UFuncoesFolha.pas:1350</code> (<code>CM.SP_APAGAPREVIA</code>)</td></tr>
+<tr><td><strong>View</strong></td><td>“Planilha virtual”: uma consulta salva que se comporta como tabela.</td><td>—</td></tr>
+<tr><td><strong>FK (chave estrangeira)</strong></td><td>Ligação entre tabelas: um campo que aponta para a linha de outra tabela (ex.: a prévia aponta para a rubrica).</td><td><code>uDbPrevia.pas</code> (IDRUBRICA)</td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">🧭 As tabelas mais importantes, em linguagem de negócio (PFC-42)</div>
+<div class="table-wrap"><table><thead><tr><th>Tabela</th><th>O que guarda (em linguagem simples)</th><th>Momento do ciclo</th></tr></thead><tbody><tr><td><code>BENEFBFCIARIO</code></td><td>A ficha de cada benefício concedido: datas, forma de pagamento, situação.</td><td>Cadastro (antes do ciclo)</td></tr><tr><td><code>PROVDESC</code></td><td>O catálogo de rubricas, ou seja, os tipos de crédito e desconto, com marcadores que dizem se incidem IR, INSS, margem consignável etc.</td><td>Parametrização</td></tr><tr><td><code>HSTBENEFBFCIARIO</code></td><td>Fotografia do benefício no mês, gravada no preparo.</td><td>Preparo</td></tr><tr><td><code>TMPDESC</code></td><td>Lançamentos de desconto e crédito programados para entrar na folha (inclusive os manuais).</td><td>Antes da prévia</td></tr><tr><td><code>PREVIA</code></td><td>O rascunho do mês: uma linha por recebedor, rubrica e plano.</td><td>Prévia</td></tr><tr><td><code>BASEDEPAGAMENTO</code> / <code>BITRIBUTACAO</code></td><td>Bases usadas para pagar e para calcular o imposto de cada recebedor.</td><td>Prévia</td></tr><tr><td><code>CTRLINTERFACE</code></td><td>Controle dos lotes de cálculo.</td><td>Prévia / efetivação</td></tr><tr><td><code>HSTFOLHABENEF</code></td><td>A “capa” de cada folha processada (versão de pagamento).</td><td>Efetivação</td></tr><tr><td><code>HISTRUBSAL</code></td><td>A folha definitiva, rubrica por rubrica. É o histórico oficial do que foi pago e descontado.</td><td>Efetivação (via ETL)</td></tr><tr><td><code>ARQUIVOPAGTO</code></td><td>Registro dos arquivos de pagamento enviados aos bancos.</td><td>Remessa</td></tr><tr><td><code>ETL_FOLHA_EFETIVACAO</code> / <code>PARAMETLPLANUS</code></td><td>Pedidos de execução da rotina de ETL da efetivação, com a situação de cada um, e as pastas onde a rotina procura o arquivo-gatilho. Não constavam do inventário anterior.</td><td>Efetivação</td></tr></tbody></table></div><p>Evidências: papéis conforme as tabelas abaixo e o caption <code>FCadTmpDesc.dfm</code> (“Cadastro Manual de Lançamentos para Folha de Benefícios”); ETL em <code>fFolhaNormalEfet.pas:8839, 8908, 8937</code> <span class="ev ev-comprovado">COMPROVADO</span>; papel de cada tabela no ciclo <span class="ev ev-inferido">INFERIDO</span>.</p>
+</section>
+
+
 <section><div class="section-title">🗄️ Visão geral</div>
 <p>41 entidades mapeadas nos DBObjects (1 <code>uDb*.pas</code> por tabela, <code>TableName</code> confirmada). Acesso via <code>TCmDbObject</code> + <code>TwwQuery</code> (InfoPower) sobre Oracle (schema <code>CM.</code>, sequences e <code>DUAL</code>). Campos-chave abaixo extraídos de <code>CreateCmDbField('CAMPO', tipo, ...)</code>. Evidência: <span class="ev ev-comprovado">COMPROVADO</span>.</p>
+
+<p><strong>💡 Em outras palavras:</strong> o sistema conhece 41 tabelas por meio de “tradutores” padronizados, um por tabela. Outras tabelas importantes (bases de pagamento, histórico da folha, arquivos de pagamento) são gravadas por comandos escritos à mão dentro do código.</p>
 </section>
 
 <section><div class="section-title">📊 Tabelas centrais com campos</div>
@@ -66,6 +95,15 @@
 <p><strong>Campos-chave:</strong> IDPESSOA + dados de banco/agência/conta. <strong>Papel:</strong> conta bancária do recebedor. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p>
 </div>
 
+
+<p><strong>💡 Em outras palavras:</strong> PREVIA é o rascunho; BENEFBFCIARIO é a ficha do benefício; PROVDESC é o catálogo de rubricas. Nos campos do catálogo, cada <code>FLG…</code> é uma “chave liga/desliga” de regra: <code>FLGIRRF</code> diz se a rubrica entra na base do IR, <code>FLGMARGEMCONSIG</code> se conta na margem consignável, <code>FLGPRORATA</code> se é paga proporcionalmente, e assim por diante.</p>
+
+<div class="note pfc42-ba"><p><strong>👔 Para o analista de negócios</strong></p><ul>
+<li>O catálogo de rubricas (PROVDESC) é, na prática, um conjunto de regras de negócio parametrizadas. Mudar um marcador muda o cálculo de todos que recebem aquela rubrica. Recomenda-se dono formal, trilha de aprovação e registro das alterações.</li>
+<li>A tabela PREVIA guarda a conta contábil, o centro de custo e o código DARF de cada linha. Por isso uma conferência da prévia já permite validar contabilidade e tributação antes da efetivação.</li>
+</ul></div>
+
+<div class="note"><p><strong>🔎 Ponto a validar</strong> <span class="ev ev-pendente">PENDENTE</span> — a lista de campos de PREVIA mostra <code>IDMOTIVO</code> duas vezes. Confirmar em <code>uDbPrevia.pas</code> se é repetição do texto ou dois campos distintos.</p></div>
 </section>
 
 <section><div class="section-title">📋 Inventário completo das 41 tabelas (chave + CRUD)</div>
@@ -113,6 +151,8 @@
 <tr><td><code>RUBRICAXPESS</code></td><td>uDbRubricaxpess.pas</td><td>62</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
 </tbody></table></div>
 <p style="margin-top:.5rem"><strong>Tabelas escritas por SQL inline fora de DBObjects</strong> (motor dFolhaPrevia.pas): BASEDEPAGAMENTO (:27387), BITRIBUTACAO (:16002), HSTBITRIBUTACAO (:15945), HSTDEDIDADEBITRIB, HSTFOLHABENEF / HSTFOLHABENEFCAP (fFolhaNormalEfet.pas), ARQUIVOPAGTO (fFolhaNormalEfet/festornafolha), RUBRICAINDIV (fFolhaNormalEfet). <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span></p>
+
+<p><strong>💡 Em outras palavras:</strong> lista de todas as tabelas com “tradutor” próprio. A coluna “Lin” é o tamanho do arquivo do tradutor; tabelas com mais campos têm arquivos maiores.</p>
 </section>
 
 <section><div class="section-title">🔐 Relacionamentos (FKs inferidas das chaves)</div>
@@ -134,6 +174,8 @@
   T --> U["CONTABANCARIA"]
   V["ALGREGRA"] --> G</div>
 <p><strong>Evidência:</strong> chaves compostas extraídas de <code>CreateCmDbField(...,True,True,...)</code> (PrimaryKey+Required) — <span class="ev ev-comprovado">COMPROVADO</span>; cardinalidade <span class="ev ev-inferido">INFERIDO</span>.</p>
+
+<p><strong>💡 Em outras palavras:</strong> o diagrama mostra como as planilhas se ligam: uma pessoa tem benefícios; um benefício pertence a um plano; uma rubrica do catálogo aparece na prévia e no histórico; um banco tem agências, e cada agência tem contas. As setas foram deduzidas das chaves, não de restrições declaradas no banco.</p>
 </section>
 
 <section><div class="section-title">✎ Operações CRUD por tabela-chave</div>
@@ -153,6 +195,8 @@
 <tr><td>CTRLINTERFACE</td><td>✅</td><td>✅</td><td>—</td><td>dFolhaPrevia.pas:19492</td></tr>
 <tr><td>PROCESSOBENEF</td><td>✅ GravaProcessoBeneficio</td><td>✅</td><td>—</td><td>FPreparo.pas:2678</td></tr>
 </tbody></table></div>
+
+<p><strong>💡 Em outras palavras:</strong> a tabela indica quem cria, altera e apaga cada informação. Um ponto chama atenção: a prévia (PREVIA) pode ser apagada e recalculada, mas o histórico do benefício (HSTBENEFBFCIARIO) e a capa da folha (HSTFOLHABENEF) não aparecem com exclusão. Faz sentido: histórico oficial não se apaga, corrige-se com estorno <span class="ev ev-inferido">INFERIDO</span>.</p>
 </section>
 
 <section><div class="section-title">🔄 Transações e commit/rollback</div>
@@ -164,6 +208,14 @@
 <li><code>ProcessaPrevia</code>: StartTransaction (:24890, :25386) → Commit (:25383, :25405)</li>
 </ul>
 <p><strong>Rollback:</strong> não identificado explicitamente no motor — em caso de exceção, a transação corrente permanece aberta (commit apenas em sucesso). <span class="ev ev-pendente">PENDENTE</span> — estratégia de rollback por erro não confirmada. <strong>Evidência:</strong> <code>FOLHA/Fontes/dFolhaPrevia.pas</code> — <span class="ev ev-comprovado">COMPROVADO</span> (commit/start); rollback <span class="ev ev-pendente">PENDENTE</span>.</p>
+
+<p><strong>💡 Em outras palavras:</strong> o motor salva o trabalho em etapas (por bloco processado), e não tudo no fim. A vantagem é não segurar o banco por muito tempo. A desvantagem é que, se der erro no meio, a parte já salva fica gravada. Por isso existe a opção de apagar a prévia e recalcular (procedure <code>CM.SP_APAGAPREVIA</code>, <code>UFuncoesFolha.pas:1350</code>) <span class="ev ev-comprovado">COMPROVADO</span>.</p>
+
+<div class="note"><p><strong>🔎 Ponto a validar</strong> <span class="ev ev-pendente">PENDENTE</span> — não há rollback dentro do motor <code>dFolhaPrevia.pas</code> (0 ocorrências) <span class="ev ev-comprovado">COMPROVADO</span>. Mas a tela da prévia abre uma transação, grava o log da operação e faz rollback se o log falhar (<code>FFolhaNormalPrevia.pas:2471-2476</code>) <span class="ev ev-comprovado">COMPROVADO</span>. Há outros rollbacks na tela da prévia (<code>:1567, 4316, 4345</code>), no estorno (<code>festornafolha.pas:2376-3397</code>, 6 pontos), na efetivação (<code>fFolhaNormalEfet.pas:6044, 6505</code>) e ao desfazer o preparo (<code>uDesfazerPreparo.pas:1370-1762</code>, 5 pontos). A estratégia completa de recuperação precisa ser validada.</p></div>
+
+<div class="note pfc42-ba"><p><strong>👔 Para o analista de negócios</strong></p><ul>
+<li>Se a prévia falhar no meio, o resultado pode ficar parcial. O procedimento operacional deve prever “apagar e recalcular” antes de conferir.</li>
+</ul></div>
 </section>
 
 <section><div class="section-title">🗄️ Views, sequences e SQL characteristics</div>
@@ -174,11 +226,30 @@
 <li><strong>Stored procedures:</strong> <code>Exec_SP_ExcessoDebito</code> (fFolhaNormalEfet.pas:8158, festornafolha.pas:1801) — SP de excesso de débito. <span class="ev ev-comprovado">COMPROVADO</span></li>
 <li><strong>Views:</strong> nenhuma view identificada nos DBObjects (acesso direto a tabelas). <span class="ev ev-pendente">PENDENTE</span> — views externas não confirmadas.</li>
 </ul>
+
+<p><strong>💡 Em outras palavras:</strong> o sistema conversa com o banco por comandos montados no código (SQL inline) e por rotinas guardadas no banco (stored procedures). A lista completa das procedures está em <a href="procedures-functions.html">🔧 Procedures</a>.</p>
+
+<div class="note"><p><strong>🔎 Ponto a validar</strong> <span class="ev ev-pendente">PENDENTE</span> — o texto acima diz que a procedure de excesso de débito existe, mas outras abas tratam o nome como não extraído. O nome é <code>CM.SP_FB_EXCESSODEBITO</code> (<code>fFolhaNormalEfet.pas:8172</code>) e, no estorno, <code>CM.SP_FB_EXCESSODEBITO_ESTORNAR</code> (<code>festornafolha.pas:1810</code>) <span class="ev ev-comprovado">COMPROVADO</span>.</p></div>
+</section>
+
+
+<section id="pfc42-analista"><div class="section-title">👔 Para o analista de negócios — síntese (PFC-42)</div>
+<div class="note pfc42-ba">
+<p>Os dados da folha seguem o ciclo: <strong>cadastro</strong> (benefício, rubricas, contas) → <strong>preparo</strong> (fotografia do mês) → <strong>prévia</strong> (rascunho) → <strong>efetivação</strong> (histórico oficial em HSTFOLHABENEF e HISTRUBSAL) → <strong>pagamento</strong> (ARQUIVOPAGTO).</p>
+<p><strong>Dados sensíveis e proteção (LGPD)</strong></p><ul>
+<li>As tabelas guardam dados pessoais e financeiros: conta bancária (CONTABANCARIA), dependentes (DEPENTIT), alimentados de pensão alimentícia (ALIMENTADOS) e valores de benefício. Pensão alimentícia envolve decisão judicial e dados de terceiros. O acesso e a retenção desses dados devem seguir a política de privacidade da entidade <span class="ev ev-inferido">INFERIDO</span>.</li>
+</ul>
+<p><strong>Decisões e validações</strong></p><ul>
+<li>Quem é o dono de cada cadastro-mestre (rubricas, bancos, benefícios)?</li>
+<li>Qual é a política de retenção do histórico (HISTRUBSAL, HSTFOLHABENEF)? É esse histórico que sustenta informes de rendimentos e eventuais ações judiciais.</li>
+<li>A tabela de controle do ETL (ETL_FOLHA_EFETIVACAO) mostra se a efetivação terminou. Ela deveria fazer parte do acompanhamento operacional do fechamento da folha?</li>
+</ul>
+</div>
 </section>
 
 </main>
 <footer>
-<p>Blueprint AS-IS — PFC-22 (enriquecido) — Módulo FOLHA | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-09</p>
+<p>Blueprint AS-IS — PFC-22 (enriquecido) — Módulo FOLHA | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-09 | Abas técnicas enriquecidas — PFC-42</p>
 </footer>
 <script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
 <script src="../assets/js/mermaid-init.js"></script>

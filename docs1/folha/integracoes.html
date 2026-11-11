@@ -8,7 +8,7 @@
 </head>
 <body>
 <header>
-  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-22 (enriquecido)</div>
+  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-22 (enriquecido) · PFC-42 (abas técnicas enriquecidas)</div>
   <h1>🔗 Integrações — Folha de Benefícios</h1>
   <p>Dependências externas (referências de interface), dependências internas, catálogo de relatórios e arquivos gerados.</p>
 </header>
@@ -27,6 +27,26 @@
   <a href="controle-cobertura.html">📊 Cobertura</a>
 </nav>
 <main>
+
+<!-- PFC-42: enriquecimento em linguagem simples -->
+<section id="pfc42-leigo"><div class="section-title">💡 Em linguagem simples (enriquecido — PFC-42)</div>
+<div class="note-info">
+<p><strong>O que esta aba mostra:</strong> com quem o módulo FOLHA “conversa”: peças de código emprestadas de outros módulos, tabelas compartilhadas, arquivos trocados com bancos e serviços externos chamados pela rede.</p>
+<p><strong>Por que isso importa:</strong> cada integração é uma dependência. Se o outro lado muda ou para, a folha pode parar ou sair errada. Saber quais são as integrações ajuda a planejar mudanças, testes e contingências.</p>
+<p><strong>Como ler esta página:</strong> há três tipos de integração. <strong>De código</strong>: a folha usa telas e rotinas de outros módulos, como quem pega ferramentas emprestadas. <strong>De dados</strong>: a folha lê ou grava tabelas que outros módulos também usam. <strong>De arquivo ou rede</strong>: a folha gera arquivos (para o banco, para o ETL) ou chama serviços web. A seção “Integrações em tempo de execução”, no fim da página, detalha as do terceiro tipo.</p>
+</div>
+<p><strong>Termos usados nesta página</strong> — termos usados nas tabelas.</p>
+<div class="table-wrap"><table><thead><tr><th>Termo técnico</th><th>Em linguagem simples</th><th>Fonte</th></tr></thead><tbody>
+<tr><td><strong>Dependência de código</strong></td><td>Uso de uma unit ou tela de outro módulo, incluída no projeto da folha.</td><td><code>Folha.dpr:257</code> (FCadUFINSS de CMAdmPrev)</td></tr>
+<tr><td><strong>Framework CM</strong></td><td>Base comum a todos os módulos da suíte: telas padrão, login, autorização, relatórios.</td><td><code>..\..\Cm\Forms\Source\</code></td></tr>
+<tr><td><strong>ETL</strong></td><td>Rotina que Extrai, Transforma e Carrega dados de um lugar para outro. Aqui, copia a folha efetivada para o histórico definitivo.</td><td><code>fFolhaNormalEfet.pas:8722</code></td></tr>
+<tr><td><strong>Arquivo-gatilho</strong></td><td>Arquivo vazio criado numa pasta só para avisar outro programa de que ele deve começar.</td><td><code>fFolhaNormalEfet.pas:8733-8743</code></td></tr>
+<tr><td><strong>API / serviço web</strong></td><td>Endereço na rede que recebe pedidos de outro programa e responde.</td><td><code>fFolhaNormalEfet.pas:9056</code></td></tr>
+<tr><td><strong>CAP / CAR</strong></td><td>Contas a Pagar / Contas a Receber, módulos financeiros que recebem títulos gerados pelo estorno.</td><td><code>festornafolha.pas:1523, 1654</code></td></tr>
+<tr><td><strong>Remessa / retorno bancário</strong></td><td>Arquivo enviado ao banco com os créditos (remessa) e arquivo devolvido pelo banco com o resultado (retorno).</td><td><code>fFolhaNormalEfet.pas:9346</code></td></tr>
+</tbody></table></div>
+</section>
+
 
 <section><div class="section-title">🔗 Dependências externas (referências de interface)</div>
 <p>Registradas apenas como referências de interface (módulo/unit/procedure + tipo). A implementação interna de módulos não autorizados não foi investigada (isolamento de escopo). Finalidade marcada "dependência externa não esclarecida" quando não confirmável pelo contexto disponível em FOLHA.</p>
@@ -54,6 +74,12 @@
 <tr><td>Oracle</td><td>Banco</td><td>schema <code>CM.</code></td><td>Banco de dados; sequences, DUAL, stored procedure de excesso de débito</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
 </tbody></table></div>
 <p><strong>Evidência:</strong> paths extraídos de <code>in '..\..\...'</code> em <code>Folha.dpr</code> e units FOLHA — <span class="ev ev-comprovado">COMPROVADO</span>. Finalidades inferidas marcadas <span class="ev ev-inferido">INFERIDO</span>; não esclarecidas marcadas <span class="ev ev-pendente">PENDENTE</span>.</p>
+
+<p><strong>💡 Em outras palavras:</strong> esta tabela lista os outros módulos da suíte de que a folha depende. Os mais importantes para o negócio: o framework comum (telas e segurança), CMPrevMT50 (conjunto de rubricas e controle de beneficiários), CONTRIBUIÇÃO e BENEFÍCIOS (de onde vêm benefícios e contribuições), IRRF e PROCJUD (imposto e ações judiciais) e CAP/CAR (financeiro).</p>
+
+<div class="note pfc42-ba"><p><strong>👔 Para o analista de negócios</strong></p><ul>
+<li>A folha não é uma ilha: concessão de benefícios, contribuições, IR e financeiro são insumos ou destinos dela. Mudanças nesses módulos devem ser avaliadas quanto ao impacto na folha, e o contrário também.</li>
+</ul></div>
 </section>
 
 <section><div class="section-title">🗺️ Dependências internas do módulo</div>
@@ -68,6 +94,8 @@
 <tr><td>dFolhaPrevia.pas</td><td>UFuncoesFolha.pas</td><td>Funções de cálculo compartilhadas</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
 <tr><td>FontesMT/</td><td>CM Framework (FCadastroMT, FWizardMT)</td><td>Forms multi-thread</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
 </tbody></table></div>
+
+<p><strong>💡 Em outras palavras:</strong> é o mapa de “quem usa quem” dentro da própria folha. Repete o que está em <a href="arquitetura.html">🏗️ Arquitetura</a>.</p>
 </section>
 
 <section><div class="section-title">📊 Catálogo de Relatórios (56 forms FPRel*/fPRel*/FPrel*)</div>
@@ -104,6 +132,8 @@
 <tr><td><code>rParametrosRubBenef</code></td><td>Parâmetros de rubrica de benefício</td><td>249</td></tr>
 </tbody></table></div>
 <p><strong>Forms de parâmetro de relatório (FParamRel*):</strong> FParamRelApropContabil (Apropriação Contábil), FParamRelBenefHist, FParamRelBenefPgto, FParamRelLancnaoProcessados, FParamRelPensAlim, FParamRelPensBanco, FParamRelPreparo, FParamRelRendasAlteradas, FParamRelSuplMaiorMenor, FParamRelaEntSaiFolha, FParamrelRubFontePag, fParamRelBenefPendentes, fParamRelBenefRetidos, fParamRelFicha, fParamRelResRubrica, fparambenefsituacao. <strong>Evidência:</strong> <code>FOLHA/Fontes/FPRel*.pas</code>, <code>fPRel*.pas</code> — <span class="ev ev-comprovado">COMPROVADO</span>.</p>
+
+<p><strong>💡 Em outras palavras:</strong> é a mesma lista da aba <a href="relatorios.html">📄 Relatórios</a>, onde os relatórios estão agrupados por finalidade de negócio.</p>
 </section>
 
 <section><div class="section-title">📁 Arquivos gerados (saídas)</div>
@@ -116,11 +146,42 @@
 <li><strong>Documentos para entidades conveniadas:</strong> <code>FExecGeraDocConvenio</code>.</li>
 <li><strong>Mapa da folha:</strong> <code>FMapaFolhaBenef</code> (WO2511).</li>
 </ul>
+
+<p><strong>💡 Em outras palavras:</strong> são os arquivos que saem da folha para fora: remessa ao banco, arquivos de convênios, mapa da folha.</p>
+
+<div class="note"><p><strong>🔎 Ponto a validar</strong> <span class="ev ev-pendente">PENDENTE</span> — “Contra-cheque (MongoDB)”: a rotina <code>CargaContraChequeMongo</code> chama uma API web do autoatendimento, não um MongoDB diretamente, e a chamada está desativada (<code>fFolhaNormalEfet.pas:9338, 9844-9880</code>) <span class="ev ev-comprovado">COMPROVADO</span>.</p></div>
+</section>
+
+
+<section><div class="section-title">🌐 Integrações em tempo de execução identificadas no código (PFC-42)</div>
+<p>Integrações que acontecem enquanto o sistema roda (além das dependências de código acima). Nesta tabela, as linhas sem nome de arquivo referem-se a <code>fFolhaNormalEfet.pas</code>.</p><div class="table-wrap"><table><thead><tr><th>Integração</th><th>Como funciona (linguagem simples)</th><th>Evidência</th><th>Classificação</th></tr></thead><tbody><tr><td><strong>Rotina de ETL da efetivação</strong></td><td>A efetivação grava um pedido em <code>CM.ETL_FOLHA_EFETIVACAO</code> (<code>:8839</code>), lê em <code>CM.PARAMETLPLANUS</code> a pasta do ETL (<code>:8908</code>) e cria nela um arquivo-gatilho: <code>Iniciar_Histrubsal.csv</code>, <code>Iniciar_Retornos.csv</code> ou <code>Iniciar_Validacao.csv</code> (<code>:8733-8743</code>). Depois, consulta a situação a cada 10 segundos (<code>:8772-8775</code>). Se a situação for “F” (falha), mostra “Erro inclusão da rubrica na Histrubsal.” e interrompe a efetivação (<code>:4113-4122</code>). Sem pasta parametrizada, mostra “Falta Parametrização no diretório do ETL” (<code>:8809</code>).</td><td><code>fFolhaNormalEfet.pas</code></td><td><span class="ev ev-comprovado">COMPROVADO</span>; ferramenta de ETL fora do repositório <span class="ev ev-pendente">PENDENTE</span></td></tr><tr><td><strong>Serviço de monitoramento (middleware interno)</strong></td><td>Etapas críticas enviam mensagens de INÍCIO, FIM e ERRO, com usuário, horário e máquina, a um serviço HTTP interno. Em produção, o grupo de destino é “Monitoramento”; nos outros ambientes, “Checklist Sistemas” (<code>:9019-9023</code>). Usado na prévia, efetivação, abertura de fita de crédito, remessa eletrônica e preparo-SP.</td><td><code>fFolhaNormalEfet.pas:9006-9056; FFolhaNormalPrevia.pas:4200; FAberturaFitaCredit.pas:1277; FRemessaEletronica.pas:5597; FPreparoSP.pas:1058</code></td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr><tr><td><strong>API do contracheque no autoatendimento</strong></td><td>Depois da efetivação de certas folhas (FLGTIPOFOLHA 0 ou 6), atualizaria o contracheque no aplicativo, com até 3 tentativas e espera de 15 segundos. A chamada está comentada.</td><td><code>fFolhaNormalEfet.pas:9338, 9844-9880</code></td><td><span class="ev ev-comprovado">COMPROVADO</span> (desativada)</td></tr><tr><td><strong>Stored procedures Oracle</strong></td><td>Procedures e pacotes chamados pela folha (preparo, apagar prévia, checklist, excesso de débito, mapa, encerramento por falecimento…).</td><td><a href="procedures-functions.html">🔧 Procedures</a></td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr><tr><td><strong>Bancos (CNAB 150 / SIACC-CNAB 240)</strong></td><td>Arquivo de remessa com os créditos aos recebedores. A escolha entre os dois depende da forma de pagamento.</td><td><code>fFolhaNormalEfet.pas:6347-6351, 9346, 9468, 9806</code></td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr><tr><td><strong>Contas a Pagar / Receber</strong></td><td>O estorno gera títulos financeiros (CAP/CAR).</td><td><code>festornafolha.pas:1523, 1654</code></td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr></tbody></table></div>
+<div class="note pfc42-ba"><p><strong>👔 Para o analista de negócios</strong></p><ul>
+<li><strong>Risco operacional:</strong> a espera pelo ETL (<code>fFolhaNormalEfet.pas:8772-8775</code>) repete a consulta enquanto não houver resposta e não tem limite de tempo <span class="ev ev-comprovado">COMPROVADO</span>. Se o ETL não rodar, a tela de efetivação pode ficar “parada” indefinidamente <span class="ev ev-inferido">INFERIDO</span>. Convém haver um procedimento de contingência e um responsável pelo ETL no dia da folha.</li>
+<li><strong>Segurança:</strong> a rotina da API do contracheque traz usuário e senha de serviço escritos no próprio código (<code>fFolhaNormalEfet.pas:9865-9866</code>) <span class="ev ev-comprovado">COMPROVADO</span>. Mesmo desativada, essa credencial deve ser tratada pela área de segurança (troca de senha e retirada do código-fonte).</li>
+<li>O serviço de monitoramento avisa a equipe sobre início, fim e erros. Vale confirmar quem recebe esses avisos e qual é o tempo de resposta esperado.</li>
+</ul></div>
+
+</section>
+
+<section id="pfc42-analista"><div class="section-title">👔 Para o analista de negócios — síntese (PFC-42)</div>
+<div class="note pfc42-ba">
+<p>A folha depende de outros módulos da suíte (benefícios, contribuições, IR, financeiro), de procedures no banco, de uma rotina de ETL externa e de um serviço de monitoramento. Também entrega arquivos aos bancos.</p>
+<p><strong>Dependências críticas para o fechamento da folha</strong></p><ul>
+<li>ETL da efetivação (sem ele, a folha não fica definitiva).</li>
+<li>Pastas de rede parametrizadas em PARAMETLPLANUS.</li>
+<li>Bancos (leiautes CNAB/SIACC homologados).</li>
+</ul>
+<p><strong>Perguntas para o responsável de negócio / TI</strong></p><ul>
+<li>Quem opera e monitora o ETL no dia da efetivação?</li>
+<li>Como o contracheque chega hoje ao aplicativo do assistido, já que a chamada automática está desativada?</li>
+<li>Os leiautes bancários estão homologados com quais bancos, e quem é avisado quando o banco muda o leiaute?</li>
+</ul>
+</div>
 </section>
 
 </main>
 <footer>
-<p>Blueprint AS-IS — PFC-22 (enriquecido) — Módulo FOLHA | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-09</p>
+<p>Blueprint AS-IS — PFC-22 (enriquecido) — Módulo FOLHA | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-09 | Abas técnicas enriquecidas — PFC-42</p>
 </footer>
 </body>
 </html>

@@ -8,7 +8,7 @@
 </head>
 <body>
 <header>
-  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-22 (enriquecido)</div>
+  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-22 (enriquecido) · PFC-42 (abas técnicas enriquecidas)</div>
   <h1>⚠️ Tratamento de Erros e Exceções — Folha de Benefícios</h1>
   <p>1157 blocos try, 163 mensagens de validação/erro — com rastreabilidade arquivo:linha</p>
 </header>
@@ -27,8 +27,34 @@
   <a href="controle-cobertura.html">📊 Cobertura</a>
 </nav>
 <main>
+
+<!-- PFC-42: enriquecimento em linguagem simples -->
+<section id="pfc42-leigo"><div class="section-title">💡 Em linguagem simples (enriquecido — PFC-42)</div>
+<div class="note-info">
+<p><strong>O que esta aba mostra:</strong> como o módulo FOLHA reage quando algo dá errado (um dado faltando, uma conta não cadastrada, uma falha no banco de dados) e quais mensagens o usuário vê.</p>
+<p><strong>Por que isso importa:</strong> na folha, um erro mal tratado pode deixar um cálculo pela metade, travar a efetivação ou, pior, deixar passar um valor errado sem aviso. Saber o que bloqueia o processo e o que apenas avisa é essencial para operar e conferir a folha.</p>
+<p><strong>Como ler esta página:</strong> a página traz a quantidade de “redes de segurança” no código, as mensagens mais relevantes e os padrões de tratamento. Um achado importante: nas telas de prévia, efetivação e estorno, a maioria das mensagens <strong>não aparece em janelas</strong>; ela é escrita num <strong>painel de resultado</strong> (log de processamento), que o usuário precisa ler ao fim do processo.</p>
+</div>
+<p><strong>Termos usados nesta página</strong> — o vocabulário de erros do Delphi, explicado.</p>
+<div class="table-wrap"><table><thead><tr><th>Termo técnico</th><th>Em linguagem simples</th><th>Fonte</th></tr></thead><tbody>
+<tr><td><strong>Exceção</strong></td><td>Um “alarme” que o programa dispara quando algo sai do esperado.</td><td>—</td></tr>
+<tr><td><strong>try / except</strong></td><td>“Rede de segurança”: tenta fazer algo e, se o alarme tocar, executa um plano B (avisar, desfazer, registrar).</td><td><code>dFolhaPrevia.pas:19419-19424</code></td></tr>
+<tr><td><strong>try / finally</strong></td><td>“Arrumar a mesa mesmo se der errado”: garante a limpeza (fechar consultas, liberar memória) em qualquer caso.</td><td><code>fFolhaNormalEfet.pas:8714-8715</code></td></tr>
+<tr><td><strong>Rollback</strong></td><td>Desfazer tudo o que ainda não foi confirmado no banco.</td><td><code>FFolhaNormalPrevia.pas:2475</code></td></tr>
+<tr><td><strong>raise exception.Create</strong></td><td>“Levantar a mão”: cria um alarme com uma mensagem e o passa para quem chamou a rotina.</td><td><code>FFolhaNormalPrevia.pas:2476</code></td></tr>
+<tr><td><strong>MessageDlg / MsgDlg / ShowMessage</strong></td><td>Janela de mensagem na tela, que o usuário precisa fechar.</td><td><code>festornafolha.pas:4063</code></td></tr>
+<tr><td><strong>ExibeMensagem (log de processamento)</strong></td><td>Escreve a mensagem no painel de resultado da prévia, efetivação ou estorno, junto com os dados do recebedor, quando houver.</td><td><code>dFolhaPrevia.pas:19415-19425</code></td></tr>
+<tr><td><strong>except silenciado</strong></td><td>Rede de segurança que “engole” o erro sem avisar ninguém.</td><td><code>dFolhaPrevia.pas:19423-19424</code></td></tr>
+<tr><td><strong>Monitoramento</strong></td><td>Aviso enviado a um serviço interno quando uma etapa crítica começa, termina ou falha.</td><td><code>fFolhaNormalEfet.pas:9006</code></td></tr>
+</tbody></table></div>
+</section>
+
 <section><div class="section-title">⚠️ Visão Geral</div>
 <p>O módulo FOLHA utiliza três padrões de tratamento de erros: (1) <code>try/except</code> com <code>MessageDlg</code>/<code>ShowMessage</code> para exibir mensagens ao usuário, (2) <code>try/except</code> com <code>RollBack</code> para reverter transações, e (3) <code>raise exception.Create</code> para propagar erros de validação. Foram contabilizados <strong>1157 blocos try</strong> e <strong>163 ocorrências de MessageDlg/ShowMessage/raise exception.Create</strong> nos arquivos .pas do módulo. O arquivo com mais blocos try é <code>dFolhaPrevia.pas</code> (233 blocos).</p>
+
+<p><strong>💡 Em outras palavras:</strong> o módulo usa três jeitos de lidar com erro: mostrar uma mensagem e parar, desfazer o que foi gravado (rollback) e “passar o problema adiante” para outra parte do programa decidir. Os números mostram que há muitas redes de segurança, o que é esperado num sistema que mexe com dinheiro.</p>
+
+<div class="note"><p><strong>🔎 Ponto a validar</strong> <span class="ev ev-pendente">PENDENTE</span> — uma recontagem com critério estrito (<code>try</code> como palavra isolada no início da linha, só em <code>FOLHA/Fontes/*.pas</code>) dá 1.130 blocos no módulo e 226 em <code>dFolhaPrevia.pas</code> <span class="ev ev-comprovado">COMPROVADO</span>. Os números acima (1.157 e 233) usam outro critério. Antes de usar a métrica, é preciso alinhar a metodologia de contagem.</p></div>
 </section>
 
 <section><div class="section-title">📊 Distribuição de Blocos try por Arquivo</div>
@@ -45,6 +71,10 @@
 <tr><td>festornafolha.pas</td><td>~25</td><td>try/except + RollBack em estorno</td></tr>
 </tbody></table></div>
 <p><strong>Evidência:</strong> <code>grep -c 'try' FOLHA/Fontes/*.pas</code> — <span class="ev ev-comprovado">COMPROVADO</span></p>
+
+<p><strong>💡 Em outras palavras:</strong> os arquivos com mais redes de segurança são os que fazem o trabalho pesado: o motor de cálculo, o preparo, a prévia, o estorno e a efetivação.</p>
+
+<div class="note"><p><strong>🔎 Ponto a validar</strong> <span class="ev ev-pendente">PENDENTE</span> — a tabela atribui “try/except + RollBack” ao motor <code>dFolhaPrevia.pas</code>, mas ele não tem nenhum rollback (0 ocorrências) <span class="ev ev-comprovado">COMPROVADO</span>. Os rollbacks ficam nas telas: prévia (<code>FFolhaNormalPrevia.pas:732, 1567, 2475, 4316, 4345</code>), estorno (<code>festornafolha.pas:2376, 2449, 2905, 3007, 3302, 3397</code>), efetivação (<code>fFolhaNormalEfet.pas:6044, 6505</code>), desfazer preparo (<code>uDesfazerPreparo.pas:1370-1762</code>) e preparo (<code>FPreparo.pas:9493</code>). Além disso, <code>_UContribuicaoPrev.pas</code> não faz parte do projeto <code>Folha.dpr</code> (ver <a href="inventario-tecnico.html">📦 Inventário</a>).</p></div>
 </section>
 
 <section><div class="section-title">📋 Mensagens de Validação Significativas</div>
@@ -59,6 +89,10 @@
 <tr><td>"Arquivo de importação inválido"</td><td>fImportaTxt.pas</td><td>MsgDlg</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
 <tr><td>"Falha na geração do CNAB"</td><td>fFolhaNormalEfet.pas:9346</td><td>MessageDlg (mtError)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
 </tbody></table></div>
+
+<p><strong>💡 Em outras palavras:</strong> são exemplos de avisos que o usuário pode ver. “mtConfirmation” é uma pergunta de confirmação; “mtError”, um erro.</p>
+
+<div class="note"><p><strong>🔎 Ponto a validar</strong> <span class="ev ev-pendente">PENDENTE</span> — vários textos da tabela acima não foram encontrados literalmente nos fontes do FOLHA (busca em <code>FOLHA/**/*.pas</code>): “Erro ao gravar Log.”, “Lote já efetivado”, “Prévia não encontrada para o período”, “Benefício não possui rubricas para estorno”, “Margem de desconto excedida”, “Arquivo de importação inválido” e “Falha na geração do CNAB”. Os textos reais mais próximos estão na tabela abaixo: por exemplo, “Não foi possível gravar o log.” (<code>FFolhaNormalPrevia.pas:2476</code>) e “Valor líquido negativo. Será atribuído zero” (<code>dFolhaPrevia.pas:17343</code>). Os textos da tabela acima devem ser tratados como paráfrases até serem validados.</p></div>
 </section>
 
 <section><div class="section-title">🔄 Padrões de Tratamento Identificados</div>
@@ -70,9 +104,39 @@
 <div class="card"><h3>try/except silenciado</h3><p>Em algumas rotinas utilitárias o except é vazio ou apenas loga. <span class="ev ev-pendente">PENDENTE</span> — verificar se intencional.</p></div>
 </div>
 </section>
+
+<section><div class="section-title">📋 Mensagens reais conferidas no código (PFC-42)</div>
+<p>Textos copiados do código-fonte, com local e efeito. “(log)” significa que a mensagem vai para o painel de resultado, e não para uma janela. Todos <span class="ev ev-comprovado">COMPROVADO</span>.</p><div class="table-wrap"><table><thead><tr><th>Mensagem</th><th>Arquivo:linha</th><th>Onde aparece</th><th>Efeito</th></tr></thead><tbody><tr><td>“Não foi possível gravar o log.”</td><td><code>FFolhaNormalPrevia.pas:2476</code></td><td>Prévia</td><td>Bloqueia: desfaz a transação e interrompe.</td></tr><tr><td>“Valor líquido negativo. Será atribuído zero: …”</td><td><code>dFolhaPrevia.pas:17343</code></td><td>Prévia (log)</td><td>Avisa e ajusta o valor para zero.</td></tr><tr><td>“Erro no processo de Validação.”</td><td><code>fFolhaNormalEfet.pas:2203</code></td><td>Efetivação (log)</td><td>Indica falha na validação prévia.</td></tr><tr><td>“Erro, Dados bancários inexistentes”</td><td><code>fFolhaNormalEfet.pas:2266</code></td><td>Efetivação (log)</td><td>Recebedor sem conta bancária.</td></tr><tr><td>“ERRO: PRÉVIA SEM PERFIL DE INVESTIMENTOS CADASTRADO”</td><td><code>fFolhaNormalEfet.pas:2347</code></td><td>Efetivação (log)</td><td><strong>Bloqueia</strong> a efetivação (<code>:2348-2349</code>).</td></tr><tr><td>“ERRO: LANÇAMENTO DA PRÉVIA SEM PERFIL DE INVESTIMENTOS CADASTRADO - LOTE n”</td><td><code>fFolhaNormalEfet.pas:8700</code></td><td>Efetivação (checklist)</td><td>Resultado da procedure de checklist.</td></tr><tr><td>“Erro na execução da procedure: SP_FB_EXCESSODEBITO. Erro: …”</td><td><code>fFolhaNormalEfet.pas:2712</code></td><td>Efetivação (log)</td><td>Falha na etapa opcional de excesso de débito.</td></tr><tr><td>“Erro na Integração Contábil/Financeira.”</td><td><code>fFolhaNormalEfet.pas:3435</code></td><td>Efetivação (log)</td><td>Rubrica sem parâmetro contábil/financeiro válido.</td></tr><tr><td>“Erro inclusão da rubrica na Histrubsal.”</td><td><code>fFolhaNormalEfet.pas:4119</code></td><td>Efetivação (log)</td><td><strong>Bloqueia</strong>: o ETL devolveu falha; aviso enviado ao monitoramento (<code>:4117-4122</code>).</td></tr><tr><td>“Erro na exclusão da planilha corrente, para regeração.”</td><td><code>fFolhaNormalEfet.pas:4509</code></td><td>Efetivação (log)</td><td>Falha ao regerar a contabilização.</td></tr><tr><td>“Erro nos Parametros Contábeis !!!”</td><td><code>fFolhaNormalEfet.pas:4841</code></td><td>Efetivação (log)</td><td>Parâmetro contábil inválido na montagem dos lançamentos.</td></tr><tr><td>“Falta Parametrização no diretório do ETL: …”</td><td><code>fFolhaNormalEfet.pas:8809</code></td><td>Efetivação (log)</td><td>Pasta do ETL não cadastrada.</td></tr><tr><td>“Esse recebedor tem consignatário(s) de pensão alimentícia associado. Deve-se fazer o estorno do(s) consignatário(s) também.”</td><td><code>festornafolha.pas:4496</code></td><td>Estorno (janela)</td><td>Orienta o usuário a estornar também os favorecidos.</td></tr><tr><td>“O processo de estorno está pronto para iniciar. Deseja realmente continuar ?”</td><td><code>festornafolha.pas:4587</code></td><td>Estorno (janela)</td><td>Confirmação antes de executar.</td></tr></tbody></table></div><p>Contagem de envios ao painel de resultado (<code>ExibeMensagem</code>): <code>dFolhaPrevia.pas</code> 340, <code>fFolhaNormalEfet.pas</code> 326, <code>festornafolha.pas</code> 115 <span class="ev ev-comprovado">COMPROVADO</span>. Quando a mensagem é “Insufficient memory”, o motor também envia um alerta de erro ao monitoramento (<code>dFolhaPrevia.pas:29559-29567</code>) <span class="ev ev-comprovado">COMPROVADO</span>.</p>
+</section>
+
+<section><div class="section-title">🔕 Erros “engolidos” e validações que não interrompem (PFC-42)</div>
+<ul><li>As rotinas que escrevem no painel de resultado do motor têm rede de segurança vazia: se a escrita falhar, nada é avisado (<code>dFolhaPrevia.pas:19419-19424, 19430-19434</code>) <span class="ev ev-comprovado">COMPROVADO</span>.</li><li>O cabeçalho da efetivação registra uma decisão de 2018: “Removido o exit. Quando a validação das informações não estão Ok sistema deve continuar o fluxo normal” (SIG 64961, <code>fFolhaNormalEfet.pas:146-150</code>) <span class="ev ev-comprovado">COMPROVADO</span>. Ou seja, parte das validações apenas avisa e não impede a continuidade.</li><li>Em contrapartida, a falta de perfil de investimento interrompe a efetivação (<code>fFolhaNormalEfet.pas:2345-2349</code>) <span class="ev ev-comprovado">COMPROVADO</span>.</li></ul>
+<div class="note pfc42-ba"><p><strong>👔 Para o analista de negócios</strong></p><ul>
+<li>Muitos avisos importantes ficam só no painel de resultado. Se o operador não ler o painel até o fim, pode efetivar uma folha com pendências. Recomenda-se incluir a leitura do log no checklist de fechamento, ou exigir que seja salvo.</li>
+<li>Defina com o negócio quais validações devem <strong>bloquear</strong> e quais podem apenas <strong>avisar</strong>. Hoje essa decisão está espalhada no código (ex.: SIG 64961).</li>
+</ul></div>
+
+</section>
+
+<section id="pfc42-analista"><div class="section-title">👔 Para o analista de negócios — síntese (PFC-42)</div>
+<div class="note pfc42-ba">
+<p>O sistema tem muitos pontos de tratamento de erro, mas a comunicação com o usuário é desigual. Algumas falhas aparecem em janelas (estorno); a maioria vai para o painel de resultado (prévia e efetivação); outras são silenciadas.</p>
+<p><strong>O que bloqueia a folha (comprovado)</strong></p><ul>
+<li>Falha ao gravar o log da prévia.</li>
+<li>Usuário não validado para processar a prévia (<code>FFolhaNormalPrevia.pas:1873-1880</code>).</li>
+<li>Lançamento sem perfil de investimento na efetivação.</li>
+<li>Falha do ETL ao gravar a folha definitiva (HISTRUBSAL).</li>
+</ul>
+<p><strong>Perguntas para o responsável de negócio</strong></p><ul>
+<li>Qual é o procedimento quando o painel de resultado mostra erros? Quem decide se a folha pode seguir?</li>
+<li>Os textos de mensagem documentados nesta aba (inclusive as paráfrases) correspondem ao que os usuários veem hoje?</li>
+</ul>
+</div>
+</section>
+
 </main>
 <footer>
-<p>Blueprint AS-IS — PFC-31 — Módulo FOLHA | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-10</p>
+<p>Blueprint AS-IS — PFC-31 — Módulo FOLHA | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-10 | Abas técnicas enriquecidas — PFC-42</p>
 </footer>
 </body>
 </html>

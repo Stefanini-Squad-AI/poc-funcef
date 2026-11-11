@@ -8,7 +8,7 @@
 </head>
 <body>
 <header>
-  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-22 (enriquecido)</div>
+  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-22 (enriquecido) · PFC-42 (abas técnicas enriquecidas)</div>
   <h1>🏗️ Arquitetura — Folha de Benefícios</h1>
   <p>Camadas, padrão de acesso a dados, packages internos e inventário de forms por área</p>
 </header>
@@ -28,11 +28,41 @@
 </nav>
 
 <main>
+
+<!-- PFC-42: enriquecimento em linguagem simples -->
+<section id="pfc42-leigo"><div class="section-title">💡 Em linguagem simples (enriquecido — PFC-42)</div>
+<div class="note-info">
+<p><strong>O que esta aba mostra:</strong> a “planta do prédio” do módulo FOLHA: de que partes o programa é feito, como elas se organizam e quem depende de quem.</p>
+<p><strong>Por que isso importa:</strong> entender a arquitetura ajuda a saber onde mora cada regra, o que pode quebrar quando algo muda e o tamanho do esforço de manutenção ou de modernização.</p>
+<p><strong>Como ler esta página:</strong> as tabelas listam camadas, pacotes e dependências. Cada bloco ganhou um parágrafo “💡 Em outras palavras”. Uma comparação útil é a de um restaurante: as <em>telas</em> são o salão, onde o cliente faz o pedido; a <em>camada de controle</em> é o garçom, que leva o pedido; a <em>camada de dados</em> é a despensa e a cozinha, onde os ingredientes (dados) são buscados e guardados; o <em>framework CM</em> é o regulamento comum a todos os restaurantes da rede (os demais módulos da suíte).</p>
+</div>
+<p><strong>Termos usados nesta página</strong> — jargão do Delphi 5 e do banco de dados, explicado.</p>
+<div class="table-wrap"><table><thead><tr><th>Termo técnico</th><th>Em linguagem simples</th><th>Fonte</th></tr></thead><tbody>
+<tr><td><strong>Delphi 5 / VCL</strong></td><td>Ferramenta de programação para Windows lançada em 1999. VCL é a biblioteca de botões, grades e janelas que ela oferece.</td><td><code>Folha.dpr</code></td></tr>
+<tr><td><strong>Unit (.pas)</strong></td><td>Arquivo de código-fonte, onde fica a lógica escrita pelo programador.</td><td><code>FOLHA/Fontes/*.pas</code></td></tr>
+<tr><td><strong>Form (.dfm)</strong></td><td>Desenho de uma tela (posição de botões, campos e grades). Cada .dfm costuma ter um .pas com o comportamento da tela.</td><td><code>FOLHA/Fontes/*.dfm</code></td></tr>
+<tr><td><strong>DataModule</strong></td><td>“Tela invisível” que guarda consultas ao banco e rotinas de cálculo, sem aparecer para o usuário. Ex.: o motor <code>dFolhaPrevia</code>.</td><td><code>dFolhaPrevia.pas</code></td></tr>
+<tr><td><strong>DBObject (TCmDbObject)</strong></td><td>Classe que representa uma tabela do banco. É o “tradutor” entre o programa e uma planilha do banco.</td><td><code>FOLHA/DBObjects/uDb*.pas</code></td></tr>
+<tr><td><strong>CtrlObject</strong></td><td>Camada de controle: aplica regras antes de gravar na tabela.</td><td><code>FOLHA/CtrlObjects/</code></td></tr>
+<tr><td><strong>Package</strong></td><td>Pacote de código compartilhado, que pode ser usado por mais de um programa (como uma caixa de ferramentas emprestada).</td><td><code>CMFbComum50, CMFbObj50, CMFolhaObjMt</code></td></tr>
+<tr><td><strong>Entry point (.dpr)</strong></td><td>Arquivo que “liga” o programa: diz qual tela abre primeiro e quais módulos de dados são carregados.</td><td><code>Folha.dpr:296-323</code></td></tr>
+<tr><td><strong>Oracle, schema CM</strong></td><td>Banco de dados da suíte. “Schema CM” é a área do banco onde ficam as tabelas da suíte (por isso os nomes começam com <code>CM.</code>).</td><td><code>fFolhaNormalEfet.pas:8686</code> (<code>CM.SP_FB_CHECKLIST_EFETIVACAO</code>)</td></tr>
+<tr><td><strong>Stored procedure</strong></td><td>Programa guardado dentro do próprio banco de dados e chamado pelo sistema. A regra fica no banco, não no código Delphi.</td><td><code>fFolhaNormalEfet.pas:8172</code></td></tr>
+<tr><td><strong>TwwQuery (InfoPower)</strong></td><td>Componente que faz consultas SQL ao banco. Há 1.114 declarações dele nos .dfm do módulo.</td><td><code>grep TwwQuery FOLHA/**/*.dfm</code> <span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><strong>Sequence / DUAL</strong></td><td>Recurso do Oracle que gera números únicos, como uma “máquina de senhas”, usados como identificadores.</td><td><code>fFolhaNormalEfet.pas:8816+</code> (<code>SEQETL_FOLHA_EFETIVACAO.NEXTVAL</code>)</td></tr>
+<tr><td><strong>MIDAS / DataSnap</strong></td><td>Tecnologia Delphi para separar o programa em cliente e servidor de aplicação. Ver “Ponto a validar” abaixo.</td><td>—</td></tr>
+</tbody></table></div>
+</section>
+
 <section><div class="section-title">🏗️ Arquitetura do Módulo</div>
 <p>O módulo <strong>FOLHA</strong> (Folha de Benefícios) é o maior dos três, com 528 artefatos Delphi. O entry point é <code>FOLHA/Fontes/Folha.dpr</code> (6.588 linhas), que cria o form principal <code>frmPrincipal</code> (Caption "Folha de Benefícios", <code>FPrincipal.pas</code> 1.976 lin).</p>
 <p>Segue o padrão CM em 4 camadas: apresentação (Fontes/ + FontesMT/), controle (CtrlObjects/ + business objects em CMFbObj50/ e CMFolhaObjMt/), acesso a dados (DBObjects/ com 41 unidades, uma por tabela) e framework CM base. O motor de cálculo central reside no DataModule <code>dFolhaPrevia.pas</code> (30.856 linhas), instanciado sob demanda (refatoração WO19556 — <code>Folha.dpr:312</code> comentado).</p>
 <p>Além dos 3 packages internos (CMFbComum50 — código comum; CMFbObj50 — business objects TObjSistemaFolha/TFolhaBenef; CMFolhaObjMt — multi-thread para 2ª via de contra-cheque), o módulo acessa Oracle via schema <code>CM.</code>, sequences e <code>DUAL</code>.</p>
 <p>Evidência: <span class="ev ev-comprovado">COMPROVADO</span> — verificado em todos os 41 DBObjects (TableName confirmada), 4 CtrlObjects, DPR e forms.</p>
+
+<p><strong>💡 Em outras palavras:</strong> o FOLHA é um programa instalado no computador do usuário (“cliente desktop”) que conversa direto com o banco Oracle. Ao abrir, ele mostra a tela principal “Folha de Benefícios”. O motor de cálculo só é carregado quando alguém processa uma prévia, o que poupa memória (<code>Folha.dpr:312</code>, linha comentada) <span class="ev ev-comprovado">COMPROVADO</span>.</p>
+
+<div class="note"><p><strong>🔎 Ponto a validar</strong> <span class="ev ev-pendente">PENDENTE</span> — a página inicial informa “Distribuído: MIDAS/DataSnap”. Nos 219 .dfm do módulo não há componente de conexão a servidor de aplicação (TDCOMConnection/TSocketConnection). Há 11 TClientDataSet e 12 TDataSetProvider, o que sugere uso local, em memória, e não uma arquitetura distribuída <span class="ev ev-inferido">INFERIDO</span>. A presença de MIDAS no ambiente precisa ser confirmada pela equipe de infraestrutura.</p></div>
 </section>
 
 <section><div class="section-title">🗂️ Camadas e Componentes</div>
@@ -42,6 +72,13 @@
 <tr><td>Acesso a Dados</td><td><code>DBObjects/</code> (41 uDb*.pas) + DataModules</td><td>TCmDbObject (1 por tabela, TableName confirmada) + dFolhaPrevia.pas (30.856 lin) + dContabil.pas (2.299 lin)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
 <tr><td>Framework base</td><td><code>..\..\Cm\Forms\Source\</code></td><td>uCmDbObject, uCmControlObject, uCmClientDataSet, uSistema</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
 </tbody></table></div>
+
+<p><strong>💡 Em outras palavras:</strong> o código segue quatro andares. No primeiro ficam as telas; no segundo, as regras de controle; no terceiro, o acesso às tabelas; e na base, o “framework CM”, compartilhado por todos os módulos da suíte. Na prática, muita regra de negócio também está nas telas: <code>FPreparo.pas</code> (10.384 linhas) e <code>fFolhaNormalEfet.pas</code> (9.975 linhas) são telas, mas contêm boa parte do processamento <span class="ev ev-comprovado">COMPROVADO</span>.</p>
+
+<div class="note pfc42-ba"><p><strong>👔 Para o analista de negócios</strong></p><ul>
+<li>Regra escrita dentro de tela é mais difícil de reaproveitar e de testar. Num levantamento de requisitos, as telas de Preparo, Prévia, Efetivação e Estorno devem ser tratadas como fontes de regra, não só como interface.</li>
+<li>Mudar uma regra pode exigir alterar mais de um lugar (tela, motor e procedure do banco). Isso aumenta o prazo e o risco de qualquer demanda de negócio.</li>
+</ul></div>
 </section>
 
 <section><div class="section-title">📦 Packages internos</div>
@@ -50,6 +87,8 @@
 <tr><td><code>CMFbObj50</code></td><td>UFolhaBenef.pas, UObjFolha.pas</td><td>Business objects (TFolhaBenef, TObjSistemaFolha)</td></tr>
 <tr><td><code>CMFolhaObjMt</code></td><td>mVersaoPagto, FPRel2ViaCChequeMT, dRel2ViaCChequeMT, uCtrl2ViaContraCheque</td><td>Multi-thread: 2ª via de contra-cheque</td></tr>
 </tbody></table></div>
+
+<p><strong>💡 Em outras palavras:</strong> os pacotes são “caixas de ferramentas” compartilhadas. Um deles guarda o código comum da folha; outro, os objetos de negócio (como o “sistema folha” com seus parâmetros); e o terceiro emite a 2ª via do contracheque em várias tarefas simultâneas (multi-thread), para ganhar velocidade.</p>
 </section>
 
 <section><div class="section-title">🔗 Dependências Internas entre Sub-áreas</div>
@@ -64,6 +103,8 @@
 <tr><td>dFolhaPrevia.pas</td><td>UFuncoesFolha.pas</td><td>Funções de cálculo compartilhadas</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
 <tr><td>FontesMT/</td><td>CM Framework (FCadastroMT, FWizardMT)</td><td>Forms multi-thread</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
 </tbody></table></div>
+
+<p><strong>💡 Em outras palavras:</strong> a tabela mostra “quem usa quem” dentro do módulo. As telas usam quase todas as outras camadas. O motor de cálculo usa o módulo contábil para conferir, ainda na prévia, se cada rubrica tem conta contábil parametrizada (<code>dFolhaPrevia.pas:19438</code>).</p>
 </section>
 
 <section><div class="section-title">📂 Inventário de Forms por Área Funcional</div>
@@ -115,16 +156,52 @@
 <tr><td>DFolha.dfm</td><td>Lookups da folha</td><td>162</td></tr>
 </tbody></table></div>
 <p style="margin-top:.5rem">+ 30 DataModules de relatório (dRel*) e 56 forms de relatório (FPRel*/fPRel*) — ver <a href="integracoes.html">🔗 Integrações</a>.</p>
+
+<p><strong>💡 Em outras palavras:</strong> as telas estão agrupadas pelo assunto que tratam. O grupo “Cálculos da Folha” reúne as telas do ciclo mensal; “Consultas” só exibe dados, sem alterá-los; os DataModules são as partes invisíveis que buscam dados e fazem contas. A coluna “Linhas” dá uma ideia do tamanho (e da complexidade) de cada tela.</p>
 </section>
 
 <section><div class="section-title">⚙️ Entry point e inicialização</div>
 <p><code>Folha.dpr:302</code> define <code>Application.Title := 'Folha de Benefícios'</code>. Criação de forms/DataModules em ordem (:305-319): frmPrincipal, frmAguarde, dtmLookFolha, dtmAPrev, dtmFolha, dtmIntegracao, dtmIntegraCAPCAR, dtmContabil, dtmRelParamRubricas, DtmAutorizacao, frmProgresso, frmPRelEstruturaRubrica, frmMsg, FrmGeraLstIndivResul. O motor <code>dtmFolhaPrevia</code> é instanciado sob demanda (linha 312 comentada — WO19556). Evidência: <span class="ev ev-comprovado">COMPROVADO</span></p>
+
+<p><strong>💡 Em outras palavras:</strong> ao abrir o programa, aparece primeiro uma tela de entrada (<code>frmCMEntrada</code>, <code>Folha.dpr:297-299</code>). Em seguida, ele carrega a tela principal e os módulos de dados de apoio, e fecha a tela de entrada (<code>Folha.dpr:320-321</code>) <span class="ev ev-comprovado">COMPROVADO</span>. O arquivo de ajuda é procurado num caminho fixo, <code>C:\ProjetosCM5\Bin\Folha.hlp</code> (<code>Folha.dpr:304</code>) <span class="ev ev-comprovado">COMPROVADO</span>. Se a máquina não tiver essa pasta, a ajuda não abre <span class="ev ev-inferido">INFERIDO</span>.</p>
+</section>
+
+
+<section><div class="section-title">🧩 Peças de infraestrutura que a arquitetura usa fora do código Delphi (PFC-42)</div>
+<p>Parte do comportamento do módulo não está nos arquivos Delphi. Está no banco de dados ou em serviços externos que o programa aciona:</p>
+<div class="table-wrap"><table><thead><tr><th>Peça</th><th>O que faz, em linguagem simples</th><th>Evidência</th></tr></thead><tbody>
+<tr><td>Stored procedures Oracle (<code>CM.SP_FB_*</code>)</td><td>Programas guardados no banco que fazem partes do processo: preparo (versão SP), apagar prévia, checklist da efetivação, excesso de débito, mapa da folha, entre outros. Lista completa em <a href="procedures-functions.html">🔧 Procedures</a>.</td><td><code>FPreparoSP.dfm:854</code>, <code>UFuncoesFolha.pas:1350</code>, <code>fFolhaNormalEfet.pas:8116, 8172, 8686</code> <span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>Processo de ETL da efetivação</td><td>Rotina externa que copia os dados da folha efetivada para as tabelas definitivas. O FOLHA registra o pedido numa tabela, cria um arquivo “gatilho” numa pasta de rede e espera a conclusão.</td><td><code>fFolhaNormalEfet.pas:8722-8790</code> <span class="ev ev-comprovado">COMPROVADO</span>; ferramenta de ETL fora do repositório <span class="ev ev-pendente">PENDENTE</span></td></tr>
+<tr><td>Serviço de monitoramento</td><td>Recebe avisos de início, fim e erro das etapas críticas (prévia, efetivação, remessa), com usuário, horário e nome da máquina.</td><td><code>fFolhaNormalEfet.pas:9006-9056</code> <span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>API do contracheque no aplicativo</td><td>Atualizaria o contracheque no autoatendimento depois da efetivação. A chamada está comentada (desativada).</td><td><code>fFolhaNormalEfet.pas:9338, 9844</code> <span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+</tbody></table></div>
+
+<div class="note pfc42-ba"><p><strong>👔 Para o analista de negócios</strong></p><ul>
+<li>Quem for mapear regras para um sistema novo precisa do código das stored procedures. No repositório foi encontrado o script da procedure de preparo (<code>__SCRIPTS__/2024/11/WO14701/WO14701_Script_DDL_01_SP Preparo Folha.sql</code>). O código das demais (excesso de débito, checklist, apagar prévia) não foi localizado <span class="ev ev-pendente">PENDENTE</span>.</li>
+<li>A efetivação depende de uma rotina de ETL externa. Se ela parar, a tela fica aguardando (ver <a href="integracoes.html">🔗 Integrações</a>). A operação da folha depende, portanto, da equipe que mantém o ETL.</li>
+</ul></div>
+
+</section>
+
+<section id="pfc42-analista"><div class="section-title">👔 Para o analista de negócios — síntese (PFC-42)</div>
+<div class="note pfc42-ba">
+<p>O FOLHA é uma aplicação desktop de duas camadas (programa no Windows conversando direto com o Oracle). A lógica de negócio fica distribuída entre telas, um motor de cálculo de 30.856 linhas, stored procedures no banco e uma rotina de ETL externa.</p>
+<p><strong>O que isso significa para o negócio</strong></p><ul>
+<li>Prazos de mudança maiores: uma regra pode morar em vários lugares.</li>
+<li>Dependência de conhecimento especializado (Delphi 5 e PL/SQL) e de infraestrutura específica (pasta de ETL, serviço de monitoramento).</li>
+<li>Risco de divergência entre os dois preparos (Delphi e SP).</li>
+</ul>
+<p><strong>Perguntas para o responsável de negócio / TI</strong></p><ul>
+<li>Quais stored procedures são de responsabilidade do time de folha, e onde está a versão oficial do código delas?</li>
+<li>Quem é avisado pelo serviço de monitoramento e qual é o procedimento quando chega um alerta de erro?</li>
+</ul>
+</div>
 </section>
 
 </main>
 
 <footer>
-<p>Blueprint AS-IS — PFC-22 (enriquecido) — Módulo FOLHA | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-09</p>
+<p>Blueprint AS-IS — PFC-22 (enriquecido) — Módulo FOLHA | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-09 | Abas técnicas enriquecidas — PFC-42</p>
 </footer>
 </body>
 </html>

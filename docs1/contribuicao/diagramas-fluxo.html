@@ -8,7 +8,7 @@
 </head>
 <body>
 <header>
-  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-23 (enriquecido)</div>
+  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-23 (enriquecido) · PFC-42 (abas técnicas enriquecidas)</div>
   <h1>🔀 Diagramas de Fluxo de Processos — Contribuição Previdenciária</h1>
   <p>Fluxos comprovados pelo código com rastreabilidade — renderizados via Mermaid.js</p>
 </header>
@@ -27,6 +27,46 @@
   <a href="controle-cobertura.html">📊 Cobertura</a>
 </nav>
 <main>
+<!-- PFC-42: enriquecimento em linguagem simples -->
+<section id="pfc42-leigo"><div class="section-title">💡 Em linguagem simples (enriquecido — PFC-42)</div>
+<div class="note-info">
+<p><strong>O que esta aba mostra:</strong> desenhos (fluxogramas) que mostram, passo a passo, como os principais processos do módulo funcionam por dentro: preparo e envio, recebimento, reservas, bitributação, portabilidade, divergências e provisão para perdas.</p>
+<p><strong>Por que isso importa:</strong> um desenho ajuda a enxergar a sequência e os pontos de decisão sem precisar ler o código. É a melhor página para explicar o módulo a quem está chegando.</p>
+<p><strong>Como ler esta página:</strong> cada caixa retangular é um passo; o losango é uma decisão (com as respostas escritas nas setas); o cilindro é uma tabela do banco de dados onde algo é gravado. Os números depois de “!” nos diagramas originais são as linhas do código-fonte. Abaixo, dois diagramas novos e simplificados: o ciclo mensal e a “vida” de uma contribuição.</p>
+</div>
+<p><strong>Ciclo mensal da contribuição (visão simplificada)</strong> — passos 1 a 4 conferidos no código (<code>FPreparaEnvia.pas:3724-5687</code>; <code>FRecebeContribuicao.pas:3058-3092</code>) <span class="ev ev-comprovado">COMPROVADO</span>; o passo 5 é feito por rotinas próprias de reservas e contabilização (<code>FPrincipal.dfm:8690-8723</code>; <code>FPreparaEnvia.pas:5143</code>), e a ordem exata em relação ao recebimento é <span class="ev ev-inferido">INFERIDO</span>.</p>
+<div class="mermaid">graph LR
+  A["1. Preparar: calcular o valor devido"] --> B["2. Enviar a cobrança"]
+  B --> C{"Desconto em folha?"}
+  C -->|"Sim"| D["Folha desconta (TMPDESC)"]
+  C -->|"Não"| E["Documento a receber (banco/CAR)"]
+  D --> F["3. Receber e conferir"]
+  E --> F
+  F --> G{"Valor confere?"}
+  G -->|"Sim"| H["Recebida (situação 2)"]
+  G -->|"Não"| I["4. Tratar divergência (situação 3)"]
+  H --> J["5. Reservas e contabilidade"]
+  I --> J
+</div>
+<p><strong>A vida de uma contribuição (principais mudanças de situação)</strong> — envio 0/8→1 (<code>FPreparaEnvia.pas:4712, 5193-5212</code>); recebimento 1→2 ou 3 (<code>FRecebeContribuicao.pas:3066-3092</code>); cancelamento 1→8 (<code>FCancelaBoleta.pas:141, 180-184</code>); desfazer/retorno a 0 (<code>FControleIndivContrib.pas:2994-3010</code>) <span class="ev ev-comprovado">COMPROVADO</span>. As situações 4, 5, 6, 7 e 9 resultam de tratamentos de divergência, devoluções, parcelamentos e cobrança na folha de benefício (ver 🗄️ Dados).</p>
+<div class="mermaid">graph LR
+  S0["0 · Não enviada"] -->|"Envio de cobrança"| S1["1 · Enviada, aguardando pagamento"]
+  S1 -->|"Valor igual ou dentro da tolerância"| S2["2 · Recebida corretamente"]
+  S1 -->|"Valor diferente"| S3["3 · Recebida com divergência"]
+  S1 -->|"Cancelamento de cobrança"| S8["8 · Cancelada"]
+  S8 -->|"Novo envio"| S1
+  S1 -->|"Desfazer envio"| S0
+</div>
+<p><strong>Termos usados nesta página</strong> — explicados de forma simples:</p>
+<div class="table-wrap"><table><thead><tr><th>Termo técnico</th><th>Em linguagem simples</th><th>Fonte</th></tr></thead><tbody>
+<tr><td><strong>Fluxograma (Mermaid)</strong></td><td>Desenho gerado a partir de texto, mostrado automaticamente pelo navegador.</td><td><code>../assets/js/mermaid-init.js</code></td></tr>
+<tr><td><strong>Losango (decisão)</strong></td><td>Ponto onde o sistema escolhe um caminho, por exemplo “desconto em folha? sim/não”.</td><td>Fluxo PF-01</td></tr>
+<tr><td><strong>Cilindro</strong></td><td>Representa uma tabela do banco de dados onde a informação é gravada.</td><td>Fluxo PF-01 (HSTCONTRIBPREV)</td></tr>
+<tr><td><strong>HSTCONTRIBPREV</strong></td><td>O “livro-caixa” das contribuições: uma linha por contribuição devida (quem, qual plano, qual mês, quanto se esperava, quanto chegou e em que situação está).</td><td><code>FPreparaEnvia.pas:2611-2884</code></td></tr>
+<tr><td><strong>SITRECEBIMENTO</strong></td><td>O “status” de cada contribuição: não enviada, enviada, recebida, com divergência, cancelada etc.</td><td><code>FControleIndivContrib.pas:4383-4393</code></td></tr>
+<tr><td><strong>IPCA-E</strong></td><td>Índice oficial de inflação usado para corrigir valores na bitributação a partir de 2008/01.</td><td><code>FCalcSalContr.pas:18-20</code></td></tr>
+</tbody></table></div>
+</section>
 <section><div class="section-title">🔀 Fluxo PF-01 — Preparo e Envio de Contribuições</div>
 <div class="mermaid">graph TD
   A["FPreparaEnvia<br/>PreparaContribuicao !3724"] --> B["SELECT patro×plano×situação"]
@@ -44,6 +84,7 @@
   L --> M[("HSTCONTRIBPREV.SITRECEBIMENTO=1")]
 </div>
 <p><strong>Evidência:</strong> <code>FPreparaEnvia.pas:3724-5687</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<p><strong>💡 Em outras palavras:</strong> o sistema primeiro descobre quais combinações de patrocinadora, plano e situação existem; depois, para cada participante, monta os dados, aplica a fórmula e grava o valor devido. No envio, cada valor segue para a folha (desconto) ou para o banco (documento de cobrança). No fim, a contribuição fica “enviada e não recebida” (situação 1).</p>
 </section>
 
 <section><div class="section-title">🔀 Fluxo PF-02 — Recebimento por Múltiplos Canais</div>
@@ -58,6 +99,7 @@
   G --> H["CobraContribuicaoPatroPart"]
 </div>
 <p><strong>Evidência:</strong> <code>FRecebeContribuicao.pas:1581-2311</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<p><strong>💡 Em outras palavras:</strong> quando a folha devolve o que descontou, o sistema compara “esperado × recebido”: se bater, situação 2; se a diferença passar da tolerância, situação 3. O desenho representa a tela legada (<code>FRecebeContribuicao</code>), que não está no projeto atual; a tela ativa usa procedimentos Oracle (<code>FRecebeContribuicaoNovo.pas:925-967</code>) <span class="ev ev-comprovado">COMPROVADO</span>.</p>
 </section>
 
 <section><div class="section-title">🔀 Fluxo PF-03 — Alimentação de Reservas</div>
@@ -71,6 +113,7 @@
   F --> G[("HISTMOVRESERVA / RESERVAPART")]
 </div>
 <p><strong>Evidência:</strong> <code>FAtualizaPorIndice.pas:421-957</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<p><strong>💡 Em outras palavras:</strong> a “poupança” de cada participante é atualizada: se houver uma fórmula cadastrada, ela é aplicada mês a mês; se não, o valor é corrigido pelos índices (valor × cotação). Cada atualização vira um movimento no extrato da reserva.</p>
 </section>
 
 <section><div class="section-title">🔀 Fluxo PF-05 — Bitributação / IR Regressivo</div>
@@ -83,6 +126,7 @@
   F --> G[("HSTBITRIBUTACAO / BITRIBUTACAO")]
 </div>
 <p><strong>Evidência:</strong> <code>FCalcSalContr.pas:440-781</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<p><strong>💡 Em outras palavras:</strong> primeiro o sistema apaga o cálculo anterior do participante; depois soma as contribuições de 1989 a 1995 corrigidas, guarda esse resultado e, a partir de um saldo em 2007/12, atualiza mês a mês pelo IPCA-E. O resultado é a parte que não deve ser tributada de novo.</p>
 </section>
 
 <section><div class="section-title">🔀 Fluxo PF-06 — Portabilidade e Benefício Saldado/FAB</div>
@@ -94,6 +138,7 @@
   E --> F[("CM.PCK_BENEFSALDFAB<br/>SP_ATUALIZASALDO")]
 </div>
 <p><strong>Evidência:</strong> <code>FCadContribuicaoPortada.pas:661 / FBeneficioSaldadoFAB.pas:1016</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<p><strong>💡 Em outras palavras:</strong> a portabilidade registra o dinheiro trazido de outra entidade e cria as contribuições correspondentes no livro-caixa. O benefício saldado/FAB é recalculado pelo banco de dados, num pacote próprio (CM.PCK_BENEFSALDFAB).</p>
 </section>
 
 <section><div class="section-title">🔀 Fluxo PF-08 — Tratamento de Divergências</div>
@@ -105,6 +150,7 @@
   E --> F[("HSTCONTRIBPREV / HSTATRASOCONTRIB<br/>DOCUMENTO / CTRLINTERFACE")]
 </div>
 <p><strong>Evidência:</strong> <code>FDivergContrib.pas:1537-6943</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<p><strong>💡 Em outras palavras:</strong> o usuário escolhe que tipo de divergência quer analisar; o sistema lista os casos, oferece as opções permitidas para cada situação (cobrar no próximo mês, tratar via banco etc.) e registra a decisão no histórico.</p>
 </section>
 
 <section><div class="section-title">🔀 Fluxo PF-07 — Provisão para Perdas</div>
@@ -115,10 +161,32 @@
   D --> E[("PROVISAOPERDASCONTRIBUICAO<br/>CONTABCONTFUND")]
 </div>
 <p><strong>Evidência:</strong> <code>FProvPerdasLote.pas:473-558</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<p><strong>💡 Em outras palavras:</strong> o sistema seleciona contribuições em atraso, calcula quantos dias de atraso cada uma tem, encontra a faixa correspondente e aplica o percentual da faixa sobre o valor esperado. O resultado é gravado e contabilizado.</p>
+<div class="note pfc42-ba"><p><strong>👔 Para o analista de negócios</strong></p><ul>
+<li>A provisão para perdas afeta diretamente o resultado contábil do plano. As faixas de dias e percentuais (FAIXASPROVISAOPERDACONTRIB, <code>FProvPerdasLote.pas:857, 905</code>) <span class="ev ev-comprovado">COMPROVADO</span> devem seguir a política contábil aprovada.</li>
+</ul></div>
+</section>
+<section id="pfc42-analista"><div class="section-title">👔 Para o analista de negócios — síntese (PFC-42)</div>
+<div class="note pfc42-ba">
+<p>Os fluxos mostram onde estão as decisões de negócio dentro de cada processo:</p>
+<ul>
+<li><strong>Canal de cobrança</strong> (folha × banco) decidido no envio.</li>
+<li><strong>Aceite de diferença</strong> (tolerância) decidido no recebimento — com ponto a validar sobre a tela/procedimento ativo.</li>
+<li><strong>Opção de tratamento de divergência</strong> escolhida pelo usuário, com registro no histórico.</li>
+<li><strong>Percentual de provisão</strong> definido por faixa de dias de atraso.</li>
+<li><strong>Índice de correção</strong> (IPCA-E) na bitributação e nas reservas.</li>
+</ul>
+<p><strong>Perguntas para levar ao responsável de negócio:</strong></p>
+<ol>
+<li>Os passos e decisões desenhados aqui correspondem ao que a equipe operacional faz hoje?</li>
+<li>Existem etapas manuais fora do sistema (planilhas, conferências, aprovações) que deveriam aparecer nesses fluxos?</li>
+<li>Qual é a ordem oficial no fechamento mensal entre recebimento, alimentação de reservas e contabilização?</li>
+</ol>
+</div>
 </section>
 </main>
 <footer>
-<p>Blueprint AS-IS — PFC-31 — Módulo CONTRIBUIÇÃO | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-10</p>
+<p>Blueprint AS-IS — PFC-31 — Módulo CONTRIBUIÇÃO | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-10 | Abas técnicas enriquecidas — PFC-42</p>
 </footer>
 <script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
 <script src="../assets/js/mermaid-init.js"></script>
