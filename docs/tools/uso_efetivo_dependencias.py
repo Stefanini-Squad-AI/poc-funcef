@@ -8,8 +8,10 @@ Uso (a partir da raiz do repositório):
 
 Saídas:
   * Analise_linhas_dependencias.md (raiz do repositório) — estudo completo;
-  * docs1/visao-geral/inventario.html — seção "Uso efetivo de dependências (PFC-44)", logo após a seção
-    PFC-26 (que não é alterada).
+  * docs1/visao-geral/inventario.html e docs1/index.html — seção "Linhas de Código" (PFC-45): só o código a
+    migrar = pastas dos três módulos + parte efetivamente usada das dependências diretas. Nenhum número que
+    soma arquivos de dependência inteiros é publicado no docs1 (essa linha de base fica só no estudo).
+    Esta seção substitui as antigas seções PFC-26 e PFC-44 (removidas automaticamente no --write).
 
 Reuso:
   * PFC-26 (contagem_docs1.py): fechamento de dependências por programa (.dof Packages= + requires,
@@ -45,9 +47,14 @@ import contagem_docs1 as c26  # noqa: E402
 ROOT = c18.ROOT
 STUDY = "Analise_linhas_dependencias.md"
 PAGE = "docs1/visao-geral/inventario.html"
-BEGIN = "<!-- PFC-44:inicio — gerado por docs/tools/uso_efetivo_dependencias.py; não editar manualmente -->"
-END = "<!-- PFC-44:fim -->"
-ANCHOR = c26.END  # a seção PFC-44 entra logo depois da seção PFC-26
+INDEX_PAGE = "docs1/index.html"
+BEGIN, END = c26.LOC_BEGIN, c26.LOC_END  # seção "Linhas de Código" (PFC-45)
+# Seções antigas, substituídas pela seção PFC-45 no --write.
+LEGACY = [(c26.BEGIN, c26.END),
+          ("<!-- PFC-44:inicio — gerado por docs/tools/uso_efetivo_dependencias.py; não editar manualmente -->",
+           "<!-- PFC-44:fim -->")]
+ANCHORS = {PAGE: '<section id="analista">', INDEX_PAGE: "</main>"}  # onde entra a seção se não houver bloco
+ORDER = ["FOLHA", "CONTRIBUIÇÃO", "BENEFICIOPREV"]  # ordem de apresentação (PFC-45)
 BASELINE = {"total": 1632702, "code": 1363291, "n": 1724}  # dependências publicadas no PFC-26
 BASELINE_ALL = {"total": 2479602, "code": 2091675, "n": 2531}  # totais consolidados do PFC-26
 
@@ -806,8 +813,8 @@ def render_md(res, runs, deps):
     w("")
     w("> PFC-44 · Gerado por `docs/tools/uso_efetivo_dependencias.py` — não editar manualmente.")
     w("> Para regenerar: `python3 -B docs/tools/uso_efetivo_dependencias.py --write` (também atualiza a seção")
-    w("> “Uso efetivo de dependências (PFC-44)” de `docs1/visao-geral/inventario.html`).")
-    w("> Linha de base: inventário PFC-26 (`docs/tools/contagem_docs1.py`), seção “Linhas de Código — Total Consolidado”.")
+    w("> “Linhas de Código” de `docs1/visao-geral/inventario.html` e `docs1/index.html`, que desde o PFC-45 mostra só o código a migrar).")
+    w("> Linha de base: contagem PFC-26 (`docs/tools/contagem_docs1.py`), arquivos de dependência inteiros — usada só neste estudo.")
     w("")
     w("## 1. Resultado")
     w("")
@@ -995,84 +1002,127 @@ def row(cells, strong=False):
     return c18.row(cells, strong)
 
 
-def md_inline(s):
-    return re.sub(r"`([^`]+)`", r"<code>\1</code>", esc(s))
+def migration(res, deps):
+    """Linhas de código a migrar (PFC-45): módulos (pastas inteiras) + parte usada das dependências diretas."""
+    mods = {m["nome"]: c26.totals(m["files"]) for m in res["modules"]}
+    used = [d for d in deps if d["eff"]["all"][0] > 0]
+    dep = {"total": sum(d["eff"]["all"][0] for d in used), "code": sum(d["eff"]["all"][1] for d in used)}
+    mod = {k: sum(mods[n][k] for n in ORDER) for k in ("total", "code")}
+    total = {k: mod[k] + dep[k] for k in ("total", "code")}
+    per_mod = {n: sum(d["eff"][k][0] for d in used) for k, n in zip(KEYS, NOMES)}
+    unused = [d["label"] for d in deps if d["eff"]["all"][0] == 0]
+    inside = [g["name"] for g in res["deps"] if not g["files"]]
+    return {"mods": mods, "mod": mod, "used": used, "dep": dep, "total": total, "per_mod": per_mod,
+            "unused": unused, "inside": inside}
 
 
-def render_html(res, runs, deps):
-    S = sums(deps)
-    tot = S[-1]
-    cats = by_category(deps)
-    o = [BEGIN, '<section id="uso-efetivo-dependencias"><div class="section-title">🔎 Uso efetivo de dependências (PFC-44)</div>']
-    o.append('<div class="stats">')
-    o.append(f'  <div class="stat"><div class="n">{fmt(tot[3])}</div><div class="l">Linhas de dependências efetivamente usadas pelos três módulos (de {fmt(tot[1])})</div></div>')
-    o.append(f'  <div class="stat"><div class="n">{fmt(tot[4])}</div><div class="l">Linhas de código de dependências efetivamente usadas (de {fmt(tot[2])})</div></div>')
-    o.append(f'  <div class="stat"><div class="n">{fmt(tot[1] - tot[3])}</div><div class="l">Linhas de dependências não usadas — fora do esforço de migração ({pct(tot[1] - tot[3], tot[1])})</div></div>')
-    o.append('</div>')
-    o.append('<p style="margin-top:1rem">A tabela de dependências da seção PFC-26 acima soma os arquivos de dependência inteiros. '
-             'Esta seção mostra quanto dessas linhas é <strong>efetivamente referenciado</strong> por CONTRIBUIÇÃO, FOLHA e BENEFICIOPREV: '
-             'de um arquivo com 20 rotinas, das quais os módulos usam 5, entram só as linhas dessas 5 (mais a estrutura mínima da unit). '
-             f'Os totais consolidados do PFC-26 ({fmt(BASELINE_ALL["total"])} linhas totais / {fmt(BASELINE_ALL["code"])} linhas de código / '
-             f'{fmt(BASELINE_ALL["n"])} arquivos) continuam válidos como inventário AS-IS e não foram alterados. '
-             '<span class="ev ev-comprovado">COMPROVADO</span>: valores gerados e conferidos por <code>docs/tools/uso_efetivo_dependencias.py</code>; '
-             'estudo completo em <code>Analise_linhas_dependencias.md</code> (raiz do repositório).</p>')
-    o.append('<div class="table-wrap"><table><thead><tr><th>Parcela</th><th>Linhas totais atuais</th><th>Linhas efetivas</th>'
-             '<th>Delta (não utilizadas)</th><th>% efetivo</th><th>Linhas de código atuais</th><th>Código efetivo</th>'
-             '<th>Delta de código</th></tr></thead><tbody>')
-    for nome, t, c, et, ec in S:
-        o.append(row([esc(nome), fmt(t), fmt(et), fmt(t - et), pct(et, t), fmt(c), fmt(ec), fmt(c - ec)],
-                     strong=nome.startswith("Total")))
+def validate_migration(M):
+    errors = []
+    for k in ("total", "code"):
+        rows = sum(M["mods"][n][k] for n in ORDER) + M["dep"][k]
+        if rows != M["total"][k]:
+            errors.append(f"PFC-45: linhas da tabela ({k}) não somam o total a migrar: {rows} != {M['total'][k]}")
+        idx = 0 if k == "total" else 1
+        if sum(d["eff"]["all"][idx] for d in M["used"]) != M["dep"][k]:
+            errors.append(f"PFC-45: dependências listadas ({k}) não somam a linha de dependências usadas")
+    if any(d["eff"]["all"][0] <= 0 for d in M["used"]):
+        errors.append("PFC-45: dependência sem linha usada listada")
+    return errors
+
+
+def summary_table(M):
+    o = ['<div class="table-wrap"><table><thead><tr><th>Parcela</th><th>Linhas totais</th><th>Linhas de código</th></tr></thead><tbody>']
+    for n in ORDER:
+        o.append(c26.module_row(n, M["mods"][n]))
+    o.append(row([f"Dependências diretas — só a parte usada pelos três módulos ({len(M['used'])} dependências)",
+                  fmt(M["dep"]["total"]), fmt(M["dep"]["code"])]))
+    o.append(row(["Total a migrar", fmt(M["total"]["total"]), fmt(M["total"]["code"])], strong=True))
     o.append("</tbody></table></div>")
-    o.append('<div class="note-info">Linhas atuais por módulo = dependências com o módulo na coluna “Usado por” da tabela PFC-26. '
-             'O total conta cada linha uma única vez e por isso é menor que a soma dos módulos. '
-             f'Conferência: total atual = {fmt(tot[1])} linhas / {fmt(tot[2])} de código = linha “Dependências compartilhadas” do PFC-26.</div>')
-    o.append('<h3 style="margin-top:1.5rem">Por dependência (31 itens com linhas)</h3>')
-    o.append('<p>Units / rotinas: units = arquivos <code>.pas</code>; rotinas = procedures, functions, constructors e destructors implementados. '
-             '“—” = o módulo não usa a dependência.</p>')
-    o.append('<div class="table-wrap"><table><thead><tr><th>Dependência</th><th>Usado por</th><th>Linhas totais atuais</th>'
-             '<th>Units / rotinas existentes</th><th>Ref. CONTRIBUIÇÃO</th><th>Ref. FOLHA</th><th>Ref. BENEFICIOPREV</th>'
-             '<th>Efetivas CONTRIBUIÇÃO</th><th>Efetivas FOLHA</th><th>Efetivas BENEFICIOPREV</th><th>Efetivas (3 módulos)</th>'
-             '<th>Código efetivo</th><th>% efetivo</th><th>Prontidão</th></tr></thead><tbody>')
-    for d in deps:
-        o.append(row([f"<code>{esc(d['label'])}</code>", ", ".join(d["users"]), fmt(d["total"]),
-                      f"{fmt(d['units'])} / {fmt(d['routines'])}"]
-                     + [cell_ref(d, k, n) for k, n in zip(KEYS, NOMES)]
-                     + [cell_eff(d, k, n) for k, n in zip(KEYS, NOMES)]
-                     + [fmt(d["eff"]["all"][0]), fmt(d["eff"]["all"][1]), pct(d["eff"]["all"][0], d["total"]),
-                        CATEGORY[d["category"]]]))
-    tu, tr = sum(d["units"] for d in deps), sum(d["routines"] for d in deps)
-    o.append(row(["Total", "", fmt(tot[1]), f"{fmt(tu)} / {fmt(tr)}"]
-                 + [f"{fmt(sum(d['ref_units'][k] for d in deps))} / {fmt(sum(d['ref_routines'][k] for d in deps))}" for k in KEYS]
-                 + [fmt(x[3]) for x in S[:3]] + [fmt(tot[3]), fmt(tot[4]), pct(tot[3], tot[1]), ""], strong=True))
+    return "\n".join(o)
+
+
+def stats(M):
+    def card(n, label):
+        return f'  <div class="stat"><div class="n">{n}</div><div class="l">{label}</div></div>'
+    return "\n".join([
+        '<div class="stats">',
+        card(fmt(M["total"]["total"]), f'<strong>Total a migrar</strong> — linhas ({fmt(M["total"]["code"])} de código)'),
+        card(fmt(M["mod"]["total"]), f'FOLHA + CONTRIBUIÇÃO + BENEFICIOPREV — linhas ({fmt(M["mod"]["code"])} de código)'),
+        card(fmt(M["dep"]["total"]), f'Parte usada das dependências diretas — linhas ({fmt(M["dep"]["code"])} de código)'),
+        '</div>',
+    ])
+
+
+def render_html(res, deps):
+    M = migration(res, deps)
+    o = [BEGIN, '<section id="linhas-de-codigo"><div class="section-title">🧮 Linhas de Código a Migrar</div>']
+    o.append(stats(M))
+    o.append('<p style="margin-top:1rem">Tamanho do código Delphi 5 a migrar: as pastas dos três módulos e, das dependências diretas '
+             '(pacotes e units CM/FUNCEF fora dessas pastas), <strong>só a parte que os módulos usam</strong>. '
+             'Cada linha entra uma única vez no total. <span class="ev ev-comprovado">COMPROVADO</span>: valores gerados e conferidos por '
+             '<code>docs/tools/uso_efetivo_dependencias.py</code>.</p>')
+    o.append(summary_table(M))
+    o.append(f'<h3 id="uso-efetivo-dependencias" style="margin-top:1.5rem">Linhas usadas por dependência ({len(M["used"])} dependências)</h3>')
+    o.append('<div class="table-wrap"><table><thead><tr><th>Dependência</th>'
+             + "".join(f"<th>Linhas usadas — {n}</th>" for n in ORDER)
+             + '<th>Linhas usadas (3 módulos)</th><th>Linhas de código usadas</th></tr></thead><tbody>')
+    key = dict(zip(NOMES, KEYS))
+    for d in sorted(M["used"], key=lambda x: (-x["eff"]["all"][0], x["label"].lower())):
+        o.append(row([f"<code>{esc(d['label'])}</code>"]
+                     + [fmt(d["eff"][key[n]][0]) if d["eff"][key[n]][0] else "—" for n in ORDER]
+                     + [fmt(d["eff"]["all"][0]), fmt(d["eff"]["all"][1])]))
+    o.append(row(["Total (cada linha uma única vez)"] + [fmt(M["per_mod"][n]) for n in ORDER]
+                 + [fmt(M["dep"]["total"]), fmt(M["dep"]["code"])], strong=True))
     o.append("</tbody></table></div>")
-    o.append('<h3 style="margin-top:1.5rem">Prontidão para migração (.NET 10 + React 19 + Oracle 23ai)</h3>')
-    o.append('<div class="table-wrap"><table><thead><tr><th>Categoria</th><th>Dependências</th><th>Efetivas CONTRIBUIÇÃO</th>'
-             '<th>Efetivas FOLHA</th><th>Efetivas BENEFICIOPREV</th><th>Efetivas (3 módulos)</th><th>Código efetivo</th>'
-             '<th>% do efetivo</th></tr></thead><tbody>')
-    for c, v in cats.items():
-        o.append(row([CATEGORY[c], str(v["n"]), fmt(v["contribuicao"]), fmt(v["folha"]), fmt(v["beneficioprev"]),
-                      fmt(v["all"]), fmt(v["code"]), pct(v["all"], tot[3])]))
-    o.append(row(["Total", str(len(deps)), fmt(S[0][3]), fmt(S[1][3]), fmt(S[2][3]), fmt(tot[3]), fmt(tot[4]), "100,0%"], strong=True))
-    o.append("</tbody></table></div>")
-    o.append('<details><summary><strong>Equivalente na stack-alvo por dependência</strong></summary>')
-    o.append('<div class="table-wrap"><table><thead><tr><th>Dependência</th><th>Categoria</th><th>Equivalente / destino</th>'
-             '<th>Efetivas (3 módulos)</th></tr></thead><tbody>')
-    for d in sorted(deps, key=lambda x: (x["category"] != "reimpl", -x["eff"]["all"][0])):
-        o.append(row([f"<code>{esc(d['label'])}</code>", CATEGORY[d["category"]], md_inline(d["why"]), fmt(d["eff"]["all"][0])]))
-    o.append("</tbody></table></div></details>")
-    o.append('<div class="note"><strong>Como as referências foram detectadas:</strong> análise estática dos fontes, sem compilar. '
-             '(1) Cada <code>.pas</code> é dividido em rotinas implementadas, declarações de classe e estrutura da unit (cabeçalho, <code>uses</code>, '
-             'declarações, <code>initialization</code>). (2) A partir de todos os fontes da pasta de cada módulo seguem-se as cláusulas <code>uses</code>, '
-             'resolvidas com o mesmo mapa unit → arquivo do PFC-26 (pacotes do <code>.dof</code> + <code>requires</code>, units do <code>.dpr</code>/<code>SearchPath</code>). '
-             '(3) Ponto fixo de referências respeitando o escopo Pascal: uma rotina ou classe é usada quando o seu nome é referenciado na própria unit '
-             'ou numa unit que a lista em <code>uses</code>; um método, quando a classe é usada e o nome é chamado, é handler no <code>.dfm</code> ou é '
-             '<code>virtual</code>/<code>override</code>. (4) Linhas efetivas = rotinas e classes usadas + estrutura das units usadas; o <code>.dfm</code> '
-             'acompanha a sua unit. O resultado é conservador (limite superior): métodos homônimos, todos os handlers de um formulário usado e o '
-             '<code>.dfm</code> inteiro contam como usados. Para recontar: <code>python3 -B docs/tools/uso_efetivo_dependencias.py</code>; '
-             '<code>--check</code> falha se esta seção ou o estudo estiverem desatualizados.</div>')
+    o.append('<div class="note-info">Quase todas as dependências são compartilhadas: a mesma linha pode ser usada por mais de um módulo. '
+             'Por isso a soma das colunas por módulo é maior que o total; o número que entra no total a migrar é a coluna '
+             f'“Linhas usadas (3 módulos)”, {fmt(M["dep"]["total"])} linhas. “—” = o módulo não usa a dependência. '
+             f'Não aparecem: {", ".join(f"<code>{esc(x)}</code>" for x in M["unused"])} (nenhuma linha usada) e '
+             f'{", ".join(f"<code>{esc(x)}</code>" for x in M["inside"])} (ficam dentro da pasta FOLHA e já estão na linha FOLHA).</div>')
+    o.append('<p><strong>Critério da contagem:</strong> linhas físicas (código + comentários + linhas vazias) dos fontes Delphi 5 '
+             '<code>.pas</code>, <code>.dfm</code>, <code>.dpr</code> e <code>.dpk</code>, com as regras do PFC-18 (sem DFM binário, cópias, backups e duplicatas); '
+             '“linhas de código” exclui comentários e linhas vazias. Módulos = pastas inteiras <code>FOLHA/</code>, <code>CONTRIBUICAOPREV/</code> e '
+             '<code>BENEFICIOPREV/</code>. Dependências diretas = pacotes de runtime próprios (lista <code>Packages=</code> do <code>.dof</code> + <code>requires</code>) '
+             'e units compiladas no executável fora dessas pastas; delas entram só as rotinas, classes e estrutura das units referenciadas pelos módulos '
+             '(o <code>.dfm</code> acompanha a sua unit), por análise estática conservadora (limite superior). VCL/Borland e componentes de terceiros ficam fora.</p>')
+    o.append('<p class="desc"><strong>Como recontar:</strong> <code>python3 -B docs/tools/uso_efetivo_dependencias.py --write</code> regenera esta seção e a da '
+             '<a href="../index.html#linhas-de-codigo">página inicial</a>; <code>--check</code> nesse script e em <code>docs/tools/contagem_docs1.py</code> falha se os números '
+             'publicados forem diferentes da recontagem. Método detalhado em <code>Analise_linhas_dependencias.md</code> (raiz do repositório).</p>')
     o.append("</section>")
     o.append(END)
     return "\n".join(o) + "\n"
+
+
+def render_index(res, deps):
+    M = migration(res, deps)
+    o = [BEGIN, '<section id="linhas-de-codigo"><div class="section-title">🧮 Linhas de Código a Migrar</div>']
+    o.append(stats(M))
+    o.append(summary_table(M))
+    o.append('<p class="desc">Pastas dos três módulos + só a parte das dependências diretas (pacotes CM/FUNCEF) que os módulos usam, '
+             'cada linha uma única vez; exclui VCL/Borland e componentes de terceiros. Linhas usadas por dependência e critério de contagem: '
+             '<a href="visao-geral/inventario.html#linhas-de-codigo">Inventário de Artefatos → Linhas de Código</a>.</p>')
+    o.append("</section>")
+    o.append(END)
+    return "\n".join(o) + "\n"
+
+
+def splice(page, fragment, anchor):
+    """Coloca a seção PFC-45 no lugar da seção atual ou das antigas PFC-26/PFC-44 (que são removidas)."""
+    blocks = [(BEGIN, END)] + LEGACY
+    pos = None
+    for b, e in blocks:
+        while b in page:
+            s = page.index(b)
+            t = page.index(e, s) + len(e)
+            if page[t:t + 1] == "\n":
+                t += 1
+            page = page[:s] + page[t:]
+            pos = s if pos is None else min(pos, s)
+    if pos is None:
+        if page.count(anchor) != 1:
+            raise SystemExit(f"âncora {anchor!r} não encontrada de forma única")
+        pos = page.index(anchor)
+    return page[:pos] + fragment + page[pos:]
 
 
 def main():
@@ -1083,23 +1133,18 @@ def main():
     res, runs, units = analyze()
     deps = aggregate(res, runs, units)
     errors = validate(deps, res["modules"])
+    M = migration(res, deps)
+    errors += validate_migration(M)
     for nome, t, c, et, ec in sums(deps):
         print(f"{nome}: atual={t} efetivo={et} delta={t - et} ({pct(et, t)}) | código atual={c} efetivo={ec} delta={c - ec}")
     for d in deps:
         print(f"  {d['label']:<26} total={d['total']:>7} efetivo={d['eff']['all'][0]:>7} "
               + " ".join(f"{k}={d['eff'][k][0]}" for k in KEYS) + f" [{d['category']}]")
+    print(f"PFC-45 — a migrar: módulos={M['mod']['total']}/{M['mod']['code']} dependências usadas "
+          f"({len(M['used'])})={M['dep']['total']}/{M['dep']['code']} total={M['total']['total']}/{M['total']['code']}")
     outputs = {STUDY: render_md(res, runs, deps)}
-    page = (ROOT / PAGE).read_text(encoding="utf-8")
-    frag = render_html(res, runs, deps)
-    if BEGIN in page:
-        s = page.index(BEGIN)
-        e = page.index(END, s) + len(END) + 1
-        outputs[PAGE] = page[:s] + frag + page[e:]
-    else:
-        if page.count(ANCHOR) != 1:
-            raise SystemExit("âncora PFC-26 não encontrada de forma única")
-        pos = page.index(ANCHOR) + len(ANCHOR) + 1
-        outputs[PAGE] = page[:pos] + frag + page[pos:]
+    for rel, frag in ((PAGE, render_html(res, deps)), (INDEX_PAGE, render_index(res, deps))):
+        outputs[rel] = splice((ROOT / rel).read_text(encoding="utf-8"), frag, ANCHORS[rel])
     stale = []
     for rel, content in outputs.items():
         path = ROOT / rel
@@ -1114,7 +1159,7 @@ def main():
         print("ERROS DE VALIDAÇÃO:\n  " + "\n  ".join(errors))
         return 1
     print("Validação OK: 31 dependências; linha de base = PFC-26; linhas por arquivo idênticas ao PFC-26; "
-          "efetivas ≤ totais; soma das categorias = total efetivo.")
+          "efetivas ≤ totais; soma das categorias = total efetivo; tabela a migrar = soma das linhas (PFC-45).")
     if args.check and stale:
         print("Arquivos desatualizados: " + ", ".join(stale))
         return 1

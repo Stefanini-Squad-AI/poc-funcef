@@ -2,8 +2,8 @@
 
 > PFC-44 · Gerado por `docs/tools/uso_efetivo_dependencias.py` — não editar manualmente.
 > Para regenerar: `python3 -B docs/tools/uso_efetivo_dependencias.py --write` (também atualiza a seção
-> “Uso efetivo de dependências (PFC-44)” de `docs1/visao-geral/inventario.html`).
-> Linha de base: inventário PFC-26 (`docs/tools/contagem_docs1.py`), seção “Linhas de Código — Total Consolidado”.
+> “Linhas de Código” de `docs1/visao-geral/inventario.html` e `docs1/index.html`, que desde o PFC-45 mostra só o código a migrar).
+> Linha de base: contagem PFC-26 (`docs/tools/contagem_docs1.py`), arquivos de dependência inteiros — usada só neste estudo.
 
 ## 1. Resultado
 
