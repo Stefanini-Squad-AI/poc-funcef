@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Metodologia da Contagem — Análise de Pontos de Função — Blueprint AS-IS</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<header>
+  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-47</div>
+  <h1>📜 Metodologia da Contagem (IFPUG FPA)</h1>
+  <p>Critérios, conceitos e tabelas de complexidade usados na Análise de Pontos de Função dos três módulos previdenciários.</p>
+</header>
+<nav>
+  <a href="index.html">📐 Entrada</a>
+  <a href="folha.html">Folha de Benefícios</a>
+  <a href="contribuicao.html">Contribuição Previdenciária</a>
+  <a href="beneficioprev.html">Benefício Previdenciário</a>
+  <a href="metodologia.html">📜 Metodologia da contagem</a>
+  <a href="../index.html">⬅ Voltar ao Blueprint</a>
+</nav>
+
+<main>
+
+<section id="entenda"><div class="section-title">💡 Entenda esta página</div>
+<div class="note-info">
+<p><strong>O que esta página mostra:</strong> as regras usadas para contar Pontos de Função. Explica o que cada tipo de função mede, como a complexidade é determinada e como os valores foram calculados. Serve para que qualquer analista possa revisar ou reproduzir a análise.</p>
+<p><strong>Por que isso importa:</strong> a Análise de Pontos de Função (APF) é um método padronizado de medir o tamanho funcional de software. Sem metodologia explícita, os números não são auditáveis. Esta página torna a contagem rastreável e reproduzível.</p>
+</div>
+</section>
+
+<section><div class="section-title">📐 O que a APF IFPUG mede</div>
+<p>A <strong>Análise de Pontos de Função (APF)</strong> pelo método <strong>IFPUG FPA</strong> (International Function Point Users Group — Function Point Analysis) mede o tamanho funcional de um software sob a perspectiva do usuário. A unidade de medida é o <strong>Ponto de Função (PF)</strong>. O método:</p>
+<ul>
+<li><strong>Mede o que o sistema faz</strong> (funcionalidade), não como foi implementado (tecnologia, linhas de código, componentes).</li>
+<li><strong>É independente de tecnologia</strong>: o mesmo conjunto de funções tem o mesmo número de PF, seja em Delphi 5, .NET, Java ou qualquer outra linguagem.</li>
+<li><strong>É baseado na fronteira da aplicação</strong>: o que está dentro da fronteira é contado; o que está fora é referenciado.</li>
+<li><strong>Fornece uma base auditável</strong>: cada função contada tem tipo, complexidade e fonte documentados.</li>
+</ul>
+<div class="note-info">
+<p><strong>Versão do método:</strong> IFPUG FPA, conforme as regras de contagem funcionais estabelecidas pelo IFPUG. Os conceitos e tabelas de complexidade usados nesta análise seguem o padrão IFPUG (DET/FTR/RET, tabelas de complexidade para funções de dados e transacionais). Não é alegada conformidade com uma versão específica do manual sem acesso às regras necessárias; a metodologia aplicada é a prática padrão de IFPUG FPA amplamente documentada.</p>
+</div>
+</section>
+
+<section><div class="section-title">🏷️ Os cinco tipos de função</div>
+<p>A APF classifica as funções do sistema em dois grupos e cinco tipos:</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Grupo</th><th>Tipo</th><th>Sigla</th><th>O que mede</th></tr></thead>
+<tbody>
+<tr><td rowspan="2">Funções de dados<br/>(o que o sistema guarda)</td><td>Arquivo Lógico Interno</td><td><strong>ILF</strong></td><td>Grupo de dados logicamente relacionado, <strong>mantido</strong> (criado, atualizado ou excluído) dentro da fronteira da aplicação. Reconhecido pelo usuário.</td></tr>
+<tr><td>Arquivo de Interface Externa</td><td><strong>EIF</strong></td><td>Grupo de dados logicamente relacionado, <strong>mantido por outra aplicação</strong> e apenas <strong>lido</strong> pela aplicação em análise. Reconhecido pelo usuário.</td></tr>
+<tr><td rowspan="3">Funções transacionais<br/>(o que o sistema faz)</td><td>Entrada Externa</td><td><strong>EI</strong></td><td>Processo que envia dados ou controle <strong>para dentro</strong> da fronteira, mantendo um ou mais ILFs. O objetivo principal é manter dados.</td></tr>
+<tr><td>Saída Externa</td><td><strong>EO</strong></td><td>Processo que envia dados ou controle <strong>para fora</strong> da fronteira. O objetivo principal é apresentar informações com <strong>dados derivados/calculados</strong> ou manter dados como efeito secundário.</td></tr>
+<tr><td>Consulta Externa</td><td><strong>EQ</strong></td><td>Processo que envia dados ou controle para fora da fronteira com <strong>dados não derivados</strong> (apenas recuperação de informações sem cálculo).</td></tr>
+</tbody></table></div>
+<p class="desc">Cada função recebe um peso em PF conforme sua complexidade (Baixa, Média, Alta). A soma de todos os pesos é o total de Pontos de Função Não Ajustados (UFP).</p>
+</section>
+
+<section><div class="section-title">📏 Atributos de complexidade (DET / FTR / RET)</div>
+<p>A complexidade de cada função é determinada por três atributos:</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Atributo</th><th>Significado</th><th>Aplica-se a</th></tr></thead>
+<tbody>
+<tr><td><strong>DET</strong><br/>(Data Element Type)</td><td>Campo único e reconhecido pelo usuário na função. Conta-se cada campo de entrada, saída ou do arquivo que o usuário vê. Campos derivados não contam como DET separado (são resultado de cálculo, não entrada).</td><td>ILF, EIF, EI, EO, EQ</td></tr>
+<tr><td><strong>RET</strong><br/>(Record Element Type)</td><td>Subgrupo de registros logicamente relacionados dentro de um ILF ou EIF. Um arquivo sem subgrupos tem RET = 1. Se há registros detalhe associados ao mestre, RET aumenta.</td><td>ILF, EIF</td></tr>
+<tr><td><strong>FTR</strong><br/>(File Type Referenced)</td><td>Quantidade de ILFs e EIFs lidos ou mantidos pela função transacional. Conta-se cada arquivo lógico referenciado.</td><td>EI, EO, EQ</td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">📊 Tabelas de complexidade — Funções de dados (ILF / EIF)</div>
+<p>A complexidade de ILF e EIF é determinada pela interseção de RET e DET:</p>
+<div class="table-wrap"><table>
+<thead><tr><th>RET ↓ \ DET →</th><th>1–19</th><th>20–50</th><th>51+</th></tr></thead>
+<tbody>
+<tr><td><strong>1</strong></td><td>Baixa</td><td>Baixa</td><td>Média</td></tr>
+<tr><td><strong>2–5</strong></td><td>Baixa</td><td>Média</td><td>Alta</td></tr>
+<tr><td><strong>6+</strong></td><td>Média</td><td>Alta</td><td>Alta</td></tr>
+</tbody></table></div>
+<p>Pesos em PF por complexidade:</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Complexidade</th><th>ILF</th><th>EIF</th></tr></thead>
+<tbody>
+<tr><td class="level-simples">Baixa</td><td>7</td><td>5</td></tr>
+<tr><td class="level-media">Média</td><td>10</td><td>7</td></tr>
+<tr><td class="level-complexa">Alta</td><td>15</td><td>10</td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">📊 Tabelas de complexidade — Funções transacionais (EI)</div>
+<p>A complexidade de EI é determinada pela interseção de FTR e DET:</p>
+<div class="table-wrap"><table>
+<thead><tr><th>FTR ↓ \ DET →</th><th>1–4</th><th>5–15</th><th>16+</th></tr></thead>
+<tbody>
+<tr><td><strong>0–1</strong></td><td>Baixa</td><td>Baixa</td><td>Média</td></tr>
+<tr><td><strong>2</strong></td><td>Baixa</td><td>Média</td><td>Alta</td></tr>
+<tr><td><strong>3+</strong></td><td>Média</td><td>Alta</td><td>Alta</td></tr>
+</tbody></table></div>
+<p>Pesos em PF por complexidade:</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Complexidade</th><th>EI</th></tr></thead>
+<tbody>
+<tr><td class="level-simples">Baixa</td><td>3</td></tr>
+<tr><td class="level-media">Média</td><td>4</td></tr>
+<tr><td class="level-complexa">Alta</td><td>6</td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">📊 Tabelas de complexidade — Funções transacionais (EO / EQ)</div>
+<p>A complexidade de EO e EQ é determinada pela interseção de FTR e DET:</p>
+<div class="table-wrap"><table>
+<thead><tr><th>FTR ↓ \ DET →</th><th>1–5</th><th>6–19</th><th>20+</th></tr></thead>
+<tbody>
+<tr><td><strong>0–1</strong></td><td>Baixa</td><td>Baixa</td><td>Média</td></tr>
+<tr><td><strong>2–3</strong></td><td>Baixa</td><td>Média</td><td>Alta</td></tr>
+<tr><td><strong>4+</strong></td><td>Média</td><td>Alta</td><td>Alta</td></tr>
+</tbody></table></div>
+<p>Pesos em PF por complexidade:</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Complexidade</th><th>EO</th><th>EQ</th></tr></thead>
+<tbody>
+<tr><td class="level-simples">Baixa</td><td>4</td><td>3</td></tr>
+<tr><td class="level-media">Média</td><td>5</td><td>4</td></tr>
+<tr><td class="level-complexa">Alta</td><td>7</td><td>6</td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">🛡️ Delphi 5 como contexto técnico, não fator de pontuação</div>
+<p>O sistema foi desenvolvido em <strong>Delphi 5</strong> (VCL, Oracle, MIDAS/DataSnap, suíte CM Contabilidade / FUNCEF). Na APF IFPUG:</p>
+<ul>
+<li><strong>Delphi 5 é registrado como característica técnica</strong> do sistema, não como fator de classificação ou pontuação.</li>
+<li><strong>Não foram convertidas</strong> linhas de código, formulários (.dfm), units (.pas), componentes, classes, procedures, métodos ou eventos Delphi em Pontos de Função.</li>
+<li><strong>Não foram contadas telas, formulários ou componentes por existência técnica</strong> — apenas funções lógicas reconhecidas pelo usuário.</li>
+<li>O código-fonte Delphi 5 foi usado como <strong>evidência auxiliar</strong> para es>clarecer comportamento, persistência e integrações — não como substituto dos requisitos funcionais.</li>
+</ul>
+<div class="note-info">
+<p><strong>Informação técnica complementar:</strong> métricas técnicas (linhas de código, inventário de componentes) ficam em seção separada na documentação do Blueprint e <strong>não são somadas nem convertidas</strong> em Pontos de Função. Ver <a href="../index.html#linhas-de-codigo">Linhas de Código a Migrar</a> no portal do Blueprint.</p>
+</div>
+</section>
+
+<section id="fronteiras"><div class="section-title">🚧 Fronteiras das aplicações</div>
+<p>Antes da contagem, é necessário definir a fronteira de cada aplicação. A fronteira separa o que está dentro (funções mantidas pela aplicação = ILF) do que está fora (funções mantidas por outras = EIF).</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Módulo</th><th>Propósito</th><th>Tipo</th><th>Fronteira</th><th>Evidência</th></tr></thead>
+<tbody>
+<tr><td><strong>FOLHA</strong></td><td>Processar e pagar a folha de benefícios mensal</td><td>Aplicação</td><td>Pasta <code>FOLHA</code>, entry point <code>Folha.dpr</code></td><td><a href="../folha/index.html">docs1/folha/</a> <span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><strong>CONTRIBUIÇÃO</strong></td><td>Calcular, cobrar, receber contribuições e alimentar reservas</td><td>Aplicação</td><td>Pasta <code>CONTRIBUICAOPREV</code>, entry point <code>ContribuicaoPREV.dpr</code></td><td><a href="../contribuicao/index.html">docs1/contribuicao/</a> <span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><strong>BENEFICIOPREV</strong></td><td>Conceder, manter e desfazer benefícios previdenciários</td><td>Aplicação</td><td>Pasta <code>BENEFICIOPREV</code>, entry point <code>BeneficioPrev.dpr</code></td><td><a href="../beneficioprev/index.html">docs1/beneficioprev/</a> <span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+</tbody></table></div>
+<div class="note">
+<p><strong>Decisão de fronteira:</strong> os três módulos foram tratados como aplicações separadas, cada um com sua fronteira. Eles compartilham dados (<code>BENEFBFCIARIO</code>, <code>HSTCONTRIBPREV</code>, <code>PREVIA</code>, <code>HISTRUBSAL</code>) e têm integrações entre si. Esta decisão é <span class="ev ev-inferido">INFERIDO</span> — se as fronteiras não puderem ser confirmadas com especialistas de negócio, a análise deve ser tratada como <strong>preliminar</strong>. Ver <a href="#dupla-contagem">Dupla contagem</a> abaixo.</p>
+</div>
+</section>
+
+<section id="dupla-contagem"><div class="section-title">🔀 Integrações e dupla contagem</div>
+<p>Uma integração ou chamada entre módulos <strong>não gera Pontos de Função automaticamente</strong>. A interação só é contada se for uma função reconhecível pelo usuário dentro da fronteira e atender às regras do método.</p>
+<p>Os três módulos compartilham dados. A tabela abaixo identifica os riscos de dupla contagem:</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Dado compartilhado</th><th>Quem mantém (ILF)</th><th>Quem lê (EIF)</th><th>Risco de dupla contagem</th></tr></thead>
+<tbody>
+<tr><td><code>BENEFBFCIARIO</code></td><td>FOLHA (15 PF) <strong>e</strong> BENEFICIOPREV (15 PF)</td><td>CONTRIBUIÇÃO (10 PF como EIF)</td><td><strong>Sim — 15 PF</strong>. Mantido por dois módulos. Se for um único grupo lógico, contar como ILF em apenas um módulo (o "dono" funcional) e EIF nos demais.</td></tr>
+<tr><td><code>HSTCONTRIBPREV</code></td><td>CONTRIBUIÇÃO (7 PF)</td><td>FOLHA (5 PF), BENEFICIOPREV (5 PF)</td><td>Não. ILF em CONTRIBUIÇÃO (dono); EIF nos demais. Contagem correta.</td></tr>
+<tr><td><code>PREVIA</code></td><td>FOLHA (15 PF)</td><td>BENEFICIOPREV (10 PF)</td><td>Baixo. ILF em FOLHA (dono); EIF em BENEF. BENEF executa DELETE no desfazimento — borderline, mas a manutenção principal é de FOLHA.</td></tr>
+<tr><td><code>HISTRUBSAL</code></td><td>FOLHA (10 PF)</td><td>CONTRIBUIÇÃO (7 PF), BENEFICIOPREV (7 PF)</td><td>Não. ILF em FOLHA (dono); EIF nos demais.</td></tr>
+<tr><td><code>TMPDESC</code></td><td>FOLHA (10 PF)</td><td>CONTRIBUIÇÃO (7 PF), BENEFICIOPREV (7 PF)</td><td>Não. ILF em FOLHA (dono); EIF nos demais.</td></tr>
+<tr><td><code>PROCESSOBENEF</code></td><td>FOLHA (7 PF) <strong>e</strong> BENEFICIOPREV (7 PF)</td><td>—</td><td><strong>Sim — 7 PF</strong>. Mantido por dois módulos. Recomenda-se contar como ILF em BENEFICIOPREV (dono funcional) e EIF em FOLHA.</td></tr>
+</tbody></table></div>
+<div class="note">
+<p><strong>Total em risco de dupla contagem:</strong> 22 PF (15 de <code>BENEFBFCIARIO</code> + 7 de <code>PROCESSOBENEF</code>). Recomendação: validar com especialistas qual módulo é o "dono" funcional de cada dado compartilhado e ajustar a contagem. O total de 764 PF já inclui estes 22 PF; o total ajustado por dupla contagem seria <strong>742 PF</strong>.</p>
+</div>
+</section>
+
+<section id="exemplo"><div class="section-title">📖 Exemplo didático de contagem</div>
+<p>Exemplo baseado em uma função documentada do módulo FOLHA: <strong>"Calcular a prévia da folha"</strong> (UC101 / JF002).</p>
+<div class="pf-block">
+<h4>Função: EI-02 — Calcular prévia da folha (UC101 / JF002)</h4>
+<p><strong>Tipo:</strong> EI (Entrada Externa) — o usuário seleciona patrocinadoras, planos e competência; o sistema processa e mantém os ILFs PREVIA, BASEDEPAGAMENTO e BITRIBUTACAO.</p>
+<p><strong>Fonte:</strong> <a href="../folha/uc101.html#PF-02">UC101 — JF002 (Prévia / Cálculo da Folha)</a>; motor <code>dFolhaPrevia.pas</code> (30.856 linhas).</p>
+<p><strong>FTR (arquivos referenciados):</strong> 5 — PREVIA (mantido), PROVDESC (lido), BENEFBFCIARIO (lido), BASEDEPAGAMENTO (mantido), BITRIBUTACAO (mantido).</p>
+<p><strong>DET (elementos de dados):</strong> 30+ — mês/ano de referência, patrocinadora, plano, beneficiário, rubrica, valor provento, valor recebido, flags de cálculo (FLGIRRF, FLGDESCONTO, FLGMARGEMCONSIG...), valor líquido, base de IR, margem consignável, etc. <span class="ev ev-comprovado">COMPROVADO</span> pelos 57 campos de PREVIA (<a href="../folha/dados.html">docs1/folha/dados.html</a>).</p>
+<p><strong>Classificação de complexidade:</strong></p>
+<ul>
+<li>FTR = 5 → faixa "3+"</li>
+<li>DET = 30 → faixa "16+"</li>
+<li>Interseção na tabela EI: FTR 3+ × DET 16+ = <strong>Alta</strong></li>
+</ul>
+<p><strong>Peso:</strong> EI de complexidade Alta = <strong>6 PF</strong>.</p>
+<p><strong>Justificativa:</strong> o cálculo da prévia é o processo central do módulo FOLHA. Ele lê múltiplos arquivos de configuração (rubricas, benefícios) e mantém vários arquivos de saída (prévia, bases de pagamento, bitributação). O alto número de DETs reflete os 57 campos documentados de PREVIA e os parâmetros de cálculo. A complexidade Alta é consistente com o volume do motor de cálculo (30.856 linhas em <code>dFolhaPrevia.pas</code>).</p>
+</div>
+</section>
+
+<section><div class="section-title">✅ Critérios aplicados nesta contagem</div>
+<ul>
+<li><strong>Funções de dados:</strong> cada tabela com DBObject (<code>uDb*.pas</code>) ou escrita por SQL inline com evidência de INSERT/UPDATE/DELETE foi avaliada como ILF (se mantida dentro da fronteira) ou EIF (se mantida por outra aplicação e apenas lida).</li>
+<li><strong>Funções transacionais:</strong> cada caso de uso (UC) documentado em <code>docs1/</code> foi mapeado para uma ou mais funções EI/EO/EQ, conforme o objetivo principal do processo (manter dados = EI; apresentar dados derivados = EO; recuperar dados sem cálculo = EQ).</li>
+<li><strong>DET:</strong> contado a partir dos campos documentados nas páginas de dados (<code>dados.html</code>) de cada módulo. Onde o número exato de campos não foi extraído do código, o DET é estimado e marcado <span class="ev ev-pendente">PENDENTE</span> para confirmação.</li>
+<li><strong>RET:</strong> inferido a partir da chave primária documentada (chaves compostas sugerem múltiplos RETs) e da presença de tabelas detalhe associadas.</li>
+<li><strong>FTR:</strong> contado a partir dos ILFs/EIFs referenciados em cada processo, conforme documentado nas páginas de funcionalidades e dados.</li>
+<li><strong>Não contados:</strong> mensagens, logs, dados derivados, telas, formulários, units, components, procedures, métodos, eventos ou linhas de código. Não contada a mesma capacidade por aparecer em mais de uma jornada ou tela.</li>
+<li><strong>Pendências:</strong> funções cujos DETs/FTRs/RETs não puderam ser determinados com evidência são marcadas <span class="ev ev-pendente">PENDENTE</span> e não apresentadas como contagem confirmada.</li>
+</ul>
+</section>
+
+<section><div class="section-title">👔 Para o analista de métricas</div>
+<div class="note">
+<ul>
+<li><strong>Revisão:</strong> cada função contada tem tipo, complexidade, peso e fonte documentados na página do módulo. Para revisar, abra a página do módulo, vá à seção "Inventário" e confira a "Memória de cálculo".</li>
+<li><strong>Reprodução:</strong> o total de PF de cada módulo é recalculado somando os pesos do inventário. Qualquer divergência entre o inventário e o sumário indica erro de totalização.</li>
+<li><strong>Validação recomendada:</strong> confirmar com especialistas de negócio (1) as fronteiras entre os três módulos, (2) o "dono" funcional de <code>BENEFBFCIARIO</code> e <code>PROCESSOBENEF</code> (dupla contagem), (3) os DETs marcados <span class="ev ev-pendente">PENDENTE</span>.</li>
+<li><strong>Contagem confirmada vs. preliminar:</strong> funções com evidência completa são contagem confirmada. Funções com DET/RET/FTR estimado são preliminares e estão na seção "Pendências de validação" de cada módulo.</li>
+</ul>
+</div>
+</section>
+
+</main>
+
+<footer>
+<p>Blueprint AS-IS — PFC-47 — Metodologia da Contagem IFPUG FPA | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-11</p>
+</footer>
+</body>
+</html>
