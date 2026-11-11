@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Metodologia da contagem — Análise de Pontos de Função — Blueprint AS-IS</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+<style>
+details.apf summary { cursor: pointer; color: var(--accent); font-size: .82rem; }
+details.apf > div { margin-top: .35rem; font-size: .84rem; color: var(--muted); }
+td.num, th.num { text-align: right; white-space: nowrap; }
+tr.total td { font-weight: 700; background: var(--bg3); }
+.breadcrumb { color: var(--muted); font-size: .85rem; margin-bottom: .75rem; }
+</style>
+</head>
+<body>
+<header>
+  <div class="badge">Análise de Pontos de Função — IFPUG</div>
+  <h1>📐 Metodologia da contagem</h1>
+  <p>Como a Análise de Pontos de Função IFPUG foi feita, com critérios, matrizes, tratamento de fronteiras e um exemplo passo a passo.</p>
+</header>
+<nav>
+  <a href="../index.html">🏠 Blueprint AS-IS</a>
+  <a href="index.html">🧮 Pontos de Função</a>
+  <a href="folha.html">💰 Folha</a>
+  <a href="beneficioprev.html">🏛️ Benefício</a>
+  <a href="contribuicao.html">📥 Contribuição</a>
+  <a href="metodologia.html" aria-current="page">📐 Metodologia da contagem</a>
+</nav>
+
+<main>
+<div class="breadcrumb"><a href="../index.html">Blueprint AS-IS</a> › <a href="index.html">Análise de pontos de função</a> › Metodologia da contagem</div>
+<section id="entenda"><div class="section-title">💡 Entenda esta página</div>
+<div class="note-info"><p><strong>O que esta página mostra:</strong> como a contagem foi feita, para que qualquer analista possa revisá-la ou refazê-la. Ela explica o que a APF mede, os tipos de função, como a complexidade e a pontuação foram obtidas, como foram tratadas as integrações e a dupla contagem e por que o Delphi 5 não entra na conta. No fim há um exemplo passo a passo com uma função real.</p></div>
+</section>
+
+<section id="metodo"><div class="section-title">📏 O que a APF IFPUG mede e qual versão foi usada</div>
+<p>A Análise de Pontos de Função (APF) mede o <strong>tamanho funcional</strong>: a quantidade de funcionalidade que o software entrega ao usuário, vista de fora, pela ótica do negócio. Não mede esforço, qualidade nem tamanho do código. Dois sistemas que fazem a mesma coisa têm o mesmo tamanho funcional, sejam escritos em Delphi 5, Java ou .NET.</p>
+<ul>
+<li><strong>Método:</strong> APF do IFPUG (International Function Point Users Group). Foram aplicadas as regras de contagem do <em>Counting Practices Manual</em> (CPM) 4.3.1, padronizadas como ISO/IEC 20926:2009: tipos de função, definições de DET/RET/FTR, matrizes de complexidade e pesos reproduzidos abaixo.</li>
+<li><strong>Material consultado:</strong> o texto do manual não está no repositório e não foi consultado diretamente nesta análise; foram usadas as definições e tabelas de complexidade e pesos publicadas pelo IFPUG e pela ISO/IEC 20926, reproduzidas nesta página. Por isso <strong>não se declara conformidade formal</strong> com o CPM: a contagem é <span class="ev ev-inferido">PRELIMINAR</span> e deve ser revisada por um especialista certificado (CFPS) antes de usos contratuais.</li>
+<li><strong>Tipo de contagem:</strong> contagem de aplicação (baseline do sistema instalado, AS-IS), um módulo por vez.</li>
+<li><strong>Resultado:</strong> pontos de função <strong>não ajustados</strong> (ver <a href="#ajuste">Fator de ajuste</a>).</li>
+</ul>
+</section>
+
+<section id="conceitos"><div class="section-title">🧩 Conceitos: tipos de função e elementos de contagem</div>
+<div class="table-wrap"><table><thead><tr><th>Sigla</th><th>Nome</th><th>O que é</th><th>Exemplo nos módulos</th></tr></thead><tbody>
+<tr><td><strong>ILF</strong></td><td>Arquivo Lógico Interno (<em>Internal Logical File</em>)</td><td>Grupo de dados logicamente relacionado, reconhecido pelo usuário e <strong>mantido</strong> (incluído, alterado ou excluído) por algum processo da aplicação.</td><td>A prévia da folha, mantida pela FOLHA.</td></tr>
+<tr><td><strong>EIF</strong></td><td>Arquivo de Interface Externa (<em>External Interface File</em>)</td><td>Grupo de dados reconhecido pelo usuário que a aplicação apenas <strong>lê</strong>; é mantido por outra aplicação.</td><td>Dados mantidos por pacotes externos (ex.: CMAdmPrev, PARAMPREV) ou por outro dos três módulos e só consultados.</td></tr>
+<tr><td><strong>EI</strong></td><td>Entrada Externa (<em>External Input</em>)</td><td>Processo elementar que recebe dados ou comandos de fora da fronteira com a intenção principal de <strong>manter ILF</strong> ou alterar o comportamento do sistema.</td><td>Calcular a prévia, importar arquivo de retorno bancário, lançar adiantamento.</td></tr>
+<tr><td><strong>EO</strong></td><td>Saída Externa (<em>External Output</em>)</td><td>Processo elementar que envia dados para fora da fronteira com <strong>cálculo, dado derivado</strong>, atualização de ILF ou alteração de comportamento.</td><td>Relatório com totais calculados, arquivo de remessa bancária.</td></tr>
+<tr><td><strong>EQ</strong></td><td>Consulta Externa (<em>External Inquiry</em>)</td><td>Processo elementar que recupera e apresenta dados <strong>sem cálculo</strong>, sem dado derivado e sem atualizar ILF.</td><td>Consulta simples de um cadastro.</td></tr>
+<tr><td><strong>DET</strong></td><td>Tipo de Dado Elementar</td><td>Campo único, reconhecido pelo usuário e não repetido. Numa transação: campos que cruzam a fronteira, mais 1 pela capacidade de mostrar mensagens e 1 pela capacidade de acionar a ação.</td><td>Mês/ano de referência, rubrica, valor.</td></tr>
+<tr><td><strong>RET</strong></td><td>Tipo de Registro Elementar</td><td>Subgrupo de dados reconhecido pelo usuário dentro de um ILF/EIF.</td><td>Capa da folha e itens da folha (rubricas) num mesmo arquivo lógico.</td></tr>
+<tr><td><strong>FTR</strong></td><td>Arquivo Referenciado</td><td>ILF lido ou mantido, ou EIF lido, por uma transação.</td><td>O cálculo da prévia lê benefícios e rubricas e grava a prévia.</td></tr>
+</tbody></table></div>
+<p><strong>Processo elementar:</strong> a menor unidade de atividade com sentido completo para o usuário, autocontida, que deixa o negócio num estado consistente. Telas, botões, forms, units e procedures <strong>não</strong> são processos elementares por si sós.</p>
+</section>
+
+<section id="dados"><div class="section-title">🗄️ Como as funções de dados foram identificadas</div>
+<ol>
+<li>Ponto de partida: as tabelas das abas <em>Dados</em> de cada módulo (<a href="../folha/dados.html">FOLHA</a>, <a href="../beneficioprev/dados.html">BENEFICIOPREV</a>, <a href="../contribuicao/dados.html">CONTRIBUIÇÃO</a>).</li>
+<li>As tabelas físicas foram <strong>agrupadas em grupos lógicos</strong> como o usuário os vê; tabelas filhas que só existem junto da tabela pai viram RETs do mesmo grupo.</li>
+<li><strong>Não foram contadas</strong>: tabelas de controle técnico, temporárias de processamento, logs técnicos, sequences e <em>code data</em> (tabelas de código e descrição sem regra de negócio). Elas estão na seção 8.4 de cada análise, com o motivo.</li>
+<li>ILF ou EIF: <strong>ILF</strong> se algum processo do próprio módulo mantém o grupo; <strong>EIF</strong> se o módulo só lê e outra aplicação mantém.</li>
+<li>DETs: campos únicos reconhecidos pelo usuário, apurados pelas abas de dados e, quando preciso, pelas definições <code>CreateCmDbField</code> dos DBObjects (<code>uDb*.pas</code>).</li>
+</ol>
+</section>
+
+<section id="transacoes"><div class="section-title">⚙️ Como as funções transacionais foram identificadas</div>
+<ol>
+<li>Fonte principal: os casos de uso (UC101–UC112, UC201–UC209, UC301–UC310), as jornadas, as regras de negócio, as pré e pós-condições e os relatórios.</li>
+<li>Cada jornada foi decomposta em processos elementares. A mesma capacidade presente em mais de uma jornada ou tela foi contada <strong>uma vez</strong>; as repetições estão na seção 8.4.</li>
+<li>Intenção primária: manter dados ou alterar comportamento → EI; apresentar com cálculo ou dado derivado → EO; apenas recuperar e apresentar → EQ. Quando a documentação não permitiu decidir entre EO e EQ, a função ficou pendente (“tipo?”).</li>
+<li>Mensagens, logs, validações e confirmações fazem parte do processo a que pertencem; não foram contados como funções separadas.</li>
+</ol>
+</section>
+
+<section id="complexidade"><div class="section-title">🎚️ Complexidade e pontuação</div>
+<p>A complexidade de cada função vem do cruzamento de DET com RET (funções de dados) ou com FTR (transações) nas matrizes abaixo. Os pontos dependem do tipo e da complexidade.</p>
+<h3>Funções de dados (ILF/EIF)</h3><div class="table-wrap"><table><thead><tr><th></th><th>DET 1–19</th><th>DET 20–50</th><th>DET 51+</th></tr></thead><tbody><tr><th>RET 1</th><td class="level-simples">Baixa</td><td class="level-simples">Baixa</td><td class="level-media">Média</td></tr><tr><th>RET 2–5</th><td class="level-simples">Baixa</td><td class="level-media">Média</td><td class="level-complexa">Alta</td></tr><tr><th>RET 6+</th><td class="level-media">Média</td><td class="level-complexa">Alta</td><td class="level-complexa">Alta</td></tr></tbody></table></div>
+<h3>Entradas externas (EI)</h3><div class="table-wrap"><table><thead><tr><th></th><th>DET 1–4</th><th>DET 5–15</th><th>DET 16+</th></tr></thead><tbody><tr><th>FTR 0–1</th><td class="level-simples">Baixa</td><td class="level-simples">Baixa</td><td class="level-media">Média</td></tr><tr><th>FTR 2</th><td class="level-simples">Baixa</td><td class="level-media">Média</td><td class="level-complexa">Alta</td></tr><tr><th>FTR 3+</th><td class="level-media">Média</td><td class="level-complexa">Alta</td><td class="level-complexa">Alta</td></tr></tbody></table></div>
+<h3>Saídas e consultas externas (EO/EQ)</h3><div class="table-wrap"><table><thead><tr><th></th><th>DET 1–5</th><th>DET 6–19</th><th>DET 20+</th></tr></thead><tbody><tr><th>FTR 0–1</th><td class="level-simples">Baixa</td><td class="level-simples">Baixa</td><td class="level-media">Média</td></tr><tr><th>FTR 2–3</th><td class="level-simples">Baixa</td><td class="level-media">Média</td><td class="level-complexa">Alta</td></tr><tr><th>FTR 4+</th><td class="level-media">Média</td><td class="level-complexa">Alta</td><td class="level-complexa">Alta</td></tr></tbody></table></div>
+<h3>Pesos (PF)</h3>
+<div class="table-wrap"><table><thead><tr><th>Tipo</th><th class="num">Baixa</th><th class="num">Média</th><th class="num">Alta</th></tr></thead><tbody>
+<tr><td>ILF — Arquivo Lógico Interno</td><td class="num">7</td><td class="num">10</td><td class="num">15</td></tr>
+<tr><td>EIF — Arquivo de Interface Externa</td><td class="num">5</td><td class="num">7</td><td class="num">10</td></tr>
+<tr><td>EI — Entrada Externa</td><td class="num">3</td><td class="num">4</td><td class="num">6</td></tr>
+<tr><td>EO — Saída Externa</td><td class="num">4</td><td class="num">5</td><td class="num">7</td></tr>
+<tr><td>EQ — Consulta Externa</td><td class="num">3</td><td class="num">4</td><td class="num">6</td></tr>
+</tbody></table></div>
+<h3 id="limites">Regra adotada: limites de evidência e pendências</h3>
+<p>Para não inventar números, cada função registra um <strong>limite mínimo</strong> (o que foi enumerado com evidência) e um <strong>limite máximo</strong> (o que a evidência permite, por exemplo o total de campos da tabela ou da tela; “+” = sem limite conhecido) para DET e RET/FTR.</p>
+<ul>
+<li>Se o mínimo e o máximo caem na <strong>mesma célula de complexidade</strong>, a complexidade está determinada e a função é <span class="ev ev-comprovado">CONFIRMADA</span>, mesmo sem o número exato. Ex.: uma EI com 3 ou mais FTRs e 16 ou mais DETs é Alta, qualquer que seja o valor exato.</li>
+<li>Se os limites cruzam células, se o tipo é incerto ou se a própria existência da função depende de validação, a função é <span class="ev ev-pendente">PENDENTE</span>: aparece no inventário, mas <strong>não entra no total</strong>. Para ela mostra-se só a faixa de pontos possível, como indicação.</li>
+<li>Os totais são recalculados a partir do inventário, e a memória de cálculo de cada módulo prova a soma.</li>
+</ul>
+<h3 id="ajuste">Fator de ajuste</h3>
+<p>Foram apurados apenas os <strong>pontos de função não ajustados</strong>. O Fator de Ajuste (VAF, 14 características gerais do sistema) é opcional no IFPUG e não faz parte da ISO/IEC 20926. Por isso não foi aplicado: as características dependem de avaliação com os usuários, que não consta da documentação.</p>
+</section>
+
+<section id="fronteira"><div class="section-title">🧱 Fronteiras dos módulos</div>
+<ul>
+<li>Cada módulo tem seu próprio executável (<code>Folha.dpr</code> e os projetos da CONTRIBUIÇÃO e do BENEFICIOPREV), menu próprio e área de negócio própria (folha de pagamento, arrecadação e concessão de benefícios). Por isso cada um foi contado como uma <strong>aplicação separada</strong> <span class="ev ev-inferido">INFERIDO</span>.</li>
+<li>Os três não chamam uns aos outros: trocam informação lendo e gravando as mesmas tabelas (<a href="../visao-geral/mapa-de-dependencias.html">Mapa de Dependências</a>) <span class="ev ev-comprovado">COMPROVADO</span>.</li>
+<li>Pasta não é sinônimo de aplicação. A decisão precisa ser confirmada com o negócio <span class="ev ev-pendente">PENDENTE</span>; se os três forem considerados uma única aplicação, as funções de dados compartilhadas serão contadas uma só vez e os EIFs entre os módulos desaparecerão. Por isso as análises são apresentadas como <strong>preliminares</strong>.</li>
+</ul>
+</section>
+
+<section id="integracoes"><div class="section-title">🔗 Integrações e dupla contagem</div>
+<ul>
+<li><strong>Integração não gera ponto automaticamente.</strong> Gravar uma tabela que outro módulo lê não é uma transação a mais: só se conta EI/EO/EQ quando há um processo elementar reconhecível pelo usuário dentro da fronteira (por exemplo, importar um arquivo de retorno ou gerar um arquivo de remessa).</li>
+<li><strong>Dados compartilhados</strong> (<code>BENEFBFCIARIO</code>, <code>HSTCONTRIBPREV</code>, <code>PREVIA</code>, <code>HISTRUBSAL</code>, <code>TMPDESC</code>…): em cada módulo são ILF se o módulo os mantém e EIF se só os lê. Um mesmo grupo pode ser ILF em dois módulos quando ambos o mantêm. Isso está correto para o tamanho de cada aplicação, mas gera risco de dupla contagem na soma dos três; os casos estão listados na seção 7 de cada análise.</li>
+<li><strong>Dentro de um módulo</strong>, uma capacidade que aparece em várias jornadas ou telas foi contada uma única vez.</li>
+<li><strong>Pacotes externos</strong> (Framework CM, CMAdmPrev, CMPrevMT50, PARAMPREV, IRRF…): só entram como EIF quando um processo contado lê dados que eles mantêm; a funcionalidade deles não é contada aqui.</li>
+</ul>
+</section>
+
+<section id="delphi"><div class="section-title">🖥️ Delphi 5: contexto técnico, não fonte de pontos</div>
+<ul>
+<li>Os módulos foram escritos em Delphi 5 (VCL, Oracle, MIDAS/DataSnap). Isso está registrado como característica técnica e <strong>não muda</strong> nenhum critério de classificação nem nenhuma pontuação.</li>
+<li>O código-fonte foi usado só como <strong>evidência auxiliar</strong>: confirmar campos de uma tela (<code>.dfm</code>), campos de uma tabela (<code>uDb*.pas</code>), o que é gravado e quais integrações existem. Quando documentação e código divergem, a divergência está na seção 8.3 de cada análise.</li>
+<li>Linhas de código, forms, units, componentes, classes e procedures <strong>não</strong> foram convertidos em pontos de função nem somados a eles. Essas métricas aparecem só no anexo “Informação técnica complementar” de cada análise e em <a href="../index.html#linhas-de-codigo">Linhas de Código a Migrar</a>.</li>
+</ul>
+</section>
+
+<section id="exemplo"><div class="section-title">🧪 Exemplo didático: Evento de regularização de pagamento</div>
+<p>Função <a href="folha.html#F-ILF-15"><code>F-ILF-15</code></a> do módulo <strong>Folha de Benefícios</strong>, classificada como <strong>ILF</strong> (Arquivo Lógico Interno).</p>
+<div class="table-wrap"><table><tbody>
+<tr><th>1. É uma função?</th><td>Incluído, alterado e desativado pela tela &#x27;Cadastro de Eventos para Regularização de Pagamentos&#x27; (JF012).</td></tr>
+<tr><th>2. RETs</th><td>1 — CADASTROEVENTOSDEREGULARIZACAO</td></tr>
+<tr><th>3. DETs</th><td>7–8 — CODIGORETORNO, DESCRICAOEVENTO, CODCENTRORESPON, CODCENTROCUSTO, TIPODOCUMENTO, TIPODOCUMENTOREC, FLGDESATIVADO</td></tr>
+<tr><th>4. Matriz</th><td>RET 1 × DET 7–8 → complexidade <strong>Baixa</strong></td></tr>
+<tr><th>5. Peso</th><td>ILF Baixa = <strong>7 PF</strong></td></tr>
+<tr><th>Fontes</th><td><a href="../folha/uc102.html#PF-12">UC102 / JF012</a><br><code>UCadastroEventoRegularizacao.dfm (DataFields)</code><br><code>UCadastroEventoRegularizacao.pas:120-227</code></td></tr>
+</tbody></table></div>
+<div class="note-info"><p><strong>Passo a passo do analista:</strong> Evento de regularização de pagamento (CADASTROEVENTOSDEREGULARIZACAO). 1) Tipo: ILF, porque é mantido pela própria FOLHA na tela &#x27;Cadastro de Eventos para Regularização de Pagamentos&#x27; (JF012: incluir, alterar, desativar). 2) RET: um único subgrupo (o evento), sem capa/itens → RET = 1. 3) DET: campos reconhecidos pelo usuário ligados aos DataFields da tela — código de retorno, descrição do evento, centro de responsabilidade, centro de custo, tipo de documento a pagar, tipo de documento a receber e indicador de desativado = 7; o &#x27;Código Interno&#x27; exibido (chave substituta) pode ou não ser reconhecido → limite máximo 8. 4) Matriz ILF: RET 1 com DET 1-19 → complexidade Baixa (min 7 e max 8 caem na mesma faixa). 5) Peso: ILF Baixa = 7 PF.</p></div>
+</section>
+
+<section id="leitura"><div class="section-title">📋 Selos usados nas análises</div>
+<ul>
+<li><span class="ev ev-comprovado">CONFIRMADA</span> — tipo e complexidade determinados com evidência; os pontos entram no total.</li>
+<li><span class="ev ev-pendente">PENDENTE</span> — função identificada, mas complexidade, tipo ou existência dependem de validação; fica fora do total.</li>
+<li>Selos de evidência <span class="ev ev-comprovado">COMPROVADO</span> / <span class="ev ev-inferido">INFERIDO</span> / <span class="ev ev-pendente">PENDENTE</span> — mesmo significado do restante do Blueprint (<a href="../metodologia/criterios-de-analise.html">Critérios de Análise</a>).</li>
+</ul>
+</section>
+</main>
+
+<footer>
+<p>Blueprint AS-IS — PFC-47 — Análise de Pontos de Função (IFPUG) dos módulos FOLHA, BENEFICIOPREV e CONTRIBUIÇÃO | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-11</p>
+</footer>
+</body>
+</html>
