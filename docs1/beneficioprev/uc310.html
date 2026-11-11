@@ -49,6 +49,24 @@
 <ul>
 <li><a href="#PF-17"><strong>JF017 — Cálculo Retroativo de Benefícios</strong></a>: Recalcular benefícios retroativamente, em lote por arquivo de matrículas, pelo componente externo do CMAdmPrev.</li>
 </ul>
+<p><strong>Necessidade de negócio:</strong> às vezes é preciso rever, para trás no tempo, o valor de benefícios já pagos, recalculando os meses anteriores, e fazer isso para muitos benefícios de uma vez. Este caso de uso permite fazer essa revisão em lote a partir de um arquivo com as matrículas dos benefícios a revisar. Todo o cálculo é delegado ao componente externo CMAdmPrev.</p>
+<p><strong>Quem inicia:</strong> o analista de benefícios, pela opção de cálculo retroativo do menu principal. A opção abre a tela externa <code>frmRetroativoPrev</code> em modo modal e identifica o Benefício Previdenciário como módulo de origem da chamada (prmMenuChamadorRetroativo = 'B') (<code>FPrincipal.pas:1929-1935</code>).</p>
+<p><strong>Resultado esperado:</strong> os benefícios das matrículas informadas ficam recalculados retroativamente. A gravação é feita pelo CMAdmPrev.</p>
+<p><strong>Termos, siglas e componentes citados nesta página</strong> — explicados na primeira vez em que aparecem; a coluna “Fonte” indica onde a explicação foi conferida no repositório:</p>
+<div class="table-wrap"><table><thead><tr><th>Termo</th><th>O que significa</th><th>Fonte</th></tr></thead><tbody>
+<tr><td><strong>PARAMAPREV</strong></td><td>Tabela de parâmetros gerais do módulo, lida quando o módulo é iniciado. Entre outros pontos, indica se a integração contábil está ligada (FLGINTCONTAB = 1, regra RS027).</td><td><code>FPrincipal.pas:928-930</code>; <a href="uc301.html#BENEF-RN027">RS027</a></td></tr>
+<tr><td><strong>Tipo de previdência e fundação do usuário</strong></td><td>O tipo de previdência diz se a entidade é uma fundação ou um instituto: com FLGTIPOPREVIDENC = 'I', as telas trocam “Fundação/Patrocinadora/Plano” por “Instituto/Entidade/Regime” (RS026). A fundação do usuário (IDFUNDACAO) limita os dados que ele consulta: cada usuário só vê os dados da sua fundação (RS045).</td><td><code>FPrincipal.pas:598-775, 566-567</code></td></tr>
+<tr><td><strong>PARTPREVPLAN</strong></td><td>Vínculo do participante com um plano previdenciário. Guarda a situação do participante no plano e as datas desse vínculo.</td><td><a href="dados.html">🗄️ Dados</a></td></tr>
+<tr><td><strong>ELEGPATRO</strong></td><td>Dados de elegibilidade do participante na patrocinadora (tabela PATRO), como o tempo de serviço e a situação funcional.</td><td><a href="dados.html">🗄️ Dados</a></td></tr>
+<tr><td><strong>EVENTOGERADOR</strong></td><td>Catálogo dos eventos que dão origem a benefícios (por exemplo, aposentadoria, falecimento e reclusão). É cadastrado por fundação e agrupado pelo código interno FLGINTERNO. O menu de eventos é montado a partir dele (RS002).</td><td><a href="dados.html">🗄️ Dados</a>; <code>FPrincipal.pas:1038-1387</code></td></tr>
+<tr><td><strong>CMAdmPrev</strong></td><td>Componente externo do framework CM (pasta <code>..\..\Cm\CMAdmPrev\</code>). Reúne os módulos de dados de cálculo e concessão (DAPrev), o cálculo retroativo em lote, o cadastro de mantenedoras e o de UF do INSS. Este módulo abre telas desse componente e delega a ele os cálculos. A lógica interna do componente não faz parte da evidência desta documentação.</td><td><a href="integracoes.html">🔗 Integrações</a>; <a href="lacunas.html">🔍 Lacunas</a></td></tr>
+<tr><td><strong>UAdmPrev / UBeneficio</strong></td><td>Bibliotecas de regras de outro módulo, chamadas pelas telas deste módulo. A UAdmPrev concentra regras de cálculo e concessão, como a verificação do limite de valor e de percentual do benefício e a criação do log de ocorrência. A UBeneficio concentra regras de benefício, como o cálculo do benefício mínimo.</td><td><a href="lacunas.html">🔍 Lacunas</a> (Dependências externas)</td></tr>
+<tr><td><strong>Folha de Benefícios</strong></td><td>Folha mensal de pagamento dos benefícios, que fica no módulo FOLHA. Este módulo se comunica com ela pelas tabelas PREVIA (prévia de cálculo da folha) e LISTAFOLHABENEF. A finalidade exata dessa interface é <span class="ev ev-inferido">INFERIDO</span>, porque a implementação da folha não foi analisada.</td><td><a href="integracoes.html">🔗 Integrações</a>; <a href="dados.html">🗄️ Dados</a></td></tr>
+<tr><td><strong>LOGTOTALPREV</strong></td><td>Log de auditoria do TotalPREV. As operações de negócio deste módulo ficam registradas nele com o código de módulo 454, o usuário, a descrição da operação e a data (RS025).</td><td><code>UModulo.pas:64-88</code></td></tr>
+<tr><td><strong>Cálculo retroativo / revisão em lote</strong></td><td>Recálculo de benefícios referente a períodos passados, feito para um conjunto de benefícios listado num arquivo de matrículas.</td><td>Registro original PF-17</td></tr>
+<tr><td><strong>Arquivo de matrículas</strong></td><td>Arquivo com as matrículas dos benefícios a revisar. O formato do arquivo é definido pela tela externa e não está documentado neste módulo.</td><td>Registro original PF-17</td></tr>
+<tr><td><strong>frmRetroativoPrev / dRetroativoLote</strong></td><td>Tela e módulo de dados do cálculo retroativo em lote, ambos do CMAdmPrev.</td><td><a href="lacunas.html">🔍 Lacunas</a> (CMAdmPrev)</td></tr>
+</tbody></table></div>
 </section>
 
 <section><div class="section-title">3. Pré-condições</div>
@@ -59,9 +77,14 @@
 <li>Participantes, planos (PARTPREVPLAN), elegibilidade (ELEGPATRO), benefícios e eventos geradores (EVENTOGERADOR) cadastrados.</li>
 <li>Componentes externos disponíveis quando a jornada os usa: CMAdmPrev (cálculo/concessão/retroativo), bibliotecas UAdmPrev/UBeneficio, Folha de Benefícios (ver <a href="integracoes.html">🔗 Integrações</a>).</li>
 </ul>
+<p><strong>O que as pré-condições gerais significam na prática:</strong> o usuário precisa ter acesso ao módulo. Ao iniciar, o sistema precisa ler os parâmetros da entidade: se a integração contábil está ligada (RS027) e se a entidade é fundação ou instituto (RS026). Também precisa saber a qual fundação o usuário pertence, porque todas as consultas de negócio são filtradas por ela (<a href="#BENEF-RN045">RS045</a>). Além disso, os cadastros básicos já devem existir: participantes, seus planos, seus dados de elegibilidade, os benefícios e o catálogo de eventos geradores. Os componentes externos (CMAdmPrev, UAdmPrev/UBeneficio e Folha de Benefícios) só são exigidos pelas jornadas que os usam, conforme indicado em cada jornada.</p>
 <p><strong>Por jornada:</strong></p>
 <ul>
 <li><a href="#PF-17">JF017</a>: Arquivo de matrículas; componente <code>frmRetroativoPrev</code> (CMAdmPrev) disponível.</li>
+</ul>
+<p><strong>Pré-condições por jornada, em termos de negócio:</strong></p>
+<ul>
+<li><a href="#PF-17">JF017</a>: o analista tem o arquivo com as matrículas dos benefícios a revisar, e o componente CMAdmPrev, onde está a tela de cálculo retroativo, está instalado e acessível.</li>
 </ul>
 </section>
 
@@ -69,22 +92,30 @@
 <ul>
 <li><a href="#PF-17">JF017</a>: Benefícios recalculados (persistência feita pelo CMAdmPrev).</li>
 </ul>
+<p><strong>Resultado de negócio:</strong></p>
+<ul>
+<li><a href="#PF-17">JF017</a> — os benefícios listados ficam recalculados retroativamente. As tabelas alteradas, as regras de cálculo, as validações e o tratamento de erros pertencem ao CMAdmPrev e não podem ser descritos a partir deste módulo <span class="ev ev-pendente">PENDENTE</span>.</li>
+</ul>
 </section>
 
 <section><div class="section-title">5. Jornadas Funcionais (JF017)</div>
 <p>Cada jornada traz objetivo, ator/gatilho, pré e pós-condições, sequência operacional, ações práticas, <strong>regras de negócio da jornada</strong> (texto completo de cada regra), tratamentos e mensagens.</p>
+<p><strong>Como ler esta jornada:</strong> JF017 é a única jornada deste caso de uso e é quase toda executada fora do módulo. Aqui o módulo só oferece a opção de menu e abre a tela externa. Em cada passo, o rótulo “Usuário” ou “Sistema” indica quem executa a ação.</p>
 <div class="legend"><span><span class="ev ev-comprovado">COMPROVADO</span> — no código</span><span><span class="ev ev-inferido">INFERIDO</span> — plausível</span><span><span class="ev ev-pendente">PENDENTE</span> — validar</span></div>
 </section>
 
 <div class="pf-block" id="PF-17"><h4>JF017 (PF-17) — Cálculo Retroativo de Benefícios</h4>
 <p><strong>Objetivo:</strong> Recalcular benefícios retroativamente, em lote por arquivo de matrículas, pelo componente externo do CMAdmPrev.</p>
+<p><strong>Necessidade de negócio:</strong> revisar o valor de vários benefícios para períodos passados numa única execução, em vez de recalcular benefício por benefício.</p>
 <p><strong>Ator / gatilho:</strong> Analista de benefícios, pela opção de cálculo retroativo do menu principal.</p>
 <p><strong>Pré-condições:</strong> Arquivo de matrículas; componente <code>frmRetroativoPrev</code> (CMAdmPrev) disponível.</p>
+<p><strong>Em termos de negócio:</strong> existe a lista de matrículas a revisar e a tela de cálculo retroativo do CMAdmPrev pode ser aberta.</p>
 <p><strong>Pós-condições:</strong> Benefícios recalculados (persistência feita pelo CMAdmPrev).</p>
+<p><strong>Em termos de negócio:</strong> os benefícios da lista passam a refletir o recálculo retroativo.</p>
 <p><strong>Sequência operacional:</strong></p>
 <ol>
-<li>Acionar o cálculo retroativo no menu; o sistema abre o form externo do CMAdmPrev.</li>
-<li>Informar o arquivo de matrículas e executar a revisão em lote (processamento externo).</li>
+<li><strong>Usuário e sistema:</strong> Acionar o cálculo retroativo no menu; o sistema abre o form externo do CMAdmPrev.<br>A tela externa abre em modo modal: o usuário precisa concluir ou fechar a tela para voltar ao menu. O módulo informa à tela que a chamada vem do Benefício Previdenciário ('B').</li>
+<li><strong>Usuário e sistema (CMAdmPrev):</strong> Informar o arquivo de matrículas e executar a revisão em lote (processamento externo).<br>O usuário indica o arquivo e dispara a revisão. O recálculo e a gravação acontecem no CMAdmPrev.</li>
 </ol>
 <p><strong>Ações práticas:</strong></p>
 <div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
@@ -147,6 +178,12 @@
 <p><strong>Mensagens:</strong> —</p>
 <p><strong>Telas:</strong> Cálculo retroativo (externo CMAdmPrev) (<code>frmRetroativoPrev</code>)</p>
 <p><strong>Dependências:</strong> Externa; depende do CMAdmPrev.</p>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span> — informações que o repositório não comprova ou que divergem entre fontes. O texto existente foi mantido; os itens abaixo dependem de validação humana.</p>
+<ul>
+<li>Formato do arquivo de matrículas, parâmetros da revisão (período, índices), regras de cálculo, mensagens e tabelas gravadas: pertencem à tela <code>frmRetroativoPrev</code>, que está em <code>CM/CMADMPREV/Fontes/FRetroativoPrev.pas</code>, fora do escopo de evidência desta documentação.</li>
+<li>Diferença de comportamento conforme o módulo de origem (prmMenuChamadorRetroativo = 'B'): o efeito desse parâmetro na tela externa não está documentado.</li>
+</ul>
+</div>
 <div class="note note-info"><p><strong>Registro original do processo PF-17</strong></p><p><strong>Forms de entrada:</strong> <code>frmRetroativoPrev</code> (externo CMAdmPrev)</p><p><strong>Lógica de processamento:</strong> Revisão em lote por arquivo de matrículas (delegado ao CMAdmPrev)</p><p><strong>Saídas:</strong> Benefícios recalculados retroativamente</p><p><strong>Persistência (tabelas escritas):</strong> Delegado ao CMAdmPrev (externo)</p><p><strong>Evidência:</strong> <code>BENEFICIOPREV/Fontes/FPrincipal.pas:1929-1935</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
 </div>
 

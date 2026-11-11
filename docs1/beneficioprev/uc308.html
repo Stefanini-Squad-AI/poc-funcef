@@ -51,6 +51,32 @@
 <li><a href="#PF-15"><strong>JF015 — Cadastro de Processos INSS (Habilitação)</strong></a>: Cadastrar os processos de habilitação do INSS dos beneficiários com benefício ativo.</li>
 <li><a href="#PF-16"><strong>JF016 — Reconstrução / Cancelamento de Evento INSS</strong></a>: Reconstruir o histórico do INSS quando ele não existe, ou cancelar um evento excluindo a memória de cálculo.</li>
 </ul>
+<p><strong>Necessidade de negócio:</strong> parte dos benefícios tem vínculo com o INSS. A entidade paga valores que depois são reembolsados pelo INSS por meio das <em>mantenedoras</em>, e precisa conferir mês a mês se o que recebeu (reembolso) bate com o que pagou (desembolso). Para isso, precisa manter cadastrados os processos de habilitação do INSS de cada beneficiário, com o número do benefício no INSS (NB) e as datas do benefício. Também precisa conseguir recompor o histórico do INSS de um benefício quando faltam meses, ou cancelar um evento do INSS registrado. Este caso de uso cobre essas três necessidades: conciliação (JF012), cadastro dos processos de habilitação (JF015) e reconstrução/cancelamento (JF016).</p>
+<p><strong>Quem inicia:</strong> o analista de conciliação INSS (JF012) e o analista de benefícios INSS (JF015, JF016), pelas telas do menu principal: Conciliação do INSS com as Mantenedoras, Cadastro de Processos INSS (<code>FPrincipal.pas:2182-2186</code>), Reconstrução do histórico do INSS (<code>:2037-2041</code>) e Cancelar Evento INSS Registrado (<code>:2188-2194</code>).</p>
+<p><strong>Resultado esperado:</strong> a conciliação do mês fica encerrada, com a comparação reembolso × desembolso feita e os valores recebidos registrados. Os processos de habilitação do INSS ficam cadastrados com histórico de movimentação. O histórico do INSS de um benefício fica recomposto, ou o evento indicado fica cancelado.</p>
+<p><strong>Termos, siglas e componentes citados nesta página</strong> — explicados na primeira vez em que aparecem; a coluna “Fonte” indica onde a explicação foi conferida no repositório:</p>
+<div class="table-wrap"><table><thead><tr><th>Termo</th><th>O que significa</th><th>Fonte</th></tr></thead><tbody>
+<tr><td><strong>PARAMAPREV</strong></td><td>Tabela de parâmetros gerais do módulo, lida quando o módulo é iniciado. Entre outros pontos, indica se a integração contábil está ligada (FLGINTCONTAB = 1, regra RS027).</td><td><code>FPrincipal.pas:928-930</code>; <a href="uc301.html#BENEF-RN027">RS027</a></td></tr>
+<tr><td><strong>Tipo de previdência e fundação do usuário</strong></td><td>O tipo de previdência diz se a entidade é uma fundação ou um instituto: com FLGTIPOPREVIDENC = 'I', as telas trocam “Fundação/Patrocinadora/Plano” por “Instituto/Entidade/Regime” (RS026). A fundação do usuário (IDFUNDACAO) limita os dados que ele consulta: cada usuário só vê os dados da sua fundação (RS045).</td><td><code>FPrincipal.pas:598-775, 566-567</code></td></tr>
+<tr><td><strong>PARTPREVPLAN</strong></td><td>Vínculo do participante com um plano previdenciário. Guarda a situação do participante no plano e as datas desse vínculo.</td><td><a href="dados.html">🗄️ Dados</a></td></tr>
+<tr><td><strong>ELEGPATRO</strong></td><td>Dados de elegibilidade do participante na patrocinadora (tabela PATRO), como o tempo de serviço e a situação funcional.</td><td><a href="dados.html">🗄️ Dados</a></td></tr>
+<tr><td><strong>EVENTOGERADOR</strong></td><td>Catálogo dos eventos que dão origem a benefícios (por exemplo, aposentadoria, falecimento e reclusão). É cadastrado por fundação e agrupado pelo código interno FLGINTERNO. O menu de eventos é montado a partir dele (RS002).</td><td><a href="dados.html">🗄️ Dados</a>; <code>FPrincipal.pas:1038-1387</code></td></tr>
+<tr><td><strong>CMAdmPrev</strong></td><td>Componente externo do framework CM (pasta <code>..\..\Cm\CMAdmPrev\</code>). Reúne os módulos de dados de cálculo e concessão (DAPrev), o cálculo retroativo em lote, o cadastro de mantenedoras e o de UF do INSS. Este módulo abre telas desse componente e delega a ele os cálculos. A lógica interna do componente não faz parte da evidência desta documentação.</td><td><a href="integracoes.html">🔗 Integrações</a>; <a href="lacunas.html">🔍 Lacunas</a></td></tr>
+<tr><td><strong>UAdmPrev / UBeneficio</strong></td><td>Bibliotecas de regras de outro módulo, chamadas pelas telas deste módulo. A UAdmPrev concentra regras de cálculo e concessão, como a verificação do limite de valor e de percentual do benefício e a criação do log de ocorrência. A UBeneficio concentra regras de benefício, como o cálculo do benefício mínimo.</td><td><a href="lacunas.html">🔍 Lacunas</a> (Dependências externas)</td></tr>
+<tr><td><strong>Folha de Benefícios</strong></td><td>Folha mensal de pagamento dos benefícios, que fica no módulo FOLHA. Este módulo se comunica com ela pelas tabelas PREVIA (prévia de cálculo da folha) e LISTAFOLHABENEF. A finalidade exata dessa interface é <span class="ev ev-inferido">INFERIDO</span>, porque a implementação da folha não foi analisada.</td><td><a href="integracoes.html">🔗 Integrações</a>; <a href="dados.html">🗄️ Dados</a></td></tr>
+<tr><td><strong>LOGTOTALPREV</strong></td><td>Log de auditoria do TotalPREV. As operações de negócio deste módulo ficam registradas nele com o código de módulo 454, o usuário, a descrição da operação e a data (RS025).</td><td><code>UModulo.pas:64-88</code></td></tr>
+<tr><td><strong>Mantenedora</strong></td><td>Entidade cadastrada para a conciliação do INSS, com código, sub-conta, plano contábil associado, tipo de recebimento, tipo de desembolso, indicação de “Própria Fundação” e modelo de leiaute do arquivo de importação (Modelo 1 ou 2). O papel de negócio da mantenedora na relação com o INSS não está descrito no repositório <span class="ev ev-pendente">PENDENTE</span>.</td><td><code>_FCadMantenedora.dfm</code></td></tr>
+<tr><td><strong>Reembolso × desembolso</strong></td><td>Reembolso é o que o INSS devolve; desembolso é o que a entidade pagou. A tela “Resumo de Reembolso e Desembolso INSS” compara os dois por tipo (concessão, PAB, revisão, IRSM, glosas, adicional de 25%, CPMF, salário-família, débito INSS, extra folha, pensão alimentícia, aposentadoria e pensão) e mostra a diferença.</td><td><code>_FComparaReembDesemb.dfm</code>; <code>_FExtratoINSS.dfm</code></td></tr>
+<tr><td><strong>Rubrica do INSS / RUBRICAXINSS</strong></td><td>Código de verba usado pelo INSS. Cada rubrica do INSS é associada uma única vez a uma rubrica interna (RS022), na tabela RUBRICAXINSS.</td><td><a href="dados.html">🗄️ Dados</a>; <a href="#BENEF-RN022">RS022</a></td></tr>
+<tr><td><strong>DETCONCINSS / TEMPCONCINSS / CONCINSS</strong></td><td>Detalhe da conciliação INSS (mantenedora × beneficiário), tabela temporária usada na importação e registro da conciliação.</td><td><a href="dados.html">🗄️ Dados</a></td></tr>
+<tr><td><strong>HISTRUBSAL</strong></td><td>Histórico de rubricas salariais. É onde fica o histórico do INSS de um benefício.</td><td><a href="dados.html">🗄️ Dados</a></td></tr>
+<tr><td><strong>Mês aberto / fechado da conciliação</strong></td><td>Situação da conciliação de um mês de cobrança. Mês fechado não aceita entrada manual de rubricas (RS044).</td><td><a href="#BENEF-RN044">RS044</a></td></tr>
+<tr><td><strong>NB (Número do Benefício)</strong></td><td>Número do benefício concedido pelo INSS ao segurado (rótulo “Número do Benefício (NB)”). No benefício da entidade, fica gravado em BENEFBFCIARIO.NUMPROCINSS.</td><td><code>FCadProcHabINSS.dfm:280</code>; <code>FCadProcHabINSS.pas:584</code></td></tr>
+<tr><td><strong>Habilitação (BENEFHABILITA / HISTBENEFHABILITA)</strong></td><td>BENEFHABILITA é o processo de habilitação do benefício INSS do segurado: NB, benefício, datas, estado (UF), tempo de serviço e as marcas de requerimento (FLGREQUERIMENTO) e de concessão (FLGCONCESSAO = 1, habilitação concedida). HISTBENEFHABILITA guarda o histórico de movimentação: data da alteração, nova situação e observações complementares.</td><td><a href="dados.html">🗄️ Dados</a>; <code>FCadProcHabINSS.dfm:39-53, 280-422</code></td></tr>
+<tr><td><strong>DER / DIB / DIP</strong></td><td>DER = data de entrada do requerimento (rótulo “Data de entrada do Requerimento (DER)”). DIB = data de início do benefício. DIP: a tela a preenche com a data de início do crédito (DTINICIOCRED) da conciliação, o que indica a data de início do pagamento <span class="ev ev-inferido">INFERIDO</span>.</td><td><code>FCadProcHabINSS.dfm:3015</code>; <code>FCadProcHabINSS.pas:646-676</code></td></tr>
+<tr><td><strong>BRDP, NUP, RMI, DEC, Lei 142</strong></td><td>Campos do processo de habilitação: número do BRDP, NUP, RMI, DEC e a marca “Benefício Lei 142?”. O significado dessas siglas não está descrito no repositório <span class="ev ev-pendente">PENDENTE</span>.</td><td><code>FCadProcHabINSS.dfm:280-422</code></td></tr>
+<tr><td><strong>Moeda (reconstrução)</strong></td><td>Moeda informada para buscar os índices usados na reconstrução do histórico do INSS (rótulo “Informe a moeda para buscar os índices”).</td><td><code>FReconstruirINSS.dfm:449</code></td></tr>
+</tbody></table></div>
 </section>
 
 <section><div class="section-title">3. Pré-condições</div>
@@ -61,11 +87,18 @@
 <li>Participantes, planos (PARTPREVPLAN), elegibilidade (ELEGPATRO), benefícios e eventos geradores (EVENTOGERADOR) cadastrados.</li>
 <li>Componentes externos disponíveis quando a jornada os usa: CMAdmPrev (cálculo/concessão/retroativo), bibliotecas UAdmPrev/UBeneficio, Folha de Benefícios (ver <a href="integracoes.html">🔗 Integrações</a>).</li>
 </ul>
+<p><strong>O que as pré-condições gerais significam na prática:</strong> o usuário precisa ter acesso ao módulo. Ao iniciar, o sistema precisa ler os parâmetros da entidade: se a integração contábil está ligada (RS027) e se a entidade é fundação ou instituto (RS026). Também precisa saber a qual fundação o usuário pertence, porque todas as consultas de negócio são filtradas por ela (<a href="#BENEF-RN045">RS045</a>). Além disso, os cadastros básicos já devem existir: participantes, seus planos, seus dados de elegibilidade, os benefícios e o catálogo de eventos geradores. Os componentes externos (CMAdmPrev, UAdmPrev/UBeneficio e Folha de Benefícios) só são exigidos pelas jornadas que os usam, conforme indicado em cada jornada.</p>
 <p><strong>Por jornada:</strong></p>
 <ul>
 <li><a href="#PF-12">JF012</a>: Mantenedoras e rubricas do INSS cadastradas e associadas; mês de conciliação aberto.</li>
 <li><a href="#PF-15">JF015</a>: Benefício ativo e habilitação concedida.</li>
 <li><a href="#PF-16">JF016</a>: Benefício sem histórico INSS ou evento a cancelar; moeda cadastrada.</li>
+</ul>
+<p><strong>Pré-condições por jornada, em termos de negócio:</strong></p>
+<ul>
+<li><a href="#PF-12">JF012</a>: as mantenedoras e a associação entre rubricas do INSS e rubricas internas precisam estar cadastradas. São feitas no primeiro passo da própria jornada e permitem ler os arquivos do INSS. O mês de cobrança precisa estar aberto para receber entradas manuais (<a href="#BENEF-RN044">RS044</a>).</li>
+<li><a href="#PF-15">JF015</a>: “benefício ativo e habilitação concedida” não são tarefas prévias do usuário. São os filtros que o sistema aplica na consulta do passo 1 (<a href="#BENEF-RN024">RS024</a>): só aparecem benefícios ativos (IDSITBENEFICIO = 1) com habilitação concedida (BENEFHABILITA.FLGCONCESSAO = 1).</li>
+<li><a href="#PF-16">JF016</a>: para reconstruir, o benefício precisa ter meses sem lançamento no histórico do INSS, e a moeda com os índices precisa estar cadastrada. Para cancelar, precisa existir o evento INSS registrado.</li>
 </ul>
 </section>
 
@@ -75,25 +108,35 @@
 <li><a href="#PF-15">JF015</a>: BENEFHABILITA, HISTBENEFHABILITA e DETCONCINSS gravados.</li>
 <li><a href="#PF-16">JF016</a>: HISTRUBSAL reconstruído ou EVENTOSPREV cancelado.</li>
 </ul>
+<p><strong>Resultado de negócio de cada jornada:</strong></p>
+<ul>
+<li><a href="#PF-12">JF012</a> — <em>conclusão com sucesso:</em> os arquivos do INSS são importados e os processos identificados (DETCONCINSS, TEMPCONCINSS). Os valores do mês são compostos e comparados com o desembolso, e o mês é encerrado com o registro dos valores recebidos do INSS e do repasse, com confirmação dos lançamentos (<code>_FEncerraConciliacao.pas:547-553</code>). <em>Interrupções:</em> campos obrigatórios (<a href="#TRT020">TRT020</a>, <a href="#TRT023">TRT023</a>), duplicidades (<a href="#TRT019">TRT019</a>, <a href="#TRT024">TRT024</a>), mês fechado (<a href="#TRT021">TRT021</a>) e excesso de rubricas no mês (<a href="#TRT022">TRT022</a>).</li>
+<li><a href="#PF-15">JF015</a> — <em>conclusão com sucesso:</em> o processo de habilitação do INSS fica gravado (BENEFHABILITA) com pelo menos um registro de histórico de movimentação (HISTBENEFHABILITA), e o botão “Gerar Relatório” é habilitado. Esse processo é usado depois no requerimento/concessão de benefícios do INSS em lote (ver card JF015 em <a href="index.html">📋 Visão Geral</a>) e na conciliação (JF012). <em>Interrupções:</em> NB já cadastrado (<a href="#TRT028">TRT028</a>) ou campo obrigatório faltando (ver passo 3).</li>
+<li><a href="#PF-16">JF016</a> — <em>reconstrução:</em> os meses sem lançamento do histórico do INSS do benefício são recompostos e listados em “Resultado do processamento”. Se não houver meses faltando, o sistema informa “Não existem meses sem lançamento no histórico desse beneficio .” (<code>FReconstruirINSS.pas:204</code>). <em>Cancelamento:</em> o evento INSS indicado é cancelado, com exclusão da memória de cálculo.</li>
+</ul>
 </section>
 
 <section><div class="section-title">5. Jornadas Funcionais (JF012, JF015, JF016)</div>
 <p>Cada jornada traz objetivo, ator/gatilho, pré e pós-condições, sequência operacional, ações práticas, <strong>regras de negócio da jornada</strong> (texto completo de cada regra), tratamentos e mensagens.</p>
+<p><strong>Como as jornadas deste caso de uso se relacionam:</strong> o cadastro de processos INSS (JF015) e a reconstrução do histórico (JF016) preparam os dados que a conciliação mensal (JF012) usa para identificar processos e comparar valores. Em cada passo, o rótulo “Usuário” ou “Sistema” indica quem executa a ação.</p>
 <div class="legend"><span><span class="ev ev-comprovado">COMPROVADO</span> — no código</span><span><span class="ev ev-inferido">INFERIDO</span> — plausível</span><span><span class="ev ev-pendente">PENDENTE</span> — validar</span></div>
 </section>
 
 <div class="pf-block" id="PF-12"><h4>JF012 (PF-12) — Conciliação INSS (mantenedoras/extrato/encerramento)</h4>
 <p><strong>Objetivo:</strong> Conciliar o reembolso do INSS com as mantenedoras: importar arquivos, identificar processos, compor valores, comparar reembolso × desembolso e encerrar a conciliação.</p>
+<p><strong>Necessidade de negócio:</strong> garantir, a cada mês, que os valores reembolsados pelo INSS correspondem aos benefícios efetivamente pagos pela entidade. A conciliação aponta diferenças e glosas por beneficiário e por tipo, e o mês só é encerrado depois de registrados os valores recebidos.</p>
 <p><strong>Ator / gatilho:</strong> Analista de conciliação INSS, nas telas de conciliação, extrato, encerramento e cadastros de apoio.</p>
 <p><strong>Pré-condições:</strong> Mantenedoras e rubricas do INSS cadastradas e associadas; mês de conciliação aberto.</p>
+<p><strong>Em termos de negócio:</strong> o sistema sabe de quais mantenedoras virão os arquivos e como traduzir cada rubrica do INSS para uma rubrica interna, e o mês a conciliar ainda não foi encerrado.</p>
 <p><strong>Pós-condições:</strong> DETCONCINSS, TEMPCONCINSS, CONCINSS e HISTRUBSAL gravados; conciliação encerrada.</p>
+<p><strong>Em termos de negócio:</strong> o reembolso do mês está importado, identificado por processo e comparado com o desembolso. A conciliação do mês fica fechada, e a partir daí o mês não aceita mais entradas manuais (<a href="#BENEF-RN044">RS044</a>).</p>
 <p><strong>Sequência operacional:</strong></p>
 <ol>
-<li>Cadastrar mantenedoras e associar as rubricas do INSS. [<a href="#TRT023">TRT023</a>] [<a href="#TRT024">TRT024</a>] [<a href="#BENEF-RN022">RS022</a>] [<a href="#TRT019">TRT019</a>]</li>
-<li>Importar os arquivos do INSS; cada linha traz até 9 rubricas. [<a href="#BENEF-RN042">RS042</a>]</li>
-<li>Incluir rubricas por entrada manual, em mês aberto. [<a href="#TRT020">TRT020</a>] [<a href="#BENEF-RN044">RS044</a>] [<a href="#TRT021">TRT021</a>]</li>
-<li>Compor os valores do reembolso; o sistema bloqueia ao atingir 20 rubricas no mesmo mês. [<a href="#BENEF-RN043">RS043</a>] [<a href="#TRT022">TRT022</a>]</li>
-<li>Consultar o resultado e o extrato, comparar reembolso × desembolso e encerrar a conciliação. [<a href="#TRT023">TRT023</a>]</li>
+<li><strong>Usuário:</strong> Cadastrar mantenedoras e associar as rubricas do INSS. [<a href="#TRT023">TRT023</a>] [<a href="#TRT024">TRT024</a>] [<a href="#BENEF-RN022">RS022</a>] [<a href="#TRT019">TRT019</a>]<br>No Cadastro de Mantenedora, o código é obrigatório (<a href="#MSG032">MSG032</a>) e não pode repetir (<a href="#MSG033">MSG033</a>); também se define o modelo de leiaute do arquivo de importação. Na Associação de Rubricas do INSS, cada rubrica do INSS só pode ser associada uma vez (<a href="#MSG025">MSG025</a>).</li>
+<li><strong>Usuário e sistema:</strong> Importar os arquivos do INSS; cada linha traz até 9 rubricas. [<a href="#BENEF-RN042">RS042</a>]<br>Na tela Conciliação do INSS com as Mantenedoras, o usuário informa o arquivo a processar, a mantenedora, a origem do arquivo, o arquivo de exceções e o mês/ano de processamento. Pode também apagar um arquivo já importado para o mês. O sistema lê cada linha de detalhe, com até 9 rubricas, e identifica os processos (<code>_FConciliacao.dfm</code>).</li>
+<li><strong>Usuário:</strong> Incluir rubricas por entrada manual, em mês aberto. [<a href="#TRT020">TRT020</a>] [<a href="#BENEF-RN044">RS044</a>] [<a href="#TRT021">TRT021</a>]<br>Rubrica do INSS, mês de cobrança, mês de referência e valor são obrigatórios (<a href="#MSG026">MSG026</a> a <a href="#MSG029">MSG029</a>). Mês de cobrança com conciliação fechada é recusado (<a href="#MSG030">MSG030</a>).</li>
+<li><strong>Sistema:</strong> Compor os valores do reembolso; o sistema bloqueia ao atingir 20 rubricas no mesmo mês. [<a href="#BENEF-RN043">RS043</a>] [<a href="#TRT022">TRT022</a>]<br>Na Composição de Valores, ao chegar a 20 rubricas no mesmo mês o sistema exibe <a href="#MSG031">MSG031</a> e desfaz a transação.</li>
+<li><strong>Usuário e sistema:</strong> Consultar o resultado e o extrato, comparar reembolso × desembolso e encerrar a conciliação. [<a href="#TRT023">TRT023</a>]<br>O resultado da importação é consultado por ano e mês, campos obrigatórios (<a href="#MSG032">MSG032</a>). O extrato individual mostra, por beneficiário e período, desembolso, reembolso, diferença e glosa. No Encerramento de Conciliação, o usuário informa mês e ano, os valores recebidos do INSS e os valores do repasse, com os dados do documento (vencimento, emissão, referência, centro de responsabilidade, centro de custo, tipo e número do documento). O sistema então pede “Confirma lancamentos?” (<code>_FEncerraConciliacao.dfm</code>; <code>.pas:547-553</code>).</li>
 </ol>
 <p><strong>Ações práticas:</strong></p>
 <div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
@@ -207,19 +250,30 @@
 <p><strong>Mensagens:</strong> <a href="#MSG025">MSG025</a>, <a href="#MSG026">MSG026</a>, <a href="#MSG027">MSG027</a>, <a href="#MSG028">MSG028</a>, <a href="#MSG029">MSG029</a>, <a href="#MSG030">MSG030</a>, <a href="#MSG031">MSG031</a>, <a href="#MSG032">MSG032</a>, <a href="#MSG033">MSG033</a></p>
 <p><strong>Telas:</strong> Conciliação do INSS com as Mantenedoras (<code>_FConciliacao.dfm</code>), Extrato Individual de Conciliação dos Proventos INSS (<code>_FExtratoINSS.dfm</code>), Encerramento de Conciliação (<code>_FEncerraConciliacao.dfm</code>), Resultado de Importação dos Arquivos do Reembolso do INSS (<code>_FResultConciliacao.dfm</code>), Cadastro de Mantenedora (<code>_FCadMantenedora.dfm</code>), Associação de Rubricas do INSS (<code>_FAssocRubINSS.dfm</code>), Reembolso do INSS - Entrada Manual de Rubricas (<code>_fCadEntrManualINSS.dfm</code>), Composição de Valores (<code>_fCompoeValoresRI.dfm</code>)</p>
 <p><strong>Dependências:</strong> Usa os processos INSS cadastrados em <a href="#PF-15">JF015</a> e o histórico reconstruído em <a href="#PF-16">JF016</a>.</p>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span> — informações que o repositório não comprova ou que divergem entre fontes. O texto existente foi mantido; os itens abaixo dependem de validação humana.</p>
+<ul>
+<li>Papel de negócio da mantenedora e significado dos tipos de reembolso (PAB, IRSM, glosas etc.): não descritos no repositório.</li>
+<li>Encerramento: os lançamentos confirmados no encerramento passam pelo controle de documentos (UCtrlDocumento, ver <a href="lacunas.html">🔍 Lacunas</a>). As tabelas e os efeitos contábeis/financeiros desses lançamentos não estão documentados, e as mensagens do encerramento (<code>_FEncerraConciliacao.pas:547-654</code>) não estão catalogadas como MSG.</li>
+<li>Versão dos fontes: o projeto referencia units sem sublinhado (FConciliacao), mas os arquivos existentes têm sublinhado (<code>_FConciliacao.pas</code>). Ver “DPR dessincronizado” em <a href="lacunas.html">🔍 Lacunas</a>.</li>
+</ul>
+</div>
 <div class="note note-info"><p><strong>Registro original do processo PF-12</strong></p><p><strong>Forms de entrada:</strong> <code>_FConciliacao.dfm</code>, <code>_FExtratoINSS.dfm</code>, <code>_FEncerraConciliacao.dfm</code></p><p><strong>Lógica de processamento:</strong> Importa arquivos (até 9 rubricas/linha), identifica processos, compara reembolso×desembolso, encerra conciliação</p><p><strong>Saídas:</strong> Conciliação INSS encerrada</p><p><strong>Persistência (tabelas escritas):</strong> DETCONCINSS, TEMPCONCINSS, CONCINSS, RUBRICAXINSS, HISTRUBSAL</p><p><strong>Evidência:</strong> <code>BENEFICIOPREV/Fontes/_FConciliacao.pas</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
 </div>
 
 <div class="pf-block" id="PF-15"><h4>JF015 (PF-15) — Cadastro de Processos INSS (Habilitação)</h4>
 <p><strong>Objetivo:</strong> Cadastrar os processos de habilitação do INSS dos beneficiários com benefício ativo.</p>
+<p><strong>Necessidade de negócio:</strong> para que a entidade possa requerer, acompanhar e conciliar com o INSS o benefício de um segurado, ela precisa ter registrado o processo de habilitação no INSS. Esse registro reúne o número do benefício no INSS (NB), o tipo de benefício, as datas do requerimento, do início do benefício e do pagamento, o estado (UF), o tempo de serviço e outros dados do INSS, além do histórico de cada mudança de situação. Esse processo é usado depois no requerimento/concessão de benefícios do INSS em lote (card JF015 em <a href="index.html">📋 Visão Geral</a>) e na conciliação (<a href="#PF-12">JF012</a>).</p>
 <p><strong>Ator / gatilho:</strong> Analista de benefícios INSS, na tela Cadastro de Processos INSS.</p>
+<p><strong>Como o processo começa:</strong> pela opção de cadastro do processo de habilitação do menu principal (<code>FPrincipal.pas:2182-2186</code>). Não há disparo automático.</p>
 <p><strong>Pré-condições:</strong> Benefício ativo e habilitação concedida.</p>
+<p><strong>Em termos de negócio:</strong> o segurado recebe da entidade um benefício que está ativo (IDSITBENEFICIO = 1) e tem uma habilitação do INSS marcada como concedida (BENEFHABILITA.FLGCONCESSAO = 1). Essas duas condições são aplicadas pelo próprio sistema como filtro na consulta do passo 1 (<a href="#BENEF-RN024">RS024</a>). O usuário não precisa fazer nenhuma verificação antes.</p>
 <p><strong>Pós-condições:</strong> BENEFHABILITA, HISTBENEFHABILITA e DETCONCINSS gravados.</p>
+<p><strong>Em termos de negócio:</strong> o processo de habilitação fica registrado com seus dados do INSS (BENEFHABILITA) e pelo menos um registro de histórico de movimentação (HISTBENEFHABILITA), e o relatório do processo pode ser gerado. Quando o NB já está cadastrado ou falta um dado obrigatório, nada é gravado e o sistema indica o campo a corrigir. Sobre DETCONCINSS, ver “Pontos a validar”.</p>
 <p><strong>Sequência operacional:</strong></p>
 <ol>
-<li>Consultar os beneficiários; o sistema lista só benefícios ativos com habilitação concedida. [<a href="#BENEF-RN024">RS024</a>]</li>
-<li>Informar o número de benefício (NB) do INSS; o sistema recusa NB já cadastrado para outra pessoa. [<a href="#TRT028">TRT028</a>]</li>
-<li>Gravar o processo.</li>
+<li><strong>Usuário e sistema:</strong> Consultar os beneficiários; o sistema lista só benefícios ativos com habilitação concedida. [<a href="#BENEF-RN024">RS024</a>]<br>Em “Selecionar Segurado”, o analista localiza a pessoa. A tela mostra CPF, nome, data de nascimento, matrícula do titular, matrícula do beneficiário, plano contábil e o benefício identificado para requerimento (<code>FCadProcHabINSS.dfm:984-1099</code>). Ao escolher o benefício, o sistema preenche a DIB e a DIP com os dados da conciliação (DETCONCINSS) ou de uma habilitação anterior, quando existem (<code>FCadProcHabINSS.pas:646-676</code>).</li>
+<li><strong>Usuário e sistema:</strong> Informar o número de benefício (NB) do INSS; o sistema recusa NB já cadastrado para outra pessoa. [<a href="#TRT028">TRT028</a>]<br>Ao informar o NB, o sistema primeiro confere se o número é válido. Se o segurado é o próprio titular, recusa o NB já gravado no benefício de outra pessoa ou já cadastrado para o mesmo segurado e titular, com <a href="#MSG038">MSG038</a> (“NB já existe cadastrado”). Se o segurado não é o titular, recusa uma segunda habilitação concedida para a mesma pessoa (<code>FCadProcHabINSS.pas:576-640, 1307-1360</code>).</li>
+<li><strong>Usuário e sistema:</strong> Gravar o processo.<br>Na confirmação, o sistema exige NB, benefício, DER, DIB, DIP, estado (UF), NUP, segurado selecionado, tempo de serviço (anos, meses e dias), % do INSS e índice de reajuste do teto. Exige também o nº do BRDP quando “Benefício Fora do Convênio?” = Não, a RMI quando = Sim e as observações quando “Sentença Judicial?” = Sim. DER, DIB e DIP não podem ser posteriores à data atual. É obrigatório ter pelo menos um registro no histórico de movimentação, com data da alteração, nova situação e observações complementares, todos obrigatórios. Gravado o processo, o botão “Gerar Relatório” é habilitado (<code>FCadProcHabINSS.pas:1031-1160, 1215-1231</code>). Um processo já marcado como requerido e concedido não pode mais ser alterado (<code>:851-862</code>).</li>
 </ol>
 <p><strong>Ações práticas:</strong></p>
 <div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
@@ -247,19 +301,31 @@
 <p><strong>Mensagens:</strong> <a href="#MSG038">MSG038</a></p>
 <p><strong>Telas:</strong> Cadastro de Processos INSS (<code>FCadProcHabINSS.dfm</code>)</p>
 <p><strong>Dependências:</strong> Precede <a href="#PF-12">JF012</a>.</p>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span> — informações que o repositório não comprova ou que divergem entre fontes. O texto existente foi mantido; os itens abaixo dependem de validação humana.</p>
+<ul>
+<li>DETCONCINSS: a pós-condição e o registro original indicam gravação nessa tabela, mas em <code>FCadProcHabINSS.pas</code> ela só é lida, para sugerir DIB e DIP (<code>:649</code>). Falta confirmar se há gravação por outro caminho; o texto existente foi mantido.</li>
+<li>Validações e mensagens da tela não catalogadas como TRT/MSG: “Numero de Benefício não valido” (<code>:604, 1316</code>); “A concessão para Participante / Número do beneficio INSS só pode ser feita uma vez.” (<code>:638, 1355</code>); “Não é possivel alterar pois o benefício já foi requerio e/ou concedido” (<code>:859</code>); campos obrigatórios e datas futuras (<code>:1037-1121</code>); histórico de movimentação obrigatório (<code>:1154, 1223-1231</code>).</li>
+<li>Regra de formato do NB (função <code>ValidaNumProcesso</code>): a implementação não foi localizada em BENEFICIOPREV/Fontes.</li>
+<li>Significado das siglas BRDP, NUP, RMI, DEC e do indicador “Benefício Lei 142?”, e confirmação de que DIP é a data de início do pagamento.</li>
+<li>O que significa, para o negócio, a habilitação estar “concedida” (FLGCONCESSAO = 1) antes do cadastro do processo, já que o mesmo cadastro grava as marcas de requerimento e de concessão.</li>
+</ul>
+</div>
 <div class="note note-info"><p><strong>Registro original do processo PF-15</strong></p><p><strong>Forms de entrada:</strong> <code>FCadProcHabINSS.dfm</code> (1.919 linhas)</p><p><strong>Lógica de processamento:</strong> Consulta BENEFHABILITA (FLGCONCESSAO=1), BENEFBFCIARIO (IDSITBENEFICIO=1); cadastra processo</p><p><strong>Saídas:</strong> Processos INSS cadastrados</p><p><strong>Persistência (tabelas escritas):</strong> BENEFHABILITA, HISTBENEFHABILITA, DETCONCINSS</p><p><strong>Evidência:</strong> <code>BENEFICIOPREV/Fontes/FCadProcHabINSS.pas:484-631</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
 </div>
 
 <div class="pf-block" id="PF-16"><h4>JF016 (PF-16) — Reconstrução / Cancelamento de Evento INSS</h4>
 <p><strong>Objetivo:</strong> Reconstruir o histórico do INSS quando ele não existe, ou cancelar um evento excluindo a memória de cálculo.</p>
+<p><strong>Necessidade de negócio:</strong> a conciliação e os cálculos ligados ao INSS dependem de um histórico mensal completo do benefício. Quando faltam meses nesse histórico, o analista precisa recompô-los com os índices de uma moeda. Quando um evento do INSS foi registrado indevidamente, ele precisa ser cancelado, junto com a memória de cálculo que gerou.</p>
 <p><strong>Ator / gatilho:</strong> Analista de benefícios INSS, na tela Reconstrução do histórico do INSS.</p>
 <p><strong>Pré-condições:</strong> Benefício sem histórico INSS ou evento a cancelar; moeda cadastrada.</p>
+<p><strong>Em termos de negócio:</strong> existe um benefício com meses sem lançamento no histórico do INSS (para reconstruir) ou um evento INSS já registrado (para cancelar). A moeda cujos índices serão usados está cadastrada.</p>
 <p><strong>Pós-condições:</strong> HISTRUBSAL reconstruído ou EVENTOSPREV cancelado.</p>
+<p><strong>Em termos de negócio:</strong> o histórico do INSS do benefício fica completo, com os meses recompostos listados em “Resultado do processamento”, ou o evento INSS fica cancelado. As duas saídas são alternativas e vêm de opções de menu diferentes.</p>
 <p><strong>Sequência operacional:</strong></p>
 <ol>
-<li>Informar os dados da reconstrução, inclusive a moeda. [<a href="#TRT029">TRT029</a>]</li>
-<li>O sistema reconstrói o histórico do INSS.</li>
-<li>Para cancelamento, o sistema exclui a memória de cálculo do evento.</li>
+<li><strong>Usuário:</strong> Informar os dados da reconstrução, inclusive a moeda. [<a href="#TRT029">TRT029</a>]<br>Na tela Reconstrução do histórico do INSS, o analista procura o benefício; a tela mostra titular, patrocinadora, plano, processo, benefício, DIB, DIP, beneficiário, matrícula, situação e valores. Depois informa o motivo e a moeda. Sem moeda, o sistema exibe <a href="#MSG039">MSG039</a>; sem motivo, “Informar motivo é obrigatório.” (<code>FReconstruirINSS.pas:261-280</code>).</li>
+<li><strong>Sistema:</strong> O sistema reconstrói o histórico do INSS.<br>A reconstrução é executada pela rotina ReatroageBeneficioINSS da biblioteca externa uCtrlBenefBfciario, com a moeda e o motivo informados. O resultado, com os meses recompostos, aparece em “Resultado do processamento”. Sem meses a recompor, o sistema informa que não existem meses sem lançamento (<code>FReconstruirINSS.pas:167-208</code>).</li>
+<li><strong>Usuário e sistema:</strong> Para cancelamento, o sistema exclui a memória de cálculo do evento.<br>O cancelamento é acionado pela opção “Cancelar Evento INSS Registrado” do menu, que abre o form <code>frmCancelaEvento</code> (<code>FPrincipal.pas:2188-2194</code>). Esse form não está em BENEFICIOPREV/Fontes.</li>
 </ol>
 <p><strong>Ações práticas:</strong></p>
 <div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
@@ -275,6 +341,13 @@
 <p><strong>Mensagens:</strong> <a href="#MSG039">MSG039</a></p>
 <p><strong>Telas:</strong> Reconstrução do histórico do INSS (<code>FReconstruirINSS.dfm</code>)</p>
 <p><strong>Dependências:</strong> Apoia <a href="#PF-12">JF012</a>.</p>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span> — informações que o repositório não comprova ou que divergem entre fontes. O texto existente foi mantido; os itens abaixo dependem de validação humana.</p>
+<ul>
+<li>Telas desta jornada: a evidência do registro original (<code>FPrincipal.pas:2188-2194</code>) corresponde à opção “Cancelar Evento INSS Registrado”, que abre <code>frmCancelaEvento</code> (form em <code>CM/CMADMPREV/Fontes/FCancelaEvento.pas</code>, fora do escopo de evidência). A reconstrução é aberta pela opção “Reconstrução do histórico do INSS” (<code>FPrincipal.pas:2037-2041</code>), que abre <code>FReconstruirINSS</code>. A ação “Cancelar evento INSS” aparece nas ações práticas com a tela <code>FReconstruirINSS.dfm</code>; falta confirmar.</li>
+<li>Gravação de HISTRUBSAL e de EVENTOSPREV: é feita pelas rotinas externas (uCtrlBenefBfciario.ReatroageBeneficioINSS e frmCancelaEvento) e não é comprovável a partir de BENEFICIOPREV/Fontes.</li>
+<li>Mensagens não catalogadas como MSG: “Informar motivo é obrigatório.” (<code>FReconstruirINSS.pas:278</code>) e “Não existem meses sem lançamento no histórico desse beneficio .” (<code>:204</code>).</li>
+</ul>
+</div>
 <div class="note note-info"><p><strong>Registro original do processo PF-16</strong></p><p><strong>Forms de entrada:</strong> <code>FReconstruirINSS.dfm</code></p><p><strong>Lógica de processamento:</strong> Reconstrói histórico do INSS quando inexistente; cancela evento excluindo memória de cálculo</p><p><strong>Saídas:</strong> Histórico INSS reconstruído</p><p><strong>Persistência (tabelas escritas):</strong> HISTRUBSAL, EVENTOSPREV</p><p><strong>Evidência:</strong> <code>BENEFICIOPREV/Fontes/FPrincipal.pas:2188-2194</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
 </div>
 

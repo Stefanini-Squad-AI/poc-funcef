@@ -50,6 +50,32 @@
 <li><a href="#PF-06"><strong>JF006 — Reajuste de Benefícios</strong></a>: Reajustar os benefícios vitalícios por plano e fonte pagadora, aplicando índice e percentual FRB, e manter as regras de reajuste do INSS.</li>
 <li><a href="#PF-07"><strong>JF007 — Reajuste Judicial</strong></a>: Aplicar reajuste (ou desreajuste) determinado judicialmente aos benefícios ativos.</li>
 </ul>
+<p><strong>Necessidade de negócio:</strong> o valor dos benefícios em manutenção precisa ser atualizado periodicamente por um índice de reajuste e, em alguns casos, ajustado por ordem da Justiça. Este caso de uso cobre dois caminhos. O primeiro é o reajuste periódico em massa dos benefícios vitalícios, por plano e por fonte pagadora (Funcef ou INSS), incluindo o cadastro das regras de reajuste do INSS (JF006). O segundo é o reajuste — ou a redução de reajuste (“desreajuste”) — determinado judicialmente para benefícios ativos específicos (JF007).</p>
+<p><strong>Quem inicia:</strong> o analista de benefícios, pelas telas Reajuste Benefícios e Cadastro de Regras de Reajuste dos Benefícios do INSS (JF006) e pela tela Reajuste Judicial (JF007), acessadas pelo menu principal (<code>FPrincipal.pas:2280-2284, 1858-1863</code>).</p>
+<p><strong>Resultado esperado:</strong> no reajuste periódico, a execução fica registrada com seus parâmetros e a lista de benefícios, e os valores dos benefícios selecionados são reajustados. No reajuste judicial, o novo valor de cada benefício indicado é gravado.</p>
+<p><strong>Termos, siglas e componentes citados nesta página</strong> — explicados na primeira vez em que aparecem; a coluna “Fonte” indica onde a explicação foi conferida no repositório:</p>
+<div class="table-wrap"><table><thead><tr><th>Termo</th><th>O que significa</th><th>Fonte</th></tr></thead><tbody>
+<tr><td><strong>PARAMAPREV</strong></td><td>Tabela de parâmetros gerais do módulo, lida quando o módulo é iniciado. Entre outros pontos, indica se a integração contábil está ligada (FLGINTCONTAB = 1, regra RS027).</td><td><code>FPrincipal.pas:928-930</code>; <a href="uc301.html#BENEF-RN027">RS027</a></td></tr>
+<tr><td><strong>Tipo de previdência e fundação do usuário</strong></td><td>O tipo de previdência diz se a entidade é uma fundação ou um instituto: com FLGTIPOPREVIDENC = 'I', as telas trocam “Fundação/Patrocinadora/Plano” por “Instituto/Entidade/Regime” (RS026). A fundação do usuário (IDFUNDACAO) limita os dados que ele consulta: cada usuário só vê os dados da sua fundação (RS045).</td><td><code>FPrincipal.pas:598-775, 566-567</code></td></tr>
+<tr><td><strong>PARTPREVPLAN</strong></td><td>Vínculo do participante com um plano previdenciário. Guarda a situação do participante no plano e as datas desse vínculo.</td><td><a href="dados.html">🗄️ Dados</a></td></tr>
+<tr><td><strong>ELEGPATRO</strong></td><td>Dados de elegibilidade do participante na patrocinadora (tabela PATRO), como o tempo de serviço e a situação funcional.</td><td><a href="dados.html">🗄️ Dados</a></td></tr>
+<tr><td><strong>EVENTOGERADOR</strong></td><td>Catálogo dos eventos que dão origem a benefícios (por exemplo, aposentadoria, falecimento e reclusão). É cadastrado por fundação e agrupado pelo código interno FLGINTERNO. O menu de eventos é montado a partir dele (RS002).</td><td><a href="dados.html">🗄️ Dados</a>; <code>FPrincipal.pas:1038-1387</code></td></tr>
+<tr><td><strong>CMAdmPrev</strong></td><td>Componente externo do framework CM (pasta <code>..\..\Cm\CMAdmPrev\</code>). Reúne os módulos de dados de cálculo e concessão (DAPrev), o cálculo retroativo em lote, o cadastro de mantenedoras e o de UF do INSS. Este módulo abre telas desse componente e delega a ele os cálculos. A lógica interna do componente não faz parte da evidência desta documentação.</td><td><a href="integracoes.html">🔗 Integrações</a>; <a href="lacunas.html">🔍 Lacunas</a></td></tr>
+<tr><td><strong>UAdmPrev / UBeneficio</strong></td><td>Bibliotecas de regras de outro módulo, chamadas pelas telas deste módulo. A UAdmPrev concentra regras de cálculo e concessão, como a verificação do limite de valor e de percentual do benefício e a criação do log de ocorrência. A UBeneficio concentra regras de benefício, como o cálculo do benefício mínimo.</td><td><a href="lacunas.html">🔍 Lacunas</a> (Dependências externas)</td></tr>
+<tr><td><strong>Folha de Benefícios</strong></td><td>Folha mensal de pagamento dos benefícios, que fica no módulo FOLHA. Este módulo se comunica com ela pelas tabelas PREVIA (prévia de cálculo da folha) e LISTAFOLHABENEF. A finalidade exata dessa interface é <span class="ev ev-inferido">INFERIDO</span>, porque a implementação da folha não foi analisada.</td><td><a href="integracoes.html">🔗 Integrações</a>; <a href="dados.html">🗄️ Dados</a></td></tr>
+<tr><td><strong>LOGTOTALPREV</strong></td><td>Log de auditoria do TotalPREV. As operações de negócio deste módulo ficam registradas nele com o código de módulo 454, o usuário, a descrição da operação e a data (RS025).</td><td><code>UModulo.pas:64-88</code></td></tr>
+<tr><td><strong>Fonte pagadora (Funcef / INSS)</strong></td><td>Indica quem paga o benefício. No reajuste, a lista de benefícios é montada separadamente para cada fonte: FLGREFERENCIA = 0 para Funcef e 1 para INSS (RS009).</td><td><a href="#BENEF-RN009">RS009</a>; <code>FReajuesteBenef.pas:101-102</code></td></tr>
+<tr><td><strong>Benefício vitalício / resgate</strong></td><td>Benefício vitalício é o de pagamento vitalício (IDTPPAGTOBENEFIC = 1). Resgate é o benefício marcado com FLGRESGATE; benefícios de resgate não são reajustados (RS007).</td><td><a href="#BENEF-RN007">RS007</a></td></tr>
+<tr><td><strong>REPLAN não saldado (255 e 358)</strong></td><td>Benefícios e planos com códigos 255 e 358, que ficam fora do reajuste periódico (RS008).</td><td><a href="#BENEF-RN008">RS008</a></td></tr>
+<tr><td><strong>% FRB</strong></td><td>Percentual informado no reajuste quando a fonte pagadora é Funcef; a tela também oferece a opção “Utilizar apenas FRB”. O significado da sigla FRB não está descrito no repositório <span class="ev ev-pendente">PENDENTE</span>.</td><td><code>FReajuesteBenef.dfm:48, 129</code>; <code>FReajuesteBenef.pas:343-392</code></td></tr>
+<tr><td><strong>REAJUSTEBENEFICIO</strong></td><td>Registro de cada execução de reajuste com os parâmetros informados: plano, períodos do índice, do recálculo e do acerto, mês de cobrança do reembolso INSS, %FRB, fonte pagadora, situações a processar (ativos, retidos, encerrados), lote, motivo, alteradores e observação.</td><td><code>FReajuesteBenef.pas:40-89</code></td></tr>
+<tr><td><strong>LISTABENEFICIOREAJUSTE</strong></td><td>Benefícios escolhidos para uma execução de reajuste. Fica vinculada ao registro em REAJUSTEBENEFICIO.</td><td><code>FReajuesteBenef.pas:38, 875-900</code></td></tr>
+<tr><td><strong>CM.SP_BF_REAJUSTE_BENEF</strong></td><td>Procedimento armazenado no banco Oracle que efetivamente aplica o reajuste, a partir da execução registrada em REAJUSTEBENEFICIO. A lógica interna está no banco e não neste repositório.</td><td><code>FReajuesteBenef.dfm:1071-1073</code>; <code>FReajuesteBenef.pas:916-925</code></td></tr>
+<tr><td><strong>Regras de reajuste do INSS</strong></td><td>Cadastro que associa um ano e um mês de reajuste à regra de reajuste usada no período para benefícios pagos pelo INSS.</td><td><code>FCadReajINSS.dfm:72-142</code></td></tr>
+<tr><td><strong>IDSITBENEFICIO = 1 / FLGDESATIVADO = 0</strong></td><td>Benefício na situação ativa e plano não desativado: as condições para entrar no reajuste judicial (RS023).</td><td><a href="#BENEF-RN023">RS023</a></td></tr>
+<tr><td><strong>VALORATUAL / VALORTOTAL</strong></td><td>Campos de valor do benefício em BENEFBFCIARIO. No reajuste judicial, o novo valor vai para VALORATUAL quando o benefício é do próprio titular e para VALORTOTAL nos demais casos.</td><td><code>FReajusteJudicial.pas:270-300, 350-360</code></td></tr>
+<tr><td><strong>Fator e FG</strong></td><td>O fator é o percentual de reajuste informado na coluna “Perc. de Reajuste (%)”. A sigla FG aparece na regra RS038, mas não foi localizada no cálculo do código <span class="ev ev-pendente">PENDENTE</span>.</td><td><a href="#BENEF-RN038">RS038</a>; <code>FReajusteJudicial.dfm:36-44</code></td></tr>
+</tbody></table></div>
 </section>
 
 <section><div class="section-title">3. Pré-condições</div>
@@ -60,10 +86,16 @@
 <li>Participantes, planos (PARTPREVPLAN), elegibilidade (ELEGPATRO), benefícios e eventos geradores (EVENTOGERADOR) cadastrados.</li>
 <li>Componentes externos disponíveis quando a jornada os usa: CMAdmPrev (cálculo/concessão/retroativo), bibliotecas UAdmPrev/UBeneficio, Folha de Benefícios (ver <a href="integracoes.html">🔗 Integrações</a>).</li>
 </ul>
+<p><strong>O que as pré-condições gerais significam na prática:</strong> o usuário precisa ter acesso ao módulo. Ao iniciar, o sistema precisa ler os parâmetros da entidade: se a integração contábil está ligada (RS027) e se a entidade é fundação ou instituto (RS026). Também precisa saber a qual fundação o usuário pertence, porque todas as consultas de negócio são filtradas por ela (<a href="#BENEF-RN045">RS045</a>). Além disso, os cadastros básicos já devem existir: participantes, seus planos, seus dados de elegibilidade, os benefícios e o catálogo de eventos geradores. Os componentes externos (CMAdmPrev, UAdmPrev/UBeneficio e Folha de Benefícios) só são exigidos pelas jornadas que os usam, conforme indicado em cada jornada.</p>
 <p><strong>Por jornada:</strong></p>
 <ul>
 <li><a href="#PF-06">JF006</a>: Índices de reajuste cadastrados; regras de reajuste do INSS cadastradas quando a fonte é INSS.</li>
 <li><a href="#PF-07">JF007</a>: Benefícios ativos em planos ativos; fator e FG definidos.</li>
+</ul>
+<p><strong>Pré-condições por jornada, em termos de negócio:</strong></p>
+<ul>
+<li><a href="#PF-06">JF006</a>: o índice de reajuste do período precisa estar cadastrado. Quando a fonte pagadora é o INSS, as regras de reajuste do INSS (ano, mês e regra) também precisam estar cadastradas, o que é feito no primeiro passo da própria jornada.</li>
+<li><a href="#PF-07">JF007</a>: só entram benefícios ativos de planos não desativados (<a href="#BENEF-RN023">RS023</a>). Para cada benefício, o analista precisa ter o percentual determinado (ou o novo valor) e saber se é reajuste ou redução de reajuste.</li>
 </ul>
 </section>
 
@@ -72,24 +104,33 @@
 <li><a href="#PF-06">JF006</a>: REAJUSTEBENEFICIO e LISTABENEFICIOREAJUSTE gravados; valores em BENEFBFCIARIO e HSTBENEFBFCIARIO atualizados.</li>
 <li><a href="#PF-07">JF007</a>: VALORATUAL e VALORTOTAL atualizados em BENEFBFCIARIO.</li>
 </ul>
+<p><strong>Resultado de negócio de cada jornada:</strong></p>
+<ul>
+<li><a href="#PF-06">JF006</a> — <em>conclusão com sucesso:</em> a execução do reajuste fica registrada (REAJUSTEBENEFICIO) com a lista de benefícios (LISTABENEFICIOREAJUSTE), e o procedimento de banco aplica o reajuste; o sistema exibe “Reajuste realizado com sucesso” (<code>FReajuesteBenef.pas:925</code>). A atualização de BENEFBFCIARIO e HSTBENEFBFCIARIO acontece dentro do procedimento armazenado, cuja lógica não está no repositório <span class="ev ev-pendente">PENDENTE</span>. <em>Interrupção:</em> se faltar algum campo obrigatório, o sistema lista os campos e não processa.</li>
+<li><a href="#PF-07">JF007</a> — <em>conclusão com sucesso:</em> cada benefício indicado recebe o novo valor (VALORATUAL ou VALORTOTAL), e é criado um log de ocorrência com o valor anterior. O sistema pede uma confirmação final antes de efetivar a gravação. <em>Interrupção:</em> em erro de gravação, toda a transação é desfeita.</li>
+</ul>
 </section>
 
 <section><div class="section-title">5. Jornadas Funcionais (JF006, JF007)</div>
 <p>Cada jornada traz objetivo, ator/gatilho, pré e pós-condições, sequência operacional, ações práticas, <strong>regras de negócio da jornada</strong> (texto completo de cada regra), tratamentos e mensagens.</p>
+<p><strong>Como as jornadas deste caso de uso se relacionam:</strong> JF006 é o reajuste periódico, em massa e parametrizado. JF007 trata casos individuais determinados judicialmente. As duas são independentes e iniciadas pelo usuário. Em cada passo, o rótulo “Usuário” ou “Sistema” indica quem executa a ação.</p>
 <div class="legend"><span><span class="ev ev-comprovado">COMPROVADO</span> — no código</span><span><span class="ev ev-inferido">INFERIDO</span> — plausível</span><span><span class="ev ev-pendente">PENDENTE</span> — validar</span></div>
 </section>
 
 <div class="pf-block" id="PF-06"><h4>JF006 (PF-06) — Reajuste de Benefícios</h4>
 <p><strong>Objetivo:</strong> Reajustar os benefícios vitalícios por plano e fonte pagadora, aplicando índice e percentual FRB, e manter as regras de reajuste do INSS.</p>
+<p><strong>Necessidade de negócio:</strong> atualizar de uma só vez o valor de todos os benefícios vitalícios de um plano e de uma fonte pagadora, com parâmetros registrados (índice, períodos, lote, motivo e observação). Assim cada execução de reajuste fica rastreável.</p>
 <p><strong>Ator / gatilho:</strong> Analista de benefícios, nas telas Reajuste Benefícios e Cadastro de Regras de Reajuste dos Benefícios do INSS.</p>
 <p><strong>Pré-condições:</strong> Índices de reajuste cadastrados; regras de reajuste do INSS cadastradas quando a fonte é INSS.</p>
+<p><strong>Em termos de negócio:</strong> o índice do período já está disponível. Para benefícios pagos pelo INSS, a regra de reajuste do período também está cadastrada (passo 1).</p>
 <p><strong>Pós-condições:</strong> REAJUSTEBENEFICIO e LISTABENEFICIOREAJUSTE gravados; valores em BENEFBFCIARIO e HSTBENEFBFCIARIO atualizados.</p>
+<p><strong>Em termos de negócio:</strong> a execução do reajuste fica registrada com seus parâmetros e com os benefícios alcançados, e os valores dos benefícios passam a refletir o reajuste aplicado pelo procedimento de banco <code>CM.SP_BF_REAJUSTE_BENEF</code>.</p>
 <p><strong>Sequência operacional:</strong></p>
 <ol>
-<li>Cadastrar ou conferir as regras de reajuste dos benefícios do INSS. [<a href="#TRT010">TRT010</a>]</li>
-<li>Informar plano e fonte pagadora (Funcef ou INSS). [<a href="#BENEF-RN009">RS009</a>]</li>
-<li>O sistema seleciona os benefícios vitalícios não-resgate, fora dos planos 255 e 358. [<a href="#BENEF-RN007">RS007</a>] [<a href="#BENEF-RN008">RS008</a>]</li>
-<li>O sistema grava a lista de reajuste e aplica índice e %FRB aos benefícios.</li>
+<li><strong>Usuário:</strong> Cadastrar ou conferir as regras de reajuste dos benefícios do INSS. [<a href="#TRT010">TRT010</a>]<br>Na tela Cadastro de Regras de Reajuste dos Benefícios do INSS, o analista informa o ano e o mês do reajuste e a regra usada no período. Os três campos são obrigatórios (<code>FCadReajINSS.pas:115-129</code>). A gravação registra o log; se o log falhar, a falha é ignorada e a regra fica gravada (<a href="#TRT010">TRT010</a>).</li>
+<li><strong>Usuário:</strong> Informar plano e fonte pagadora (Funcef ou INSS). [<a href="#BENEF-RN009">RS009</a>]<br>Na tela Reajuste Benefícios, o analista escolhe o plano e a fonte pagadora. A fonte define quais benefícios são listados e quais campos aparecem: para Funcef, o “Percentual FRB” e a opção “Utilizar apenas FRB”; para INSS, o mês de cobrança do Reembolso do INSS. O analista também informa os períodos do índice, do recálculo e do acerto, as situações a processar (Ativos, Encerrados, Retidos), o lote, o motivo, os alteradores e uma observação (<code>FReajuesteBenef.dfm:21-202</code>; <code>FReajuesteBenef.pas:343-392</code>).</li>
+<li><strong>Sistema:</strong> O sistema seleciona os benefícios vitalícios não-resgate, fora dos planos 255 e 358. [<a href="#BENEF-RN007">RS007</a>] [<a href="#BENEF-RN008">RS008</a>]<br>A lista mostra apenas benefícios de pagamento vitalício que não são resgate, fora do REPLAN não saldado. O analista marca os benefícios desejados ou “Selecionar todos os benefícios”, e pode restringir o reajuste a uma lista de matrículas (“Indicar Lista de Matrículas”).</li>
+<li><strong>Sistema:</strong> O sistema grava a lista de reajuste e aplica índice e %FRB aos benefícios.<br>Primeiro, o sistema confere os campos obrigatórios e mostra os que faltam (<code>FReajuesteBenef.pas:693-741</code>). Depois grava a execução em REAJUSTEBENEFICIO e os benefícios escolhidos em LISTABENEFICIOREAJUSTE, executa o procedimento <code>CM.SP_BF_REAJUSTE_BENEF</code> e exibe “Reajuste realizado com sucesso”.</li>
 </ol>
 <p><strong>Ações práticas:</strong></p>
 <div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
@@ -190,19 +231,31 @@
 <p><strong>Mensagens:</strong> <a href="#MSG008">MSG008</a></p>
 <p><strong>Telas:</strong> Reajuste Benefícios (<code>FReajuesteBenef.dfm</code>), Cadastro de Regras de Reajuste dos Benefícios do INSS (<code>FCadReajINSS.dfm</code>)</p>
 <p><strong>Dependências:</strong> Independente; o reajuste judicial é tratado em <a href="#PF-07">JF007</a>.</p>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span> — informações que o repositório não comprova ou que divergem entre fontes. O texto existente foi mantido; os itens abaixo dependem de validação humana.</p>
+<ul>
+<li>Cálculo do reajuste (aplicação do índice e do %FRB e atualização de BENEFBFCIARIO/HSTBENEFBFCIARIO): é feito pelo procedimento armazenado <code>CM.SP_BF_REAJUSTE_BENEF</code> (<code>FReajuesteBenef.dfm:1073</code>), cujo código não está no repositório. O nome do procedimento resolve o item “Stored procedure de reajuste” de <a href="lacunas.html">🔍 Lacunas</a>; a lógica continua não comprovada.</li>
+<li>Código da fonte pagadora: a lista de benefícios usa FLGREFERENCIA 0 = Funcef e 1 = INSS (<a href="#BENEF-RN009">RS009</a>). Já o registro da execução grava FONTEPAGADORA = 1 quando Funcef está marcado e 0 caso contrário (<code>FReajuesteBenef.pas:825-828</code>). Falta confirmar como o procedimento interpreta esse campo.</li>
+<li>Filtro de planos 255/358 (<a href="#BENEF-RN008">RS008</a>): na lista por plano, o filtro de plano está comentado e só os benefícios 255 e 358 são excluídos (<code>FReajuesteBenef.pas:99-100</code>). Em “Selecionar todos os benefícios”, o filtro de plano vale e a lista se limita aos planos 2, 66 e 74 (<code>:110-111</code>). O texto da regra foi mantido.</li>
+<li>Mensagens da tela não catalogadas como MSG: lista de campos obrigatórios (<code>FReajuesteBenef.pas:741</code>), “Você não listou nenhuma matrícula na lista de matrículas.” (<code>:702</code>), “As matrículas abaixo não estão cadastradas no sistema” (<code>:564</code>), “Reajuste realizado com sucesso” (<code>:925</code>) e “Informe o Ano/Mês/a Regra de Reajuste.” (<code>FCadReajINSS.pas:115-129</code>).</li>
+<li>Significado de negócio da sigla FRB.</li>
+</ul>
+</div>
 <div class="note note-info"><p><strong>Registro original do processo PF-06</strong></p><p><strong>Forms de entrada:</strong> <code>FReajuesteBenef.dfm</code>, <code>FCadReajINSS.dfm</code></p><p><strong>Lógica de processamento:</strong> Seleciona benefícios vitais não-resgate por plano/fonte; insere em REAJUSTEBENEFICIO/LISTABENEFICIOREAJUSTE; aplica índice e %FRB</p><p><strong>Saídas:</strong> Benefícios reajustados</p><p><strong>Persistência (tabelas escritas):</strong> REAJUSTEBENEFICIO, LISTABENEFICIOREAJUSTE, HSTBENEFBFCIARIO, BENEFBFCIARIO</p><p><strong>Evidência:</strong> <code>BENEFICIOPREV/Fontes/FReajuesteBenef.pas:38-113</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
 </div>
 
 <div class="pf-block" id="PF-07"><h4>JF007 (PF-07) — Reajuste Judicial</h4>
 <p><strong>Objetivo:</strong> Aplicar reajuste (ou desreajuste) determinado judicialmente aos benefícios ativos.</p>
+<p><strong>Necessidade de negócio:</strong> cumprir decisões judiciais que mandam aumentar ou reduzir o valor de benefícios específicos, fora do reajuste periódico, registrando o valor anterior para auditoria.</p>
 <p><strong>Ator / gatilho:</strong> Analista de benefícios, na tela Reajuste Judicial.</p>
 <p><strong>Pré-condições:</strong> Benefícios ativos em planos ativos; fator e FG definidos.</p>
+<p><strong>Em termos de negócio:</strong> o benefício alvo está ativo e o plano não está desativado. O analista já sabe o percentual (ou o novo valor) determinado e se a decisão é de aumento ou de redução.</p>
 <p><strong>Pós-condições:</strong> VALORATUAL e VALORTOTAL atualizados em BENEFBFCIARIO.</p>
+<p><strong>Em termos de negócio:</strong> o benefício passa a ter o valor determinado. O campo atualizado é VALORATUAL quando o benefício é do próprio titular e VALORTOTAL nos demais casos, e o valor anterior fica no log de ocorrência (<code>FReajusteJudicial.pas:270-372</code>).</p>
 <p><strong>Sequência operacional:</strong></p>
 <ol>
-<li>Selecionar os benefícios; o sistema considera só ativos em planos ativos. [<a href="#BENEF-RN023">RS023</a>]</li>
-<li>Informar fator, FG e se é desreajuste.</li>
-<li>O sistema calcula o novo valor e atualiza o benefício. [<a href="#BENEF-RN038">RS038</a>]</li>
+<li><strong>Usuário e sistema:</strong> Selecionar os benefícios; o sistema considera só ativos em planos ativos. [<a href="#BENEF-RN023">RS023</a>]<br>Na grade “Benefícios a Reajustar”, o analista digita a matrícula ou o número de inscrição. O sistema localiza o participante e o benefício que ele recebe no momento (ativo, já iniciado e sem data final vencida) e preenche nome, valor atual e benefício (<code>FReajusteJudicial.pas:84-180</code>).</li>
+<li><strong>Usuário:</strong> Informar fator, FG e se é desreajuste.<br>Na mesma linha, o analista marca “Redução de Reajuste” quando for desreajuste e informa o percentual (“Perc. de Reajuste (%)”) ou o novo valor. O sistema calcula o campo que ficou em branco (<code>FReajusteJudicial.pas:129-150</code>).</li>
+<li><strong>Sistema:</strong> O sistema calcula o novo valor e atualiza o benefício. [<a href="#BENEF-RN038">RS038</a>]<br>Na gravação, o sistema atualiza o benefício e cria o log de ocorrência. Depois pergunta “Gravação dos reajustes efetuada com sucesso. Deseja efetivar gravação ?”: a resposta confirma ou descarta as alterações (<code>FReajusteJudicial.pas:372-411</code>). Em erro de gravação, exibe “Erro na gravação do novo valor do benefício.” e desfaz a transação.</li>
 </ol>
 <p><strong>Ações práticas:</strong></p>
 <div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
@@ -243,6 +296,12 @@
 <p><strong>Mensagens:</strong> —</p>
 <p><strong>Telas:</strong> Reajuste Judicial (<code>FReajusteJudicial.dfm</code>)</p>
 <p><strong>Dependências:</strong> Complementa <a href="#PF-06">JF006</a>.</p>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span> — informações que o repositório não comprova ou que divergem entre fontes. O texto existente foi mantido; os itens abaixo dependem de validação humana.</p>
+<ul>
+<li>FG: a regra <a href="#BENEF-RN038">RS038</a> fala em “valor × FG × fator / 100”, mas o cálculo em <code>FReajusteJudicial.pas:133-136</code> usa só o valor anterior e o fator (novo valor = valor anterior ± valor anterior × fator / 100). O que é FG precisa ser confirmado; o texto da regra foi mantido.</li>
+<li>Mensagens não catalogadas como MSG: “Erro na gravação do novo valor do benefício.” (<code>FReajusteJudicial.pas:294, 363</code>) e a confirmação final (<code>:401</code>).</li>
+</ul>
+</div>
 <div class="note note-info"><p><strong>Registro original do processo PF-07</strong></p><p><strong>Forms de entrada:</strong> <code>FReajusteJudicial.dfm</code></p><p><strong>Lógica de processamento:</strong> Filtra IDSITBENEFICIO=1 e FLGDESATIVADO=0; atualiza VALORATUAL/VALORTOTAL</p><p><strong>Saídas:</strong> Benefícios reajustados judicialmente</p><p><strong>Persistência (tabelas escritas):</strong> BENEFBFCIARIO</p><p><strong>Evidência:</strong> <code>BENEFICIOPREV/Fontes/FReajusteJudicial.pas:99,172</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
 </div>
 

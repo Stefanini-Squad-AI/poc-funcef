@@ -50,6 +50,30 @@
 <li><a href="#PF-10"><strong>JF010 — Liberação de Benefício em Exigência ou Retido</strong></a>: Liberar benefícios em exigência ou retidos, concluindo o processo e iniciando o pagamento.</li>
 <li><a href="#PF-11"><strong>JF011 — Liberação de Benefício Provisório (Adiantamento)</strong></a>: Liberar um benefício provisório (adiantamento), ajustando a data de início do benefício e da contribuição.</li>
 </ul>
+<p><strong>Necessidade de negócio:</strong> nem todo benefício concedido começa a ser pago imediatamente. Alguns ficam <em>em exigência</em> ou <em>retidos</em>, e outros são concedidos como <em>provisórios</em> (adiantamento), com datas ainda não definitivas. Este caso de uso cobre o momento em que o analista libera esses benefícios para pagamento. A liberação conclui o processo e ativa o benefício (JF010) ou troca as datas provisórias pelas definitivas (JF011).</p>
+<p><strong>Quem inicia:</strong> o analista de benefícios, pelas telas Liberação de Benefício em Exigência (<code>FPrincipal.pas:1844-1849</code>) e Liberação de Benefício Provisório (<code>FPrincipal.pas:1814-1819</code>) do menu principal.</p>
+<p><strong>Resultado esperado:</strong> o benefício passa a ser pago. Na liberação em exigência ou retido, o processo fica concluído e o benefício ativo, com a data de início da liberação registrada. Na liberação do provisório, o benefício deixa de ser provisório e passa a ter datas definitivas, assim como a contribuição.</p>
+<p><strong>Termos, siglas e componentes citados nesta página</strong> — explicados na primeira vez em que aparecem; a coluna “Fonte” indica onde a explicação foi conferida no repositório:</p>
+<div class="table-wrap"><table><thead><tr><th>Termo</th><th>O que significa</th><th>Fonte</th></tr></thead><tbody>
+<tr><td><strong>PARAMAPREV</strong></td><td>Tabela de parâmetros gerais do módulo, lida quando o módulo é iniciado. Entre outros pontos, indica se a integração contábil está ligada (FLGINTCONTAB = 1, regra RS027).</td><td><code>FPrincipal.pas:928-930</code>; <a href="uc301.html#BENEF-RN027">RS027</a></td></tr>
+<tr><td><strong>Tipo de previdência e fundação do usuário</strong></td><td>O tipo de previdência diz se a entidade é uma fundação ou um instituto: com FLGTIPOPREVIDENC = 'I', as telas trocam “Fundação/Patrocinadora/Plano” por “Instituto/Entidade/Regime” (RS026). A fundação do usuário (IDFUNDACAO) limita os dados que ele consulta: cada usuário só vê os dados da sua fundação (RS045).</td><td><code>FPrincipal.pas:598-775, 566-567</code></td></tr>
+<tr><td><strong>PARTPREVPLAN</strong></td><td>Vínculo do participante com um plano previdenciário. Guarda a situação do participante no plano e as datas desse vínculo.</td><td><a href="dados.html">🗄️ Dados</a></td></tr>
+<tr><td><strong>ELEGPATRO</strong></td><td>Dados de elegibilidade do participante na patrocinadora (tabela PATRO), como o tempo de serviço e a situação funcional.</td><td><a href="dados.html">🗄️ Dados</a></td></tr>
+<tr><td><strong>EVENTOGERADOR</strong></td><td>Catálogo dos eventos que dão origem a benefícios (por exemplo, aposentadoria, falecimento e reclusão). É cadastrado por fundação e agrupado pelo código interno FLGINTERNO. O menu de eventos é montado a partir dele (RS002).</td><td><a href="dados.html">🗄️ Dados</a>; <code>FPrincipal.pas:1038-1387</code></td></tr>
+<tr><td><strong>CMAdmPrev</strong></td><td>Componente externo do framework CM (pasta <code>..\..\Cm\CMAdmPrev\</code>). Reúne os módulos de dados de cálculo e concessão (DAPrev), o cálculo retroativo em lote, o cadastro de mantenedoras e o de UF do INSS. Este módulo abre telas desse componente e delega a ele os cálculos. A lógica interna do componente não faz parte da evidência desta documentação.</td><td><a href="integracoes.html">🔗 Integrações</a>; <a href="lacunas.html">🔍 Lacunas</a></td></tr>
+<tr><td><strong>UAdmPrev / UBeneficio</strong></td><td>Bibliotecas de regras de outro módulo, chamadas pelas telas deste módulo. A UAdmPrev concentra regras de cálculo e concessão, como a verificação do limite de valor e de percentual do benefício e a criação do log de ocorrência. A UBeneficio concentra regras de benefício, como o cálculo do benefício mínimo.</td><td><a href="lacunas.html">🔍 Lacunas</a> (Dependências externas)</td></tr>
+<tr><td><strong>Folha de Benefícios</strong></td><td>Folha mensal de pagamento dos benefícios, que fica no módulo FOLHA. Este módulo se comunica com ela pelas tabelas PREVIA (prévia de cálculo da folha) e LISTAFOLHABENEF. A finalidade exata dessa interface é <span class="ev ev-inferido">INFERIDO</span>, porque a implementação da folha não foi analisada.</td><td><a href="integracoes.html">🔗 Integrações</a>; <a href="dados.html">🗄️ Dados</a></td></tr>
+<tr><td><strong>LOGTOTALPREV</strong></td><td>Log de auditoria do TotalPREV. As operações de negócio deste módulo ficam registradas nele com o código de módulo 454, o usuário, a descrição da operação e a data (RS025).</td><td><code>UModulo.pas:64-88</code></td></tr>
+<tr><td><strong>Benefício em exigência / retido</strong></td><td>Benefícios que estão aguardando liberação e aparecem na grade “Benefícios Retidos ou Em Exigência”. A retenção é registrada pela opção de retenção/encerramento do menu (<code>FPrincipal.pas:1829-1835</code>). O que caracteriza a “exigência” em termos de negócio não está descrito no repositório <span class="ev ev-pendente">PENDENTE</span>.</td><td><code>FCadInicioBenefExigencia.dfm:199-215</code></td></tr>
+<tr><td><strong>Benefício provisório (adiantamento)</strong></td><td>Benefício concedido com marca de provisório (FLGPROVISORIO) e data final prevista. Na liberação, essa marca é retirada e as datas definitivas são gravadas.</td><td><code>FLiberaBeneficioProvisorio.pas:491-504</code></td></tr>
+<tr><td><strong>Recálculo na liberação (prmFlgLibRecalc)</strong></td><td>Parâmetro que ativa o recálculo do valor na liberação em exigência. Só nesse caso o valor atualizado é conferido contra os limites de valor e de percentual (RS033).</td><td><a href="#BENEF-RN033">RS033</a></td></tr>
+<tr><td><strong>Limite de valor e limite de percentual</strong></td><td>Verificações da biblioteca UAdmPrev (VerificaVALORLimiteBeneficio e VerificaPERCLimiteBeneficio). Acima de qualquer um dos limites, a liberação só prossegue com usuário autorizador.</td><td><a href="#BENEF-RN033">RS033</a>; <a href="lacunas.html">🔍 Lacunas</a></td></tr>
+<tr><td><strong>PROCESSOBENEF.IDSITPROCESSO = 1</strong></td><td>Situação “concluído” do processo de benefício, gravada na liberação em exigência (RS021).</td><td><a href="#BENEF-RN021">RS021</a></td></tr>
+<tr><td><strong>MOVBENEF.DTINICIOLIBERACAO</strong></td><td>Data de início da liberação, registrada no movimento do benefício.</td><td><a href="#BENEF-RN021">RS021</a></td></tr>
+<tr><td><strong>CONTRIBPREVPARTP / FLGCOBRA</strong></td><td>Contribuição do participante e o indicador de que ela deve ser cobrada (1) ou não (0).</td><td><a href="dados.html">🗄️ Dados</a>; <code>FLiberaBeneficioProvisorio.pas:720-730</code></td></tr>
+<tr><td><strong>CONTRIBPREVNUCLEO</strong></td><td>Tabela gravada na liberação em exigência. Pelo nome e pelo menu “Contribuições por Núcleo Familiar”, refere-se a contribuições por núcleo familiar <span class="ev ev-inferido">INFERIDO</span>.</td><td>Registro original PF-10; <code>FPrincipal.pas:1988</code></td></tr>
+<tr><td><strong>DATAINICIOFUND / DIB</strong></td><td>Data de início do benefício na fundação. Na liberação do provisório, recebe a “Data de Início (DIB)” informada.</td><td><code>FLiberaBeneficioProvisorio.dfm:292-306</code>; <code>.pas:491</code></td></tr>
+</tbody></table></div>
 </section>
 
 <section><div class="section-title">3. Pré-condições</div>
@@ -60,10 +84,16 @@
 <li>Participantes, planos (PARTPREVPLAN), elegibilidade (ELEGPATRO), benefícios e eventos geradores (EVENTOGERADOR) cadastrados.</li>
 <li>Componentes externos disponíveis quando a jornada os usa: CMAdmPrev (cálculo/concessão/retroativo), bibliotecas UAdmPrev/UBeneficio, Folha de Benefícios (ver <a href="integracoes.html">🔗 Integrações</a>).</li>
 </ul>
+<p><strong>O que as pré-condições gerais significam na prática:</strong> o usuário precisa ter acesso ao módulo. Ao iniciar, o sistema precisa ler os parâmetros da entidade: se a integração contábil está ligada (RS027) e se a entidade é fundação ou instituto (RS026). Também precisa saber a qual fundação o usuário pertence, porque todas as consultas de negócio são filtradas por ela (<a href="#BENEF-RN045">RS045</a>). Além disso, os cadastros básicos já devem existir: participantes, seus planos, seus dados de elegibilidade, os benefícios e o catálogo de eventos geradores. Os componentes externos (CMAdmPrev, UAdmPrev/UBeneficio e Folha de Benefícios) só são exigidos pelas jornadas que os usam, conforme indicado em cada jornada.</p>
 <p><strong>Por jornada:</strong></p>
 <ul>
 <li><a href="#PF-10">JF010</a>: Benefício em exigência ou retido; limites de valor e percentual parametrizados.</li>
 <li><a href="#PF-11">JF011</a>: Benefício provisório concedido.</li>
+</ul>
+<p><strong>Pré-condições por jornada, em termos de negócio:</strong></p>
+<ul>
+<li><a href="#PF-10">JF010</a>: o benefício está em exigência ou retido. Os limites de valor e de percentual estão parametrizados; eles só são usados quando a liberação recalcula o valor (<a href="#BENEF-RN033">RS033</a>).</li>
+<li><a href="#PF-11">JF011</a>: o benefício foi concedido como provisório e ainda não foi liberado.</li>
 </ul>
 </section>
 
@@ -72,24 +102,33 @@
 <li><a href="#PF-10">JF010</a>: Processo concluído (IDSITPROCESSO = 1); benefício ativo; históricos, contribuições e movimento atualizados.</li>
 <li><a href="#PF-11">JF011</a>: BENEFBFCIARIO.DATAINICIOFUND e CONTRIBPREVPARTP.DATAINICIO atualizados.</li>
 </ul>
+<p><strong>Resultado de negócio de cada jornada:</strong></p>
+<ul>
+<li><a href="#PF-10">JF010</a> — <em>conclusão com sucesso:</em> o processo fica concluído, o benefício fica ativo/pago e a data de início da liberação é registrada (<a href="#BENEF-RN021">RS021</a>). Históricos e contribuições são atualizados. <em>Interrupções:</em> nenhum benefício selecionado (<a href="#TRT016">TRT016</a>) ou valor acima de um limite sem autorização (<a href="#TRT017">TRT017</a>, <a href="#TRT018">TRT018</a>), casos em que a transação é desfeita; também erro de banco (<a href="#TRT006">TRT006</a>).</li>
+<li><a href="#PF-11">JF011</a> — <em>conclusão com sucesso:</em> o benefício deixa de ser provisório e recebe a data de início definitiva. Sem data final, fica ativo e a contribuição volta a ser cobrada. Com data final até o mês de pagamento, o benefício recebe a situação 3 e a contribuição não é cobrada (<code>FLiberaBeneficioProvisorio.pas:491-504, 720-730</code>). O sistema exibe “Liberação do Benefício efetuada com sucesso.” (<code>:1314</code>).</li>
+</ul>
 </section>
 
 <section><div class="section-title">5. Jornadas Funcionais (JF010, JF011)</div>
 <p>Cada jornada traz objetivo, ator/gatilho, pré e pós-condições, sequência operacional, ações práticas, <strong>regras de negócio da jornada</strong> (texto completo de cada regra), tratamentos e mensagens.</p>
+<p><strong>Como as jornadas deste caso de uso se relacionam:</strong> as duas liberações sucedem a concessão (JF001) e tratam situações diferentes do benefício: em exigência ou retido (JF010) e provisório (JF011). A liberação em exigência pode ser revertida em JF004. Em cada passo, o rótulo “Usuário” ou “Sistema” indica quem executa a ação.</p>
 <div class="legend"><span><span class="ev ev-comprovado">COMPROVADO</span> — no código</span><span><span class="ev ev-inferido">INFERIDO</span> — plausível</span><span><span class="ev ev-pendente">PENDENTE</span> — validar</span></div>
 </section>
 
 <div class="pf-block" id="PF-10"><h4>JF010 (PF-10) — Liberação de Benefício em Exigência ou Retido</h4>
 <p><strong>Objetivo:</strong> Liberar benefícios em exigência ou retidos, concluindo o processo e iniciando o pagamento.</p>
+<p><strong>Necessidade de negócio:</strong> quando a pendência que mantinha o benefício em exigência ou retido é resolvida, a entidade precisa colocá-lo em pagamento, conferindo antes se o valor atualizado respeita os limites de valor e de percentual.</p>
 <p><strong>Ator / gatilho:</strong> Analista de benefícios, na tela Liberação de Benefício em Exigência.</p>
 <p><strong>Pré-condições:</strong> Benefício em exigência ou retido; limites de valor e percentual parametrizados.</p>
+<p><strong>Em termos de negócio:</strong> há benefícios aguardando liberação, e os limites que controlam liberações com recálculo estão cadastrados.</p>
 <p><strong>Pós-condições:</strong> Processo concluído (IDSITPROCESSO = 1); benefício ativo; históricos, contribuições e movimento atualizados.</p>
+<p><strong>Em termos de negócio:</strong> o benefício entra em pagamento, o processo é encerrado como concluído e fica registrada a data de início da liberação.</p>
 <p><strong>Sequência operacional:</strong></p>
 <ol>
-<li>Selecionar os benefícios a liberar. [<a href="#TRT016">TRT016</a>]</li>
-<li>Com recálculo, o sistema confere os limites de valor e de percentual. [<a href="#BENEF-RN033">RS033</a>] [<a href="#TRT017">TRT017</a>] [<a href="#TRT018">TRT018</a>]</li>
-<li>O sistema conclui o processo e atualiza benefício, históricos, contribuições e movimento. [<a href="#BENEF-RN021">RS021</a>]</li>
-<li>Em erro de gravação, a transação é revertida. [<a href="#TRT006">TRT006</a>]</li>
+<li><strong>Usuário:</strong> Selecionar os benefícios a liberar. [<a href="#TRT016">TRT016</a>]<br>O analista procura pela matrícula, pelo plano, pela patrocinadora ou pelo titular, e marca, na grade “Benefícios Retidos ou Em Exigência”, os benefícios a liberar. Ao clicar em “Liberar” sem nenhum marcado, o sistema exibe <a href="#MSG022">MSG022</a> e não processa.</li>
+<li><strong>Sistema:</strong> Com recálculo, o sistema confere os limites de valor e de percentual. [<a href="#BENEF-RN033">RS033</a>] [<a href="#TRT017">TRT017</a>] [<a href="#TRT018">TRT018</a>]<br>Só quando a liberação recalcula o valor (prmFlgLibRecalc). Se o valor atualizado passar do limite de valor (<a href="#MSG023">MSG023</a>) ou do limite de percentual sobre o valor atual (<a href="#MSG024">MSG024</a>) e não houver autorização, a transação é desfeita e a liberação é interrompida.</li>
+<li><strong>Sistema:</strong> O sistema conclui o processo e atualiza benefício, históricos, contribuições e movimento. [<a href="#BENEF-RN021">RS021</a>]<br>O processo passa a IDSITPROCESSO = 1 (concluído) e o benefício passa a ativo/pago, com situação, valor e datas atualizados. A data de início da liberação é gravada em MOVBENEF, e a cobrança da contribuição (CONTRIBPREVPARTP.FLGCOBRA) é ajustada.</li>
+<li><strong>Sistema:</strong> Em erro de gravação, a transação é revertida. [<a href="#TRT006">TRT006</a>]<br>Em erro de banco, nada do que foi feito na tentativa fica gravado (RollBack), e o form exibe a mensagem do erro.</li>
 </ol>
 <p><strong>Ações práticas:</strong></p>
 <div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
@@ -180,18 +219,27 @@
 <p><strong>Mensagens:</strong> <a href="#MSG022">MSG022</a>, <a href="#MSG023">MSG023</a>, <a href="#MSG024">MSG024</a></p>
 <p><strong>Telas:</strong> Liberação de Benefício em Exigência (<code>FCadInicioBenefExigencia.dfm</code>)</p>
 <p><strong>Dependências:</strong> Sucede <a href="uc301.html#PF-01">JF001</a>; pode ser revertida em <a href="uc302.html#PF-04">JF004</a>.</p>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span> — informações que o repositório não comprova ou que divergem entre fontes. O texto existente foi mantido; os itens abaixo dependem de validação humana.</p>
+<ul>
+<li>O que caracteriza um benefício “em exigência” (motivo, origem da situação) e qual código de situação o representa: não descrito no repositório.</li>
+<li>Quem define o parâmetro de recálculo (prmFlgLibRecalc) e em que casos ele está ligado: não documentado.</li>
+</ul>
+</div>
 <div class="note note-info"><p><strong>Registro original do processo PF-10</strong></p><p><strong>Forms de entrada:</strong> <code>FCadInicioBenefExigencia.dfm</code> (4.646 linhas)</p><p><strong>Lógica de processamento:</strong> UPDATE BENEFBFCIARIO (situação/valor/datas), HSTBENEFBFCIARIO, HSTCONTRIBPREV, CONTRIBPREVPARTP.FLGCOBRA, PROCESSOBENEF.IDSITPROCESSO=1, MOVBENEF.DTINICIOLIBERACAO</p><p><strong>Saídas:</strong> Benefício liberado</p><p><strong>Persistência (tabelas escritas):</strong> BENEFBFCIARIO, HSTBENEFBFCIARIO, HSTCONTRIBPREV, CONTRIBPREVPARTP, CONTRIBPREVNUCLEO, PROCESSOBENEF, MOVBENEF</p><p><strong>Evidência:</strong> <code>BENEFICIOPREV/Fontes/FCadInicioBenefExigencia.pas:1256-4283</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
 </div>
 
 <div class="pf-block" id="PF-11"><h4>JF011 (PF-11) — Liberação de Benefício Provisório (Adiantamento)</h4>
 <p><strong>Objetivo:</strong> Liberar um benefício provisório (adiantamento), ajustando a data de início do benefício e da contribuição.</p>
+<p><strong>Necessidade de negócio:</strong> um benefício concedido como provisório tem datas previstas. Quando as datas definitivas são conhecidas, o analista precisa registrá-las, retirar a marca de provisório e alinhar a vigência e a cobrança da contribuição.</p>
 <p><strong>Ator / gatilho:</strong> Analista de benefícios, na tela Liberação de Benefício Provisório.</p>
 <p><strong>Pré-condições:</strong> Benefício provisório concedido.</p>
+<p><strong>Em termos de negócio:</strong> existe um benefício concedido com a marca de provisório, ainda não liberado.</p>
 <p><strong>Pós-condições:</strong> BENEFBFCIARIO.DATAINICIOFUND e CONTRIBPREVPARTP.DATAINICIO atualizados.</p>
+<p><strong>Em termos de negócio:</strong> o benefício e a contribuição passam a ter a data de início definitiva. Além das duas datas citadas, o código retira a marca de provisório (FLGPROVISORIO = 0), apaga a data final prevista, grava a data e o mês de pagamento da liberação e ajusta a situação do benefício e a cobrança da contribuição conforme a data final informada (<code>FLiberaBeneficioProvisorio.pas:491-504, 720-730</code>).</p>
 <p><strong>Sequência operacional:</strong></p>
 <ol>
-<li>Selecionar o benefício provisório e informar a data de referência da liberação.</li>
-<li>O sistema atualiza a data de início do benefício e da contribuição.</li>
+<li><strong>Usuário:</strong> Selecionar o benefício provisório e informar a data de referência da liberação.<br>O analista procura o processo; a tela mostra o evento gerador, a data do evento, a data do registro e os beneficiários. Em “Datas Definitivas”, ele informa a Data de Início (DIB) e, se houver, a Data Final. A data de referência é obrigatória (“Informe a Data de Referência da Liberação”, <code>FLiberaBeneficioProvisorio.pas:384</code>). Quando o benefício é pago a beneficiários, o sistema pergunta se a liberação vale para todos (<code>:419-423</code>). Antes de gravar, pede a confirmação “Confirma a Liberação do Benefício ?” (<code>:1300</code>).</li>
+<li><strong>Sistema:</strong> O sistema atualiza a data de início do benefício e da contribuição.<br>Grava a DIB informada em BENEFBFCIARIO.DATAINICIOFUND e em CONTRIBPREVPARTP.DATAINICIO. Sem data final, o benefício fica ativo (situação 1) e a contribuição volta a ser cobrada (FLGCOBRA = 1). Com data final até o mês de pagamento, o benefício fica na situação 3 e a contribuição deixa de ser cobrada. O sistema também trata devoluções de contribuição (<code>:642, 880, 921</code>), registra o log (<code>:1308</code>) e informa o sucesso (<code>:1314</code>).</li>
 </ol>
 <p><strong>Ações práticas:</strong></p>
 <div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
@@ -206,6 +254,13 @@
 <p><strong>Mensagens:</strong> —</p>
 <p><strong>Telas:</strong> Liberação de Benefício Provisório (<code>FLiberaBeneficioProvisorio.dfm</code>)</p>
 <p><strong>Dependências:</strong> Sucede <a href="uc301.html#PF-01">JF001</a>.</p>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span> — informações que o repositório não comprova ou que divergem entre fontes. O texto existente foi mantido; os itens abaixo dependem de validação humana.</p>
+<ul>
+<li>Comportamento não catalogado nesta jornada: pergunta sobre liberar para todos os beneficiários, troca de situação para 3 quando há data final, inserção de devoluções de contribuição e uso de parametrização contábil/financeira para essa devolução (<code>FLiberaBeneficioProvisorio.pas:419-423, 499-503, 642, 880, 921</code>). Essas regras não estão catalogadas como BENEF-RN, TRT ou MSG.</li>
+<li>Significado de negócio da situação de benefício 3 e regra que define quando há devolução de contribuição.</li>
+<li>Mensagens da tela não catalogadas: “Informe a Data de Referência da Liberação” (<code>:384</code>), “Confirma a Liberação do Benefício ?” (<code>:1300</code>), “Liberação do Benefício efetuada com sucesso.” (<code>:1314</code>), “Liberação de Benefício Cancelada.” (<code>:1292</code>) e as mensagens de erro de <code>:519, 585, 642, 816, 880, 921</code>.</li>
+</ul>
+</div>
 <div class="note note-info"><p><strong>Registro original do processo PF-11</strong></p><p><strong>Forms de entrada:</strong> <code>FLiberaBeneficioProvisorio.dfm</code></p><p><strong>Lógica de processamento:</strong> UPDATE BENEFBFCIARIO SET DATAINICIOFUND; UPDATE CONTRIBPREVPARTP SET DATAINICIO</p><p><strong>Saídas:</strong> Benefício provisório liberado</p><p><strong>Persistência (tabelas escritas):</strong> BENEFBFCIARIO, CONTRIBPREVPARTP</p><p><strong>Evidência:</strong> <code>BENEFICIOPREV/Fontes/FLiberaBeneficioProvisorio.pas:491,720</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
 </div>
 

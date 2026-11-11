@@ -49,6 +49,28 @@
 <ul>
 <li><a href="#PF-14"><strong>JF014 — Alteração de Benefício (individual e em lote)</strong></a>: Alterar dados de benefícios concedidos, individualmente ou em lote por planilha.</li>
 </ul>
+<p><strong>Necessidade de negócio:</strong> depois da concessão, dados e valores de benefícios precisam ser corrigidos ou atualizados. Às vezes é um benefício só, por exemplo uma data ou um número do INSS. Às vezes são os valores de muitos benefícios ao mesmo tempo. Este caso de uso oferece os dois caminhos: a alteração individual, numa tela de dados do benefício, e a alteração de valores em lote, por planilha Excel. O lote é protegido contra importação repetida e contra valores incoerentes com as parcelas BS e FAB.</p>
+<p><strong>Quem inicia:</strong> o analista de benefícios, pelas telas Alteração de Dados de Benefícios Concedidos (<code>FPrincipal.pas:2011-2016</code>) e Alteração de Valor do Benefício em Lote (<code>FPrincipal.pas:2309-2317</code>).</p>
+<p><strong>Resultado esperado:</strong> os benefícios passam a ter os dados ou valores corrigidos. No lote, o arquivo importado fica registrado com os valores anteriores de cada benefício, o que permite desfazer a importação.</p>
+<p><strong>Termos, siglas e componentes citados nesta página</strong> — explicados na primeira vez em que aparecem; a coluna “Fonte” indica onde a explicação foi conferida no repositório:</p>
+<div class="table-wrap"><table><thead><tr><th>Termo</th><th>O que significa</th><th>Fonte</th></tr></thead><tbody>
+<tr><td><strong>PARAMAPREV</strong></td><td>Tabela de parâmetros gerais do módulo, lida quando o módulo é iniciado. Entre outros pontos, indica se a integração contábil está ligada (FLGINTCONTAB = 1, regra RS027).</td><td><code>FPrincipal.pas:928-930</code>; <a href="uc301.html#BENEF-RN027">RS027</a></td></tr>
+<tr><td><strong>Tipo de previdência e fundação do usuário</strong></td><td>O tipo de previdência diz se a entidade é uma fundação ou um instituto: com FLGTIPOPREVIDENC = 'I', as telas trocam “Fundação/Patrocinadora/Plano” por “Instituto/Entidade/Regime” (RS026). A fundação do usuário (IDFUNDACAO) limita os dados que ele consulta: cada usuário só vê os dados da sua fundação (RS045).</td><td><code>FPrincipal.pas:598-775, 566-567</code></td></tr>
+<tr><td><strong>PARTPREVPLAN</strong></td><td>Vínculo do participante com um plano previdenciário. Guarda a situação do participante no plano e as datas desse vínculo.</td><td><a href="dados.html">🗄️ Dados</a></td></tr>
+<tr><td><strong>ELEGPATRO</strong></td><td>Dados de elegibilidade do participante na patrocinadora (tabela PATRO), como o tempo de serviço e a situação funcional.</td><td><a href="dados.html">🗄️ Dados</a></td></tr>
+<tr><td><strong>EVENTOGERADOR</strong></td><td>Catálogo dos eventos que dão origem a benefícios (por exemplo, aposentadoria, falecimento e reclusão). É cadastrado por fundação e agrupado pelo código interno FLGINTERNO. O menu de eventos é montado a partir dele (RS002).</td><td><a href="dados.html">🗄️ Dados</a>; <code>FPrincipal.pas:1038-1387</code></td></tr>
+<tr><td><strong>CMAdmPrev</strong></td><td>Componente externo do framework CM (pasta <code>..\..\Cm\CMAdmPrev\</code>). Reúne os módulos de dados de cálculo e concessão (DAPrev), o cálculo retroativo em lote, o cadastro de mantenedoras e o de UF do INSS. Este módulo abre telas desse componente e delega a ele os cálculos. A lógica interna do componente não faz parte da evidência desta documentação.</td><td><a href="integracoes.html">🔗 Integrações</a>; <a href="lacunas.html">🔍 Lacunas</a></td></tr>
+<tr><td><strong>UAdmPrev / UBeneficio</strong></td><td>Bibliotecas de regras de outro módulo, chamadas pelas telas deste módulo. A UAdmPrev concentra regras de cálculo e concessão, como a verificação do limite de valor e de percentual do benefício e a criação do log de ocorrência. A UBeneficio concentra regras de benefício, como o cálculo do benefício mínimo.</td><td><a href="lacunas.html">🔍 Lacunas</a> (Dependências externas)</td></tr>
+<tr><td><strong>Folha de Benefícios</strong></td><td>Folha mensal de pagamento dos benefícios, que fica no módulo FOLHA. Este módulo se comunica com ela pelas tabelas PREVIA (prévia de cálculo da folha) e LISTAFOLHABENEF. A finalidade exata dessa interface é <span class="ev ev-inferido">INFERIDO</span>, porque a implementação da folha não foi analisada.</td><td><a href="integracoes.html">🔗 Integrações</a>; <a href="dados.html">🗄️ Dados</a></td></tr>
+<tr><td><strong>LOGTOTALPREV</strong></td><td>Log de auditoria do TotalPREV. As operações de negócio deste módulo ficam registradas nele com o código de módulo 454, o usuário, a descrição da operação e a data (RS025).</td><td><code>UModulo.pas:64-88</code></td></tr>
+<tr><td><strong>Planilha do lote (leiaute esperado)</strong></td><td>Arquivo Excel com 9 colunas, nesta ordem: Matrícula, Número de Processo, Valor do SRB, Valor Atual BS, Valor Atual FAB, Valor Atual, Valor Total BS, Valor Total FAB e Valor Total. Um arquivo fora desse leiaute é recusado com “Arquivo não está no formato válido.”</td><td><code>FAlteraBeneficioLote.pas:115-131, 416</code></td></tr>
+<tr><td><strong>BS / FAB</strong></td><td>Duas parcelas do valor do benefício, informadas separadamente (atual e total) e somadas na conferência do lote. A conferência só vale para benefícios marcados com FLGOBRIGA_BS_FAB = 1 (RS040). O significado das siglas não está descrito no repositório <span class="ev ev-pendente">PENDENTE</span>.</td><td><a href="#BENEF-RN040">RS040</a></td></tr>
+<tr><td><strong>SRB</strong></td><td>Valor gravado em VALORSRB. Na tela de alteração individual, só aparece quando a fonte pagadora do benefício é 1 (<code>FAlteraBeneficio.pas:549-550</code>). Na tela de reabertura há um campo “Salário Real Benefício”, o que sugere esse significado para a sigla <span class="ev ev-inferido">INFERIDO</span>.</td><td><code>FReaberturaData.dfm:535</code></td></tr>
+<tr><td><strong>HSTARQUIVOALTBENEF / HSTARQUIVOALTBENEFDET</strong></td><td>Registro de cada arquivo de lote importado (nome, data, quantidade de itens, quantidade importada e hash) e o seu detalhe por benefício, com os valores novos e os anteriores (sufixo ANT).</td><td><code>FAlteraBeneficioLote.pas:512-560</code></td></tr>
+<tr><td><strong>Hash do arquivo (CRC32)</strong></td><td>Código calculado para identificar o arquivo importado e impedir que ele seja importado duas vezes (RS041).</td><td><a href="#BENEF-RN041">RS041</a></td></tr>
+<tr><td><strong>DER / DIB / DIP / NUP / NB INSS</strong></td><td>Campos da tela de alteração individual. DER = data de entrada do requerimento e DIB = data de início do benefício (rótulos de outras telas do módulo). NB = Número do Benefício no INSS. O significado de DIP <span class="ev ev-inferido">INFERIDO</span> (data de início do pagamento) e o de NUP não estão descritos no repositório.</td><td><code>FAlteraBeneficio.dfm:191-306</code>; <code>FCadProcHabINSS.dfm:280, 3015</code></td></tr>
+<tr><td><strong>BENEFBFCIARIO / HSTBENEFBFCIARIO</strong></td><td>Cadastro central do benefício e o seu histórico mensal.</td><td><a href="dados.html">🗄️ Dados</a></td></tr>
+</tbody></table></div>
 </section>
 
 <section><div class="section-title">3. Pré-condições</div>
@@ -59,9 +81,14 @@
 <li>Participantes, planos (PARTPREVPLAN), elegibilidade (ELEGPATRO), benefícios e eventos geradores (EVENTOGERADOR) cadastrados.</li>
 <li>Componentes externos disponíveis quando a jornada os usa: CMAdmPrev (cálculo/concessão/retroativo), bibliotecas UAdmPrev/UBeneficio, Folha de Benefícios (ver <a href="integracoes.html">🔗 Integrações</a>).</li>
 </ul>
+<p><strong>O que as pré-condições gerais significam na prática:</strong> o usuário precisa ter acesso ao módulo. Ao iniciar, o sistema precisa ler os parâmetros da entidade: se a integração contábil está ligada (RS027) e se a entidade é fundação ou instituto (RS026). Também precisa saber a qual fundação o usuário pertence, porque todas as consultas de negócio são filtradas por ela (<a href="#BENEF-RN045">RS045</a>). Além disso, os cadastros básicos já devem existir: participantes, seus planos, seus dados de elegibilidade, os benefícios e o catálogo de eventos geradores. Os componentes externos (CMAdmPrev, UAdmPrev/UBeneficio e Folha de Benefícios) só são exigidos pelas jornadas que os usam, conforme indicado em cada jornada.</p>
 <p><strong>Por jornada:</strong></p>
 <ul>
 <li><a href="#PF-14">JF014</a>: Benefícios concedidos; para o lote, planilha no leiaute esperado e ainda não importada.</li>
+</ul>
+<p><strong>Pré-condições por jornada, em termos de negócio:</strong></p>
+<ul>
+<li><a href="#PF-14">JF014</a>: os benefícios a alterar já foram concedidos. Para o lote, a planilha precisa seguir o leiaute de 9 colunas. A regra “ainda não importada” é conferida pelo sistema ao escolher o arquivo (<a href="#BENEF-RN041">RS041</a>); não é uma verificação que o usuário faz antes.</li>
 </ul>
 </section>
 
@@ -69,25 +96,34 @@
 <ul>
 <li><a href="#PF-14">JF014</a>: BENEFBFCIARIO e HSTBENEFBFCIARIO atualizados; arquivo do lote registrado em HSTARQUIVOALTBENEF.</li>
 </ul>
+<p><strong>Resultado de negócio:</strong></p>
+<ul>
+<li><a href="#PF-14">JF014</a> — <em>alteração individual concluída:</em> o benefício passa a ter os dados editados e o sistema exibe <a href="#MSG035">MSG035</a> (“Alteração realizada com sucesso!”). A operação é registrada no log (<code>FAlteraBeneficio.pas:484</code>).</li>
+<li><a href="#PF-14">JF014</a> — <em>lote concluído:</em> os registros válidos têm seus valores atualizados em BENEFBFCIARIO. O arquivo e os valores anteriores de cada benefício ficam registrados em HSTARQUIVOALTBENEF/HSTARQUIVOALTBENEFDET, e o sistema exibe “Arquivo importado com sucesso.” (<code>FAlteraBeneficioLote.pas:622</code>). Registros com valor divergente de BS + FAB são rejeitados e listados no resultado (<a href="#MSG037">MSG037</a>), e os demais seguem. <em>Interrupção:</em> arquivo já importado (<a href="#MSG036">MSG036</a>).</li>
+</ul>
 </section>
 
 <section><div class="section-title">5. Jornadas Funcionais (JF014)</div>
 <p>Cada jornada traz objetivo, ator/gatilho, pré e pós-condições, sequência operacional, ações práticas, <strong>regras de negócio da jornada</strong> (texto completo de cada regra), tratamentos e mensagens.</p>
+<p><strong>Como ler esta jornada:</strong> JF014 tem dois caminhos independentes, identificados nos passos como “Individual” e “Lote”. Os dois sucedem a concessão (JF001). Em cada passo, o rótulo “Usuário” ou “Sistema” indica quem executa a ação.</p>
 <div class="legend"><span><span class="ev ev-comprovado">COMPROVADO</span> — no código</span><span><span class="ev ev-inferido">INFERIDO</span> — plausível</span><span><span class="ev ev-pendente">PENDENTE</span> — validar</span></div>
 </section>
 
 <div class="pf-block" id="PF-14"><h4>JF014 (PF-14) — Alteração de Benefício (individual e em lote)</h4>
 <p><strong>Objetivo:</strong> Alterar dados de benefícios concedidos, individualmente ou em lote por planilha.</p>
+<p><strong>Necessidade de negócio:</strong> corrigir dados de um benefício específico ou atualizar os valores de muitos benefícios de uma vez, de forma rastreável e reversível no caso do lote.</p>
 <p><strong>Ator / gatilho:</strong> Analista de benefícios, nas telas Alteração de Dados de Benefícios Concedidos e Alteração de Valor do Benefício em Lote.</p>
 <p><strong>Pré-condições:</strong> Benefícios concedidos; para o lote, planilha no leiaute esperado e ainda não importada.</p>
+<p><strong>Em termos de negócio:</strong> os benefícios existem. Para o lote, a planilha tem as 9 colunas esperadas, e o próprio sistema recusa um arquivo já importado.</p>
 <p><strong>Pós-condições:</strong> BENEFBFCIARIO e HSTBENEFBFCIARIO atualizados; arquivo do lote registrado em HSTARQUIVOALTBENEF.</p>
+<p><strong>Em termos de negócio:</strong> os benefícios passam a refletir os novos dados ou valores. No lote, o arquivo fica registrado com os valores anteriores, o que permite desfazer a importação pelo botão “Desfazer” da tela.</p>
 <p><strong>Sequência operacional:</strong></p>
 <ol>
-<li>Individual: editar os dados do benefício, com datas no formato DD/MM/AAAA. [<a href="#BENEF-RN015">RS015</a>] [<a href="#TRT025">TRT025</a>]</li>
-<li>Individual: confirmar; o sistema informa o sucesso.</li>
-<li>Lote: escolher a planilha; o sistema recusa arquivo já importado. [<a href="#BENEF-RN041">RS041</a>] [<a href="#TRT026">TRT026</a>]</li>
-<li>Lote: validar a planilha; registros com valor divergente de BS + FAB são rejeitados. [<a href="#BENEF-RN040">RS040</a>] [<a href="#TRT027">TRT027</a>]</li>
-<li>Lote: processar os registros válidos.</li>
+<li><strong>Usuário:</strong> Individual: editar os dados do benefício, com datas no formato DD/MM/AAAA. [<a href="#BENEF-RN015">RS015</a>] [<a href="#TRT025">TRT025</a>]<br>O analista seleciona o beneficiário e o benefício e edita, entre outros campos, DER, DIB, DIP, DIB anterior, valores do benefício (anterior, inicial e bases 1 a 3), data final, data de encerramento, plano contábil, perfil de investimento, NB INSS, valor SRB, NUP, tempo de serviço e as marcas “Dentro do Convênio” e “Benefício Lei 142” (<code>FAlteraBeneficio.dfm:191-479</code>). As chamadas da crítica de formato de data estão comentadas no código atual (ver RS015).</li>
+<li><strong>Usuário e sistema:</strong> Individual: confirmar; o sistema informa o sucesso.<br>Na confirmação, o sistema grava o benefício (BENEFBFCIARIO) e, se os valores base mudaram, também BENEFPLANOPART (<code>FAlteraBeneficio.pas:430-445</code>). Registra o log e exibe <a href="#MSG035">MSG035</a>.</li>
+<li><strong>Usuário e sistema:</strong> Lote: escolher a planilha; o sistema recusa arquivo já importado. [<a href="#BENEF-RN041">RS041</a>] [<a href="#TRT026">TRT026</a>]<br>Ao escolher o arquivo, o sistema calcula o hash e, se ele já existir entre os arquivos importados, exibe <a href="#MSG036">MSG036</a>, limpa a escolha e não habilita a validação.</li>
+<li><strong>Sistema:</strong> Lote: validar a planilha; registros com valor divergente de BS + FAB são rejeitados. [<a href="#BENEF-RN040">RS040</a>] [<a href="#TRT027">TRT027</a>]<br>Cada linha é conferida. O sistema verifica se a matrícula e o número de processo existem, se os dados obrigatórios estão preenchidos e, para benefícios que exigem BS/FAB, se o valor não supera BS + FAB em mais de 0,02. As falhas aparecem no quadro “Resultado” com os totais de inconsistências, de registros OK e de registros da planilha (<code>FAlteraBeneficioLote.pas:203-412</code>).</li>
+<li><strong>Usuário e sistema:</strong> Lote: processar os registros válidos.<br>Ao clicar em “Importa”, o sistema registra o arquivo e, para cada benefício válido, os valores novos e os anteriores. Atualiza os valores em BENEFBFCIARIO (SRB, BS e FAB atuais e totais, valor atual e valor total), cria o log de ocorrência e exibe “Arquivo importado com sucesso.” (<code>FAlteraBeneficioLote.pas:505-622</code>).</li>
 </ol>
 <p><strong>Ações práticas:</strong></p>
 <div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
@@ -190,6 +226,15 @@
 <p><strong>Mensagens:</strong> <a href="#MSG034">MSG034</a>, <a href="#MSG035">MSG035</a>, <a href="#MSG036">MSG036</a>, <a href="#MSG037">MSG037</a></p>
 <p><strong>Telas:</strong> Alteração de Dados de Benefícios Concedidos (<code>FAlteraBeneficio.dfm</code>), Alteração de Valor do Benefício em Lote (<code>FAlteraBeneficioLote.dfm</code>)</p>
 <p><strong>Dependências:</strong> Sucede <a href="uc301.html#PF-01">JF001</a>.</p>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span> — informações que o repositório não comprova ou que divergem entre fontes. O texto existente foi mantido; os itens abaixo dependem de validação humana.</p>
+<ul>
+<li>Desfazer importação: a tela de lote tem o botão “Desfazer”. Ele pede confirmação, restaura os valores anteriores gravados em HSTARQUIVOALTBENEFDET e exclui o registro do arquivo (<code>FAlteraBeneficioLote.pas:720-806</code>). Esse comportamento não está catalogado como regra, TRT ou MSG.</li>
+<li>HSTBENEFBFCIARIO: a pós-condição cita a atualização do histórico, mas não foi localizada gravação nessa tabela em <code>FAlteraBeneficio.pas</code> nem em <code>FAlteraBeneficioLote.pas</code>. Falta confirmar se a atualização ocorre indiretamente (por exemplo, na criação do log de ocorrência).</li>
+<li>Gravação de BENEFPLANOPART (valores base 1 a 3) na alteração individual (<code>FAlteraBeneficio.pas:430-445</code>): não consta da persistência documentada.</li>
+<li>Mensagens do lote não catalogadas como MSG: “Arquivo não está no formato válido.” (<code>:416</code>), matrícula ou processo não localizados e dados obrigatórios faltando (<code>:219, 238, 287, 307</code>), “Arquivo importado com sucesso.” (<code>:622</code>), “Erro ao atualizar dados de benefício.” (<code>:635</code>) e as do “Desfazer” (<code>:724, 806</code>).</li>
+<li>Significado das siglas BS, FAB, NUP e confirmação de SRB e DIP.</li>
+</ul>
+</div>
 <div class="note note-info"><p><strong>Registro original do processo PF-14</strong></p><p><strong>Forms de entrada:</strong> <code>FAlteraBeneficio.dfm</code>, <code>FAlteraBeneficioLote.dfm</code></p><p><strong>Lógica de processamento:</strong> Valida datas (DD/MM/AAAA); atualiza dados do benefício; lote via arquivo de matrículas</p><p><strong>Saídas:</strong> Benefícios alterados</p><p><strong>Persistência (tabelas escritas):</strong> BENEFBFCIARIO, HSTBENEFBFCIARIO</p><p><strong>Evidência:</strong> <code>BENEFICIOPREV/Fontes/FAlteraBeneficio.pas:249,456</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
 </div>
 

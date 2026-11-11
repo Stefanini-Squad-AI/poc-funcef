@@ -49,6 +49,32 @@
 <ul>
 <li><a href="#PF-04"><strong>JF004 — Desfazer Operações de Benefícios</strong></a>: Desfazer a última operação feita sobre um benefício (concessão, renovação, reabertura, desdobramento, etc.), restaurando os valores e excluindo os efeitos gravados.</li>
 </ul>
+<p><strong>Necessidade de negócio:</strong> operações sobre um benefício às vezes são registradas por engano ou precisam ser refeitas: uma concessão, uma renovação, uma reabertura, um desdobramento, uma liberação e outras. Este caso de uso permite reverter a <em>última</em> operação feita sobre o benefício e devolvê-lo à situação anterior. O sistema só permite a reversão enquanto ela não afeta pagamentos já feitos (<a href="#BENEF-RN028">RS028</a>, <a href="#BENEF-RN029">RS029</a>).</p>
+<p><strong>Quem inicia:</strong> o analista de benefícios, pela opção de desfazer operações de benefícios do menu principal (<code>FPrincipal.pas:1865-1870</code>), que abre a tela Desfazer Operações de Benefícios.</p>
+<p><strong>Resultado esperado:</strong> o valor do benefício e a vigência da contribuição voltam ao que eram antes da operação. Os registros que a operação tinha gerado (históricos, descontos temporários, prévia da folha, correção monetária) são excluídos. Se o benefício já foi pago no período ou a folha com os acertos do desdobramento já foi executada, nada é alterado e o usuário é avisado.</p>
+<p><strong>Termos, siglas e componentes citados nesta página</strong> — explicados na primeira vez em que aparecem; a coluna “Fonte” indica onde a explicação foi conferida no repositório:</p>
+<div class="table-wrap"><table><thead><tr><th>Termo</th><th>O que significa</th><th>Fonte</th></tr></thead><tbody>
+<tr><td><strong>PARAMAPREV</strong></td><td>Tabela de parâmetros gerais do módulo, lida quando o módulo é iniciado. Entre outros pontos, indica se a integração contábil está ligada (FLGINTCONTAB = 1, regra RS027).</td><td><code>FPrincipal.pas:928-930</code>; <a href="uc301.html#BENEF-RN027">RS027</a></td></tr>
+<tr><td><strong>Tipo de previdência e fundação do usuário</strong></td><td>O tipo de previdência diz se a entidade é uma fundação ou um instituto: com FLGTIPOPREVIDENC = 'I', as telas trocam “Fundação/Patrocinadora/Plano” por “Instituto/Entidade/Regime” (RS026). A fundação do usuário (IDFUNDACAO) limita os dados que ele consulta: cada usuário só vê os dados da sua fundação (RS045).</td><td><code>FPrincipal.pas:598-775, 566-567</code></td></tr>
+<tr><td><strong>PARTPREVPLAN</strong></td><td>Vínculo do participante com um plano previdenciário. Guarda a situação do participante no plano e as datas desse vínculo.</td><td><a href="dados.html">🗄️ Dados</a></td></tr>
+<tr><td><strong>ELEGPATRO</strong></td><td>Dados de elegibilidade do participante na patrocinadora (tabela PATRO), como o tempo de serviço e a situação funcional.</td><td><a href="dados.html">🗄️ Dados</a></td></tr>
+<tr><td><strong>EVENTOGERADOR</strong></td><td>Catálogo dos eventos que dão origem a benefícios (por exemplo, aposentadoria, falecimento e reclusão). É cadastrado por fundação e agrupado pelo código interno FLGINTERNO. O menu de eventos é montado a partir dele (RS002).</td><td><a href="dados.html">🗄️ Dados</a>; <code>FPrincipal.pas:1038-1387</code></td></tr>
+<tr><td><strong>CMAdmPrev</strong></td><td>Componente externo do framework CM (pasta <code>..\..\Cm\CMAdmPrev\</code>). Reúne os módulos de dados de cálculo e concessão (DAPrev), o cálculo retroativo em lote, o cadastro de mantenedoras e o de UF do INSS. Este módulo abre telas desse componente e delega a ele os cálculos. A lógica interna do componente não faz parte da evidência desta documentação.</td><td><a href="integracoes.html">🔗 Integrações</a>; <a href="lacunas.html">🔍 Lacunas</a></td></tr>
+<tr><td><strong>UAdmPrev / UBeneficio</strong></td><td>Bibliotecas de regras de outro módulo, chamadas pelas telas deste módulo. A UAdmPrev concentra regras de cálculo e concessão, como a verificação do limite de valor e de percentual do benefício e a criação do log de ocorrência. A UBeneficio concentra regras de benefício, como o cálculo do benefício mínimo.</td><td><a href="lacunas.html">🔍 Lacunas</a> (Dependências externas)</td></tr>
+<tr><td><strong>Folha de Benefícios</strong></td><td>Folha mensal de pagamento dos benefícios, que fica no módulo FOLHA. Este módulo se comunica com ela pelas tabelas PREVIA (prévia de cálculo da folha) e LISTAFOLHABENEF. A finalidade exata dessa interface é <span class="ev ev-inferido">INFERIDO</span>, porque a implementação da folha não foi analisada.</td><td><a href="integracoes.html">🔗 Integrações</a>; <a href="dados.html">🗄️ Dados</a></td></tr>
+<tr><td><strong>LOGTOTALPREV</strong></td><td>Log de auditoria do TotalPREV. As operações de negócio deste módulo ficam registradas nele com o código de módulo 454, o usuário, a descrição da operação e a data (RS025).</td><td><code>UModulo.pas:64-88</code></td></tr>
+<tr><td><strong>MOVBENEF e tipo de movimento (TIPOMOV)</strong></td><td>MOVBENEF guarda os movimentos do benefício (DIB, data final, retenção). O campo TIPOMOV indica qual operação gerou o movimento (renovação, reabertura, retenção, encerramento, desdobramento, concessão, falecimento, liberação de retido, revisão, reversão ou alteração manual). É por ele que o sistema escolhe como desfazer (RS030).</td><td><a href="dados.html">🗄️ Dados</a>; <a href="#BENEF-RN030">RS030</a></td></tr>
+<tr><td><strong>Log de ocorrência</strong></td><td>Registro com os valores anteriores à operação, como o valor atual anterior (VALORATUALANT) e a data final anterior da contribuição (DATAFINALANT). O desfazimento usa esses valores para restaurar o benefício. A criação do log é feita pela biblioteca UAdmPrev (CriaLogOcorrencia).</td><td><a href="#BENEF-RN011">RS011</a>, <a href="#BENEF-RN013">RS013</a>; <a href="lacunas.html">🔍 Lacunas</a></td></tr>
+<tr><td><strong>VLBENEFPGTO</strong></td><td>Valor do benefício efetivamente pago em um mês, gravado no histórico (HSTBENEFBFCIARIO). Valor maior que zero no período afetado indica que já houve pagamento.</td><td><a href="#BENEF-RN028">RS028</a></td></tr>
+<tr><td><strong>FLGCONCESSAO</strong></td><td>Marca, nos históricos do benefício e da contribuição, os registros gerados pela concessão (= 1). Os demais são registros de pré-concessão.</td><td><a href="#BENEF-RN010">RS010</a></td></tr>
+<tr><td><strong>FLGENVIADO e lote da folha</strong></td><td>Indica se o lote da Folha de Benefícios com os acertos do desdobramento já foi enviado (= 1). O vínculo entre o histórico e o lote fica em LOTEXHSTFOLHABENEF.</td><td><a href="#BENEF-RN029">RS029</a></td></tr>
+<tr><td><strong>BENEFBFCIARIO / HSTBENEFBFCIARIO</strong></td><td>Cadastro central do benefício (valor, situação, processo e plano) e o seu histórico mensal (mês, valor previsto e lote).</td><td><a href="dados.html">🗄️ Dados</a></td></tr>
+<tr><td><strong>CONTRIBPREVPARTP / HSTCONTRIBPREV</strong></td><td>Contribuição de cada participante (com data final e indicador de cobrança) e o histórico dessas contribuições.</td><td><a href="dados.html">🗄️ Dados</a></td></tr>
+<tr><td><strong>PROCESSOBENEF</strong></td><td>Processo de benefício: número do processo (NUMEROPROCESSO) e situação do processo (IDSITPROCESSO).</td><td><a href="dados.html">🗄️ Dados</a></td></tr>
+<tr><td><strong>TMPDESC, PREVIA, HISTMOVRESERVA, HSTPERCGRUPO</strong></td><td>Respectivamente: descontos temporários do lote de concessão, prévia de cálculo da folha, histórico de movimentação de reservas e histórico de percentual em grupo.</td><td><a href="dados.html">🗄️ Dados</a></td></tr>
+<tr><td><strong>Pensão Reg/Replan</strong></td><td>Pensão dos planos Reg/Replan, cujo percentual é de 50% mais 10% por dependente, limitado a 80%.</td><td><a href="#BENEF-RN034">RS034</a></td></tr>
+<tr><td><strong>BS / FAB</strong></td><td>Duas parcelas do valor do benefício, gravadas em campos próprios (por exemplo, VLRBSATUAL e VLRFABATUAL em BENEFBFCIARIO). O significado das siglas não está descrito no repositório <span class="ev ev-pendente">PENDENTE</span>.</td><td><code>FAlteraBeneficioLote.pas:124-128, 573-580</code></td></tr>
+</tbody></table></div>
 </section>
 
 <section><div class="section-title">3. Pré-condições</div>
@@ -59,9 +85,14 @@
 <li>Participantes, planos (PARTPREVPLAN), elegibilidade (ELEGPATRO), benefícios e eventos geradores (EVENTOGERADOR) cadastrados.</li>
 <li>Componentes externos disponíveis quando a jornada os usa: CMAdmPrev (cálculo/concessão/retroativo), bibliotecas UAdmPrev/UBeneficio, Folha de Benefícios (ver <a href="integracoes.html">🔗 Integrações</a>).</li>
 </ul>
+<p><strong>O que as pré-condições gerais significam na prática:</strong> o usuário precisa ter acesso ao módulo. Ao iniciar, o sistema precisa ler os parâmetros da entidade: se a integração contábil está ligada (RS027) e se a entidade é fundação ou instituto (RS026). Também precisa saber a qual fundação o usuário pertence, porque todas as consultas de negócio são filtradas por ela (<a href="#BENEF-RN045">RS045</a>). Além disso, os cadastros básicos já devem existir: participantes, seus planos, seus dados de elegibilidade, os benefícios e o catálogo de eventos geradores. Os componentes externos (CMAdmPrev, UAdmPrev/UBeneficio e Folha de Benefícios) só são exigidos pelas jornadas que os usam, conforme indicado em cada jornada.</p>
 <p><strong>Por jornada:</strong></p>
 <ul>
 <li><a href="#PF-04">JF004</a>: Benefício com movimento (MOVBENEF) e log de ocorrência com os valores anteriores; benefício não pago no período afetado.</li>
+</ul>
+<p><strong>Pré-condições por jornada, em termos de negócio:</strong></p>
+<ul>
+<li><a href="#PF-04">JF004</a>: o benefício precisa ter um movimento registrado (MOVBENEF), que indica qual foi a última operação. Também precisa haver um log de ocorrência com os valores de antes dessa operação, senão não há para onde voltar. A condição “benefício não pago no período afetado” não é um passo prévio do usuário: o próprio sistema a confere durante a jornada (passo 2, <a href="#BENEF-RN028">RS028</a>) e interrompe se ela não for atendida.</li>
 </ul>
 </section>
 
@@ -69,28 +100,37 @@
 <ul>
 <li><a href="#PF-04">JF004</a>: Valores e vigências anteriores restaurados; históricos derivados excluídos; contribuições reabertas.</li>
 </ul>
+<p><strong>Resultado de negócio:</strong></p>
+<ul>
+<li><a href="#PF-04">JF004</a> — <em>conclusão com sucesso:</em> o benefício volta ao valor anterior (<a href="#BENEF-RN011">RS011</a>) e a contribuição volta a ter a data final anterior, ou seja, fica de novo vigente (<a href="#BENEF-RN013">RS013</a>). Os históricos e registros gerados pela operação são excluídos (<a href="#BENEF-RN012">RS012</a>). Só são tocados os registros marcados como gerados pela concessão (<a href="#BENEF-RN010">RS010</a>).</li>
+<li><a href="#PF-04">JF004</a> — <em>interrupção sem alteração:</em> se o benefício já foi pago no período (<a href="#MSG003">MSG003</a>) ou a folha com os acertos do desdobramento já foi executada (<a href="#MSG004">MSG004</a>), a operação não é desfeita. Em erro de banco, a transação é revertida (<a href="#TRT006">TRT006</a>).</li>
+</ul>
 </section>
 
 <section><div class="section-title">5. Jornadas Funcionais (JF004)</div>
 <p>Cada jornada traz objetivo, ator/gatilho, pré e pós-condições, sequência operacional, ações práticas, <strong>regras de negócio da jornada</strong> (texto completo de cada regra), tratamentos e mensagens.</p>
+<p><strong>Como ler esta jornada:</strong> JF004 é a única jornada deste caso de uso. Ela reverte operações feitas em outras jornadas: concessão (JF001), desdobramento (JF008), reabertura/renovação (JF009) e liberação (JF010). Em cada passo, o rótulo “Usuário” ou “Sistema” indica quem executa a ação.</p>
 <div class="legend"><span><span class="ev ev-comprovado">COMPROVADO</span> — no código</span><span><span class="ev ev-inferido">INFERIDO</span> — plausível</span><span><span class="ev ev-pendente">PENDENTE</span> — validar</span></div>
 </section>
 
 <div class="pf-block" id="PF-04"><h4>JF004 (PF-04) — Desfazer Operações de Benefícios</h4>
 <p><strong>Objetivo:</strong> Desfazer a última operação feita sobre um benefício (concessão, renovação, reabertura, desdobramento, etc.), restaurando os valores e excluindo os efeitos gravados.</p>
+<p><strong>Necessidade de negócio:</strong> corrigir uma operação registrada indevidamente sem ajustes manuais na base, garantindo que os registros gerados por ela também sejam removidos e que nenhum pagamento já feito seja afetado.</p>
 <p><strong>Ator / gatilho:</strong> Analista de benefícios, na tela Desfazer Operações de Benefícios.</p>
 <p><strong>Pré-condições:</strong> Benefício com movimento (MOVBENEF) e log de ocorrência com os valores anteriores; benefício não pago no período afetado.</p>
+<p><strong>Em termos de negócio:</strong> existe uma operação registrada sobre o benefício, e o sistema guardou os valores de antes dela. A ausência de pagamento no período é conferida pelo próprio sistema no passo 2.</p>
 <p><strong>Pós-condições:</strong> Valores e vigências anteriores restaurados; históricos derivados excluídos; contribuições reabertas.</p>
+<p><strong>Em termos de negócio:</strong> o benefício e a contribuição ficam como estavam antes da operação. Quando um bloqueio de pagamento ou de folha impede o desfazimento, nada é alterado (<a href="#TRT003">TRT003</a>, <a href="#TRT004">TRT004</a>).</p>
 <p><strong>Sequência operacional:</strong></p>
 <ol>
-<li>Selecionar o processo e o movimento a desfazer; o sistema identifica o tipo do movimento e aplica o tratamento correspondente. [<a href="#BENEF-RN030">RS030</a>]</li>
-<li>O sistema verifica se o benefício já foi pago no período; se sim, interrompe. [<a href="#BENEF-RN028">RS028</a>] [<a href="#TRT003">TRT003</a>]</li>
-<li>Para desdobramento, verifica se a folha com os acertos já foi executada; se sim, interrompe. [<a href="#BENEF-RN029">RS029</a>] [<a href="#TRT004">TRT004</a>]</li>
-<li>Considera apenas os registros gerados pela concessão. [<a href="#BENEF-RN010">RS010</a>]</li>
-<li>Restaura o valor atual do benefício e a data final da contribuição a partir do log. [<a href="#BENEF-RN011">RS011</a>] [<a href="#BENEF-RN013">RS013</a>]</li>
-<li>Na pensão Reg/Replan, restaura os valores usados no percentual por dependente. [<a href="#BENEF-RN034">RS034</a>]</li>
-<li>Exclui históricos derivados, inclusive a correção monetária. [<a href="#BENEF-RN012">RS012</a>] [<a href="#TRT005">TRT005</a>]</li>
-<li>Em erro de gravação, a transação é revertida. [<a href="#TRT006">TRT006</a>]</li>
+<li><strong>Usuário e sistema:</strong> Selecionar o processo e o movimento a desfazer; o sistema identifica o tipo do movimento e aplica o tratamento correspondente. [<a href="#BENEF-RN030">RS030</a>]<br>O usuário escolhe o processo e o movimento. O tipo do movimento (TIPOMOV) diz qual operação será revertida, e cada tipo tem um tratamento próprio.</li>
+<li><strong>Sistema:</strong> O sistema verifica se o benefício já foi pago no período; se sim, interrompe. [<a href="#BENEF-RN028">RS028</a>] [<a href="#TRT003">TRT003</a>]<br>Se algum mês do período afetado tem valor pago (VLBENEFPGTO &gt; 0), o sistema exibe <a href="#MSG003">MSG003</a> (“Benefício já foi pago no período de … a …”) e não altera nada.</li>
+<li><strong>Sistema:</strong> Para desdobramento, verifica se a folha com os acertos já foi executada; se sim, interrompe. [<a href="#BENEF-RN029">RS029</a>] [<a href="#TRT004">TRT004</a>]<br>Vale só quando o movimento é um desdobramento. Se o lote da folha já foi enviado (FLGENVIADO = 1) ou tem valor pago, o sistema exibe <a href="#MSG004">MSG004</a> e interrompe.</li>
+<li><strong>Sistema:</strong> Considera apenas os registros gerados pela concessão. [<a href="#BENEF-RN010">RS010</a>]<br>Só os históricos com FLGCONCESSAO = 1 entram no desfazimento; os registros de pré-concessão ficam como estão.</li>
+<li><strong>Sistema:</strong> Restaura o valor atual do benefício e a data final da contribuição a partir do log. [<a href="#BENEF-RN011">RS011</a>] [<a href="#BENEF-RN013">RS013</a>]<br>O valor atual (VALORATUAL) recebe o valor anterior do log (VALORATUALANT). A data final da contribuição (CONTRIBPREVPARTP.DATAFINAL) recebe a data anterior (DATAFINALANT), o que reabre a vigência da contribuição.</li>
+<li><strong>Sistema:</strong> Na pensão Reg/Replan, restaura os valores usados no percentual por dependente. [<a href="#BENEF-RN034">RS034</a>]<br>Nessa pensão, o percentual é 50% mais 10% por dependente, limitado a 80%. O sistema restaura os valores BS/FAB do titular usados nesse cálculo.</li>
+<li><strong>Sistema:</strong> Exclui históricos derivados, inclusive a correção monetária. [<a href="#BENEF-RN012">RS012</a>] [<a href="#TRT005">TRT005</a>]<br>São excluídos os históricos de benefício e de contribuição, a movimentação de reservas (HISTMOVRESERVA), o percentual de grupo (HSTPERCGRUPO), os descontos temporários (TMPDESC), a prévia da folha (PREVIA) e a correção monetária. Se a exclusão da correção monetária falhar, o sistema exibe <a href="#MSG005">MSG005</a> e interrompe.</li>
+<li><strong>Sistema:</strong> Em erro de gravação, a transação é revertida. [<a href="#TRT006">TRT006</a>]<br>Em erro de banco durante a gravação, toda a transação é desfeita (RollBack) e o form exibe a mensagem do erro. O texto dessa mensagem não está catalogado.</li>
 </ol>
 <p><strong>Ações práticas:</strong></p>
 <div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
@@ -251,6 +291,14 @@
 <p><strong>Mensagens:</strong> <a href="#MSG003">MSG003</a>, <a href="#MSG004">MSG004</a>, <a href="#MSG005">MSG005</a></p>
 <p><strong>Telas:</strong> Desfazer Operações de Benefícios (<code>FDesfazConcessaoBenefNOVO.dfm</code>)</p>
 <p><strong>Dependências:</strong> Reverte <a href="uc301.html#PF-01">JF001</a>, <a href="uc305.html#PF-08">JF008</a>, <a href="uc309.html#PF-09">JF009</a> e <a href="uc306.html#PF-10">JF010</a>.</p>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span> — informações que o repositório não comprova ou que divergem entre fontes. O texto existente foi mantido; os itens abaixo dependem de validação humana.</p>
+<ul>
+<li>Correspondência entre cada código de TIPOMOV (0, 1, 3, 4, 5, 7, 9, 12, 13, 16, 17) e o nome da operação: <a href="#BENEF-RN030">RS030</a> lista os códigos e os nomes, mas não a correspondência um a um.</li>
+<li>Estado do benefício quando o desfazimento para em <a href="#TRT005">TRT005</a> (erro ao excluir a correção monetária): o código sai com Exit, e falta confirmar se as alterações anteriores ficam pendentes de gravação ou se são revertidas.</li>
+<li>Versão ativa da tela: existe a variante <code>_FDesfazConcessaoBenefNOVO.pas</code> além de <code>FDesfazConcessaoBenefNOVO.pas</code>. A documentação se baseia na versão sem sublinhado (ver <a href="lacunas.html">🔍 Lacunas</a>).</li>
+<li>Significado de negócio das siglas BS e FAB.</li>
+</ul>
+</div>
 <div class="note note-info"><p><strong>Registro original do processo PF-04</strong></p><p><strong>Forms de entrada:</strong> <code>FDesfazConcessaoBenefNOVO.dfm</code> (6.940 linhas)</p><p><strong>Lógica de processamento:</strong> Restaura valores do log (qryLogOcorrencia), exclui históricos com FLGCONCESSAO=1, reabre contribuições, exclui TMPDESC/PREVIA/HISTMOVRESERVA/HSTPERCGRUPO</p><p><strong>Saídas:</strong> Concessão desfeita</p><p><strong>Persistência (tabelas escritas):</strong> U/D em BENEFBFCIARIO, HSTBENEFBFCIARIO, HSTCONTRIBPREV, CONTRIBPREVPARTP, MOVBENEF, PROCESSOBENEF, TMPDESC, PREVIA</p><p><strong>Evidência:</strong> <code>BENEFICIOPREV/Fontes/FDesfazConcessaoBenefNOVO.pas:913-3628</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
 </div>
 

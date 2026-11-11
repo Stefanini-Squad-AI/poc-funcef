@@ -50,6 +50,32 @@
 <li><a href="#PF-08"><strong>JF008 — Desdobramento de Benefício</strong></a>: Desdobrar um benefício entre beneficiários, gerando novos benefícios e processos, aplicando a regra contábil, reajustando desde a DIP original e gerando dívida quando houver.</li>
 <li><a href="#PF-13"><strong>JF013 — Controle / Histórico de Dívidas de Benefícios</strong></a>: Parametrizar e controlar o parcelamento das dívidas de benefícios, incluindo o reajuste das dívidas vinculadas ao plano REG REPLAN.</li>
 </ul>
+<p><strong>Necessidade de negócio:</strong> um benefício concedido pode precisar ser dividido (“desdobrado”) entre beneficiários. Cada um passa a ter seu próprio benefício e seu próprio processo, com valor calculado pela regra de cálculo do benefício e contabilização definida por regra automática. Quando o desdobramento gera valores a devolver, o sistema registra uma dívida de benefício. Este caso de uso cobre o desdobramento (JF008) e a parametrização e o controle do parcelamento dessas dívidas (JF013).</p>
+<p><strong>Quem inicia:</strong> o analista de benefícios. O desdobramento começa pela opção Desdobramento de Benefício do menu principal (<code>FPrincipal.pas:1851-1856</code>). A parametrização do parcelamento começa pela tela Parametrização de Parcelamento de Dívida de Benefícios (<code>FPrincipal.pas:2303-2307</code>). O registro e a atualização das dívidas acontecem automaticamente durante o desdobramento.</p>
+<p><strong>Resultado esperado:</strong> os novos benefícios e processos ficam gravados com conta bancária, rubricas individuais e contabilização definidas. Quando houver dívida, ela fica registrada e controlada conforme os parâmetros de parcelamento vigentes.</p>
+<p><strong>Termos, siglas e componentes citados nesta página</strong> — explicados na primeira vez em que aparecem; a coluna “Fonte” indica onde a explicação foi conferida no repositório:</p>
+<div class="table-wrap"><table><thead><tr><th>Termo</th><th>O que significa</th><th>Fonte</th></tr></thead><tbody>
+<tr><td><strong>PARAMAPREV</strong></td><td>Tabela de parâmetros gerais do módulo, lida quando o módulo é iniciado. Entre outros pontos, indica se a integração contábil está ligada (FLGINTCONTAB = 1, regra RS027).</td><td><code>FPrincipal.pas:928-930</code>; <a href="uc301.html#BENEF-RN027">RS027</a></td></tr>
+<tr><td><strong>Tipo de previdência e fundação do usuário</strong></td><td>O tipo de previdência diz se a entidade é uma fundação ou um instituto: com FLGTIPOPREVIDENC = 'I', as telas trocam “Fundação/Patrocinadora/Plano” por “Instituto/Entidade/Regime” (RS026). A fundação do usuário (IDFUNDACAO) limita os dados que ele consulta: cada usuário só vê os dados da sua fundação (RS045).</td><td><code>FPrincipal.pas:598-775, 566-567</code></td></tr>
+<tr><td><strong>PARTPREVPLAN</strong></td><td>Vínculo do participante com um plano previdenciário. Guarda a situação do participante no plano e as datas desse vínculo.</td><td><a href="dados.html">🗄️ Dados</a></td></tr>
+<tr><td><strong>ELEGPATRO</strong></td><td>Dados de elegibilidade do participante na patrocinadora (tabela PATRO), como o tempo de serviço e a situação funcional.</td><td><a href="dados.html">🗄️ Dados</a></td></tr>
+<tr><td><strong>EVENTOGERADOR</strong></td><td>Catálogo dos eventos que dão origem a benefícios (por exemplo, aposentadoria, falecimento e reclusão). É cadastrado por fundação e agrupado pelo código interno FLGINTERNO. O menu de eventos é montado a partir dele (RS002).</td><td><a href="dados.html">🗄️ Dados</a>; <code>FPrincipal.pas:1038-1387</code></td></tr>
+<tr><td><strong>CMAdmPrev</strong></td><td>Componente externo do framework CM (pasta <code>..\..\Cm\CMAdmPrev\</code>). Reúne os módulos de dados de cálculo e concessão (DAPrev), o cálculo retroativo em lote, o cadastro de mantenedoras e o de UF do INSS. Este módulo abre telas desse componente e delega a ele os cálculos. A lógica interna do componente não faz parte da evidência desta documentação.</td><td><a href="integracoes.html">🔗 Integrações</a>; <a href="lacunas.html">🔍 Lacunas</a></td></tr>
+<tr><td><strong>UAdmPrev / UBeneficio</strong></td><td>Bibliotecas de regras de outro módulo, chamadas pelas telas deste módulo. A UAdmPrev concentra regras de cálculo e concessão, como a verificação do limite de valor e de percentual do benefício e a criação do log de ocorrência. A UBeneficio concentra regras de benefício, como o cálculo do benefício mínimo.</td><td><a href="lacunas.html">🔍 Lacunas</a> (Dependências externas)</td></tr>
+<tr><td><strong>Folha de Benefícios</strong></td><td>Folha mensal de pagamento dos benefícios, que fica no módulo FOLHA. Este módulo se comunica com ela pelas tabelas PREVIA (prévia de cálculo da folha) e LISTAFOLHABENEF. A finalidade exata dessa interface é <span class="ev ev-inferido">INFERIDO</span>, porque a implementação da folha não foi analisada.</td><td><a href="integracoes.html">🔗 Integrações</a>; <a href="dados.html">🗄️ Dados</a></td></tr>
+<tr><td><strong>LOGTOTALPREV</strong></td><td>Log de auditoria do TotalPREV. As operações de negócio deste módulo ficam registradas nele com o código de módulo 454, o usuário, a descrição da operação e a data (RS025).</td><td><code>UModulo.pas:64-88</code></td></tr>
+<tr><td><strong>Desdobramento</strong></td><td>Divisão de um benefício já concedido entre beneficiários, gerando novos benefícios e processos.</td><td>Registro original PF-08</td></tr>
+<tr><td><strong>Regra de cálculo do benefício</strong></td><td>Fórmula cadastrada para o benefício (identificada por IdRegraCalculo) e executada no desdobramento para obter o valor de cada beneficiário. Em erro, aparece <a href="#MSG018">MSG018</a>.</td><td><a href="#TRT013">TRT013</a></td></tr>
+<tr><td><strong>Limite de valor e usuário autorizador</strong></td><td>A biblioteca UAdmPrev (VerificaVALORLimiteBeneficio) confere se o valor rateado excede o limite do benefício. Se exceder, o desdobramento só prossegue com um usuário autorizador (RS032).</td><td><a href="#BENEF-RN032">RS032</a>; <a href="lacunas.html">🔍 Lacunas</a></td></tr>
+<tr><td><strong>Regra contábil automática</strong></td><td>Regra parametrizada (prmIdRegraContabBenefIndiv) que define a entidade contábil e as contas de débito e de crédito usadas para contabilizar o benefício. Erro ou resultado vazio/inválido impede o desdobramento (RS017).</td><td><a href="#BENEF-RN017">RS017</a></td></tr>
+<tr><td><strong>Nº do Processo no INSS / FLGOBRIGANPROC</strong></td><td>Número do processo do benefício no INSS, obrigatório no desdobramento apenas quando o benefício está marcado com FLGOBRIGANPROC = 1.</td><td><a href="#BENEF-RN014">RS014</a></td></tr>
+<tr><td><strong>DIP</strong></td><td>Sigla usada nas telas ao lado de DER e DIB. Pelo contexto, refere-se à data de início do pagamento <span class="ev ev-inferido">INFERIDO</span>; o repositório não traz a definição.</td><td><code>FDesdobramentoBenef.dfm:3987</code>; <code>FAlteraBeneficio.dfm:191-205</code></td></tr>
+<tr><td><strong>NUMEROPROCESSO (PROCESSOBENEF)</strong></td><td>Número do processo de benefício. No desdobramento, cada benefício gerado recebe um número próprio (RS031).</td><td><a href="#BENEF-RN031">RS031</a></td></tr>
+<tr><td><strong>CONTABANCARIA / RUBRICAINDIV</strong></td><td>Tabelas gravadas no desdobramento. Pelos nomes, guardam a conta bancária do beneficiário e as rubricas individuais do benefício <span class="ev ev-inferido">INFERIDO</span>; não estão descritas em <a href="dados.html">🗄️ Dados</a>.</td><td>Registro original PF-08</td></tr>
+<tr><td><strong>CONTROLEDIVIDABENEFICIO / HSTDIVIDABENEFICIO</strong></td><td>Controle da dívida de benefício e o seu histórico.</td><td><a href="dados.html">🗄️ Dados</a>; <code>FDesdobramentoBenef.pas:7756-7846</code></td></tr>
+<tr><td><strong>PARAMPARCDIVIDABENEFICIO</strong></td><td>Parâmetros de parcelamento das dívidas: funcionalidade (Cálculo ou Desdobramento), fonte pagadora (Funcef ou INSS), faixa de redução de benefício, percentual, quantidade de meses (de/até) e vigência.</td><td><code>FParamDividaBenef.dfm:14-200</code>; <code>FParamDividaBenef.pas:230-290</code></td></tr>
+<tr><td><strong>REG REPLAN não saldada</strong></td><td>Plano cujas dívidas de benefício vinculadas são reajustadas, segundo o registro de alterações do desdobramento.</td><td><code>FDesdobramentoBenef.pas:62</code></td></tr>
+</tbody></table></div>
 </section>
 
 <section><div class="section-title">3. Pré-condições</div>
@@ -60,10 +86,16 @@
 <li>Participantes, planos (PARTPREVPLAN), elegibilidade (ELEGPATRO), benefícios e eventos geradores (EVENTOGERADOR) cadastrados.</li>
 <li>Componentes externos disponíveis quando a jornada os usa: CMAdmPrev (cálculo/concessão/retroativo), bibliotecas UAdmPrev/UBeneficio, Folha de Benefícios (ver <a href="integracoes.html">🔗 Integrações</a>).</li>
 </ul>
+<p><strong>O que as pré-condições gerais significam na prática:</strong> o usuário precisa ter acesso ao módulo. Ao iniciar, o sistema precisa ler os parâmetros da entidade: se a integração contábil está ligada (RS027) e se a entidade é fundação ou instituto (RS026). Também precisa saber a qual fundação o usuário pertence, porque todas as consultas de negócio são filtradas por ela (<a href="#BENEF-RN045">RS045</a>). Além disso, os cadastros básicos já devem existir: participantes, seus planos, seus dados de elegibilidade, os benefícios e o catálogo de eventos geradores. Os componentes externos (CMAdmPrev, UAdmPrev/UBeneficio e Folha de Benefícios) só são exigidos pelas jornadas que os usam, conforme indicado em cada jornada.</p>
 <p><strong>Por jornada:</strong></p>
 <ul>
 <li><a href="#PF-08">JF008</a>: Benefício concedido com beneficiários; regra contábil automática e regra de cálculo parametrizadas.</li>
 <li><a href="#PF-13">JF013</a>: Dívida de benefício gerada (por exemplo, no desdobramento).</li>
+</ul>
+<p><strong>Pré-condições por jornada, em termos de negócio:</strong></p>
+<ul>
+<li><a href="#PF-08">JF008</a>: o benefício a desdobrar já foi concedido e tem beneficiários. O benefício precisa ter regra contábil automática e regra de cálculo cadastradas, porque a falta ou o erro de qualquer uma delas interrompe o desdobramento (<a href="#TRT012">TRT012</a>, <a href="#TRT013">TRT013</a>).</li>
+<li><a href="#PF-13">JF013</a>: para controlar uma dívida, ela já precisa ter sido gerada (por exemplo, no desdobramento). Para parametrizar o parcelamento, não é preciso haver dívida: os parâmetros (faixas, percentual, meses, vigência) podem ser cadastrados antes.</li>
 </ul>
 </section>
 
@@ -72,27 +104,36 @@
 <li><a href="#PF-08">JF008</a>: Novos benefícios e processos gravados; conta bancária, rubricas individuais e controle de dívida atualizados; log gravado.</li>
 <li><a href="#PF-13">JF013</a>: CONTROLEDIVIDABENEFICIO, HSTDIVIDABENEFICIO e PARAMPARCDIVIDABENEFICIO gravados.</li>
 </ul>
+<p><strong>Resultado de negócio de cada jornada:</strong></p>
+<ul>
+<li><a href="#PF-08">JF008</a> — <em>conclusão com sucesso:</em> cada beneficiário passa a ter um benefício e um processo próprios (<a href="#BENEF-RN031">RS031</a>), com valor reajustado desde a DIP original, conta bancária, rubricas individuais e contabilização definida. Quando houver, a dívida é registrada, e a operação fica no log. <em>Interrupções:</em> dado obrigatório faltando (<a href="#TRT011">TRT011</a>), regra contábil inválida (<a href="#TRT012">TRT012</a>), erro na regra de cálculo (<a href="#TRT013">TRT013</a>) ou valor acima do limite sem autorização (<a href="#TRT014">TRT014</a>). Depois de concluído, o desdobramento só pode ser desfeito enquanto a folha com os acertos não tiver sido executada (<a href="#BENEF-RN029">RS029</a>, JF004).</li>
+<li><a href="#PF-13">JF013</a> — os parâmetros de parcelamento ficam cadastrados (PARAMPARCDIVIDABENEFICIO), e as dívidas ficam controladas e historiadas (CONTROLEDIVIDABENEFICIO, HSTDIVIDABENEFICIO).</li>
+</ul>
 </section>
 
 <section><div class="section-title">5. Jornadas Funcionais (JF008, JF013)</div>
 <p>Cada jornada traz objetivo, ator/gatilho, pré e pós-condições, sequência operacional, ações práticas, <strong>regras de negócio da jornada</strong> (texto completo de cada regra), tratamentos e mensagens.</p>
+<p><strong>Como as jornadas deste caso de uso se relacionam:</strong> o desdobramento (JF008) pode gerar uma dívida de benefício. O controle dessa dívida e os parâmetros do seu parcelamento são tratados em JF013. Em cada passo, o rótulo “Usuário” ou “Sistema” indica quem executa a ação.</p>
 <div class="legend"><span><span class="ev ev-comprovado">COMPROVADO</span> — no código</span><span><span class="ev ev-inferido">INFERIDO</span> — plausível</span><span><span class="ev ev-pendente">PENDENTE</span> — validar</span></div>
 </section>
 
 <div class="pf-block" id="PF-08"><h4>JF008 (PF-08) — Desdobramento de Benefício</h4>
 <p><strong>Objetivo:</strong> Desdobrar um benefício entre beneficiários, gerando novos benefícios e processos, aplicando a regra contábil, reajustando desde a DIP original e gerando dívida quando houver.</p>
+<p><strong>Necessidade de negócio:</strong> repartir um benefício entre beneficiários de forma que cada um tenha valor, processo, dados de pagamento e contabilização próprios, preservando o histórico de reajustes desde a data original e registrando eventuais valores a devolver.</p>
 <p><strong>Ator / gatilho:</strong> Analista de benefícios, nas telas Desdobramento de Benefícios para Beneficiários e Dados para o Desdobramento do Benefício.</p>
 <p><strong>Pré-condições:</strong> Benefício concedido com beneficiários; regra contábil automática e regra de cálculo parametrizadas.</p>
+<p><strong>Em termos de negócio:</strong> existe um benefício concedido com beneficiários e o benefício tem as regras de cálculo e de contabilização cadastradas.</p>
 <p><strong>Pós-condições:</strong> Novos benefícios e processos gravados; conta bancária, rubricas individuais e controle de dívida atualizados; log gravado.</p>
+<p><strong>Em termos de negócio:</strong> cada beneficiário tem seu benefício próprio, pronto para pagamento, e eventuais dívidas geradas ficam sob controle (JF013).</p>
 <p><strong>Sequência operacional:</strong></p>
 <ol>
-<li>Selecionar o benefício e os beneficiários.</li>
-<li>Informar os dados do desdobramento (datas, tipo de pagamento e, se exigido, Nº do Processo INSS). [<a href="#BENEF-RN014">RS014</a>] [<a href="#TRT011">TRT011</a>]</li>
-<li>O sistema calcula o valor pela regra de cálculo do benefício. [<a href="#TRT013">TRT013</a>]</li>
-<li>Se o valor rateado exceder o limite, exige autorização. [<a href="#BENEF-RN032">RS032</a>] [<a href="#TRT014">TRT014</a>]</li>
-<li>O sistema aplica a regra contábil automática (entidade e contas D/C). [<a href="#BENEF-RN017">RS017</a>] [<a href="#TRT012">TRT012</a>]</li>
-<li>O sistema gera um número de processo por benefício, reajusta desde a DIP original e gera a dívida, quando houver. [<a href="#BENEF-RN031">RS031</a>]</li>
-<li>O sistema grava a operação e o log. [<a href="#TRT010">TRT010</a>]</li>
+<li><strong>Usuário:</strong> Selecionar o benefício e os beneficiários.<br>Na tela Desdobramento de Benefícios para Beneficiários, o analista localiza o benefício a desdobrar e marca os beneficiários que vão recebê-lo.</li>
+<li><strong>Usuário:</strong> Informar os dados do desdobramento (datas, tipo de pagamento e, se exigido, Nº do Processo INSS). [<a href="#BENEF-RN014">RS014</a>] [<a href="#TRT011">TRT011</a>]<br>Na tela Dados para o Desdobramento do Benefício, são obrigatórios a Data de Requerimento, a Data de Início na Fundação, a Data de Início do Pagamento e o Tipo de Pagamento. O Nº do Processo no INSS é obrigatório só quando o benefício o exige (FLGOBRIGANPROC = 1). A falta de qualquer um exibe a mensagem correspondente (<a href="#MSG010">MSG010</a> a <a href="#MSG014">MSG014</a>) e impede a confirmação.</li>
+<li><strong>Sistema:</strong> O sistema calcula o valor pela regra de cálculo do benefício. [<a href="#TRT013">TRT013</a>]<br>Se a regra de cálculo der erro, o sistema exibe <a href="#MSG018">MSG018</a> com o número da regra e interrompe.</li>
+<li><strong>Sistema:</strong> Se o valor rateado exceder o limite, exige autorização. [<a href="#BENEF-RN032">RS032</a>] [<a href="#TRT014">TRT014</a>]<br>Sem um usuário autorizador, o valor rateado é zerado e o desdobramento é interrompido com <a href="#MSG019">MSG019</a>.</li>
+<li><strong>Sistema:</strong> O sistema aplica a regra contábil automática (entidade e contas D/C). [<a href="#BENEF-RN017">RS017</a>] [<a href="#TRT012">TRT012</a>]<br>O sistema executa as regras que definem a entidade contábil, a conta de débito e a conta de crédito. Erro, resultado vazio ou resultado inválido em qualquer uma delas bloqueia o desdobramento (<a href="#MSG015">MSG015</a>, <a href="#MSG016">MSG016</a>, <a href="#MSG017">MSG017</a>).</li>
+<li><strong>Sistema:</strong> O sistema gera um número de processo por benefício, reajusta desde a DIP original e gera a dívida, quando houver. [<a href="#BENEF-RN031">RS031</a>]<br>Cada benefício gerado recebe um número de processo próprio. Quando há dívida, ela é registrada em CONTROLEDIVIDABENEFICIO, com histórico em HSTDIVIDABENEFICIO (<code>FDesdobramentoBenef.pas:7756-7846</code>).</li>
+<li><strong>Sistema:</strong> O sistema grava a operação e o log. [<a href="#TRT010">TRT010</a>]<br>São gravados os novos benefícios, os históricos, a conta bancária, as rubricas individuais, o controle de dívida e o processo. Se a gravação do log falhar, o erro cai no tratamento geral da transação do desdobramento (<a href="#TRT010">TRT010</a>, <a href="#MSG008">MSG008</a>).</li>
 </ol>
 <p><strong>Ações práticas:</strong></p>
 <div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
@@ -222,19 +263,29 @@
 <p><strong>Mensagens:</strong> <a href="#MSG008">MSG008</a>, <a href="#MSG010">MSG010</a>, <a href="#MSG011">MSG011</a>, <a href="#MSG012">MSG012</a>, <a href="#MSG013">MSG013</a>, <a href="#MSG014">MSG014</a>, <a href="#MSG015">MSG015</a>, <a href="#MSG016">MSG016</a>, <a href="#MSG017">MSG017</a>, <a href="#MSG018">MSG018</a>, <a href="#MSG019">MSG019</a></p>
 <p><strong>Telas:</strong> Desdobramento de Benefícios para Beneficiários (<code>FDesdobramentoBenef.dfm</code>), Dados para o Desdobramento do Benefício ... (<code>FPedeInfRevisao.dfm</code>)</p>
 <p><strong>Dependências:</strong> Sucede <a href="uc301.html#PF-01">JF001</a>; gera a dívida controlada em <a href="#PF-13">JF013</a>; pode ser revertido em <a href="uc302.html#PF-04">JF004</a>.</p>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span> — informações que o repositório não comprova ou que divergem entre fontes. O texto existente foi mantido; os itens abaixo dependem de validação humana.</p>
+<ul>
+<li>Condição em que o desdobramento gera dívida e como o valor da dívida é calculado: o código grava CONTROLEDIVIDABENEFICIO (<code>FDesdobramentoBenef.pas:7776</code>), mas a regra de negócio que decide quando há dívida não está catalogada como BENEF-RN.</li>
+<li>Como é feito o “reajuste desde a DIP original” (índices, período): não há regra catalogada.</li>
+<li>Significado da sigla DIP e papel das tabelas CONTABANCARIA e RUBRICAINDIV: não descritos na documentação do módulo.</li>
+</ul>
+</div>
 <div class="note note-info"><p><strong>Registro original do processo PF-08</strong></p><p><strong>Forms de entrada:</strong> <code>FDesdobramentoBenef.dfm</code> (9.118 linhas), <code>FPedeInfRevisao.dfm</code></p><p><strong>Lógica de processamento:</strong> INSERT BENEFBFCIARIO; aplica regra contábil automática (entidade/conta D/C); reajusta desde DIP original; gera dívida</p><p><strong>Saídas:</strong> Benefício desdobrado entre beneficiários</p><p><strong>Persistência (tabelas escritas):</strong> BENEFBFCIARIO, HSTBENEFBFCIARIO, CONTABANCARIA, RUBRICAINDIV, CONTROLEDIVIDABENEFICIO, PROCESSOBENEF</p><p><strong>Evidência:</strong> <code>BENEFICIOPREV/Fontes/FDesdobramentoBenef.pas:5184-5293</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
 </div>
 
 <div class="pf-block" id="PF-13"><h4>JF013 (PF-13) — Controle / Histórico de Dívidas de Benefícios</h4>
 <p><strong>Objetivo:</strong> Parametrizar e controlar o parcelamento das dívidas de benefícios, incluindo o reajuste das dívidas vinculadas ao plano REG REPLAN.</p>
+<p><strong>Necessidade de negócio:</strong> definir de forma padronizada como uma dívida de benefício é parcelada: em quantos meses, com qual percentual e para qual faixa de redução de benefício, conforme a funcionalidade de origem e a fonte pagadora. Também manter as dívidas existentes controladas e com saldo atualizado.</p>
 <p><strong>Ator / gatilho:</strong> Analista de benefícios, na tela Parametrização de Parcelamento de Dívida de Benefícios.</p>
 <p><strong>Pré-condições:</strong> Dívida de benefício gerada (por exemplo, no desdobramento).</p>
+<p><strong>Em termos de negócio:</strong> para controlar ou reajustar uma dívida, ela já precisa existir. O cadastro dos parâmetros de parcelamento pode ser feito antes de haver dívida.</p>
 <p><strong>Pós-condições:</strong> CONTROLEDIVIDABENEFICIO, HSTDIVIDABENEFICIO e PARAMPARCDIVIDABENEFICIO gravados.</p>
+<p><strong>Em termos de negócio:</strong> os parâmetros de parcelamento ficam vigentes para a combinação de funcionalidade e fonte pagadora, e as dívidas ficam com seu controle e histórico atualizados.</p>
 <p><strong>Sequência operacional:</strong></p>
 <ol>
-<li>Informar os parâmetros de parcelamento da dívida.</li>
-<li>O sistema grava ou atualiza o controle da dívida.</li>
-<li>Para dívidas do plano REG REPLAN, o sistema reajusta o saldo.</li>
+<li><strong>Usuário:</strong> Informar os parâmetros de parcelamento da dívida.<br>Na tela Parametrização de Parcelamento de Dívida de Benefícios, o analista informa a funcionalidade (Cálculo ou Desdobramento), a fonte pagadora (Funcef ou INSS), a faixa de redução de benefício (início e fim), o percentual, a quantidade de meses (de/até) e a vigência (início e fim). A faixa e a quantidade de meses são obrigatórias para Funcef ou Cálculo; o percentual e o início da vigência, sempre (<code>FParamDividaBenef.pas:230-290</code>).</li>
+<li><strong>Sistema:</strong> O sistema grava ou atualiza o controle da dívida.<br>Antes de gravar, o sistema confere os campos e não aceita um cadastro ativo idêntico a outro já existente (<code>FParamDividaBenef.pas:366-399</code>). O botão “Faixas Vigentes” lista as faixas em vigor.</li>
+<li><strong>Sistema:</strong> Para dívidas do plano REG REPLAN, o sistema reajusta o saldo.<br>Segundo o registro de alterações do código, as dívidas vinculadas ao plano REG REPLAN-não Saldada são reajustadas (<code>FDesdobramentoBenef.pas:62</code>). A rotina fica no código do desdobramento, não na tela de parametrização.</li>
 </ol>
 <p><strong>Ações práticas:</strong></p>
 <div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
@@ -250,6 +301,14 @@
 <p><strong>Mensagens:</strong> —</p>
 <p><strong>Telas:</strong> Parametrização de Parcelamento de Dívida de Benefícios (<code>FParamDividaBenef.dfm</code>)</p>
 <p><strong>Dependências:</strong> Sucede <a href="#PF-08">JF008</a>.</p>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span> — informações que o repositório não comprova ou que divergem entre fontes. O texto existente foi mantido; os itens abaixo dependem de validação humana.</p>
+<ul>
+<li>Divisão entre telas: a tela desta jornada (<code>FParamDividaBenef</code>) só grava PARAMPARCDIVIDABENEFICIO. As gravações em CONTROLEDIVIDABENEFICIO e HSTDIVIDABENEFICIO citadas como evidência estão em <code>FDesdobramentoBenef.pas</code>. O menu tem ainda as opções Controle de Dívidas de Benefícios (<code>FrmCtrlDiviBenef_Novo</code>) e Histórico de Dívidas de Benefícios (<code>FrmHstDividaBenef3</code>) (<code>FPrincipal.pas:2286-2299</code>), cujos forms não estão em BENEFICIOPREV/Fontes.</li>
+<li>Como as faixas de redução, o percentual e a quantidade de meses são usados para calcular as parcelas de uma dívida: não comprovado.</li>
+<li>Validação de data final da vigência: a mensagem diz “deverá ser maior que a data atual”, mas é exibida quando a data informada é posterior à data atual (<code>FParamDividaBenef.pas:286-288, 407-432</code>). Falta confirmar a intenção.</li>
+<li>Mensagens da tela não catalogadas como MSG: campos obrigatórios e coerência de meses e vigência (<code>FParamDividaBenef.pas:243-288</code>) e cadastro duplicado (<code>:399</code>).</li>
+</ul>
+</div>
 <div class="note note-info"><p><strong>Registro original do processo PF-13</strong></p><p><strong>Forms de entrada:</strong> <code>FParamDividaBenef.dfm</code></p><p><strong>Lógica de processamento:</strong> INSERT/UPDATE CONTROLEDIVIDABENEFICIO; reajusta dívidas vinculadas a plano REG REPLAN</p><p><strong>Saídas:</strong> Dívidas parametrizadas</p><p><strong>Persistência (tabelas escritas):</strong> CONTROLEDIVIDABENEFICIO, HSTDIVIDABENEFICIO, PARAMPARCDIVIDABENEFICIO</p><p><strong>Evidência:</strong> <code>BENEFICIOPREV/Fontes/FDesdobramentoBenef.pas:7776,8130-8337</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
 </div>
 
