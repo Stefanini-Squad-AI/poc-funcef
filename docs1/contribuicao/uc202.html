@@ -50,6 +50,9 @@
 <li><a href="#PF-02"><strong>JF002 — Recebimento por múltiplos canais</strong></a>: Registrar o recebimento das contribuições cobradas (via folha, empréstimo ou Contas a Receber), baixando contribuições e documentos.</li>
 <li><a href="#PF-08"><strong>JF008 — Tratamento de divergências e inconsistências</strong></a>: Comparar contribuições enviadas e recebidas, identificar e tratar divergências, desfazer documentos e consultar estatísticas de divergência.</li>
 </ul>
+<p><strong>Finalidade de negócio:</strong> Após o envio da cobrança (<a href="uc201.html">UC201</a>), o fundo precisa registrar o efetivo recebimento das contribuições pelos canais — desconto em folha de pagamento, quitação via empréstimo ou baixa no Contas a Receber. Nem sempre o valor recebido coincide com o esperado: descontos parciais, diferenças de arredondamento, devoluções ou inadimplências geram divergências que precisam ser tratadas para manter a integridade das reservas e da contabilidade. JF002 cuida do recebimento (baixa das contribuições e documentos) e JF008 cuida da regularização das divergências entre o que foi cobrado e o que efetivamente voltou.</p>
+<p><strong>Ator / gatilho:</strong> Analista de arrecadação, ao processar o retorno dos canais de cobrança (arquivo de folha, baixa de empréstimo ou retorno do CaR) e ao identificar divergências que precisam de tratamento manual.</p>
+<p><strong>Resultado esperado:</strong> Contribuições recebidas com valor e data de recebimento; documentos baixados no CaR; divergências identificadas e regularizadas; lançamentos contábeis e logs de auditoria gerados.</p>
 </section>
 
 <section><div class="section-title">3. Pré-condições</div>
@@ -66,6 +69,7 @@
 <li><a href="#PF-02">JF002</a>: Contribuições enviadas (<a href="uc201.html#PF-01">JF001</a>) com SITRECEBIMENTO = 1; retorno do canal disponível; período contábil aberto.</li>
 <li><a href="#PF-08">JF008</a>: Contribuições enviadas (<a href="uc201.html#PF-01">JF001</a>) e retornos processados (<a href="#PF-02">JF002</a>); motivo padrão de tratamento cadastrado.</li>
 </ul>
+<p><strong>Por que estas pré-condições:</strong> O recebimento (JF002) só ocorre depois que as contribuições foram enviadas (SITRECEBIMENTO = 1) e há um retorno do canal (arquivo de folha, baixa de empréstimo ou retorno do CaR). O tratamento de divergências (JF008) depende de já haver envio e recebimento para comparar enviado × recebido, e exige o motivo padrão de tratamento parametrizado para atribuir o motivo das regularizações (validação <a href="#TRT040">TRT040</a>).</p>
 </section>
 
 <section><div class="section-title">4. Pós-condições</div>
@@ -73,16 +77,19 @@
 <li><a href="#PF-02">JF002</a>: HSTCONTRIBPREV com VALORRECEBIDO, DATARECEBIMENTO e situação de recebida; DOCUMENTO e LANCTODOCUM baixados; lançamentos contábeis gerados.</li>
 <li><a href="#PF-08">JF008</a>: HSTCONTRIBPREV ajustado; HSTATRASOCONTRIB atualizado; LOGTOTALPREV gravado; documentos desfeitos quando solicitado.</li>
 </ul>
+<p><strong>Significado de negócio:</strong> Após o recebimento (JF002), cada contribuição recebe o valor efetivamente recebido (VALORRECEBIDO), a data de recebimento (DATARECEBIMENTO) e a situação passa a “recebida” (SITRECEBIMENTO ≥ 2); os documentos do CaR são baixados e os lançamentos contábeis refletem a entrada do recurso. Após o tratamento de divergências (JF008), o histórico é ajustado conforme o modo escolhido (cobrar, devolver, descontar no próximo benefício, etc. — <a href="#CONTRIB-RN037">RS037</a>), o rastro de alteração (HSTATRASOCONTRIB) e o log de auditoria (LOGTOTALPREV) registram quem tratou e como; documentos podem ser desfeitos quando a divergência exige reverter a cobrança.</p>
 </section>
 
 <section><div class="section-title">5. Jornadas Funcionais (JF002, JF008)</div>
 <p>Cada jornada traz objetivo, ator/gatilho, pré e pós-condições, sequência operacional, ações práticas, <strong>regras de negócio da jornada</strong> (texto completo de cada regra), tratamentos e mensagens.</p>
 <div class="legend"><span><span class="ev ev-comprovado">COMPROVADO</span> — no código</span><span><span class="ev ev-inferido">INFERIDO</span> — plausível</span><span><span class="ev ev-pendente">PENDENTE</span> — validar</span></div>
+<p><strong>Contexto das jornadas:</strong> JF002 processa o retorno dos canais de cobrança: via folha, o analista informa o mês e a data de recebimento, o sistema seleciona as contribuições enviadas e descontadas em folha (<a href="#CONTRIB-RN024">RS024</a>) e baixa; via empréstimo, o valor em aberto deve igualar o do contrato (<a href="#CONTRIB-RN045">RS045</a>); via CaR, baixa por matrícula. A divergência entre esperado e recebido é aceita dentro de uma margem (<a href="#CONTRIB-RN032">RS032</a>). Três inadimplências consecutivas disparam evento de inadimplência (<a href="#CONTRIB-RN046">RS046</a>). JF008 compara enviado × recebido, oferece 9 modos de tratamento (<a href="#CONTRIB-RN037">RS037</a>), bloqueia cobrança se há ação judicial vigente (<a href="#CONTRIB-RN038">RS038</a>), permite desfazer documentos e consulta estatística de divergências.</p>
 </section>
 
 <div class="pf-block" id="PF-02"><h4>JF002 (PF-02) — Recebimento por múltiplos canais</h4>
 <p><strong>Objetivo:</strong> Registrar o recebimento das contribuições cobradas (via folha, empréstimo ou Contas a Receber), baixando contribuições e documentos.</p>
 <p><strong>Ator / gatilho:</strong> Analista de arrecadação, nas telas <em>Recebimento de Contribuições via Folha</em>, <em>Recebimento de Contribuições Via Empréstimo</em> e <em>Receber Contribuições do Contas a Receber</em>.</p>
+<p><strong>Explicação:</strong> Após o envio (UC201), as contribuições chegam ao canal de cobrança. O recebimento via folha processa o retorno do desconto em folha de pagamento: o sistema seleciona as contribuições enviadas e ainda sem valor recebido, ou já recebidas com data, de origem diferente de 'B' e descontadas em folha (<a href="#CONTRIB-RN024">RS024</a>), e baixa com o valor retornado. Quando marcadas as opções “Efetuar apenas integração” e “Documentos distintos por dia”, os documentos do CaR são gerados por data de recebimento gravada (<a href="#CONTRIB-RN028">RS028</a>). O recebimento via empréstimo quita contribuições com crédito de empréstimo, exigindo que o valor em aberto iguale o do contrato (<a href="#CONTRIB-RN045">RS045</a>). O recebimento via CaR baixa por matrícula, refletindo as baixas registradas no Contas a Receber. A divergência entre valor esperado e recebido é aceita dentro da margem VLRACEITADIVERG (<a href="#CONTRIB-RN032">RS032</a>); fora dela, a contribuição fica como divergência não tratada.</p>
 <p><strong>Pré-condições:</strong> Contribuições enviadas (<a href="uc201.html#PF-01">JF001</a>) com SITRECEBIMENTO = 1; retorno do canal disponível; período contábil aberto.</p>
 <p><strong>Pós-condições:</strong> HSTCONTRIBPREV com VALORRECEBIDO, DATARECEBIMENTO e situação de recebida; DOCUMENTO e LANCTODOCUM baixados; lançamentos contábeis gerados.</p>
 <p><strong>Sequência operacional:</strong></p>
@@ -167,6 +174,7 @@
 <div class="pf-block" id="PF-08"><h4>JF008 (PF-08) — Tratamento de divergências e inconsistências</h4>
 <p><strong>Objetivo:</strong> Comparar contribuições enviadas e recebidas, identificar e tratar divergências, desfazer documentos e consultar estatísticas de divergência.</p>
 <p><strong>Ator / gatilho:</strong> Analista de arrecadação, nas telas <em>Tratamento de Divergência de Contribuição</em>, <em>Consulta de Estatística de Massa</em> e <em>Interface do Desfazer Documento</em>.</p>
+<p><strong>Explicação:</strong> Quando o valor recebido difere do esperado além da margem de aceitação (<a href="#CONTRIB-RN032">RS032</a>), a contribuição fica como divergência não tratada (SITRECEBIMENTO = 3). O analista seleciona um modo de divergência e os filtros (patrocinadora, plano, contribuição, faixas, participante, mês de referência); o sistema compara enviado × recebido e verifica baixas no CAP/CaR. O tratamento oferece 9 modos (<a href="#CONTRIB-RN037">RS037</a>): cobrar via interface ou banco, descontar no próximo benefício, devolver via interface ou banco, acrescentar no próximo benefício, adicionar como aporte, ou ignorar (com ou sem recálculo patronal). Cada modo valida a situação do participante (ativo, aposentado, etc.) e a direção da divergência (pagou a maior ou a menor). Se o beneficiário possui ação judicial de déficit vigente, o sistema não gera cobrança nem desconto (<a href="#CONTRIB-RN038">RS038</a>). O analista também pode desfazer documentos de contribuição e consultar a estatística de massa de divergências.</p>
 <p><strong>Pré-condições:</strong> Contribuições enviadas (<a href="uc201.html#PF-01">JF001</a>) e retornos processados (<a href="#PF-02">JF002</a>); motivo padrão de tratamento cadastrado.</p>
 <p><strong>Pós-condições:</strong> HSTCONTRIBPREV ajustado; HSTATRASOCONTRIB atualizado; LOGTOTALPREV gravado; documentos desfeitos quando solicitado.</p>
 <p><strong>Sequência operacional:</strong></p>

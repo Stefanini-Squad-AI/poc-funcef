@@ -49,6 +49,9 @@
 <ul>
 <li><a href="#PF-07"><strong>JF007 — Provisão para perdas</strong></a>: Calcular, registrar ou desfazer a provisão para perdas de contribuições, individualmente ou em lote, e emitir o relatório de provisão.</li>
 </ul>
+<p><strong>Finalidade de negócio:</strong> Contribuições que foram cobradas mas não recebidas dentro de um prazo configurado representam risco de perda (inadimplência). Contabilmente, o fundo precisa constituir uma provisão para perdas sobre esses valores, aplicando um percentual conforme a faixa de dias de atraso. Este caso de uso calcula essa provisão — individualmente ou em lote por patrocinadora/plano/competência — registra ou desfaz a provisão, gera os lançamentos contábeis correspondentes e emite o relatório de provisão para acompanhamento.</p>
+<p><strong>Ator / gatilho:</strong> Analista contábil, ao constituir/reverter a provisão para perdas do período ou ao emitir o relatório de provisão.</p>
+<p><strong>Resultado esperado:</strong> Provisão para perdas calculada e registrada (PROVISAOPERDASCONTRIBUICAO); lançamentos contábeis gerados; relatório de provisão emitido.</p>
 </section>
 
 <section><div class="section-title">3. Pré-condições</div>
@@ -64,22 +67,26 @@
 <ul>
 <li><a href="#PF-07">JF007</a>: Contribuições em atraso; faixas de provisão parametrizadas.</li>
 </ul>
+<p><strong>Por que estas pré-condições:</strong> A provisão para perdas só faz sentido quando há contribuições em atraso (cobradas mas não recebidas). As faixas de provisão (FAIXASPROVISAOPERDACONTRIB) precisam estar parametrizadas com os percentuais por faixa de dias de atraso, para que o sistema saiba qual percentual aplicar a cada contribuição atrasada (<a href="#CONTRIB-RN042">RS042</a>).</p>
 </section>
 
 <section><div class="section-title">4. Pós-condições</div>
 <ul>
 <li><a href="#PF-07">JF007</a>: PROVISAOPERDASCONTRIBUICAO gravada; lançamentos contábeis gerados; relatório emitido.</li>
 </ul>
+<p><strong>Significado de negócio:</strong> A provisão para perdas (PROVISAOPERDASCONTRIBUICAO) registra o valor provisionado para cada contribuição atrasada, calculado como <code>(TOTALESPERADO / 100) × PERCENTUAL</code> da faixa de dias de atraso (<a href="#CONTRIB-RN042">RS042</a>). Os lançamentos contábeis refletem a constituição/reversão da provisão no razão. O relatório permite acompanhar o volume de provisão por patrocinadora, plano e competência.</p>
 </section>
 
 <section><div class="section-title">5. Jornadas Funcionais (JF007)</div>
 <p>Cada jornada traz objetivo, ator/gatilho, pré e pós-condições, sequência operacional, ações práticas, <strong>regras de negócio da jornada</strong> (texto completo de cada regra), tratamentos e mensagens.</p>
 <div class="legend"><span><span class="ev ev-comprovado">COMPROVADO</span> — no código</span><span><span class="ev ev-inferido">INFERIDO</span> — plausível</span><span><span class="ev ev-pendente">PENDENTE</span> — validar</span></div>
+<p><strong>Contexto da jornada:</strong> JF007 tem três caminhos: (1) provisão em lote — o analista seleciona ano/mês de cobrança, patrocinadora(s) e plano(s) (<a href="#CONTRIB-RN020">RS020</a>); o sistema calcula a provisão por faixas parametrizadas (<a href="#CONTRIB-RN042">RS042</a>), listando matrículas com erro; (2) provisão individual — seleciona a contribuição e confirma registrar ou desfazer; (3) relatório — informa matrícula, parâmetro de pesquisa e mês de cobrança (<a href="#CONTRIB-RN021">RS021</a>).</p>
 </section>
 
 <div class="pf-block" id="PF-07"><h4>JF007 (PF-07) — Provisão para perdas</h4>
 <p><strong>Objetivo:</strong> Calcular, registrar ou desfazer a provisão para perdas de contribuições, individualmente ou em lote, e emitir o relatório de provisão.</p>
 <p><strong>Ator / gatilho:</strong> Analista contábil, nas telas <em>Provisão para Perdas Individual</em>, <em>Provisão para Perdas em Lote</em> e <em>Relatório de Provisão para Perdas</em>.</p>
+<p><strong>Explicação:</strong> Contribuições cobradas e não recebidas dentro do prazo configurado representam risco de perda. A provisão em lote exige competência (ano/mês), ao menos uma patrocinadora e um plano (<a href="#CONTRIB-RN020">RS020</a>); o sistema calcula a provisão sobre o valor total esperado das contribuições atrasadas (SITRECEBIMENTO IN (0,1) com pai SITRECEBIMENTO=4), aplicando o percentual da faixa de dias de atraso: <code>VALORPROV = (TOTALESPERADO / 100) × PERCENTUAL</code> (<a href="#CONTRIB-RN042">RS042</a>), onde os dias de atraso são <code>TRUNC(SYSDATE) − MIN(DATAPREVISAORECE do pai)</code>. A provisão individual permite registrar ou desfazer para uma contribuição específica. O relatório exige matrícula (na pesquisa por participante), ao menos um parâmetro de pesquisa e mês de cobrança (<a href="#CONTRIB-RN021">RS021</a>).</p>
 <p><strong>Pré-condições:</strong> Contribuições em atraso; faixas de provisão parametrizadas.</p>
 <p><strong>Pós-condições:</strong> PROVISAOPERDASCONTRIBUICAO gravada; lançamentos contábeis gerados; relatório emitido.</p>
 <p><strong>Sequência operacional:</strong></p>

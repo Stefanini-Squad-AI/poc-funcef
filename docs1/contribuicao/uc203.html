@@ -49,6 +49,9 @@
 <ul>
 <li><a href="#PF-03"><strong>JF003 — Alimentação de reservas</strong></a>: Alimentar e atualizar as reservas dos participantes por índice de correção, por replanejamento (alimentação rápida) ou pela movimentação padrão de reserva.</li>
 </ul>
+<p><strong>Finalidade de negócio:</strong> As reservas individuais representam o montante acumulado de cada participante que servirá de base para o pagamento de benefícios futuros. À medida que as contribuições são recebidas (<a href="uc202.html">UC202</a>), elas precisam ser alocadas nas reservas; e periodicamente as reservas precisam ser corrigidas por índices (inflação, IPCA-E, etc.) para manter o poder de compra. Este caso de uso alimenta as reservas a partir das contribuições recebidas e atualiza os saldos por índice de correção, por replanejamento (alimentação rápida via procedure) ou pela movimentação padrão de reserva.</p>
+<p><strong>Ator / gatilho:</strong> Analista de reservas, ao processar a alimentação do período ou a correção de reservas por índice.</p>
+<p><strong>Resultado esperado:</strong> Reservas dos participantes (RESERVAPART, RESERVAXPLANO) atualizadas com os movimentos de alimentação/correção; histórico de movimentação (HISTMOVRESERVA) gravado; log de auditoria registrado.</p>
 </section>
 
 <section><div class="section-title">3. Pré-condições</div>
@@ -64,22 +67,26 @@
 <ul>
 <li><a href="#PF-03">JF003</a>: Contribuições recebidas (<a href="uc202.html#PF-02">JF002</a>); índices de correção cadastrados; patrocinadoras, planos e reservas cadastrados.</li>
 </ul>
+<p><strong>Por que estas pré-condições:</strong> A alimentação só faz sentido depois que as contribuições foram recebidas (JF002), pois é o recebimento que gera o montante a alocar. Os índices de correção precisam estar cadastrados (em COTACAOMOEDA) para que a atualização por índice (<a href="#CONTRIB-RN043">RS043</a>) tenha o fator de correção a aplicar. Patrocinadoras, planos e reservas cadastrados definem o escopo da operação.</p>
 </section>
 
 <section><div class="section-title">4. Pós-condições</div>
 <ul>
 <li><a href="#PF-03">JF003</a>: HISTMOVRESERVA, RESERVAPART e RESERVAXPLANO atualizados; log de auditoria gravado.</li>
 </ul>
+<p><strong>Significado de negócio:</strong> Cada movimentação de reserva (alimentação ou correção) é registrada no histórico (HISTMOVRESERVA) para rastreabilidade, e os saldos das reservas do participante (RESERVAPART) e por plano (RESERVAXPLANO) passam a refletir o novo montante — seja pela alocação das contribuições recebidas, seja pela correção pelo índice. O log de auditoria registra quem executou e quando.</p>
 </section>
 
 <section><div class="section-title">5. Jornadas Funcionais (JF003)</div>
 <p>Cada jornada traz objetivo, ator/gatilho, pré e pós-condições, sequência operacional, ações práticas, <strong>regras de negócio da jornada</strong> (texto completo de cada regra), tratamentos e mensagens.</p>
 <div class="legend"><span><span class="ev ev-comprovado">COMPROVADO</span> — no código</span><span><span class="ev ev-inferido">INFERIDO</span> — plausível</span><span><span class="ev ev-pendente">PENDENTE</span> — validar</span></div>
+<p><strong>Contexto da jornada:</strong> JF003 oferece três caminhos: (1) atualização por índice — o analista seleciona patrocinadora(s), plano(s) e reserva(s), informa a data de atualização e o sistema corrige os saldos mês a mês pelo COTVALOR da cotação da moeda (<a href="#CONTRIB-RN043">RS043</a>), podendo desfazer até uma data; (2) alimentação rápida Replan — informa mês inicial/final e opcionalmente o participante, e a procedure alimenta as reservas do período; (3) movimentação padrão — aplica a movimentação padrão de reserva por matrícula, com erros listados no resultado.</p>
 </section>
 
 <div class="pf-block" id="PF-03"><h4>JF003 (PF-03) — Alimentação de reservas</h4>
 <p><strong>Objetivo:</strong> Alimentar e atualizar as reservas dos participantes por índice de correção, por replanejamento (alimentação rápida) ou pela movimentação padrão de reserva.</p>
 <p><strong>Ator / gatilho:</strong> Analista de reservas, nas telas <em>Atualização de Reservas por Índice</em>, <em>Alimentação RÁPIDA de reservas Replan</em> e <em>Movimentação Padrão de Reserva</em>.</p>
+<p><strong>Explicação:</strong> As reservas individuais são o patrimônio acumulado de cada participante no fundo. A atualização por índice corrige os saldos das reservas pela cotação da moeda (COTVALOR) mês a mês: <code>dValorAtualizado = dValorAtualizado × COTVALOR</code> (<a href="#CONTRIB-RN043">RS043</a>); se a reserva tem regra de cálculo, usa RegraNumerica em vez do índice direto. A alimentação rápida Replan executa a procedure <code>StrProcAlimenta</code> para alimentar as reservas do período informado. A movimentação padrão aplica o processamento padrão de reserva por matrícula, listando erros no resultado. Em todos os casos, o histórico de movimentação (HISTMOVRESERVA) é gravado para rastreabilidade.</p>
 <p><strong>Pré-condições:</strong> Contribuições recebidas (<a href="uc202.html#PF-02">JF002</a>); índices de correção cadastrados; patrocinadoras, planos e reservas cadastrados.</p>
 <p><strong>Pós-condições:</strong> HISTMOVRESERVA, RESERVAPART e RESERVAXPLANO atualizados; log de auditoria gravado.</p>
 <p><strong>Sequência operacional:</strong></p>

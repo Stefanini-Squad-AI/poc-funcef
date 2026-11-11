@@ -49,6 +49,9 @@
 <ul>
 <li><a href="#PF-01"><strong>JF001 — Manutenção e cobrança de contribuições (Preparo e Envio)</strong></a>: Selecionar as contribuições do mês de cobrança, calcular os valores, gerar o histórico de cobrança e enviá-las para cobrança (folha, Contas a Receber ou banco), com integração contábil.</li>
 </ul>
+<p><strong>Finalidade de negócio:</strong> Em um fundo de pensão (FUNCEF), participantes e patrocinadoras (empresas) recolhem mensalmente contribuições previdenciárias para alimentar as reservas individuais que pagarão os benefícios futuros. Este caso de uso é o ponto de partida do ciclo mensal de arrecadação: a cada competência (mês/ano), o analista de arrecadação seleciona as contribuições devidas, o sistema calcula os valores conforme as regras de cada plano, gera o histórico de cobrança (HSTCONTRIBPREV) e encaminha os lotes para o canal escolhido — desconto em folha de pagamento, documento no Contas a Receber (CaR) ou boleta bancária. Ao final, as contribuições ficam marcadas como “enviadas” (SITRECEBIMENTO = 1) e aguardam o retorno do canal (recebimento em <a href="uc202.html">UC202</a>).</p>
+<p><strong>Ator / gatilho:</strong> Analista de arrecadação / contribuições previdenciárias, na tela <em>Envio de Contribuições</em> (<code>FPreparaEnvia.dfm</code>), ao iniciar a cobrança da competência.</p>
+<p><strong>Resultado esperado:</strong> Lotes de cobrança gerados e enviados ao canal; documentos e lançamentos contábeis criados; contribuições com SITRECEBIMENTO = 1; controle de último mês preparado atualizado para impedir duplicidade.</p>
 </section>
 
 <section><div class="section-title">3. Pré-condições</div>
@@ -64,22 +67,26 @@
 <ul>
 <li><a href="#PF-01">JF001</a>: Mês/ano e tipo de cobrança definidos; motivo padrão de cobrança parametrizado; participantes com contribuições em CONTRIBPREVPARTP; período contábil aberto para a data de vencimento.</li>
 </ul>
+<p><strong>Por que estas pré-condições:</strong> O preparo só faz sentido quando há uma competência (mês/ano) definida e contribuições cadastradas para os participantes; sem o motivo padrão de cobrança parametrizado, o sistema não sabe qual motivo atribuir aos documentos gerados (validação <a href="#TRT003">TRT003</a>). O período contábil aberto é necessário porque o envio gera lançamentos contábeis (LANCAMENTO) que precisam de um período aberto para serem gravados. As integrações com Folha, CaR e Contabilidade precisam estar configuradas para que os lotes cheguem ao canal de cobrança e a contabilização ocorra.</p>
 </section>
 
 <section><div class="section-title">4. Pós-condições</div>
 <ul>
 <li><a href="#PF-01">JF001</a>: HSTCONTRIBPREV gravado com SITRECEBIMENTO = 1; CONTRIBPREVPARTP.ULTMESPREPARO atualizado; DOCUMENTO e LANCAMENTO gerados; lotes de cobrança disponíveis.</li>
 </ul>
+<p><strong>Significado de negócio:</strong> Cada contribuição enviada passa a situação 1 (“enviada”), indicando que está aguardando o retorno do canal de cobrança (folha, CaR ou banco). O campo ULTMESPREPARO é atualizado para o mês processado, funcionando como trava (<a href="#CONTRIB-RN013">RS013</a>) que impede preparar a mesma competência duas vezes. Os documentos (DOCUMENTO) e lançamentos contábeis (LANCAMENTO) são gerados para que o Contas a Receber e a Contabilidade reflitam a cobrança. Os lotes ficam disponíveis para o recebimento em <a href="uc202.html#PF-02">UC202 / JF002</a>.</p>
 </section>
 
 <section><div class="section-title">5. Jornadas Funcionais (JF001)</div>
 <p>Cada jornada traz objetivo, ator/gatilho, pré e pós-condições, sequência operacional, ações práticas, <strong>regras de negócio da jornada</strong> (texto completo de cada regra), tratamentos e mensagens.</p>
 <div class="legend"><span><span class="ev ev-comprovado">COMPROVADO</span> — no código</span><span><span class="ev ev-inferido">INFERIDO</span> — plausível</span><span><span class="ev ev-pendente">PENDENTE</span> — validar</span></div>
+<p><strong>Contexto da jornada:</strong> JF001 é a jornada de cobrança mensal. O analista informa a competência (mês/ano) e o tipo de cobrança; o sistema seleciona as contribuições elegíveis — apenas aquelas cujo último mês preparado é anterior ao mês de cobrança (<a href="#CONTRIB-RN013">RS013</a>), incluindo atrasos quando o tipo é “envia base” (<a href="#CONTRIB-RN017">RS017</a>) e filtrando por evento quando marcada a opção correspondente (<a href="#CONTRIB-RN027">RS027</a>). O sistema então calcula os valores, grava o histórico (HSTCONTRIBPREV), questiona divergência de plano contábil (<a href="#CONTRIB-RN026">RS026</a>), valida o período contábil para a data de vencimento e envia os lotes ao canal, marcando SITRECEBIMENTO = 1 (<a href="#CONTRIB-RN014">RS014</a>). O fluxo alternativo de Desfazer (<a href="#CONTRIB-RN015">RS015</a>) reverte uma cobrança, devolvendo as contribuições à situação 0.</p>
 </section>
 
 <div class="pf-block" id="PF-01"><h4>JF001 (PF-01) — Manutenção e cobrança de contribuições (Preparo e Envio)</h4>
 <p><strong>Objetivo:</strong> Selecionar as contribuições do mês de cobrança, calcular os valores, gerar o histórico de cobrança e enviá-las para cobrança (folha, Contas a Receber ou banco), com integração contábil.</p>
 <p><strong>Ator / gatilho:</strong> Analista de arrecadação, na tela <em>Envio de Contribuições</em>.</p>
+<p><strong>Explicação:</strong> Em um fundo de pensão, cada participante (e sua patrocinadora) tem contribuições parametrizadas por plano. Mensalmente, o analista dispara o preparo da competência: o sistema percorre as contribuições dos participantes, calcula o valor segundo a regra de cálculo do plano (considerando salário de participação, percentual, 13º salário quando aplicável — <a href="#CONTRIB-RN034">RS034</a> — e contribuições associadas — <a href="#CONTRIB-RN035">RS035</a>), grava o histórico em HSTCONTRIBPREV e encaminha os lotes ao canal de cobrança. O tipo de valor da contribuição (FLGTPVLR: base, valor ou envio — <a href="#CONTRIB-RN033">RS033</a>) define se envia só a base de cálculo ou o valor calculado. O commit é parcial a cada 800 registros (<a href="#CONTRIB-RN048">RS048</a>) para evitar transações longas. Após o envio, o último mês preparado do participante é atualizado (<a href="#CONTRIB-RN016">RS016</a>), impedindo reprocessar a mesma competência.</p>
 <p><strong>Pré-condições:</strong> Mês/ano e tipo de cobrança definidos; motivo padrão de cobrança parametrizado; participantes com contribuições em CONTRIBPREVPARTP; período contábil aberto para a data de vencimento.</p>
 <p><strong>Pós-condições:</strong> HSTCONTRIBPREV gravado com SITRECEBIMENTO = 1; CONTRIBPREVPARTP.ULTMESPREPARO atualizado; DOCUMENTO e LANCAMENTO gerados; lotes de cobrança disponíveis.</p>
 <p><strong>Sequência operacional:</strong></p>
@@ -93,6 +100,7 @@
 <li>O sistema atualiza o último mês preparado do participante. [<a href="#CONTRIB-RN016">RS016</a>]</li>
 <li>Fluxo alternativo — Desfazer: contribuições voltam a SITRECEBIMENTO = 0 e o documento/data de emissão são limpos. [<a href="#CONTRIB-RN015">RS015</a>]</li>
 </ol>
+<p><strong>Leitura da sequência:</strong> O analista começa informando a competência e o tipo de cobrança (passo 1); o sistema valida o motivo padrão e a integração (passo 2) e seleciona as contribuições elegíveis segundo os filtros de último mês preparado, envio de base e evento (passo 3). Ao confirmar, o sistema prepara — calcula valores e grava o histórico — e questiona divergência de plano contábil (passo 4). O analista informa a data de vencimento, validada contra o período contábil (passo 5), e o sistema envia os lotes ao canal, marcando as contribuições como enviadas (passo 6) e atualizando o controle de preparo (passo 7). O fluxo alternativo de Desfazer (passo 8) reverte uma cobrança já enviada, devolvendo as contribuições à situação pendente — bloqueado se a boleta já foi enviada ao banco (<a href="#CONTRIB-RN031">RS031</a>).</p>
 <p><strong>Ações práticas:</strong></p>
 <div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
 <tr><td>Informar parâmetros da cobrança</td><td>Definir competência e canal</td><td>Mês, ano, tipo de cobrança, patrocinadoras/planos</td><td>Valida campos obrigatórios e motivo padrão</td><td>Parâmetros aceitos</td><td>—</td><td><a href="#MSG001">MSG001</a>, <a href="#MSG002">MSG002</a>, <a href="#MSG003">MSG003</a>, <a href="#MSG004">MSG004</a>, <a href="#MSG005">MSG005</a></td><td><code>FPreparaEnvia.dfm</code></td></tr>
