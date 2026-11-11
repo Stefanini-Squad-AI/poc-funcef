@@ -49,6 +49,28 @@
 <ul>
 <li><a href="#PF-09"><strong>JF009 — Reabertura / Renovação de Benefício</strong></a>: Reabrir, renovar ou prorrogar um benefício encerrado, voltando as situações do processo, do participante e da contribuição.</li>
 </ul>
+<p><strong>Necessidade de negócio:</strong> um benefício encerrado pode precisar voltar a ser pago, por exemplo quando o encerramento foi indevido ou quando o direito é restabelecido ou estendido. Este caso de uso permite reabrir, renovar ou prorrogar o benefício e devolve à situação anterior o processo, o participante (situação funcional e no plano), o evento e a contribuição. Para não conflitar com a folha de pagamento, o sistema não permite a operação se o benefício já entrou na prévia da folha ou já foi calculado para o mês de pagamento (<a href="#BENEF-RN039">RS039</a>).</p>
+<p><strong>Quem inicia:</strong> o analista de benefícios, pela tela Reabertura de Benefícios, aberta pelo menu principal (<code>FPrincipal.pas:1837-1842, 2175-2180</code>).</p>
+<p><strong>Resultado esperado:</strong> o benefício volta a vigorar com as novas datas. Processo, participante, evento e contribuição voltam a refletir um benefício ativo.</p>
+<p><strong>Termos, siglas e componentes citados nesta página</strong> — explicados na primeira vez em que aparecem; a coluna “Fonte” indica onde a explicação foi conferida no repositório:</p>
+<div class="table-wrap"><table><thead><tr><th>Termo</th><th>O que significa</th><th>Fonte</th></tr></thead><tbody>
+<tr><td><strong>PARAMAPREV</strong></td><td>Tabela de parâmetros gerais do módulo, lida quando o módulo é iniciado. Entre outros pontos, indica se a integração contábil está ligada (FLGINTCONTAB = 1, regra RS027).</td><td><code>FPrincipal.pas:928-930</code>; <a href="uc301.html#BENEF-RN027">RS027</a></td></tr>
+<tr><td><strong>Tipo de previdência e fundação do usuário</strong></td><td>O tipo de previdência diz se a entidade é uma fundação ou um instituto: com FLGTIPOPREVIDENC = 'I', as telas trocam “Fundação/Patrocinadora/Plano” por “Instituto/Entidade/Regime” (RS026). A fundação do usuário (IDFUNDACAO) limita os dados que ele consulta: cada usuário só vê os dados da sua fundação (RS045).</td><td><code>FPrincipal.pas:598-775, 566-567</code></td></tr>
+<tr><td><strong>PARTPREVPLAN</strong></td><td>Vínculo do participante com um plano previdenciário. Guarda a situação do participante no plano e as datas desse vínculo.</td><td><a href="dados.html">🗄️ Dados</a></td></tr>
+<tr><td><strong>ELEGPATRO</strong></td><td>Dados de elegibilidade do participante na patrocinadora (tabela PATRO), como o tempo de serviço e a situação funcional.</td><td><a href="dados.html">🗄️ Dados</a></td></tr>
+<tr><td><strong>EVENTOGERADOR</strong></td><td>Catálogo dos eventos que dão origem a benefícios (por exemplo, aposentadoria, falecimento e reclusão). É cadastrado por fundação e agrupado pelo código interno FLGINTERNO. O menu de eventos é montado a partir dele (RS002).</td><td><a href="dados.html">🗄️ Dados</a>; <code>FPrincipal.pas:1038-1387</code></td></tr>
+<tr><td><strong>CMAdmPrev</strong></td><td>Componente externo do framework CM (pasta <code>..\..\Cm\CMAdmPrev\</code>). Reúne os módulos de dados de cálculo e concessão (DAPrev), o cálculo retroativo em lote, o cadastro de mantenedoras e o de UF do INSS. Este módulo abre telas desse componente e delega a ele os cálculos. A lógica interna do componente não faz parte da evidência desta documentação.</td><td><a href="integracoes.html">🔗 Integrações</a>; <a href="lacunas.html">🔍 Lacunas</a></td></tr>
+<tr><td><strong>UAdmPrev / UBeneficio</strong></td><td>Bibliotecas de regras de outro módulo, chamadas pelas telas deste módulo. A UAdmPrev concentra regras de cálculo e concessão, como a verificação do limite de valor e de percentual do benefício e a criação do log de ocorrência. A UBeneficio concentra regras de benefício, como o cálculo do benefício mínimo.</td><td><a href="lacunas.html">🔍 Lacunas</a> (Dependências externas)</td></tr>
+<tr><td><strong>Folha de Benefícios</strong></td><td>Folha mensal de pagamento dos benefícios, que fica no módulo FOLHA. Este módulo se comunica com ela pelas tabelas PREVIA (prévia de cálculo da folha) e LISTAFOLHABENEF. A finalidade exata dessa interface é <span class="ev ev-inferido">INFERIDO</span>, porque a implementação da folha não foi analisada.</td><td><a href="integracoes.html">🔗 Integrações</a>; <a href="dados.html">🗄️ Dados</a></td></tr>
+<tr><td><strong>LOGTOTALPREV</strong></td><td>Log de auditoria do TotalPREV. As operações de negócio deste módulo ficam registradas nele com o código de módulo 454, o usuário, a descrição da operação e a data (RS025).</td><td><code>UModulo.pas:64-88</code></td></tr>
+<tr><td><strong>Reabertura, renovação e prorrogação</strong></td><td>Três formas de fazer um benefício encerrado voltar a vigorar. O código as identifica como RB (reabertura), RN (renovação) e PR (prorrogação). Na reabertura o benefício é recalculado; na renovação e na prorrogação, não.</td><td><code>FReaberturaBeneficio.pas:759, 785-884</code></td></tr>
+<tr><td><strong>Prévia da Folha de Benefícios</strong></td><td>Cálculo prévio da folha mensal de pagamento dos benefícios. Benefício já processado pela prévia do mês não pode ser reaberto (<a href="#MSG020">MSG020</a>).</td><td><a href="#BENEF-RN039">RS039</a>; <a href="dados.html">🗄️ Dados</a> (PREVIA)</td></tr>
+<tr><td><strong>HSTBENEFBFCIARIO.MESREFERENCIA</strong></td><td>Mês de referência do histórico do benefício. Um registro no mês de pagamento indica que o benefício já foi calculado para esse mês (<a href="#MSG021">MSG021</a>).</td><td><a href="#BENEF-RN039">RS039</a></td></tr>
+<tr><td><strong>PROCESSOBENEF.IDSITPROCESSO</strong></td><td>Situação do processo de benefício.</td><td><a href="#BENEF-RN020">RS020</a></td></tr>
+<tr><td><strong>ELEGPATRO.IDSITFUNC / PARTPREVPLAN.IDSITPART</strong></td><td>Situação funcional do participante na patrocinadora e situação do participante no plano.</td><td><a href="#BENEF-RN020">RS020</a></td></tr>
+<tr><td><strong>EVENTOSPREV.DATAVOLTA</strong></td><td>Data de volta registrada no evento previdenciário quando o benefício é reaberto.</td><td><a href="#BENEF-RN020">RS020</a></td></tr>
+<tr><td><strong>CONTRIBPREVPARTP.DATAFINAL / FLGCOBRA</strong></td><td>Data final da contribuição do participante e indicador de cobrança da contribuição.</td><td>Registro original PF-09</td></tr>
+</tbody></table></div>
 </section>
 
 <section><div class="section-title">3. Pré-condições</div>
@@ -59,9 +81,14 @@
 <li>Participantes, planos (PARTPREVPLAN), elegibilidade (ELEGPATRO), benefícios e eventos geradores (EVENTOGERADOR) cadastrados.</li>
 <li>Componentes externos disponíveis quando a jornada os usa: CMAdmPrev (cálculo/concessão/retroativo), bibliotecas UAdmPrev/UBeneficio, Folha de Benefícios (ver <a href="integracoes.html">🔗 Integrações</a>).</li>
 </ul>
+<p><strong>O que as pré-condições gerais significam na prática:</strong> o usuário precisa ter acesso ao módulo. Ao iniciar, o sistema precisa ler os parâmetros da entidade: se a integração contábil está ligada (RS027) e se a entidade é fundação ou instituto (RS026). Também precisa saber a qual fundação o usuário pertence, porque todas as consultas de negócio são filtradas por ela (<a href="#BENEF-RN045">RS045</a>). Além disso, os cadastros básicos já devem existir: participantes, seus planos, seus dados de elegibilidade, os benefícios e o catálogo de eventos geradores. Os componentes externos (CMAdmPrev, UAdmPrev/UBeneficio e Folha de Benefícios) só são exigidos pelas jornadas que os usam, conforme indicado em cada jornada.</p>
 <p><strong>Por jornada:</strong></p>
 <ul>
 <li><a href="#PF-09">JF009</a>: Benefício encerrado; benefício ainda não processado pela prévia nem calculado no mês de pagamento.</li>
+</ul>
+<p><strong>Pré-condições por jornada, em termos de negócio:</strong></p>
+<ul>
+<li><a href="#PF-09">JF009</a>: o benefício está encerrado. A condição “ainda não processado pela prévia nem calculado no mês de pagamento” não é uma verificação prévia do usuário: o sistema a confere no passo 2 (<a href="#BENEF-RN039">RS039</a>). Se ela falhar, o usuário é orientado a procurar o setor de Pagamento de Benefício para desbloquear o benefício (<a href="#MSG020">MSG020</a>, <a href="#MSG021">MSG021</a>).</li>
 </ul>
 </section>
 
@@ -69,25 +96,34 @@
 <ul>
 <li><a href="#PF-09">JF009</a>: PROCESSOBENEF, ELEGPATRO, PARTPREVPLAN, CONTRIBPREVPARTP, EVENTOSPREV e BENEFBFCIARIO atualizados.</li>
 </ul>
+<p><strong>Resultado de negócio:</strong></p>
+<ul>
+<li><a href="#PF-09">JF009</a> — <em>conclusão com sucesso:</em> o processo, a situação funcional e a situação no plano do participante voltam ao estado de benefício ativo, o evento recebe a data de volta (<a href="#BENEF-RN020">RS020</a>), a contribuição recebe nova vigência e indicador de cobrança, e o benefício é atualizado (recalculado, no caso da reabertura).</li>
+<li><a href="#PF-09">JF009</a> — <em>bloqueio:</em> se o benefício já foi processado pela prévia da folha ou calculado para o mês de pagamento, a operação é negada e a transação desfeita (<a href="#TRT015">TRT015</a>). Em erro de banco, a transação também é desfeita (<a href="#TRT006">TRT006</a>).</li>
+</ul>
 </section>
 
 <section><div class="section-title">5. Jornadas Funcionais (JF009)</div>
 <p>Cada jornada traz objetivo, ator/gatilho, pré e pós-condições, sequência operacional, ações práticas, <strong>regras de negócio da jornada</strong> (texto completo de cada regra), tratamentos e mensagens.</p>
+<p><strong>Como ler esta jornada:</strong> JF009 é a única jornada deste caso de uso. A operação pode ser revertida pelo desfazimento (JF004). Em cada passo, o rótulo “Usuário” ou “Sistema” indica quem executa a ação.</p>
 <div class="legend"><span><span class="ev ev-comprovado">COMPROVADO</span> — no código</span><span><span class="ev ev-inferido">INFERIDO</span> — plausível</span><span><span class="ev ev-pendente">PENDENTE</span> — validar</span></div>
 </section>
 
 <div class="pf-block" id="PF-09"><h4>JF009 (PF-09) — Reabertura / Renovação de Benefício</h4>
 <p><strong>Objetivo:</strong> Reabrir, renovar ou prorrogar um benefício encerrado, voltando as situações do processo, do participante e da contribuição.</p>
+<p><strong>Necessidade de negócio:</strong> restabelecer o pagamento de um benefício encerrado de forma coerente em todos os cadastros envolvidos (processo, participante, evento e contribuição), sem interferir em uma folha de pagamento já calculada.</p>
 <p><strong>Ator / gatilho:</strong> Analista de benefícios, nas telas Reabertura de Benefícios e Datas para Reabertura de Benefício.</p>
 <p><strong>Pré-condições:</strong> Benefício encerrado; benefício ainda não processado pela prévia nem calculado no mês de pagamento.</p>
+<p><strong>Em termos de negócio:</strong> o benefício está encerrado. A ausência de prévia e de cálculo no mês de pagamento é conferida pelo próprio sistema durante a jornada (passo 2).</p>
 <p><strong>Pós-condições:</strong> PROCESSOBENEF, ELEGPATRO, PARTPREVPLAN, CONTRIBPREVPARTP, EVENTOSPREV e BENEFBFCIARIO atualizados.</p>
+<p><strong>Em termos de negócio:</strong> o benefício volta a vigorar com as novas datas, e os cadastros de processo, participante, evento e contribuição ficam coerentes com essa situação.</p>
 <p><strong>Sequência operacional:</strong></p>
 <ol>
-<li>Selecionar o benefício e informar as datas da reabertura.</li>
-<li>O sistema verifica se o benefício já foi processado pela prévia ou calculado no mês; se sim, bloqueia. [<a href="#BENEF-RN039">RS039</a>] [<a href="#TRT015">TRT015</a>]</li>
-<li>O sistema atualiza as situações do processo, do participante e do evento, e a vigência da contribuição. [<a href="#BENEF-RN020">RS020</a>]</li>
-<li>Na reabertura, o benefício é recalculado; na renovação ou prorrogação, não.</li>
-<li>Em erro de gravação, a transação é revertida. [<a href="#TRT006">TRT006</a>]</li>
+<li><strong>Usuário:</strong> Selecionar o benefício e informar as datas da reabertura.<br>Na tela Datas para Reabertura de Benefício, o sistema mostra a situação até o momento (data de início e data final) e o analista informa a data da reabertura, que vem preenchida com a data atual, e a nova data final. Na mesma tela aparecem os campos de valores: BS total, FAB total, total FUNCEF, base de cálculo do déficit, valor atual, valor total e salário real de benefício (<code>FReaberturaData.dfm:20-535</code>; <code>FReaberturaBeneficio.pas:735-760</code>).</li>
+<li><strong>Sistema:</strong> O sistema verifica se o benefício já foi processado pela prévia ou calculado no mês; se sim, bloqueia. [<a href="#BENEF-RN039">RS039</a>] [<a href="#TRT015">TRT015</a>]<br>São duas verificações: prévia da folha do mês (<a href="#MSG020">MSG020</a>) e cálculo do benefício para o mês de pagamento (<a href="#MSG021">MSG021</a>). Nos dois casos a operação é negada, a transação é desfeita e o usuário é orientado a procurar o setor de Pagamento de Benefício.</li>
+<li><strong>Sistema:</strong> O sistema atualiza as situações do processo, do participante e do evento, e a vigência da contribuição. [<a href="#BENEF-RN020">RS020</a>]<br>Atualiza PROCESSOBENEF.IDSITPROCESSO, ELEGPATRO.IDSITFUNC, PARTPREVPLAN.IDSITPART e EVENTOSPREV.DATAVOLTA, além de CONTRIBPREVPARTP.DATAFINAL e FLGCOBRA.</li>
+<li><strong>Sistema:</strong> Na reabertura, o benefício é recalculado; na renovação ou prorrogação, não.<br>O tipo da operação (RB, RN ou PR) define se há recálculo. Ver em “Pontos a validar” como o tipo é definido no código atual.</li>
+<li><strong>Sistema:</strong> Em erro de gravação, a transação é revertida. [<a href="#TRT006">TRT006</a>]<br>Em erro de banco, nada do que foi feito na tentativa fica gravado (RollBack), e o form exibe a mensagem do erro.</li>
 </ol>
 <p><strong>Ações práticas:</strong></p>
 <div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
@@ -179,6 +215,12 @@
 <p><strong>Mensagens:</strong> <a href="#MSG020">MSG020</a>, <a href="#MSG021">MSG021</a></p>
 <p><strong>Telas:</strong> Reabertura de Benefícios (<code>FReaberturaBeneficio.dfm</code>), Datas para Reabertura de Benefício (<code>FReaberturaData.dfm</code>)</p>
 <p><strong>Dependências:</strong> Pode ser revertida em <a href="uc302.html#PF-04">JF004</a>.</p>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span> — informações que o repositório não comprova ou que divergem entre fontes. O texto existente foi mantido; os itens abaixo dependem de validação humana.</p>
+<ul>
+<li>Escolha entre reabertura, renovação e prorrogação: no código ativo, o tipo é fixado como reabertura (RB) após a tela de datas (<code>FReaberturaBeneficio.pas:759</code>). A seleção entre renovação/prorrogação (RN/PR) está num trecho comentado (<code>:667-734</code>). Falta confirmar se renovação e prorrogação ainda são possíveis por esta tela. O texto existente foi mantido.</li>
+<li>Uso dos valores informados na tela de datas (BS total, FAB total, total FUNCEF, base de cálculo do déficit, salário real de benefício) e significado das siglas BS e FAB: não descritos nas regras catalogadas.</li>
+</ul>
+</div>
 <div class="note note-info"><p><strong>Registro original do processo PF-09</strong></p><p><strong>Forms de entrada:</strong> <code>FReaberturaBeneficio.dfm</code>, <code>FReaberturaData.dfm</code></p><p><strong>Lógica de processamento:</strong> UPDATE PROCESSOBENEF.IDSITPROCESSO, ELEGPATRO.IDSITFUNC, PARTPREVPLAN.IDSITPART, CONTRIBPREVPARTP.DATAFINAL/FLGCOBRA, EVENTOSPREV.DATAVOLTA</p><p><strong>Saídas:</strong> Benefício reaberto</p><p><strong>Persistência (tabelas escritas):</strong> PROCESSOBENEF, ELEGPATRO, PARTPREVPLAN, CONTRIBPREVPARTP, EVENTOSPREV, BENEFBFCIARIO</p><p><strong>Evidência:</strong> <code>BENEFICIOPREV/Fontes/FReaberturaBeneficio.pas:947-2530</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
 </div>
 

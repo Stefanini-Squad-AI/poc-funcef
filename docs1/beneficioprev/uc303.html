@@ -50,6 +50,30 @@
 <li><a href="#PF-05"><strong>JF005 — Eventos Previdenciários</strong></a>: Registrar eventos previdenciários (aposentadoria, falecimento, reclusão, assistido temporário, aposentadoria exclusiva do INSS) e atualizar as situações do participante.</li>
 <li><a href="#PF-18"><strong>JF018 — Registro de Falecimento de Beneficiário</strong></a>: Registrar o falecimento de um beneficiário, pelo componente externo.</li>
 </ul>
+<p><strong>Necessidade de negócio:</strong> um benefício previdenciário nasce de um fato da vida do participante: aposentadoria por tempo de serviço ou por idade, incapacidade, falecimento, reclusão ou aposentadoria concedida pelo INSS. Antes de conceder o benefício, a entidade precisa registrar esse fato, chamado <em>evento previdenciário</em>, e ajustar a situação do participante (tempo de serviço, situação funcional, situação no plano e, no falecimento, a data da morte). Este caso de uso faz esse registro (JF005). Ele também cobre o registro do falecimento de um <em>beneficiário</em>, feito por um componente externo (JF018).</p>
+<p><strong>Quem inicia:</strong> o analista de benefícios, pelo menu de eventos da tela principal. Os itens desse menu são montados com os eventos cadastrados para a fundação do usuário (<a href="#BENEF-RN002">RS002</a>). O registro de falecimento de beneficiário tem opção própria no menu principal (<code>FPrincipal.pas:2273-2278</code>).</p>
+<p><strong>Resultado esperado:</strong> o evento fica registrado no histórico de eventos (EVENTOSPREV) com a data da alteração. Os dados do participante são atualizados conforme o evento, o que prepara a concessão dos benefícios decorrentes (JF001).</p>
+<p><strong>Termos, siglas e componentes citados nesta página</strong> — explicados na primeira vez em que aparecem; a coluna “Fonte” indica onde a explicação foi conferida no repositório:</p>
+<div class="table-wrap"><table><thead><tr><th>Termo</th><th>O que significa</th><th>Fonte</th></tr></thead><tbody>
+<tr><td><strong>PARAMAPREV</strong></td><td>Tabela de parâmetros gerais do módulo, lida quando o módulo é iniciado. Entre outros pontos, indica se a integração contábil está ligada (FLGINTCONTAB = 1, regra RS027).</td><td><code>FPrincipal.pas:928-930</code>; <a href="uc301.html#BENEF-RN027">RS027</a></td></tr>
+<tr><td><strong>Tipo de previdência e fundação do usuário</strong></td><td>O tipo de previdência diz se a entidade é uma fundação ou um instituto: com FLGTIPOPREVIDENC = 'I', as telas trocam “Fundação/Patrocinadora/Plano” por “Instituto/Entidade/Regime” (RS026). A fundação do usuário (IDFUNDACAO) limita os dados que ele consulta: cada usuário só vê os dados da sua fundação (RS045).</td><td><code>FPrincipal.pas:598-775, 566-567</code></td></tr>
+<tr><td><strong>PARTPREVPLAN</strong></td><td>Vínculo do participante com um plano previdenciário. Guarda a situação do participante no plano e as datas desse vínculo.</td><td><a href="dados.html">🗄️ Dados</a></td></tr>
+<tr><td><strong>ELEGPATRO</strong></td><td>Dados de elegibilidade do participante na patrocinadora (tabela PATRO), como o tempo de serviço e a situação funcional.</td><td><a href="dados.html">🗄️ Dados</a></td></tr>
+<tr><td><strong>EVENTOGERADOR</strong></td><td>Catálogo dos eventos que dão origem a benefícios (por exemplo, aposentadoria, falecimento e reclusão). É cadastrado por fundação e agrupado pelo código interno FLGINTERNO. O menu de eventos é montado a partir dele (RS002).</td><td><a href="dados.html">🗄️ Dados</a>; <code>FPrincipal.pas:1038-1387</code></td></tr>
+<tr><td><strong>CMAdmPrev</strong></td><td>Componente externo do framework CM (pasta <code>..\..\Cm\CMAdmPrev\</code>). Reúne os módulos de dados de cálculo e concessão (DAPrev), o cálculo retroativo em lote, o cadastro de mantenedoras e o de UF do INSS. Este módulo abre telas desse componente e delega a ele os cálculos. A lógica interna do componente não faz parte da evidência desta documentação.</td><td><a href="integracoes.html">🔗 Integrações</a>; <a href="lacunas.html">🔍 Lacunas</a></td></tr>
+<tr><td><strong>UAdmPrev / UBeneficio</strong></td><td>Bibliotecas de regras de outro módulo, chamadas pelas telas deste módulo. A UAdmPrev concentra regras de cálculo e concessão, como a verificação do limite de valor e de percentual do benefício e a criação do log de ocorrência. A UBeneficio concentra regras de benefício, como o cálculo do benefício mínimo.</td><td><a href="lacunas.html">🔍 Lacunas</a> (Dependências externas)</td></tr>
+<tr><td><strong>Folha de Benefícios</strong></td><td>Folha mensal de pagamento dos benefícios, que fica no módulo FOLHA. Este módulo se comunica com ela pelas tabelas PREVIA (prévia de cálculo da folha) e LISTAFOLHABENEF. A finalidade exata dessa interface é <span class="ev ev-inferido">INFERIDO</span>, porque a implementação da folha não foi analisada.</td><td><a href="integracoes.html">🔗 Integrações</a>; <a href="dados.html">🗄️ Dados</a></td></tr>
+<tr><td><strong>LOGTOTALPREV</strong></td><td>Log de auditoria do TotalPREV. As operações de negócio deste módulo ficam registradas nele com o código de módulo 454, o usuário, a descrição da operação e a data (RS025).</td><td><code>UModulo.pas:64-88</code></td></tr>
+<tr><td><strong>Grupos de eventos (FLGINTERNO)</strong></td><td>Código interno que agrupa os eventos do catálogo EVENTOGERADOR. Grupos ativos no menu: TS (Tempo de Serviço), ID (Idade), IN (Incapacidade), FL (Falecimento), AI (Benefício do INSS para Participante) e BI (Benefício do INSS para Beneficiário). Os grupos DO (Doença), AC (Acidente), RC (Reclusão) e OE (Outros Eventos Temporários) estão comentados na montagem do menu.</td><td><code>FPrincipal.pas:1047-1387</code>; <a href="lacunas.html">🔍 Lacunas</a></td></tr>
+<tr><td><strong>Tela aberta por grupo</strong></td><td>TS e ID abrem a tela de aposentadoria (<code>FEventoAposentaBenef</code>); IN abre a de assistido temporário (<code>FEventoAssistidoBenef</code>); FL abre a de falecimento (<code>FEventoMorte</code>); AI e BI abrem a de aposentadoria exclusiva do INSS (<code>FEventoAssistidoINSS</code>). O título da tela é o nome do evento escolhido no catálogo.</td><td><code>FPrincipal.pas:1436-1602</code></td></tr>
+<tr><td><strong>EVENTOSPREV</strong></td><td>Histórico dos eventos previdenciários registrados para cada pessoa.</td><td><a href="dados.html">🗄️ Dados</a></td></tr>
+<tr><td><strong>PESSOAFISICA.DATAMORTE</strong></td><td>Data de falecimento da pessoa, gravada no evento Falecimento.</td><td><a href="#BENEF-RN018">RS018</a></td></tr>
+<tr><td><strong>ELEGPATRO.TEMPOSERVTOTAL</strong></td><td>Tempo de serviço total do participante, atualizado no evento Falecimento.</td><td><a href="#BENEF-RN018">RS018</a></td></tr>
+<tr><td><strong>BFCIARIOTITPLAN / DEPENTIT</strong></td><td>BFCIARIOTITPLAN liga o beneficiário ao titular e ao plano. DEPENTIT é o cadastro de dependentes do titular; DATACANCELA vazia indica dependente ativo.</td><td><a href="dados.html">🗄️ Dados</a>; <a href="#BENEF-RN035">RS035</a></td></tr>
+<tr><td><strong>Situações de benefício 4 e 6 (IDSITBENEFICIO)</strong></td><td>Situações consideradas nos eventos de aposentadoria e morte. Um comentário de alteração do código descreve a situação 4 como “processos pendentes de concessão” <span class="ev ev-inferido">INFERIDO</span>. O significado da situação 6 não está descrito no repositório <span class="ev ev-pendente">PENDENTE</span>.</td><td><a href="#BENEF-RN006">RS006</a>; <code>_FConciliacao.pas:91-93</code></td></tr>
+<tr><td><strong>Eventos 129, 130 e 346</strong></td><td>129 = aposentadoria INSS do participante; 130 = aposentadoria INSS do beneficiário (RS036). O evento 346 é excluído do menu de Falecimento (RS003); o que ele representa não está descrito <span class="ev ev-pendente">PENDENTE</span>.</td><td><a href="#BENEF-RN036">RS036</a>; <a href="#BENEF-RN003">RS003</a></td></tr>
+<tr><td><strong>FLGINVALIDO</strong></td><td>Marca de pessoa inválida no cadastro de pessoa (PESSOA), ligada no evento INSS de invalidez.</td><td><a href="#BENEF-RN037">RS037</a></td></tr>
+</tbody></table></div>
 </section>
 
 <section><div class="section-title">3. Pré-condições</div>
@@ -60,10 +84,16 @@
 <li>Participantes, planos (PARTPREVPLAN), elegibilidade (ELEGPATRO), benefícios e eventos geradores (EVENTOGERADOR) cadastrados.</li>
 <li>Componentes externos disponíveis quando a jornada os usa: CMAdmPrev (cálculo/concessão/retroativo), bibliotecas UAdmPrev/UBeneficio, Folha de Benefícios (ver <a href="integracoes.html">🔗 Integrações</a>).</li>
 </ul>
+<p><strong>O que as pré-condições gerais significam na prática:</strong> o usuário precisa ter acesso ao módulo. Ao iniciar, o sistema precisa ler os parâmetros da entidade: se a integração contábil está ligada (RS027) e se a entidade é fundação ou instituto (RS026). Também precisa saber a qual fundação o usuário pertence, porque todas as consultas de negócio são filtradas por ela (<a href="#BENEF-RN045">RS045</a>). Além disso, os cadastros básicos já devem existir: participantes, seus planos, seus dados de elegibilidade, os benefícios e o catálogo de eventos geradores. Os componentes externos (CMAdmPrev, UAdmPrev/UBeneficio e Folha de Benefícios) só são exigidos pelas jornadas que os usam, conforme indicado em cada jornada.</p>
 <p><strong>Por jornada:</strong></p>
 <ul>
 <li><a href="#PF-05">JF005</a>: Eventos geradores cadastrados para a fundação; participante com plano; para falecimento, dependente elegível cadastrado.</li>
 <li><a href="#PF-18">JF018</a>: Beneficiário com benefício; componente <code>frmRegFalBenef</code> disponível.</li>
+</ul>
+<p><strong>Pré-condições por jornada, em termos de negócio:</strong></p>
+<ul>
+<li><a href="#PF-05">JF005</a>: o catálogo de eventos geradores precisa ter os eventos da fundação, senão o menu fica vazio (<a href="#BENEF-RN002">RS002</a>). O participante precisa estar vinculado a um plano. Para o falecimento, o participante precisa ter dependente elegível a benefício com cadastro ativo (<a href="#BENEF-RN035">RS035</a>); sem ele, o sistema orienta usar o Cadastro de Dependentes/Beneficiários (<a href="#MSG007">MSG007</a>).</li>
+<li><a href="#PF-18">JF018</a>: o beneficiário já recebe um benefício, e o componente externo de registro de falecimento (<code>frmRegFalBenef</code>) está disponível.</li>
 </ul>
 </section>
 
@@ -72,26 +102,35 @@
 <li><a href="#PF-05">JF005</a>: Evento gravado em EVENTOSPREV; ELEGPATRO, PARTPREVPLAN e PESSOAFISICA atualizados conforme o evento.</li>
 <li><a href="#PF-18">JF018</a>: Falecimento registrado (persistência no componente externo).</li>
 </ul>
+<p><strong>Resultado de negócio de cada jornada:</strong></p>
+<ul>
+<li><a href="#PF-05">JF005</a> — <em>conclusão com sucesso:</em> o evento fica gravado em EVENTOSPREV com a data da alteração (<a href="#BENEF-RN019">RS019</a>), e a situação do participante é atualizada conforme o evento. No falecimento, são gravados a data da morte e o tempo de serviço total (<a href="#BENEF-RN018">RS018</a>). Na invalidez INSS, a pessoa é marcada como inválida (<a href="#BENEF-RN037">RS037</a>). Na aposentadoria exclusiva do INSS, é gravado o evento 129 ou 130 (<a href="#BENEF-RN036">RS036</a>). A operação é registrada no log (RS025). Em alguns forms, porém, a falha ao gravar o log é ignorada e o evento segue gravado sem log (<a href="#TRT010">TRT010</a>). <em>Interrupções:</em> evento em aberto (<a href="#TRT007">TRT007</a>), falta de dependente elegível no falecimento (<a href="#TRT008">TRT008</a>) ou erro de banco (<a href="#TRT009">TRT009</a>).</li>
+<li><a href="#PF-18">JF018</a> — o falecimento do beneficiário é registrado pelo componente externo. As tabelas alteradas não são conhecidas a partir deste módulo <span class="ev ev-pendente">PENDENTE</span>.</li>
+</ul>
 </section>
 
 <section><div class="section-title">5. Jornadas Funcionais (JF005, JF018)</div>
 <p>Cada jornada traz objetivo, ator/gatilho, pré e pós-condições, sequência operacional, ações práticas, <strong>regras de negócio da jornada</strong> (texto completo de cada regra), tratamentos e mensagens.</p>
+<p><strong>Como as jornadas deste caso de uso se relacionam:</strong> JF005 registra o evento do participante e prepara a concessão (JF001). JF018 complementa o tratamento de falecimento quando quem falece é um beneficiário. Em cada passo, o rótulo “Usuário” ou “Sistema” indica quem executa a ação.</p>
 <div class="legend"><span><span class="ev ev-comprovado">COMPROVADO</span> — no código</span><span><span class="ev ev-inferido">INFERIDO</span> — plausível</span><span><span class="ev ev-pendente">PENDENTE</span> — validar</span></div>
 </section>
 
 <div class="pf-block" id="PF-05"><h4>JF005 (PF-05) — Eventos Previdenciários</h4>
 <p><strong>Objetivo:</strong> Registrar eventos previdenciários (aposentadoria, falecimento, reclusão, assistido temporário, aposentadoria exclusiva do INSS) e atualizar as situações do participante.</p>
+<p><strong>Necessidade de negócio:</strong> formalizar no sistema o fato que dá direito ao benefício e deixar a situação do participante coerente com ele. Sem o evento registrado, a concessão do benefício decorrente (JF001) não tem base.</p>
 <p><strong>Ator / gatilho:</strong> Analista de benefícios, nas telas de evento acessadas pelo menu de eventos.</p>
 <p><strong>Pré-condições:</strong> Eventos geradores cadastrados para a fundação; participante com plano; para falecimento, dependente elegível cadastrado.</p>
+<p><strong>Em termos de negócio:</strong> o catálogo de eventos da fundação está preenchido (é dele que sai o menu), o participante está vinculado a um plano e, no caso de falecimento, tem pelo menos um dependente elegível com cadastro ativo.</p>
 <p><strong>Pós-condições:</strong> Evento gravado em EVENTOSPREV; ELEGPATRO, PARTPREVPLAN e PESSOAFISICA atualizados conforme o evento.</p>
+<p><strong>Em termos de negócio:</strong> o evento passa a constar do histórico da pessoa. A situação funcional e o tempo de serviço (ELEGPATRO) e a situação no plano (PARTPREVPLAN) são ajustados. No falecimento, a data da morte é gravada no cadastro da pessoa (PESSOAFISICA).</p>
 <p><strong>Sequência operacional:</strong></p>
 <ol>
-<li>Escolher o evento no menu, montado a partir do cadastro de eventos geradores. [<a href="#BENEF-RN002">RS002</a>] [<a href="#BENEF-RN003">RS003</a>]</li>
-<li>Procurar o participante; se houver evento em aberto, o sistema exige confirmar ou cancelar. [<a href="#BENEF-RN016">RS016</a>] [<a href="#TRT007">TRT007</a>]</li>
-<li>O sistema considera os benefícios nas situações 4 ou 6. [<a href="#BENEF-RN006">RS006</a>]</li>
-<li>No falecimento, o sistema exige dependente elegível e grava a data da morte e o tempo de serviço. [<a href="#BENEF-RN035">RS035</a>] [<a href="#TRT008">TRT008</a>] [<a href="#BENEF-RN018">RS018</a>]</li>
-<li>Na aposentadoria exclusiva do INSS, grava o evento 129 ou 130; na invalidez, marca a pessoa como inválida. [<a href="#BENEF-RN036">RS036</a>] [<a href="#BENEF-RN037">RS037</a>]</li>
-<li>O sistema grava o evento com a data da alteração e registra o log. [<a href="#BENEF-RN019">RS019</a>] [<a href="#TRT009">TRT009</a>] [<a href="#TRT010">TRT010</a>]</li>
+<li><strong>Usuário:</strong> Escolher o evento no menu, montado a partir do cadastro de eventos geradores. [<a href="#BENEF-RN002">RS002</a>] [<a href="#BENEF-RN003">RS003</a>]<br>O menu agrupa os eventos da fundação por tipo: Tempo de Serviço, Idade, Incapacidade, Falecimento, Benefício do INSS para Participante e para Beneficiário. No grupo Falecimento, o evento 346 não aparece. A tela aberta depende do grupo e recebe como título o nome do evento.</li>
+<li><strong>Usuário e sistema:</strong> Procurar o participante; se houver evento em aberto, o sistema exige confirmar ou cancelar. [<a href="#BENEF-RN016">RS016</a>] [<a href="#TRT007">TRT007</a>]<br>O usuário procura pela matrícula ou pelo nome. Se o evento anterior ainda não foi confirmado nem cancelado, o sistema bloqueia a nova procura e exibe <a href="#MSG006">MSG006</a>.</li>
+<li><strong>Sistema:</strong> O sistema considera os benefícios nas situações 4 ou 6. [<a href="#BENEF-RN006">RS006</a>]<br>Nos eventos de aposentadoria e morte, só entram os benefícios com IDSITBENEFICIO 4 ou 6.</li>
+<li><strong>Sistema:</strong> No falecimento, o sistema exige dependente elegível e grava a data da morte e o tempo de serviço. [<a href="#BENEF-RN035">RS035</a>] [<a href="#TRT008">TRT008</a>] [<a href="#BENEF-RN018">RS018</a>]<br>Se não houver dependente elegível com cadastro ativo para o evento escolhido, o sistema exibe <a href="#MSG007">MSG007</a> e interrompe. Havendo, grava PESSOAFISICA.DATAMORTE e atualiza ELEGPATRO.TEMPOSERVTOTAL.</li>
+<li><strong>Sistema:</strong> Na aposentadoria exclusiva do INSS, grava o evento 129 ou 130; na invalidez, marca a pessoa como inválida. [<a href="#BENEF-RN036">RS036</a>] [<a href="#BENEF-RN037">RS037</a>]<br>Grupo AI: evento 129 (aposentadoria INSS do participante). Grupo BI: evento 130 (aposentadoria INSS do beneficiário). Grupo IN: PESSOA.FLGINVALIDO = 1.</li>
+<li><strong>Sistema:</strong> O sistema grava o evento com a data da alteração e registra o log. [<a href="#BENEF-RN019">RS019</a>] [<a href="#TRT009">TRT009</a>] [<a href="#TRT010">TRT010</a>]<br>Na confirmação, o evento é inserido em EVENTOSPREV com DATAALTERADO = data atual. Erro de banco exibe a mensagem da exceção (<a href="#MSG009">MSG009</a>) e interrompe. Se a gravação do log falhar, em FEventoMorte e FEventoReclusao a falha é ignorada e o evento segue sem log (<a href="#MSG008">MSG008</a>).</li>
 </ol>
 <p><strong>Ações práticas:</strong></p>
 <div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
@@ -267,18 +306,29 @@
 <p><strong>Mensagens:</strong> <a href="#MSG006">MSG006</a>, <a href="#MSG007">MSG007</a>, <a href="#MSG008">MSG008</a>, <a href="#MSG009">MSG009</a></p>
 <p><strong>Telas:</strong> Evento Aposentadoria (<code>FEventoAposentaBenef.dfm</code>), Evento Falecimento (<code>FEventoMorte.dfm</code>), Evento Reclusão (<code>FEventoReclusao.dfm</code>), Evento Assistido Temporário (<code>FEventoAssistidoBenef.dfm</code>), Evento Aposentadoria Exclusiva do INSS (<code>FEventoAssistidoINSS.dfm</code>)</p>
 <p><strong>Dependências:</strong> Precede a concessão de benefícios decorrentes do evento (<a href="uc301.html#PF-01">JF001</a>) e o registro de falecimento de beneficiário (<a href="#PF-18">JF018</a>).</p>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span> — informações que o repositório não comprova ou que divergem entre fontes. O texto existente foi mantido; os itens abaixo dependem de validação humana.</p>
+<ul>
+<li>Reclusão: o grupo RC está comentado na montagem do menu (<code>FPrincipal.pas:1242-1265</code>; ver <a href="lacunas.html">🔍 Lacunas</a>), mas a tela Evento Reclusão (<code>FEventoReclusao</code>) consta desta jornada. Falta confirmar por qual caminho essa tela é acessada hoje.</li>
+<li>Invalidez: no menu, o grupo IN (Incapacidade) abre <code>FEventoAssistidoBenef</code> (<code>FPrincipal.pas:1480-1502</code>), enquanto a regra <a href="#BENEF-RN037">RS037</a> está em <code>FEventoAssistidoINSS.pas:942-957</code>. Falta confirmar por qual tela a pessoa é marcada como inválida.</li>
+<li>Momento da exigência de dependente: a verificação de <a href="#BENEF-RN035">RS035</a> está no botão de requerer benefício (<code>FEventoMorte.pas:935-1035</code>, <code>bbtnRequerBeneficioClick</code>). A gravação da data da morte está na confirmação do evento (<code>:1189</code> em diante). Falta confirmar se o dependente é exigido para registrar o falecimento ou só para requerer a pensão. O texto do passo 4 foi mantido.</li>
+<li>Significado de negócio da situação de benefício 6 e do evento gerador 346.</li>
+</ul>
+</div>
 <div class="note note-info"><p><strong>Registro original do processo PF-05</strong></p><p><strong>Forms de entrada:</strong> <code>FEventoAposentaBenef.dfm</code>, <code>FEventoMorte.dfm</code>, <code>FEventoReclusao.dfm</code>, <code>FEventoAssistidoBenef.dfm</code></p><p><strong>Lógica de processamento:</strong> Atualiza ELEGPATRO (tempo serviço/situação), PARTPREVPLAN (situação plano), PESSOAFISICA.DATAMORTE; insere em EVENTOSPREV</p><p><strong>Saídas:</strong> Evento registrado, situações atualizadas</p><p><strong>Persistência (tabelas escritas):</strong> ELEGPATRO, PARTPREVPLAN, PESSOAFISICA, EVENTOSPREV</p><p><strong>Evidência:</strong> <code>BENEFICIOPREV/Fontes/FEventoMorte.pas:1332-1618</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
 </div>
 
 <div class="pf-block" id="PF-18"><h4>JF018 (PF-18) — Registro de Falecimento de Beneficiário</h4>
 <p><strong>Objetivo:</strong> Registrar o falecimento de um beneficiário, pelo componente externo.</p>
+<p><strong>Necessidade de negócio:</strong> quando morre uma pessoa que recebe benefício na condição de beneficiário (e não o participante titular, tratado em JF005), a entidade precisa registrar o fato para encerrar o benefício dessa pessoa. O objetivo “encerrar o benefício do beneficiário falecido” consta das ações práticas.</p>
 <p><strong>Ator / gatilho:</strong> Analista de benefícios, pela opção do menu principal.</p>
 <p><strong>Pré-condições:</strong> Beneficiário com benefício; componente <code>frmRegFalBenef</code> disponível.</p>
+<p><strong>Em termos de negócio:</strong> a pessoa falecida recebe benefício como beneficiário, e o componente externo de registro de falecimento está instalado.</p>
 <p><strong>Pós-condições:</strong> Falecimento registrado (persistência no componente externo).</p>
+<p><strong>Em termos de negócio:</strong> o falecimento do beneficiário fica registrado. As regras, as validações e as tabelas alteradas são do componente externo e não podem ser descritas a partir deste módulo.</p>
 <p><strong>Sequência operacional:</strong></p>
 <ol>
-<li>Acionar o registro de falecimento de beneficiário no menu; o sistema abre o form externo.</li>
-<li>Informar os dados do falecimento (processamento externo).</li>
+<li><strong>Usuário e sistema:</strong> Acionar o registro de falecimento de beneficiário no menu; o sistema abre o form externo.<br>A opção do menu principal abre o form <code>frmRegFalBenef</code> (<code>FPrincipal.pas:2273-2278</code>), que não está em BENEFICIOPREV/Fontes.</li>
+<li><strong>Usuário:</strong> Informar os dados do falecimento (processamento externo).<br>Pelas ações práticas, a entrada esperada é o beneficiário e a data. Os campos e as críticas da tela externa não estão documentados.</li>
 </ol>
 <p><strong>Ações práticas:</strong></p>
 <div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
@@ -293,6 +343,12 @@
 <p><strong>Mensagens:</strong> —</p>
 <p><strong>Telas:</strong> Registro de falecimento de beneficiário (externo) (<code>frmRegFalBenef</code>)</p>
 <p><strong>Dependências:</strong> Complementa <a href="#PF-05">JF005</a> (falecimento do participante).</p>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span> — informações que o repositório não comprova ou que divergem entre fontes. O texto existente foi mantido; os itens abaixo dependem de validação humana.</p>
+<ul>
+<li>Campos, validações, mensagens e tabelas gravadas pelo registro de falecimento de beneficiário: o form está em <code>CM/CMADMPREV/Fontes/FRegFalBenef.pas</code>, fora do escopo de evidência desta documentação.</li>
+<li>Efeito sobre o benefício do beneficiário falecido (encerramento, data final, situação): não comprovado neste módulo.</li>
+</ul>
+</div>
 <div class="note note-info"><p><strong>Registro original do processo PF-18</strong></p><p><strong>Forms de entrada:</strong> <code>frmRegFalBenef</code> (externo)</p><p><strong>Lógica de processamento:</strong> Registra falecimento de beneficiário (delegado)</p><p><strong>Saídas:</strong> Falecimento registrado</p><p><strong>Persistência (tabelas escritas):</strong> Delegado (externo)</p><p><strong>Evidência:</strong> <code>BENEFICIOPREV/Fontes/FPrincipal.pas:2273-2278</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
 </div>
 
