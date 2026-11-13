@@ -653,7 +653,163 @@ Cada prompt abaixo é **autônomo** — pode ser executado independentemente, an
 
 ---
 
-### Prompt 1 — Cadastro Previdenciário (CADASTROPREV)
+### Prompt 1 — Módulo Básico RH (MODBAS)
+
+```
+Você é um analista de métricas de software. Sua tarefa é executar a contagem SFP (Simple Function Points) do módulo Módulo Básico RH do sistema legado Delphi 5.
+
+MÓDULO: Módulo Básico RH
+CÓDIGO: MODBAS
+PASTA: MODBAS/
+ENTRY POINT: MODBAS/Fontes/ModBas.dpr
+PROPÓSITO: Módulo básico de RH — pessoas, filiais, sindicatos, profissões e dados base de recursos humanos.
+TECNOLOGIA: Delphi 5 / VCL / Oracle (schema CM.) — contexto técnico, não fator de contagem SFP.
+
+DEPENDÊNCIAS (referenciadas, não contadas como elementos deste módulo):
+- CMRHOBJ50 (objetos de negócio RH compartilhados — dependência)
+- CMGLOBALOBJ50 (objetos globais compartilhados — dependência)
+
+FRONTEIRA: Pasta MODBAS — mantém dados base de RH (pessoas, filiais, sindicatos) dentro desta fronteira; é a fundação para os demais módulos MOD*.
+
+RISCOS DE DUPLA CONTAGEM:
+- Dados base de RH: verificar se MODBAS é o dono dos dados de pessoas ou se CADASTROPREV também mantém. Pode haver sobreposição entre dados de pessoas de RH e dados de participantes previdenciários.
+- Validar com especialista de negócio a fronteira entre MODBAS e CADASTROPREV.
+
+MÉTODO: SFP (Simple Function Points) — IFPUG SFP; Roteiro de Métricas de Software do SISP v3.0.
+PESOS: 4,6 SFP por Processo Elementar (PE); 7 SFP por Arquivo Lógico (AL).
+FÓRMULA: Total SFP = (qtd_PE × 4,6) + (qtd_AL × 7)
+TERMINOLOGIA: Use exclusivamente SFP — Processos Elementares (PE) e Arquivos Lógicos (AL). NÃO use EI, EO, EQ, ILF, EIF, DET, FTR, RET, matrizes de complexidade ou pesos da APF tradicional.
+
+MODELO DE REFERÊNCIA: docs1/pontos-de-funcao/folha.html — análise SFP completa de Folha de Benefícios (25 PE, 23 AL, 276 SFP). Use como modelo de estrutura, apresentação visual e metodologia. NÃO copie totais ou conteúdo funcional de Folha — cada contagem é independente.
+
+INSTRUÇÕES:
+1. Explore o código-fonte em MODBAS/ (Fontes/, CtrlObjects/, DbObjetos/) para identificar Processos Elementares (PE) e Arquivos Lógicos (AL).
+2. Para cada PE: documente ID, nome, objetivo, justificativa de distinção, fonte no código (.pas), situação (COMPROVADO/INFERIDO/PENDENTE).
+3. Para cada AL: documente ID, nome, descrição, fronteira (mantido ou referenciado), PE relacionados, fonte, situação.
+4. Calcule o total SFP: (qtd_PE × 4,6) + (qtd_AL × 7).
+5. Documente a rastreabilidade de cada PE ao código-fonte.
+6. Identifique integrações e riscos de dupla contagem com outros módulos.
+7. Liste pendências (elementos com identificação incompleta).
+8. Crie o arquivo docs1/pontos-de-funcao/modbas.html seguindo o padrão visual de folha.html (8 seções: Identificação, Sumário executivo, Inventário de PE, Inventário de AL, Memória de cálculo, Rastreabilidade, Integrações e dupla contagem, Pendências).
+9. Adicione a aba "Módulo Básico RH" na navegação <nav> de:
+   - docs1/pontos-de-funcao/index.html
+   - docs1/pontos-de-funcao/folha.html
+   - docs1/pontos-de-funcao/contribuicao.html
+   - docs1/pontos-de-funcao/beneficioprev.html
+   - docs1/pontos-de-funcao/metodologia.html
+   - docs1/pontos-de-funcao/modbas.html (o novo arquivo)
+10. Adicione um card na seção "Análises por módulo" e uma linha na tabela "Resumo comparativo" de docs1/pontos-de-funcao/index.html.
+
+ENTREGÁVEL: relatório final listando todos os arquivos criados ou alterados, o total de PE, AL e SFP do módulo, e as pendências identificadas.
+```
+
+---
+### Prompt 2 — Controle de Acesso/Ponto (MODACESSO)
+
+```
+Você é um analista de métricas de software. Sua tarefa é executar a contagem SFP (Simple Function Points) do módulo Controle de Acesso/Ponto do sistema legado Delphi 5.
+
+MÓDULO: Controle de Acesso/Ponto
+CÓDIGO: MODACESSO
+PASTA: MODACESSO/
+ENTRY POINT: MODACESSO/Fontes/ModAcesso.dpr
+PROPÓSITO: Controle de acesso e ponto — gestão de cartões, biometria, estações de acesso e registro de ponto.
+TECNOLOGIA: Delphi 5 / VCL / Oracle (schema CM.) — contexto técnico, não fator de contagem SFP.
+
+DEPENDÊNCIAS (referenciadas, não contadas como elementos deste módulo):
+- MODBAS (módulo básico RH — dados de pessoas)
+- CMRHOBJ50 (objetos de negócio RH compartilhados — dependência)
+- CMRHOBJUTIL50 (objetos utilitários RH — biometria — dependência)
+
+FRONTEIRA: Pasta MODACESSO — mantém dados de acesso (cartões, biometria, estações, ponto) dentro desta fronteira; lê dados de MODBAS.
+
+RISCOS DE DUPLA CONTAGEM:
+- Dados de ponto: verificar sobreposição com MODASM. MODACESSO registra ponto; MODASM registra faltas/ocorrências. Verificar se há dados compartilhados.
+- Validar com especialista de negócio a fronteira entre MODACESSO e MODASM.
+
+MÉTODO: SFP (Simple Function Points) — IFPUG SFP; Roteiro de Métricas de Software do SISP v3.0.
+PESOS: 4,6 SFP por Processo Elementar (PE); 7 SFP por Arquivo Lógico (AL).
+FÓRMULA: Total SFP = (qtd_PE × 4,6) + (qtd_AL × 7)
+TERMINOLOGIA: Use exclusivamente SFP — Processos Elementares (PE) e Arquivos Lógicos (AL). NÃO use EI, EO, EQ, ILF, EIF, DET, FTR, RET, matrizes de complexidade ou pesos da APF tradicional.
+
+MODELO DE REFERÊNCIA: docs1/pontos-de-funcao/folha.html — análise SFP completa de Folha de Benefícios (25 PE, 23 AL, 276 SFP). Use como modelo de estrutura, apresentação visual e metodologia. NÃO copie totais ou conteúdo funcional de Folha — cada contagem é independente.
+
+INSTRUÇÕES:
+1. Explore o código-fonte em MODACESSO/ (Fontes/, CtrlObjetos/) para identificar Processos Elementares (PE) e Arquivos Lógicos (AL).
+2. Para cada PE: documente ID, nome, objetivo, justificativa de distinção, fonte no código (.pas), situação (COMPROVADO/INFERIDO/PENDENTE).
+3. Para cada AL: documente ID, nome, descrição, fronteira (mantido ou referenciado), PE relacionados, fonte, situação.
+4. Calcule o total SFP: (qtd_PE × 4,6) + (qtd_AL × 7).
+5. Documente a rastreabilidade de cada PE ao código-fonte.
+6. Identifique integrações e riscos de dupla contagem com outros módulos.
+7. Liste pendências (elementos com identificação incompleta).
+8. Crie o arquivo docs1/pontos-de-funcao/modacesso.html seguindo o padrão visual de folha.html (8 seções: Identificação, Sumário executivo, Inventário de PE, Inventário de AL, Memória de cálculo, Rastreabilidade, Integrações e dupla contagem, Pendências).
+9. Adicione a aba "Controle de Acesso/Ponto" na navegação <nav> de:
+   - docs1/pontos-de-funcao/index.html
+   - docs1/pontos-de-funcao/folha.html
+   - docs1/pontos-de-funcao/contribuicao.html
+   - docs1/pontos-de-funcao/beneficioprev.html
+   - docs1/pontos-de-funcao/metodologia.html
+   - docs1/pontos-de-funcao/modacesso.html (o novo arquivo)
+10. Adicione um card na seção "Análises por módulo" e uma linha na tabela "Resumo comparativo" de docs1/pontos-de-funcao/index.html.
+
+ENTREGÁVEL: relatório final listando todos os arquivos criados ou alterados, o total de PE, AL e SFP do módulo, e as pendências identificadas.
+```
+
+---
+### Prompt 3 — IRRF (Imposto de Renda) (IRRF)
+
+```
+Você é um analista de métricas de software. Sua tarefa é executar a contagem SFP (Simple Function Points) do módulo IRRF (Imposto de Renda) do sistema legado Delphi 5.
+
+MÓDULO: IRRF (Imposto de Renda)
+CÓDIGO: IRRF
+PASTA: IRRF/
+ENTRY POINT: IRRF/Fontes/Impostos.dpr
+PROPÓSITO: Cálculo, retenção e postagem de Imposto de Renda Retido na Fonte (IRRF) — tabelas de IR progressiva/regressiva, informe de rendimentos.
+TECNOLOGIA: Delphi 5 / VCL / Oracle (schema CM.) — contexto técnico, não fator de contagem SFP.
+
+DEPENDÊNCIAS (referenciadas, não contadas como elementos deste módulo):
+- CMIRRFOBJ50 (objetos de negócio compartilhados — dependência)
+- APPSERVERIRRFDLL (servidor COM — infraestrutura)
+- Módulos que consomem IRRF: FOLHA (PE-05), CONTRIBUICAOPREV, MODFOL
+
+FRONTEIRA: Pasta IRRF — mantém tabelas de IR e dados de retenção dentro desta fronteira; fornece tabelas para FOLHA, CONTRIBUICAOPREV e MODFOL (referenciado por estes).
+
+RISCOS DE DUPLA CONTAGEM:
+- Tabelas de IR: verificar se IRRF é o único dono das tabelas. FOLHA referencia as tabelas como AL-23 (referenciado) — confirmar que IRRF é o dono.
+- Retenções: verificar se FOLHA ou MODFOL também mantêm retenções próprias ou se apenas IRRF.
+- Validar com especialista de negócio se a fronteira está correta.
+
+MÉTODO: SFP (Simple Function Points) — IFPUG SFP; Roteiro de Métricas de Software do SISP v3.0.
+PESOS: 4,6 SFP por Processo Elementar (PE); 7 SFP por Arquivo Lógico (AL).
+FÓRMULA: Total SFP = (qtd_PE × 4,6) + (qtd_AL × 7)
+TERMINOLOGIA: Use exclusivamente SFP — Processos Elementares (PE) e Arquivos Lógicos (AL). NÃO use EI, EO, EQ, ILF, EIF, DET, FTR, RET, matrizes de complexidade ou pesos da APF tradicional.
+
+MODELO DE REFERÊNCIA: docs1/pontos-de-funcao/folha.html — análise SFP completa de Folha de Benefícios (25 PE, 23 AL, 276 SFP). Use como modelo de estrutura, apresentação visual e metodologia. NÃO copie totais ou conteúdo funcional de Folha — cada contagem é independente.
+
+INSTRUÇÕES:
+1. Explore o código-fonte em IRRF/ (Fontes/, CtrlObjects/, DBObjects/) para identificar Processos Elementares (PE) e Arquivos Lógicos (AL).
+2. Para cada PE: documente ID, nome, objetivo, justificativa de distinção, fonte no código (.pas), situação (COMPROVADO/INFERIDO/PENDENTE).
+3. Para cada AL: documente ID, nome, descrição, fronteira (mantido ou referenciado), PE relacionados, fonte, situação.
+4. Calcule o total SFP: (qtd_PE × 4,6) + (qtd_AL × 7).
+5. Documente a rastreabilidade de cada PE ao código-fonte.
+6. Identifique integrações e riscos de dupla contagem com outros módulos.
+7. Liste pendências (elementos com identificação incompleta).
+8. Crie o arquivo docs1/pontos-de-funcao/irrf.html seguindo o padrão visual de folha.html (8 seções: Identificação, Sumário executivo, Inventário de PE, Inventário de AL, Memória de cálculo, Rastreabilidade, Integrações e dupla contagem, Pendências).
+9. Adicione a aba "IRRF" na navegação <nav> de:
+   - docs1/pontos-de-funcao/index.html
+   - docs1/pontos-de-funcao/folha.html
+   - docs1/pontos-de-funcao/contribuicao.html
+   - docs1/pontos-de-funcao/beneficioprev.html
+   - docs1/pontos-de-funcao/metodologia.html
+   - docs1/pontos-de-funcao/irrf.html (o novo arquivo)
+10. Adicione um card na seção "Análises por módulo" e uma linha na tabela "Resumo comparativo" de docs1/pontos-de-funcao/index.html.
+
+ENTREGÁVEL: relatório final listando todos os arquivos criados ou alterados, o total de PE, AL e SFP do módulo, e as pendências identificadas.
+```
+
+---
+### Prompt 4 — Cadastro Previdenciário (CADASTROPREV)
 
 ```
 Você é um analista de métricas de software. Sua tarefa é executar a contagem SFP (Simple Function Points) do módulo Cadastro Previdenciário do sistema legado Delphi 5.
@@ -704,112 +860,7 @@ ENTREGÁVEL: relatório final listando todos os arquivos criados ou alterados, o
 ```
 
 ---
-### Prompt 2 — Processos Previdenciários (PROCPREV)
-
-```
-Você é um analista de métricas de software. Sua tarefa é executar a contagem SFP (Simple Function Points) do módulo Processos Previdenciários do sistema legado Delphi 5.
-
-MÓDULO: Processos Previdenciários
-CÓDIGO: PROCPREV
-PASTA: PROCPREV/
-ENTRY POINT: PROCPREV/Fontes/ProcPrev.dpr
-PROPÓSITO: Processamento de requerimentos/processos previdenciários — concessões, cálculos e fluxos procedurais de benefícios.
-TECNOLOGIA: Delphi 5 / VCL / Oracle (schema CM.) — contexto técnico, não fator de contagem SFP.
-
-DEPENDÊNCIAS (referenciadas, não contadas como elementos deste módulo):
-- CADASTROPREV (dados cadastrais de participantes)
-- BENEFICIOPREV (dados de benefícios)
-- PARAMPREV (parâmetros previdenciários — serviço compartilhado)
-- OBJRAD (objetos de workflow RAD — dependência compartilhada)
-
-FRONTEIRA: Pasta PROCPREV — mantém dados de processos/requerimentos dentro desta fronteira; lê dados de CADASTROPREV e BENEFICIOPREV.
-
-RISCOS DE DUPLA CONTAGEM:
-- Dados de processo/benefício: verificar sobreposição com BENEFICIOPREV. Se PROCPREV mantém dados de processo que BENEFICIOPREV também mantém, sinalizar ambiguidade de dono.
-- Validar com especialista de negócio a fronteira entre PROCPREV e BENEFICIOPREV.
-
-MÉTODO: SFP (Simple Function Points) — IFPUG SFP; Roteiro de Métricas de Software do SISP v3.0.
-PESOS: 4,6 SFP por Processo Elementar (PE); 7 SFP por Arquivo Lógico (AL).
-FÓRMULA: Total SFP = (qtd_PE × 4,6) + (qtd_AL × 7)
-TERMINOLOGIA: Use exclusivamente SFP — Processos Elementares (PE) e Arquivos Lógicos (AL). NÃO use EI, EO, EQ, ILF, EIF, DET, FTR, RET, matrizes de complexidade ou pesos da APF tradicional.
-
-MODELO DE REFERÊNCIA: docs1/pontos-de-funcao/folha.html — análise SFP completa de Folha de Benefícios (25 PE, 23 AL, 276 SFP). Use como modelo de estrutura, apresentação visual e metodologia. NÃO copie totais ou conteúdo funcional de Folha — cada contagem é independente.
-
-INSTRUÇÕES:
-1. Explore o código-fonte em PROCPREV/ (Fontes/, CtrlObjects/, DBObjects/) para identificar Processos Elementares (PE) e Arquivos Lógicos (AL).
-2. Para cada PE: documente ID, nome, objetivo, justificativa de distinção, fonte no código (.pas), situação (COMPROVADO/INFERIDO/PENDENTE).
-3. Para cada AL: documente ID, nome, descrição, fronteira (mantido ou referenciado), PE relacionados, fonte, situação.
-4. Calcule o total SFP: (qtd_PE × 4,6) + (qtd_AL × 7).
-5. Documente a rastreabilidade de cada PE ao código-fonte.
-6. Identifique integrações e riscos de dupla contagem com outros módulos.
-7. Liste pendências (elementos com identificação incompleta).
-8. Crie o arquivo docs1/pontos-de-funcao/procprev.html seguindo o padrão visual de folha.html (8 seções: Identificação, Sumário executivo, Inventário de PE, Inventário de AL, Memória de cálculo, Rastreabilidade, Integrações e dupla contagem, Pendências).
-9. Adicione a aba "Processos Previdenciários" na navegação <nav> de:
-   - docs1/pontos-de-funcao/index.html
-   - docs1/pontos-de-funcao/folha.html
-   - docs1/pontos-de-funcao/contribuicao.html
-   - docs1/pontos-de-funcao/beneficioprev.html
-   - docs1/pontos-de-funcao/metodologia.html
-   - docs1/pontos-de-funcao/procprev.html (o novo arquivo)
-10. Adicione um card na seção "Análises por módulo" e uma linha na tabela "Resumo comparativo" de docs1/pontos-de-funcao/index.html.
-
-ENTREGÁVEL: relatório final listando todos os arquivos criados ou alterados, o total de PE, AL e SFP do módulo, e as pendências identificadas.
-```
-
----
-### Prompt 3 — Assistencial (ASSISTENCIAL)
-
-```
-Você é um analista de métricas de software. Sua tarefa é executar a contagem SFP (Simple Function Points) do módulo Assistencial do sistema legado Delphi 5.
-
-MÓDULO: Assistencial
-CÓDIGO: ASSISTENCIAL
-PASTA: ASSISTENCIAL/
-ENTRY POINT: ASSISTENCIAL/Fontes/assistencial.dpr
-PROPÓSITO: Administração de benefícios de assistência social/welfare concedidos a participantes e beneficiários.
-TECNOLOGIA: Delphi 5 / VCL / Oracle (schema CM.) — contexto técnico, não fator de contagem SFP.
-
-DEPENDÊNCIAS (referenciadas, não contadas como elementos deste módulo):
-- CADASTROPREV (dados cadastrais de participantes)
-- BENEFICIOPREV (dados de benefícios)
-- PARAMPREV (parâmetros previdenciários — serviço compartilhado)
-
-FRONTEIRA: Pasta ASSISTENCIAL — mantém dados de benefícios assistenciais dentro desta fronteira; lê dados de CADASTROPREV e BENEFICIOPREV.
-
-RISCOS DE DUPLA CONTAGEM:
-- Dados de benefício assistencial: verificar sobreposição com BENEFICIOPREV. Benefícios assistenciais podem compartilhar tabelas com benefícios previdenciários.
-- Validar com especialista de negócio a fronteira entre ASSISTENCIAL e BENEFICIOPREV.
-
-MÉTODO: SFP (Simple Function Points) — IFPUG SFP; Roteiro de Métricas de Software do SISP v3.0.
-PESOS: 4,6 SFP por Processo Elementar (PE); 7 SFP por Arquivo Lógico (AL).
-FÓRMULA: Total SFP = (qtd_PE × 4,6) + (qtd_AL × 7)
-TERMINOLOGIA: Use exclusivamente SFP — Processos Elementares (PE) e Arquivos Lógicos (AL). NÃO use EI, EO, EQ, ILF, EIF, DET, FTR, RET, matrizes de complexidade ou pesos da APF tradicional.
-
-MODELO DE REFERÊNCIA: docs1/pontos-de-funcao/folha.html — análise SFP completa de Folha de Benefícios (25 PE, 23 AL, 276 SFP). Use como modelo de estrutura, apresentação visual e metodologia. NÃO copie totais ou conteúdo funcional de Folha — cada contagem é independente.
-
-INSTRUÇÕES:
-1. Explore o código-fonte em ASSISTENCIAL/ (Fontes/, CtrlObjects/, DBObjects/) para identificar Processos Elementares (PE) e Arquivos Lógicos (AL).
-2. Para cada PE: documente ID, nome, objetivo, justificativa de distinção, fonte no código (.pas), situação (COMPROVADO/INFERIDO/PENDENTE).
-3. Para cada AL: documente ID, nome, descrição, fronteira (mantido ou referenciado), PE relacionados, fonte, situação.
-4. Calcule o total SFP: (qtd_PE × 4,6) + (qtd_AL × 7).
-5. Documente a rastreabilidade de cada PE ao código-fonte.
-6. Identifique integrações e riscos de dupla contagem com outros módulos.
-7. Liste pendências (elementos com identificação incompleta).
-8. Crie o arquivo docs1/pontos-de-funcao/assistencial.html seguindo o padrão visual de folha.html (8 seções: Identificação, Sumário executivo, Inventário de PE, Inventário de AL, Memória de cálculo, Rastreabilidade, Integrações e dupla contagem, Pendências).
-9. Adicione a aba "Assistencial" na navegação <nav> de:
-   - docs1/pontos-de-funcao/index.html
-   - docs1/pontos-de-funcao/folha.html
-   - docs1/pontos-de-funcao/contribuicao.html
-   - docs1/pontos-de-funcao/beneficioprev.html
-   - docs1/pontos-de-funcao/metodologia.html
-   - docs1/pontos-de-funcao/assistencial.html (o novo arquivo)
-10. Adicione um card na seção "Análises por módulo" e uma linha na tabela "Resumo comparativo" de docs1/pontos-de-funcao/index.html.
-
-ENTREGÁVEL: relatório final listando todos os arquivos criados ou alterados, o total de PE, AL e SFP do módulo, e as pendências identificadas.
-```
-
----
-### Prompt 4 — Contabilidade (CONTAB)
+### Prompt 5 — Contabilidade (CONTAB)
 
 ```
 Você é um analista de métricas de software. Sua tarefa é executar a contagem SFP (Simple Function Points) do módulo Contabilidade do sistema legado Delphi 5.
@@ -865,7 +916,7 @@ ENTREGÁVEL: relatório final listando todos os arquivos criados ou alterados, o
 ```
 
 ---
-### Prompt 5 — Contabilidade Financeira (CFINAN)
+### Prompt 6 — Contabilidade Financeira (CFINAN)
 
 ```
 Você é um analista de métricas de software. Sua tarefa é executar a contagem SFP (Simple Function Points) do módulo Contabilidade Financeira do sistema legado Delphi 5.
@@ -919,7 +970,59 @@ ENTREGÁVEL: relatório final listando todos os arquivos criados ou alterados, o
 ```
 
 ---
-### Prompt 6 — Contas a Pagar (CPAGAR)
+### Prompt 7 — Orçamento (ORCAMENTO)
+
+```
+Você é um analista de métricas de software. Sua tarefa é executar a contagem SFP (Simple Function Points) do módulo Orçamento do sistema legado Delphi 5.
+
+MÓDULO: Orçamento
+CÓDIGO: ORCAMENTO
+PASTA: ORCAMENTO/
+ENTRY POINT: ORCAMENTO/FontesMT/Orcamento.dpr
+PROPÓSITO: Orçamento — planejamento orçamentário, execução e monitoramento de dotações.
+TECNOLOGIA: Delphi 5 / VCL / Oracle (schema CM.) — contexto técnico, não fator de contagem SFP.
+
+DEPENDÊNCIAS (referenciadas, não contadas como elementos deste módulo):
+- CONTAB (contabilidade — dados de execução)
+- CMPLANEORCOBJ50 (objetos de negócio compartilhados — dependência)
+- APPSERVERORCAMENTO (servidor COM — infraestrutura)
+
+FRONTEIRA: Pasta ORCAMENTO — mantém dados de orçamento (dotações, saldos, cenários, contas orçamentárias) dentro desta fronteira; lê dados de execução de CONTAB.
+
+RISCOS DE DUPLA CONTAGEM:
+- Saldos orçamentários: verificar se CONTAB também mantém saldos ou se apenas ORCAMENTO.
+- Validar com especialista de negócio se a fronteira está correta.
+
+MÉTODO: SFP (Simple Function Points) — IFPUG SFP; Roteiro de Métricas de Software do SISP v3.0.
+PESOS: 4,6 SFP por Processo Elementar (PE); 7 SFP por Arquivo Lógico (AL).
+FÓRMULA: Total SFP = (qtd_PE × 4,6) + (qtd_AL × 7)
+TERMINOLOGIA: Use exclusivamente SFP — Processos Elementares (PE) e Arquivos Lógicos (AL). NÃO use EI, EO, EQ, ILF, EIF, DET, FTR, RET, matrizes de complexidade ou pesos da APF tradicional.
+
+MODELO DE REFERÊNCIA: docs1/pontos-de-funcao/folha.html — análise SFP completa de Folha de Benefícios (25 PE, 23 AL, 276 SFP). Use como modelo de estrutura, apresentação visual e metodologia. NÃO copie totais ou conteúdo funcional de Folha — cada contagem é independente.
+
+INSTRUÇÕES:
+1. Explore o código-fonte em ORCAMENTO/ (FontesMT/, CtrlObjects/, DBObjects/) para identificar Processos Elementares (PE) e Arquivos Lógicos (AL).
+2. Para cada PE: documente ID, nome, objetivo, justificativa de distinção, fonte no código (.pas), situação (COMPROVADO/INFERIDO/PENDENTE).
+3. Para cada AL: documente ID, nome, descrição, fronteira (mantido ou referenciado), PE relacionados, fonte, situação.
+4. Calcule o total SFP: (qtd_PE × 4,6) + (qtd_AL × 7).
+5. Documente a rastreabilidade de cada PE ao código-fonte.
+6. Identifique integrações e riscos de dupla contagem com outros módulos.
+7. Liste pendências (elementos com identificação incompleta).
+8. Crie o arquivo docs1/pontos-de-funcao/orcamento.html seguindo o padrão visual de folha.html (8 seções: Identificação, Sumário executivo, Inventário de PE, Inventário de AL, Memória de cálculo, Rastreabilidade, Integrações e dupla contagem, Pendências).
+9. Adicione a aba "Orçamento" na navegação <nav> de:
+   - docs1/pontos-de-funcao/index.html
+   - docs1/pontos-de-funcao/folha.html
+   - docs1/pontos-de-funcao/contribuicao.html
+   - docs1/pontos-de-funcao/beneficioprev.html
+   - docs1/pontos-de-funcao/metodologia.html
+   - docs1/pontos-de-funcao/orcamento.html (o novo arquivo)
+10. Adicione um card na seção "Análises por módulo" e uma linha na tabela "Resumo comparativo" de docs1/pontos-de-funcao/index.html.
+
+ENTREGÁVEL: relatório final listando todos os arquivos criados ou alterados, o total de PE, AL e SFP do módulo, e as pendências identificadas.
+```
+
+---
+### Prompt 8 — Contas a Pagar (CPAGAR)
 
 ```
 Você é um analista de métricas de software. Sua tarefa é executar a contagem SFP (Simple Function Points) do módulo Contas a Pagar do sistema legado Delphi 5.
@@ -974,7 +1077,7 @@ ENTREGÁVEL: relatório final listando todos os arquivos criados ou alterados, o
 ```
 
 ---
-### Prompt 7 — Contas a Receber (CRECEBER)
+### Prompt 9 — Contas a Receber (CRECEBER)
 
 ```
 Você é um analista de métricas de software. Sua tarefa é executar a contagem SFP (Simple Function Points) do módulo Contas a Receber do sistema legado Delphi 5.
@@ -1023,111 +1126,6 @@ INSTRUÇÕES:
    - docs1/pontos-de-funcao/beneficioprev.html
    - docs1/pontos-de-funcao/metodologia.html
    - docs1/pontos-de-funcao/creceber.html (o novo arquivo)
-10. Adicione um card na seção "Análises por módulo" e uma linha na tabela "Resumo comparativo" de docs1/pontos-de-funcao/index.html.
-
-ENTREGÁVEL: relatório final listando todos os arquivos criados ou alterados, o total de PE, AL e SFP do módulo, e as pendências identificadas.
-```
-
----
-### Prompt 8 — Orçamento (ORCAMENTO)
-
-```
-Você é um analista de métricas de software. Sua tarefa é executar a contagem SFP (Simple Function Points) do módulo Orçamento do sistema legado Delphi 5.
-
-MÓDULO: Orçamento
-CÓDIGO: ORCAMENTO
-PASTA: ORCAMENTO/
-ENTRY POINT: ORCAMENTO/FontesMT/Orcamento.dpr
-PROPÓSITO: Orçamento — planejamento orçamentário, execução e monitoramento de dotações.
-TECNOLOGIA: Delphi 5 / VCL / Oracle (schema CM.) — contexto técnico, não fator de contagem SFP.
-
-DEPENDÊNCIAS (referenciadas, não contadas como elementos deste módulo):
-- CONTAB (contabilidade — dados de execução)
-- CMPLANEORCOBJ50 (objetos de negócio compartilhados — dependência)
-- APPSERVERORCAMENTO (servidor COM — infraestrutura)
-
-FRONTEIRA: Pasta ORCAMENTO — mantém dados de orçamento (dotações, saldos, cenários, contas orçamentárias) dentro desta fronteira; lê dados de execução de CONTAB.
-
-RISCOS DE DUPLA CONTAGEM:
-- Saldos orçamentários: verificar se CONTAB também mantém saldos ou se apenas ORCAMENTO.
-- Validar com especialista de negócio se a fronteira está correta.
-
-MÉTODO: SFP (Simple Function Points) — IFPUG SFP; Roteiro de Métricas de Software do SISP v3.0.
-PESOS: 4,6 SFP por Processo Elementar (PE); 7 SFP por Arquivo Lógico (AL).
-FÓRMULA: Total SFP = (qtd_PE × 4,6) + (qtd_AL × 7)
-TERMINOLOGIA: Use exclusivamente SFP — Processos Elementares (PE) e Arquivos Lógicos (AL). NÃO use EI, EO, EQ, ILF, EIF, DET, FTR, RET, matrizes de complexidade ou pesos da APF tradicional.
-
-MODELO DE REFERÊNCIA: docs1/pontos-de-funcao/folha.html — análise SFP completa de Folha de Benefícios (25 PE, 23 AL, 276 SFP). Use como modelo de estrutura, apresentação visual e metodologia. NÃO copie totais ou conteúdo funcional de Folha — cada contagem é independente.
-
-INSTRUÇÕES:
-1. Explore o código-fonte em ORCAMENTO/ (FontesMT/, CtrlObjects/, DBObjects/) para identificar Processos Elementares (PE) e Arquivos Lógicos (AL).
-2. Para cada PE: documente ID, nome, objetivo, justificativa de distinção, fonte no código (.pas), situação (COMPROVADO/INFERIDO/PENDENTE).
-3. Para cada AL: documente ID, nome, descrição, fronteira (mantido ou referenciado), PE relacionados, fonte, situação.
-4. Calcule o total SFP: (qtd_PE × 4,6) + (qtd_AL × 7).
-5. Documente a rastreabilidade de cada PE ao código-fonte.
-6. Identifique integrações e riscos de dupla contagem com outros módulos.
-7. Liste pendências (elementos com identificação incompleta).
-8. Crie o arquivo docs1/pontos-de-funcao/orcamento.html seguindo o padrão visual de folha.html (8 seções: Identificação, Sumário executivo, Inventário de PE, Inventário de AL, Memória de cálculo, Rastreabilidade, Integrações e dupla contagem, Pendências).
-9. Adicione a aba "Orçamento" na navegação <nav> de:
-   - docs1/pontos-de-funcao/index.html
-   - docs1/pontos-de-funcao/folha.html
-   - docs1/pontos-de-funcao/contribuicao.html
-   - docs1/pontos-de-funcao/beneficioprev.html
-   - docs1/pontos-de-funcao/metodologia.html
-   - docs1/pontos-de-funcao/orcamento.html (o novo arquivo)
-10. Adicione um card na seção "Análises por módulo" e uma linha na tabela "Resumo comparativo" de docs1/pontos-de-funcao/index.html.
-
-ENTREGÁVEL: relatório final listando todos os arquivos criados ou alterados, o total de PE, AL e SFP do módulo, e as pendências identificadas.
-```
-
----
-### Prompt 9 — IRRF (Imposto de Renda) (IRRF)
-
-```
-Você é um analista de métricas de software. Sua tarefa é executar a contagem SFP (Simple Function Points) do módulo IRRF (Imposto de Renda) do sistema legado Delphi 5.
-
-MÓDULO: IRRF (Imposto de Renda)
-CÓDIGO: IRRF
-PASTA: IRRF/
-ENTRY POINT: IRRF/Fontes/Impostos.dpr
-PROPÓSITO: Cálculo, retenção e postagem de Imposto de Renda Retido na Fonte (IRRF) — tabelas de IR progressiva/regressiva, informe de rendimentos.
-TECNOLOGIA: Delphi 5 / VCL / Oracle (schema CM.) — contexto técnico, não fator de contagem SFP.
-
-DEPENDÊNCIAS (referenciadas, não contadas como elementos deste módulo):
-- CMIRRFOBJ50 (objetos de negócio compartilhados — dependência)
-- APPSERVERIRRFDLL (servidor COM — infraestrutura)
-- Módulos que consomem IRRF: FOLHA (PE-05), CONTRIBUICAOPREV, MODFOL
-
-FRONTEIRA: Pasta IRRF — mantém tabelas de IR e dados de retenção dentro desta fronteira; fornece tabelas para FOLHA, CONTRIBUICAOPREV e MODFOL (referenciado por estes).
-
-RISCOS DE DUPLA CONTAGEM:
-- Tabelas de IR: verificar se IRRF é o único dono das tabelas. FOLHA referencia as tabelas como AL-23 (referenciado) — confirmar que IRRF é o dono.
-- Retenções: verificar se FOLHA ou MODFOL também mantêm retenções próprias ou se apenas IRRF.
-- Validar com especialista de negócio se a fronteira está correta.
-
-MÉTODO: SFP (Simple Function Points) — IFPUG SFP; Roteiro de Métricas de Software do SISP v3.0.
-PESOS: 4,6 SFP por Processo Elementar (PE); 7 SFP por Arquivo Lógico (AL).
-FÓRMULA: Total SFP = (qtd_PE × 4,6) + (qtd_AL × 7)
-TERMINOLOGIA: Use exclusivamente SFP — Processos Elementares (PE) e Arquivos Lógicos (AL). NÃO use EI, EO, EQ, ILF, EIF, DET, FTR, RET, matrizes de complexidade ou pesos da APF tradicional.
-
-MODELO DE REFERÊNCIA: docs1/pontos-de-funcao/folha.html — análise SFP completa de Folha de Benefícios (25 PE, 23 AL, 276 SFP). Use como modelo de estrutura, apresentação visual e metodologia. NÃO copie totais ou conteúdo funcional de Folha — cada contagem é independente.
-
-INSTRUÇÕES:
-1. Explore o código-fonte em IRRF/ (Fontes/, CtrlObjects/, DBObjects/) para identificar Processos Elementares (PE) e Arquivos Lógicos (AL).
-2. Para cada PE: documente ID, nome, objetivo, justificativa de distinção, fonte no código (.pas), situação (COMPROVADO/INFERIDO/PENDENTE).
-3. Para cada AL: documente ID, nome, descrição, fronteira (mantido ou referenciado), PE relacionados, fonte, situação.
-4. Calcule o total SFP: (qtd_PE × 4,6) + (qtd_AL × 7).
-5. Documente a rastreabilidade de cada PE ao código-fonte.
-6. Identifique integrações e riscos de dupla contagem com outros módulos.
-7. Liste pendências (elementos com identificação incompleta).
-8. Crie o arquivo docs1/pontos-de-funcao/irrf.html seguindo o padrão visual de folha.html (8 seções: Identificação, Sumário executivo, Inventário de PE, Inventário de AL, Memória de cálculo, Rastreabilidade, Integrações e dupla contagem, Pendências).
-9. Adicione a aba "IRRF" na navegação <nav> de:
-   - docs1/pontos-de-funcao/index.html
-   - docs1/pontos-de-funcao/folha.html
-   - docs1/pontos-de-funcao/contribuicao.html
-   - docs1/pontos-de-funcao/beneficioprev.html
-   - docs1/pontos-de-funcao/metodologia.html
-   - docs1/pontos-de-funcao/irrf.html (o novo arquivo)
 10. Adicione um card na seção "Análises por módulo" e uma linha na tabela "Resumo comparativo" de docs1/pontos-de-funcao/index.html.
 
 ENTREGÁVEL: relatório final listando todos os arquivos criados ou alterados, o total de PE, AL e SFP do módulo, e as pendências identificadas.
@@ -1186,7 +1184,533 @@ ENTREGÁVEL: relatório final listando todos os arquivos criados ou alterados, o
 ```
 
 ---
-### Prompt 11 — Controle de Aplicações Financeiras (CAF)
+### Prompt 11 — Contratos (CONTRATO)
+
+```
+Você é um analista de métricas de software. Sua tarefa é executar a contagem SFP (Simple Function Points) do módulo Contratos do sistema legado Delphi 5.
+
+MÓDULO: Contratos
+CÓDIGO: CONTRATO
+PASTA: CONTRATO/
+ENTRY POINT: CONTRATO/Fontes/contrato.dpr
+PROPÓSITO: Gestão de contratos — registro e manutenção de contratos, áreas gestoras e partes relacionadas.
+TECNOLOGIA: Delphi 5 / VCL / Oracle (schema CM.) — contexto técnico, não fator de contagem SFP.
+
+DEPENDÊNCIAS (referenciadas, não contadas como elementos deste módulo):
+- CPAGAR (contas a pagar — despesas contratuais)
+- CRECEBER (contas a receber — receitas contratuais)
+- CMGLOBALOBJ50 (objetos globais compartilhados — dependência)
+
+FRONTEIRA: Pasta CONTRATO — mantém dados de contratos (partes, cláusulas, vigências) dentro desta fronteira; gera obrigações para CPAGAR e CRECEBER.
+
+RISCOS DE DUPLA CONTAGEM:
+- Contratos: verificar sobreposição com MODAUTO (gestão de frota usa contratos) e ADMINIMOB (contratos imobiliários). Verificar se CONTRATO é o dono genérico ou se cada domínio tem seus próprios contratos.
+- Validar com especialista de negócio a fronteira.
+
+MÉTODO: SFP (Simple Function Points) — IFPUG SFP; Roteiro de Métricas de Software do SISP v3.0.
+PESOS: 4,6 SFP por Processo Elementar (PE); 7 SFP por Arquivo Lógico (AL).
+FÓRMULA: Total SFP = (qtd_PE × 4,6) + (qtd_AL × 7)
+TERMINOLOGIA: Use exclusivamente SFP — Processos Elementares (PE) e Arquivos Lógicos (AL). NÃO use EI, EO, EQ, ILF, EIF, DET, FTR, RET, matrizes de complexidade ou pesos da APF tradicional.
+
+MODELO DE REFERÊNCIA: docs1/pontos-de-funcao/folha.html — análise SFP completa de Folha de Benefícios (25 PE, 23 AL, 276 SFP). Use como modelo de estrutura, apresentação visual e metodologia. NÃO copie totais ou conteúdo funcional de Folha — cada contagem é independente.
+
+INSTRUÇÕES:
+1. Explore o código-fonte em CONTRATO/ (Fontes/, CtrlObjects/, DBObjects/) para identificar Processos Elementares (PE) e Arquivos Lógicos (AL).
+2. Para cada PE: documente ID, nome, objetivo, justificativa de distinção, fonte no código (.pas), situação (COMPROVADO/INFERIDO/PENDENTE).
+3. Para cada AL: documente ID, nome, descrição, fronteira (mantido ou referenciado), PE relacionados, fonte, situação.
+4. Calcule o total SFP: (qtd_PE × 4,6) + (qtd_AL × 7).
+5. Documente a rastreabilidade de cada PE ao código-fonte.
+6. Identifique integrações e riscos de dupla contagem com outros módulos.
+7. Liste pendências (elementos com identificação incompleta).
+8. Crie o arquivo docs1/pontos-de-funcao/contrato.html seguindo o padrão visual de folha.html (8 seções: Identificação, Sumário executivo, Inventário de PE, Inventário de AL, Memória de cálculo, Rastreabilidade, Integrações e dupla contagem, Pendências).
+9. Adicione a aba "Contratos" na navegação <nav> de:
+   - docs1/pontos-de-funcao/index.html
+   - docs1/pontos-de-funcao/folha.html
+   - docs1/pontos-de-funcao/contribuicao.html
+   - docs1/pontos-de-funcao/beneficioprev.html
+   - docs1/pontos-de-funcao/metodologia.html
+   - docs1/pontos-de-funcao/contrato.html (o novo arquivo)
+10. Adicione um card na seção "Análises por módulo" e uma linha na tabela "Resumo comparativo" de docs1/pontos-de-funcao/index.html.
+
+ENTREGÁVEL: relatório final listando todos os arquivos criados ou alterados, o total de PE, AL e SFP do módulo, e as pendências identificadas.
+```
+
+---
+### Prompt 12 — Empréstimo (EMPRESTIMO)
+
+```
+Você é um analista de métricas de software. Sua tarefa é executar a contagem SFP (Simple Function Points) do módulo Empréstimo do sistema legado Delphi 5.
+
+MÓDULO: Empréstimo
+CÓDIGO: EMPRESTIMO
+PASTA: EMPRESTIMO/
+ENTRY POINT: EMPRESTIMO/Fontes/emprestimo.dpr
+PROPÓSITO: Empréstimo a participantes/associados — concessão, manutenção, cálculo e acompanhamento de empréstimos.
+TECNOLOGIA: Delphi 5 / VCL / Oracle (schema CM.) — contexto técnico, não fator de contagem SFP.
+
+DEPENDÊNCIAS (referenciadas, não contadas como elementos deste módulo):
+- CRECEBER (contas a receber — títulos de empréstimo)
+- CONTAB (contabilidade — lançamentos)
+- CADASTROPREV (dados cadastrais de participantes)
+- EMPRESTIMOBPL (BPL compartilhado — dependência)
+
+FRONTEIRA: Pasta EMPRESTIMO — mantém dados de empréstimos (contratos, parcelas, saldos) dentro desta fronteira; gera títulos para CRECEBER.
+
+RISCOS DE DUPLA CONTAGEM:
+- Empréstimos: verificar sobreposição com FINANCIAMENTO e AUTOATENDIMENTO. EMPRESTIMO pode ser o dono dos dados de empréstimo, com FINANCIAMENTO como sub-módulo e AUTOATENDIMENTO como canal web.
+- Validar com especialista de negócio a fronteira entre EMPRESTIMO, FINANCIAMENTO e AUTOATENDIMENTO.
+
+MÉTODO: SFP (Simple Function Points) — IFPUG SFP; Roteiro de Métricas de Software do SISP v3.0.
+PESOS: 4,6 SFP por Processo Elementar (PE); 7 SFP por Arquivo Lógico (AL).
+FÓRMULA: Total SFP = (qtd_PE × 4,6) + (qtd_AL × 7)
+TERMINOLOGIA: Use exclusivamente SFP — Processos Elementares (PE) e Arquivos Lógicos (AL). NÃO use EI, EO, EQ, ILF, EIF, DET, FTR, RET, matrizes de complexidade ou pesos da APF tradicional.
+
+MODELO DE REFERÊNCIA: docs1/pontos-de-funcao/folha.html — análise SFP completa de Folha de Benefícios (25 PE, 23 AL, 276 SFP). Use como modelo de estrutura, apresentação visual e metodologia. NÃO copie totais ou conteúdo funcional de Folha — cada contagem é independente.
+
+INSTRUÇÕES:
+1. Explore o código-fonte em EMPRESTIMO/ (Fontes/, CtrlObjects/, DBObjects/) para identificar Processos Elementares (PE) e Arquivos Lógicos (AL).
+2. Para cada PE: documente ID, nome, objetivo, justificativa de distinção, fonte no código (.pas), situação (COMPROVADO/INFERIDO/PENDENTE).
+3. Para cada AL: documente ID, nome, descrição, fronteira (mantido ou referenciado), PE relacionados, fonte, situação.
+4. Calcule o total SFP: (qtd_PE × 4,6) + (qtd_AL × 7).
+5. Documente a rastreabilidade de cada PE ao código-fonte.
+6. Identifique integrações e riscos de dupla contagem com outros módulos.
+7. Liste pendências (elementos com identificação incompleta).
+8. Crie o arquivo docs1/pontos-de-funcao/emprestimo.html seguindo o padrão visual de folha.html (8 seções: Identificação, Sumário executivo, Inventário de PE, Inventário de AL, Memória de cálculo, Rastreabilidade, Integrações e dupla contagem, Pendências).
+9. Adicione a aba "Empréstimo" na navegação <nav> de:
+   - docs1/pontos-de-funcao/index.html
+   - docs1/pontos-de-funcao/folha.html
+   - docs1/pontos-de-funcao/contribuicao.html
+   - docs1/pontos-de-funcao/beneficioprev.html
+   - docs1/pontos-de-funcao/metodologia.html
+   - docs1/pontos-de-funcao/emprestimo.html (o novo arquivo)
+10. Adicione um card na seção "Análises por módulo" e uma linha na tabela "Resumo comparativo" de docs1/pontos-de-funcao/index.html.
+
+ENTREGÁVEL: relatório final listando todos os arquivos criados ou alterados, o total de PE, AL e SFP do módulo, e as pendências identificadas.
+```
+
+---
+### Prompt 13 — Financiamento (FINANCIAMENTO)
+
+```
+Você é um analista de métricas de software. Sua tarefa é executar a contagem SFP (Simple Function Points) do módulo Financiamento do sistema legado Delphi 5.
+
+MÓDULO: Financiamento
+CÓDIGO: FINANCIAMENTO
+PASTA: FINANCIAMENTO/
+ENTRY POINT: FINANCIAMENTO/Fontes/Financiamento.dpr
+PROPÓSITO: Financiamento — gestão de contratos de financiamento, amortização e acompanhamento.
+TECNOLOGIA: Delphi 5 / VCL / Oracle (schema CM.) — contexto técnico, não fator de contagem SFP.
+
+DEPENDÊNCIAS (referenciadas, não contadas como elementos deste módulo):
+- EMPRESTIMO (empréstimo — dados de contrato)
+- CRECEBER (contas a receber — títulos)
+- CONTAB (contabilidade — lançamentos)
+- EMPRESTIMOBPL (BPL compartilhado — dependência)
+
+FRONTEIRA: Pasta FINANCIAMENTO — mantém dados de financiamentos dentro desta fronteira; integra com EMPRESTIMO e CRECEBER.
+
+RISCOS DE DUPLA CONTAGEM:
+- Financiamentos: verificar sobreposição com EMPRESTIMO. FINANCIAMENTO pode ser sub-módulo de EMPRESTIMO ou fronteira própria.
+- Validar com especialista de negócio a fronteira entre FINANCIAMENTO e EMPRESTIMO.
+
+MÉTODO: SFP (Simple Function Points) — IFPUG SFP; Roteiro de Métricas de Software do SISP v3.0.
+PESOS: 4,6 SFP por Processo Elementar (PE); 7 SFP por Arquivo Lógico (AL).
+FÓRMULA: Total SFP = (qtd_PE × 4,6) + (qtd_AL × 7)
+TERMINOLOGIA: Use exclusivamente SFP — Processos Elementares (PE) e Arquivos Lógicos (AL). NÃO use EI, EO, EQ, ILF, EIF, DET, FTR, RET, matrizes de complexidade ou pesos da APF tradicional.
+
+MODELO DE REFERÊNCIA: docs1/pontos-de-funcao/folha.html — análise SFP completa de Folha de Benefícios (25 PE, 23 AL, 276 SFP). Use como modelo de estrutura, apresentação visual e metodologia. NÃO copie totais ou conteúdo funcional de Folha — cada contagem é independente.
+
+INSTRUÇÕES:
+1. Explore o código-fonte em FINANCIAMENTO/ (Fontes/, CtrlObjects/, DBObjects/) para identificar Processos Elementares (PE) e Arquivos Lógicos (AL).
+2. Para cada PE: documente ID, nome, objetivo, justificativa de distinção, fonte no código (.pas), situação (COMPROVADO/INFERIDO/PENDENTE).
+3. Para cada AL: documente ID, nome, descrição, fronteira (mantido ou referenciado), PE relacionados, fonte, situação.
+4. Calcule o total SFP: (qtd_PE × 4,6) + (qtd_AL × 7).
+5. Documente a rastreabilidade de cada PE ao código-fonte.
+6. Identifique integrações e riscos de dupla contagem com outros módulos.
+7. Liste pendências (elementos com identificação incompleta).
+8. Crie o arquivo docs1/pontos-de-funcao/financiamento.html seguindo o padrão visual de folha.html (8 seções: Identificação, Sumário executivo, Inventário de PE, Inventário de AL, Memória de cálculo, Rastreabilidade, Integrações e dupla contagem, Pendências).
+9. Adicione a aba "Financiamento" na navegação <nav> de:
+   - docs1/pontos-de-funcao/index.html
+   - docs1/pontos-de-funcao/folha.html
+   - docs1/pontos-de-funcao/contribuicao.html
+   - docs1/pontos-de-funcao/beneficioprev.html
+   - docs1/pontos-de-funcao/metodologia.html
+   - docs1/pontos-de-funcao/financiamento.html (o novo arquivo)
+10. Adicione um card na seção "Análises por módulo" e uma linha na tabela "Resumo comparativo" de docs1/pontos-de-funcao/index.html.
+
+ENTREGÁVEL: relatório final listando todos os arquivos criados ou alterados, o total de PE, AL e SFP do módulo, e as pendências identificadas.
+```
+
+---
+### Prompt 14 — Agendamento (AGENDAMENTO)
+
+```
+Você é um analista de métricas de software. Sua tarefa é executar a contagem SFP (Simple Function Points) do módulo Agendamento do sistema legado Delphi 5.
+
+MÓDULO: Agendamento
+CÓDIGO: AGENDAMENTO
+PASTA: AGENDAMENTO/
+ENTRY POINT: AGENDAMENTO/Fontes/Agendamento.dpr
+PROPÓSITO: Agendamento — agendamento de atendimentos, serviços e compromissos.
+TECNOLOGIA: Delphi 5 / VCL / Oracle (schema CM.) — contexto técnico, não fator de contagem SFP.
+
+DEPENDÊNCIAS (referenciadas, não contadas como elementos deste módulo):
+- CADASTROPREV (dados cadastrais de participantes)
+- CMAGENDAMENTOOBJ50 (objetos compartilhados — dependência)
+
+FRONTEIRA: Pasta AGENDAMENTO — mantém dados de agendamentos (horários, calendários, atendentes) dentro desta fronteira.
+
+RISCOS DE DUPLA CONTAGEM:
+- Agendamentos: verificar sobreposição com CENTRALAP. AGENDAMENTO pode ser referenciado por CENTRALAP.
+- Validar com especialista de negócio se a fronteira está correta.
+
+MÉTODO: SFP (Simple Function Points) — IFPUG SFP; Roteiro de Métricas de Software do SISP v3.0.
+PESOS: 4,6 SFP por Processo Elementar (PE); 7 SFP por Arquivo Lógico (AL).
+FÓRMULA: Total SFP = (qtd_PE × 4,6) + (qtd_AL × 7)
+TERMINOLOGIA: Use exclusivamente SFP — Processos Elementares (PE) e Arquivos Lógicos (AL). NÃO use EI, EO, EQ, ILF, EIF, DET, FTR, RET, matrizes de complexidade ou pesos da APF tradicional.
+
+MODELO DE REFERÊNCIA: docs1/pontos-de-funcao/folha.html — análise SFP completa de Folha de Benefícios (25 PE, 23 AL, 276 SFP). Use como modelo de estrutura, apresentação visual e metodologia. NÃO copie totais ou conteúdo funcional de Folha — cada contagem é independente.
+
+INSTRUÇÕES:
+1. Explore o código-fonte em AGENDAMENTO/ (Fontes/, CtrlObjects/, DBObjects/) para identificar Processos Elementares (PE) e Arquivos Lógicos (AL).
+2. Para cada PE: documente ID, nome, objetivo, justificativa de distinção, fonte no código (.pas), situação (COMPROVADO/INFERIDO/PENDENTE).
+3. Para cada AL: documente ID, nome, descrição, fronteira (mantido ou referenciado), PE relacionados, fonte, situação.
+4. Calcule o total SFP: (qtd_PE × 4,6) + (qtd_AL × 7).
+5. Documente a rastreabilidade de cada PE ao código-fonte.
+6. Identifique integrações e riscos de dupla contagem com outros módulos.
+7. Liste pendências (elementos com identificação incompleta).
+8. Crie o arquivo docs1/pontos-de-funcao/agendamento.html seguindo o padrão visual de folha.html (8 seções: Identificação, Sumário executivo, Inventário de PE, Inventário de AL, Memória de cálculo, Rastreabilidade, Integrações e dupla contagem, Pendências).
+9. Adicione a aba "Agendamento" na navegação <nav> de:
+   - docs1/pontos-de-funcao/index.html
+   - docs1/pontos-de-funcao/folha.html
+   - docs1/pontos-de-funcao/contribuicao.html
+   - docs1/pontos-de-funcao/beneficioprev.html
+   - docs1/pontos-de-funcao/metodologia.html
+   - docs1/pontos-de-funcao/agendamento.html (o novo arquivo)
+10. Adicione um card na seção "Análises por módulo" e uma linha na tabela "Resumo comparativo" de docs1/pontos-de-funcao/index.html.
+
+ENTREGÁVEL: relatório final listando todos os arquivos criados ou alterados, o total de PE, AL e SFP do módulo, e as pendências identificadas.
+```
+
+---
+### Prompt 15 — Central de Atendimento (CENTRALAP)
+
+```
+Você é um analista de métricas de software. Sua tarefa é executar a contagem SFP (Simple Function Points) do módulo Central de Atendimento do sistema legado Delphi 5.
+
+MÓDULO: Central de Atendimento
+CÓDIGO: CENTRALAP
+PASTA: CENTRALAP/
+ENTRY POINT: CENTRALAP/Fontes/CentralAP.dpr
+PROPÓSITO: Central de atendimento — atendimento a participantes, catálogo de serviços e gestão de ocorrências.
+TECNOLOGIA: Delphi 5 / VCL / Oracle (schema CM.) — contexto técnico, não fator de contagem SFP.
+
+DEPENDÊNCIAS (referenciadas, não contadas como elementos deste módulo):
+- CADASTROPREV (dados cadastrais de participantes)
+- AGENDAMENTO (agendamento de atendimentos)
+- CMAGENDAMENTOOBJ50 (objetos compartilhados — dependência)
+
+FRONTEIRA: Pasta CENTRALAP — mantém dados de atendimentos (ocorrências, protocolos, serviços) dentro desta fronteira; lê dados de CADASTROPREV.
+
+RISCOS DE DUPLA CONTAGEM:
+- Atendimentos: verificar sobreposição com AGENDAMENTO. CENTRALAP pode compartilhar dados de agendamento.
+- Validar com especialista de negócio se a fronteira está correta.
+
+MÉTODO: SFP (Simple Function Points) — IFPUG SFP; Roteiro de Métricas de Software do SISP v3.0.
+PESOS: 4,6 SFP por Processo Elementar (PE); 7 SFP por Arquivo Lógico (AL).
+FÓRMULA: Total SFP = (qtd_PE × 4,6) + (qtd_AL × 7)
+TERMINOLOGIA: Use exclusivamente SFP — Processos Elementares (PE) e Arquivos Lógicos (AL). NÃO use EI, EO, EQ, ILF, EIF, DET, FTR, RET, matrizes de complexidade ou pesos da APF tradicional.
+
+MODELO DE REFERÊNCIA: docs1/pontos-de-funcao/folha.html — análise SFP completa de Folha de Benefícios (25 PE, 23 AL, 276 SFP). Use como modelo de estrutura, apresentação visual e metodologia. NÃO copie totais ou conteúdo funcional de Folha — cada contagem é independente.
+
+INSTRUÇÕES:
+1. Explore o código-fonte em CENTRALAP/ (Fontes/, CtrlObjects/, DBObjects/) para identificar Processos Elementares (PE) e Arquivos Lógicos (AL).
+2. Para cada PE: documente ID, nome, objetivo, justificativa de distinção, fonte no código (.pas), situação (COMPROVADO/INFERIDO/PENDENTE).
+3. Para cada AL: documente ID, nome, descrição, fronteira (mantido ou referenciado), PE relacionados, fonte, situação.
+4. Calcule o total SFP: (qtd_PE × 4,6) + (qtd_AL × 7).
+5. Documente a rastreabilidade de cada PE ao código-fonte.
+6. Identifique integrações e riscos de dupla contagem com outros módulos.
+7. Liste pendências (elementos com identificação incompleta).
+8. Crie o arquivo docs1/pontos-de-funcao/centralap.html seguindo o padrão visual de folha.html (8 seções: Identificação, Sumário executivo, Inventário de PE, Inventário de AL, Memória de cálculo, Rastreabilidade, Integrações e dupla contagem, Pendências).
+9. Adicione a aba "Central de Atendimento" na navegação <nav> de:
+   - docs1/pontos-de-funcao/index.html
+   - docs1/pontos-de-funcao/folha.html
+   - docs1/pontos-de-funcao/contribuicao.html
+   - docs1/pontos-de-funcao/beneficioprev.html
+   - docs1/pontos-de-funcao/metodologia.html
+   - docs1/pontos-de-funcao/centralap.html (o novo arquivo)
+10. Adicione um card na seção "Análises por módulo" e uma linha na tabela "Resumo comparativo" de docs1/pontos-de-funcao/index.html.
+
+ENTREGÁVEL: relatório final listando todos os arquivos criados ou alterados, o total de PE, AL e SFP do módulo, e as pendências identificadas.
+```
+
+---
+### Prompt 16 — Autoatendimento (AUTOATENDIMENTO)
+
+```
+Você é um analista de métricas de software. Sua tarefa é executar a contagem SFP (Simple Function Points) do módulo Autoatendimento do sistema legado Delphi 5.
+
+MÓDULO: Autoatendimento
+CÓDIGO: AUTOATENDIMENTO
+PASTA: AUTOATENDIMENTO/
+ENTRY POINT: AUTOATENDIMENTO/Aplicacao/Fontes/AutoAtendimento.dpr
+PROPÓSITO: Autoatendimento web — portal de self-service para participantes (empréstimos, consultas, solicitações).
+TECNOLOGIA: Delphi 5 / VCL / Oracle (schema CM.) — contexto técnico, não fator de contagem SFP.
+
+DEPENDÊNCIAS (referenciadas, não contadas como elementos deste módulo):
+- EMPRESTIMO (empréstimo — simulação e contratação)
+- CADASTROPREV (dados cadastrais de participantes)
+- EMPRESTIMOBPL (BPL compartilhado — dependência)
+
+FRONTEIRA: Pasta AUTOATENDIMENTO — mantém dados de autoatendimento (sessões, solicitações web) dentro desta fronteira; consome serviços de EMPRESTIMO e CADASTROPREV.
+
+RISCOS DE DUPLA CONTAGEM:
+- Empréstimos web: verificar sobreposição com EMPRESTIMO. AUTOATENDIMENTO é um canal web que consome EMPRESTIMO — verificar se mantém dados próprios ou se apenas consome.
+- Validar com especialista de negócio se AUTOATENDIMENTO é fronteira própria ou canal de EMPRESTIMO.
+
+MÉTODO: SFP (Simple Function Points) — IFPUG SFP; Roteiro de Métricas de Software do SISP v3.0.
+PESOS: 4,6 SFP por Processo Elementar (PE); 7 SFP por Arquivo Lógico (AL).
+FÓRMULA: Total SFP = (qtd_PE × 4,6) + (qtd_AL × 7)
+TERMINOLOGIA: Use exclusivamente SFP — Processos Elementares (PE) e Arquivos Lógicos (AL). NÃO use EI, EO, EQ, ILF, EIF, DET, FTR, RET, matrizes de complexidade ou pesos da APF tradicional.
+
+MODELO DE REFERÊNCIA: docs1/pontos-de-funcao/folha.html — análise SFP completa de Folha de Benefícios (25 PE, 23 AL, 276 SFP). Use como modelo de estrutura, apresentação visual e metodologia. NÃO copie totais ou conteúdo funcional de Folha — cada contagem é independente.
+
+INSTRUÇÕES:
+1. Explore o código-fonte em AUTOATENDIMENTO/ (Aplicacao/Fontes/, GerenciaAA/Fontes/, AutoEmprestimo/Fontes/) para identificar Processos Elementares (PE) e Arquivos Lógicos (AL).
+2. Para cada PE: documente ID, nome, objetivo, justificativa de distinção, fonte no código (.pas), situação (COMPROVADO/INFERIDO/PENDENTE).
+3. Para cada AL: documente ID, nome, descrição, fronteira (mantido ou referenciado), PE relacionados, fonte, situação.
+4. Calcule o total SFP: (qtd_PE × 4,6) + (qtd_AL × 7).
+5. Documente a rastreabilidade de cada PE ao código-fonte.
+6. Identifique integrações e riscos de dupla contagem com outros módulos.
+7. Liste pendências (elementos com identificação incompleta).
+8. Crie o arquivo docs1/pontos-de-funcao/autoatendimento.html seguindo o padrão visual de folha.html (8 seções: Identificação, Sumário executivo, Inventário de PE, Inventário de AL, Memória de cálculo, Rastreabilidade, Integrações e dupla contagem, Pendências).
+9. Adicione a aba "Autoatendimento" na navegação <nav> de:
+   - docs1/pontos-de-funcao/index.html
+   - docs1/pontos-de-funcao/folha.html
+   - docs1/pontos-de-funcao/contribuicao.html
+   - docs1/pontos-de-funcao/beneficioprev.html
+   - docs1/pontos-de-funcao/metodologia.html
+   - docs1/pontos-de-funcao/autoatendimento.html (o novo arquivo)
+10. Adicione um card na seção "Análises por módulo" e uma linha na tabela "Resumo comparativo" de docs1/pontos-de-funcao/index.html.
+
+ENTREGÁVEL: relatório final listando todos os arquivos criados ou alterados, o total de PE, AL e SFP do módulo, e as pendências identificadas.
+```
+
+---
+### Prompt 17 — Compras (COMPRAS2000)
+
+```
+Você é um analista de métricas de software. Sua tarefa é executar a contagem SFP (Simple Function Points) do módulo Compras do sistema legado Delphi 5.
+
+MÓDULO: Compras
+CÓDIGO: COMPRAS2000
+PASTA: COMPRAS2000/
+ENTRY POINT: COMPRAS2000/Fontes/Compras.dpr
+PROPÓSITO: Compras — solicitações de compra, ordens de compra, cotações de fornecedores.
+TECNOLOGIA: Delphi 5 / VCL / Oracle (schema CM.) — contexto técnico, não fator de contagem SFP.
+
+DEPENDÊNCIAS (referenciadas, não contadas como elementos deste módulo):
+- ALMOXARIFADO (almoxarifado — destino dos materiais)
+- CPAGAR (contas a pagar — faturas de compra)
+- CMALMOXCOMPRAOBJ50 (objetos compartilhados — dependência)
+- ALMOX&COMPRAS (biblioteca compartilhada — dependência)
+
+FRONTEIRA: Pasta COMPRAS2000 — mantém dados de compras (pedidos, cotações, ordens) dentro desta fronteira; envia materiais para ALMOXARIFADO.
+
+RISCOS DE DUPLA CONTAGEM:
+- Pedidos de compra: verificar sobreposição com ALMOXARIFADO. COMPRAS2000 gera pedidos; ALMOXARIFADO mantém estoque. Verificar se há dados compartilhados.
+- Validar com especialista de negócio se a fronteira está correta.
+
+MÉTODO: SFP (Simple Function Points) — IFPUG SFP; Roteiro de Métricas de Software do SISP v3.0.
+PESOS: 4,6 SFP por Processo Elementar (PE); 7 SFP por Arquivo Lógico (AL).
+FÓRMULA: Total SFP = (qtd_PE × 4,6) + (qtd_AL × 7)
+TERMINOLOGIA: Use exclusivamente SFP — Processos Elementares (PE) e Arquivos Lógicos (AL). NÃO use EI, EO, EQ, ILF, EIF, DET, FTR, RET, matrizes de complexidade ou pesos da APF tradicional.
+
+MODELO DE REFERÊNCIA: docs1/pontos-de-funcao/folha.html — análise SFP completa de Folha de Benefícios (25 PE, 23 AL, 276 SFP). Use como modelo de estrutura, apresentação visual e metodologia. NÃO copie totais ou conteúdo funcional de Folha — cada contagem é independente.
+
+INSTRUÇÕES:
+1. Explore o código-fonte em COMPRAS2000/ (Fontes/, CtrlObjects/, DBObjects/) para identificar Processos Elementares (PE) e Arquivos Lógicos (AL).
+2. Para cada PE: documente ID, nome, objetivo, justificativa de distinção, fonte no código (.pas), situação (COMPROVADO/INFERIDO/PENDENTE).
+3. Para cada AL: documente ID, nome, descrição, fronteira (mantido ou referenciado), PE relacionados, fonte, situação.
+4. Calcule o total SFP: (qtd_PE × 4,6) + (qtd_AL × 7).
+5. Documente a rastreabilidade de cada PE ao código-fonte.
+6. Identifique integrações e riscos de dupla contagem com outros módulos.
+7. Liste pendências (elementos com identificação incompleta).
+8. Crie o arquivo docs1/pontos-de-funcao/compras.html seguindo o padrão visual de folha.html (8 seções: Identificação, Sumário executivo, Inventário de PE, Inventário de AL, Memória de cálculo, Rastreabilidade, Integrações e dupla contagem, Pendências).
+9. Adicione a aba "Compras" na navegação <nav> de:
+   - docs1/pontos-de-funcao/index.html
+   - docs1/pontos-de-funcao/folha.html
+   - docs1/pontos-de-funcao/contribuicao.html
+   - docs1/pontos-de-funcao/beneficioprev.html
+   - docs1/pontos-de-funcao/metodologia.html
+   - docs1/pontos-de-funcao/compras.html (o novo arquivo)
+10. Adicione um card na seção "Análises por módulo" e uma linha na tabela "Resumo comparativo" de docs1/pontos-de-funcao/index.html.
+
+ENTREGÁVEL: relatório final listando todos os arquivos criados ou alterados, o total de PE, AL e SFP do módulo, e as pendências identificadas.
+```
+
+---
+### Prompt 18 — Almoxarifado (ALMOXARIFADO)
+
+```
+Você é um analista de métricas de software. Sua tarefa é executar a contagem SFP (Simple Function Points) do módulo Almoxarifado do sistema legado Delphi 5.
+
+MÓDULO: Almoxarifado
+CÓDIGO: ALMOXARIFADO
+PASTA: ALMOXARIFADO/
+ENTRY POINT: ALMOXARIFADO/Fontes/Almoxarifado.dpr
+PROPÓSITO: Almoxarifado — controle de estoque, movimentações de materiais e inventário.
+TECNOLOGIA: Delphi 5 / VCL / Oracle (schema CM.) — contexto técnico, não fator de contagem SFP.
+
+DEPENDÊNCIAS (referenciadas, não contadas como elementos deste módulo):
+- COMPRAS2000 (compras — pedidos de compra)
+- CONTAB (contabilidade — lançamentos)
+- CPAGAR (contas a pagar — faturas)
+- CMALMOXCOMPRAOBJ50 (objetos compartilhados — dependência)
+- ALMOX&COMPRAS (biblioteca compartilhada — dependência)
+
+FRONTEIRA: Pasta ALMOXARIFADO — mantém dados de estoque (itens, saldos, movimentações) dentro desta fronteira; recebe pedidos de COMPRAS2000.
+
+RISCOS DE DUPLA CONTAGEM:
+- Itens de estoque: verificar sobreposição com COMPRAS2000. ALMOXARIFADO mantém o estoque; COMPRAS2000 gera pedidos. Verificar se há dados compartilhados.
+- Validar com especialista de negócio se a fronteira está correta.
+
+MÉTODO: SFP (Simple Function Points) — IFPUG SFP; Roteiro de Métricas de Software do SISP v3.0.
+PESOS: 4,6 SFP por Processo Elementar (PE); 7 SFP por Arquivo Lógico (AL).
+FÓRMULA: Total SFP = (qtd_PE × 4,6) + (qtd_AL × 7)
+TERMINOLOGIA: Use exclusivamente SFP — Processos Elementares (PE) e Arquivos Lógicos (AL). NÃO use EI, EO, EQ, ILF, EIF, DET, FTR, RET, matrizes de complexidade ou pesos da APF tradicional.
+
+MODELO DE REFERÊNCIA: docs1/pontos-de-funcao/folha.html — análise SFP completa de Folha de Benefícios (25 PE, 23 AL, 276 SFP). Use como modelo de estrutura, apresentação visual e metodologia. NÃO copie totais ou conteúdo funcional de Folha — cada contagem é independente.
+
+INSTRUÇÕES:
+1. Explore o código-fonte em ALMOXARIFADO/ (Fontes/, CtrlObjects/, DBObjects/) para identificar Processos Elementares (PE) e Arquivos Lógicos (AL).
+2. Para cada PE: documente ID, nome, objetivo, justificativa de distinção, fonte no código (.pas), situação (COMPROVADO/INFERIDO/PENDENTE).
+3. Para cada AL: documente ID, nome, descrição, fronteira (mantido ou referenciado), PE relacionados, fonte, situação.
+4. Calcule o total SFP: (qtd_PE × 4,6) + (qtd_AL × 7).
+5. Documente a rastreabilidade de cada PE ao código-fonte.
+6. Identifique integrações e riscos de dupla contagem com outros módulos.
+7. Liste pendências (elementos com identificação incompleta).
+8. Crie o arquivo docs1/pontos-de-funcao/almoxarifado.html seguindo o padrão visual de folha.html (8 seções: Identificação, Sumário executivo, Inventário de PE, Inventário de AL, Memória de cálculo, Rastreabilidade, Integrações e dupla contagem, Pendências).
+9. Adicione a aba "Almoxarifado" na navegação <nav> de:
+   - docs1/pontos-de-funcao/index.html
+   - docs1/pontos-de-funcao/folha.html
+   - docs1/pontos-de-funcao/contribuicao.html
+   - docs1/pontos-de-funcao/beneficioprev.html
+   - docs1/pontos-de-funcao/metodologia.html
+   - docs1/pontos-de-funcao/almoxarifado.html (o novo arquivo)
+10. Adicione um card na seção "Análises por módulo" e uma linha na tabela "Resumo comparativo" de docs1/pontos-de-funcao/index.html.
+
+ENTREGÁVEL: relatório final listando todos os arquivos criados ou alterados, o total de PE, AL e SFP do módulo, e as pendências identificadas.
+```
+
+---
+### Prompt 19 — Investimentos (INVESTIMENTOS)
+
+```
+Você é um analista de métricas de software. Sua tarefa é executar a contagem SFP (Simple Function Points) do módulo Investimentos do sistema legado Delphi 5.
+
+MÓDULO: Investimentos
+CÓDIGO: INVESTIMENTOS
+PASTA: INVESTIMENTOS/
+ENTRY POINT: INVESTIMENTOS/FontesProducao/Investimentos.dpr
+PROPÓSITO: Gestão da carteira de investimentos do fundo — renda fixa, renda variável, fundos e aplicações.
+TECNOLOGIA: Delphi 5 / VCL / Oracle (schema CM.) — contexto técnico, não fator de contagem SFP.
+
+DEPENDÊNCIAS (referenciadas, não contadas como elementos deste módulo):
+- COTAS (cotas de fundos — cotação)
+- CFINAN (contabilidade financeira — conciliação)
+- CONTAB (contabilidade — lançamentos)
+- CAF (controle de aplicações financeiras)
+- CMGLOBALOBJ50 (objetos globais compartilhados — dependência)
+
+FRONTEIRA: Pasta INVESTIMENTOS — mantém dados da carteira de investimentos dentro desta fronteira; integra com COTAS, CFINAN e CONTAB.
+
+RISCOS DE DUPLA CONTAGEM:
+- Carteira de investimentos: verificar sobreposição com COTAS, CAF e INVESTCOTAS/INVESTFDO (módulos a validar). INVESTIMENTOS pode ser o guarda-chuva destes.
+- Validar com especialista de negócio a fronteira entre INVESTIMENTOS e seus sub-módulos.
+
+MÉTODO: SFP (Simple Function Points) — IFPUG SFP; Roteiro de Métricas de Software do SISP v3.0.
+PESOS: 4,6 SFP por Processo Elementar (PE); 7 SFP por Arquivo Lógico (AL).
+FÓRMULA: Total SFP = (qtd_PE × 4,6) + (qtd_AL × 7)
+TERMINOLOGIA: Use exclusivamente SFP — Processos Elementares (PE) e Arquivos Lógicos (AL). NÃO use EI, EO, EQ, ILF, EIF, DET, FTR, RET, matrizes de complexidade ou pesos da APF tradicional.
+
+MODELO DE REFERÊNCIA: docs1/pontos-de-funcao/folha.html — análise SFP completa de Folha de Benefícios (25 PE, 23 AL, 276 SFP). Use como modelo de estrutura, apresentação visual e metodologia. NÃO copie totais ou conteúdo funcional de Folha — cada contagem é independente.
+
+INSTRUÇÕES:
+1. Explore o código-fonte em INVESTIMENTOS/ (FontesProducao/, CtrlObjects/, DBObjects/) para identificar Processos Elementares (PE) e Arquivos Lógicos (AL).
+2. Para cada PE: documente ID, nome, objetivo, justificativa de distinção, fonte no código (.pas), situação (COMPROVADO/INFERIDO/PENDENTE).
+3. Para cada AL: documente ID, nome, descrição, fronteira (mantido ou referenciado), PE relacionados, fonte, situação.
+4. Calcule o total SFP: (qtd_PE × 4,6) + (qtd_AL × 7).
+5. Documente a rastreabilidade de cada PE ao código-fonte.
+6. Identifique integrações e riscos de dupla contagem com outros módulos.
+7. Liste pendências (elementos com identificação incompleta).
+8. Crie o arquivo docs1/pontos-de-funcao/investimentos.html seguindo o padrão visual de folha.html (8 seções: Identificação, Sumário executivo, Inventário de PE, Inventário de AL, Memória de cálculo, Rastreabilidade, Integrações e dupla contagem, Pendências).
+9. Adicione a aba "Investimentos" na navegação <nav> de:
+   - docs1/pontos-de-funcao/index.html
+   - docs1/pontos-de-funcao/folha.html
+   - docs1/pontos-de-funcao/contribuicao.html
+   - docs1/pontos-de-funcao/beneficioprev.html
+   - docs1/pontos-de-funcao/metodologia.html
+   - docs1/pontos-de-funcao/investimentos.html (o novo arquivo)
+10. Adicione um card na seção "Análises por módulo" e uma linha na tabela "Resumo comparativo" de docs1/pontos-de-funcao/index.html.
+
+ENTREGÁVEL: relatório final listando todos os arquivos criados ou alterados, o total de PE, AL e SFP do módulo, e as pendências identificadas.
+```
+
+---
+### Prompt 20 — Cotas (COTAS)
+
+```
+Você é um analista de métricas de software. Sua tarefa é executar a contagem SFP (Simple Function Points) do módulo Cotas do sistema legado Delphi 5.
+
+MÓDULO: Cotas
+CÓDIGO: COTAS
+PASTA: COTAS/
+ENTRY POINT: COTAS/Fontes/Cotas.dpr
+PROPÓSITO: Gestão de cotas de fundos e aplicações — cotação, manutenção e histórico de cotas.
+TECNOLOGIA: Delphi 5 / VCL / Oracle (schema CM.) — contexto técnico, não fator de contagem SFP.
+
+DEPENDÊNCIAS (referenciadas, não contadas como elementos deste módulo):
+- INVESTIMENTOS (investimentos — dados de fundos)
+- CFINAN (contabilidade financeira — conciliação)
+
+FRONTEIRA: Pasta COTAS — mantém dados de cotas (cotações, histórico) dentro desta fronteira; lê dados de fundos de INVESTIMENTOS.
+
+RISCOS DE DUPLA CONTAGEM:
+- Cotas de fundos: verificar sobreposição com INVESTIMENTOS. COTAS pode ser sub-módulo de INVESTIMENTOS ou fronteira própria.
+- Verificar se COTASPATRIM (cotas patrimoniais) compartilha dados com COTAS.
+- Validar com especialista de negócio a fronteira entre COTAS, INVESTIMENTOS e COTASPATRIM.
+
+MÉTODO: SFP (Simple Function Points) — IFPUG SFP; Roteiro de Métricas de Software do SISP v3.0.
+PESOS: 4,6 SFP por Processo Elementar (PE); 7 SFP por Arquivo Lógico (AL).
+FÓRMULA: Total SFP = (qtd_PE × 4,6) + (qtd_AL × 7)
+TERMINOLOGIA: Use exclusivamente SFP — Processos Elementares (PE) e Arquivos Lógicos (AL). NÃO use EI, EO, EQ, ILF, EIF, DET, FTR, RET, matrizes de complexidade ou pesos da APF tradicional.
+
+MODELO DE REFERÊNCIA: docs1/pontos-de-funcao/folha.html — análise SFP completa de Folha de Benefícios (25 PE, 23 AL, 276 SFP). Use como modelo de estrutura, apresentação visual e metodologia. NÃO copie totais ou conteúdo funcional de Folha — cada contagem é independente.
+
+INSTRUÇÕES:
+1. Explore o código-fonte em COTAS/ (Fontes/, CtrlObjects/, DBObjects/) para identificar Processos Elementares (PE) e Arquivos Lógicos (AL).
+2. Para cada PE: documente ID, nome, objetivo, justificativa de distinção, fonte no código (.pas), situação (COMPROVADO/INFERIDO/PENDENTE).
+3. Para cada AL: documente ID, nome, descrição, fronteira (mantido ou referenciado), PE relacionados, fonte, situação.
+4. Calcule o total SFP: (qtd_PE × 4,6) + (qtd_AL × 7).
+5. Documente a rastreabilidade de cada PE ao código-fonte.
+6. Identifique integrações e riscos de dupla contagem com outros módulos.
+7. Liste pendências (elementos com identificação incompleta).
+8. Crie o arquivo docs1/pontos-de-funcao/cotas.html seguindo o padrão visual de folha.html (8 seções: Identificação, Sumário executivo, Inventário de PE, Inventário de AL, Memória de cálculo, Rastreabilidade, Integrações e dupla contagem, Pendências).
+9. Adicione a aba "Cotas" na navegação <nav> de:
+   - docs1/pontos-de-funcao/index.html
+   - docs1/pontos-de-funcao/folha.html
+   - docs1/pontos-de-funcao/contribuicao.html
+   - docs1/pontos-de-funcao/beneficioprev.html
+   - docs1/pontos-de-funcao/metodologia.html
+   - docs1/pontos-de-funcao/cotas.html (o novo arquivo)
+10. Adicione um card na seção "Análises por módulo" e uma linha na tabela "Resumo comparativo" de docs1/pontos-de-funcao/index.html.
+
+ENTREGÁVEL: relatório final listando todos os arquivos criados ou alterados, o total de PE, AL e SFP do módulo, e as pendências identificadas.
+```
+
+---
+### Prompt 21 — Controle de Aplicações Financeiras (CAF)
 
 ```
 Você é um analista de métricas de software. Sua tarefa é executar a contagem SFP (Simple Function Points) do módulo Controle de Aplicações Financeiras do sistema legado Delphi 5.
@@ -1239,28 +1763,27 @@ ENTREGÁVEL: relatório final listando todos os arquivos criados ou alterados, o
 ```
 
 ---
-### Prompt 12 — Cotas (COTAS)
+### Prompt 22 — Receitas de Mercado (RECMERC)
 
 ```
-Você é um analista de métricas de software. Sua tarefa é executar a contagem SFP (Simple Function Points) do módulo Cotas do sistema legado Delphi 5.
+Você é um analista de métricas de software. Sua tarefa é executar a contagem SFP (Simple Function Points) do módulo Receitas de Mercado do sistema legado Delphi 5.
 
-MÓDULO: Cotas
-CÓDIGO: COTAS
-PASTA: COTAS/
-ENTRY POINT: COTAS/Fontes/Cotas.dpr
-PROPÓSITO: Gestão de cotas de fundos e aplicações — cotação, manutenção e histórico de cotas.
+MÓDULO: Receitas de Mercado
+CÓDIGO: RECMERC
+PASTA: RECMERC/
+ENTRY POINT: RECMERC/Fontes/RecMerc.dpr
+PROPÓSITO: Receitas de mercado — controle de receitas e recursos financeiros de mercado.
 TECNOLOGIA: Delphi 5 / VCL / Oracle (schema CM.) — contexto técnico, não fator de contagem SFP.
 
 DEPENDÊNCIAS (referenciadas, não contadas como elementos deste módulo):
-- INVESTIMENTOS (investimentos — dados de fundos)
+- INVESTIMENTOS (investimentos — dados de carteira)
 - CFINAN (contabilidade financeira — conciliação)
 
-FRONTEIRA: Pasta COTAS — mantém dados de cotas (cotações, histórico) dentro desta fronteira; lê dados de fundos de INVESTIMENTOS.
+FRONTEIRA: Pasta RECMERC — mantém dados de receitas de mercado dentro desta fronteira; lê dados de INVESTIMENTOS e CFINAN.
 
 RISCOS DE DUPLA CONTAGEM:
-- Cotas de fundos: verificar sobreposição com INVESTIMENTOS. COTAS pode ser sub-módulo de INVESTIMENTOS ou fronteira própria.
-- Verificar se COTASPATRIM (cotas patrimoniais) compartilha dados com COTAS.
-- Validar com especialista de negócio a fronteira entre COTAS, INVESTIMENTOS e COTASPATRIM.
+- Receitas: verificar sobreposição com CFINAN. RECMERC pode compartilhar dados de receita com a contabilidade financeira.
+- Validar com especialista de negócio se a fronteira está correta.
 
 MÉTODO: SFP (Simple Function Points) — IFPUG SFP; Roteiro de Métricas de Software do SISP v3.0.
 PESOS: 4,6 SFP por Processo Elementar (PE); 7 SFP por Arquivo Lógico (AL).
@@ -1270,28 +1793,82 @@ TERMINOLOGIA: Use exclusivamente SFP — Processos Elementares (PE) e Arquivos L
 MODELO DE REFERÊNCIA: docs1/pontos-de-funcao/folha.html — análise SFP completa de Folha de Benefícios (25 PE, 23 AL, 276 SFP). Use como modelo de estrutura, apresentação visual e metodologia. NÃO copie totais ou conteúdo funcional de Folha — cada contagem é independente.
 
 INSTRUÇÕES:
-1. Explore o código-fonte em COTAS/ (Fontes/, CtrlObjects/, DBObjects/) para identificar Processos Elementares (PE) e Arquivos Lógicos (AL).
+1. Explore o código-fonte em RECMERC/ (Fontes/, CtrlObjects/, DBObjects/) para identificar Processos Elementares (PE) e Arquivos Lógicos (AL).
 2. Para cada PE: documente ID, nome, objetivo, justificativa de distinção, fonte no código (.pas), situação (COMPROVADO/INFERIDO/PENDENTE).
 3. Para cada AL: documente ID, nome, descrição, fronteira (mantido ou referenciado), PE relacionados, fonte, situação.
 4. Calcule o total SFP: (qtd_PE × 4,6) + (qtd_AL × 7).
 5. Documente a rastreabilidade de cada PE ao código-fonte.
 6. Identifique integrações e riscos de dupla contagem com outros módulos.
 7. Liste pendências (elementos com identificação incompleta).
-8. Crie o arquivo docs1/pontos-de-funcao/cotas.html seguindo o padrão visual de folha.html (8 seções: Identificação, Sumário executivo, Inventário de PE, Inventário de AL, Memória de cálculo, Rastreabilidade, Integrações e dupla contagem, Pendências).
-9. Adicione a aba "Cotas" na navegação <nav> de:
+8. Crie o arquivo docs1/pontos-de-funcao/recmerc.html seguindo o padrão visual de folha.html (8 seções: Identificação, Sumário executivo, Inventário de PE, Inventário de AL, Memória de cálculo, Rastreabilidade, Integrações e dupla contagem, Pendências).
+9. Adicione a aba "Receitas de Mercado" na navegação <nav> de:
    - docs1/pontos-de-funcao/index.html
    - docs1/pontos-de-funcao/folha.html
    - docs1/pontos-de-funcao/contribuicao.html
    - docs1/pontos-de-funcao/beneficioprev.html
    - docs1/pontos-de-funcao/metodologia.html
-   - docs1/pontos-de-funcao/cotas.html (o novo arquivo)
+   - docs1/pontos-de-funcao/recmerc.html (o novo arquivo)
 10. Adicione um card na seção "Análises por módulo" e uma linha na tabela "Resumo comparativo" de docs1/pontos-de-funcao/index.html.
 
 ENTREGÁVEL: relatório final listando todos os arquivos criados ou alterados, o total de PE, AL e SFP do módulo, e as pendências identificadas.
 ```
 
 ---
-### Prompt 13 — Administração Imobiliária (ADMINIMOB)
+### Prompt 23 — Investimento Imobiliário (INVESTIMOB)
+
+```
+Você é um analista de métricas de software. Sua tarefa é executar a contagem SFP (Simple Function Points) do módulo Investimento Imobiliário do sistema legado Delphi 5.
+
+MÓDULO: Investimento Imobiliário
+CÓDIGO: INVESTIMOB
+PASTA: INVESTIMOB/
+ENTRY POINT: INVESTIMOB/Fontes/InvestImob.dpr
+PROPÓSITO: Investimento imobiliário — gestão dos imóveis investidos pelo fundo, incluindo aquisição, valorização e baixa.
+TECNOLOGIA: Delphi 5 / VCL / Oracle (schema CM.) — contexto técnico, não fator de contagem SFP.
+
+DEPENDÊNCIAS (referenciadas, não contadas como elementos deste módulo):
+- ADMINIMOB (administração imobiliária — dados de locação)
+- CONTAB (contabilidade — lançamentos)
+- CFINAN (contabilidade financeira — conciliação)
+- CMIMOBILIARIOOBJ50 (objetos de negócio compartilhados — dependência)
+- EPIM, EPIMIMOB (bibliotecas de formulários compartilhados — dependência)
+
+FRONTEIRA: Pasta INVESTIMOB — mantém dados de imóveis investidos dentro desta fronteira; integra com ADMINIMOB para locação e CONTAB para lançamentos.
+
+RISCOS DE DUPLA CONTAGEM:
+- Imóveis: verificar sobreposição com ADMINIMOB. INVESTIMOB gerencia imóveis investidos; ADMINIMOB gerencia contratos de aluguel. Verificar se a tabela de imóveis é mantida por ambos.
+- Validar com especialista de negócio a fronteira entre INVESTIMOB e ADMINIMOB.
+
+MÉTODO: SFP (Simple Function Points) — IFPUG SFP; Roteiro de Métricas de Software do SISP v3.0.
+PESOS: 4,6 SFP por Processo Elementar (PE); 7 SFP por Arquivo Lógico (AL).
+FÓRMULA: Total SFP = (qtd_PE × 4,6) + (qtd_AL × 7)
+TERMINOLOGIA: Use exclusivamente SFP — Processos Elementares (PE) e Arquivos Lógicos (AL). NÃO use EI, EO, EQ, ILF, EIF, DET, FTR, RET, matrizes de complexidade ou pesos da APF tradicional.
+
+MODELO DE REFERÊNCIA: docs1/pontos-de-funcao/folha.html — análise SFP completa de Folha de Benefícios (25 PE, 23 AL, 276 SFP). Use como modelo de estrutura, apresentação visual e metodologia. NÃO copie totais ou conteúdo funcional de Folha — cada contagem é independente.
+
+INSTRUÇÕES:
+1. Explore o código-fonte em INVESTIMOB/ (Fontes/, CtrlObjects/, DBObjects/) para identificar Processos Elementares (PE) e Arquivos Lógicos (AL).
+2. Para cada PE: documente ID, nome, objetivo, justificativa de distinção, fonte no código (.pas), situação (COMPROVADO/INFERIDO/PENDENTE).
+3. Para cada AL: documente ID, nome, descrição, fronteira (mantido ou referenciado), PE relacionados, fonte, situação.
+4. Calcule o total SFP: (qtd_PE × 4,6) + (qtd_AL × 7).
+5. Documente a rastreabilidade de cada PE ao código-fonte.
+6. Identifique integrações e riscos de dupla contagem com outros módulos.
+7. Liste pendências (elementos com identificação incompleta).
+8. Crie o arquivo docs1/pontos-de-funcao/investimob.html seguindo o padrão visual de folha.html (8 seções: Identificação, Sumário executivo, Inventário de PE, Inventário de AL, Memória de cálculo, Rastreabilidade, Integrações e dupla contagem, Pendências).
+9. Adicione a aba "Investimento Imobiliário" na navegação <nav> de:
+   - docs1/pontos-de-funcao/index.html
+   - docs1/pontos-de-funcao/folha.html
+   - docs1/pontos-de-funcao/contribuicao.html
+   - docs1/pontos-de-funcao/beneficioprev.html
+   - docs1/pontos-de-funcao/metodologia.html
+   - docs1/pontos-de-funcao/investimob.html (o novo arquivo)
+10. Adicione um card na seção "Análises por módulo" e uma linha na tabela "Resumo comparativo" de docs1/pontos-de-funcao/index.html.
+
+ENTREGÁVEL: relatório final listando todos os arquivos criados ou alterados, o total de PE, AL e SFP do módulo, e as pendências identificadas.
+```
+
+---
+### Prompt 24 — Administração Imobiliária (ADMINIMOB)
 
 ```
 Você é um analista de métricas de software. Sua tarefa é executar a contagem SFP (Simple Function Points) do módulo Administração Imobiliária do sistema legado Delphi 5.
@@ -1347,61 +1924,7 @@ ENTREGÁVEL: relatório final listando todos os arquivos criados ou alterados, o
 ```
 
 ---
-### Prompt 14 — Investimento Imobiliário (INVESTIMOB)
-
-```
-Você é um analista de métricas de software. Sua tarefa é executar a contagem SFP (Simple Function Points) do módulo Investimento Imobiliário do sistema legado Delphi 5.
-
-MÓDULO: Investimento Imobiliário
-CÓDIGO: INVESTIMOB
-PASTA: INVESTIMOB/
-ENTRY POINT: INVESTIMOB/Fontes/InvestImob.dpr
-PROPÓSITO: Investimento imobiliário — gestão dos imóveis investidos pelo fundo, incluindo aquisição, valorização e baixa.
-TECNOLOGIA: Delphi 5 / VCL / Oracle (schema CM.) — contexto técnico, não fator de contagem SFP.
-
-DEPENDÊNCIAS (referenciadas, não contadas como elementos deste módulo):
-- ADMINIMOB (administração imobiliária — dados de locação)
-- CONTAB (contabilidade — lançamentos)
-- CFINAN (contabilidade financeira — conciliação)
-- CMIMOBILIARIOOBJ50 (objetos de negócio compartilhados — dependência)
-- EPIM, EPIMIMOB (bibliotecas de formulários compartilhados — dependência)
-
-FRONTEIRA: Pasta INVESTIMOB — mantém dados de imóveis investidos dentro desta fronteira; integra com ADMINIMOB para locação e CONTAB para lançamentos.
-
-RISCOS DE DUPLA CONTAGEM:
-- Imóveis: verificar sobreposição com ADMINIMOB. INVESTIMOB gerencia imóveis investidos; ADMINIMOB gerencia contratos de aluguel. Verificar se a tabela de imóveis é mantida por ambos.
-- Validar com especialista de negócio a fronteira entre INVESTIMOB e ADMINIMOB.
-
-MÉTODO: SFP (Simple Function Points) — IFPUG SFP; Roteiro de Métricas de Software do SISP v3.0.
-PESOS: 4,6 SFP por Processo Elementar (PE); 7 SFP por Arquivo Lógico (AL).
-FÓRMULA: Total SFP = (qtd_PE × 4,6) + (qtd_AL × 7)
-TERMINOLOGIA: Use exclusivamente SFP — Processos Elementares (PE) e Arquivos Lógicos (AL). NÃO use EI, EO, EQ, ILF, EIF, DET, FTR, RET, matrizes de complexidade ou pesos da APF tradicional.
-
-MODELO DE REFERÊNCIA: docs1/pontos-de-funcao/folha.html — análise SFP completa de Folha de Benefícios (25 PE, 23 AL, 276 SFP). Use como modelo de estrutura, apresentação visual e metodologia. NÃO copie totais ou conteúdo funcional de Folha — cada contagem é independente.
-
-INSTRUÇÕES:
-1. Explore o código-fonte em INVESTIMOB/ (Fontes/, CtrlObjects/, DBObjects/) para identificar Processos Elementares (PE) e Arquivos Lógicos (AL).
-2. Para cada PE: documente ID, nome, objetivo, justificativa de distinção, fonte no código (.pas), situação (COMPROVADO/INFERIDO/PENDENTE).
-3. Para cada AL: documente ID, nome, descrição, fronteira (mantido ou referenciado), PE relacionados, fonte, situação.
-4. Calcule o total SFP: (qtd_PE × 4,6) + (qtd_AL × 7).
-5. Documente a rastreabilidade de cada PE ao código-fonte.
-6. Identifique integrações e riscos de dupla contagem com outros módulos.
-7. Liste pendências (elementos com identificação incompleta).
-8. Crie o arquivo docs1/pontos-de-funcao/investimob.html seguindo o padrão visual de folha.html (8 seções: Identificação, Sumário executivo, Inventário de PE, Inventário de AL, Memória de cálculo, Rastreabilidade, Integrações e dupla contagem, Pendências).
-9. Adicione a aba "Investimento Imobiliário" na navegação <nav> de:
-   - docs1/pontos-de-funcao/index.html
-   - docs1/pontos-de-funcao/folha.html
-   - docs1/pontos-de-funcao/contribuicao.html
-   - docs1/pontos-de-funcao/beneficioprev.html
-   - docs1/pontos-de-funcao/metodologia.html
-   - docs1/pontos-de-funcao/investimob.html (o novo arquivo)
-10. Adicione um card na seção "Análises por módulo" e uma linha na tabela "Resumo comparativo" de docs1/pontos-de-funcao/index.html.
-
-ENTREGÁVEL: relatório final listando todos os arquivos criados ou alterados, o total de PE, AL e SFP do módulo, e as pendências identificadas.
-```
-
----
-### Prompt 15 — Alienação de Bens (ALIENACAO)
+### Prompt 25 — Alienação de Bens (ALIENACAO)
 
 ```
 Você é um analista de métricas de software. Sua tarefa é executar a contagem SFP (Simple Function Points) do módulo Alienação de Bens do sistema legado Delphi 5.
@@ -1454,112 +1977,7 @@ ENTREGÁVEL: relatório final listando todos os arquivos criados ou alterados, o
 ```
 
 ---
-### Prompt 16 — Investimentos (INVESTIMENTOS)
-
-```
-Você é um analista de métricas de software. Sua tarefa é executar a contagem SFP (Simple Function Points) do módulo Investimentos do sistema legado Delphi 5.
-
-MÓDULO: Investimentos
-CÓDIGO: INVESTIMENTOS
-PASTA: INVESTIMENTOS/
-ENTRY POINT: INVESTIMENTOS/FontesProducao/Investimentos.dpr
-PROPÓSITO: Gestão da carteira de investimentos do fundo — renda fixa, renda variável, fundos e aplicações.
-TECNOLOGIA: Delphi 5 / VCL / Oracle (schema CM.) — contexto técnico, não fator de contagem SFP.
-
-DEPENDÊNCIAS (referenciadas, não contadas como elementos deste módulo):
-- COTAS (cotas de fundos — cotação)
-- CFINAN (contabilidade financeira — conciliação)
-- CONTAB (contabilidade — lançamentos)
-- CAF (controle de aplicações financeiras)
-- CMGLOBALOBJ50 (objetos globais compartilhados — dependência)
-
-FRONTEIRA: Pasta INVESTIMENTOS — mantém dados da carteira de investimentos dentro desta fronteira; integra com COTAS, CFINAN e CONTAB.
-
-RISCOS DE DUPLA CONTAGEM:
-- Carteira de investimentos: verificar sobreposição com COTAS, CAF e INVESTCOTAS/INVESTFDO (módulos a validar). INVESTIMENTOS pode ser o guarda-chuva destes.
-- Validar com especialista de negócio a fronteira entre INVESTIMENTOS e seus sub-módulos.
-
-MÉTODO: SFP (Simple Function Points) — IFPUG SFP; Roteiro de Métricas de Software do SISP v3.0.
-PESOS: 4,6 SFP por Processo Elementar (PE); 7 SFP por Arquivo Lógico (AL).
-FÓRMULA: Total SFP = (qtd_PE × 4,6) + (qtd_AL × 7)
-TERMINOLOGIA: Use exclusivamente SFP — Processos Elementares (PE) e Arquivos Lógicos (AL). NÃO use EI, EO, EQ, ILF, EIF, DET, FTR, RET, matrizes de complexidade ou pesos da APF tradicional.
-
-MODELO DE REFERÊNCIA: docs1/pontos-de-funcao/folha.html — análise SFP completa de Folha de Benefícios (25 PE, 23 AL, 276 SFP). Use como modelo de estrutura, apresentação visual e metodologia. NÃO copie totais ou conteúdo funcional de Folha — cada contagem é independente.
-
-INSTRUÇÕES:
-1. Explore o código-fonte em INVESTIMENTOS/ (FontesProducao/, CtrlObjects/, DBObjects/) para identificar Processos Elementares (PE) e Arquivos Lógicos (AL).
-2. Para cada PE: documente ID, nome, objetivo, justificativa de distinção, fonte no código (.pas), situação (COMPROVADO/INFERIDO/PENDENTE).
-3. Para cada AL: documente ID, nome, descrição, fronteira (mantido ou referenciado), PE relacionados, fonte, situação.
-4. Calcule o total SFP: (qtd_PE × 4,6) + (qtd_AL × 7).
-5. Documente a rastreabilidade de cada PE ao código-fonte.
-6. Identifique integrações e riscos de dupla contagem com outros módulos.
-7. Liste pendências (elementos com identificação incompleta).
-8. Crie o arquivo docs1/pontos-de-funcao/investimentos.html seguindo o padrão visual de folha.html (8 seções: Identificação, Sumário executivo, Inventário de PE, Inventário de AL, Memória de cálculo, Rastreabilidade, Integrações e dupla contagem, Pendências).
-9. Adicione a aba "Investimentos" na navegação <nav> de:
-   - docs1/pontos-de-funcao/index.html
-   - docs1/pontos-de-funcao/folha.html
-   - docs1/pontos-de-funcao/contribuicao.html
-   - docs1/pontos-de-funcao/beneficioprev.html
-   - docs1/pontos-de-funcao/metodologia.html
-   - docs1/pontos-de-funcao/investimentos.html (o novo arquivo)
-10. Adicione um card na seção "Análises por módulo" e uma linha na tabela "Resumo comparativo" de docs1/pontos-de-funcao/index.html.
-
-ENTREGÁVEL: relatório final listando todos os arquivos criados ou alterados, o total de PE, AL e SFP do módulo, e as pendências identificadas.
-```
-
----
-### Prompt 17 — Receitas de Mercado (RECMERC)
-
-```
-Você é um analista de métricas de software. Sua tarefa é executar a contagem SFP (Simple Function Points) do módulo Receitas de Mercado do sistema legado Delphi 5.
-
-MÓDULO: Receitas de Mercado
-CÓDIGO: RECMERC
-PASTA: RECMERC/
-ENTRY POINT: RECMERC/Fontes/RecMerc.dpr
-PROPÓSITO: Receitas de mercado — controle de receitas e recursos financeiros de mercado.
-TECNOLOGIA: Delphi 5 / VCL / Oracle (schema CM.) — contexto técnico, não fator de contagem SFP.
-
-DEPENDÊNCIAS (referenciadas, não contadas como elementos deste módulo):
-- INVESTIMENTOS (investimentos — dados de carteira)
-- CFINAN (contabilidade financeira — conciliação)
-
-FRONTEIRA: Pasta RECMERC — mantém dados de receitas de mercado dentro desta fronteira; lê dados de INVESTIMENTOS e CFINAN.
-
-RISCOS DE DUPLA CONTAGEM:
-- Receitas: verificar sobreposição com CFINAN. RECMERC pode compartilhar dados de receita com a contabilidade financeira.
-- Validar com especialista de negócio se a fronteira está correta.
-
-MÉTODO: SFP (Simple Function Points) — IFPUG SFP; Roteiro de Métricas de Software do SISP v3.0.
-PESOS: 4,6 SFP por Processo Elementar (PE); 7 SFP por Arquivo Lógico (AL).
-FÓRMULA: Total SFP = (qtd_PE × 4,6) + (qtd_AL × 7)
-TERMINOLOGIA: Use exclusivamente SFP — Processos Elementares (PE) e Arquivos Lógicos (AL). NÃO use EI, EO, EQ, ILF, EIF, DET, FTR, RET, matrizes de complexidade ou pesos da APF tradicional.
-
-MODELO DE REFERÊNCIA: docs1/pontos-de-funcao/folha.html — análise SFP completa de Folha de Benefícios (25 PE, 23 AL, 276 SFP). Use como modelo de estrutura, apresentação visual e metodologia. NÃO copie totais ou conteúdo funcional de Folha — cada contagem é independente.
-
-INSTRUÇÕES:
-1. Explore o código-fonte em RECMERC/ (Fontes/, CtrlObjects/, DBObjects/) para identificar Processos Elementares (PE) e Arquivos Lógicos (AL).
-2. Para cada PE: documente ID, nome, objetivo, justificativa de distinção, fonte no código (.pas), situação (COMPROVADO/INFERIDO/PENDENTE).
-3. Para cada AL: documente ID, nome, descrição, fronteira (mantido ou referenciado), PE relacionados, fonte, situação.
-4. Calcule o total SFP: (qtd_PE × 4,6) + (qtd_AL × 7).
-5. Documente a rastreabilidade de cada PE ao código-fonte.
-6. Identifique integrações e riscos de dupla contagem com outros módulos.
-7. Liste pendências (elementos com identificação incompleta).
-8. Crie o arquivo docs1/pontos-de-funcao/recmerc.html seguindo o padrão visual de folha.html (8 seções: Identificação, Sumário executivo, Inventário de PE, Inventário de AL, Memória de cálculo, Rastreabilidade, Integrações e dupla contagem, Pendências).
-9. Adicione a aba "Receitas de Mercado" na navegação <nav> de:
-   - docs1/pontos-de-funcao/index.html
-   - docs1/pontos-de-funcao/folha.html
-   - docs1/pontos-de-funcao/contribuicao.html
-   - docs1/pontos-de-funcao/beneficioprev.html
-   - docs1/pontos-de-funcao/metodologia.html
-   - docs1/pontos-de-funcao/recmerc.html (o novo arquivo)
-10. Adicione um card na seção "Análises por módulo" e uma linha na tabela "Resumo comparativo" de docs1/pontos-de-funcao/index.html.
-
-ENTREGÁVEL: relatório final listando todos os arquivos criados ou alterados, o total de PE, AL e SFP do módulo, e as pendências identificadas.
-```
-
----
-### Prompt 18 — Sistema Jurídico (SISTJUR)
+### Prompt 26 — Sistema Jurídico (SISTJUR)
 
 ```
 Você é um analista de métricas de software. Sua tarefa é executar a contagem SFP (Simple Function Points) do módulo Sistema Jurídico do sistema legado Delphi 5.
@@ -1613,7 +2031,7 @@ ENTREGÁVEL: relatório final listando todos os arquivos criados ou alterados, o
 ```
 
 ---
-### Prompt 19 — Processos Judiciais (PROCJUD)
+### Prompt 27 — Processos Judiciais (PROCJUD)
 
 ```
 Você é um analista de métricas de software. Sua tarefa é executar a contagem SFP (Simple Function Points) do módulo Processos Judiciais do sistema legado Delphi 5.
@@ -1665,187 +2083,26 @@ ENTREGÁVEL: relatório final listando todos os arquivos criados ou alterados, o
 ```
 
 ---
-### Prompt 20 — Contratos (CONTRATO)
+### Prompt 28 — Projeto Atuarial (PROJETOATUARIAL)
 
 ```
-Você é um analista de métricas de software. Sua tarefa é executar a contagem SFP (Simple Function Points) do módulo Contratos do sistema legado Delphi 5.
+Você é um analista de métricas de software. Sua tarefa é executar a contagem SFP (Simple Function Points) do módulo Projeto Atuarial do sistema legado Delphi 5.
 
-MÓDULO: Contratos
-CÓDIGO: CONTRATO
-PASTA: CONTRATO/
-ENTRY POINT: CONTRATO/Fontes/contrato.dpr
-PROPÓSITO: Gestão de contratos — registro e manutenção de contratos, áreas gestoras e partes relacionadas.
+MÓDULO: Projeto Atuarial
+CÓDIGO: PROJETOATUARIAL
+PASTA: PROJETOATUARIAL/
+ENTRY POINT: PROJETOATUARIAL/FONTES/ProjetoAtuarial.dpr
+PROPÓSITO: Projeto atuarial — estudos atuariais, projeções e avaliações do fundo de pensão.
 TECNOLOGIA: Delphi 5 / VCL / Oracle (schema CM.) — contexto técnico, não fator de contagem SFP.
 
 DEPENDÊNCIAS (referenciadas, não contadas como elementos deste módulo):
-- CPAGAR (contas a pagar — despesas contratuais)
-- CRECEBER (contas a receber — receitas contratuais)
-- CMGLOBALOBJ50 (objetos globais compartilhados — dependência)
-
-FRONTEIRA: Pasta CONTRATO — mantém dados de contratos (partes, cláusulas, vigências) dentro desta fronteira; gera obrigações para CPAGAR e CRECEBER.
-
-RISCOS DE DUPLA CONTAGEM:
-- Contratos: verificar sobreposição com MODAUTO (gestão de frota usa contratos) e ADMINIMOB (contratos imobiliários). Verificar se CONTRATO é o dono genérico ou se cada domínio tem seus próprios contratos.
-- Validar com especialista de negócio a fronteira.
-
-MÉTODO: SFP (Simple Function Points) — IFPUG SFP; Roteiro de Métricas de Software do SISP v3.0.
-PESOS: 4,6 SFP por Processo Elementar (PE); 7 SFP por Arquivo Lógico (AL).
-FÓRMULA: Total SFP = (qtd_PE × 4,6) + (qtd_AL × 7)
-TERMINOLOGIA: Use exclusivamente SFP — Processos Elementares (PE) e Arquivos Lógicos (AL). NÃO use EI, EO, EQ, ILF, EIF, DET, FTR, RET, matrizes de complexidade ou pesos da APF tradicional.
-
-MODELO DE REFERÊNCIA: docs1/pontos-de-funcao/folha.html — análise SFP completa de Folha de Benefícios (25 PE, 23 AL, 276 SFP). Use como modelo de estrutura, apresentação visual e metodologia. NÃO copie totais ou conteúdo funcional de Folha — cada contagem é independente.
-
-INSTRUÇÕES:
-1. Explore o código-fonte em CONTRATO/ (Fontes/, CtrlObjects/, DBObjects/) para identificar Processos Elementares (PE) e Arquivos Lógicos (AL).
-2. Para cada PE: documente ID, nome, objetivo, justificativa de distinção, fonte no código (.pas), situação (COMPROVADO/INFERIDO/PENDENTE).
-3. Para cada AL: documente ID, nome, descrição, fronteira (mantido ou referenciado), PE relacionados, fonte, situação.
-4. Calcule o total SFP: (qtd_PE × 4,6) + (qtd_AL × 7).
-5. Documente a rastreabilidade de cada PE ao código-fonte.
-6. Identifique integrações e riscos de dupla contagem com outros módulos.
-7. Liste pendências (elementos com identificação incompleta).
-8. Crie o arquivo docs1/pontos-de-funcao/contrato.html seguindo o padrão visual de folha.html (8 seções: Identificação, Sumário executivo, Inventário de PE, Inventário de AL, Memória de cálculo, Rastreabilidade, Integrações e dupla contagem, Pendências).
-9. Adicione a aba "Contratos" na navegação <nav> de:
-   - docs1/pontos-de-funcao/index.html
-   - docs1/pontos-de-funcao/folha.html
-   - docs1/pontos-de-funcao/contribuicao.html
-   - docs1/pontos-de-funcao/beneficioprev.html
-   - docs1/pontos-de-funcao/metodologia.html
-   - docs1/pontos-de-funcao/contrato.html (o novo arquivo)
-10. Adicione um card na seção "Análises por módulo" e uma linha na tabela "Resumo comparativo" de docs1/pontos-de-funcao/index.html.
-
-ENTREGÁVEL: relatório final listando todos os arquivos criados ou alterados, o total de PE, AL e SFP do módulo, e as pendências identificadas.
-```
-
----
-### Prompt 21 — Empréstimo (EMPRESTIMO)
-
-```
-Você é um analista de métricas de software. Sua tarefa é executar a contagem SFP (Simple Function Points) do módulo Empréstimo do sistema legado Delphi 5.
-
-MÓDULO: Empréstimo
-CÓDIGO: EMPRESTIMO
-PASTA: EMPRESTIMO/
-ENTRY POINT: EMPRESTIMO/Fontes/emprestimo.dpr
-PROPÓSITO: Empréstimo a participantes/associados — concessão, manutenção, cálculo e acompanhamento de empréstimos.
-TECNOLOGIA: Delphi 5 / VCL / Oracle (schema CM.) — contexto técnico, não fator de contagem SFP.
-
-DEPENDÊNCIAS (referenciadas, não contadas como elementos deste módulo):
-- CRECEBER (contas a receber — títulos de empréstimo)
-- CONTAB (contabilidade — lançamentos)
 - CADASTROPREV (dados cadastrais de participantes)
-- EMPRESTIMOBPL (BPL compartilhado — dependência)
+- PARAMPREV (parâmetros previdenciários — serviço compartilhado)
 
-FRONTEIRA: Pasta EMPRESTIMO — mantém dados de empréstimos (contratos, parcelas, saldos) dentro desta fronteira; gera títulos para CRECEBER.
-
-RISCOS DE DUPLA CONTAGEM:
-- Empréstimos: verificar sobreposição com FINANCIAMENTO e AUTOATENDIMENTO. EMPRESTIMO pode ser o dono dos dados de empréstimo, com FINANCIAMENTO como sub-módulo e AUTOATENDIMENTO como canal web.
-- Validar com especialista de negócio a fronteira entre EMPRESTIMO, FINANCIAMENTO e AUTOATENDIMENTO.
-
-MÉTODO: SFP (Simple Function Points) — IFPUG SFP; Roteiro de Métricas de Software do SISP v3.0.
-PESOS: 4,6 SFP por Processo Elementar (PE); 7 SFP por Arquivo Lógico (AL).
-FÓRMULA: Total SFP = (qtd_PE × 4,6) + (qtd_AL × 7)
-TERMINOLOGIA: Use exclusivamente SFP — Processos Elementares (PE) e Arquivos Lógicos (AL). NÃO use EI, EO, EQ, ILF, EIF, DET, FTR, RET, matrizes de complexidade ou pesos da APF tradicional.
-
-MODELO DE REFERÊNCIA: docs1/pontos-de-funcao/folha.html — análise SFP completa de Folha de Benefícios (25 PE, 23 AL, 276 SFP). Use como modelo de estrutura, apresentação visual e metodologia. NÃO copie totais ou conteúdo funcional de Folha — cada contagem é independente.
-
-INSTRUÇÕES:
-1. Explore o código-fonte em EMPRESTIMO/ (Fontes/, CtrlObjects/, DBObjects/) para identificar Processos Elementares (PE) e Arquivos Lógicos (AL).
-2. Para cada PE: documente ID, nome, objetivo, justificativa de distinção, fonte no código (.pas), situação (COMPROVADO/INFERIDO/PENDENTE).
-3. Para cada AL: documente ID, nome, descrição, fronteira (mantido ou referenciado), PE relacionados, fonte, situação.
-4. Calcule o total SFP: (qtd_PE × 4,6) + (qtd_AL × 7).
-5. Documente a rastreabilidade de cada PE ao código-fonte.
-6. Identifique integrações e riscos de dupla contagem com outros módulos.
-7. Liste pendências (elementos com identificação incompleta).
-8. Crie o arquivo docs1/pontos-de-funcao/emprestimo.html seguindo o padrão visual de folha.html (8 seções: Identificação, Sumário executivo, Inventário de PE, Inventário de AL, Memória de cálculo, Rastreabilidade, Integrações e dupla contagem, Pendências).
-9. Adicione a aba "Empréstimo" na navegação <nav> de:
-   - docs1/pontos-de-funcao/index.html
-   - docs1/pontos-de-funcao/folha.html
-   - docs1/pontos-de-funcao/contribuicao.html
-   - docs1/pontos-de-funcao/beneficioprev.html
-   - docs1/pontos-de-funcao/metodologia.html
-   - docs1/pontos-de-funcao/emprestimo.html (o novo arquivo)
-10. Adicione um card na seção "Análises por módulo" e uma linha na tabela "Resumo comparativo" de docs1/pontos-de-funcao/index.html.
-
-ENTREGÁVEL: relatório final listando todos os arquivos criados ou alterados, o total de PE, AL e SFP do módulo, e as pendências identificadas.
-```
-
----
-### Prompt 22 — Financiamento (FINANCIAMENTO)
-
-```
-Você é um analista de métricas de software. Sua tarefa é executar a contagem SFP (Simple Function Points) do módulo Financiamento do sistema legado Delphi 5.
-
-MÓDULO: Financiamento
-CÓDIGO: FINANCIAMENTO
-PASTA: FINANCIAMENTO/
-ENTRY POINT: FINANCIAMENTO/Fontes/Financiamento.dpr
-PROPÓSITO: Financiamento — gestão de contratos de financiamento, amortização e acompanhamento.
-TECNOLOGIA: Delphi 5 / VCL / Oracle (schema CM.) — contexto técnico, não fator de contagem SFP.
-
-DEPENDÊNCIAS (referenciadas, não contadas como elementos deste módulo):
-- EMPRESTIMO (empréstimo — dados de contrato)
-- CRECEBER (contas a receber — títulos)
-- CONTAB (contabilidade — lançamentos)
-- EMPRESTIMOBPL (BPL compartilhado — dependência)
-
-FRONTEIRA: Pasta FINANCIAMENTO — mantém dados de financiamentos dentro desta fronteira; integra com EMPRESTIMO e CRECEBER.
+FRONTEIRA: Pasta PROJETOATUARIAL — mantém dados de projeções atuariais (cenários, hipóteses, resultados) dentro desta fronteira; lê dados de CADASTROPREV.
 
 RISCOS DE DUPLA CONTAGEM:
-- Financiamentos: verificar sobreposição com EMPRESTIMO. FINANCIAMENTO pode ser sub-módulo de EMPRESTIMO ou fronteira própria.
-- Validar com especialista de negócio a fronteira entre FINANCIAMENTO e EMPRESTIMO.
-
-MÉTODO: SFP (Simple Function Points) — IFPUG SFP; Roteiro de Métricas de Software do SISP v3.0.
-PESOS: 4,6 SFP por Processo Elementar (PE); 7 SFP por Arquivo Lógico (AL).
-FÓRMULA: Total SFP = (qtd_PE × 4,6) + (qtd_AL × 7)
-TERMINOLOGIA: Use exclusivamente SFP — Processos Elementares (PE) e Arquivos Lógicos (AL). NÃO use EI, EO, EQ, ILF, EIF, DET, FTR, RET, matrizes de complexidade ou pesos da APF tradicional.
-
-MODELO DE REFERÊNCIA: docs1/pontos-de-funcao/folha.html — análise SFP completa de Folha de Benefícios (25 PE, 23 AL, 276 SFP). Use como modelo de estrutura, apresentação visual e metodologia. NÃO copie totais ou conteúdo funcional de Folha — cada contagem é independente.
-
-INSTRUÇÕES:
-1. Explore o código-fonte em FINANCIAMENTO/ (Fontes/, CtrlObjects/, DBObjects/) para identificar Processos Elementares (PE) e Arquivos Lógicos (AL).
-2. Para cada PE: documente ID, nome, objetivo, justificativa de distinção, fonte no código (.pas), situação (COMPROVADO/INFERIDO/PENDENTE).
-3. Para cada AL: documente ID, nome, descrição, fronteira (mantido ou referenciado), PE relacionados, fonte, situação.
-4. Calcule o total SFP: (qtd_PE × 4,6) + (qtd_AL × 7).
-5. Documente a rastreabilidade de cada PE ao código-fonte.
-6. Identifique integrações e riscos de dupla contagem com outros módulos.
-7. Liste pendências (elementos com identificação incompleta).
-8. Crie o arquivo docs1/pontos-de-funcao/financiamento.html seguindo o padrão visual de folha.html (8 seções: Identificação, Sumário executivo, Inventário de PE, Inventário de AL, Memória de cálculo, Rastreabilidade, Integrações e dupla contagem, Pendências).
-9. Adicione a aba "Financiamento" na navegação <nav> de:
-   - docs1/pontos-de-funcao/index.html
-   - docs1/pontos-de-funcao/folha.html
-   - docs1/pontos-de-funcao/contribuicao.html
-   - docs1/pontos-de-funcao/beneficioprev.html
-   - docs1/pontos-de-funcao/metodologia.html
-   - docs1/pontos-de-funcao/financiamento.html (o novo arquivo)
-10. Adicione um card na seção "Análises por módulo" e uma linha na tabela "Resumo comparativo" de docs1/pontos-de-funcao/index.html.
-
-ENTREGÁVEL: relatório final listando todos os arquivos criados ou alterados, o total de PE, AL e SFP do módulo, e as pendências identificadas.
-```
-
----
-### Prompt 23 — Almoxarifado (ALMOXARIFADO)
-
-```
-Você é um analista de métricas de software. Sua tarefa é executar a contagem SFP (Simple Function Points) do módulo Almoxarifado do sistema legado Delphi 5.
-
-MÓDULO: Almoxarifado
-CÓDIGO: ALMOXARIFADO
-PASTA: ALMOXARIFADO/
-ENTRY POINT: ALMOXARIFADO/Fontes/Almoxarifado.dpr
-PROPÓSITO: Almoxarifado — controle de estoque, movimentações de materiais e inventário.
-TECNOLOGIA: Delphi 5 / VCL / Oracle (schema CM.) — contexto técnico, não fator de contagem SFP.
-
-DEPENDÊNCIAS (referenciadas, não contadas como elementos deste módulo):
-- COMPRAS2000 (compras — pedidos de compra)
-- CONTAB (contabilidade — lançamentos)
-- CPAGAR (contas a pagar — faturas)
-- CMALMOXCOMPRAOBJ50 (objetos compartilhados — dependência)
-- ALMOX&COMPRAS (biblioteca compartilhada — dependência)
-
-FRONTEIRA: Pasta ALMOXARIFADO — mantém dados de estoque (itens, saldos, movimentações) dentro desta fronteira; recebe pedidos de COMPRAS2000.
-
-RISCOS DE DUPLA CONTAGEM:
-- Itens de estoque: verificar sobreposição com COMPRAS2000. ALMOXARIFADO mantém o estoque; COMPRAS2000 gera pedidos. Verificar se há dados compartilhados.
+- Projeções atuariais: verificar sobreposição com SIMULADORFCRT. PROJETOATUARIAL fornece dados para o simulador.
 - Validar com especialista de negócio se a fronteira está correta.
 
 MÉTODO: SFP (Simple Function Points) — IFPUG SFP; Roteiro de Métricas de Software do SISP v3.0.
@@ -1856,102 +2113,50 @@ TERMINOLOGIA: Use exclusivamente SFP — Processos Elementares (PE) e Arquivos L
 MODELO DE REFERÊNCIA: docs1/pontos-de-funcao/folha.html — análise SFP completa de Folha de Benefícios (25 PE, 23 AL, 276 SFP). Use como modelo de estrutura, apresentação visual e metodologia. NÃO copie totais ou conteúdo funcional de Folha — cada contagem é independente.
 
 INSTRUÇÕES:
-1. Explore o código-fonte em ALMOXARIFADO/ (Fontes/, CtrlObjects/, DBObjects/) para identificar Processos Elementares (PE) e Arquivos Lógicos (AL).
+1. Explore o código-fonte em PROJETOATUARIAL/ (FONTES/, CtrlObjects/, DBObjects/) para identificar Processos Elementares (PE) e Arquivos Lógicos (AL).
 2. Para cada PE: documente ID, nome, objetivo, justificativa de distinção, fonte no código (.pas), situação (COMPROVADO/INFERIDO/PENDENTE).
 3. Para cada AL: documente ID, nome, descrição, fronteira (mantido ou referenciado), PE relacionados, fonte, situação.
 4. Calcule o total SFP: (qtd_PE × 4,6) + (qtd_AL × 7).
 5. Documente a rastreabilidade de cada PE ao código-fonte.
 6. Identifique integrações e riscos de dupla contagem com outros módulos.
 7. Liste pendências (elementos com identificação incompleta).
-8. Crie o arquivo docs1/pontos-de-funcao/almoxarifado.html seguindo o padrão visual de folha.html (8 seções: Identificação, Sumário executivo, Inventário de PE, Inventário de AL, Memória de cálculo, Rastreabilidade, Integrações e dupla contagem, Pendências).
-9. Adicione a aba "Almoxarifado" na navegação <nav> de:
+8. Crie o arquivo docs1/pontos-de-funcao/projetoatuarial.html seguindo o padrão visual de folha.html (8 seções: Identificação, Sumário executivo, Inventário de PE, Inventário de AL, Memória de cálculo, Rastreabilidade, Integrações e dupla contagem, Pendências).
+9. Adicione a aba "Projeto Atuarial" na navegação <nav> de:
    - docs1/pontos-de-funcao/index.html
    - docs1/pontos-de-funcao/folha.html
    - docs1/pontos-de-funcao/contribuicao.html
    - docs1/pontos-de-funcao/beneficioprev.html
    - docs1/pontos-de-funcao/metodologia.html
-   - docs1/pontos-de-funcao/almoxarifado.html (o novo arquivo)
+   - docs1/pontos-de-funcao/projetoatuarial.html (o novo arquivo)
 10. Adicione um card na seção "Análises por módulo" e uma linha na tabela "Resumo comparativo" de docs1/pontos-de-funcao/index.html.
 
 ENTREGÁVEL: relatório final listando todos os arquivos criados ou alterados, o total de PE, AL e SFP do módulo, e as pendências identificadas.
 ```
 
 ---
-### Prompt 24 — Compras (COMPRAS2000)
+### Prompt 29 — Processos Previdenciários (PROCPREV)
 
 ```
-Você é um analista de métricas de software. Sua tarefa é executar a contagem SFP (Simple Function Points) do módulo Compras do sistema legado Delphi 5.
+Você é um analista de métricas de software. Sua tarefa é executar a contagem SFP (Simple Function Points) do módulo Processos Previdenciários do sistema legado Delphi 5.
 
-MÓDULO: Compras
-CÓDIGO: COMPRAS2000
-PASTA: COMPRAS2000/
-ENTRY POINT: COMPRAS2000/Fontes/Compras.dpr
-PROPÓSITO: Compras — solicitações de compra, ordens de compra, cotações de fornecedores.
-TECNOLOGIA: Delphi 5 / VCL / Oracle (schema CM.) — contexto técnico, não fator de contagem SFP.
-
-DEPENDÊNCIAS (referenciadas, não contadas como elementos deste módulo):
-- ALMOXARIFADO (almoxarifado — destino dos materiais)
-- CPAGAR (contas a pagar — faturas de compra)
-- CMALMOXCOMPRAOBJ50 (objetos compartilhados — dependência)
-- ALMOX&COMPRAS (biblioteca compartilhada — dependência)
-
-FRONTEIRA: Pasta COMPRAS2000 — mantém dados de compras (pedidos, cotações, ordens) dentro desta fronteira; envia materiais para ALMOXARIFADO.
-
-RISCOS DE DUPLA CONTAGEM:
-- Pedidos de compra: verificar sobreposição com ALMOXARIFADO. COMPRAS2000 gera pedidos; ALMOXARIFADO mantém estoque. Verificar se há dados compartilhados.
-- Validar com especialista de negócio se a fronteira está correta.
-
-MÉTODO: SFP (Simple Function Points) — IFPUG SFP; Roteiro de Métricas de Software do SISP v3.0.
-PESOS: 4,6 SFP por Processo Elementar (PE); 7 SFP por Arquivo Lógico (AL).
-FÓRMULA: Total SFP = (qtd_PE × 4,6) + (qtd_AL × 7)
-TERMINOLOGIA: Use exclusivamente SFP — Processos Elementares (PE) e Arquivos Lógicos (AL). NÃO use EI, EO, EQ, ILF, EIF, DET, FTR, RET, matrizes de complexidade ou pesos da APF tradicional.
-
-MODELO DE REFERÊNCIA: docs1/pontos-de-funcao/folha.html — análise SFP completa de Folha de Benefícios (25 PE, 23 AL, 276 SFP). Use como modelo de estrutura, apresentação visual e metodologia. NÃO copie totais ou conteúdo funcional de Folha — cada contagem é independente.
-
-INSTRUÇÕES:
-1. Explore o código-fonte em COMPRAS2000/ (Fontes/, CtrlObjects/, DBObjects/) para identificar Processos Elementares (PE) e Arquivos Lógicos (AL).
-2. Para cada PE: documente ID, nome, objetivo, justificativa de distinção, fonte no código (.pas), situação (COMPROVADO/INFERIDO/PENDENTE).
-3. Para cada AL: documente ID, nome, descrição, fronteira (mantido ou referenciado), PE relacionados, fonte, situação.
-4. Calcule o total SFP: (qtd_PE × 4,6) + (qtd_AL × 7).
-5. Documente a rastreabilidade de cada PE ao código-fonte.
-6. Identifique integrações e riscos de dupla contagem com outros módulos.
-7. Liste pendências (elementos com identificação incompleta).
-8. Crie o arquivo docs1/pontos-de-funcao/compras.html seguindo o padrão visual de folha.html (8 seções: Identificação, Sumário executivo, Inventário de PE, Inventário de AL, Memória de cálculo, Rastreabilidade, Integrações e dupla contagem, Pendências).
-9. Adicione a aba "Compras" na navegação <nav> de:
-   - docs1/pontos-de-funcao/index.html
-   - docs1/pontos-de-funcao/folha.html
-   - docs1/pontos-de-funcao/contribuicao.html
-   - docs1/pontos-de-funcao/beneficioprev.html
-   - docs1/pontos-de-funcao/metodologia.html
-   - docs1/pontos-de-funcao/compras.html (o novo arquivo)
-10. Adicione um card na seção "Análises por módulo" e uma linha na tabela "Resumo comparativo" de docs1/pontos-de-funcao/index.html.
-
-ENTREGÁVEL: relatório final listando todos os arquivos criados ou alterados, o total de PE, AL e SFP do módulo, e as pendências identificadas.
-```
-
----
-### Prompt 25 — Central de Atendimento (CENTRALAP)
-
-```
-Você é um analista de métricas de software. Sua tarefa é executar a contagem SFP (Simple Function Points) do módulo Central de Atendimento do sistema legado Delphi 5.
-
-MÓDULO: Central de Atendimento
-CÓDIGO: CENTRALAP
-PASTA: CENTRALAP/
-ENTRY POINT: CENTRALAP/Fontes/CentralAP.dpr
-PROPÓSITO: Central de atendimento — atendimento a participantes, catálogo de serviços e gestão de ocorrências.
+MÓDULO: Processos Previdenciários
+CÓDIGO: PROCPREV
+PASTA: PROCPREV/
+ENTRY POINT: PROCPREV/Fontes/ProcPrev.dpr
+PROPÓSITO: Processamento de requerimentos/processos previdenciários — concessões, cálculos e fluxos procedurais de benefícios.
 TECNOLOGIA: Delphi 5 / VCL / Oracle (schema CM.) — contexto técnico, não fator de contagem SFP.
 
 DEPENDÊNCIAS (referenciadas, não contadas como elementos deste módulo):
 - CADASTROPREV (dados cadastrais de participantes)
-- AGENDAMENTO (agendamento de atendimentos)
-- CMAGENDAMENTOOBJ50 (objetos compartilhados — dependência)
+- BENEFICIOPREV (dados de benefícios)
+- PARAMPREV (parâmetros previdenciários — serviço compartilhado)
+- OBJRAD (objetos de workflow RAD — dependência compartilhada)
 
-FRONTEIRA: Pasta CENTRALAP — mantém dados de atendimentos (ocorrências, protocolos, serviços) dentro desta fronteira; lê dados de CADASTROPREV.
+FRONTEIRA: Pasta PROCPREV — mantém dados de processos/requerimentos dentro desta fronteira; lê dados de CADASTROPREV e BENEFICIOPREV.
 
 RISCOS DE DUPLA CONTAGEM:
-- Atendimentos: verificar sobreposição com AGENDAMENTO. CENTRALAP pode compartilhar dados de agendamento.
-- Validar com especialista de negócio se a fronteira está correta.
+- Dados de processo/benefício: verificar sobreposição com BENEFICIOPREV. Se PROCPREV mantém dados de processo que BENEFICIOPREV também mantém, sinalizar ambiguidade de dono.
+- Validar com especialista de negócio a fronteira entre PROCPREV e BENEFICIOPREV.
 
 MÉTODO: SFP (Simple Function Points) — IFPUG SFP; Roteiro de Métricas de Software do SISP v3.0.
 PESOS: 4,6 SFP por Processo Elementar (PE); 7 SFP por Arquivo Lógico (AL).
@@ -1961,48 +2166,49 @@ TERMINOLOGIA: Use exclusivamente SFP — Processos Elementares (PE) e Arquivos L
 MODELO DE REFERÊNCIA: docs1/pontos-de-funcao/folha.html — análise SFP completa de Folha de Benefícios (25 PE, 23 AL, 276 SFP). Use como modelo de estrutura, apresentação visual e metodologia. NÃO copie totais ou conteúdo funcional de Folha — cada contagem é independente.
 
 INSTRUÇÕES:
-1. Explore o código-fonte em CENTRALAP/ (Fontes/, CtrlObjects/, DBObjects/) para identificar Processos Elementares (PE) e Arquivos Lógicos (AL).
+1. Explore o código-fonte em PROCPREV/ (Fontes/, CtrlObjects/, DBObjects/) para identificar Processos Elementares (PE) e Arquivos Lógicos (AL).
 2. Para cada PE: documente ID, nome, objetivo, justificativa de distinção, fonte no código (.pas), situação (COMPROVADO/INFERIDO/PENDENTE).
 3. Para cada AL: documente ID, nome, descrição, fronteira (mantido ou referenciado), PE relacionados, fonte, situação.
 4. Calcule o total SFP: (qtd_PE × 4,6) + (qtd_AL × 7).
 5. Documente a rastreabilidade de cada PE ao código-fonte.
 6. Identifique integrações e riscos de dupla contagem com outros módulos.
 7. Liste pendências (elementos com identificação incompleta).
-8. Crie o arquivo docs1/pontos-de-funcao/centralap.html seguindo o padrão visual de folha.html (8 seções: Identificação, Sumário executivo, Inventário de PE, Inventário de AL, Memória de cálculo, Rastreabilidade, Integrações e dupla contagem, Pendências).
-9. Adicione a aba "Central de Atendimento" na navegação <nav> de:
+8. Crie o arquivo docs1/pontos-de-funcao/procprev.html seguindo o padrão visual de folha.html (8 seções: Identificação, Sumário executivo, Inventário de PE, Inventário de AL, Memória de cálculo, Rastreabilidade, Integrações e dupla contagem, Pendências).
+9. Adicione a aba "Processos Previdenciários" na navegação <nav> de:
    - docs1/pontos-de-funcao/index.html
    - docs1/pontos-de-funcao/folha.html
    - docs1/pontos-de-funcao/contribuicao.html
    - docs1/pontos-de-funcao/beneficioprev.html
    - docs1/pontos-de-funcao/metodologia.html
-   - docs1/pontos-de-funcao/centralap.html (o novo arquivo)
+   - docs1/pontos-de-funcao/procprev.html (o novo arquivo)
 10. Adicione um card na seção "Análises por módulo" e uma linha na tabela "Resumo comparativo" de docs1/pontos-de-funcao/index.html.
 
 ENTREGÁVEL: relatório final listando todos os arquivos criados ou alterados, o total de PE, AL e SFP do módulo, e as pendências identificadas.
 ```
 
 ---
-### Prompt 26 — Agendamento (AGENDAMENTO)
+### Prompt 30 — Assistencial (ASSISTENCIAL)
 
 ```
-Você é um analista de métricas de software. Sua tarefa é executar a contagem SFP (Simple Function Points) do módulo Agendamento do sistema legado Delphi 5.
+Você é um analista de métricas de software. Sua tarefa é executar a contagem SFP (Simple Function Points) do módulo Assistencial do sistema legado Delphi 5.
 
-MÓDULO: Agendamento
-CÓDIGO: AGENDAMENTO
-PASTA: AGENDAMENTO/
-ENTRY POINT: AGENDAMENTO/Fontes/Agendamento.dpr
-PROPÓSITO: Agendamento — agendamento de atendimentos, serviços e compromissos.
+MÓDULO: Assistencial
+CÓDIGO: ASSISTENCIAL
+PASTA: ASSISTENCIAL/
+ENTRY POINT: ASSISTENCIAL/Fontes/assistencial.dpr
+PROPÓSITO: Administração de benefícios de assistência social/welfare concedidos a participantes e beneficiários.
 TECNOLOGIA: Delphi 5 / VCL / Oracle (schema CM.) — contexto técnico, não fator de contagem SFP.
 
 DEPENDÊNCIAS (referenciadas, não contadas como elementos deste módulo):
 - CADASTROPREV (dados cadastrais de participantes)
-- CMAGENDAMENTOOBJ50 (objetos compartilhados — dependência)
+- BENEFICIOPREV (dados de benefícios)
+- PARAMPREV (parâmetros previdenciários — serviço compartilhado)
 
-FRONTEIRA: Pasta AGENDAMENTO — mantém dados de agendamentos (horários, calendários, atendentes) dentro desta fronteira.
+FRONTEIRA: Pasta ASSISTENCIAL — mantém dados de benefícios assistenciais dentro desta fronteira; lê dados de CADASTROPREV e BENEFICIOPREV.
 
 RISCOS DE DUPLA CONTAGEM:
-- Agendamentos: verificar sobreposição com CENTRALAP. AGENDAMENTO pode ser referenciado por CENTRALAP.
-- Validar com especialista de negócio se a fronteira está correta.
+- Dados de benefício assistencial: verificar sobreposição com BENEFICIOPREV. Benefícios assistenciais podem compartilhar tabelas com benefícios previdenciários.
+- Validar com especialista de negócio a fronteira entre ASSISTENCIAL e BENEFICIOPREV.
 
 MÉTODO: SFP (Simple Function Points) — IFPUG SFP; Roteiro de Métricas de Software do SISP v3.0.
 PESOS: 4,6 SFP por Processo Elementar (PE); 7 SFP por Arquivo Lógico (AL).
@@ -2012,80 +2218,28 @@ TERMINOLOGIA: Use exclusivamente SFP — Processos Elementares (PE) e Arquivos L
 MODELO DE REFERÊNCIA: docs1/pontos-de-funcao/folha.html — análise SFP completa de Folha de Benefícios (25 PE, 23 AL, 276 SFP). Use como modelo de estrutura, apresentação visual e metodologia. NÃO copie totais ou conteúdo funcional de Folha — cada contagem é independente.
 
 INSTRUÇÕES:
-1. Explore o código-fonte em AGENDAMENTO/ (Fontes/, CtrlObjects/, DBObjects/) para identificar Processos Elementares (PE) e Arquivos Lógicos (AL).
+1. Explore o código-fonte em ASSISTENCIAL/ (Fontes/, CtrlObjects/, DBObjects/) para identificar Processos Elementares (PE) e Arquivos Lógicos (AL).
 2. Para cada PE: documente ID, nome, objetivo, justificativa de distinção, fonte no código (.pas), situação (COMPROVADO/INFERIDO/PENDENTE).
 3. Para cada AL: documente ID, nome, descrição, fronteira (mantido ou referenciado), PE relacionados, fonte, situação.
 4. Calcule o total SFP: (qtd_PE × 4,6) + (qtd_AL × 7).
 5. Documente a rastreabilidade de cada PE ao código-fonte.
 6. Identifique integrações e riscos de dupla contagem com outros módulos.
 7. Liste pendências (elementos com identificação incompleta).
-8. Crie o arquivo docs1/pontos-de-funcao/agendamento.html seguindo o padrão visual de folha.html (8 seções: Identificação, Sumário executivo, Inventário de PE, Inventário de AL, Memória de cálculo, Rastreabilidade, Integrações e dupla contagem, Pendências).
-9. Adicione a aba "Agendamento" na navegação <nav> de:
+8. Crie o arquivo docs1/pontos-de-funcao/assistencial.html seguindo o padrão visual de folha.html (8 seções: Identificação, Sumário executivo, Inventário de PE, Inventário de AL, Memória de cálculo, Rastreabilidade, Integrações e dupla contagem, Pendências).
+9. Adicione a aba "Assistencial" na navegação <nav> de:
    - docs1/pontos-de-funcao/index.html
    - docs1/pontos-de-funcao/folha.html
    - docs1/pontos-de-funcao/contribuicao.html
    - docs1/pontos-de-funcao/beneficioprev.html
    - docs1/pontos-de-funcao/metodologia.html
-   - docs1/pontos-de-funcao/agendamento.html (o novo arquivo)
+   - docs1/pontos-de-funcao/assistencial.html (o novo arquivo)
 10. Adicione um card na seção "Análises por módulo" e uma linha na tabela "Resumo comparativo" de docs1/pontos-de-funcao/index.html.
 
 ENTREGÁVEL: relatório final listando todos os arquivos criados ou alterados, o total de PE, AL e SFP do módulo, e as pendências identificadas.
 ```
 
 ---
-### Prompt 27 — Autoatendimento (AUTOATENDIMENTO)
-
-```
-Você é um analista de métricas de software. Sua tarefa é executar a contagem SFP (Simple Function Points) do módulo Autoatendimento do sistema legado Delphi 5.
-
-MÓDULO: Autoatendimento
-CÓDIGO: AUTOATENDIMENTO
-PASTA: AUTOATENDIMENTO/
-ENTRY POINT: AUTOATENDIMENTO/Aplicacao/Fontes/AutoAtendimento.dpr
-PROPÓSITO: Autoatendimento web — portal de self-service para participantes (empréstimos, consultas, solicitações).
-TECNOLOGIA: Delphi 5 / VCL / Oracle (schema CM.) — contexto técnico, não fator de contagem SFP.
-
-DEPENDÊNCIAS (referenciadas, não contadas como elementos deste módulo):
-- EMPRESTIMO (empréstimo — simulação e contratação)
-- CADASTROPREV (dados cadastrais de participantes)
-- EMPRESTIMOBPL (BPL compartilhado — dependência)
-
-FRONTEIRA: Pasta AUTOATENDIMENTO — mantém dados de autoatendimento (sessões, solicitações web) dentro desta fronteira; consome serviços de EMPRESTIMO e CADASTROPREV.
-
-RISCOS DE DUPLA CONTAGEM:
-- Empréstimos web: verificar sobreposição com EMPRESTIMO. AUTOATENDIMENTO é um canal web que consome EMPRESTIMO — verificar se mantém dados próprios ou se apenas consome.
-- Validar com especialista de negócio se AUTOATENDIMENTO é fronteira própria ou canal de EMPRESTIMO.
-
-MÉTODO: SFP (Simple Function Points) — IFPUG SFP; Roteiro de Métricas de Software do SISP v3.0.
-PESOS: 4,6 SFP por Processo Elementar (PE); 7 SFP por Arquivo Lógico (AL).
-FÓRMULA: Total SFP = (qtd_PE × 4,6) + (qtd_AL × 7)
-TERMINOLOGIA: Use exclusivamente SFP — Processos Elementares (PE) e Arquivos Lógicos (AL). NÃO use EI, EO, EQ, ILF, EIF, DET, FTR, RET, matrizes de complexidade ou pesos da APF tradicional.
-
-MODELO DE REFERÊNCIA: docs1/pontos-de-funcao/folha.html — análise SFP completa de Folha de Benefícios (25 PE, 23 AL, 276 SFP). Use como modelo de estrutura, apresentação visual e metodologia. NÃO copie totais ou conteúdo funcional de Folha — cada contagem é independente.
-
-INSTRUÇÕES:
-1. Explore o código-fonte em AUTOATENDIMENTO/ (Aplicacao/Fontes/, GerenciaAA/Fontes/, AutoEmprestimo/Fontes/) para identificar Processos Elementares (PE) e Arquivos Lógicos (AL).
-2. Para cada PE: documente ID, nome, objetivo, justificativa de distinção, fonte no código (.pas), situação (COMPROVADO/INFERIDO/PENDENTE).
-3. Para cada AL: documente ID, nome, descrição, fronteira (mantido ou referenciado), PE relacionados, fonte, situação.
-4. Calcule o total SFP: (qtd_PE × 4,6) + (qtd_AL × 7).
-5. Documente a rastreabilidade de cada PE ao código-fonte.
-6. Identifique integrações e riscos de dupla contagem com outros módulos.
-7. Liste pendências (elementos com identificação incompleta).
-8. Crie o arquivo docs1/pontos-de-funcao/autoatendimento.html seguindo o padrão visual de folha.html (8 seções: Identificação, Sumário executivo, Inventário de PE, Inventário de AL, Memória de cálculo, Rastreabilidade, Integrações e dupla contagem, Pendências).
-9. Adicione a aba "Autoatendimento" na navegação <nav> de:
-   - docs1/pontos-de-funcao/index.html
-   - docs1/pontos-de-funcao/folha.html
-   - docs1/pontos-de-funcao/contribuicao.html
-   - docs1/pontos-de-funcao/beneficioprev.html
-   - docs1/pontos-de-funcao/metodologia.html
-   - docs1/pontos-de-funcao/autoatendimento.html (o novo arquivo)
-10. Adicione um card na seção "Análises por módulo" e uma linha na tabela "Resumo comparativo" de docs1/pontos-de-funcao/index.html.
-
-ENTREGÁVEL: relatório final listando todos os arquivos criados ou alterados, o total de PE, AL e SFP do módulo, e as pendências identificadas.
-```
-
----
-### Prompt 28 — Exportação FCRT (EXPORTFCRT)
+### Prompt 31 — Exportação FCRT (EXPORTFCRT)
 
 ```
 Você é um analista de métricas de software. Sua tarefa é executar a contagem SFP (Simple Function Points) do módulo Exportação FCRT do sistema legado Delphi 5.
@@ -2137,7 +2291,7 @@ ENTREGÁVEL: relatório final listando todos os arquivos criados ou alterados, o
 ```
 
 ---
-### Prompt 29 — Simulador FCRT (SIMULADORFCRT)
+### Prompt 32 — Simulador FCRT (SIMULADORFCRT)
 
 ```
 Você é um analista de métricas de software. Sua tarefa é executar a contagem SFP (Simple Function Points) do módulo Simulador FCRT do sistema legado Delphi 5.
@@ -2188,109 +2342,7 @@ ENTREGÁVEL: relatório final listando todos os arquivos criados ou alterados, o
 ```
 
 ---
-### Prompt 30 — Projeto Atuarial (PROJETOATUARIAL)
-
-```
-Você é um analista de métricas de software. Sua tarefa é executar a contagem SFP (Simple Function Points) do módulo Projeto Atuarial do sistema legado Delphi 5.
-
-MÓDULO: Projeto Atuarial
-CÓDIGO: PROJETOATUARIAL
-PASTA: PROJETOATUARIAL/
-ENTRY POINT: PROJETOATUARIAL/FONTES/ProjetoAtuarial.dpr
-PROPÓSITO: Projeto atuarial — estudos atuariais, projeções e avaliações do fundo de pensão.
-TECNOLOGIA: Delphi 5 / VCL / Oracle (schema CM.) — contexto técnico, não fator de contagem SFP.
-
-DEPENDÊNCIAS (referenciadas, não contadas como elementos deste módulo):
-- CADASTROPREV (dados cadastrais de participantes)
-- PARAMPREV (parâmetros previdenciários — serviço compartilhado)
-
-FRONTEIRA: Pasta PROJETOATUARIAL — mantém dados de projeções atuariais (cenários, hipóteses, resultados) dentro desta fronteira; lê dados de CADASTROPREV.
-
-RISCOS DE DUPLA CONTAGEM:
-- Projeções atuariais: verificar sobreposição com SIMULADORFCRT. PROJETOATUARIAL fornece dados para o simulador.
-- Validar com especialista de negócio se a fronteira está correta.
-
-MÉTODO: SFP (Simple Function Points) — IFPUG SFP; Roteiro de Métricas de Software do SISP v3.0.
-PESOS: 4,6 SFP por Processo Elementar (PE); 7 SFP por Arquivo Lógico (AL).
-FÓRMULA: Total SFP = (qtd_PE × 4,6) + (qtd_AL × 7)
-TERMINOLOGIA: Use exclusivamente SFP — Processos Elementares (PE) e Arquivos Lógicos (AL). NÃO use EI, EO, EQ, ILF, EIF, DET, FTR, RET, matrizes de complexidade ou pesos da APF tradicional.
-
-MODELO DE REFERÊNCIA: docs1/pontos-de-funcao/folha.html — análise SFP completa de Folha de Benefícios (25 PE, 23 AL, 276 SFP). Use como modelo de estrutura, apresentação visual e metodologia. NÃO copie totais ou conteúdo funcional de Folha — cada contagem é independente.
-
-INSTRUÇÕES:
-1. Explore o código-fonte em PROJETOATUARIAL/ (FONTES/, CtrlObjects/, DBObjects/) para identificar Processos Elementares (PE) e Arquivos Lógicos (AL).
-2. Para cada PE: documente ID, nome, objetivo, justificativa de distinção, fonte no código (.pas), situação (COMPROVADO/INFERIDO/PENDENTE).
-3. Para cada AL: documente ID, nome, descrição, fronteira (mantido ou referenciado), PE relacionados, fonte, situação.
-4. Calcule o total SFP: (qtd_PE × 4,6) + (qtd_AL × 7).
-5. Documente a rastreabilidade de cada PE ao código-fonte.
-6. Identifique integrações e riscos de dupla contagem com outros módulos.
-7. Liste pendências (elementos com identificação incompleta).
-8. Crie o arquivo docs1/pontos-de-funcao/projetoatuarial.html seguindo o padrão visual de folha.html (8 seções: Identificação, Sumário executivo, Inventário de PE, Inventário de AL, Memória de cálculo, Rastreabilidade, Integrações e dupla contagem, Pendências).
-9. Adicione a aba "Projeto Atuarial" na navegação <nav> de:
-   - docs1/pontos-de-funcao/index.html
-   - docs1/pontos-de-funcao/folha.html
-   - docs1/pontos-de-funcao/contribuicao.html
-   - docs1/pontos-de-funcao/beneficioprev.html
-   - docs1/pontos-de-funcao/metodologia.html
-   - docs1/pontos-de-funcao/projetoatuarial.html (o novo arquivo)
-10. Adicione um card na seção "Análises por módulo" e uma linha na tabela "Resumo comparativo" de docs1/pontos-de-funcao/index.html.
-
-ENTREGÁVEL: relatório final listando todos os arquivos criados ou alterados, o total de PE, AL e SFP do módulo, e as pendências identificadas.
-```
-
----
-### Prompt 31 — Módulo Básico RH (MODBAS)
-
-```
-Você é um analista de métricas de software. Sua tarefa é executar a contagem SFP (Simple Function Points) do módulo Módulo Básico RH do sistema legado Delphi 5.
-
-MÓDULO: Módulo Básico RH
-CÓDIGO: MODBAS
-PASTA: MODBAS/
-ENTRY POINT: MODBAS/Fontes/ModBas.dpr
-PROPÓSITO: Módulo básico de RH — pessoas, filiais, sindicatos, profissões e dados base de recursos humanos.
-TECNOLOGIA: Delphi 5 / VCL / Oracle (schema CM.) — contexto técnico, não fator de contagem SFP.
-
-DEPENDÊNCIAS (referenciadas, não contadas como elementos deste módulo):
-- CMRHOBJ50 (objetos de negócio RH compartilhados — dependência)
-- CMGLOBALOBJ50 (objetos globais compartilhados — dependência)
-
-FRONTEIRA: Pasta MODBAS — mantém dados base de RH (pessoas, filiais, sindicatos) dentro desta fronteira; é a fundação para os demais módulos MOD*.
-
-RISCOS DE DUPLA CONTAGEM:
-- Dados base de RH: verificar se MODBAS é o dono dos dados de pessoas ou se CADASTROPREV também mantém. Pode haver sobreposição entre dados de pessoas de RH e dados de participantes previdenciários.
-- Validar com especialista de negócio a fronteira entre MODBAS e CADASTROPREV.
-
-MÉTODO: SFP (Simple Function Points) — IFPUG SFP; Roteiro de Métricas de Software do SISP v3.0.
-PESOS: 4,6 SFP por Processo Elementar (PE); 7 SFP por Arquivo Lógico (AL).
-FÓRMULA: Total SFP = (qtd_PE × 4,6) + (qtd_AL × 7)
-TERMINOLOGIA: Use exclusivamente SFP — Processos Elementares (PE) e Arquivos Lógicos (AL). NÃO use EI, EO, EQ, ILF, EIF, DET, FTR, RET, matrizes de complexidade ou pesos da APF tradicional.
-
-MODELO DE REFERÊNCIA: docs1/pontos-de-funcao/folha.html — análise SFP completa de Folha de Benefícios (25 PE, 23 AL, 276 SFP). Use como modelo de estrutura, apresentação visual e metodologia. NÃO copie totais ou conteúdo funcional de Folha — cada contagem é independente.
-
-INSTRUÇÕES:
-1. Explore o código-fonte em MODBAS/ (Fontes/, CtrlObjects/, DbObjetos/) para identificar Processos Elementares (PE) e Arquivos Lógicos (AL).
-2. Para cada PE: documente ID, nome, objetivo, justificativa de distinção, fonte no código (.pas), situação (COMPROVADO/INFERIDO/PENDENTE).
-3. Para cada AL: documente ID, nome, descrição, fronteira (mantido ou referenciado), PE relacionados, fonte, situação.
-4. Calcule o total SFP: (qtd_PE × 4,6) + (qtd_AL × 7).
-5. Documente a rastreabilidade de cada PE ao código-fonte.
-6. Identifique integrações e riscos de dupla contagem com outros módulos.
-7. Liste pendências (elementos com identificação incompleta).
-8. Crie o arquivo docs1/pontos-de-funcao/modbas.html seguindo o padrão visual de folha.html (8 seções: Identificação, Sumário executivo, Inventário de PE, Inventário de AL, Memória de cálculo, Rastreabilidade, Integrações e dupla contagem, Pendências).
-9. Adicione a aba "Módulo Básico RH" na navegação <nav> de:
-   - docs1/pontos-de-funcao/index.html
-   - docs1/pontos-de-funcao/folha.html
-   - docs1/pontos-de-funcao/contribuicao.html
-   - docs1/pontos-de-funcao/beneficioprev.html
-   - docs1/pontos-de-funcao/metodologia.html
-   - docs1/pontos-de-funcao/modbas.html (o novo arquivo)
-10. Adicione um card na seção "Análises por módulo" e uma linha na tabela "Resumo comparativo" de docs1/pontos-de-funcao/index.html.
-
-ENTREGÁVEL: relatório final listando todos os arquivos criados ou alterados, o total de PE, AL e SFP do módulo, e as pendências identificadas.
-```
-
----
-### Prompt 32 — Folha de Pagamento RH (MODFOL)
+### Prompt 33 — Folha de Pagamento RH (MODFOL)
 
 ```
 Você é um analista de métricas de software. Sua tarefa é executar a contagem SFP (Simple Function Points) do módulo Folha de Pagamento RH do sistema legado Delphi 5.
@@ -2345,7 +2397,7 @@ ENTREGÁVEL: relatório final listando todos os arquivos criados ou alterados, o
 ```
 
 ---
-### Prompt 33 — Benefícios RH (MODBEN)
+### Prompt 34 — Benefícios RH (MODBEN)
 
 ```
 Você é um analista de métricas de software. Sua tarefa é executar a contagem SFP (Simple Function Points) do módulo Benefícios RH do sistema legado Delphi 5.
@@ -2398,7 +2450,7 @@ ENTREGÁVEL: relatório final listando todos os arquivos criados ou alterados, o
 ```
 
 ---
-### Prompt 34 — Cargos e Salários (MODCES)
+### Prompt 35 — Cargos e Salários (MODCES)
 
 ```
 Você é um analista de métricas de software. Sua tarefa é executar a contagem SFP (Simple Function Points) do módulo Cargos e Salários do sistema legado Delphi 5.
@@ -2450,7 +2502,7 @@ ENTREGÁVEL: relatório final listando todos os arquivos criados ou alterados, o
 ```
 
 ---
-### Prompt 35 — Avaliação de Desempenho (MODAVA)
+### Prompt 36 — Avaliação de Desempenho (MODAVA)
 
 ```
 Você é um analista de métricas de software. Sua tarefa é executar a contagem SFP (Simple Function Points) do módulo Avaliação de Desempenho do sistema legado Delphi 5.
@@ -2503,7 +2555,7 @@ ENTREGÁVEL: relatório final listando todos os arquivos criados ou alterados, o
 ```
 
 ---
-### Prompt 36 — Recrutamento e Seleção (MODRES)
+### Prompt 37 — Recrutamento e Seleção (MODRES)
 
 ```
 Você é um analista de métricas de software. Sua tarefa é executar a contagem SFP (Simple Function Points) do módulo Recrutamento e Seleção do sistema legado Delphi 5.
@@ -2555,7 +2607,7 @@ ENTREGÁVEL: relatório final listando todos os arquivos criados ou alterados, o
 ```
 
 ---
-### Prompt 37 — Treinamento (MODTRN)
+### Prompt 38 — Treinamento (MODTRN)
 
 ```
 Você é um analista de métricas de software. Sua tarefa é executar a contagem SFP (Simple Function Points) do módulo Treinamento do sistema legado Delphi 5.
@@ -2607,7 +2659,7 @@ ENTREGÁVEL: relatório final listando todos os arquivos criados ou alterados, o
 ```
 
 ---
-### Prompt 38 — Assiduidade/Movimentação (MODASM)
+### Prompt 39 — Assiduidade/Movimentação (MODASM)
 
 ```
 Você é um analista de métricas de software. Sua tarefa é executar a contagem SFP (Simple Function Points) do módulo Assiduidade/Movimentação do sistema legado Delphi 5.
@@ -2660,7 +2712,7 @@ ENTREGÁVEL: relatório final listando todos os arquivos criados ou alterados, o
 ```
 
 ---
-### Prompt 39 — Gestão de Frota/Automóveis (MODAUTO)
+### Prompt 40 — Gestão de Frota/Automóveis (MODAUTO)
 
 ```
 Você é um analista de métricas de software. Sua tarefa é executar a contagem SFP (Simple Function Points) do módulo Gestão de Frota/Automóveis do sistema legado Delphi 5.
@@ -2707,58 +2759,6 @@ INSTRUÇÕES:
    - docs1/pontos-de-funcao/beneficioprev.html
    - docs1/pontos-de-funcao/metodologia.html
    - docs1/pontos-de-funcao/modauto.html (o novo arquivo)
-10. Adicione um card na seção "Análises por módulo" e uma linha na tabela "Resumo comparativo" de docs1/pontos-de-funcao/index.html.
-
-ENTREGÁVEL: relatório final listando todos os arquivos criados ou alterados, o total de PE, AL e SFP do módulo, e as pendências identificadas.
-```
-
----
-### Prompt 40 — Controle de Acesso/Ponto (MODACESSO)
-
-```
-Você é um analista de métricas de software. Sua tarefa é executar a contagem SFP (Simple Function Points) do módulo Controle de Acesso/Ponto do sistema legado Delphi 5.
-
-MÓDULO: Controle de Acesso/Ponto
-CÓDIGO: MODACESSO
-PASTA: MODACESSO/
-ENTRY POINT: MODACESSO/Fontes/ModAcesso.dpr
-PROPÓSITO: Controle de acesso e ponto — gestão de cartões, biometria, estações de acesso e registro de ponto.
-TECNOLOGIA: Delphi 5 / VCL / Oracle (schema CM.) — contexto técnico, não fator de contagem SFP.
-
-DEPENDÊNCIAS (referenciadas, não contadas como elementos deste módulo):
-- MODBAS (módulo básico RH — dados de pessoas)
-- CMRHOBJ50 (objetos de negócio RH compartilhados — dependência)
-- CMRHOBJUTIL50 (objetos utilitários RH — biometria — dependência)
-
-FRONTEIRA: Pasta MODACESSO — mantém dados de acesso (cartões, biometria, estações, ponto) dentro desta fronteira; lê dados de MODBAS.
-
-RISCOS DE DUPLA CONTAGEM:
-- Dados de ponto: verificar sobreposição com MODASM. MODACESSO registra ponto; MODASM registra faltas/ocorrências. Verificar se há dados compartilhados.
-- Validar com especialista de negócio a fronteira entre MODACESSO e MODASM.
-
-MÉTODO: SFP (Simple Function Points) — IFPUG SFP; Roteiro de Métricas de Software do SISP v3.0.
-PESOS: 4,6 SFP por Processo Elementar (PE); 7 SFP por Arquivo Lógico (AL).
-FÓRMULA: Total SFP = (qtd_PE × 4,6) + (qtd_AL × 7)
-TERMINOLOGIA: Use exclusivamente SFP — Processos Elementares (PE) e Arquivos Lógicos (AL). NÃO use EI, EO, EQ, ILF, EIF, DET, FTR, RET, matrizes de complexidade ou pesos da APF tradicional.
-
-MODELO DE REFERÊNCIA: docs1/pontos-de-funcao/folha.html — análise SFP completa de Folha de Benefícios (25 PE, 23 AL, 276 SFP). Use como modelo de estrutura, apresentação visual e metodologia. NÃO copie totais ou conteúdo funcional de Folha — cada contagem é independente.
-
-INSTRUÇÕES:
-1. Explore o código-fonte em MODACESSO/ (Fontes/, CtrlObjetos/) para identificar Processos Elementares (PE) e Arquivos Lógicos (AL).
-2. Para cada PE: documente ID, nome, objetivo, justificativa de distinção, fonte no código (.pas), situação (COMPROVADO/INFERIDO/PENDENTE).
-3. Para cada AL: documente ID, nome, descrição, fronteira (mantido ou referenciado), PE relacionados, fonte, situação.
-4. Calcule o total SFP: (qtd_PE × 4,6) + (qtd_AL × 7).
-5. Documente a rastreabilidade de cada PE ao código-fonte.
-6. Identifique integrações e riscos de dupla contagem com outros módulos.
-7. Liste pendências (elementos com identificação incompleta).
-8. Crie o arquivo docs1/pontos-de-funcao/modacesso.html seguindo o padrão visual de folha.html (8 seções: Identificação, Sumário executivo, Inventário de PE, Inventário de AL, Memória de cálculo, Rastreabilidade, Integrações e dupla contagem, Pendências).
-9. Adicione a aba "Controle de Acesso/Ponto" na navegação <nav> de:
-   - docs1/pontos-de-funcao/index.html
-   - docs1/pontos-de-funcao/folha.html
-   - docs1/pontos-de-funcao/contribuicao.html
-   - docs1/pontos-de-funcao/beneficioprev.html
-   - docs1/pontos-de-funcao/metodologia.html
-   - docs1/pontos-de-funcao/modacesso.html (o novo arquivo)
 10. Adicione um card na seção "Análises por módulo" e uma linha na tabela "Resumo comparativo" de docs1/pontos-de-funcao/index.html.
 
 ENTREGÁVEL: relatório final listando todos os arquivos criados ou alterados, o total de PE, AL e SFP do módulo, e as pendências identificadas.
