@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Processos Previdenciários — Simple Function Points — Blueprint AS-IS</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<header>
+  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-64</div>
+  <h1>📐 Simple Function Points — Processos Previdenciários</h1>
+  <p>Contagem SFP do módulo PROCPREV (executável <code>ProcPrev.exe</code> — "Contencioso Previdenciário") — 3 Processos Elementares (PE), 27 Arquivos Lógicos (AL) — Total: 202,8 SFP</p>
+</header>
+<nav>
+  <a href="index.html">📐 Entrada</a>
+  <a href="folha.html">Folha de Benefícios</a>
+  <a href="contribuicao.html">Contribuição Previdenciária</a>
+  <a href="beneficioprev.html">Benefício Previdenciário</a>
+  <a href="irrf.html">IRRF</a>
+  <a href="cadastroprev.html">Cadastro Previdenciário</a>
+  <a href="modbas.html">Módulo Básico RH</a>
+  <a href="modacesso.html">Controle de Acesso/Ponto</a>
+  <a href="contab.html">Contabilidade</a>
+  <a href="cfinan.html">Contabilidade Financeira</a>
+  <a href="orcamento.html">Orçamento</a>
+  <a href="cpagar.html">Contas a Pagar</a>
+  <a href="creceber.html">Contas a Receber</a>
+  <a href="indicadores.html">Indicadores</a>
+  <a href="contrato.html">Contratos</a>
+  <a href="emprestimo.html">Empréstimo</a>
+  <a href="financiamento.html">Financiamento</a>
+  <a href="agendamento.html">Agendamento</a>
+  <a href="centralap.html">Central de Atendimento</a>
+  <a href="autoatendimento.html">Autoatendimento</a>
+  <a href="compras.html">Compras</a>
+  <a href="almoxarifado.html">Almoxarifado</a>
+  <a href="investimentos.html">Investimentos</a>
+  <a href="cotas.html">Cotas</a>
+  <a href="caf.html">Ativo Fixo (CAF)</a>
+  <a href="recmerc.html">Recebimento de Mercadoria</a>
+  <a href="investimob.html">Investimentos Imobiliários</a>
+  <a href="adminimob.html">Administração Imobiliária</a>
+  <a href="alienacao.html">Alienação de Bens</a>
+  <a href="sistjur.html">Sistema Jurídico</a>
+  <a href="procjud.html">Processos Judiciais</a>
+  <a href="projetoatuarial.html">Projeto Atuarial</a>
+  <a href="procprev.html">Processos Previdenciários</a>
+  <a href="metodologia.html">📜 Metodologia da contagem</a>
+  <a href="../index.html">⬅ Voltar ao Blueprint</a>
+</nav>
+
+<main>
+
+<!-- Seção 1: Identificação -->
+<section id="s1-identificacao"><div class="section-title">1. Identificação da contagem</div>
+<div class="table-wrap"><table>
+<thead><tr><th>Atributo</th><th>Valor</th></tr></thead>
+<tbody>
+<tr><td>Nome do módulo</td><td>Processos Previdenciários — no código, "Contencioso Previdenciário" (<code>Application.Title</code> em <code>PROCPREV/Fontes/ProcPrev.dpr</code>; <code>Sistema.NomeModulo</code> em <code>FPrincipal.pas</code>; <code>Sistema.IdModulo := PROCPREV</code>, versão 3.21.05)</td></tr>
+<tr><td>Código</td><td><code>PROCPREV</code></td></tr>
+<tr><td>Pasta no repositório</td><td><code>PROCPREV/</code> — <code>Fontes/</code> (menu <code>FPrincipal</code>; demais unidades são cópias antigas fora do projeto, inclusive <code>FHistRubrica.pas</code>), <code>FontesMT/</code> (8 descendentes locais: processo, etapas, honorários, consultas, gráficos e seleção de processos com filtros previdenciários), <code>CtrlObjetos/</code> (<code>uCmCtrlRptProcPrev.pas</code>, <code>uModulo.pas</code>), <code>Reports/Source/</code> (6 unidades de relatório). Não há pasta <code>DBObjects/</code>: os objetos de negócio vêm de <code>SHARED/ModComp/</code> e <code>CMRHOBJ50/</code></td></tr>
+<tr><td>Entry point</td><td><code>PROCPREV/Fontes/ProcPrev.dpr</code> (<code>program ProcPrev</code>; menu <code>FPrincipal.dfm</code>/<code>.pas</code>). O SISTJUR (<code>SISTJUR/Fontes/FPrincipal.pas</code>) executa <code>ProcPrev.exe</code> pelo botão <code>BitBtnPrev</code>.</td></tr>
+<tr><td>Tecnologia</td><td>Delphi 5 / VCL / framework CM (<code>TCmControlObject</code>, <code>AbrirForm</code>) / MIDAS (ClientDataSet) / BDE (consultas dos relatórios) / Oracle (schema <code>CM.</code>) / ReportBuilder — <strong>contexto técnico, não fator de contagem SFP</strong></td></tr>
+<tr><td>Propósito</td><td>Contencioso previdenciário: ações judiciais movidas por participantes/assistidos contra o fundo (processos com <code>PROCESSOTRAB.INDMATERIA IN (2,3)</code>), com os mesmos cadastros, etapas, honorários e integrações CAP/CAR e contábil do jurídico, mais a exibição e a filtragem por dados do participante (plano, patrocinadora, situação, cargo, lotação). O código <strong>não</strong> trata requerimentos administrativos nem concessão/cálculo de benefícios (ver <a href="#s7-integracoes">seção 7.2</a>).</td></tr>
+<tr><td>Tipo de fronteira</td><td>Aplicação</td></tr>
+<tr><td>Fronteira</td><td>Executável PROCPREV. As tabelas de processo (<code>PROCESSOTRAB</code> e dependentes) e os cadastros jurídicos são gravados pelos mesmos formulários de <code>SHARED/ModComp</code> usados pelo SISTJURCONS e <strong>já estão contados como mantidos em <a href="sistjur.html">SISTJUR</a></strong> (sistjur.html, seção 7.2). Os dados do participante são lidos de CADASTROPREV/PARAMPREV/MODBAS. Nesta contagem todos os AL são referenciados e os PE de formulário compartilhado não são contados de novo (seção 7.1).</td></tr>
+<tr><td>Escopo</td><td>Processos elementares acionáveis pelo menu de <code>PROCPREV/Fontes/FPrincipal.dfm</code> que <strong>não</strong> abrem formulário já contado no SISTJUR ou no PROCJUD, e relatórios do catálogo do PROCPREV com formulário de parâmetros próprio (<code>AppPadraoShowParamReportPadrao</code>: 4052, 3196, 4065); arquivos lógicos lidos ou gravados por esses processos.</td></tr>
+<tr><td>Fora do escopo (não contado)</td><td>Os 23 itens de menu e as 6 subtelas que abrem formulários já contados em SISTJUR/PROCJUD (tabela após o inventário da seção 3). Transações › Manutenção de Documentos (AP/GR) — <code>mnuManutDocClick</code> com corpo comentado e <code>fLancDocCapCar</code> comentado no <code>.dpr</code>. Agenda de etapas do usuário exibida após o login (<code>fAgenda</code>, só leitura). Funções do framework CM: login, troca de empresa, Sair/Ajuda, tela padrão de relatórios. Relatórios de listagem de cadastros sem formulário de parâmetros próprio (<code>RVara</code>, <code>RMotivoJur</code>, <code>RTipAcao</code>, <code>RTipObjeto</code>, <code>RTipProc</code>, <code>RTipRec</code>, <code>RTipSent</code>, <code>RGrupoObjeto</code>). Subtelas de penhora, multa, condenação (do processo), valor real e conta bancária, gravadas junto com o processo/etapa. Unidades de <code>PROCPREV/Fontes</code> fora de <code>ProcPrev.dpr</code> (versões BDE antigas: <code>FCadTRT</code>, <code>FCadRateio</code>, <code>FConProc</code>, <code>FEncerProc</code>, <code>FEstObjeto</code>, <code>FEstProcesso</code>, <code>FFolUpProc</code>, <code>FProcProc</code>, <code>FSel*</code>, <code>rProcesso</code>, <code>rResumoProc</code>, <code>fParamProcTrab</code>, <code>DBaseDados</code> etc.), inclusive <code>FHistRubrica.pas</code> (consulta de histórico de rubricas do reclamante e paradigma em <code>HISTRUBSAL</code>, chamada só pela antiga <code>FCadProcesso</code> BDE); <code>PROCPREV/Reports/Source/RFichaProc.pas</code> (fora do projeto).</td></tr>
+<tr><td>Dependências (referenciadas, não contadas como elementos de PROCPREV)</td><td>SISTJUR (dono funcional das tabelas de processo e dos cadastros jurídicos), CADASTROPREV (<code>ELEGPATRO</code>, <code>PARTPREVPLAN</code>), PARAMPREV (<code>PLANPREV</code>, <code>PATRO</code>, <code>SITPART</code>), MODBAS (pessoa, situação funcional, profissão, grau de instrução, sindicato, motivos), CMGLOBALOBJ50/CM (UF/cidade, moeda, cargo, centro de custo), BENEFICIOPREV (dependência declarada; nenhuma tabela de benefício acessada — seção 7.2), OBJRAD (dependência declarada; nenhuma unidade de workflow RAD usada no projeto — seção 7.3), CPAGAR/CRECEBER e CONTAB (integração das etapas, via formulários compartilhados)</td></tr>
+<tr><td>Data da contagem</td><td>2026-11-16</td></tr>
+<tr><td>Método de contagem</td><td>SFP (Simple Function Points) — <a href="metodologia.html">Metodologia</a></td></tr>
+<tr><td>Versão do método</td><td>IFPUG SFP; Roteiro de Métricas de Software do SISP v3.0 — pesos: 4,6 SFP/PE, 7 SFP/AL</td></tr>
+<tr><td>Fonte primária</td><td>Código-fonte Delphi 5: <code>PROCPREV/</code> (<code>Fontes</code>, <code>FontesMT</code>, <code>CtrlObjetos</code>, <code>Reports/Source</code>), <code>SHARED/ModComp/</code>, <code>SISTJURCONS/Fontes</code> (subtelas usadas pelo código compartilhado), <code>CMRHOBJ50/</code> e, para a análise de fronteira, <code>BENEFICIOPREV/Fontes</code>. Não há casos de uso documentados em <code>docs1/</code> para este módulo.</td></tr>
+</tbody></table></div>
+</section>
+
+<!-- Seção 2: Sumário executivo -->
+<section id="s2-sumario"><div class="section-title">2. Sumário executivo</div>
+<div class="stats">
+<div class="stat"><div class="n">3</div><div class="l">Processos Elementares (PE)</div></div>
+<div class="stat"><div class="n">27</div><div class="l">Arquivos Lógicos (AL)</div></div>
+<div class="stat"><div class="n">30</div><div class="l">Elementos totais</div></div>
+<div class="stat"><div class="n">202,8</div><div class="l"><strong>SFP totais</strong></div></div>
+</div>
+<div class="table-wrap"><table>
+<thead><tr><th>Elemento</th><th>Quantidade</th><th>Peso unitário (SFP)</th><th>Subtotal (SFP)</th></tr></thead>
+<tbody>
+<tr><td><strong>Processo Elementar (PE)</strong></td><td>3</td><td>4,6</td><td>13,8</td></tr>
+<tr><td><strong>Arquivo Lógico (AL)</strong></td><td>27</td><td>7</td><td>189,0</td></tr>
+<tr><td><strong>Total</strong></td><td><strong>30</strong></td><td>—</td><td><strong>202,8</strong></td></tr>
+</tbody></table></div>
+<p class="desc">Memória de cálculo: (3 × 4,6) + (27 × 7) = 13,8 + 189,0 = <strong>202,8 SFP</strong>. Pesos conforme IFPUG SFP e SISP Roteiro v3.0. O total é recalculado a partir do inventário das seções 3 e 4.</p>
+<div class="note-info">
+<p><strong>Interpretação:</strong> 202,8 SFP refletem o tamanho funcional <strong>incremental</strong> do PROCPREV em relação ao SISTJUR e ao PROCJUD. Os 3 PE são relatórios com parâmetros próprios (PE-001 a PE-003), que acrescentam os dados do participante à visão jurídica. Os 27 AL são todos referenciados: 12 de SISTJUR (AL-01 a AL-12 — processo, honorários e cadastros jurídicos), 4 de MODBAS/CM de uso jurídico (AL-13 a AL-16) e 11 de dados do participante — CADASTROPREV, PARAMPREV, MODBAS e CM (AL-17 a AL-27). O PROCPREV não tem tabela própria.</p>
+<p><strong>Situação:</strong> PE — 0 COMPROVADO, 3 INFERIDO, 0 PENDENTE; AL — 26 COMPROVADO, 1 INFERIDO, 0 PENDENTE.</p>
+</div>
+<div class="note">
+<p><strong>Ressalva de fronteira:</strong> o menu do PROCPREV tem 24 itens funcionais; 22 abrem formulários já contados em <a href="sistjur.html">sistjur.html</a>, 1 (Consulta Processo de Qualquer Matéria) já contado em <a href="procjud.html">procjud.html</a> e 1 (Manutenção de Documentos) está desativado no código. Seguindo a decisão registrada no SISTJUR (seção 7.2), esses PE e as 6 subtelas compartilhadas não são contados de novo e as tabelas de processo entram como <strong>Referenciado (SISTJUR)</strong>. Contagem isolada do executável, sem essa regra: 32 PE e 51 AL = 504,2 SFP (seção 7.1). <strong>Validar as fronteiras PROCPREV × SISTJUR e PROCPREV × BENEFICIOPREV com especialista de negócio</strong> (seção 8).</p>
+</div>
+</section>
+
+<!-- Seção 3: Inventário de Processos Elementares -->
+<section id="s3-pe"><div class="section-title">3. Inventário de Processos Elementares (PE)</div>
+<p>Processos elementares identificados a partir do menu principal (<code>PROCPREV/Fontes/FPrincipal.dfm</code> / <code>FPrincipal.pas</code>): cada <code>OnClick</code> foi rastreado até o formulário aberto (<code>AbrirForm</code>) e comparado com os formulários já contados no SISTJUR (sistjur.html, seção 7.2) e no PROCJUD (procjud.html, seção 3). Os relatórios vêm do evento <code>AppPadraoShowParamReportPadrao</code> (ids 4052, 3196, 4065) e do controlador <code>PROCPREV/CtrlObjetos/uCmCtrlRptProcPrev.pas</code>. Cada PE é a menor unidade de atividade funcional significativa para o usuário — sem subclassificação e sem nível de complexidade. Caminhos de fonte relativos à raiz do repositório.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>ID</th><th>Nome do Processo Elementar</th><th>Objetivo</th><th>Origem (menu)</th><th>Justificativa de distinção</th><th>Fonte (.pas)</th><th>Situação</th></tr></thead>
+<tbody>
+<tr><td>PE-001</td><td>Emitir ficha do processo previdenciário (relatório 4052)</td><td>Imprimir a ficha completa do processo previdenciário, com dados do participante (estabelecimento, cargo, centro de custo, profissão, grau de instrução), partes, vara, advogados, litisconsortes, objetos reclamados, etapas, honorários e valores atualizados</td><td>Relatórios (tela padrão) › Ficha do Processo; também pelo botão de ficha da tela Processo Previdenciário</td><td>Relatório do catálogo do PROCPREV (id 4052) com formulário de parâmetros e leiaute próprios (<code>_ProcPrev</code>), que acrescenta os dados do participante — distinto da ficha do SISTJURCONS (4077) e do PROCJUD (4042)</td><td><code>PROCPREV/Reports/Source/fParamFichaProc_ProcPrev.pas</code>, <code>PROCPREV/Reports/Source/RFichaProc_ProcPrev.pas</code></td><td><span class="ev ev-inferido">INFERIDO</span></td></tr>
+<tr><td>PE-002</td><td>Emitir relatório de processos previdenciários (relatório 3196)</td><td>Imprimir a relação dos processos previdenciários filtrados por dados do processo (tipo, ação, vara, advogados, objetos, sentença, etapa) e do participante (plano, patrocinadora, situação no plano e funcional, cargo, lotação, estabelecimento, sindicato, profissão, grau de instrução)</td><td>Relatórios (tela padrão) › Processos Previdenciários</td><td>Relatório do catálogo do PROCPREV (id 3196) com formulário de parâmetros e unidade de relatório próprios (<code>RProcPrev</code>, opção de imprimir cargo) — filtros previdenciários inexistentes nos relatórios do SISTJUR/PROCJUD</td><td><code>PROCPREV/Reports/Source/fParamProcPrev.pas</code> (herda <code>PROCPREV/FontesMT/fSelProcessoMT.pas</code>), <code>PROCPREV/Reports/Source/RProcPrev.pas</code></td><td><span class="ev ev-inferido">INFERIDO</span></td></tr>
+<tr><td>PE-003</td><td>Emitir análise sintética de processos previdenciários (relatório 4065)</td><td>Imprimir os totais sintéticos de processos e valores dos objetos reclamados (estimado/atualizado) por agrupamento, com os filtros previdenciários</td><td>Relatórios (tela padrão) › Análise Sintética</td><td>Relatório do catálogo do PROCPREV (id 4065) com formulário de parâmetros próprio — saída totalizada, distinta da relação de processos</td><td><code>PROCPREV/Reports/Source/fParamAnalSintProc.pas</code>, <code>SHARED/ModComp/Reports/Source/RAnalSintProc.pas</code></td><td><span class="ev ev-inferido">INFERIDO</span></td></tr>
+</tbody></table></div>
+<p><strong>Total de Processos Elementares:</strong> 3 PE × 4,6 SFP = <strong>13,8 SFP</strong></p>
+<p><strong>PE compartilhados — documentados, não contados em PROCPREV</strong> (regra de fronteira da <a href="#s7-integracoes">seção 7.1</a>). Os 23 itens de menu abaixo abrem, pelo mesmo <code>OnClick</code>/<code>AbrirForm</code>, formulários já contados em <a href="sistjur.html">sistjur.html</a> (22) ou em <a href="procjud.html">procjud.html</a> (1). As 6 subtelas com gravação própria (S1–S6) são alcançadas pelas telas de processo e etapas, cujo código é o mesmo do SISTJURCONS (<code>SHARED/ModComp/FontesMT/fCustomCadProcesso.pas</code> e <code>fCustomCadRegEtp.pas</code>).</p>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>Origem (menu PROCPREV)</th><th>Formulário</th><th>PE equivalente</th><th>Decisão</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>Sistema › Configuração › Parâmetros</td><td><code>frmCadParam</code></td><td>sistjur.html PE-001</td><td>Não contado em PROCPREV — já contado em SISTJUR</td></tr>
+<tr><td>2</td><td>Sistema › Utilitários › Verificação e Acerto do Custo</td><td><code>frmAcertaCusto</code></td><td>sistjur.html PE-002</td><td>Não contado em PROCPREV — já contado em SISTJUR</td></tr>
+<tr><td>3</td><td>Sistema › Utilitários › Alteração do Responsável</td><td><code>frmUsuxProcJur</code></td><td>sistjur.html PE-003</td><td>Não contado em PROCPREV — já contado em SISTJUR</td></tr>
+<tr><td>4</td><td>Sistema › Utilitários › Alteração do Escritório/Advogado</td><td><code>frmAdvogxProcJur</code></td><td>sistjur.html PE-004</td><td>Não contado em PROCPREV — já contado em SISTJUR</td></tr>
+<tr><td>5</td><td>Cadastros › Advogados, Assistentes e Peritos</td><td><code>frmCadAdvog</code></td><td>sistjur.html PE-005</td><td>Não contado em PROCPREV — já contado em SISTJUR</td></tr>
+<tr><td>6</td><td>Cadastros › Contrapartes e Litisconsortes</td><td><code>frmCadEmprAdq</code></td><td>sistjur.html PE-007</td><td>Não contado em PROCPREV — já contado em SISTJUR</td></tr>
+<tr><td>7</td><td>Cadastros › Órgãos Jurisdicionais (Varas)</td><td><code>frmCadVara</code></td><td>sistjur.html PE-008</td><td>Não contado em PROCPREV — já contado em SISTJUR</td></tr>
+<tr><td>8</td><td>Cadastros › Tipos de Processo</td><td><code>frmCadTipProc</code></td><td>sistjur.html PE-009</td><td>Não contado em PROCPREV — já contado em SISTJUR</td></tr>
+<tr><td>9</td><td>Cadastros › Tipos de Ação</td><td><code>frmCadTipAcao</code></td><td>sistjur.html PE-010</td><td>Não contado em PROCPREV — já contado em SISTJUR</td></tr>
+<tr><td>10</td><td>Cadastros › Motivos de Exclusão de Litisconsortes</td><td><code>frmCadMotivoJur</code></td><td>sistjur.html PE-011</td><td>Não contado em PROCPREV — já contado em SISTJUR</td></tr>
+<tr><td>11</td><td>Cadastros › Grupos de Objeto Reclamado</td><td><code>frmCadGrpObjeto</code></td><td>sistjur.html PE-012</td><td>Não contado em PROCPREV — já contado em SISTJUR</td></tr>
+<tr><td>12</td><td>Cadastros › Tipos de Objeto Reclamado</td><td><code>frmCadTipObjeto</code></td><td>sistjur.html PE-013</td><td>Não contado em PROCPREV — já contado em SISTJUR</td></tr>
+<tr><td>13</td><td>Cadastros › Tipos de Sentença</td><td><code>frmCadTipSent</code></td><td>sistjur.html PE-014</td><td>Não contado em PROCPREV — já contado em SISTJUR</td></tr>
+<tr><td>14</td><td>Cadastros › Tipos de Etapa (Andamento)</td><td><code>frmCadTipRec</code></td><td>sistjur.html PE-015</td><td>Não contado em PROCPREV — já contado em SISTJUR</td></tr>
+<tr><td>15</td><td>Cadastros › Parametrização Contábil</td><td><code>frmCadContJurid</code></td><td>sistjur.html PE-017</td><td>Não contado em PROCPREV — já contado em SISTJUR</td></tr>
+<tr><td>16</td><td>Transações › Processo Previdenciário</td><td><code>frmCadProcesso</code> (<code>PROCPREV/FontesMT/fCadProcesso.pas</code>, ancestral <code>fCustomCadProcesso</code>; acrescenta dados do participante e filtro <code>INDMATERIA IN (2,3)</code>)</td><td>sistjur.html PE-019</td><td>Não contado em PROCPREV — já contado em SISTJUR</td></tr>
+<tr><td>17</td><td>Transações › Etapas do Processo</td><td><code>frmCadRegEtp</code> (<code>PROCPREV/FontesMT/fCadRegEtp.pas</code>, ancestral <code>fCustomCadRegEtp</code>)</td><td>sistjur.html PE-021</td><td>Não contado em PROCPREV — já contado em SISTJUR</td></tr>
+<tr><td>18</td><td>Transações › Honorários</td><td><code>frmCadRegHon</code> (<code>PROCPREV/FontesMT/fCadRegHon.pas</code>, ancestral <code>fCustomCadRegHon</code>)</td><td>sistjur.html PE-027</td><td>Não contado em PROCPREV — já contado em SISTJUR</td></tr>
+<tr><td>19</td><td>Consulta › Consulta Geral de Processos</td><td><code>frmSelConProc</code></td><td>sistjur.html PE-036</td><td>Não contado em PROCPREV — já contado em SISTJUR</td></tr>
+<tr><td>20</td><td>Consulta › FollowUp das Etapas dos Processos</td><td><code>frmSelFolUp</code></td><td>sistjur.html PE-037</td><td>Não contado em PROCPREV — já contado em SISTJUR</td></tr>
+<tr><td>21</td><td>Gráficos Fixos › Estatística de Reclamações</td><td><code>frmSelEstObj</code></td><td>sistjur.html PE-039</td><td>Não contado em PROCPREV — já contado em SISTJUR</td></tr>
+<tr><td>22</td><td>Gráficos Fixos › Estatística de Processos</td><td><code>frmSelEstProc</code></td><td>sistjur.html PE-040</td><td>Não contado em PROCPREV — já contado em SISTJUR</td></tr>
+<tr><td>23</td><td>Consulta › Consulta Processo de Qualquer Matéria</td><td><code>frmConsultaProcesso</code> (<code>SHARED/ModComp/FontesMT/fConsultaProcesso.pas</code>)</td><td>procjud.html PE-001</td><td>Não contado em PROCPREV — já contado em PROCJUD</td></tr>
+<tr><td>S1</td><td>Processo › botão Parcelamento</td><td><code>frmParcelaAcordoMT</code> (<code>SHARED/ModComp/FontesMT/fParcelaAcordoMT.pas</code>, listado em <code>ProcPrev.dpr</code>)</td><td>sistjur.html PE-020</td><td>Não contado em PROCPREV — já contado em SISTJUR</td></tr>
+<tr><td>S2</td><td>Etapas › Informações adicionais (etapas 1035/1110)</td><td><code>frmCadDepositoJudicial</code> (<code>SISTJURCONS/Fontes</code>, via <code>fCustomCadRegEtp</code>)</td><td>sistjur.html PE-022</td><td>Não contado em PROCPREV — já contado em SISTJUR</td></tr>
+<tr><td>S3</td><td>Etapas › Informações adicionais (etapa 1053)</td><td><code>frmCadCondenacoes</code> (<code>SISTJURCONS/Fontes</code>, listado em <code>ProcPrev.dpr</code>)</td><td>sistjur.html PE-023</td><td>Não contado em PROCPREV — já contado em SISTJUR</td></tr>
+<tr><td>S4</td><td>Etapas › Informações adicionais (etapa 1086)</td><td><code>frmCadHonorarioSucumbenciais</code> (<code>SISTJURCONS/Fontes</code>, listado em <code>ProcPrev.dpr</code>)</td><td>sistjur.html PE-024</td><td>Não contado em PROCPREV — já contado em SISTJUR</td></tr>
+<tr><td>S5</td><td>Etapas › Informações adicionais (etapa 1111)</td><td><code>frmCadMovArrematacao</code> (<code>SISTJURCONS/Fontes</code>, via <code>fCustomCadRegEtp</code>)</td><td>sistjur.html PE-025</td><td>Não contado em PROCPREV — já contado em SISTJUR</td></tr>
+<tr><td>S6</td><td>Etapas › navegação entre etapas</td><td><code>frmCadEtapasXObjetos</code> (<code>SISTJURCONS/Fontes</code>, via <code>fCustomCadRegEtp</code>)</td><td>sistjur.html PE-026</td><td>Não contado em PROCPREV — já contado em SISTJUR</td></tr>
+</tbody></table></div>
+<p>Contagem isolada (sem a regra de fronteira): +29 PE = +133,4 SFP — ver <a href="#s7-integracoes">seção 7.1</a>.</p>
+</section>
+
+<!-- Seção 4: Inventário de Arquivos Lógicos -->
+<section id="s4-al"><div class="section-title">4. Inventário de Arquivos Lógicos (AL)</div>
+<p>Arquivos lógicos identificados pelo SQL dos formulários e relatórios dos PE contados (<code>FROM</code>/<code>JOIN</code> em <code>.pas</code>/<code>.dfm</code>, em especial <code>PROCPREV/FontesMT/fSelProcessoMT.pas</code> e <code>PROCPREV/Reports/Source/RFichaProc_ProcPrev.pas</code>) e pelos métodos de controlador chamados (<code>CMRHOBJ50/CtrlObjetos</code>). Regra geral: 1 tabela = 1 AL; históricos e detalhes dependentes agrupados com "+", como em sistjur.html. Não há AL mantido pelo PROCPREV (os PE contados são só de leitura). A coluna Fronteira aponta o AL equivalente na página do dono, quando ela existe.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>ID</th><th>Nome do Arquivo Lógico</th><th>Descrição</th><th>Fronteira</th><th>PE relacionados</th><th>Fonte</th><th>Situação</th></tr></thead>
+<tbody>
+<tr><td>AL-01</td><td><code>PROCESSOTRAB</code> (+ <code>HSTPROCTRAB</code>)</td><td>Processo judicial; o PROCPREV trata apenas <code>INDMATERIA IN (2,3)</code> (matéria previdenciária)</td><td>Referenciado (SISTJUR) — sistjur.html AL-01</td><td>PE-001, PE-002, PE-003</td><td><code>PROCPREV/FontesMT/fSelProcessoMT.pas</code> (<code>PT.INDMATERIA IN (2,3)</code>); <code>RFichaProc_ProcPrev.pas</code></td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>AL-02</td><td><code>COPARTPROCTRAB</code></td><td>Co-partes e litisconsortes do processo</td><td>Referenciado (SISTJUR) — sistjur.html AL-02</td><td>PE-001, PE-002</td><td><code>RProcPrev.dfm</code>; <code>RFichaProc_ProcPrev.pas</code> (<code>ListDadosLitisconsortes</code>)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>AL-03</td><td><code>OBJPROCTRAB</code> (+ <code>HSTOBJPROCTRAB</code>)</td><td>Objetos reclamados com estimativa original e valor atualizado</td><td>Referenciado (SISTJUR) — sistjur.html AL-03</td><td>PE-001, PE-002, PE-003</td><td><code>RProcPrev.dfm</code>, <code>RFichaProc_ProcPrev.dfm</code>, <code>RAnalSintProc.dfm</code>, <code>fSelProcessoMT.pas</code></td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>AL-04</td><td><code>ETAPAPROCTRAB</code> (+ <code>HSTETAPAPROCTRAB</code>)</td><td>Etapas (andamentos) do processo</td><td>Referenciado (SISTJUR) — sistjur.html AL-04</td><td>PE-001, PE-002, PE-003</td><td><code>RProcPrev.dfm</code>, <code>RFichaProc_ProcPrev.dfm</code>; <code>fSelProcessoMT.pas</code> (filtro por etapa)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>AL-05</td><td><code>TIPOOBJPROCTRAB</code></td><td>Tipos de objeto reclamado</td><td>Referenciado (SISTJUR) — sistjur.html AL-18</td><td>PE-001, PE-002, PE-003</td><td><code>RProcPrev.dfm</code>, <code>RFichaProc_ProcPrev.dfm</code>; <code>fSelProcessoMT.pas</code> (<code>CtrlTipObjeto.ListTipObjeto</code>)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>AL-06</td><td><code>TIPORECTRAB</code></td><td>Tipos de etapa (andamento)</td><td>Referenciado (SISTJUR) — sistjur.html AL-20</td><td>PE-001, PE-002, PE-003</td><td><code>RProcPrev.dfm</code>, <code>RFichaProc_ProcPrev.dfm</code>; <code>fSelProcessoMT.pas</code> (<code>CtrlTipRec.ListTipRec</code>)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>AL-07</td><td><code>VARAJUSTICA</code></td><td>Órgãos jurisdicionais (varas)</td><td>Referenciado (SISTJUR) — sistjur.html AL-14</td><td>PE-001, PE-002, PE-003</td><td><code>RFichaProc_ProcPrev.pas</code> (<code>VARAJUSTICA VJ</code>); <code>fSelProcessoMT.pas</code> (<code>ListVarasDoModulo</code>)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>AL-08</td><td><code>ADVOGADO</code></td><td>Advogados da casa, contratados e da parte contrária; assistentes técnicos</td><td>Referenciado (SISTJUR) — sistjur.html AL-12</td><td>PE-001, PE-002, PE-003</td><td><code>RFichaProc_ProcPrev.dfm</code>; <code>fSelProcessoMT.pas</code> (<code>CtrlGlobalRH.ListAdvogado*</code>)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>AL-09</td><td><code>TIPOPROCESSO</code></td><td>Tipos de processo</td><td>Referenciado (SISTJUR) — sistjur.html AL-15</td><td>PE-002, PE-003</td><td><code>fSelProcessoMT.pas</code> (<code>CtrlTipProc.ListTipProc</code>)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>AL-10</td><td><code>TIPOACAOPROCJUR</code></td><td>Tipos de ação judicial</td><td>Referenciado (SISTJUR) — sistjur.html AL-16</td><td>PE-002, PE-003</td><td><code>fSelProcessoMT.pas</code> (<code>CtrlTipAcao.ListTipAcao</code>)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>AL-11</td><td><code>TIPOSENTENCA</code></td><td>Tipos de sentença</td><td>Referenciado (SISTJUR) — sistjur.html AL-19</td><td>PE-002, PE-003</td><td><code>fSelProcessoMT.pas</code> (<code>CtrlTipSent.ListTipSent</code>)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>AL-12</td><td><code>HONORARIOS</code></td><td>Honorários pagos por processo/etapa (impressos na ficha)</td><td>Referenciado (SISTJUR) — sistjur.html AL-08</td><td>PE-001</td><td><code>RFichaProc_ProcPrev.pas</code> (<code>CtrlHonorarioProcesso.ListHonorario</code>)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>AL-13</td><td><code>PESSOA</code> (+ <code>PESSOAFISICA</code>, <code>ENDPESS</code>, <code>TELENDPESS</code>)</td><td>Pessoas (reclamante/participante, partes, advogados, estabelecimento) com dados de pessoa física, endereço e telefone</td><td>Referenciado (MODBAS / CM)</td><td>PE-001, PE-002, PE-003</td><td><code>RFichaProc_ProcPrev.pas</code> (<code>PESSOA PJ, PESSOA P1, PESSOAFISICA PF, ENDPESS E</code>, <code>TELENDPESS</code>); <code>fSelProcessoMT.pas</code></td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>AL-14</td><td><code>ESTADO</code> (+ <code>CIDADES</code>)</td><td>Unidades da federação e cidades</td><td>Referenciado (CM — CMGLOBALOBJ50)</td><td>PE-001, PE-002, PE-003</td><td><code>fSelProcessoMT.pas</code> (<code>CIDADES CI</code>, <code>ListEstado</code>); <code>RProcPrev.dfm</code>; <code>RFichaProc_ProcPrev.pas</code></td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>AL-15</td><td><code>MOEDA</code></td><td>Moedas/índices dos valores do processo</td><td>Referenciado (CM — cadastro global)</td><td>PE-003</td><td><code>SHARED/ModComp/Reports/Source/RAnalSintProc.dfm</code></td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>AL-16</td><td><code>MOTIVO</code></td><td>Motivos de exclusão de litisconsortes</td><td>Referenciado (MODBAS)</td><td>PE-002</td><td><code>PROCPREV/Reports/Source/RProcPrev.dfm</code></td><td><span class="ev ev-inferido">INFERIDO</span></td></tr>
+<tr><td>AL-17</td><td><code>ELEGPATRO</code></td><td>Elegibilidade do participante por patrocinadora (estabelecimento, cargo, centro de custo, admissão/demissão, situação funcional)</td><td>Referenciado (CADASTROPREV) — cadastroprev.html AL-01</td><td>PE-001, PE-002, PE-003</td><td><code>RFichaProc_ProcPrev.pas</code> (<code>ELEGPATRO EP</code>); <code>fSelProcessoMT.pas</code> (<code>ELEGPATRO EP</code>)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>AL-18</td><td><code>PARTPREVPLAN</code></td><td>Participação no plano previdenciário (plano, inscrição, situação)</td><td>Referenciado (CADASTROPREV) — cadastroprev.html AL-02</td><td>PE-002, PE-003</td><td><code>fSelProcessoMT.pas</code> (<code>PARTPREVPLAN PP</code>)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>AL-19</td><td><code>PLANPREV</code></td><td>Planos previdenciários (filtro por plano)</td><td>Referenciado (PARAMPREV) — cadastroprev.html AL-37</td><td>PE-002, PE-003</td><td><code>fSelProcessoMT.pas</code> (<code>CtrlListTerceirosRH.ListPlanoPrev</code>)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>AL-20</td><td><code>PATRO</code></td><td>Patrocinadoras (filtro por patrocinadora)</td><td>Referenciado (PARAMPREV) — cadastroprev.html AL-36</td><td>PE-002, PE-003</td><td><code>fSelProcessoMT.pas</code> (<code>CtrlListTerceirosRH.ListPatrocinadora</code>)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>AL-21</td><td><code>SITPART</code></td><td>Situações do participante no plano (efetivo, mantido, assistido)</td><td>Referenciado (PARAMPREV) — cadastroprev.html AL-39</td><td>PE-002, PE-003</td><td><code>fSelProcessoMT.pas</code> (<code>SITPART SP</code>, <code>SP.FLGINTERNO</code>)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>AL-22</td><td><code>SITFUNC</code></td><td>Situações funcionais (ativo, afastado, demitido)</td><td>Referenciado (MODBAS) — modbas.html AL-10</td><td>PE-002, PE-003</td><td><code>fSelProcessoMT.pas</code> (<code>SITFUNC ST</code>, <code>ST.TIPOSIT</code>)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>AL-23</td><td><code>CARGOEXT</code> (+ <code>CARGO</code>)</td><td>Cargos do participante na patrocinadora</td><td>Referenciado (CM) — cadastroprev.html AL-41</td><td>PE-001, PE-002, PE-003</td><td><code>fSelProcessoMT.pas</code> (<code>ListCargoEx</code> → <code>FROM CARGOEXT</code>); <code>RFichaProc_ProcPrev.pas</code> (<code>CARGO C</code>)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>AL-24</td><td><code>CENTCUST</code></td><td>Centros de custo (lotação do participante)</td><td>Referenciado (CMGLOBALOBJ50)</td><td>PE-001, PE-002, PE-003</td><td><code>RFichaProc_ProcPrev.pas</code> (<code>CENTCUST CC</code>); <code>fSelProcessoMT.pas</code> (<code>ListCCusto</code>)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>AL-25</td><td><code>PROFISS</code></td><td>Profissões</td><td>Referenciado (MODBAS) — modbas.html AL-08</td><td>PE-001, PE-002, PE-003</td><td><code>RFichaProc_ProcPrev.pas</code> (<code>PROFISS PFS</code>); <code>fSelProcessoMT.pas</code> (<code>CtrlProfiss.ListProfissao</code>)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>AL-26</td><td><code>GRINSTR</code></td><td>Graus de instrução</td><td>Referenciado (MODBAS) — modbas.html AL-09</td><td>PE-001, PE-002, PE-003</td><td><code>RFichaProc_ProcPrev.pas</code> (<code>GRINSTR GR</code>); <code>fSelProcessoMT.pas</code> (<code>CtrlGrInstr.ListGrauInstrucao</code>)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>AL-27</td><td><code>SINDICATO</code></td><td>Sindicatos (filtro)</td><td>Referenciado (MODBAS) — modbas.html AL-13</td><td>PE-002, PE-003</td><td><code>fSelProcessoMT.pas</code> (<code>CtrlPessoaSindicato.ListPessoaSindicato</code> → <code>PESSOA PJ, SINDICATO S</code>)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+</tbody></table></div>
+<p><strong>Total de Arquivos Lógicos:</strong> 27 AL × 7 SFP = <strong>189,0 SFP</strong> (0 mantidos em PROCPREV + 27 referenciados)</p>
+<p><strong>AL acessados apenas por PE compartilhados — não contados em PROCPREV.</strong> Pela regra da seção 7.1, um AL entra nesta contagem somente se for lido ou gravado por algum PE contado acima. As tabelas abaixo são gravadas/lidas pelo PROCPREV apenas por meio dos 29 PE compartilhados e já estão contadas em <a href="sistjur.html">sistjur.html</a>.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Tabela(s)</th><th>Uso no PROCPREV</th><th>Onde está contada</th></tr></thead>
+<tbody>
+<tr><td><code>ETPDESDOBRAMENTO</code>, <code>ETAPA_DETALHAMENTO</code>, <code>JUR_ETAPAXOBJETOPROC</code>, <code>HONORJURIDICOSGERAIS</code>, <code>PARCELASPROCTRAB</code></td><td>Gravadas pelas subtelas S1–S6 das etapas e do processo</td><td>sistjur.html AL-05, AL-06, AL-07, AL-09, AL-10 (Mantido em SISTJUR)</td></tr>
+<tr><td><code>JURIDICORATEIOCONTABIL</code>, <code>CONTABJURID</code>, <code>GRPOBJPROCJUR</code></td><td>Processo, Parametrização Contábil, Grupos de Objeto</td><td>sistjur.html AL-11, AL-22, AL-17</td></tr>
+<tr><td><code>PARAMRH</code>, <code>FORNSERV</code>, <code>FUNCIONARIO</code></td><td>Parâmetros, Contrapartes, Processo</td><td>sistjur.html AL-28, AL-31, AL-32 (Referenciado — MODBAS/CPAGAR)</td></tr>
+<tr><td><code>DOCUMENTO</code>, <code>TIPODOCRECPAG</code>, <code>TIPORECEBDESEMB</code>, <code>PLANILHA</code>/<code>LANCAMENTO</code>, <code>PERIODO</code></td><td>Integração CAP/CAR e contábil das etapas (<code>IntegraBack</code>; <code>iTipoIntegraCAPCAR := CAPCAR</code> em <code>fCadProcesso</code>)</td><td>sistjur.html AL-33 a AL-37 (Referenciado — CPAGAR/CONTAB)</td></tr>
+<tr><td><code>IMOVEL</code>, <code>BEM</code>, <code>INVESTIMENTO</code>, <code>FUNDOINVEST</code>, <code>PORTADORCONTA</code></td><td>Penhora, liberação de penhora e conta bancária das etapas</td><td>sistjur.html AL-38 a AL-42</td></tr>
+<tr><td><code>PROGRAMA</code>, <code>JUR_PROGRAMAXSUBPROGRAMA</code>, <code>TIPOPER</code></td><td>Tipos de Objeto, Tipos de Etapa, Parametrização Contábil</td><td>sistjur.html AL-47 a AL-49</td></tr>
+</tbody></table></div>
+</section>
+
+<!-- Seção 5: Memória de cálculo -->
+<section id="s5-calculo"><div class="section-title">5. Memória de cálculo</div>
+<p>Contagem SFP calculada diretamente a partir do inventário de Processos Elementares (seção 3) e Arquivos Lógicos (seção 4).</p>
+<div class="pf-block">
+<h4>Fórmula aplicada</h4>
+<p style="text-align:center"><strong>Total SFP = (qtd_PE × peso_PE) + (qtd_AL × peso_AL)</strong></p>
+<p style="text-align:center"><strong>Total SFP = (3 × 4,6) + (27 × 7) = 13,8 + 189,0 = 202,8 SFP</strong></p>
+</div>
+<div class="table-wrap"><table>
+<thead><tr><th>Elemento</th><th>Quantidade</th><th>Peso unitário (SFP)</th><th>Subtotal (SFP)</th><th>Referência</th></tr></thead>
+<tbody>
+<tr><td><strong>Processo Elementar (PE)</strong></td><td>3</td><td>4,6</td><td>13,8</td><td>IFPUG SFP; SISP Roteiro v3.0</td></tr>
+<tr><td><strong>Arquivo Lógico (AL)</strong></td><td>27</td><td>7</td><td>189,0</td><td>IFPUG SFP; SISP Roteiro v3.0</td></tr>
+<tr><td><strong>Total</strong></td><td><strong>30</strong></td><td>—</td><td><strong>202,8</strong></td><td>—</td></tr>
+</tbody></table></div>
+<div class="note-info">
+<p><strong>Verificação:</strong> 13,8 (PE) + 189,0 (AL) = <strong>202,8 SFP</strong>. O total coincide com o sumário executivo (seção 2) e é reproduzido diretamente do inventário das seções 3 e 4. Composição dos AL: 0 mantidos × 7 = 0,0 SFP; 27 referenciados × 7 = 189,0 SFP. Contagem isolada do executável (sem a regra de fronteira da seção 7.1): (32 × 4,6) + (51 × 7) = 147,2 + 357,0 = 504,2 SFP — apenas referência, não somada ao portal.</p>
+</div>
+</section>
+
+<!-- Seção 6: Rastreabilidade -->
+<section id="s6-rastreabilidade"><div class="section-title">6. Rastreabilidade</div>
+<p>Cada elemento contado (PE e AL) tem justificativa e fonte documentadas. A tabela abaixo mapeia os Processos Elementares aos controladores (<code>uCtrl*.pas</code>, em <code>CMRHOBJ50/CtrlObjetos</code>) e às tabelas lidas. Os ids de relatório foram rastreados em <code>PROCPREV/Fontes/FPrincipal.pas</code> (<code>AppPadraoShowParamReportPadrao</code>) e em <code>PROCPREV/CtrlObjetos/uCmCtrlRptProcPrev.pas</code>; a unidade de cada formulário foi localizada pela cláusula <code>uses</code> de <code>ProcPrev.dpr</code>.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>PE</th><th>Controlador (Ctrl)</th><th>Objeto de dados (Db)</th><th>Fonte código</th></tr></thead>
+<tbody>
+<tr><td>PE-001</td><td><code>TCmCtrlRptProcPrev</code> (id 4052 → <code>TRptFichaProc_ProcPrev</code>); <code>TCtrlProcessoTrab</code> (<code>ListProcessosVinculados</code>, <code>ListReclamantesDoProcesso</code>, <code>ListDadosLitisconsortes</code>), <code>TCtrlHonorarioProcesso</code> (<code>ListHonorario</code>), <code>TCtrlListTerceirosRH</code> (<code>ListDocPessoa</code>)</td><td>AL-01 a AL-08, AL-12 a AL-14, AL-17, AL-23 a AL-26</td><td><code>PROCPREV/Reports/Source/fParamFichaProc_ProcPrev.pas</code>, <code>RFichaProc_ProcPrev.pas</code>; <code>PROCPREV/FontesMT/fCadProcesso.pas</code> (<code>CriarTelaParamFichaProc</code>)</td></tr>
+<tr><td>PE-002</td><td><code>TCmCtrlRptProcPrev</code> (id 3196 → <code>TRptProcPrev</code>); filtros por <code>TCtrlTipProc</code>, <code>TCtrlTipAcao</code>, <code>TCtrlTipObjeto</code>, <code>TCtrlTipSent</code>, <code>TCtrlTipRec</code>, <code>TCtrlVaraJustica</code>, <code>TCtrlGlobalRH</code>, <code>TCtrlListTerceirosRH</code>, <code>TCtrlProfiss</code>, <code>TCtrlGrInstr</code>, <code>TCtrlPessoaSindicato</code>, <code>TCtrlPessoaFilialPessoa</code></td><td>AL-01 a AL-11, AL-13, AL-14, AL-16 a AL-27</td><td><code>PROCPREV/Reports/Source/fParamProcPrev.pas</code> → <code>PROCPREV/FontesMT/fSelProcessoMT.pas</code>; <code>PROCPREV/Reports/Source/RProcPrev.pas</code></td></tr>
+<tr><td>PE-003</td><td><code>TCmCtrlRptProcPrev</code> (id 4065 → <code>TRptAnalSintProc</code>); mesmos filtros de PE-002</td><td>AL-01, AL-03 a AL-11, AL-13 a AL-15, AL-17 a AL-27</td><td><code>PROCPREV/Reports/Source/fParamAnalSintProc.pas</code>; <code>SHARED/ModComp/Reports/Source/RAnalSintProc.pas</code></td></tr>
+</tbody></table></div>
+<p><strong>Arquivos Lógicos:</strong> rastreáveis ao SQL dos <code>.pas</code>/<code>.dfm</code> indicados na coluna "Fonte" da seção 4 e, para os AL referenciados do SISTJUR, ao <code>TableName</code> dos objetos <code>uDb*.pas</code> de <code>CMRHOBJ50/DbObjetos</code> citados em sistjur.html.</p>
+</section>
+
+<!-- Seção 7: Integrações e dupla contagem -->
+<section id="s7-integracoes"><div class="section-title">7. Integrações e dupla contagem</div>
+<p>Dados compartilhados com outros módulos e risco de dupla contagem. No SFP, a dupla contagem ocorre quando o mesmo Arquivo Lógico (AL) — ou o mesmo Processo Elementar (PE), quando o formulário é compartilhado — é contado como próprio em mais de um módulo.</p>
+<h3>7.1 PROCPREV × SISTJUR / PROCJUD — tabela de processos compartilhada</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>Aspecto</th><th>Evidência / conclusão</th></tr></thead>
+<tbody>
+<tr><td>Evidência no código</td><td><code>ProcPrev.dpr</code> inclui as mesmas unidades de <code>SHARED/ModComp</code> que <code>ProcJud.dpr</code> (mais <code>SISTJURCONS/Fontes/fCadCondenacoes.pas</code> e <code>fCadHonorarioSucumbenciais.pas</code>). 22 dos 24 itens funcionais do menu abrem os formulários listados em sistjur.html (7.2) e 1 abre <code>frmConsultaProcesso</code>, contado em procjud.html (PE-001). O descendente local <code>PROCPREV/FontesMT/fCadProcesso.pas</code> só muda o filtro (<code>PROCESSOTRAB.INDMATERIA IN (2,3)</code>), a integração (<code>CAPCAR</code>) e mostra os dados do participante (<code>CtrlPessoaFuncionario.ListDadosParticipante_ComPlano</code> — o mesmo método já usado por <code>SISTJURCONS/FontesMT/fCadProcesso.pas</code>). A gravação de <code>PROCESSOTRAB</code> e dependentes é feita pelos mesmos controladores de <code>CMRHOBJ50</code>.</td></tr>
+<tr><td>Tabelas afetadas</td><td>Os 18 AL que sistjur.html registra como "Mantido em SISTJUR (compartilhado com PROCJUD/MODCON/PROCPREV)", mais <code>JUR_ETAPAXOBJETOPROC</code> e <code>HONORJURIDICOSGERAIS</code>. Nesta página: 12 entram como <strong>Referenciado (SISTJUR)</strong> (AL-01 a AL-12); os demais estão listados após a seção 4, sem contagem.</td></tr>
+<tr><td>Decisão de contagem</td><td>Aplicada a decisão registrada em sistjur.html (7.2), também seguida em procjud.html: <strong>PE de formulário compartilhado não são contados de novo</strong> (23 de menu + 6 subtelas = 29 PE, −133,4 SFP) e <strong>as tabelas de processo ficam com o SISTJUR</strong> (Referenciado). O PROCPREV conta só os 3 relatórios do seu catálogo, com parâmetros e filtros previdenciários próprios.</td></tr>
+<tr><td>Contagem isolada (referência)</td><td>Sem a regra: 32 PE (3 + 29) e 51 AL (27 + 24 listados após a seção 4) = 147,2 + 357,0 = <strong>504,2 SFP</strong>. A diferença (301,4 SFP) já está nos totais do SISTJUR e do PROCJUD; somá-la ao portal seria dupla contagem.</td></tr>
+<tr><td>Risco</td><td>Sem dupla contagem efetiva com a regra aplicada. Risco potencial de 301,4 SFP se a contagem isolada for usada — <strong>validar fronteira com especialista de negócio</strong>.</td></tr>
+</tbody></table></div>
+<h3>7.2 PROCPREV × BENEFICIOPREV — dono dos dados de processo/benefício</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>Aspecto</th><th>Evidência / conclusão</th></tr></thead>
+<tbody>
+<tr><td>O que o PROCPREV grava</td><td>Somente o processo judicial previdenciário (<code>PROCESSOTRAB</code> com <code>INDMATERIA</code> 2/3, objetos, etapas, honorários), por formulários compartilhados com o SISTJUR. Nenhuma unidade de <code>PROCPREV/</code> nem de <code>SHARED/ModComp</code> referencia tabelas de benefício (<code>BENEFICIO</code>, <code>BENEFBFCIARIO</code>, <code>BENEFPLANPREV</code>) ou controladores do BENEFICIOPREV.</td></tr>
+<tr><td>O que o PROCPREV lê do participante</td><td><code>ELEGPATRO</code>, <code>PARTPREVPLAN</code> (CADASTROPREV), <code>PLANPREV</code>, <code>PATRO</code>, <code>SITPART</code> (PARAMPREV) — AL-17 a AL-21. São dados cadastrais do participante, não do benefício.</td></tr>
+<tr><td>O que o BENEFICIOPREV grava sobre ações judiciais</td><td><code>BENEFICIOPREV/Fontes/FReajusteJudicial.pas</code> (menu "Reajuste Judicial", <code>ReajusteJudicial1Click</code>) grava reajustes de benefício por decisão judicial sobre <code>BENEFBFCIARIO</code>/<code>BENEFPLANPREV</code>/<code>BENEFICIO</code>; o desdobramento e o desfazimento de concessão tratam os campos <code>FLGSENTENCAJUDICIAL</code>, <code>OBSSENTENCAJUDICIAL</code> e <code>PERICJUDICIAL</code>. Não há chave para <code>PROCESSOTRAB</code> (<code>NUMPROCTRAB</code>) nessas telas.</td></tr>
+<tr><td>Conclusão</td><td>Nenhum AL é gravado pelos dois módulos — <strong>sem dupla contagem de AL</strong>. Há, porém, <strong>ambiguidade funcional de dono</strong>: o resultado de uma ação previdenciária fica registrado no processo (PROCPREV/SISTJUR: sentença, encerramento, valor real) e, de forma independente, no benefício (BENEFICIOPREV: indicador/observação de sentença judicial, reajuste judicial). O item de trabalho descreve o PROCPREV como "processamento de requerimentos — concessões, cálculos e fluxos de benefícios"; o código não confirma isso: concessão e cálculo de benefícios estão no BENEFICIOPREV/FOLHA.</td></tr>
+<tr><td>Decisão de contagem</td><td>Nenhum elemento do BENEFICIOPREV é contado aqui; nenhum elemento do PROCPREV deve ser contado no BENEFICIOPREV. <a href="beneficioprev.html">beneficioprev.html</a> (contado por casos de uso) não inclui o Reajuste Judicial — se ele for contado no futuro, pertence ao BENEFICIOPREV.</td></tr>
+<tr><td>Risco</td><td>Baixo para a contagem (tabelas distintas); médio para a modernização (dado duplicado sem vínculo). <strong>Validar com especialista de negócio</strong> qual módulo é o dono do "resultado judicial" do benefício e se o PROCPREV deveria referenciar o benefício afetado.</td></tr>
+</tbody></table></div>
+<h3>7.3 Demais integrações</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>Dado compartilhado</th><th>Papel no PROCPREV</th><th>Quem mais usa</th><th>Decisão de contagem</th><th>Risco</th></tr></thead>
+<tbody>
+<tr><td>Participante (AL-17, AL-18)</td><td>Leitura na ficha e nos filtros (estabelecimento, cargo, centro de custo, situação, plano, inscrição)</td><td>CADASTROPREV (dono — cadastroprev.html AL-01 <code>ELEGPATRO</code>, AL-02 <code>PARTPREVPLAN</code>); também referenciados por BENEFICIOPREV, CENTRALAP e EMPRESTIMO</td><td>Referenciado (CADASTROPREV)</td><td>Não</td></tr>
+<tr><td>Plano, patrocinadora e situação no plano (AL-19 a AL-21)</td><td>Filtros dos relatórios</td><td>PARAMPREV (sem página no portal; cadastroprev.html AL-36, AL-37, AL-39 os registram como referenciados)</td><td>Referenciado (PARAMPREV)</td><td>Não</td></tr>
+<tr><td>Pessoa e tabelas de RH (AL-13, AL-16, AL-22, AL-25 a AL-27)</td><td>Leitura</td><td>MODBAS (modbas.html AL-08, AL-09, AL-10, AL-13; sistjur.html AL-29, AL-30)</td><td>Referenciado (MODBAS / CM)</td><td>Não</td></tr>
+<tr><td>Cadastros globais (AL-14, AL-15, AL-23, AL-24)</td><td>Leitura</td><td>CMGLOBALOBJ50 / CM</td><td>Referenciado (CM)</td><td>Não</td></tr>
+<tr><td>Workflow RAD (OBJRAD)</td><td>Dependência declarada no item de trabalho. Nenhuma unidade de <code>OBJRAD/</code> consta de <code>ProcPrev.dpr</code> nem é citada nos fontes do PROCPREV; o RAD do framework CM está fora do escopo SFP</td><td>OBJRAD (sem página)</td><td>Nenhum AL contado</td><td>Não — PENDENTE confirmar</td></tr>
+<tr><td>Contas a Pagar/Receber e Contabilidade</td><td>Integração CAP/CAR e contábil das etapas — só por formulário compartilhado</td><td>CPAGAR, CRECEBER, CONTAB</td><td>Não contados aqui</td><td>Não</td></tr>
+<tr><td>Histórico de rubricas (<code>HISTRUBSAL</code>)</td><td>Lido apenas por <code>PROCPREV/Fontes/FHistRubrica.pas</code>, fora do projeto (código morto)</td><td>FOLHA / CADASTROPREV (cadastroprev.html AL-19)</td><td>Não contado</td><td>Não</td></tr>
+</tbody></table></div>
+<p><strong>Recomendação:</strong> validar com especialista de negócio (1) a fronteira SISTJUR × PROCJUD × PROCPREV, mantendo um único dono para <code>PROCESSOTRAB</code> e dependentes, e (2) o dono do resultado judicial do benefício (PROCPREV × BENEFICIOPREV). Se o dono mudar, mover (não duplicar) os elementos entre as páginas.</p>
+</section>
+
+<!-- Seção 8: Pendências -->
+<section id="s8-pendencias"><div class="section-title">8. Pendências</div>
+<p>Elementos cuja identificação não pôde ser confirmada com evidência completa do código-fonte, e fronteiras a validar. Estes itens são <strong>contagem preliminar</strong> e não devem ser tratados como confirmados até validação. Todos os elementos INFERIDO (3 PE e 1 AL) e PENDENTE (0 PE e 0 AL) do inventário estão listados abaixo.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Elemento</th><th>Tipo</th><th>O que está pendente</th><th>Impacto se confirmado</th><th>Validação necessária</th></tr></thead>
+<tbody>
+<tr><td>Fronteira PROCPREV × SISTJUR / PROCJUD</td><td>Fronteira</td><td>Dono funcional de <code>PROCESSOTRAB</code> e dos cadastros jurídicos; 29 PE compartilhados não contados aqui (seção 7.1)</td><td>Se o PROCPREV for o dono da matéria previdenciária: até +29 PE e +24 AL nesta página (504,2 SFP), retirados do SISTJUR/PROCJUD — total do portal não muda</td><td><strong>Validar fronteira com especialista de negócio</strong></td></tr>
+<tr><td>Fronteira PROCPREV × BENEFICIOPREV</td><td>Fronteira</td><td>Resultado judicial registrado no processo e no benefício sem vínculo (seção 7.2); descrição do item de trabalho (requerimentos/concessões) não confirmada no código</td><td>Nenhum impacto nesta contagem; possível PE de "Reajuste Judicial" a contar no BENEFICIOPREV</td><td><strong>Validar dono com especialista de negócio</strong></td></tr>
+<tr><td>PE-001, PE-002, PE-003</td><td>PE</td><td>Relatórios do catálogo (4052, 3196, 4065) identificados pelo evento <code>AppPadraoShowParamReportPadrao</code>; o cadastro do catálogo de relatórios não está no repositório. PE-003 usa a mesma unidade de relatório (<code>RAnalSintProc</code>) do PROCJUD (4066) e do SISTJUR (4076)</td><td>Se PE-003 for a mesma função: −1 PE (−4,6 SFP) → 198,2 SFP; se os três forem: −13,8 SFP → 189,0 SFP</td><td>Confirmar no catálogo de relatórios e com o usuário</td></tr>
+<tr><td>AL-16 <code>MOTIVO</code></td><td>AL</td><td>Lido apenas pelo SQL do relatório 3196 (<code>RProcPrev.dfm</code>); confirmar que o campo é exibido</td><td>Se não for usado: −1 AL (−7 SFP)</td><td>Confirmar no leiaute do relatório</td></tr>
+<tr><td>Dependência OBJRAD</td><td>Fronteira</td><td>Declarada no item de trabalho, sem evidência no código do PROCPREV</td><td>Nenhum impacto na contagem atual</td><td>Confirmar com especialista de negócio</td></tr>
+</tbody></table></div>
+<div class="note">
+<p><strong>Total de pendências:</strong> 5 itens. Na contagem isolada do módulo, o pior caso é a retirada dos 3 relatórios e do AL-16 (−20,8 SFP), o que leva o total a 182,0 SFP. No portfólio, a fronteira com SISTJUR/PROCJUD concentra o risco: aplicar a contagem isolada (504,2 SFP) sem retirar os elementos daquelas páginas duplicaria 301,4 SFP. <strong>O total de 202,8 SFP é a contagem preliminar; a contagem confirmada depende da validação destes itens.</strong></p>
+</div>
+</section>
+
+<section><div class="section-title">🔗 Navegação</div>
+<div class="doc-links">
+<a href="index.html">📐 Entrada da área</a>
+<a href="sistjur.html">Sistema Jurídico</a>
+<a href="procjud.html">Processos Judiciais</a>
+<a href="beneficioprev.html">Benefício Previdenciário</a>
+<a href="cadastroprev.html">Cadastro Previdenciário</a>
+<a href="metodologia.html">📜 Metodologia</a>
+<a href="../index.html">⬅ Blueprint AS-IS</a>
+</div>
+</section>
+
+</main>
+
+<footer>
+<p>Blueprint AS-IS — PFC-64 — Simple Function Points (SFP) — Módulo PROCPREV | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-16</p>
+</footer>
+</body>
+</html>
