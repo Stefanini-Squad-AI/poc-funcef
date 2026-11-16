@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Recebimento de Mercadoria — Simple Function Points — Blueprint AS-IS</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<header>
+  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-62</div>
+  <h1>📐 Simple Function Points — Recebimento de Mercadoria</h1>
+  <p>Contagem SFP do módulo RECMERC — 29 Processos Elementares (PE), 43 Arquivos Lógicos (AL) — Total: 434,4 SFP</p>
+</header>
+<nav>
+  <a href="index.html">📐 Entrada</a>
+  <a href="folha.html">Folha de Benefícios</a>
+  <a href="contribuicao.html">Contribuição Previdenciária</a>
+  <a href="beneficioprev.html">Benefício Previdenciário</a>
+  <a href="irrf.html">IRRF</a>
+  <a href="cadastroprev.html">Cadastro Previdenciário</a>
+  <a href="modbas.html">Módulo Básico RH</a>
+  <a href="modacesso.html">Controle de Acesso/Ponto</a>
+  <a href="contab.html">Contabilidade</a>
+  <a href="cfinan.html">Contabilidade Financeira</a>
+  <a href="orcamento.html">Orçamento</a>
+  <a href="cpagar.html">Contas a Pagar</a>
+  <a href="creceber.html">Contas a Receber</a>
+  <a href="indicadores.html">Indicadores</a>
+  <a href="contrato.html">Contratos</a>
+  <a href="emprestimo.html">Empréstimo</a>
+  <a href="financiamento.html">Financiamento</a>
+  <a href="agendamento.html">Agendamento</a>
+  <a href="centralap.html">Central de Atendimento</a>
+  <a href="autoatendimento.html">Autoatendimento</a>
+  <a href="compras.html">Compras</a>
+  <a href="almoxarifado.html">Almoxarifado</a>
+  <a href="investimentos.html">Investimentos</a>
+  <a href="cotas.html">Cotas</a>
+  <a href="caf.html">Ativo Fixo (CAF)</a>
+  <a href="recmerc.html">Recebimento de Mercadoria</a>
+  <a href="investimob.html">Investimentos Imobiliários</a>
+  <a href="metodologia.html">📜 Metodologia da contagem</a>
+  <a href="../index.html">⬅ Voltar ao Blueprint</a>
+</nav>
+
+<main>
+
+<!-- Seção 1: Identificação -->
+<section id="s1-identificacao"><div class="section-title">1. Identificação da contagem</div>
+<div class="table-wrap"><table>
+<thead><tr><th>Atributo</th><th>Valor</th></tr></thead>
+<tbody>
+<tr><td>Nome do módulo</td><td>Recebimento de Mercadoria (título da aplicação: "Sistema de Recebimento de Mercadoria", definido em <code>RECMERC/Fontes/FPrincipal.dfm</code>; <code>Sistema.NomeAplicativo = 'Recebimento de Mercadoria'</code>, IdModulo 46, versão 3.01.03 em <code>FPrincipal.pas</code>)</td></tr>
+<tr><td>Código</td><td><code>RECMERC</code></td></tr>
+<tr><td>Pasta no repositório</td><td><code>RECMERC/</code> (<code>Fontes/</code> — apenas 2 unidades próprias: <code>FPrincipal.pas</code> e <code>UModulo.pas</code>; todas as demais unidades compiladas são reutilizadas de <code>ALMOXARIFADO/</code>, <code>ALMOX&amp;COMPRAS/</code>, <code>CMALMOXCOMPRAOBJ50/</code>, <code>CMCAPCAROBJ50/</code>, <code>CMCAPCARUTILOBJ50/</code>, <code>CMCONTABOBJ50/</code>, <code>GERAL/</code> e do framework <code>CM/</code>)</td></tr>
+<tr><td>Entry point</td><td><code>RECMERC/Fontes/RecMerc.dpr</code> (<code>program RecMerc</code>)</td></tr>
+<tr><td>Tecnologia</td><td>Delphi 5 / VCL / objetos de controle CM (<code>TCmControlObject</code>) e objetos de dados CM (<code>TCmDbObject</code>) / Oracle (schema <code>CM.</code>) / ReportBuilder — <strong>contexto técnico, não fator de contagem SFP</strong></td></tr>
+<tr><td>Propósito (evidenciado no código)</td><td>Recebimento de mercadorias de fornecedores com e sem ordem de compra (nota fiscal de entrada, itens, custos agregados/impostos, entrada em estoque, custo médio, baixa da OC/SCI, avaliação do fornecedor, entrada de bens no Ativo Fixo, integração com Contas a Pagar, Contabilidade e Livro Fiscal), devolução de mercadorias e cadastros de apoio (produtos, unidades, almoxarifados, custos agregados, fornecedores).</td></tr>
+<tr><td>Propósito declarado no card PFC-62</td><td>"Receitas de mercado — controle de receitas e recursos financeiros de mercado". <strong>Divergente do código-fonte</strong> — ver nota abaixo e <a href="#s8-pendencias">Pendências</a>.</td></tr>
+<tr><td>Tipo de fronteira</td><td>Aplicação</td></tr>
+<tr><td>Fronteira</td><td>Executável <code>RecMerc.dpr</code> — mantém notas fiscais de recebimento/devolução, movimentações e saldos de estoque, custos agregados, avaliação de fornecedor e os cadastros de apoio acionáveis pelo seu menu. Lê/atualiza OC (COMPRAS2000), SCI (ALMOXARIFADO), gera documentos em CPAGAR, lançamentos em CONTAB, registros de livro fiscal e bens pendentes no CAF.</td></tr>
+<tr><td>Escopo</td><td>Processos elementares acionáveis pelo menu principal (<code>RECMERC/Fontes/FPrincipal.dfm</code> / <code>FPrincipal.pas</code>) e relatórios de recebimento/devolução registrados pelos data modules de relatórios (<code>AppPadraoCreateFormReports</code>); arquivos lógicos persistidos ou lidos por esses processos.</td></tr>
+<tr><td>Fora do escopo (não contado)</td><td>Funções herdadas do framework CM (login, RAD, troca de empresa, tela padrão de relatórios, sair/ajuda); "Mudar Centro de Custo / Almoxarifado" (<code>FLogCCusto</code> — seleção do contexto de sessão, não altera dados de negócio); demais relatórios de almoxarifado compilados no executável (<code>FParam*</code> de inventário, curva ABC, giro etc. — pertencem funcionalmente ao ALMOXARIFADO; ver pendências).</td></tr>
+<tr><td>Dependências (referenciadas, não contadas como elementos de RECMERC)</td><td>ALMOXARIFADO e ALMOX&amp;COMPRAS (formulários, controladores e objetos de dados reutilizados), CMALMOXCOMPRAOBJ50 (<code>DMovEstoque</code>), COMPRAS2000 (OC), CPAGAR via CMCAPCAROBJ50/CMCAPCARUTILOBJ50 (<code>FLancDocCapCarMT</code>, <code>uCtrlLancDocCapCar</code>), CONTAB via CMCONTABOBJ50 (<code>uCtrlLancamento</code>), CAF (<code>uCtrlAlmoxCAF</code> — bens pendentes), GERAL (classificação fiscal). <strong>INVESTIMENTOS e CFINAN</strong>, citados no card como dependências, <strong>não aparecem</strong> no <code>RecMerc.dpr</code> nem no menu.</td></tr>
+<tr><td>Data da contagem</td><td>2026-11-16</td></tr>
+<tr><td>Método de contagem</td><td>SFP (Simple Function Points) — <a href="metodologia.html">Metodologia</a></td></tr>
+<tr><td>Versão do método</td><td>IFPUG SFP; Roteiro de Métricas de Software do SISP v3.0 — pesos: 4,6 SFP/PE, 7 SFP/AL</td></tr>
+<tr><td>Fonte primária</td><td>Código-fonte Delphi 5: <code>RECMERC/Fontes/RecMerc.dpr</code>, menu <code>FPrincipal.dfm</code>/<code>.pas</code>, formulários e controladores reutilizados (<code>ALMOXARIFADO/FontesMT/FMTRecebMerc.pas</code>, <code>ALMOX&amp;COMPRAS/CtrlObjetos/uCtrlRecebMerc.pas</code> etc.), objetos de dados <code>ALMOX&amp;COMPRAS/DbObjetos/uDb*.pas</code> e <code>CMALMOXCOMPRAOBJ50/DbObjetos/uDb*.pas</code>. Não há casos de uso documentados em <code>docs1/</code> para este módulo.</td></tr>
+</tbody></table></div>
+<div class="note">
+<p><strong>Divergência de propósito:</strong> o card PFC-62 descreve RECMERC como "Receitas de Mercado". O código-fonte comprova que se trata do <strong>Sistema de Recebimento de Mercadoria</strong> (caption do formulário principal, <code>Sistema.NomeModulo := 'Recebimento de Mecadoria'</code>, histórico de alterações em <code>RECMERC/Fontes/recmerc.ALT</code>: "Histórico de alterações efetuadas no módulo Recebimento de Mercadoria"). A contagem segue o que o código evidencia. A aba de navegação usa o nome real ("Recebimento de Mercadoria").</p>
+</div>
+</section>
+
+<!-- Seção 2: Sumário executivo -->
+<section id="s2-sumario"><div class="section-title">2. Sumário executivo</div>
+<div class="stats">
+<div class="stat"><div class="n">29</div><div class="l">Processos Elementares (PE)</div></div>
+<div class="stat"><div class="n">43</div><div class="l">Arquivos Lógicos (AL)</div></div>
+<div class="stat"><div class="n">72</div><div class="l">Elementos totais</div></div>
+<div class="stat"><div class="n">434,4</div><div class="l"><strong>SFP totais</strong></div></div>
+</div>
+<div class="table-wrap"><table>
+<thead><tr><th>Elemento</th><th>Quantidade</th><th>Peso unitário (SFP)</th><th>Subtotal (SFP)</th></tr></thead>
+<tbody>
+<tr><td><strong>Processo Elementar (PE)</strong></td><td>29</td><td>4,6</td><td>133,4</td></tr>
+<tr><td><strong>Arquivo Lógico (AL)</strong></td><td>43</td><td>7</td><td>301,0</td></tr>
+<tr><td><strong>Total</strong></td><td><strong>72</strong></td><td>—</td><td><strong>434,4</strong></td></tr>
+</tbody></table></div>
+<p class="desc">Memória de cálculo: (29 × 4,6) + (43 × 7) = 133,4 + 301,0 = <strong>434,4 SFP</strong>. Pesos conforme IFPUG SFP e SISP Roteiro v3.0. O total é recalculado a partir do inventário das seções 3 e 4.</p>
+<div class="note-info">
+<p><strong>Interpretação:</strong> 434,4 SFP refletem o tamanho funcional do executável RECMERC tratado como aplicação própria. Dos 29 PE, 4 são parametrização/acesso, 3 são movimentações (recebimento com OC, sem OC e devolução), 14 são cadastros de apoio, 1 é configuração de histórico, 1 é consulta, 1 é lançamento de nota complementar e 6 são relatórios. Dos 43 AL, 28 são mantidos pelo próprio processo de recebimento ou pelos cadastros do menu e 15 são mantidos por outros módulos (COMPRAS2000, ALMOXARIFADO, CPAGAR, CONTAB, CAF, Livro Fiscal, CM/GERAL) e apenas lidos ou atualizados pela integração.</p>
+</div>
+<div class="note">
+<p><strong>Atenção — sobreposição quase total com ALMOXARIFADO:</strong> RECMERC possui apenas 2 unidades próprias; todos os formulários de negócio são os mesmos do ALMOXARIFADO (ex.: <code>FMTRecebMerc.pas</code>, <code>FMTDevolMerc.pas</code>, <code>FCadGrupoProd.pas</code>). Os PE e AL aqui inventariados já estão contados em <a href="almoxarifado.html">Almoxarifado</a> (ex.: PE-029/PE-030/PE-031 de ALMOXARIFADO = PE-005/PE-006/PE-007 aqui). Na soma multi-módulo, RECMERC deve ser tratado como <strong>executável alternativo da mesma aplicação</strong> — ver <a href="#s7-integracoes">seção 7</a>.</p>
+</div>
+</section>
+
+<!-- Seção 3: Inventário de Processos Elementares -->
+<section id="s3-pe"><div class="section-title">3. Inventário de Processos Elementares (PE)</div>
+<p>Processos elementares identificados a partir do menu principal (<code>RECMERC/Fontes/FPrincipal.dfm</code> / <code>FPrincipal.pas</code>) e dos relatórios de recebimento/devolução. PE-001 a PE-004 são parametrização e acesso; PE-005 a PE-007 são movimentações; PE-008 a PE-020 são cadastros; PE-021 é configuração; PE-022 é consulta; PE-023 é lançamento de nota complementar; PE-024 a PE-029 são relatórios. Cada PE é a menor unidade de atividade funcional significativa para o usuário — sem subclassificação em entradas, saídas ou consultas e sem nível de complexidade. Caminhos relativos à raiz do repositório.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>ID</th><th>Nome do Processo Elementar</th><th>Objetivo</th><th>Origem (menu)</th><th>Justificativa de distinção</th><th>Fonte (.pas)</th><th>Situação</th></tr></thead>
+<tbody>
+<tr><td>PE-001</td><td>Configurar parâmetros do módulo</td><td>Configurar parâmetros de almoxarifado/recebimento (máscaras, integração, plano/patrocinadora)</td><td>Sistema › Configuração › Parâmetros</td><td>Parametrização geral — distinta dos cadastros</td><td><code>ALMOXARIFADO/FontesMT/fMTParamAlmox.pas</code> (handler <code>nmuConfigParametrosClick</code>)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>PE-002</td><td>Manter usuários por centro de custo</td><td>Associar usuários aos centros de custo em que podem receber mercadorias</td><td>Sistema › Usuários por Centro de Custo</td><td>Associação usuário × centro de custo — distinta das demais associações</td><td><code>ALMOX&amp;COMPRAS/Fontes/FUsuxCCusto.pas</code></td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>PE-003</td><td>Manter usuários por almoxarifado</td><td>Associar usuários a almoxarifados</td><td>Sistema › Usuários por Almoxarifado</td><td>Associação usuário × almoxarifado — distinta da associação por centro de custo</td><td><code>ALMOX&amp;COMPRAS/Fontes/FCadUsuxAlmox.pas</code></td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>PE-004</td><td>Manter usuários por grupo de produto</td><td>Associar usuários a grupos de produto</td><td>Sistema › Usuários por Grupo de Produto</td><td>Associação usuário × grupo — distinta das demais</td><td><code>ALMOX&amp;COMPRAS/Fontes/FCadUsuxGrpProd.pas</code></td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>PE-005</td><td>Receber mercadoria com OC</td><td>Registrar NF de entrada vinculada a ordem de compra: itens, custos agregados, entrada em estoque, custo médio, baixa da OC/SCI, avaliação do fornecedor, integração CAP/CONTAB/Livro e entrada de bens no Ativo Fixo</td><td>Movimentação › Recebimento de Mercadoria › Com O.C.</td><td>Recebimento com OC (<code>Modulo.sComSemOC := 'C'</code>) — valida e baixa itens da OC</td><td><code>ALMOXARIFADO/FontesMT/FMTRecebMerc.pas</code>, <code>ALMOX&amp;COMPRAS/CtrlObjetos/uCtrlRecebMerc.pas</code></td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>PE-006</td><td>Receber mercadoria sem OC</td><td>Registrar NF de entrada sem ordem de compra (opcionalmente gerando OC automática — <code>GeraOCAuto</code>)</td><td>Movimentação › Recebimento de Mercadoria › Sem O.C.</td><td>Recebimento sem OC (<code>Modulo.sComSemOC := 'S'</code>) — regras de validação e geração diferentes do PE-005</td><td><code>ALMOXARIFADO/FontesMT/FMTRecebMerc.pas</code>, <code>ALMOX&amp;COMPRAS/CtrlObjetos/uCtrlRecebMerc.pas</code></td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>PE-007</td><td>Devolver mercadoria</td><td>Registrar devolução de mercadoria ao fornecedor (NF de devolução, saída de estoque)</td><td>Movimentação › Devolução de Mercadoria</td><td>Processo oposto ao recebimento</td><td><code>ALMOXARIFADO/FontesMT/FMTDevolMerc.pas</code>, <code>ALMOX&amp;COMPRAS/CtrlObjetos/uCtrlDevolMerc.pas</code></td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>PE-008</td><td>Manter grupo de produto</td><td>Cadastrar grupos de produto (exige máscara de grupo parametrizada)</td><td>Cadastro › Produto › Grupo de Produto</td><td>Cadastro de grupo — distinto do artigo</td><td><code>ALMOX&amp;COMPRAS/Fontes/FCadGrupoProd.pas</code></td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>PE-009</td><td>Manter artigos — insumos</td><td>Cadastrar artigos do tipo insumo (<code>sTipoArtigo = '2'</code>)</td><td>Cadastro › Produto › Insumos</td><td>Cadastro por tipo de artigo — formulário e regras próprias</td><td><code>ALMOX&amp;COMPRAS/Fontes/FCadInsumos.pas</code></td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>PE-010</td><td>Manter artigos — outros</td><td>Cadastrar artigos do tipo outros (<code>sTipoArtigo = '3'</code>)</td><td>Cadastro › Produto › Outros</td><td>Cadastro por tipo de artigo — formulário próprio</td><td><code>ALMOX&amp;COMPRAS/Fontes/FCadOutros.pas</code></td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>PE-011</td><td>Manter artigos — itens de venda</td><td>Cadastrar artigos do tipo item de venda (<code>sTipoArtigo = '4'</code>)</td><td>Cadastro › Produto › Itens de Venda</td><td>Cadastro por tipo de artigo — formulário próprio</td><td><code>ALMOX&amp;COMPRAS/Fontes/FCadItemVenda.pas</code></td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>PE-012</td><td>Manter artigos — itens de PDV</td><td>Cadastrar artigos do tipo item de PDV (<code>sTipoArtigo = '0'</code>)</td><td>Cadastro › Produto › Itens de PDV</td><td>Cadastro por tipo de artigo — formulário próprio</td><td><code>ALMOX&amp;COMPRAS/Fontes/FCadItemPDV.pas</code></td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>PE-013</td><td>Manter unidade de medida</td><td>Cadastrar unidades de medida</td><td>Cadastro › Produto › Unidade de Medida</td><td>Cadastro de apoio — distinto do artigo</td><td><code>ALMOX&amp;COMPRAS/Fontes/FCadUnMedida.pas</code></td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>PE-014</td><td>Manter tamanho</td><td>Cadastrar tamanhos de produto</td><td>Cadastro › Produto › Tamanho</td><td>Cadastro de apoio — distinto da unidade</td><td><code>ALMOX&amp;COMPRAS/Fontes/FCadTamanho.pas</code></td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>PE-015</td><td>Manter cor</td><td>Cadastrar cores de produto</td><td>Cadastro › Produto › Cor</td><td>Cadastro de apoio — distinto do tamanho</td><td><code>ALMOX&amp;COMPRAS/Fontes/FCadCores.pas</code></td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>PE-016</td><td>Manter unidade de custeio</td><td>Cadastrar unidades de custeio</td><td>Cadastro › Unidade de Custeio</td><td>Cadastro — distinto da unidade de medida</td><td><code>ALMOX&amp;COMPRAS/Fontes/FCadUnCusteio.pas</code></td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>PE-017</td><td>Manter almoxarifado</td><td>Cadastrar almoxarifados (depósitos de recebimento)</td><td>Cadastro › Almoxarifado</td><td>Cadastro central — distinto das associações de usuário</td><td><code>ALMOX&amp;COMPRAS/Fontes/FCadAlmox.pas</code></td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>PE-018</td><td>Manter custos agregados</td><td>Cadastrar tipos de custo agregado (impostos/frete) e suas contas contábeis</td><td>Cadastro › Custos Agregados</td><td>Cadastro de custos — distinto do artigo; grava <code>TIPOAGRE</code> e <code>TIPCUSTAGREGCONTA</code></td><td><code>ALMOX&amp;COMPRAS/Fontes/FCadTipoAgre.pas</code></td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>PE-019</td><td>Manter fornecedor</td><td>Cadastrar dados de fornecedor da empresa</td><td>Cadastro › Fornecedor</td><td>Cadastro de fornecedor — distinto do ramo</td><td><code>FCadForne</code> (unidade do framework resolvida por search path; implementação em <code>CM/Forms/SourceMT/fCadForne.pas</code>)</td><td><span class="ev ev-inferido">INFERIDO</span></td></tr>
+<tr><td>PE-020</td><td>Manter ramo de fornecedor</td><td>Cadastrar ramos de atividade de fornecedores</td><td>Cadastro › Ramo de Fornecedor</td><td>Cadastro de apoio — distinto do fornecedor</td><td><code>FCadRamoFor</code> (resolvida por search path; implementação em <code>CMBACK/Source/FCadRamoFor.pas</code>)</td><td><span class="ev ev-inferido">INFERIDO</span></td></tr>
+<tr><td>PE-021</td><td>Configurar modelos de histórico</td><td>Definir modelos de texto de histórico (composição por campos) usados nos lançamentos do almoxarifado/recebimento</td><td>Cadastro › Configuração de Modelos de Histórico</td><td>Configuração de texto — distinta dos parâmetros</td><td><code>ALMOXARIFADO/FontesMT/FMTConfigHistAlmox.pas</code> (herda <code>CM/Forms/SourceMT/FCadModeloHistoricoMT.pas</code>)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>PE-022</td><td>Consultar recebimento de mercadoria</td><td>Consultar NFs de recebimento (<code>FLGTIPONOTA = 'R'</code>), itens, custos agregados e lançamentos gerados</td><td>Consulta › Consulta de Recebimento de Mercadoria</td><td>Consulta — sem alteração de dados; distinta dos relatórios</td><td><code>ALMOX&amp;COMPRAS/FontesMT/FMTConsultaRecMerc.pas</code></td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>PE-023</td><td>Lançar nota fiscal complementar</td><td>Registrar NF complementar referenciando NF de recebimento já gravada (custos agregados complementares)</td><td>Movimentação › Recebimento de Mercadoria (diálogo da tela)</td><td>Lógica própria (<code>GravaNotaCompl</code>, <code>GetNotaComplementar</code>) — distinta do recebimento original</td><td><code>ALMOXARIFADO/FontesMT/FMTNotaCompl.pas</code>, <code>uCtrlRecebMerc.pas</code></td><td><span class="ev ev-inferido">INFERIDO</span></td></tr>
+<tr><td>PE-024</td><td>Relatório de recebimento de mercadoria</td><td>Emitir relatório de recebimentos por almoxarifado e período</td><td>Relatórios (tela padrão CM)</td><td>Relatório analítico — distinto da consulta</td><td><code>ALMOXARIFADO/Fontes/fParamRecebimento.pas</code>, <code>DRelatoriosAlmox.pas</code> (<code>rpRecebimento</code>)</td><td><span class="ev ev-inferido">INFERIDO</span></td></tr>
+<tr><td>PE-025</td><td>Relatório de recebimento sintético</td><td>Emitir resumo sintético dos recebimentos por almoxarifado e faixa de datas</td><td>Relatórios (tela padrão CM)</td><td>Visão sintética — distinta do analítico</td><td><code>ALMOXARIFADO/Fontes/FParamRecMercSint.pas</code></td><td><span class="ev ev-inferido">INFERIDO</span></td></tr>
+<tr><td>PE-026</td><td>Relatório de recebimento por tipo de desembolso</td><td>Emitir recebimentos agrupados por tipo de desembolso e período</td><td>Relatórios (tela padrão CM)</td><td>Agrupamento por desembolso — distinto dos demais</td><td><code>ALMOXARIFADO/Fontes/FParamRecMercDesemb.pas</code></td><td><span class="ev ev-inferido">INFERIDO</span></td></tr>
+<tr><td>PE-027</td><td>Relatório de devolução de mercadoria</td><td>Emitir devoluções por almoxarifado e período</td><td>Relatórios (tela padrão CM)</td><td>Relatório de devolução — distinto do de recebimento</td><td><code>ALMOXARIFADO/Fontes/fParamDevolucao.pas</code>, <code>DRelatoriosAlmox.pas</code> (<code>rpDevolucao</code>)</td><td><span class="ev ev-inferido">INFERIDO</span></td></tr>
+<tr><td>PE-028</td><td>Relatório de notas fiscais diferentes das OCs</td><td>Listar NFs recebidas com divergência em relação à OC</td><td>Relatórios (tela padrão CM)</td><td>Conferência NF × OC — distinta dos relatórios de volume</td><td><code>ALMOXARIFADO/Fontes/FParamNotaDifOC.pas</code></td><td><span class="ev ev-inferido">INFERIDO</span></td></tr>
+<tr><td>PE-029</td><td>Relatório de notas × custos agregados</td><td>Listar NFs com seus custos agregados (opcionalmente por agregado) no período</td><td>Relatórios (tela padrão CM)</td><td>Visão por custo agregado — distinta dos demais</td><td><code>ALMOXARIFADO/Fontes/FParamNFxCustAgreg.pas</code></td><td><span class="ev ev-inferido">INFERIDO</span></td></tr>
+</tbody></table></div>
+<p><strong>Total de Processos Elementares:</strong> 29 PE × 4,6 SFP = <strong>133,4 SFP</strong></p>
+</section>
+
+<!-- Seção 4: Inventário de Arquivos Lógicos -->
+<section id="s4-al"><div class="section-title">4. Inventário de Arquivos Lógicos (AL)</div>
+<p>Arquivos lógicos identificados a partir dos objetos de dados (<code>TableName</code> nos construtores de <code>uDb*.pas</code>) e do SQL inline dos controladores (<code>uCtrlRecebMerc.pas</code>, <code>uCtrlAlmoxCAF.pas</code>, <code>DMovEstoque.dfm</code>, <code>FCadTipoAgre.pas</code>, <code>FUsuxCCusto.dfm</code>). AL-01 a AL-28 são mantidos pelos processos do RECMERC; AL-29 a AL-43 pertencem a outros módulos e são lidos ou atualizados apenas pela integração (contados como referenciados, situação <span class="ev ev-pendente">PENDENTE</span> até confirmação do dono). Cada AL é um grupo de dados logicamente relacionado, identificável pelo usuário — sem subclassificação em interno ou de interface.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>ID</th><th>Nome do Arquivo Lógico</th><th>Descrição</th><th>Fronteira</th><th>PE relacionados</th><th>Fonte</th><th>Situação</th></tr></thead>
+<tbody>
+<tr><td>AL-01</td><td><code>NFRECEBDEVOL</code></td><td>Nota fiscal de recebimento/devolução (cabeçalho; <code>FLGTIPONOTA</code> R/D); CRUD</td><td>Mantido em RECMERC</td><td>PE-005, PE-006, PE-007, PE-022, PE-023, PE-024–PE-029</td><td><code>ALMOX&amp;COMPRAS/DbObjetos/udbNota.pas</code>, <code>uCtrlRecebMerc.pas</code></td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>AL-02</td><td><code>ITENSRECEBDEVOL</code></td><td>Itens da NF de recebimento/devolução; CRUD</td><td>Mantido em RECMERC</td><td>PE-005, PE-006, PE-007, PE-022, PE-024, PE-027</td><td><code>udbItemNota.pas</code>, <code>uCtrlRecebMerc.pas</code>, <code>uCtrlDevolMerc.pas</code></td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>AL-03</td><td><code>AGRNFRECDEV</code></td><td>Custos agregados por nota; CRUD</td><td>Mantido em RECMERC</td><td>PE-005, PE-006, PE-023, PE-029</td><td><code>udbAgregNota.pas</code></td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>AL-04</td><td><code>AGRITENSRECDEV</code></td><td>Custos agregados por item da nota; CRUD</td><td>Mantido em RECMERC</td><td>PE-005, PE-006, PE-023</td><td><code>udbAgregItemNota.pas</code></td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>AL-05</td><td><code>MOVIMENT</code></td><td>Movimentações de estoque geradas pelo recebimento/devolução; INSERT/UPDATE/DELETE</td><td>Mantido em RECMERC</td><td>PE-005, PE-006, PE-007</td><td><code>CMALMOXCOMPRAOBJ50/DbObjetos/uDbMoviment.pas</code>, <code>DMovEstoque.dfm</code></td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>AL-06</td><td><code>SALDO</code></td><td>Saldo por artigo/almoxarifado; atualizado na entrada/saída</td><td>Mantido em RECMERC</td><td>PE-005, PE-006, PE-007</td><td><code>CMALMOXCOMPRAOBJ50/DbObjetos/uDbSaldo.pas</code>, <code>DMovEstoque.dfm</code></td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>AL-07</td><td><code>CUSTOMED</code></td><td>Custo médio por artigo; recalculado no recebimento</td><td>Mantido em RECMERC</td><td>PE-005, PE-006, PE-007</td><td><code>CMALMOXCOMPRAOBJ50/DbObjetos/uDbCustoMed.pas</code>, <code>DMovEstoque.dfm</code></td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>AL-08</td><td><code>LOTEVALI</code></td><td>Lote e validade dos itens recebidos</td><td>Mantido em RECMERC</td><td>PE-005, PE-006</td><td><code>CMALMOXCOMPRAOBJ50/DbObjetos/uDbLoteVali.pas</code>, <code>DMovEstoque.dfm</code></td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>AL-09</td><td><code>AVALIACAO</code></td><td>Avaliação do fornecedor registrada no recebimento; INSERT/DELETE</td><td>Mantido em RECMERC</td><td>PE-005, PE-006</td><td><code>uCtrlRecebMerc.pas</code> (<code>ExcluiAvaliacaoForn</code>), <code>TCtrlAvaliacaoFornec</code></td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>AL-10</td><td><code>ITEMAVALIACAO</code></td><td>Itens (critérios) da avaliação do fornecedor</td><td>Mantido em RECMERC</td><td>PE-005, PE-006</td><td><code>uCtrlRecebMerc.pas</code></td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>AL-11</td><td><code>SOLIBAIXADAS</code></td><td>Solicitações de compra baixadas pelo recebimento (vínculo SCI × item recebido)</td><td>Mantido em RECMERC</td><td>PE-005, PE-006</td><td><code>uCtrlRecebMerc.pas</code> (<code>BaixaSCI</code>, <code>ExcluiBaixaSCI</code>)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>AL-12</td><td><code>ARTIGO</code></td><td>Artigos (SKUs) por tipo; CRUD e atualização da última compra</td><td>Mantido em RECMERC</td><td>PE-005, PE-006, PE-009–PE-012</td><td><code>ALMOX&amp;COMPRAS/DbObjetos/uDbArtigo.pas</code></td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>AL-13</td><td><code>PRODUTO</code></td><td>Produtos (grupo + medida); CRUD</td><td>Mantido em RECMERC</td><td>PE-009–PE-012</td><td><code>ALMOX&amp;COMPRAS/DbObjetos/uDbProduto.pas</code></td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>AL-14</td><td><code>GRUPPROD</code></td><td>Grupos de produto; CRUD</td><td>Mantido em RECMERC</td><td>PE-004, PE-008</td><td><code>ALMOX&amp;COMPRAS/DbObjetos/uDbGrupoProd.pas</code></td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>AL-15</td><td><code>UNMEDIDA</code></td><td>Unidades de medida; CRUD</td><td>Mantido em RECMERC</td><td>PE-013</td><td><code>CMALMOXCOMPRAOBJ50/DbObjetos/uDbUnMedida.pas</code></td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>AL-16</td><td><code>TAMANHO</code></td><td>Tamanhos de produto; CRUD</td><td>Mantido em RECMERC</td><td>PE-014</td><td><code>ALMOX&amp;COMPRAS/DbObjetos/uDbTamanho.pas</code></td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>AL-17</td><td><code>COR</code></td><td>Cores de produto; CRUD</td><td>Mantido em RECMERC</td><td>PE-015</td><td><code>ALMOX&amp;COMPRAS/DbObjetos/uDbCor.pas</code></td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>AL-18</td><td><code>UNCUSTEI</code></td><td>Unidades de custeio; CRUD</td><td>Mantido em RECMERC</td><td>PE-016</td><td><code>ALMOX&amp;COMPRAS/DbObjetos/uDbUnCusteio.pas</code></td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>AL-19</td><td><code>ALMOX</code></td><td>Almoxarifados; CRUD</td><td>Mantido em RECMERC</td><td>PE-003, PE-017</td><td><code>ALMOX&amp;COMPRAS/DbObjetos/udbAlmox.pas</code></td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>AL-20</td><td><code>TIPOAGRE</code></td><td>Tipos de custo agregado (imposto/frete); CRUD</td><td>Mantido em RECMERC</td><td>PE-005, PE-006, PE-018, PE-029</td><td><code>ALMOX&amp;COMPRAS/Fontes/FCadTipoAgre.pas</code></td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>AL-21</td><td><code>TIPCUSTAGREGCONTA</code></td><td>Contas contábeis por tipo de custo agregado; CRUD</td><td>Mantido em RECMERC</td><td>PE-018</td><td><code>ALMOX&amp;COMPRAS/Fontes/FCadTipoAgre.pas</code></td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>AL-22</td><td><code>USUXALMOX</code></td><td>Usuários × almoxarifado; CRUD</td><td>Mantido em RECMERC</td><td>PE-003</td><td><code>ALMOX&amp;COMPRAS/DbObjetos/uDbUsuxAlmox.pas</code></td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>AL-23</td><td><code>USUXGRUPPROD</code></td><td>Usuários × grupo de produto; CRUD</td><td>Mantido em RECMERC</td><td>PE-004</td><td><code>ALMOX&amp;COMPRAS/DbObjetos/uDbUsuxGrupProd.pas</code></td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>AL-24</td><td><code>USCCUSTO</code></td><td>Usuários × centro de custo; CRUD</td><td>Mantido em RECMERC</td><td>PE-002</td><td><code>ALMOX&amp;COMPRAS/Fontes/FUsuxCCusto.dfm</code> (insert/update/delete)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>AL-25</td><td><code>PARALMOX</code></td><td>Parâmetros do almoxarifado/recebimento; UPDATE</td><td>Mantido em RECMERC</td><td>PE-001, PE-008</td><td><code>ALMOXARIFADO/FontesMT/fMTParamAlmox.dfm</code>, <code>uDbParAlmox.pas</code></td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>AL-26</td><td><code>RAMOFORNECEDOR</code></td><td>Ramos de fornecedor; CRUD</td><td>Mantido em RECMERC</td><td>PE-020</td><td><code>CMBACK/Source/FCadRamoFor.pas</code></td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>AL-27</td><td><code>EMPRESAFORN</code></td><td>Dados do fornecedor por empresa; UPDATE</td><td>Mantido em RECMERC</td><td>PE-019</td><td><code>CM/Forms/SourceMT/fCadForne.pas</code></td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>AL-28</td><td><code>MODELOHISTORICO</code></td><td>Modelos de histórico de lançamento; CRUD</td><td>Mantido em RECMERC</td><td>PE-021</td><td><code>CM/Forms/CtrlObjects/uCtrlModeloHistorico.pas</code></td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>AL-29</td><td><code>NFLIVRO</code> (+ <code>NFLIVRODETALHE</code>)</td><td>Registro da NF no livro fiscal de entradas (cabeçalho e detalhe tratados como 1 grupo lógico); gravado na integração com o Livro (<code>IntegraLivro</code>)</td><td>Referenciado (Livro Fiscal — CMLIVROOBJ50)</td><td>PE-005, PE-006</td><td><code>uCtrlRecebMerc.pas</code></td><td><span class="ev ev-pendente">PENDENTE</span></td></tr>
+<tr><td>AL-30</td><td><code>BENSPENDENTES</code></td><td>Bens pendentes de tombamento gerados pelo recebimento de itens de ativo fixo (<code>ExecutaEntradaBensPendentes</code>)</td><td>Referenciado (CAF)</td><td>PE-005, PE-006</td><td><code>ALMOX&amp;COMPRAS/CtrlObjetos/uCtrlAlmoxCAF.pas</code></td><td><span class="ev ev-pendente">PENDENTE</span></td></tr>
+<tr><td>AL-31</td><td><code>PARAMETROSCAFMANUT</code></td><td>Parâmetros do CAF (última placa de tombamento); UPDATE na geração de placas</td><td>Referenciado (CAF)</td><td>PE-005, PE-006</td><td><code>uCtrlAlmoxCAF.pas</code> (<code>GeraPlacaTomb</code>)</td><td><span class="ev ev-pendente">PENDENTE</span></td></tr>
+<tr><td>AL-32</td><td><code>DOCUMENTO</code> (+ <code>LANCTODOCUM</code>)</td><td>Documento a pagar ao fornecedor gerado pela integração CAP (<code>FazIntegraCAP</code>)</td><td>Referenciado (CPAGAR)</td><td>PE-005, PE-006, PE-022</td><td><code>uCtrlRecebMerc.pas</code>, <code>CMCAPCAROBJ50/ctrlobjects/uCtrlLancDocCapCar.pas</code></td><td><span class="ev ev-pendente">PENDENTE</span></td></tr>
+<tr><td>AL-33</td><td><code>LANCAMENTO</code></td><td>Lançamento contábil gerado pela integração (<code>FazIntegraContab</code>)</td><td>Referenciado (CONTAB)</td><td>PE-005, PE-006, PE-022</td><td><code>uCtrlRecebMerc.pas</code>, <code>CMContabObj50/CtrlObjects/uCtrlLancamento.pas</code></td><td><span class="ev ev-pendente">PENDENTE</span></td></tr>
+<tr><td>AL-34</td><td><code>OC</code> (+ <code>ITEMOC</code>)</td><td>Ordem de compra; lida e com itens baixados (<code>BaixaOC</code>) no recebimento</td><td>Referenciado (COMPRAS2000)</td><td>PE-005, PE-006, PE-028</td><td><code>uCtrlRecebMerc.pas</code></td><td><span class="ev ev-pendente">PENDENTE</span></td></tr>
+<tr><td>AL-35</td><td><code>SOLICOMP</code> (+ <code>ITEMSOLI</code>)</td><td>Solicitação de compra interna; itens atualizados no recebimento</td><td>Referenciado (ALMOXARIFADO)</td><td>PE-005, PE-006</td><td><code>uCtrlRecebMerc.pas</code> (<code>BaixaSCI</code>)</td><td><span class="ev ev-pendente">PENDENTE</span></td></tr>
+<tr><td>AL-36</td><td><code>PESSOA</code></td><td>Pessoas (fornecedores, empresa); lido</td><td>Referenciado (CM/MODBAS)</td><td>PE-005–PE-007, PE-019</td><td><code>uCtrlRecebMerc.pas</code>, <code>fCadForne.pas</code></td><td><span class="ev ev-pendente">PENDENTE</span></td></tr>
+<tr><td>AL-37</td><td><code>CENTCUST</code></td><td>Centros de custo; lido</td><td>Referenciado (CONTAB)</td><td>PE-002, PE-005, PE-006</td><td><code>FUsuxCCusto.dfm</code>, <code>TCtrlCentroCusto</code></td><td><span class="ev ev-pendente">PENDENTE</span></td></tr>
+<tr><td>AL-38</td><td><code>IMPOSTOSXPRODUTOS</code></td><td>Impostos por produto; lido no cálculo dos agregados</td><td>Referenciado (externo)</td><td>PE-005, PE-006</td><td><code>uDbImpostos.pas</code>, <code>uCtrlRecebMerc.pas</code></td><td><span class="ev ev-pendente">PENDENTE</span></td></tr>
+<tr><td>AL-39</td><td><code>CLASFISC</code></td><td>Classificação fiscal; lido</td><td>Referenciado (GERAL)</td><td>PE-005–PE-007</td><td><code>GERAL/DbObjetos/uDbClasfisc.pas</code></td><td><span class="ev ev-pendente">PENDENTE</span></td></tr>
+<tr><td>AL-40</td><td><code>TIPODOCRECPAG</code></td><td>Tipos de documento a pagar/receber; lido</td><td>Referenciado (CPAGAR)</td><td>PE-005–PE-007</td><td><code>uCtrlRecebMerc.pas</code>, <code>uCtrlDevolMerc.pas</code></td><td><span class="ev ev-pendente">PENDENTE</span></td></tr>
+<tr><td>AL-41</td><td><code>PARAMCAP</code></td><td>Parâmetros de Contas a Pagar (integração, vencimentos); lido</td><td>Referenciado (CPAGAR)</td><td>PE-005, PE-006</td><td><code>uCtrlRecebMerc.pas</code>, <code>FPrincipal.pas</code> (<code>BuscaParamIntegra('PARAMCAP', …)</code>)</td><td><span class="ev ev-pendente">PENDENTE</span></td></tr>
+<tr><td>AL-42</td><td><code>CONVER</code></td><td>Conversão de unidades de medida; lido</td><td>Referenciado (externo)</td><td>PE-005, PE-006</td><td><code>uDbConver.pas</code></td><td><span class="ev ev-pendente">PENDENTE</span></td></tr>
+<tr><td>AL-43</td><td><code>PLANPREVCONTABIL</code></td><td>Plano previdencial × contabilidade (segregação por plano/patrocinadora); lido</td><td>Referenciado (CONTAB)</td><td>PE-005, PE-006</td><td><code>uCtrlRecebMerc.pas</code></td><td><span class="ev ev-pendente">PENDENTE</span></td></tr>
+</tbody></table></div>
+<p><strong>Total de Arquivos Lógicos:</strong> 43 AL × 7 SFP = <strong>301,0 SFP</strong></p>
+</section>
+
+<!-- Seção 5: Memória de cálculo -->
+<section id="s5-calculo"><div class="section-title">5. Memória de cálculo</div>
+<p>Contagem SFP calculada diretamente a partir do inventário de Processos Elementares (seção 3) e Arquivos Lógicos (seção 4).</p>
+<div class="pf-block">
+<h4>Fórmula aplicada</h4>
+<p style="text-align:center"><strong>Total SFP = (qtd_PE × 4,6) + (qtd_AL × 7)</strong></p>
+<p style="text-align:center"><strong>Total SFP = (29 × 4,6) + (43 × 7) = 133,4 + 301,0 = 434,4 SFP</strong></p>
+</div>
+<div class="table-wrap"><table>
+<thead><tr><th>Elemento</th><th>Quantidade</th><th>Peso unitário (SFP)</th><th>Subtotal (SFP)</th><th>Referência</th></tr></thead>
+<tbody>
+<tr><td><strong>Processo Elementar (PE)</strong></td><td>29</td><td>4,6</td><td>133,4</td><td>IFPUG SFP; SISP Roteiro v3.0</td></tr>
+<tr><td><strong>Arquivo Lógico (AL)</strong></td><td>43</td><td>7</td><td>301,0</td><td>IFPUG SFP; SISP Roteiro v3.0</td></tr>
+<tr><td><strong>Total</strong></td><td><strong>72</strong></td><td>—</td><td><strong>434,4</strong></td><td>—</td></tr>
+</tbody></table></div>
+<div class="table-wrap"><table>
+<thead><tr><th>Situação</th><th>PE</th><th>AL</th><th>SFP</th></tr></thead>
+<tbody>
+<tr><td><span class="ev ev-comprovado">COMPROVADO</span></td><td>20</td><td>28</td><td>(20 × 4,6) + (28 × 7) = 92,0 + 196,0 = 288,0</td></tr>
+<tr><td><span class="ev ev-inferido">INFERIDO</span></td><td>9</td><td>0</td><td>9 × 4,6 = 41,4</td></tr>
+<tr><td><span class="ev ev-pendente">PENDENTE</span></td><td>0</td><td>15</td><td>15 × 7 = 105,0</td></tr>
+<tr><td><strong>Total</strong></td><td><strong>29</strong></td><td><strong>43</strong></td><td><strong>434,4</strong></td></tr>
+</tbody></table></div>
+<div class="note-info">
+<p><strong>Verificação:</strong> 133,4 (PE) + 301,0 (AL) = <strong>434,4 SFP</strong>; 288,0 + 41,4 + 105,0 = 434,4. O total coincide com o sumário executivo (seção 2) e é reproduzido diretamente do inventário das seções 3 e 4.</p>
+</div>
+</section>
+
+<!-- Seção 6: Rastreabilidade -->
+<section id="s6-rastreabilidade"><div class="section-title">6. Rastreabilidade</div>
+<p>Cada elemento contado tem justificativa e fonte documentadas. A tabela abaixo mapeia os Processos Elementares ao handler do menu em <code>RECMERC/Fontes/FPrincipal.pas</code>, ao formulário aberto e aos controladores/objetos de dados.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>PE</th><th>Handler (FPrincipal.pas)</th><th>Formulário</th><th>Controlador / objeto de dados</th><th>AL</th></tr></thead>
+<tbody>
+<tr><td>PE-001</td><td><code>nmuConfigParametrosClick</code></td><td><code>fMTParamAlmox</code></td><td><code>uCtrlAlmoxCompra</code>, <code>uDbParAlmox</code></td><td>AL-25</td></tr>
+<tr><td>PE-002</td><td><code>UsuriosporCentrodeCustoClick</code></td><td><code>FUsuxCCusto</code></td><td>SQL no <code>.dfm</code></td><td>AL-24, AL-37</td></tr>
+<tr><td>PE-003</td><td><code>UsurioporAlmoxarifadoClick</code></td><td><code>FCadUsuxAlmox</code></td><td><code>uDbUsuxAlmox</code></td><td>AL-19, AL-22</td></tr>
+<tr><td>PE-004</td><td><code>UsuriosporGrupodeProdutoClick</code></td><td><code>FCadUsuxGrpProd</code></td><td><code>uDbUsuxGrupProd</code></td><td>AL-14, AL-23</td></tr>
+<tr><td>PE-005, PE-006</td><td><code>ComOCClick</code>, <code>SemOCClick</code></td><td><code>FMTRecebMerc</code> (+ <code>FMTBaixaDir</code>, <code>FMTOCxForn</code>, <code>FMTValTotAgreg</code>, <code>FLancDocCapCarMT</code>)</td><td><code>uCtrlRecebMerc</code>, <code>uCtrlAlmoxCAF</code>, <code>DMovEstoque</code>, <code>uCtrlLancDocCapCar</code>, <code>uCtrlLancamento</code></td><td>AL-01–AL-13, AL-20, AL-29–AL-43</td></tr>
+<tr><td>PE-007</td><td><code>DevoluodeMercadoriaClick</code></td><td><code>FMTDevolMerc</code></td><td><code>uCtrlDevolMerc</code>, <code>DMovEstoque</code></td><td>AL-01, AL-02, AL-05–AL-07, AL-36, AL-39, AL-40</td></tr>
+<tr><td>PE-008</td><td><code>GrupodeProdutoClick</code></td><td><code>FCadGrupoProd</code></td><td><code>uCtrlGrupoProd</code>, <code>uDbGrupoProd</code></td><td>AL-14, AL-25</td></tr>
+<tr><td>PE-009–PE-012</td><td><code>InsumosClick</code>, <code>OutrosClick</code>, <code>ItensdeVendaClick</code>, <code>ItensdePDVClick</code></td><td><code>FCadInsumos</code>, <code>FCadOutros</code>, <code>FCadItemVenda</code>, <code>FCadItemPDV</code></td><td><code>uCtrlArtigo</code>, <code>uDbArtigo</code>, <code>uDbProduto</code></td><td>AL-12, AL-13</td></tr>
+<tr><td>PE-013–PE-015</td><td><code>UnidadedeMedidaClick</code>, <code>TamanhoClick</code>, <code>CorClick</code></td><td><code>FCadUnMedida</code>, <code>FCadTamanho</code>, <code>FCadCores</code></td><td><code>uDbUnMedida</code>, <code>uDbTamanho</code>, <code>uDbCor</code></td><td>AL-15, AL-16, AL-17</td></tr>
+<tr><td>PE-016, PE-017</td><td><code>UnidadedeCusteioClick</code>, <code>AlmoxarifadoClick</code></td><td><code>FCadUnCusteio</code>, <code>FCadAlmox</code></td><td><code>uDbUnCusteio</code>, <code>udbAlmox</code></td><td>AL-18, AL-19</td></tr>
+<tr><td>PE-018</td><td><code>ImpostosClick</code></td><td><code>FCadTipoAgre</code></td><td>SQL inline</td><td>AL-20, AL-21</td></tr>
+<tr><td>PE-019, PE-020</td><td><code>FornecedorClick</code>, <code>RamodeFornecedorClick</code></td><td><code>FCadForne</code>, <code>FCadRamoFor</code></td><td>SQL inline</td><td>AL-26, AL-27, AL-36</td></tr>
+<tr><td>PE-021</td><td><code>ConfiguraodeModelosdeHistrico1Click</code></td><td><code>FMTConfigHistAlmox</code></td><td><code>uCtrlModeloHistorico</code></td><td>AL-28</td></tr>
+<tr><td>PE-022</td><td><code>ConsultadeRecebimentodeMercadoria1Click</code></td><td><code>FMTConsultaRecMerc</code></td><td>procedures <code>splistRecMerc</code>/<code>splistItemRecMerc</code></td><td>AL-01–AL-03, AL-32, AL-33</td></tr>
+<tr><td>PE-023</td><td>— (botão da tela de recebimento)</td><td><code>FMTNotaCompl</code></td><td><code>uCtrlRecebMerc.GravaNotaCompl</code></td><td>AL-01, AL-03, AL-04</td></tr>
+<tr><td>PE-024–PE-029</td><td><code>AppPadraoCreateFormReports</code> (cria <code>dtmRelatoriosAlmox</code> e <code>dtmRptRelats</code>)</td><td><code>fParamRecebimento</code>, <code>FParamRecMercSint</code>, <code>FParamRecMercDesemb</code>, <code>fParamDevolucao</code>, <code>FParamNotaDifOC</code>, <code>FParamNFxCustAgreg</code></td><td><code>DRelatoriosAlmox</code>, <code>DRptRelats</code></td><td>AL-01–AL-03, AL-20, AL-34</td></tr>
+</tbody></table></div>
+<p><strong>Arquivos Lógicos:</strong> rastreáveis aos objetos de dados (<code>TableName</code> no construtor) e ao SQL inline listados na coluna "Fonte" da seção 4.</p>
+</section>
+
+<!-- Seção 7: Integrações e dupla contagem -->
+<section id="s7-integracoes"><div class="section-title">7. Integrações e dupla contagem</div>
+<p>Dados compartilhados com outros módulos e risco de dupla contagem. No SFP, a dupla contagem ocorre quando o mesmo Processo Elementar ou Arquivo Lógico é contado em mais de um módulo.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Dado / função compartilhada</th><th>Papel no RECMERC</th><th>Quem mais usa</th><th>Decisão de contagem</th><th>Risco</th></tr></thead>
+<tbody>
+<tr><td><strong>Receitas × CFINAN</strong> (risco indicado no card PFC-62)</td><td>Nenhum: não há unidade de CFINAN/CMCFINANOBJ50 no <code>RecMerc.dpr</code> e nenhuma tabela de movimento financeiro (<code>MOVIMFINANC</code>, contas bancárias) é lida ou gravada</td><td>CFINAN (dono do movimento financeiro)</td><td>Nenhum elemento de CFINAN contado em RECMERC. O impacto financeiro do recebimento passa por CPAGAR (AL-32), não por CFINAN</td><td>Não (com base no código) — <strong>validar com especialista de negócio</strong>, pois o card descreve "receitas de mercado"</td></tr>
+<tr><td>Dados de INVESTIMENTOS (dependência indicada no card)</td><td>Nenhum: nenhuma unidade ou tabela de INVESTIMENTOS é referenciada</td><td>INVESTIMENTOS</td><td>Nada contado</td><td>Não</td></tr>
+<tr><td>PE de recebimento, devolução e cadastros (PE-001–PE-018, PE-021, PE-023–PE-029)</td><td>Mesmos formulários do ALMOXARIFADO compilados em outro executável</td><td>ALMOXARIFADO (PE-001–PE-010, PE-015–PE-017, PE-019, PE-020, PE-029–PE-031, PE-063, PE-069 de <a href="almoxarifado.html">almoxarifado.html</a>)</td><td>Contados em ambos — RECMERC é um recorte do ALMOXARIFADO</td><td><strong>Sim — alto (20 PE = 92,0 SFP)</strong></td></tr>
+<tr><td><code>NFRECEBDEVOL</code>, <code>ITENSRECEBDEVOL</code>, <code>MOVIMENT</code>, <code>SALDO</code>, <code>CUSTOMED</code>, <code>LOTEVALI</code>, <code>AVALIACAO</code>, <code>ARTIGO</code>, <code>PRODUTO</code>, <code>GRUPPROD</code>, <code>UNMEDIDA</code>, <code>UNCUSTEI</code>, <code>ALMOX</code>, <code>TIPOAGRE</code>, <code>USUXGRUPPROD</code>, <code>PARALMOX</code></td><td>AL-01, AL-02, AL-05–AL-09, AL-12–AL-15, AL-18–AL-20, AL-23, AL-25 — mantidos</td><td>ALMOXARIFADO (AL-01–AL-04, AL-08, AL-09, AL-14–AL-17, AL-19, AL-22, AL-26, AL-27, AL-29, AL-30 de almoxarifado.html); COMPRAS2000 (produtos, grupos, unidades)</td><td>Contados como AL em RECMERC e em ALMOXARIFADO</td><td><strong>Sim — até 16 AL (112 SFP)</strong></td></tr>
+<tr><td><code>OC</code>/<code>ITEMOC</code></td><td>AL-34 — referenciado (baixa de itens)</td><td>COMPRAS2000 (dono); ALMOXARIFADO (AL-43, referenciado)</td><td>AL em COMPRAS2000; referenciado aqui</td><td>Sim — se a soma incluir o referenciado (7 SFP)</td></tr>
+<tr><td><code>BENSPENDENTES</code>, <code>PARAMETROSCAFMANUT</code></td><td>AL-30, AL-31 — gravados na entrada de bens de ativo fixo</td><td>CAF (dono — ver <a href="caf.html">caf.html</a>)</td><td>AL em CAF; referenciado aqui</td><td>Sim — 2 AL (14 SFP) se somados</td></tr>
+<tr><td><code>DOCUMENTO</code>/<code>LANCTODOCUM</code></td><td>AL-32 — gerado pela integração CAP</td><td>CPAGAR (dono — <a href="cpagar.html">cpagar.html</a>)</td><td>AL em CPAGAR; referenciado aqui</td><td>Sim — 7 SFP se somado</td></tr>
+<tr><td><code>LANCAMENTO</code></td><td>AL-33 — gerado pela integração contábil</td><td>CONTAB (dono — <a href="contab.html">contab.html</a>)</td><td>AL em CONTAB; referenciado aqui</td><td>Sim — 7 SFP se somado</td></tr>
+<tr><td><code>NFLIVRO</code>/<code>NFLIVRODETALHE</code></td><td>AL-29 — gravado na integração com o Livro Fiscal</td><td>Livro Fiscal (CMLIVROOBJ50 — sem página de contagem)</td><td>Referenciado aqui</td><td>Futuro — quando o Livro Fiscal for contado</td></tr>
+</tbody></table></div>
+<p><strong>Fronteira declarada:</strong> pasta/executável RECMERC tratado como aplicação própria, conforme solicitado no card. <strong>Conclusão a partir do código:</strong> a fronteira funcional real é a do ALMOXARIFADO — RECMERC é um executável que expõe um subconjunto (recebimento/devolução e cadastros) da mesma aplicação, com IdModulo próprio (46) para controle de acesso.</p>
+<p><strong>Recomendação:</strong> na soma multi-módulo, considerar somente os elementos de RECMERC que não existem no ALMOXARIFADO (na prática, 9 PE — PE-002, PE-021–PE-027 e PE-029 — e 12 AL — AL-03, AL-04, AL-10, AL-11, AL-16, AL-17, AL-21, AL-22, AL-24, AL-26–AL-28 —, que somam (9 × 4,6) + (12 × 7) = 41,4 + 84,0 = 125,4 SFP), ou excluir RECMERC por inteiro — decisão a <strong>validar com especialista de negócio</strong> e com a equipe de métricas.</p>
+</section>
+
+<!-- Seção 8: Pendências -->
+<section id="s8-pendencias"><div class="section-title">8. Pendências</div>
+<p>Elementos cuja identificação não pôde ser confirmada com evidência completa do código-fonte e decisões de fronteira em aberto. São <strong>contagem preliminar</strong> e não devem ser tratados como confirmados até validação.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Elemento</th><th>Tipo</th><th>Situação</th><th>O que está pendente</th><th>Impacto se confirmado / removido</th><th>Validação necessária</th></tr></thead>
+<tbody>
+<tr><td>Propósito do módulo</td><td>Escopo</td><td>—</td><td>Card PFC-62 descreve "Receitas de Mercado"; código comprova "Recebimento de Mercadoria"</td><td>Se existir outro sistema de "receitas de mercado", ele não está na pasta RECMERC</td><td>Confirmar com o solicitante/especialista de negócio</td></tr>
+<tr><td>Fronteira RECMERC × ALMOXARIFADO</td><td>Fronteira</td><td>—</td><td>RECMERC reutiliza os formulários do ALMOXARIFADO</td><td>20 PE e 16 AL (92,0 + 112,0 = 204,0 SFP) duplicados na soma multi-módulo</td><td>Validar com especialista de negócio e equipe de métricas</td></tr>
+<tr><td>Fronteira RECMERC × CFINAN</td><td>Fronteira</td><td>—</td><td>Risco declarado no card; nenhuma evidência no código</td><td>Nenhum elemento a remover</td><td>Validar com especialista de negócio</td></tr>
+<tr><td>PE-019 Manter fornecedor</td><td>PE</td><td><span class="ev ev-inferido">INFERIDO</span></td><td>Unidade <code>FCadForne</code> resolvida por search path (não listada no <code>.dpr</code>); há versões em <code>CM/Forms/SourceMT</code> e <code>CMBACK/SourceOld</code></td><td>Permanece 1 PE (4,6 SFP)</td><td>Confirmar a unidade efetivamente compilada</td></tr>
+<tr><td>PE-020 Manter ramo de fornecedor</td><td>PE</td><td><span class="ev ev-inferido">INFERIDO</span></td><td>Unidade <code>FCadRamoFor</code> resolvida por search path</td><td>Permanece 1 PE (4,6 SFP)</td><td>Confirmar a unidade efetivamente compilada</td></tr>
+<tr><td>PE-023 Lançar NF complementar</td><td>PE</td><td><span class="ev ev-inferido">INFERIDO</span></td><td>Acionado por diálogo da tela de recebimento, não pelo menu</td><td>Pode ser absorvido por PE-005/PE-006 (−4,6 SFP)</td><td>Confirmar com usuário se é processo independente</td></tr>
+<tr><td>PE-024–PE-029 Relatórios</td><td>PE</td><td><span class="ev ev-inferido">INFERIDO</span></td><td>Relatórios disponibilizados pela tela padrão de relatórios CM, cuja lista por módulo (IdModulo 46) fica na base SAD, não no código</td><td>6 PE (27,6 SFP); outros relatórios de almoxarifado compilados no executável (inventário, ABC, giro etc.) <strong>não foram contados</strong></td><td>Consultar a configuração de relatórios do IdModulo 46 no SAD</td></tr>
+<tr><td>AL-29 <code>NFLIVRO</code></td><td>AL</td><td><span class="ev ev-pendente">PENDENTE</span></td><td>Dono funcional (Livro Fiscal) sem contagem</td><td>7 SFP</td><td>Confirmar dono e agrupamento cabeçalho/detalhe</td></tr>
+<tr><td>AL-30, AL-31 (CAF)</td><td>AL</td><td><span class="ev ev-pendente">PENDENTE</span></td><td>Tabelas do Ativo Fixo gravadas pelo recebimento</td><td>14 SFP — remover na soma se contados no CAF</td><td>Confirmar fronteira com CAF</td></tr>
+<tr><td>AL-32 <code>DOCUMENTO</code>, AL-33 <code>LANCAMENTO</code>, AL-34 <code>OC</code>, AL-35 <code>SOLICOMP</code></td><td>AL</td><td><span class="ev ev-pendente">PENDENTE</span></td><td>Tabelas de CPAGAR, CONTAB, COMPRAS2000 e ALMOXARIFADO alimentadas pela integração</td><td>28 SFP</td><td>Confirmar que são apenas referenciados</td></tr>
+<tr><td>AL-36–AL-43</td><td>AL</td><td><span class="ev ev-pendente">PENDENTE</span></td><td>Tabelas externas só lidas (<code>PESSOA</code>, <code>CENTCUST</code>, <code>IMPOSTOSXPRODUTOS</code>, <code>CLASFISC</code>, <code>TIPODOCRECPAG</code>, <code>PARAMCAP</code>, <code>CONVER</code>, <code>PLANPREVCONTABIL</code>)</td><td>56 SFP</td><td>Confirmar grupos lógicos e donos</td></tr>
+</tbody></table></div>
+<div class="note">
+<p><strong>Total de pendências:</strong> 11 itens (3 de fronteira/escopo, 9 PE inferidos e 15 AL pendentes agrupados em 4 linhas). Considerando apenas elementos comprovados, o RECMERC soma 288,0 SFP. A sobreposição com ALMOXARIFADO pode reduzir a contribuição líquida do RECMERC na soma multi-módulo a 125,4 SFP (elementos mantidos sem equivalente no ALMOXARIFADO), acrescidos dos referenciados que se decidir manter. <strong>O total de 434,4 SFP é a contagem preliminar da aplicação isolada; a contagem confirmada depende da validação destes itens.</strong></p>
+</div>
+</section>
+
+<section><div class="section-title">🔗 Navegação</div>
+<div class="doc-links">
+<a href="index.html">📐 Entrada da área</a>
+<a href="almoxarifado.html">Almoxarifado</a>
+<a href="compras.html">Compras</a>
+<a href="caf.html">Ativo Fixo (CAF)</a>
+<a href="investimob.html">Investimentos Imobiliários</a>
+<a href="metodologia.html">📜 Metodologia</a>
+<a href="../index.html">⬅ Blueprint AS-IS</a>
+</div>
+</section>
+
+</main>
+
+<footer>
+<p>Blueprint AS-IS — PFC-62 — Simple Function Points (SFP) — Módulo RECMERC | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-16</p>
+</footer>
+</body>
+</html>
