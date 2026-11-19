@@ -115,16 +115,61 @@ Cada pasta funcional do repositório foi classificada em uma de cinco categorias
 | 5. Requer validação | 7 |
 | **Total de pastas classificadas** | **120** |
 
-### 4.2 Módulos já analisados (contagem SFP completa)
+### 4.2 Módulos já analisados (contagem SFP completa — 44)
+
+> **Atualizado em PFC-72 (auditoria):** todos os 44 módulos agora têm análise SFP completa e auditada. A tabela completa dos 44 módulos com PE/AL/SFP, primeira geração, divergências e situação está no <a href="docs1/pontos-de-funcao/auditoria-sfp.html">relatório de auditoria SFP</a> (`docs1/pontos-de-funcao/auditoria-sfp.html`). O total consolidado é **22.037,8 SFP** (2.283 PE + 1.648 AL).
 
 | Módulo | Pasta | PE | AL | Total SFP | Documento |
 |---|---|---|---|---|---|
 | Folha de Benefícios | `FOLHA/` | 25 | 23 | 276,0 | `docs1/pontos-de-funcao/folha.html` |
 | Contribuição Previdenciária | `CONTRIBUICAOPREV/` | 19 | 22 | 241,4 | `docs1/pontos-de-funcao/contribuicao.html` |
 | Benefício Previdenciário | `BENEFICIOPREV/` | 20 | 20 | 232,0 | `docs1/pontos-de-funcao/beneficioprev.html` |
-| **Total** | — | **64** | **65** | **749,4** | — |
+| IRRF | `IRRF/` | 65 | 52 | 663,0 | `docs1/pontos-de-funcao/irrf.html` |
+| Cadastro Previdenciário | `CADASTROPREV/` | 72 | 57 | 730,2 | `docs1/pontos-de-funcao/cadastroprev.html` |
+| Módulo Básico RH | `MODBAS/` | 29 | 26 | 315,4 | `docs1/pontos-de-funcao/modbas.html` |
+| Controle de Acesso/Ponto | `MODACESSO/` | 26 | 21 | 266,6 | `docs1/pontos-de-funcao/modacesso.html` |
+| Contabilidade | `CONTAB/` | 132 | 42 | 901,2 | `docs1/pontos-de-funcao/contab.html` |
+| Contabilidade Financeira | `CFINAN/` | 65 | 46 | 621,0 | `docs1/pontos-de-funcao/cfinan.html` |
+| Orçamento | `ORCAMENTO/` | 87 | 38 | 666,2 | `docs1/pontos-de-funcao/orcamento.html` |
+| Contas a Pagar | `CPAGAR/` | 119 | 45 | 862,4 | `docs1/pontos-de-funcao/cpagar.html` |
+| Contas a Receber | `CRECEBER/` | 91 | 40 | 698,6 | `docs1/pontos-de-funcao/creceber.html` |
+| Indicadores | `INDICADORES/` | 49 | 23 | 386,4 | `docs1/pontos-de-funcao/indicadores.html` |
+| Contratos | `CONTRATO/` | 38 | 40 | 454,8 | `docs1/pontos-de-funcao/contrato.html` |
+| Empréstimo | `EMPRESTIMO/` | 176 | 68 | 1.285,6 | `docs1/pontos-de-funcao/emprestimo.html` |
+| Financiamento | `FINANCIAMENTO/` | 4 | 7 | 67,4 | `docs1/pontos-de-funcao/financiamento.html` |
+| Agendamento | `AGENDAMENTO/` | 12 | 9 | 118,2 | `docs1/pontos-de-funcao/agendamento.html` |
+| Central de Atendimento | `CENTRALAP/` | 38 | 18 | 300,8 | `docs1/pontos-de-funcao/centralap.html` |
+| Autoatendimento | `AUTOATENDIMENTO/` | 48 | 24 | 388,8 | `docs1/pontos-de-funcao/autoatendimento.html` |
+| Compras | `COMPRAS2000/` | 41 | 19 | 321,6 | `docs1/pontos-de-funcao/compras.html` |
+| Almoxarifado | `ALMOXARIFADO/` | 78 | 45 | 673,8 | `docs1/pontos-de-funcao/almoxarifado.html` |
+| Investimentos | `INVESTIMENTOS/` | 199 | 54 | 1.293,4 | `docs1/pontos-de-funcao/investimentos.html` |
+| Cotas | `COTAS/` | 20 | 14 | 190,0 | `docs1/pontos-de-funcao/cotas.html` |
+| Ativo Fixo (CAF) | `CAF/` | 66 | 59 | 716,6 | `docs1/pontos-de-funcao/caf.html` |
+| Recebimento de Mercadoria | `RECMERC/` | 29 | 43 | 434,4 | `docs1/pontos-de-funcao/recmerc.html` |
+| Investimentos Imobiliários | `INVESTIMOB/` | 77 | 82 | 928,2 | `docs1/pontos-de-funcao/investimob.html` |
+| Administração Imobiliária | `ADMINIMOB/` | 96 | 82 | 1.015,6 | `docs1/pontos-de-funcao/adminimob.html` |
+| Alienação de Bens | `ALIENACAO/` | 38 | 49 | 517,8 | `docs1/pontos-de-funcao/alienacao.html` |
+| Sistema Jurídico | `SISTJUR/` | 46 | 51 | 568,6 | `docs1/pontos-de-funcao/sistjur.html` |
+| Processos Judiciais | `PROCJUD/` | 4 | 16 | 130,4 | `docs1/pontos-de-funcao/procjud.html` |
+| Projeto Atuarial | `PROJETOATUARIAL/` | 71 | 88 | 942,6 | `docs1/pontos-de-funcao/projetoatuarial.html` |
+| Processos Previdenciários | `PROCPREV/` | 3 | 27 | 202,8 | `docs1/pontos-de-funcao/procprev.html` |
+| Assistencial | `ASSISTENCIAL/` | 53 | 55 | 628,8 | `docs1/pontos-de-funcao/assistencial.html` |
+| Exportação FCRT | `EXPORTFCRT/` | 3 | 19 | 146,8 | `docs1/pontos-de-funcao/exportfcrt.html` |
+| Simulador FCRT | `SIMULADORFCRT/` | 13 | 35 | 304,8 | `docs1/pontos-de-funcao/simuladorfcrt.html` |
+| Folha de Pagamento RH | `MODFOL/` | 129 | 63 | 1.034,4 | `docs1/pontos-de-funcao/modfol.html` |
+| Benefícios RH | `MODBEN/` | 7 | 12 | 116,2 | `docs1/pontos-de-funcao/modben.html` |
+| Cargos e Salários | `MODCES/` | 39 | 31 | 396,4 | `docs1/pontos-de-funcao/modces.html` |
+| Avaliação de Desempenho | `MODAVA/` | 17 | 16 | 190,2 | `docs1/pontos-de-funcao/modava.html` |
+| Recrutamento e Seleção | `MODRES/` | 27 | 31 | 341,2 | `docs1/pontos-de-funcao/modres.html` |
+| Treinamento | `MODTRN/` | 35 | 32 | 385,0 | `docs1/pontos-de-funcao/modtrn.html` |
+| Assiduidade/Movimentação | `MODASM/` | 30 | 38 | 404,0 | `docs1/pontos-de-funcao/modasm.html` |
+| Gestão de Frota/Automóveis | `MODAUTO/` | 44 | 38 | 468,4 | `docs1/pontos-de-funcao/modauto.html` |
+| Contencioso RH | `MODCON/` | 3 | 28 | 209,8 | `docs1/pontos-de-funcao/modcon.html` |
+| **Total** | — | **2.283** | **1.648** | **22.037,8** | — |
 
 ### 4.3 Módulos recomendados para contagem individual (novos — 41)
+
+> **Atualizado em PFC-72 (auditoria):** todos os 41 módulos abaixo foram analisados e auditados. As análises SFP estão publicadas em `docs1/pontos-de-funcao/*.html` e o resultado da auditoria está em `docs1/pontos-de-funcao/auditoria-sfp.html`. Esta tabela preserva o planejamento original de PFC-49 (entry points e domínios) para referência histórica.
 
 | # | Módulo | Pasta | Entry point | Domínio |
 |---|---|---|---|---|
@@ -172,21 +217,23 @@ Cada pasta funcional do repositório foi classificada em uma de cinco categorias
 
 ### 4.4 Resumo por domínio
 
+> **Atualizado em PFC-72 (auditoria):** todos os 44 módulos estão analisados e auditados. A coluna "Já analisados" reflete o estado atual.
+
 | Domínio | Módulos a contar individualmente | Já analisados | Requer validação |
 |---|---|---|---|
-| Previdenciário | 3 (Cadastro, Proc, Assistencial) | 3 (Folha, Contrib, Benef) | 2 (RADG, SCQ) |
-| Contábil/Financeiro | 9 | 0 | 0 |
-| Imobiliário | 3 | 0 | 0 |
-| Investimentos | 2 | 0 | 3 (InvestCotas, InvestFDO, CotasPatrim) |
-| Jurídico/Contratos | 3 | 0 | 0 |
-| Empréstimos | 2 | 0 | 0 |
-| Compras/Estoque | 2 | 0 | 0 |
-| Atendimento | 3 | 0 | 0 |
-| FCRT | 2 | 0 | 0 |
-| Atuarial | 1 | 0 | 0 |
-| Recursos Humanos | 11 | 0 | 1 (SRHCS) |
+| Previdenciário | 3 (Cadastro, Proc, Assistencial) | 5 (Folha, Contrib, Benef, IRRF, CadastroPrev) | 2 (RADG, SCQ) |
+| Contábil/Financeiro | 9 | 9 | 0 |
+| Imobiliário | 3 | 3 | 0 |
+| Investimentos | 2 | 2 | 3 (InvestCotas, InvestFDO, CotasPatrim) |
+| Jurídico/Contratos | 3 | 3 | 0 |
+| Empréstimos | 2 | 2 | 0 |
+| Compras/Estoque | 2 | 2 | 0 |
+| Atendimento | 3 | 3 | 0 |
+| FCRT | 2 | 2 | 0 |
+| Atuarial | 1 | 1 | 0 |
+| Recursos Humanos | 11 | 11 | 1 (SRHCS) |
 | Integração/Regras | 0 | 0 | 1 (RelatoriosCM) |
-| **Total** | **41** | **3** | **7** |
+| **Total** | **41** | **44** | **7** |
 
 ---
 
@@ -605,13 +652,17 @@ A execução dos prompts individuais (contagem SFP de cada módulo) deve seguir 
 
 ## 10. Estado das análises existentes
 
-### 10.1 Análises SFP completas (3 módulos)
+### 10.1 Análises SFP completas (44 módulos)
+
+> **Atualizado em PFC-72 (auditoria):** todos os 44 módulos têm análise SFP completa e auditada. A tabela completa está na seção 4.2 e no relatório de auditoria (`docs1/pontos-de-funcao/auditoria-sfp.html`). Total consolidado: **22.037,8 SFP** (2.283 PE + 1.648 AL). Os 3 módulos previdenciários originais (PFC-47/PFC-48) foram inicialmente contados em IFPUG FPA e convertidos para SFP; os 41 módulos restantes foram contados em SFP desde a primeira geração (PFC-50 a PFC-68).
 
 | Módulo | Arquivo SFP | PE | AL | SFP | Issue | Data |
 |---|---|---|---|---|---|---|
-| Folha de Benefícios | `docs1/pontos-de-funcao/folha.html` | 25 | 23 | 276,0 | PFC-48 | 2026-11-12 |
-| Contribuição Previdenciária | `docs1/pontos-de-funcao/contribuicao.html` | 19 | 22 | 241,4 | PFC-48 | 2026-11-12 |
-| Benefício Previdenciário | `docs1/pontos-de-funcao/beneficioprev.html` | 20 | 20 | 232,0 | PFC-48 | 2026-11-12 |
+| Folha de Benefícios | `docs1/pontos-de-funcao/folha.html` | 25 | 23 | 276,0 | PFC-47→SFP | 2026-11-12 |
+| Contribuição Previdenciária | `docs1/pontos-de-funcao/contribuicao.html` | 19 | 22 | 241,4 | PFC-47→SFP | 2026-11-12 |
+| Benefício Previdenciário | `docs1/pontos-de-funcao/beneficioprev.html` | 20 | 20 | 232,0 | PFC-47→SFP | 2026-11-12 |
+| + 41 módulos (PFC-50 a PFC-68) | `docs1/pontos-de-funcao/*.html` | 2.219 | 1.583 | 21.288,4 | PFC-50–PFC-68 | 2026-11-13 a 2026-11-17 |
+| **Total** | **44 páginas** | **2.283** | **1.648** | **22.037,8** | — | — |
 
 ### 10.2 Documentação funcional existente (Blueprint AS-IS)
 
@@ -642,7 +693,7 @@ A execução dos prompts individuais (contagem SFP de cada módulo) deve seguir 
 
 ### 10.5 Estado dos 41 módulos novos
 
-Todos os 41 módulos recomendados para contagem individual estão **sem análise SFP**. Nenhum possui documentação funcional em `docs1/` (apenas os 3 módulos previdenciários já analisados têm). A contagem SFP de cada módulo novo deverá ser precedida da documentação funcional (casos de uso, modelo de dados, integrações) ou executada diretamente a partir do código-fonte, conforme o prompt individual.
+> **Atualizado em PFC-72 (auditoria):** todos os 41 módulos recomendados para contagem individual **foram analisados** em SFP (PFC-50 a PFC-68) e auditados em PFC-72. As 41 análises estão publicadas em `docs1/pontos-de-funcao/*.html` e o resultado da auditoria está em `docs1/pontos-de-funcao/auditoria-sfp.html`. Para os 41 módulos, a contagem SFP foi executada diretamente a partir do código-fonte (menu, formulários, relatórios e objetos de dados), pois não há documentação funcional em `docs1/`. A primeira geração de cada análise foi localizada no histórico Git e comparada com a versão atual: para os 41 módulos, a contagem é estável desde a primeira geração (situação: mantido).
 
 ---
 ## 11. Prompts individuais
@@ -2905,4 +2956,56 @@ Os 41 módulos recomendados para contagem individual **não possuem documentaç�
 
 ---
 
-*Fim do documento — `analise_modulos_APF.md` — PFC-49 — Gerado em 2026-11-12*
+## 14. Resultado da auditoria SFP (PFC-72)
+
+> **Auditoria executada em 2026-11-19 (PFC-72).** Esta seção registra o resultado da auditoria das 44 análises SFP publicadas no portal `docs1/pontos-de-funcao/index.html#modulos`. O relatório completo está em `docs1/pontos-de-funcao/auditoria-sfp.html`.
+
+### 14.1 Objetivo e escopo da auditoria
+
+Auditar todas as 44 análises SFP publicadas no portal, comparando a contagem atual de cada módulo com a primeira geração localizável no histórico Git, validando cálculos, fronteiras, rastreabilidade e consistência cruzada. Escopo: 44 módulos, método SFP exclusivamente, 0 arquivos de código-fonte alterados.
+
+### 14.2 Resumo da auditoria
+
+| Item | Valor |
+|---|---|
+| Módulos auditados | 44 |
+| Situação: mantido | 41 (contagem estável desde a primeira geração) |
+| Situação: corrigido | 3 (FOLHA, CONTRIBUIÇÃO, BENEFICIOPREV — conversão IFPUG FPA → SFP) |
+| Situação: pendente | 0 |
+| Total SFP recalculado | 22.037,8 (2.283 PE + 1.648 AL) |
+| Cálculos individuais verificados | 44/44 corretos |
+| Memórias de cálculo verificadas | 44/44 corretas |
+| Inventários (PE/AL) verificados | 44/44 — linhas coincidem com totais declarados |
+| Marcadores de conflito | 0 (nenhum encontrado) |
+| Terminologia APF em inventários | 0 (nenhuma — apenas em seções de comparação histórica) |
+| Arquivos de código-fonte alterados | 0 |
+
+### 14.3 Comparação histórica (primeira geração)
+
+Todas as 44 primeiras gerações foram localizadas no histórico Git. Os 44 módulos foram adicionados em 16 commits (PFC-47, PFC-50, PFC-52, PFC-53, PFC-54, PFC-58 a PFC-68). Para 41 módulos, a contagem SFP atual é idêntica à primeira geração (PE e AL não mudaram). Para 3 módulos (FOLHA, CONTRIBUIÇÃO, BENEFICIOPREV), a primeira geração usava IFPUG FPA (método diferente) e foi convertida para SFP no commit `e8dba425` — os totais não são diretamente comparáveis (pesos diferentes).
+
+### 14.4 Auditoria cruzada
+
+- **Método:** todos os 44 módulos usam SFP com pesos 4,6/7 (IFPUG SFP; SISP v3.0). Sem mistura de APF tradicional nas seções de inventário.
+- **Totais consolidados:** (2.283 × 4,6) + (1.648 × 7) = 22.037,8 SFP — confere com a soma dos 44 totais individuais.
+- **Dupla contagem:** AL compartilhados entre módulos (ex.: `BENEFBFCIARIO`, `PROCESSOBENEF`, `PARAMRH`, `PROVDESC`/`RUBRICAINDIV`, `CARGO`/`EVOLFUNC`, `FATORAVAL`/`TIPOAVAL`, `PROCESSOTRAB`, `TIPOCMED`/`LOCALIZACAO`) estão documentados em cada módulo (seção 7) e em `metodologia.html#dupla-contagem`. O "dono" funcional de vários AL compartilhados está marcado como pendente de validação. O total consolidado pode incluir algum AL contado em mais de um módulo — os totais são apresentados por módulo e a soma deve ser interpretada com essa ressalva.
+
+### 14.5 Correções aplicadas
+
+| Arquivo | Correção |
+|---|---|
+| `docs1/pontos-de-funcao/auditoria-sfp.html` | **Novo** — relatório de auditoria com tabela dos 44 módulos, divergências, auditoria cruzada, correções e limitações |
+| `docs1/pontos-de-funcao/metodologia.html` | Correção de contagens obsoletas (17/20 → 44 módulos), totais obsoletos (9.797,6 → 22.037,8 SFP), referências "ainda não contados" → contados, badge/footer atualizados |
+| `docs1/pontos-de-funcao/index.html` | Adicionado link de navegação para o relatório de auditoria |
+| `analise_modulos_APF.md` | Atualização das seções 4.2, 4.3, 4.4, 10.1 e 10.5 (status: 44 módulos analisados) e adição desta seção 14 |
+
+### 14.6 Limitações
+
+- Fronteiras entre módulos são INFERIDO para os 39 módulos sem documentação funcional em `docs1/`.
+- AL compartilhados com "dono" pendente de validação podem gerar dupla contagem no total consolidado.
+- A tabela de fronteiras em `metodologia.html` lista 19 módulos (até PFC-60); os 25 restantes seguem o mesmo tratamento, documentado em cada página e na auditoria.
+- Os 3 módulos previdenciários originais tiveram primeira geração em IFPUG FPA (método diferente) — os totais não são diretamente comparáveis.
+
+---
+
+*Fim do documento — `analise_modulos_APF.md` — PFC-49 (gerado em 2026-11-12) — Atualizado em PFC-72 (auditoria, 2026-11-19)*
