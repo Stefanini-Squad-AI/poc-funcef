@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UC405 — Demissão — Cadastro Previdenciário</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<header>
+  <div class="badge">Blueprint AS-IS — PFC-73 — Processos Funcionais</div>
+  <h1>UC405 — Demissão</h1>
+  <p>Caso de uso do módulo Cadastro Previdenciário: 4 jornada(s) funcional(is) e 4 regra(s) de negócio descritas dentro de cada jornada.</p>
+</header>
+<nav>
+  <a href="index.html">📋 Visão Geral</a>
+  <a href="arquitetura.html">🏗️ Arquitetura</a>
+  <a href="inventario-tecnico.html">📦 Inventário</a>
+  <a href="funcionalidades.html">⚙️ Processos Funcionais</a>
+  <a href="procedures-functions.html">🔧 Procedures</a>
+  <a href="dados.html">🗄️ Dados</a>
+  <a href="relatorios.html">📄 Relatórios</a>
+  <a href="integracoes.html">🔗 Integrações</a>
+  <a href="tratamento-erros.html">⚠️ Erros</a>
+  <a href="diagramas-fluxo.html">🔀 Fluxos</a>
+  <a href="lacunas.html">🔍 Lacunas</a>
+  <a href="controle-cobertura.html">📊 Cobertura</a>
+</nav>
+<main>
+
+<a class="back-btn" href="funcionalidades.html">← Voltar à lista de Casos de Uso (Processos Funcionais)</a>
+<div class="breadcrumb"><a href="index.html">Cadastro Previdenciário</a> › <a href="funcionalidades.html">Processos Funcionais</a> › UC405</div>
+
+<section><div class="section-title">1. Identificação</div>
+<div class="table-wrap"><table><tbody>
+<tr><th>Caso de Uso</th><td><strong>UC405 — Demissão</strong></td></tr>
+<tr><th>Módulo</th><td>CADASTROPREV — Cadastro Previdenciário</td></tr>
+<tr><th>Sistema</th><td>CM Contabilidade / FUNCEF (Delphi 5 / VCL / MIDAS / Oracle)</td></tr>
+<tr><th>Tipo</th><td>Sistema Desktop</td></tr>
+<tr><th>Ator</th><td>Usuário operacional (analista de cadastro previdenciário)</td></tr>
+<tr><th>Jornadas</th><td><a href="#PF-13">JF013 — Demissão da Patrocinadora</a>, <a href="#PF-14">JF014 — Demissão com Cancelamento</a>, <a href="#PF-15">JF015 — Demissão com Manutenção de Contribuição</a>, <a href="#PF-16">JF016 — Demissão com Manutenção de Saldo</a></td></tr>
+<tr><th>Regras de negócio</th><td>4 regra(s) CADASTROPREV-RN, descritas na íntegra dentro de cada jornada</td></tr>
+<tr><th>OS - Título</th><td>PFC-73 — Lista de UC (Processos Funcionais organizados em Casos de Uso)</td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">2. Descrição Resumida</div>
+<p>Registro da demissão do participante da patrocinadora, com diferentes tratamentos: demissão simples, demissão com cancelamento do plano, demissão com manutenção de contribuição e demissão com manutenção de saldo. Este caso de uso reúne 4 jornada(s) funcional(is) do módulo Cadastro Previdenciário:</p>
+<ul>
+<li><a href="#PF-13"><strong>JF013 — Demissão da Patrocinadora</strong></a>: registrar a demissão do participante da patrocinadora, com análise de elegibilidade e validação de tempo de afastamento.</li>
+<li><a href="#PF-14"><strong>JF014 — Demissão com Cancelamento</strong></a>: demissão com cancelamento do plano (form externo, INFERIDO).</li>
+<li><a href="#PF-15"><strong>JF015 — Demissão com Manutenção de Contribuição</strong></a>: demissão mantendo a contribuição do participante (form externo, INFERIDO).</li>
+<li><a href="#PF-16"><strong>JF016 — Demissão com Manutenção de Saldo</strong></a>: demissão mantendo o saldo no plano (form externo, INFERIDO).</li>
+</ul>
+<p><strong>Necessidade de negócio:</strong> a demissão do participante da patrocinadora (empregadora) é o evento que desvincula o participante da empresa. O sistema valida a data de demissão, executa análise de elegibilidade antes da demissão, valida o tempo de afastamento e atualiza a situação na patrocinadora, no plano e na fundação. A demissão pode ser simples (JF013), com cancelamento do plano (JF014), com manutenção de contribuição (JF015 — o participante continua contribuindo como associado) ou com manutenção de saldo (JF016 — o saldo fica preservado no plano). As jornadas JF014, JF015 e JF016 abrem forms externos ao módulo CADASTROPREV (em CMAdmPrev/CM), sendo portanto INFERIDO quanto à sua implementação detalhada.</p>
+<p><strong>Quem inicia:</strong> sempre o usuário (analista de cadastro), pelo menu <em>Eventos</em> da tela principal.</p>
+<p><strong>Resultado esperado:</strong> ao fim do registro, o evento fica gravado em <code>EVENTOSPREV</code> e em <code>HSTCONTEVENTOSPR</code>, a situação do participante em <code>PARTPREVPLAN</code> é atualizada conforme o tipo de demissão, a elegibilidade em <code>ELEGPATRO</code> é analisada, e as reservas em <code>RESERVAPART</code> refletem o tratamento escolhido.</p>
+</section>
+
+<section><div class="section-title">3. Pré-condições</div>
+<p><strong>Gerais do módulo:</strong></p>
+<ul>
+<li>O módulo CADASTROPREV deve estar compilado e disponível (entry point <code>CADASTROPREV/Fontes/CadastroPrev.dpr</code>).</li>
+<li>O banco Oracle (schema <code>CM.</code>) deve estar acessível.</li>
+<li>O participante deve estar selecionado na tela principal.</li>
+<li>Os parâmetros globais do sistema previdenciário devem estar carregados.</li>
+<li>O usuário deve ter permissão de acesso ao módulo e ao tipo de evento.</li>
+</ul>
+<p><strong>Por jornada:</strong></p>
+<ul>
+<li><a href="#PF-13">JF013</a>: participante ativo na patrocinadora; data de demissão informada; elegibilidade analisável.</li>
+<li><a href="#PF-14">JF014</a>: participante ativo; data de demissão informada; condições de cancelamento satisfeitas.</li>
+<li><a href="#PF-15">JF015</a>: participante ativo; data de demissão informada; condições de manutenção de contribuição satisfeitas.</li>
+<li><a href="#PF-16">JF016</a>: participante ativo; data de demissão informada; condições de manutenção de saldo satisfeitas.</li>
+</ul>
+</section>
+
+<section><div class="section-title">4. Pós-condições</div>
+<ul>
+<li><a href="#PF-13">JF013</a>: evento de demissão gravado em EVENTOSPREV/HSTCONTEVENTOSPR; situação na patrocinadora/plano/fundação atualizada em PARTPREVPLAN; elegibilidade analisada em ELEGPATRO; reservas atualizadas em RESERVAPART.</li>
+<li><a href="#PF-14">JF014</a>: evento de demissão com cancelamento gravado; participante em situação de cancelado; reservas zeradas/saldadas.</li>
+<li><a href="#PF-15">JF015</a>: evento de demissão com manutenção de contribuição gravado; participante em situação de associado/assistido; contribuições mantidas.</li>
+<li><a href="#PF-16">JF016</a>: evento de demissão com manutenção de saldo gravado; participante em situação de mantido; saldo preservado.</li>
+</ul>
+</section>
+
+<section><div class="section-title">5. Jornadas Funcionais (JF013, JF014, JF015, JF016)</div>
+<p>Cada jornada traz objetivo, ator/gatilho, pré e pós-condições, sequência operacional, ações práticas, <strong>regras de negócio da jornada</strong> (texto completo de cada regra), tratamentos e mensagens.</p>
+<p><strong>Como as jornadas deste caso de uso se relacionam:</strong> JF013 (demissão da patrocinadora) é a jornada base, com implementação comprovada no módulo. JF014 (cancelamento), JF015 (manutenção de contribuição) e JF016 (manutenção de saldo) são variações que abrem forms externos ao módulo CADASTROPREV — o item de menu é comprovado mas a implementação está fora da fronteira do módulo (INFERIDO). Em cada passo, o rótulo "Usuário" ou "Sistema" indica quem executa a ação.</p>
+<div class="legend"><span><span class="ev ev-comprovado">COMPROVADO</span> — no código</span><span><span class="ev ev-inferido">INFERIDO</span> — plausível</span><span><span class="ev ev-pendente">PENDENTE</span> — validar</span></div>
+</section>
+
+<div class="pf-block" id="PF-13"><h4>JF013 (PF-13) — Demissão da Patrocinadora</h4>
+<p><strong>Objetivo:</strong> registrar a demissão do participante da patrocinadora, com análise de elegibilidade e validação de tempo de afastamento.</p>
+<p><strong>Necessidade de negócio:</strong> a demissão da patrocinadora desvincula o participante da empresa. O sistema valida a data de demissão, executa análise de elegibilidade antes de confirmar, valida o tempo de afastamento e atualiza a situação na patrocinadora, no plano e na fundação. O form <code>FEventoDemissaoPatrocinadora.pas</code> (1.011 linhas) trata o fluxo.</p>
+<p><strong>Gatilho/Ator:</strong> usuário aciona o menu <em>Eventos › Demissão da Patrocinadora</em> na tela principal.</p>
+<p><strong>Pré-condições:</strong> participante ativo na patrocinadora; data de demissão informada; elegibilidade analisável.</p>
+<p><strong>Pós-condições:</strong> evento de demissão gravado; situação na patrocinadora/plano/fundação atualizada; elegibilidade analisada; reservas atualizadas.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li><strong>Usuário:</strong> seleciona o participante na tela principal e aciona o menu <em>Eventos › Demissão da Patrocinadora</em>. O sistema abre o form <code>FEventoDemissaoPatrocinadora.dfm</code> com os dados do participante (<code>FEventoDemissaoPatrocinadora.pas:401</code>).</li>
+<li><strong>Sistema:</strong> valida se o participante foi selecionado. Se nenhum participante estiver selecionado, exibe <a href="#MSG001">MSG001</a> e bloqueia (<a href="#TRT001">TRT001</a>).</li>
+<li><strong>Usuário:</strong> informa a data de demissão e clica em "Confirmar".</li>
+<li><strong>Sistema:</strong> valida se a data de demissão foi encontrada <a href="#CADASTROPREV-RN020">[RN020]</a>. Se não encontrada, exibe <a href="#MSG020">MSG020</a> e bloqueia (<a href="#TRT020">TRT020</a>).</li>
+<li><strong>Sistema:</strong> executa a análise de elegibilidade antes da demissão <a href="#CADASTROPREV-RN021">[RN021]</a> (<code>FEventoDemissaoPatrocinadora.pas:954</code>). Se a elegibilidade falhar, exibe <a href="#MSG022">MSG022</a> e bloqueia (<a href="#TRT021">TRT021</a>).</li>
+<li><strong>Sistema:</strong> valida o tempo de afastamento do participante <a href="#CADASTROPREV-RN022">[RN022]</a> (<code>FEventoDemissaoPatrocinadora.pas:992</code>). Se a regra de validação retornar falso, exibe <a href="#MSG021">MSG021</a> e bloqueia (<a href="#TRT022">TRT022</a>).</li>
+<li><strong>Sistema:</strong> grava o evento em <code>EVENTOSPREV</code> com o tipo "Demissão da Patrocinadora". Atualiza a situação na patrocinadora, no plano e na fundação em <code>PARTPREVPLAN</code> <a href="#CADASTROPREV-RN023">[RN023]</a>. Atualiza a elegibilidade em <code>ELEGPATRO</code>. Atualiza as reservas em <code>RESERVAPART</code>. Grava o histórico em <code>HSTCONTEVENTOSPR</code>.</li>
+<li><strong>Sistema:</strong> exibe mensagem de sucesso e fecha o form.</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Abrir form de demissão</td><td>Carregar dados do participante</td><td>Participante selecionado</td><td>Abre FEventoDemissaoPatrocinadora</td><td>Form preenchido</td><td>—</td><td><a href="#MSG001">MSG001</a></td><td><code>FEventoDemissaoPatrocinadora.dfm</code></td></tr>
+<tr><td>Validar data demissão</td><td>Data de demissão encontrada</td><td>Data de demissão</td><td>Valida se informada/encontrada</td><td>Encontrada ou bloqueio</td><td><a href="#CADASTROPREV-RN020">RN020</a></td><td><a href="#MSG020">MSG020</a></td><td><code>FEventoDemissaoPatrocinadora.dfm</code></td></tr>
+<tr><td>Analisar elegibilidade</td><td>Verificar elegibilidade antes da demissão</td><td>ID participante</td><td>Executa análise de elegibilidade (:954)</td><td>Aprovada ou bloqueio</td><td><a href="#CADASTROPREV-RN021">RN021</a></td><td><a href="#MSG022">MSG022</a></td><td><code>FEventoDemissaoPatrocinadora.dfm</code></td></tr>
+<tr><td>Validar tempo afastamento</td><td>Verificar tempo de afastamento</td><td>Histórico de afastamentos</td><td>Executa regra de validação (:992)</td><td>Válido ou bloqueio</td><td><a href="#CADASTROPREV-RN022">RN022</a></td><td><a href="#MSG021">MSG021</a></td><td><code>FEventoDemissaoPatrocinadora.dfm</code></td></tr>
+<tr><td>Gravar demissão</td><td>Persistir evento e atualizar situações</td><td>Dados validados</td><td>Insere em EVENTOSPREV e atualiza PARTPREVPLAN/ELEGPATRO/RESERVAPART</td><td>Evento gravado</td><td><a href="#CADASTROPREV-RN023">RN023</a></td><td>—</td><td><code>FEventoDemissaoPatrocinadora.dfm</code></td></tr>
+</tbody></table></div>
+<div class="jf-rules">
+<p><strong>Regras de negócio da jornada:</strong> 4 regra(s) — texto completo abaixo.</p>
+<div class="rule-block" id="CADASTROPREV-RN020"><div class="rule-id">RN020 (CADASTROPREV-RN020) — Data de demissão obrigatória</div>
+<p><strong>Descrição:</strong> a data de demissão do participante deve ser informada e encontrada no cadastro.</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>dtpDataDemissao</code> — [obrigatório] — data da demissão</li>
+<li><code>EVENTOSPREV.DTEVENTO</code> — [obrigatório] — gravado com a data</li>
+</ul>
+<p><strong>Categoria:</strong> validação de entrada · <strong>Gatilho:</strong> confirmação da demissão</p>
+<p><strong>Condição:</strong> se <code>dtpDataDemissao</code> vazio ou não encontrada → bloqueia.</p>
+<p><strong>Tratamento (TRT):</strong> <a href="#TRT020">TRT020</a> → <a href="#MSG020">MSG020</a> → Bloqueia execução</p>
+<p><strong>Rotina:</strong> validação inline no form. <strong>Origem:</strong> <code>CADASTROPREV/Fontes/FEventoDemissaoPatrocinadora.pas</code>. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> · <strong>Severidade:</strong> alta (bloqueante) · <strong>Jornada:</strong> <a href="#PF-13">JF013</a> · <strong>Relacionadas:</strong> —</p>
+</div>
+<div class="rule-block" id="CADASTROPREV-RN021"><div class="rule-id">RN021 (CADASTROPREV-RN021) — Análise de elegibilidade antes da demissão</div>
+<p><strong>Descrição:</strong> antes de confirmar a demissão, o sistema executa a análise de elegibilidade do participante.</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>ELEGPATRO</code> — [obrigatório] — elegibilidade do participante</li>
+<li><code>URegra.pas</code> — [obrigatório] — motor de regras</li>
+</ul>
+<p><strong>Categoria:</strong> validação de negócio · <strong>Gatilho:</strong> confirmação da demissão</p>
+<p><strong>Condição:</strong> se a análise de elegibilidade falhar → bloqueia.</p>
+<p><strong>Tratamento (TRT):</strong> <a href="#TRT021">TRT021</a> → <a href="#MSG022">MSG022</a> → Bloqueia execução</p>
+<p><strong>Rotina:</strong> <code>URegra.ExecutaRegraElegibilidade</code>. <strong>Origem:</strong> <code>CADASTROPREV/Fontes/FEventoDemissaoPatrocinadora.pas:954</code>. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> · <strong>Severidade:</strong> alta (bloqueante) · <strong>Jornada:</strong> <a href="#PF-13">JF013</a> · <strong>Relacionadas:</strong> —</p>
+</div>
+<div class="rule-block" id="CADASTROPREV-RN022"><div class="rule-id">RN022 (CADASTROPREV-RN022) — Validação do tempo de afastamento</div>
+<p><strong>Descrição:</strong> o sistema valida o tempo de afastamento do participante antes de confirmar a demissão.</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>EVOLFUNCPREV</code> — [obrigatório] — histórico de afastamentos</li>
+<li><code>URegra.pas</code> — [obrigatório] — motor de regras</li>
+</ul>
+<p><strong>Categoria:</strong> validação de negócio · <strong>Gatilho:</strong> confirmação da demissão</p>
+<p><strong>Condição:</strong> se a regra de validação do tempo de afastamento retornar falso → bloqueia.</p>
+<p><strong>Tratamento (TRT):</strong> <a href="#TRT022">TRT022</a> → <a href="#MSG021">MSG021</a> → Bloqueia execução</p>
+<p><strong>Rotina:</strong> <code>URegra.ExecutaRegraTempoAfastamento</code>. <strong>Origem:</strong> <code>CADASTROPREV/Fontes/FEventoDemissaoPatrocinadora.pas:992</code>. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> · <strong>Severidade:</strong> alta (bloqueante) · <strong>Jornada:</strong> <a href="#PF-13">JF013</a> · <strong>Relacionadas:</strong> —</p>
+</div>
+<div class="rule-block" id="CADASTROPREV-RN023"><div class="rule-id">RN023 (CADASTROPREV-RN023) — Situação na patrocinadora/plano/fundação atualizada</div>
+<p><strong>Descrição:</strong> após a demissão, a situação do participante é atualizada na patrocinadora, no plano e na fundação.</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>PARTPREVPLAN.SITPARTICIPANTE</code> — [obrigatório] — situação do participante no plano</li>
+<li><code>ELEGPATRO.SITPARTICIPANTE</code> — [obrigatório] — situação na patrocinadora</li>
+<li><code>RESERVAPART</code> — [obrigatório] — reservas atualizadas conforme tratamento</li>
+</ul>
+<p><strong>Categoria:</strong> regra de negócio · <strong>Gatilho:</strong> gravação do evento de demissão</p>
+<p><strong>Condição:</strong> após gravar o evento, atualiza situação em PARTPREVPLAN, ELEGPATRO e RESERVAPART.</p>
+<p><strong>Rotina:</strong> atualização inline no form. <strong>Origem:</strong> <code>CADASTROPREV/Fontes/FEventoDemissaoPatrocinadora.pas</code>. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> · <strong>Severidade:</strong> alta · <strong>Jornada:</strong> <a href="#PF-13">JF013</a> · <strong>Relacionadas:</strong> —</p>
+</div>
+</div>
+
+<p><strong>Dependências:</strong> consulta ELEGPATRO e EVOLFUNCPREV; atualiza PARTPREVPLAN e RESERVAPART. Evidência: <code>CADASTROPREV/Fontes/FEventoDemissaoPatrocinadora.pas:401-1011</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<div class="mermaid">graph LR
+  n0["FEventoDemissaoPatrocinadora"] --> n1["ValidaParticipante"] --> n2["ValidaDataDemissao(:RN020)"] --> n3["AnalisaElegibilidade(:RN021,:954)"] --> n4["ValidaTempoAfastamento(:RN022,:992)"] --> n5["GravaEvento"] --> n6["EVENTOSPREV/HSTCONTEVENTOSPR"] --> n7["AtualizaSituacao(:RN023)"] --> n8["PARTPREVPLAN/ELEGPATRO"] --> n9["AtualizaReservas"] --> n10["RESERVAPART"]</div>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span></p>
+<ul>
+<li>Confirmar se a análise de elegibilidade (passo 5) é a mesma regra usada na reinscrição (RN009) ou uma regra específica de demissão.</li>
+<li>Validar se a atualização de reservas (passo 7) calcula o saldo de resgate ou se apenas marca a reserva como passível de resgate.</li>
+<li>O form tem 1.011 linhas — pode haver regras adicionais não catalogadas.</li>
+</ul>
+</div>
+</div>
+
+<div class="pf-block" id="PF-14"><h4>JF014 (PF-14) — Demissão com Cancelamento <span class="ev ev-inferido">INFERIDO</span></h4>
+<p><strong>Objetivo:</strong> demissão do participante com cancelamento do plano.</p>
+<p><strong>Necessidade de negócio:</strong> nesta variação, a demissão do participante da patrocinadora é acompanhada do cancelamento do plano previdenciário. O participante deixa de contribuir e o saldo é tratado conforme as regras de cancelamento (resgate, portabilidade ou preservação). O form <code>frmEventoDemissaoCancel</code> é externo ao módulo CADASTROPREV (em CMAdmPrev/CM), sendo a implementação INFERIDO.</p>
+<p><strong>Gatilho/Ator:</strong> usuário aciona o menu <em>Eventos › Demissão com Cancelamento</em> na tela principal.</p>
+<p><strong>Pré-condições:</strong> participante ativo; data de demissão informada; condições de cancelamento satisfeitas.</p>
+<p><strong>Pós-condições:</strong> evento de demissão com cancelamento gravado; participante em situação de cancelado; reservas zeradas/saldadas.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li><strong>Usuário:</strong> seleciona o participante na tela principal e aciona o menu <em>Eventos › Demissão com Cancelamento</em>. O handler abre o form externo <code>frmEventoDemissaoCancel</code>.</li>
+<li><strong>Sistema:</strong> valida se o participante foi selecionado. Se nenhum participante estiver selecionado, exibe <a href="#MSG001">MSG001</a> e bloqueia (<a href="#TRT001">TRT001</a>).</li>
+<li><strong>Usuário:</strong> informa a data de demissão e os parâmetros do cancelamento. Clica em "Confirmar".</li>
+<li><strong>Sistema:</strong> valida a data de demissão <a href="#CADASTROPREV-RN020">[RN020]</a>. Se inválida, exibe <a href="#MSG020">MSG020</a> e bloqueia (<a href="#TRT020">TRT020</a>).</li>
+<li><strong>Sistema:</strong> executa a análise de elegibilidade <a href="#CADASTROPREV-RN021">[RN021]</a>. Se falhar, exibe <a href="#MSG022">MSG022</a> e bloqueia (<a href="#TRT021">TRT021</a>).</li>
+<li><strong>Sistema:</strong> valida o tempo de afastamento <a href="#CADASTROPREV-RN022">[RN022]</a>. Se inválido, exibe <a href="#MSG021">MSG021</a> e bloqueia (<a href="#TRT022">TRT022</a>).</li>
+<li><strong>Sistema:</strong> grava o evento de demissão com cancelamento em <code>EVENTOSPREV</code>. Atualiza a situação para "Cancelado" em <code>PARTPREVPLAN</code> <a href="#CADASTROPREV-RN023">[RN023]</a>. Trata as reservas em <code>RESERVAPART</code> conforme regras de cancelamento. Grava histórico em <code>HSTCONTEVENTOSPR</code>.</li>
+<li><strong>Sistema:</strong> exibe mensagem de sucesso e fecha o form.</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Abrir form externo</td><td>Iniciar demissão com cancelamento</td><td>Participante selecionado</td><td>Abre frmEventoDemissaoCancel (externo)</td><td>Form aberto</td><td>—</td><td><a href="#MSG001">MSG001</a></td><td><code>frmEventoDemissaoCancel</code> (externo)</td></tr>
+<tr><td>Validar data demissão</td><td>Data obrigatória</td><td>Data de demissão</td><td>Valida se informada</td><td>Encontrada ou bloqueio</td><td><a href="#CADASTROPREV-RN020">RN020</a></td><td><a href="#MSG020">MSG020</a></td><td><code>frmEventoDemissaoCancel</code></td></tr>
+<tr><td>Analisar elegibilidade</td><td>Verificar elegibilidade</td><td>ID participante</td><td>Executa análise de elegibilidade</td><td>Aprovada ou bloqueio</td><td><a href="#CADASTROPREV-RN021">RN021</a></td><td><a href="#MSG022">MSG022</a></td><td><code>frmEventoDemissaoCancel</code></td></tr>
+<tr><td>Validar tempo afastamento</td><td>Verificar tempo de afastamento</td><td>Histórico</td><td>Executa regra de validação</td><td>Válido ou bloqueio</td><td><a href="#CADASTROPREV-RN022">RN022</a></td><td><a href="#MSG021">MSG021</a></td><td><code>frmEventoDemissaoCancel</code></td></tr>
+<tr><td>Gravar demissão com cancelamento</td><td>Persistir evento e cancelar plano</td><td>Dados validados</td><td>Insere em EVENTOSPREV e cancela PARTPREVPLAN/RESERVAPART</td><td>Evento gravado, plano cancelado</td><td><a href="#CADASTROPREV-RN023">RN023</a></td><td>—</td><td><code>frmEventoDemissaoCancel</code></td></tr>
+</tbody></table></div>
+<div class="jf-rules">
+<p><strong>Regras de negócio da jornada:</strong> 4 regra(s) — reaproveitadas de JF013 (RN020, RN021, RN022, RN023), aplicadas no form externo.</p>
+<div class="rule-block" id="CADASTROPREV-RN020b"><div class="rule-id">RN020 (CADASTROPREV-RN020) — Data de demissão obrigatória (reaproveitada)</div>
+<p><strong>Descrição:</strong> mesma regra <a href="#CADASTROPREV-RN020">RN020</a> aplicada na demissão com cancelamento.</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>dtpDataDemissao</code> — [obrigatório] — data da demissão</li>
+</ul>
+<p><strong>Condição:</strong> se <code>dtpDataDemissao</code> vazio → bloqueia.</p>
+<p><strong>Tratamento (TRT):</strong> <a href="#TRT020">TRT020</a> → <a href="#MSG020">MSG020</a> → Bloqueia execução</p>
+<p><strong>Rotina:</strong> validação no form externo. <strong>Origem:</strong> <code>frmEventoDemissaoCancel</code> (externo). <strong>Evidência:</strong> <span class="ev ev-inferido">INFERIDO</span> · <strong>Severidade:</strong> alta (bloqueante) · <strong>Jornada:</strong> <a href="#PF-14">JF014</a> · <strong>Relacionadas:</strong> <a href="#CADASTROPREV-RN020">RN020</a></p>
+</div>
+<div class="rule-block" id="CADASTROPREV-RN021b"><div class="rule-id">RN021 (CADASTROPREV-RN021) — Análise de elegibilidade (reaproveitada)</div>
+<p><strong>Descrição:</strong> mesma regra <a href="#CADASTROPREV-RN021">RN021</a> aplicada na demissão com cancelamento.</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>ELEGPATRO</code> — [obrigatório] — elegibilidade do participante</li>
+</ul>
+<p><strong>Condição:</strong> se a análise de elegibilidade falhar → bloqueia.</p>
+<p><strong>Tratamento (TRT):</strong> <a href="#TRT021">TRT021</a> → <a href="#MSG022">MSG022</a> → Bloqueia execução</p>
+<p><strong>Rotina:</strong> <code>URegra.ExecutaRegraElegibilidade</code>. <strong>Origem:</strong> <code>frmEventoDemissaoCancel</code> (externo). <strong>Evidência:</strong> <span class="ev ev-inferido">INFERIDO</span> · <strong>Severidade:</strong> alta (bloqueante) · <strong>Jornada:</strong> <a href="#PF-14">JF014</a> · <strong>Relacionadas:</strong> <a href="#CADASTROPREV-RN021">RN021</a></p>
+</div>
+<div class="rule-block" id="CADASTROPREV-RN022b"><div class="rule-id">RN022 (CADASTROPREV-RN022) — Validação do tempo de afastamento (reaproveitada)</div>
+<p><strong>Descrição:</strong> mesma regra <a href="#CADASTROPREV-RN022">RN022</a> aplicada na demissão com cancelamento.</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>EVOLFUNCPREV</code> — [obrigatório] — histórico de afastamentos</li>
+</ul>
+<p><strong>Condição:</strong> se a regra de validação do tempo de afastamento retornar falso → bloqueia.</p>
+<p><strong>Tratamento (TRT):</strong> <a href="#TRT022">TRT022</a> → <a href="#MSG021">MSG021</a> → Bloqueia execução</p>
+<p><strong>Rotina:</strong> <code>URegra.ExecutaRegraTempoAfastamento</code>. <strong>Origem:</strong> <code>frmEventoDemissaoCancel</code> (externo). <strong>Evidência:</strong> <span class="ev ev-inferido">INFERIDO</span> · <strong>Severidade:</strong> alta (bloqueante) · <strong>Jornada:</strong> <a href="#PF-14">JF014</a> · <strong>Relacionadas:</strong> <a href="#CADASTROPREV-RN022">RN022</a></p>
+</div>
+<div class="rule-block" id="CADASTROPREV-RN023b"><div class="rule-id">RN023 (CADASTROPREV-RN023) — Situação atualizada (reaproveitada)</div>
+<p><strong>Descrição:</strong> mesma regra <a href="#CADASTROPREV-RN023">RN023</a> — situação atualizada para "Cancelado".</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>PARTPREVPLAN.SITPARTICIPANTE</code> — [obrigatório] — situação atualizada para "Cancelado"</li>
+<li><code>RESERVAPART</code> — [obrigatório] — reservas tratadas conforme cancelamento</li>
+</ul>
+<p><strong>Rotina:</strong> atualização no form externo. <strong>Origem:</strong> <code>frmEventoDemissaoCancel</code> (externo). <strong>Evidência:</strong> <span class="ev ev-inferido">INFERIDO</span> · <strong>Severidade:</strong> alta · <strong>Jornada:</strong> <a href="#PF-14">JF014</a> · <strong>Relacionadas:</strong> <a href="#CADASTROPREV-RN023">RN023</a></p>
+</div>
+</div>
+
+<p><strong>Dependências:</strong> form externo ao módulo (CMAdmPrev/CM). Evidência: item de menu comprovado, implementação externa · <span class="ev ev-inferido">INFERIDO</span></p>
+<div class="mermaid">graph LR
+  n0["frmEventoDemissaoCancel(externo)"] --> n1["ValidaParticipante"] --> n2["ValidaDataDemissao(:RN020)"] --> n3["AnalisaElegibilidade(:RN021)"] --> n4["ValidaTempoAfastamento(:RN022)"] --> n5["GravaEvento"] --> n6["EVENTOSPREV/HSTCONTEVENTOSPR"] --> n7["CancelaPlano(:RN023)"] --> n8["PARTPREVPLAN(sit=Cancelado)"] --> n9["TrataReservas"] --> n10["RESERVAPART"]</div>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span></p>
+<ul>
+<li>O form <code>frmEventoDemissaoCancel</code> é externo ao módulo CADASTROPREV. Confirmar se as regras RN020–RN023 são aplicadas ou se há regras próprias no form externo.</li>
+<li>Validar o tratamento de reservas no cancelamento: resgate, portabilidade ou preservação.</li>
+</ul>
+</div>
+</div>
+
+<div class="pf-block" id="PF-15"><h4>JF015 (PF-15) — Demissão com Manutenção de Contribuição <span class="ev ev-inferido">INFERIDO</span></h4>
+<p><strong>Objetivo:</strong> demissão do participante mantendo a contribuição como associado.</p>
+<p><strong>Necessidade de negócio:</strong> nesta variação, o participante é demitido da patrocinadora mas continua contribuindo para o plano como associado (autopatrocinador). O form <code>frmEventoDemissaoManutContrib</code> é externo ao módulo CADASTROPREV, sendo a implementação INFERIDO.</p>
+<p><strong>Gatilho/Ator:</strong> usuário aciona o menu <em>Eventos › Demissão com Manutenção de Contribuição</em> na tela principal.</p>
+<p><strong>Pré-condições:</strong> participante ativo; data de demissão informada; condições de manutenção de contribuição satisfeitas.</p>
+<p><strong>Pós-condições:</strong> evento de demissão com manutenção de contribuição gravado; participante em situação de associado/assistido; contribuições mantidas.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li><strong>Usuário:</strong> seleciona o participante e aciona o menu <em>Eventos › Demissão com Manutenção de Contribuição</em>. O handler abre o form externo <code>frmEventoDemissaoManutContrib</code>.</li>
+<li><strong>Sistema:</strong> valida se o participante foi selecionado. Se nenhum, exibe <a href="#MSG001">MSG001</a> e bloqueia (<a href="#TRT001">TRT001</a>).</li>
+<li><strong>Usuário:</strong> informa a data de demissão e os parâmetros da manutenção. Clica em "Confirmar".</li>
+<li><strong>Sistema:</strong> valida a data de demissão <a href="#CADASTROPREV-RN020">[RN020]</a>, a elegibilidade <a href="#CADASTROPREV-RN021">[RN021]</a> e o tempo de afastamento <a href="#CADASTROPREV-RN022">[RN022]</a>.</li>
+<li><strong>Sistema:</strong> grava o evento em <code>EVENTOSPREV</code>. Atualiza a situação para "Associado" em <code>PARTPREVPLAN</code> <a href="#CADASTROPREV-RN023">[RN023]</a>. Mantém as contribuições em <code>CONTRIBPREVPARTP</code>. Grava histórico em <code>HSTCONTEVENTOSPR</code>.</li>
+<li><strong>Sistema:</strong> exibe mensagem de sucesso e fecha o form.</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Abrir form externo</td><td>Iniciar demissão com manutenção</td><td>Participante selecionado</td><td>Abre frmEventoDemissaoManutContrib (externo)</td><td>Form aberto</td><td>—</td><td><a href="#MSG001">MSG001</a></td><td><code>frmEventoDemissaoManutContrib</code> (externo)</td></tr>
+<tr><td>Validar dados</td><td>Validar data, elegibilidade e afastamento</td><td>Dados da demissão</td><td>Aplica RN020, RN021, RN022</td><td>Válido ou bloqueio</td><td><a href="#CADASTROPREV-RN020">RN020</a>, <a href="#CADASTROPREV-RN021">RN021</a>, <a href="#CADASTROPREV-RN022">RN022</a></td><td><a href="#MSG020">MSG020</a>, <a href="#MSG021">MSG021</a>, <a href="#MSG022">MSG022</a></td><td><code>frmEventoDemissaoManutContrib</code></td></tr>
+<tr><td>Gravar demissão</td><td>Persistir e manter contribuição</td><td>Dados validados</td><td>Insere em EVENTOSPREV e mantém CONTRIBPREVPARTP</td><td>Participante associado</td><td><a href="#CADASTROPREV-RN023">RN023</a></td><td>—</td><td><code>frmEventoDemissaoManutContrib</code></td></tr>
+</tbody></table></div>
+<div class="jf-rules">
+<p><strong>Regras de negócio da jornada:</strong> 4 regra(s) — reaproveitadas de JF013 (RN020, RN021, RN022, RN023), aplicadas no form externo. Evidência: <span class="ev ev-inferido">INFERIDO</span> para todas.</p>
+<div class="rule-block" id="CADASTROPREV-RN020c"><div class="rule-id">RN020 (CADASTROPREV-RN020) — Data de demissão obrigatória (reaproveitada)</div>
+<p><strong>Descrição:</strong> mesma regra <a href="#CADASTROPREV-RN020">RN020</a>. <strong>Evidência:</strong> <span class="ev ev-inferido">INFERIDO</span> · <strong>Jornada:</strong> <a href="#PF-15">JF015</a></p>
+</div>
+<div class="rule-block" id="CADASTROPREV-RN021c"><div class="rule-id">RN021 (CADASTROPREV-RN021) — Análise de elegibilidade (reaproveitada)</div>
+<p><strong>Descrição:</strong> mesma regra <a href="#CADASTROPREV-RN021">RN021</a>. <strong>Evidência:</strong> <span class="ev ev-inferido">INFERIDO</span> · <strong>Jornada:</strong> <a href="#PF-15">JF015</a></p>
+</div>
+<div class="rule-block" id="CADASTROPREV-RN022c"><div class="rule-id">RN022 (CADASTROPREV-RN022) — Validação do tempo de afastamento (reaproveitada)</div>
+<p><strong>Descrição:</strong> mesma regra <a href="#CADASTROPREV-RN022">RN022</a>. <strong>Evidência:</strong> <span class="ev ev-inferido">INFERIDO</span> · <strong>Jornada:</strong> <a href="#PF-15">JF015</a></p>
+</div>
+<div class="rule-block" id="CADASTROPREV-RN023c"><div class="rule-id">RN023 (CADASTROPREV-RN023) — Situação atualizada para "Associado" (reaproveitada)</div>
+<p><strong>Descrição:</strong> mesma regra <a href="#CADASTROPREV-RN023">RN023</a> — situação atualizada para "Associado". <strong>Evidência:</strong> <span class="ev ev-inferido">INFERIDO</span> · <strong>Jornada:</strong> <a href="#PF-15">JF015</a></p>
+</div>
+</div>
+
+<p><strong>Dependências:</strong> form externo ao módulo (CMAdmPrev/CM). Evidência: item de menu comprovado, implementação externa · <span class="ev ev-inferido">INFERIDO</span></p>
+<div class="mermaid">graph LR
+  n0["frmEventoDemissaoManutContrib(externo)"] --> n1["ValidaParticipante"] --> n2["ValidaDados(:RN020-022)"] --> n3["GravaEvento"] --> n4["EVENTOSPREV/HSTCONTEVENTOSPR"] --> n5["AtualizaSituacao(:RN023,Associado)"] --> n6["PARTPREVPLAN"] --> n7["MantemContribuicoes"] --> n8["CONTRIBPREVPARTP"]</div>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span></p>
+<ul>
+<li>Confirmar se a manutenção de contribuição exige cadastro prévio do participante como associado/aptopatrocinador.</li>
+<li>Validar se há regras próprias no form externo além das reaproveitadas.</li>
+</ul>
+</div>
+</div>
+
+<div class="pf-block" id="PF-16"><h4>JF016 (PF-16) — Demissão com Manutenção de Saldo <span class="ev ev-inferido">INFERIDO</span></h4>
+<p><strong>Objetivo:</strong> demissão do participante mantendo o saldo no plano.</p>
+<p><strong>Necessidade de negócio:</strong> nesta variação, o participante é demitido da patrocinadora mas o saldo acumulado no plano é preservado (benefício de risco, reserva matemática). O participante passa à situação de mantido. O form <code>frmEventoDemissaoManutSaldo</code> é externo ao módulo CADASTROPREV, sendo a implementação INFERIDO.</p>
+<p><strong>Gatilho/Ator:</strong> usuário aciona o menu <em>Eventos › Demissão com Manutenção de Saldo</em> na tela principal.</p>
+<p><strong>Pré-condições:</strong> participante ativo; data de demissão informada; condições de manutenção de saldo satisfeitas.</p>
+<p><strong>Pós-condições:</strong> evento de demissão com manutenção de saldo gravado; participante em situação de mantido; saldo preservado.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li><strong>Usuário:</strong> seleciona o participante e aciona o menu <em>Eventos › Demissão com Manutenção de Saldo</em>. O handler abre o form externo <code>frmEventoDemissaoManutSaldo</code>.</li>
+<li><strong>Sistema:</strong> valida se o participante foi selecionado. Se nenhum, exibe <a href="#MSG001">MSG001</a> e bloqueia (<a href="#TRT001">TRT001</a>).</li>
+<li><strong>Usuário:</strong> informa a data de demissão e os parâmetros da manutenção de saldo. Clica em "Confirmar".</li>
+<li><strong>Sistema:</strong> valida a data de demissão <a href="#CADASTROPREV-RN020">[RN020]</a>, a elegibilidade <a href="#CADASTROPREV-RN021">[RN021]</a> e o tempo de afastamento <a href="#CADASTROPREV-RN022">[RN022]</a>.</li>
+<li><strong>Sistema:</strong> grava o evento em <code>EVENTOSPREV</code>. Atualiza a situação para "Mantido" em <code>PARTPREVPLAN</code> <a href="#CADASTROPREV-RN023">[RN023]</a>. Preserva o saldo em <code>RESERVAPART</code>. Grava histórico em <code>HSTCONTEVENTOSPR</code>.</li>
+<li><strong>Sistema:</strong> exibe mensagem de sucesso e fecha o form.</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Abrir form externo</td><td>Iniciar demissão com manutenção de saldo</td><td>Participante selecionado</td><td>Abre frmEventoDemissaoManutSaldo (externo)</td><td>Form aberto</td><td>—</td><td><a href="#MSG001">MSG001</a></td><td><code>frmEventoDemissaoManutSaldo</code> (externo)</td></tr>
+<tr><td>Validar dados</td><td>Validar data, elegibilidade e afastamento</td><td>Dados da demissão</td><td>Aplica RN020, RN021, RN022</td><td>Válido ou bloqueio</td><td><a href="#CADASTROPREV-RN020">RN020</a>, <a href="#CADASTROPREV-RN021">RN021</a>, <a href="#CADASTROPREV-RN022">RN022</a></td><td><a href="#MSG020">MSG020</a>, <a href="#MSG021">MSG021</a>, <a href="#MSG022">MSG022</a></td><td><code>frmEventoDemissaoManutSaldo</code></td></tr>
+<tr><td>Gravar demissão</td><td>Persistir e preservar saldo</td><td>Dados validados</td><td>Insere em EVENTOSPREV e preserva RESERVAPART</td><td>Participante mantido</td><td><a href="#CADASTROPREV-RN023">RN023</a></td><td>—</td><td><code>frmEventoDemissaoManutSaldo</code></td></tr>
+</tbody></table></div>
+<div class="jf-rules">
+<p><strong>Regras de negócio da jornada:</strong> 4 regra(s) — reaproveitadas de JF013 (RN020, RN021, RN022, RN023), aplicadas no form externo. Evidência: <span class="ev ev-inferido">INFERIDO</span> para todas.</p>
+<div class="rule-block" id="CADASTROPREV-RN020d"><div class="rule-id">RN020 (CADASTROPREV-RN020) — Data de demissão obrigatória (reaproveitada)</div>
+<p><strong>Descrição:</strong> mesma regra <a href="#CADASTROPREV-RN020">RN020</a>. <strong>Evidência:</strong> <span class="ev ev-inferido">INFERIDO</span> · <strong>Jornada:</strong> <a href="#PF-16">JF016</a></p>
+</div>
+<div class="rule-block" id="CADASTROPREV-RN021d"><div class="rule-id">RN021 (CADASTROPREV-RN021) — Análise de elegibilidade (reaproveitada)</div>
+<p><strong>Descrição:</strong> mesma regra <a href="#CADASTROPREV-RN021">RN021</a>. <strong>Evidência:</strong> <span class="ev ev-inferido">INFERIDO</span> · <strong>Jornada:</strong> <a href="#PF-16">JF016</a></p>
+</div>
+<div class="rule-block" id="CADASTROPREV-RN022d"><div class="rule-id">RN022 (CADASTROPREV-RN022) — Validação do tempo de afastamento (reaproveitada)</div>
+<p><strong>Descrição:</strong> mesma regra <a href="#CADASTROPREV-RN022">RN022</a>. <strong>Evidência:</strong> <span class="ev ev-inferido">INFERIDO</span> · <strong>Jornada:</strong> <a href="#PF-16">JF016</a></p>
+</div>
+<div class="rule-block" id="CADASTROPREV-RN023d"><div class="rule-id">RN023 (CADASTROPREV-RN023) — Situação atualizada para "Mantido" (reaproveitada)</div>
+<p><strong>Descrição:</strong> mesma regra <a href="#CADASTROPREV-RN023">RN023</a> — situação atualizada para "Mantido", saldo preservado. <strong>Evidência:</strong> <span class="ev ev-inferido">INFERIDO</span> · <strong>Jornada:</strong> <a href="#PF-16">JF016</a></p>
+</div>
+</div>
+
+<p><strong>Dependências:</strong> form externo ao módulo (CMAdmPrev/CM). Evidência: item de menu comprovado, implementação externa · <span class="ev ev-inferido">INFERIDO</span></p>
+<div class="mermaid">graph LR
+  n0["frmEventoDemissaoManutSaldo(externo)"] --> n1["ValidaParticipante"] --> n2["ValidaDados(:RN020-022)"] --> n3["GravaEvento"] --> n4["EVENTOSPREV/HSTCONTEVENTOSPR"] --> n5["AtualizaSituacao(:RN023,Mantido)"] --> n6["PARTPREVPLAN"] --> n7["PreservaSaldo"] --> n8["RESERVAPART"]</div>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span></p>
+<ul>
+<li>Confirmar se a manutenção de saldo bloqueia resgates ou se permite movimentação posterior.</li>
+<li>Validar se há diferença entre "mantido" por demissão e "mantido" por afastamento (JF011/JF012).</li>
+</ul>
+</div>
+</div>
+
+<section id="TRT-section"><div class="section-title">6. Tratamentos (TRT)</div>
+<p>Tratamentos de erro derivados das validações bloqueantes e exceções das regras. Cada TRT possui Condição, Mensagem e Resultado.</p>
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Condição</th><th>Mensagem</th><th>Resultado</th><th>Regra</th><th>Jornada</th></tr></thead><tbody>
+<tr id="TRT001"><td><strong>TRT001</strong></td><td>Participante não selecionado</td><td><a href="#MSG001">MSG001</a></td><td>Bloqueia execução</td><td>—</td><td>JF013, JF014, JF015, JF016</td></tr>
+<tr id="TRT020"><td><strong>TRT020</strong></td><td>Data de demissão não encontrada</td><td><a href="#MSG020">MSG020</a></td><td>Bloqueia execução</td><td><a href="#CADASTROPREV-RN020">RN020</a></td><td>JF013, JF014, JF015, JF016</td></tr>
+<tr id="TRT021"><td><strong>TRT021</strong></td><td>Elegibilidade falhou na demissão</td><td><a href="#MSG022">MSG022</a></td><td>Bloqueia execução</td><td><a href="#CADASTROPREV-RN021">RN021</a></td><td>JF013, JF014, JF015, JF016</td></tr>
+<tr id="TRT022"><td><strong>TRT022</strong></td><td>Tempo de afastamento inválido</td><td><a href="#MSG021">MSG021</a></td><td>Bloqueia execução</td><td><a href="#CADASTROPREV-RN022">RN022</a></td><td>JF013, JF014, JF015, JF016</td></tr>
+</tbody></table></div>
+</section>
+
+<section id="MSG-section"><div class="section-title">7. Mensagens (MSG)</div>
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Texto da Mensagem</th><th>Jornadas relacionadas</th></tr></thead><tbody>
+<tr id="MSG001"><td><strong>MSG001</strong></td><td>"Primeiro selecione o Participante."</td><td>JF013, JF014, JF015, JF016</td></tr>
+<tr id="MSG020"><td><strong>MSG020</strong></td><td>"A data de demissão do participante não foi encontrada."</td><td>JF013, JF014, JF015, JF016</td></tr>
+<tr id="MSG021"><td><strong>MSG021</strong></td><td>"A Regra de Validação do Tempo de Afastamento retornou \"Falso\""</td><td>JF013, JF014, JF015, JF016</td></tr>
+<tr id="MSG022"><td><strong>MSG022</strong></td><td>"Erro na Execução da Regra de Validação da Opção 1/2/3."</td><td>JF013, JF014, JF015, JF016</td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">8. Tabela/API/Programa</div>
+<div class="table-wrap"><table><thead><tr><th>Jornada</th><th>Tabelas (escrita)</th><th>Rotina-chave (file:linha)</th></tr></thead><tbody>
+<tr><td>JF013</td><td>EVENTOSPREV, PARTPREVPLAN, ELEGPATRO, RESERVAPART, HSTCONTEVENTOSPR</td><td><code>FEventoDemissaoPatrocinadora.pas:401</code> (1.011 lin)</td></tr>
+<tr><td>JF014</td><td>EVENTOSPREV, PARTPREVPLAN, RESERVAPART, HSTCONTEVENTOSPR</td><td><code>frmEventoDemissaoCancel</code> (externo) <span class="ev ev-inferido">INFERIDO</span></td></tr>
+<tr><td>JF015</td><td>EVENTOSPREV, PARTPREVPLAN, CONTRIBPREVPARTP, HSTCONTEVENTOSPR</td><td><code>frmEventoDemissaoManutContrib</code> (externo) <span class="ev ev-inferido">INFERIDO</span></td></tr>
+<tr><td>JF016</td><td>EVENTOSPREV, PARTPREVPLAN, RESERVAPART, HSTCONTEVENTOSPR</td><td><code>frmEventoDemissaoManutSaldo</code> (externo) <span class="ev ev-inferido">INFERIDO</span></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">9. Telas/Layouts</div>
+<div class="table-wrap"><table><thead><tr><th>Jornada</th><th>Form(s) (.dfm)</th></tr></thead><tbody>
+<tr><td>JF013</td><td><code>FEventoDemissaoPatrocinadora.dfm</code></td></tr>
+<tr><td>JF014</td><td><code>frmEventoDemissaoCancel</code> (externo) <span class="ev ev-inferido">INFERIDO</span></td></tr>
+<tr><td>JF015</td><td><code>frmEventoDemissaoManutContrib</code> (externo) <span class="ev ev-inferido">INFERIDO</span></td></tr>
+<tr><td>JF016</td><td><code>frmEventoDemissaoManutSaldo</code> (externo) <span class="ev ev-inferido">INFERIDO</span></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">10. Visão Consolidada das Jornadas</div>
+<div class="table-wrap"><table><thead><tr><th>Jornada</th><th>ID</th><th>Título</th><th>Critério de aceitação (Dado/Quando/Então)</th><th>Mensagens</th><th>Telas</th></tr></thead><tbody>
+<tr><td>JF013</td><td>PF-13</td><td>Demissão da Patrocinadora</td><td><strong>Dado</strong> participante ativo com data e elegibilidade, <strong>Quando</strong> usuário registra demissão, <strong>Então</strong> evento é gravado e situação atualizada</td><td><a href="#MSG020">MSG020</a>–<a href="#MSG022">MSG022</a></td><td>FEventoDemissaoPatrocinadora</td></tr>
+<tr><td>JF014</td><td>PF-14</td><td>Demissão com Cancelamento</td><td><strong>Dado</strong> participante ativo, <strong>Quando</strong> usuário registra demissão com cancelamento, <strong>Então</strong> plano é cancelado e reservas tratadas</td><td><a href="#MSG020">MSG020</a>–<a href="#MSG022">MSG022</a></td><td>frmEventoDemissaoCancel (externo)</td></tr>
+<tr><td>JF015</td><td>PF-15</td><td>Demissão com Manutenção de Contribuição</td><td><strong>Dado</strong> participante ativo, <strong>Quando</strong> usuário registra demissão com manutenção, <strong>Então</strong> participante passa a associado e contribuições mantidas</td><td><a href="#MSG020">MSG020</a>–<a href="#MSG022">MSG022</a></td><td>frmEventoDemissaoManutContrib (externo)</td></tr>
+<tr><td>JF016</td><td>PF-16</td><td>Demissão com Manutenção de Saldo</td><td><strong>Dado</strong> participante ativo, <strong>Quando</strong> usuário registra demissão com manutenção de saldo, <strong>Então</strong> participante passa a mantido e saldo preservado</td><td><a href="#MSG020">MSG020</a>–<a href="#MSG022">MSG022</a></td><td>frmEventoDemissaoManutSaldo (externo)</td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">11. Critérios de Aceitação por Regra</div>
+<div class="table-wrap"><table><thead><tr><th>Regra</th><th>ID</th><th>Título</th><th>Critério de aceitação (Dado/Quando/Então)</th><th>Mensagens</th><th>Telas</th></tr></thead><tbody>
+<tr><td>RN020</td><td>CADASTROPREV-RN020</td><td>Data de demissão obrigatória</td><td><strong>Dado</strong> demissão, <strong>Quando</strong> data não encontrada, <strong>Então</strong> bloqueia com MSG020</td><td><a href="#MSG020">MSG020</a></td><td>FEventoDemissaoPatrocinadora + externos</td></tr>
+<tr><td>RN021</td><td>CADASTROPREV-RN021</td><td>Análise de elegibilidade</td><td><strong>Dado</strong> demissão, <strong>Quando</strong> elegibilidade falha, <strong>Então</strong> bloqueia com MSG022</td><td><a href="#MSG022">MSG022</a></td><td>FEventoDemissaoPatrocinadora + externos</td></tr>
+<tr><td>RN022</td><td>CADASTROPREV-RN022</td><td>Validação do tempo de afastamento</td><td><strong>Dado</strong> demissão, <strong>Quando</strong> tempo de afastamento inválido, <strong>Então</strong> bloqueia com MSG021</td><td><a href="#MSG021">MSG021</a></td><td>FEventoDemissaoPatrocinadora + externos</td></tr>
+<tr><td>RN023</td><td>CADASTROPREV-RN023</td><td>Situação atualizada</td><td><strong>Dado</strong> demissão confirmada, <strong>Quando</strong> evento gravado, <strong>Então</strong> situação em patro/plano/fundação atualizada</td><td>—</td><td>FEventoDemissaoPatrocinadora + externos</td></tr>
+</tbody></table></div>
+</section>
+
+<p><a class="back-btn" href="funcionalidades.html">← Voltar à lista de Casos de Uso (Processos Funcionais)</a></p>
+</main>
+<footer>
+<p>Blueprint AS-IS — PFC-73 — Processos Funcionais organizados em Casos de Uso — Módulo CADASTROPREV | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-24</p>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+<script src="../assets/js/mermaid-init.js"></script>
+</body>
+</html>

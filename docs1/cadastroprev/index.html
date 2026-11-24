@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cadastro Previdenciário — Blueprint AS-IS</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<header>
+  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-73</div>
+  <h1>Cadastro Previdenciário</h1>
+  <p>Manutenção cadastral de participantes, dependentes e recadastramento; registro de eventos previdenciários (aposentadoria, falecimento, reclusão, demissão, transferência, afastamento, cancelamento); saldamento de contas para novo plano.</p>
+</header>
+<nav>
+  <a href="index.html">📋 Visão Geral</a>
+  <a href="arquitetura.html">🏗️ Arquitetura</a>
+  <a href="inventario-tecnico.html">📦 Inventário</a>
+  <a href="funcionalidades.html">⚙️ Processos Funcionais</a>
+  <a href="procedures-functions.html">🔧 Procedures</a>
+  <a href="dados.html">🗄️ Dados</a>
+  <a href="relatorios.html">📄 Relatórios</a>
+  <a href="integracoes.html">🔗 Integrações</a>
+  <a href="tratamento-erros.html">⚠️ Erros</a>
+  <a href="diagramas-fluxo.html">🔀 Fluxos</a>
+  <a href="lacunas.html">🔍 Lacunas</a>
+  <a href="controle-cobertura.html">📊 Cobertura</a>
+</nav>
+
+<main class="layout-2">
+<div class="main-col">
+
+<section id="pfc73-leigo">
+<div class="note-info">
+<p><strong>O que esta aba mostra:</strong> o "cartão de visita" do módulo CADASTROPREV (Cadastro Previdenciário). É o programa que mantém o cadastro de todos os participantes do plano de previdência: quem são, em que plano estão inscritos, quem são seus dependentes, e registra todos os eventos que mudam a situação do participante (aposentadoria, falecimento, reclusão, demissão, transferência de plano, afastamento, cancelamento). Faz também o recadastramento periódico e o saldamento de contas quando há migração para um novo plano.</p>
+<p><strong>Por que isso importa:</strong> é aqui que nasce a informação base de todo o sistema previdenciário. Sem cadastro correto, não há contribuição, não há benefício, não há folha. Um evento registrado errado (por exemplo, um falecimento sem dependentes) impede o pagamento de pensão. Por isso o módulo tem 23 tipos de evento gerador e 72 processos elementares — o maior número de processos entre todos os módulos analisados.</p>
+<p><strong>Como ler esta página:</strong> a coluna da esquerda resume o que o módulo faz, os processos, as regras e as principais tabelas. A coluna da direita traz a "ficha técnica" (tecnologia, quantidade de arquivos, dependências). Os selos indicam o grau de certeza: <span class="ev ev-comprovado">COMPROVADO</span> (lido no código), <span class="ev ev-inferido">INFERIDO</span> (dedução plausível) e <span class="ev ev-pendente">PENDENTE</span> (precisa de validação humana). Os blocos "👔 Para o analista de negócios" destacam o que interessa a quem define regras e processos.</p>
+</div>
+<p><strong>Termos usados nesta página</strong> — explicados na ordem em que aparecem; a coluna "Fonte" mostra onde a explicação foi conferida.</p>
+<div class="table-wrap"><table><thead><tr><th>Termo técnico</th><th>Em linguagem simples</th><th>Fonte</th></tr></thead><tbody>
+<tr><td><strong>Participante</strong></td><td>Pessoa que contribui para o plano de previdência (ativo, assistido ou pensionista).</td><td><code>PARTPREVPLAN</code> (vínculo participante×plano)</td></tr>
+<tr><td><strong>Patrocinadora</strong></td><td>Empresa que patrocina o plano previdenciário (empregadora do participante).</td><td><code>PATRO</code> (tabela de patrocinadoras)</td></tr>
+<tr><td><strong>Plano previdenciário</strong></td><td>Conjunto de regras de benefício ao qual o participante pertence.</td><td><code>PLANPREV</code> (definição do plano)</td></tr>
+<tr><td><strong>Evento gerador</strong></td><td>Fato que muda a situação do participante (aposentadoria, falecimento, demissão, etc.). O menu "Eventos" é montado dinamicamente a partir da tabela EVENTOGERADOR.</td><td><code>FPrincipal.pas:701</code> (MontaMenu)</td></tr>
+<tr><td><strong>Dependente / beneficiário</strong></td><td>Pessoa vinculada ao participante que recebe benefício em caso de falecimento (pensão).</td><td><code>DEPENTIT</code>, <code>BFCIARIOTITPLAN</code></td></tr>
+<tr><td><strong>Recadastramento</strong></td><td>Processo periódico de confirmação de dados cadastrais. O módulo emite cartas, recebe o retorno e suspende benefícios de quem não recadastrou.</td><td><code>FEmissaoRecadastramento.pas</code></td></tr>
+<tr><td><strong>Saldamento</strong></td><td>Transferência do saldo de contas individuais para um novo plano previdenciário (migração de plano).</td><td><code>FSaldamento.pas</code>, <code>USaldamento.pas</code></td></tr>
+<tr><td><strong>Elegibilidade</strong></td><td>Verificação se o participante atende aos requisitos para inscrição ou benefício no plano.</td><td><code>ELEGPATRO</code>, <code>URegra.pas</code></td></tr>
+<tr><td><strong>Reserva</strong></td><td>Saldo acumulado do participante por tipo (reserva matemática, benefício de risco, etc.) em cada plano.</td><td><code>RESERVAPART</code></td></tr>
+<tr><td><strong>Evolução funcional</strong></td><td>Histórico de cargos, funções e rubricas salariais do participante ao longo do tempo — base para cálculos previdenciários.</td><td><code>EVOLFUNCPREV</code>, <code>HISTRUBSAL</code></td></tr>
+<tr><td><strong>Delphi 5 / Oracle</strong></td><td>Delphi 5 é a ferramenta (de 1999) com que o programa foi escrito; Oracle é o banco de dados onde as informações ficam guardadas.</td><td><a href="arquitetura.html">🏗️ Arquitetura</a></td></tr>
+<tr><td><strong>Mapa PREVIC</strong></td><td>Relatório regulatório enviado à Superintendência Nacional de Previdência Complementar (PREVIC).</td><td><code>FMapaPrevi.pas</code></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">📋 Visão Geral do Módulo (PFC-73)</div>
+<p>Este Blueprint foi criado em PFC-73 a partir de investigação do código-fonte do módulo CADASTROPREV, seguindo a mesma estrutura, método e nível de detalhe dos blueprints de Folha de Benefícios (PFC-21/22), Contribuição Previdenciária (PFC-23) e Benefício Previdenciário (PFC-24). O escopo foi definido pela contagem de pontos de função PFC-52 (72 processos elementares, 57 arquivos lógicos, 730,2 SFP).</p>
+<p><strong>Contexto de Negócio:</strong> integra a suíte CM Contabilidade / FUNCEF e é a fonte primária de dados cadastrais para todos os demais módulos previdenciários (FOLHA, CONTRIBUICAOPREV, BENEFICIOPREV, PROCPREV, ASSISTENCIAL, EMPRESTIMO, AUTOATENDIMENTO, CENTRALAP, AGENDAMENTO, PROJETOATUARIAL).</p>
+<p><strong>Responsabilidades:</strong></p>
+<ul><li>Manutenção cadastral de participantes, dependentes e beneficiários</li><li>Registro de eventos previdenciários (23 tipos: aposentadoria por tempo/idade/invalidez, falecimento, reclusão, demissão, transferência de plano/patrocinadora, afastamento com/sem manutenção, cancelamento, reinscrição, manutenção parcial, retorno de mantido, assistido INSS)</li><li>Recadastramento periódico (emissão de cartas, recebimento via cartas/TXT, suspensão por falta)</li><li>Saldamento de contas para novo plano (ativos, aposentados, pensionistas)</li><li>Inscrição em novo plano e importação de reservas da COATE</li><li>Evolução funcional e histórico de rubricas salariais</li><li>Mapa PREVIC (obrigação regulatória)</li><li>Consultas e relatórios (eventos, log de operações, extrato de desligamento, situação de participantes)</li></ul>
+
+<p><strong>💡 Em outras palavras:</strong> o módulo CADASTROPREV é o "cadastro mestre" da previdência. Tudo começa aqui: o participante é inscrito, seus dependentes são cadastrados, e cada evento da vida funcional (entrada, saída, transferência, falecimento) é registrado. Os demais módulos (folha, contribuição, benefício) leem estes dados para calcular, cobrar e pagar. Por isso a integridade deste cadastro é crítica.</p>
+</section>
+
+<section><div class="section-title">📊 Indicadores do Blueprint</div>
+<div class="stats">
+<div class="stat"><div class="n">77</div><div class="l">Units (.pas)</div></div>
+<div class="stat"><div class="n">65</div><div class="l">Forms (.dfm)</div></div>
+<div class="stat"><div class="n">3</div><div class="l">DBObjects</div></div>
+<div class="stat"><div class="n">4</div><div class="l">CtrlObjects</div></div>
+<div class="stat"><div class="n">23</div><div class="l">Tipos de evento</div></div>
+<div class="stat"><div class="n">72</div><div class="l">Processos elementares</div></div>
+<div class="stat"><div class="n">57</div><div class="l">Arquivos lógicos</div></div>
+<div class="stat"><div class="n">11</div><div class="l">Relatórios</div></div>
+</div>
+
+<p><strong>💡 Em outras palavras:</strong> os números mostram o tamanho do sistema. São 77 arquivos de programação e 65 telas. O módulo registra 23 tipos de evento gerador (o menu "Eventos" é montado dinamicamente), totalizando 72 processos elementares — o maior número entre todos os módulos analisados. O motor de saldamento (<code>USaldamento.pas</code>) tem 8.861 linhas e a transferência de plano (<code>FEventoTransfPlano.pas</code>) tem 7.873 linhas.</p>
+</section>
+
+<section><div class="section-title">⚔️ Processos Funcionais</div>
+<p>72 processos elementares organizados em 11 casos de uso (UC401–UC411), cobrindo os 5 grupos de menu. Detalhe completo em <a href="funcionalidades.html">⚙️ Processos Funcionais</a>.</p>
+<div class="cards-grid">
+<a class="card" href="uc401.html#PF-01" style="display:block;color:inherit"><h3>UC401 — Eventos de Benefício</h3><p>Falecimento, reclusão, aposentadoria INSS, falecimento INSS.</p></a>
+<a class="card" href="uc402.html#PF-05" style="display:block;color:inherit"><h3>UC402 — Eventos Cadastrais</h3><p>Inscrição, reinscrição, manutenção parcial, retorno de mantido.</p></a>
+<a class="card" href="uc403.html#PF-09" style="display:block;color:inherit"><h3>UC403 — Transferências</h3><p>Transferência de plano e de patrocinadora (lote).</p></a>
+<a class="card" href="uc404.html#PF-11" style="display:block;color:inherit"><h3>UC404 — Afastamento</h3><p>Afastamento com e sem manutenção de contribuição.</p></a>
+<a class="card" href="uc405.html#PF-13" style="display:block;color:inherit"><h3>UC405 — Demissão</h3><p>Demissão da patrocinadora, cancelamento, manutenção.</p></a>
+<a class="card" href="uc406.html#PF-17" style="display:block;color:inherit"><h3>UC406 — Cancelamento</h3><p>Cancelamento na fundação, cancelar evento, alterar evento.</p></a>
+<a class="card" href="uc407.html#PF-20" style="display:block;color:inherit"><h3>UC407 — Recadastramento</h3><p>Emissão de cartas, recebimento, suspensão por falta.</p></a>
+<a class="card" href="uc408.html#PF-23" style="display:block;color:inherit"><h3>UC408 — Manutenção Operacional</h3><p>PDV, tempo de serviço, rubricas, % contribuição, recebedor, conta salário, Mapa PREVIC.</p></a>
+<a class="card" href="uc409.html#PF-28" style="display:block;color:inherit"><h3>UC409 — Saldamento</h3><p>Inscrição novo plano, preparo, saldamento (ativos/aposentados/pensionistas), desfazer, importação COATE.</p></a>
+<a class="card" href="uc410.html#PF-34" style="display:block;color:inherit"><h3>UC410 — Cadastro</h3><p>Elegível, dependente, recebedor, conta bancária, histórico funcional, evolução, simulação, reservas, bloqueio IR.</p></a>
+<a class="card" href="uc411.html#PF-40" style="display:block;color:inherit"><h3>UC411 — Consultas e Relatórios</h3><p>Rubricas, cargos, pessoa, endereços, eventos, log, extrato, PREV,C, etiquetas.</p></a>
+</div>
+
+<p><strong>💡 Em outras palavras:</strong> cada cartão leva a um caso de uso detalhado na aba Processos Funcionais. Os 11 casos de uso cobrem os 5 grupos de menu do módulo: Eventos, Manutenção, Novo Plano, Cadastro e Consulta.</p>
+</section>
+
+<section><div class="section-title">📏 Regras de Negócio (resumo)</div>
+<p>35 regras de negócio catalogadas, cada uma com referência ao código-fonte e classificação de evidência. O texto completo de cada regra está dentro das jornadas dos casos de uso, em <a href="funcionalidades.html">⚙️ Processos Funcionais</a>.</p>
+<div class="legend"><span><span class="ev ev-comprovado">COMPROVADO</span> — no código</span><span><span class="ev ev-inferido">INFERIDO</span> — plausível</span><span><span class="ev ev-pendente">PENDENTE</span> — validar</span></div>
+<ul><li><a href="uc401.html#CADASTROPREV-RN001"><strong>CADASTROPREV-RN001</strong></a> — Data do evento não pode ser futura</li><li><a href="uc401.html#CADASTROPREV-RN002"><strong>CADASTROPREV-RN002</strong></a> — Dependente precisa de conta salário, CPF e opção de IR para falecimento</li><li><a href="uc402.html#CADASTROPREV-RN006"><strong>CADASTROPREV-RN006</strong></a> — Reinscrição deve ser posterior ao cancelamento</li><li><a href="uc403.html#CADASTROPREV-RN010"><strong>CADASTROPREV-RN010</strong></a> — Plano destino não pode ser o mesmo de origem</li><li><a href="uc404.html#CADASTROPREV-RN014"><strong>CADASTROPREV-RN014</strong></a> — Afastamento não pode ser anterior a 120 dias</li><li><a href="uc409.html#CADASTROPREV-RN028"><strong>CADASTROPREV-RN028</strong></a> — Saldamento não pode ser desfeito se há contribuições recebidas</li></ul>
+
+<p><strong>💡 Em outras palavras:</strong> regra de negócio é uma instrução que o sistema segue sempre, sem perguntar. Exemplos desta lista: a data do evento não pode ser no futuro (RN001); para registrar um falecimento, cada dependente precisa ter conta salário, CPF e opção de IR (RN002); a reinscrição deve ser posterior à data do cancelamento (RN006); o plano destino de uma transferência não pode ser o mesmo de origem (RN010).</p>
+
+<div class="note pfc73-ba"><p><strong>👔 Para o analista de negócios</strong></p><ul>
+<li>O menu "Eventos" é dinâmico: os 23 tipos de evento são lidos da tabela <code>EVENTOGERADOR</code> em <code>FPrincipal.MontaMenu</code> (<code>FPrincipal.pas:701</code>) <span class="ev ev-comprovado">COMPROVADO</span>. Adicionar um novo tipo de evento exige cadastrar na tabela, não mudar o código — mas o handler (<code>AbreFormEventoXX</code>) precisa existir.</li>
+<li>Vários eventos (aposentadoria por tempo/idade/invalidez, demissão com cancelamento/manutenção) abrem forms que estão fora da fronteira do módulo (em CMAdmPrev/CM). O item de menu é comprovado mas a implementação é externa <span class="ev ev-inferido">INFERIDO</span>.</li>
+<li>O saldamento é o processo mais complexo: <code>USaldamento.pas</code> (8.861 linhas) contém 5 classes (<code>TSaldamentoAssociado</code>, <code>TSaldamentoAtivo</code>, <code>TSaldamentoAssistido</code>, <code>TSaldamentoAposentado</code>, <code>TSaldamentoPensionista</code>) <span class="ev ev-comprovado">COMPROVADO</span>.</li>
+</ul></div>
+</section>
+
+<section><div class="section-title">🗄️ Modelo de Dados (resumo)</div>
+<p>57 arquivos lógicos mapeados (35 mantidos em CADASTROPREV, 22 referenciados de PARAMPREV/CM). 3 DBObjects formais + SQL inline nos forms. Campos-chave e CRUD em <a href="dados.html">🗄️ Dados</a>.</p>
+<div class="table-wrap"><table class=""><thead><tr><th>Entidade</th><th>Papel</th><th>Evidência</th></tr></thead><tbody>
+<tr><td><code>PARTPREVPLAN</code></td><td>Vínculo participante × plano (situação) — chave IDPESSOA+IDPLANOPREV</td><td>SQL inline nos forms</td></tr>
+<tr><td><code>EVENTOSPREV</code></td><td>Eventos previdenciários registrados (livro-razão de eventos)</td><td>SQL inline nos forms</td></tr>
+<tr><td><code>RESERVAPART</code></td><td>Reservas do participante (saldo por tipo/plano)</td><td><code>uDbReservapart.pas</code></td></tr>
+<tr><td><code>EVOLFUNCPREV</code></td><td>Evolução funcional (cargos, funções, adicionais)</td><td><code>uDbEvolfuncprev.pas</code></td></tr>
+<tr><td><code>HISTRUBSAL</code></td><td>Histórico de rubricas salariais (80+ campos)</td><td><code>uDbHistrubsal.pas</code></td></tr>
+<tr><td><code>ELEGPATRO</code></td><td>Elegibilidade do participante por patrocinadora</td><td>SQL inline nos forms</td></tr>
+<tr><td><code>BENEFBFCIARIO</code></td><td>Benefícios do beneficiário (compartilhado com FOLHA/BENEF)</td><td>SQL inline nos forms</td></tr>
+</tbody></table></div>
+
+<p><strong>💡 Em outras palavras:</strong> pense no banco de dados como um arquivo de planilhas. PARTPREVPLAN é a ficha de cada participante em cada plano; EVENTOSPREV é o diário de eventos da vida funcional; RESERVAPART guarda o saldo acumulado; EVOLFUNCPREV e HISTRUBSAL registram a evolução de cargo e salário. Mais detalhes em <a href="dados.html">🗄️ Dados</a>.</p>
+</section>
+
+<div class="note"><p><strong>🔎 Ponto a validar</strong> <span class="ev ev-pendente">PENDENTE</span> — as tabelas <code>PESSOA</code>/<code>PESSOAFISICA</code> têm núcleo mantido pelo CM framework, mas CADASTROPREV faz UPDATE parcial. <code>BENEFBFCIARIO</code> e <code>PROCESSOBENEF</code> são compartilhados com FOLHA e BENEFICIOPREV. A definição do "dono funcional" de cada tabela compartilhada precisa ser validada com especialistas de negócio. Ver <a href="lacunas.html">🔍 Lacunas</a>.</p></div>
+
+<section id="pfc73-analista"><div class="section-title">👔 Para o analista de negócios — síntese (PFC-73)</div>
+<div class="note pfc73-ba">
+<p>O módulo CADASTROPREV é a porta de entrada do sistema previdenciário: todo participante, dependente e evento passa por aqui. É o maior módulo em processos elementares (72 PE) e o que mais tabelas mantém (35 AL), refletindo a complexidade de gerenciar 23 tipos de evento gerador e o saldamento para novo plano.</p>
+<p>As regras de negócio estão em três lugares: nas telas Delphi (por exemplo, <code>FEventoTransfPlano.pas</code>, 7.873 linhas), no motor de saldamento (<code>USaldamento.pas</code>, 8.861 linhas) e em units compartilhadas do framework (UAdmPrev, UBeneficio, URegra, UEventos). Isso pesa em qualquer projeto de modernização ou auditoria.</p>
+<p><strong>Áreas de negócio envolvidas</strong></p><ul>
+<li>Atendimento/Cadastro (inscrição, manutenção cadastral), Benefícios (eventos geradores), Recursos Humanos (evolução funcional, afastamento, demissão), Regulatório (Mapa PREVIC), Tesouraria (conta salário, conta bancária), Tributário (bloqueio IR, opção de IR) e Jurídico (cancelamento por descumprimento, inadimplência).</li>
+</ul>
+<p><strong>Decisões e validações recomendadas</strong></p><ul>
+<li>27 dos 72 processos elementares abrem forms externos (CM, CMAdmPrev, PARAMPREV). O item de menu é comprovado mas a implementação está fora da fronteira do módulo <span class="ev ev-inferido">INFERIDO</span>. Confirmar se estes forms são responsabilidade do CADASTROPREV ou dos módulos externos.</li>
+<li>O saldamento tem três variantes (ativos, aposentados, pensionistas) e pode ser desfeito. Validar com a área de negócio o fluxo completo e os pontos de não-retorno.</li>
+<li>O recadastramento suspende benefícios de quem não recadastrou. Confirmar o percentual de suspensão e o processo de liberação posterior.</li>
+</ul>
+<p><strong>Perguntas para o responsável de negócio</strong></p><ul>
+<li>Quais dos 23 tipos de evento estão efetivamente em uso na fundação? O menu é dinâmico (tabela EVENTOGERADOR), então alguns podem estar desativados.</li>
+<li>Qual é o calendário do recadastramento e quem autoriza a suspensão de benefícios?</li>
+<li>No saldamento para novo plano, qual é o critério de enquadramento e quem aprova?</li>
+</ul>
+</div>
+</section>
+
+</div>
+<div class="sidebar">
+<section><div class="section-title">ℹ️ Informações</div>
+<ul class="info-list"><li><span class="key">ID do Módulo</span><span class="val"><code>cadastroprev</code></span></li><li><span class="key">Pasta</span><span class="val"><code>CADASTROPREV</code></span></li><li><span class="key">Entry point</span><span class="val"><code>CADASTROPREV/Fontes/CadastroPrev.dpr</code></span></li><li><span class="key">Application.Title</span><span class="val">Cadastro Previdenciário</span></li><li><span class="key">IdModulo</span><span class="val">452</span></li><li><span class="key">Versão</span><span class="val">3.00.07</span></li><li><span class="key">Tecnologia</span><span class="val">Delphi 5 / VCL</span></li><li><span class="key">Banco</span><span class="val">Oracle (schema CM.)</span></li><li><span class="key">Acesso a Dados</span><span class="val">TCmDbObject + TwwQuery</span></li><li><span class="key">Artefatos</span><span class="val"><strong>152</strong></span></li></ul>
+</section>
+
+<section><div class="section-title">📂 Artefatos Delphi 5</div>
+<ul class="info-list"><li><span class="key">Units (.pas)</span><span class="val">77</span></li><li><span class="key">Forms (.dfm)</span><span class="val">65</span></li><li><span class="key">Projects (.dpr)</span><span class="val">1</span></li><li><span class="key">DBObjects</span><span class="val">3</span></li><li><span class="key">CtrlObjects</span><span class="val">4</span></li><li><span class="key">Motor saldamento</span><span class="val">8.861 lin</span></li><li><span class="key">Transf. plano</span><span class="val">7.873 lin</span></li></ul>
+</section>
+
+<section><div class="section-title">🧭 Navegação do Blueprint</div>
+<ul class="dep-list"><li><a href="inventario-tecnico.html">📂 Inventário completo</a></li><li><a href="procedures-functions.html">🔧 Procedures (motor)</a></li><li><a href="funcionalidades.html">⚙️ Processos Funcionais (lista de UCs) + fluxogramas</a></li><li><a href="funcionalidades.html">📏 Regras de negócio (dentro das jornadas dos UCs)</a></li><li><a href="dados.html">🗄️ Dados (campos/CRUD)</a></li><li><a href="integracoes.html">🔗 Relatórios + deps</a></li></ul>
+</section>
+
+<section><div class="section-title">🔗 Dependências</div>
+<ul class="dep-list"><li><span class="key">CM Framework</span><span class="val">Forms base</span></li><li><span class="key">CMAdmPrev</span><span class="val">Motor benef.</span></li><li><span class="key">PARAMPREV</span><span class="val">Parâmetros</span></li><li><span class="key">CMPrevMT50</span><span class="val">Entidades prev.</span></li><li><span class="key">GLOBALCM</span><span class="val">Extrato deslig.</span></li></ul>
+</section>
+
+<section><div class="section-title">📎 Ver Também</div>
+<ul class="dep-list"><li><a href="../visao-geral/visao-geral.html">Visão Geral</a></li><li><a href="../visao-geral/arquitetura-atual.html">Arquitetura Atual</a></li><li><a href="../pontos-de-funcao/cadastroprev.html">Pontos de Função (PFC-52)</a></li><li><a href="../metodologia/criterios-de-analise.html">Metodologia</a></li></ul>
+</section>
+
+</div>
+</main>
+
+<footer>
+<p>Blueprint AS-IS — PFC-73 — Módulo CADASTROPREV | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-24</p>
+</footer>
+</body>
+</html>

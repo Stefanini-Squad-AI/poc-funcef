@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UC401 — Eventos de Benefício — Cadastro Previdenciário</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<header>
+  <div class="badge">Blueprint AS-IS — PFC-73 — Processos Funcionais</div>
+  <h1>UC401 — Eventos de Benefício</h1>
+  <p>Caso de uso do módulo Cadastro Previdenciário: 4 jornada(s) funcional(is) e 4 regra(s) de negócio descritas dentro de cada jornada.</p>
+</header>
+<nav>
+  <a href="index.html">📋 Visão Geral</a>
+  <a href="arquitetura.html">🏗️ Arquitetura</a>
+  <a href="inventario-tecnico.html">📦 Inventário</a>
+  <a href="funcionalidades.html">⚙️ Processos Funcionais</a>
+  <a href="procedures-functions.html">🔧 Procedures</a>
+  <a href="dados.html">🗄️ Dados</a>
+  <a href="relatorios.html">📄 Relatórios</a>
+  <a href="integracoes.html">🔗 Integrações</a>
+  <a href="tratamento-erros.html">⚠️ Erros</a>
+  <a href="diagramas-fluxo.html">🔀 Fluxos</a>
+  <a href="lacunas.html">🔍 Lacunas</a>
+  <a href="controle-cobertura.html">📊 Cobertura</a>
+</nav>
+<main>
+
+<a class="back-btn" href="funcionalidades.html">← Voltar à lista de Casos de Uso (Processos Funcionais)</a>
+<div class="breadcrumb"><a href="index.html">Cadastro Previdenciário</a> › <a href="funcionalidades.html">Processos Funcionais</a> › UC401</div>
+
+<section><div class="section-title">1. Identificação</div>
+<div class="table-wrap"><table><tbody>
+<tr><th>Caso de Uso</th><td><strong>UC401 — Eventos de Benefício</strong></td></tr>
+<tr><th>Módulo</th><td>CADASTROPREV — Cadastro Previdenciário</td></tr>
+<tr><th>Sistema</th><td>CM Contabilidade / FUNCEF (Delphi 5 / VCL / MIDAS / Oracle)</td></tr>
+<tr><th>Tipo</th><td>Sistema Desktop</td></tr>
+<tr><th>Ator</th><td>Usuário operacional (analista de cadastro previdenciário)</td></tr>
+<tr><th>Jornadas</th><td><a href="#PF-01">JF001 — Falecimento</a>, <a href="#PF-02">JF002 — Reclusão</a>, <a href="#PF-03">JF003 — Aposentadoria INSS</a>, <a href="#PF-04">JF004 — Falecimento INSS</a></td></tr>
+<tr><th>Regras de negócio</th><td>4 regra(s) CADASTROPREV-RN, descritas na íntegra dentro de cada jornada</td></tr>
+<tr><th>OS - Título</th><td>PFC-73 — Lista de UC (Processos Funcionais organizados em Casos de Uso)</td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">2. Descrição Resumida</div>
+<p>Registro de eventos de benefício que alteram a situação do participante: falecimento, reclusão, aposentadoria pelo INSS e falecimento de assistido pelo INSS. Este caso de uso reúne 4 jornada(s) funcional(is) do módulo Cadastro Previdenciário:</p>
+<ul>
+<li><a href="#PF-01"><strong>JF001 — Falecimento</strong></a>: registrar o falecimento do participante, validar dependentes e gerar pensão.</li>
+<li><a href="#PF-02"><strong>JF002 — Reclusão</strong></a>: registrar a reclusão do participante, verificar empréstimos e suspender contribuições.</li>
+<li><a href="#PF-03"><strong>JF003 — Aposentadoria INSS</strong></a>: registrar aposentadoria pelo INSS do participante assistido.</li>
+<li><a href="#PF-04"><strong>JF004 — Falecimento INSS</strong></a>: registrar falecimento de participante aposentado pelo INSS.</li>
+</ul>
+<p><strong>Necessidade de negócio:</strong> quando um participante falece, é recluso ou se aposenta pelo INSS, o sistema precisa registrar o evento, validar os dependentes/beneficiários, atualizar a situação do participante no plano e disparar os efeitos previdenciários correspondentes (pensão, suspensão de contribuição, atualização de reserva). O falecimento é o evento mais sensível: sem dependentes válidos (conta salário, CPF e opção de IR), o sistema bloqueia o registro e não gera pensão. A reclusão verifica empréstimos ativos e suspende contribuições. Os eventos de INSS tratam participantes cujo benefício é pago pelo regime geral, ajustando apenas a situação no plano complementar.</p>
+<p><strong>Quem inicia:</strong> sempre o usuário (analista de cadastro), pelo menu <em>Eventos</em> da tela principal. O menu é montado dinamicamente a partir da tabela <code>EVENTOGERADOR</code> em <code>FPrincipal.pas:701</code>. Cada tipo de evento abre o form específico via handler <code>AbreFormEventoXX</code>.</p>
+<p><strong>Resultado esperado:</strong> ao fim do registro, o evento fica gravado em <code>EVENTOSPREV</code> e em <code>HSTCONTEVENTOSPR</code>, a situação do participante em <code>PARTPREVPLAN</code> é atualizada, os dependentes/beneficiários em <code>BENEFBFCIARIO</code> são validados e, no caso de falecimento, a pensão é gerada. O participante passa à situação correspondente (falecido, recluso, aposentado INSS).</p>
+<p><strong>Referência cruzada:</strong> os eventos de falecimento e reclusão também são tratados no módulo BENEFICIOPREV (concessão de pensão e benefício de reclusão). As regras de validação de dependentes e geração de pensão estão documentadas aqui no contexto do registro do evento; a concessão e o pagamento do benefício são detalhados em <a href="../beneficioprev/funcionalidades.html">BENEFICIOPREV — Processos Funcionais</a>. Não há duplicação: este UC documenta o registro do evento e a validação cadastral; o UC de BENEFICIOPREV documenta a concessão e o cálculo do benefício.</p>
+</section>
+
+<section><div class="section-title">3. Pré-condições</div>
+<p><strong>Gerais do módulo:</strong></p>
+<ul>
+<li>O módulo CADASTROPREV deve estar compilado e disponível (entry point <code>CADASTROPREV/Fontes/CadastroPrev.dpr</code>).</li>
+<li>O banco Oracle (schema <code>CM.</code>) deve estar acessível.</li>
+<li>O participante deve estar selecionado na tela principal.</li>
+<li>Os parâmetros globais do sistema previdenciário devem estar carregados.</li>
+<li>O usuário deve ter permissão de acesso ao módulo e ao tipo de evento.</li>
+</ul>
+<p><strong>Por jornada:</strong></p>
+<ul>
+<li><a href="#PF-01">JF001</a>: participante ativo ou assistido selecionado; dependentes cadastrados com conta salário, CPF e opção de IR.</li>
+<li><a href="#PF-02">JF002</a>: participante ativo selecionado; situação cadastral em dia.</li>
+<li><a href="#PF-03">JF003</a>: participante ativo selecionado; elegível para aposentadoria INSS.</li>
+<li><a href="#PF-04">JF004</a>: participante assistido (aposentado) selecionado; dependentes cadastrados.</li>
+</ul>
+</section>
+
+<section><div class="section-title">4. Pós-condições</div>
+<ul>
+<li><a href="#PF-01">JF001</a>: evento de falecimento gravado em EVENTOSPREV/HSTCONTEVENTOSPR; participante em situação de falecido; pensão gerada para dependentes válidos.</li>
+<li><a href="#PF-02">JF002</a>: evento de reclusão gravado; participante em situação de recluso; contribuições suspensas; empréstimos verificados.</li>
+<li><a href="#PF-03">JF003</a>: evento de aposentadoria INSS gravado; participante em situação de aposentado INSS; situação no plano atualizada.</li>
+<li><a href="#PF-04">JF004</a>: evento de falecimento INSS gravado; participante em situação de falecido; pensão de assistido gerada.</li>
+</ul>
+</section>
+
+<section><div class="section-title">5. Jornadas Funcionais (JF001, JF002, JF003, JF004)</div>
+<p>Cada jornada traz objetivo, ator/gatilho, pré e pós-condições, sequência operacional, ações práticas, <strong>regras de negócio da jornada</strong> (texto completo de cada regra), tratamentos e mensagens.</p>
+<p><strong>Como as jornadas deste caso de uso se relacionam:</strong> todas registram eventos que alteram a situação do participante por motivo de benefício. JF001 (falecimento) e JF04 (falecimento INSS) tratam o óbito do participante — a diferença é o regime de pagamento (plano complementar vs. INSS). JF002 (reclusão) trata o encarceramento, que suspende contribuições mas não encerra o plano. JF003 (aposentadoria INSS) registra a aposentadoria pelo regime geral e ajusta a situação no plano complementar. Em cada passo, o rótulo "Usuário" ou "Sistema" indica quem executa a ação.</p>
+<div class="legend"><span><span class="ev ev-comprovado">COMPROVADO</span> — no código</span><span><span class="ev ev-inferido">INFERIDO</span> — plausível</span><span><span class="ev ev-pendente">PENDENTE</span> — validar</span></div>
+</section>
+
+<div class="pf-block" id="PF-01"><h4>JF001 (PF-01) — Falecimento</h4>
+<p><strong>Objetivo:</strong> registrar o falecimento do participante, validar dependentes e gerar pensão.</p>
+<p><strong>Necessidade de negócio:</strong> o falecimento é o evento que dispara o pagamento de pensão aos dependentes. Para que a pensão seja gerada corretamente, cada dependente precisa ter conta salário cadastrada, CPF e opção de imposto de renda. A data do evento não pode ser futura. O form <code>FEventoMorte.pas</code> (1.873 linhas) é o responsável por toda a validação e gravação.</p>
+<p><strong>Gatilho/Ator:</strong> usuário aciona o menu <em>Eventos › Falecimento</em> na tela principal.</p>
+<p><strong>Pré-condições:</strong> participante ativo ou assistido selecionado; dependentes cadastrados com conta salário, CPF e opção de IR.</p>
+<p><strong>Pós-condições:</strong> evento de falecimento gravado em EVENTOSPREV/HSTCONTEVENTOSPR; participante em situação de falecido; pensão gerada para dependentes válidos.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li><strong>Usuário:</strong> seleciona o participante na tela principal e aciona o menu <em>Eventos › Falecimento</em>. O sistema abre o form <code>FEventoMorte.dfm</code> com os dados do participante carregados (<code>FEventoMorte.pas:976</code>).</li>
+<li><strong>Sistema:</strong> valida se o participante foi selecionado. Se nenhum participante estiver selecionado, exibe a mensagem <a href="#MSG001">MSG001</a> e bloqueia (<a href="#TRT001">TRT001</a>).</li>
+<li><strong>Usuário:</strong> informa a data do falecimento no campo correspondente e clica em "Confirmar".</li>
+<li><strong>Sistema:</strong> valida se a data foi informada. Se vazia, exibe <a href="#MSG002">MSG002</a> e bloqueia (<a href="#TRT002">TRT002</a>). Em seguida, valida se a data não é futura comparando com a data atual (<code>FEventoMorte.pas:1073</code>). Se for futura, exibe <a href="#MSG003">MSG003</a> e bloqueia (<a href="#TRT003">TRT003</a>) <a href="#CADASTROPREV-RN001">[RN001]</a>.</li>
+<li><strong>Sistema:</strong> percorre os dependentes do participante e valida cada um: conta salário cadastrada (<code>FEventoMorte.pas:988-1049</code>), CPF informado e opção de imposto de renda. Se qualquer dependente falhar, exibe a mensagem correspondente (<a href="#MSG004">MSG004</a>, <a href="#MSG005">MSG005</a> ou <a href="#MSG006">MSG006</a>) e bloqueia (<a href="#TRT004">TRT004</a>, <a href="#TRT005">TRT005</a>, <a href="#TRT006">TRT006</a>) <a href="#CADASTROPREV-RN002">[RN002]</a>.</li>
+<li><strong>Sistema:</strong> grava o evento em <code>EVENTOSPREV</code> com o tipo "Falecimento", a data informada e o ID do participante. Atualiza a situação do participante para "Falecido" em <code>PARTPREVPLAN</code>. Grava o histórico em <code>HSTCONTEVENTOSPR</code>.</li>
+<li><strong>Sistema:</strong> para cada dependente válido, gera o benefício de pensão em <code>BENEFBFCIARIO</code> e atualiza as contribuições em <code>CONTRIBPREVPARTP</code>. Exibe mensagem de sucesso e fecha o form.</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Abrir form de falecimento</td><td>Carregar dados do participante</td><td>Participante selecionado</td><td>Abre FEventoMorte com dados do participante</td><td>Form preenchido</td><td>—</td><td><a href="#MSG001">MSG001</a></td><td><code>FEventoMorte.dfm</code></td></tr>
+<tr><td>Validar data do evento</td><td>Impedir data futura</td><td>Data do falecimento</td><td>Compara com data atual</td><td>Data válida ou bloqueio</td><td><a href="#CADASTROPREV-RN001">RN001</a></td><td><a href="#MSG002">MSG002</a>, <a href="#MSG003">MSG003</a></td><td><code>FEventoMorte.dfm</code></td></tr>
+<tr><td>Validar dependentes</td><td>Verificar conta salário, CPF e opção IR</td><td>Lista de dependentes</td><td>Percorre dependentes e valida cada campo</td><td>Dependentes válidos ou bloqueio</td><td><a href="#CADASTROPREV-RN002">RN002</a></td><td><a href="#MSG004">MSG004</a>, <a href="#MSG005">MSG005</a>, <a href="#MSG006">MSG006</a></td><td><code>FEventoMorte.dfm</code></td></tr>
+<tr><td>Gravar evento</td><td>Persistir falecimento</td><td>Dados validados</td><td>Insere em EVENTOSPREV e HSTCONTEVENTOSPR</td><td>Evento gravado</td><td>—</td><td>—</td><td><code>FEventoMorte.dfm</code></td></tr>
+<tr><td>Gerar pensão</td><td>Criar benefício para dependentes</td><td>Dependentes válidos</td><td>Insere em BENEFBFCIARIO e atualiza CONTRIBPREVPARTP</td><td>Pensão gerada</td><td>—</td><td>—</td><td><code>FEventoMorte.dfm</code></td></tr>
+</tbody></table></div>
+<div class="jf-rules">
+<p><strong>Regras de negócio da jornada:</strong> 2 regra(s) — texto completo abaixo.</p>
+<div class="rule-block" id="CADASTROPREV-RN001"><div class="rule-id">RN001 (CADASTROPREV-RN001) — Data do evento não pode ser futura</div>
+<p><strong>Descrição:</strong> a data do evento de falecimento não pode ser posterior à data atual do sistema.</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>dtpDataEvento</code> — [obrigatório] — data do falecimento informada</li>
+<li><code>Date()</code> — [obrigatório] — data atual do sistema</li>
+<li><code>EVENTOSPREV.DTEVENTO</code> — [obrigatório] — gravado com a data validada</li>
+</ul>
+<p><strong>Categoria:</strong> validação de entrada · <strong>Gatilho:</strong> confirmação do evento de falecimento</p>
+<p><strong>Condição:</strong> se <code>dtpDataEvento > Date()</code> → bloqueia. <strong>Fórmula:</strong> n/a (comparação de datas).</p>
+<p><strong>Tratamento (TRT):</strong> <a href="#TRT003">TRT003</a> → <a href="#MSG003">MSG003</a> → Bloqueia execução</p>
+<p><strong>Rotina:</strong> validação inline no form. <strong>Origem:</strong> <code>CADASTROPREV/Fontes/FEventoMorte.pas:1073</code>. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> · <strong>Severidade:</strong> alta (bloqueante) · <strong>Jornada:</strong> <a href="#PF-01">JF001</a>, <a href="#PF-04">JF004</a> · <strong>Relacionadas:</strong> —</p>
+</div>
+<div class="rule-block" id="CADASTROPREV-RN002"><div class="rule-id">RN002 (CADASTROPREV-RN002) — Dependente precisa de conta salário, CPF e opção de IR</div>
+<p><strong>Descrição:</strong> para registrar o falecimento e gerar pensão, cada dependente deve ter conta salário cadastrada, CPF informado e opção de imposto de renda definida.</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>BENEFBFCIARIO.IDCONTASALARIO</code> — [obrigatório] — conta salário do dependente</li>
+<li><code>PESSOAFISICA.NRCPF</code> — [obrigatório] — CPF do dependente</li>
+<li><code>BENEFBFCIARIO.FLGOPCAOIR</code> — [obrigatório] — opção de IR (progressivo/regressivo)</li>
+</ul>
+<p><strong>Categoria:</strong> validação de negócio · <strong>Gatilho:</strong> confirmação do falecimento com dependentes</p>
+<p><strong>Condição:</strong> se qualquer dependente não tiver conta salário → <a href="#TRT004">TRT004</a>/<a href="#MSG004">MSG004</a>; se não tiver CPF → <a href="#TRT005">TRT005</a>/<a href="#MSG005">MSG005</a>; se não tiver opção de IR → <a href="#TRT006">TRT006</a>/<a href="#MSG006">MSG006</a>.</p>
+<p><strong>Tratamento (TRT):</strong> <a href="#TRT004">TRT004</a>, <a href="#TRT005">TRT005</a>, <a href="#TRT006">TRT006</a> → bloqueia execução</p>
+<p><strong>Rotina:</strong> validação inline no form, percorrendo dependentes. <strong>Origem:</strong> <code>CADASTROPREV/Fontes/FEventoMorte.pas:988-1049</code>. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> · <strong>Severidade:</strong> alta (bloqueante) · <strong>Jornada:</strong> <a href="#PF-01">JF001</a> · <strong>Relacionadas:</strong> —</p>
+</div>
+</div>
+
+<p><strong>Dependências:</strong> dispara geração de pensão em BENEFICIOPREV. Evidência: <code>CADASTROPREV/Fontes/FEventoMorte.pas:976-1873</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<div class="mermaid">graph LR
+  n0["FEventoMorte"] --> n1["ValidaParticipante"] --> n2["ValidaData(:1073)"] --> n3["ValidaDependentes(:988-1049)"] --> n4["GravaEvento"] --> n5["EVENTOSPREV/HSTCONTEVENTOSPR"] --> n6["AtualizaPartPrevPlan"] --> n7["GeraPenso"] --> n8["BENEFBFCIARIO/CONTRIBPREVPARTP"]</div>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span> — informações que o repositório não comprova ou que dependem de validação humana.</p>
+<ul>
+<li>A geração da pensão (passo 7) pode ser feita por chamada ao módulo BENEFICIOPREV ou internamente. Confirmar o fluxo exato.</li>
+<li>O form <code>FEventoMorte.pas</code> tem 1.873 linhas — há lógica adicional (cálculo de pro-rata, atualização de reservas) que pode gerar regras de negócio não catalogadas aqui.</li>
+<li>Validar se o evento de falecimento dispara automaticamente o recadastramento de dependentes ou se é um processo separado.</li>
+</ul>
+</div>
+</div>
+
+<div class="pf-block" id="PF-02"><h4>JF002 (PF-02) — Reclusão</h4>
+<p><strong>Objetivo:</strong> registrar a reclusão do participante, verificar empréstimos ativos e suspender contribuições.</p>
+<p><strong>Necessidade de negócio:</strong> a reclusão do participante não encerra o plano, mas suspende as contribuições e verifica se há empréstimos ativos que precisam de tratamento específico. O form <code>FEventoReclusao.pas</code> (1.351 linhas) trata todo o fluxo.</p>
+<p><strong>Gatilho/Ator:</strong> usuário aciona o menu <em>Eventos › Reclusão</em> na tela principal.</p>
+<p><strong>Pré-condições:</strong> participante ativo selecionado; situação cadastral em dia.</p>
+<p><strong>Pós-condições:</strong> evento de reclusão gravado; participante em situação de recluso; contribuições suspensas; empréstimos verificados.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li><strong>Usuário:</strong> seleciona o participante na tela principal e aciona o menu <em>Eventos › Reclusão</em>. O sistema abre o form <code>FEventoReclusao.dfm</code> com os dados do participante (<code>FEventoReclusao.pas:700</code>).</li>
+<li><strong>Sistema:</strong> valida se o participante foi selecionado. Se nenhum participante estiver selecionado, exibe <a href="#MSG001">MSG001</a> e bloqueia (<a href="#TRT001">TRT001</a>).</li>
+<li><strong>Usuário:</strong> informa a data da reclusão e clica em "Confirmar".</li>
+<li><strong>Sistema:</strong> valida se a data foi informada. Se vazia, exibe <a href="#MSG002">MSG002</a> e bloqueia (<a href="#TRT002">TRT002</a>). Valida se a data não é futura (<a href="#CADASTROPREV-RN001">RN001</a>). Se for futura, exibe <a href="#MSG003">MSG003</a> e bloqueia (<a href="#TRT003">TRT003</a>).</li>
+<li><strong>Sistema:</strong> verifica se o participante possui empréstimo ativo chamando <code>AtualizaFLGPossuiEmprestimo</code>. Atualiza o flag de empréstimo no cadastro do participante <a href="#CADASTROPREV-RN004">[RN004]</a>.</li>
+<li><strong>Sistema:</strong> grava o evento em <code>EVENTOSPREV</code> com o tipo "Reclusão" e a data informada. Atualiza a situação do participante para "Recluso" em <code>PARTPREVPLAN</code>. Grava o histórico em <code>HSTCONTEVENTOSPR</code>.</li>
+<li><strong>Sistema:</strong> suspende as contribuições do participante em <code>CONTRIBPREVPARTP</code>, desde que o benefício não seja exclusivamente do INSS <a href="#CADASTROPREV-RN003">[RN003]</a>. Exibe mensagem de sucesso e fecha o form.</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Abrir form de reclusão</td><td>Carregar dados do participante</td><td>Participante selecionado</td><td>Abre FEventoReclusao com dados</td><td>Form preenchido</td><td>—</td><td><a href="#MSG001">MSG001</a></td><td><code>FEventoReclusao.dfm</code></td></tr>
+<tr><td>Validar data</td><td>Impedir data futura</td><td>Data da reclusão</td><td>Compara com data atual</td><td>Data válida ou bloqueio</td><td><a href="#CADASTROPREV-RN001">RN001</a></td><td><a href="#MSG002">MSG002</a>, <a href="#MSG003">MSG003</a></td><td><code>FEventoReclusao.dfm</code></td></tr>
+<tr><td>Verificar empréstimo</td><td>Atualizar flag de empréstimo ativo</td><td>ID do participante</td><td>AtualizaFLGPossuiEmprestimo</td><td>Flag atualizado</td><td><a href="#CADASTROPREV-RN004">RN004</a></td><td>—</td><td><code>FEventoReclusao.dfm</code></td></tr>
+<tr><td>Gravar evento</td><td>Persistir reclusão</td><td>Dados validados</td><td>Insere em EVENTOSPREV e HSTCONTEVENTOSPR</td><td>Evento gravado</td><td>—</td><td>—</td><td><code>FEventoReclusao.dfm</code></td></tr>
+<tr><td>Suspender contribuições</td><td>Parar contribuições se não INSS-only</td><td>Situação do benefício</td><td>Atualiza CONTRIBPREVPARTP</td><td>Contribuições suspensas</td><td><a href="#CADASTROPREV-RN003">RN003</a></td><td>—</td><td><code>FEventoReclusao.dfm</code></td></tr>
+</tbody></table></div>
+<div class="jf-rules">
+<p><strong>Regras de negócio da jornada:</strong> 2 regra(s) — texto completo abaixo.</p>
+<div class="rule-block" id="CADASTROPREV-RN003"><div class="rule-id">RN003 (CADASTROPREV-RN003) — Suspender contribuições após falecimento/reclusão se benefício não for INSS-only</div>
+<p><strong>Descrição:</strong> após registrar falecimento ou reclusão, as contribuições do participante são suspensas, exceto se o benefício for pago exclusivamente pelo INSS.</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>PARTPREVPLAN.FLGPAGAINSS</code> — [obrigatório] — indica se benefício é pago pelo INSS (S/N)</li>
+<li><code>CONTRIBPREVPARTP.SITCONTRIB</code> — [obrigatório] — situação da contribuição</li>
+<li><code>EVENTOSPREV.TPEVENTO</code> — [obrigatório] — tipo do evento (Falecimento/Reclusão)</li>
+</ul>
+<p><strong>Categoria:</strong> regra de negócio · <strong>Gatilho:</strong> gravação de evento de falecimento ou reclusão</p>
+<p><strong>Condição:</strong> se <code>FLGPAGAINSS ≠ 'S'</code> (benefício não é INSS-only) → suspende contribuições em CONTRIBPREVPARTP.</p>
+<p><strong>Rotina:</strong> <code>AtualizaSituacaoContribuicao</code>. <strong>Origem:</strong> <code>CADASTROPREV/Fontes/FEventoReclusao.pas</code>. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> · <strong>Severidade:</strong> alta · <strong>Jornada:</strong> <a href="#PF-02">JF002</a> · <strong>Relacionadas:</strong> —</p>
+</div>
+<div class="rule-block" id="CADASTROPREV-RN004"><div class="rule-id">RN004 (CADASTROPREV-RN004) — Verificar empréstimo ativo</div>
+<p><strong>Descrição:</strong> ao registrar a reclusão, o sistema verifica se o participante possui empréstimo ativo e atualiza o flag correspondente.</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>PARTPREVPLAN.FLGPOSSUIEMPRESTIMO</code> — [obrigatório] — flag de empréstimo ativo</li>
+<li><code>EMPRESTIMO.SITUACAO</code> — [obrigatório] — situação dos empréstimos do participante</li>
+</ul>
+<p><strong>Categoria:</strong> regra de negócio · <strong>Gatilho:</strong> confirmação do evento de reclusão</p>
+<p><strong>Condição:</strong> verifica empréstimos ativos e atualiza <code>FLGPOSSUIEMPRESTIMO</code>.</p>
+<p><strong>Rotina:</strong> <code>AtualizaFLGPossuiEmprestimo</code>. <strong>Origem:</strong> <code>CADASTROPREV/Fontes/FEventoReclusao.pas</code>. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> · <strong>Severidade:</strong> média · <strong>Jornada:</strong> <a href="#PF-02">JF002</a> · <strong>Relacionadas:</strong> —</p>
+</div>
+</div>
+
+<p><strong>Dependências:</strong> atualiza CONTRIBPREVPARTP (contribuições) e consulta EMPRESTIMO. Evidência: <code>CADASTROPREV/Fontes/FEventoReclusao.pas:700-1351</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<div class="mermaid">graph LR
+  n0["FEventoReclusao"] --> n1["ValidaParticipante"] --> n2["ValidaData"] --> n3["AtualizaFLGPossuiEmprestimo"] --> n4["GravaEvento"] --> n5["EVENTOSPREV/HSTCONTEVENTOSPR"] --> n6["AtualizaPartPrevPlan"] --> n7["SuspenderContribuicoes"] --> n8["CONTRIBPREVPARTP"]</div>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span></p>
+<ul>
+<li>Confirmar se a suspensão de contribuições gera um evento separado em EVENTOSPREV ou se é apenas um UPDATE em CONTRIBPREVPARTP.</li>
+<li>O tratamento de empréstimo ativo (passo 5) apenas atualiza o flag — confirmar se há tratamento adicional (suspensão de desconto, renegociação).</li>
+<li>Validar se a reclusão tem efeito sobre dependentes (suspensão de pensão de reclusão, por exemplo).</li>
+</ul>
+</div>
+</div>
+
+<div class="pf-block" id="PF-03"><h4>JF003 (PF-03) — Aposentadoria INSS</h4>
+<p><strong>Objetivo:</strong> registrar a aposentadoria pelo INSS do participante e ajustar a situação no plano complementar.</p>
+<p><strong>Necessidade de negócio:</strong> quando o participante se aposenta pelo regime geral (INSS), o sistema registra o evento e atualiza a situação no plano complementar. O form <code>FEventoAssistidoINSS.pas</code> (1.657 linhas) trata tanto a aposentadoria quanto o falecimento de assistido INSS.</p>
+<p><strong>Gatilho/Ator:</strong> usuário aciona o menu <em>Eventos › Aposentadoria INSS</em> na tela principal.</p>
+<p><strong>Pré-condições:</strong> participante ativo selecionado; elegível para aposentadoria INSS.</p>
+<p><strong>Pós-condições:</strong> evento de aposentadoria INSS gravado; participante em situação de aposentado INSS; situação no plano atualizada.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li><strong>Usuário:</strong> seleciona o participante na tela principal e aciona o menu <em>Eventos › Aposentadoria INSS</em>. O sistema abre o form <code>FEventoAssistidoINSS.dfm</code> com os dados do participante.</li>
+<li><strong>Sistema:</strong> valida se o participante foi selecionado. Se nenhum participante estiver selecionado, exibe <a href="#MSG001">MSG001</a> e bloqueia (<a href="#TRT001">TRT001</a>).</li>
+<li><strong>Usuário:</strong> informa a data da aposentadoria INSS e clica em "Confirmar".</li>
+<li><strong>Sistema:</strong> valida se a data foi informada. Se vazia, exibe <a href="#MSG002">MSG002</a> e bloqueia (<a href="#TRT002">TRT002</a>). Valida se a data não é futura (<a href="#CADASTROPREV-RN001">RN001</a>).</li>
+<li><strong>Sistema:</strong> grava o evento em <code>EVENTOSPREV</code> com o tipo "Aposentadoria INSS" e a data informada. Atualiza a situação do participante para "Aposentado INSS" em <code>PARTPREVPLAN</code>. Grava o histórico em <code>HSTCONTEVENTOSPR</code>.</li>
+<li><strong>Sistema:</strong> atualiza as contribuições em <code>CONTRIBPREVPARTP</code> refletindo a nova situação. Exibe mensagem de sucesso e fecha o form.</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Abrir form</td><td>Carregar dados do participante</td><td>Participante selecionado</td><td>Abre FEventoAssistidoINSS</td><td>Form preenchido</td><td>—</td><td><a href="#MSG001">MSG001</a></td><td><code>FEventoAssistidoINSS.dfm</code></td></tr>
+<tr><td>Validar data</td><td>Impedir data futura</td><td>Data da aposentadoria</td><td>Compara com data atual</td><td>Data válida ou bloqueio</td><td><a href="#CADASTROPREV-RN001">RN001</a></td><td><a href="#MSG002">MSG002</a>, <a href="#MSG003">MSG003</a></td><td><code>FEventoAssistidoINSS.dfm</code></td></tr>
+<tr><td>Gravar evento</td><td>Persistir aposentadoria INSS</td><td>Dados validados</td><td>Insere em EVENTOSPREV e HSTCONTEVENTOSPR</td><td>Evento gravado</td><td>—</td><td>—</td><td><code>FEventoAssistidoINSS.dfm</code></td></tr>
+<tr><td>Atualizar situação</td><td>Ajustar situação no plano</td><td>Nova situação</td><td>Atualiza PARTPREVPLAN e CONTRIBPREVPARTP</td><td>Situação atualizada</td><td>—</td><td>—</td><td><code>FEventoAssistidoINSS.dfm</code></td></tr>
+</tbody></table></div>
+<div class="jf-rules">
+<p><strong>Regras de negócio da jornada:</strong> 1 regra(s) — texto completo abaixo.</p>
+<div class="rule-block" id="CADASTROPREV-RN001b"><div class="rule-id">RN001 (CADASTROPREV-RN001) — Data do evento não pode ser futura (reaproveitada)</div>
+<p><strong>Descrição:</strong> a data da aposentadoria INSS não pode ser posterior à data atual do sistema. Mesma regra <a href="#CADASTROPREV-RN001">RN001</a> aplicada em JF001.</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>dtpDataEvento</code> — [obrigatório] — data da aposentadoria informada</li>
+<li><code>Date()</code> — [obrigatório] — data atual do sistema</li>
+</ul>
+<p><strong>Condição:</strong> se <code>dtpDataEvento > Date()</code> → bloqueia.</p>
+<p><strong>Tratamento (TRT):</strong> <a href="#TRT003">TRT003</a> → <a href="#MSG003">MSG003</a> → Bloqueia execução</p>
+<p><strong>Rotina:</strong> validação inline no form. <strong>Origem:</strong> <code>CADASTROPREV/Fontes/FEventoAssistidoINSS.pas</code>. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> · <strong>Severidade:</strong> alta (bloqueante) · <strong>Jornada:</strong> <a href="#PF-03">JF003</a> · <strong>Relacionadas:</strong> <a href="#CADASTROPREV-RN001">RN001</a></p>
+</div>
+</div>
+
+<p><strong>Dependências:</strong> atualiza PARTPREVPLAN e CONTRIBPREVPARTP. Evidência: <code>CADASTROPREV/Fontes/FEventoAssistidoINSS.pas</code> (1.657 lin) · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<div class="mermaid">graph LR
+  n0["FEventoAssistidoINSS"] --> n1["ValidaParticipante"] --> n2["ValidaData"] --> n3["GravaEvento"] --> n4["EVENTOSPREV/HSTCONTEVENTOSPR"] --> n5["AtualizaPartPrevPlan"] --> n6["AtualizaContribuicoes"] --> n7["CONTRIBPREVPARTP"]</div>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span></p>
+<ul>
+<li>Confirmar se a aposentadoria INSS dispara cálculo de reserva ou se é apenas atualização de situação.</li>
+<li>O form <code>FEventoAssistidoINSS.pas</code> é compartilhado entre JF003 e JF004 — validar como o form distingue os dois tipos de evento.</li>
+</ul>
+</div>
+</div>
+
+<div class="pf-block" id="PF-04"><h4>JF004 (PF-04) — Falecimento INSS</h4>
+<p><strong>Objetivo:</strong> registrar o falecimento de participante aposentado pelo INSS e gerar pensão de assistido.</p>
+<p><strong>Necessidade de negócio:</strong> quando um participante aposentado pelo INSS falece, o sistema registra o evento, valida os dependentes e gera a pensão de assistido. O form <code>FEventoAssistidoINSS.pas</code> é o mesmo de JF003, distinguindo o tipo de evento internamente.</p>
+<p><strong>Gatilho/Ator:</strong> usuário aciona o menu <em>Eventos › Falecimento INSS</em> na tela principal.</p>
+<p><strong>Pré-condições:</strong> participante assistido (aposentado) selecionado; dependentes cadastrados.</p>
+<p><strong>Pós-condições:</strong> evento de falecimento INSS gravado; participante em situação de falecido; pensão de assistido gerada.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li><strong>Usuário:</strong> seleciona o participante aposentado na tela principal e aciona o menu <em>Eventos › Falecimento INSS</em>. O sistema abre o form <code>FEventoAssistidoINSS.dfm</code> no modo "Falecimento".</li>
+<li><strong>Sistema:</strong> valida se o participante foi selecionado. Se nenhum participante estiver selecionado, exibe <a href="#MSG001">MSG001</a> e bloqueia (<a href="#TRT001">TRT001</a>).</li>
+<li><strong>Usuário:</strong> informa a data do falecimento e clica em "Confirmar".</li>
+<li><strong>Sistema:</strong> valida se a data foi informada e se não é futura (<a href="#CADASTROPREV-RN001">RN001</a>). Se inválida, exibe a mensagem correspondente e bloqueia.</li>
+<li><strong>Sistema:</strong> percorre os dependentes e valida conta salário, CPF e opção de IR (<a href="#CADASTROPREV-RN002">RN002</a>), mesma validação de JF001.</li>
+<li><strong>Sistema:</strong> grava o evento em <code>EVENTOSPREV</code> com o tipo "Falecimento INSS". Atualiza a situação para "Falecido" em <code>PARTPREVPLAN</code>. Grava histórico em <code>HSTCONTEVENTOSPR</code>.</li>
+<li><strong>Sistema:</strong> gera a pensão de assistido em <code>BENEFBFCIARIO</code> para os dependentes válidos. Exibe mensagem de sucesso e fecha o form.</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Abrir form (modo falecimento)</td><td>Carregar dados do assistido</td><td>Participante aposentado selecionado</td><td>Abre FEventoAssistidoINSS em modo falecimento</td><td>Form preenchido</td><td>—</td><td><a href="#MSG001">MSG001</a></td><td><code>FEventoAssistidoINSS.dfm</code></td></tr>
+<tr><td>Validar data</td><td>Impedir data futura</td><td>Data do falecimento</td><td>Compara com data atual</td><td>Data válida ou bloqueio</td><td><a href="#CADASTROPREV-RN001">RN001</a></td><td><a href="#MSG002">MSG002</a>, <a href="#MSG003">MSG003</a></td><td><code>FEventoAssistidoINSS.dfm</code></td></tr>
+<tr><td>Validar dependentes</td><td>Verificar conta salário, CPF e opção IR</td><td>Lista de dependentes</td><td>Percorre dependentes e valida cada campo</td><td>Dependentes válidos ou bloqueio</td><td><a href="#CADASTROPREV-RN002">RN002</a></td><td><a href="#MSG004">MSG004</a>, <a href="#MSG005">MSG005</a>, <a href="#MSG006">MSG006</a></td><td><code>FEventoAssistidoINSS.dfm</code></td></tr>
+<tr><td>Gravar evento</td><td>Persistir falecimento INSS</td><td>Dados validados</td><td>Insere em EVENTOSPREV e HSTCONTEVENTOSPR</td><td>Evento gravado</td><td>—</td><td>—</td><td><code>FEventoAssistidoINSS.dfm</code></td></tr>
+<tr><td>Gerar pensão de assistido</td><td>Criar benefício para dependentes</td><td>Dependentes válidos</td><td>Insere em BENEFBFCIARIO</td><td>Pensão gerada</td><td>—</td><td>—</td><td><code>FEventoAssistidoINSS.dfm</code></td></tr>
+</tbody></table></div>
+<div class="jf-rules">
+<p><strong>Regras de negócio da jornada:</strong> 2 regra(s) — texto completo abaixo.</p>
+<div class="rule-block" id="CADASTROPREV-RN001c"><div class="rule-id">RN001 (CADASTROPREV-RN001) — Data do evento não pode ser futura (reaproveitada)</div>
+<p><strong>Descrição:</strong> a data do falecimento INSS não pode ser posterior à data atual. Mesma regra <a href="#CADASTROPREV-RN001">RN001</a>.</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>dtpDataEvento</code> — [obrigatório] — data do falecimento</li>
+<li><code>Date()</code> — [obrigatório] — data atual do sistema</li>
+</ul>
+<p><strong>Condição:</strong> se <code>dtpDataEvento > Date()</code> → bloqueia.</p>
+<p><strong>Tratamento (TRT):</strong> <a href="#TRT003">TRT003</a> → <a href="#MSG003">MSG003</a> → Bloqueia execução</p>
+<p><strong>Rotina:</strong> validação inline no form. <strong>Origem:</strong> <code>CADASTROPREV/Fontes/FEventoAssistidoINSS.pas</code>. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> · <strong>Severidade:</strong> alta (bloqueante) · <strong>Jornada:</strong> <a href="#PF-04">JF004</a> · <strong>Relacionadas:</strong> <a href="#CADASTROPREV-RN001">RN001</a></p>
+</div>
+<div class="rule-block" id="CADASTROPREV-RN002b"><div class="rule-id">RN002 (CADASTROPREV-RN002) — Dependente precisa de conta salário, CPF e opção de IR (reaproveitada)</div>
+<p><strong>Descrição:</strong> mesma validação de <a href="#CADASTROPREV-RN002">RN002</a> aplicada no falecimento INSS.</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>BENEFBFCIARIO.IDCONTASALARIO</code> — [obrigatório] — conta salário do dependente</li>
+<li><code>PESSOAFISICA.NRCPF</code> — [obrigatório] — CPF do dependente</li>
+<li><code>BENEFBFCIARIO.FLGOPCAOIR</code> — [obrigatório] — opção de IR</li>
+</ul>
+<p><strong>Tratamento (TRT):</strong> <a href="#TRT004">TRT004</a>, <a href="#TRT005">TRT005</a>, <a href="#TRT006">TRT006</a> → bloqueia execução</p>
+<p><strong>Rotina:</strong> validação inline no form. <strong>Origem:</strong> <code>CADASTROPREV/Fontes/FEventoAssistidoINSS.pas</code>. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> · <strong>Severidade:</strong> alta (bloqueante) · <strong>Jornada:</strong> <a href="#PF-04">JF004</a> · <strong>Relacionadas:</strong> <a href="#CADASTROPREV-RN002">RN002</a></p>
+</div>
+</div>
+
+<p><strong>Dependências:</strong> dispara geração de pensão em BENEFICIOPREV. Evidência: <code>CADASTROPREV/Fontes/FEventoAssistidoINSS.pas</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<div class="mermaid">graph LR
+  n0["FEventoAssistidoINSS"] --> n1["ValidaParticipante"] --> n2["ValidaData"] --> n3["ValidaDependentes"] --> n4["GravaEvento"] --> n5["EVENTOSPREV/HSTCONTEVENTOSPR"] --> n6["AtualizaPartPrevPlan"] --> n7["GeraPensoAssistido"] --> n8["BENEFBFCIARIO"]</div>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span></p>
+<ul>
+<li>Confirmar se a pensão de assistido INSS tem cálculo diferente da pensão normal (JF001).</li>
+<li>O form é compartilhado com JF003 — validar como o tipo de evento é distinguido internamente.</li>
+</ul>
+</div>
+</div>
+
+<section id="TRT-section"><div class="section-title">6. Tratamentos (TRT)</div>
+<p>Tratamentos de erro derivados das validações bloqueantes e exceções das regras. Cada TRT possui Condição, Mensagem e Resultado.</p>
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Condição</th><th>Mensagem</th><th>Resultado</th><th>Regra</th><th>Jornada</th></tr></thead><tbody>
+<tr id="TRT001"><td><strong>TRT001</strong></td><td>Participante não selecionado</td><td><a href="#MSG001">MSG001</a></td><td>Bloqueia execução</td><td>—</td><td>JF001, JF002, JF003, JF004</td></tr>
+<tr id="TRT002"><td><strong>TRT002</strong></td><td>Data do evento não informada</td><td><a href="#MSG002">MSG002</a></td><td>Bloqueia execução</td><td>—</td><td>JF001, JF002, JF003, JF004</td></tr>
+<tr id="TRT003"><td><strong>TRT003</strong></td><td>Data do evento futura</td><td><a href="#MSG003">MSG003</a></td><td>Bloqueia execução</td><td><a href="#CADASTROPREV-RN001">RN001</a></td><td>JF001, JF002, JF003, JF004</td></tr>
+<tr id="TRT004"><td><strong>TRT004</strong></td><td>Dependente sem conta salário</td><td><a href="#MSG004">MSG004</a></td><td>Bloqueia execução</td><td><a href="#CADASTROPREV-RN002">RN002</a></td><td>JF001, JF004</td></tr>
+<tr id="TRT005"><td><strong>TRT005</strong></td><td>Dependente sem CPF</td><td><a href="#MSG005">MSG005</a></td><td>Bloqueia execução</td><td><a href="#CADASTROPREV-RN002">RN002</a></td><td>JF001, JF004</td></tr>
+<tr id="TRT006"><td><strong>TRT006</strong></td><td>Dependente sem opção de IR</td><td><a href="#MSG006">MSG006</a></td><td>Bloqueia execução</td><td><a href="#CADASTROPREV-RN002">RN002</a></td><td>JF001, JF004</td></tr>
+</tbody></table></div>
+</section>
+
+<section id="MSG-section"><div class="section-title">7. Mensagens (MSG)</div>
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Texto da Mensagem</th><th>Jornadas relacionadas</th></tr></thead><tbody>
+<tr id="MSG001"><td><strong>MSG001</strong></td><td>"Primeiro selecione o Participante."</td><td>JF001, JF002, JF003, JF004</td></tr>
+<tr id="MSG002"><td><strong>MSG002</strong></td><td>"A Data do Evento deve ser informada."</td><td>JF001, JF002, JF003, JF004</td></tr>
+<tr id="MSG003"><td><strong>MSG003</strong></td><td>"A data do evento não pode ser maior que a data atual."</td><td>JF001, JF002, JF003, JF004</td></tr>
+<tr id="MSG004"><td><strong>MSG004</strong></td><td>"Conta Salário não cadastrada!"</td><td>JF001, JF004</td></tr>
+<tr id="MSG005"><td><strong>MSG005</strong></td><td>"Participante/Pensionita sem CPF cadastrado!"</td><td>JF001, JF004</td></tr>
+<tr id="MSG006"><td><strong>MSG006</strong></td><td>"Participante/Pensionista sem Opção de Imposto de Renda!"</td><td>JF001, JF004</td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">8. Tabela/API/Programa</div>
+<div class="table-wrap"><table><thead><tr><th>Jornada</th><th>Tabelas (escrita)</th><th>Rotina-chave (file:linha)</th></tr></thead><tbody>
+<tr><td>JF001</td><td>EVENTOSPREV, PARTPREVPLAN, BENEFBFCIARIO, CONTRIBPREVPARTP, HSTCONTEVENTOSPR</td><td><code>FEventoMorte.pas:976</code> (1.873 lin)</td></tr>
+<tr><td>JF002</td><td>EVENTOSPREV, PARTPREVPLAN, CONTRIBPREVPARTP, HSTCONTEVENTOSPR</td><td><code>FEventoReclusao.pas:700</code> (1.351 lin)</td></tr>
+<tr><td>JF003</td><td>EVENTOSPREV, PARTPREVPLAN, CONTRIBPREVPARTP, HSTCONTEVENTOSPR</td><td><code>FEventoAssistidoINSS.pas</code> (1.657 lin)</td></tr>
+<tr><td>JF004</td><td>EVENTOSPREV, PARTPREVPLAN, BENEFBFCIARIO, HSTCONTEVENTOSPR</td><td><code>FEventoAssistidoINSS.pas</code></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">9. Telas/Layouts</div>
+<div class="table-wrap"><table><thead><tr><th>Jornada</th><th>Form(s) (.dfm)</th></tr></thead><tbody>
+<tr><td>JF001</td><td><code>FEventoMorte.dfm</code></td></tr>
+<tr><td>JF002</td><td><code>FEventoReclusao.dfm</code></td></tr>
+<tr><td>JF003</td><td><code>FEventoAssistidoINSS.dfm</code></td></tr>
+<tr><td>JF004</td><td><code>FEventoAssistidoINSS.dfm</code></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">10. Visão Consolidada das Jornadas</div>
+<div class="table-wrap"><table><thead><tr><th>Jornada</th><th>ID</th><th>Título</th><th>Critério de aceitação (Dado/Quando/Então)</th><th>Mensagens</th><th>Telas</th></tr></thead><tbody>
+<tr><td>JF001</td><td>PF-01</td><td>Falecimento</td><td><strong>Dado</strong> participante ativo com dependentes válidos, <strong>Quando</strong> usuário registra falecimento, <strong>Então</strong> evento é gravado e pensão é gerada</td><td><a href="#MSG001">MSG001</a>–<a href="#MSG006">MSG006</a></td><td>FEventoMorte</td></tr>
+<tr><td>JF002</td><td>PF-02</td><td>Reclusão</td><td><strong>Dado</strong> participante ativo, <strong>Quando</strong> usuário registra reclusão, <strong>Então</strong> evento é gravado, contribuições suspensas e empréstimos verificados</td><td><a href="#MSG001">MSG001</a>–<a href="#MSG003">MSG003</a></td><td>FEventoReclusao</td></tr>
+<tr><td>JF003</td><td>PF-03</td><td>Aposentadoria INSS</td><td><strong>Dado</strong> participante ativo elegível, <strong>Quando</strong> usuário registra aposentadoria INSS, <strong>Então</strong> evento é gravado e situação no plano atualizada</td><td><a href="#MSG001">MSG001</a>–<a href="#MSG003">MSG003</a></td><td>FEventoAssistidoINSS</td></tr>
+<tr><td>JF004</td><td>PF-04</td><td>Falecimento INSS</td><td><strong>Dado</strong> participante aposentado com dependentes válidos, <strong>Quando</strong> usuário registra falecimento INSS, <strong>Então</strong> evento é gravado e pensão de assistido é gerada</td><td><a href="#MSG001">MSG001</a>–<a href="#MSG006">MSG006</a></td><td>FEventoAssistidoINSS</td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">11. Critérios de Aceitação por Regra</div>
+<div class="table-wrap"><table><thead><tr><th>Regra</th><th>ID</th><th>Título</th><th>Critério de aceitação (Dado/Quando/Então)</th><th>Mensagens</th><th>Telas</th></tr></thead><tbody>
+<tr><td>RN001</td><td>CADASTROPREV-RN001</td><td>Data do evento não pode ser futura</td><td><strong>Dado</strong> data do evento informada, <strong>Quando</strong> data > data atual, <strong>Então</strong> bloqueia com MSG003</td><td><a href="#MSG003">MSG003</a></td><td>FEventoMorte, FEventoReclusao, FEventoAssistidoINSS</td></tr>
+<tr><td>RN002</td><td>CADASTROPREV-RN002</td><td>Dependente precisa de conta salário, CPF e opção de IR</td><td><strong>Dado</strong> falecimento com dependentes, <strong>Quando</strong> dependente sem conta/CPF/opção IR, <strong>Então</strong> bloqueia com MSG004/MSG005/MSG006</td><td><a href="#MSG004">MSG004</a>, <a href="#MSG005">MSG005</a>, <a href="#MSG006">MSG006</a></td><td>FEventoMorte, FEventoAssistidoINSS</td></tr>
+<tr><td>RN003</td><td>CADASTROPREV-RN003</td><td>Suspender contribuições se não INSS-only</td><td><strong>Dado</strong> falecimento/reclusão, <strong>Quando</strong> benefício não é INSS-only, <strong>Então</strong> contribuições suspensas em CONTRIBPREVPARTP</td><td>—</td><td>FEventoReclusao</td></tr>
+<tr><td>RN004</td><td>CADASTROPREV-RN004</td><td>Verificar empréstimo ativo</td><td><strong>Dado</strong> reclusão do participante, <strong>Quando</strong> AtualizaFLGPossuiEmprestimo, <strong>Então</strong> flag de empréstimo atualizado</td><td>—</td><td>FEventoReclusao</td></tr>
+</tbody></table></div>
+</section>
+
+<p><a class="back-btn" href="funcionalidades.html">← Voltar à lista de Casos de Uso (Processos Funcionais)</a></p>
+</main>
+<footer>
+<p>Blueprint AS-IS — PFC-73 — Processos Funcionais organizados em Casos de Uso — Módulo CADASTROPREV | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-24</p>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+<script src="../assets/js/mermaid-init.js"></script>
+</body>
+</html>

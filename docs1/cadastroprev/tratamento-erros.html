@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>⚠️ Tratamento de Erros — Cadastro Previdenciário</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<header>
+  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-73</div>
+  <h1>⚠️ Tratamento de Erros — Cadastro Previdenciário</h1>
+  <p>Mensagens de validação, confirmação, erro e sucesso — com rastreabilidade arquivo:linha e categorização por tipo.</p>
+</header>
+<nav>
+  <a href="index.html">📋 Visão Geral</a>
+  <a href="arquitetura.html">🏗️ Arquitetura</a>
+  <a href="inventario-tecnico.html">📦 Inventário</a>
+  <a href="funcionalidades.html">⚙️ Processos Funcionais</a>
+  <a href="procedures-functions.html">🔧 Procedures</a>
+  <a href="dados.html">🗄️ Dados</a>
+  <a href="relatorios.html">📄 Relatórios</a>
+  <a href="integracoes.html">🔗 Integrações</a>
+  <a href="tratamento-erros.html">⚠️ Erros</a>
+  <a href="diagramas-fluxo.html">🔀 Fluxos</a>
+  <a href="lacunas.html">🔍 Lacunas</a>
+  <a href="controle-cobertura.html">📊 Cobertura</a>
+</nav>
+<main>
+
+<section id="pfc73-leigo">
+<div class="note-info">
+<p><strong>O que esta aba mostra:</strong> como o módulo CADASTROPREV reage quando algo dá errado (um dado faltando, uma data inválida, uma regra de elegibilidade não atendida) e quais mensagens o usuário vê.</p>
+<p><strong>Por que isso importa:</strong> no cadastro previdenciário, um erro mal tratado pode registrar um evento inválido (ex.: falecimento sem dependente com conta salário), deixar um participante em situação inconsistente ou, pior, permitir uma transferência de plano que viola a regra de elegibilidade. Saber o que bloqueia o processo e o que apenas avisa é essencial para operar com segurança.</p>
+<p><strong>Como ler esta página:</strong> as mensagens estão organizadas por categoria (validação de campos obrigatórios, datas, regras de negócio, erros de execução, confirmações e sucesso). Cada mensagem traz a fonte no código. Todos os textos foram conferidos no código-fonte — <span class="ev ev-comprovado">COMPROVADO</span>.</p>
+</div>
+<p><strong>Termos usados nesta página</strong> — o vocabulário de erros do Delphi, explicado.</p>
+<div class="table-wrap"><table><thead><tr><th>Termo técnico</th><th>Em linguagem simples</th><th>Fonte</th></tr></thead><tbody>
+<tr><td><strong>Exceção</strong></td><td>Um "alarme" que o programa dispara quando algo sai do esperado.</td><td>—</td></tr>
+<tr><td><strong>try / except</strong></td><td>"Rede de segurança": tenta fazer algo e, se o alarme tocar, executa um plano B.</td><td>forms de evento</td></tr>
+<tr><td><strong>MessageDlg / ShowMessage</strong></td><td>Janela de mensagem na tela, que o usuário precisa fechar.</td><td>forms de evento</td></tr>
+<tr><td><strong>raise exception.Create</strong></td><td>"Levantar a mão": cria um alarme com uma mensagem e o passa para quem chamou.</td><td>forms de evento</td></tr>
+<tr><td><strong>Validação bloqueante</strong></td><td>Mensagem que impede a continuação — o evento não é gravado.</td><td>forms de evento</td></tr>
+<tr><td><strong>Confirmação Yes/No</strong></td><td>Pergunta ao usuário antes de efetivar (ex.: "Confirma efetivação do evento?").</td><td>forms de evento</td></tr>
+<tr><td><strong>Exceção silenciosa</strong></td><td>Rede de segurança que "engole" o erro sem avisar ninguém.</td><td>ver seção "engolidos"</td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">⚠️ Visão Geral</div>
+<p>O módulo CADASTROPREV utiliza três padrões de tratamento de erros: (1) <code>try/except</code> com <code>MessageDlg</code>/<code>ShowMessage</code> para exibir mensagens ao usuário, (2) validação bloqueante com <code>raise exception.Create</code> ou <code>Abort</code> para impedir a gravação, e (3) confirmação <code>MessageDlg(mtConfirmation)</code> antes de efetivar eventos. As mensagens estão concentradas nos forms de evento (<code>FEventoMorte</code>, <code>FEventoReclusao</code>, <code>FEventoTransfPlano</code>, <code>FEventoAfastamento</code>, etc.) e no motor de saldamento (<code>USaldamento.pas</code>).</p>
+
+<p><strong>💡 Em outras palavras:</strong> o módulo usa três jeitos de lidar com erro: mostrar uma mensagem e parar (validação bloqueante), perguntar antes de agir (confirmação Yes/No) e avisar quando deu certo (mensagem de sucesso). As validações mais importantes são as de regras de negócio: elegibilidade, plano destino diferente de origem, contribuições já recebidas.</p>
+</section>
+
+<section><div class="section-title">📊 Distribuição de blocos try por Arquivo</div>
+<div class="table-wrap"><table><thead><tr><th>Arquivo</th><th>Padrão dominante</th><th>Evidência</th></tr></thead><tbody>
+<tr><td><code>FEventoTransfPlano.pas</code> (7.873 lin)</td><td>try/except + MessageDlg + validação bloqueante</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><code>USaldamento.pas</code> (8.861 lin)</td><td>try/except + raise exception.Create + rollback</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><code>FEventoMorte.pas</code> (1.873 lin)</td><td>try/except + MessageDlg (validação de dependentes)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><code>FEventoReclusao.pas</code> (1.351 lin)</td><td>try/except + MessageDlg (validação de dependentes)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><code>FEventoAssistidoINSS.pas</code> (1.657 lin)</td><td>try/except + MessageDlg</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><code>FEventoAfastamento.pas</code> (2.040 lin)</td><td>try/except + MessageDlg (validação de datas e elegibilidade)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><code>FEventoReinscricao.pas</code> (1.751 lin)</td><td>try/except + MessageDlg (validação de datas)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><code>FCancelaDependente.pas</code> (843 lin)</td><td>try/except + MessageDlg (confirmação de cancelamento)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><code>FEmissaoRecadastramento.pas</code> (1.896 lin)</td><td>try/except + MessageDlg (confirmação de suspensão)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+</tbody></table></div>
+<p><strong>Evidência:</strong> mensagens extraídas dos forms de evento em <code>CADASTROPREV/Fontes/*.pas</code> — <span class="ev ev-comprovado">COMPROVADO</span>.</p>
+
+<p><strong>💡 Em outras palavras:</strong> os arquivos com mais redes de segurança são os forms de evento (transferência de plano, falecimento, reclusão, afastamento) e o motor de saldamento — exatamente os processos mais críticos, onde um erro tem maior impacto.</p>
+</section>
+
+<section><div class="section-title">📋 Mensagens de Validação</div>
+<p>Mensagens que bloqueiam a operação quando uma condição não é atendida. Todas <span class="ev ev-comprovado">COMPROVADO</span> (encontradas no código-fonte).</p>
+<h4>Validação — Campos obrigatórios</h4>
+<div class="table-wrap"><table><thead><tr><th>Mensagem</th><th>Categoria</th><th>Evidência</th></tr></thead><tbody>
+<tr><td>"Primeiro selecione o Participante."</td><td>Campo obrigatório</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>"A Data do Evento deve ser informada."</td><td>Campo obrigatório</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>"A Data Inicial do Afastamento deve ser informada."</td><td>Campo obrigatório</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>"A Data da Reinscrição deve ser informada."</td><td>Campo obrigatório</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>"O Plano destino deve ser informado."</td><td>Campo obrigatório</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>"O Plano destino não pode ser o mesmo de origem."</td><td>Campo obrigatório</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>"Salário de Manutenção deve ser informado."</td><td>Campo obrigatório</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>"Selecione o Motivo do Cancelamento."</td><td>Campo obrigatório</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+</tbody></table></div>
+
+<h4>Validação — Restrições de data</h4>
+<div class="table-wrap"><table><thead><tr><th>Mensagem</th><th>Categoria</th><th>Evidência</th></tr></thead><tbody>
+<tr><td>"A data do evento não pode ser maior que a data atual."</td><td>Restrição de data</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>"A data de início do afastamento está anterior a 120 dias da data atual."</td><td>Restrição de data</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>"A data de reinscrição deve ser posterior à data do cancelamento."</td><td>Restrição de data</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>"A Data do Cancelamento deve ser igual ou posterior a Data do Cadastro do dependente."</td><td>Restrição de data</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+</tbody></table></div>
+
+<h4>Validação — Regras de negócio</h4>
+<div class="table-wrap"><table><thead><tr><th>Mensagem</th><th>Categoria</th><th>Evidência</th></tr></thead><tbody>
+<tr><td>"Afastamento não permitido. Motivo: Participante não aprovado pela Regra de Elegibilidade."</td><td>Regra de negócio</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>"O participante não está cadastrado com o elegível na patrocinadora do Plano Destino."</td><td>Regra de negócio</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>"Participante já inscrito nesse plano, realizar a reinscrição"</td><td>Regra de negócio</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>"O participante possui contribuições já recebidas!"</td><td>Regra de negócio</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>"Conta Salário não cadastrada!"</td><td>Regra de negócio</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>"Participante/Pensionita sem CPF cadastrado!"</td><td>Regra de negócio</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+</tbody></table></div>
+
+<p><strong>💡 Em outras palavras:</strong> as validações de campos obrigatórios impedem o usuário de gravar sem dados mínimos. As de data garantem consistência temporal (ex.: reinscrição posterior ao cancelamento). As de regra de negócio verificam elegibilidade, duplicidade de inscrição e pré-requisitos (conta salário, CPF).</p>
+</section>
+
+<section><div class="section-title">🔄 Padrões de Tratamento Identificados</div>
+<div class="cards-grid">
+<div class="card"><h3>Validação bloqueante</h3><p>Mensagem de erro + <code>Abort</code> ou <code>raise exception.Create</code>. O evento não é gravado. Usado em validações de campos obrigatórios, datas e regras de elegibilidade. Padrão dominante nos forms de evento.</p></div>
+<div class="card"><h3>Confirmação Yes/No</h3><p><code>MessageDlg(mtConfirmation, mbYesNo)</code> antes de efetivar. Se o usuário responder "Não", a operação é abortada. Usado em efetivação de evento, afastamento com manutenção, desfazimento de saldamento e suspensão de benefícios.</p></div>
+<div class="card"><h3>Exceção silenciosa</h3><p><code>try/except</code> com except vazio ou apenas log. O erro é "engolido" sem avisar o usuário. Ver seção "Erros engolidos" para os casos identificados.</p></div>
+<div class="card"><h3>Log de erro</h3><p><code>try/except</code> que escreve a mensagem num log ou painel de resultado, sem interromper. Usado em operações de lote e recadastramento, onde um erro individual não deve parar o lote.</p></div>
+</div>
+</section>
+
+<section><div class="section-title">📋 Mensagens reais conferidas no código</div>
+<p>Textos copiados do código-fonte, com categoria e efeito. Todos <span class="ev ev-comprovado">COMPROVADO</span> (encontrados nos forms de evento e no motor de saldamento).</p>
+<div class="table-wrap"><table><thead><tr><th>Categoria</th><th>Mensagem</th><th>Fonte</th><th>Evidência</th></tr></thead><tbody>
+<tr><td>Execução</td><td>"Erro ao gravar evento. Registro do Evento não efetuado."</td><td>forms de evento</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>Execução</td><td>"Erro ao cancelar o dependente"</td><td><code>FCancelaDependente.pas</code></td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>Execução</td><td>"Ocorreu um erro na Atualização. Evento não Efetuado."</td><td>forms de evento</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>Confirmação</td><td>"Confirma efetivação do evento?"</td><td>forms de evento</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>Confirmação</td><td>"Confirma Afastamento com Manutenção?"</td><td><code>FEventoAfastamento.pas</code></td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>Confirmação</td><td>"Deseja realmente desfazer o saldamento do participante ATIVO/APOSENTADO/PENSIONISTA indicado?"</td><td><code>FCancSaldamento.pas</code></td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>Confirmação</td><td>"Deseja realmente suspender TODOS os benefícios pendentes de recadastramento?"</td><td><code>FSuspendeBeneficio.pas</code></td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>Sucesso</td><td>"Efetuado com Sucesso."</td><td>forms de evento</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>Sucesso</td><td>"Transferência de Patrocinadora efetuada com sucesso."</td><td><code>fTransfPatroBatch.pas</code></td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>Sucesso</td><td>"Saldamento desfeito."</td><td><code>FCancSaldamento.pas</code></td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>Sucesso</td><td>"Dependente Cancelado."</td><td><code>FCancelaDependente.pas</code></td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+</tbody></table></div>
+
+<p><strong>💡 Em outras palavras:</strong> as mensagens de confirmação são as mais sensíveis: "Deseja realmente suspender TODOS os benefícios?" e "Deseja realmente desfazer o saldamento?" são ações irreversíveis que o sistema pergunta antes de executar. As de sucesso confirmam que a operação foi gravada.</p>
+
+<div class="note pfc73-ba"><p><strong>👔 Para o analista de negócios</strong></p><ul>
+<li>A confirmação "Deseja realmente suspender TODOS os benefícios pendentes de recadastramento?" é uma ação em massa. Validar se há desfazimento e quem tem autorização para executá-la.</li>
+<li>O desfazimento de saldamento ("Deseja realmente desfazer o saldamento...") é crítico: confirmar os pontos de não-retorno (contribuições já recebidas).</li>
+<li>A mensagem "Participante/Pensionita sem CPF cadastrado!" tem um erro de digitação ("Pensionita" em vez de "Pensionista"). Considerar corrigir.</li>
+</ul></div>
+</section>
+
+<section><div class="section-title">🔕 Erros "engolidos" e validações que não interrompem</div>
+<ul>
+<li>Em operações de lote (transferência de patrocinadora em batch, alteração de % de contribuição em lote), erros individuais são logados sem interromper o lote — o processamento continua para os demais participantes. <span class="ev ev-comprovado">COMPROVADO</span>.</li>
+<li>No recadastramento, a suspensão de benefícios processa todos os participantes pendentes; falhas individuais são registradas no log mas não impedem a suspensão dos demais. <span class="ev ev-comprovado">COMPROVADO</span>.</li>
+<li>Algumas rotinas utilitárias do motor de saldamento (<code>USaldamento.pas</code>) têm <code>try/except</code> com except vazio ou apenas log, para que uma falha numa etapa intermediária não aborte todo o saldamento. <span class="ev ev-inferido">INFERIDO</span> — verificar se intencional.</li>
+</ul>
+
+<div class="note pfc73-ba"><p><strong>👔 Para o analista de negócios</strong></p><ul>
+<li>Em operações de lote, o operador precisa ler o log ao final para saber quais participantes falharam. Recomenda-se incluir a leitura do log no procedimento operacional.</li>
+<li>Defina com o negócio quais validações devem <strong>bloquear</strong> e quais podem apenas <strong>avisar</strong>. Hoje essa decisão está espalhada no código.</li>
+</ul></div>
+</section>
+
+<section id="pfc73-analista"><div class="section-title">👔 Para o analista de negócios — síntese (PFC-73)</div>
+<div class="note pfc73-ba">
+<p>O módulo tem tratamento de erro robusto nos forms de evento (validação bloqueante + confirmação Yes/No) e tratamento mais tolerante em operações de lote (log sem interrupção). As mensagens de validação cobrem campos obrigatórios, restrições de data, regras de elegibilidade e pré-requisitos (conta salário, CPF).</p>
+<p><strong>O que bloqueia o evento (comprovado)</strong></p><ul>
+<li>Campos obrigatórios não preenchidos (participante, data, plano, motivo).</li><li>Data do evento futura; afastamento anterior a 120 dias; reinscrição anterior ao cancelamento.</li>
+<li>Participante não elegível; já inscrito no plano; com contribuições já recebidas; sem conta salário; sem CPF.</li>
+</ul>
+<p><strong>Perguntas para o responsável de negócio</strong></p><ul>
+<li>As confirmações em massa (suspensão de todos os benefícios, desfazimento de saldamento) devem exigir dupla aprovação?</li>
+<li>Qual é o procedimento quando o log de uma operação de lote mostra erros individuais?</li>
+</ul>
+</div>
+</section>
+
+</main>
+<footer>
+<p>Blueprint AS-IS — PFC-73 — Erros — Módulo CADASTROPREV | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-24</p>
+</footer>
+</body>
+</html>
