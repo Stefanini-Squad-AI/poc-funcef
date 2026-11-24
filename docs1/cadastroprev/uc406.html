@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UC406 — Cancelamento e Alteração — Cadastro Previdenciário</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<header>
+  <div class="badge">Blueprint AS-IS — PFC-73 — Processos Funcionais</div>
+  <h1>UC406 — Cancelamento e Alteração</h1>
+  <p>Caso de uso do módulo Cadastro Previdenciário: 5 jornada(s) funcional(is) e 3 regra(s) de negócio descritas dentro de cada jornada.</p>
+</header>
+<nav>
+  <a href="index.html">📋 Visão Geral</a>
+  <a href="arquitetura.html">🏗️ Arquitetura</a>
+  <a href="inventario-tecnico.html">📦 Inventário</a>
+  <a href="funcionalidades.html">⚙️ Processos Funcionais</a>
+  <a href="procedures-functions.html">🔧 Procedures</a>
+  <a href="dados.html">🗄️ Dados</a>
+  <a href="relatorios.html">📄 Relatórios</a>
+  <a href="integracoes.html">🔗 Integrações</a>
+  <a href="tratamento-erros.html">⚠️ Erros</a>
+  <a href="diagramas-fluxo.html">🔀 Fluxos</a>
+  <a href="lacunas.html">🔍 Lacunas</a>
+  <a href="controle-cobertura.html">📊 Cobertura</a>
+</nav>
+<main>
+
+<a class="back-btn" href="funcionalidades.html">← Voltar à lista de Casos de Uso (Processos Funcionais)</a>
+<div class="breadcrumb"><a href="index.html">Cadastro Previdenciário</a> › <a href="funcionalidades.html">Processos Funcionais</a> › UC406</div>
+
+<section><div class="section-title">1. Identificação</div>
+<div class="table-wrap"><table><tbody>
+<tr><th>Caso de Uso</th><td><strong>UC406 — Cancelamento e Alteração</strong></td></tr>
+<tr><th>Módulo</th><td>CADASTROPREV — Cadastro Previdenciário</td></tr>
+<tr><th>Sistema</th><td>CM Contabilidade / FUNCEF (Delphi 5 / VCL / MIDAS / Oracle)</td></tr>
+<tr><th>Tipo</th><td>Sistema Desktop</td></tr>
+<tr><th>Ator</th><td>Usuário operacional (analista de cadastro previdenciário)</td></tr>
+<tr><th>Jornadas</th><td><a href="#PF-17">JF017 — Cancelamento por Iniciativa do Participante</a>, <a href="#PF-18">JF018 — Cancelamento por Descumprimento de Prazo</a>, <a href="#PF-19">JF019 — Cancelamento por Inadimplência</a>, <a href="#PF-20">JF020 — Cancelar Evento Registrado</a>, <a href="#PF-21">JF021 — Alterar Evento</a></td></tr>
+<tr><th>Regras de negócio</th><td>3 regra(s) CADASTROPREV-RN, descritas na íntegra dentro de cada jornada</td></tr>
+<tr><th>OS - Título</th><td>PFC-73 — Lista de UC (Processos Funcionais organizados em Casos de Uso)</td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">2. Descrição Resumida</div>
+<p>Cancelamento de eventos e alteração de eventos já registrados no sistema. Este caso de uso reúne 5 jornada(s) funcional(is) do módulo Cadastro Previdenciário:</p>
+<ul>
+<li><a href="#PF-17"><strong>JF017 — Cancelamento por Iniciativa do Participante</strong></a>: cancelar a inscrição do participante por iniciativa própria (form externo, INFERIDO).</li>
+<li><a href="#PF-18"><strong>JF018 — Cancelamento por Descumprimento de Prazo</strong></a>: cancelar por descumprimento de prazo contratual (form externo, INFERIDO).</li>
+<li><a href="#PF-19"><strong>JF019 — Cancelamento por Inadimplência</strong></a>: cancelar por inadimplência do participante (form externo, INFERIDO).</li>
+<li><a href="#PF-20"><strong>JF020 — Cancelar Evento Registrado</strong></a>: cancelar um evento previamente registrado no sistema (form externo, INFERIDO).</li>
+<li><a href="#PF-21"><strong>JF021 — Alterar Evento</strong></a>: alterar um evento já registrado, preservando o histórico (COMPROVADO).</li>
+</ul>
+<p><strong>Necessidade de negócio:</strong> eventos registrados podem precisar ser cancelados ou alterados. O cancelamento pode ocorrer por iniciativa do participante (JF017), por descumprimento de prazo (JF018), por inadimplência (JF019) ou como correção de um evento registrado erroneamente (JF020). A alteração de evento (JF021) permite corrigir dados de um evento já registrado, preservando o histórico. As jornadas JF017–JF020 abrem forms externos ao módulo CADASTROPREV (em CMAdmPrev/CM), sendo INFERIDO quanto à implementação detalhada. A jornada JF021 é COMPROVADA no form <code>FAlteraEvento.pas</code> (497 linhas).</p>
+<p><strong>Quem inicia:</strong> sempre o usuário (analista de cadastro), pelo menu <em>Eventos</em> da tela principal.</p>
+<p><strong>Resultado esperado:</strong> ao fim do cancelamento, o evento cancelado fica marcado em <code>EVENTOSPREV</code> e em <code>HSTCONTEVENTOSPR</code>, a situação do participante em <code>PARTPREVPLAN</code> é atualizada conforme o tipo de cancelamento. Ao fim da alteração, o evento alterado tem seus dados atualizados em <code>EVENTOSPREV</code> com o histórico preservado em <code>HSTCONTEVENTOSPR</code>.</p>
+</section>
+
+<section><div class="section-title">3. Pré-condições</div>
+<p><strong>Gerais do módulo:</strong></p>
+<ul>
+<li>O módulo CADASTROPREV deve estar compilado e disponível (entry point <code>CADASTROPREV/Fontes/CadastroPrev.dpr</code>).</li>
+<li>O banco Oracle (schema <code>CM.</code>) deve estar acessível.</li>
+<li>O participante deve estar selecionado na tela principal.</li>
+<li>Os parâmetros globais do sistema previdenciário devem estar carregados.</li>
+<li>O usuário deve ter permissão de acesso ao módulo e ao tipo de evento.</li>
+</ul>
+<p><strong>Por jornada:</strong></p>
+<ul>
+<li><a href="#PF-17">JF017</a>: participante ativo no plano; condições de cancelamento por iniciativa satisfeitas.</li>
+<li><a href="#PF-18">JF018</a>: participante com prazo descumprido; condições de cancelamento satisfeitas.</li>
+<li><a href="#PF-19">JF019</a>: participante inadimplente; condições de cancelamento satisfeitas.</li>
+<li><a href="#PF-20">JF020</a>: evento previamente registrado e não cancelado.</li>
+<li><a href="#PF-21">JF021</a>: evento previamente registrado; dados a alterar informados.</li>
+</ul>
+</section>
+
+<section><div class="section-title">4. Pós-condições</div>
+<ul>
+<li><a href="#PF-17">JF017</a>: evento de cancelamento por iniciativa gravado em EVENTOSPREV/HSTCONTEVENTOSPR; participante em situação de cancelado em PARTPREVPLAN.</li>
+<li><a href="#PF-18">JF018</a>: evento de cancelamento por descumprimento gravado; participante em situação de cancelado.</li>
+<li><a href="#PF-19">JF019</a>: evento de cancelamento por inadimplência gravado; participante em situação de cancelado.</li>
+<li><a href="#PF-20">JF020</a>: evento cancelado marcado em EVENTOSPREV; situação do participante atualizada conforme o evento cancelado.</li>
+<li><a href="#PF-21">JF021</a>: evento alterado em EVENTOSPREV; histórico preservado em HSTCONTEVENTOSPR.</li>
+</ul>
+</section>
+
+<section><div class="section-title">5. Jornadas Funcionais (JF017, JF018, JF019, JF020, JF021)</div>
+<p>Cada jornada traz objetivo, ator/gatilho, pré e pós-condições, sequência operacional, ações práticas, <strong>regras de negócio da jornada</strong> (texto completo de cada regra), tratamentos e mensagens.</p>
+<p><strong>Como as jornadas deste caso de uso se relacionam:</strong> JF017–JF019 são três motivos de cancelamento do participante no plano (iniciativa, descumprimento, inadimplência), todos abrindo forms externos (INFERIDO). JF020 cancela um evento registrado (correção), também em form externo. JF021 altera um evento registrado, sendo a única jornada com implementação comprovada no módulo (<code>FAlteraEvento.pas</code>). Em cada passo, o rótulo "Usuário" ou "Sistema" indica quem executa a ação.</p>
+<div class="legend"><span><span class="ev ev-comprovado">COMPROVADO</span> — no código</span><span><span class="ev ev-inferido">INFERIDO</span> — plausível</span><span><span class="ev ev-pendente">PENDENTE</span> — validar</span></div>
+</section>
+
+<div class="pf-block" id="PF-17"><h4>JF017 (PF-17) — Cancelamento por Iniciativa do Participante <span class="ev ev-inferido">INFERIDO</span></h4>
+<p><strong>Objetivo:</strong> cancelar a inscrição do participante no plano por iniciativa própria.</p>
+<p><strong>Necessidade de negócio:</strong> o participante pode solicitar o cancelamento de sua inscrição no plano a qualquer momento. O sistema registra o cancelamento, atualiza a situação do participante e trata as reservas conforme as regras de cancelamento. O form <code>frmEventoCancelInicia</code> é externo ao módulo CADASTROPREV, sendo a implementação INFERIDO.</p>
+<p><strong>Gatilho/Ator:</strong> usuário aciona o menu <em>Eventos › Cancelamento por Iniciativa</em> na tela principal.</p>
+<p><strong>Pré-condições:</strong> participante ativo no plano; condições de cancelamento por iniciativa satisfeitas.</p>
+<p><strong>Pós-condições:</strong> evento de cancelamento por iniciativa gravado; participante em situação de cancelado.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li><strong>Usuário:</strong> seleciona o participante na tela principal e aciona o menu <em>Eventos › Cancelamento por Iniciativa</em>. O handler abre o form externo <code>frmEventoCancelInicia</code>.</li>
+<li><strong>Sistema:</strong> valida se o participante foi selecionado. Se nenhum, exibe <a href="#MSG001">MSG001</a> e bloqueia (<a href="#TRT001">TRT001</a>).</li>
+<li><strong>Usuário:</strong> informa a data do cancelamento e o motivo. Clica em "Confirmar".</li>
+<li><strong>Sistema:</strong> valida se o evento a cancelar está registrado <a href="#CADASTROPREV-RN024">[RN024]</a>. Se não estiver, exibe <a href="#MSG023">MSG023</a> e bloqueia (<a href="#TRT023">TRT023</a>).</li>
+<li><strong>Sistema:</strong> valida se o evento já não está cancelado. Se já estiver, exibe <a href="#MSG024">MSG024</a> e bloqueia (<a href="#TRT024">TRT024</a>).</li>
+<li><strong>Sistema:</strong> grava o evento de cancelamento em <code>EVENTOSPREV</code>. Atualiza a situação do participante para "Cancelado" em <code>PARTPREVPLAN</code> <a href="#CADASTROPREV-RN026">[RN026]</a>. Grava o histórico em <code>HSTCONTEVENTOSPR</code> <a href="#CADASTROPREV-RN025">[RN025]</a>. Trata as reservas conforme regras de cancelamento.</li>
+<li><strong>Sistema:</strong> exibe mensagem de sucesso e fecha o form.</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Abrir form externo</td><td>Iniciar cancelamento por iniciativa</td><td>Participante selecionado</td><td>Abre frmEventoCancelInicia (externo)</td><td>Form aberto</td><td>—</td><td><a href="#MSG001">MSG001</a></td><td><code>frmEventoCancelInicia</code> (externo)</td></tr>
+<tr><td>Validar evento registrado</td><td>Verificar se há evento a cancelar</td><td>ID participante, plano</td><td>Consulta EVENTOSPREV</td><td>Evento encontrado ou bloqueio</td><td><a href="#CADASTROPREV-RN024">RN024</a></td><td><a href="#MSG023">MSG023</a></td><td><code>frmEventoCancelInicia</code></td></tr>
+<tr><td>Validar não cancelado</td><td>Verificar se já não está cancelado</td><td>ID evento</td><td>Consulta EVENTOSPREV</td><td>Não cancelado ou bloqueio</td><td>—</td><td><a href="#MSG024">MSG024</a></td><td><code>frmEventoCancelInicia</code></td></tr>
+<tr><td>Gravar cancelamento</td><td>Persistir evento e atualizar situação</td><td>Dados validados</td><td>Insere em EVENTOSPREV e atualiza PARTPREVPLAN</td><td>Participante cancelado</td><td><a href="#CADASTROPREV-RN025">RN025</a>, <a href="#CADASTROPREV-RN026">RN026</a></td><td>—</td><td><code>frmEventoCancelInicia</code></td></tr>
+</tbody></table></div>
+<div class="jf-rules">
+<p><strong>Regras de negócio da jornada:</strong> 3 regra(s) — texto completo abaixo.</p>
+<div class="rule-block" id="CADASTROPREV-RN024"><div class="rule-id">RN024 (CADASTROPREV-RN024) — Evento deve estar registrado para ser cancelado</div>
+<p><strong>Descrição:</strong> para cancelar um evento, ele deve estar previamente registrado no sistema em EVENTOSPREV.</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>EVENTOSPREV.IDEVENTO</code> — [obrigatório] — ID do evento a cancelar</li>
+<li><code>EVENTOSPREV.FLGCANCELADO</code> — [obrigatório] — flag de cancelado</li>
+</ul>
+<p><strong>Categoria:</strong> validação de negócio · <strong>Gatilho:</strong> confirmação do cancelamento</p>
+<p><strong>Condição:</strong> se o evento não existir em EVENTOSPREV → bloqueia.</p>
+<p><strong>Tratamento (TRT):</strong> <a href="#TRT023">TRT023</a> → <a href="#MSG023">MSG023</a> → Bloqueia execução</p>
+<p><strong>Rotina:</strong> consulta a EVENTOSPREV no form. <strong>Origem:</strong> <code>frmEventoCancelInicia</code> (externo). <strong>Evidência:</strong> <span class="ev ev-inferido">INFERIDO</span> · <strong>Severidade:</strong> alta (bloqueante) · <strong>Jornada:</strong> <a href="#PF-17">JF017</a>, <a href="#PF-18">JF018</a>, <a href="#PF-19">JF019</a>, <a href="#PF-20">JF020</a> · <strong>Relacionadas:</strong> —</p>
+</div>
+<div class="rule-block" id="CADASTROPREV-RN025"><div class="rule-id">RN025 (CADASTROPREV-RN025) — Alteração/cancelamento de evento preserva histórico</div>
+<p><strong>Descrição:</strong> ao cancelar ou alterar um evento, o histórico em HSTCONTEVENTOSPR é preservado, registrando a operação.</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>HSTCONTEVENTOSPR</code> — [obrigatório] — histórico de eventos preservado</li>
+<li><code>EVENTOSPREV</code> — [obrigatório] — evento cancelado/alterado</li>
+</ul>
+<p><strong>Categoria:</strong> regra de negócio · <strong>Gatilho:</strong> gravação de cancelamento ou alteração</p>
+<p><strong>Condição:</strong> ao cancelar/alterar, o registro anterior em HSTCONTEVENTOSPR é preservado e um novo registro é inserido.</p>
+<p><strong>Rotina:</strong> <code>FAlteraEvento.pas</code> (JF021); forms externos (JF017–JF020). <strong>Origem:</strong> <code>CADASTROPREV/Fontes/FAlteraEvento.pas</code>. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> (JF021) · <span class="ev ev-inferido">INFERIDO</span> (JF017–JF020) · <strong>Severidade:</strong> alta · <strong>Jornada:</strong> <a href="#PF-17">JF017</a>, <a href="#PF-18">JF018</a>, <a href="#PF-19">JF019</a>, <a href="#PF-20">JF020</a>, <a href="#PF-21">JF021</a> · <strong>Relacionadas:</strong> —</p>
+</div>
+<div class="rule-block" id="CADASTROPREV-RN026"><div class="rule-id">RN026 (CADASTROPREV-RN026) — Cancelamento atualiza situação do participante</div>
+<p><strong>Descrição:</strong> ao cancelar um evento, a situação do participante em PARTPREVPLAN é atualizada conforme o tipo de cancelamento.</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>PARTPREVPLAN.SITPARTICIPANTE</code> — [obrigatório] — situação do participante</li>
+<li><code>EVENTOSPREV.TPEVENTO</code> — [obrigatório] — tipo do evento de cancelamento</li>
+</ul>
+<p><strong>Categoria:</strong> regra de negócio · <strong>Gatilho:</strong> gravação do cancelamento</p>
+<p><strong>Condição:</strong> após gravar o cancelamento, atualiza SITPARTICIPANTE em PARTPREVPLAN.</p>
+<p><strong>Rotina:</strong> atualização no form. <strong>Origem:</strong> forms externos (JF017–JF020); <code>FAlteraEvento.pas</code> (JF021). <strong>Evidência:</strong> <span class="ev ev-inferido">INFERIDO</span> (JF017–JF020) · <span class="ev ev-comprovado">COMPROVADO</span> (JF021) · <strong>Severidade:</strong> alta · <strong>Jornada:</strong> <a href="#PF-17">JF017</a>, <a href="#PF-18">JF018</a>, <a href="#PF-19">JF019</a>, <a href="#PF-20">JF020</a> · <strong>Relacionadas:</strong> —</p>
+</div>
+</div>
+
+<p><strong>Dependências:</strong> form externo ao módulo (CMAdmPrev/CM). Evidência: item de menu comprovado, implementação externa · <span class="ev ev-inferido">INFERIDO</span></p>
+<div class="mermaid">graph LR
+  n0["frmEventoCancelInicia(externo)"] --> n1["ValidaParticipante"] --> n2["ValidaEventoRegistrado(:RN024)"] --> n3["ValidaNaoCancelado"] --> n4["GravaCancelamento"] --> n5["EVENTOSPREV/HSTCONTEVENTOSPR(:RN025)"] --> n6["AtualizaSituacao(:RN026)"] --> n7["PARTPREVPLAN(sit=Cancelado)"]</div>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span></p>
+<ul>
+<li>O form <code>frmEventoCancelInicia</code> é externo ao módulo. Confirmar se as regras RN024–RN026 são aplicadas ou se há regras próprias.</li>
+<li>Validar o tratamento de reservas no cancelamento por iniciativa: resgate, portabilidade ou preservação.</li>
+</ul>
+</div>
+</div>
+
+<div class="pf-block" id="PF-18"><h4>JF018 (PF-18) — Cancelamento por Descumprimento de Prazo <span class="ev ev-inferido">INFERIDO</span></h4>
+<p><strong>Objetivo:</strong> cancelar a inscrição do participante por descumprimento de prazo contratual.</p>
+<p><strong>Necessidade de negócio:</strong> quando o participante descumpre um prazo contratual definido no regulamento do plano, o sistema registra o cancelamento por descumprimento. O form <code>frmEventoCancelInicia</code> (mesmo form de JF017, com motivo diferente) é externo ao módulo, sendo INFERIDO.</p>
+<p><strong>Gatilho/Ator:</strong> usuário aciona o menu <em>Eventos › Cancelamento por Descumprimento</em> na tela principal.</p>
+<p><strong>Pré-condições:</strong> participante com prazo descumprido; condições de cancelamento satisfeitas.</p>
+<p><strong>Pós-condições:</strong> evento de cancelamento por descumprimento gravado; participante em situação de cancelado.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li><strong>Usuário:</strong> seleciona o participante e aciona o menu <em>Eventos › Cancelamento por Descumprimento</em>. O handler abre o form externo <code>frmEventoCancelInicia</code> com motivo "Descumprimento de Prazo".</li>
+<li><strong>Sistema:</strong> valida se o participante foi selecionado. Se nenhum, exibe <a href="#MSG001">MSG001</a> e bloqueia (<a href="#TRT001">TRT001</a>).</li>
+<li><strong>Usuário:</strong> informa a data do cancelamento e confirma o descumprimento. Clica em "Confirmar".</li>
+<li><strong>Sistema:</strong> valida se o evento a cancelar está registrado <a href="#CADASTROPREV-RN024">[RN024]</a>. Se não, exibe <a href="#MSG023">MSG023</a> e bloqueia (<a href="#TRT023">TRT023</a>).</li>
+<li><strong>Sistema:</strong> valida se o evento já não está cancelado. Se já, exibe <a href="#MSG024">MSG024</a> e bloqueia (<a href="#TRT024">TRT024</a>).</li>
+<li><strong>Sistema:</strong> grava o evento de cancelamento em <code>EVENTOSPREV</code> com motivo "Descumprimento de Prazo". Atualiza a situação para "Cancelado" em <code>PARTPREVPLAN</code> <a href="#CADASTROPREV-RN026">[RN026]</a>. Preserva o histórico em <code>HSTCONTEVENTOSPR</code> <a href="#CADASTROPREV-RN025">[RN025]</a>.</li>
+<li><strong>Sistema:</strong> exibe mensagem de sucesso e fecha o form.</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Abrir form externo</td><td>Iniciar cancelamento por descumprimento</td><td>Participante selecionado</td><td>Abre frmEventoCancelInicia (externo)</td><td>Form aberto</td><td>—</td><td><a href="#MSG001">MSG001</a></td><td><code>frmEventoCancelInicia</code> (externo)</td></tr>
+<tr><td>Validar evento registrado</td><td>Verificar se há evento a cancelar</td><td>ID participante, plano</td><td>Consulta EVENTOSPREV</td><td>Evento encontrado ou bloqueio</td><td><a href="#CADASTROPREV-RN024">RN024</a></td><td><a href="#MSG023">MSG023</a></td><td><code>frmEventoCancelInicia</code></td></tr>
+<tr><td>Validar não cancelado</td><td>Verificar se já não está cancelado</td><td>ID evento</td><td>Consulta EVENTOSPREV</td><td>Não cancelado ou bloqueio</td><td>—</td><td><a href="#MSG024">MSG024</a></td><td><code>frmEventoCancelInicia</code></td></tr>
+<tr><td>Gravar cancelamento</td><td>Persistir evento</td><td>Dados validados</td><td>Insere em EVENTOSPREV e atualiza PARTPREVPLAN</td><td>Participante cancelado</td><td><a href="#CADASTROPREV-RN025">RN025</a>, <a href="#CADASTROPREV-RN026">RN026</a></td><td>—</td><td><code>frmEventoCancelInicia</code></td></tr>
+</tbody></table></div>
+<div class="jf-rules">
+<p><strong>Regras de negócio da jornada:</strong> 3 regra(s) — reaproveitadas de JF017 (RN024, RN025, RN026). Evidência: <span class="ev ev-inferido">INFERIDO</span> para todas.</p>
+<div class="rule-block" id="CADASTROPREV-RN024b"><div class="rule-id">RN024 (CADASTROPREV-RN024) — Evento deve estar registrado (reaproveitada)</div>
+<p><strong>Descrição:</strong> mesma regra <a href="#CADASTROPREV-RN024">RN024</a>. <strong>Evidência:</strong> <span class="ev ev-inferido">INFERIDO</span> · <strong>Jornada:</strong> <a href="#PF-18">JF018</a></p>
+</div>
+<div class="rule-block" id="CADASTROPREV-RN025b"><div class="rule-id">RN025 (CADASTROPREV-RN025) — Preserva histórico (reaproveitada)</div>
+<p><strong>Descrição:</strong> mesma regra <a href="#CADASTROPREV-RN025">RN025</a>. <strong>Evidência:</strong> <span class="ev ev-inferido">INFERIDO</span> · <strong>Jornada:</strong> <a href="#PF-18">JF018</a></p>
+</div>
+<div class="rule-block" id="CADASTROPREV-RN026b"><div class="rule-id">RN026 (CADASTROPREV-RN026) — Atualiza situação (reaproveitada)</div>
+<p><strong>Descrição:</strong> mesma regra <a href="#CADASTROPREV-RN026">RN026</a>. <strong>Evidência:</strong> <span class="ev ev-inferido">INFERIDO</span> · <strong>Jornada:</strong> <a href="#PF-18">JF018</a></p>
+</div>
+</div>
+
+<p><strong>Dependências:</strong> form externo ao módulo (CMAdmPrev/CM). Evidência: item de menu comprovado, implementação externa · <span class="ev ev-inferido">INFERIDO</span></p>
+<div class="mermaid">graph LR
+  n0["frmEventoCancelInicia(externo)"] --> n1["ValidaParticipante"] --> n2["ValidaEventoRegistrado(:RN024)"] --> n3["ValidaNaoCancelado"] --> n4["GravaCancelamento"] --> n5["EVENTOSPREV/HSTCONTEVENTOSPR(:RN025)"] --> n6["AtualizaSituacao(:RN026)"] --> n7["PARTPREVPLAN(sit=Cancelado)"]</div>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span></p>
+<ul>
+<li>Confirmar se o descumprimento de prazo é verificado automaticamente ou se depende de registro manual.</li>
+<li>Validar se há diferença no tratamento de reservas entre cancelamento por iniciativa e por descumprimento.</li>
+</ul>
+</div>
+</div>
+
+<div class="pf-block" id="PF-19"><h4>JF019 (PF-19) — Cancelamento por Inadimplência <span class="ev ev-inferido">INFERIDO</span></h4>
+<p><strong>Objetivo:</strong> cancelar a inscrição do participante por inadimplência.</p>
+<p><strong>Necessidade de negócio:</strong> quando o participante deixa de contribuir por um período definido no regulamento, o sistema registra o cancelamento por inadimplência. O form <code>frmEventoRegInadimplencia_Cadastro</code> é externo ao módulo, sendo INFERIDO.</p>
+<p><strong>Gatilho/Ator:</strong> usuário aciona o menu <em>Eventos › Cancelamento por Inadimplência</em> na tela principal.</p>
+<p><strong>Pré-condições:</strong> participante inadimplente; condições de cancelamento satisfeitas.</p>
+<p><strong>Pós-condições:</strong> evento de cancelamento por inadimplência gravado; participante em situação de cancelado.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li><strong>Usuário:</strong> seleciona o participante e aciona o menu <em>Eventos › Cancelamento por Inadimplência</em>. O handler abre o form externo <code>frmEventoRegInadimplencia_Cadastro</code>.</li>
+<li><strong>Sistema:</strong> valida se o participante foi selecionado. Se nenhum, exibe <a href="#MSG001">MSG001</a> e bloqueia (<a href="#TRT001">TRT001</a>).</li>
+<li><strong>Usuário:</strong> informa a data do cancelamento e confirma a inadimplência. Clica em "Confirmar".</li>
+<li><strong>Sistema:</strong> valida se o evento a cancelar está registrado <a href="#CADASTROPREV-RN024">[RN024]</a>. Se não, exibe <a href="#MSG023">MSG023</a> e bloqueia (<a href="#TRT023">TRT023</a>).</li>
+<li><strong>Sistema:</strong> valida se o evento já não está cancelado. Se já, exibe <a href="#MSG024">MSG024</a> e bloqueia (<a href="#TRT024">TRT024</a>).</li>
+<li><strong>Sistema:</strong> grava o evento de cancelamento em <code>EVENTOSPREV</code> com motivo "Inadimplência". Atualiza a situação para "Cancelado" em <code>PARTPREVPLAN</code> <a href="#CADASTROPREV-RN026">[RN026]</a>. Preserva o histórico em <code>HSTCONTEVENTOSPR</code> <a href="#CADASTROPREV-RN025">[RN025]</a>.</li>
+<li><strong>Sistema:</strong> exibe mensagem de sucesso e fecha o form.</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Abrir form externo</td><td>Iniciar cancelamento por inadimplência</td><td>Participante selecionado</td><td>Abre frmEventoRegInadimplencia_Cadastro (externo)</td><td>Form aberto</td><td>—</td><td><a href="#MSG001">MSG001</a></td><td><code>frmEventoRegInadimplencia_Cadastro</code> (externo)</td></tr>
+<tr><td>Validar evento registrado</td><td>Verificar se há evento a cancelar</td><td>ID participante, plano</td><td>Consulta EVENTOSPREV</td><td>Evento encontrado ou bloqueio</td><td><a href="#CADASTROPREV-RN024">RN024</a></td><td><a href="#MSG023">MSG023</a></td><td><code>frmEventoRegInadimplencia_Cadastro</code></td></tr>
+<tr><td>Validar não cancelado</td><td>Verificar se já não está cancelado</td><td>ID evento</td><td>Consulta EVENTOSPREV</td><td>Não cancelado ou bloqueio</td><td>—</td><td><a href="#MSG024">MSG024</a></td><td><code>frmEventoRegInadimplencia_Cadastro</code></td></tr>
+<tr><td>Gravar cancelamento</td><td>Persistir evento</td><td>Dados validados</td><td>Insere em EVENTOSPREV e atualiza PARTPREVPLAN</td><td>Participante cancelado</td><td><a href="#CADASTROPREV-RN025">RN025</a>, <a href="#CADASTROPREV-RN026">RN026</a></td><td>—</td><td><code>frmEventoRegInadimplencia_Cadastro</code></td></tr>
+</tbody></table></div>
+<div class="jf-rules">
+<p><strong>Regras de negócio da jornada:</strong> 3 regra(s) — reaproveitadas de JF017 (RN024, RN025, RN026). Evidência: <span class="ev ev-inferido">INFERIDO</span> para todas.</p>
+<div class="rule-block" id="CADASTROPREV-RN024c"><div class="rule-id">RN024 (CADASTROPREV-RN024) — Evento deve estar registrado (reaproveitada)</div>
+<p><strong>Descrição:</strong> mesma regra <a href="#CADASTROPREV-RN024">RN024</a>. <strong>Evidência:</strong> <span class="ev ev-inferido">INFERIDO</span> · <strong>Jornada:</strong> <a href="#PF-19">JF019</a></p>
+</div>
+<div class="rule-block" id="CADASTROPREV-RN025Gc"><div class="rule-id">RN025 (CADASTROPREV-RN025) — Preserva histórico (reaproveitada)</div>
+<p><strong>Descrição:</strong> mesma regra <a href="#CADASTROPREV-RN025">RN025</a>. <strong>Evidência:</strong> <span class="ev ev-inferido">INFERIDO</span> · <strong>Jornada:</strong> <a href="#PF-19">JF019</a></p>
+</div>
+<div class="rule-block" id="CADASTROPREV-RN026c"><div class="rule-id">RN026 (CADASTROPREV-RN026) — Atualiza situação (reaproveitada)</div>
+<p><strong>Descrição:</strong> mesma regra <a href="#CADASTROPREV-RN026">RN026</a>. <strong>Evidência:</strong> <span class="ev ev-inferido">INFERIDO</span> · <strong>Jornada:</strong> <a href="#PF-19">JF019</a></p>
+</div>
+</div>
+
+<p><strong>Dependências:</strong> form externo ao módulo (CMAdmPrev/CM). Evidência: item de menu comprovado, implementação externa · <span class="ev ev-inferido">INFERIDO</span></p>
+<div class="mermaid">graph LR
+  n0["frmEventoRegInadimplencia_Cadastro(externo)"] --> n1["ValidaParticipante"] --> n2["ValidaEventoRegistrado(:RN024)"] --> n3["ValidaNaoCancelado"] --> n4["GravaCancelamento"] --> n5["EVENTOSPREV/HSTCONTEVENTOSPR(:RN025)"] --> n6["AtualizaSituacao(:RN026)"] --> n7["PARTPREVPLAN(sit=Cancelado)"]</div>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span></p>
+<ul>
+<li>Confirmar se a inadimplência é detectada automaticamente pelo sistema ou se depende de registro manual.</li>
+<li>Validar se há período de carência antes do cancelamento por inadimplência.</li>
+</ul>
+</div>
+</div>
+
+<div class="pf-block" id="PF-20"><h4>JF020 (PF-20) — Cancelar Evento Registrado <span class="ev ev-inferido">INFERIDO</span></h4>
+<p><strong>Objetivo:</strong> cancelar um evento previamente registrado no sistema (correção de erro de registro).</p>
+<p><strong>Necessidade de negócio:</strong> quando um evento é registrado erroneamente (data errada, participante errado, tipo errado), o sistema permite cancelá-lo. Diferente dos cancelamentos por motivo (JF017–JF019), este cancela o evento em si, não a inscrição do participante. O form <code>frmCancelaEvento</code> é externo ao módulo, sendo INFERIDO.</p>
+<p><strong>Gatilho/Ator:</strong> usuário aciona o menu <em>Eventos › Cancelar Evento</em> na tela principal.</p>
+<p><strong>Pré-condições:</strong> evento previamente registrado e não cancelado.</p>
+<p><strong>Pós-condições:</strong> evento cancelado marcado em EVENTOSPREV; situação do participante atualizada conforme o evento cancelado.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li><strong>Usuário:</strong> seleciona o participante e aciona o menu <em>Eventos › Cancelar Evento</em>. O handler abre o form externo <code>frmCancelaEvento</code>.</li>
+<li><strong>Sistema:</strong> valida se o participante foi selecionado. Se nenhum, exibe <a href="#MSG001">MSG001</a> e bloqueia (<a href="#TRT001">TRT001</a>).</li>
+<li><strong>Usuário:</strong> seleciona o evento a cancelar da lista de eventos do participante. Clica em "Confirmar".</li>
+<li><strong>Sistema:</strong> valida se o evento foi gerado pelo sistema <a href="#CADASTROPREV-RN024">[RN024]</a>. Se não foi, exibe <a href="#MSG023">MSG023</a> e bloqueia (<a href="#TRT023">TRT023</a>).</li>
+<li><strong>Sistema:</strong> valida se o evento já não está cancelado. Se já, exibe <a href="#MSG024">MSG024</a> e bloqueia (<a href="#TRT024">TRT024</a>).</li>
+<li><strong>Sistema:</strong> marca o evento como cancelado em <code>EVENTOSPREV</code>. Atualiza a situação do participante em <code>PARTPREVPLAN</code> conforme o evento cancelado <a href="#CADASTROPREV-RN026">[RN026]</a>. Preserva o histórico em <code>HSTCONTEVENTOSPR</code> <a href="#CADASTROPREV-RN025">[RN025]</a>.</li>
+<li><strong>Sistema:</strong> exibe mensagem de sucesso e fecha o form.</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Abrir form externo</td><td>Iniciar cancelamento de evento</td><td>Participante selecionado</td><td>Abre frmCancelaEvento (externo)</td><td>Form aberto</td><td>—</td><td><a href="#MSG001">MSG001</a></td><td><code>frmCancelaEvento</code> (externo)</td></tr>
+<tr><td>Selecionar evento</td><td>Escolher evento a cancelar</td><td>Lista de eventos</td><td>Lista eventos de EVENTOSPREV</td><td>Evento selecionado</td><td>—</td><td>—</td><td><code>frmCancelaEvento</code></td></tr>
+<tr><td>Validar evento gerado</td><td>Verificar se foi gerado pelo sistema</td><td>ID evento</td><td>Consulta EVENTOSPREV</td><td>Gerado ou bloqueio</td><td><a href="#CADASTROPREV-RN024">RN024</a></td><td><a href="#MSG023">MSG023</a></td><td><code>frmCancelaEvento</code></td></tr>
+<tr><td>Validar não cancelado</td><td>Verificar se já não está cancelado</td><td>ID evento</td><td>Consulta EVENTOSPREV</td><td>Não cancelado ou bloqueio</td><td>—</td><td><a href="#MSG024">MSG024</a></td><td><code>frmCancelaEvento</code></td></tr>
+<tr><td>Cancelar evento</td><td>Marcar como cancelado</td><td>Dados validados</td><td>Atualiza EVENTOSPREV e PARTPREVPLAN</td><td>Evento cancelado</td><td><a href="#CADASTROPREV-RN025">RN025</a>, <a href="#CADASTROPREV-RN026">RN026</a></td><td>—</td><td><code>frmCancelaEvento</code></td></tr>
+</tbody></table></div>
+<div class="jf-rules">
+<p><strong>Regras de negócio da jornada:</strong> 3 regra(s) — reaproveitadas de JF017 (RN024, RN025, RN026). Evidência: <span class="ev ev-inferido">INFERIDO</span> para todas.</p>
+<div class="rule-block" id="CADASTROPREV-RN024d"><div class="rule-id">RN024 (CADASTROPREV-RN024) — Evento deve estar registrado (reaproveitada)</div>
+<p><strong>Descrição:</strong> mesma regra <a href="#CADASTROPREV-RN024">RN024</a>. <strong>Evidência:</strong> <span class="ev ev-inferido">INFERIDO</span> · <strong>Jornada:</strong> <a href="#PF-20">JF020</a></p>
+</div>
+<div class="rule-block" id="CADASTROPREV-RN025d"><div class="rule-id">RN025 (CADASTROPREV-RN025) — Preserva histórico (reaproveitada)</div>
+<p><strong>Descrição:</strong> mesma regra <a href="#CADASTROPREV-RN025">RN025</a>. <strong>Evidência:</strong> <span class="ev ev-inferido">INFERIDO</span> · <strong>Jornada:</strong> <a href="#PF-20">JF020</a></p>
+</div>
+<div class="rule-block" id="CADASTROPREV-RN026d"><div class="rule-id">RN026 (CADASTROPREV-RN026) — Atualiza situação (reaproveitada)</div>
+<p><strong>Descrição:</strong> mesma regra <a href="#CADASTROPREV-RN026">RN026</a>. <strong>Evidência:</strong> <span class="ev ev-inferido">INFERIDO</span> · <strong>Jornada:</strong> <a href="#PF-20">JF020</a></p>
+</div>
+</div>
+
+<p><strong>Dependências:</strong> form externo ao módulo (CMAdmPrev/CM). Evidência: item de menu comprovado, implementação externa · <span class="ev ev-inferido">INFERIDO</span></p>
+<div class="mermaid">graph LR
+  n0["frmCancelaEvento(externo)"] --> n1["ValidaParticipante"] --> n2["ListaEventos"] --> n3["ValidaEventoGerado(:RN024)"] --> n4["ValidaNaoCancelado"] --> n5["CancelaEvento"] --> n6["EVENTOSPREV(:RN025)"] --> n7["AtualizaSituacao(:RN026)"] --> n8["PARTPREVPLAN"]</div>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span></p>
+<ul>
+<li>Confirmar se o cancelamento de evento reverte todos os efeitos do evento original (reservas, contribuições, situação).</li>
+<li>Validar se há eventos que não podem ser cancelados (eventos de folha já efetivada, por exemplo).</li>
+</ul>
+</div>
+</div>
+
+<div class="pf-block" id="PF-21"><h4>JF021 (PF-21) — Alterar Evento <span class="ev ev-comprovado">COMPROVADO</span></h4>
+<p><strong>Objetivo:</strong> alterar um evento já registrado, preservando o histórico.</p>
+<p><strong>Necessidade de negócio:</strong> quando um evento é registrado com dados incorretos (data errada, motivo errado), o sistema permite alterá-lo. A alteração preserva o histórico: o registro anterior em <code>HSTCONTEVENTOSPR</code> é mantido e o evento em <code>EVENTOSPREV</code> é atualizado. O form <code>FAlteraEvento.pas</code> (497 linhas) é a única jornada deste UC com implementação comprovada no módulo.</p>
+<p><strong>Gatilho/Ator:</strong> usuário aciona o menu <em>Eventos › Alterar Evento</em> na tela principal.</p>
+<p><strong>Pré-condições:</strong> evento previamente registrado; dados a alterar informados.</p>
+<p><strong>Pós-condições:</strong> evento alterado em EVENTOSPREV; histórico preservado em HSTCONTEVENTOSPR.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li><strong>Usuário:</strong> seleciona o participante na tela principal e aciona o menu <em>Eventos › Alterar Evento</em>. O sistema abre o form <code>FAlteraEvento.dfm</code> com os dados do participante.</li>
+<li><strong>Sistema:</strong> valida se o participante foi selecionado. Se nenhum, exibe <a href="#MSG001">MSG001</a> e bloqueia (<a href="#TRT001">TRT001</a>).</li>
+<li><strong>Usuário:</strong> seleciona o evento a alterar da lista de eventos do participante. O sistema carrega os dados do evento no form.</li>
+<li><strong>Sistema:</strong> valida se o evento foi gerado pelo sistema <a href="#CADASTROPREV-RN024">[RN024]</a>. Se não foi, exibe <a href="#MSG023">MSG023</a> e bloqueia (<a href="#TRT023">TRT023</a>).</li>
+<li><strong>Sistema:</strong> valida se o evento já não está cancelado. Se já, exibe <a href="#MSG024">MSG024</a> e bloqueia (<a href="#TRT024">TRT024</a>).</li>
+<li><strong>Usuário:</strong> altera os dados desejados (data, motivo, etc.) e clica em "Confirmar".</li>
+<li><strong>Sistema:</strong> preserva o histórico do evento original em <code>HSTCONTEVENTOSPR</code> <a href="#CADASTROPREV-RN025">[RN025]</a>. Atualiza o evento em <code>EVENTOSPREV</code> com os novos dados. Atualiza a situação do participante em <code>PARTPREVPLAN</code> se necessário <a href="#CADASTROPREV-RN026">[RN026]</a>.</li>
+<li><strong>Sistema:</strong> exibe <a href="#MSG025">MSG025</a> ("Alteraçãoo de Evento efetuado com sucesso.") e fecha o form.</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Abrir form de alteração</td><td>Carregar dados do participante</td><td>Participante selecionado</td><td>Abre FAlteraEvento</td><td>Form preenchido</tdF><td>—</td><td><a href="#MSG001">MSG001</a></td><td><code>FAlteraEvento.dfm</code></td></tr>
+<tr><td>Selecionar evento</td><td>Escolher evento a alterar</td><td>Lista de eventos</td><td>Lista eventos de EVENTOSPREV</td><td>Evento selecionado</td><td>—</td><td>—</td><td><code>FAlteraEvento.dfm</code></td></tr>
+<tr><td>Validar evento gerado</td><td>Verificar se foi gerado pelo sistema</td><td>ID evento</td><td>Consulta EVENTOSPREV</td><td>Gerado ou bloqueio</td><td><a href="#CADASTROPREV-RN024">RN024</a></td><td><a href="#MSG023">MSG023</a></td><td><code>FAlteraEvento.dfm</code></td></tr>
+<tr><td>Validar não cancelado</td><td>Verificar se já não está cancelado</td><td>ID evento</td><td>Consulta EVENTOSPREV</td><td>Não cancelado ou bloqueio</td><td>—</td><td><a href="#MSG024">MSG024</a></td><td><code>FAlteraEvento.dfm</code></td></tr>
+<tr><td>Alterar evento</td><td>Preservar histórico e atualizar</td><td>Dados alterados</td><td>Preserva HSTCONTEVENTOSPR e atualiza EVENTOSPREV</td><td>Evento alterado</td><td><a href="#CADASTROPREV-RN025">RN025</a>, <a href="#CADASTROPREV-RN026">RN026</a></td><td><a href="#MSG025">MSG025</a9></td><td><code>FAlteraEvento.dfm</code></td></tr>
+</tbody></table></div>
+<div class="jf-rules">
+<p><strong>Regras de negócio da jornada:</strong> 3 regra(s) — texto completo abaixo.</p>
+<div class="rule-block" id="CADASTROPREV-RN024e"><div class="rule-id">RN024 (CADASTROPREV-RN024) — Evento deve estar registrado para ser alterado (reaproveitada)</div>
+<p><strong>Descrição:</strong> mesma regra <a href="#CADASTROPREV-RN024">RN024</a> aplicada na alteração de evento.</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>EVENTOSPREV.IDEVENTO</code> — [obrigatório] — ID do evento a alterar</li>
+</ul>
+<p><strong>Condição:</strong> se o evento não existir em EVENTOSPREV → bloqueia.</p>
+<p><strong>Tratamento (TRT):</strong> <a href="#TRT023">TRT023</a> → <a href="#MSG023">MSG023</a> → Bloqueia execução</p>
+<p><strong>Rotina:</strong> consulta a EVENTOSPREV no form. <strong>Origem:</strong> <code>CADASTROPREV/Fontes/FAlteraEvento.pas</code>. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> · <strong>Severidade:</strong> alta (bloqueante) · <strong>Jornada:</strong> <a href="#PF-21">JF021</a> · <strong>Relacionadas:</strong> <a href="#CADASTROPREV-RN024">RN024</a></p>
+</div>
+<div class="rule-block" id="CADASTROPREV-RN025e"><div class="rule-id">RN025 (CADASTROPREV-RN025) — Alteração de evento preserva histórico</div>
+<p><strong>Descrição:</strong> ao alterar um evento, o histórico em HSTCONTEVENTOSPR é preservado, registrando a operação de alteração.</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>HSTCONTEVENTOSPR</code> — [obrigatório] — histórico de eventos preservado</li>
+<li><code>EVENTOSPREV</code> — [obrigatório] — evento alterado com novos dados</li>
+</ul>
+<p><strong>Categoria:</strong> regra de negócio · <strong>Gatilho:</strong> confirmação da alteração</p>
+<p><strong>Condição:</strong> ao alterar, o registro anterior em HSTCONTEVENTOSPR é preservado e o evento em EVENTOSPREV é atualizado.</p>
+<p><strong>Rotina:</strong> <code>FAlteraEvento.pas</code>. <strong>Origem:</strong> <code>CADASTROPREV/Fontes/FAlteraEvento.pas</code>. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> · <strong>Severidade:</strong> alta · <strong>Jornada:</strong> <a href="#PF-21">JF021</a> · <strong>Relacionadas:</strong> <a href="#CADASTROPREV-RN025">RN025</a></p>
+</div>
+<div class="rule-block" id="CADASTROPREV-RN026e"><div class="rule-id">RN026 (CADASTROPREV-RN026) — Alteração atualiza situação do participante se necessário</div>
+<p><strong>Descrição:</strong> ao alterar um evento, a situação do participante em PARTPREVPLAN é atualizada se a alteração afetar a situação.</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>PARTPREVPLAN.SITPARTICIPANTE</code> — [obrigatório] — situação do participante</li>
+<li><code>EVENTOSPREV</code> — [obrigatório] — evento alterado</li>
+</ul>
+<p><strong>Condição:</strong> se a alteração do evento afeta a situação → atualiza PARTPREVPLAN.</p>
+<p><strong>Rotina:</strong> <code>FAlteraEvento.pas</code>. <strong>Origem:</strong> <code>CADASTROPREV/Fontes/FAlteraEvento.pas</code>. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> · <strong>Severidade:</strong> média · <strong>Jornada:</strong> <a href="#PF-21">JF021</a> · <strong>Relacionadas:</strong> <a href="#CADASTROPREV-RN026">RN026</a></p>
+</div>
+</div>
+
+<p><strong>Dependências:</strong> consulta e atualiza EVENTOSPREV e HSTCONTEVENTOSPR; atualiza PARTPREVPLAN se necessário. Evidência: <code>CADASTROPREV/Fontes/FAlteraEvento.pas</code> (497 lin) · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<div class="mermaid">graph LR
+  n0["FAlteraEvento"] --> n1["ValidaParticipante"] --> n2["ListaEventos"] --> n3["ValidaEventoGerado(:RN024)"] --> n4["ValidaNaoCancelado"] --> n5["PreservaHistorico(:RN025)"] --> n6["AlteraEvento"] --> n7["EVENTOSPREV"] --> n8["AtualizaSituacao(:RN026)"] --> n9["PARTPREVPLAN"] --> n10["MSG025"]</div>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span></p>
+<ul>
+<li>Confirmar quais campos do evento podem ser alterados (data, motivo, tipo) e quais não podem.</li>
+<li>Validar se a alteração de evento dispara recálculo de reservas ou contribuições.</li>
+<li>O form tem 497 linhas — confirmar se há regras adicionais não catalogadas.</li>
+</ul>
+</div>
+</div>
+
+<section id="TRT-section"><div class="section-title">6. Tratamentos (TRT)</div>
+<p>Tratamentos de erro derivados das validações bloqueantes e exceções das regras. Cada TRT possui Condição, Mensagem e Resultado.</p>
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Condição</th><th>Mensagem</th><th>Resultado</th><th>Regra</th><th>Jornada</th></tr></thead><tbody>
+<tr id="TRT001"><td><strong>TRT001</strong></td><td>Participante não selecionado</td><td><a href="#MSG001">MSG001</a></td><td>Bloqueia execução</td><td>—</td><td>JF017, JF018, JF019, JF020, JF021</td></tr>
+<tr id="TRT023"><td><strong>TRT023</strong></td><td>Evento não encontrado/ não gerado pelo sistema</td><td><a href="#MSG023">MSG023</a></td><td>Bloqueia execução</td><td><a href="#CADASTROPREV-RN024">RN024</a></td><td>JF017, JF018, JF019, JF020, JF021</td></tr>
+<tr id="TRT024"><td><strong>TRT024</strong></td><td>Evento já cancelado</td><td><a href="#MSG024">MSG024</a></td><td>Bloqueia execução</td><td>—</td><td>JF017, JF018, JF019, JF020, JF021</td></tr>
+</tbody></table></div>
+</section>
+
+<section id="MSG-section"><div class="section-title">7. Mensagens (MSG)</div>
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Texto da Mensagem</th><th>Jornadas relacionadas</th></tr></thead><tbody>
+<tr id="MSG001"><td><strong>MSG001</strong></td><td>"Primeiro selecione o Participante."</td><td>JF017, JF018, JF019, JF020, JF021</td></tr>
+<tr id="MSG023"><td><strong>MSG023</strong></td><td>"Este evento NÃO foi gerado pelo sistema."</td><td>JF017, JF018, JF019, JF020, JF021</td></tr>
+<tr id="MSG024"><td><strong>MSG024</strong></td><td>"O evento ainda não foi confirmado."</td><td>JF017, JF018, JF019, JF020, JF021</td></tr>
+<tr id="MSG025"><td><strong>MSG025</strong></td><td>"Alteraçãoo de Evento efetuado com sucesso."</td><td>JF021</td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">8. Tabela/API/Programa</div>
+<div class="table-wrap"><table><thead><tr><th>Jornada</th><th>Tabelas (escrita)</th><th>Rotina-chave (file:linha)</th></tr></thead><tbody>
+<tr><td>JF017</td><td>EVENTOSPREV, PARTPREVPLAN, HSTCONTEVENTOSPR</td><td><code>frmEventoCancelInicia</code> (externo) <span class="ev ev-inferido">INFERIDO</span></td></tr>
+<tr><td>JF018</td><td>EVENTOSPREV, PARTPREVPLAN, HSTCONTEVENTOSPR</td><td><code>frmEventoCancelInicia</code> (externo) <span class="ev ev-inferido">INFERIDO</span></td></tr>
+<tr><td>JF019</td><td>EVENTOSPREV, PARTPREVPLAN, HSTCONTEVENTOSPR</td><td><code>frmEventoRegInadimplencia_Cadastro</code> (externo) <span class="ev ev-inferido">INFERIDO</span></td></tr>
+<tr><td>JF020</td><td>EVENTOSPREV, PARTPREVPLAN, HSTCONTEVENTOSPR</td><td><code>frmCancelaEvento</code> (externo) <span class="ev ev-inferido">INFERIDO</span></td></tr>
+<tr><td>JF021</td><td>EVENTOSPREV, PARTPREVPLAN, HSTCONTEVENTOSPR</td><td><code>FAlteraEvento.pas</code> (497 lin) <span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">9. Telas/Layouts</div>
+<div class="table-wrap"><table><thead><tr><th>Jornada</th><th>Form(s) (.dfm)</th></tr></thead><tbody>
+<tr><td>JF017</td><td><code>frmEventoCancelInicia</code> (externo) <span class="ev ev-inferido">INFERIDO</span></td></tr>
+<tr><td>JF018</td><td><code>frmEventoCancelInicia</code> (externo) <span class="ev ev-inferido">INFERIDO</span></td></tr>
+<tr><td>JF019</td><td><code>frmEventoRegInadimplencia_Cadastro</code> (externo) <span class="ev ev-inferido">INFERIDO</span></td></tr>
+<tr><td>JF020</td><td><code>frmCancelaEvento</code> (externo) <span class="ev ev-inferido">INFERIDO</span></td></tr>
+<tr><td>JF021</td><td><code>FAlteraEvento.dfm</code> <span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">10. Visão Consolidada das Jornadas</div>
+<div class="table-wrap"><table><thead><tr><th>Jornada</th><th>ID</th><th>Título</th><th>Critério de aceitação (Dado/Quando/Então)</th><th>Mensagens</th><th>Telas</th></tr></thead><tbody>
+<tr><td>JF017</td><td>PF-17</td><td>Cancelamento por Iniciativa</td><td><strong>Dado</strong> participante ativo, <strong>Quando</strong> usuário cancela por iniciativa, <strong>Então</strong> evento de cancelamento é gravado</td><td><a href="#MSG023">MSG023</a>, <a href="#MSG024">MSG024</a></td><td>frmEventoCancelInicia (externo)</td></tr>
+<tr><td>JF018</td><td>PF-18</td><td>Cancelamento por Descumprimento</td><td><strong>Dado</strong> participante com prazo descumprido, <strong>Quando</strong> usuário cancela por descumprimento, <strong>Então</strong> evento de cancelamento é gravado</td><td><a href="#MSG023">MSG023</a>, <a href="#MSG024">MSG024</a></td><td>frmEventoCancelInicia (externo)</td></tr>
+<tr><td>JF019</td><td>PF-19</td><td>Cancelamento por Inadimplência</td><td><strong>Dado</strong> participante inadimplente, <strong>Quando</strong> usuário cancela por inadimplência, <strong>Então</strong> evento de cancelamento é gravado</td><td><a href="#MSG023">MSG023</a>, <a href="#MSG024">MSG024</a></td><td>frmEventoRegInadimplencia_Cadastro (externo)</td></tr>
+<tr><td>JF020</td><td>PF-20</td><td>Cancelar Evento Registrado</td><td><strong>Dado</strong> evento registrado, <strong>Quando</strong> usuário cancela evento, <strong>Então</strong> evento é marcado como cancelado</td><td><a href="#MSG023">MSG023</a>, <a href="#MSG024">MSG024</a></td><td>frmCancelaEvento (externo)</td></tr>
+<tr><td>JF021</td><td>PF-21</td><td>Alterar Evento</td><td><strong>Dado</strong> evento registrado, <strong>Quando</strong> usuário altera evento, <strong>Então</strong> evento é alterado e histórico preservado</td><td><a href="#MSG023">MSG023</a>, <a href="#MSG024">MSG024</a>, <a href="#MSG025">MSG025</a></td><td>FAlteraEvento</td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">11. Critérios de Aceitação por Regra</div>
+<div class="table-wrap"><table><thead><tr><th>Regra</th><th>ID</th><th>Título</th><th>Critério de aceitação (Dado/Quando/Então)</th><th>Mensagens</th><th>Telas</th></tr></thead><tbody>
+<tr><td>RN024</td><td>CADASTROPREV-RN024</td><td>Evento deve estar registrado</td><td><strong>Dado</strong> cancelamento/alteração, <strong>Quando</strong> evento não registrado, <strong>Então</strong> bloqueia com MSG023</td><td><a href="#MSG023">MSG023</a></td><td>frmEventoCancelInicia, frmCancelaEvento, FAlteraEvento</td></tr>
+<tr><td>RN025</td><td>CADASTROPREV-RN025</td><td>Preserva histórico</td><td><strong>Dado</strong> cancelamento/alteração, <strong>Quando</strong> evento gravado, <strong>Então</strong> histórico em HSTCONTEVENTOSPR preservado</td><td>—</td><td>frmEventoCancelInicia, frmCancelaEvento, FAlteraEvento</td></tr>
+<tr><td>RN026</td><td>CADASTROPREV-RN026</td><td>Atualiza situação do participante</td><td><strong>Dado</strong> cancelamento/alteração, <strong>Quando</strong> evento gravado, <strong>Então</strong> situação em PARTPREVPLAN atualizada</td><td>—</td><td>frmEventoCancelInicia, frmCancelaEvento, FAlteraEvento</td></tr>
+</tbody></table></div>
+</section>
+
+<p><a class="back-btn" href="funcionalidades.html">← Voltar à lista de Casos de Uso (Processos Funcionais)</a></p>
+</main>
+<footer>
+<p>Blueprint AS-IS — PFC-73 — Processos Funcionais organizados em Casos de Uso — Módulo CADASTROPREV | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-24</p>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+<script src="../assets/js/mermaid-init.js"></script>
+</body>
+</html>

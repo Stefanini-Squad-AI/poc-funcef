@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UC404 — Afastamento — Cadastro Previdenciário</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<header>
+  <div class="badge">Blueprint AS-IS — PFC-73 — Processos Funcionais</div>
+  <h1>UC404 — Afastamento</h1>
+  <p>Caso de uso do módulo Cadastro Previdenciário: 2 jornada(s) funcional(is) e 5 regra(s) de negócio descritas dentro de cada jornada.</p>
+</header>
+<nav>
+  <a href="index.html">📋 Visão Geral</a>
+  <a href="arquitetura.html">🏗️ Arquitetura</a>
+  <a href="inventario-tecnico.html">📦 Inventário</a>
+  <a href="funcionalidades.html">⚙️ Processos Funcionais</a>
+  <a href="procedures-functions.html">🔧 Procedures</a>
+  <a href="dados.html">🗄️ Dados</a>
+  <a href="relatorios.html">📄 Relatórios</a>
+  <a href="integracoes.html">🔗 Integrações</a>
+  <a href="tratamento-erros.html">⚠️ Erros</a>
+  <a href="diagramas-fluxo.html">🔀 Fluxos</a>
+  <a href="lacunas.html">🔍 Lacunas</a>
+  <a href="controle-cobertura.html">📊 Cobertura</a>
+</nav>
+<main>
+
+<a class="back-btn" href="funcionalidades.html">← Voltar à lista de Casos de Uso (Processos Funcionais)</a>
+<div class="breadcrumb"><a href="index.html">Cadastro Previdenciário</a> › <a href="funcionalidades.html">Processos Funcionais</a> › UC404</div>
+
+<section><div class="section-title">1. Identificação</div>
+<div class="table-wrap"><table><tbody>
+<tr><th>Caso de Uso</th><td><strong>UC404 — Afastamento</strong></td></tr>
+<tr><th>Módulo</th><td>CADASTROPREV — Cadastro Previdenciário</td></tr>
+<tr><th>Sistema</th><td>CM Contabilidade / FUNCEF (Delphi 5 / VCL / MIDAS / Oracle)</td></tr>
+<tr><th>Tipo</th><td>Sistema Desktop</td></tr>
+<tr><th>Ator</th><td>Usuário operacional (analista de cadastro previdenciário)</td></tr>
+<tr><th>Jornadas</th><td><a href="#PF-11">JF011 — Afastamento com Manutenção</a>, <a href="#PF-12">JF012 — Afastamento sem Remuneração</a></td></tr>
+<tr><th>Regras de negócio</th><td>5 regra(s) CADASTROPREV-RN, descritas na íntegra dentro de cada jornada</td></tr>
+<tr><th>OS - Título</th><td>PFC-73 — Lista de UC (Processos Funcionais organizados em Casos de Uso)</td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">2. Descrição Resumida</div>
+<p>Registro de afastamento do participante, com ou sem manutenção de contribuição. Este caso de uso reúne 2 jornada(s) funcional(is) do módulo Cadastro Previdenciário:</p>
+<ul>
+<li><a href="#PF-11"><strong>JF011 — Afastamento com Manutenção</strong></a>: afastar o participante mantendo a contribuição e o salário de manutenção.</li>
+<li><a href="#PF-12"><strong>JF012 — Afastamento sem Remuneração</strong></a>: afastar o participante sem remuneração, suspendendo a contribuição.</li>
+</ul>
+<p><strong>Necessidade de negócio:</strong> o afastamento do participante pode ocorrer por diversos motivos (doença, acidente, licença maternidade, etc.). Quando o afastamento é com manutenção, o participante continua contribuindo e recebe um salário de manutenção. Quando é sem remuneração, a contribuição é suspensa. O sistema valida que a data inicial é obrigatória, que a data final é maior que a inicial, que o afastamento não tem início anterior a 120 dias da data atual, que o salário de manutenção é informado (no caso com manutenção), e que a elegibilidade do participante é aprovada. O form <code>FEventoAfastamento.pas</code> (2.040 linhas) trata o afastamento com manutenção; <code>FEventoAfastSemRemun.pas</code> (1.223 linhas) trata o sem remuneração.</p>
+<p><strong>Quem inicia:</strong> sempre o usuário (analista de cadastro), pelo menu <em>Eventos</em> da tela principal.</p>
+<p><strong>Resultado esperado:</strong> ao fim do registro, o evento fica gravado em <code>EVENTOSPREV</code> e em <code>HSTCONTEVENTOSPR</code>, a situação do participante em <code>PARTPREVPLAN</code> é atualizada para "Afastado", e a evolução funcional em <code>EVOLFUNCPREV</code> registra o período de afastamento.</p>
+</section>
+
+<section><div class="section-title">3. Pré-condições</div>
+<p><strong>Gerais do módulo:</strong></p>
+<ul>
+<li>O módulo CADASTROPREV deve estar compilado e disponível (entry point <code>CADASTROPREV/Fontes/CadastroPrev.dpr</code>).</li>
+<li>O banco Oracle (schema <code>CM.</code>) deve estar acessível.</li>
+<li>O participante deve estar selecionado na tela principal.</li>
+<li>Os parâmetros globais do sistema previdenciário devem estar carregados.</li>
+<li>O usuário deve ter permissão de acesso ao módulo e ao tipo de evento.</li>
+</ul>
+<p><strong>Por jornada:</strong></p>
+<ul>
+<li><a href="#PF-11">JF011</a>: participante ativo; data inicial e final informadas; salário de manutenção informado; elegibilidade aprovada.</li>
+<li><a href="#PF-12">JF012</a>: participante ativo; data inicial e final informadas; elegibilidade aprovada.</li>
+</ul>
+</section>
+
+<section><div class="section-title">4. Pós-condições</div>
+<ul>
+<li><a href="#PF-11">JF011</a>: evento de afastamento com manutenção gravado em EVENTOSPREV/HSTCONTEVENTOSPR; participante em situação de afastado em PARTPREVPLAN; evolução funcional registrada em EVOLFUNCPREV; contribuição mantida.</li>
+<li><a href="#PF-12">JF012</a>: evento de afastamento sem remuneração gravado; participante em situação de afastado; evolução funcional registrada; contribuição suspensa.</li>
+</ul>
+</section>
+
+<section><div class="section-title">5. Jornadas Funcionais (JF011, JF012)</div>
+<p>Cada jornada traz objetivo, ator/gatilho, pré e pós-condições, sequência operacional, ações práticas, <strong>regras de negócio da jornada</strong> (texto completo de cada regra), tratamentos e mensagens.</p>
+<p><strong>Como as jornadas deste caso de uso se relacionam:</strong> JF011 (com manutenção) e JF012 (sem remuneração) são dois tipos de afastamento que diferem quanto à manutenção da contribuição e do salário. Ambas validam datas e elegibilidade. Em cada passo, o rótulo "Usuário" ou "Sistema" indica quem executa a ação.</p>
+<div class="legend"><span><span class="ev ev-comprovado">COMPROVADO</span> — no código</span><span><span class="ev ev-inferido">INFERIDO</span> — plausível</span><span><span class="ev ev-pendente">PENDENTE</span> — validar</span></div>
+</section>
+
+<div class="pf-block" id="PF-11"><h4>JF011 (PF-11) — Afastamento com Manutenção</h4>
+<p><strong>Objetivo:</strong> afastar o participante mantendo a contribuição e o salário de manutenção.</p>
+<p><strong>Necessidade de negócio:</strong> o afastamento com manutenção ocorre quando o participante se afasta temporariamente (por exemplo, licença médica) mas continua contribuindo para o plano e recebe um salário de manutenção. O sistema valida datas, salário e elegibilidade. O form <code>FEventoAfastamento.pas</code> (2.040 linhas) trata o fluxo.</p>
+<p><strong>Gatilho/Ator:</strong> usuário aciona o menu <em>Eventos › Afastamento (com Manutenção)</em> na tela principal.</p>
+<p><strong>Pré-condições:</strong> participante ativo; data inicial e final informadas; salário de manutenção informado; elegibilidade aprovada.</p>
+<p><strong>Pós-condições:</strong> evento de afastamento com manutenção gravado; participante em situação de afastado; evolução funcional registrada; contribuição mantida.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li><strong>Usuário:</strong> seleciona o participante na tela principal e aciona o menu <em>Eventos › Afastamento (com Manutenção)</em>. O sistema abre o form <code>FEventoAfastamento.dfm</code> com os dados do participante (<code>FEventoAfastamento.pas:594</code>).</li>
+<li><strong>Sistema:</strong> valida se o participante foi selecionado. Se nenhum participante estiver selecionado, exibe <a href="#MSG001">MSG001</a> e bloqueia (<a href="#TRT001">TRT001</a>).</li>
+<li><strong>Usuário:</strong> informa a data inicial, a data final, o motivo do afastamento e o salário de manutenção. Clica em "Confirmar".</li>
+<li><strong>Sistema:</strong> valida se a data inicial foi informada <a href="#CADASTROPREV-RN015">[RN015]</a>. Se vazia, exibe <a href="#MSG015">MSG015</a> e bloqueia (<a href="#TRT015">TRT015</a>).</li>
+<li><strong>Sistema:</strong> valida se a data final é maior que a data inicial <a href="#CADASTROPREV-RN016">[RN016]</a>. Se não, exibe <a href="#MSG016">MSG016</a> e bloqueia (<a href="#TRT016">TRT016</a>).</li>
+<li><strong>Sistema:</strong> valida se a data inicial não é anterior a 120 dias da data atual <a href="#CADASTROPREV-RN017">[RN017]</a>. Se for, exibe <a href="#MSG017">MSG017</a> e bloqueia (<a href="#TRT017">TRT017</a>).</li>
+<li><strong>Sistema:</strong> valida se o salário de manutenção foi informado <a href="#CADASTROPREV-RN018">[RN018]</a>. Se vazio, exibe <a href="#MSG018">MSG018</a> e bloqueia (<a href="#TRT018">TRT018</a>).</li>
+<li><strong>Sistema:</strong> executa a regra de elegibilidade do participante <a href="#CADASTROPREV-RN019">[RN019]</a> (<code>FEventoAfastamento.pas:2005</code>). Se reprovada, exibe <a href="#MSG019">MSG019</a> e bloqueia (<a href="#TRT019">TRT019</a>).</li>
+<li><strong>Sistema:</strong> grava o evento em <code>EVENTOSPREV</code> com o tipo "Afastamento com Manutenção". Atualiza a situação do participante para "Afastado" em <code>PARTPREVPLAN</code>. Registra a evolução funcional em <code>EVOLFUNCPREV</code>. Grava o histórico em <code>HSTCONTEVENTOSPR</code>. A contribuição é mantida.</li>
+<li><strong>Sistema:</strong> exibe mensagem de sucesso e fecha o form.</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Abrir form de afastamento</td><td>Carregar dados do participante</td><td>Participante selecionado</td><td>Abre FEventoAfastamento</td><td>Form preenchido</td><td>—</td><td><a href="#MSG001">MSG001</a></td><td><code>FEventoAfastamento.dfm</code></td></tr>
+<tr><td>Validar data inicial</td><td>Data inicial obrigatória</td><td>Data inicial</td><td>Valida se informada</td><td>Informada ou bloqueio</td><td><a href="#CADASTROPREV-RN015">RN015</a></td><td><a href="#MSG015">MSG015</a></td><td><code>FEventoAfastamento.dfm</code></td></tr>
+<tr><td>Validar data final</td><td>Data final > data inicial</td><td>Data inicial, data final</td><td>Compara datas</td><td>Maior ou bloqueio</td><td><a href="#CADASTROPREV-RN016">RN016</a></td><td><a href="#MSG016">MSG016</a></td><td><code>FEventoAfastamento.dfm</code></td></tr>
+<tr><td>Validar janela 120 dias</td><td>Não anterior a 120 dias</td><td>Data inicial, data atual</td><td>Compara datas</td><td>Dentro da janela ou bloqueio</td><td><a href="#CADASTROPREV-RN017">RN017</a></td><td><a href="#MSG017">MSG017</a></td><td><code>FEventoAfastamento.dfm</code></td></tr>
+<tr><td>Validar salário manutenção</td><td>Salário obrigatório</td><td>Salário de manutenção</td><td>Valida se informado</td><td>Informado ou bloqueio</td><td><a href="#CADASTROPREV-RN018">RN018</a></td><td><a href="#MSG018">MSG018</a></td><td><code>FEventoAfastamento.dfm</code></td></tr>
+<tr><td>Validar elegibilidade</td><td>Aprovar afastamento</td><td>ID participante</td><td>Executa regra de elegibilidade</td><td>Aprovado ou bloqueio</td><td><a href="#CADASTROPREV-RN019">RN019</a></td><td><a href="#MSG019">MSG019</a></td><td><code>FEventoAfastamento.dfm</code></td></tr>
+<tr><td>Gravar afastamento</td><td>Persistir evento</td><td>Dados validados</td><td>Insere em EVENTOSPREV e EVOLFUNCPREV</td><td>Evento gravado</td><td>—</td><td>—</td><td><code>FEventoAfastamento.dfm</code></td></tr>
+</tbody></table></div>
+<div class="jf-rules">
+<p><strong>Regras de negócio da jornada:</strong> 5 regra(s) — texto completo abaixo.</p>
+<div class="rule-block" id="CADASTROPREV-RN015"><div class="rule-id">RN015 (CADASTROPREV-RN015) — Data inicial obrigatória</div>
+<p><strong>Descrição:</strong> a data inicial do afastamento deve ser informada.</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>dtpDataInicial</code> — [obrigatório] — data inicial do afastamento</li>
+</ul>
+<p><strong>Categoria:</strong> validação de entrada · <strong>Gatilho:</strong> confirmação do afastamento</p>
+<p><strong>Condição:</strong> se <code>dtpDataInicial</code> vazio → bloqueia.</p>
+<p><strong>Tratamento (TRT):</strong> <a href="#TRT015">TRT015</a> → <a href="#MSG015">MSG015</a> → Bloqueia execução</p>
+<p><strong>Rotina:</strong> validação inline no form. <strong>Origem:</strong> <code>CADASTROPREV/Fontes/FEventoAfastamento.pas</code>. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> · <strong>Severidade:</strong> alta (bloqueante) · <strong>Jornada:</strong> <a href="#PF-11">JF011</a>, <a href="#PF-12">JF012</a> · <strong>Relacionadas:</strong> —</p>
+</div>
+<div class="rule-block" id="CADASTROPREV-RN016"><div class="rule-id">RN016 (CADASTROPREV-RN016) — Data final maior que data inicial</div>
+<p><strong>Descrição:</strong> a data final do afastamento deve ser maior que a data inicial.</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>dtpDataInicial</code> — [obrigatório] — data inicial</li>
+<li><code>dtpDataFinal</code> — [obrigatório] — data final</li>
+</ul>
+<p><strong>Condição:</strong> se <code>dtpDataFinal <= dtpDataInicial</code> → bloqueia.</p>
+<p><strong>Tratamento (TRT):</strong> <a href="#TRT016">TRT016</a> → <a href="#MSG016">MSG016</a> → Bloqueia execução</p>
+<p><strong>Rotina:</strong> validação inline no form. <strong>Origem:</strong> <code>CADASTROPREV/Fontes/FEventoAfastamento.pas</code>. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> · <strong>Severidade:</strong> alta (bloqueante) · <strong>Jornada:</strong> <a href="#PF-11">JF011</a>, <a href="#PF-12">JF012</a> · <strong>Relacionadas:</strong> —</p>
+</div>
+<div class="rule-block" id="CADASTROPREV-RN017"><div class="rule-id">RN017 (CADASTROPREV-RN017) — Afastamento não pode ser anterior a 120 dias</div>
+<p><strong>Descrição:</strong> a data de início do afastamento não pode ser anterior a 120 dias da data atual.</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>dtpDataInicial</code> — [obrigatório] — data inicial do afastamento</li>
+<li><code>Date()</code> — [obrigatório] — data atual do sistema</li>
+</ul>
+<p><strong>Categoria:</strong> validação de negócio · <strong>Gatilho:</strong> confirmação do afastamento</p>
+<p><strong>Condição:</strong> se <code>dtpDataInicial < Date() - 120</code> → bloqueia.</p>
+<p><strong>Tratamento (TRT):</strong> <a href="#TRT017">TRT017</a> → <a href="#MSG017">MSG017</a> → Bloqueia execução</p>
+<p><strong>Rotina:</strong> validação inline no form. <strong>Origem:</strong> <code>CADASTROPREV/Fontes/FEventoAfastamento.pas</code>. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> · <strong>Severidade:</strong> alta (bloqueante) · <strong>Jornada:</strong> <a href="#PF-11">JF011</a>, <a href="#PF-12">JF012</a> · <strong>Relacionadas:</strong> —</p>
+</div>
+<div class="rule-block" id="CADASTROPREV-RN018"><div class="rule-id">RN018 (CADASTROPREV-RN018) — Salário de manutenção obrigatório</div>
+<p><strong>Descrição:</strong> no afastamento com manutenção, o salário de manutenção deve ser informado.</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>edtSalarioManutencao</code> — [obrigatório] — salário de manutenção</li>
+</ul>
+<p><strong>Condição:</strong> se <code>edtSalarioManutencao</code> vazio ou zero → bloqueia.</p>
+<p><strong>Tratamento (TRT):</strong> <a href="#TRT018">TRT018</a> → <a href="#MSG018">MSG018</a> → Bloqueia execução</p>
+<p><strong>Rotina:</strong> validação inline no form. <strong>Origem:</strong> <code>CADASTROPREV/Fontes/FEventoAfastamento.pas</code>. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> · <strong>Severidade:</strong> alta (bloqueante) · <strong>Jornada:</strong> <a href="#PF-11">JF011</a> · <strong>Relacionadas:</strong> —</p>
+</div>
+<div class="rule-block" id="CADASTROPREV-RN019"><div class="rule-id">RN019 (CADASTROPREV-RN019) — Elegibilidade deve ser aprovada</div>
+<p><strong>Descrição:</strong> o participante deve ser aprovado pela regra de elegibilidade para que o afastamento seja registrado.</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>ELEGPATRO</code> — [obrigatório] — elegibilidade do participante</li>
+<li><code>URegra.pas</code> — [obrigatório] — motor de regras</li>
+</ul>
+<p><strong>Condição:</strong> se a regra de elegibilidade retornar falso → bloqueia.</p>
+<p><strong>Tratamento (TRT):</strong> <a href="#TRT019">TRT019</a> → <a href="#MSG019">MSG019</a> → Bloqueia execução</p>
+<p><strong>Rotina:</strong> <code>URegra.ExecutaRegraElegibilidade</code>. <strong>Origem:</strong> <code>CADASTROPREV/Fontes/FEventoAfastamento.pas:2005</code>. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> · <strong>Severidade:</strong> alta (bloqueante) · <strong>Jornada:</strong> <a href="#PF-11">JF011</a>, <a href="#PF-12">JF012</a> · <strong>Relacionadas:</strong> —</p>
+</div>
+</div>
+
+<p><strong>Dependências:</strong> consulta ELEGPATRO; atualiza PARTPREVPLAN e EVOLFUNCPREV. Evidência: <code>CADASTROPREV/Fontes/FEventoAfastamento.pas:594-2040</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<div class="mermaid">graph LR
+  n0["FEventoAfastamento"] --> n1["ValidaParticipante"] --> n2["ValidaDataInicial(:RN015)"] --> n3["ValidaDataFinal(:RN016)"] --> n4["ValidaJanela120Dias(:RN017)"] --> n5["ValidaSalarioManutencao(:RN018)"] --> n6["ValidaElegibilidade(:RN019,:2005)"] --> n7["GravaEvento"] --> n8["EVENTOSPREV/HSTCONTEVENTOSPR"] --> n9["AtualizaPartPrevPlan"] --> n10["RegistraEvolFuncPrev"] --> n11["EVOLFUNCPREV"]</div>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span></p>
+<ul>
+<li>Confirmar se o afastamento com manutenção recalcula reservas durante o período de afastamento.</li>
+<li>O form <code>FEventoAfastamento.pas</code> tem 2.040 linhas — pode haver regras adicionais para tipos específicos de afastamento (doença, maternidade, etc.).</li>
+<li>Validar se a janela de 120 dias é configurável ou fixa no código.</li>
+</ul>
+</div>
+</div>
+
+<div class="pf-block" id="PF-12"><h4>JF012 (PF-12) — Afastamento sem Remuneração</h4>
+<p><strong>Objetivo:</strong> afastar o participante sem remuneração, suspendendo a contribuição.</p>
+<p><strong>Necessidade de negócio:</strong> o afastamento sem remuneração ocorre quando o participante se afasta sem receber salário (por exemplo, licença sem vencimentos). O sistema valida datas e elegibilidade, mas não exige salário de manutenção. A contribuição é suspensa durante o período. O form <code>FEventoAfastSemRemun.pas</code> (1.223 linhas) trata o fluxo.</p>
+<p><strong>Gatilho/Ator:</strong> usuário aciona o menu <em>Eventos › Afastamento (sem Remuneração)</em> na tela principal.</p>
+<p><strong>Pré-condições:</strong> participante ativo; data inicial e final informadas; elegibilidade aprovada.</p>
+<p><strong>Pós-condições:</strong> evento de afastamento sem remuneração gravado; participante em situação de afastado; evolução funcional registrada; contribuição suspensa.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li><strong>Usuário:</strong> seleciona o participante na tela principal e aciona o menu <em>Eventos › Afastamento (sem Remuneração)</em>. O sistema abre o form <code>FEventoAfastSemRemun.dfm</code> com os dados do participante.</li>
+<li><strong>Sistema:</strong> valida se o participante foi selecionado. Se nenhum participante estiver selecionado, exibe <a href="#MSG001">MSG001</a> e bloqueia (<a href="#TRT001">TRT001</a>).</li>
+<li><strong>Usuário:</strong> informa a data inicial, a data final e o motivo do afastamento. Clica em "Confirmar".</li>
+<li><strong>Sistema:</strong> valida se a data inicial foi informada <a href="#CADASTROPREV-RN015">[RN015]</a>. Se vazia, exibe <a href="#MSG015">MSG015</a> e bloqueia (<a href="#TRT015">TRT015</a>).</li>
+<li><strong>Sistema:</strong> valida se a data final é maior que a data inicial <a href="#CADASTROPREV-RN016">[RN016]</a>. Se não, exibe <a href="#MSG016">MSG016</a> e bloqueia (<a href="#TRT016">TRT016</a>).</li>
+<li><strong>Sistema:</strong> valida se a data inicial não é anterior a 120 dias da data atual <a href="#CADASTROPREV-RN017">[RN017]</a>. Se for, exibe <a href="#MSG017">MSG017</a> e bloqueia (<a href="#TRT017">TRT017</a>).</li>
+<li><strong>Sistema:</strong> executa a regra de elegibilidade do participante <a href="#CADASTROPREV-RN019">[RN019]</a>. Se reprovada, exibe <a href="#MSG019">MSG019</a> e bloqueia (<a href="#TRT019">TRT019</a>).</li>
+<li><strong>Sistema:</strong> grava o evento em <code>EVENTOSPREV</code> com o tipo "Afastamento sem Remuneração". Atualiza a situação do participante para "Afastado" em <code>PARTPREVPLAN</code>. Registra a evolução funcional em <code>EVOLFUNCPREV</code>. Grava o histórico em <code>HSTCONTEVENTOSPR</code>. Suspende as contribuições em <code>CONTRIBPREVPARTP</code>.</li>
+<li><strong>Sistema:</strong> exibe mensagem de sucesso e fecha o form.</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Abrir form</td><td>Carregar dados do participante</td><td>Participante selecionado</td><td>Abre FEventoAfastSemRemun</td><td>Form preenchido</td><td>—</td><td><a href="#MSG001">MSG001</a></td><td><code>FEventoAfastSemRemun.dfm</code></td></tr>
+<tr><td>Validar data inicial</td><td>Data inicial obrigatória</td><td>Data inicial</td><td>Valida se informada</td><td>Informada ou bloqueio</td><td><a href="#CADASTROPREV-RN015">RN015</a></td><td><a href="#MSG015">MSG015</a></td><td><code>FEventoAfastSemRemun.dfm</code></td></tr>
+<tr><td>Validar data final</td><td>Data final > data inicial</td><td>Data inicial, data final</td><td>Compara datas</td><td>Maior ou bloqueio</td><td><a href="#CADASTROPREV-RN016">RN016</a></td><td><a href="#MSG016">MSG016</a></td><td><code>FEventoAfastSemRemun.dfm</code></td></tr>
+<tr><td>Validar janela 120 dias</td><td>Não anterior a 120 dias</td><td>Data inicial, data atual</td><td>Compara datas</td><td>Dentro da janela ou bloqueio</td><td><a href="#CADASTROPREV-RN017">RN017</a></td><td><a href="#MSG017">MSG017</a></td><td><code>FEventoAfastSemRemun.dfm</code></td></tr>
+<tr><td>Validar elegibilidade</td><td>Aprovar afastamento</td><td>ID participante</td><td>Executa regra de elegibilidade</td><td>Aprovado ou bloqueio</td><td><a href="#CADASTROPREV-RN019">RN019</a></td><td><a href="#MSG019">MSG019</a></td><td><code>FEventoAfastSemRemun.dfm</code></td></tr>
+<tr><td>Gravar afastamento</td><td>Persistir evento e suspender contribuição</td><td>Dados validados</td><td>Insere em EVENTOSPREV e suspende CONTRIBPREVPARTP</td><td>Evento gravado, contribuição suspensa</td><td>—</td><td>—</td><td><code>FEventoAfastSemRemun.dfm</code></td></tr>
+</tbody></table></div>
+<div class="jf-rules">
+<p><strong>Regras de negócio da jornada:</strong> 4 regra(s) — reaproveitadas de JF011 (RN015, RN016, RN017, RN019), sem RN018 (salário não é exigido).</p>
+<div class="rule-block" id="CADASTROPREV-RN015b"><div class="rule-id">RN015 (CADASTROPREV-RN015) — Data inicial obrigatória (reaproveitada)</div>
+<p><strong>Descrição:</strong> mesma regra <a href="#CADASTROPREV-RN015">RN015</a> aplicada no afastamento sem remuneração.</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>dtpDataInicial</code> — [obrigatório] — data inicial do afastamento</li>
+</ul>
+<p><strong>Condição:</strong> se <code>dtpDataInicial</code> vazio → bloqueia.</p>
+<p><strong>Tratamento (TRT):</strong> <a href="#TRT015">TRT015</a> → <a href="#MSG015">MSG015</a> → Bloqueia execução</p>
+<p><strong>Rotina:</strong> validação inline no form. <strong>Origem:</strong> <code>CADASTROPREV/Fontes/FEventoAfastSemRemun.pas</code>. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> · <strong>Severidade:</strong> alta (bloqueante) · <strong>Jornada:</strong> <a href="#PF-12">JF012</a> · <strong>Relacionadas:</strong> <a href="#CADASTROPREV-RN015">RN015</a></p>
+</div>
+<div class="rule-block" id="CADASTROPREV-RN016b"><div class="rule-id">RN016 (CADASTROPREV-RN016) — Data final maior que data inicial (reaproveitada)</div>
+<p><strong>Descrição:</strong> mesma regra <a href="#CADASTROPREV-RN016">RN016</a> aplicada no afastamento sem remuneração.</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>dtpDataInicial</code> — [obrigatório] — data inicial</li>
+<li><code>dtpDataFinal</code> — [obrigatório] — data final</li>
+</ul>
+<p><strong>Condição:</strong> se <code>dtpDataFinal <= dtpDataInicial</code> → bloqueia.</p>
+<p><strong>Tratamento (TRT):</strong> <a href="#TRT016">TRT016</a> → <a href="#MSG016">MSG016</a> → Bloqueia execução</p>
+<p><strong>Rotina:</strong> validação inline no form. <strong>Origem:</strong> <code>CADASTROPREV/Fontes/FEventoAfastSemRemun.pas</code>. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> · <strong>Severidade:</strong> alta (bloqueante) · <strong>Jornada:</strong> <a href="#PF-12">JF012</a> · <strong>Relacionadas:</strong> <a href="#CADASTROPREV-RN016">RN016</a></p>
+</div>
+<div class="rule-block" id="CADASTROPREV-RN017b"><div class="rule-id">RN017 (CADASTROPREV-RN017) — Afastamento não pode ser anterior a 120 dias (reaproveitada)</div>
+<p><strong>Descrição:</strong> mesma regra <a href="#CADASTROPREV-RN017">RN017</a> aplicada no afastamento sem remuneração.</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>dtpDataInicial</code> — [obrigatório] — data inicial</li>
+<li><code>Date()</code> — [obrigatório] — data atual</li>
+</ul>
+<p><strong>Condição:</strong> se <code>dtpDataInicial < Date() - 120</code> → bloqueia.</p>
+<p><strong>Tratamento (TRT):</strong> <a href="#TRT017">TRT017</a> → <a href="#MSG017">MSG017</a> → Bloqueia execução</p>
+<p><strong>Rotina:</strong> validação inline no form. <strong>Origem:</strong> <code>CADASTROPREV/Fontes/FEventoAfastSemRemun.pas</code>. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> · <strong>Severidade:</strong> alta (bloqueante) · <strong>Jornada:</strong> <a href="#PF-12">JF012</a> · <strong>Relacionadas:</strong> <a href="#CADASTROPREV-RN017">RN017</a></p>
+</div>
+<div class="rule-block" id="CADASTROPREV-RN019b"><div class="rule-id">RN019 (CADASTROPREV-RN019) — Elegibilidade deve ser aprovada (reaproveitada)</div>
+<p><strong>Descrição:</strong> mesma regra <a href="#CADASTROPREV-RN019">RN019</a> aplicada no afastamento sem remuneração.</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>ELEGPATRO</code> — [obrigatório] — elegibilidade do participante</li>
+</ul>
+<p><strong>Condição:</strong> se a regra de elegibilidade retornar falso → bloqueia.</p>
+<p><strong>Tratamento (TRT):</strong> <a href="#TRT019">TRT019</a> → <a href="#MSG019">MSG019</a> → Bloqueia execução</p>
+<p><strong>Rotina:</strong> <code>URegra.ExecutaRegraElegibilidade</code>. <strong>Origem:</strong> <code>CADASTROPREV/Fontes/FEventoAfastSemRemun.pas</code>. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> · <strong>Severidade:</strong> alta (bloqueante) · <strong>Jornada:</strong> <a href="#PF-12">JF012</a> · <strong>Relacionadas:</strong> <a href="#CADASTROPREV-RN019">RN019</a></p>
+</div>
+</div>
+
+<p><strong>Dependências:</strong> consulta ELEGPATRO; atualiza PARTPREVPLAN, EVOLFUNCPREV e CONTRIBPREVPARTP. Evidência: <code>CADASTROPREV/Fontes/FEventoAfastSemRemun.pas</code> (1.223 lin) · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<div class="mermaid">graph LR
+  n0["FEventoAfastSemRemun"] --> n1["ValidaParticipante"] --> n2["ValidaDataInicial(:RN015)"] --> n3["ValidaDataFinal(:RN016)"] --> n4["ValidaJanela120Dias(:RN017)"] --> n5["ValidaElegibilidade(:RN019)"] --> n6["GravaEvento"] --> n7["EVENTOSPREV/HSTCONTEVENTOSPR"] --> n8["AtualizaPartPrevPlan"] --> n9["RegistraEvolFuncPrev"] --> n10["SuspenderContribuicoes"] --> n11["CONTRIBPREVPARTP"]</div>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span></p>
+<ul>
+<li>Confirmar se a suspensão de contribuição é automática ou se exige confirmação do usuário.</li>
+<li>Validar se o afastamento sem remuneração pode ser convertido em afastamento com manutenção posteriormente.</li>
+</ul>
+</div>
+</div>
+
+<section id="TRT-section"><div class="section-title">6. Tratamentos (TRT)</div>
+<p>Tratamentos de erro derivados das validações bloqueantes e exceções das regras. Cada TRT possui Condição, Mensagem e Resultado.</p>
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Condição</th><th>Mensagem</th><th>Resultado</th><th>Regra</th><th>Jornada</th></tr></thead><tbody>
+<tr id="TRT001"><td><strong>TRT001</strong></td><td>Participante não selecionado</td><td><a href="#MSG001">MSG001</a></td><td>Bloqueia execução</td><td>—</td><td>JF011, JF012</td></tr>
+<tr id="TRT015"><td><strong>TRT015</strong></td><td>Data inicial não informada</td><td><a href="#MSG015">MSG015</a></td><td>Bloqueia execução</td><td><a href="#CADASTROPREV-RN015">RN015</a></td><td>JF011, JF012</td></tr>
+<tr id="TRT016"><td><strong>TRT016</strong></td><td>Data final menor ou igual à inicial</td><td><a href="#MSG016">MSG016</a></td><td>Bloqueia execução</td><td><a href="#CADASTROPREV-RN016">RN016</a></td><td>JF011, JF012</td></tr>
+<tr id="TRT017"><td><strong>TRT017</strong></td><td>Afastamento anterior a 120 dias</td><td><a href="#MSG017">MSG017</a></td><td>Bloqueia execução</td><td><a href="#CADASTROPREV-RN017">RN017</a></td><td>JF011, JF012</td></tr>
+<tr id="TRT018"><td><strong>TRT018</strong></td><td>Salário de manutenção não informado</td><td><a href="#MSG018">MSG018</a></td><td>Bloqueia execução</td><td><a href="#CADASTROPREV-RN018">RN018</a></td><td>JF011</td></tr>
+<tr id="TRT019"><td><strong>TRT019</strong></td><td>Elegibilidade reprovada</td><td><a href="#MSG019">MSG019</a></td><td>Bloqueia execução</td><td><a href="#CADASTROPREV-RN019">RN019</a></td><td>JF011, JF012</td></tr>
+</tbody></table></div>
+</section>
+
+<section id="MSG-section"><div class="section-title">7. Mensagens (MSG)</div>
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Texto da Mensagem</th><th>Jornadas relacionadas</th></tr></thead><tbody>
+<tr id="MSG001"><td><strong>MSG001</strong></td><td>"Primeiro selecione o Participante."</td><td>JF011, JF012</td></tr>
+<tr id="MSG015"><td><strong>MSG015</strong></td><td>"A Data Inicial do Afastamento deve ser informada."</td><td>JF011, JF012</td></tr>
+<tr id="MSG016"><td><strong>MSG016</strong></td><td>"A Data Final do Afastamento deve ser maior que a Data Inicial."</td><td>JF011, JF012</td></tr>
+<tr id="MSG017"><td><strong>MSG017</strong></td><td>"A data de início do afastamento está anterior a 120 dias da data atual."</td><td>JF011, JF012</td></tr>
+<tr id="MSG018"><td><strong>MSG018</strong></td><td>"Salário de Manutenção deve ser informado."</td><td>JF011</td></tr>
+<tr id="MSG019"><td><strong>MSG019</strong></td><td>"Afastamento não permitido. Motivo: Participante não aprovado pela Regra de Elegibilidade."</td><td>JF011, JF012</td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">8. Tabela/API/Programa</div>
+<div class="table-wrap"><table><thead><tr><th>Jornada</th><th>Tabelas (escrita)</th><th>Rotina-chave (file:linha)</th></tr></thead><tbody>
+<tr><td>JF011</td><td>EVENTOSPREV, PARTPREVPLAN, EVOLFUNCPREV, HSTCONTEVENTOSPR</td><td><code>FEventoAfastamento.pas:594</code> (2.040 lin)</td></tr>
+<tr><td>JF012</td><td>EVENTOSPREV, PARTPREVPLAN, EVOLFUNCPREV, CONTRIBPREVPARTP, HSTCONTEVENTOSPR</td><td><code>FEventoAfastSemRemun.pas</code> (1.223 lin)</td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">9. Telas/Layouts</div>
+<div class="table-wrap"><table><thead><tr><th>Jornada</th><th>Form(s) (.dfm)</th></tr></thead><tbody>
+<tr><td>JF011</td><td><code>FEventoAfastamento.dfm</code></td></tr>
+<tr><td>JF012</td><td><code>FEventoAfastSemRemun.dfm</code></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">10. Visão Consolidada das Jornadas</div>
+<div class="table-wrap"><table><thead><tr><th>Jornada</th><th>ID</th><th>Título</th><th>Critério de aceitação (Dado/Quando/Então)</th><th>Mensagens</th><th>Telas</th></tr></thead><tbody>
+<tr><td>JF011</td><td>PF-11</td><td>Afastamento com Manutenção</td><td><strong>Dado</strong> participante ativo com datas válidas, salário e elegibilidade, <strong>Quando</strong> usuário registra afastamento, <strong>Então</strong> evento é gravado e contribuição mantida</td><td><a href="#MSG015">MSG015</a>–<a href="#MSG019">MSG019</a></td><td>FEventoAfastamento</td></tr>
+<tr><td>JF012</td><td>PF-12</td><td>Afastamento sem Remuneração</td><td><strong>Dado</strong> participante ativo com datas válidas e elegibilidade, <strong>Quando</strong> usuário registra afastamento, <strong>Então</strong> evento é gravado e contribuição suspensa</td><td><a href="#MSG015">MSG015</a>–<a href="#MSG017">MSG017</a>, <a href="#MSG019">MSG019</a></td><td>FEventoAfastSemRemun</td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">11. Critérios de Aceitação por Regra</div>
+<div class="table-wrap"><table><thead><tr><th>Regra</th><th>ID</th><th>Título</th><th>Critério de aceitação (Dado/Quando/Então)</th><th>Mensagens</th><th>Telas</th></tr></thead><tbody>
+<tr><td>RN015</td><td>CADASTROPREV-RN015</td><td>Data inicial obrigatória</td><td><strong>Dado</strong> afastamento, <strong>Quando</strong> data inicial vazia, <strong>Então</strong> bloqueia com MSG015</td><td><a href="#MSG015">MSG015</a></td><td>FEventoAfastamento, FEventoAfastSemRemun</td></tr>
+<tr><td>RN016</td><td>CADASTROPREV-RN016</td><td>Data final > data inicial</td><td><strong>Dado</strong> afastamento, <strong>Quando</strong> data final ≤ inicial, <strong>Então</strong> bloqueia com MSG016</td><td><a href="#MSG016">MSG016</a></td><td>FEventoAfastamento, FEventoAfastSemRemun</td></tr>
+<tr><td>RN017</td><td>CADASTROPREV-RN017</td><td>Não anterior a 120 dias</td><td><strong>Dado</strong> afastamento, <strong>Quando</strong> data inicial < atual − 120, <strong>Então</strong> bloqueia com MSG017</td><td><a href="#MSG017">MSG017</a></td><td>FEventoAfastamento, FEventoAfastSemRemun</td></tr>
+<tr><td>RN018</td><td>CADASTROPREV-RN018</td><td>Salário de manutenção obrigatório</td><td><strong>Dado</strong> afastamento com manutenção, <strong>Quando</strong> salário vazio, <strong>Então</strong> bloqueia com MSG018</td><td><a href="#MSG018">MSG018</a></td><td>FEventoAfastamento</td></tr>
+<tr><td>RN019</td><td>CADASTROPREV-RN019</td><td>Elegibilidade aprovada</td><td><strong>Dado</strong> afastamento, <strong>Quando</strong> elegibilidade reprovada, <strong>Então</strong> bloqueia com MSG019</td><td><a href="#MSG019">MSG019</a></td><td>FEventoAfastamento, FEventoAfastSemRemun</td></tr>
+</tbody></table></div>
+</section>
+
+<p><a class="back-btn" href="funcionalidades.html">← Voltar à lista de Casos de Uso (Processos Funcionais)</a></p>
+</main>
+<footer>
+<p>Blueprint AS-IS — PFC-73 — Processos Funcionais organizados em Casos de Uso — Módulo CADASTROPREV | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-24</p>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+<script src="../assets/js/mermaid-init.js"></script>
+</body>
+</html>

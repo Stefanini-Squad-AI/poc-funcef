@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cadastro Previdenciário — Arquitetura — Blueprint AS-IS</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<header>
+  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-73</div>
+  <h1>🏗️ Arquitetura — Cadastro Previdenciário</h1>
+  <p>Camadas, padrão de acesso a dados, framework CM e relacionamento entre sub-áreas do módulo CADASTROPREV.</p>
+</header>
+<nav>
+  <a href="index.html">📋 Visão Geral</a>
+  <a href="arquitetura.html">🏗️ Arquitetura</a>
+  <a href="inventario-tecnico.html">📦 Inventário</a>
+  <a href="funcionalidades.html">⚙️ Processos Funcionais</a>
+  <a href="procedures-functions.html">🔧 Procedures</a>
+  <a href="dados.html">🗄️ Dados</a>
+  <a href="relatorios.html">📄 Relatórios</a>
+  <a href="integracoes.html">🔗 Integrações</a>
+  <a href="tratamento-erros.html">⚠️ Erros</a>
+  <a href="diagramas-fluxo.html">🔀 Fluxos</a>
+  <a href="lacunas.html">🔍 Lacunas</a>
+  <a href="controle-cobertura.html">📊 Cobertura</a>
+</nav>
+
+<main>
+
+<section id="pfc73-leigo">
+<div class="note-info">
+<p><strong>O que esta aba mostra:</strong> como o programa Cadastro Previdenciário é organizado por dentro — as camadas de código, os padrões de acesso ao banco de dados e como as telas se conectam com o framework CM.</p>
+<p><strong>Por que isso importa:</strong> entender a arquitetura ajuda a localizar onde está cada regra de negócio e o que precisa ser testado ao mudar algo. O módulo segue o padrão do framework CM (telas de cadastro, DataModules, DBObjects), mas tem particularidades: o menu de eventos é dinâmico e o motor de saldamento é uma unit separada de 8.861 linhas.</p>
+<p><strong>Como ler esta página:</strong> comece pelo diagrama de camadas, depois veja a tabela de dependências internas e o inventário de forms por área funcional. Os selos <span class="ev ev-comprovado">COMPROVADO</span> indicam o que foi lido no código.</p>
+</div>
+<p><strong>Termos usados nesta página</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Termo técnico</th><th>Em linguagem simples</th><th>Fonte</th></tr></thead><tbody>
+<tr><td><strong>Framework CM</strong></td><td>Biblioteca base do sistema (da CM Contabilidade) que fornece telas, relatórios e acesso a dados prontos.</td><td><code>..\..\Cm\Forms\Source\</code></td></tr>
+<tr><td><strong>DBObject</strong></td><td>Classe que encapsula uma tabela do banco — gera SQL automaticamente.</td><td><code>TCmDbObject</code> (CM)</td></tr>
+<tr><td><strong>CtrlObject</strong></td><td>Classe de controle que orquestra DBObjects e regras de negócio.</td><td><code>CADASTROPREV/CtrlObjects/</code></td></tr>
+<tr><td><strong>DataModule</strong></td><td>Contêiner não-visual que agrupa componentes de acesso a dados (queries, datasets).</td><td>forms com prefixo <code>d</code></td></tr>
+<tr><td><strong>Menu dinâmico</strong></td><td>Itens de menu criados em tempo de execução a partir de dados do banco (tabela EVENTOGERADOR).</td><td><code>FPrincipal.pas:701</code></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">🏗️ Arquitetura do Módulo</div>
+<p>O módulo CADASTROPREV é uma aplicação Delphi 5 MDI (Multiple Document Interface) que herda do framework CM. A tela principal <code>FPrincipal</code> (classe <code>TfrmPrincipal</code>, herda de <code>TfrmCMPrincipal</code>) é o container MDI pai com o menu principal. O menu "Eventos" é construído dinamicamente em <code>MontaMenu</code> (<code>FPrincipal.pas:701</code>) consultando a tabela <code>EVENTOGERADOR</code> filtrada por <code>FLGINTERNO</code> e <code>IDFUNDACAO</code> <span class="ev ev-comprovado">COMPROVADO</span>.</p>
+<p><strong>Application.Title</strong> = <code>'Cadastro Previdenciário'</code> (<code>CadastroPrev.dpr:143</code>). <strong>IdModulo</strong> = 452 (<code>FPrincipal.pas:2110</code>). <strong>Versão</strong> = 3.00.07.</p>
+<p>O acesso a dados usa o padrão <code>TCmDbObject</code> (DBObjects formais) e <code>TwwQuery</code> (SQL inline nos forms). Não há componentes de conexão a servidor remoto (TDCOMConnection/TSocketConnection) nos .dfm — o acesso é local, via <code>DBaseDados</code> (datamodule de conexão do CM) <span class="ev ev-inferido">INFERIDO</span>.</p>
+</section>
+
+<section><div class="section-title">🗂️ Camadas e Componentes</div>
+<div class="table-wrap"><table><thead><tr><th>Camada</th><th>Componentes</th><th>Descrição</th><th>Evidência</th></tr></thead><tbody>
+<tr><td><strong>Apresentação</strong></td><td>Forms (.dfm/.pas)</td><td>65 telas Delphi VCL — cadastro, eventos, consultas, relatórios. Herdam de <code>TfrmCadastroCS</code>, <code>TfrmCadastroGridCS</code>, <code>TfrmCadMestreDetCS</code> do CM.</td><td><code>Fontes/*.dfm</code> <span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><strong>Controle</strong></td><td>CtrlObjects (4 units)</td><td>Classes de controle: <code>TCtrlEvolFuncPrev</code>, <code>TCtrlPCS</code>, <code>TCtrlAlimentaReserva</code>, <code>TCtrlExtratoReserva</code>. Orquestram DBObjects e regras.</td><td><code>CtrlObjects/*.pas</code> <span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><strong>Dados</strong></td><td>DBObjects (3 units) + SQL inline</td><td><code>TDbEvolfuncprev</code>, <code>TDbHistrubsal</code>, <code>TDbReservapart</code> (TCmDbObject). SQL inline nos forms via TwwQuery para as demais 54 tabelas.</td><td><code>DBObjects/*.pas</code> <span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><strong>Motor / Domínio</strong></td><td>USaldamento, uFuncoesSaldamento, uFuncoesFuncef</td><td>Lógica de saldamento (8.861 + 1.623 linhas) e funções utilitárias. Sem form — classes puras.</td><td><code>USaldamento.pas</code> <span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><strong>Framework CM</strong></td><td>~15 units externas</td><td>Forms base, relatórios, pessoa, progresso. Referenciado via <code>..\..\Cm\Forms\Source\</code>.</td><td><code>CadastroPrev.dpr</code> uses <span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><strong>Framework Previdenciário</strong></td><td>UAdmPrev, UBeneficio, URegra, UEventos, UParticipante, UMovReserva, UContribuicaoPrev</td><td>Units compartilhadas do CMAdmPrev com lógica de negócio previdenciária (eventos, benefícios, elegibilidade, reservas).</td><td>uses clauses <span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+</tbody></table></div>
+<div class="note pfc73-ba"><p><strong>👔 Para o analista de negócios</strong></p><ul>
+<li>A separação entre "forms com SQL inline" e "DBObjects formais" é importante: apenas 3 tabelas têm DBObject (EVOLFUNCPREV, HISTRUBSAL, RESERVAPART). As demais 54 tabelas são acessadas via SQL escrito diretamente nos forms, o que dificulta rastreabilidade e manutenção.</li>
+<li>O motor de saldamento (<code>USaldamento.pas</code>) é uma unit sem form — puramente de domínio. As 5 classes de saldamento (Ativo, Aposentado, Pensionista, Assistido, Associado) implementam o padrão Strategy.</li>
+</ul></div>
+</section>
+
+<section><div class="section-title">📦 Packages e Configuração</div>
+<div class="table-wrap"><table><thead><tr><th>Arquivo</th><th>Tipo</th><th>Descrição</th></tr></thead><tbody>
+<tr><td><code>CadastroPrev.dpr</code></td><td>Project</td><td>Entry point — 132 units no uses, auto-cria ~30 forms/datamodules</td></tr>
+<tr><td><code>CadastroPrev.dof</code></td><td>Config</td><td>Configuração do projeto Delphi (diretórios, compiler)</td></tr>
+<tr><td><code>CadastroPrev.cfg</code></td><td>Config</td><td>Configuração do compilador</td></tr>
+<tr><td><code>CadastroPrev.alt</code></td><td>ALT</td><td>Arquivo de alterações (545 KB)</td></tr>
+<tr><td><code>CMAdmPrev.alt</code></td><td>ALT</td><td>Alterações do CMAdmPrev referenciadas (330 KB)</td></tr>
+<tr><td><code>Previdenciario.bpg</code></td><td>Group</td><td>Grupo de projetos que inclui CadastroPrev.dpr</td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">📂 Inventário de Forms por Área Funcional</div>
+<h4>Eventos (Benefícios)</h4>
+<div class="table-wrap"><table><thead><tr><th>Form</th><th>Classe</th><th>Linhas</th><th>Caption</th></tr></thead><tbody>
+<tr><td><code>FEventoMorte</code></td><td>TfrmEventoMorte</td><td>1873</td><td>Evento Falecimento</td></tr>
+<tr><td><code>FEventoReclusao</code></td><td>TfrmEventoReclusao</td><td>1351</td><td>Evento Reclusão</td></tr>
+<tr><td><code>FEventoAssistidoINSS</code></td><td>TfrmEventoAssistidoINSS</td><td>1657</td><td>Evento Aposentadoria Exclusiva do INSS</td></tr>
+</tbody></table></div>
+<h4>Eventos (Cadastrais)</h4>
+<div class="table-wrap"><table><thead><tr><th>Form</th><th>Classe</th><th>Linhas</th><th>Caption</th></tr></thead><tbody>
+<tr><td><code>FEventoReinscricao</code></td><td>TfrmEventoReinscricao</td><td>1751</td><td>Evento Reinscrição de Participante</td></tr>
+<tr><td><code>FEventoManutParcial</code></td><td>TfrmEventoManutParcial</td><td>1554</td><td>Evento Manutenção Parcial</td></tr>
+<tr><td><code>FEventoRetornoMantidoParaAtivo</code></td><td>TfrmEventoRetornoMantidoParaAtivo</td><td>1662</td><td>Evento Retorno de Mantido para Ativo</td></tr>
+<tr><td><code>FEventoTransfPlano</code></td><td>TFrmEventoTransfPlano</td><td>7873</td><td>Transferência de Planos</td></tr>
+<tr><td><code>fTransfPatroBatch</code></td><td>TfrmTransfPatroBatch</td><td>2053</td><td>Transferência de Patrocinadora</td></tr>
+<tr><td><code>FInscricaoParticipanteLote</code></td><td>TfrmInscricaoParticipanteLote</td><td>1096</td><td>Inscrição do Participante em Lote</td></tr>
+</tbody></table></div>
+<h4>Eventos (Afastamento e Demissão)</h4>
+<div class="table-wrap"><table><thead><tr><th>Form</th><th>Classe</th><th>Linhas</th><th>Caption</th></tr></thead><tbody>
+<tr><td><code>FEventoAfastamento</code></td><td>TfrmEventoAfastamento</td><td>2040</td><td>Evento Afastamento</td></tr>
+<tr><td><code>FEventoAfastSemRemun</code></td><td>TfrmEventoAfastSemRemun</td><td>1223</td><td>Evento Afastamento sem Remuneração</td></tr>
+<tr><td><code>FEventoDemissaoPatrocinadora</code></td><td>TfrmEventoDemissaoPatrocinadora</td><td>1011</td><td>Evento Demissão da Patrocinadora</td></tr>
+</tbody></table></div>
+<h4>Manutenção / Recadastramento</h4>
+<div class="table-wrap"><table><thead><tr><th>Form</th><th>Classe</th><th>Linhas</th><th>Caption</th></tr></thead><tbody>
+<tr><td><code>FEmissaoRecadastramento</code></td><td>TfrmEmiteRecadastramento</td><td>1896</td><td>Emissão de Cartas de Recadastramento</td></tr>
+<tr><td><code>FRecebeRecadastramento</code></td><td>TfrmRecebeRecadastramento</td><td>873</td><td>Recebimento de Cartas de Recadastramento</td></tr>
+<tr><td><code>fRecebeRecadTXT</code></td><td>TfrmRecebeRecadTXT</td><td>235</td><td>Recebimento de Recadastramento via TXT</td></tr>
+<tr><td><code>FSuspendeBeneficio</code></td><td>TfrmSuspendeBeneficio</td><td>452</td><td>Suspensão de Benefícios</td></tr>
+<tr><td><code>FMapaPrevi</code></td><td>TfrmMapaPrevic</td><td>3501</td><td>Mapa PREVIC</td></tr>
+<tr><td><code>uAltPercContribLote</code></td><td>TFrmAltPercContribLote</td><td>914</td><td>Alteração de % Contribuição em Lote</td></tr>
+<tr><td><code>fEnvioPeriodico</code></td><td>TfrmEnvioPeriodico</td><td>1709</td><td>Envio de Periódicos</td></tr>
+</tbody></table></div>
+<h4>Novo Plano / Saldamento</h4>
+<div class="table-wrap"><table><thead><tr><th>Form</th><th>Classe</th><th>Linhas</th><th>Caption</th></tr></thead><tbody>
+<tr><td><code>FInscricaoNovoPlano</code></td><td>TfrmInscricaoNovoPlano</td><td>1402</td><td>Saldamento e Inscrição Novo Plano</td></tr>
+<tr><td><code>FSaldamento</code></td><td>TFrmSaldamento</td><td>287</td><td>Formulário de Saldamento</td></tr>
+<tr><td><code>FCancSaldamento</code></td><td>TfrmCancSaldamento</td><td>994</td><td>Desfazer saldamento</td></tr>
+<tr><td><code>USaldamento</code></td><td>(unit)</td><td>8861</td><td>Motor de saldamento (5 classes)</td></tr>
+<tr><td><code>uFuncoesSaldamento</code></td><td>(unit)</td><td>1623</td><td>Funções de saldamento</td></tr>
+</tbody></table></div>
+<h4>Cadastro</h4>
+<div class="table-wrap"><table><thead><tr><th>Form</th><th>Classe</th><th>Linhas</th><th>Caption</th></tr></thead><tbody>
+<tr><td><code>FCancelaDependente</code></td><td>TfrmCancelaDependente</td><td>843</td><td>Cancelamento de Dependentes</td></tr>
+<tr><td><code>FCadHistFuncPartCS</code></td><td>TfrmCadHistFuncPartCS</td><td>1038</td><td>Cadastro de Histórico Anterior à Patrocinadora</td></tr>
+<tr><td><code>FCadContaEmLote</code></td><td>TfrmCadContaEmLote</td><td>1805</td><td>Conta bancária em lote</td></tr>
+<tr><td><code>FAssocReservaPart</code></td><td>TFrmAssocReservaPart</td><td>596</td><td>Associação de Reservas</td></tr>
+<tr><td><code>FSimulacaoEnquadramento</code></td><td>TFrmSimulacaoEnquadramento</td><td>1262</td><td>Processamento de Cálculos Retroativos</td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">⚙️ Entry point e inicialização</div>
+<p>O <code>CadastroPrev.dpr</code> (305 linhas) inicializa a aplicação na seguinte ordem <span class="ev ev-comprovado">COMPROVADO</span>:</p>
+<ol>
+<li>Cria e exibe <code>frmCMEntrada</code> (splash screen do CM)</li>
+<li><code>Application.Initialize</code>; <code>Application.Title := 'Cadastro Previdenciário'</code></li>
+<li>Auto-cria ~30 forms/datamodules (frmPrincipal, dtmReports, dtmRelatAdmPrev, frmEventoReclusao, etc.)</li>
+<li>Libera <code>frmCMEntrada</code>; <code>Application.Run</code></li>
+</ol>
+<p>Na seção <code>initialization</code> (<code>FPrincipal.pas:2773-2779</code>): <code>Sistema.NomeModulo := 'CadastroPrev'</code>, <code>Sistema.IdModulo := 452</code>, <code>Sistema.Versao := '3.00.07'</code>, <code>IntegraBack := TIntegraBack.Create(True, True, True)</code> (integração com contabilidade + financeiro + empréstimo).</p>
+</section>
+
+<section id="pfc73-analista"><div class="section-title">👔 Para o analista de negócios — síntese (PFC-73)</div>
+<div class="note pfc73-ba">
+<p>A arquitetura segue o padrão CM: forms de cadastro herdam de classes base do framework, DBObjects encapsulam tabelas, e CtrlObjects orquestram a lógica. A particularidade do CADASTROPREV é o menu dinâmico de eventos (23 tipos) e o motor de saldamento como unit separada.</p>
+<p><strong>Áreas de risco na modernização:</strong></p><ul>
+<li>SQL inline nos forms (54 tabelas sem DBObject) — difícil de migrar para um ORM moderno.</li>
+<li>Dependência massiva de units compartilhadas (UAdmPrev em 23 files, UBeneficio em 14, URegra em 13) — qualquer mudança nestas units afeta o módulo.</li>
+<li>O motor de saldamento (8.861 linhas) é o maior bloco de lógica e não tem testes automatizados.</li>
+</ul>
+</div>
+</section>
+
+</main>
+
+<footer>
+<p>Blueprint AS-IS — PFC-73 — Arquitetura — Módulo CADASTROPREV | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-24</p>
+</footer>
+</body>
+</html>

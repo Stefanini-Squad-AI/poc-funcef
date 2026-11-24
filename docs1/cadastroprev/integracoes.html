@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🔗 Integrações — Cadastro Previdenciário</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<header>
+  <div class="badge">Blueprint AS-IS — Delphi 5 — PFC-73</div>
+  <h1>🔗 Integrações — Cadastro Previdenciário</h1>
+  <p>Dependências externas (CM, CMAdmPrev, GLOBALCM, PARAMPREV), dependências internas, integrações em tempo de execução e cross-references com BENEFICIOPREV.</p>
+</header>
+<nav>
+  <a href="index.html">📋 Visão Geral</a>
+  <a href="arquitetura.html">🏗️ Arquitetura</a>
+  <a href="inventario-tecnico.html">📦 Inventário</a>
+  <a href="funcionalidades.html">⚙️ Processos Funcionais</a>
+  <a href="procedures-functions.html">🔧 Procedures</a>
+  <a href="dados.html">🗄️ Dados</a>
+  <a href="relatorios.html">📄 Relatórios</a>
+  <a href="integracoes.html">🔗 Integrações</a>
+  <a href="tratamento-erros.html">⚠️ Erros</a>
+  <a href="diagramas-fluxo.html">🔀 Fluxos</a>
+  <a href="lacunas.html">🔍 Lacunas</a>
+  <a href="controle-cobertura.html">📊 Cobertura</a>
+</nav>
+<main>
+
+<section id="pfc73-leigo">
+<div class="note-info">
+<p><strong>O que esta aba mostra:</strong> com quem o módulo CADASTROPREV "conversa": peças de código emprestadas de outros módulos (CM, CMAdmPrev, PARAMPREV, GLOBALCM), tabelas compartilhadas, integrações em tempo de execução (contabilidade, financeiro, empréstimo) e módulos que consomem os dados cadastrais.</p>
+<p><strong>Por que isso importa:</strong> o CADASTROPREV é a fonte primária de dados de todos os módulos previdenciários. Cada integração é uma dependência: se o outro lado muda ou para, o cadastro pode parar ou sair errado. Saber quais são as integrações ajuda a planejar mudanças, testes e contingências.</p>
+<p><strong>Como ler esta página:</strong> há três tipos de integração. <strong>De código</strong>: o módulo usa telas e rotinas de outros módulos. <strong>De dados</strong>: o módulo lê ou grava tabelas que outros módulos também usam. <strong>De execução</strong>: o módulo chama serviços em tempo de execução (IntegraBack com contabilidade, financeiro e empréstimo; UIntegraEP com empréstimo). A seção "Cross-references com BENEFICIOPREV" trata do overlap de eventos documentados em ambos os módulos.</p>
+</div>
+<p><strong>Termos usados nesta página</strong> — termos usados nas tabelas.</p>
+<div class="table-wrap"><table><thead><tr><th>Termo técnico</th><th>Em linguagem simples</th><th>Fonte</th></tr></thead><tbody>
+<tr><td><strong>Dependência de código</strong></td><td>Uso de uma unit ou tela de outro módulo, incluída no projeto.</td><td><code>CadastroPrev.dpr</code> uses</td></tr>
+<tr><td><strong>Framework CM</strong></td><td>Base comum a todos os módulos da suíte: telas padrão, login, autorização, relatórios.</td><td><code>..\..\Cm\</code></td></tr>
+<tr><td><strong>CMAdmPrev</strong></td><td>Módulo de administração previdenciária: solicitação de patrocinadora, tipos de benefício, elegibilidade.</td><td><code>..\..\Cm\CMAdmPrev\</code></td></tr>
+<tr><td><strong>PARAMPREV</strong></td><td>Parâmetros previdenciários: planos, situações, eventos geradores, reservas.</td><td>Referência indireta</td></tr>
+<tr><td><strong>GLOBALCM</strong></td><td>Biblioteca global: extrato de desligamento, controle de extrato, institutos.</td><td><code>..\..\GLOBALCM\FONTES\</code></td></tr>
+<tr><td><strong>IntegraBack</strong></td><td>Integração com contabilidade, financeiro e empréstimo — instanciada na inicialização.</td><td><code>FPrincipal.pas:2773-2779</code></td></tr>
+<tr><td><strong>UIntegraEP</strong></td><td>Integração com empréstimo (EP).</td><td>uses clauses</td></tr>
+<tr><td><strong>Cross-reference</strong></td><td>Evento documentado em mais de um módulo (ex.: falecimento em CADASTROPREV e BENEFICIOPREV).</td><td><a href="lacunas.html">🔍 Lacunas</a></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">🔗 Dependências externas (referências de interface)</div>
+<p>Registradas como referências de interface (módulo/unit + path). A implementação interna de módulos não autorizados não foi investigada (isolamento de escopo).</p>
+<div class="table-wrap"><table><thead><tr><th>Módulo/Unit externo</th><th>Tipo</th><th>Path/Origem</th><th>Finalidade</th><th>Evidência</th></tr></thead><tbody>
+<tr><td>CM Framework (~15 units)</td><td>Framework</td><td><code>..\..\Cm\</code></td><td>Forms base (FCMEntrada, FPai, FTelaAut, FCMPrincipalForms, FCMPrincipal, FCadastroPai, FCadastroCS, FCadastroGridCS, FCadMestreDetCS), pessoa (fPessoa), relatórios (FCmReport), diálogos (FOkCancelar, FSairAjuda), progresso (FProgresso, fAguarde), DataModule de relatório (dReports)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>CMAdmPrev</td><td>Outro módulo</td><td><code>..\..\Cm\CMAdmPrev\</code></td><td>FSolicitaPatro (solicitação de patrocinadora), FTipoBenefConcede (tipos de benefício concedidos), FCadOpcoesElegivel (opções de elegível), FConsCargoFuncao (consulta de cargo/função), fConciliaInstResgPort (conciliação de institutos/resgate/portabilidade)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>GLOBALCM</td><td>Biblioteca</td><td><code>..\..\GLOBALCM\FONTES\</code></td><td>uPextratoDesligamento, dRelExtratoDesligamento, UctrlExtratoDesligamento, dExtratoInstitutos, uTipoExtratoInstitutos — extrato de desligamento e institutos</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>PARAMPREV</td><td>Outro módulo</td><td>Referência indireta</td><td>Parâmetros previdenciários: planos, situações, eventos geradores, reservas</td><td><span class="ev ev-inferido">INFERIDO</span></td></tr>
+<tr><td>CMPrevMT50</td><td>Outro módulo</td><td><code>..\..\Cm\CMPrevMT50\</code></td><td>DataModules de entidades previdenciárias centrais</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>Oracle</td><td>Banco</td><td>schema <code>CM.</code></td><td>Banco de dados; sequences, DUAL, stored procedures</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+</tbody></table></div>
+<p><strong>Evidência:</strong> paths extraídos de <code>in '..\..\...'</code> em <code>CadastroPrev.dpr</code> e units do módulo — <span class="ev ev-comprovado">COMPROVADO</span>.</p>
+
+<p><strong>💡 Em outras palavras:</strong> esta tabela lista os módulos externos de que o CADASTROPREV depende. O framework CM fornece as telas base; o CMAdmPrev fornece a lógica de benefício e elegibilidade; o GLOBALCM fornece o extrato de desligamento; o PARAMPREV fornece os parâmetros (planos, situações, eventos).</p>
+
+<div class="note pfc73-ba"><p><strong>👔 Para o analista de negócios</strong></p><ul>
+<li>O CADASTROPREV não é uma ilha: ele depende do CM (telas), CMAdmPrev (lógica de benefício), PARAMPREV (parâmetros) e GLOBALCM (extrato). Mudanças nesses módulos afetam o cadastro.</li>
+<li>O PARAMPREV é a fonte dos planos, situações e eventos geradores. Confirmar quem mantém o PARAMPREV e o processo de mudança de parâmetros.</li>
+</ul></div>
+</section>
+
+<section><div class="section-title">🗺️ Dependências internas do módulo</div>
+<p>Units compartilhadas do framework previdenciário, referenciadas nas uses clauses dos forms do CADASTROPREV:</p>
+<div class="table-wrap"><table><thead><tr><th>Conjunto de units</th><th>Quantidade</th><th>Finalidade</th><th>Evidência</th></tr></thead><tbody>
+<tr><td>UAdmPrev</td><td>23 files</td><td>Administração previdenciária — regras de plano, patrocinadora, situação</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>UBeneficio</td><td>14 files</td><td>Lógica de benefício — concessão, manutenção, encerramento</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>URegra</td><td>13 files</td><td>Regras de elegibilidade e enquadramento</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>UParticipante</td><td>12 files</td><td>Lógica de participante — inscrição, manutenção, situação</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>UEventos</td><td>11 files</td><td>Lógica de eventos previdenciários — registro, validação, efetivação</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>UMovReserva</td><td>8 files</td><td>Movimentação de reservas — cálculo, atualização</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>UContribuicaoPrev</td><td>7 files</td><td>Contribuição previdenciária — cálculo, histórico</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>UIntegraBack</td><td>6 files</td><td>Integração com contabilidade + financeiro + empréstimo</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>UIntegraEP</td><td>2 files</td><td>Integração com empréstimo (EP)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>DAPrev</td><td>7 files</td><td>DataModules de acesso a dados previdenciários</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>DBaseDados</td><td>1</td><td>DataModule de conexão com o banco (CM)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>UMensErro</td><td>1</td><td>Mensagens de erro padronizadas</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>USistema</td><td>1</td><td>Variáveis de sistema (nome, versão, id do módulo)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td>UAutorizacao</td><td>1</td><td>Controle de autorização e permissões</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+</tbody></table></div>
+
+<p><strong>💡 Em outras palavras:</strong> é o mapa de "quem usa quem" dentro do módulo. A dependência mais pesada é UAdmPrev (23 files), seguida de UBeneficio (14) e URegra (13). Qualquer mudança nestas units compartilhadas afeta o CADASTROPREV.</p>
+</section>
+
+<section><div class="section-title">🌐 Integrações em tempo de execução identificadas no código</div>
+<p>Integrações que acontecem enquanto o sistema roda, além das dependências de código estáticas.</p>
+<div class="table-wrap"><table><thead><tr><th>Integração</th><th>Como funciona (linguagem simples)</th><th>Evidência</th><th>Classificação</th></tr></thead><tbody>
+<tr><td><strong>IntegraBack (contabilidade + financeiro + empréstimo)</strong></td><td>Na inicialização do módulo, <code>IntegraBack := TIntegraBack.Create(True, True, True)</code> cria a integração com contabilidade, financeiro e empréstimo. Os três parâmetros booleanos ativam cada integração. Usada quando um evento previdenciário gera lançamento contábil ou financeiro.</td><td><code>FPrincipal.pas:2773-2779</code></td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><strong>UIntegraEP (empréstimo)</strong></td><td>Integração específica com o módulo de empréstimo (EP). Usada para verificar margem consignável e atualizar situação do participante perante empréstimos.</td><td>uses clauses (UIntegraEP, 2 files)</td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><strong>CMPrevMT50 (entidades centrais)</strong></td><td>DataModules de entidades previdenciárias centrais acessados em tempo de execução para ler/gravar dados de beneficiários e conjuntos de rubricas.</td><td><code>..\..\Cm\CMPrevMT50\</code></td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+<tr><td><strong>Oracle (banco)</strong></td><td>Acesso ao schema CM. para ler e gravar todas as tabelas (PARTPREVPLAN, EVENTOSPREV, RESERVAPART, etc.) via TCmDbObject e TwwQuery.</td><td>schema <code>CM.</code></td><td><span class="ev ev-comprovado">COMPROVADO</span></td></tr>
+</tbody></table></div>
+
+<p><strong>💡 Em outras palavras:</strong> quando o usuário registra um evento (ex.: aposentadoria), o módulo não só grava no banco como também avisa a contabilidade, o financeiro e o empréstimo via IntegraBack. Isso garante que os demais sistemas reflitam a mudança de situação do participante.</p>
+
+<div class="note pfc73-ba"><p><strong>👔 Para o analista de negócios</strong></p><ul>
+<li>A integração com contabilidade e financeiro (IntegraBack) é ativada na inicialização do módulo. Confirmar se há cenário em que alguma das três integrações deve ser desativada (ex.: ambiente de teste).</li>
+<li>A integração com empréstimo (UIntegraEP) afeta a margem consignável do participante. Validar o fluxo quando um participante é desligado com empréstimo ativo.</li>
+</ul></div>
+</section>
+
+<section><div class="section-title">📦 Módulos que consomem dados do CADASTROPREV (leitura)</div>
+<p>O CADASTROPREV é a fonte primária de dados cadastrais. Os módulos abaixo leem os dados de participantes, dependentes, eventos e reservas gravados aqui:</p>
+<div class="table-wrap"><table><thead><tr><th>Módulo consumidor</th><th>O que consome</th><th>Evidência</th></tr></thead><tbody>
+<tr><td>FOLHA</td><td>Participantes, beneficiários, rubricas salariais, situação para cálculo de folha</td><td><span class="ev ev-inferido">INFERIDO</span></td></tr>
+<tr><td>CONTRIBUICAOPREV</td><td>Participantes, planos, eventos para cálculo de contribuição</td><td><span class="ev ev-inferido">INFERIDO</span></td></tr>
+<tr><td>BENEFICIOPREV</td><td>Participantes, dependentes, eventos de falecimento/reclusão/INSS para concessão de benefício</td><td><span class="ev ev-inferido">INFERIDO</span></td></tr>
+<tr><td>PROCPREV</td><td>Participantes, reservas para processos previdenciários</td><td><span class="ev ev-inferido">INFERIDO</span></td></tr>
+<tr><td>ASSISTENCIAL</td><td>Participantes assistidos para programas assistenciais</td><td><span class="ev ev-inferido">INFERIDO</span></td></tr>
+<tr><td>EMPRESTIMO</td><td>Participantes, situação, margem consignável</td><td><span class="ev ev-inferido">INFERIDO</span></td></tr>
+<tr><td>AUTOATENDIMENTO</td><td>Participantes, dependentes, extrato para o aplicativo do assistido</td><td><span class="ev ev-inferido">INFERIDO</span></td></tr>
+<tr><td>CENTRALAP</td><td>Participantes, eventos para a central de atendimento</td><td><span class="ev ev-inferido">INFERIDO</span></td></tr>
+<tr><td>AGENDAMENTO</td><td>Participantes para agendamento de atendimentos</td><td><span class="ev ev-inferido">INFERIDO</span></td></tr>
+<tr><td>PROJETOATUARIAL</td><td>Participantes, reservas, eventos para projeções atuariais</td><td><span class="ev ev-inferido">INFERIDO</span></td></tr>
+</tbody></table></div>
+
+<p><strong>💡 Em outras palavras:</strong> dez módulos leem os dados do CADASTROPREV. É por isso que a integridade deste cadastro é crítica: um erro aqui propaga para folha, contribuição, benefício, empréstimo e atendimento.</p>
+</section>
+
+<section><div class="section-title">🔀 Cross-references com BENEFICIOPREV</div>
+<p>Eventos de falecimento, reclusão e INSS assistido são documentados em ambos os módulos (CADASTROPREV e BENEFICIOPREV). O CADASTROPREV registra o evento; o BENEFICIOPREV concede e mantém o benefício. As cross-references abaixo indicam onde o mesmo evento aparece nos dois blueprints:</p>
+<div class="table-wrap"><table><thead><tr><th>Evento</th><th>No CADASTROPREV</th><th>No BENEFICIOPREV</th><th>Observação</th></tr></thead><tbody>
+<tr><td>Falecimento</td><td><code>FEventoMorte.pas</code> (1.873 lin) — registra o evento e cadastra pensionistas</td><td>Concede pensão por morte aos dependentes</td><td>O CADASTROPREV é o gatilho; o BENEFICIOPREV é o efeito.</td></tr>
+<tr><td>Reclusão</td><td><code>FEventoReclusao.pas</code> (1.351 lin) — registra o evento</td><td>Concede pensão por reclusão aos dependentes</td><td>Cross-reference: o evento origina-se no CADASTROPREV.</td></tr>
+<tr><td>Aposentadoria INSS (assistido)</td><td><code>FEventoAssistidoINSS.pas</code> (1.657 lin) — registra o evento</td><td>Reconhece o assistido INSS para benefício</td><td>O participante torna-se assistido do INSS.</td></tr>
+</tbody></table></div>
+
+<p><strong>💡 Em outras palavras:</strong> três eventos são documentados em ambos os módulos. Para evitar duplicidade, usar cross-references: o CADASTROPREV documenta o registro do evento; o BENEFICIOPREV documenta a concessão do benefício. Ver <a href="lacunas.html">🔍 Lacunas</a> para o detalhamento do overlap.</p>
+
+<div class="note pfc73-ba"><p><strong>👔 Para o analista de negócios</strong></p><ul>
+<li>O overlap com BENEFICIOPREV é esperado: o CADASTROPREV registra o evento, o BENEFICIOPREV concede o benefício. Confirmar que não há divergência de regras entre os dois módulos.</li>
+<li>Em projeto de modernização, decidir se os eventos de falecimento/reclusão/INSS ficam no módulo de cadastro ou no de benefício, ou se a separação atual é mantida.</li>
+</ul></div>
+</section>
+
+<section id="pfc73-analista"><div class="section-title">👔 Para o analista de negócios — síntese (PFC-73)</div>
+<div class="note pfc73-ba">
+<p>O CADASTROPREV depende do framework CM (telas base), do CMAdmPrev (lógica de benefício e elegibilidade), do PARAMPREV (parâmetros), do GLOBALCM (extrato de desligamento) e do CMPrevMT50 (entidades centrais). Em tempo de execução, integra-se com contabilidade, financeiro e empréstimo via IntegraBack. É a fonte primária de dados para 10 módulos consumidores.</p>
+<p><strong>Dependências críticas</strong></p><ul>
+<li>UAdmPrev (23 files) e UBeneficio (14 files) — lógica compartilhada; mudança nestas units afeta o cadastro.</li>
+<li>IntegraBack (contabilidade + financeiro + empréstimo) — ativada na inicialização.</li>
+<li>PARAMPREV — fonte dos planos, situações e eventos geradores.</li>
+</ul>
+<p><strong>Perguntas para o responsável de negócio / TI</strong></p><ul>
+<li>Quem mantém o PARAMPREV e qual é o processo de mudança de parâmetros?</li>
+<li>Como é resolvido o overlap de eventos com o BENEFICIOPREV? Há conflito de regras?</li>
+<li>Qual é o impacto nos 10 módulos consumidores quando o CADASTROPREV muda a estrutura de dados?</li>
+</ul>
+</div>
+</section>
+
+</main>
+<footer>
+<p>Blueprint AS-IS — PFC-73 — Integrações — Módulo CADASTROPREV | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-24</p>
+</footer>
+</body>
+</html>

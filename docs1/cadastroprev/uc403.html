@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UC403 — Transferências — Cadastro Previdenciário</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<header>
+  <div class="badge">Blueprint AS-IS — PFC-73 — Processos Funcionais</div>
+  <h1>UC403 — Transferências</h1>
+  <p>Caso de uso do módulo Cadastro Previdenciário: 2 jornada(s) funcional(is) e 5 regra(s) de negócio descritas dentro de cada jornada.</p>
+</header>
+<nav>
+  <a href="index.html">📋 Visão Geral</a>
+  <a href="arquitetura.html">🏗️ Arquitetura</a>
+  <a href="inventario-tecnico.html">📦 Inventário</a>
+  <a href="funcionalidades.html">⚙️ Processos Funcionais</a>
+  <a href="procedures-functions.html">🔧 Procedures</a>
+  <a href="dados.html">🗄️ Dados</a>
+  <a href="relatorios.html">📄 Relatórios</a>
+  <a href="integracoes.html">🔗 Integrações</a>
+  <a href="tratamento-erros.html">⚠️ Erros</a>
+  <a href="diagramas-fluxo.html">🔀 Fluxos</a>
+  <a href="lacunas.html">🔍 Lacunas</a>
+  <a href="controle-cobertura.html">📊 Cobertura</a>
+</nav>
+<main>
+
+<a class="back-btn" href="funcionalidades.html">← Voltar à lista de Casos de Uso (Processos Funcionais)</a>
+<div class="breadcrumb"><a href="index.html">Cadastro Previdenciário</a> › <a href="funcionalidades.html">Processos Funcionais</a> › UC403</div>
+
+<section><div class="section-title">1. Identificação</div>
+<div class="table-wrap"><table><tbody>
+<tr><th>Caso de Uso</th><td><strong>UC403 — Transferências</strong></td></tr>
+<tr><th>Módulo</th><td>CADASTROPREV — Cadastro Previdenciário</td></tr>
+<tr><th>Sistema</th><td>CM Contabilidade / FUNCEF (Delphi 5 / VCL / MIDAS / Oracle)</td></tr>
+<tr><th>Tipo</th><td>Sistema Desktop</td></tr>
+<tr><th>Ator</th><td>Usuário operacional (analista de cadastro previdenciário)</td></tr>
+<tr><th>Jornadas</th><td><a href="#PF-09">JF009 — Transferência de Plano</a>, <a href="#PF-10">JF010 — Transferência de Patrocinadora em Lote</a></td></tr>
+<tr><th>Regras de negócio</th><td>5 regra(s) CADASTROPREV-RN, descritas na íntegra dentro de cada jornada</td></tr>
+<tr><th>OS - Título</th><td>PFC-73 — Lista de UC (Processos Funcionais organizados em Casos de Uso)</td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">2. Descrição Resumida</div>
+<p>Transferência de participante entre planos previdenciários e entre patrocinadoras. Este caso de uso reúne 2 jornada(s) funcional(is) do módulo Cadastro Previdenciário:</p>
+<ul>
+<li><a href="#PF-09"><strong>JF009 — Transferência de Plano</strong></a>: transferir o participante de um plano de origem para um plano de destino, movendo reservas e atualizando vínculos.</li>
+<li><a href="#PF-10"><strong>JF010 — Transferência de Patrocinadora em Lote</strong></a>: transferir participantes de uma patrocinadora para outra em modo de lote.</li>
+</ul>
+<p><strong>Necessidade de negócio:</strong> a transferência de plano é o processo mais complexo do módulo CADASTROPREV: o form <code>FEventoTransfPlano.pas</code> tem 7.873 linhas — o maior form do módulo. Ele transfere o participante de um plano de origem para um plano de destino, movendo reservas, atualizando vínculos, beneficiários e contribuições. O plano destino não pode ser o mesmo de origem, a patrocinadora destino é obrigatória, o participante deve estar cadastrado como elegível na patrocinadora destino, e o novo número de inscrição deve ser informado e válido. A transferência de patrocinadora em lote (<code>fTransfPatroBatch.pas</code>, 2.053 linhas) aplica as mesmas regras para um conjunto de participantes.</p>
+<p><strong>Quem inicia:</strong> sempre o usuário (analista de cadastro), pelo menu <em>Eventos</em> da tela principal.</p>
+<p><strong>Resultado esperado:</strong> ao fim da transferência, o evento fica gravado em <code>EVENTOSPREV</code> e em <code>HSTCONTEVENTOSPR</code>, o participante tem novo vínculo em <code>PARTPREVPLAN</code>, as reservas são movidas em <code>RESERVAPART</code>, os beneficiários são atualizados em <code>BENEFPLANOPART</code> e <code>BFCIARIOTITPLAN</code>, e as contribuições em <code>CONTRIBPREVPARTP</code> refletem o novo plano.</p>
+</section>
+
+<section><div class="section-title">3. Pré-condições</div>
+<p><strong>Gerais do módulo:</strong></p>
+<ul>
+<li>O módulo CADASTROPREV deve estar compilado e disponível (entry point <code>CADASTROPREV/Fontes/CadastroPrev.dpr</code>).</li>
+<li>O banco Oracle (schema <code>CM.</code>) deve estar acessível.</li>
+<li>O participante deve estar selecionado na tela principal.</li>
+<li>Os parâmetros globais do sistema previdenciário devem estar carregados.</li>
+<li>O usuário deve ter permissão de acesso ao módulo e ao tipo de evento.</li>
+</ul>
+<p><strong>Por jornada:</strong></p>
+<ul>
+<li><a href="#PF-09">JF009</a>: participante ativo no plano de origem; plano destino diferente da origem; patrocinadora destino informada; participante elegível na patrocinadora destino; novo número de inscrição informado.</li>
+<li><a href="#PF-10">JF010</a>: lista de participantes selecionada; patrocinadora destino informada; participantes elegíveis na patrocinadora destino.</li>
+</ul>
+</section>
+
+<section><div class="section-title">4. Pós-condições</div>
+<ul>
+<li><a href="#PF-09">JF009</a>: evento de transferência gravado em EVENTOSPREV/HSTCONTEVENTOSPR; participante vinculado ao plano destino em PARTPREVPLAN; reservas movidas em RESERVAPART; beneficiários atualizados em BENEFPLANOPART/BFCIARIOTITPLAN; contribuições atualizadas em CONTRIBPREVPARTP; reserva temporária em MOVRESERVATEMP.</li>
+<li><a href="#PF-10">JF010</a>: eventos de transferência gravados para todos os participantes do lote; vínculos atualizados em PARTPREVPLAN; reservas movidas em RESERVAPART.</li>
+</ul>
+</section>
+
+<section><div class="section-title">5. Jornadas Funcionais (JF009, JF010)</div>
+<p>Cada jornada traz objetivo, ator/gatilho, pré e pós-condições, sequência operacional, ações práticas, <strong>regras de negócio da jornada</strong> (texto completo de cada regra), tratamentos e mensagens.</p>
+<p><strong>Como as jornadas deste caso de uso se relacionam:</strong> JF009 (transferência de plano) é o processo individual e o mais complexo, envolvendo movimentação de reservas e atualização de múltiplas tabelas. JF010 (transferência de patrocinadora em lote) aplica regras similares a um conjunto de participantes, mudando a patrocinadora de vínculo. Em cada passo, o rótulo "Usuário" ou "Sistema" indica quem executa a ação.</p>
+<div class="legend"><span><span class="ev ev-comprovado">COMPROVADO</span> — no código</span><span><span class="ev ev-inferido">INFERIDO</span> — plausível</span><span><span class="ev ev-pendente">PENDENTE</span> — validar</span></div>
+</section>
+
+<div class="pf-block" id="PF-09"><h4>JF009 (PF-09) — Transferência de Plano</h4>
+<p><strong>Objetivo:</strong> transferir o participante de um plano de origem para um plano de destino, movendo reservas e atualizando vínculos.</p>
+<p><strong>Necessidade de negócio:</strong> a transferência de plano ocorre quando o participante muda de um plano previdenciário para outro (por exemplo, de um plano de benefício definido para um plano de contribuição definida). O sistema valida que o plano destino é diferente do origem, que a patrocinadora destino está informada, que a situação na patrocinadora destino está informada, que o participante está cadastrado como elegível na patrocinadora destino, e que o novo número de inscrição é informado e válido. Em seguida, move as reservas, atualiza os vínculos, beneficiários e contribuições. O form <code>FEventoTransfPlano.pas</code> (7.873 linhas) é o maior form do módulo.</p>
+<p><strong>Gatilho/Ator:</strong> usuário aciona o menu <em>Eventos › Transferência de Plano</em> na tela principal.</p>
+<p><strong>Pré-condições:</strong> participante ativo no plano de origem; plano destino diferente da origem; patrocinadora destino informada; participante elegível na patrocinadora destino; novo número de inscrição informado.</p>
+<p><strong>Pós-condições:</strong> evento de transferência gravado; participante vinculado ao plano destino; reservas movidas; beneficiários atualizados; contribuições atualizadas; reserva temporária criada.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li><strong>Usuário:</strong> seleciona o participante na tela principal e aciona o menu <em>Eventos › Transferência de Plano</em>. O sistema abre o form <code>FEventoTransfPlano.dfm</code> com os dados do participante (<code>FEventoTransfPlano.pas:1043</code>).</li>
+<li><strong>Sistema:</strong> valida se o participante foi selecionado. Se nenhum participante estiver selecionado, exibe <a href="#MSG001">MSG001</a> e bloqueia (<a href="#TRT001">TRT001</a>).</li>
+<li><strong>Usuário:</strong> seleciona o plano destino, a patrocinadora destino, a situação na patrocinadora destino e informa o novo número de inscrição. Clica em "Confirmar".</li>
+<li><strong>Sistema:</strong> valida se o plano destino é diferente do plano de origem <a href="#CADASTROPREV-RN010">[RN010]</a>. Se for o mesmo, exibe <a href="#MSG011">MSG011</a> e bloqueia (<a href="#TRT011">TRT011</a>).</li>
+<li><strong>Sistema:</strong> valida se a patrocinadora destino foi informada <a href="#CADASTROPREV-RN011">[RN011]</a>. Se não, exibe <a href="#MSG012">MSG012</a> e bloqueia (<a href="#TRT012">TRT012</a>).</li>
+<li><strong>Sistema:</strong> valida se a situação na patrocinadora destino foi informada <a href="#CADASTROPREV-RN012">[RN012]</a>. Se não, bloqueia.</li>
+<li><strong>Sistema:</strong> valida se o participante está cadastrado como elegível na patrocinadora destino <a href="#CADASTROPREV-RN013">[RN013]</a>. Se não, exibe <a href="#MSG013">MSG013</a> e bloqueia (<a href="#TRT013">TRT013</a>).</li>
+<li><strong>Sistema:</strong> valida se o novo número de inscrição foi informado e é válido <a href="#CADASTROPREV-RN014">[RN014]</a>. Se não, exibe <a href="#MSG014">MSG014</a> e bloqueia (<a href="#TRT014">TRT014</a>).</li>
+<li><strong>Sistema:</strong> grava o evento em <code>EVENTOSPREV</code> com o tipo "Transferência de Plano". Cria o novo vínculo em <code>PARTPREVPLAN</code> com o plano destino e o novo número de inscrição. Grava o histórico em <code>HSTCONTEVENTOSPR</code>.</li>
+<li><strong>Sistema:</strong> move as reservas do participante de <code>RESERVAPART</code> para o novo plano, criando registros temporários em <code>MOVRESERVATEMP</code>. Atualiza os beneficiários em <code>BENEFPLANOPART</code> e <code>BFCIARIOTITPLAN</code>. Atualiza as contribuições em <code>CONTRIBPREVPARTP</code>. Exibe mensagem de sucesso e fecha o form.</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Abrir form de transferência</td><td>Carregar dados do participante</td><td>Participante selecionado</td><td>Abre FEventoTransfPlano</td><td>Form preenchido</td><td>—</td><td><a href="#MSG001">MSG001</a></td><td><code>FEventoTransfPlano.dfm</code></td></tr>
+<tr><td>Validar plano destino</td><td>Plano destino ≠ origem</td><td>Plano origem, plano destino</td><td>Compara planos</td><td>Diferente ou bloqueio</td><td><a href="#CADASTROPREV-RN010">RN010</a></td><td><a href="#MSG011">MSG011</a></td><td><code>FEventoTransfPlano.dfm</code></td></tr>
+<tr><td>Validar patrocinadora destino</td><td>Patrocinadora obrigatória</td><td>Patrocinadora destino</td><td>Valida se informada</td><td>Informada ou bloqueio</td><td><a href="#CADASTROPREV-RN011">RN011</a></td><td><a href="#MSG012">MSG012</a></td><td><code>FEventoTransfPlano.dfm</code></td></tr>
+<tr><td>Validar situação patrocinadora</td><td>Situação obrigatória</td><td>Situação na patrocinadora destino</td><td>Valida se informada</td><td>Informada ou bloqueio</td><td><a href="#CADASTROPREV-RN012">RN012</a></td><td>—</td><td><code>FEventoTransfPlano.dfm</code></td></tr>
+<tr><td>Validar elegibilidade</td><td>Participante elegível na patro. destino</td><td>ID participante, patrocinadora destino</td><td>Consulta ELEGPATRO</td><td>Elegível ou bloqueio</td><td><a href="#CADASTROPREV-RN013">RN013</a></td><td><a href="#MSG013">MSG013</a></td><td><code>FEventoTransfPlano.dfm</code></td></tr>
+<tr><td>Validar novo número inscrição</td><td>Inscrição obrigatória e válida</td><td>Novo número de inscrição</td><td>Valida se informado e válido</td><td>Válido ou bloqueio</td><td><a href="#CADASTROPREV-RN014">RN014</a></td><td><a href="#MSG014">MSG014</a></td><td><code>FEventoTransfPlano.dfm</code></td></tr>
+<tr><td>Gravar transferência</td><td>Persistir evento e vínculo</td><td>Dados validados</td><td>Insere em EVENTOSPREV e PARTPREVPLAN</td><td>Evento e vínculo gravados</td><td>—</td><td>—</td><td><code>FEventoTransfPlano.dfm</code></td></tr>
+<tr><td>Mover reservas</td><td>Transferir reservas para novo plano</td><td>Reservas do participante</td><td>Move RESERVAPART e cria MOVRESERVATEMP</td><td>Reservas movidas</td><td>—</td><td>—</td><td><code>FEventoTransfPlano.dfm</code></td></tr>
+<tr><td>Atualizar beneficiários</td><td>Vincular beneficiários ao novo plano</td><td>Beneficiários do participante</td><td>Atualiza BENEFPLANOPART e BFCIARIOTITPLAN</td><td>Beneficiários atualizados</td><td>—</td><td>—</td><td><code>FEventoTransfPlano.dfm</code></td></tr>
+</tbody></table></div>
+<div class="jf-rules">
+<p><strong>Regras de negócio da jornada:</strong> 5 regra(s) — texto completo abaixo.</p>
+<div class="rule-block" id="CADASTROPREV-RN010"><div class="rule-id">RN010 (CADASTROPREV-RN010) — Plano destino não pode ser o mesmo de origem</div>
+<p><strong>Descrição:</strong> o plano destino da transferência deve ser diferente do plano de origem do participante.</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>cboPlanoOrigem</code> — [obrigatório] — plano atual do participante</li>
+<li><code>cboPlanoDestino</code> — [obrigatório] — plano destino da transferência</li>
+</ul>
+<p><strong>Categoria:</strong> validação de negócio · <strong>Gatilho:</strong> confirmação da transferência de plano</p>
+<p><strong>Condição:</strong> se <code>cboPlanoDestino = cboPlanoOrigem</code> → bloqueia.</p>
+<p><strong>Tratamento (TRT):</strong> <a href="#TRT011">TRT011</a> → <a href="#MSG011">MSG011</a> → Bloqueia execução</p>
+<p><strong>Rotina:</strong> validação inline no form. <strong>Origem:</strong> <code>CADASTROPREV/Fontes/FEventoTransfPlano.pas</code>. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> · <strong>Severidade:</strong> alta (bloqueante) · <strong>Jornada:</strong> <a href="#PF-09">JF009</a> · <strong>Relacionadas:</strong> —</p>
+</div>
+<div class="rule-block" id="CADASTROPREV-RN011"><div class="rule-id">RN011 (CADASTROPREV-RN011) — Patrocinadora destino obrigatória</div>
+<p><strong>Descrição:</strong> a patrocinadora destino deve ser informada na transferência de plano.</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>cboPatroDestino</code> — [obrigatório] — patrocinadora destino</li>
+</ul>
+<p><strong>Condição:</strong> se <code>cboPatroDestino</code> vazio → bloqueia.</p>
+<p><strong>Tratamento (TRT):</strong> <a href="#TRT012">TRT012</a> → <a href="#MSG012">MSG012</a> → Bloqueia execução</p>
+<p><strong>Rotina:</strong> validação inline no form. <strong>Origem:</strong> <code>CADASTROPREV/Fontes/FEventoTransfPlano.pas</code>. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> · <strong>Severidade:</strong> alta (bloqueante) · <strong>Jornada:</strong> <a href="#PF-09">JF009</a> · <strong>Relacionadas:</strong> —</p>
+</div>
+<div class="rule-block" id="CADASTROPREV-RN012"><div class="rule-id">RN012 (CADASTROPREV-RN012) — Situação na patrocinadora destino obrigatória</div>
+<p><strong>Descrição:</strong> a situação do participante na patrocinadora destino deve ser informada.</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>cboSituacaoPatroDestino</code> — [obrigatório] — situação na patrocinadora destino</li>
+</ul>
+<p><strong>Condição:</strong> se <code>cboSituacaoPatroDestino</code> vazio → bloqueia.</p>
+<p><strong>Rotina:</strong> validação inline no form. <strong>Origem:</strong> <code>CADASTROPREV/Fontes/FEventoTransfPlano.pas</code>. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> · <strong>Severidade:</strong> alta (bloqueante) · <strong>Jornada:</strong> <a href="#PF-09">JF009</a> · <strong>Relacionadas:</strong> —</p>
+</div>
+<div class="rule-block" id="CADASTROPREV-RN013"><div class="rule-id">RN013 (CADASTROPREV-RN013) — Participante deve estar cadastrado como elegível na patrocinadora destino</div>
+<p><strong>Descrição:</strong> o participante deve estar cadastrado como elegível na patrocinadora do plano destino para que a transferência seja permitida.</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>ELEGPATRO.IDPESSOA</code> — [obrigatório] — ID do participante</li>
+<li><code>ELEGPATRO.IDPATRO</code> — [obrigatório] — ID da patrocinadora destino</li>
+<li><code>ELEGPATRO.FLGELEGIVEL</code> — [obrigatório] — flag de elegível</li>
+</ul>
+<p><strong>Condição:</strong> se não existir registro em ELEGPATRO com FLGELEGIVEL = 'S' para o participante na patrocinadora destino → bloqueia.</p>
+<p><strong>Tratamento (TRT):</strong> <a href="#TRT013">TRT013</a> → <a href="#MSG013">MSG013</a> → Bloqueia execução</p>
+<p><strong>Rotina:</strong> consulta a ELEGPATRO no form. <strong>Origem:</strong> <code>CADASTROPREV/Fontes/FEventoTransfPlano.pas</code>. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> · <strong>Severidade:</strong> alta (bloqueante) · <strong>Jornada:</strong> <a href="#PF-09">JF009</a> · <strong>Relacionadas:</strong> —</p>
+</div>
+<div class="rule-block" id="CADASTROPREV-RN014"><div class="rule-id">RN014 (CADASTROPREV-RN014) — Novo número de inscrição obrigatório e válido</div>
+<p><strong>Descrição:</strong> o novo número de inscrição do participante no plano destino deve ser informado e válido.</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>edtNrInscricaoDestino</code> — [obrigatório] — novo número de inscrição</li>
+<li><code>PARTPREVPLAN.NRINSCRICAO</code> — [obrigatório] — gravado com o novo número</li>
+</ul>
+<p><strong>Condição:</strong> se <code>edtNrInscricaoDestino</code> vazio ou inválido → bloqueia.</p>
+<p><strong>Tratamento (TRT):</strong> <a href="#TRT014">TRT014</a> → <a href="#MSG014">MSG014</a> → Bloqueia execução</p>
+<p><strong>Rotina:</strong> validação inline no form. <strong>Origem:</strong> <code>CADASTROPREV/Fontes/FEventoTransfPlano.pas</code>. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> · <strong>Severidade:</strong> alta (bloqueante) · <strong>Jornada:</strong> <a href="#PF-09">JF009</a> · <strong>Relacionadas:</strong> —</p>
+</div>
+</div>
+
+<p><strong>Dependências:</strong> consulta ELEGPATRO; atualiza RESERVAPART, BENEFPLANOPART, BFCIARIOTITPLAN, CONTRIBPREVPARTP, MOVRESERVATEMP. Evidência: <code>CADASTROPREV/Fontes/FEventoTransfPlano.pas:1043-7873</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<div class="mermaid">graph LR
+  n0["FEventoTransfPlano"] --> n1["ValidaParticipante"] --> n2["ValidaPlanoDestino(:RN010)"] --> n3["ValidaPatroDestino(:RN011)"] --> n4["ValidaSituacaoPatro(:RN012)"] --> n5["ValidaElegibilidade(:RN013)"] --> n6["ValidaNrInscricao(:RN014)"] --> n7["GravaEvento"] --> n8["EVENTOSPREV/HSTCONTEVENTOSPR"] --> n9["CriaVinculoPartPrevPlan"] --> n10["MoveReservas"] --> n11["RESERVAPART/MOVRESERVATEMP"] --> n12["AtualizaBeneficiarios"] --> n13["BENEFPLANOPART/BFCIARIOTITPLAN"]</div>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span></p>
+<ul>
+<li>O form <code>FEventoTransfPlano.pas</code> tem 7.873 linhas — o maior do módulo. Há certamente regras de negócio adicionais não catalogadas aqui (cálculo de reserva, rateio, atualização de histórico funcional).</li>
+<li>Confirmar se a movimentação de reservas usa MOVRESERVATEMP como tabela temporária e se há um processo de confirmação posterior.</li>
+<li>Validar se a transferência de plano dispara saldamento ou se é um processo independente.</li>
+<li>Confirmar se a transferência preserva o histórico de contribuições ou se cria novos registros.</li>
+</ul>
+</div>
+</div>
+
+<div class="pf-block" id="PF-10"><h4>JF010 (PF-10) — Transferência de Patrocinadora em Lote</h4>
+<p><strong>Objetivo:</strong> transferir participantes de uma patrocinadora para outra em modo de lote.</p>
+<p><strong>Necessidade de negócio:</strong> quando uma empresa (patrocinadora) é incorporada, fundida ou cede seus participantes para outra patrocinadora, o sistema transfere todos os participantes afetados em lote. O form <code>fTransfPatroBatch.pas</code> (2.053 linhas) aplica as regras de transferência a um conjunto de participantes, validando elegibilidade na patrocinadora destino para cada um.</p>
+<p><strong>Gatilho/Ator:</strong> usuário aciona o menu <em>Eventos › Transferência de Patrocinadora (Lote)</em> na tela principal.</p>
+<p><strong>Pré-condições:</strong> lista de participantes selecionada; patrocinadora destino informada; participantes elegíveis na patrocinadora destino.</p>
+<p><strong>Pós-condições:</strong> eventos de transferência gravados para todos os participantes do lote; vínculos atualizados em PARTPREVPLAN; reservas movidas em RESERVAPART.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li><strong>Usuário:</strong> aciona o menu <em>Eventos › Transferência de Patrocinadora (Lote)</em>. O sistema abre o form <code>fTransfPatroBatch.dfm</code>.</li>
+<li><strong>Usuário:</strong> seleciona a patrocinadora de origem, a patrocinadora destino e os participantes a transferir. Clica em "Processar".</li>
+<li><strong>Sistema:</strong> valida se a patrocinadora destino foi informada <a href="#CADASTROPREV-RN011">[RN011]</a>. Se não, exibe <a href="#MSG012">MSG012</a> e bloqueia (<a href="#TRT012">TRT012</a>).</li>
+<li><strong>Sistema:</strong> valida se a situação na patrocinadora destino foi informada <a href="#CADASTROPREV-RN012">[RN012]</a>. Se não, bloqueia.</li>
+<li><strong>Sistema:</strong> para cada participante do lote: valida se está cadastrado como elegível na patrocinadora destino <a href="#CADASTROPREV-RN013">[RN013]</a>. Se não, exibe <a href="#MSG013">MSG013</a> e marca o participante como não processado (<a href="#TRT013">TRT013</a>).</li>
+<li><strong>Sistema:</strong> para cada participante elegível: valida o novo número de inscrição <a href="#CADASTROPREV-RN014">[RN014]</a>. Se inválido, exibe <a href="#MSG014">MSG014</a> e marca como não processado (<a href="#TRT014">TRT014</a>).</li>
+<li><strong>Sistema:</strong> para cada participante válido: grava o evento em <code>EVENTOSPREV</code>, atualiza o vínculo em <code>PARTPREVPLAN</code>, move as reservas em <code>RESERVAPART</code>, atualiza contribuições em <code>CONTRIBPREVPARTP</code>, e grava histórico em <code>HSTCONTEVENTOSPR</code>.</li>
+<li><strong>Sistema:</strong> exibe o resumo do lote: participantes transferidos, não processados por inelegibilidade e não processados por inscrição inválida. Fecha o form.</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Abrir form de lote</td><td>Iniciar transferência em lote</td><td>—</td><td>Abre fTransfPatroBatch</td><td>Form aberto</td><td>—</td><td>—</td><td><code>fTransfPatroBatch.dfm</code></td></tr>
+<tr><td>Validar patrocinadora destino</td><td>Patrocinadora obrigatória</td><td>Patrocinadora destino</td><td>Valida se informada</td><td>Informada ou bloqueio</td><td><a href="#CADASTROPREV-RN011">RN011</a></td><td><a href="#MSG012">MSG012</a></td><td><code>fTransfPatroBatch.dfm</code></td></tr>
+<tr><td>Validar situação patrocinadora</td><td>Situação obrigatória</td><td>Situação na patro. destino</td><td>Valida se informada</td><td>Informada ou bloqueio</td><td><a href="#CADASTROPREV-RN012">RN012</a></td><td>—</td><td><code>fTransfPatroBatch.dfm</code></td></tr>
+<tr><td>Processar lote (loop)</td><td>Transferir cada participante</td><td>Lista de participantes</td><td>Para cada um: valida elegibilidade e inscrição</td><td>Participantes transferidos ou marcados</td><td><a href="#CADASTROPREV-RN013">RN013</a>, <a href="#CADASTROPREV-RN014">RN014</a></td><td><a href="#MSG013">MSG013</a>, <a href="#MSG014">MSG014</a></td><td><code>fTransfPatroBatch.dfm</code></td></tr>
+<tr><td>Gravar transferências</td><td>Persistir eventos do lote</td><td>Participantes válidos</td><td>Insere em EVENTOSPREV e atualiza PARTPREVPLAN/RESERVAPART</td><td>Lote processado</td><td>—</td><td>—</td><td><code>fTransfPatroBatch.dfm</code></td></tr>
+</tbody></table></div>
+<div class="jf-rules">
+<p><strong>Regras de negócio da jornada:</strong> 4 regra(s) — reaproveitadas de JF009 (RN011, RN012, RN013, RN014), aplicadas a cada participante do lote.</p>
+<div class="rule-block" id="CADASTROPREV-RN011b"><div class="rule-id">RN011 (CADASTROPREV-RN011) — Patrocinadora destino obrigatória (reaproveitada)</div>
+<p><strong>Descrição:</strong> mesma regra <a href="#CADASTROPREV-RN011">RN011</a> aplicada na transferência em lote.</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>cboPatroDestino</code> — [obrigatório] — patrocinadora destino</li>
+</ul>
+<p><strong>Condição:</strong> se <code>cboPatroDestino</code> vazio → bloqueia.</p>
+<p><strong>Tratamento (TRT):</strong> <a href="#TRT012">TRT012</a> → <a href="#MSG012">MSG012</a> → Bloqueia execução</p>
+<p><strong>Rotina:</strong> validação inline no form. <strong>Origem:</strong> <code>CADASTROPREV/Fontes/fTransfPatroBatch.pas</code>. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> · <strong>Severidade:</strong> alta (bloqueante) · <strong>Jornada:</strong> <a href="#PF-10">JF010</a> · <strong>Relacionadas:</strong> <a href="#CADASTROPREV-RN011">RN011</a></p>
+</div>
+<div class="rule-block" id="CADASTROPREV-RN012b"><div class="rule-id">RN012 (CADASTROPREV-RN012) — Situação na patrocinadora destino obrigatória (reaproveitada)</div>
+<p><strong>Descrição:</strong> mesma regra <a href="#CADASTROPREV-RN012">RN012</a> aplicada na transferência em lote.</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>cboSituacaoPatroDestino</code> — [obrigatório] — situação na patrocinadora destino</li>
+</ul>
+<p><strong>Condição:</strong> se <code>cboSituacaoPatroDestino</code> vazio → bloqueia.</p>
+<p><strong>Rotina:</strong> validação inline no form. <strong>Origem:</strong> <code>CADASTROPREV/Fontes/fTransfPatroBatch.pas</code>. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> · <strong>Severidade:</strong> alta (bloqueante) · <strong>Jornada:</strong> <a href="#PF-10">JF010</a> · <strong>Relacionadas:</strong> <a href="#CADASTROPREV-RN012">RN012</a></p>
+</div>
+<div class="rule-block" id="CADASTROPREV-RN013b"><div class="rule-id">RN013 (CADASTROPREV-RN013) — Participante elegível na patrocinadora destino (reaproveitada)</div>
+<p><strong>Descrição:</strong> mesma regra <a href="#CADASTROPREV-RN013">RN013</a> aplicada a cada participante do lote.</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>ELEGPATRO.IDPESSOA</code> — [obrigatório] — ID do participante</li>
+<li><code>ELEGPATRO.IDPATRO</code> — [obrigatório] — ID da patrocinadora destino</li>
+</ul>
+<p><strong>Condição:</strong> se participante não elegível na patrocinadora destino → marca como não processado.</p>
+<p><strong>Tratamento (TRT):</strong> <a href="#TRT013">TRT013</a> → <a href="#MSG013">MSG013</a> → Marca participante como não processado</p>
+<p><strong>Rotina:</strong> consulta a ELEGPATRO no loop do lote. <strong>Origem:</strong> <code>CADASTROPREV/Fontes/fTransfPatroBatch.pas</code>. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> · <strong>Severidade:</strong> alta · <strong>Jornada:</strong> <a href="#PF-10">JF010</a> · <strong>Relacionadas:</strong> <a href="#CADASTROPREV-RN013">RN013</a></p>
+</div>
+<div class="rule-block" id="CADASTROPREV-RN014b"><div class="rule-id">RN014 (CADASTROPREV-RN014) — Novo número de inscrição obrigatório e válido (reaproveitada)</div>
+<p><strong>Descrição:</strong> mesma regra <a href="#CADASTROPREV-RN014">RN014</a> aplicada a cada participante do lote.</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>edtNrInscricaoDestino</code> — [obrigatório] — novo número de inscrição</li>
+</ul>
+<p><strong>Condição:</strong> se <code>edtNrInscricaoDestino</code> vazio ou inválido → marca como não processado.</p>
+<p><strong>Tratamento (TRT):</strong> <a href="#TRT014">TRT014</a> → <a href="#MSG014">MSG014</a> → Marca participante como não processado</p>
+<p><strong>Rotina:</strong> validação inline no loop do lote. <strong>Origem:</strong> <code>CADASTROPREV/Fontes/fTransfPatroBatch.pas</code>. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> · <strong>Severidade:</strong> alta · <strong>Jornada:</strong> <a href="#PF-10">JF010</a> · <strong>Relacionadas:</strong> <a href="#CADASTROPREV-RN014">RN014</a></p>
+</div>
+</div>
+
+<p><strong>Dependências:</strong> consulta ELEGPATRO; atualiza PARTPREVPLAN, RESERVAPART, CONTRIBPREVPARTP. Evidência: <code>CADASTROPREV/Fontes/fTransfPatroBatch.pas</code> (2.053 lin) · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<div class="mermaid">graph LR
+  n0["fTransfPatroBatch"] --> n1["ValidaPatroDestino(:RN011)"] --> n2["ValidaSituacaoPatro(:RN012)"] --> n3["LoopParticipantes"] --> n4["ValidaElegibilidade(:RN013)"] --> n5["ValidaNrInscricao(:RN014)"] --> n6["GravaEvento"] --> n7["EVENTOSPREV/HSTCONTEVENTOSPR"] --> n8["AtualizaPartPrevPlan"] --> n9["MoveReservas"] --> n10["RESERVAPART"] --> n11["ResumoLote"]</div>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span></p>
+<ul>
+<li>Confirmar se a transferência em lote gera um evento único por participante ou um evento de lote.</li>
+<li>Validar se participantes não processados são listados em relatório para tratamento posterior.</li>
+<li>O form tem 2.053 linhas — pode haver regras adicionais para casos especiais (participantes com reservas bloqueadas, beneficiários ativos, etc.).</li>
+</ul>
+</div>
+</div>
+
+<section id="TRT-section"><div class="section-title">6. Tratamentos (TRT)</div>
+<p>Tratamentos de erro derivados das validações bloqueantes e exceções das regras. Cada TRT possui Condição, Mensagem e Resultado.</p>
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Condição</th><th>Mensagem</th><th>Resultado</th><th>Regra</th><th>Jornada</th></tr></thead><tbody>
+<tr id="TRT001"><td><strong>TRT001</strong></td><td>Participante não selecionado</td><td><a href="#MSG001">MSG001</a></td><td>Bloqueia execução</td><td>—</td><td>JF009</td></tr>
+<tr id="TRT011"><td><strong>TRT011</strong></td><td>Plano destino igual ao de origem</td><td><a href="#MSG011">MSG011</a></td><td>Bloqueia execução</td><td><a href="#CADASTROPREV-RN010">RN010</a></td><td>JF009</td></tr>
+<tr id="TRT012"><td><strong>TRT012</strong></td><td>Patrocinadora destino não informada</td><td><a href="#MSG012">MSG012</a></td><td>Bloqueia execução</td><td><a href="#CADASTROPREV-RN011">RN011</a></td><td>JF009, JF010</td></tr>
+<tr id="TRT013"><td><strong>TRT013</strong></td><td>Participante não cadastrado como elegível na patrocinadora destino</td><td><a href="#MSG013">MSG013</a></td><td>Bloqueia/marca não processado</td><td><a href="#CADASTROPREV-RN013">RN013</a></td><td>JF009, JF010</td></tr>
+<tr id="TRT014"><td><strong>TRT014</strong></td><td>Novo número de inscrição inválido</td><td><a href="#MSG014">MSG014</a></td><td>Bloqueia/marca não processado</td><td><a href="#CADASTROPREV-RN014">RN014</a></td><td>JF009, JF010</td></tr>
+</tbody></table></div>
+</section>
+
+<section id="MSG-section"><div class="section-title">7. Mensagens (MSG)</div>
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Texto da Mensagem</th><th>Jornadas relacionadas</th></tr></thead><tbody>
+<tr id="MSG001"><td><strong>MSG001</strong></td><td>"Primeiro selecione o Participante."</td><td>JF009</td></tr>
+<tr id="MSG011"><td><strong>MSG011</strong></td><td>"O Plano destino não pode ser o mesmo de origem."</td><td>JF009</td></tr>
+<tr id="MSG012"><td><strong>MSG012</strong></td><td>"É obrigatório o preenchimento da Patrocinadora de Destino."</td><td>JF009, JF010</td></tr>
+<tr id="MSG013"><td><strong>MSG013</strong></td><td>"O participante não está cadastrado com o elegível na patrocinadora do Plano Destino."</td><td>JF009, JF010</td></tr>
+<tr id="MSG014"><td><strong>MSG014</strong></td><td>"O novo número de inscrição deve ser informado."</td><td>JF009, JF010</td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">8. Tabela/API/Programa</div>
+<div class="table-wrap"><table><thead><tr><th>Jornada</th><th>Tabelas (escrita)</th><th>Rotina-chave (file:linha)</th></tr></thead><tbody>
+<tr><td>JF009</td><td>EVENTOSPREV, PARTPREVPLAN, RESERVAPART, CONTRIBPREVPARTP, BFCIARIOTITPLAN, BENEFPLANOPART, HSTCONTEVENTOSPR, MOVRESERVATEMP</td><td><code>FEventoTransfPlano.pas:1043</code> (7.873 lin)</td></tr>
+<tr><td>JF010</td><td>EVENTOSPREV, PARTPREVPLAN, RESERVAPART, CONTRIBPREVPARTP, HSTCONTEVENTOSPR</td><td><code>fTransfPatroBatch.pas</code> (2.053 lin)</td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">9. Telas/Layouts</div>
+<div class="table-wrap"><table><thead><tr><th>Jornada</th><th>Form(s) (.dfm)</th></tr></thead><tbody>
+<tr><td>JF009</td><td><code>FEventoTransfPlano.dfm</code></td></tr>
+<tr><td>JF010</td><td><code>fTransfPatroBatch.dfm</code></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">10. Visão Consolidada das Jornadas</div>
+<div class="table-wrap"><table><thead><tr><th>Jornada</th><th>ID</th><th>Título</th><th>Critério de aceitação (Dado/Quando/Então)</th><th>Mensagens</th><th>Telas</th></tr></thead><tbody>
+<tr><td>JF009</td><td>PF-09</td><td>Transferência de Plano</td><td><strong>Dado</strong> participante ativo com plano destino válido e elegibilidade, <strong>Quando</strong> usuário confirma transferência, <strong>Então</strong> participante é transferido e reservas movidas</td><td><a href="#MSG011">MSG011</a>–<a href="#MSG014">MSG014</a></td><td>FEventoTransfPlano</td></tr>
+<tr><td>JF010</td><td>PF-10</td><td>Transferência de Patrocinadora em Lote</td><td><strong>Dado</strong> lista de participantes com patrocinadora destino válida, <strong>Quando</strong> usuário processa lote, <strong>Então</strong> participantes elegíveis são transferidos</td><td><a href="#MSG012">MSG012</a>–<a href="#MSG014">MSG014</a></td><td>fTransfPatroBatch</td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">11. Critérios de Aceitação por Regra</div>
+<div class="table-wrap"><table><thead><tr><th>Regra</th><th>ID</th><th>Título</th><th>Critério de aceitação (Dado/Quando/Então)</th><th>Mensagens</th><th>Telas</th></tr></thead><tbody>
+<tr><td>RN010</td><td>CADASTROPREV-RN010</td><td>Plano destino ≠ origem</td><td><strong>Dado</strong> transferência de plano, <strong>Quando</strong> plano destino = origem, <strong>Então</strong> bloqueia com MSG011</td><td><a href="#MSG011">MSG011</a></td><td>FEventoTransfPlano</td></tr>
+<tr><td>RN011</td><td>CADASTROPREV-RN011</td><td>Patrocinadora destino obrigatória</td><td><strong>Dado</strong> transferência, <strong>Quando</strong> patrocinadora destino vazia, <strong>Então</strong> bloqueia com MSG012</td><td><a href="#MSG012">MSG012</a></td><td>FEventoTransfPlano, fTransfPatroBatch</td></tr>
+<tr><td>RN012</td><td>CADASTROPREV-RN012</td><td>Situação na patrocinadora destino obrigatória</td><td><strong>Dado</strong> transferência, <strong>Quando</strong> situação não informada, <strong>Então</strong> bloqueia</td><td>—</td><td>FEventoTransfPlano, fTransfPatroBatch</td></tr>
+<tr><td>RN013</td><td>CADASTROPREV-RN013</td><td>Participante elegível na patrocinadora destino</td><td><strong>Dado</strong> transferência, <strong>Quando</strong> participante não elegível, <strong>Então</strong> bloqueia com MSG013</td><td><a href="#MSG013">MSG013</a></td><td>FEventoTransfPlano, fTransfPatroBatch</td></tr>
+<tr><td>RN014</td><td>CADASTROPREV-RN014</td><td>Novo número de inscrição obrigatório e válido</td><td><strong>Dado</strong> transferência, <strong>Quando</strong> inscrição vazia/inválida, <strong>Então</strong> bloqueia com MSG014</td><td><a href="#MSG014">MSG014</a></td><td>FEventoTransfPlano, fTransfPatroBatch</td></tr>
+</tbody></table></div>
+</section>
+
+<p><a class="back-btn" href="funcionalidades.html">← Voltar à lista de Casos de Uso (Processos Funcionais)</a></p>
+</main>
+<footer>
+<p>Blueprint AS-IS — PFC-73 — Processos Funcionais organizados em Casos de Uso — Módulo CADASTROPREV | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-24</p>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+<script src="../assets/js/mermaid-init.js"></script>
+</body>
+</html>

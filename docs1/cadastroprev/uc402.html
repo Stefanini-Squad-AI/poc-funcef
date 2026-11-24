@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UC402 — Eventos Cadastrais — Cadastro Previdenciário</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<header>
+  <div class="badge">Blueprint AS-IS — PFC-73 — Processos Funcionais</div>
+  <h1>UC402 — Eventos Cadastrais</h1>
+  <p>Caso de uso do módulo Cadastro Previdenciário: 4 jornada(s) funcional(is) e 5 regra(s) de negócio descritas dentro de cada jornada.</p>
+</header>
+<nav>
+  <a href="index.html">📋 Visão Geral</a>
+  <a href="arquitetura.html">🏗️ Arquitetura</a>
+  <a href="inventario-tecnico.html">📦 Inventário</a>
+  <a href="funcionalidades.html">⚙️ Processos Funcionais</a>
+  <a href="procedures-functions.html">🔧 Procedures</a>
+  <a href="dados.html">🗄️ Dados</a>
+  <a href="relatorios.html">📄 Relatórios</a>
+  <a href="integracoes.html">🔗 Integrações</a>
+  <a href="tratamento-erros.html">⚠️ Erros</a>
+  <a href="diagramas-fluxo.html">🔀 Fluxos</a>
+  <a href="lacunas.html">🔍 Lacunas</a>
+  <a href="controle-cobertura.html">📊 Cobertura</a>
+</nav>
+<main>
+
+<a class="back-btn" href="funcionalidades.html">← Voltar à lista de Casos de Uso (Processos Funcionais)</a>
+<div class="breadcrumb"><a href="index.html">Cadastro Previdenciário</a> › <a href="funcionalidades.html">Processos Funcionais</a> › UC402</div>
+
+<section><div class="section-title">1. Identificação</div>
+<div class="table-wrap"><table><tbody>
+<tr><th>Caso de Uso</th><td><strong>UC402 — Eventos Cadastrais</strong></td></tr>
+<tr><th>Módulo</th><td>CADASTROPREV — Cadastro Previdenciário</td></tr>
+<tr><th>Sistema</th><td>CM Contabilidade / FUNCEF (Delphi 5 / VCL / MIDAS / Oracle)</td></tr>
+<tr><th>Tipo</th><td>Sistema Desktop</td></tr>
+<tr><th>Ator</th><td>Usuário operacional (analista de cadastro previdenciário)</td></tr>
+<tr><th>Jornadas</th><td><a href="#PF-05">JF005 — Inscrição do Participante</a>, <a href="#PF-06">JF006 — Reinscrição</a>, <a href="#PF-07">JF007 — Manutenção Parcial</a>, <a href="#PF-08">JF008 — Retorno de Mantido para Ativo</a></td></tr>
+<tr><th>Regras de negócio</th><td>5 regra(s) CADASTROPREV-RN, descritas na íntegra dentro de cada jornada</td></tr>
+<tr><th>OS - Título</th><td>PFC-73 — Lista de UC (Processos Funcionais organizados em Casos de Uso)</td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">2. Descrição Resumida</div>
+<p>Registro de eventos cadastrais que controlam o ciclo de inscrição do participante no plano: inscrição inicial, reinscrição após cancelamento, manutenção parcial de dados e retorno de mantido para ativo. Este caso de uso reúne 4 jornada(s) funcional(is) do módulo Cadastro Previdenciário:</p>
+<ul>
+<li><a href="#PF-05"><strong>JF005 — Inscrição do Participante</strong></a>: inscrever o participante em um plano previdenciário, com validação de matrícula, nome e CPF.</li>
+<li><a href="#PF-06"><strong>JF006 — Reinscrição</strong></a>: reinscrever participante após cancelamento, validando datas e elegibilidade.</li>
+<li><a href="#PF-07"><strong>JF007 — Manutenção Parcial</strong></a>: atualizar dados cadastrais do participante sem alterar a situação do plano.</li>
+<li><a href="#PF-08"><strong>JF008 — Retorno de Mantido para Ativo</strong></a>: retornar participante da situação de mantido para ativo.</li>
+</ul>
+<p><strong>Necessidade de negócio:</strong> o ciclo de inscrição do participante no plano tem vários momentos: a inscrição inicial (quando o participante entra no plano), a reinscrição (quando ele volta após um cancelamento), a manutenção parcial (quando apenas dados cadastrais são atualizados) e o retorno de mantido para ativo (quando um participante que estava em situação de mantido volta à atividade). Cada um desses eventos tem regras próprias de validação de datas e elegibilidade. A reinscrição é a mais complexa: a data deve ser posterior ao cancelamento, pelo menos 1 dia após a inscrição original, e o participante deve satisfazer a regra de elegibilidade do plano.</p>
+<p><strong>Quem inicia:</strong> sempre o usuário (analista de cadastro), pelo menu <em>Eventos</em> da tela principal. O menu é montado dinamicamente a partir da tabela <code>EVENTOGERADOR</code> em <code>FPrincipal.pas:701</code>.</p>
+<p><strong>Resultado esperado:</strong> ao fim do registro, o evento fica gravado em <code>EVENTOSPREV</code> e em <code>HSTCONTEVENTOSPR</code>, a situação do participante em <code>PARTPREVPLAN</code> é atualizada conforme o tipo de evento, e a elegibilidade em <code>ELEGPATRO</code> é verificada quando aplicável.</p>
+</section>
+
+<section><div class="section-title">3. Pré-condições</div>
+<p><strong>Gerais do módulo:</strong></p>
+<ul>
+<li>O módulo CADASTROPREV deve estar compilado e disponível (entry point <code>CADASTROPREV/Fontes/CadastroPrev.dpr</code>).</li>
+<li>O banco Oracle (schema <code>CM.</code>) deve estar acessível.</li>
+<li>O participante deve estar selecionado na tela principal.</li>
+<li>Os parâmetros globais do sistema previdenciário devem estar carregados.</li>
+<li>O usuário deve ter permissão de acesso ao módulo e ao tipo de evento.</li>
+</ul>
+<p><strong>Por jornada:</strong></p>
+<ul>
+<li><a href="#PF-05">JF005</a>: participante cadastrado como elegível na patrocinadora; matrícula, nome e CPF informados.</li>
+<li><a href="#PF-06">JF006</a>: participante com cancelamento registrado; data de reinscrição posterior ao cancelamento.</li>
+<li><a href="#PF-07">JF007</a>: participante inscrito no plano; dados a atualizar informados.</li>
+<li><a href="#PF-08">JF008</a>: participante em situação de mantido; condições de retorno satisfeitas.</li>
+</ul>
+</section>
+
+<section><div class="section-title">4. Pós-condições</div>
+<ul>
+<li><a href="#PF-05">JF005</a>: evento de inscrição gravado em EVENTOSPREV/HSTCONTEVENTOSPR; participante inscrito no plano em PARTPREVPLAN.</li>
+<li><a href="#PF-06">JF006</a>: evento de reinscrição gravado; participante em situação de ativo; contribuições reiniciadas.</li>
+<li><a href="#PF-07">JF007</a>: evento de manutenção parcial gravado; dados cadastrais atualizados; situação do plano preservada.</li>
+<li><a href="#PF-08">JF008</a>: evento de retorno gravado; participante em situação de ativo.</li>
+</ul>
+</section>
+
+<section><div class="section-title">5. Jornadas Funcionais (JF005, JF006, JF007, JF008)</div>
+<p>Cada jornada traz objetivo, ator/gatilho, pré e pós-condições, sequência operacional, ações práticas, <strong>regras de negócio da jornada</strong> (texto completo de cada regra), tratamentos e mensagens.</p>
+<p><strong>Como as jornadas deste caso de uso se relacionam:</strong> JF005 (inscrição) é o ponto de entrada do participante no plano. JF006 (reinscrição) ocorre após um cancelamento e tem validações de data mais estritas. JF007 (manutenção parcial) não altera a situação do plano, apenas atualiza dados. JF008 (retorno de mantido) reativa um participante que estava em situação de mantido. Em cada passo, o rótulo "Usuário" ou "Sistema" indica quem executa a ação.</p>
+<div class="legend"><span><span class="ev ev-comprovado">COMPROVADO</span> — no código</span><span><span class="ev ev-inferido">INFERIDO</span> — plausível</span><span><span class="ev ev-pendente">PENDENTE</span> — validar</span></div>
+</section>
+
+<div class="pf-block" id="PF-05"><h4>JF005 (PF-05) — Inscrição do Participante</h4>
+<p><strong>Objetivo:</strong> inscrever o participante em um plano previdenciário, com validação de matrícula, nome e CPF.</p>
+<p><strong>Necessidade de negócio:</strong> a inscrição é o primeiro evento do participante no plano. O sistema valida os dados essenciais (matrícula, nome e CPF) e, em modo de lote, valida todos os participantes antes de gravar. O handler <code>IniciaEventoInscricao</code> é responsável por abrir o form e iniciar o processo.</p>
+<p><strong>Gatilho/Ator:</strong> usuário aciona o menu <em>Eventos › Inscrição</em> na tela principal.</p>
+<p><strong>Pré-condições:</strong> participante cadastrado como elegível na patrocinadora; matrícula, nome e CPF informados.</p>
+<p><strong>Pós-condições:</strong> evento de inscrição gravado em EVENTOSPREV/HSTCONTEVENTOSPR; participante inscrito no plano em PARTPREVPLAN.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li><strong>Usuário:</strong> seleciona o participante na tela principal e aciona o menu <em>Eventos › Inscrição</em>. O handler <code>IniciaEventoInscricao</code> abre o form de inscrição.</li>
+<li><strong>Sistema:</strong> valida se o participante foi selecionado. Se nenhum participante estiver selecionado, exibe <a href="#MSG001">MSG001</a> e bloqueia (<a href="#TRT001">TRT001</a>).</li>
+<li><strong>Usuário:</strong> informa os dados da inscrição (plano, patrocinadora, data de inscrição, matrícula, nome, CPF) e clica em "Confirmar".</li>
+<li><strong>Sistema:</strong> valida os dados essenciais: matrícula, nome e CPF. Em modo de lote, valida todos os participantes antes de gravar <a href="#CADASTROPREV-RN005">[RN005]</a>. Se qualquer dado essencial estiver ausente, exibe mensagem e bloqueia.</li>
+<li><strong>Sistema:</strong> verifica se o participante já está inscrito no plano. Se já estiver inscrito, exibe <a href="#MSG009">MSG009</a> e bloqueia (<a href="#TRT009">TRT009</a>).</li>
+<li><strong>Sistema:</strong> grava o evento em <code>EVENTOSPREV</code> com o tipo "Inscrição". Atualiza a situação do participante para "Ativo" em <code>PARTPREVPLAN</code>. Grava o histórico em <code>HSTCONTEVENTOSPR</code>. Registra a elegibilidade em <code>ELEGPATRO</code>.</li>
+<li><strong>Sistema:</strong> exibe mensagem de sucesso e fecha o form.</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Abrir form de inscrição</td><td>Iniciar processo de inscrição</td><td>Participante selecionado</td><td>IniciaEventoInscricao abre o form</td><td>Form aberto</td><td>—</td><td><a href="#MSG001">MSG001</a></td><td>Inscrição</td></tr>
+<tr><td>Validar dados essenciais</td><td>Verificar matrícula, nome, CPF</td><td>Dados do participante</td><td>Valida campos obrigatórios</td><td>Dados válidos ou bloqueio</td><td><a href="#CADASTROPREV-RN005">RN005</a></td><td>—</td><td>Inscrição</td></tr>
+<tr><td>Verificar inscrição existente</td><td>Impedir duplicidade</td><td>ID participante + plano</td><td>Consulta PARTPREVPLAN</td><td>Bloqueio se já inscrito</td><td>—</td><td><a href="#MSG009">MSG009</a></td><td>Inscrição</td></tr>
+<tr><td>Gravar inscrição</td><td>Persistir evento</td><td>Dados validados</td><td>Insere em EVENTOSPREV e HSTCONTEVENTOSPR</td><td>Evento gravado</td><td>—</td><td>—</td><td>Inscrição</td></tr>
+</tbody></table></div>
+<div class="jf-rules">
+<p><strong>Regras de negócio da jornada:</strong> 1 regra(s) — texto completo abaixo.</p>
+<div class="rule-block" id="CADASTROPREV-RN005"><div class="rule-id">RN005 (CADASTROPREV-RN005) — Inscrição em lote valida matrícula, nome e CPF</div>
+<p><strong>Descrição:</strong> ao inscrever participantes em lote, o sistema valida matrícula, nome e CPF de cada participante antes de gravar.</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>PARTPREVPLAN.NRMATRICULA</code> — [obrigatório] — número de matrícula do participante</li>
+<li><code>PESSOA.NMPESSOA</code> — [obrigatório] — nome do participante</li>
+<li><code>PESSOAFISICA.NRCPF</code> — [obrigatório] — CPF do participante</li>
+</ul>
+<p><strong>Categoria:</strong> validação de entrada · <strong>Gatilho:</strong> confirmação de inscrição em lote</p>
+<p><strong>Condição:</strong> se matrícula, nome ou CPF estiverem vazios → bloqueia o participante no lote.</p>
+<p><strong>Rotina:</strong> validação inline no form de inscrição em lote. <strong>Origem:</strong> <code>CADASTROPREV/Fontes/FInscricaoParticipanteLote.pas</code>. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> · <strong>Severidade:</strong> alta (bloqueante) · <strong>Jornada:</strong> <a href="#PF-05">JF005</a> · <strong>Relacionadas:</strong> —</p>
+</div>
+</div>
+
+<p><strong>Dependências:</strong> atualiza PARTPREVPLAN e ELEGPATRO. Evidência: <code>CADASTROPREV/Fontes/FInscricaoParticipanteLote.pas</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<div class="mermaid">graph LR
+  n0["IniciaEventoInscricao"] --> n1["ValidaParticipante"] --> n2["ValidaDados(:matricula/nome/CPF)"] --> n3["VerificaInscricaoExistente"] --> n4["GravaEvento"] --> n5["EVENTOSPREV/HSTCONTEVENTOSPR"] --> n6["AtualizaPartPrevPlan"] --> n7["RegistraElegibilidade"] --> n8["ELEGPATRO"]</div>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span></p>
+<ul>
+<li>Confirmar se a inscrição em lote tem tela própria ou usa o form individual em modo iteração.</li>
+<li>Validar se a inscrição dispara cálculo de reserva inicial ou se isso é feito em processo separado.</li>
+</ul>
+</div>
+</div>
+
+<div class="pf-block" id="PF-06"><h4>JF006 (PF-06) — Reinscrição</h4>
+<p><strong>Objetivo:</strong> reinscrever participante após cancelamento, validando datas e elegibilidade.</p>
+<p><strong>Necessidade de negócio:</strong> a reinscrição ocorre quando um participante cancelado volta ao plano. O sistema valida que a data da reinscrição é posterior à data do cancelamento, que é pelo menos 1 dia após a inscrição original, que o último mês de contribuição não é posterior à reinscrição, e que o participante satisfaz a regra de elegibilidade do plano. O form <code>FEventoReinscricao.pas</code> (1.751 linhas) trata todo o fluxo.</p>
+<p><strong>Gatilho/Ator:</strong> usuário aciona o menu <em>Eventos › Reinscrição</em> na tela principal.</p>
+<p><strong>Pré-condições:</strong> participante com cancelamento registrado; data de reinscrição posterior ao cancelamento.</p>
+<p><strong>Pós-condições:</strong> evento de reinscrição gravado; participante em situação de ativo; contribuições reiniciadas.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li><strong>Usuário:</strong> seleciona o participante na tela principal e aciona o menu <em>Eventos › Reinscrição</em>. O sistema abre o form <code>FEventoReinscricao.dfm</code> com os dados do participante (<code>FEventoReinscricao.pas:266</code>).</li>
+<li><strong>Sistema:</strong> valida se o participante foi selecionado. Se nenhum participante estiver selecionado, exibe <a href="#MSG001">MSG001</a> e bloqueia (<a href="#TRT001">TRT001</a>).</li>
+<li><strong>Usuário:</strong> informa a data da reinscrição e clica em "Confirmar".</li>
+<li><strong>Sistema:</strong> valida se a data foi informada. Se vazia, exibe <a href="#MSG007">MSG007</a> e bloqueia (<a href="#TRT007">TRT007</a>).</li>
+<li><strong>Sistema:</strong> valida se a data da reinscrição é posterior à data do cancelamento <a href="#CADASTROPREV-RN006">[RN006]</a>. Se não for, exibe <a href="#MSG008">MSG008</a> e bloqueia (<a href="#TRT008">TRT008</a>).</li>
+<li><strong>Sistema:</strong> valida se a data da reinscrição é pelo menos 1 dia após a data da inscrição original <a href="#CADASTROPREV-RN007">[RN007]</a>. Se não for, bloqueia.</li>
+<li><strong>Sistema:</strong> valida se o último mês de contribuição não é posterior à data da reinscrição <a href="#CADASTROPREV-RN008">[RN008]</a>. Se for, bloqueia.</li>
+<li><strong>Sistema:</strong> verifica se o participante já está inscrito no plano. Se já estiver, exibe <a href="#MSG009">MSG009</a> e bloqueia (<a href="#TRT009">TRT009</a>).</li>
+<li><strong>Sistema:</strong> executa a regra de elegibilidade para reinscrição no plano <a href="#CADASTROPREV-RN009">[RN009]</a>. Se a elegibilidade não for satisfeita, exibe <a href="#MSG010">MSG010</a> e bloqueia (<a href="#TRT010">TRT010</a>).</li>
+<li><strong>Sistema:</strong> grava o evento em <code>EVENTOSPREV</code> com o tipo "Reinscrição". Atualiza a situação do participante para "Ativo" em <code>PARTPREVPLAN</code>. Grava o histórico em <code>HSTCONTEVENTOSPR</code>. Reinicia as contribuições em <code>CONTRIBPREVPARTP</code>. Exibe mensagem de sucesso e fecha o form.</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Abrir form de reinscrição</td><td>Carregar dados do participante</td><td>Participante selecionado</td><td>Abre FEventoReinscricao</td><td>Form preenchido</td><td>—</td><td><a href="#MSG001">MSG001</a></td><td><code>FEventoReinscricao.dfm</code></td></tr>
+<tr><td>Validar data informada</td><td>Verificar data da reinscrição</td><td>Data da reinscrição</td><td>Valida se não é vazia</td><td>Data informada ou bloqueio</td><td>—</td><td><a href="#MSG007">MSG007</a></td><td><code>FEventoReinscricao.dfm</code></td></tr>
+<tr><td>Validar posterioridade ao cancelamento</td><td>Reinscrição > cancelamento</td><td>Data reinscrição, data cancelamento</td><td>Compara datas</td><td>Posterior ou bloqueio</td><td><a href="#CADASTROPREV-RN006">RN006</a></td><td><a href="#MSG008">MSG008</a></td><td><code>FEventoReinscricao.dfm</code></td></tr>
+<tr><td>Validar intervalo mínimo</td><td>Reinscrição ≥ inscrição + 1 dia</td><td>Data reinscrição, data inscrição</td><td>Compara datas</td><td>Intervalo válido ou bloqueio</td><td><a href="#CADASTROPREV-RN007">RN007</a></td><td>—</td><td><code>FEventoReinscricao.dfm</code></td></tr>
+<tr><td>Validar último mês contribuição</td><td>Últ. mês contrib ≤ reinscrição</td><td>Últ. mês contrib, data reinscrição</td><td>Compara datas</td><td>Válido ou bloqueio</td><td><a href="#CADASTROPREV-RN008">RN008</a></td><td>—</td><td><code>FEventoReinscricao.dfm</code></td></tr>
+<tr><td>Verificar inscrição existente</td><td>Impedir duplicidade</td><td>ID participante + plano</td><td>Consulta PARTPREVPLAN</td><td>Bloqueio se já inscrito</td><td>—</td><td><a href="#MSG009">MSG009</a></td><td><code>FEventoReinscricao.dfm</code></td></tr>
+<tr><td>Verificar elegibilidade</td><td>Aprovar reinscrição no plano</td><td>ID participante, plano</td><td>Executa regra de elegibilidade</td><td>Elegível ou bloqueio</td><td><a href="#CADASTROPREV-RN009">RN009</a></td><td><a href="#MSG010">MSG010</a></td><td><code>FEventoReinscricao.dfm</code></td></tr>
+<tr><td>Gravar reinscrição</td><td>Persistir evento</td><td>Dados validados</td><td>Insere em EVENTOSPREV e HSTCONTEVENTOSPR</td><td>Evento gravado</td><td>—</td><td>—</td><td><code>FEventoReinscricao.dfm</code></td></tr>
+</tbody></table></div>
+<div class="jf-rules">
+<p><strong>Regras de negócio da jornada:</strong> 4 regra(s) — texto completo abaixo.</p>
+<div class="rule-block" id="CADASTROPREV-RN006"><div class="rule-id">RN006 (CADASTROPREV-RN006) — Reinscrição deve ser posterior ao cancelamento</div>
+<p><strong>Descrição:</strong> a data da reinscrição deve ser posterior à data do cancelamento do participante no plano.</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>dtpDataReinscricao</code> — [obrigatório] — data da reinscrição informada</li>
+<li><code>EVENTOSPREV.DTEVENTO</code> (cancelamento) — [obrigatório] — data do cancelamento anterior</li>
+</ul>
+<p><strong>Categoria:</strong> validação de negócio · <strong>Gatilho:</strong> confirmação da reinscrição</p>
+<p><strong>Condição:</strong> se <code>dtpDataReinscricao <= dataCancelamento</code> → bloqueia.</p>
+<p><strong>Tratamento (TRT):</strong> <a href="#TRT008">TRT008</a> → <a href="#MSG008">MSG008</a> → Bloqueia execução</p>
+<p><strong>Rotina:</strong> validação inline no form. <strong>Origem:</strong> <code>CADASTROPREV/Fontes/FEventoReinscricao.pas</code>. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> · <strong>Severidade:</strong> alta (bloqueante) · <strong>Jornada:</strong> <a href="#PF-06">JF006</a> · <strong>Relacionadas:</strong> <a href="#CADASTROPREV-RN007">RN007</a></p>
+</div>
+<div class="rule-block" id="CADASTROPREV-RN007"><div class="rule-id">RN007 (CADASTROPREV-RN007) — Reinscrição deve ser pelo menos 1 dia após a inscrição</div>
+<p><strong>Descrição:</strong> a data da reinscrição deve ser pelo menos 1 dia posterior à data da inscrição original.</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>dtpDataReinscricao</code> — [obrigatório] — data da reinscrição</li>
+<li><code>EVENTOSPREV.DTEVENTO</code> (inscrição) — [obrigatório] — data da inscrição original</li>
+</ul>
+<p><strong>Condição:</strong> se <code>dtpDataReinscricao <= dataInscricao</code> → bloqueia.</p>
+<p><strong>Rotina:</strong> validação inline no form. <strong>Origem:</strong> <code>CADASTROPREV/Fontes/FEventoReinscricao.pas</code>. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> · <strong>Severidade:</strong> alta (bloqueante) · <strong>Jornada:</strong> <a href="#PF-06">JF006</a> · <strong>Relacionadas:</strong> <a href="#CADASTROPREV-RN006">RN006</a></p>
+</div>
+<div class="rule-block" id="CADASTROPREV-RN008"><div class="rule-id">RN008 (CADASTROPREV-RN008) — Último mês de contribuição não pode ser posterior à reinscrição</div>
+<p><strong>Descrição:</strong> o último mês de contribuição do participante não pode ser posterior à data da reinscrição.</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>CONTRIBPREVPARTP.MESCOMPET</code> — [obrigatório] — último mês de contribuição</li>
+<li><code>dtpDataReinscricao</code> — [obrigatório] — data da reinscrição</li>
+</ul>
+<p><strong>Condição:</strong> se <code>ultimoMesContribuicao > dtpDataReinscricao</code> → bloqueia.</p>
+<p><strong>Rotina:</strong> validação inline no form. <strong>Origem:</strong> <code>CADASTROPREV/Fontes/FEventoReinscricao.pas</code>. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> · <strong>Severidade:</strong> alta (bloqueante) · <strong>Jornada:</strong> <a href="#PF-06">JF006</a> · <strong>Relacionadas:</strong> —</p>
+</div>
+<div class="rule-block" id="CADASTROPREV-RN009"><div class="rule-id">RN009 (CADASTROPREV-RN009) — Elegibilidade para reinscrição no plano</div>
+<p><strong>Descrição:</strong> o participante deve satisfazer a regra de elegibilidade do plano para ser reinscrito.</p>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>ELEGPATRO</code> — [obrigatório] — elegibilidade do participante na patrocinadora</li>
+<li><code>PLANPREV</code> — [obrigatório] — regras de elegibilidade do plano</li>
+<li><code>URegra.pas</code> — [obrigatório] — motor de regras</li>
+</ul>
+<p><strong>Condição:</strong> se a regra de elegibilidade retornar falso → bloqueia.</p>
+<p><strong>Tratamento (TRT):</strong> <a href="#TRT010">TRT010</a> → <a href="#MSG010">MSG010</a> → Bloqueia execução</p>
+<p><strong>Rotina:</strong> <code>URegra.ExecutaRegraElegibilidade</code>. <strong>Origem:</strong> <code>CADASTROPREV/Fontes/FEventoReinscricao.pas</code>. <strong>Evidência:</strong> <span class="ev ev-comprovado">COMPROVADO</span> · <strong>Severidade:</strong> alta (bloqueante) · <strong>Jornada:</strong> <a href="#PF-06">JF006</a> · <strong>Relacionadas:</strong> —</p>
+</div>
+</div>
+
+<p><strong>Dependências:</strong> consulta ELEGPATRO e CONTRIBPREVPARTP; executa URegra.pas. Evidência: <code>CADASTROPREV/Fontes/FEventoReinscricao.pas:266-1751</code> · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<div class="mermaid">graph LR
+  n0["FEventoReinscricao"] --> n1["ValidaParticipante"] --> n2["ValidaDataInformada"] --> n3["ValidaPosterioridadeCancelamento(:RN006)"] --> n4["ValidaIntervaloMinimo(:RN007)"] --> n5["ValidaUltimoMesContrib(:RN008)"] --> n6["VerificaInscricaoExistente"] --> n7["ExecutaElegibilidade(:RN009)"] --> n8["GravaEvento"] --> n9["EVENTOSPREV/HSTCONTEVENTOSPR"] --> n10["ReiniciaContribuicoes"]</div>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span></p>
+<ul>
+<li>Confirmar se a reinscrição recalcula reservas ou se as reservas anteriores são preservadas.</li>
+<li>O form <code>FEventoReinscricao.pas</code> tem 1.751 linhas — há lógica adicional que pode gerar regras não catalogadas.</li>
+<li>Validar se a reinscrição em lote é suportada ou apenas individual.</li>
+</ul>
+</div>
+</div>
+
+<div class="pf-block" id="PF-07"><h4>JF007 (PF-07) — Manutenção Parcial</h4>
+<p><strong>Objetivo:</strong> atualizar dados cadastrais do participante sem alterar a situação do plano.</p>
+<p><strong>Necessidade de negócio:</strong> a manutenção parcial permite corrigir ou atualizar dados do participante (endereço, dados bancários, dados funcionais) sem registrar um evento que altere a situação no plano. O form <code>FEventoManutParcial.pas</code> (1.554 linhas) trata o fluxo.</p>
+<p><strong>Gatilho/Ator:</strong> usuário aciona o menu <em>Eventos › Manutenção Parcial</em> na tela principal.</p>
+<p><strong>Pré-condições:</strong> participante inscrito no plano; dados a atualizar informados.</p>
+<p><strong>Pós-condições:</strong> evento de manutenção parcial gravado; dados cadastrais atualizados; situação do plano preservada.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li><strong>Usuário:</strong> seleciona o participante na tela principal e aciona o menu <em>Eventos › Manutenção Parcial</em>. O sistema abre o form <code>FEventoManutParcial.dfm</code> com os dados do participante.</li>
+<li><strong>Sistema:</strong> valida se o participante foi selecionado. Se nenhum participante estiver selecionado, exibe <a href="#MSG001">MSG001</a> e bloqueia (<a href="#TRT001">TRT001</a>).</li>
+<li><strong>Usuário:</strong> atualiza os dados cadastrais desejados (endereço, conta bancária, dados funcionais, etc.) e clica em "Confirmar".</li>
+<li><strong>Sistema:</strong> valida os dados alterados conforme as regras de cada campo (CPF válido, conta bancária válida, etc.). Se qualquer validação falhar, exibe mensagem e bloqueia.</li>
+<li><strong>Sistema:</strong> grava o evento em <code>EVENTOSPREV</code> com o tipo "Manutenção Parcial". Atualiza os dados cadastrais nas tabelas correspondentes. Grava o histórico em <code>HSTCONTEVENTOSPR</code>. A situação do participante em <code>PARTPREVPLAN</code> é preservada.</li>
+<li><strong>Sistema:</strong> exibe mensagem de sucesso e fecha o form.</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Abrir form de manutenção</td><td>Carregar dados do participante</td><td>Participante selecionado</td><td>Abre FEventoManutParcial</td><td>Form preenchido</td><td>—</td><td><a href="#MSG001">MSG001</a></td><td><code>FEventoManutParcial.dfm</code></td></tr>
+<tr><td>Validar dados alterados</td><td>Verificar campos modificados</td><td>Dados atualizados</td><td>Valida conforme regras de cada campo</td><td>Dados válidos ou bloqueio</td><td>—</td><td>—</td><td><code>FEventoManutParcial.dfm</code></td></tr>
+<tr><td>Gravar manutenção</td><td>Persistir alterações</td><td>Dados validados</td><td>Atualiza tabelas cadastrais e insere em EVENTOSPREV</td><td>Dados atualizados</td><td>—</td><td>—</td><td><code>FEventoManutParcial.dfm</code></td></tr>
+</tbody></table></div>
+<div class="jf-rules">
+<p><strong>Regras de negócio da jornada:</strong> 0 regra(s) específica(s) — a manutenção parcial aplica validações de campo (CPF, conta bancária) mas não tem regras de negócio catalogadas próprias.</p>
+</div>
+
+<p><strong>Dependências:</strong> atualiza tabelas cadastrais (PESSOA, PESSOAFISICA, PARTPREVPLAN). Evidência: <code>CADASTROPREV/Fontes/FEventoManutParcial.pas</code> (1.554 lin) · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<div class="mermaid">graph LR
+  n0["FEventoManutParcial"] --> n1["ValidaParticipante"] --> n2["CarregaDados"] --> n3["ValidaDadosAlterados"] --> n4["GravaEvento"] --> n5["EVENTOSPREV/HSTCONTEVENTOSPR"] --> n6["AtualizaDadosCadastrais"] --> n7["PARTPREVPLAN(preserva situao)"]</div>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span></p>
+<ul>
+<li>Confirmar quais tabelas são atualizadas pela manutenção parcial além de PARTPREVPLAN.</li>
+<li>O form tem 1.554 linhas — pode haver regras de negócio não catalogadas para tipos específicos de manutenção.</li>
+</ul>
+</div>
+</div>
+
+<div class="pf-block" id="PF-08"><h4>JF008 (PF-08) — Retorno de Mantido para Ativo</h4>
+<p><strong>Objetivo:</strong> retornar participante da situação de mantido para ativo.</p>
+<p><strong>Necessidade de negócio:</strong> quando um participante está em situação de mantido (por exemplo, após um afastamento prolongado ou suspensão), o sistema pode retorná-lo à situação de ativo. O form <code>FEventoRetornoMantidoParaAtivo.pas</code> (1.662 linhas) trata o fluxo.</p>
+<p><strong>Gatilho/Ator:</strong> usuário aciona o menu <em>Eventos › Retorno de Mantido</em> na tela principal.</p>
+<p><strong>Pré-condições:</strong> participante em situação de mantido; condições de retorno satisfeitas.</p>
+<p><strong>Pós-condições:</strong> evento de retorno gravado; participante em situação de ativo.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li><strong>Usuário:</strong> seleciona o participante na tela principal e aciona o menu <em>Eventos › Retorno de Mantido</em>. O sistema abre o form <code>FEventoRetornoMantidoParaAtivo.dfm</code> com os dados do participante.</li>
+<li><strong>Sistema:</strong> valida se o participante foi selecionado. Se nenhum participante estiver selecionado, exibe <a href="#MSG001">MSG001</a> e bloqueia (<a href="#TRT001">TRT001</a>).</li>
+<li><strong>Sistema:</strong> valida se o participante está em situação de mantido. Se não estiver, exibe mensagem e bloqueia.</li>
+<li><strong>Usuário:</strong> informa a data do retorno e clica em "Confirmar".</li>
+<li><strong>Sistema:</strong> valida se a data foi informada e se não é futura. Se inválida, exibe mensagem e bloqueia.</li>
+<li><strong>Sistema:</strong> grava o evento em <code>EVENTOSPREV</code> com o tipo "Retorno de Mantido". Atualiza a situação do participante para "Ativo" em <code>PARTPREVPLAN</code>. Grava o histórico em <code>HSTCONTEVENTOSPR</code>. Reinicia as contribuições em <code>CONTRIBPREVPARTP</code>.</li>
+<li><strong>Sistema:</strong> exibe mensagem de sucesso e fecha o form.</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Abrir form de retorno</td><td>Carregar dados do participante</td><td>Participante selecionado</td><td>Abre FEventoRetornoMantidoParaAtivo</td><td>Form preenchido</td><td>—</td><td><a href="#MSG001">MSG001</a></td><td><code>FEventoRetornoMantidoParaAtivo.dfm</code></td></tr>
+<tr><td>Validar situação mantido</td><td>Confirmar que está em mantido</td><td>Situação do participante</td><td>Consulta PARTPREVPLAN</td><td>Situação confirmada ou bloqueio</td><td>—</td><td>—</td><td><code>FEventoRetornoMantidoParaAtivo.dfm</code></td></tr>
+<tr><td>Validar data</td><td>Impedir data futura</td><td>Data do retorno</td><td>Compara com data atual</td><td>Data válida ou bloqueio</td><td>—</td><td>—</td><td><code>FEventoRetornoMantidoParaAtivo.dfm</code></td></tr>
+<tr><td>Gravar retorno</td><td>Persistir evento</td><td>Dados validados</td><td>Insere em EVENTOSPREV e atualiza PARTPREVPLAN</td><td>Participante ativo</td><td>—</td><td>—</td><td><code>FEventoRetornoMantidoParaAtivo.dfm</code></td></tr>
+</tbody></table></div>
+<div class="jf-rules">
+<p><strong>Regras de negócio da jornada:</strong> 0 regra(s) específica(s) — o retorno de mantido aplica validações de situação e data mas não tem regras de negócio catalogadas próprias.</p>
+</div>
+
+<p><strong>Dependências:</strong> atualiza PARTPREVPLAN e CONTRIBPREVPARTP. Evidência: <code>CADASTROPREV/Fontes/FEventoRetornoMantidoParaAtivo.pas</code> (1.662 lin) · <span class="ev ev-comprovado">COMPROVADO</span></p>
+<div class="mermaid">graph LR
+  n0["FEventoRetornoMantidoParaAtivo"] --> n1["ValidaParticipante"] --> n2["ValidaSituacaoMantido"] --> n3["ValidaData"] --> n4["GravaEvento"] --> n5["EVENTOSPREV/HSTCONTEVENTOSPR"] --> n6["AtualizaPartPrevPlan"] --> n7["ReiniciaContribuicoes"] --> n8["CONTRIBPREVPARTP"]</div>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span></p>
+<ul>
+<li>Confirmar se o retorno de mantido exige verificação de elegibilidade como a reinscrição.</li>
+<li>O form tem 1.662 linhas — pode haver regras de negócio não catalogadas.</li>
+</ul>
+</div>
+</div>
+
+<section id="TRT-section"><div class="section-title">6. Tratamentos (TRT)</div>
+<p>Tratamentos de erro derivados das validações bloqueantes e exceções das regras. Cada TRT possui Condição, Mensagem e Resultado.</p>
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Condição</th><th>Mensagem</th><th>Resultado</th><th>Regra</th><th>Jornada</th></tr></thead><tbody>
+<tr id="TRT001"><td><strong>TRT001</strong></td><td>Participante não selecionado</td><td><a href="#MSG001">MSG001</a></td><td>Bloqueia execução</td><td>—</td><td>JF005, JF006, JF007, JF008</td></tr>
+<tr id="TRT007"><td><strong>TRT007</strong></td><td>Data da reinscrição não informada</td><td><a href="#MSG007">MSG007</a></td><td>Bloqueia execução</td><td>—</td><td>JF006</td></tr>
+<tr id="TRT008"><td><strong>TRT008</strong></td><td>Reinscrição anterior ou igual ao cancelamento</td><td><a href="#MSG008">MSG008</a></td><td>Bloqueia execução</td><td><a href="#CADASTROPREV-RN006">RN006</a></td><td>JF006</td></tr>
+<tr id="TRT009"><td><strong>TRT009</strong></td><td>Participante já inscrito no plano</td><td><a href="#MSG009">MSG009</a></td><td>Bloqueia execução</td><td>—</td><td>JF005, JF006</td></tr>
+<tr id="TRT010"><td><strong>TRT010</strong></td><td>Elegibilidade para reinscrição não satisfeita</td><td><a href="#MSG010">MSG010</a></td><td>Bloqueia execução</td><td><a href="#CADASTROPREV-RN009">RN009</a></td><td>JF006</td></tr>
+</tbody></table></div>
+</section>
+
+<section id="MSG-section"><div class="section-title">7. Mensagens (MSG)</div>
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Texto da Mensagem</th><th>Jornadas relacionadas</th></tr></thead><tbody>
+<tr id="MSG001"><td><strong>MSG001</strong></td><td>"Primeiro selecione o Participante."</td><td>JF005, JF006, JF007, JF008</td></tr>
+<tr id="MSG007"><td><strong>MSG007</strong></td><td>"A Data da Reinscrição deve ser informada."</td><td>JF006</td></tr>
+<tr id="MSG008"><td><strong>MSG008</strong></td><td>"A data de reinscrição deve ser posterior à data do cancelamento."</td><td>JF006</td></tr>
+<tr id="MSG009"><td><strong>MSG009</strong></td><td>"Participante já inscrito nesse plano, realizar a reinscrição"</td><td>JF005, JF006</td></tr>
+<tr id="MSG010"><td><strong>MSG010</strong></td><td>"A Regra de Elegibilidade para Reinscrição no Plano Nº"</td><td>JF006</td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">8. Tabela/API/Programa</div>
+<div class="table-wrap"><table><thead><tr><th>Jornada</th><th>Tabelas (escrita)</th><th>Rotina-chave (file:linha)</th></tr></thead><tbody>
+<tr><td>JF005</td><td>EVENTOSPREV, PARTPREVPLAN, ELEGPATRO, HSTCONTEVENTOSPR</td><td><code>FInscricaoParticipanteLote.pas</code></td></tr>
+<tr><td>JF006</td><td>EVENTOSPREV, PARTPREVPLAN, ELEGPATRO, CONTRIBPREVPARTP, HSTCONTEVENTOSPR</td><td><code>FEventoReinscricao.pas:266</code> (1.751 lin)</td></tr>
+<tr><td>JF007</td><td>EVENTOSPREV, PARTPREVPLAN, HSTCONTEVENTOSPR</td><td><code>FEventoManutParcial.pas</code> (1.554 lin)</td></tr>
+<tr><td>JF008</td><td>EVENTOSPREV, PARTPREVPLAN, CONTRIBPREVPARTP, HSTCONTEVENTOSPR</td><td><code>FEventoRetornoMantidoParaAtivo.pas</code> (1.662 lin)</td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">9. Telas/Layouts</div>
+<div class="table-wrap"><table><thead><tr><th>Jornada</th><th>Form(s) (.dfm)</th></tr></thead><tbody>
+<tr><td>JF005</td><td><code>FInscricaoParticipanteLote.dfm</code></td></tr>
+<tr><td>JF006</td><td><code>FEventoReinscricao.dfm</code></td></tr>
+<tr><td>JF007</td><td><code>FEventoManutParcial.dfm</code></td></tr>
+<tr><td>JF008</td><td><code>FEventoRetornoMantidoParaAtivo.dfm</code></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">10. Visão Consolidada das Jornadas</div>
+<div class="table-wrap"><table><thead><tr><th>Jornada</th><th>ID</th><th>Título</th><th>Critério de aceitação (Dado/Quando/Então)</th><th>Mensagens</th><th>Telas</th></tr></thead><tbody>
+<tr><td>JF005</td><td>PF-05</td><td>Inscrição do Participante</td><td><strong>Dado</strong> participante elegível com dados válidos, <strong>Quando</strong> usuário registra inscrição, <strong>Então</strong> participante é inscrito no plano</td><td><a href="#MSG001">MSG001</a>, <a href="#MSG009">MSG009</a></td><td>FInscricaoParticipanteLote</td></tr>
+<tr><td>JF006</td><td>PF-06</td><td>Reinscrição</td><td><strong>Dado</strong> participante cancelado com datas válidas e elegibilidade, <strong>Quando</strong> usuário registra reinscrição, <strong>Então</strong> participante é reinscrito e contribuições reiniciadas</td><td><a href="#MSG007">MSG007</a>–<a href="#MSG010">MSG010</a></td><td>FEventoReinscricao</td></tr>
+<tr><td>JF007</td><td>PF-07</td><td>Manutenção Parcial</td><td><strong>Dado</strong> participante inscrito, <strong>Quando</strong> usuário atualiza dados, <strong>Então</strong> dados são atualizados e situação preservada</td><td><a href="#MSG001">MSG001</a></td><td>FEventoManutParcial</td></tr>
+<tr><td>JF008</td><td>PF-08</td><td>Retorno de Mantido para Ativo</td><td><strong>Dado</strong> participante em situação de mantido, <strong>Quando</strong> usuário registra retorno, <strong>Então</strong> participante passa a ativo</td><td><a href="#MSG001">MSG001</a></td><td>FEventoRetornoMantidoParaAtivo</td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">11. Critérios de Aceitação por Regra</div>
+<div class="table-wrap"><table><thead><tr><th>Regra</th><th>ID</th><th>Título</th><th>Critério de aceitação (Dado/Quando/Então)</th><th>Mensagens</th><th>Telas</th></tr></thead><tbody>
+<tr><td>RN005</td><td>CADASTROPREV-RN005</td><td>Inscrição em lote valida matrícula, nome e CPF</td><td><strong>Dado</strong> inscrição em lote, <strong>Quando</strong> participante sem matrícula/nome/CPF, <strong>Então</strong> bloqueia o participante no lote</td><td>—</td><td>FInscricaoParticipanteLote</td></tr>
+<tr><td>RN006</td><td>CADASTROPREV-RN006</td><td>Reinscrição posterior ao cancelamento</td><td><strong>Dado</strong> reinscrição, <strong>Quando</strong> data reinscrição ≤ data cancelamento, <strong>Então</strong> bloqueia com MSG008</td><td><a href="#MSG008">MSG008</a></td><td>FEventoReinscricao</td></tr>
+<tr><td>RN007</td><td>CADASTROPREV-RN007</td><td>Reinscrição ≥ inscrição + 1 dia</td><td><strong>Dado</strong> reinscrição, <strong>Quando</strong> data reinscrição ≤ data inscrição, <strong>Então</strong> bloqueia</td><td>—</td><td>FEventoReinscricao</td></tr>
+<tr><td>RN008</td><td>CADASTROPREV-RN008</td><td>Últ. mês contrib ≤ reinscrição</td><td><strong>Dado</strong> reinscrição, <strong>Quando</strong> último mês contrib > data reinscrição, <strong>Então</strong> bloqueia</td><td>—</td><td>FEventoReinscricao</td></tr>
+<tr><td>RN009</td><td>CADASTROPREV-RN009</td><td>Elegibilidade para reinscrição</td><td><strong>Dado</strong> reinscrição, <strong>Quando</strong> elegibilidade não satisfeita, <strong>Então</strong> bloqueia com MSG010</td><td><a href="#MSG010">MSG010</a></td><td>FEventoReinscricao</td></tr>
+</tbody></table></div>
+</section>
+
+<p><a class="back-btn" href="funcionalidades.html">← Voltar à lista de Casos de Uso (Processos Funcionais)</a></p>
+</main>
+<footer>
+<p>Blueprint AS-IS — PFC-73 — Processos Funcionais organizados em Casos de Uso — Módulo CADASTROPREV | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-24</p>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+<script src="../assets/js/mermaid-init.js"></script>
+</body>
+</html>
