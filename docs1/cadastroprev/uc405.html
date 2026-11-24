@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cadastro Previdenciário — UC405 – Gerir Eventos Registrados — Blueprint AS-IS</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<header>
+  <div class="badge">Blueprint AS-IS — PFC-73 — Processos Funcionais</div>
+  <h1>UC405 – Gerir Eventos Registrados</h1>
+  <p>Caso de uso do módulo Cadastro Previdenciário: 3 jornada(s) funcional(is) e 18 regra(s) de negócio descritas dentro de cada jornada.</p>
+</header>
+<nav>
+  <a href="index.html">📋 Visão Geral</a>
+  <a href="arquitetura.html">🏗️ Arquitetura</a>
+  <a href="inventario-tecnico.html">📦 Inventário</a>
+  <a href="funcionalidades.html">⚙️ Processos Funcionais</a>
+  <a href="procedures-functions.html">🔧 Procedures</a>
+  <a href="dados.html">🗄️ Dados</a>
+  <a href="relatorios.html">📄 Relatórios</a>
+  <a href="integracoes.html">🔗 Integrações</a>
+  <a href="tratamento-erros.html">⚠️ Erros</a>
+  <a href="diagramas-fluxo.html">🔀 Fluxos</a>
+  <a href="lacunas.html">🔍 Lacunas</a>
+  <a href="controle-cobertura.html">📊 Cobertura</a>
+</nav>
+<main>
+
+<a class="back-btn" href="funcionalidades.html">← Voltar à lista de Casos de Uso (Processos Funcionais)</a>
+<div class="breadcrumb"><a href="index.html">Cadastro Previdenciário</a> › <a href="funcionalidades.html">Processos Funcionais</a> › UC405</div>
+
+<section><div class="section-title">1. Identificação</div>
+<div class="table-wrap"><table><tbody>
+<tr><th>Caso de Uso</th><td><strong>UC405 – Gerir Eventos Registrados</strong></td></tr>
+<tr><th>Módulo</th><td>CADASTROPREV — Cadastro Previdenciário</td></tr>
+<tr><th>Sistema</th><td>CM Contabilidade / FUNCEF (Delphi 5 / VCL / MIDAS / Oracle)</td></tr>
+<tr><th>Tipo</th><td>Sistema Desktop</td></tr>
+<tr><th>Ator</th><td>Usuário operacional da área de cadastro e de benefícios (analistas que corrigem, cancelam ou revertem eventos e que requerem benefícios do INSS em lote)</td></tr>
+<tr><th>Jornadas</th><td><a href="#PF-16">JF016 — Cancelar evento registrado e retorno de evento</a>, <a href="#PF-17">JF017 — Alterar evento</a>, <a href="#PF-18">JF018 — Requerimento de benefícios do INSS em lote</a></td></tr>
+<tr><th>Regras de negócio</th><td>18 regra(s) CADPREV-RN (RN101–RN118), descritas na íntegra dentro de cada jornada; regras transversais em <a href="uc401.html">UC401</a></td></tr>
+<tr><th>OS - Título</th><td>PFC-73 — Blueprint Cadastro Previdenciário</td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">2. Descrição Resumida</div>
+<p>Manutenção dos eventos previdenciários já registrados (EVENTOSPREV): cancelamento do último evento, retorno de eventos temporários, alteração direta dos dados do evento e o requerimento em lote dos benefícios de aposentados e pensionistas do INSS (que também gera eventos). Este caso de uso reúne 3 jornada(s) funcional(is) do módulo Cadastro Previdenciário:</p>
+<ul>
+<li><a href="#PF-16"><strong>JF016 — Cancelar evento registrado e retorno de evento</strong></a>: desfazer o último evento do participante (tela externa FCancelaEvento) ou registrar o retorno de um evento temporário/afastamento/cancelamento (tela externa FDesfazerEvento).</li>
+<li><a href="#PF-17"><strong>JF017 — Alterar evento</strong></a>: corrigir os campos de um evento registrado e ainda não efetivado (tela local FAlteraEvento).</li>
+<li><a href="#PF-18"><strong>JF018 — Requerimento de benefícios do INSS em lote</strong></a>: requerer (ou desfazer o requerimento) em lote dos benefícios de participantes e pensionistas habilitados no INSS (tela externa FCadRequerBenefInssLote).</li>
+</ul>
+<p><strong>Necessidade de negócio:</strong> eventos são registrados com erro (data, situação, plano) ou precisam ser revertidos (evento lançado indevidamente, fim de um afastamento ou de uma situação temporária). Corrigir ou cancelar o evento deve também reverter seus efeitos (situações, contribuições, processos de benefício), respeitando o que já foi pago. Além disso, a entidade precisa abrir, de uma vez, os requerimentos de benefício de todos os habilitados no INSS.</p>
+<p><strong>Quem inicia:</strong> o usuário, pelo menu <em>Eventos</em>: “Cancelar Evento Registrado”, “Requerimento de Benefícios do INSS em Lote” e “Alterar Evento” (<code>FPrincipal.dfm:8573-8585</code>), e pelos itens “Retorno” criados dinamicamente em alguns submenus de eventos (<code>FPrincipal.pas:834-846, 1120-1132, 1169-1181, 1353-1366, 1417-1430</code>).</p>
+<p><strong>Resultado esperado:</strong> evento cancelado com situação anterior restaurada; retorno registrado com data de volta e novo evento; evento corrigido; requerimentos de benefício INSS gravados (evento, processo, beneficiário e benefício) ou desfeitos.</p>
+<p><strong>Termos, siglas e componentes citados nesta página</strong> — explicados na primeira vez em que aparecem; a coluna “Fonte” indica onde a explicação foi conferida no repositório:</p>
+<div class="table-wrap"><table><thead><tr><th>Termo</th><th>O que significa</th><th>Fonte</th></tr></thead><tbody>
+<tr><td><strong>EVENTOSPREV</strong></td><td>Registro de cada evento previdenciário do participante: data do registro, data do evento, situações atual e nova (na patrocinadora, na fundação e no plano), evento gerador, efetivação (FLGEFETIVADO/DATAEFETIVADO), data de volta (DATAVOLTA) e FLGMIGRADO (1 = evento importado, não gerado pelo sistema).</td><td><code>FAlteraEvento.dfm:1461-1498</code></td></tr>
+<tr><td><strong>Evento efetivado</strong></td><td>Evento cujas mudanças de situação já foram aplicadas (FLGEFETIVADO = 1). Evento registrado e não efetivado tem FLGEFETIVADO = 0.</td><td><code>FAlteraEvento.pas:234-268, 365-376</code></td></tr>
+<tr><td><strong>FLGCANCELAMENTO / FLGACEITARETORNO</strong></td><td>Indicadores do EVENTOGERADOR: se o evento pode ser cancelado pelo sistema e se o evento CI aceita “Retorno”.</td><td><code>CM/CMADMPREV/Fontes/FCancelaEvento.pas:925</code>; <code>FPrincipal.pas:1418</code></td></tr>
+<tr><td><strong>CMAdmPrev</strong></td><td>Componente externo do framework CM (<code>CM/CMADMPREV/Fontes</code>) que fornece as telas FCancelaEvento, FDesfazerEvento e FCadRequerBenefInssLote usadas aqui. Seu comportamento é descrito em alto nível; as regras correspondentes são marcadas como dependência externa.</td><td><code>FPrincipal.pas:2147-2152, 1778-1805, 2666-2671</code></td></tr>
+<tr><td><strong>Eventos 129 e 130</strong></td><td>Eventos geradores usados pelo requerimento INSS em lote: 129 para o titular (aposentado) e 130 para pensionista. Também são o filtro das telas de cancelamento/alteração quando chamadas pelo módulo 454 (Benefício Previdenciário).</td><td><code>CM/CMADMPREV/Fontes/FCadRequerBenefInssLote.pas:1328-1339</code>; <code>FAlteraEvento.pas:426-427</code></td></tr>
+<tr><td><strong>BENEFHABILITA / DETCONCINSS</strong></td><td>Habilitação de benefício INSS do participante (dados do NB, DIB, RMI, flags de requerimento e concessão) e detalhe da conciliação INSS.</td><td><code>CM/CMADMPREV/Fontes/FCadRequerBenefInssLote.pas:497-812, 2442-2458</code></td></tr>
+<tr><td><strong>LOGREQUERLOTE</strong></td><td>Log temporário das críticas do requerimento em lote, exibido na aba de log e no relatório.</td><td><code>CM/CMADMPREV/Fontes/FCadRequerBenefInssLote.pas:2887-2914, 3248-3256</code></td></tr>
+<tr><td><strong>DIB / DIP / RMI / NB</strong></td><td>Data de início do benefício, data de início do pagamento, renda mensal inicial e número do benefício no INSS (rótulos da tela de requerimento).</td><td><code>CM/CMADMPREV/Fontes/FCadRequerBenefInssLote.dfm:150-213</code></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">3. Pré-condições</div>
+<p><strong>Gerais do módulo:</strong></p>
+<ul>
+<li>Módulo disponível e usuário com acesso ao menu Eventos.</li>
+<li>Telas do CMAdmPrev compiladas no executável (FCancelaEvento, FDesfazerEvento, FCadRequerBenefInssLote não estão em <code>CadastroPrev.dpr</code>; são resolvidas pelo caminho de busca do projeto) <span class="ev ev-inferido">INFERIDO</span>.</li>
+</ul>
+<p><strong>O que as pré-condições gerais significam na prática:</strong> o participante já deve ter eventos registrados; as telas de cancelamento, retorno e requerimento INSS pertencem ao CMAdmPrev e precisam estar disponíveis.</p>
+<p><strong>Por jornada:</strong></p>
+<ul>
+<li><a href="#PF-16">JF016</a>: participante com evento em EVENTOSPREV; para “Retorno”, evento gerador OE/AF/AR/CP ou CI com FLGACEITARETORNO = 1.</li>
+<li><a href="#PF-17">JF017</a>: participante com evento em EVENTOSPREV gerado pelo sistema (FLGMIGRADO ≠ 1).</li>
+<li><a href="#PF-18">JF018</a>: pessoas habilitadas em BENEFHABILITA com dados do INSS.</li>
+</ul>
+<p><strong>Pré-condições por jornada, em termos de negócio:</strong></p>
+<ul>
+<li><a href="#PF-16">JF016</a>: só se cancela o último evento e apenas se ele foi gerado pelo sistema e o tipo de evento permitir.</li>
+<li><a href="#PF-17">JF017</a>: só eventos ainda não efetivados podem ser editados.</li>
+<li><a href="#PF-18">JF018</a>: os benefícios do INSS dos aposentados/pensionistas já foram habilitados.</li>
+</ul>
+</section>
+
+<section><div class="section-title">4. Pós-condições</div>
+<ul>
+<li><a href="#PF-16">JF016</a>: cancelamento — EVENTOSPREV removido/estornado, situações em ELEGPATRO/PARTPREVPLAN restauradas, contribuições e processos de benefício revertidos, log “Cancelamento de Evento Registrado”; retorno — EVENTOSPREV.DATAVOLTA preenchida, situações restauradas, contribuições reassociadas e novo EVENTOSPREV do evento anterior.</li>
+<li><a href="#PF-17">JF017</a>: linha de EVENTOSPREV atualizada.</li>
+<li><a href="#PF-18">JF018</a>: requerimento — EVENTOSPREV (129/130, não efetivado), PROCESSOBENEF, BFCIARIOTITPLAN, BENEFBFCIARIO, BENEFPLANOPART, BENEFHABILITA; desfazer — exclusão desses registros.</li>
+</ul>
+<p><strong>Resultado de negócio de cada jornada:</strong></p>
+<ul>
+<li><a href="#PF-16">JF016</a> — o participante volta à situação anterior ao evento (cancelamento) ou ao fim do evento temporário (retorno). Se o usuário não confirmar, nada muda.</li>
+<li><a href="#PF-17">JF017</a> — o evento passa a ter os dados corrigidos; nenhum efeito derivado é recalculado.</li>
+<li><a href="#PF-18">JF018</a> — os benefícios INSS ficam requeridos e prontos para a concessão em lote (botão “Conceder”), ou são desfeitos se ainda não pagos pela folha.</li>
+</ul>
+</section>
+
+<section><div class="section-title">5. Jornadas Funcionais (JF016, JF017, JF018)</div>
+<p>Cada jornada traz objetivo, ator/gatilho, pré e pós-condições, sequência operacional, ações práticas, <strong>regras de negócio da jornada</strong> (texto completo de cada regra), tratamentos e mensagens.</p>
+<p><strong>Como as jornadas deste caso de uso se relacionam:</strong> todas atuam sobre EVENTOSPREV. O requerimento INSS em lote (JF018) cria eventos 129/130 não efetivados, que podem ser corrigidos (JF017) ou cancelados (JF016). O cancelamento genérico não trata a transferência de plano, que tem o seu próprio “Desfazer” (<a href="uc403.html#PF-09">JF009</a>).</p>
+<div class="legend"><span><span class="ev ev-comprovado">COMPROVADO</span> — no código</span><span><span class="ev ev-inferido">INFERIDO</span> — plausível</span><span><span class="ev ev-pendente">PENDENTE</span> — validar</span></div>
+</section>
+
+<div class="pf-block" id="PF-16"><h4>JF016 (PF-16) — Cancelar evento registrado e retorno de evento</h4>
+<p><strong>Objetivo:</strong> cancelar o último evento registrado de um participante, revertendo seus efeitos, ou registrar o retorno de um evento que admite retorno.</p>
+<p><strong>Necessidade de negócio:</strong> eventos lançados por engano precisam ser desfeitos sem deixar resíduos (situações, contribuições, processos de benefício, quitações de empréstimo). Eventos temporários (afastamentos, outros eventos temporários, cancelamentos com retorno) precisam ter registrada a data em que o participante voltou.</p>
+<p><strong>Ator / gatilho:</strong> analista de cadastro. Cancelamento: menu <em>Eventos › Cancelar Evento Registrado</em> (<code>FPrincipal.dfm:8573-8577</code>; <code>FPrincipal.pas:2147-2152</code>). Retorno: <em>Eventos › Benefícios › Outros Eventos Temporários › Retorno</em>, <em>Eventos › Afastamento da Empresa › Afastamento com/sem Manutenção › Retorno</em>, <em>Eventos › Cancelamento na Fundação › Cancelamento por Iniciativa do Participante / por Inadimplência › Retorno</em> (<code>FPrincipal.pas:834-846, 1120-1132, 1169-1181, 1353-1366, 1417-1430</code>).</p>
+<p><strong>Pré-condições:</strong> evento registrado em EVENTOSPREV para o participante.</p>
+<p><strong>Em termos de negócio:</strong> existe um evento a cancelar ou do qual retornar.</p>
+<p><strong>Pós-condições:</strong> ver seção 4 (JF016).</p>
+<p><strong>Em termos de negócio:</strong> o participante volta à situação anterior; a operação de cancelamento é registrada no log.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li><strong>Sistema:</strong> “Cancelar Evento Registrado” cria os datamodules e abre a tela externa “Cancelamento de Eventos Registrados”, que filtra participantes pela fundação do usuário. [<a href="#CADPREV-RN101">RS101</a>, <a href="uc401.html#CADPREV-RN001">RS001</a>]<br><code>FPrincipal.pas:2147-2152</code>; <code>CM/CMADMPREV/Fontes/FCancelaEvento.pas:3631-3639</code>.</li>
+<li><strong>Usuário:</strong> clica “Procurar” e escolhe o participante/evento (lista ordenada pelo evento mais recente). [<a href="#CADPREV-RN102">RS102</a>]<br><code>FCancelaEvento.pas:802-962, 3708-3714</code>; o sistema recusa evento migrado (<a href="#TRT162">TRT162</a>) ou não cancelável (<a href="#TRT163">TRT163</a>) e lista as “Ações do Cancelamento” (<code>:646-719</code>).</li>
+<li><strong>Usuário:</strong> confirma; o sistema aplica as críticas do tipo de evento (transferência de plano, inscrição, processos pagos) e pede confirmação da exclusão dos processos de benefício. [<a href="#CADPREV-RN103">RS103</a>, <a href="#CADPREV-RN104">RS104</a>, <a href="#CADPREV-RN105">RS105</a>]<br><code>FCancelaEvento.pas:964-1165</code>.</li>
+<li><strong>Sistema:</strong> numa transação, desfaz quitação de empréstimo, restaura isenção de IR, executa o cancelamento (retorno para ativo com troca de patrocinadora, ou cancelamento padrão; se o evento for inscrição ligada a transferência de plano, também cancela a transferência), grava o log e pede confirmação final (commit/rollback). [<a href="#CADPREV-RN106">RS106</a>]<br><code>FCancelaEvento.pas:1154-1486</code>.</li>
+<li><strong>Usuário (retorno):</strong> no item “Retorno”, abre “Retorno - &lt;evento&gt;”, procura o participante, informa a Data do Retorno e confirma. [<a href="#CADPREV-RN107">RS107</a>, <a href="#CADPREV-RN108">RS108</a>, <a href="#CADPREV-RN109">RS109</a>]<br><code>FPrincipal.pas:1778-1805</code>; <code>CM/CMADMPREV/Fontes/FDesfazerEvento.pas:115-279</code>.</li>
+<li><strong>Sistema (retorno):</strong> grava DATAVOLTA, reassocia as contribuições antigas, restaura situações e registra novo evento com o evento anterior. [<a href="#CADPREV-RN109">RS109</a>]<br><code>FDesfazerEvento.pas:318-457</code>.</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Procurar evento a cancelar</td><td>Identificar o último evento</td><td>Participante</td><td>Mostra evento, situações e ações</td><td>Ações do cancelamento listadas</td><td><a href="#CADPREV-RN102">RS102</a></td><td><a href="#MSG161">MSG161</a>–<a href="#MSG163">MSG163</a></td><td><code>CM/CMADMPREV/Fontes/FCancelaEvento.dfm</code></td></tr>
+<tr><td>Confirmar cancelamento</td><td>Reverter o evento</td><td>Confirmações</td><td>Críticas, exclusão de processos, reversão, log</td><td>Evento cancelado</td><td><a href="#CADPREV-RN103">RS103</a>–<a href="#CADPREV-RN106">RS106</a></td><td><a href="#MSG164">MSG164</a>–<a href="#MSG177">MSG177</a></td><td><code>FCancelaEvento.dfm</code></td></tr>
+<tr><td>Registrar retorno</td><td>Encerrar evento temporário</td><td>Participante e Data do Retorno</td><td>Grava data de volta e situação anterior</td><td>Retorno registrado</td><td><a href="#CADPREV-RN107">RS107</a>–<a href="#CADPREV-RN109">RS109</a></td><td><a href="#MSG178">MSG178</a>–<a href="#MSG182">MSG182</a></td><td><code>CM/CMADMPREV/Fontes/FDesfazerEvento.dfm</code></td></tr>
+</tbody></table></div>
+<div class="jf-rules">
+<p><strong>Regras de negócio da jornada:</strong> 9 regra(s) — texto completo abaixo.</p>
+
+<div class="rule-block" id="CADPREV-RN101"><div class="rule-id">RS101 (CADPREV-RN101) — Cancelamento delegado à tela do CMAdmPrev com filtro por fundação</div>
+<div class="rule-desc">“Cancelar Evento Registrado” cria os datamodules do módulo e abre a tela FCancelaEvento do CMAdmPrev (“Cancelamento de Eventos Registrados”). Na abertura, a busca de participantes é limitada às patrocinadoras da fundação do usuário; o filtro adicional por eventos 129/130 só vale quando o módulo é o 454 (Benefício Previdenciário), não no Cadastro Previdenciário (452). É a mesma tela usada em <a href="../beneficioprev/uc308.html#PF-16">BENEFICIOPREV JF016</a>.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul><li><code>Sistema.IdModulo</code> — 452 neste módulo; <code>iIdFundacao</code></li></ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT167">TRT167</a> (criação de controles)</p>
+<p><strong>Jornada:</strong> <a href="#PF-16">JF016</a></p>
+<p><strong>Descrição original:</strong> CancelarEventoRegistrado1Click: CriaDataModule; AbrirForm(frmCancelaEvento, TfrmCancelaEvento, False).</p>
+<p><strong>Condições:</strong> sistema.idmodulo = 454 → filtro IDEVENTOGERADOR IN (129,130)</p><p><strong>Dados envolvidos:</strong> PATRO, PARTPREVPLAN, EVENTOSPREV</p><p><strong>Resultado/Exceção:</strong> tela externa aberta</p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/FPrincipal.pas:2147-2152</code>; <code>CM/CMADMPREV/Fontes/FCancelaEvento.pas:3631-3639</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+
+<div class="rule-block" id="CADPREV-RN102"><div class="rule-id">RS102 (CADPREV-RN102) — Só eventos gerados pelo sistema e canceláveis</div>
+<div class="rule-desc">O evento selecionado não pode ser cancelado se for migrado (FLGMIGRADO = 1 — “NÃO foi gerado pelo sistema”) ou se o evento gerador não permitir cancelamento (FLGCANCELAMENTO = 0). Se não houver evento, o sistema avisa.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul><li><code>EVENTOSPREV.FLGMIGRADO</code>; <code>EVENTOGERADOR.FLGCANCELAMENTO</code></li></ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT161">TRT161</a>, <a href="#TRT162">TRT162</a>, <a href="#TRT163">TRT163</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-16">JF016</a></p>
+<p><strong>Descrição original:</strong> “SELECIONA O ULTIMO EVENTO GERADOR E SUA SITUACÃO”.</p>
+<p><strong>Condições:</strong> sFlgMigrado = '1'; FLGCANCELAMENTO = 0; qryUltEventoGerador vazio</p><p><strong>Dados envolvidos:</strong> EVENTOSPREV, EVENTOGERADOR</p><p><strong>Resultado/Exceção:</strong> <a href="#MSG161">MSG161</a>, <a href="#MSG162">MSG162</a>, <a href="#MSG163">MSG163</a></p>
+<div class="rule-origin">📂 Origem: <code>CM/CMADMPREV/Fontes/FCancelaEvento.pas:905-930</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span> (dependência externa)</div></div>
+
+<div class="rule-block" id="CADPREV-RN103"><div class="rule-id">RS103 (CADPREV-RN103) — Transferência de plano não se cancela diretamente</div>
+<div class="rule-desc">Um evento com FLGINTERNO = 'TP' não é cancelado por esta tela: deve-se cancelar o evento de “Inscrição” no plano destino, e a transferência é cancelada junto (CancelaEventoTransferenciaPlano, quando há evento TP registrado na mesma data da inscrição).</div>
+<p><strong>Campos de dados:</strong></p>
+<ul><li><code>EVENTOGERADOR.FLGINTERNO</code> — 'TP' / 'IP'</li></ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT164">TRT164</a> → <a href="#MSG165">MSG165</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-16">JF016</a></p>
+<p><strong>Descrição original:</strong> “Se o evento que acabou de ser cancelado for uma INSCRICAO Entao verificar se o evento anterior era uma transferencia de plano”.</p>
+<p><strong>Condições:</strong> FlgInterno = 'TP' → bloqueia; FlgInterno = 'IP' e existe TP na mesma DATAREGISTRO → CancelaEventoTransferenciaPlano</p><p><strong>Dados envolvidos:</strong> EVENTOSPREV, EVENTOGERADOR, PARTPREVPLAN</p><p><strong>Resultado/Exceção:</strong> transferência revertida com a inscrição</p>
+<div class="rule-origin">📂 Origem: <code>CM/CMADMPREV/Fontes/FCancelaEvento.pas:1014-1021, 1314-1348, 1500-1630</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span> (dependência externa)</div></div>
+
+<div class="rule-block" id="CADPREV-RN104"><div class="rule-id">RS104 (CADPREV-RN104) — Cancelamento de inscrição bloqueado por vínculos posteriores</div>
+<div class="rule-desc">O cancelamento de um evento de inscrição (IP) é recusado se o participante estiver vinculado a plano assistencial, tiver contrato de empréstimo ou já tiver contribuições recebidas.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul><li><code>PARTASS/PLANASS</code>; <code>CONTRATOEMPTMO</code>; <code>HSTCONTRIBPREV</code></li></ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT165">TRT165</a> → <a href="#MSG166">MSG166</a>, <a href="#MSG167">MSG167</a>, <a href="#MSG168">MSG168</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-16">JF016</a></p>
+<p><strong>Descrição original:</strong> “Se for cancelamento de inscricao verificar se participante está no assistencial ou no emprestimo ... Se tiver, não permitir cancelamento”.</p>
+<p><strong>Condições:</strong> FlgInterno = 'IP' e alguma consulta não vazia</p><p><strong>Dados envolvidos:</strong> PARTASS, PLANASS, CONTRATOEMPTMO, HSTCONTRIBPREV</p><p><strong>Resultado/Exceção:</strong> cancelamento bloqueado</p>
+<div class="rule-origin">📂 Origem: <code>CM/CMADMPREV/Fontes/FCancelaEvento.pas:1040-1098</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span> (dependência externa)</div></div>
+
+<div class="rule-block" id="CADPREV-RN105"><div class="rule-id">RS105 (CADPREV-RN105) — Processos de benefício gerados pelo evento</div>
+<div class="rule-desc">Se o evento gerou processos de benefício, o cancelamento é recusado quando já houve pagamento (HSTBENEFBFCIARIO.VLBENEFPGTO &gt; 0); caso contrário, o usuário confirma a exclusão dos processos. Quitação de empréstimo feita pelo evento é desfeita (DesfazQuitacaoMutuario). O bloqueio “Existem Operações de Benefícios...” só vale no módulo 454.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul><li><code>PROCESSOBENEF/BENEFBFCIARIO.NUMEROPROCESSO</code>; <code>HSTBENEFBFCIARIO.VLBENEFPGTO</code>; <code>CTRLINTERFACE.DATAPAGAMENTO</code></li></ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT166">TRT166</a> → <a href="#MSG169">MSG169</a>, <a href="#MSG170">MSG170</a>, <a href="#MSG171">MSG171</a>, <a href="#MSG177">MSG177</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-16">JF016</a></p>
+<p><strong>Descrição original:</strong> “Este evento gerou o(s) seguinte(s) Processo(s) de Benefício”.</p>
+<p><strong>Condições:</strong> qryProcessoBenef não vazio</p><p><strong>Dados envolvidos:</strong> PROCESSOBENEF, BENEFBFCIARIO, HSTBENEFBFCIARIO, CTRLINTERFACE; dtmDividaEP</p><p><strong>Resultado/Exceção:</strong> processos excluídos ou cancelamento recusado</p>
+<div class="rule-origin">📂 Origem: <code>CM/CMADMPREV/Fontes/FCancelaEvento.pas:976-1004, 1100-1165</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span> (dependência externa)</div></div>
+
+<div class="rule-block" id="CADPREV-RN106"><div class="rule-id">RS106 (CADPREV-RN106) — Cancelamento em transação, confirmado ao final e registrado no log</div>
+<div class="rule-desc">O cancelamento é executado numa transação. Para eventos de retorno para ativo (RA) com troca de patrocinadora, usa CancelaEventoRetornoParaAtivo; senão CancelaOutrosEventos (restaura situações, contribuições, datas de cancelamento/manutenção conforme o tipo). Qualquer falha faz rollback com “Erro no Cancelamento de Evento.”. Ao final grava o log “Cancelamento de Evento Registrado” (falha ignorada) e pede “Confirma cancelamento do evento ?”: Sim = commit, Não = rollback.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul><li><code>EVENTOSPREV</code>, <code>ELEGPATRO</code>, <code>PARTPREVPLAN</code>, <code>CONTRIBPREVPARTP</code>; log de operações</li></ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT168">TRT168</a>, <a href="#TRT169">TRT169</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-16">JF016</a></p>
+<p><strong>Descrição original:</strong> “Adicionando Log Padrao”.</p>
+<p><strong>Condições:</strong> FLGINTERNO = 'RA' e patrocinadora anterior ≠ atual</p><p><strong>Dados envolvidos:</strong> tabelas acima; Sistema.GravaLogOperacoes</p><p><strong>Resultado/Exceção:</strong> <a href="#MSG172">MSG172</a>–<a href="#MSG175">MSG175</a></p>
+<div class="rule-origin">📂 Origem: <code>CM/CMADMPREV/Fontes/FCancelaEvento.pas:1236-1310, 1467-1486</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span> (dependência externa)</div></div>
+
+<div class="rule-block" id="CADPREV-RN107"><div class="rule-id">RS107 (CADPREV-RN107) — Item “Retorno” nos submenus de eventos</div>
+<div class="rule-desc">O MontaMenu acrescenta um separador e o item “Retorno” (nome “D&lt;IDEVENTOGERADOR&gt;”, OnClick AbreFormDesfazerEvento) depois dos eventos de Outros Eventos Temporários (OE), Afastamento com Manutenção (AF), Afastamento sem Manutenção (AR), Cancelamento por Iniciativa do Participante (CP) — sempre que houver evento do tipo — e de Cancelamento por Inadimplência (CI) somente se o primeiro evento CI tiver FLGACEITARETORNO = 1. A tela aberta é FDesfazerEvento com título “Retorno - &lt;nome do evento&gt;”. Complementa a regra transversal <a href="uc401.html#CADPREV-RN006">RS006</a>.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul><li><code>EVENTOGERADOR.FLGINTERNO</code> (OE, AF, AR, CP, CI); <code>EVENTOGERADOR.FLGACEITARETORNO</code></li></ul>
+<p><strong>Tratamento de erro:</strong> — (montagem de menu)</p>
+<p><strong>Jornada:</strong> <a href="#PF-16">JF016</a></p>
+<p><strong>Descrição original:</strong> NovoItem.Caption := 'Retorno'; NovoItem.OnClick := AbreFormDesfazerEvento.</p>
+<p><strong>Condições:</strong> qryAux.RecordCount &lt;&gt; 0 (CI: e FLGACEITARETORNO = 1)</p><p><strong>Dados envolvidos:</strong> EVENTOGERADOR</p><p><strong>Resultado/Exceção:</strong> HelpContext 160008 (AF), 160009 (AR), 160027 (CI), 160028 (demais)</p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/FPrincipal.pas:834-846, 1120-1132, 1169-1181, 1353-1366, 1417-1430, 1778-1805</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+
+<div class="rule-block" id="CADPREV-RN108"><div class="rule-id">RS108 (CADPREV-RN108) — Retorno não se aplica a quem entrou em manutenção</div>
+<div class="rule-desc">Se o último evento do participante for DM ou AF, ou a situação na fundação for de mantido (MA), o retorno é recusado: deve ser usado um evento “Retorno de Mantido para Ativo”.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul><li><code>EVENTOGERADOR.FLGINTERNO</code> do último evento; <code>SITPART.FLGINTERNO</code></li></ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT170">TRT170</a> → <a href="#MSG178">MSG178</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-16">JF016</a></p>
+<p><strong>Descrição original:</strong> “Este participante entrou em manutenção...”.</p>
+<p><strong>Condições:</strong> sFlgIntEvento in ('DM','AF') ou sFlgIntSitPart = 'MA'</p><p><strong>Dados envolvidos:</strong> EVENTOSPREV, EVENTOGERADOR</p><p><strong>Resultado/Exceção:</strong> data do retorno limpa; confirmação bloqueada</p>
+<div class="rule-origin">📂 Origem: <code>CM/CMADMPREV/Fontes/FDesfazerEvento.pas:219-240</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span> (dependência externa)</div></div>
+
+<div class="rule-block" id="CADPREV-RN109"><div class="rule-id">RS109 (CADPREV-RN109) — Registro do retorno</div>
+<div class="rule-desc">O retorno atua sobre o último evento do participante no plano (MAX(IDEVENTOSPREV)). Exige participante e Data do Retorno e confirmação. Numa transação: grava EVENTOSPREV.DATAVOLTA; encerra as contribuições do evento e volta a cobrar as da situação anterior (RetornaContribuicoesAntigas, data final = retorno − 1); restaura a situação funcional (ELEGPATRO) e as situações no plano e na fundação (PARTPREVPLAN) para as “atuais” do evento; se houver evento anterior, grava novo EVENTOSPREV efetivado com o evento gerador anterior, invertendo as situações, com data do evento = data do retorno.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul><li>Data do Retorno (<code>dtVolta</code>) — [obrigatório]; <code>EVENTOSPREV.DATAVOLTA</code>; SEQPROPOSTA fixa '1'</li></ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT171">TRT171</a>, <a href="#TRT172">TRT172</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-16">JF016</a></p>
+<p><strong>Descrição original:</strong> “Grava a Data em que o participante voltou de um evento temporário”; “Volta a situação anterior ao evento retornado”.</p>
+<p><strong>Condições:</strong> sIdEventoGeradorAnterior &lt;&gt; '-1' para o novo evento</p><p><strong>Dados envolvidos:</strong> EVENTOSPREV, ELEGPATRO, PARTPREVPLAN, CONTRIBPREVPARTP; UEventos.RetornaContribuicoesAntigas</p><p><strong>Resultado/Exceção:</strong> <a href="#MSG181">MSG181</a>/<a href="#MSG182">MSG182</a></p>
+<div class="rule-origin">📂 Origem: <code>CM/CMADMPREV/Fontes/FDesfazerEvento.pas:115-205, 228-279, 318-457</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span> (dependência externa)</div></div>
+
+<p><strong>Regras transversais do módulo</strong> (texto completo em <a href="uc401.html">UC401</a>): <a href="uc401.html#CADPREV-RN001">RS001 (CADPREV-RN001) — Dados isolados por fundação</a>, <a href="uc401.html#CADPREV-RN002">RS002 (CADPREV-RN002) — Menu de eventos a partir de EVENTOGERADOR</a>, <a href="uc401.html#CADPREV-RN003">RS003 (CADPREV-RN003) — Instituto troca a nomenclatura</a>, <a href="uc401.html#CADPREV-RN005">RS005 (CADPREV-RN005) — Log de operações</a>, <a href="uc401.html#CADPREV-RN006">RS006 (CADPREV-RN006) — Opção “Retorno”</a>.</p>
+</div>
+
+<p><strong>Tratamentos de erro:</strong> <a href="#TRT161">TRT161</a>–<a href="#TRT172">TRT172</a></p>
+<p><strong>Mensagens:</strong> <a href="#MSG161">MSG161</a>–<a href="#MSG182">MSG182</a></p>
+<p><strong>Telas:</strong> Cancelamento de Eventos Registrados (<code>CM/CMADMPREV/Fontes/FCancelaEvento.dfm</code>), Retornar do Evento — título em execução “Retorno - &lt;evento&gt;” (<code>CM/CMADMPREV/Fontes/FDesfazerEvento.dfm</code>)</p>
+<p><strong>Dependências:</strong> reverte eventos de <a href="uc401.html">UC401</a>, <a href="uc402.html">UC402</a> e <a href="uc404.html">UC404</a>; transferência de plano tem desfazer próprio (<a href="uc403.html#CADPREV-RN078">RS078</a>); mesma tela de cancelamento do <a href="../beneficioprev/uc308.html#PF-16">BENEFICIOPREV JF016</a> (lá com filtro 129/130).</p>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span> — informações que o repositório não comprova ou que divergem entre fontes. O texto existente foi mantido; os itens abaixo dependem de validação humana.</p>
+<ul>
+<li>O menu oferece “Retorno” para Afastamento com Manutenção (AF) (<code>FPrincipal.pas:1120-1132</code>), mas FDesfazerEvento recusa o retorno quando o último evento é AF (<code>FDesfazerEvento.pas:219-224, 233-240</code>). Confirmar o uso real do retorno de AF.</li>
+<li>FDesfazerEvento ignora qual evento foi escolhido no menu: atua sempre sobre o último evento do participante no plano (<code>:140-205</code>) e não filtra participantes por fundação (<code>FDesfazerEvento.dfm:692-703</code>, sem IDFUNDACAO).</li>
+<li>A transferência de plano gravada pela tela local (FEventoTransfPlano) registra apenas um evento TP no plano de origem e nenhum evento de inscrição (IP) no destino (<code>FEventoTransfPlano.pas:1481-1523</code>); assim, o caminho “cancelar a inscrição no plano destino” (<a href="#CADPREV-RN103">RS103</a>) pode não estar disponível para essas transferências — usar o “Desfazer” da própria tela. Confirmar.</li>
+<li>Detalhe das rotinas CancelaOutrosEventos (<code>FCancelaEvento.pas:1632-3231</code>) e CancelaEventoRetornoParaAtivo (<code>:3336-3623</code>) não foi descrito linha a linha (componente externo).</li>
+</ul>
+</div>
+<div class="note note-info"><p><strong>Registro original do processo PF-16</strong></p><p><strong>Forms de entrada:</strong> <code>FPrincipal.dfm</code> → <code>CM/CMADMPREV/Fontes/FCancelaEvento.dfm</code>; menus dinâmicos “Retorno” → <code>CM/CMADMPREV/Fontes/FDesfazerEvento.dfm</code></p><p><strong>Lógica de processamento:</strong> seleção do último evento; críticas por tipo; reversão em transação; confirmação; log. Retorno: DATAVOLTA, contribuições, situações, novo evento</p><p><strong>Saídas:</strong> mensagens</p><p><strong>Persistência (tabelas escritas):</strong> EVENTOSPREV, ELEGPATRO, PARTPREVPLAN, CONTRIBPREVPARTP, HSTCONTEVENTOSPR, PROCESSOBENEF, BENEFBFCIARIO, HSTBENEFBFCIARIO, PESSOAFISICA (FLGISENTOIRRF), log de operações</p><p><strong>Evidência:</strong> <code>CADASTROPREV/Fontes/FPrincipal.pas:2147-2152, 1778-1805</code> · <span class="ev ev-comprovado">COMPROVADO</span>; comportamento interno das telas externas: <code>CM/CMADMPREV/Fontes/FCancelaEvento.pas</code>, <code>FDesfazerEvento.pas</code> · <span class="ev ev-comprovado">COMPROVADO</span> nas linhas citadas</p></div>
+</div>
+
+<div class="pf-block" id="PF-17"><h4>JF017 (PF-17) — Alterar evento</h4>
+<p><strong>Objetivo:</strong> corrigir diretamente os campos de um evento registrado (datas, situações, plano, evento gerador) enquanto ele não estiver efetivado.</p>
+<p><strong>Necessidade de negócio:</strong> erros de digitação em eventos ainda não efetivados (por exemplo, requerimentos INSS gerados em lote) precisam ser corrigidos sem cancelar e registrar de novo.</p>
+<p><strong>Ator / gatilho:</strong> analista de cadastro, menu <em>Eventos › Alterar Evento</em> (<code>FPrincipal.dfm:8582-8585</code>; <code>FPrincipal.pas:2766-2771</code>). Tela criada na SIG83736 (2020) (<code>FAlteraEvento.pas:1-6</code>).</p>
+<p><strong>Pré-condições:</strong> evento em EVENTOSPREV gerado pelo sistema.</p>
+<p><strong>Em termos de negócio:</strong> o evento existe e não foi importado de outro sistema.</p>
+<p><strong>Pós-condições:</strong> EVENTOSPREV atualizado.</p>
+<p><strong>Em termos de negócio:</strong> o evento passa a refletir os dados corrigidos. Situações do participante, contribuições e benefícios não são recalculados.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li><strong>Sistema:</strong> cria datamodules e abre “Alteração de Eventos”; cria controles de documento e de lançamento contábil; limita a busca à fundação. [<a href="#CADPREV-RN113">RS113</a>]<br><code>FPrincipal.pas:2766-2771</code>; <code>FAlteraEvento.pas:423-472</code>.</li>
+<li><strong>Usuário:</strong> clica “Procurar” e escolhe o participante/evento (lista por data do evento, mais recente primeiro). [<a href="#CADPREV-RN110">RS110</a>]<br><code>FAlteraEvento.pas:270-345, 484-490</code>.</li>
+<li><strong>Sistema:</strong> carrega o evento e abre uma transação; se não efetivado, coloca o registro em edição; se efetivado, apenas exibe. [<a href="#CADPREV-RN111">RS111</a>]<br><code>FAlteraEvento.pas:340-381</code>.</li>
+<li><strong>Usuário:</strong> altera os campos (Data Evento, Data Volta, Data Registro, Data da Efetivação, Efetivado, situações atual/nova, plano, evento gerador) e clica “Ok”; confirma. [<a href="#CADPREV-RN112">RS112</a>]<br><code>FAlteraEvento.pas:383-410</code>; <code>FAlteraEvento.dfm:147-490</code>.</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Procurar evento</td><td>Escolher o evento</td><td>Participante/evento</td><td>Carrega EVENTOSPREV; edita se não efetivado</td><td>Dados do evento na tela</td><td><a href="#CADPREV-RN110">RS110</a>, <a href="#CADPREV-RN111">RS111</a></td><td><a href="#MSG161">MSG161</a>, <a href="#MSG162">MSG162</a></td><td><code>FAlteraEvento.dfm</code></td></tr>
+<tr><td>Confirmar alteração</td><td>Gravar correção</td><td>Campos alterados</td><td>ApplyUpdates + commit, ou cancel + rollback</td><td>Evento atualizado</td><td><a href="#CADPREV-RN112">RS112</a></td><td><a href="#MSG183">MSG183</a>, <a href="#MSG184">MSG184</a>, <a href="#MSG175">MSG175</a></td><td><code>FAlteraEvento.dfm</code></td></tr>
+<tr><td>Cancelar</td><td>Descartar edição</td><td>Confirmação</td><td>Limpa campos e cancela edição</td><td>Nada gravado</td><td><a href="#CADPREV-RN112">RS112</a></td><td><a href="#MSG176">MSG176</a></td><td><code>FAlteraEvento.dfm</code></td></tr>
+</tbody></table></div>
+<div class="jf-rules">
+<p><strong>Regras de negócio da jornada:</strong> 4 regra(s) — texto completo abaixo.</p>
+
+<div class="rule-block" id="CADPREV-RN110"><div class="rule-id">RS110 (CADPREV-RN110) — Seleção do evento e bloqueio de evento migrado</div>
+<div class="rule-desc">A busca lista participante × evento (matrícula, nome, inscrição, data do evento, evento, plano, patrocinadora) ordenada pela data do evento decrescente. O evento escolhido (EVENTOSPREV.IDEVENTOSPREV) não pode ser alterado se tiver FLGMIGRADO = 1; se não for encontrado, o sistema avisa.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul><li><code>MontaSelectPart.ValoresChave[29]</code> = IDEVENTOSPREV; <code>[30]</code> = FLGMIGRADO</li></ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT161">TRT161</a>, <a href="#TRT162">TRT162</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-17">JF017</a></p>
+<p><strong>Descrição original:</strong> “SELECIONA O ULTIMO EVENTO GERADOR E SUA SITUACÃO”.</p>
+<p><strong>Condições:</strong> trim(sFlgMigrado) = '1'; qryUltEventoGerador.IsEmpty</p><p><strong>Dados envolvidos:</strong> EVENTOSPREV, EVENTOGERADOR, SITPART, SITFUNC, SITPLANOPREV</p><p><strong>Resultado/Exceção:</strong> <a href="#MSG162">MSG162</a> (texto diz “Não poderá ser cancelado”, herdado da tela de cancelamento), <a href="#MSG161">MSG161</a></p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/FAlteraEvento.pas:270-339, 484-490; FAlteraEvento.dfm:886-970</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+
+<div class="rule-block" id="CADPREV-RN111"><div class="rule-id">RS111 (CADPREV-RN111) — Somente evento não efetivado entra em edição</div>
+<div class="rule-desc">Se EVENTOSPREV.FLGEFETIVADO = 0, o registro é colocado em edição; se já efetivado, a tela apenas mostra os dados (o aviso “Evento já efetivado” e o bloqueio na confirmação estão comentados no código). A transação é aberta logo após a seleção.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul><li><code>EVENTOSPREV.FLGEFETIVADO</code></li></ul>
+<p><strong>Tratamento de erro:</strong> — (sem crítica ativa)</p>
+<p><strong>Jornada:</strong> <a href="#PF-17">JF017</a></p>
+<p><strong>Descrição original:</strong> QryAlteraEvendo.Edit quando FLGEFETIVADO = 0.</p>
+<p><strong>Condições:</strong> FLGEFETIVADO = 0</p><p><strong>Dados envolvidos:</strong> QryAlteraEvendo (SELECT * FROM EVENTOSPREV WHERE IDEVENTOSPREV = :IDEVENTOSPREV, CachedUpdates)</p><p><strong>Resultado/Exceção:</strong> bAltera/bEfetivado</p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/FAlteraEvento.pas:363-381, 386-391; FAlteraEvento.dfm:1286-1301</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+
+<div class="rule-block" id="CADPREV-RN112"><div class="rule-id">RS112 (CADPREV-RN112) — Gravação direta do evento, sem efeitos derivados</div>
+<div class="rule-desc">Com “Confirma Alteração do evento?” = Sim, as alterações são aplicadas por UPDATE de todos os campos de EVENTOSPREV (TUpdateSQL updAlteraEvendo) e a transação é confirmada; com Não, a edição é cancelada e a transação desfeita. Não há validação de consistência entre os campos, não há atualização de ELEGPATRO/PARTPREVPLAN, contribuições ou benefícios, e não há registro no log de operações.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul><li><code>EVENTOSPREV</code>: IDSITPLANOATUAL, IDSITFUNCATUAL, IDSITPARTATUAL, IDSITPLANONOVO, IDSITPARTNOVO, IDSITFUNCNOVO, IDEVENTOGERADOR, IDPLANOPREV, DATAREGISTRO, DATAEVENTO, DATAVOLTA, FLGEFETIVADO, DATAEFETIVADO (editáveis na tela) e demais colunas regravadas</li></ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT173">TRT173</a>, <a href="#TRT174">TRT174</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-17">JF017</a></p>
+<p><strong>Descrição original:</strong> QryAlteraEvendo.ApplyUpdates; dtmBaseDados.dbBaseDados.Commit.</p>
+<p><strong>Condições:</strong> MsgDlg = mrYes</p><p><strong>Dados envolvidos:</strong> EVENTOSPREV</p><p><strong>Resultado/Exceção:</strong> <a href="#MSG184">MSG184</a> / <a href="#MSG175">MSG175</a></p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/FAlteraEvento.pas:383-421; FAlteraEvento.dfm:147-490, 1461-1498</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+
+<div class="rule-block" id="CADPREV-RN113"><div class="rule-id">RS113 (CADPREV-RN113) — Filtro por fundação; filtro 129/130 apenas no módulo 454</div>
+<div class="rule-desc">A busca é restrita às patrocinadoras da fundação do usuário. Quando a tela roda no módulo 454 (Benefício Previdenciário) também é restrita aos eventos 129 e 130; no Cadastro Previdenciário (452) todos os eventos são listados.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul><li><code>Sistema.IdModulo</code>; <code>iIdFundacao</code></li></ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT167">TRT167</a> (criação de controles)</p>
+<p><strong>Jornada:</strong> <a href="#PF-17">JF017</a></p>
+<p><strong>Descrição original:</strong> “Higor Nayde Ferreira SOL 211709/15287 KINTANA 2050393”.</p>
+<p><strong>Condições:</strong> sistema.idmodulo = 454</p><p><strong>Dados envolvidos:</strong> PATRO, EVENTOGERADOR</p><p><strong>Resultado/Exceção:</strong> lista filtrada</p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/FAlteraEvento.pas:423-472</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+
+<p><strong>Regras transversais do módulo</strong> (texto completo em <a href="uc401.html">UC401</a>): <a href="uc401.html#CADPREV-RN001">RS001 (CADPREV-RN001) — Dados isolados por fundação</a>, <a href="uc401.html#CADPREV-RN003">RS003 (CADPREV-RN003) — Instituto troca a nomenclatura</a>, <a href="uc401.html#CADPREV-RN005">RS005 (CADPREV-RN005) — Log de operações</a> (não gravado nesta tela).</p>
+</div>
+
+<p><strong>Tratamentos de erro:</strong> <a href="#TRT161">TRT161</a>, <a href="#TRT162">TRT162</a>, <a href="#TRT167">TRT167</a>, <a href="#TRT173">TRT173</a>, <a href="#TRT174">TRT174</a></p>
+<p><strong>Mensagens:</strong> <a href="#MSG161">MSG161</a>, <a href="#MSG162">MSG162</a>, <a href="#MSG175">MSG175</a>, <a href="#MSG176">MSG176</a>, <a href="#MSG183">MSG183</a>–<a href="#MSG185">MSG185</a></p>
+<p><strong>Telas:</strong> Alteração de Eventos (<code>FAlteraEvento.dfm</code>)</p>
+<p><strong>Dependências:</strong> corrige eventos criados pelas demais jornadas de evento, em especial os eventos INSS de <a href="#PF-18">JF018</a>.</p>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span> — informações que o repositório não comprova ou que divergem entre fontes. O texto existente foi mantido; os itens abaixo dependem de validação humana.</p>
+<ul>
+<li>A transação é aberta a cada “Procurar” (<code>FAlteraEvento.pas:363</code>) sem verificar se já existe uma ativa; “Cancelar” (<code>:412-421</code>) e o fechamento da tela (<code>:474-482</code>) não fazem rollback. Uma segunda busca sem confirmar pode gerar erro de transação já ativa.</li>
+<li>Com evento efetivado, “Ok” ainda executa ApplyUpdates/Commit sem alterações (bloqueio comentado em <code>:386-391</code>); confirmar se a edição de efetivados deve ser bloqueada.</li>
+<li>Nenhuma validação impede gravar situações/planos incoerentes com PARTPREVPLAN; não há log de operações.</li>
+<li>As queries de lookup (QryPlanoDesc, QryPlanoAtual etc.) e a função de VerificaEstadoEvento (<code>:234-268</code>) existem mas VerificaEstadoEvento não é chamada.</li>
+</ul>
+</div>
+<div class="note note-info"><p><strong>Registro original do processo PF-17</strong></p><p><strong>Forms de entrada:</strong> <code>FPrincipal.dfm</code> → <code>FAlteraEvento.dfm</code></p><p><strong>Lógica de processamento:</strong> seleção do evento; edição se não efetivado; ApplyUpdates + Commit</p><p><strong>Saídas:</strong> mensagens</p><p><strong>Persistência (tabelas escritas):</strong> EVENTOSPREV</p><p><strong>Evidência:</strong> <code>CADASTROPREV/Fontes/FAlteraEvento.pas:270-490</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+</div>
+
+<div class="pf-block" id="PF-18"><h4>JF018 (PF-18) — Requerimento de benefícios do INSS em lote</h4>
+<p><strong>Objetivo:</strong> gerar, para vários aposentados/pensionistas habilitados no INSS, os requerimentos de benefício (evento, processo, beneficiário, benefício) de uma só vez, ou desfazer requerimentos ainda não pagos.</p>
+<p><strong>Necessidade de negócio:</strong> a entidade recebe as concessões do INSS e precisa abrir os processos de complementação para todos os habilitados, conferindo NB, DIB, RMI e demais dados, sem digitar requerimento a requerimento.</p>
+<p><strong>Ator / gatilho:</strong> analista de benefícios, menu <em>Eventos › Requerimento de Benefícios do INSS em Lote</em> (<code>FPrincipal.dfm:8578-8581</code>; <code>FPrincipal.pas:2666-2671</code>).</p>
+<p><strong>Pré-condições:</strong> habilitações em BENEFHABILITA.</p>
+<p><strong>Em termos de negócio:</strong> os benefícios do INSS já estão habilitados.</p>
+<p><strong>Pós-condições:</strong> ver seção 4 (JF018).</p>
+<p><strong>Em termos de negócio:</strong> os requerimentos ficam gravados (eventos não efetivados) e podem seguir para a concessão em lote.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li><strong>Sistema:</strong> abre a tela externa “Requerimento de Benefício do INSS” (sem CriaDataModule). [<a href="#CADPREV-RN114">RS114</a>]<br><code>FPrincipal.pas:2666-2671</code>.</li>
+<li><strong>Usuário:</strong> escolhe o Tipo de Recebedor, filtra (matrícula, NB, DER) e marca os participantes; pode alterar dados do detalhe (RMI, DIB anterior, validado). [<a href="#CADPREV-RN115">RS115</a>, <a href="#CADPREV-RN118">RS118</a>]<br><code>CM/CMADMPREV/Fontes/FCadRequerBenefInssLote.pas:812-940, 3525-3563, 2285-2326</code>.</li>
+<li><strong>Usuário:</strong> clica “Requerer”; o sistema valida e grava, por participante, evento 129/130, processo, beneficiário, benefício e BENEFPLANOPART, registrando críticas no log; pergunta se grava. [<a href="#CADPREV-RN116">RS116</a>]<br><code>FCadRequerBenefInssLote.pas:1239-1890, 2334-2760</code>.</li>
+<li><strong>Usuário (alternativo):</strong> “Desfazer” requerimentos selecionados ainda não processados pela folha. [<a href="#CADPREV-RN117">RS117</a>]<br><code>FCadRequerBenefInssLote.pas:1922-2283</code>.</li>
+<li><strong>Usuário (opcional):</strong> “Conceder” fecha a tela e abre a concessão em lote (FrmCadConcederBenefInssLote). <br><code>FCadRequerBenefInssLote.pas:3330-3336</code>.</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Requerer</td><td>Gerar requerimentos</td><td>Tipo de recebedor e participantes marcados</td><td>Valida e grava por participante; log de críticas</td><td>Requerimentos gravados (após confirmação)</td><td><a href="#CADPREV-RN115">RS115</a>, <a href="#CADPREV-RN116">RS116</a></td><td><a href="#MSG186">MSG186</a>–<a href="#MSG193">MSG193</a></td><td><code>CM/CMADMPREV/Fontes/FCadRequerBenefInssLote.dfm</code></td></tr>
+<tr><td>Desfazer</td><td>Cancelar requerimentos</td><td>Participantes marcados</td><td>Bloqueia já pagos pela folha; exclui registros</td><td>Requerimentos removidos</td><td><a href="#CADPREV-RN117">RS117</a></td><td><a href="#MSG194">MSG194</a>–<a href="#MSG197">MSG197</a></td><td><code>FCadRequerBenefInssLote.dfm</code></td></tr>
+<tr><td>Alterar detalhe</td><td>Corrigir dados INSS</td><td>RMI, DIB anterior, Validado</td><td>Exige desfazer concessão/requerimento; valida formatos</td><td>Detalhe gravado</td><td><a href="#CADPREV-RN118">RS118</a></td><td><a href="#MSG198">MSG198</a>–<a href="#MSG200">MSG200</a></td><td><code>FCadRequerBenefInssLote.dfm</code></td></tr>
+</tbody></table></div>
+<div class="jf-rules">
+<p><strong>Regras de negócio da jornada:</strong> 5 regra(s) — texto completo abaixo.</p>
+
+<div class="rule-block" id="CADPREV-RN114"><div class="rule-id">RS114 (CADPREV-RN114) — Requerimento INSS em lote delegado ao CMAdmPrev</div>
+<div class="rule-desc">O item de menu abre diretamente a tela FCadRequerBenefInssLote do CMAdmPrev (“Requerimento de Benefício do INSS”). Diferente dos demais itens deste caso de uso, não chama CriaDataModule antes.</div>
+<p><strong>Campos de dados:</strong> —</p>
+<p><strong>Tratamento de erro:</strong> —</p>
+<p><strong>Jornada:</strong> <a href="#PF-18">JF018</a></p>
+<p><strong>Descrição original:</strong> AbrirForm(FrmCadRequerBenefInssLote, TFrmCadRequerBenefInssLote, False) // douglas siqueira 3564.</p>
+<p><strong>Condições:</strong> —</p><p><strong>Dados envolvidos:</strong> —</p><p><strong>Resultado/Exceção:</strong> tela externa aberta</p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/FPrincipal.pas:2666-2671</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+
+<div class="rule-block" id="CADPREV-RN115"><div class="rule-id">RS115 (CADPREV-RN115) — Tipo de recebedor e seleção obrigatórios; críticas por participante</div>
+<div class="rule-desc">Para requerer é obrigatório escolher o tipo de recebedor e marcar ao menos um participante. Pensionista sem matrícula, divergência no benefício informado, perfil de investimento inativo e pensionista sem benefício associado impedem o requerimento.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul><li><code>cb_tipo_recebedor</code>; <code>qrydet.SELECIONADO = 'S'</code>; matrícula; perfil de investimento</li></ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT175">TRT175</a> → <a href="#MSG186">MSG186</a>–<a href="#MSG191">MSG191</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-18">JF018</a></p>
+<p><strong>Descrição original:</strong> marcações “msg02” etc. no código.</p>
+<p><strong>Condições:</strong> Trim(cb_tipo_recebedor.Text) = ''; qrydet filtrado vazio</p><p><strong>Dados envolvidos:</strong> BENEFHABILITA, DETCONCINSS, ELEGPATRO, PARTPREVPLAN, PERFILINVEST</p><p><strong>Resultado/Exceção:</strong> requerimento não executado</p>
+<div class="rule-origin">📂 Origem: <code>CM/CMADMPREV/Fontes/FCadRequerBenefInssLote.pas:1276-1300, 1321, 1352, 1693, 1725</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span> (dependência externa)</div></div>
+
+<div class="rule-block" id="CADPREV-RN116"><div class="rule-id">RS116 (CADPREV-RN116) — Gravação do requerimento com evento 129/130 não efetivado</div>
+<div class="rule-desc">Para cada participante selecionado, o evento gerador é 129 (titular/aposentado) ou 130 (pensionista), conforme o tipo de recebedor. São gravados EVENTOSPREV (FLGEFETIVADO = 0, flags imediatas 0, data de requerimento), BFCIARIOTITPLAN, PROCESSOBENEF, BENEFBFCIARIO, BENEFPLANOPART e atualizada BENEFHABILITA (FLGREQUERIMENTO, NUMEROPROCESSO). As críticas vão para LOGREQUERLOTE. Ao final, se “Gravação Individual” não estiver marcada, o usuário decide se grava (commit) ou não (rollback).</div>
+<p><strong>Campos de dados:</strong></p>
+<ul><li><code>EVENTOSPREV.IDEVENTOGERADOR</code> 129/130; <code>BENEFHABILITA.FLGREQUERIMENTO</code>; <code>cb_grava_indiv</code> (“Gravação Individual”)</li></ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT176">TRT176</a> → <a href="#MSG192">MSG192</a>, <a href="#MSG193">MSG193</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-18">JF018</a></p>
+<p><strong>Descrição original:</strong> “EventoGerador 129 ou 130 RN015”.</p>
+<p><strong>Condições:</strong> cb_tipo_recebedor.ItemIndex (0/3 por titular=pessoa; 1 = 129; 2 = 130)</p><p><strong>Dados envolvidos:</strong> EVENTOSPREV, BFCIARIOTITPLAN, PROCESSOBENEF, BENEFBFCIARIO, BENEFPLANOPART, BENEFHABILITA, LOGREQUERLOTE</p><p><strong>Resultado/Exceção:</strong> requerimentos gravados</p>
+<div class="rule-origin">📂 Origem: <code>CM/CMADMPREV/Fontes/FCadRequerBenefInssLote.pas:1328-1339, 1800-1870, 2334-2458, 2460-2760, 2887-2914, 3404-3440</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span> (dependência externa)</div></div>
+
+<div class="rule-block" id="CADPREV-RN117"><div class="rule-id">RS117 (CADPREV-RN117) — Desfazer requerimento só antes do pagamento pela folha</div>
+<div class="rule-desc">Desfazer exige tipo de recebedor e seleção; as matrículas devem ter benefício requerido (BENEFHABILITA.FLGREQUERIMENTO = 1). Se a pessoa já tiver o benefício na prévia da folha em mês de cobrança da conciliação, é recusada (“já teve (tiveram) o benefício processado pela folha de benefícios”). Os demais têm excluídos HSTBENEFBFCIARIO, MOVBENEF, RUBRICAINDIV, BENEFBFCIARIO, BFCIARIOTITPLAN, BENEFPLANOPART, PROCESSOBENEF e EVENTOSPREV, com confirmação de gravação.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul><li><code>BENEFHABILITA.FLGREQUERIMENTO</code>; <code>DETCONCINSS.MESCOBRANCA</code>; <code>PREVIA</code></li></ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT177">TRT177</a> → <a href="#MSG194">MSG194</a>–<a href="#MSG197">MSG197</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-18">JF018</a></p>
+<p><strong>Descrição original:</strong> marcações “msg16”, “msg19”.</p>
+<p><strong>Condições:</strong> PREVIA com mesmo IDBENEFICIO e MESCOBRANCA</p><p><strong>Dados envolvidos:</strong> tabelas acima</p><p><strong>Resultado/Exceção:</strong> requerimentos excluídos</p>
+<div class="rule-origin">📂 Origem: <code>CM/CMADMPREV/Fontes/FCadRequerBenefInssLote.pas:1922-2283, 2755-2860, 2924-2978, 3218-3240, 3441-3464</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span> (dependência externa)</div></div>
+
+<div class="rule-block" id="CADPREV-RN118"><div class="rule-id">RS118 (CADPREV-RN118) — Alteração de dados do detalhe INSS</div>
+<div class="rule-desc">Alterar o detalhe de uma habilitação exige que o benefício não esteja concedido/requerido (senão “É necessário desfazer a concessão/requerimento...”). Ao gravar, pede confirmação, nova confirmação se “Validado” estiver desmarcado, e valida RMI preenchida e DIB anterior em formato de data.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul><li>RMI — [obrigatório]; DIB Anterior — [data válida]; Validado (<code>cb_validado</code>)</li></ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT178">TRT178</a> → <a href="#MSG198">MSG198</a>–<a href="#MSG200">MSG200</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-18">JF018</a></p>
+<p><strong>Descrição original:</strong> marcações “msg21”, “msg22”, “msg25”.</p>
+<p><strong>Condições:</strong> BeneficioConcedido; RMI = ''; not IsDate(DIBANT)</p><p><strong>Dados envolvidos:</strong> BENEFHABILITA, BENEFBFCIARIO</p><p><strong>Resultado/Exceção:</strong> detalhe gravado ou recusado</p>
+<div class="rule-origin">📂 Origem: <code>CM/CMADMPREV/Fontes/FCadRequerBenefInssLote.pas:2285-2326, 3565-3600</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span> (dependência externa)</div></div>
+
+<p><strong>Regras transversais do módulo</strong> (texto completo em <a href="uc401.html">UC401</a>): <a href="uc401.html#CADPREV-RN001">RS001 (CADPREV-RN001) — Dados isolados por fundação</a>, <a href="uc401.html#CADPREV-RN003">RS003 (CADPREV-RN003) — Instituto troca a nomenclatura</a>, <a href="uc401.html#CADPREV-RN005">RS005 (CADPREV-RN005) — Log de operações</a>.</p>
+</div>
+
+<p><strong>Tratamentos de erro:</strong> <a href="#TRT175">TRT175</a>–<a href="#TRT178">TRT178</a></p>
+<p><strong>Mensagens:</strong> <a href="#MSG186">MSG186</a>–<a href="#MSG200">MSG200</a></p>
+<p><strong>Telas:</strong> Requerimento de Benefício do INSS (<code>CM/CMADMPREV/Fontes/FCadRequerBenefInssLote.dfm</code>)</p>
+<p><strong>Dependências:</strong> habilitação INSS e conciliação (BENEFICIOPREV, <a href="../beneficioprev/uc308.html">UC308</a>); concessão em lote (FrmCadConcederBenefInssLote, CMAdmPrev); eventos gerados podem ser alterados em <a href="#PF-17">JF017</a>.</p>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span> — informações que o repositório não comprova ou que divergem entre fontes. O texto existente foi mantido; os itens abaixo dependem de validação humana.</p>
+<ul>
+<li>O item de menu não chama CriaDataModule (<code>FPrincipal.pas:2666-2671</code>), ao contrário dos demais; confirmar se a tela depende de datamodules criados por ela mesma.</li>
+<li>A regra “filtro por fundação” não foi localizada na tela externa; confirmar se a lista de habilitações respeita a fundação do usuário (<a href="uc401.html#CADPREV-RN001">RS001</a>).</li>
+<li>Parte das críticas aparece comentada (<code>FCadRequerBenefInssLote.pas:1626-1640, 2019-2049</code>); o conjunto ativo de validações deve ser confirmado com a área de benefícios.</li>
+<li>A gravação de log de operações (<a href="uc401.html#CADPREV-RN005">RS005</a>) não foi identificada nesta tela, apenas LOGREQUERLOTE.</li>
+</ul>
+</div>
+<div class="note note-info"><p><strong>Registro original do processo PF-18</strong></p><p><strong>Forms de entrada:</strong> <code>FPrincipal.dfm</code> → <code>CM/CMADMPREV/Fontes/FCadRequerBenefInssLote.dfm</code></p><p><strong>Lógica de processamento:</strong> filtro e seleção; Requerer (eventos 129/130, processo, beneficiário, benefício); Desfazer; alteração de detalhe; Conceder</p><p><strong>Saídas:</strong> log de críticas e “DEMONSTRATIVO DE REQUERIMENTO DE BENEFÍCIOS DO INSS” (relatório da tela)</p><p><strong>Persistência (tabelas escritas):</strong> EVENTOSPREV, PROCESSOBENEF, BFCIARIOTITPLAN, BENEFBFCIARIO, BENEFPLANOPART, BENEFHABILITA, HSTBENEFBFCIARIO (D), MOVBENEF (D), RUBRICAINDIV (D), LOGREQUERLOTE</p><p><strong>Evidência:</strong> <code>CADASTROPREV/Fontes/FPrincipal.pas:2666-2671</code> · <span class="ev ev-comprovado">COMPROVADO</span>; tela externa <span class="ev ev-comprovado">COMPROVADO</span> nas linhas citadas</p></div>
+</div>
+
+<section id="TRT-section"><div class="section-title">6. Tratamentos (TRT)</div>
+<p>Cada tratamento traz a condição, a mensagem exibida, o resultado e a regra/jornada de origem. Telas externas: caminho completo a partir de <code>CM/CMADMPREV/Fontes</code>.</p>
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Condição</th><th>Mensagem</th><th>Resultado</th><th>Regra</th><th>Jornada</th></tr></thead><tbody>
+<tr id="TRT161"><td><strong>TRT161</strong></td><td>Nenhum evento encontrado para o participante (<code>FCancelaEvento.pas:917-922</code>; <code>FDesfazerEvento.pas:154-174</code>; <code>FAlteraEvento.pas:334-339</code>)</td><td><a href="#MSG161">MSG161</a></td><td>Limpa a tela</td><td><a href="#CADPREV-RN102">RS102</a>, <a href="#CADPREV-RN110">RS110</a></td><td><a href="#PF-16">JF016</a>, <a href="#PF-17">JF017</a></td></tr>
+<tr id="TRT162"><td><strong>TRT162</strong></td><td>Evento migrado (FLGMIGRADO = 1) (<code>FCancelaEvento.pas:905-911</code>; <code>FAlteraEvento.pas:322-328</code>)</td><td><a href="#MSG162">MSG162</a></td><td>Limpa a tela</td><td><a href="#CADPREV-RN102">RS102</a>, <a href="#CADPREV-RN110">RS110</a></td><td><a href="#PF-16">JF016</a>, <a href="#PF-17">JF017</a></td></tr>
+<tr id="TRT163"><td><strong>TRT163</strong></td><td>Evento gerador com FLGCANCELAMENTO = 0 (<code>FCancelaEvento.pas:925-930</code>)</td><td><a href="#MSG163">MSG163</a></td><td>Bloqueia</td><td><a href="#CADPREV-RN102">RS102</a></td><td><a href="#PF-16">JF016</a></td></tr>
+<tr id="TRT164"><td><strong>TRT164</strong></td><td>Evento a cancelar é transferência de plano (TP) (<code>FCancelaEvento.pas:1014-1021</code>)</td><td><a href="#MSG165">MSG165</a></td><td>Bloqueia; orienta cancelar a inscrição no destino</td><td><a href="#CADPREV-RN103">RS103</a></td><td><a href="#PF-16">JF016</a></td></tr>
+<tr id="TRT165"><td><strong>TRT165</strong></td><td>Cancelamento de inscrição com plano assistencial, empréstimo ou contribuições recebidas (<code>FCancelaEvento.pas:1042-1098</code>)</td><td><a href="#MSG166">MSG166</a>, <a href="#MSG167">MSG167</a>, <a href="#MSG168">MSG168</a></td><td>Bloqueia</td><td><a href="#CADPREV-RN104">RS104</a></td><td><a href="#PF-16">JF016</a></td></tr>
+<tr id="TRT166"><td><strong>TRT166</strong></td><td>Processos de benefício do evento já pagos / a excluir / quitação não desfeita (<code>FCancelaEvento.pas:1120-1165</code>; módulo 454: <code>:998-1004</code>)</td><td><a href="#MSG169">MSG169</a>, <a href="#MSG170">MSG170</a>, <a href="#MSG171">MSG171</a>, <a href="#MSG177">MSG177</a></td><td>Bloqueia ou pede confirmação</td><td><a href="#CADPREV-RN105">RS105</a></td><td><a href="#PF-16">JF016</a></td></tr>
+<tr id="TRT167"><td><strong>TRT167</strong></td><td>Falha ao criar Controle de Documentos / Lançamento Contábil na abertura (<code>FAlteraEvento.pas:436-466</code>; <code>FCancelaEvento.pas:3660-3690</code>)</td><td><a href="#MSG185">MSG185</a></td><td>Abort (tela não abre)</td><td>validação técnica</td><td><a href="#PF-16">JF016</a>, <a href="#PF-17">JF017</a></td></tr>
+<tr id="TRT168"><td><strong>TRT168</strong></td><td>Falha em CancelaOutrosEventos / CancelaEventoRetornoParaAtivo / CancelaEventoTransferenciaPlano (<code>FCancelaEvento.pas:1282-1308, 1342-1346</code>)</td><td><a href="#MSG172">MSG172</a></td><td>Rollback</td><td><a href="#CADPREV-RN106">RS106</a></td><td><a href="#PF-16">JF016</a></td></tr>
+<tr id="TRT169"><td><strong>TRT169</strong></td><td>Confirmação final do cancelamento; falha no log (<code>FCancelaEvento.pas:1467-1486</code>)</td><td><a href="#MSG173">MSG173</a>, <a href="#MSG174">MSG174</a>, <a href="#MSG175">MSG175</a></td><td>Sim: commit; Não: rollback; erro de log ignorado</td><td><a href="#CADPREV-RN106">RS106</a></td><td><a href="#PF-16">JF016</a></td></tr>
+<tr id="TRT170"><td><strong>TRT170</strong></td><td>Retorno para participante em manutenção (DM, AF ou situação MA) (<code>FDesfazerEvento.pas:219-240</code>)</td><td><a href="#MSG178">MSG178</a></td><td>Limpa data; bloqueia</td><td><a href="#CADPREV-RN108">RS108</a></td><td><a href="#PF-16">JF016</a></td></tr>
+<tr id="TRT171"><td><strong>TRT171</strong></td><td>Retorno sem participante ou sem Data do Retorno; confirmação (<code>FDesfazerEvento.pas:241-260</code>)</td><td><a href="#MSG164">MSG164</a>, <a href="#MSG179">MSG179</a>, <a href="#MSG180">MSG180</a></td><td>Foco no campo / “Não” limpa a tela</td><td><a href="#CADPREV-RN109">RS109</a></td><td><a href="#PF-16">JF016</a></td></tr>
+<tr id="TRT172"><td><strong>TRT172</strong></td><td>Erro ao gravar o retorno (EDBEngineError) (<code>FDesfazerEvento.pas:262-275, 334-341, 375-382, 394-401, 447-453</code>)</td><td><a href="#MSG181">MSG181</a> (após MostrarErro)</td><td>Rollback</td><td><a href="#CADPREV-RN109">RS109</a></td><td><a href="#PF-16">JF016</a></td></tr>
+<tr id="TRT173"><td><strong>TRT173</strong></td><td>Confirmação da alteração do evento (<code>FAlteraEvento.pas:394-409</code>)</td><td><a href="#MSG183">MSG183</a>, <a href="#MSG184">MSG184</a>, <a href="#MSG175">MSG175</a></td><td>Sim: ApplyUpdates + commit; Não: cancel + rollback</td><td><a href="#CADPREV-RN112">RS112</a></td><td><a href="#PF-17">JF017</a></td></tr>
+<tr id="TRT174"><td><strong>TRT174</strong></td><td>Cancelar na tela de alteração (<code>FAlteraEvento.pas:412-421</code>)</td><td><a href="#MSG176">MSG176</a></td><td>Limpa campos e cancela a edição (sem rollback da transação)</td><td><a href="#CADPREV-RN112">RS112</a></td><td><a href="#PF-17">JF017</a></td></tr>
+<tr id="TRT175"><td><strong>TRT175</strong></td><td>Requerimento sem tipo de recebedor, sem seleção ou com crítica do participante (<code>FCadRequerBenefInssLote.pas:1276-1300, 1321, 1352, 1693, 1725</code>)</td><td><a href="#MSG186">MSG186</a>–<a href="#MSG191">MSG191</a></td><td>Interrompe (algumas com rollback)</td><td><a href="#CADPREV-RN115">RS115</a></td><td><a href="#PF-18">JF018</a></td></tr>
+<tr id="TRT176"><td><strong>TRT176</strong></td><td>Fim do requerimento com ou sem falhas (<code>FCadRequerBenefInssLote.pas:1800-1870</code>)</td><td><a href="#MSG192">MSG192</a>, <a href="#MSG193">MSG193</a></td><td>Sem gravação individual: pergunta e faz commit/rollback; com gravação individual: apenas informa</td><td><a href="#CADPREV-RN116">RS116</a></td><td><a href="#PF-18">JF018</a></td></tr>
+<tr id="TRT177"><td><strong>TRT177</strong></td><td>Desfazer sem tipo/seleção, sem requerimento ou já processado pela folha (<code>FCadRequerBenefInssLote.pas:1950, 1964, 2010, 2099, 2217-2271</code>)</td><td><a href="#MSG194">MSG194</a>–<a href="#MSG197">MSG197</a></td><td>Bloqueia a matrícula / pergunta gravação</td><td><a href="#CADPREV-RN117">RS117</a></td><td><a href="#PF-18">JF018</a></td></tr>
+<tr id="TRT178"><td><strong>TRT178</strong></td><td>Alteração de detalhe com benefício concedido, sem validação ou com RMI/DIB inválidos (<code>FCadRequerBenefInssLote.pas:2285-2316</code>)</td><td><a href="#MSG198">MSG198</a>–<a href="#MSG200">MSG200</a></td><td>Bloqueia / pede confirmação</td><td><a href="#CADPREV-RN118">RS118</a></td><td><a href="#PF-18">JF018</a></td></tr>
+</tbody></table></div>
+</section>
+
+<section id="MSG-section"><div class="section-title">7. Mensagens (MSG)</div>
+<p>Textos conferidos no código-fonte (grafia original mantida). Trechos variáveis aparecem entre &lt; &gt;. Origem relativa a <code>CADASTROPREV/Fontes/</code> ou, para telas externas, a <code>CM/CMADMPREV/Fontes/</code>.</p>
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Texto da mensagem</th><th>Tipo</th><th>Origem</th><th>Jornadas</th></tr></thead><tbody>
+<tr id="MSG161"><td><strong>MSG161</strong></td><td>“Nenhum evento foi encontrado para este participante. Verifique. ”</td><td>Informação</td><td><code>CM/CMADMPREV/Fontes/FCancelaEvento.pas:919</code>; <code>FDesfazerEvento.pas:156, 171</code>; <code>CADASTROPREV/Fontes/FAlteraEvento.pas:336</code></td><td><a href="#PF-16">JF016</a>, <a href="#PF-17">JF017</a></td></tr>
+<tr id="MSG162"><td><strong>MSG162</strong></td><td>“ Este evento NÃO foi gerado pelo sistema. Não poderá ser cancelado. ”</td><td>Aviso</td><td><code>CM/CMADMPREV/Fontes/FCancelaEvento.pas:907</code>; <code>CADASTROPREV/Fontes/FAlteraEvento.pas:324</code></td><td><a href="#PF-16">JF016</a>, <a href="#PF-17">JF017</a></td></tr>
+<tr id="MSG163"><td><strong>MSG163</strong></td><td>“Esse evento não pode ser desfeito pelo sistema”</td><td>Aviso</td><td><code>CM/CMADMPREV/Fontes/FCancelaEvento.pas:927</code></td><td><a href="#PF-16">JF016</a></td></tr>
+<tr id="MSG164"><td><strong>MSG164</strong></td><td>“Primeiro selecione o Participante.”</td><td>Erro</td><td><code>CM/CMADMPREV/Fontes/FCancelaEvento.pas:1008</code>; <code>FDesfazerEvento.pas:243</code></td><td><a href="#PF-16">JF016</a></td></tr>
+<tr id="MSG165"><td><strong>MSG165</strong></td><td>“O evento de "Transferência de Plano" deve ser cancelado através do evento "Inscrição" no plano destino. Selecione o evento da categoria "Inscrição" no plano destino e cancele este evento. O evento de transferência será cancelado automaticamente. ”</td><td>Aviso</td><td><code>CM/CMADMPREV/Fontes/FCancelaEvento.pas:1016</code></td><td><a href="#PF-16">JF016</a></td></tr>
+<tr id="MSG166"><td><strong>MSG166</strong></td><td>“Este participante está vinculado ao Plano Assistencial &lt;nome&gt;.A operação de Cancelamento de Inscrição não é permitida para esta situação.”</td><td>Aviso</td><td><code>CM/CMADMPREV/Fontes/FCancelaEvento.pas:1056</code></td><td><a href="#PF-16">JF016</a></td></tr>
+<tr id="MSG167"><td><strong>MSG167</strong></td><td>“Este participante possui um Contrato de Empréstimo, Contrato No. &lt;n&gt;. A operação de Cancelamento de Inscrição não é permitida para esta situação.”</td><td>Aviso</td><td><code>CM/CMADMPREV/Fontes/FCancelaEvento.pas:1071</code></td><td><a href="#PF-16">JF016</a></td></tr>
+<tr id="MSG168"><td><strong>MSG168</strong></td><td>“Este participante possui contribuições já recebidas. A operação de Cancelamento de Inscrição não é permitida para esta situação.”</td><td>Aviso</td><td><code>CM/CMADMPREV/Fontes/FCancelaEvento.pas:1093</code></td><td><a href="#PF-16">JF016</a></td></tr>
+<tr id="MSG169"><td><strong>MSG169</strong></td><td>“O evento não pode ser desfeito pois já houve pagamento de benefícios para processos relacionados.”</td><td>Erro</td><td><code>CM/CMADMPREV/Fontes/FCancelaEvento.pas:1129</code></td><td><a href="#PF-16">JF016</a></td></tr>
+<tr id="MSG170"><td><strong>MSG170</strong></td><td>“Este evento gerou o(s) seguinte(s) Processo(s) de Benefício : &lt;lista&gt;.Este(s) processo(s) será(ão) EXCLUÍDO(S). Confirma ? ”</td><td>Confirmação</td><td><code>CM/CMADMPREV/Fontes/FCancelaEvento.pas:1134</code></td><td><a href="#PF-16">JF016</a></td></tr>
+<tr id="MSG171"><td><strong>MSG171</strong></td><td>“Não foi possível desfazer a quitação que foi efetuada neste evento.”</td><td>Erro</td><td><code>CM/CMADMPREV/Fontes/FCancelaEvento.pas:1162</code></td><td><a href="#PF-16">JF016</a></td></tr>
+<tr id="MSG172"><td><strong>MSG172</strong></td><td>“Erro no Cancelamento de Evento.”</td><td>Erro</td><td><code>CM/CMADMPREV/Fontes/FCancelaEvento.pas:1285, 1294, 1306, 1345</code></td><td><a href="#PF-16">JF016</a></td></tr>
+<tr id="MSG173"><td><strong>MSG173</strong></td><td>“Confirma cancelamento do evento ? ”</td><td>Confirmação</td><td><code>CM/CMADMPREV/Fontes/FCancelaEvento.pas:1474</code></td><td><a href="#PF-16">JF016</a></td></tr>
+<tr id="MSG174"><td><strong>MSG174</strong></td><td>“Cancelamento de Evento efetuado com sucesso.”</td><td>Informação</td><td><code>CM/CMADMPREV/Fontes/FCancelaEvento.pas:1477</code></td><td><a href="#PF-16">JF016</a></td></tr>
+<tr id="MSG175"><td><strong>MSG175</strong></td><td>“Operação Cancelada!!”</td><td>Informação</td><td><code>CM/CMADMPREV/Fontes/FCancelaEvento.pas:1483</code>; <code>CADASTROPREV/Fontes/FAlteraEvento.pas:405</code></td><td><a href="#PF-16">JF016</a>, <a href="#PF-17">JF017</a></td></tr>
+<tr id="MSG176"><td><strong>MSG176</strong></td><td>“Todas as operações executadas serão canceladas. Confirma ? ”</td><td>Confirmação</td><td><code>CM/CMADMPREV/Fontes/FCancelaEvento.pas:1493</code>; <code>CADASTROPREV/Fontes/FAlteraEvento.pas:415</code></td><td><a href="#PF-16">JF016</a>, <a href="#PF-17">JF017</a></td></tr>
+<tr id="MSG177"><td><strong>MSG177</strong></td><td>“Existem Operações de Benefícios para o Número de Processo: &lt;n&gt;. A operação de Cancelamento não é permitida para esta situação.” (somente módulo 454)</td><td>Erro</td><td><code>CM/CMADMPREV/Fontes/FCancelaEvento.pas:1000</code></td><td><a href="#PF-16">JF016</a></td></tr>
+<tr id="MSG178"><td><strong>MSG178</strong></td><td>“Este participante entrou em manutenção. Caso deseje retorná-lo para ativo, utilize um evento da categoria "Retorno de Mantido para Ativo".”</td><td>Erro</td><td><code>CM/CMADMPREV/Fontes/FDesfazerEvento.pas:221, 235</code></td><td><a href="#PF-16">JF016</a></td></tr>
+<tr id="MSG179"><td><strong>MSG179</strong></td><td>“A Data do Retorno deve ser informada.”</td><td>Erro</td><td><code>CM/CMADMPREV/Fontes/FDesfazerEvento.pas:250</code></td><td><a href="#PF-16">JF016</a></td></tr>
+<tr id="MSG180"><td><strong>MSG180</strong></td><td>“Confirma retorno do participante ?”</td><td>Confirmação</td><td><code>CM/CMADMPREV/Fontes/FDesfazerEvento.pas:255</code></td><td><a href="#PF-16">JF016</a></td></tr>
+<tr id="MSG181"><td><strong>MSG181</strong></td><td>“Evento não efetuado.”</td><td>Informação</td><td><code>CM/CMADMPREV/Fontes/FDesfazerEvento.pas:270</code></td><td><a href="#PF-16">JF016</a></td></tr>
+<tr id="MSG182"><td><strong>MSG182</strong></td><td>“Evento efetuado com sucesso.”</td><td>Informação</td><td><code>CM/CMADMPREV/Fontes/FDesfazerEvento.pas:274</code></td><td><a href="#PF-16">JF016</a></td></tr>
+<tr id="MSG183"><td><strong>MSG183</strong></td><td>“Confirma Alteração do evento? ”</td><td>Confirmação</td><td><code>FAlteraEvento.pas:394</code></td><td><a href="#PF-17">JF017</a></td></tr>
+<tr id="MSG184"><td><strong>MSG184</strong></td><td>“Alteração de Evento efetuado com sucesso.”</td><td>Informação</td><td><code>FAlteraEvento.pas:398</code></td><td><a href="#PF-17">JF017</a></td></tr>
+<tr id="MSG185"><td><strong>MSG185</strong></td><td>“Erro ao criar Controle de Documentos.” / “Erro ao criar Controle de Lançamento Contábil.”</td><td>Erro</td><td><code>FAlteraEvento.pas:448, 464</code>; <code>CM/CMADMPREV/Fontes/FCancelaEvento.pas:3672, 3688</code></td><td><a href="#PF-16">JF016</a>, <a href="#PF-17">JF017</a></td></tr>
+<tr id="MSG186"><td><strong>MSG186</strong></td><td>“ É necessário selecionar um dos tipos de recebedores disponíveis para requerimento do benefício.”</td><td>Erro</td><td><code>CM/CMADMPREV/Fontes/FCadRequerBenefInssLote.pas:824, 1279</code></td><td><a href="#PF-18">JF018</a></td></tr>
+<tr id="MSG187"><td><strong>MSG187</strong></td><td>“ É necessário selecionar pelo menos um participante para requerimento do benefício.”</td><td>Erro</td><td><code>CM/CMADMPREV/Fontes/FCadRequerBenefInssLote.pas:1296</code></td><td><a href="#PF-18">JF018</a></td></tr>
+<tr id="MSG188"><td><strong>MSG188</strong></td><td>“Pensionista sem matricula cadastrada.”</td><td>Erro</td><td><code>CM/CMADMPREV/Fontes/FCadRequerBenefInssLote.pas:1321</code></td><td><a href="#PF-18">JF018</a></td></tr>
+<tr id="MSG189"><td><strong>MSG189</strong></td><td>“O(s) Participante(s) abaixo possui(em) divergência no "Benefício" informado. Favor verificar! &lt;lista&gt;”</td><td>Erro</td><td><code>CM/CMADMPREV/Fontes/FCadRequerBenefInssLote.pas:1352</code></td><td><a href="#PF-18">JF018</a></td></tr>
+<tr id="MSG190"><td><strong>MSG190</strong></td><td>“O perfil de investimento do participante está inativo.”</td><td>Erro</td><td><code>CM/CMADMPREV/Fontes/FCadRequerBenefInssLote.pas:1693</code></td><td><a href="#PF-18">JF018</a></td></tr>
+<tr id="MSG191"><td><strong>MSG191</strong></td><td>“ É necessário associar os benefícios aos pensionistas para requerimento.”</td><td>Erro</td><td><code>CM/CMADMPREV/Fontes/FCadRequerBenefInssLote.pas:1725</code></td><td><a href="#PF-18">JF018</a></td></tr>
+<tr id="MSG192"><td><strong>MSG192</strong></td><td>“Para pelo menos uma matrícula selecionada não foi possível efetuar o requerimento do benefício. Verifique. Deseja gravar as alterações ?” (sem a pergunta quando “Gravação Individual”)</td><td>Confirmação / Erro</td><td><code>CM/CMADMPREV/Fontes/FCadRequerBenefInssLote.pas:1811, 1832</code></td><td><a href="#PF-18">JF018</a></td></tr>
+<tr id="MSG193"><td><strong>MSG193</strong></td><td>“ Requerimento efetuado com sucesso para as matrículas selecionadas.Deseja gravar as alterações ?” (ou “  Requerimento efetuado com sucesso para as matrículas selecionadas.”)</td><td>Confirmação / Informação</td><td><code>CM/CMADMPREV/Fontes/FCadRequerBenefInssLote.pas:1844, 1867</code></td><td><a href="#PF-18">JF018</a></td></tr>
+<tr id="MSG194"><td><strong>MSG194</strong></td><td>“ É necessário selecionar um dos tipos de recebedores disponíveis para desfazer o requerimento do benefício.” / “ É necessário selecionar pelo menos um participante para desfazer o requerimento do benefício.”</td><td>Erro</td><td><code>CM/CMADMPREV/Fontes/FCadRequerBenefInssLote.pas:1950, 1964</code></td><td><a href="#PF-18">JF018</a></td></tr>
+<tr id="MSG195"><td><strong>MSG195</strong></td><td>“ A(S) matrículas selecionada(s) não possui(em) benefício requererido”</td><td>Erro</td><td><code>CM/CMADMPREV/Fontes/FCadRequerBenefInssLote.pas:2010</code></td><td><a href="#PF-18">JF018</a></td></tr>
+<tr id="MSG196"><td><strong>MSG196</strong></td><td>“ A(S) matrículas &lt;lista&gt; já teve (tiveram) o benefício processado pela folha de benefícios”</td><td>Erro</td><td><code>CM/CMADMPREV/Fontes/FCadRequerBenefInssLote.pas:2099</code></td><td><a href="#PF-18">JF018</a></td></tr>
+<tr id="MSG197"><td><strong>MSG197</strong></td><td>“Para pelo menos uma matrícula selecionada não foi possível desfazer o requerimento do benefício. Verifique. Deseja gravar as alterações ?” / “Requerimento cancelados com sucesso para as matrículas selecionadas. Deseja gravar as alterações ?”</td><td>Confirmação</td><td><code>CM/CMADMPREV/Fontes/FCadRequerBenefInssLote.pas:2217, 2237, 2250, 2271</code></td><td><a href="#PF-18">JF018</a></td></tr>
+<tr id="MSG198"><td><strong>MSG198</strong></td><td>“É necessário desfazer a concessão/requerimento do benefício para realizar a alteração.”</td><td>Erro</td><td><code>CM/CMADMPREV/Fontes/FCadRequerBenefInssLote.pas:2290</code></td><td><a href="#PF-18">JF018</a></td></tr>
+<tr id="MSG199"><td><strong>MSG199</strong></td><td>“Deseja gravar as alterações ? ” / “Alterações foram efetuadas e o campo "Validado" está desmarcado - Deseja confirmar a alteração sem a validação ? ”</td><td>Confirmação</td><td><code>CM/CMADMPREV/Fontes/FCadRequerBenefInssLote.pas:2295, 2300</code></td><td><a href="#PF-18">JF018</a></td></tr>
+<tr id="MSG200"><td><strong>MSG200</strong></td><td>“ A RMI para a matrícula &lt;m&gt; não está no formato correto.” / “ A DIB Anterior para a matrícula &lt;m&gt; não está no formato correto.”</td><td>Erro</td><td><code>CM/CMADMPREV/Fontes/FCadRequerBenefInssLote.pas:2307, 2313</code></td><td><a href="#PF-18">JF018</a></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">8. Tabela/API/Programa</div>
+<div class="table-wrap"><table><thead><tr><th>Jornada</th><th>Tabelas (escrita)</th><th>Rotinas</th></tr></thead><tbody>
+<tr><td><a href="#PF-16">JF016</a></td><td>EVENTOSPREV (I/U/D), ELEGPATRO (U), PARTPREVPLAN (U), CONTRIBPREVPARTP (U/I), HSTCONTEVENTOSPR, PROCESSOBENEF/BENEFBFCIARIO/HSTBENEFBFCIARIO (D), PESSOAFISICA (U), log de operações</td><td><code>CADASTROPREV/Fontes/FPrincipal.pas:2147-2152, 1778-1805</code>; <code>CM/CMADMPREV/Fontes/FCancelaEvento.pas:964-1486</code>; <code>CM/CMADMPREV/Fontes/FDesfazerEvento.pas:228-457</code></td></tr>
+<tr><td><a href="#PF-17">JF017</a></td><td>EVENTOSPREV (U)</td><td><code>CADASTROPREV/Fontes/FPrincipal.pas:2766-2771</code>; <code>FAlteraEvento.pas:270-421</code>; <code>FAlteraEvento.dfm:1286-1301, 1461-1498</code></td></tr>
+<tr><td><a href="#PF-18">JF018</a></td><td>EVENTOSPREV, PROCESSOBENEF, BFCIARIOTITPLAN, BENEFBFCIARIO, BENEFPLANOPART (I/D), BENEFHABILITA (U), HSTBENEFBFCIARIO, MOVBENEF, RUBRICAINDIV (D), LOGREQUERLOTE (I/D)</td><td><code>CADASTROPREV/Fontes/FPrincipal.pas:2666-2671</code>; <code>CM/CMADMPREV/Fontes/FCadRequerBenefInssLote.pas:1239-2283, 2334-2978, 3404-3464</code></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">9. Telas/Layouts</div>
+<div class="table-wrap"><table><thead><tr><th>Jornada</th><th>Tela (título)</th><th>Form (.dfm)</th></tr></thead><tbody>
+<tr><td><a href="#PF-16">JF016</a></td><td>Cancelamento de Eventos Registrados<br>Retornar do Evento (título em execução “Retorno - &lt;evento&gt;”)</td><td><code>CM/CMADMPREV/Fontes/FCancelaEvento.dfm</code><br><code>CM/CMADMPREV/Fontes/FDesfazerEvento.dfm</code></td></tr>
+<tr><td><a href="#PF-17">JF017</a></td><td>Alteração de Eventos</td><td><code>FAlteraEvento.dfm</code></td></tr>
+<tr><td><a href="#PF-18">JF018</a></td><td>Requerimento de Benefício do INSS</td><td><code>CM/CMADMPREV/Fontes/FCadRequerBenefInssLote.dfm</code></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">10. Visão Consolidada das Jornadas</div>
+<div class="table-wrap"><table><thead><tr><th>Item</th><th>Jornada</th><th>Título</th><th>Critério de aceitação</th><th>Regras</th><th>Mensagens</th><th>Telas</th></tr></thead><tbody>
+<tr><td>[US] CADPREV-JF016</td><td><a href="#PF-16">JF016</a></td><td>Cancelar evento registrado e retorno de evento</td><td><strong>Dado</strong> o último evento de um participante gerado pelo sistema, cancelável e sem benefício pago, <strong>Quando</strong> o analista confirma o cancelamento, <strong>Então</strong> o evento é revertido, o log é gravado e a transação é confirmada; <strong>Dado</strong> um evento que admite retorno, <strong>Quando</strong> o analista informa a data de retorno e confirma, <strong>Então</strong> a data de volta e a situação anterior são gravadas.</td><td><a href="#CADPREV-RN101">RS101</a>–<a href="#CADPREV-RN109">RS109</a></td><td><a href="#MSG161">MSG161</a>–<a href="#MSG182">MSG182</a></td><td>Cancelamento de Eventos Registrados; Retornar do Evento</td></tr>
+<tr><td>[US] CADPREV-JF017</td><td><a href="#PF-17">JF017</a></td><td>Alterar evento</td><td><strong>Dado</strong> um evento não efetivado e não migrado, <strong>Quando</strong> o analista altera campos e confirma, <strong>Então</strong> EVENTOSPREV é atualizado e a transação confirmada.</td><td><a href="#CADPREV-RN110">RS110</a>–<a href="#CADPREV-RN113">RS113</a></td><td><a href="#MSG161">MSG161</a>, <a href="#MSG162">MSG162</a>, <a href="#MSG175">MSG175</a>, <a href="#MSG176">MSG176</a>, <a href="#MSG183">MSG183</a>–<a href="#MSG185">MSG185</a></td><td>Alteração de Eventos</td></tr>
+<tr><td>[US] CADPREV-JF018</td><td><a href="#PF-18">JF018</a></td><td>Requerimento de benefícios do INSS em lote</td><td><strong>Dado</strong> habilitações INSS selecionadas e um tipo de recebedor, <strong>Quando</strong> o analista clica “Requerer” e confirma a gravação, <strong>Então</strong> cada participante sem crítica recebe evento 129/130 não efetivado, processo e benefício.</td><td><a href="#CADPREV-RN114">RS114</a>–<a href="#CADPREV-RN118">RS118</a></td><td><a href="#MSG186">MSG186</a>–<a href="#MSG200">MSG200</a></td><td>Requerimento de Benefício do INSS</td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">11. Critérios de Aceitação por Regra</div>
+<div class="table-wrap"><table><thead><tr><th>Regra</th><th>Jornada</th><th>Critério de aceitação</th></tr></thead><tbody>
+<tr><td><a href="#CADPREV-RN101">RS101 (CADPREV-RN101)</a></td><td><a href="#PF-16">JF016</a></td><td><strong>Dado</strong> um usuário do Cadastro Previdenciário, <strong>Quando</strong> abre “Cancelar Evento Registrado”, <strong>Então</strong> a busca lista eventos de todas as categorias, apenas de patrocinadoras da sua fundação.</td></tr>
+<tr><td><a href="#CADPREV-RN102">RS102 (CADPREV-RN102)</a></td><td><a href="#PF-16">JF016</a></td><td><strong>Dado</strong> um evento com FLGMIGRADO = 1, <strong>Quando</strong> é selecionado para cancelamento, <strong>Então</strong> o sistema mostra <a href="#MSG162">MSG162</a> e limpa a tela.</td></tr>
+<tr><td><a href="#CADPREV-RN103">RS103 (CADPREV-RN103)</a></td><td><a href="#PF-16">JF016</a></td><td><strong>Dado</strong> um evento TP selecionado, <strong>Quando</strong> o analista confirma, <strong>Então</strong> o sistema mostra <a href="#MSG165">MSG165</a> e não cancela.</td></tr>
+<tr><td><a href="#CADPREV-RN104">RS104 (CADPREV-RN104)</a></td><td><a href="#PF-16">JF016</a></td><td><strong>Dado</strong> um evento de inscrição de participante com contrato de empréstimo, <strong>Quando</strong> o analista confirma, <strong>Então</strong> o sistema mostra <a href="#MSG167">MSG167</a> e não cancela.</td></tr>
+<tr><td><a href="#CADPREV-RN105">RS105 (CADPREV-RN105)</a></td><td><a href="#PF-16">JF016</a></td><td><strong>Dado</strong> um evento cujo processo de benefício já teve pagamento, <strong>Quando</strong> o analista confirma, <strong>Então</strong> o sistema mostra <a href="#MSG169">MSG169</a> e não cancela.</td></tr>
+<tr><td><a href="#CADPREV-RN106">RS106 (CADPREV-RN106)</a></td><td><a href="#PF-16">JF016</a></td><td><strong>Dado</strong> o cancelamento executado sem erro, <strong>Quando</strong> o analista responde “Não” a <a href="#MSG173">MSG173</a>, <strong>Então</strong> a transação é desfeita e nada muda.</td></tr>
+<tr><td><a href="#CADPREV-RN107">RS107 (CADPREV-RN107)</a></td><td><a href="#PF-16">JF016</a></td><td><strong>Dado</strong> eventos CI sem FLGACEITARETORNO = 1, <strong>Quando</strong> o menu é montado, <strong>Então</strong> o submenu de Cancelamento por Inadimplência não mostra “Retorno”; para OE, AF, AR e CP o item aparece sempre que houver evento.</td></tr>
+<tr><td><a href="#CADPREV-RN108">RS108 (CADPREV-RN108)</a></td><td><a href="#PF-16">JF016</a></td><td><strong>Dado</strong> um participante cujo último evento é DM, <strong>Quando</strong> o analista tenta o retorno, <strong>Então</strong> o sistema mostra <a href="#MSG178">MSG178</a> e não grava.</td></tr>
+<tr><td><a href="#CADPREV-RN109">RS109 (CADPREV-RN109)</a></td><td><a href="#PF-16">JF016</a></td><td><strong>Dado</strong> um evento temporário e a Data do Retorno R, <strong>Quando</strong> o analista confirma, <strong>Então</strong> EVENTOSPREV.DATAVOLTA = R, as situações voltam às anteriores e, havendo evento anterior, é gravado novo evento com data R.</td></tr>
+<tr><td><a href="#CADPREV-RN110">RS110 (CADPREV-RN110)</a></td><td><a href="#PF-17">JF017</a></td><td><strong>Dado</strong> um evento migrado, <strong>Quando</strong> é escolhido em “Alterar Evento”, <strong>Então</strong> o sistema mostra <a href="#MSG162">MSG162</a> e não permite editar.</td></tr>
+<tr><td><a href="#CADPREV-RN111">RS111 (CADPREV-RN111)</a></td><td><a href="#PF-17">JF017</a></td><td><strong>Dado</strong> um evento com FLGEFETIVADO = 1, <strong>Quando</strong> é carregado, <strong>Então</strong> o registro não entra em modo de edição.</td></tr>
+<tr><td><a href="#CADPREV-RN112">RS112 (CADPREV-RN112)</a></td><td><a href="#PF-17">JF017</a></td><td><strong>Dado</strong> um evento em edição com a data do evento alterada, <strong>Quando</strong> o analista confirma <a href="#MSG183">MSG183</a>, <strong>Então</strong> EVENTOSPREV é atualizado e nenhuma outra tabela é alterada.</td></tr>
+<tr><td><a href="#CADPREV-RN113">RS113 (CADPREV-RN113)</a></td><td><a href="#PF-17">JF017</a></td><td><strong>Dado</strong> o módulo Cadastro Previdenciário (452), <strong>Quando</strong> a busca é aberta, <strong>Então</strong> eventos de qualquer evento gerador da fundação são listados (sem o filtro 129/130).</td></tr>
+<tr><td><a href="#CADPREV-RN114">RS114 (CADPREV-RN114)</a></td><td><a href="#PF-18">JF018</a></td><td><strong>Dado</strong> o menu Eventos, <strong>Quando</strong> o usuário clica “Requerimento de Benefícios do INSS em Lote”, <strong>Então</strong> a tela “Requerimento de Benefício do INSS” é aberta.</td></tr>
+<tr><td><a href="#CADPREV-RN115">RS115 (CADPREV-RN115)</a></td><td><a href="#PF-18">JF018</a></td><td><strong>Dado</strong> nenhum participante marcado, <strong>Quando</strong> o analista clica “Requerer”, <strong>Então</strong> o sistema mostra <a href="#MSG187">MSG187</a>.</td></tr>
+<tr><td><a href="#CADPREV-RN116">RS116 (CADPREV-RN116)</a></td><td><a href="#PF-18">JF018</a></td><td><strong>Dado</strong> um pensionista selecionado, <strong>Quando</strong> o requerimento é gravado, <strong>Então</strong> é criado EVENTOSPREV com evento 130 e FLGEFETIVADO = 0.</td></tr>
+<tr><td><a href="#CADPREV-RN117">RS117 (CADPREV-RN117)</a></td><td><a href="#PF-18">JF018</a></td><td><strong>Dado</strong> uma matrícula cujo benefício já está na prévia da folha, <strong>Quando</strong> o analista tenta desfazer, <strong>Então</strong> o sistema mostra <a href="#MSG196">MSG196</a> para ela.</td></tr>
+<tr><td><a href="#CADPREV-RN118">RS118 (CADPREV-RN118)</a></td><td><a href="#PF-18">JF018</a></td><td><strong>Dado</strong> um benefício já requerido, <strong>Quando</strong> o analista tenta alterar o detalhe, <strong>Então</strong> o sistema mostra <a href="#MSG198">MSG198</a>.</td></tr>
+</tbody></table></div>
+</section>
+
+<p><a class="back-btn" href="funcionalidades.html">← Voltar à lista de Casos de Uso (Processos Funcionais)</a></p>
+</main>
+<footer>
+<p>Blueprint AS-IS — PFC-73 — Processos Funcionais organizados em Casos de Uso — Módulo CADASTROPREV | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-24</p>
+</footer>
+</body>
+</html>
