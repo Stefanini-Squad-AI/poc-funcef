@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cadastro Previdenciário — UC403 – Transferir Participante de Plano ou Patrocinadora — Blueprint AS-IS</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<header>
+  <div class="badge">Blueprint AS-IS — PFC-73 — Processos Funcionais</div>
+  <h1>UC403 – Transferir Participante de Plano ou Patrocinadora</h1>
+  <p>Caso de uso do módulo Cadastro Previdenciário: 2 jornada(s) funcional(is) e 20 regra(s) de negócio descritas dentro de cada jornada.</p>
+</header>
+<nav>
+  <a href="index.html">📋 Visão Geral</a>
+  <a href="arquitetura.html">🏗️ Arquitetura</a>
+  <a href="inventario-tecnico.html">📦 Inventário</a>
+  <a href="funcionalidades.html">⚙️ Processos Funcionais</a>
+  <a href="procedures-functions.html">🔧 Procedures</a>
+  <a href="dados.html">🗄️ Dados</a>
+  <a href="relatorios.html">📄 Relatórios</a>
+  <a href="integracoes.html">🔗 Integrações</a>
+  <a href="tratamento-erros.html">⚠️ Erros</a>
+  <a href="diagramas-fluxo.html">🔀 Fluxos</a>
+  <a href="lacunas.html">🔍 Lacunas</a>
+  <a href="controle-cobertura.html">📊 Cobertura</a>
+</nav>
+<main>
+
+<a class="back-btn" href="funcionalidades.html">← Voltar à lista de Casos de Uso (Processos Funcionais)</a>
+<div class="breadcrumb"><a href="index.html">Cadastro Previdenciário</a> › <a href="funcionalidades.html">Processos Funcionais</a> › UC403</div>
+
+<section><div class="section-title">1. Identificação</div>
+<div class="table-wrap"><table><tbody>
+<tr><th>Caso de Uso</th><td><strong>UC403 – Transferir Participante de Plano ou Patrocinadora</strong></td></tr>
+<tr><th>Módulo</th><td>CADASTROPREV — Cadastro Previdenciário</td></tr>
+<tr><th>Sistema</th><td>CM Contabilidade / FUNCEF (Delphi 5 / VCL / MIDAS / Oracle)</td></tr>
+<tr><th>Tipo</th><td>Sistema Desktop</td></tr>
+<tr><th>Ator</th><td>Usuário operacional da área de cadastro previdenciário (analistas de cadastro e de benefícios responsáveis por migrações de plano e mudanças de patrocinadora)</td></tr>
+<tr><th>Jornadas</th><td><a href="#PF-09">JF009 — Transferência de plano</a>, <a href="#PF-10">JF010 — Transferência de patrocinadora individual/em lote</a></td></tr>
+<tr><th>Regras de negócio</th><td>20 regra(s) CADPREV-RN (RN061–RN080), descritas na íntegra dentro de cada jornada; regras transversais em <a href="uc401.html">UC401</a></td></tr>
+<tr><th>OS - Título</th><td>PFC-73 — Blueprint Cadastro Previdenciário</td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">2. Descrição Resumida</div>
+<p>Mudança do vínculo previdenciário de um participante (ou de um pensionista/beneficiário) para outro plano da mesma patrocinadora, ou para outra patrocinadora mantendo o plano. Este caso de uso reúne 2 jornada(s) funcional(is) do módulo Cadastro Previdenciário:</p>
+<ul>
+<li><a href="#PF-09"><strong>JF009 — Transferência de plano</strong></a>: encerrar a participação no plano de origem e inscrever a pessoa no plano de destino, levando reservas, contribuições e benefícios em manutenção, com demonstrativo e efetivação controlada (individual, por núcleo familiar ou em lote por arquivo de matrículas). Inclui o “Desfazer” da transferência.</li>
+<li><a href="#PF-10"><strong>JF010 — Transferência de patrocinadora individual/em lote</strong></a>: mover um participante (ou todos os que atendem a um filtro) de uma patrocinadora para outra, mantendo o mesmo plano previdenciário, com cópia do cadastro funcional, da inscrição, das contribuições, das reservas e dos benefícios ativos.</li>
+</ul>
+<p><strong>Necessidade de negócio:</strong> ao longo da vida laboral, o participante pode migrar de plano (por exemplo, numa reestruturação de planos de uma patrocinadora) ou ser transferido entre empresas do mesmo grupo (patrocinadoras). Em ambos os casos a entidade precisa preservar o histórico — a participação antiga é encerrada, não apagada —, levar o saldo das reservas e as contribuições para o novo vínculo e manter o pagamento dos benefícios de quem já está aposentado ou é pensionista, sem pagar em duplicidade e lançando as diferenças na próxima folha.</p>
+<p><strong>Quem inicia:</strong> sempre o usuário, pelo menu <em>Eventos › Cadastrais › Transferências</em>. Os itens desse submenu são os eventos cadastrados em EVENTOGERADOR com código interno TP (transferência de plano) e TE (transferência de patrocinadora) (<code>FPrincipal.pas:1053-1097</code>; <a href="uc401.html#CADPREV-RN002">RS002</a>). O item “Transferência de Reserva” (TR) existe mas está oculto (<code>FPrincipal.dfm:8501-8505</code>).</p>
+<p><strong>Resultado esperado:</strong> na transferência de plano, a pessoa fica inscrita no plano destino, desativada no plano de origem, com reservas transportadas, contribuições reassociadas e benefícios recriados no plano destino; nada é gravado definitivamente até o usuário clicar em “Efetivar”. Na transferência de patrocinadora, o participante passa a constar na nova patrocinadora (elegível, inscrição, contribuições, benefícios, histórico funcional), com evento registrado e operação no log.</p>
+<p><strong>Termos, siglas e componentes citados nesta página</strong> — explicados na primeira vez em que aparecem; a coluna “Fonte” indica onde a explicação foi conferida no repositório:</p>
+<div class="table-wrap"><table><thead><tr><th>Termo</th><th>O que significa</th><th>Fonte</th></tr></thead><tbody>
+<tr><td><strong>EVENTOGERADOR / FLGINTERNO</strong></td><td>Catálogo de eventos previdenciários por fundação. O código interno (FLGINTERNO) classifica o evento: TP = transferência de plano, TE = transferência de patrocinadora, TR = transferência de reserva. O nome do evento vira o título da tela.</td><td><code>FPrincipal.pas:1053-1097, 1504-1549</code></td></tr>
+<tr><td><strong>FLGSIMULA</strong></td><td>Indicador do evento de transferência de plano: com valor '1' o sistema abre a tela de migração com simulação do CMAdmPrev (FEventoTransfPlanoNOVO) em vez da tela local.</td><td><code>FPrincipal.pas:1520-1531</code></td></tr>
+<tr><td><strong>PARTPREVPLAN</strong></td><td>Vínculo (inscrição) do participante com um plano em uma patrocinadora: situação no plano, número e data de inscrição, salário de participação, FLGDESATIVADO (1 = vínculo encerrado).</td><td><code>FEventoTransfPlano.pas:3380-3505</code></td></tr>
+<tr><td><strong>ELEGPATRO</strong></td><td>Cadastro do empregado (elegível) na patrocinadora: matrícula, situação funcional, datas de admissão/demissão e opções de contribuição (VALORBASE1..6).</td><td><code>fTransfPatroBatch.pas:540-650</code></td></tr>
+<tr><td><strong>DE-PARA de benefícios (BENEFTRANSFPLANO)</strong></td><td>Tabela que diz, para cada par plano origem → plano destino e evento, qual benefício do destino substitui cada benefício do origem e qual regra de cálculo usar.</td><td><code>FEventoTransfPlano.pas:1758-1815, 2230-2344</code></td></tr>
+<tr><td><strong>RESERVAPART / HISTMOVRESERVA</strong></td><td>Saldos de reserva (poupança previdenciária) do participante por tipo de reserva e plano, e o histórico de movimentos desses saldos.</td><td><code>FEventoTransfPlano.pas:3511-3621</code></td></tr>
+<tr><td><strong>Padrão de movimentação de reservas</strong></td><td>Rotina do CMAdmPrev (RODAPADRAOMOVRESERVA / DESFAZPADRAOMOVRESERVA, unit UMovReserva) que aplica as regras de movimentação de reservas parametrizadas para o evento. A lógica interna é externa ao módulo.</td><td><code>CM/CMADMPREV/Fontes/UMovReserva.pas:566, 711</code></td></tr>
+<tr><td><strong>CONTRIBPREVPARTP / CONTRIBPREVNUCLEO</strong></td><td>Contribuições associadas ao participante (por plano) e ao núcleo familiar do pensionista. FLGCOBRA = 1 indica cobrança ativa.</td><td><code>FEventoTransfPlano.pas:3643, 3752</code></td></tr>
+<tr><td><strong>HSTCONTEVENTOSPR</strong></td><td>Histórico das contribuições desassociadas e associadas por um evento (permite desfazer o evento).</td><td><code>FEventoTransfPlano.pas:7007-7176</code></td></tr>
+<tr><td><strong>BENEFBFCIARIO / BFCIARIOTITPLAN / PROCESSOBENEF</strong></td><td>Benefício de cada beneficiário, vínculo beneficiário × titular × plano × benefício (recebedor, percentual, núcleo familiar) e processo de benefício (IDSITPROCESSO 3 = encerrado neste contexto).</td><td><code>FEventoTransfPlano.pas:3886-4596</code></td></tr>
+<tr><td><strong>HSTBENEFBFCIARIO / HSTCONTRIBPREV</strong></td><td>Histórico mensal de pagamento de benefícios e de cobrança de contribuições (preparos de folha).</td><td><code>FEventoTransfPlano.pas:7374-7540</code></td></tr>
+<tr><td><strong>Lote de folha (CTRLINTERFACE)</strong></td><td>Lote de folha de benefícios preparado em que os novos benefícios e acertos serão pagos (TIPO 'B', preparado, de concessão).</td><td><code>FEventoTransfPlano.dfm:2390-2401</code>; <code>FEventoTransfPlano.pas:7589-7616</code></td></tr>
+<tr><td><strong>PREVIA</strong></td><td>Prévia da folha de benefícios; um valor pendente para o participante no mês do lote impede a migração dos benefícios.</td><td><code>FEventoTransfPlano.pas:3806-3830</code></td></tr>
+<tr><td><strong>Demonstrativo</strong></td><td>Janela “Demonstrativos” com duas abas: “Demonstrativo de cálculo” (memResult) e “Erros” (memErros). Pode ser impressa ou salva em arquivo.</td><td><code>FEventoTransfPlano.dfm:966-1159</code>; <code>FEventoTransfPlano.pas:5322-5387</code></td></tr>
+<tr><td><strong>Efetivar</strong></td><td>Botão que confirma (commit) a transação do banco após a conferência do demonstrativo. Antes dele, tudo pode ser descartado.</td><td><code>FEventoTransfPlano.pas:5390-5397</code></td></tr>
+<tr><td><strong>CONTRATOEMPTMO</strong></td><td>Contratos de empréstimo do participante, vinculados à patrocinadora e ao plano.</td><td><code>FEventoTransfPlano.pas:7756-7804</code>; <code>fTransfPatroBatch.pas:1194-1205</code></td></tr>
+<tr><td><strong>HISTFUNCPREV</strong></td><td>Histórico funcional do participante na patrocinadora (cargos, períodos).</td><td><code>fTransfPatroBatch.pas:1102-1192</code></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">3. Pré-condições</div>
+<p><strong>Gerais do módulo:</strong></p>
+<ul>
+<li>Módulo disponível (<code>CADASTROPREV/Fontes/CadastroPrev.dpr</code>) e usuário com acesso ao menu Eventos.</li>
+<li>Eventos TP/TE cadastrados em EVENTOGERADOR para a fundação do usuário (<a href="uc401.html#CADPREV-RN001">RS001</a>, <a href="uc401.html#CADPREV-RN002">RS002</a>).</li>
+<li>Componentes externos do CMAdmPrev disponíveis: UMovReserva, UEventos, UBeneficio, UAdmPrev, motor de regras e FCadOpcoesElegivel/FNumInsc.</li>
+</ul>
+<p><strong>O que as pré-condições gerais significam na prática:</strong> o item de menu só aparece se houver evento do tipo cadastrado para a fundação. Os cálculos (reservas, benefícios, contribuições) dependem de regras parametrizadas e de rotinas do CMAdmPrev; sem elas a transferência falha e o erro aparece no demonstrativo.</p>
+<p><strong>Por jornada:</strong></p>
+<ul>
+<li><a href="#PF-09">JF009</a>: participante inscrito no plano de origem (PARTPREVPLAN); plano destino ligado à mesma patrocinadora (PLANPREVPATRO); situações do plano permitidas para o evento (EVENTOXSITPLAPREV); DE-PARA de benefícios (BENEFTRANSFPLANO) quando houver benefício; lote de folha preparado quando houver benefício a migrar.</li>
+<li><a href="#PF-10">JF010</a>: patrocinadoras de origem e destino da fundação; plano ativo na patrocinadora destino (PLANPREVPATRO.FLGATIVO = 1); participante ativo (FLGDESATIVADO = 0) na situação funcional escolhida.</li>
+</ul>
+<p><strong>Pré-condições por jornada, em termos de negócio:</strong></p>
+<ul>
+<li><a href="#PF-09">JF009</a>: a pessoa precisa estar inscrita no plano antigo; o novo plano precisa ser um plano da mesma patrocinadora; se a pessoa recebe benefício, a área de planos precisa ter definido qual benefício do novo plano substitui o antigo; não pode haver pagamento pendente na prévia da folha para ela.</li>
+<li><a href="#PF-10">JF010</a>: a nova patrocinadora precisa oferecer o mesmo plano previdenciário, ativo.</li>
+</ul>
+</section>
+
+<section><div class="section-title">4. Pós-condições</div>
+<ul>
+<li><a href="#PF-09">JF009</a>: PARTPREVPLAN origem desativado (FLGDESATIVADO = 1, DATACANCELAMENTO = data do evento − 1) e novo PARTPREVPLAN no destino; EVENTOSPREV gravado; RESERVAPART destino criado e origem zerado (HISTMOVRESERVA); contribuições suspensas no origem e associadas no destino (CONTRIBPREVPARTP/CONTRIBPREVNUCLEO, HSTCONTEVENTOSPR); benefícios recriados no destino e encerrados no origem (BFCIARIOTITPLAN, PROCESSOBENEF, BENEFBFCIARIO, HSTBENEFBFCIARIO); CONTRATOEMPTMO apontando para o plano destino. Tudo pendente de “Efetivar”.</li>
+<li><a href="#PF-10">JF010</a>: ELEGPATRO/PARTPREVPLAN/CONTRIBPREVPARTP/BENEFPLANOPART/BFCIARIOTITPLAN/BENEFBFCIARIO/HISTFUNCPREV replicados na patrocinadora destino; vínculos antigos encerrados; EVENTOSPREV gravado; CONTRATOEMPTMO atualizado (individual); log de operações gravado; commit por participante.</li>
+</ul>
+<p><strong>Resultado de negócio de cada jornada:</strong></p>
+<ul>
+<li><a href="#PF-09">JF009</a> — <em>sucesso:</em> o usuário vê o demonstrativo de cálculo e efetiva. <em>Interrupções:</em> qualquer erro de uma etapa é registrado no demonstrativo de erros; no modo individual a transação é desfeita (<a href="#MSG101">MSG101</a>); no lote o comportamento depende da opção “Efetivar migração apenas após demonstrativo” (<a href="#CADPREV-RN075">RS075</a>). Fechar a tela sem efetivar desfaz tudo.</li>
+<li><a href="#PF-10">JF010</a> — <em>sucesso:</em> mensagem <a href="#MSG117">MSG117</a>. <em>Erro:</em> o participante com erro é desfeito e listado na janela “Resultado” (<a href="#MSG120">MSG120</a>).</li>
+</ul>
+</section>
+
+<section><div class="section-title">5. Jornadas Funcionais (JF009, JF010)</div>
+<p>Cada jornada traz objetivo, ator/gatilho, pré e pós-condições, sequência operacional, ações práticas, <strong>regras de negócio da jornada</strong> (texto completo de cada regra), tratamentos e mensagens.</p>
+<p><strong>Como as jornadas deste caso de uso se relacionam:</strong> as duas são independentes e ficam no mesmo submenu “Transferências”. A transferência de plano (JF009) troca o plano e mantém a patrocinadora; a transferência de patrocinadora (JF010) troca a patrocinadora e mantém o plano. Uma transferência de plano gravada pode ser revertida pelo botão “Desfazer” da própria tela (JF009); o cancelamento genérico de eventos (<a href="uc405.html#PF-16">JF016</a>) não cancela diretamente eventos TP.</p>
+<div class="legend"><span><span class="ev ev-comprovado">COMPROVADO</span> — no código</span><span><span class="ev ev-inferido">INFERIDO</span> — plausível</span><span><span class="ev ev-pendente">PENDENTE</span> — validar</span></div>
+</section>
+
+<div class="pf-block" id="PF-09"><h4>JF009 (PF-09) — Transferência de plano</h4>
+<p><strong>Objetivo:</strong> transferir um participante titular, um beneficiário (com todo o núcleo familiar) ou uma lista de matrículas de um plano para outro plano da mesma patrocinadora, levando reservas, contribuições e benefícios, com demonstrativo antes da efetivação.</p>
+<p><strong>Necessidade de negócio:</strong> quando a patrocinadora reorganiza seus planos ou o participante opta por migrar, o vínculo antigo deve ser encerrado e o novo criado sem perda de histórico, de saldo de reserva ou de pagamento de benefício. A entidade precisa conferir o resultado (demonstrativo) antes de tornar a migração definitiva.</p>
+<p><strong>Ator / gatilho:</strong> analista de cadastro, menu <em>Eventos › Cadastrais › Transferências › Transferência de Plano › &lt;nome do evento TP&gt;</em> (<code>FPrincipal.dfm:8498-8511</code>; <code>FPrincipal.pas:1053-1074, 1504-1531</code>).</p>
+<p><strong>Pré-condições:</strong> participante em PARTPREVPLAN no plano de origem; plano destino em PLANPREVPATRO da mesma patrocinadora; DE-PARA em BENEFTRANSFPLANO para quem recebe benefício; lote de folha preparado em CTRLINTERFACE quando houver benefício.</p>
+<p><strong>Em termos de negócio:</strong> a pessoa está inscrita no plano antigo, o novo plano existe para a patrocinadora e, se ela recebe benefício, a correspondência de benefícios entre os planos foi parametrizada.</p>
+<p><strong>Pós-condições:</strong> ver seção 4 (JF009).</p>
+<p><strong>Em termos de negócio:</strong> a pessoa passa a ser participante (ou pensionista) do novo plano, com o saldo transportado, as contribuições do novo plano e os benefícios equivalentes; o vínculo antigo fica encerrado na véspera da data do evento. Só depois de “Efetivar” a mudança é definitiva.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li><strong>Sistema:</strong> ao clicar no item do menu, lê o evento em EVENTOGERADOR e escolhe a tela: com FLGSIMULA = '1' abre a tela externa <code>FEventoTransfPlanoNOVO</code> do CMAdmPrev; caso contrário abre a tela local “Transferência de Planos”, com o nome do evento como título. [<a href="#CADPREV-RN061">RS061</a>, <a href="#CADPREV-RN062">RS062</a>]<br><code>FPrincipal.pas:1504-1531</code>.</li>
+<li><strong>Sistema:</strong> ao abrir, carrega as situações de plano permitidas para o evento (EVENTOXSITPLAPREV), as situações do participante, as regras de correção e restringe a busca de participantes à fundação do usuário. [<a href="uc401.html#CADPREV-RN001">RS001</a>]<br><code>FEventoTransfPlano.pas:1682-1698</code>; também cria o controle de lançamento contábil (<code>:7543-7587</code>, <a href="#TRT103">TRT103</a>).</li>
+<li><strong>Usuário:</strong> na aba “Individual”, escolhe “Titular” ou “Beneficiário” e clica “Procurar”; ou, na aba “Em Lote”, informa a patrocinadora e o plano de origem e o arquivo texto de matrículas. [<a href="#CADPREV-RN076">RS076</a>]<br><code>FEventoTransfPlano.pas:798-1041, 4920-4975</code>. Se o participante estiver desativado no plano, o sistema pede confirmação (<a href="#TRT081">TRT081</a>). Para quem recebe benefício, avisa sobre benefícios que não serão migrados (<a href="#TRT082">TRT082</a>, <a href="#CADPREV-RN065">RS065</a>).</li>
+<li><strong>Usuário:</strong> informa Data do Evento, Plano Destino, Situação no Plano Destino, Nova Situação no Plano Origem e Nova Situação do Participante na Fundação; opcionalmente “Opções” (opções de contribuição do elegível), “Contribuições” (lote) e as opções “Manter valores dos benefícios de suplementação”, “Manter valores do benefício do INSS” e “Efetivar migração apenas após demonstrativo”. [<a href="#CADPREV-RN064">RS064</a>]<br>Ao escolher o plano destino o sistema verifica se a pessoa já está nele, se é elegível na patrocinadora e se existe DE-PARA (<code>:1700-1817</code>; <a href="#TRT087">TRT087</a>, <a href="#TRT088">TRT088</a>, <a href="#TRT089">TRT089</a>). Opções gravam ELEGPATRO.VALORBASE1..6 imediatamente (<code>:1819-1959</code>).</li>
+<li><strong>Usuário:</strong> clica “Transferir”; o sistema valida os campos obrigatórios. [<a href="#CADPREV-RN063">RS063</a>]<br><code>:1052-1109</code>; <a href="#TRT083">TRT083</a>–<a href="#TRT085">TRT085</a>.</li>
+<li><strong>Sistema / Usuário:</strong> se a pessoa recebe benefício e a lista de benefícios ainda não foi montada, abre a janela “Benefícios” com os pares do DE-PARA; o usuário pode incluir/retirar benefícios a conceder, informar valores-base, a Nova DIP, a regra de correção e o lote de pagamento. [<a href="#CADPREV-RN065">RS065</a>]<br><code>:1112-1141, 2230-2400, 1636-1668, 2201-2228, 7589-7616</code>.</li>
+<li><strong>Sistema:</strong> abre uma transação no banco e processa a pessoa (ou cada matrícula do arquivo, ou cada membro do núcleo familiar). [<a href="#CADPREV-RN075">RS075</a>, <a href="#CADPREV-RN077">RS077</a>]<br><code>:1159-1162, 1190-1436</code>.</li>
+<li><strong>Sistema:</strong> para cada pessoa executa, em ordem: regra de validação do plano destino; desativação no origem e inclusão no destino com número de inscrição; evento EVENTOSPREV; reservas; contribuições; benefícios (de-para, cálculo, preparo, excedentes, acertos); empréstimo. [<a href="#CADPREV-RN066">RS066</a> … <a href="#CADPREV-RN074">RS074</a>]<br>Função <code>TransfPlano</code> (<code>:1963-2199</code>).</li>
+<li><strong>Sistema:</strong> monta o demonstrativo de cálculo (dados, conta bancária, saldo de reservas, benefícios concedidos, valores a pagar/receber, opções de contribuição) e o demonstrativo de erros; informa o resultado. [<a href="#CADPREV-RN075">RS075</a>]<br><code>:2403-3366, 1438-1475</code>; <a href="#MSG100">MSG100</a>–<a href="#MSG103">MSG103</a>.</li>
+<li><strong>Usuário:</strong> confere o demonstrativo (pode imprimir/salvar) e clica “Efetivar” (commit) ou “Cancelar” (rollback). [<a href="#CADPREV-RN075">RS075</a>]<br><code>:5390-5397, 1526-1537, 5341-5369</code>.</li>
+<li><strong>Usuário (alternativo):</strong> “Desfazer” uma transferência já gravada para o participante selecionado ou para o arquivo de matrículas; o sistema reverte as gravações em ordem inversa e também exige “Efetivar”. [<a href="#CADPREV-RN078">RS078</a>]<br><code>:6798-7004, 6026-6796</code>.</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Selecionar pessoa</td><td>Definir quem migra</td><td>Titular/Beneficiário via “Procurar”</td><td>Carrega dados no plano de origem e situação de benefícios</td><td>Painel “Informações” habilitado</td><td><a href="#CADPREV-RN065">RS065</a></td><td><a href="#MSG081">MSG081</a>–<a href="#MSG083">MSG083</a></td><td><code>FEventoTransfPlano.dfm</code></td></tr>
+<tr><td>Selecionar arquivo de lote</td><td>Migrar várias matrículas</td><td>Arquivo texto (uma matrícula por linha), patrocinadora e plano de origem</td><td>Marca modo lote</td><td>Botão “Transferir” habilitado</td><td><a href="#CADPREV-RN076">RS076</a></td><td><a href="#MSG091">MSG091</a></td><td><code>FEventoTransfPlano.dfm</code> (aba Em Lote)</td></tr>
+<tr><td>Escolher plano destino</td><td>Definir novo plano</td><td>Plano da mesma patrocinadora</td><td>Verifica participação existente, elegibilidade e DE-PARA</td><td>Botão “Benefícios” visível se houver DE-PARA</td><td><a href="#CADPREV-RN064">RS064</a>, <a href="#CADPREV-RN065">RS065</a></td><td><a href="#MSG092">MSG092</a>–<a href="#MSG095">MSG095</a></td><td><code>FEventoTransfPlano.dfm</code></td></tr>
+<tr><td>Montar benefícios</td><td>Definir benefícios a conceder no destino</td><td>Lote, Nova DIP, valores-base, regra de correção</td><td>Lista DE-PARA; permite incluir/retirar</td><td>Lista de benefícios para concessão</td><td><a href="#CADPREV-RN065">RS065</a>, <a href="#CADPREV-RN072">RS072</a></td><td><a href="#MSG089">MSG089</a></td><td>Janela “Benefícios”</td></tr>
+<tr><td>Transferir</td><td>Gravar a migração</td><td>Campos obrigatórios</td><td>Executa todas as etapas numa transação</td><td>Demonstrativo + mensagem final</td><td><a href="#CADPREV-RN063">RS063</a>–<a href="#CADPREV-RN077">RS077</a></td><td><a href="#MSG084">MSG084</a>–<a href="#MSG103">MSG103</a></td><td><code>FEventoTransfPlano.dfm</code></td></tr>
+<tr><td>Efetivar / Cancelar</td><td>Tornar definitivo ou descartar</td><td>Clique</td><td>Commit / rollback</td><td>Migração gravada ou descartada</td><td><a href="#CADPREV-RN075">RS075</a></td><td><a href="#MSG104">MSG104</a></td><td><code>FEventoTransfPlano.dfm</code></td></tr>
+<tr><td>Desfazer</td><td>Reverter transferência</td><td>Pessoa ou arquivo</td><td>Exclui gravações do destino e reativa origem</td><td>Situação anterior restaurada (após Efetivar)</td><td><a href="#CADPREV-RN078">RS078</a></td><td><a href="#MSG107">MSG107</a>, <a href="#MSG108">MSG108</a>, <a href="#MSG110">MSG110</a></td><td><code>FEventoTransfPlano.dfm</code></td></tr>
+</tbody></table></div>
+<div class="jf-rules">
+<p><strong>Regras de negócio da jornada:</strong> 18 regra(s) — texto completo abaixo.</p>
+
+<div class="rule-block" id="CADPREV-RN061"><div class="rule-id">RS061 (CADPREV-RN061) — Submenu Transferências montado por tipo de evento; Transferência de Reserva oculta</div>
+<div class="rule-desc">Os itens “Transferência de Plano” e “Transferência de Patrocinadora” recebem como subitens os eventos de EVENTOGERADOR com FLGINTERNO 'TP' e 'TE' da fundação do usuário. O item “Transferência de Reserva” (TR) também é preenchido pelo MontaMenu, mas está com Visible = False no formulário, portanto não aparece ao usuário.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>EVENTOGERADOR.FLGINTERNO</code> — [obrigatório] — 'TP', 'TE', 'TR'</li>
+<li><code>EVENTOGERADOR.IDFUNDACAO</code> — [obrigatório] — fundação da sessão</li>
+<li><code>mnuEventoTransfReserva.Visible</code> — [fixo] — False</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> — (regra de seleção, sem crítica ao usuário)</p>
+<p><strong>Jornada:</strong> <a href="#PF-09">JF009</a>, <a href="#PF-10">JF010</a></p>
+<p><strong>Descrição original:</strong> “Monta Menu Transferência de Reserva - TR / Plano - TP / Patro - TE”.</p>
+<p><strong>Condições:</strong> item pai habilitado (Enabled); SELECT ... WHERE FLGINTERNO = 'TP'|'TE'|'TR' AND IDFUNDACAO = iIdFundacao ORDER BY NOME</p><p><strong>Dados envolvidos:</strong> EVENTOGERADOR; FPrincipal.dfm</p><p><strong>Resultado/Exceção:</strong> subitens “A&lt;IDEVENTOGERADOR&gt;” com OnClick AbreFormEventoTR/TP/TE</p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/FPrincipal.pas:1028-1097; FPrincipal.dfm:8498-8516</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+
+<div class="rule-block" id="CADPREV-RN062"><div class="rule-id">RS062 (CADPREV-RN062) — Evento com simulação abre a tela de migração do CMAdmPrev</div>
+<div class="rule-desc">Na transferência de plano, se o evento tiver FLGSIMULA = '1', a tela aberta é FEventoTransfPlanoNOVO (CMAdmPrev, “Evento Transferência de Plano”, assistente com etapas, regras de simulação e termo de opção); caso contrário, é a tela local FEventoTransfPlano. Ambas recebem o nome do evento como título e HelpContext 160032.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul><li><code>EVENTOGERADOR.FLGSIMULA</code> — [condicional] — '1' = tela com simulação</li></ul>
+<p><strong>Tratamento de erro:</strong> — (seleção de tela)</p>
+<p><strong>Jornada:</strong> <a href="#PF-09">JF009</a></p>
+<p><strong>Descrição original:</strong> AbreFormEventoTP: if FLGSIMULA = '1' then TfrmEventoTransfPlanoNOVO else TfrmEventoTransfPlano.</p>
+<p><strong>Condições:</strong> FLGSIMULA = '1'</p><p><strong>Dados envolvidos:</strong> EVENTOGERADOR</p><p><strong>Resultado/Exceção:</strong> tela externa (CM/CMADMPREV/Fontes/FEventoTransfPlanoNOVO.pas, 2941 linhas) ou local</p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/FPrincipal.pas:1504-1531</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span> (comportamento interno da tela NOVO: <span class="ev ev-inferido">INFERIDO</span>)</div></div>
+
+<div class="rule-block" id="CADPREV-RN063"><div class="rule-id">RS063 (CADPREV-RN063) — Dados obrigatórios e plano destino diferente do origem</div>
+<div class="rule-desc">Para transferir é obrigatório informar a data do evento, o plano destino, a nova situação no plano origem, a situação no plano destino e a nova situação do participante na fundação, e ter selecionado uma pessoa ou um arquivo de matrículas. O plano destino (patrocinadora + plano) não pode ser igual ao de origem. Se houver benefícios para concessão, o lote de pagamento também é obrigatório.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li>Data do Evento (<code>dtEvento</code>) — [obrigatório]</li>
+<li>Plano Destino (<code>dblkpNovoPlano</code>) — [obrigatório] — ≠ origem</li>
+<li>Nova Situação no Plano Origem (<code>cmbsitorig</code>), Situação no Plano Destino (<code>cmbsitdest</code>), Nova Situação do Participante na Fundação (<code>cmbSitPartDest</code>) — [obrigatório]</li>
+<li>Lote (<code>dblkpcmbLote</code>) — [condicional] — se há benefícios para concessão</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT083">TRT083</a>, <a href="#TRT084">TRT084</a>, <a href="#TRT085">TRT085</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-09">JF009</a></p>
+<p><strong>Descrição original:</strong> críticas sequenciais em bbtnConfirmarClick antes de abrir a transação.</p>
+<p><strong>Condições:</strong> Trim(campo) = ''; sIdPessJurTransf+sIdPlanoOrigem = sIdPessJurDestinoTransf+sIdPlanoDestino</p><p><strong>Dados envolvidos:</strong> campos da tela</p><p><strong>Resultado/Exceção:</strong> mensagem de erro, foco no campo e saída sem gravar</p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/FEventoTransfPlano.pas:1052-1141</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+
+<div class="rule-block" id="CADPREV-RN064"><div class="rule-id">RS064 (CADPREV-RN064) — Plano destino da mesma patrocinadora e participante elegível</div>
+<div class="rule-desc">A lista de planos destino traz apenas planos da patrocinadora de origem (PLANPREVPATRO filtrado por :IDPESSJUR = patrocinadora do participante). No modo individual, ao escolher o plano, o sistema avisa se a pessoa já é participante do plano destino (e, nesse caso, não reinsere a inscrição, reservas e contribuições) e bloqueia se ela não estiver cadastrada como elegível (ELEGPATRO) na patrocinadora do plano destino.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>PLANPREVPATRO.IDPESSJUR</code> — [obrigatório] — = patrocinadora de origem</li>
+<li><code>PARTPREVPLAN</code> (IDPESSOA, IDPESSJUR, IDPLANOPREV destino, SEQPROPOSTA) — [verificação]</li>
+<li><code>ELEGPATRO</code> (IDPESSOA, IDPESSJUR destino) — [verificação]</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT087">TRT087</a>, <a href="#TRT088">TRT088</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-09">JF009</a></p>
+<p><strong>Descrição original:</strong> “verifica se o participante já existe no plano destino”; “verifica se o participante já está cadastrado como elegível”.</p>
+<p><strong>Condições:</strong> bindividual; qryaux não vazio → bParticipanteMigrado := True; ELEGPATRO vazio → plano destino limpo</p><p><strong>Dados envolvidos:</strong> qryPatroPlano, PARTPREVPLAN, ELEGPATRO</p><p><strong>Resultado/Exceção:</strong> transferência entre planos de uma mesma patrocinadora; troca de patrocinadora é feita em JF010</p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/FEventoTransfPlano.pas:1700-1755, 5306-5312; FEventoTransfPlano.dfm:2274-2287</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+
+<div class="rule-block" id="CADPREV-RN065"><div class="rule-id">RS065 (CADPREV-RN065) — DE-PARA de benefícios obrigatório para quem recebe benefício; só benefícios ativos migram</div>
+<div class="rule-desc">Se a pessoa recebe benefício, deve existir DE-PARA (BENEFTRANSFPLANO) entre o plano origem e o destino para o evento; sem ele, no individual o plano destino é rejeitado e, no lote, o usuário decide se continua transferindo só as informações não ligadas a benefícios. Só migram benefícios de suplementação (FONTEPAGADORA = 1, frequência diferente de pagamento único 'U') em situação 1 ou 2; os demais são listados como “não serão migrados”. A janela “Benefícios” lista os pares do DE-PARA (benefícios do destino, com o benefício de origem), permite incluir benefícios do destino sem correspondência (nova concessão) e retirar os incluídos manualmente; benefícios destinados só ao beneficiário não são oferecidos ao titular e vice-versa.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>BENEFTRANSFPLANO</code> (IDPLANOORIGEM, IDPLANODEST, IDEVENTOGERADOR, IDBENEFORIGEM, IDBENEFDEST, IDRGCALCBENEFICIO) — [obrigatório se há benefício]</li>
+<li><code>BENEFBFCIARIO.IDSITBENEFICIO</code> — [obrigatório] — 1 ou 2 para migrar</li>
+<li><code>BENEFICIO.FLGDESTBENEF</code> — [filtro] — 'B' Beneficiário / 'P' Participante</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT082">TRT082</a>, <a href="#TRT089">TRT089</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-09">JF009</a></p>
+<p><strong>Descrição original:</strong> “verifica se cadastraram o de-para de benefícios”.</p>
+<p><strong>Condições:</strong> SELECT 1 FROM BENEFTRANSFPLANO ...; IDSITBENEFICIO IN (1,2); T.FLGFREQUENCIA &lt;&gt; 'U'</p><p><strong>Dados envolvidos:</strong> BENEFTRANSFPLANO, BENEFPLANPREV, BENEFBFCIARIO, BENEFICIO, TPPAGTOBENEFICIO; CdsBeneficiosParaConcessao</p><p><strong>Resultado/Exceção:</strong> lista de benefícios para concessão (SETA ' &gt; ' = de-para; ' * ' = incluído manualmente)</p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/FEventoTransfPlano.pas:957-1017, 1760-1815, 2230-2400, 1636-1668, 2201-2211, 3841-3848</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+
+<div class="rule-block" id="CADPREV-RN066"><div class="rule-id">RS066 (CADPREV-RN066) — Regra de validação de transferência do plano destino</div>
+<div class="rule-desc">Se o plano destino tiver regra de transferência (PLANPREV.IDREGRATRANSFPLA), ela é executada como regra booleana sobre os dados do participante no plano de origem; se retornar falso ou der erro, a pessoa não é transferida e o erro “Não passou na regra de elegibilidade.” vai para o demonstrativo.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul><li><code>PLANPREV.IDREGRATRANSFPLA</code> — [opcional]</li><li>Dados PARTPREVPLAN/ELEGPATRO do origem (inscrição, salários, datas, situação)</li></ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT090">TRT090</a> → <a href="#MSG109">MSG109</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-09">JF009</a></p>
+<p><strong>Descrição original:</strong> “Executa regra de validação de transferencia de plano”.</p>
+<p><strong>Condições:</strong> IDREGRATRANSFPLA &lt;&gt; '' e RegraBooleana(...) = False</p><p><strong>Dados envolvidos:</strong> PARTPREVPLAN, ELEGPATRO, motor de regras</p><p><strong>Resultado/Exceção:</strong> TransfPlano retorna False</p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/FEventoTransfPlano.pas:1976-2014</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+
+<div class="rule-block" id="CADPREV-RN067"><div class="rule-id">RS067 (CADPREV-RN067) — Número de inscrição no plano destino</div>
+<div class="rule-desc">Se o evento mantém a inscrição (EVENTOGERADOR.FLGMANTEMINSC = 1), o número de inscrição do origem é reaproveitado. Senão, se o plano destino numera automaticamente (FLGAUTONUMINSC = '1'), usa MAX(INSCRICAONUMERO)+1 do plano destino. Senão, no individual o usuário digita o número (tela FNumInsc); deixar em branco cancela; no lote a transferência é recusada.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul><li><code>EVENTOGERADOR.FLGMANTEMINSC</code>; <code>PLANPREV.FLGAUTONUMINSC</code>; <code>PARTPREVPLAN.INSCRICAONUMERO</code></li></ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT091">TRT091</a> → <a href="#MSG096">MSG096</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-09">JF009</a></p>
+<p><strong>Descrição original:</strong> “Gerar Numero de Inscricao Automaticamente, caso o parametro diga que é automatico”; “participante entra com a inscrição”.</p>
+<p><strong>Condições:</strong> FLGMANTEMINSC = 1 | sAutoNumInscTransf = '1' | bindividual</p><p><strong>Dados envolvidos:</strong> EVENTOGERADOR, PARTPREVPLAN, PLANPREV</p><p><strong>Resultado/Exceção:</strong> sNumInscDestino usado no INSERT do destino. Observação: a tela de digitação mostra o nome do plano de origem (edNomePlano := sNomePlanoOrigem, <code>:3437</code>)</p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/FEventoTransfPlano.pas:3399-3460</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+
+<div class="rule-block" id="CADPREV-RN068"><div class="rule-id">RS068 (CADPREV-RN068) — Encerramento no plano origem, inscrição no destino e evento registrado</div>
+<div class="rule-desc">Para o titular, o vínculo no plano origem é desativado (FLGDESATIVADO = 1), recebe a nova situação escolhida e DATACANCELAMENTO = data do evento − 1. Um novo PARTPREVPLAN é inserido no destino copiando os dados do origem, com a situação na fundação e a situação no plano escolhidas, o número de inscrição de RS067, INSCRICAODATA = data do evento e datas temporárias/manutenção trocadas pela data do evento quando preenchidas. Em seguida grava EVENTOSPREV no plano de origem já efetivado (FLGEFETIVADO = '1', flags imediatas '1', situação antes/depois).</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>PARTPREVPLAN</code> origem: FLGDESATIVADO, IDSITPLANOPREV, DATACANCELAMENTO</li>
+<li><code>PARTPREVPLAN</code> destino: IDSITPART, IDSITPLANOPREV, INSCRICAONUMERO, INSCRICAODATA, REQUERIMENTODATA = SYSDATE</li>
+<li><code>EVENTOSPREV</code>: IDEVENTOSPREV (LeUltRegistro), DATAREGISTRO, DATAEVENTO, situações atual/nova, IDEVENTOGERADOR, FLGEFETIVADO = '1', DATAEFETIVADO, INSCRICAONUMERO</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT093">TRT093</a> (falha no INSERT/UPDATE retorna False; falha no evento grava “Erro na gravação no histórico de eventos.”)</p>
+<p><strong>Jornada:</strong> <a href="#PF-09">JF009</a></p>
+<p><strong>Descrição original:</strong> “Insere participante no plano destino”; “Gravar evento da categoria Transferencia de Plano no plano de origem”.</p>
+<p><strong>Condições:</strong> piIdTitular = piIdPessoa e bParticipanteMigrado = False</p><p><strong>Dados envolvidos:</strong> PARTPREVPLAN, EVENTOSPREV</p><p><strong>Resultado/Exceção:</strong> pessoa inscrita no destino e evento registrado</p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/FEventoTransfPlano.pas:2016-2037, 3370-3508, 1481-1523</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+
+<div class="rule-block" id="CADPREV-RN069"><div class="rule-id">RS069 (CADPREV-RN069) — Transporte das reservas</div>
+<div class="rule-desc">Cria no destino uma RESERVAPART ativa para cada tipo de reserva analítico e não coletivo do plano destino; executa o padrão de movimentação de reservas do evento (origem → destino); grava em HISTMOVRESERVA a saída de 100% do saldo restante no origem e zera/desativa as reservas do origem (FLGATIVO = 0, DATADESATIV = SYSDATE, VALORRESERVA = 0).</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>RESERVAXPLANO</code> (ANALITICOSINTETI = 'A', FLGCOLETIVA = 0)</li>
+<li><code>RESERVAPART</code> (IDTIPORESERVA, FLGATIVO, IDPARTICIPANTE, VALORRESERVA)</li>
+<li><code>HISTMOVRESERVA</code> (FLGENTRADA = 0, VLRREAL = VLRCOTAS = saldo, MESREFERENCIA = AAAA/MM do evento, SEQHISTMOVRESERVA)</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT093">TRT093</a> (“Erro na execução do Padrão de Movimentação de Reserva com a mensagem.”, “Erro ao zerar ...”). Falha no INSERT de RESERVAPART é ignorada (except vazio, <code>:3545-3549</code>).</p>
+<p><strong>Jornada:</strong> <a href="#PF-09">JF009</a></p>
+<p><strong>Descrição original:</strong> “roda padrão de movimentação e zera reservas anteriores”.</p>
+<p><strong>Condições:</strong> titular (piIdTitular = piIdPessoa)</p><p><strong>Dados envolvidos:</strong> RESERVAXPLANO, RESERVAPART, HISTMOVRESERVA; UMovReserva.RODAPADRAOMOVRESERVA (CMAdmPrev)</p><p><strong>Resultado/Exceção:</strong> saldo transportado para o destino</p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/FEventoTransfPlano.pas:3511-3621</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span> (lógica do padrão: <span class="ev ev-inferido">INFERIDO</span>)</div></div>
+
+<div class="rule-block" id="CADPREV-RN070"><div class="rule-id">RS070 (CADPREV-RN070) — Contribuições: suspende no origem e associa no destino</div>
+<div class="rule-desc">Titular: suspende as contribuições do origem (CONTRIBPREVPARTP.FLGCOBRA = 0, DATAFINAL = evento − 1), registra em HSTCONTEVENTOSPR as suspensas e as novas, escolhendo as novas contribuições do destino ligadas ao evento (CONTPREVEVENTO) e à situação (CONTPREV.FLGINTERNO) que passam na regra de associação, e as associa a partir da data do evento ou da Nova DIP. No lote, as opções de valores das contribuições vêm da janela “Contribuições”. Beneficiário: suspende CONTRIBPREVNUCLEO do núcleo familiar e insere as contribuições do evento/plano destino para o núcleo.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>CONTRIBPREVPARTP</code> (FLGCOBRA, DATAFINAL); <code>CONTRIBPREVNUCLEO</code> (IDNUCLEOFAMILIAR, DATAINICIO, ULTMESPREPARO '0000/00', FLGCOBRA 0)</li>
+<li><code>HSTCONTEVENTOSPR</code> (TIPO 'F', FLGASSOCIADA 0/1)</li>
+<li><code>CONTPREVEVENTO.IDREGRAVALIDAASS</code> — regra de associação</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT093">TRT093</a> (“Erro ao suspender as contribuições no plano origem.”, “Erro ao associar as contribuições do plano destino.”, “Nucleo familiar do beneficiário não encontrado.”)</p>
+<p><strong>Jornada:</strong> <a href="#PF-09">JF009</a></p>
+<p><strong>Descrição original:</strong> “desassocia e associa contribuições / os beneficiários não precisam pois a contribprevnucleo não é por plano”.</p>
+<p><strong>Condições:</strong> strContribuicaoAAssociar &lt;&gt; '0'</p><p><strong>Dados envolvidos:</strong> CONTRIBPREVPARTP, CONTRIBPREVNUCLEO, BFCIARIOTITPLAN, CONTPREV, CONTPREVEVENTO, HSTCONTEVENTOSPR; UEventos.AssociaNovasContribuicoes/ExecutaRegraAssociaContribuicao (CMAdmPrev)</p><p><strong>Resultado/Exceção:</strong> contribuições do novo plano em cobrança. O resultado de GravaHSTCONTEVENTOSPRTransf não é verificado (<code>:3660-3667</code>)</p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/FEventoTransfPlano.pas:3625-3787, 7007-7176, 7618-7689</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+
+<div class="rule-block" id="CADPREV-RN071"><div class="rule-id">RS071 (CADPREV-RN071) — Recriação dos benefícios no destino e encerramento no origem</div>
+<div class="rule-desc">Antes, bloqueia se houver valor pendente na prévia da folha (PREVIA, mês do lote, tipo 'B', lote não devolvido). Para cada benefício da lista (respeitando o destino do pagamento): se tem benefício de origem ativo, copia BFCIARIOTITPLAN, cria ou reaproveita o PROCESSOBENEF do destino, encerra o processo do origem (IDSITPROCESSO = 3), calcula a data final pela regra de fim (IDREGRAFIM) se houver, aplica regra contábil individual (entidade contábil e contas débito/crédito), insere BENEFBFCIARIO no destino (DATAINICIO = maior entre Nova DIP e DIP anterior; guarda DIB/valor anteriores), encerra o benefício no origem (IDSITBENEFICIO = 3, DATAFINAL = evento − 1) e cria log de ocorrência (tipos '4'/'7'). Benefício sem origem é nova concessão (BFCIARIOTITPLAN/PROCESSOBENEF/BENEFBFCIARIO novos).</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>PREVIA</code> (IDPATRO, IDPLANOPREV, MESCOBRANCA = mês do lote, FLGTIPODESC 'B'); <code>CTRLINTERFACE.FLGVOLTATMP = 0</code></li>
+<li><code>BENEFBFCIARIO</code> destino: NUMEROPROCESSO, IDPLANOORIGEM, DATAINICIO, DIBBENEFANT, VALORBENEFANT, VALORBASE1..3, IDPLANPREVCONTAB, PLACONTAD, PLACONTAC</li>
+<li><code>PROCESSOBENEF.IDSITPROCESSO</code> — 3 no origem</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT092">TRT092</a>, <a href="#TRT093">TRT093</a>, <a href="#TRT096">TRT096</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-09">JF009</a></p>
+<p><strong>Descrição original:</strong> “Fazer DE-PARA de beneficios na BFCIARIOTITPLAN / BENEFBFCIARIO”; “Encerrar beneficio no plano anterior”; “nova concessão”.</p>
+<p><strong>Condições:</strong> CdsBeneficiosParaConcessao não vazio; IDBENEFORIGEM preenchido ou não</p><p><strong>Dados envolvidos:</strong> PREVIA, CTRLINTERFACE, BFCIARIOTITPLAN, PROCESSOBENEF, BENEFBFCIARIO, PLANPREVCONTABIL, PLANOCONTA; UAdmPrev.CriaLogOcorrencia</p><p><strong>Resultado/Exceção:</strong> benefícios ativos no destino e encerrados no origem</p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/FEventoTransfPlano.pas:3790-4596</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+
+<div class="rule-block" id="CADPREV-RN072"><div class="rule-id">RS072 (CADPREV-RN072) — Recalcular benefícios no destino ou manter valores</div>
+<div class="rule-desc">Se “Manter valores dos benefícios de suplementação” estiver desmarcado, para cada benefício migrado (em ordem de cálculo NUMORDEMEVENTO) o sistema: obtém a regra de cálculo (do DE-PARA ou do benefício do plano); calcula a reserva disponível para o benefício (regra de reserva ou soma convertida pela cota na data do evento); executa a regra numérica do benefício e grava VALORATUAL/VALORCALCULADO/VALORTOTAL; prepara benefícios e contribuições no lote; elimina preparos excedentes já pagos no origem; e lança acertos de diferença (motivo 3037) entre o pago no origem e o devido no destino a partir da Nova DIP, corrigidos pela regra de correção opcional; diferenças até 0,01 são ignoradas.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>chkManterValores</code> — [opção] — marcado = não recalcula</li>
+<li><code>BENEFTRANSFPLANO.IDRGCALCBENEFICIO</code> / <code>BENEFPLANPREV.IDREGRACALCULO</code>, <code>IDREGRAPAGAMENTO</code></li>
+<li><code>prmIdMotivoAcertoMigracaoPlano</code> — [fixo] — 3037</li>
+<li>Regra de correção (<code>dblkpcmbRegraParcela</code>) — [opcional] — índice ≤ 0 vira 1</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT093">TRT093</a> (“Regra de cálculo do benefício ... não associada ...”, “Erro no cálculo do benefício ...”, “Erro ao inserir acerto ...”); <a href="#TRT097">TRT097</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-09">JF009</a></p>
+<p><strong>Descrição original:</strong> “calcular benefícios na data”; “fazer cálculo retroativo, gerando diferenças”; “retira IDLOTE ... registros preparados nos meses em que os mesmos já foram pagos”; “apurar diferenças entre os benefícios (utilizando o de-para)”.</p>
+<p><strong>Condições:</strong> not chkManterValores.checked; dDiferenca &gt; 0.01</p><p><strong>Dados envolvidos:</strong> BENEFBFCIARIO, RESERVAPART, MOVRESERVATEMP, HSTBENEFBFCIARIO, HSTCONTRIBPREV, CTRLINTERFACE; UBeneficio (PreparaBeneficioConcedido, InsereHstBenefBfciario), UContribuicaoPrev (CMAdmPrev)</p><p><strong>Resultado/Exceção:</strong> valores recalculados e acertos para a próxima folha</p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/FEventoTransfPlano.pas:2104-2180, 4600-4900, 4977-5300, 5424-5661, 5666-6023, 7374-7540, 7691-7754</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+
+<div class="rule-block" id="CADPREV-RN073"><div class="rule-id">RS073 (CADPREV-RN073) — Manter valores do benefício do INSS</div>
+<div class="rule-desc">Com “Manter valores do benefício do INSS” marcado, para o benefício de referência (FLGREFERENCIA = '1') o histórico do INSS (HSTBENEFBFCIARIO) é copiado para o plano destino, e o recálculo só considera benefícios não de referência (BPL.FLGREFERENCIA = 0).</div>
+<p><strong>Campos de dados:</strong></p>
+<ul><li><code>chkManterInss</code>; <code>BENEFPLANPREV.FLGREFERENCIA</code></li></ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT093">TRT093</a> (“Erro inserir histórico de benefícios do INSS no plano destino.”)</p>
+<p><strong>Jornada:</strong> <a href="#PF-09">JF009</a></p>
+<p><strong>Descrição original:</strong> SOL 132659 (Brunno Mattos).</p>
+<p><strong>Condições:</strong> chkManterInss.checked e FLGREFERENCIA = '1'</p><p><strong>Dados envolvidos:</strong> HSTBENEFBFCIARIO, BENEFPLANPREV</p><p><strong>Resultado/Exceção:</strong> INSS de referência mantido</p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/FEventoTransfPlano.pas:4296-4341, 7734-7735</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+
+<div class="rule-block" id="CADPREV-RN074"><div class="rule-id">RS074 (CADPREV-RN074) — Contrato de empréstimo acompanha o plano</div>
+<div class="rule-desc">O contrato de empréstimo da pessoa no plano de origem (CONTRATOEMPTMO) passa a apontar para o plano destino. O sistema pergunta se os recursos contábeis também migram (IDPLANOORIGEM = destino) — no individual por contrato, no lote uma vez para todos. Pela forma como a condição foi escrita (<code>if not MsgDlg(...) = mrYes</code>), a resposta não produz efeito: a expressão é sempre falsa e IDPLANOORIGEM nunca é alterado.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul><li><code>CONTRATOEMPTMO</code> (IDPATRO, IDPLANOPREV, IDPLANOORIGEM, IDPESSOA)</li></ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT095">TRT095</a>; falha no UPDATE → “Erro na atualização do contrato de empréstimo.”</p>
+<p><strong>Jornada:</strong> <a href="#PF-09">JF009</a></p>
+<p><strong>Descrição original:</strong> “Verificar se pessoa tem emprestimo aberto ou encerrado ( nao quitado )”.</p>
+<p><strong>Condições:</strong> IDCONTRATOEMPTMO &gt; 0</p><p><strong>Dados envolvidos:</strong> CONTRATOEMPTMO</p><p><strong>Resultado/Exceção:</strong> IDPLANOPREV = destino (sempre); IDPLANOORIGEM — ver Pontos a validar</p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/FEventoTransfPlano.pas:7756-7804, 1152-1157, 2184-2193</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span> (efeito da precedência do operador: <span class="ev ev-inferido">INFERIDO</span>)</div></div>
+
+<div class="rule-block" id="CADPREV-RN075"><div class="rule-id">RS075 (CADPREV-RN075) — Transação única com efetivação após demonstrativo</div>
+<div class="rule-desc">Ao transferir, qualquer transação pendente é desfeita e uma nova é aberta. Individual: erro → rollback e mensagem; sucesso → o usuário confere o demonstrativo e clica “Efetivar” (commit) ou “Cancelar” (rollback). Fechar a tela também faz rollback. Lote: com “Efetivar migração apenas após demonstrativo” marcado (padrão), tudo fica na mesma transação até “Efetivar”; desmarcado, cada matrícula é confirmada (commit) logo após processada, e com erro é desfeita (rollback).</div>
+<p><strong>Campos de dados:</strong></p>
+<ul><li><code>cbchkCommit</code> (“Efetivar migração apenas após demonstrativo”, Checked = True no .dfm)</li></ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT093">TRT093</a>, <a href="#TRT099">TRT099</a>, <a href="#TRT100">TRT100</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-09">JF009</a></p>
+<p><strong>Descrição original:</strong> “caso o commit esteja marcado para cada um”.</p>
+<p><strong>Condições:</strong> bErro / bIndividual / cbchkCommit.checked</p><p><strong>Dados envolvidos:</strong> dtmBaseDados.dbBaseDados</p><p><strong>Resultado/Exceção:</strong> <a href="#MSG100">MSG100</a>–<a href="#MSG104">MSG104</a></p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/FEventoTransfPlano.pas:1159-1162, 1355-1368, 1438-1475, 1526-1537, 1622-1632, 5390-5397; FEventoTransfPlano.dfm:534-547</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+
+<div class="rule-block" id="CADPREV-RN076"><div class="rule-id">RS076 (CADPREV-RN076) — Transferência em lote por arquivo de matrículas</div>
+<div class="rule-desc">No lote, o arquivo texto deve conter só matrículas, uma por linha, exatamente como cadastradas. Exige patrocinadora e plano de origem. Para cada matrícula procura primeiro um participante (ELEGPATRO/PARTPREVPLAN); se não achar, um pensionista (DEPENTIT/BENEFBFCIARIO, situação 'AS'). Matrícula não encontrada ou com benefício fora das situações 1/2 vai para o demonstrativo de erros e o processamento segue. Todos usam as mesmas opções da tela. Com mais de 100 matrículas, o demonstrativo é gravado no arquivo “&lt;arquivo&gt;_Saida”. O plano destino exige numeração automática ou manutenção de inscrição (RS067).</div>
+<p><strong>Campos de dados:</strong></p>
+<ul><li><code>edarqmat</code> (arquivo); <code>dblkPatroDestino</code> (rótulo “Patrocinadora de origem”); <code>dblkPlanoOrigem</code></li></ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT086">TRT086</a>, <a href="#TRT093">TRT093</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-09">JF009</a></p>
+<p><strong>Descrição original:</strong> texto do memo de ajuda: “Este arquivo deve conter apenas matrícula, uma por linha...”.</p>
+<p><strong>Condições:</strong> Trim(edarqmat.Text) &lt;&gt; ''; iContTotal &gt; 100</p><p><strong>Dados envolvidos:</strong> ELEGPATRO, PARTPREVPLAN, DEPENTIT, BENEFBFCIARIO, arquivo texto</p><p><strong>Resultado/Exceção:</strong> contagem de erros em <a href="#MSG102">MSG102</a>/<a href="#MSG103">MSG103</a></p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/FEventoTransfPlano.pas:1192-1388, 7563-7568, 4920-4975</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+
+<div class="rule-block" id="CADPREV-RN077"><div class="rule-id">RS077 (CADPREV-RN077) — Beneficiário migra com todo o núcleo familiar</div>
+<div class="rule-desc">Quando a pessoa selecionada é beneficiário (não é o titular), o sistema localiza todas as pessoas do mesmo núcleo familiar (BFCIARIOTITPLAN.IDNUCLEOFAMILIAR) e, se houver mais de uma, pede confirmação e transfere todas. A inscrição, reservas e contribuições do titular só são tratadas na primeira pessoa.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul><li><code>BFCIARIOTITPLAN.IDNUCLEOFAMILIAR</code>; <code>aPessoasaProcessar</code></li></ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT094">TRT094</a> → <a href="#MSG098">MSG098</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-09">JF009</a></p>
+<p><strong>Descrição original:</strong> “Processar nucleos Familiares caso possua mais de uma pessoa no mesmo nucleo”.</p>
+<p><strong>Condições:</strong> sIdTitularTransf &lt;&gt; sIdPessoaTransf e iPessoasNucleo &gt; 1</p><p><strong>Dados envolvidos:</strong> BFCIARIOTITPLAN</p><p><strong>Resultado/Exceção:</strong> todos os membros migrados e com demonstrativo</p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/FEventoTransfPlano.pas:1393-1435, 7806-7827</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+
+<div class="rule-block" id="CADPREV-RN078"><div class="rule-id">RS078 (CADPREV-RN078) — Desfazer transferência de plano</div>
+<div class="rule-desc">O desfazer só é permitido se, para o titular, o último evento registrado for o evento de transferência; para o beneficiário, se os benefícios encerrados estiverem em um único plano e houver benefícios ativos em outro plano. A reversão é feita “de trás para frente”: desfaz o padrão de movimentação de reservas e exclui planilhas contábeis geradas, restaura reservas, apaga históricos e alteradores de benefícios e contribuições, BENEFPLANOPART, benefícios e beneficiários do destino, reativa processos e benefícios do origem, contribuições, reservas, HSTCONTEVENTOSPR, EVENTOSPREV, PARTPREVPLAN do destino e reativa o PARTPREVPLAN do origem. Também exige “Efetivar”.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul><li><code>EVENTOSPREV</code> (último IDEVENTOSPREV, IDEVENTOGERADOR = evento da tela); <code>BENEFBFCIARIO.IDSITBENEFICIO</code> 3 / (1,2)</li></ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT098">TRT098</a> → <a href="#MSG110">MSG110</a>; <a href="#MSG107">MSG107</a>/<a href="#MSG108">MSG108</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-09">JF009</a></p>
+<p><strong>Descrição original:</strong> “Para desfazer a transferencia de plano, excluir lançamentos de traz para frente”.</p>
+<p><strong>Condições:</strong> último evento = sIdEventoGerador (titular); recordcount = 1 (beneficiário)</p><p><strong>Dados envolvidos:</strong> RESERVAPART, HISTMOVRESERVA, HSTATRASOBENEF, HSTBENEFBFCIARIO, HSTATRASOCONTRIB, HSTCONTRIBPREV, BENEFPLANOPART, PROCESSOBENEF, BENEFBFCIARIO, BFCIARIOTITPLAN, CONTRIBPREVPARTP, CONTRIBPREVNUCLEO, HSTCONTEVENTOSPR, EVENTOSPREV, PARTPREVPLAN; UMovReserva.DESFAZPADRAOMOVRESERVA; CtrlLancamento.ExcluiLancaContab</p><p><strong>Resultado/Exceção:</strong> situação anterior restaurada</p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/FEventoTransfPlano.pas:6026-6796, 6798-7004</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+
+<p><strong>Regras transversais do módulo</strong> (valem também para esta jornada; texto completo em <a href="uc401.html">UC401</a>): <a href="uc401.html#CADPREV-RN001">RS001 (CADPREV-RN001) — Dados isolados por fundação</a>, <a href="uc401.html#CADPREV-RN002">RS002 (CADPREV-RN002) — Menu de eventos montado a partir de EVENTOGERADOR</a>, <a href="uc401.html#CADPREV-RN003">RS003 (CADPREV-RN003) — Instituto troca a nomenclatura</a>, <a href="uc401.html#CADPREV-RN004">RS004 (CADPREV-RN004) — Integração contábil por parâmetro</a>, <a href="uc401.html#CADPREV-RN005">RS005 (CADPREV-RN005) — Log de operações</a> (não há gravação de log nesta tela: nenhuma chamada a GravaLogOperacoes/GravaLogTotalPrev em FEventoTransfPlano.pas).</p>
+</div>
+
+<p><strong>Tratamentos de erro:</strong> <a href="#TRT081">TRT081</a>–<a href="#TRT100">TRT100</a>, <a href="#TRT103">TRT103</a></p>
+<p><strong>Mensagens:</strong> <a href="#MSG081">MSG081</a>–<a href="#MSG111">MSG111</a></p>
+<p><strong>Telas:</strong> Transferência de Planos (<code>FEventoTransfPlano.dfm</code>, título em execução = nome do evento), janelas “Benefícios”, “Demonstrativos” e “Contribuições” (no mesmo .dfm); Opções do elegível (<code>CM/CMADMPREV/Fontes/FCadOpcoesElegivel</code>), número de inscrição (<code>CM/CMADMPREV/Fontes/FNumInsc</code>); alternativa com simulação “Evento Transferência de Plano” (<code>CM/CMADMPREV/Fontes/FEventoTransfPlanoNOVO.dfm</code>). Forms locais sem chamada: “Cadastro de Contribuições do Participante” (<code>FCadContribPartTransfPlano.dfm</code>) e “Transferência de Planos - Beneficiários por Benefício” (<code>FCadBfciarioTitPlanTransf.dfm</code>).</p>
+<p><strong>Dependências:</strong> precisa dos cadastros de planos, benefícios e contribuições; gera preparos e acertos para a Folha de Benefícios (lote de CTRLINTERFACE); eventos TP não são cancelados pelo “Cancelar Evento Registrado” (<a href="uc405.html#PF-16">JF016</a>, <a href="uc405.html#CADPREV-RN103">RS103</a>).</p>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span> — informações que o repositório não comprova ou que divergem entre fontes. O texto existente foi mantido; os itens abaixo dependem de validação humana.</p>
+<ul>
+<li>FCadContribPartTransfPlano (1008 linhas) e FCadBfciarioTitPlanTransf (424 linhas) estão no projeto e no <code>uses</code> de FEventoTransfPlano, mas nenhuma unit do repositório os instancia (busca por <code>TfrmCadContribPartTransfPlano</code>/<code>TFrmCadBfciarioTitPlanTransf</code>). Eles gravam diretamente CONTRIBPREVPARTP e BFCIARIOTITPLAN do plano destino usando as variáveis globais da transferência (<code>FCadContribPartTransfPlano.pas:126, 173-199, 409, 464</code>; <code>FCadBfciarioTitPlanTransf.pas:174-205, 235-342</code>). Confirmar se são código morto.</li>
+<li>Pergunta sobre recursos contábeis do empréstimo sem efeito por precedência de operador (<code>FEventoTransfPlano.pas:1155, 7783</code>): IDPLANOORIGEM do contrato nunca é atualizado.</li>
+<li>Lote com “Efetivar migração apenas após demonstrativo” desmarcado: em caso de erro o código faz Rollback (<code>:1359-1360</code>) e em seguida Commit (<code>:1364-1366</code>) sem transação ativa; o efeito no BDE (exceção) não foi confirmado.</li>
+<li>Uso de objeto após liberação: <code>frmCadOpcoesElegivel.Free</code> (<code>:1905, 1929</code>) antes de ler <code>frmCadOpcoesElegivel.ModalResult</code> (<code>:1934</code>).</li>
+<li>AbreQryBenefNConcedidos avança o cursor antes de ler (<code>:2354-2361</code>): o primeiro benefício da lista é ignorado ao montar “Benefícios não associados”, podendo oferecê-lo em duplicidade.</li>
+<li>Erros de regra contábil e de atualização de reserva usam <code>Abort</code> (<code>:4043, 4884-4885</code>): a transação fica aberta e a janela “Aguarde” pode não ser fechada.</li>
+<li>Núcleo familiar: responder “Não” à confirmação (<code>:1400-1405</code>) sai com a transação aberta e os botões desabilitados.</li>
+<li>Não há registro no log de operações (<a href="uc401.html#CADPREV-RN005">RS005</a>) nesta tela.</li>
+<li>Item “Transferência de Reserva” oculto: a tela <code>CM/CMADMPREV/Fontes/FEventoTransfReserva.pas</code> (967 linhas, “Evento Transferência de Reservas”) continua ligada ao menu (<code>FPrincipal.pas:1485-1502</code>); confirmar se a ocultação é definitiva.</li>
+<li>Comportamento interno de FEventoTransfPlanoNOVO (simulação, termo de opção, prévia de migração) não foi detalhado; é componente externo.</li>
+</ul>
+</div>
+<div class="note note-info"><p><strong>Registro original do processo PF-09</strong></p><p><strong>Forms de entrada:</strong> <code>FPrincipal.dfm</code> → <code>FEventoTransfPlano.dfm</code> (ou <code>CM/CMADMPREV/Fontes/FEventoTransfPlanoNOVO.dfm</code>)</p><p><strong>Lógica de processamento:</strong> seleção individual/lote; validações; TransfPlano (InsereParticipante, GravaEVENTOSPREV, AssociaReservas, AssociaContrib, InsereBeneficios, CalculaBeneficios, PreparaBeneficiosTransfPlano, ModificaPreparosExcedentes, AcertaBeneficioTransfPlano, VerificaMigraPlanoEmprestimo); demonstrativo; Efetivar/Cancelar; DesfazTransfPlano</p><p><strong>Saídas:</strong> demonstrativo de cálculo e de erros (tela, impressão, arquivo)</p><p><strong>Persistência (tabelas escritas):</strong> PARTPREVPLAN, EVENTOSPREV, ELEGPATRO, RESERVAPART, HISTMOVRESERVA, MOVRESERVATEMP, CONTRIBPREVPARTP, CONTRIBPREVNUCLEO, HSTCONTEVENTOSPR, BFCIARIOTITPLAN, PROCESSOBENEF, BENEFBFCIARIO, HSTBENEFBFCIARIO, HSTCONTRIBPREV, CONTRATOEMPTMO</p><p><strong>Evidência:</strong> <code>CADASTROPREV/Fontes/FEventoTransfPlano.pas:798-7827</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+</div>
+
+<div class="pf-block" id="PF-10"><h4>JF010 (PF-10) — Transferência de patrocinadora individual/em lote</h4>
+<p><strong>Objetivo:</strong> mover um participante, ou todos os participantes de uma patrocinadora/filial/situação funcional/plano (opcionalmente filtrados por data de demissão), para uma nova patrocinadora, mantendo o plano previdenciário.</p>
+<p><strong>Necessidade de negócio:</strong> quando empregados são transferidos entre empresas patrocinadoras (por exemplo, numa cisão ou incorporação), o cadastro previdenciário precisa refletir o novo empregador sem perder tempo de serviço, inscrição, contribuições, reservas, benefícios em manutenção e histórico funcional.</p>
+<p><strong>Ator / gatilho:</strong> analista de cadastro, menu <em>Eventos › Cadastrais › Transferências › Transferência de Patrocinadora › &lt;nome do evento TE&gt;</em> (<code>FPrincipal.dfm:8512-8516</code>; <code>FPrincipal.pas:1076-1097, 1533-1549</code>).</p>
+<p><strong>Pré-condições:</strong> evento TE da fundação; plano ativo na patrocinadora destino (PLANPREVPATRO.FLGATIVO = 1); participantes ativos (PARTPREVPLAN.FLGDESATIVADO = 0).</p>
+<p><strong>Em termos de negócio:</strong> a nova empresa já oferece o plano e os participantes a transferir estão com vínculo ativo.</p>
+<p><strong>Pós-condições:</strong> ver seção 4 (JF010).</p>
+<p><strong>Em termos de negócio:</strong> cada participante transferido passa a constar como empregado e participante da nova patrocinadora a partir da data de transferência; o vínculo antigo fica encerrado na véspera e um evento de transferência é registrado.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li><strong>Sistema:</strong> abre a tela “Transferência de Patrocinadora” (título = nome do evento) e carrega patrocinadoras e planos da fundação, situações funcionais, documentos de contrato e o evento. [<a href="#CADPREV-RN061">RS061</a>, <a href="uc401.html#CADPREV-RN001">RS001</a>]<br><code>FPrincipal.pas:1533-1549</code>; <code>fTransfPatroBatch.pas:233-255</code>.</li>
+<li><strong>Usuário:</strong> individual: digita a matrícula ou usa “Procurar”; o sistema preenche patrocinadora, plano, filial e situação de origem. Lote: informa patrocinadora atual, filial, situação na patrocinadora e plano (e a opção/data de demissão quando a situação é de desligado). [<a href="#CADPREV-RN079">RS079</a>]<br><code>fTransfPatroBatch.pas:1241-1335, 1957-2015, 286-303</code>; <a href="#TRT107">TRT107</a>.</li>
+<li><strong>Usuário:</strong> informa nova situação na patrocinadora de origem, nova patrocinadora, nova filial, situação na nova patrocinadora, nova matrícula (individual) e data da transferência; clica “Transfere”. [<a href="#CADPREV-RN079">RS079</a>]<br><code>fTransfPatroBatch.pas:305-399</code>; <a href="#TRT101">TRT101</a>, <a href="#TRT102">TRT102</a>.</li>
+<li><strong>Sistema:</strong> seleciona os participantes conforme os filtros e, para cada um, numa transação própria, encerra o vínculo de origem e replica o cadastro na nova patrocinadora; pergunta se reativa dados quando a pessoa já existe na destino. [<a href="#CADPREV-RN080">RS080</a>]<br><code>fTransfPatroBatch.pas:419-1239</code>; <a href="#TRT103">TRT103</a>–<a href="#TRT106">TRT106</a>, <a href="#TRT108">TRT108</a>.</li>
+<li><strong>Sistema:</strong> exibe sucesso ou erro; se houver erros por matrícula, abre a janela “Resultado”; limpa a tela. [<a href="#CADPREV-RN080">RS080</a>]<br><code>fTransfPatroBatch.pas:399-417</code>.</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Informar matrícula / Procurar</td><td>Transferência individual</td><td>Matrícula ou busca</td><td>Preenche dados de origem</td><td>Participante identificado</td><td><a href="#CADPREV-RN079">RS079</a></td><td><a href="#MSG118">MSG118</a>, <a href="#MSG119">MSG119</a></td><td><code>fTransfPatroBatch.dfm</code></td></tr>
+<tr><td>Informar filtros de origem</td><td>Transferência em lote</td><td>Patrocinadora, filial, situação, plano, demissão</td><td>Define o conjunto de participantes</td><td>Seleção montada no “Transfere”</td><td><a href="#CADPREV-RN079">RS079</a></td><td><a href="#MSG114">MSG114</a></td><td><code>fTransfPatroBatch.dfm</code></td></tr>
+<tr><td>Transfere</td><td>Gravar a transferência</td><td>Campos obrigatórios e destino</td><td>Processa participante a participante com commit individual</td><td>Participantes na nova patrocinadora</td><td><a href="#CADPREV-RN079">RS079</a>, <a href="#CADPREV-RN080">RS080</a></td><td><a href="#MSG112">MSG112</a>–<a href="#MSG117">MSG117</a>, <a href="#MSG120">MSG120</a></td><td><code>fTransfPatroBatch.dfm</code></td></tr>
+<tr><td>Cancelar</td><td>Limpar a tela</td><td>Clique</td><td>Rollback se houver transação e limpa campos</td><td>Tela vazia</td><td>—</td><td>—</td><td><code>fTransfPatroBatch.dfm</code></td></tr>
+</tbody></table></div>
+<div class="jf-rules">
+<p><strong>Regras de negócio da jornada:</strong> 3 regra(s) — texto completo abaixo (RS061 está descrita em JF009).</p>
+<div class="rule-block"><div class="rule-id">RS061 (CADPREV-RN061) — Submenu Transferências montado por tipo de evento; Transferência de Reserva oculta</div>
+<div class="rule-desc">Ver texto completo em <a href="#CADPREV-RN061">JF009</a>: o item “Transferência de Patrocinadora” lista os eventos TE da fundação.</div>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/FPrincipal.pas:1076-1097</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+
+<div class="rule-block" id="CADPREV-RN079"><div class="rule-id">RS079 (CADPREV-RN079) — Dados obrigatórios e plano existente na patrocinadora destino</div>
+<div class="rule-desc">Para transferir são obrigatórios: patrocinadora de origem, patrocinadora de destino, situação na patrocinadora de origem, situação na patrocinadora de destino, data de transferência, plano previdenciário e — quando a situação de origem é de demitido (SITFUNC.TIPOSIT = 'D') — a opção de comparação da data de demissão. O plano escolhido deve existir e estar ativo na patrocinadora destino. Na busca por matrícula, só participantes com vínculo ativo são considerados; mais de um resultado abre a busca.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>dblkPatroOrigem</code>, <code>dblkPatroDestino</code>, <code>dblkSitPatOrigem</code>, <code>dblkSitPatDestino</code>, <code>dtDataTransf</code>, <code>dblkPlanoPrev</code> — [obrigatório]</li>
+<li><code>cbOpDemissao</code> (&gt;=, &lt;=, =, &gt;, &lt;) e <code>dtDemissao</code> — [condicional] — situação de desligado</li>
+<li><code>PLANPREVPATRO</code> (IDPESSJUR destino, IDPLANOPREV, FLGATIVO = 1)</li>
+<li><code>dblkSitPatFinal</code> (“Nova Situação na Patrocinadora de Origem”), <code>dblkDocContrato</code> (“Contrato entre as Patrocinadoras”) — [não criticados]</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT101">TRT101</a>, <a href="#TRT102">TRT102</a>, <a href="#TRT107">TRT107</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-10">JF010</a></p>
+<p><strong>Descrição original:</strong> “Crítica de campos obrigatórios”; “Avalia se a Patrocinadora Destino tem o Plano selecionado”.</p>
+<p><strong>Condições:</strong> Trim(campo) = ''; grbDemissao.Visible; SELECT * FROM PLANPREVPATRO ... FLGATIVO = 1</p><p><strong>Dados envolvidos:</strong> PLANPREVPATRO, SITFUNC, PARTPREVPLAN, ELEGPATRO, PESSOA</p><p><strong>Resultado/Exceção:</strong> mensagem e foco no campo. O documento de contrato é passado vazio para a rotina de atualização (<code>:388-391</code>, parâmetro sTipoDoc = '')</p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/fTransfPatroBatch.pas:305-386, 1241-1335; fTransfPatroBatch.dfm:464-480</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+
+<div class="rule-block" id="CADPREV-RN080"><div class="rule-id">RS080 (CADPREV-RN080) — Replicação do cadastro na nova patrocinadora, participante a participante</div>
+<div class="rule-desc">Seleciona os participantes ativos da patrocinadora de origem na situação funcional e plano escolhidos (filial, pessoa e data de demissão opcionais). Para cada um, numa transação: atualiza o elegível de origem (DATADEMISSAO = transferência − 1, nova situação); insere (ou, se já existe e o usuário confirmar a reativação, atualiza) o elegível na destino com a nova matrícula e DATAADMISSAO = transferência; atualiza/insere DEPENTIT; desativa o PARTPREVPLAN de origem e insere o da destino (mesmo plano); copia as contribuições em cobrança para a destino e suspende as de origem; executa o padrão de movimentação de reservas; copia BENEFPLANOPART; grava EVENTOSPREV (SEQEVENTOSPREV) com flags de efetivação imediata conforme o evento; grava HSTCONTEVENTOSPR; encerra benefícios ativos do titular no último dia do mês anterior e os recria (BFCIARIOTITPLAN/BENEFBFCIARIO) na destino; registra HISTFUNCPREV na destino e fecha o da origem; atualiza CONTRATOEMPTMO. Sem erro: grava o log de operações e o log do TotalPREV (“Transferência de Patrocinadora Em Lote/Individual ...”) e faz commit; com erro: rollback do participante e linha na janela “Resultado”.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>EVENTOGERADOR.FLGSITFUNCIMEDIA/FLGSITPARTIMEDIA/FLGSITPLANOIMEDI</code> — todas '1' ⇒ FLGEFETIVADO = '1' e DATAEFETIVADO = hoje</li>
+<li><code>ELEGPATRO</code>, <code>DEPENTIT</code>, <code>PARTPREVPLAN</code>, <code>CONTRIBPREVPARTP</code>, <code>BENEFPLANOPART</code>, <code>EVENTOSPREV</code>, <code>HSTCONTEVENTOSPR</code>, <code>BENEFBFCIARIO</code>, <code>BFCIARIOTITPLAN</code>, <code>HISTFUNCPREV</code>, <code>CONTRATOEMPTMO</code></li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT103">TRT103</a>, <a href="#TRT104">TRT104</a>, <a href="#TRT105">TRT105</a>, <a href="#TRT106">TRT106</a>, <a href="#TRT108">TRT108</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-10">JF010</a></p>
+<p><strong>Descrição original:</strong> “Atualização cadastral - Insersão do elegível na nova patrocinadora”; “Atualização do FLGDESATIVADO na PARTPREVPLAN - Etapa 1”; “Atualizações de Contribuições - Etapa 2”; “Atualização de Benefícios - Etapa 4”; “Inserir no historico funcional a entrada na patrocinadora destino”.</p>
+<p><strong>Condições:</strong> PP.FLGDESATIVADO = 0; EL.IDSITFUNC = situação de origem; PP.IDPLANOPREV = plano; bErro</p><p><strong>Dados envolvidos:</strong> tabelas acima; UMovReserva.RodaPadraoMovReserva (CMAdmPrev); Sistema.GravaLogOperacoes; GravaLogTotalPrev</p><p><strong>Resultado/Exceção:</strong> <a href="#MSG116">MSG116</a>/<a href="#MSG117">MSG117</a>; o retorno final reflete apenas o último participante processado</p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/fTransfPatroBatch.pas:419-1239</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+
+<p><strong>Regras transversais do módulo</strong> (texto completo em <a href="uc401.html">UC401</a>): <a href="uc401.html#CADPREV-RN001">RS001 (CADPREV-RN001) — Dados isolados por fundação</a>, <a href="uc401.html#CADPREV-RN002">RS002 (CADPREV-RN002) — Menu de eventos a partir de EVENTOGERADOR</a>, <a href="uc401.html#CADPREV-RN003">RS003 (CADPREV-RN003) — Instituto troca a nomenclatura</a>, <a href="uc401.html#CADPREV-RN005">RS005 (CADPREV-RN005) — Log de operações</a> (gravado em <code>fTransfPatroBatch.pas:1224-1232</code>).</p>
+</div>
+
+<p><strong>Tratamentos de erro:</strong> <a href="#TRT101">TRT101</a>–<a href="#TRT108">TRT108</a></p>
+<p><strong>Mensagens:</strong> <a href="#MSG112">MSG112</a>–<a href="#MSG120">MSG120</a></p>
+<p><strong>Telas:</strong> Transferência de Patrocinadora (<code>fTransfPatroBatch.dfm</code>, título em execução = nome do evento), janela “Resultado” (mesmo .dfm)</p>
+<p><strong>Dependências:</strong> cadastro de patrocinadoras, filiais, planos por patrocinadora e situações funcionais; padrão de movimentação de reservas do CMAdmPrev.</p>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span> — informações que o repositório não comprova ou que divergem entre fontes. O texto existente foi mantido; os itens abaixo dependem de validação humana.</p>
+<ul>
+<li>A consulta de seleção (qryLoop, <code>fTransfPatroBatch.pas:498-505</code>) não traz SEQPROPOSTA, mas a chamada ao padrão de reservas lê <code>QryLoop.FieldByName('SEQPROPOSTA')</code> (<code>:850</code>). Pelo código, isso levantaria erro de campo inexistente; confirmar em execução se a transferência de patrocinadora funciona.</li>
+<li><code>iIdEvento</code> é usada no INSERT de HSTCONTEVENTOSPR (<code>:974</code>) sem nunca receber valor (<code>:437</code>): o histórico de contribuições desativadas provavelmente não é gravado.</li>
+<li>CONTRATOEMPTMO é atualizado com <code>IDPESSOA = iIdPessoa</code> (<code>:1196-1199</code>); no lote iIdPessoa = 0, então nenhum contrato muda de patrocinadora. Falha nesse UPDATE sai da rotina sem rollback e sem mensagem.</li>
+<li>Falha no padrão de reservas sai da rotina (<code>:867-869</code>) sem rollback e sem exibir a mensagem montada; a transação fica aberta até o “Cancelar” automático (<code>:409, 1928-1933</code>).</li>
+<li>Responder “Não” à pergunta de reativação (<a href="#MSG115">MSG115</a>) encerra todo o processamento (rollback e saída), inclusive em lote.</li>
+<li>A mensagem final (<a href="#MSG116">MSG116</a>/<a href="#MSG117">MSG117</a>) depende apenas do resultado do último participante processado.</li>
+<li>No “Procurar”, a filial de origem é filtrada por <code>iIdPessoa</code> (pessoa) em vez da patrocinadora (<code>:1988-1990</code>), diferente do botão de busca (<code>:1321-1323</code>).</li>
+<li>“Nova Situação na Patrocinadora de Origem” (dblkSitPatFinal) não é validada e é usada sem aspas no UPDATE do elegível (<code>:540-545</code>); vazia gera erro de SQL tratado como “Atualizando dados do elegível na patrocinadora origem.”.</li>
+</ul>
+</div>
+<div class="note note-info"><p><strong>Registro original do processo PF-10</strong></p><p><strong>Forms de entrada:</strong> <code>FPrincipal.dfm</code> → <code>fTransfPatroBatch.dfm</code></p><p><strong>Lógica de processamento:</strong> críticas; seleção de participantes; loop com transação por participante; Atualiza (ELEGPATRO, DEPENTIT, PARTPREVPLAN, CONTRIBPREVPARTP, reservas, BENEFPLANOPART, EVENTOSPREV, HSTCONTEVENTOSPR, BENEFBFCIARIO, BFCIARIOTITPLAN, HISTFUNCPREV, CONTRATOEMPTMO); log</p><p><strong>Saídas:</strong> mensagens e janela “Resultado”</p><p><strong>Persistência (tabelas escritas):</strong> ELEGPATRO, DEPENTIT, PARTPREVPLAN, CONTRIBPREVPARTP, RESERVAPART/HISTMOVRESERVA (via padrão), BENEFPLANOPART, EVENTOSPREV, HSTCONTEVENTOSPR, BENEFBFCIARIO, BFCIARIOTITPLAN, HISTFUNCPREV, CONTRATOEMPTMO, LOGTOTALPREV</p><p><strong>Evidência:</strong> <code>CADASTROPREV/Fontes/fTransfPatroBatch.pas:305-1239</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+</div>
+
+<section id="TRT-section"><div class="section-title">6. Tratamentos (TRT)</div>
+<p>Cada tratamento traz a condição, a mensagem exibida, o resultado e a regra/jornada de origem. “validação de tela” = crítica sem regra CADPREV-RN própria; “validação técnica” = falha técnica tratada pelo form.</p>
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Condição</th><th>Mensagem</th><th>Resultado</th><th>Regra</th><th>Jornada</th></tr></thead><tbody>
+<tr id="TRT081"><td><strong>TRT081</strong></td><td>Participante selecionado está desativado no plano (FLGDESATIVADO = 1) (<code>FEventoTransfPlano.pas:825-830</code>)</td><td><a href="#MSG081">MSG081</a></td><td>“Não” interrompe a seleção</td><td>validação de tela</td><td><a href="#PF-09">JF009</a></td></tr>
+<tr id="TRT082"><td><strong>TRT082</strong></td><td>Beneficiário sem benefício de suplementação ou com benefícios fora das situações 1/2 (<code>:988-1017</code>)</td><td><a href="#MSG082">MSG082</a>, <a href="#MSG083">MSG083</a></td><td>Aviso; benefícios listados não migram</td><td><a href="#CADPREV-RN065">RS065</a></td><td><a href="#PF-09">JF009</a></td></tr>
+<tr id="TRT083"><td><strong>TRT083</strong></td><td>Campo obrigatório vazio ao transferir (<code>:1052-1100, 1133-1141</code>)</td><td><a href="#MSG084">MSG084</a>, <a href="#MSG085">MSG085</a>, <a href="#MSG087">MSG087</a>, <a href="#MSG089">MSG089</a></td><td>Foco no campo; nada gravado</td><td><a href="#CADPREV-RN063">RS063</a></td><td><a href="#PF-09">JF009</a></td></tr>
+<tr id="TRT084"><td><strong>TRT084</strong></td><td>Plano destino igual ao de origem (<code>:1068-1074</code>)</td><td><a href="#MSG086">MSG086</a></td><td>Bloqueia</td><td><a href="#CADPREV-RN063">RS063</a></td><td><a href="#PF-09">JF009</a></td></tr>
+<tr id="TRT085"><td><strong>TRT085</strong></td><td>Sem participante e sem arquivo (<code>:1103-1109</code>; desfazer <code>:6803-6809</code>)</td><td><a href="#MSG088">MSG088</a></td><td>Foco em “Procurar”</td><td><a href="#CADPREV-RN063">RS063</a></td><td><a href="#PF-09">JF009</a></td></tr>
+<tr id="TRT086"><td><strong>TRT086</strong></td><td>Lote sem patrocinadora ou plano de origem (<code>:1199-1207</code>; <code>:6860-6868</code>)</td><td><a href="#MSG091">MSG091</a></td><td>Reabilita botões e sai</td><td><a href="#CADPREV-RN076">RS076</a></td><td><a href="#PF-09">JF009</a></td></tr>
+<tr id="TRT087"><td><strong>TRT087</strong></td><td>Pessoa já é participante do plano destino (<code>:1716-1735</code>)</td><td><a href="#MSG092">MSG092</a></td><td>Aviso; inscrição/reservas/contribuições não são reinseridas (bParticipanteMigrado)</td><td><a href="#CADPREV-RN064">RS064</a></td><td><a href="#PF-09">JF009</a></td></tr>
+<tr id="TRT088"><td><strong>TRT088</strong></td><td>Pessoa não é elegível na patrocinadora do plano destino (<code>:1738-1755</code>)</td><td><a href="#MSG093">MSG093</a></td><td>Limpa o plano destino</td><td><a href="#CADPREV-RN064">RS064</a></td><td><a href="#PF-09">JF009</a></td></tr>
+<tr id="TRT089"><td><strong>TRT089</strong></td><td>DE-PARA de benefícios inexistente (<code>:1760-1815</code>)</td><td><a href="#MSG094">MSG094</a>, <a href="#MSG095">MSG095</a></td><td>Individual com benefício: limpa plano; lote: “Sim” continua sem benefícios</td><td><a href="#CADPREV-RN065">RS065</a></td><td><a href="#PF-09">JF009</a></td></tr>
+<tr id="TRT090"><td><strong>TRT090</strong></td><td>Regra de transferência do plano reprova (<code>:1999-2011</code>)</td><td><a href="#MSG109">MSG109</a></td><td>Pessoa não transferida; erro no demonstrativo</td><td><a href="#CADPREV-RN066">RS066</a></td><td><a href="#PF-09">JF009</a></td></tr>
+<tr id="TRT091"><td><strong>TRT091</strong></td><td>Plano exige inscrição digitada: lote, ou individual com número vazio (<code>:3432-3460</code>)</td><td><a href="#MSG096">MSG096</a></td><td>Lote: falha da pessoa; individual vazio: limpa a tela</td><td><a href="#CADPREV-RN067">RS067</a></td><td><a href="#PF-09">JF009</a></td></tr>
+<tr id="TRT092"><td><strong>TRT092</strong></td><td>Pagamento pendente na prévia da folha no mês do lote (<code>:3806-3830</code>)</td><td><a href="#MSG097">MSG097</a></td><td>Benefícios não migram; erro no demonstrativo</td><td><a href="#CADPREV-RN071">RS071</a></td><td><a href="#PF-09">JF009</a></td></tr>
+<tr id="TRT093"><td><strong>TRT093</strong></td><td>Falha em qualquer etapa da transferência (GravaErro) (<code>:5376-5387</code>; resultado <code>:1438-1475</code>)</td><td><a href="#MSG109">MSG109</a>; <a href="#MSG101">MSG101</a>/<a href="#MSG102">MSG102</a>/<a href="#MSG103">MSG103</a></td><td>Individual: rollback; lote: conta erros e segue</td><td><a href="#CADPREV-RN075">RS075</a></td><td><a href="#PF-09">JF009</a></td></tr>
+<tr id="TRT094"><td><strong>TRT094</strong></td><td>Núcleo familiar com mais de um beneficiário (<code>:1395-1406</code>)</td><td><a href="#MSG098">MSG098</a></td><td>“Não” interrompe (transação permanece aberta)</td><td><a href="#CADPREV-RN077">RS077</a></td><td><a href="#PF-09">JF009</a></td></tr>
+<tr id="TRT095"><td><strong>TRT095</strong></td><td>Participante com contrato de empréstimo (individual) ou lote (<code>:7783-7785, 1155-1157</code>)</td><td><a href="#MSG099">MSG099</a>, <a href="#MSG090">MSG090</a></td><td>Pergunta sem efeito prático (precedência de operador)</td><td><a href="#CADPREV-RN074">RS074</a></td><td><a href="#PF-09">JF009</a></td></tr>
+<tr id="TRT096"><td><strong>TRT096</strong></td><td>Regra contábil individual com erro, resultado nulo ou inválido (<code>:4040-4152</code>)</td><td><a href="#MSG105">MSG105</a></td><td>Abort (interrompe a operação sem rollback explícito)</td><td><a href="#CADPREV-RN071">RS071</a></td><td><a href="#PF-09">JF009</a></td></tr>
+<tr id="TRT097"><td><strong>TRT097</strong></td><td>Falha ao atualizar reserva do participante após cálculo de resgate (<code>:4879-4886</code>)</td><td><a href="#MSG106">MSG106</a></td><td>Abort</td><td><a href="#CADPREV-RN072">RS072</a></td><td><a href="#PF-09">JF009</a></td></tr>
+<tr id="TRT098"><td><strong>TRT098</strong></td><td>Desfazer: último evento não é a transferência / plano destino não encontrado (<code>:6061-6097, 6114-6149</code>)</td><td><a href="#MSG110">MSG110</a>, <a href="#MSG108">MSG108</a></td><td>Desfazer recusado; erro no demonstrativo</td><td><a href="#CADPREV-RN078">RS078</a></td><td><a href="#PF-09">JF009</a></td></tr>
+<tr id="TRT099"><td><strong>TRT099</strong></td><td>Usuário clica “Cancelar” (<code>:1526-1537</code>)</td><td><a href="#MSG104">MSG104</a></td><td>Rollback, limpa campos, nova transação</td><td><a href="#CADPREV-RN075">RS075</a></td><td><a href="#PF-09">JF009</a></td></tr>
+<tr id="TRT100"><td><strong>TRT100</strong></td><td>Tela fechada com transação aberta (<code>:1622-1632</code>)</td><td>—</td><td>Rollback silencioso</td><td><a href="#CADPREV-RN075">RS075</a></td><td><a href="#PF-09">JF009</a></td></tr>
+<tr id="TRT101"><td><strong>TRT101</strong></td><td>Campo obrigatório vazio na transferência de patrocinadora (<code>fTransfPatroBatch.pas:316-365</code>)</td><td><a href="#MSG112">MSG112</a></td><td>Foco no campo</td><td><a href="#CADPREV-RN079">RS079</a></td><td><a href="#PF-10">JF010</a></td></tr>
+<tr id="TRT102"><td><strong>TRT102</strong></td><td>Plano não existe/ativo na patrocinadora destino (<code>:368-386</code>)</td><td><a href="#MSG113">MSG113</a></td><td>Bloqueia</td><td><a href="#CADPREV-RN079">RS079</a></td><td><a href="#PF-10">JF010</a></td></tr>
+<tr id="TRT103"><td><strong>TRT103</strong></td><td>Nenhum participante nos filtros (<code>:522-527</code>); ou falha ao criar o controle de lançamento contábil (<code>FEventoTransfPlano.pas:7571-7583</code>)</td><td><a href="#MSG114">MSG114</a>, <a href="#MSG111">MSG111</a></td><td>Encerra sem gravar / Abort na abertura</td><td>validação de tela / técnica</td><td><a href="#PF-10">JF010</a>, <a href="#PF-09">JF009</a></td></tr>
+<tr id="TRT104"><td><strong>TRT104</strong></td><td>Pessoa já existe na patrocinadora destino (<code>:560-584</code>)</td><td><a href="#MSG115">MSG115</a></td><td>Sim: reativa; Sim p/ todos: não pergunta mais; Não: rollback e encerra</td><td><a href="#CADPREV-RN080">RS080</a></td><td><a href="#PF-10">JF010</a></td></tr>
+<tr id="TRT105"><td><strong>TRT105</strong></td><td>Erro em etapa do participante (bErro) (<code>:1209-1220</code>)</td><td><a href="#MSG120">MSG120</a>, <a href="#MSG116">MSG116</a></td><td>Rollback do participante; segue para o próximo</td><td><a href="#CADPREV-RN080">RS080</a></td><td><a href="#PF-10">JF010</a></td></tr>
+<tr id="TRT106"><td><strong>TRT106</strong></td><td>Falha ao gravar log de operações (<code>:1225-1229</code>)</td><td>—</td><td>Exceção “Erro ao gravar Log.” engolida por except vazio; segue com commit</td><td>validação técnica</td><td><a href="#PF-10">JF010</a></td></tr>
+<tr id="TRT107"><td><strong>TRT107</strong></td><td>Matrícula digitada não encontrada ou ambígua (<code>:1267-1278</code>)</td><td><a href="#MSG118">MSG118</a>, <a href="#MSG119">MSG119</a></td><td>Não encontrada: sai; várias: abre busca</td><td><a href="#CADPREV-RN079">RS079</a></td><td><a href="#PF-10">JF010</a></td></tr>
+<tr id="TRT108"><td><strong>TRT108</strong></td><td>Falha no padrão de movimentação de reservas (<code>:847-871</code>)</td><td>— (mensagem montada mas não exibida)</td><td>Sai da rotina sem rollback; tela cancelada em seguida (rollback em bbtnCancelarClick, <code>:409, 1928-1933</code>)</td><td><a href="#CADPREV-RN080">RS080</a></td><td><a href="#PF-10">JF010</a></td></tr>
+</tbody></table></div>
+</section>
+
+<section id="MSG-section"><div class="section-title">7. Mensagens (MSG)</div>
+<p>Textos conferidos no código-fonte (grafia original mantida). Trechos variáveis aparecem entre &lt; &gt;.</p>
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Texto da mensagem</th><th>Tipo</th><th>Origem (CADASTROPREV/Fontes/)</th><th>Jornadas</th></tr></thead><tbody>
+<tr id="MSG081"><td><strong>MSG081</strong></td><td>“O participante está desativado no plano selecionado. Deseja continuar a Transferência de Plano ? ”</td><td>Confirmação</td><td><code>FEventoTransfPlano.pas:827</code></td><td><a href="#PF-09">JF009</a></td></tr>
+<tr id="MSG082"><td><strong>MSG082</strong></td><td>“O beneficiário selecionado não tem benefício de suplementação concedido.”</td><td>Informação</td><td><code>FEventoTransfPlano.pas:990</code></td><td><a href="#PF-09">JF009</a></td></tr>
+<tr id="MSG083"><td><strong>MSG083</strong></td><td>“Os benefícios, listados abaixo, não serão migrados. &lt; O Benefício X encontra-se &lt;situação&gt;.&gt;”</td><td>Informação</td><td><code>FEventoTransfPlano.pas:1012</code></td><td><a href="#PF-09">JF009</a></td></tr>
+<tr id="MSG084"><td><strong>MSG084</strong></td><td>“A Data do Evento deve ser informada.”</td><td>Erro</td><td><code>FEventoTransfPlano.pas:1054</code></td><td><a href="#PF-09">JF009</a></td></tr>
+<tr id="MSG085"><td><strong>MSG085</strong></td><td>“O Plano destino deve ser informado.”</td><td>Erro</td><td><code>FEventoTransfPlano.pas:1062, 4911</code></td><td><a href="#PF-09">JF009</a></td></tr>
+<tr id="MSG086"><td><strong>MSG086</strong></td><td>“O Plano destino não pode ser o mesmo de origem.”</td><td>Erro</td><td><code>FEventoTransfPlano.pas:1070</code></td><td><a href="#PF-09">JF009</a></td></tr>
+<tr id="MSG087"><td><strong>MSG087</strong></td><td>“A Nova Situação no Plano origem deve ser informada.” / “A situação no Plano destino deve ser informada.” / “A Nova Situação do Participante na Fundação deve ser informada.”</td><td>Erro</td><td><code>FEventoTransfPlano.pas:1078, 1086, 1095</code></td><td><a href="#PF-09">JF009</a></td></tr>
+<tr id="MSG088"><td><strong>MSG088</strong></td><td>“Primeiro selecione o Participante ou o arquivo de matrículas.”</td><td>Erro</td><td><code>FEventoTransfPlano.pas:1105, 6805</code></td><td><a href="#PF-09">JF009</a></td></tr>
+<tr id="MSG089"><td><strong>MSG089</strong></td><td>“O lote deve ser informado.”</td><td>Erro</td><td><code>FEventoTransfPlano.pas:1137</code></td><td><a href="#PF-09">JF009</a></td></tr>
+<tr id="MSG090"><td><strong>MSG090</strong></td><td>“Deseja migrar os recursos contábeis dos participantes que possuirem Empréstimo ?”</td><td>Confirmação</td><td><code>FEventoTransfPlano.pas:1155</code></td><td><a href="#PF-09">JF009</a></td></tr>
+<tr id="MSG091"><td><strong>MSG091</strong></td><td>“Para migração em lote, a Patrocinadora e Plano devem ser selecionados.”</td><td>Erro</td><td><code>FEventoTransfPlano.pas:1201, 6862</code></td><td><a href="#PF-09">JF009</a></td></tr>
+<tr id="MSG092"><td><strong>MSG092</strong></td><td>“Esta pessoa já está cadastrada como Participante do Plano Destino.”</td><td>Aviso</td><td><code>FEventoTransfPlano.pas:1732</code></td><td><a href="#PF-09">JF009</a></td></tr>
+<tr id="MSG093"><td><strong>MSG093</strong></td><td>“O participante não está cadastrado com o elegível na patrocinadora do Plano Destino.”</td><td>Erro</td><td><code>FEventoTransfPlano.pas:1753</code></td><td><a href="#PF-09">JF009</a></td></tr>
+<tr id="MSG094"><td><strong>MSG094</strong></td><td>“O participante recebe o benefício &lt;nome&gt;, porém, o DE-PARA de benefícios não foi cadastrado.”</td><td>Erro</td><td><code>FEventoTransfPlano.pas:1785</code></td><td><a href="#PF-09">JF009</a></td></tr>
+<tr id="MSG095"><td><strong>MSG095</strong></td><td>“O DE-PARA de benefícios não foi cadastrado. Caso hajam participantes assistidos no arquivo, apenas as informações que não estiverem ligadas aos benefícios serão transferidas. Deseja continuar?”</td><td>Aviso / Confirmação</td><td><code>FEventoTransfPlano.pas:1800</code></td><td><a href="#PF-09">JF009</a></td></tr>
+<tr id="MSG096"><td><strong>MSG096</strong></td><td>“O Plano Destino exige que o número de inscrição seja digitado. Assim, não é possível fazer transferência de plano em lote.”</td><td>Erro</td><td><code>FEventoTransfPlano.pas:3456</code></td><td><a href="#PF-09">JF009</a></td></tr>
+<tr id="MSG097"><td><strong>MSG097</strong></td><td>“Existem registros de pagamentos pendentes na Prévia da Folha para este participante. Eles devem ser acertados antes do processo de transferência.”</td><td>Informação (Pendência)</td><td><code>FEventoTransfPlano.pas:3826 (e GravaErro :3827)</code></td><td><a href="#PF-09">JF009</a></td></tr>
+<tr id="MSG098"><td><strong>MSG098</strong></td><td>“Este Núcleo Familiar possui mais de um beneficiário, todos os beneficiários serão migrados. Deseja continuar a Transferência de Plano ? ”</td><td>Confirmação</td><td><code>FEventoTransfPlano.pas:1400</code></td><td><a href="#PF-09">JF009</a></td></tr>
+<tr id="MSG099"><td><strong>MSG099</strong></td><td>“O participante possui Contrato de Empréstimo ainda não quitado. Os recursos contábeis deste contrato também serão migrados ?”</td><td>Confirmação</td><td><code>FEventoTransfPlano.pas:7783</code></td><td><a href="#PF-09">JF009</a></td></tr>
+<tr id="MSG100"><td><strong>MSG100</strong></td><td>“Evento efetuado com sucesso. A operação pode ser efetivada após a verificação do demonstrativo.”</td><td>Informação</td><td><code>FEventoTransfPlano.pas:1445</code></td><td><a href="#PF-09">JF009</a></td></tr>
+<tr id="MSG101"><td><strong>MSG101</strong></td><td>“Erro ao transferir o participante de plano. Operação Cancelada.”</td><td>Erro</td><td><code>FEventoTransfPlano.pas:1451</code></td><td><a href="#PF-09">JF009</a></td></tr>
+<tr id="MSG102"><td><strong>MSG102</strong></td><td>“Houveram erros em &lt;n&gt; das &lt;total&gt; tranferências. Todas as demais foram efetivadas. Verificar desmonstrativo.”</td><td>Erro</td><td><code>FEventoTransfPlano.pas:1463</code></td><td><a href="#PF-09">JF009</a></td></tr>
+<tr id="MSG103"><td><strong>MSG103</strong></td><td>“Houveram erros em &lt;n&gt; das &lt;total&gt; tranferências. Todas as demais podem ser efetivadas após verfiicação do desmonstrativo. Não recomendado.”</td><td>Erro</td><td><code>FEventoTransfPlano.pas:1468, 6997</code></td><td><a href="#PF-09">JF009</a></td></tr>
+<tr id="MSG104"><td><strong>MSG104</strong></td><td>“Todas as operações executadas serão canceladas. Confirma ? ”</td><td>Confirmação</td><td><code>FEventoTransfPlano.pas:1529</code></td><td><a href="#PF-09">JF009</a></td></tr>
+<tr id="MSG105"><td><strong>MSG105</strong></td><td>“Erro na regra para atribuição automática de entidade contábil.” (variantes: “... Resultado nulo.”, “[&lt;regra&gt;] - Regra para atribuição automática de entidade contábil. Resultado inválido: &lt;valor&gt;.” e as mesmas para “conta para débito” e “conta para crédito”)</td><td>Erro</td><td><code>FEventoTransfPlano.pas:4044, 4051, 4067, 4086, 4093, 4108, 4128, 4135, 4150</code></td><td><a href="#PF-09">JF009</a></td></tr>
+<tr id="MSG106"><td><strong>MSG106</strong></td><td>“Ocorreu um erro na atualização do valor da reserva do participante. ”</td><td>Erro</td><td><code>FEventoTransfPlano.pas:4882</code></td><td><a href="#PF-09">JF009</a></td></tr>
+<tr id="MSG107"><td><strong>MSG107</strong></td><td>“Desfazer efetuado com sucesso. A operação pode ser efetivada após a verificação do demonstrativo.”</td><td>Informação</td><td><code>FEventoTransfPlano.pas:6981</code></td><td><a href="#PF-09">JF009</a></td></tr>
+<tr id="MSG108"><td><strong>MSG108</strong></td><td>“Erro ao desfazer transferência. Operação Cancelada.”</td><td>Erro</td><td><code>FEventoTransfPlano.pas:6987</code></td><td><a href="#PF-09">JF009</a></td></tr>
+<tr id="MSG109"><td><strong>MSG109</strong></td><td>Demonstrativo de erros (aba “Erros”): “Matrícula: &lt;m&gt; / Nome: &lt;n&gt; / Erro: &lt;texto&gt;”, por exemplo “Não passou na regra de elegibilidade.”, “Matrícula não encontrada.”, “Erro na gravação no histórico de eventos.”, “Erro na execução do Padrão de Movimentação de Reserva com a mensagem.”</td><td>Erro (registro)</td><td><code>FEventoTransfPlano.pas:5376-5387, 2004, 1285, 2035, 3572</code></td><td><a href="#PF-09">JF009</a></td></tr>
+<tr id="MSG110"><td><strong>MSG110</strong></td><td>“O participante não tem um evento de transferência de plano como último evento realizado.” / “O Beneficiário não tem um evento de transferência de plano como último evento realizado.”</td><td>Erro (registro)</td><td><code>FEventoTransfPlano.pas:6069, 6126, 6147</code></td><td><a href="#PF-09">JF009</a></td></tr>
+<tr id="MSG111"><td><strong>MSG111</strong></td><td>“Erro ao criar Controle de Lançamento Contábil.”</td><td>Erro</td><td><code>FEventoTransfPlano.pas:7581</code></td><td><a href="#PF-09">JF009</a></td></tr>
+<tr id="MSG112"><td><strong>MSG112</strong></td><td>“É obrigatório o preenchimento da Patrocinadora de Origem.” (variantes: “... da Patrocinadora de Destino.”, “... da Situação na Patrocinadora de Origem.”, “... da Situação na Patrocinadora de Destino.”, “... da Data de Transferência.”, “... da Opção da Data de Demissão.”, “... do Plano Previdenciário.”)</td><td>Erro</td><td><code>fTransfPatroBatch.pas:318, 325, 333, 340, 347, 354, 362</code></td><td><a href="#PF-10">JF010</a></td></tr>
+<tr id="MSG113"><td><strong>MSG113</strong></td><td>“Plano Previdenciário escolhido não existe na Patrocinadora Destino.”</td><td>Erro</td><td><code>fTransfPatroBatch.pas:383</code></td><td><a href="#PF-10">JF010</a></td></tr>
+<tr id="MSG114"><td><strong>MSG114</strong></td><td>“Nenhum participante foi selecionado nos parâmetros atuais.”</td><td>Aviso</td><td><code>fTransfPatroBatch.pas:524</code></td><td><a href="#PF-10">JF010</a></td></tr>
+<tr id="MSG115"><td><strong>MSG115</strong></td><td>“A matrícula &lt;m&gt; já existe na patrocinadora Destino. Deseja reativar seus dados nesta patrocinadora ? ”</td><td>Confirmação (Sim / Não / Sim para todos)</td><td><code>fTransfPatroBatch.pas:572</code></td><td><a href="#PF-10">JF010</a></td></tr>
+<tr id="MSG116"><td><strong>MSG116</strong></td><td>“Erro na execução da Transferência de Patrocinadora. Transferência não Efetuada.”</td><td>Erro</td><td><code>fTransfPatroBatch.pas:402</code></td><td><a href="#PF-10">JF010</a></td></tr>
+<tr id="MSG117"><td><strong>MSG117</strong></td><td>“Transferência de Patrocinadora efetuada com sucesso.”</td><td>Informação</td><td><code>fTransfPatroBatch.pas:406</code></td><td><a href="#PF-10">JF010</a></td></tr>
+<tr id="MSG118"><td><strong>MSG118</strong></td><td>“Matrícula não encontrada.”</td><td>Erro</td><td><code>fTransfPatroBatch.pas:1269</code></td><td><a href="#PF-10">JF010</a></td></tr>
+<tr id="MSG119"><td><strong>MSG119</strong></td><td>“Mais de um participante selecionado.”</td><td>Aviso</td><td><code>fTransfPatroBatch.pas:1275</code></td><td><a href="#PF-10">JF010</a></td></tr>
+<tr id="MSG120"><td><strong>MSG120</strong></td><td>“Erro - Matrícula: &lt;m&gt; - &lt;etapa&gt;” (ex.: “Inserindo elegível na nova patrocinadora”, “Desativando planos dos participantes na patrocinadora anterior.”, “Registrando eventos dos participantes.”)</td><td>Erro (janela Resultado)</td><td><code>fTransfPatroBatch.pas:1214, 634, 714, 961</code></td><td><a href="#PF-10">JF010</a></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">8. Tabela/API/Programa</div>
+<div class="table-wrap"><table><thead><tr><th>Jornada</th><th>Tabelas (escrita)</th><th>Rotinas (CADASTROPREV/Fontes/)</th></tr></thead><tbody>
+<tr><td><a href="#PF-09">JF009</a></td><td>PARTPREVPLAN (I/U), EVENTOSPREV (I), ELEGPATRO (U opções), RESERVAPART (I/U), HISTMOVRESERVA (I), MOVRESERVATEMP (I/U), CONTRIBPREVPARTP (U/I), CONTRIBPREVNUCLEO (U/I), HSTCONTEVENTOSPR (I), BFCIARIOTITPLAN (I), PROCESSOBENEF (I/U), BENEFBFCIARIO (I/U), HSTBENEFBFCIARIO (I/U/D), HSTCONTRIBPREV (I/U/D), CONTRATOEMPTMO (U); no desfazer também D em HSTATRASOBENEF, HSTATRASOCONTRIB, BENEFPLANOPART</td><td><code>FPrincipal.pas:1504-1531</code>; <code>FEventoTransfPlano.pas:1043-1477</code> (bbtnConfirmarClick), <code>:1963-2199</code> (TransfPlano), <code>:3370-3508</code>, <code>:3511-3621</code>, <code>:3625-3787</code>, <code>:3790-4596</code>, <code>:4600-4900</code>, <code>:5424-6023</code>, <code>:7374-7540</code>, <code>:7756-7804</code>, <code>:6026-7004</code> (desfazer)</td></tr>
+<tr><td><a href="#PF-10">JF010</a></td><td>ELEGPATRO (I/U), DEPENTIT (I/U), PARTPREVPLAN (I/U), CONTRIBPREVPARTP (I/U), BENEFPLANOPART (I), EVENTOSPREV (I), HSTCONTEVENTOSPR (I), BENEFBFCIARIO (I/U), BFCIARIOTITPLAN (I), HISTFUNCPREV (I/U), CONTRATOEMPTMO (U), LOGTOTALPREV (I via GravaLogTotalPrev)</td><td><code>FPrincipal.pas:1533-1549</code>; <code>fTransfPatroBatch.pas:305-417</code> (bbtnConfirmarClick), <code>:419-1239</code> (Atualiza), <code>:1336-1905</code> (Atualiza* auxiliares)</td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">9. Telas/Layouts</div>
+<div class="table-wrap"><table><thead><tr><th>Jornada</th><th>Tela (título)</th><th>Form (.dfm)</th></tr></thead><tbody>
+<tr><td><a href="#PF-09">JF009</a></td><td>Transferência de Planos (título em execução = nome do evento TP); janelas “Benefícios”, “Demonstrativos”, “Contribuições”<br>Evento Transferência de Plano (FLGSIMULA = '1', externo)<br>Cadastro de Contribuições do Participante (sem chamada)<br>Transferência de Planos - Beneficiários por Benefício (sem chamada)</td><td><code>FEventoTransfPlano.dfm</code><br><code>CM/CMADMPREV/Fontes/FEventoTransfPlanoNOVO.dfm</code><br><code>FCadContribPartTransfPlano.dfm</code><br><code>FCadBfciarioTitPlanTransf.dfm</code></td></tr>
+<tr><td><a href="#PF-10">JF010</a></td><td>Transferência de Patrocinadora (título em execução = nome do evento TE); janela “Resultado”</td><td><code>fTransfPatroBatch.dfm</code></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">10. Visão Consolidada das Jornadas</div>
+<div class="table-wrap"><table><thead><tr><th>Item</th><th>Jornada</th><th>Título</th><th>Critério de aceitação</th><th>Regras</th><th>Mensagens</th><th>Telas</th></tr></thead><tbody>
+<tr><td>[US] CADPREV-JF009</td><td><a href="#PF-09">JF009</a></td><td>Transferência de plano</td><td><strong>Dado</strong> um participante inscrito no plano de origem e um plano destino da mesma patrocinadora com DE-PARA cadastrado, <strong>Quando</strong> o analista informa os dados obrigatórios, clica “Transferir” e depois “Efetivar”, <strong>Então</strong> o vínculo de origem fica desativado na véspera da data do evento, a pessoa fica inscrita no destino com reservas, contribuições e benefícios transportados, e o demonstrativo mostra o cálculo.</td><td><a href="#CADPREV-RN061">RS061</a>–<a href="#CADPREV-RN078">RS078</a></td><td><a href="#MSG081">MSG081</a>–<a href="#MSG111">MSG111</a></td><td>Transferência de Planos</td></tr>
+<tr><td>[US] CADPREV-JF010</td><td><a href="#PF-10">JF010</a></td><td>Transferência de patrocinadora individual/em lote</td><td><strong>Dado</strong> participantes ativos de uma patrocinadora e um plano ativo na patrocinadora destino, <strong>Quando</strong> o analista preenche origem, destino e data e clica “Transfere”, <strong>Então</strong> cada participante sem erro é replicado na nova patrocinadora com commit e log, e os com erro são desfeitos e listados em “Resultado”.</td><td><a href="#CADPREV-RN061">RS061</a>, <a href="#CADPREV-RN079">RS079</a>, <a href="#CADPREV-RN080">RS080</a></td><td><a href="#MSG112">MSG112</a>–<a href="#MSG120">MSG120</a></td><td>Transferência de Patrocinadora</td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">11. Critérios de Aceitação por Regra</div>
+<div class="table-wrap"><table><thead><tr><th>Regra</th><th>Jornada</th><th>Critério de aceitação</th></tr></thead><tbody>
+<tr><td><a href="#CADPREV-RN061">RS061 (CADPREV-RN061)</a></td><td><a href="#PF-09">JF009</a>, <a href="#PF-10">JF010</a></td><td><strong>Dado</strong> eventos TP e TE cadastrados para a fundação, <strong>Quando</strong> o menu é montado, <strong>Então</strong> eles aparecem em Transferências › Transferência de Plano/Patrocinadora e o item Transferência de Reserva não é exibido.</td></tr>
+<tr><td><a href="#CADPREV-RN062">RS062 (CADPREV-RN062)</a></td><td><a href="#PF-09">JF009</a></td><td><strong>Dado</strong> um evento TP com FLGSIMULA = '1', <strong>Quando</strong> o usuário o seleciona, <strong>Então</strong> abre a tela com simulação do CMAdmPrev; com outro valor, abre a tela local.</td></tr>
+<tr><td><a href="#CADPREV-RN063">RS063 (CADPREV-RN063)</a></td><td><a href="#PF-09">JF009</a></td><td><strong>Dado</strong> a data do evento vazia ou o plano destino igual ao de origem, <strong>Quando</strong> o usuário clica “Transferir”, <strong>Então</strong> o sistema mostra a mensagem correspondente e nada é gravado.</td></tr>
+<tr><td><a href="#CADPREV-RN064">RS064 (CADPREV-RN064)</a></td><td><a href="#PF-09">JF009</a></td><td><strong>Dado</strong> um participante não cadastrado como elegível na patrocinadora do plano destino, <strong>Quando</strong> o plano destino é escolhido, <strong>Então</strong> o sistema mostra <a href="#MSG093">MSG093</a> e limpa o plano destino.</td></tr>
+<tr><td><a href="#CADPREV-RN065">RS065 (CADPREV-RN065)</a></td><td><a href="#PF-09">JF009</a></td><td><strong>Dado</strong> uma pessoa que recebe benefício e não há DE-PARA para o par de planos e evento, <strong>Quando</strong> o plano destino é escolhido (individual), <strong>Então</strong> o sistema mostra <a href="#MSG094">MSG094</a> e não permite seguir com esse plano.</td></tr>
+<tr><td><a href="#CADPREV-RN066">RS066 (CADPREV-RN066)</a></td><td><a href="#PF-09">JF009</a></td><td><strong>Dado</strong> um plano destino com regra de transferência que retorna falso, <strong>Quando</strong> a transferência é executada, <strong>Então</strong> a pessoa não é transferida e o demonstrativo de erros registra “Não passou na regra de elegibilidade.”.</td></tr>
+<tr><td><a href="#CADPREV-RN067">RS067 (CADPREV-RN067)</a></td><td><a href="#PF-09">JF009</a></td><td><strong>Dado</strong> um plano destino sem numeração automática e evento que não mantém inscrição, <strong>Quando</strong> a transferência é em lote, <strong>Então</strong> o sistema mostra <a href="#MSG096">MSG096</a> e a pessoa não é transferida.</td></tr>
+<tr><td><a href="#CADPREV-RN068">RS068 (CADPREV-RN068)</a></td><td><a href="#PF-09">JF009</a></td><td><strong>Dado</strong> uma transferência com data de evento D, <strong>Quando</strong> é efetivada, <strong>Então</strong> o vínculo de origem tem FLGDESATIVADO = 1 e DATACANCELAMENTO = D − 1, o destino tem INSCRICAODATA = D e há um EVENTOSPREV efetivado no plano de origem.</td></tr>
+<tr><td><a href="#CADPREV-RN069">RS069 (CADPREV-RN069)</a></td><td><a href="#PF-09">JF009</a></td><td><strong>Dado</strong> um titular com saldo de reservas, <strong>Quando</strong> a transferência é executada, <strong>Então</strong> as reservas do destino são criadas, o padrão de movimentação é aplicado e as reservas do origem ficam com valor 0 e inativas.</td></tr>
+<tr><td><a href="#CADPREV-RN070">RS070 (CADPREV-RN070)</a></td><td><a href="#PF-09">JF009</a></td><td><strong>Dado</strong> um titular com contribuições em cobrança, <strong>Quando</strong> a transferência é executada, <strong>Então</strong> elas ficam com FLGCOBRA = 0 e DATAFINAL = D − 1 e as contribuições do destino que passam na regra de associação são associadas.</td></tr>
+<tr><td><a href="#CADPREV-RN071">RS071 (CADPREV-RN071)</a></td><td><a href="#PF-09">JF009</a></td><td><strong>Dado</strong> um pagamento pendente na prévia da folha para a pessoa no mês do lote, <strong>Quando</strong> a transferência é executada, <strong>Então</strong> o sistema mostra <a href="#MSG097">MSG097</a> e não migra os benefícios; sem pendência, os benefícios ficam ativos no destino e encerrados (situação 3) no origem.</td></tr>
+<tr><td><a href="#CADPREV-RN072">RS072 (CADPREV-RN072)</a></td><td><a href="#PF-09">JF009</a></td><td><strong>Dado</strong> “Manter valores dos benefícios” desmarcado, <strong>Quando</strong> a transferência é executada, <strong>Então</strong> os benefícios são recalculados pela regra do DE-PARA e as diferenças acima de 0,01 em relação ao pago no origem são lançadas com motivo 3037 no lote.</td></tr>
+<tr><td><a href="#CADPREV-RN073">RS073 (CADPREV-RN073)</a></td><td><a href="#PF-09">JF009</a></td><td><strong>Dado</strong> “Manter valores do benefício do INSS” marcado, <strong>Quando</strong> o benefício de referência é migrado, <strong>Então</strong> o histórico do INSS é copiado para o destino e ele não é recalculado.</td></tr>
+<tr><td><a href="#CADPREV-RN074">RS074 (CADPREV-RN074)</a></td><td><a href="#PF-09">JF009</a></td><td><strong>Dado</strong> uma pessoa com contrato de empréstimo no plano de origem, <strong>Quando</strong> a transferência é executada, <strong>Então</strong> o contrato passa a apontar para o plano destino (IDPLANOPREV).</td></tr>
+<tr><td><a href="#CADPREV-RN075">RS075 (CADPREV-RN075)</a></td><td><a href="#PF-09">JF009</a></td><td><strong>Dado</strong> uma transferência individual concluída sem erro, <strong>Quando</strong> o usuário fecha a tela sem clicar “Efetivar”, <strong>Então</strong> nenhuma alteração permanece no banco.</td></tr>
+<tr><td><a href="#CADPREV-RN076">RS076 (CADPREV-RN076)</a></td><td><a href="#PF-09">JF009</a></td><td><strong>Dado</strong> um arquivo com uma matrícula inexistente, <strong>Quando</strong> o lote é processado, <strong>Então</strong> a matrícula aparece no demonstrativo de erros como “Matrícula não encontrada.” e as demais são processadas.</td></tr>
+<tr><td><a href="#CADPREV-RN077">RS077 (CADPREV-RN077)</a></td><td><a href="#PF-09">JF009</a></td><td><strong>Dado</strong> um beneficiário cujo núcleo familiar tem duas pessoas, <strong>Quando</strong> o usuário confirma <a href="#MSG098">MSG098</a>, <strong>Então</strong> as duas pessoas são transferidas.</td></tr>
+<tr><td><a href="#CADPREV-RN078">RS078 (CADPREV-RN078)</a></td><td><a href="#PF-09">JF009</a></td><td><strong>Dado</strong> um titular cujo último evento não é a transferência, <strong>Quando</strong> o usuário clica “Desfazer”, <strong>Então</strong> o desfazer é recusado com <a href="#MSG110">MSG110</a> no demonstrativo de erros.</td></tr>
+<tr><td><a href="#CADPREV-RN079">RS079 (CADPREV-RN079)</a></td><td><a href="#PF-10">JF010</a></td><td><strong>Dado</strong> um plano que não está ativo na patrocinadora destino, <strong>Quando</strong> o usuário clica “Transfere”, <strong>Então</strong> o sistema mostra <a href="#MSG113">MSG113</a> e nada é gravado.</td></tr>
+<tr><td><a href="#CADPREV-RN080">RS080 (CADPREV-RN080)</a></td><td><a href="#PF-10">JF010</a></td><td><strong>Dado</strong> dois participantes selecionados e um deles com erro numa etapa, <strong>Quando</strong> a transferência é executada, <strong>Então</strong> o participante com erro é desfeito e listado em “Resultado” e o outro é gravado com commit e log de operações.</td></tr>
+</tbody></table></div>
+</section>
+
+<p><a class="back-btn" href="funcionalidades.html">← Voltar à lista de Casos de Uso (Processos Funcionais)</a></p>
+</main>
+<footer>
+<p>Blueprint AS-IS — PFC-73 — Processos Funcionais organizados em Casos de Uso — Módulo CADASTROPREV | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-24</p>
+</footer>
+</body>
+</html>

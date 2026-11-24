@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cadastro Previdenciário — UC402 – Registrar Eventos Cadastrais de Inscrição e Situação — Blueprint AS-IS</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<header>
+  <div class="badge">Blueprint AS-IS — PFC-73 — Processos Funcionais</div>
+  <h1>UC402 – Registrar Eventos Cadastrais de Inscrição e Situação</h1>
+  <p>Caso de uso do módulo Cadastro Previdenciário: 4 jornada(s) funcional(is) e 20 regra(s) de negócio descritas dentro de cada jornada.</p>
+</header>
+<nav>
+  <a href="index.html">📋 Visão Geral</a>
+  <a href="arquitetura.html">🏗️ Arquitetura</a>
+  <a href="inventario-tecnico.html">📦 Inventário</a>
+  <a href="funcionalidades.html">⚙️ Processos Funcionais</a>
+  <a href="procedures-functions.html">🔧 Procedures</a>
+  <a href="dados.html">🗄️ Dados</a>
+  <a href="relatorios.html">📄 Relatórios</a>
+  <a href="integracoes.html">🔗 Integrações</a>
+  <a href="tratamento-erros.html">⚠️ Erros</a>
+  <a href="diagramas-fluxo.html">🔀 Fluxos</a>
+  <a href="lacunas.html">🔍 Lacunas</a>
+  <a href="controle-cobertura.html">📊 Cobertura</a>
+</nav>
+<main>
+
+<a class="back-btn" href="funcionalidades.html">← Voltar à lista de Casos de Uso (Processos Funcionais)</a>
+<div class="breadcrumb"><a href="index.html">Cadastro Previdenciário</a> › <a href="funcionalidades.html">Processos Funcionais</a> › UC402</div>
+
+<section><div class="section-title">1. Identificação</div>
+<div class="table-wrap"><table><tbody>
+<tr><th>Caso de Uso</th><td><strong>UC402 – Registrar Eventos Cadastrais de Inscrição e Situação</strong></td></tr>
+<tr><th>Módulo</th><td>CADASTROPREV — Cadastro Previdenciário</td></tr>
+<tr><th>Sistema</th><td>CM Contabilidade / FUNCEF (Delphi 5 / VCL / MIDAS / Oracle)</td></tr>
+<tr><th>Tipo</th><td>Sistema Desktop</td></tr>
+<tr><th>Ator</th><td>Usuário operacional do cadastro previdenciário (analistas de cadastro/inscrição de participantes)</td></tr>
+<tr><th>Jornadas</th><td><a href="#PF-05">JF005 — Inscrição do participante (individual e em lote)</a>, <a href="#PF-06">JF006 — Reinscrição do participante</a>, <a href="#PF-07">JF007 — Manutenção parcial</a>, <a href="#PF-08">JF008 — Retorno de mantido para ativo</a></td></tr>
+<tr><th>Regras de negócio</th><td>20 regra(s) CADPREV-RN (RN041–RN060), descritas na íntegra dentro de cada jornada; regras transversais em <a href="uc401.html#PF-01">UC401</a></td></tr>
+<tr><th>OS - Título</th><td>PFC-73 — Blueprint Cadastro Previdenciário</td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">2. Descrição Resumida</div>
+<p>Registro dos eventos do menu <strong>Eventos › Cadastrais</strong> que criam ou mudam o vínculo do participante com o plano: inscrição (individual pelo cadastro de elegível e em lote), reinscrição, manutenção parcial (participante que deixa de contribuir integralmente e mantém parte do vínculo) e retorno de mantido para ativo. Este caso de uso reúne 4 jornada(s) funcional(is):</p>
+<ul>
+<li><a href="#PF-05"><strong>JF005 — Inscrição do participante (IP) e inscrição em lote</strong></a>: inscrever um participante pelo cadastro de elegível (componente externo) ou vários participantes de uma vez, com geração de relatório e arquivo.</li>
+<li><a href="#PF-06"><strong>JF006 — Reinscrição do participante</strong></a>: reinscrever no plano um participante cancelado ou demitido, na mesma ou em nova patrocinadora.</li>
+<li><a href="#PF-07"><strong>JF007 — Manutenção parcial</strong></a>: registrar que o participante passa a “Mantido Parcial”, com salário de manutenção e regra de concessão.</li>
+<li><a href="#PF-08"><strong>JF008 — Retorno de mantido para ativo</strong></a>: devolver à condição de ativo um participante mantido (ou cancelado, no evento 354), na mesma ou em nova patrocinadora.</li>
+</ul>
+<p><strong>Necessidade de negócio:</strong> o participante precisa estar inscrito no plano para contribuir e ter direitos; ao longo da vida ele pode sair (cancelamento, demissão), voltar (reinscrição), reduzir a participação (manutenção parcial) e retomar a condição de ativo. Cada uma dessas mudanças é registrada como um <em>evento cadastral</em> em EVENTOSPREV e ajusta situações, salários, contribuições e reservas.</p>
+<p><strong>Quem inicia:</strong> o analista de cadastro, pelo menu <em>Eventos › Cadastrais</em> (<code>FPrincipal.dfm:8480-8497</code>), cujos itens são lidos do catálogo de eventos da fundação (<a href="uc401.html#CADPREV-RN002">RS002</a>).</p>
+<p><strong>Resultado esperado:</strong> o vínculo do participante com o plano (PARTPREVPLAN) e com a patrocinadora (ELEGPATRO) fica coerente com o evento; o evento fica em EVENTOSPREV; contribuições, reservas e histórico funcional são atualizados conforme o caso; a operação vai para o log (exceto na inscrição em lote).</p>
+<p><strong>Termos, siglas e componentes citados nesta página</strong> — explicados na primeira vez em que aparecem; a coluna “Fonte” indica onde a explicação foi conferida no repositório:</p>
+<div class="table-wrap"><table><thead><tr><th>Termo</th><th>O que significa</th><th>Fonte</th></tr></thead><tbody>
+<tr><td><strong>Grupos IP, RM, MP, RA</strong></td><td>Códigos internos (FLGINTERNO) dos eventos: IP = Inscrição do Participante; RM = Reinscrição; MP = Manutenção Parcial; RA = Retorno de Mantido para Ativo.</td><td><code>FPrincipal.pas:912-1026</code></td></tr>
+<tr><td><strong>FCadElegivel / IniciaEventoInscricao</strong></td><td>Tela externa (CMAdmPrev) de cadastro de elegível e participante. A rotina <code>IniciaEventoInscricao</code> a abre em modo “evento de inscrição” (situações filtradas pelo evento) ou em modo “cadastro” (todas as situações).</td><td><code>CM/CMADMPREV/Fontes/FCadElegivel.pas:2308-2411</code></td></tr>
+<tr><td><strong>Patrocinadoras 1 e 91008; planos 66 (REB) e 74 (Novo Plano)</strong></td><td>Valores fixos no código da inscrição em lote: matrícula de 4 dígitos → patrocinadora 1 e plano 66; de 7 dígitos → patrocinadora 91008 e plano 74. As mensagens chamam o plano 74 de “Novo Plano” e o 66 de “REB”.</td><td><code>fInscBuscaParticipLote.pas:185-206, 412-444</code></td></tr>
+<tr><td><strong>Contribuições 1 e 21</strong></td><td>Tipos de contribuição criados na inscrição em lote em CONTRIBPREVPARTP com o percentual informado. O significado de cada código não está descrito no código <span class="ev ev-pendente">PENDENTE</span>.</td><td><code>FInscricaoParticipanteLote.pas:560-656</code></td></tr>
+<tr><td><strong>DOCPESSOA documento 43</strong></td><td>Documento da pessoa usado para guardar a “Proposta Recebida Em” (data em que a proposta de inscrição foi recebida).</td><td><code>fInscBuscaParticipLote.pas:323-336</code>; <code>FInscricaoParticipanteLote.pas:356-384</code></td></tr>
+<tr><td><strong>RESERVAPART / HSTPERCONTRIBPREV / HISTOPIR</strong></td><td>Reservas do participante por tipo de reserva; histórico de percentual de contribuição; histórico de opção de imposto de renda (progressiva/regressiva).</td><td><code>FInscricaoParticipanteLote.pas:660-735</code></td></tr>
+<tr><td><strong>Mantido / Mantido Parcial</strong></td><td>Situação do participante na fundação em que ele mantém o vínculo com o plano sem ser ativo. A manutenção parcial exige situação com FLGINTERNO = 'MP'; o retorno aceita participantes nas categorias MA, MP, MS, AS, AT (ou CA no evento 354).</td><td><code>FEventoManutParcial.pas:548-553</code>; <code>FEventoRetornoMantidoParaAtivo.pas:364-371</code></td></tr>
+<tr><td><strong>Regra (RegraBooleana / regCalculo)</strong></td><td>Regras parametrizáveis cadastradas por plano/patrocinadora e executadas em tempo de execução: regra de elegibilidade para reinscrição (PLANPREV.IDREGRAELEGREINS), regra de concessão de manutenção parcial (PLANPREVPATRO.IDREGRAMANUTPARC).</td><td><code>FEventoReinscricao.pas:711-748</code>; <code>FEventoManutParcial.pas:920-993</code></td></tr>
+<tr><td><strong>Padrão de Movimentação de Reserva</strong></td><td>Rotina do CMAdmPrev (<code>RODAPADRAOMOVRESERVA</code>, UMovReserva) que movimenta as reservas do participante conforme o evento.</td><td><code>FEventoReinscricao.pas:1042-1061</code></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">3. Pré-condições</div>
+<p><strong>Gerais do módulo:</strong> as mesmas de <a href="uc401.html">UC401</a> (login, parâmetros carregados, catálogo EVENTOGERADOR, CMAdmPrev disponível).</p>
+<p><strong>O que as pré-condições gerais significam na prática:</strong> o menu Cadastrais só tem itens se houver eventos IP/RM/MP/RA para a fundação do usuário (<a href="uc401.html#CADPREV-RN002">RS002</a>); as pesquisas só retornam participantes da fundação (<a href="uc401.html#CADPREV-RN001">RS001</a>), exceto na inscrição em lote.</p>
+<p><strong>Por jornada:</strong></p>
+<ul>
+<li><a href="#PF-05">JF005</a>: evento IP cadastrado (o item “Inscrição em Lote” aparece sempre que o grupo está habilitado); planos 66/74 e patrocinadoras 1/91008 existentes para o lote.</li>
+<li><a href="#PF-06">JF006</a>: evento RM cadastrado; participante cancelado/demitido; patrocinadoras do plano cadastradas.</li>
+<li><a href="#PF-07">JF007</a>: evento MP cadastrado; situação “Mantido Parcial” associada ao evento; regra de concessão/cálculo opcional por patrocinadora×plano.</li>
+<li><a href="#PF-08">JF008</a>: evento RA cadastrado; participante mantido (ou cancelado, evento 354); evento do tipo IP existente no catálogo.</li>
+</ul>
+<p><strong>Pré-condições por jornada, em termos de negócio:</strong></p>
+<ul>
+<li><a href="#PF-05">JF005</a>: a pessoa pode ainda não existir (matrícula nova); nesse caso o lote cria o cadastro básico (<a href="#CADPREV-RN046">RS046</a>).</li>
+<li><a href="#PF-06">JF006</a>: só quem estava demitido pode voltar por outra patrocinadora (<a href="#CADPREV-RN049">RS049</a>); a regra de elegibilidade do plano, se houver, precisa ser satisfeita (<a href="#CADPREV-RN052">RS052</a>).</li>
+<li><a href="#PF-07">JF007</a>: o último salário de participação precisa existir ou ser informado (<a href="#CADPREV-RN055">RS055</a>).</li>
+<li><a href="#PF-08">JF008</a>: normalmente já existe evento de manutenção; se não houver, o sistema pergunta se continua (<a href="#CADPREV-RN058">RS058</a>).</li>
+</ul>
+</section>
+
+<section><div class="section-title">4. Pós-condições</div>
+<ul>
+<li><a href="#PF-05">JF005</a>: individual — delegado a FCadElegivel; lote — PESSOA/ELEGIVEL/PESSOAFISICA/ELEGPATRO/DEPENDENTE/DEPENTIT (matrícula nova), DOCPESSOA, PARTPREVPLAN, EVENTOSPREV (evento 1), CONTRIBPREVPARTP (1 e 21), RESERVAPART, HSTPERCONTRIBPREV, HISTOPIR.</li>
+<li><a href="#PF-06">JF006</a>: ELEGPATRO, PARTPREVPLAN, CONTRIBPREVPARTP, EVENTOSPREV, HISTFUNCPREV (se demitido) e rotinas externas de patrocinadora/contribuição/reserva.</li>
+<li><a href="#PF-07">JF007</a>: ELEGPATRO (situação, nível, cargo, cedido, SALTOTAL), PARTPREVPLAN (situações, SALMANTIDO, SALPARTICIPACAO, DATAINICIOMANUT), EVENTOSPREV, contribuições, reserva, parcelamento.</li>
+<li><a href="#PF-08">JF008</a>: EVENTOSPREV (RA e, em nova patrocinadora, também IP), ELEGPATRO.DATAREADMISSAO, HISTFUNCPREV, rotinas externas de patrocinadora/contribuição/reserva.</li>
+</ul>
+<p><strong>Resultado de negócio de cada jornada:</strong></p>
+<ul>
+<li><a href="#PF-05">JF005</a> — <em>sucesso:</em> participantes inscritos (situação 1/1, evento de inscrição efetivado) e mensagem <a href="#MSG050">MSG050</a>. <em>Falha:</em> qualquer erro desfaz todo o lote sem mensagem (<a href="#TRT050">TRT050</a>).</li>
+<li><a href="#PF-06">JF006</a> — <em>sucesso:</em> participante reativado no plano com nova inscrição, salário e situação. <em>Atenção:</em> responder “Não” à confirmação final não desfaz a gravação (<a href="#CADPREV-RN054">RS054</a>).</li>
+<li><a href="#PF-07">JF007</a> — <em>sucesso:</em> participante mantido parcial com salário de manutenção, contribuições e reserva ajustadas. <em>Interrupções:</em> regra de concessão negada (<a href="#TRT071">TRT071</a>), erro de parcelamento (<a href="#TRT072">TRT072</a>).</li>
+<li><a href="#PF-08">JF008</a> — <em>sucesso:</em> participante volta a ativo com data de readmissão e, se informado o cargo, histórico funcional do período anterior.</li>
+</ul>
+</section>
+
+<section><div class="section-title">5. Jornadas Funcionais (JF005–JF008)</div>
+<p>Cada jornada traz objetivo, ator/gatilho, pré e pós-condições, sequência operacional, ações práticas, <strong>regras de negócio da jornada</strong> (texto completo de cada regra), tratamentos e mensagens. Regras, tratamentos (TRT001–TRT037) e mensagens (MSG001–MSG039) transversais ou comuns às telas de evento estão em <a href="uc401.html">UC401</a> e são apenas referenciados aqui.</p>
+<p><strong>Como as jornadas deste caso de uso se relacionam:</strong> JF005 cria o vínculo; JF006 o recria depois de cancelamento/demissão; JF007 reduz o vínculo para mantido parcial; JF008 desfaz a manutenção e volta o participante a ativo. JF006 e JF008 compartilham a lógica “mesma patrocinadora × nova patrocinadora” (rotinas externas ReativaParticipanteNaPatro / InsereNaPatrocinadoraNova). As telas locais seguem o ciclo de estado do evento (<a href="uc401.html#CADPREV-RN007">RS007</a>) e a transação por tela (<a href="uc401.html#CADPREV-RN009">RS009</a>).</p>
+<div class="legend"><span><span class="ev ev-comprovado">COMPROVADO</span> — no código</span><span><span class="ev ev-inferido">INFERIDO</span> — plausível</span><span><span class="ev ev-pendente">PENDENTE</span> — validar</span></div>
+</section>
+
+<!-- ======================================================= JF005 -->
+<div class="pf-block" id="PF-05"><h4>JF005 (PF-05) — Inscrição do participante (IP) e inscrição em lote</h4>
+<p><strong>Objetivo:</strong> Inscrever participantes no plano: individualmente, pelo cadastro de elegível do CMAdmPrev aberto como “Evento de Inscrição de Participante”; ou em lote, montando uma grade de participantes (matrícula, plano, percentual, datas, opção de IR) e gravando todos de uma vez, com relatório e arquivo TXT das inscrições.</p>
+<p><strong>Necessidade de negócio:</strong> a adesão ao plano cria o vínculo previdenciário, as contribuições e as reservas. Em campanhas de adesão a entidade precisa inscrever muitos participantes de uma vez e enviar o arquivo das inscrições.</p>
+<p><strong>Ator / gatilho:</strong> Analista de cadastro, pelo menu <em>Eventos › Cadastrais › Inscrição do Participante › &lt;nome do evento&gt;</em> ou <em>› Inscrição em Lote</em> (<code>FPrincipal.dfm:8483-8486</code>; <code>FPrincipal.pas:911-951</code>).</p>
+<p><strong>Pré-condições:</strong> Evento IP cadastrado; para o lote, patrocinadoras 1/91008 e planos 66/74.</p>
+<p><strong>Em termos de negócio:</strong> a inscrição individual segue as regras do cadastro de elegível; o lote foi construído para dois planos e duas patrocinadoras específicos.</p>
+<p><strong>Pós-condições:</strong> individual — delegado; lote — ver seção 4.</p>
+<p><strong>Em termos de negócio:</strong> os participantes passam a constar do plano, com contribuições, reservas, opção de IR e evento de inscrição registrados.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li><strong>Usuário:</strong> Escolhe o evento de inscrição. [<a href="#CADPREV-RN041">RS041</a>]<br><code>AbreFormEventoIP</code> chama <code>IniciaEventoInscricao(qryAux, &lt;id&gt;, 'Evento de Inscrição de Participante', False)</code> (<code>FPrincipal.pas:1438-1445</code>), que abre <code>FCadElegivel</code> com situações do evento.</li>
+<li><strong>Usuário:</strong> Escolhe “Inscrição em Lote”. O sistema abre a tela de lote com a grade vazia. [<a href="#CADPREV-RN047">RS047</a>]<br><code>FPrincipal.pas:942-949, 2480-2485</code>; <code>FInscricaoParticipanteLote.pas:788-798</code>.</li>
+<li><strong>Usuário:</strong> Clica em Inserir (ou Procurar para editar), informa a matrícula e busca. [<a href="#CADPREV-RN042">RS042</a>] [<a href="#CADPREV-RN046">RS046</a>]<br>A busca valida o tamanho da matrícula, localiza a pessoa, define patrocinadora/plano e carrega percentual, datas, proposta e e-mail; matrícula inexistente pode ser cadastrada (<code>fInscBuscaParticipLote.pas:134-359</code>).</li>
+<li><strong>Usuário e sistema:</strong> Informa percentual, datas, opção de IR, proposta e e-mail e confirma a linha. [<a href="#CADPREV-RN043">RS043</a>] [<a href="#CADPREV-RN044">RS044</a>] [<a href="#CADPREV-RN045">RS045</a>]<br>Validações e inclusão da linha na grade (<code>fInscBuscaParticipLote.pas:373-900</code>).</li>
+<li><strong>Usuário e sistema:</strong> Confirma o lote; o sistema grava cada linha selecionada e faz commit. [<a href="#CADPREV-RN047">RS047</a>]<br><code>FInscricaoParticipanteLote.pas:226-767</code>.</li>
+<li><strong>Usuário:</strong> Gera relatório/PDF/Excel/TXT das inscrições do período. [<a href="#CADPREV-RN048">RS048</a>]<br><code>FInscricaoParticipanteLote.pas:813-945</code>.</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Inscrição individual</td><td>Inscrever um participante</td><td>Item do evento IP</td><td>Abre FCadElegivel com situações do evento</td><td>Tela externa aberta</td><td><a href="#CADPREV-RN041">RS041</a></td><td><a href="uc401.html#MSG001">MSG001</a></td><td><code>CM/CMADMPREV/Fontes/FCadElegivel.dfm</code></td></tr>
+<tr><td>Buscar matrícula</td><td>Carregar o participante</td><td>Matrícula de 4 ou 7 dígitos</td><td>Define patrocinadora/plano; carrega dados; oferece cadastrar matrícula nova</td><td>Dados na tela de busca</td><td><a href="#CADPREV-RN042">RS042</a>, <a href="#CADPREV-RN046">RS046</a></td><td><a href="#MSG041">MSG041</a>, <a href="#MSG042">MSG042</a></td><td><code>fInscBuscaParticipLote.dfm</code></td></tr>
+<tr><td>Incluir linha</td><td>Adicionar participante ao lote</td><td>Percentual, datas, IR, proposta, e-mail</td><td>Valida obrigatórios, datas, percentuais, plano já inscrito, outro plano ativo, e-mail</td><td>Linha na grade</td><td><a href="#CADPREV-RN043">RS043</a>, <a href="#CADPREV-RN044">RS044</a>, <a href="#CADPREV-RN045">RS045</a></td><td><a href="#MSG043">MSG043</a>–<a href="#MSG049">MSG049</a></td><td><code>fInscBuscaParticipLote.dfm</code></td></tr>
+<tr><td>Confirmar lote</td><td>Gravar as inscrições</td><td>Linhas selecionadas</td><td>Grava cadastro, inscrição, evento, contribuições, reservas, IR; commit</td><td>Inscrições gravadas</td><td><a href="#CADPREV-RN047">RS047</a></td><td><a href="#MSG050">MSG050</a></td><td><code>FInscricaoParticipanteLote.dfm</code></td></tr>
+<tr><td>Gerar arquivos</td><td>Listar/exportar inscrições</td><td>Período, formatos</td><td>Consulta inscrições em lote do período; gera relatório, PDF, XLS, TXT</td><td>Arquivos na pasta da empresa</td><td><a href="#CADPREV-RN048">RS048</a></td><td><a href="#MSG051">MSG051</a>, <a href="#MSG052">MSG052</a>, <a href="#MSG053">MSG053</a></td><td><code>FInscricaoParticipanteLote.dfm</code></td></tr>
+</tbody></table></div>
+<div class="jf-rules">
+<p><strong>Regras de negócio da jornada:</strong> 8 regra(s) — texto completo abaixo.</p>
+<div class="rule-block" id="CADPREV-RN041"><div class="rule-id">RS041 (CADPREV-RN041) — Inscrição individual pelo cadastro de elegível, com situações do evento</div>
+<div class="rule-desc">Cada evento IP da fundação vira um item de menu. Ao escolhê-lo, o sistema abre o cadastro de elegível (FCadElegivel, externo) com o título “Evento de Inscrição de Participante”, carregando apenas as situações funcional, na fundação e no plano associadas ao evento (EVENTOXSITFUNC/EVENTOXSITPART/EVENTOXSITPLAPREV). O item “Reversão Aposentadoria - Inscrição Novo Plano” é criado desabilitado.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>EVENTOGERADOR.FLGINTERNO</code> = 'IP'; <code>NOME</code></li>
+<li><code>SITFUNC.FLGUSO</code> — 'P' (ou 'P','G' se prmMostraSitGeral)</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="uc401.html#TRT001">TRT001</a> → <a href="uc401.html#MSG001">MSG001</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-05">JF005</a></p>
+<p><strong>Nota de verificação:</strong> a leitura do evento em <code>IniciaEventoInscricao</code> não filtra fundação (<code>FCadElegivel.pas:2318-2321</code>), mas o ID vem de item já filtrado. O mesmo procedimento com <code>pbVeioDoMenu = True</code> é o “Cadastro de Elegível e Participante” (<a href="uc410.html#PF-35">JF035</a>).</p>
+<p><strong>Descrição original:</strong> AbreFormEventoIP: IniciaEventoInscricao(qryAux, copy(Name,2,..), 'Evento de Inscrição de Participante', False); SOL 157980 — item 'Reversão Aposentadoria - Inscrição Novo Plano' Enabled := False.</p>
+<p><strong>Condições:</strong> FLGINTERNO = 'IP' AND IDFUNDACAO = fundação</p><p><strong>Dados envolvidos:</strong> EVENTOGERADOR, SITFUNC, SITPART, SITPLANOPREV, EVENTOXSIT*</p><p><strong>Resultado/Exceção:</strong> FCadElegivel aberto (HelpContext 160005)</p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/FPrincipal.pas:911-940, 1438-1445</code>; <code>CM/CMADMPREV/Fontes/FCadElegivel.pas:2308-2411</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<div class="rule-block" id="CADPREV-RN042"><div class="rule-id">RS042 (CADPREV-RN042) — Matrícula define patrocinadora e plano no lote</div>
+<div class="rule-desc">Na inscrição em lote a matrícula deve ter 4 ou 7 caracteres. Matrícula de 4 caracteres → patrocinadora 1 e plano 66; de 7 → patrocinadora 91008 e plano 74. Para matrícula já existente, a patrocinadora vem de ELEGPATRO e o plano é o 74 se a patrocinadora for 91008, senão o 66.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>edtMatricula</code> — [obrigatório] — tamanho 4 ou 7</li>
+<li><code>ELEGPATRO.IDPESSJUR</code>; <code>PLANPREV.IDPLANOPREV</code> 66/74</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT041">TRT041</a> → <a href="#MSG041">MSG041</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-05">JF005</a></p>
+<p><strong>Nota de verificação:</strong> valores fixos de patrocinadora e plano; não há filtro por fundação (exceção a <a href="uc401.html#CADPREV-RN001">RS001</a>).</p>
+<p><strong>Descrição original:</strong> if Length = 4 then sidPessJur := '1' else sidPessJur := '91008'; QryPlanPrev WHERE IDPLANOPREV = 74/66.</p>
+<p><strong>Condições:</strong> Length(matrícula) ∈ {4,7}</p><p><strong>Dados envolvidos:</strong> ELEGPATRO, PESSOA, PLANPREV</p><p><strong>Resultado/Exceção:</strong> Patrocinadora e plano definidos</p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/fInscBuscaParticipLote.pas:140-145, 185-206, 222-245</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<div class="rule-block" id="CADPREV-RN043"><div class="rule-id">RS043 (CADPREV-RN043) — Limites de percentual de contribuição por plano</div>
+<div class="rule-desc">Na inclusão de linha nova (não edição), o percentual informado deve ser de 5% a 100% no plano 74 (“Novo Plano”) e de 2% a 100% no plano 66 (“REB”). O código também calcula tetos de 12% (plano 74) e 7% (plano 66), mas o valor limitado não é usado: a grade recebe o percentual digitado.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>edtNovoPercentual</code> — [obrigatório]</li>
+<li><code>sPercentual</code> — teto calculado e não usado</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT045">TRT045</a> → <a href="#MSG045">MSG045</a>; <a href="#TRT046">TRT046</a> → <a href="#MSG046">MSG046</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-05">JF005</a></p>
+<p><strong>Nota de verificação:</strong> o teto (<code>:529-538</code>) só era usado no trecho de gravação que foi comentado (<code>:542-854</code>); a grade recebe <code>edtNovoPercentual.Text</code> (<code>:868</code>) <span class="ev ev-inferido">INFERIDO</span>: teto sem efeito.</p>
+<p><strong>Descrição original:</strong> SOL 227902 — StrToFloat(StringReplace(edtNovoPercentual.Text,'.','')) &lt; 5 / &gt; 100 (74); &lt; 2 / &gt; 100 (66).</p>
+<p><strong>Condições:</strong> not bEditar</p><p><strong>Dados envolvidos:</strong> grade (QryGrid.PERCENTUAL)</p><p><strong>Resultado/Exceção:</strong> Percentual rejeitado e campo limpo</p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/fInscBuscaParticipLote.pas:412-444, 529-538, 868</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<div class="rule-block" id="CADPREV-RN044"><div class="rule-id">RS044 (CADPREV-RN044) — Campos obrigatórios, data FUNCEF não futura e e-mail válido</div>
+<div class="rule-desc">A data de inscrição FUNCEF não pode ser posterior a hoje. Na inclusão de linha nova, todos os campos são obrigatórios (matrícula, plano, percentual, data de inscrição, data de opção de IR, proposta recebida em, nome), exceto o e-mail FUNCEF. Se o e-mail for informado, precisa ter formato válido.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>dtInscricao, dtOpcaoIR, dtRecebidoEm, edtNome, cboPlanoPrev, edtNovoPercentual</code> — [obrigatório]</li>
+<li><code>edtEmail</code> — [opcional] — validado por <code>ValidaEMail</code></li>
+<li><code>rdProgressiva</code> — opção IR 1 (progressiva) ou 2 (regressiva)</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT043">TRT043</a> → <a href="#MSG043">MSG043</a>; <a href="#TRT044">TRT044</a> → <a href="#MSG044">MSG044</a>; <a href="#TRT049">TRT049</a> → <a href="#MSG049">MSG049</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-05">JF005</a></p>
+<p><strong>Descrição original:</strong> SOL 180408 — “Apenas o campo e-mail Funcef pode ficar sem preenchimento”.</p>
+<p><strong>Condições:</strong> trunc(dtInscricao) &gt; trunc(Now); campos vazios; e-mail inválido</p><p><strong>Dados envolvidos:</strong> campos da tela</p><p><strong>Resultado/Exceção:</strong> Linha não incluída</p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/fInscBuscaParticipLote.pas:387-411, 518-526, 953-1007</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<div class="rule-block" id="CADPREV-RN045"><div class="rule-id">RS045 (CADPREV-RN045) — Já inscrito no plano exige reinscrição; outro plano ativo é desativado</div>
+<div class="rule-desc">Se a pessoa já tem vínculo (qualquer situação) com o plano escolhido, a linha nova é recusada e o usuário é orientado a fazer reinscrição. Se a pessoa tem outro plano ativo (FLGDESATIVADO = 0 e sem DATACANCELAMENTO), o sistema pergunta se continua; confirmando, na gravação do lote os outros planos da pessoa são desativados com data de cancelamento = data de inscrição − 1 dia e recebem a data de opção de IR.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>PARTPREVPLAN.IDPESSOA / IDPLANOPREV / FLGDESATIVADO / DATACANCELAMENTO / DATAOPCAOIR</code></li>
+<li><code>POSSUIPLANOATIVO</code> (grade) — 1 se confirmado</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT047">TRT047</a> → <a href="#MSG047">MSG047</a>; <a href="#TRT048">TRT048</a> → <a href="#MSG048">MSG048</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-05">JF005</a></p>
+<p><strong>Nota de verificação:</strong> a lista de planos ativos mostrada na mensagem guarda só o último plano lido (<code>sNome := ','+NOME</code> sobrescreve, <code>:489</code>).</p>
+<p><strong>Descrição original:</strong> SOL 140614 — SELECT COUNT(*) FROM PARTPREVPLAN WHERE IDPESSOA AND IDPLANOPREV; UPDATE PARTPREVPLAN SET FLGDESATIVADO = 1, DATACANCELAMENTO = DATAINSCRICAO − 1, DATAOPCAOIR WHERE IDPESSOA AND IDPLANOPREV &lt;&gt; plano.</p>
+<p><strong>Condições:</strong> QNT &gt; 0 and not bEditar; planos ativos ≠ plano escolhido</p><p><strong>Dados envolvidos:</strong> PARTPREVPLAN, PLANPREV</p><p><strong>Resultado/Exceção:</strong> Recusa ou desativação dos outros planos</p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/fInscBuscaParticipLote.pas:457-512</code>; <code>FInscricaoParticipanteLote.pas:251-260</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<div class="rule-block" id="CADPREV-RN046"><div class="rule-id">RS046 (CADPREV-RN046) — Matrícula nova cria o cadastro básico da pessoa</div>
+<div class="rule-desc">Se a matrícula não existe e o usuário aceita cadastrá-la (não disponível em modo edição), a linha recebe um novo IDPESSOA (último registro de PESSOA) e, na gravação do lote, o sistema cria PESSOA (nome), ELEGIVEL, PESSOAFISICA (e-mail FUNCEF), ELEGPATRO (patrocinadora, matrícula, PARTICIPPREVID = 1), DEPENDENTE e DEPENTIT (a própria pessoa como titular, dependência 'PRP').</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>NOVAMATRICULA</code> (grade) = 1</li>
+<li><code>PESSOA, ELEGIVEL, PESSOAFISICA, ELEGPATRO, DEPENDENTE, DEPENTIT</code></li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT042">TRT042</a> → <a href="#MSG042">MSG042</a>; <a href="#TRT050">TRT050</a> (falha na gravação)</p>
+<p><strong>Jornada:</strong> <a href="#PF-05">JF005</a></p>
+<p><strong>Descrição original:</strong> SOL 147489 — insert into PESSOA/"ELEGIVEL"/PESSOAFISICA/ELEGPATRO/DEPENDENTE/DEPENTIT; idPessoa := IntToStr(LeUltRegistro(nil,'PESSOA')).</p>
+<p><strong>Condições:</strong> matrícula sem ELEGPATRO e resposta “Sim”</p><p><strong>Dados envolvidos:</strong> PESSOA, ELEGIVEL, PESSOAFISICA, ELEGPATRO, DEPENDENTE, DEPENTIT</p><p><strong>Resultado/Exceção:</strong> Pessoa criada</p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/fInscBuscaParticipLote.pas:175-183, 461-463</code>; <code>FInscricaoParticipanteLote.pas:263-342</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<div class="rule-block" id="CADPREV-RN047"><div class="rule-id">RS047 (CADPREV-RN047) — Gravação do lote: inscrição, evento, contribuições, reservas e IR em uma transação</div>
+<div class="rule-desc">Para cada linha selecionada, o sistema: marca ELEGPATRO.PARTICIPPREVID = 1; grava/atualiza a proposta (DOCPESSOA 43) e o e-mail; insere PARTPREVPLAN (proposta 1, situação na fundação 1, situação no plano 1, inscrição = matrícula, FLGINSCRICAOLOTE = 1) ou atualiza inscrição/datas/IR se já existir; insere ou atualiza o evento de inscrição 1 em EVENTOSPREV já efetivado; insere as contribuições 1 e 21 com o percentual (ou atualiza data e percentual); insere RESERVAPART para os tipos de reserva analíticos não coletivos ligados às contribuições 1 e 21; insere HSTPERCONTRIBPREV e HISTOPIR. No fim faz commit, mostra a mensagem e remove da grade as linhas gravadas. Qualquer erro desfaz o lote inteiro sem mensagem.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>PARTPREVPLAN</code> (IDSITPART = 1, IDSITPLANOPREV = 1, FLGINSCRICAOLOTE = 1, TIPOOPCAOIR, DATAOPCAOIR)</li>
+<li><code>EVENTOSPREV</code> (IDEVENTOGERADOR = 1, FLGEFETIVADO = 1, situações 1, SEQEVENTOSPREV.NEXTVAL)</li>
+<li><code>CONTRIBPREVPARTP</code> (IDCONTRIBUICAO 1 e 21, VALORBASE1 = percentual, IDPLANPREVCONTAB = plano)</li>
+<li><code>RESERVAPART, HSTPERCONTRIBPREV, HISTOPIR, DOCPESSOA</code></li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT050">TRT050</a> → rollback silencioso</p>
+<p><strong>Jornada:</strong> <a href="#PF-05">JF005</a></p>
+<p><strong>Nota de verificação:</strong> o evento 1 e as situações 1 são valores fixos, sem consulta ao catálogo (o evento IP escolhido não é usado no lote). Não há gravação de log (<a href="uc401.html#CADPREV-RN005">RS005</a>). HSTPERCONTRIBPREV é inserido mesmo quando a contribuição já existia.</p>
+<p><strong>Descrição original:</strong> SOL 180408 / 238766 / 253577 / SIG28170 — blocos INSERT/UPDATE por linha da grade; Commit; MsgDlg('Cadastro atualizado com sucesso'); btnExcluirClick.</p>
+<p><strong>Condições:</strong> QryGrid.SEL = 1</p><p><strong>Dados envolvidos:</strong> ELEGPATRO, DOCPESSOA, PESSOAFISICA, PARTPREVPLAN, EVENTOSPREV, CONTRIBPREVPARTP, RESERVAPART, RESERVAXPLANO, RESERVAXCONTRIB, HSTPERCONTRIBPREV, HISTOPIR</p><p><strong>Resultado/Exceção:</strong> Lote gravado ou desfeito</p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/FInscricaoParticipanteLote.pas:226-767</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<div class="rule-block" id="CADPREV-RN048"><div class="rule-id">RS048 (CADPREV-RN048) — Relatório e arquivo TXT das inscrições em lote</div>
+<div class="rule-desc">Com pelo menos um formato marcado (Relatório, Pdf, Excel, Txt), o usuário informa o período; o sistema lista as inscrições com FLGINSCRICAOLOTE = 1 incluídas no período (TRGDTINCLUSAO) e a contribuição 1. Gera relatório em tela, PDF e XLS na pasta de arquivos da empresa com o nome “Inscrições Mês AAAAMM”, e um TXT só com as linhas da patrocinadora 91008: matrícula sem o último dígito, data de inscrição com pontos, percentual×100 com 5 dígitos e tipo 13 (plano 66) ou 15 (plano 74).</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>dtInicio, dtFim</code> — [obrigatório] — início ≤ fim</li>
+<li><code>PARTPREVPLAN.FLGINSCRICAOLOTE, TRGDTINCLUSAO</code>; <code>CONTRIBPREVPARTP.VALORBASE1</code></li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT051">TRT051</a> → <a href="#MSG051">MSG051</a>; <a href="#TRT052">TRT052</a> → <a href="#MSG052">MSG052</a>; sucesso → <a href="#MSG053">MSG053</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-05">JF005</a></p>
+<p><strong>Descrição original:</strong> QryRelatorio: SELECT ... FROM PARTPREVPLAN PPP, CONTRIBPREVPARTP CTP, ELEGPATRO EL, PLANPREV PP, PESSOA P WHERE PPP.FLGINSCRICAOLOTE = 1 AND TRUNC(PPP.TRGDTINCLUSAO) BETWEEN :PDTINICIO AND :PDATAFIM AND CTP.IDCONTRIBUICAO = 1 ...; GeraArquivo.</p>
+<p><strong>Condições:</strong> formatos marcados</p><p><strong>Dados envolvidos:</strong> PARTPREVPLAN, CONTRIBPREVPARTP, ELEGPATRO, PLANPREV, PESSOA</p><p><strong>Resultado/Exceção:</strong> Relatório e arquivos gerados</p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/FInscricaoParticipanteLote.pas:813-945</code>; <code>FInscricaoParticipanteLote.dfm:1043-1080</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<p><strong>Regras transversais do módulo</strong> (texto completo em <a href="uc401.html#PF-01">UC401 JF001</a>): <a href="uc401.html#CADPREV-RN001">RS001</a>, <a href="uc401.html#CADPREV-RN002">RS002</a>, <a href="uc401.html#CADPREV-RN003">RS003</a>, <a href="uc401.html#CADPREV-RN005">RS005</a>.</p>
+</div>
+
+<p><strong>Tratamentos de erro:</strong> <a href="#TRT041">TRT041</a>–<a href="#TRT052">TRT052</a>; <a href="uc401.html#TRT001">TRT001</a></p>
+<p><strong>Mensagens:</strong> <a href="#MSG041">MSG041</a>–<a href="#MSG053">MSG053</a></p>
+<p><strong>Telas:</strong> Inscrição do Participante em Lote (<code>FInscricaoParticipanteLote.dfm</code>), Inscrição do Participante em Lote — busca (<code>fInscBuscaParticipLote.dfm</code>), Elegivel (<code>CM/CMADMPREV/Fontes/FCadElegivel.dfm</code>, externo)</p>
+<p><strong>Dependências:</strong> CMAdmPrev (FCadElegivel, UAdmPrev.LeUltRegistro, BuscaDataFuncef); sequences SEQEVENTOSPREV, SEQHSTPERCONTRIBPREV, SEQHISTOPIR. A inscrição em novo plano (REPLAN) é outra funcionalidade (<a href="uc409.html#PF-30">JF030</a>).</p>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span> — informações que o repositório não comprova ou que divergem entre fontes. O texto existente foi mantido; os itens abaixo dependem de validação humana.</p>
+<ul>
+<li>O fluxo interno de <code>FCadElegivel</code> (12.706 linhas, externo) não foi detalhado: validações e tabelas gravadas na inscrição individual.</li>
+<li>Patrocinadoras (1, 91008), planos (66, 74), contribuições (1, 21), evento (1), documento (43) e situações (1) fixos no código do lote — confirmar se correspondem ao cadastro atual.</li>
+<li>Teto de percentual (12%/7%) calculado e não aplicado (<a href="#CADPREV-RN043">RS043</a>).</li>
+<li>Erro na gravação do lote é desfeito sem mensagem (<a href="#TRT050">TRT050</a>).</li>
+<li>Os campos “DATAEMISSAO” e “NUMDOCUMENTO” da proposta recebem o mesmo valor (<code>dtRecebidoEm.Text</code>, <code>fInscBuscaParticipLote.pas:876-877</code>).</li>
+</ul>
+</div>
+<div class="note note-info"><p><strong>Registro original do processo PF-05</strong></p><p><strong>Forms de entrada:</strong> <code>FInscricaoParticipanteLote.dfm</code>, <code>fInscBuscaParticipLote.dfm</code>; <code>FCadElegivel.dfm</code> (externo)</p><p><strong>Lógica de processamento:</strong> Individual: abre cadastro de elegível. Lote: monta grade, valida linha, grava cadastro/inscrição/evento/contribuições/reservas/IR em transação; relatório e TXT</p><p><strong>Saídas:</strong> Participantes inscritos; relatório; PDF/XLS/TXT</p><p><strong>Persistência (tabelas escritas):</strong> PESSOA, ELEGIVEL, PESSOAFISICA, ELEGPATRO, DEPENDENTE, DEPENTIT, DOCPESSOA, PARTPREVPLAN, EVENTOSPREV, CONTRIBPREVPARTP, RESERVAPART, HSTPERCONTRIBPREV, HISTOPIR</p><p><strong>Evidência:</strong> <code>CADASTROPREV/Fontes/FInscricaoParticipanteLote.pas:226-767</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+</div>
+
+<!-- ======================================================= JF006 -->
+<div class="pf-block" id="PF-06"><h4>JF006 (PF-06) — Reinscrição do participante</h4>
+<p><strong>Objetivo:</strong> Reinscrever no plano um participante que estava cancelado ou demitido, informando data da reinscrição, nova inscrição, salário, tempo de serviço anterior, último mês de contribuição e novas situações, na mesma patrocinadora ou — se estava demitido — em nova patrocinadora.</p>
+<p><strong>Necessidade de negócio:</strong> quem saiu do plano pode voltar; o retorno precisa reativar o vínculo, retomar contribuições e reservas e, se for por outra patrocinadora, encerrar o vínculo antigo.</p>
+<p><strong>Ator / gatilho:</strong> Analista, pelo menu <em>Eventos › Cadastrais › Reinscrição do Participante › &lt;nome do evento&gt;</em> (<code>FPrincipal.dfm:8487-8490</code>; <code>FPrincipal.pas:953-976, 1447-1464</code>).</p>
+<p><strong>Pré-condições:</strong> Evento RM cadastrado; participante com vínculo cancelado/demitido.</p>
+<p><strong>Em termos de negócio:</strong> o participante já teve inscrição no plano e precisa ser reativado.</p>
+<p><strong>Pós-condições:</strong> PARTPREVPLAN (inscrição, salários, idade base, tempo afastado, situações), ELEGPATRO (situação, matrícula, tempo de serviço anterior), CONTRIBPREVPARTP.ULTMESPREPARO, EVENTOSPREV; HISTFUNCPREV (demitido); rotinas externas.</p>
+<p><strong>Em termos de negócio:</strong> o participante volta ao plano com nova inscrição e salário.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li><strong>Usuário:</strong> Escolhe o evento de reinscrição; a tela abre com as patrocinadoras e filtro por fundação. [<a href="uc401.html#CADPREV-RN001">RS001</a>]<br><code>FEventoReinscricao.pas:1543-1550</code>.</li>
+<li><strong>Usuário e sistema:</strong> Procura o participante; o sistema carrega dados, define se pode mudar de patrocinadora e calcula o último mês de contribuição. [<a href="#CADPREV-RN049">RS049</a>]<br><code>FEventoReinscricao.pas:266-497</code>.</li>
+<li><strong>Sistema:</strong> Verifica o estado do evento; se já existe, pede nova data. [<a href="#CADPREV-RN050">RS050</a>] [<a href="uc401.html#CADPREV-RN007">RS007</a>]<br><code>FEventoReinscricao.pas:523-546, 1552-1571</code>.</li>
+<li><strong>Sistema:</strong> Sugere o número de inscrição se o plano numera automaticamente. [<a href="#CADPREV-RN051">RS051</a>]<br><code>FEventoReinscricao.pas:499-520</code>.</li>
+<li><strong>Usuário e sistema:</strong> Informa os dados e confirma; o sistema valida campos e datas e executa a regra de elegibilidade. [<a href="#CADPREV-RN051">RS051</a>] [<a href="#CADPREV-RN052">RS052</a>]<br><code>FEventoReinscricao.pas:548-748, 1500-1541</code>.</li>
+<li><strong>Sistema:</strong> Grava situações e o evento e trata mesma × nova patrocinadora, histórico funcional, padrão de movimentação de reserva e log. [<a href="#CADPREV-RN053">RS053</a>] [<a href="uc401.html#CADPREV-RN005">RS005</a>]<br><code>FEventoReinscricao.pas:751-1061, 1091-1300</code>.</li>
+<li><strong>Usuário e sistema:</strong> Confirma a gravação; o sistema faz commit e emite a carta. [<a href="#CADPREV-RN054">RS054</a>] [<a href="uc401.html#CADPREV-RN010">RS010</a>]<br><code>FEventoReinscricao.pas:1066-1088</code>.</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Procurar participante</td><td>Carregar o vínculo cancelado</td><td>Pesquisa</td><td>Define patrocinadora editável (demitido) ou fixa; calcula último mês</td><td>Dados carregados</td><td><a href="#CADPREV-RN049">RS049</a>, <a href="#CADPREV-RN050">RS050</a></td><td><a href="uc401.html#MSG005">MSG005</a>–<a href="uc401.html#MSG007">MSG007</a></td><td><code>FEventoReinscricao.dfm</code>; <code>fNovaDataReinscricao.dfm</code></td></tr>
+<tr><td>Informar data de reinscrição</td><td>Calcular tempo afastado</td><td>Data</td><td>Exige data ≥ cancelamento; soma dias ao tempo afastado</td><td>Tempo afastado atualizado</td><td><a href="#CADPREV-RN051">RS051</a></td><td><a href="#MSG068">MSG068</a></td><td><code>FEventoReinscricao.dfm</code></td></tr>
+<tr><td>Confirmar reinscrição</td><td>Reativar o vínculo</td><td>Inscrição, salário, datas, situações</td><td>Valida; regra de elegibilidade; grava; mesma/nova patrocinadora; reserva; log</td><td>Pergunta de gravação</td><td><a href="#CADPREV-RN051">RS051</a>, <a href="#CADPREV-RN052">RS052</a>, <a href="#CADPREV-RN053">RS053</a></td><td><a href="#MSG054">MSG054</a>–<a href="#MSG066">MSG066</a></td><td><code>FEventoReinscricao.dfm</code></td></tr>
+<tr><td>Confirmar gravação</td><td>Efetivar</td><td>Sim/Não</td><td>Sim: commit; Não: não desfaz</td><td>Evento efetuado</td><td><a href="#CADPREV-RN054">RS054</a></td><td><a href="#MSG067">MSG067</a>, <a href="uc401.html#MSG008">MSG008</a></td><td><code>FEventoReinscricao.dfm</code></td></tr>
+</tbody></table></div>
+<div class="jf-rules">
+<p><strong>Regras de negócio da jornada:</strong> 6 regra(s) — texto completo abaixo.</p>
+<div class="rule-block" id="CADPREV-RN049"><div class="rule-id">RS049 (CADPREV-RN049) — Nova patrocinadora só para participante demitido</div>
+<div class="rule-desc">Se o participante tem data de demissão, a patrocinadora e a matrícula ficam editáveis (“Patrocinadora na qual o Participante está Reingressando”); caso contrário, ficam bloqueadas e a reinscrição é na mesma patrocinadora. A lista de patrocinadoras é filtrada pelo plano do participante.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>ELEGPATRO.DATADEMISSAO</code> (ValoresChave[30])</li>
+<li><code>dblkpcmbNovaPatro, edNovaMatricula</code></li>
+</ul>
+<p><strong>Tratamento de erro:</strong> — (regra de tela)</p>
+<p><strong>Jornada:</strong> <a href="#PF-06">JF006</a></p>
+<p><strong>Descrição original:</strong> “Se o participante estava demitido, entao permitir a inclusao dele em uma nova Patrocinadora. Senao, obrigar a reinscricao na mesma patrocinadora.”</p>
+<p><strong>Condições:</strong> Trim(sDataDemissao) &lt;&gt; ''</p><p><strong>Dados envolvidos:</strong> ELEGPATRO, PATRO (qryPatro por IdPlanoPrev)</p><p><strong>Resultado/Exceção:</strong> Campos habilitados/desabilitados</p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/FEventoReinscricao.pas:301-327</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<div class="rule-block" id="CADPREV-RN050"><div class="rule-id">RS050 (CADPREV-RN050) — Reinscrição repetida exige data posterior à última</div>
+<div class="rule-desc">Se já existe evento de reinscrição para o vínculo, o sistema abre a janela “Data da Reinscrição” pedindo a data do novo evento. Se ela for posterior à data do último evento, a reinscrição é tratada como nova (estado “não registrado”), a data é copiada para a tela e fica somente leitura; senão segue o ciclo normal (registrado/efetivado).</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>frmNovaDataReinscricao.dtEvento</code></li>
+<li><code>EVENTOSPREV.DATAEVENTO</code> (qryEvento)</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> — </p>
+<p><strong>Jornada:</strong> <a href="#PF-06">JF006</a></p>
+<p><strong>Descrição original:</strong> “Criada função VerificaDatas, utilizada na VerificaEstadoEvento.” — Result := frmNovaDataReinscricao.dtEvento.Date &gt; qryEvento.DATAEVENTO.</p>
+<p><strong>Condições:</strong> qryEvento não vazio</p><p><strong>Dados envolvidos:</strong> EVENTOSPREV</p><p><strong>Resultado/Exceção:</strong> Novo evento ou alteração do existente</p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/FEventoReinscricao.pas:523-546, 1552-1571</code>; <code>fNovaDataReinscricao.pas:1-27</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<div class="rule-block" id="CADPREV-RN051"><div class="rule-id">RS051 (CADPREV-RN051) — Dados obrigatórios, numeração e coerência de datas da reinscrição</div>
+<div class="rule-desc">São obrigatórios: participante, data da reinscrição, novo número de inscrição (numérico; se o plano tem FLGAUTONUMINSC = 1 o sistema sugere MAX(INSCRICAONUMERO)+1), tempo de serviço anterior, patrocinadora, data de admissão, matrícula e as três novas situações. O mês e o ano da última contribuição devem vir juntos (vazios viram 0000/00). Avisos com opção de continuar: último mês de contribuição não anterior ao mês da reinscrição; reinscrição não posterior à data da inscrição; salário não informado (só aviso). A data de reinscrição não pode ser anterior à de cancelamento; ao informá-la, o tempo afastado é somado com os dias entre cancelamento e reinscrição.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>dtEvento, edNovaInscricao, edTempoServAnt, dblkpcmbNovaPatro, dtAdmissao, edNovaMatricula, edUltMesContrib, edUltAnoContrib, edNovoSalario, edTempoAfast</code></li>
+<li><code>PLANPREV.FLGAUTONUMINSC</code>; <code>PARTPREVPLAN.INSCRICAONUMERO</code></li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT053">TRT053</a>–<a href="#TRT059">TRT059</a>, <a href="#TRT067">TRT067</a>; <a href="uc401.html#TRT017">TRT017</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-06">JF006</a></p>
+<p><strong>Descrição original:</strong> validações sequenciais em bbtnConfirmarClick; dtEventoExit calcula iTempoAfast := iTempoAfastIni + dias.</p>
+<p><strong>Condições:</strong> ver descrição</p><p><strong>Dados envolvidos:</strong> PLANPREV, PARTPREVPLAN</p><p><strong>Resultado/Exceção:</strong> Bloqueio, aviso ou continuação</p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/FEventoReinscricao.pas:499-520, 555-697, 1500-1541</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<div class="rule-block" id="CADPREV-RN052"><div class="rule-id">RS052 (CADPREV-RN052) — Regra de elegibilidade para reinscrição do plano</div>
+<div class="rule-desc">Se o plano tiver regra de elegibilidade para reinscrição (PLANPREV.IDREGRAELEGREINS &gt; 0), o sistema a executa com os dados do vínculo, da patrocinadora e da pessoa (data de reinscrição como data de referência). Se a regra não for satisfeita, o participante não pode ser reinscrito; se der erro na execução, o sistema informa o número da regra.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>PLANPREV.IDREGRAELEGREINS</code></li>
+<li>PARTPREVPLAN, ELEGPATRO, PESSOAFISICA (dados passados à regra)</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT060">TRT060</a> → <a href="#MSG061">MSG061</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-06">JF006</a></p>
+<p><strong>Descrição original:</strong> if not RegraBooleana(IDREGRAELEGREINS, sSQL, bErro) then MsgDlg(...); Exit.</p>
+<p><strong>Condições:</strong> IDREGRAELEGREINS &gt; 0</p><p><strong>Dados envolvidos:</strong> PLANPREV, PARTPREVPLAN, ELEGPATRO, PESSOAFISICA</p><p><strong>Resultado/Exceção:</strong> Reinscrição permitida ou bloqueada</p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/FEventoReinscricao.pas:711-748</code>; <code>CM/CMADMPREV/Fontes/UAdmPrev.pas</code> (RegraBooleana) | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<div class="rule-block" id="CADPREV-RN053"><div class="rule-id">RS053 (CADPREV-RN053) — Gravação da reinscrição na mesma ou em nova patrocinadora</div>
+<div class="rule-desc">O sistema grava, conforme as flags de imediatez do evento (sem evento no catálogo, todas = 1): situação funcional e nova matrícula em ELEGPATRO; em PARTPREVPLAN da patrocinadora escolhida a data e o número de inscrição, salário de inscrição e de participação, idade base, tempo afastado e as situações imediatas; reativa o vínculo; grava o tempo de serviço anterior e, se estava vazio, o último mês de contribuição. Depois: <em>nova patrocinadora</em> → insere o participante na nova patrocinadora, grava o evento, o histórico de contribuições, desativa o vínculo antigo, cancela na patrocinadora antiga (data da reinscrição − 1) e encerra benefício anterior; <em>mesma patrocinadora</em> → grava o evento, reativa o participante, grava o histórico de contribuições e retoma as contribuições anteriores. Se estava demitido e a admissão é posterior à demissão, insere período no histórico funcional. Por fim mostra contribuições, valida benefício anterior, grava o log e roda o padrão de movimentação de reserva.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>ELEGPATRO.IDSITFUNC, MATRICULA, TEMPOSERVANTERIOR</code></li>
+<li><code>PARTPREVPLAN.INSCRICAODATA, INSCRICAONUMERO, SALINSCRICAO, SALPARTICIPACAO, IDADEBASE, TEMPOAFASTADO, IDSITPART, IDSITPLANOPREV</code></li>
+<li><code>CONTRIBPREVPARTP.ULTMESPREPARO</code>; <code>EVENTOSPREV</code> (inclui MATRICULA e a patrocinadora escolhida)</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT061">TRT061</a>–<a href="#TRT065">TRT065</a>; <a href="uc401.html#TRT037">TRT037</a> (sMsgErro das rotinas externas, com rollback)</p>
+<p><strong>Jornada:</strong> <a href="#PF-06">JF006</a></p>
+<p><strong>Nota de verificação:</strong> falha em <code>RODAPADRAOMOVRESERVA</code> mostra a mensagem e sai sem desfazer a transação (<code>:1059-1061</code>). Mesma lógica de patrocinadora é usada no retorno (<a href="#CADPREV-RN060">RS060</a>).</p>
+<p><strong>Descrição original:</strong> InsereNaPatrocinadoraNova / CancelaNaPatrocinadoraAntiga / ReativaParticipanteNaPatro / VoltaContribuicoesAnteriores (UEventos); AtualizaFlgDesativado / InsereHistFuncPrev (UParticipante); RODAPADRAOMOVRESERVA (UMovReserva).</p>
+<p><strong>Condições:</strong> sIdPessjur ≠ patrocinadora escolhida → nova; senão mesma</p><p><strong>Dados envolvidos:</strong> ELEGPATRO, PARTPREVPLAN, CONTRIBPREVPARTP, EVENTOSPREV, HISTFUNCPREV, reservas</p><p><strong>Resultado/Exceção:</strong> Vínculo reativado</p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/FEventoReinscricao.pas:751-1061, 1091-1300</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<div class="rule-block" id="CADPREV-RN054"><div class="rule-id">RS054 (CADPREV-RN054) — Confirmação final da reinscrição não desfaz ao responder “Não”</div>
+<div class="rule-desc">Ao final, o sistema pergunta “Evento efetuado com sucesso. Confirma a Gravaçao ?”. Respondendo “Sim”, faz commit e mostra sucesso. Pela estrutura do código (o <code>Else</code> está ligado ao <code>If InTransaction</code> interno), responder “Não” não executa o rollback nem a mensagem “Evento cancelado.”: a transação continua aberta e só será desfeita ao cancelar/fechar a tela ou confirmada numa próxima operação.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>dtmBaseDados.dbBaseDados.InTransaction</code></li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT066">TRT066</a> → <a href="#MSG067">MSG067</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-06">JF006</a></p>
+<p><strong>Nota de verificação:</strong> efeito de “else pendente” <span class="ev ev-inferido">INFERIDO</span> a partir da sintaxe Delphi; confirmar em execução. A carta do evento é emitida mesmo após “Não”.</p>
+<p><strong>Descrição original:</strong> If MsgDlg(...) = mrYes Then If InTransaction Then Begin Commit ... End Else If InTransaction Then Begin Rollback; MsgDlg('Evento cancelado.') End;</p>
+<p><strong>Condições:</strong> resposta à confirmação</p><p><strong>Dados envolvidos:</strong> transação</p><p><strong>Resultado/Exceção:</strong> Commit (Sim) ou transação pendente (Não)</p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/FEventoReinscricao.pas:1066-1088</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<p><strong>Regras transversais do módulo</strong> (texto completo em <a href="uc401.html#PF-01">UC401 JF001</a>): <a href="uc401.html#CADPREV-RN001">RS001</a>, <a href="uc401.html#CADPREV-RN005">RS005</a>, <a href="uc401.html#CADPREV-RN007">RS007</a>, <a href="uc401.html#CADPREV-RN009">RS009</a>, <a href="uc401.html#CADPREV-RN010">RS010</a>.</p>
+</div>
+
+<p><strong>Tratamentos de erro:</strong> <a href="#TRT053">TRT053</a>–<a href="#TRT067">TRT067</a></p>
+<p><strong>Mensagens:</strong> <a href="#MSG054">MSG054</a>–<a href="#MSG068">MSG068</a>, <a href="#MSG075">MSG075</a></p>
+<p><strong>Telas:</strong> Evento Reinscrição de Participante (<code>FEventoReinscricao.dfm</code>), Data da Reinscrição (<code>fNovaDataReinscricao.dfm</code>)</p>
+<p><strong>Dependências:</strong> CMAdmPrev (UEventos, UParticipante, UMovReserva, UAdmPrev.RegraBooleana, UContribuicaoPrev.MostraDetalhesContribuicao).</p>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span> — informações que o repositório não comprova ou que divergem entre fontes. O texto existente foi mantido; os itens abaixo dependem de validação humana.</p>
+<ul>
+<li>Comportamento ao responder “Não” na confirmação final (<a href="#CADPREV-RN054">RS054</a>).</li>
+<li>A mensagem <a href="#MSG062">MSG062</a> (“A data da reinscrição deveria ser...”) usa ícone de erro mas permite continuar.</li>
+<li>Regras internas de InsereNaPatrocinadoraNova, CancelaNaPatrocinadoraAntiga, ReativaParticipanteNaPatro e VoltaContribuicoesAnteriores (CMAdmPrev) não detalhadas.</li>
+</ul>
+</div>
+<div class="note note-info"><p><strong>Registro original do processo PF-06</strong></p><p><strong>Forms de entrada:</strong> <code>FEventoReinscricao.dfm</code>, <code>fNovaDataReinscricao.dfm</code></p><p><strong>Lógica de processamento:</strong> Estado do evento com nova data; validações; regra de elegibilidade; grava situações/vínculo; mesma × nova patrocinadora; histórico funcional; reserva; log; commit</p><p><strong>Saídas:</strong> Participante reinscrito</p><p><strong>Persistência (tabelas escritas):</strong> ELEGPATRO, PARTPREVPLAN, CONTRIBPREVPARTP, EVENTOSPREV, HISTFUNCPREV (+ rotinas externas)</p><p><strong>Evidência:</strong> <code>CADASTROPREV/Fontes/FEventoReinscricao.pas:548-1300</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+</div>
+
+<!-- ======================================================= JF007 -->
+<div class="pf-block" id="PF-07"><h4>JF007 (PF-07) — Manutenção parcial</h4>
+<p><strong>Objetivo:</strong> Registrar que o participante passa à situação de Mantido Parcial, com salário de manutenção, salário de participação, nível e cargo, ajustando contribuições, reservas e parcelamento.</p>
+<p><strong>Necessidade de negócio:</strong> o participante que perde parte do vínculo (ex.: redução salarial ou cessão) pode manter-se no plano com contribuição reduzida; isso exige regra de concessão e novo salário de referência.</p>
+<p><strong>Ator / gatilho:</strong> Analista, pelo menu <em>Eventos › Cadastrais › Manutenção Parcial › &lt;nome do evento&gt;</em> (<code>FPrincipal.dfm:8491-8493</code>; <code>FPrincipal.pas:978-1002, 1692-1709</code>).</p>
+<p><strong>Pré-condições:</strong> Evento MP cadastrado com situação MP associada.</p>
+<p><strong>Em termos de negócio:</strong> o plano/patrocinadora pode ter regra de concessão; o último salário de participação precisa estar disponível.</p>
+<p><strong>Pós-condições:</strong> ver seção 4.</p>
+<p><strong>Em termos de negócio:</strong> o participante fica mantido parcial a partir da data do evento.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li><strong>Sistema:</strong> Ao abrir, carrega situações do evento e habilita os campos de situação conforme as flags do evento. [<a href="uc401.html#CADPREV-RN008">RS008</a>]<br>Situação funcional editável só se FLGSITFUNCIMEDIA = 1 e FLGALTERASITFUNC = 1; botão de evolução funcional só se FLGINCLUIHISTFUNC = 1 (<code>FEventoManutParcial.pas:246-281</code>).</li>
+<li><strong>Usuário e sistema:</strong> Procura o participante; carrega nível, cargo, salário de participação e se é cedido. [<a href="uc401.html#CADPREV-RN007">RS007</a>]<br><code>FEventoManutParcial.pas:283-467</code>.</li>
+<li><strong>Usuário:</strong> Informa data, salário de manutenção (opcionalmente calculado), situações e data do requerimento; confirma. [<a href="#CADPREV-RN055">RS055</a>]<br><code>FEventoManutParcial.pas:495-579</code>.</li>
+<li><strong>Sistema:</strong> Executa a regra de concessão. [<a href="#CADPREV-RN056">RS056</a>]<br><code>FEventoManutParcial.pas:581-593, 920-993</code>.</li>
+<li><strong>Sistema:</strong> Grava situações, evento, ELEGPATRO, PARTPREVPLAN, contribuições, reserva, log, padrão de reserva e parcelamento; pede confirmação final. [<a href="#CADPREV-RN057">RS057</a>]<br><code>FEventoManutParcial.pas:595-800</code>.</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Procurar participante</td><td>Carregar o ativo</td><td>Pesquisa</td><td>Carrega nível, cargo, salário de participação, cedido; estado do evento</td><td>Dados carregados</td><td><a href="uc401.html#CADPREV-RN007">RS007</a></td><td><a href="uc401.html#MSG005">MSG005</a>–<a href="uc401.html#MSG007">MSG007</a></td><td><code>FEventoManutParcial.dfm</code></td></tr>
+<tr><td>Confirmar manutenção</td><td>Registrar mantido parcial</td><td>Data, salários, situações, requerimento</td><td>Valida; regra de concessão; grava; reserva; parcelamento</td><td>Pergunta de efetivação</td><td><a href="#CADPREV-RN055">RS055</a>, <a href="#CADPREV-RN056">RS056</a>, <a href="#CADPREV-RN057">RS057</a></td><td><a href="#MSG069">MSG069</a>–<a href="#MSG074">MSG074</a>, <a href="uc401.html#MSG024">MSG024</a></td><td><code>FEventoManutParcial.dfm</code></td></tr>
+<tr><td>Confirmar efetivação</td><td>Gravar definitivamente</td><td>Sim/Não</td><td>Sim: commit + carta; Não: rollback e cancelamento</td><td>Evento efetuado ou desfeito</td><td><a href="#CADPREV-RN057">RS057</a></td><td><a href="#MSG074">MSG074</a>, <a href="uc401.html#MSG008">MSG008</a></td><td><code>FEventoManutParcial.dfm</code></td></tr>
+</tbody></table></div>
+<div class="jf-rules">
+<p><strong>Regras de negócio da jornada:</strong> 3 regra(s) — texto completo abaixo.</p>
+<div class="rule-block" id="CADPREV-RN055"><div class="rule-id">RS055 (CADPREV-RN055) — Manutenção parcial exige situação “Mantido Parcial” e salários</div>
+<div class="rule-desc">São obrigatórios: participante, data do evento, salário de manutenção, as três novas situações, data do requerimento (preenchida com a data do evento ao sair do campo) e o salário de participação (se não veio do banco, o usuário deve informar o salário praticado). A nova situação na fundação precisa ser da categoria Mantido Parcial (FLGINTERNO = 'MP').</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>reSalarioManut, reSalarioParticip, dtEvento, dtRequerimento</code> — [obrigatório]</li>
+<li><code>SITPART.FLGINTERNO</code> — = 'MP'</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT068">TRT068</a> → <a href="#MSG069">MSG069</a>; <a href="#TRT069">TRT069</a> → <a href="#MSG070">MSG070</a>; <a href="#TRT070">TRT070</a> → <a href="#MSG071">MSG071</a>; <a href="uc401.html#TRT014">TRT014</a>, <a href="uc401.html#TRT015">TRT015</a>, <a href="uc401.html#TRT017">TRT017</a>, <a href="uc401.html#TRT029">TRT029</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-07">JF007</a></p>
+<p><strong>Descrição original:</strong> if qrySitPart.FieldByName('FLGINTERNO').AsString &lt;&gt; 'MP' then MsgDlg('...Categoria Mantido Parcial.').</p>
+<p><strong>Condições:</strong> ver descrição</p><p><strong>Dados envolvidos:</strong> SITPART</p><p><strong>Resultado/Exceção:</strong> Confirmação bloqueada</p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/FEventoManutParcial.pas:506-571, 1221-1229, 1544-1552</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<div class="rule-block" id="CADPREV-RN056"><div class="rule-id">RS056 (CADPREV-RN056) — Regra de concessão de manutenção parcial por patrocinadora × plano</div>
+<div class="rule-desc">Antes de gravar, o sistema busca a regra de concessão de manutenção parcial da patrocinadora × plano (PLANPREVPATRO.IDREGRAMANUTPARC) e a executa com os dados do participante e as situações atual e nova. Sem regra cadastrada, a manutenção é permitida. Com regra que retorna falso ou erro na execução, o evento não é efetuado e a transação é desfeita.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>PLANPREVPATRO.IDREGRAMANUTPARC</code></li>
+<li>PARTPREVPLAN, ELEGPATRO, PESSOAFISICA, PESSOA (dados passados à regra)</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT071">TRT071</a> → <a href="#MSG072">MSG072</a> + <a href="uc401.html#MSG024">MSG024</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-07">JF007</a></p>
+<p><strong>Descrição original:</strong> ExecutaRegraConcessao: regCalculo.RuleName := IDREGRAMANUTPARC; regCalculo.Execute; sResultadoRegra := regCalculo.Result.</p>
+<p><strong>Condições:</strong> IDREGRAMANUTPARC preenchido</p><p><strong>Dados envolvidos:</strong> PLANPREVPATRO, PARTPREVPLAN, ELEGPATRO, PLANPREV, PESSOAFISICA, PESSOA</p><p><strong>Resultado/Exceção:</strong> 'True' segue; 'False' rollback</p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/FEventoManutParcial.pas:581-593, 920-993</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<div class="rule-block" id="CADPREV-RN057"><div class="rule-id">RS057 (CADPREV-RN057) — Gravação da manutenção parcial e efetivação</div>
+<div class="rule-desc">Em evento novo, grava sempre as novas situações (ELEGPATRO.IDSITFUNC; PARTPREVPLAN.IDSITPART e IDSITPLANOPREV) e o evento como efetivado. Depois: atualiza ELEGPATRO nível e cargo (e IDPESSJURCEDIDO = fundação se “funcionário cedido”), recalcula ELEGPATRO.SALTOTAL pela remuneração do mês anterior, grava PARTPREVPLAN.SALMANTIDO, SALPARTICIPACAO e DATAINICIOMANUT; em evento novo fecha o histórico de contribuições, associa novas contribuições (com o salário de manutenção), mostra as contribuições e valida benefício anterior; movimenta a reserva (MoveReserva, com integração contábil se ligada), grava o log, roda o padrão de movimentação de reserva, mostra detalhes das contribuições e efetua o parcelamento. Por fim pergunta se confirma a efetivação: “Sim” faz commit e emite a carta; “Não” desfaz.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>ELEGPATRO.NIVEL, IDCARGOEXT, IDPESSJURCEDIDO, SALTOTAL</code></li>
+<li><code>PARTPREVPLAN.SALMANTIDO, SALPARTICIPACAO, DATAINICIOMANUT</code></li>
+<li><code>IntegraBack.Contabilidade</code> (<a href="uc401.html#CADPREV-RN004">RS004</a>)</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT072">TRT072</a> → <a href="#MSG073">MSG073</a>; <a href="#TRT073">TRT073</a> → <a href="#MSG074">MSG074</a>; <a href="#TRT065">TRT065</a> → <a href="#MSG066">MSG066</a>; <a href="uc401.html#TRT022">TRT022</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-07">JF007</a></p>
+<p><strong>Nota de verificação:</strong> o UPDATE de nível/cargo ignora erros (except vazio, <code>:622-625</code>); o resultado de MoveReserva não é verificado (<code>:711-713</code>). Em alteração (bAltera) as situações não são regravadas.</p>
+<p><strong>Descrição original:</strong> UPDATE ELEGPATRO SET NIVEL, IDCARGOEXT[, IDPESSJURCEDIDO]; UPDATE ELEGPATRO SET SALTOTAL = CalcRemTotal(...); UPDATE PARTPREVPLAN SET SALMANTIDO, SALPARTICIPACAO, DATAINICIOMANUT; EfetuaPareclamentoContribuicao.</p>
+<p><strong>Condições:</strong> confirmação</p><p><strong>Dados envolvidos:</strong> ELEGPATRO, PARTPREVPLAN, EVENTOSPREV, contribuições, reservas</p><p><strong>Resultado/Exceção:</strong> Mantido parcial efetivado ou desfeito</p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/FEventoManutParcial.pas:595-800, 802-855</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<p><strong>Regras transversais do módulo</strong> (texto completo em <a href="uc401.html#PF-01">UC401 JF001</a>): <a href="uc401.html#CADPREV-RN001">RS001</a>, <a href="uc401.html#CADPREV-RN004">RS004</a>, <a href="uc401.html#CADPREV-RN005">RS005</a>, <a href="uc401.html#CADPREV-RN007">RS007</a>, <a href="uc401.html#CADPREV-RN008">RS008</a>, <a href="uc401.html#CADPREV-RN009">RS009</a>, <a href="uc401.html#CADPREV-RN010">RS010</a>.</p>
+</div>
+
+<p><strong>Tratamentos de erro:</strong> <a href="#TRT065">TRT065</a>, <a href="#TRT068">TRT068</a>–<a href="#TRT073">TRT073</a></p>
+<p><strong>Mensagens:</strong> <a href="#MSG066">MSG066</a>, <a href="#MSG069">MSG069</a>–<a href="#MSG074">MSG074</a></p>
+<p><strong>Telas:</strong> Evento Manutenção Parcial (<code>FEventoManutParcial.dfm</code>)</p>
+<p><strong>Dependências:</strong> CMAdmPrev (UEventos, UMovReserva, UContribuicaoPrev, regras de cálculo); evolução funcional (<a href="uc411.html#PF-40">JF040</a>).</p>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span> — informações que o repositório não comprova ou que divergem entre fontes. O texto existente foi mantido; os itens abaixo dependem de validação humana.</p>
+<ul>
+<li>Cálculo do salário de manutenção (<code>ExecutaRegraCalculo</code>, <code>FEventoManutParcial.pas:995-1165</code>, e botão do campo, <code>:1373-1413</code>) lido apenas em alto nível.</li>
+<li>Efeito de <code>MoveReserva</code> e <code>EfetuaPareclamentoContribuicao</code> (CMAdmPrev) não detalhado.</li>
+<li>O item de menu “Manutenção Parcial” não tem HelpContext no .dfm, mas a tela recebe 160007 (<code>FPrincipal.pas:1707</code>).</li>
+</ul>
+</div>
+<div class="note note-info"><p><strong>Registro original do processo PF-07</strong></p><p><strong>Forms de entrada:</strong> <code>FEventoManutParcial.dfm</code></p><p><strong>Lógica de processamento:</strong> Validações; regra de concessão; grava situações/evento/salários; contribuições; reserva; log; parcelamento; confirmação</p><p><strong>Saídas:</strong> Participante mantido parcial</p><p><strong>Persistência (tabelas escritas):</strong> ELEGPATRO, PARTPREVPLAN, EVENTOSPREV (+ rotinas externas)</p><p><strong>Evidência:</strong> <code>CADASTROPREV/Fontes/FEventoManutParcial.pas:495-855</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+</div>
+
+<!-- ======================================================= JF008 -->
+<div class="pf-block" id="PF-08"><h4>JF008 (PF-08) — Retorno de mantido para ativo</h4>
+<p><strong>Objetivo:</strong> Devolver à condição de ativo um participante mantido (ou cancelado, no evento 354), informando o fim da manutenção, a data de retorno, a patrocinadora (mesma ou nova), a nova admissão, matrícula, salário e, opcionalmente, o cargo para registrar o histórico funcional do período anterior.</p>
+<p><strong>Necessidade de negócio:</strong> o participante que voltou a trabalhar numa patrocinadora deixa de ser mantido e volta a contribuir como ativo; o período anterior precisa entrar no histórico funcional.</p>
+<p><strong>Ator / gatilho:</strong> Analista, pelo menu <em>Eventos › Cadastrais › Retorno de Mantido para Ativo › &lt;nome do evento&gt;</em> (<code>FPrincipal.dfm:8494-8497</code>; <code>FPrincipal.pas:1004-1026, 1466-1483</code>).</p>
+<p><strong>Pré-condições:</strong> Evento RA cadastrado; participante nas categorias de manutenção/assistido (ou cancelado, evento 354); evento IP no catálogo (nova patrocinadora).</p>
+<p><strong>Em termos de negócio:</strong> o participante está mantido e foi readmitido.</p>
+<p><strong>Pós-condições:</strong> EVENTOSPREV (RA; IP na nova patrocinadora), ELEGPATRO.DATAREADMISSAO, HISTFUNCPREV, rotinas externas de patrocinadora/contribuição/reserva.</p>
+<p><strong>Em termos de negócio:</strong> o participante volta a ativo a partir da data de retorno.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li><strong>Sistema:</strong> Ao abrir, carrega listas e ajusta a pesquisa: participantes nas categorias MA/MP/MS/AS/AT ativos; no evento 354, categoria CA desativados. [<a href="#CADPREV-RN058">RS058</a>]<br><code>FEventoRetornoMantidoParaAtivo.pas:346-380</code>.</li>
+<li><strong>Usuário e sistema:</strong> Procura o participante; o sistema mostra dados antes/durante a manutenção e verifica o estado. [<a href="#CADPREV-RN058">RS058</a>]<br><code>FEventoRetornoMantidoParaAtivo.pas:382-529, 303-337</code>.</li>
+<li><strong>Usuário:</strong> Informa fim da manutenção (data de retorno = fim + 1), patrocinadora, admissão, matrícula, situações, cargo. [<a href="#CADPREV-RN059">RS059</a>]<br><code>FEventoRetornoMantidoParaAtivo.pas:531-620, 1637-1660</code>.</li>
+<li><strong>Sistema:</strong> Grava o evento e trata mesma × nova patrocinadora, histórico funcional, readmissão e reserva; pede confirmação; commit; log; carta. [<a href="#CADPREV-RN060">RS060</a>]<br><code>FEventoRetornoMantidoParaAtivo.pas:622-907</code>.</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Procurar participante</td><td>Carregar o mantido</td><td>Pesquisa</td><td>Filtra categorias; mostra situação antes/durante; avisa se não há evento de manutenção</td><td>Dados carregados</td><td><a href="#CADPREV-RN058">RS058</a></td><td><a href="#MSG076">MSG076</a>, <a href="uc401.html#MSG005">MSG005</a>–<a href="uc401.html#MSG007">MSG007</a></td><td><code>FEventoRetornoMantidoParaAtivo.dfm</code></td></tr>
+<tr><td>Informar datas</td><td>Definir retorno</td><td>Fim da manutenção, data de retorno</td><td>Retorno = fim + 1; fim não anterior ao início</td><td>Datas coerentes</td><td><a href="#CADPREV-RN059">RS059</a></td><td><a href="#MSG077">MSG077</a></td><td><code>FEventoRetornoMantidoParaAtivo.dfm</code></td></tr>
+<tr><td>Confirmar retorno</td><td>Reativar o participante</td><td>Patrocinadora, admissão, matrícula, situações, cargo</td><td>Grava evento; mesma/nova patrocinadora; histórico; readmissão; reserva</td><td>Pergunta de confirmação</td><td><a href="#CADPREV-RN060">RS060</a></td><td><a href="#MSG054">MSG054</a>, <a href="#MSG062">MSG062</a>–<a href="#MSG066">MSG066</a>, <a href="#MSG074">MSG074</a>, <a href="#MSG075">MSG075</a>, <a href="#MSG078">MSG078</a>–<a href="#MSG080">MSG080</a></td><td><code>FEventoRetornoMantidoParaAtivo.dfm</code></td></tr>
+</tbody></table></div>
+<div class="jf-rules">
+<p><strong>Regras de negócio da jornada:</strong> 3 regra(s) — texto completo abaixo.</p>
+<div class="rule-block" id="CADPREV-RN058"><div class="rule-id">RS058 (CADPREV-RN058) — Quem pode retornar e como o estado é verificado</div>
+<div class="rule-desc">A pesquisa padrão traz participantes com situação na fundação nas categorias MA, MP, MS, AS ou AT e vínculo ativo; no evento 354 (retorno de cancelado para ativo) troca para a categoria CA e vínculo desativado. Ao selecionar, o sistema busca o evento de manutenção do participante e, se não houver, pergunta se continua. O estado do evento é verificado contra eventos de aposentadoria (grupos TS, ID, IN) do vínculo; no evento 352, havendo tal evento, o estado é sempre “não registrado”.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>SITPART.FLGINTERNO</code> — MA, MP, MS, AS, AT (ou CA)</li>
+<li><code>PARTPREVPLAN.FLGDESATIVADO</code> — 0 (ou 1 no 354)</li>
+<li><code>EVENTOSPREV × EVENTOGERADOR.FLGINTERNO IN ('TS','ID','IN')</code></li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT075">TRT075</a> → <a href="#MSG076">MSG076</a>; <a href="uc401.html#TRT005">TRT005</a>–<a href="uc401.html#TRT007">TRT007</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-08">JF008</a></p>
+<p><strong>Nota de verificação:</strong> usar eventos de aposentadoria (TS/ID/IN) para o estado do retorno é <span class="ev ev-inferido">INFERIDO</span> como herança de código; o significado dos eventos 352 e 354 vem de comentários (SIG78421, SOL 264614).</p>
+<p><strong>Descrição original:</strong> MontaSelectPart.Filtro: StringReplace('SITPART.FLGINTERNO IN (''MA'', ''MP'',''MS'',''AS'',''AT'')' → 'IN (''CA'')'); VerificaEstadoEvento com EG.FLGINTERNO IN ('TS','ID','IN').</p>
+<p><strong>Condições:</strong> sIdEventoGerador = '354' / '352'</p><p><strong>Dados envolvidos:</strong> PARTPREVPLAN, SITPART, EVENTOSPREV, EVENTOGERADOR</p><p><strong>Resultado/Exceção:</strong> Participante elegível carregado</p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/FEventoRetornoMantidoParaAtivo.pas:303-337, 362-371, 431-449</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<div class="rule-block" id="CADPREV-RN059"><div class="rule-id">RS059 (CADPREV-RN059) — Datas do retorno e dados obrigatórios</div>
+<div class="rule-desc">São obrigatórios participante, patrocinadora, fim da manutenção, data de retorno (nova admissão), matrícula e as três novas situações. Ao informar o fim da manutenção, a data de retorno passa a ser o dia seguinte; se o usuário digitar outra data de retorno, ela é rejeitada e limpa. O fim da manutenção não pode ser anterior ao início da manutenção (data do evento de manutenção), exceto nos eventos 352 e 354. Sem cargo informado, o sistema pergunta se continua sem gravar o histórico funcional.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>dtVolta</code> (fim da manutenção), <code>dtEvento</code> (retorno) — dtEvento = dtVolta + 1</li>
+<li><code>qryEventos.DataEvento</code> — início da manutenção</li>
+<li><code>dblkpcmbIdCargoExt</code> — [opcional]</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT076">TRT076</a> → <a href="#MSG077">MSG077</a>; <a href="#TRT077">TRT077</a> → <a href="#MSG078">MSG078</a>; <a href="#TRT053">TRT053</a> → <a href="#MSG054">MSG054</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-08">JF008</a></p>
+<p><strong>Nota de verificação:</strong> o texto da mensagem diz “O "Fim da Manutenção" deve ser anterior ao início da mesma.”, mas a condição bloqueia quando o fim é <em>anterior</em> ao início (<code>:602-607</code>) — texto invertido em relação à regra.</p>
+<p><strong>Descrição original:</strong> dtVoltaExit: dtEvento.Date := dtVolta.date + 1; dtEventoExit: AdcionaDias(dtVolta.Text, 1); if StrToDate(dtVolta) &lt; StrToDate(DataEvento) and evento ∉ {354, 352}.</p>
+<p><strong>Condições:</strong> ver descrição</p><p><strong>Dados envolvidos:</strong> EVENTOSPREV (evento de manutenção)</p><p><strong>Resultado/Exceção:</strong> Bloqueio ou continuação</p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/FEventoRetornoMantidoParaAtivo.pas:536-620, 1637-1660</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<div class="rule-block" id="CADPREV-RN060"><div class="rule-id">RS060 (CADPREV-RN060) — Gravação do retorno na mesma ou em nova patrocinadora</div>
+<div class="rule-desc">O evento RA é gravado sempre efetivado e com as três situações imediatas. <em>Nova patrocinadora:</em> grava o histórico de contribuições, insere o participante na nova patrocinadora (salário ativo, último mês 0000/00), grava também um evento de Inscrição (primeiro evento IP do catálogo), desativa e cancela o vínculo antigo (data de retorno − 1, com o fim da manutenção) e, se houver cargo, insere o histórico funcional. <em>Mesma patrocinadora:</em> insere o histórico funcional (se cargo), reativa o participante, grava o histórico de contribuições e retoma as contribuições anteriores. Em ambos: grava ELEGPATRO.DATAREADMISSAO, roda o padrão de movimentação de reserva, mostra os detalhes das contribuições e pede confirmação; “Sim” faz commit e depois grava o log; “Não” desfaz.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>EVENTOSPREV</code> (RA e IP), <code>ELEGPATRO.DATAREADMISSAO</code></li>
+<li><code>HISTFUNCPREV</code> (SEQHISTFUNC = MAX+1; DATAINICIO = admissão antiga; DATAFINAL = demissão; cargo, insalubridade, documento)</li>
+<li><code>EVENTOGERADOR</code> (FLGINTERNO = 'IP', ROWNUM ≤ 1)</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT061">TRT061</a>–<a href="#TRT065">TRT065</a>; <a href="#TRT074">TRT074</a> → <a href="#MSG074">MSG074</a>/<a href="#MSG075">MSG075</a>; <a href="#TRT078">TRT078</a> → <a href="#MSG079">MSG079</a>; <a href="#TRT079">TRT079</a> → <a href="#MSG080">MSG080</a>; <a href="#TRT080">TRT080</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-08">JF008</a></p>
+<p><strong>Nota de verificação:</strong> o evento IP é buscado sem filtro de fundação (exceção a <a href="uc401.html#CADPREV-RN001">RS001</a>). Falhas em DATAREADMISSAO e no padrão de reserva saem sem rollback (<code>:841-845, 862-866</code>). O log é gravado após o commit (<a href="uc401.html#CADPREV-RN005">RS005</a>).</p>
+<p><strong>Descrição original:</strong> GravaEVENTOSPREV / GravaEVENTOSPREVNovaPatro / InsereNoHistoricoFuncional; UPDATE ELEGPATRO SET DATAREADMISSAO; RODAPADRAOMOVRESERVA; Commit; GravaLogOperacoes('Evento Retorno de Mantido para Ativo').</p>
+<p><strong>Condições:</strong> sIdPessjur ≠ patrocinadora escolhida → nova; senão mesma</p><p><strong>Dados envolvidos:</strong> EVENTOSPREV, EVENTOGERADOR, ELEGPATRO, HISTFUNCPREV (+ rotinas externas)</p><p><strong>Resultado/Exceção:</strong> Participante ativo</p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/FEventoRetornoMantidoParaAtivo.pas:622-907, 910-1120, 1246-1410</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<p><strong>Regras transversais do módulo</strong> (texto completo em <a href="uc401.html#PF-01">UC401 JF001</a>): <a href="uc401.html#CADPREV-RN001">RS001</a>, <a href="uc401.html#CADPREV-RN005">RS005</a>, <a href="uc401.html#CADPREV-RN007">RS007</a>, <a href="uc401.html#CADPREV-RN008">RS008</a>, <a href="uc401.html#CADPREV-RN009">RS009</a>, <a href="uc401.html#CADPREV-RN010">RS010</a>.</p>
+</div>
+
+<p><strong>Tratamentos de erro:</strong> <a href="#TRT053">TRT053</a>, <a href="#TRT061">TRT061</a>–<a href="#TRT065">TRT065</a>, <a href="#TRT074">TRT074</a>–<a href="#TRT080">TRT080</a></p>
+<p><strong>Mensagens:</strong> <a href="#MSG054">MSG054</a>, <a href="#MSG062">MSG062</a>–<a href="#MSG066">MSG066</a>, <a href="#MSG074">MSG074</a>–<a href="#MSG080">MSG080</a></p>
+<p><strong>Telas:</strong> Evento Retorno de Mantido Integral para Ativo (<code>FEventoRetornoMantidoParaAtivo.dfm</code>)</p>
+<p><strong>Dependências:</strong> CMAdmPrev (UEventos, UParticipante, UMovReserva). Complementa <a href="#PF-07">JF007</a> e a demissão com manutenção (<a href="uc404.html#PF-14">JF014</a>).</p>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span> — informações que o repositório não comprova ou que divergem entre fontes. O texto existente foi mantido; os itens abaixo dependem de validação humana.</p>
+<ul>
+<li>Significado dos eventos 352 e 354 e das categorias de situação MA, MS, AS, AT, CA.</li>
+<li>Estado do retorno verificado contra eventos de aposentadoria (TS/ID/IN) (<a href="#CADPREV-RN058">RS058</a>).</li>
+<li>Texto invertido da mensagem <a href="#MSG077">MSG077</a> (<a href="#CADPREV-RN059">RS059</a>).</li>
+<li>Evento IP escolhido por <code>ROWNUM &lt;= 1</code> sem fundação (<code>:1332-1335</code>).</li>
+</ul>
+</div>
+<div class="note note-info"><p><strong>Registro original do processo PF-08</strong></p><p><strong>Forms de entrada:</strong> <code>FEventoRetornoMantidoParaAtivo.dfm</code></p><p><strong>Lógica de processamento:</strong> Filtro de elegíveis; datas; grava RA (e IP); mesma × nova patrocinadora; histórico funcional; readmissão; reserva; confirmação; log</p><p><strong>Saídas:</strong> Participante ativo</p><p><strong>Persistência (tabelas escritas):</strong> EVENTOSPREV, ELEGPATRO, HISTFUNCPREV (+ rotinas externas)</p><p><strong>Evidência:</strong> <code>CADASTROPREV/Fontes/FEventoRetornoMantidoParaAtivo.pas:531-907</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+</div>
+
+<section id="TRT-section"><div class="section-title">6. Tratamentos (TRT)</div>
+<p>Cada tratamento traz a condição, a mensagem exibida, o resultado e a regra/jornada de origem. Tratamentos comuns às telas de evento (estado do evento, erro de banco, cancelar, log) estão em <a href="uc401.html#TRT-section">UC401 §6</a>.</p>
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Condição</th><th>Mensagem</th><th>Resultado</th><th>Regra</th><th>Jornada</th></tr></thead><tbody>
+<tr id="TRT041"><td><strong>TRT041</strong></td><td>Matrícula com tamanho diferente de 4 e 7</td><td><a href="#MSG041">MSG041</a></td><td>Exit</td><td><a href="#CADPREV-RN042">RS042</a></td><td><a href="#PF-05">JF005</a></td></tr>
+<tr id="TRT042"><td><strong>TRT042</strong></td><td>Matrícula não encontrada (inclusão)</td><td><a href="#MSG042">MSG042</a></td><td>“Sim”: habilita cadastro de matrícula nova; “Não”: limpa a matrícula</td><td><a href="#CADPREV-RN046">RS046</a></td><td><a href="#PF-05">JF005</a></td></tr>
+<tr id="TRT043"><td><strong>TRT043</strong></td><td>Data de inscrição FUNCEF futura</td><td><a href="#MSG043">MSG043</a></td><td>Exit</td><td><a href="#CADPREV-RN044">RS044</a></td><td><a href="#PF-05">JF005</a></td></tr>
+<tr id="TRT044"><td><strong>TRT044</strong></td><td>Campo obrigatório vazio na linha nova</td><td><a href="#MSG044">MSG044</a></td><td>Exit</td><td><a href="#CADPREV-RN044">RS044</a></td><td><a href="#PF-05">JF005</a></td></tr>
+<tr id="TRT045"><td><strong>TRT045</strong></td><td>Percentual abaixo do mínimo do plano</td><td><a href="#MSG045">MSG045</a></td><td>Limpa o percentual; Exit</td><td><a href="#CADPREV-RN043">RS043</a></td><td><a href="#PF-05">JF005</a></td></tr>
+<tr id="TRT046"><td><strong>TRT046</strong></td><td>Percentual acima de 100%</td><td><a href="#MSG046">MSG046</a></td><td>Limpa o percentual; Exit</td><td><a href="#CADPREV-RN043">RS043</a></td><td><a href="#PF-05">JF005</a></td></tr>
+<tr id="TRT047"><td><strong>TRT047</strong></td><td>Pessoa já tem vínculo com o plano (inclusão)</td><td><a href="#MSG047">MSG047</a></td><td>Limpa os campos; Exit</td><td><a href="#CADPREV-RN045">RS045</a></td><td><a href="#PF-05">JF005</a></td></tr>
+<tr id="TRT048"><td><strong>TRT048</strong></td><td>Pessoa tem outro plano ativo</td><td><a href="#MSG048">MSG048</a></td><td>“Sim”: POSSUIPLANOATIVO = 1; “Não”: limpa os campos</td><td><a href="#CADPREV-RN045">RS045</a></td><td><a href="#PF-05">JF005</a></td></tr>
+<tr id="TRT049"><td><strong>TRT049</strong></td><td>E-mail informado inválido</td><td><a href="#MSG049">MSG049</a></td><td>Exit</td><td><a href="#CADPREV-RN044">RS044</a></td><td><a href="#PF-05">JF005</a></td></tr>
+<tr id="TRT050"><td><strong>TRT050</strong></td><td>Qualquer exceção durante a gravação do lote</td><td>— (sem mensagem)</td><td>Rollback de todo o lote; usuário não é avisado</td><td><a href="#CADPREV-RN047">RS047</a></td><td><a href="#PF-05">JF005</a></td></tr>
+<tr id="TRT051"><td><strong>TRT051</strong></td><td>Datas do relatório vazias ou início &gt; fim</td><td><a href="#MSG051">MSG051</a></td><td>Exit</td><td><a href="#CADPREV-RN048">RS048</a></td><td><a href="#PF-05">JF005</a></td></tr>
+<tr id="TRT052"><td><strong>TRT052</strong></td><td>Nenhuma inscrição em lote no período</td><td><a href="#MSG052">MSG052</a></td><td>Exit</td><td><a href="#CADPREV-RN048">RS048</a></td><td><a href="#PF-05">JF005</a></td></tr>
+<tr id="TRT053"><td><strong>TRT053</strong></td><td>Campo obrigatório do evento vazio (data da reinscrição, tempo de serviço anterior, patrocinadora, admissão, matrícula, fim da manutenção)</td><td><a href="#MSG054">MSG054</a></td><td>Foco no campo; Exit</td><td><a href="#CADPREV-RN051">RS051</a>, <a href="#CADPREV-RN059">RS059</a></td><td><a href="#PF-06">JF006</a>, <a href="#PF-08">JF008</a></td></tr>
+<tr id="TRT054"><td><strong>TRT054</strong></td><td>Novo número de inscrição vazio</td><td><a href="#MSG055">MSG055</a></td><td>Exit</td><td><a href="#CADPREV-RN051">RS051</a></td><td><a href="#PF-06">JF006</a></td></tr>
+<tr id="TRT055"><td><strong>TRT055</strong></td><td>Só mês ou só ano da última contribuição preenchido</td><td><a href="#MSG056">MSG056</a></td><td>Exit</td><td><a href="#CADPREV-RN051">RS051</a></td><td><a href="#PF-06">JF006</a></td></tr>
+<tr id="TRT056"><td><strong>TRT056</strong></td><td>Último mês de contribuição não anterior ao mês da reinscrição</td><td><a href="#MSG057">MSG057</a></td><td>“Não”: Exit; “Sim”: segue</td><td><a href="#CADPREV-RN051">RS051</a></td><td><a href="#PF-06">JF006</a></td></tr>
+<tr id="TRT057"><td><strong>TRT057</strong></td><td>Novo salário vazio</td><td><a href="#MSG058">MSG058</a></td><td>Aviso; segue</td><td><a href="#CADPREV-RN051">RS051</a></td><td><a href="#PF-06">JF006</a></td></tr>
+<tr id="TRT058"><td><strong>TRT058</strong></td><td>Novo número de inscrição não numérico</td><td><a href="#MSG059">MSG059</a></td><td>Exit</td><td><a href="#CADPREV-RN051">RS051</a></td><td><a href="#PF-06">JF006</a></td></tr>
+<tr id="TRT059"><td><strong>TRT059</strong></td><td>Data da reinscrição ≤ data da inscrição</td><td><a href="#MSG060">MSG060</a></td><td>“Não”: Exit; “Sim”: segue</td><td><a href="#CADPREV-RN051">RS051</a></td><td><a href="#PF-06">JF006</a></td></tr>
+<tr id="TRT060"><td><strong>TRT060</strong></td><td>Regra de elegibilidade para reinscrição não satisfeita ou com erro</td><td><a href="#MSG061">MSG061</a></td><td>Exit</td><td><a href="#CADPREV-RN052">RS052</a></td><td><a href="#PF-06">JF006</a></td></tr>
+<tr id="TRT061"><td><strong>TRT061</strong></td><td>Falha ao gravar o evento</td><td><a href="#MSG062">MSG062</a></td><td>Rollback; limpa; nova transação</td><td><a href="#CADPREV-RN053">RS053</a>, <a href="#CADPREV-RN060">RS060</a></td><td><a href="#PF-06">JF006</a>, <a href="#PF-08">JF008</a></td></tr>
+<tr id="TRT062"><td><strong>TRT062</strong></td><td>Falha ao gravar o histórico de contribuições do evento</td><td><a href="#MSG063">MSG063</a></td><td>Rollback; limpa; nova transação</td><td><a href="#CADPREV-RN053">RS053</a>, <a href="#CADPREV-RN060">RS060</a></td><td><a href="#PF-06">JF006</a>, <a href="#PF-08">JF008</a></td></tr>
+<tr id="TRT063"><td><strong>TRT063</strong></td><td>Falha ao desativar o vínculo antigo</td><td><a href="#MSG064">MSG064</a></td><td>Rollback; limpa; nova transação</td><td><a href="#CADPREV-RN053">RS053</a>, <a href="#CADPREV-RN060">RS060</a></td><td><a href="#PF-06">JF006</a>, <a href="#PF-08">JF008</a></td></tr>
+<tr id="TRT064"><td><strong>TRT064</strong></td><td>Falha ao inserir histórico funcional (ou admissão/demissão ausentes no retorno)</td><td><a href="#MSG065">MSG065</a></td><td>Rollback; limpa; nova transação</td><td><a href="#CADPREV-RN053">RS053</a>, <a href="#CADPREV-RN060">RS060</a></td><td><a href="#PF-06">JF006</a>, <a href="#PF-08">JF008</a></td></tr>
+<tr id="TRT065"><td><strong>TRT065</strong></td><td>Erro no padrão de movimentação de reserva</td><td><a href="#MSG066">MSG066</a></td><td>Exit sem rollback (transação continua aberta)</td><td><a href="#CADPREV-RN053">RS053</a>, <a href="#CADPREV-RN057">RS057</a>, <a href="#CADPREV-RN060">RS060</a></td><td><a href="#PF-06">JF006</a>, <a href="#PF-07">JF007</a>, <a href="#PF-08">JF008</a></td></tr>
+<tr id="TRT066"><td><strong>TRT066</strong></td><td>Confirmação final da reinscrição</td><td><a href="#MSG067">MSG067</a></td><td>“Sim”: commit + <a href="uc401.html#MSG008">MSG008</a>; “Não”: nada é desfeito</td><td><a href="#CADPREV-RN054">RS054</a></td><td><a href="#PF-06">JF006</a></td></tr>
+<tr id="TRT067"><td><strong>TRT067</strong></td><td>Data da reinscrição anterior ao cancelamento</td><td><a href="#MSG068">MSG068</a></td><td>Foco na data; Exit</td><td><a href="#CADPREV-RN051">RS051</a></td><td><a href="#PF-06">JF006</a></td></tr>
+<tr id="TRT068"><td><strong>TRT068</strong></td><td>Nova situação na fundação fora da categoria MP</td><td><a href="#MSG069">MSG069</a></td><td>Exit</td><td><a href="#CADPREV-RN055">RS055</a></td><td><a href="#PF-07">JF007</a></td></tr>
+<tr id="TRT069"><td><strong>TRT069</strong></td><td>Salário de manutenção vazio</td><td><a href="#MSG070">MSG070</a></td><td>Exit</td><td><a href="#CADPREV-RN055">RS055</a></td><td><a href="#PF-07">JF007</a></td></tr>
+<tr id="TRT070"><td><strong>TRT070</strong></td><td>Salário de participação vazio</td><td><a href="#MSG071">MSG071</a></td><td>Exit</td><td><a href="#CADPREV-RN055">RS055</a></td><td><a href="#PF-07">JF007</a></td></tr>
+<tr id="TRT071"><td><strong>TRT071</strong></td><td>Regra de concessão retorna falso ou falha</td><td><a href="#MSG072">MSG072</a>, <a href="uc401.html#MSG024">MSG024</a></td><td>Rollback; limpa; nova transação</td><td><a href="#CADPREV-RN056">RS056</a></td><td><a href="#PF-07">JF007</a></td></tr>
+<tr id="TRT072"><td><strong>TRT072</strong></td><td>Falha no parcelamento da contribuição</td><td><a href="#MSG073">MSG073</a></td><td>Rollback; limpa; nova transação</td><td><a href="#CADPREV-RN057">RS057</a></td><td><a href="#PF-07">JF007</a></td></tr>
+<tr id="TRT073"><td><strong>TRT073</strong></td><td>Confirmação de efetivação da manutenção parcial</td><td><a href="#MSG074">MSG074</a></td><td>“Sim”: commit + carta; “Não”: rollback e cancelamento</td><td><a href="#CADPREV-RN057">RS057</a></td><td><a href="#PF-07">JF007</a></td></tr>
+<tr id="TRT074"><td><strong>TRT074</strong></td><td>Confirmação do retorno</td><td><a href="#MSG074">MSG074</a>, <a href="#MSG075">MSG075</a></td><td>“Sim”: commit + log; “Não”: rollback e “Evento cancelado.”</td><td><a href="#CADPREV-RN060">RS060</a></td><td><a href="#PF-08">JF008</a></td></tr>
+<tr id="TRT075"><td><strong>TRT075</strong></td><td>Participante sem evento de manutenção registrado</td><td><a href="#MSG076">MSG076</a></td><td>“Não”: Exit</td><td><a href="#CADPREV-RN058">RS058</a></td><td><a href="#PF-08">JF008</a></td></tr>
+<tr id="TRT076"><td><strong>TRT076</strong></td><td>Fim da manutenção anterior ao início (exceto 352/354) ou data de retorno ≠ fim + 1</td><td><a href="#MSG077">MSG077</a></td><td>Exit / limpa a data de retorno</td><td><a href="#CADPREV-RN059">RS059</a></td><td><a href="#PF-08">JF008</a></td></tr>
+<tr id="TRT077"><td><strong>TRT077</strong></td><td>Cargo não informado</td><td><a href="#MSG078">MSG078</a></td><td>“Não”: volta à aba de histórico; “Sim”: segue sem histórico</td><td><a href="#CADPREV-RN059">RS059</a></td><td><a href="#PF-08">JF008</a></td></tr>
+<tr id="TRT078"><td><strong>TRT078</strong></td><td>Erro ao gravar DATAREADMISSAO</td><td><a href="#MSG079">MSG079</a></td><td>Exit sem rollback</td><td><a href="#CADPREV-RN060">RS060</a></td><td><a href="#PF-08">JF008</a></td></tr>
+<tr id="TRT079"><td><strong>TRT079</strong></td><td>Catálogo sem evento do tipo IP (nova patrocinadora)</td><td><a href="#MSG080">MSG080</a></td><td>Sai da gravação do evento IP; o fluxo continua</td><td><a href="#CADPREV-RN060">RS060</a></td><td><a href="#PF-08">JF008</a></td></tr>
+<tr id="TRT080"><td><strong>TRT080</strong></td><td>Rotina externa de patrocinadora/contribuição devolve erro (InsereNaPatrocinadoraNova, CancelaNaPatrocinadoraAntiga, ReativaParticipanteNaPatro, VoltaContribuicoesAnteriores, ValidaBeneficioAnterior)</td><td><a href="uc401.html#MSG039">MSG039</a></td><td>Rollback; limpa; nova transação</td><td><a href="#CADPREV-RN053">RS053</a>, <a href="#CADPREV-RN060">RS060</a></td><td><a href="#PF-06">JF006</a>, <a href="#PF-08">JF008</a></td></tr>
+</tbody></table></div>
+</section>
+
+<section id="MSG-section"><div class="section-title">7. Mensagens (MSG)</div>
+<p>Textos conferidos no código-fonte (grafia original mantida). Trechos variáveis aparecem entre &lt; &gt;. Mensagens comuns (MSG001–MSG039) estão em <a href="uc401.html#MSG-section">UC401 §7</a>.</p>
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Texto da mensagem</th><th>Tipo</th><th>Origem (CADASTROPREV/Fontes/)</th><th>Jornadas</th></tr></thead><tbody>
+<tr id="MSG041"><td><strong>MSG041</strong></td><td>“Matrícula inválida.”</td><td>Informação</td><td><code>fInscBuscaParticipLote.pas:142</code></td><td><a href="#PF-05">JF005</a></td></tr>
+<tr id="MSG042"><td><strong>MSG042</strong></td><td>“Matrícula não encontrada. Deseja cadastrar?”</td><td>Confirmação</td><td><code>fInscBuscaParticipLote.pas:177</code></td><td><a href="#PF-05">JF005</a></td></tr>
+<tr id="MSG043"><td><strong>MSG043</strong></td><td>“Data FUNCEF não pode ser maior que a data atual. ”</td><td>Informação</td><td><code>fInscBuscaParticipLote.pas:395</code></td><td><a href="#PF-05">JF005</a></td></tr>
+<tr id="MSG044"><td><strong>MSG044</strong></td><td>“Apenas o campo e-mail Funcef pode ficar sem preenchimento”</td><td>Informação</td><td><code>fInscBuscaParticipLote.pas:408</code></td><td><a href="#PF-05">JF005</a></td></tr>
+<tr id="MSG045"><td><strong>MSG045</strong></td><td>“O percentual mínimo para Novo Plano não pode ser menor que 5%. ” / “O percentual mínimo para REB não pode ser menor que 2%. ”</td><td>Informação</td><td><code>fInscBuscaParticipLote.pas:416, 433</code></td><td><a href="#PF-05">JF005</a></td></tr>
+<tr id="MSG046"><td><strong>MSG046</strong></td><td>“O percentual máximo para Novo Plano não pode ser maior que 100%. ” / “O percentual máximo para REB não pode ser maior que 100%. ”</td><td>Informação</td><td><code>fInscBuscaParticipLote.pas:423, 440</code></td><td><a href="#PF-05">JF005</a></td></tr>
+<tr id="MSG047"><td><strong>MSG047</strong></td><td>“Participante já inscrito nesse plano, realizar a reinscrição”</td><td>Informação</td><td><code>fInscBuscaParticipLote.pas:470</code></td><td><a href="#PF-05">JF005</a></td></tr>
+<tr id="MSG048"><td><strong>MSG048</strong></td><td>“Esta matrícula já possui o plano &lt;nome do plano&gt; ativo! Deseja continuar? ”</td><td>Confirmação</td><td><code>fInscBuscaParticipLote.pas:498</code></td><td><a href="#PF-05">JF005</a></td></tr>
+<tr id="MSG049"><td><strong>MSG049</strong></td><td>“Endereço de e-mail incorreto. Favor verificar!”</td><td>Informação</td><td><code>fInscBuscaParticipLote.pas:524</code></td><td><a href="#PF-05">JF005</a></td></tr>
+<tr id="MSG050"><td><strong>MSG050</strong></td><td>“Cadastro atualizado com sucesso”</td><td>Informação</td><td><code>FInscricaoParticipanteLote.pas:751</code></td><td><a href="#PF-05">JF005</a></td></tr>
+<tr id="MSG051"><td><strong>MSG051</strong></td><td>“Preencha as Datas ” / “Data inicial não pode ser maior que a final ”</td><td>Informação</td><td><code>FInscricaoParticipanteLote.pas:883, 891</code></td><td><a href="#PF-05">JF005</a></td></tr>
+<tr id="MSG052"><td><strong>MSG052</strong></td><td>“Nenhum participante encontrado.”</td><td>Informação</td><td><code>FInscricaoParticipanteLote.pas:903</code></td><td><a href="#PF-05">JF005</a></td></tr>
+<tr id="MSG053"><td><strong>MSG053</strong></td><td>“Arquivo(s) gerado(s) em &lt;pasta de arquivos da empresa&gt;”</td><td>Informação</td><td><code>FInscricaoParticipanteLote.pas:939</code></td><td><a href="#PF-05">JF005</a></td></tr>
+<tr id="MSG054"><td><strong>MSG054</strong></td><td>Campos obrigatórios do evento (variantes): “A Data da Reinscrição deve ser informada.” / “O Tempo de Serviço Anterior deve ser informado.” / “A Patrocinadora do Participante deve ser informada.” / “A Data de Admissão do Participante deve ser informada.” / “A Matrícula do Participante deve ser informada.” / “A Nova Situação do Participante na Fundação deve ser informada.” / “A Patrocinadora deve ser informada.” / “A Data do Final da Manutenção deve ser informada.” / “A nova Data de Admissão deve ser informada.” / “A Matrícula deve ser informada.” / “A Nova Situação do Participante na Patrocinadora deve ser informada.”</td><td>Erro</td><td><code>FEventoReinscricao.pas:566, 581, 630, 637, 644, 681; FEventoManutParcial.pas:543; FEventoRetornoMantidoParaAtivo.pas:546, 554, 562, 570, 578, 586, 594</code></td><td><a href="#PF-06">JF006</a>, <a href="#PF-07">JF007</a>, <a href="#PF-08">JF008</a></td></tr>
+<tr id="MSG055"><td><strong>MSG055</strong></td><td>“O novo número de inscrição deve ser informado. Caso não haja um novo número, repita o número anterior.”</td><td>Erro</td><td><code>FEventoReinscricao.pas:573-574</code></td><td><a href="#PF-06">JF006</a></td></tr>
+<tr id="MSG056"><td><strong>MSG056</strong></td><td>“O Mês e o Ano da Última Contribuição devem ser preenchidos.”</td><td>Erro</td><td><code>FEventoReinscricao.pas:590, 597</code></td><td><a href="#PF-06">JF006</a></td></tr>
+<tr id="MSG057"><td><strong>MSG057</strong></td><td>“O Último Mês de Contribuição não pode ser posterior à Data da Reinscrição. Deseja Continuar assim mesmo? ”</td><td>Aviso (confirmação)</td><td><code>FEventoReinscricao.pas:619</code></td><td><a href="#PF-06">JF006</a></td></tr>
+<tr id="MSG058"><td><strong>MSG058</strong></td><td>“O novo salário não foi informado.”</td><td>Aviso</td><td><code>FEventoReinscricao.pas:652</code></td><td><a href="#PF-06">JF006</a></td></tr>
+<tr id="MSG059"><td><strong>MSG059</strong></td><td>“O novo número de inscrição é inválido.”</td><td>Erro</td><td><code>FEventoReinscricao.pas:660</code></td><td><a href="#PF-06">JF006</a></td></tr>
+<tr id="MSG060"><td><strong>MSG060</strong></td><td>“A data da reinscrição deveria ser pelo menos um dia após a data da inscrição. Deseja continuar assim mesmo?”</td><td>Aviso (confirmação, ícone de erro)</td><td><code>FEventoReinscricao.pas:690-691</code></td><td><a href="#PF-06">JF006</a></td></tr>
+<tr id="MSG061"><td><strong>MSG061</strong></td><td>“Erro na execução da Regra de Elegibilidade para Reinscrição Nº &lt;n&gt;” / “A Regra de Elegibilidade para Reinscrição no Plano Nº &lt;n&gt; não foi satisfeita. O participante não poderá ser reinscrito no plano. ”</td><td>Erro / Informação</td><td><code>FEventoReinscricao.pas:740, 742-743</code></td><td><a href="#PF-06">JF006</a></td></tr>
+<tr id="MSG062"><td><strong>MSG062</strong></td><td>“Erro ao gravar evento. Registro do Evento não efetuado.” / “Erro ao gravar evento. ”</td><td>Erro</td><td><code>FEventoReinscricao.pas:814, 896; FEventoRetornoMantidoParaAtivo.pas:628, 689</code></td><td><a href="#PF-06">JF006</a>, <a href="#PF-08">JF008</a></td></tr>
+<tr id="MSG063"><td><strong>MSG063</strong></td><td>“Erro ao gravar histórico de contribuições do evento. ”</td><td>Erro</td><td><code>FEventoReinscricao.pas:832, 938; FEventoRetornoMantidoParaAtivo.pas:651, 791</code></td><td><a href="#PF-06">JF006</a>, <a href="#PF-08">JF008</a></td></tr>
+<tr id="MSG064"><td><strong>MSG064</strong></td><td>“Erro ao desativar participante da patrocinadora X plano anterior.”</td><td>Erro</td><td><code>FEventoReinscricao.pas:848; FEventoRetornoMantidoParaAtivo.pas:705</code></td><td><a href="#PF-06">JF006</a>, <a href="#PF-08">JF008</a></td></tr>
+<tr id="MSG065"><td><strong>MSG065</strong></td><td>“Erro ao inserir histórico funcional. ” / “Erro na tentativa de inserir participante no histórico funcional. Evento não efetuado.” / “A data de admissão do participante não foi encontrada. Por favor acerte o cadastro do participante antes de retorná-lo para ativo.” / “A data de demissão do participante não foi encontrada. Por favor acerte o cadastro do participante antes de retorná-lo para ativo.”</td><td>Erro</td><td><code>FEventoReinscricao.pas:984; FEventoRetornoMantidoParaAtivo.pas:950-953, 1000, 1096</code></td><td><a href="#PF-06">JF006</a>, <a href="#PF-08">JF008</a></td></tr>
+<tr id="MSG066"><td><strong>MSG066</strong></td><td>“Ocorreu um erro na execução do Padrão de Movimentação de Reserva [&lt;erro&gt;]. Verifique.”</td><td>Erro</td><td><code>FEventoReinscricao.pas:1059; FEventoManutParcial.pas:740; FEventoRetornoMantidoParaAtivo.pas:864</code></td><td><a href="#PF-06">JF006</a>, <a href="#PF-07">JF007</a>, <a href="#PF-08">JF008</a></td></tr>
+<tr id="MSG067"><td><strong>MSG067</strong></td><td>“Evento efetuado com sucesso. Confirma a Gravaçao ?”</td><td>Confirmação</td><td><code>FEventoReinscricao.pas:1066</code></td><td><a href="#PF-06">JF006</a></td></tr>
+<tr id="MSG068"><td><strong>MSG068</strong></td><td>“A data de reinscrição deve ser posterior à data do cancelamento.”</td><td>Informação</td><td><code>FEventoReinscricao.pas:1523</code></td><td><a href="#PF-06">JF006</a></td></tr>
+<tr id="MSG069"><td><strong>MSG069</strong></td><td>“A Nova Situação do Participante na Fundação deve ser da Categoria Mantido Parcial.”</td><td>Erro</td><td><code>FEventoManutParcial.pas:550</code></td><td><a href="#PF-07">JF007</a></td></tr>
+<tr id="MSG070"><td><strong>MSG070</strong></td><td>“Salário de Manutenção deve ser informado.”</td><td>Informação</td><td><code>FEventoManutParcial.pas:522, 1226</code></td><td><a href="#PF-07">JF007</a></td></tr>
+<tr id="MSG071"><td><strong>MSG071</strong></td><td>“O último salário de participação não foi encontrado no banco. Informe o valor do salário praticado. ”</td><td>Aviso</td><td><code>FEventoManutParcial.pas:567-568</code></td><td><a href="#PF-07">JF007</a></td></tr>
+<tr id="MSG072"><td><strong>MSG072</strong></td><td>“Manutenção não permitida .” / “Erro na Execução da Regra de Concessão de Manutenção Parcial.”</td><td>Informação</td><td><code>FEventoManutParcial.pas:989, 979</code></td><td><a href="#PF-07">JF007</a></td></tr>
+<tr id="MSG073"><td><strong>MSG073</strong></td><td>“Erro no parcelamento, Evento não efetuado.”</td><td>Erro</td><td><code>FEventoManutParcial.pas:763</code></td><td><a href="#PF-07">JF007</a></td></tr>
+<tr id="MSG074"><td><strong>MSG074</strong></td><td>“Confirma efetivação do evento ? ” / “Deseja confirmar o evento ?”</td><td>Confirmação</td><td><code>FEventoManutParcial.pas:772; FEventoRetornoMantidoParaAtivo.pas:882</code></td><td><a href="#PF-07">JF007</a>, <a href="#PF-08">JF008</a></td></tr>
+<tr id="MSG075"><td><strong>MSG075</strong></td><td>“Evento cancelado.”</td><td>Informação</td><td><code>FEventoReinscricao.pas:1075; FEventoRetornoMantidoParaAtivo.pas:896</code></td><td><a href="#PF-06">JF006</a>, <a href="#PF-08">JF008</a></td></tr>
+<tr id="MSG076"><td><strong>MSG076</strong></td><td>“Não existe evento de manutenção registrado para este participante.Deseja continuar ?”</td><td>Confirmação</td><td><code>FEventoRetornoMantidoParaAtivo.pas:447-448</code></td><td><a href="#PF-08">JF008</a></td></tr>
+<tr id="MSG077"><td><strong>MSG077</strong></td><td>“O "Fim da Manutenção" deve ser anterior ao início da mesma.” / “A "Data de Retorno" deve ser um dia após o "Fim da Manutenção". Verifique.”</td><td>Erro</td><td><code>FEventoRetornoMantidoParaAtivo.pas:606, 1654</code></td><td><a href="#PF-08">JF008</a></td></tr>
+<tr id="MSG078"><td><strong>MSG078</strong></td><td>“O cargo não foi preenchido. Deseja continuar sem gravar o histórico funcional?”</td><td>Confirmação</td><td><code>FEventoRetornoMantidoParaAtivo.pas:615</code></td><td><a href="#PF-08">JF008</a></td></tr>
+<tr id="MSG079"><td><strong>MSG079</strong></td><td>“Erro na tentativa de atualizar a DATA DE READMISSÃO. Evento não efetuado.”</td><td>Informação</td><td><code>FEventoRetornoMantidoParaAtivo.pas:843</code></td><td><a href="#PF-08">JF008</a></td></tr>
+<tr id="MSG080"><td><strong>MSG080</strong></td><td>“Não foi encontrado no cadastro um evento para o tipo INSCRIÇÃO.”</td><td>Erro</td><td><code>FEventoRetornoMantidoParaAtivo.pas:1344</code></td><td><a href="#PF-08">JF008</a></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">8. Tabela/API/Programa</div>
+<div class="table-wrap"><table><thead><tr><th>Jornada</th><th>Tabelas (escrita)</th><th>Rotinas (CADASTROPREV/Fontes/ e externas)</th></tr></thead><tbody>
+<tr><td><a href="#PF-05">JF005</a></td><td>PESSOA, ELEGIVEL, PESSOAFISICA, ELEGPATRO, DEPENDENTE, DEPENTIT, DOCPESSOA, PARTPREVPLAN, EVENTOSPREV, CONTRIBPREVPARTP, RESERVAPART, HSTPERCONTRIBPREV, HISTOPIR</td><td><code>FPrincipal.pas:1438-1445, 2480-2485</code>; <code>FInscricaoParticipanteLote.pas:189-224 (sbtnInserirClick), 226-767 (bbtnConfirmarClick), 813-867 (GeraArquivo), 869-945 (btnGerarClick)</code>; <code>fInscBuscaParticipLote.pas:134-359 (btnBuscaClick), 373-900 (bbtnConfirmarClick)</code>; <code>CM/CMADMPREV/Fontes/FCadElegivel.pas:2308-2411</code></td></tr>
+<tr><td><a href="#PF-06">JF006</a></td><td>ELEGPATRO, PARTPREVPLAN, CONTRIBPREVPARTP, EVENTOSPREV, HISTFUNCPREV</td><td><code>FEventoReinscricao.pas:266-521, 523-546, 548-1089, 1091-1224 (VerificaeGravaSituacoes), 1226-1300 (GravaEVENTOSPREV), 1552-1571 (VerificaDatas)</code></td></tr>
+<tr><td><a href="#PF-07">JF007</a></td><td>ELEGPATRO, PARTPREVPLAN, EVENTOSPREV</td><td><code>FEventoManutParcial.pas:495-800, 802-855, 856-918 (GravaEVENTOSPREV), 920-993 (ExecutaRegraConcessao), 995-1165 (ExecutaRegraCalculo)</code></td></tr>
+<tr><td><a href="#PF-08">JF008</a></td><td>EVENTOSPREV, ELEGPATRO, HISTFUNCPREV</td><td><code>FEventoRetornoMantidoParaAtivo.pas:303-337, 382-529, 531-907, 910-1120 (InsereNoHistoricoFuncional), 1246-1318, 1320-1410 (GravaEVENTOSPREVNovaPatro)</code></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">9. Telas/Layouts</div>
+<div class="table-wrap"><table><thead><tr><th>Jornada</th><th>Tela (título)</th><th>Form (.dfm)</th></tr></thead><tbody>
+<tr><td><a href="#PF-05">JF005</a></td><td>Inscrição do Participante em Lote<br>Inscrição do Participante em Lote (busca)<br>Elegivel (externo; título em execução “Evento de Inscrição de Participante”)</td><td><code>FInscricaoParticipanteLote.dfm</code><br><code>fInscBuscaParticipLote.dfm</code><br><code>CM/CMADMPREV/Fontes/FCadElegivel.dfm</code></td></tr>
+<tr><td><a href="#PF-06">JF006</a></td><td>Evento Reinscrição de Participante<br>Data da Reinscrição</td><td><code>FEventoReinscricao.dfm</code><br><code>fNovaDataReinscricao.dfm</code></td></tr>
+<tr><td><a href="#PF-07">JF007</a></td><td>Evento Manutenção Parcial</td><td><code>FEventoManutParcial.dfm</code></td></tr>
+<tr><td><a href="#PF-08">JF008</a></td><td>Evento Retorno de Mantido Integral para Ativo</td><td><code>FEventoRetornoMantidoParaAtivo.dfm</code></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">10. Visão Consolidada das Jornadas</div>
+<div class="table-wrap"><table><thead><tr><th>Item</th><th>Jornada</th><th>Título</th><th>Critério de aceitação</th><th>Regras</th><th>Mensagens</th><th>Telas</th></tr></thead><tbody>
+<tr><td>[US] CADPREV-JF005</td><td><a href="#PF-05">JF005</a></td><td>Inscrição individual e em lote</td><td><strong>Dado</strong> linhas válidas na grade de lote, <strong>Quando</strong> o analista confirma, <strong>Então</strong> cada participante recebe PARTPREVPLAN (situação 1/1, FLGINSCRICAOLOTE = 1), evento 1 efetivado, contribuições 1 e 21 e reservas, e aparece <a href="#MSG050">MSG050</a>.</td><td><a href="#CADPREV-RN041">RS041</a>–<a href="#CADPREV-RN048">RS048</a></td><td><a href="#MSG041">MSG041</a>–<a href="#MSG053">MSG053</a></td><td>Inscrição do Participante em Lote</td></tr>
+<tr><td>[US] CADPREV-JF006</td><td><a href="#PF-06">JF006</a></td><td>Reinscrição</td><td><strong>Dado</strong> um participante demitido, <strong>Quando</strong> o analista o reinscreve em nova patrocinadora e confirma a gravação, <strong>Então</strong> o vínculo novo é criado, o antigo é cancelado e desativado, e o evento é gravado.</td><td><a href="#CADPREV-RN049">RS049</a>–<a href="#CADPREV-RN054">RS054</a></td><td><a href="#MSG054">MSG054</a>–<a href="#MSG068">MSG068</a></td><td>Evento Reinscrição de Participante</td></tr>
+<tr><td>[US] CADPREV-JF007</td><td><a href="#PF-07">JF007</a></td><td>Manutenção parcial</td><td><strong>Dado</strong> nova situação na fundação de categoria MP e regra de concessão satisfeita, <strong>Quando</strong> o analista confirma a efetivação, <strong>Então</strong> SALMANTIDO e DATAINICIOMANUT são gravados e o evento é efetivado.</td><td><a href="#CADPREV-RN055">RS055</a>–<a href="#CADPREV-RN057">RS057</a></td><td><a href="#MSG069">MSG069</a>–<a href="#MSG074">MSG074</a></td><td>Evento Manutenção Parcial</td></tr>
+<tr><td>[US] CADPREV-JF008</td><td><a href="#PF-08">JF008</a></td><td>Retorno de mantido para ativo</td><td><strong>Dado</strong> um participante mantido com fim de manutenção informado, <strong>Quando</strong> o analista confirma o retorno, <strong>Então</strong> o evento RA é gravado efetivado e ELEGPATRO.DATAREADMISSAO recebe a data de retorno (fim + 1).</td><td><a href="#CADPREV-RN058">RS058</a>–<a href="#CADPREV-RN060">RS060</a></td><td><a href="#MSG074">MSG074</a>–<a href="#MSG080">MSG080</a></td><td>Evento Retorno de Mantido Integral para Ativo</td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">11. Critérios de Aceitação por Regra</div>
+<div class="table-wrap"><table><thead><tr><th>Regra</th><th>Jornada</th><th>Critério (Dado / Quando / Então)</th></tr></thead><tbody>
+<tr><td><a href="#CADPREV-RN041">RS041 (CADPREV-RN041)</a></td><td><a href="#PF-05">JF005</a></td><td><strong>Dado</strong> um evento IP da fundação, <strong>Quando</strong> é escolhido, <strong>Então</strong> o cadastro de elegível abre com o título “Evento de Inscrição de Participante” e só as situações do evento.</td></tr>
+<tr><td><a href="#CADPREV-RN042">RS042 (CADPREV-RN042)</a></td><td><a href="#PF-05">JF005</a></td><td><strong>Dado</strong> matrícula nova de 7 caracteres, <strong>Quando</strong> o usuário aceita cadastrá-la, <strong>Então</strong> a patrocinadora é 91008 e o plano 74.</td></tr>
+<tr><td><a href="#CADPREV-RN043">RS043 (CADPREV-RN043)</a></td><td><a href="#PF-05">JF005</a></td><td><strong>Dado</strong> plano 66 e percentual 1, <strong>Quando</strong> a linha é confirmada, <strong>Então</strong> aparece <a href="#MSG045">MSG045</a> e o percentual é limpo.</td></tr>
+<tr><td><a href="#CADPREV-RN044">RS044 (CADPREV-RN044)</a></td><td><a href="#PF-05">JF005</a></td><td><strong>Dado</strong> data de inscrição futura, <strong>Quando</strong> a linha é confirmada, <strong>Então</strong> aparece <a href="#MSG043">MSG043</a>.</td></tr>
+<tr><td><a href="#CADPREV-RN045">RS045 (CADPREV-RN045)</a></td><td><a href="#PF-05">JF005</a></td><td><strong>Dado</strong> pessoa com outro plano ativo e resposta “Sim” a <a href="#MSG048">MSG048</a>, <strong>Quando</strong> o lote é gravado, <strong>Então</strong> os outros planos recebem FLGDESATIVADO = 1 e DATACANCELAMENTO = inscrição − 1.</td></tr>
+<tr><td><a href="#CADPREV-RN046">RS046 (CADPREV-RN046)</a></td><td><a href="#PF-05">JF005</a></td><td><strong>Dado</strong> linha de matrícula nova, <strong>Quando</strong> o lote é gravado, <strong>Então</strong> PESSOA, ELEGIVEL, PESSOAFISICA, ELEGPATRO, DEPENDENTE e DEPENTIT ('PRP') são criados.</td></tr>
+<tr><td><a href="#CADPREV-RN047">RS047 (CADPREV-RN047)</a></td><td><a href="#PF-05">JF005</a></td><td><strong>Dado</strong> erro de banco numa linha, <strong>Quando</strong> o lote é confirmado, <strong>Então</strong> nenhuma linha é gravada e nenhuma mensagem é exibida.</td></tr>
+<tr><td><a href="#CADPREV-RN048">RS048 (CADPREV-RN048)</a></td><td><a href="#PF-05">JF005</a></td><td><strong>Dado</strong> inscrições em lote no período e TXT marcado, <strong>Quando</strong> o usuário gera, <strong>Então</strong> o arquivo “Inscrições Mês AAAAMM.TXT” traz só as linhas da patrocinadora 91008 com tipo 13/15.</td></tr>
+<tr><td><a href="#CADPREV-RN049">RS049 (CADPREV-RN049)</a></td><td><a href="#PF-06">JF006</a></td><td><strong>Dado</strong> participante sem data de demissão, <strong>Quando</strong> é selecionado, <strong>Então</strong> patrocinadora e matrícula ficam bloqueadas.</td></tr>
+<tr><td><a href="#CADPREV-RN050">RS050 (CADPREV-RN050)</a></td><td><a href="#PF-06">JF006</a></td><td><strong>Dado</strong> reinscrição anterior registrada, <strong>Quando</strong> o usuário informa data posterior na janela “Data da Reinscrição”, <strong>Então</strong> um novo evento é registrado.</td></tr>
+<tr><td><a href="#CADPREV-RN051">RS051 (CADPREV-RN051)</a></td><td><a href="#PF-06">JF006</a></td><td><strong>Dado</strong> plano com FLGAUTONUMINSC = 1, <strong>Quando</strong> o participante é selecionado, <strong>Então</strong> o novo número de inscrição sugerido é MAX(INSCRICAONUMERO) + 1.</td></tr>
+<tr><td><a href="#CADPREV-RN052">RS052 (CADPREV-RN052)</a></td><td><a href="#PF-06">JF006</a></td><td><strong>Dado</strong> regra de elegibilidade não satisfeita, <strong>Quando</strong> o usuário confirma, <strong>Então</strong> aparece <a href="#MSG061">MSG061</a> e nada é gravado.</td></tr>
+<tr><td><a href="#CADPREV-RN053">RS053 (CADPREV-RN053)</a></td><td><a href="#PF-06">JF006</a></td><td><strong>Dado</strong> reinscrição na mesma patrocinadora, <strong>Quando</strong> é confirmada, <strong>Então</strong> o participante é reativado e as contribuições anteriores são retomadas.</td></tr>
+<tr><td><a href="#CADPREV-RN054">RS054 (CADPREV-RN054)</a></td><td><a href="#PF-06">JF006</a></td><td><strong>Dado</strong> a pergunta <a href="#MSG067">MSG067</a>, <strong>Quando</strong> o usuário responde “Não”, <strong>Então</strong> nenhuma mensagem de cancelamento é exibida e a transação permanece aberta (validar).</td></tr>
+<tr><td><a href="#CADPREV-RN055">RS055 (CADPREV-RN055)</a></td><td><a href="#PF-07">JF007</a></td><td><strong>Dado</strong> nova situação na fundação de categoria diferente de MP, <strong>Quando</strong> o usuário confirma, <strong>Então</strong> aparece <a href="#MSG069">MSG069</a>.</td></tr>
+<tr><td><a href="#CADPREV-RN056">RS056 (CADPREV-RN056)</a></td><td><a href="#PF-07">JF007</a></td><td><strong>Dado</strong> regra de concessão que retorna falso, <strong>Quando</strong> o usuário confirma, <strong>Então</strong> aparecem <a href="#MSG072">MSG072</a> e “Evento não efetuado.” e nada é gravado.</td></tr>
+<tr><td><a href="#CADPREV-RN057">RS057 (CADPREV-RN057)</a></td><td><a href="#PF-07">JF007</a></td><td><strong>Dado</strong> manutenção confirmada com “Sim” em <a href="#MSG074">MSG074</a>, <strong>Quando</strong> a gravação termina, <strong>Então</strong> PARTPREVPLAN.SALMANTIDO e DATAINICIOMANUT ficam gravados.</td></tr>
+<tr><td><a href="#CADPREV-RN058">RS058 (CADPREV-RN058)</a></td><td><a href="#PF-08">JF008</a></td><td><strong>Dado</strong> o evento 354, <strong>Quando</strong> o usuário pesquisa, <strong>Então</strong> só aparecem participantes na categoria CA com vínculo desativado.</td></tr>
+<tr><td><a href="#CADPREV-RN059">RS059 (CADPREV-RN059)</a></td><td><a href="#PF-08">JF008</a></td><td><strong>Dado</strong> fim da manutenção em 10/05, <strong>Quando</strong> o usuário digita retorno em 15/05, <strong>Então</strong> aparece <a href="#MSG077">MSG077</a> e a data é limpa.</td></tr>
+<tr><td><a href="#CADPREV-RN060">RS060 (CADPREV-RN060)</a></td><td><a href="#PF-08">JF008</a></td><td><strong>Dado</strong> retorno para nova patrocinadora, <strong>Quando</strong> confirmado, <strong>Então</strong> são gravados o evento RA e um evento de inscrição (IP), e o vínculo antigo é cancelado.</td></tr>
+</tbody></table></div>
+</section>
+
+<p><a class="back-btn" href="funcionalidades.html">← Voltar à lista de Casos de Uso (Processos Funcionais)</a></p>
+</main>
+<footer>
+<p>Blueprint AS-IS — PFC-73 — Processos Funcionais organizados em Casos de Uso — Módulo CADASTROPREV | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-24</p>
+</footer>
+</body>
+</html>

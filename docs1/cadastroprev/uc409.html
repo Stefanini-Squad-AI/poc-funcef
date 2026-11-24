@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cadastro Previdenciário — UC409 – Migrar para Novo Plano e Saldar Benefícios — Blueprint AS-IS</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<header>
+  <div class="badge">Blueprint AS-IS — PFC-73 — Processos Funcionais</div>
+  <h1>UC409 – Migrar para Novo Plano e Saldar Benefícios</h1>
+  <p>Caso de uso do módulo Cadastro Previdenciário: 5 jornada(s) funcional(is) e 20 regra(s) de negócio descritas dentro de cada jornada.</p>
+</header>
+<nav>
+  <a href="index.html">📋 Visão Geral</a>
+  <a href="arquitetura.html">🏗️ Arquitetura</a>
+  <a href="inventario-tecnico.html">📦 Inventário</a>
+  <a href="funcionalidades.html">⚙️ Processos Funcionais</a>
+  <a href="procedures-functions.html">🔧 Procedures</a>
+  <a href="dados.html">🗄️ Dados</a>
+  <a href="relatorios.html">📄 Relatórios</a>
+  <a href="integracoes.html">🔗 Integrações</a>
+  <a href="tratamento-erros.html">⚠️ Erros</a>
+  <a href="diagramas-fluxo.html">🔀 Fluxos</a>
+  <a href="lacunas.html">🔍 Lacunas</a>
+  <a href="controle-cobertura.html">📊 Cobertura</a>
+</nav>
+<main>
+
+<a class="back-btn" href="funcionalidades.html">← Voltar à lista de Casos de Uso (Processos Funcionais)</a>
+<div class="breadcrumb"><a href="index.html">Cadastro Previdenciário</a> › <a href="funcionalidades.html">Processos Funcionais</a> › UC409</div>
+<section><div class="section-title">1. Identificação</div>
+<div class="table-wrap"><table><tbody>
+<tr><th>Caso de Uso</th><td><strong>UC409 – Migrar para Novo Plano e Saldar Benefícios</strong></td></tr>
+<tr><th>Módulo</th><td>CADASTROPREV — Cadastro Previdenciário</td></tr>
+<tr><th>Sistema</th><td>CM Contabilidade / FUNCEF (Delphi 5 / VCL / MIDAS / Oracle)</td></tr>
+<tr><th>Tipo</th><td>Sistema Desktop (processamentos em lote com arquivos TXT)</td></tr>
+<tr><th>Ator</th><td>Analistas de cadastro, de benefícios e da área atuarial responsáveis pela migração para o Novo Plano e pelo saldamento do REPLAN/REB</td></tr>
+<tr><th>Jornadas</th><td><a href="#PF-30">JF030 — Novas inscrições e ativos REPLAN</a>, <a href="#PF-31">JF031 — Preparo para saldamento</a>, <a href="#PF-32">JF032 — Saldamento de ativos, aposentados e pensionistas</a>, <a href="#PF-33">JF033 — Desfazer saldamento</a>, <a href="#PF-34">JF034 — Importação de reservas da COATE</a></td></tr>
+<tr><th>Regras de negócio</th><td>20 regra(s) CADPREV-RN (RN181–RN200), descritas na íntegra dentro de cada jornada; regras transversais em <a href="uc401.html">UC401</a></td></tr>
+<tr><th>OS - Título</th><td>PFC-73 — Blueprint Cadastro Previdenciário</td></tr>
+</tbody></table></div>
+</section>
+<section><div class="section-title">2. Descrição Resumida</div>
+<p>Conjunto de rotinas do menu <em>Novo Plano</em> usadas na migração dos participantes do plano REPLAN/REB para o Novo Plano e no <strong>saldamento</strong> (congelamento do direito acumulado no plano antigo, transformado em um “Benefício Saldado”). Todas são específicas da FUNCEF (patrocinadora 91008, planos 2, 66 e 74 fixos no código). Este caso de uso reúne 5 jornada(s) funcional(is):</p>
+<ul>
+<li><a href="#PF-30"><strong>JF030 — Novas inscrições e ativos REPLAN</strong></a>: Importa arquivo TXT que salda ativos do REPLAN (evento 334) e inscreve todos no Novo Plano (74); permite desfazer.</li>
+<li><a href="#PF-31"><strong>JF031 — Preparo para saldamento</strong></a>: Simula o valor do Benefício Saldado (BS) de aposentados/pensionistas e gera demonstrativo TXT, sem gravar.</li>
+<li><a href="#PF-32"><strong>JF032 — Saldamento de ativos, aposentados e pensionistas</strong></a>: Executa o saldamento (individual ou em lote) de ativos (plano 74, evento 338) e assistidos (REPLAN, evento 339) com conversão de benefícios e acerto financeiro.</li>
+<li><a href="#PF-33"><strong>JF033 — Desfazer saldamento</strong></a>: Reverte o saldamento de um ativo (plano 74/evento 338) ou assistido (evento 339), se ainda não processado pela folha.</li>
+<li><a href="#PF-34"><strong>JF034 — Importação de reservas da COATE</strong></a>: Importa arquivo com reserva matemática e benefício saldado por matrícula e atualiza RESERVAPART 113/114 com histórico.</li>
+</ul>
+<p><strong>Necessidade de negócio:</strong> ao criar um novo plano, a entidade precisa (1) inscrever em massa quem migra, (2) congelar (saldar) o benefício do plano antigo, calculando o valor saldado a partir de reservas atuariais, (3) converter os benefícios de aposentados e pensionistas e pagar/descontar as diferenças retroativas, e (4) poder desfazer cada passo.</p>
+<p><strong>Quem inicia:</strong> o usuário, pelo menu <em>Novo Plano</em> (“Novas inscrições e ativos Replan”, “Preparo para saldamento”, “Saldamento de ativos”, “Saldamento de aposentados”, “Saldamento de Pensionistas”, “Desfazer saldamento”, “Importação de Reservas da COATE”) (<code>FPrincipal.dfm:8653-8695</code>; <code>FPrincipal.pas:2697-2749</code>).</p>
+<p><strong>Resultado esperado:</strong> participantes inscritos no Novo Plano; reservas de saldamento carregadas; benefícios saldados com acertos financeiros lançados para a folha; possibilidade de reverter importação e saldamento.</p>
+<p><strong>Termos, siglas e componentes citados nesta página</strong> — explicados na primeira vez em que aparecem; a coluna “Fonte” indica onde a explicação foi conferida no repositório:</p>
+<div class="table-wrap"><table><thead><tr><th>Termo</th><th>O que significa</th><th>Fonte</th></tr></thead><tbody>
+<tr><td><strong>Saldamento / Benefício Saldado (BS)</strong></td><td>Encerramento das contribuições no plano antigo, mantendo um benefício proporcional ao que foi acumulado. No código o valor vem da reserva tipo 114 (“BS”) e é corrigido pelo INPC.</td><td><code>USaldamento.pas:830, 7446-7463</code></td></tr>
+<tr><td><strong>REPLAN / REB / Novo Plano</strong></td><td>Planos de benefícios identificados por número fixo: 2 = REPLAN (“não do Replan(2)”), 66 = REB, 74 = Novo Plano (“não do NovoPlano(74)”). A sigla REPLAN não é expandida no código <span class="ev ev-pendente">PENDENTE</span>.</td><td><code>FInscricaoNovoPlano.pas:829, 836</code>; <code>USaldamento.pas:3074-3110</code></td></tr>
+<tr><td><strong>Pré-78 / Pós-78</strong></td><td>Classificação do participante pela data de início da inscrição antes ou depois de 23/01/1978 (REPLANPRÉ78, REBPRÉ78 etc.).</td><td><code>USaldamento.pas:3084, 3091, 3101-3110</code></td></tr>
+<tr><td><strong>RM / RA / BUA</strong></td><td>RM = reserva matemática (tipo 113). RA = “Renda Antecipada”: parte (percentual P) da reserva paga em parcelas (benefícios 506-509/515, rubrica 38599 “R.A.”). BUA aparece como opção “Somente BUA” e no cálculo do percentual devido; o significado da sigla não está no código <span class="ev ev-pendente">PENDENTE</span>.</td><td><code>USaldamento.pas:831, 5435, 5680-5689, 7189-7307</code>; <code>FSaldamento.dfm:504</code></td></tr>
+<tr><td><strong>COATE</strong></td><td>Origem externa do arquivo de reservas (título da tela “Importação de Reservas da COATE”); sigla não expandida no código <span class="ev ev-pendente">PENDENTE</span>.</td><td><code>FExecImportaReserva.dfm:5</code></td></tr>
+<tr><td><strong>DIB / DIP</strong></td><td>Data de início do benefício e data de início do pagamento; no saldamento nunca antes de 01/09/2001.</td><td><code>USaldamento.pas:5288-5314</code></td></tr>
+<tr><td><strong>INPC</strong></td><td>Índice de correção (COTACAOMOEDA, MOECODIGO = 7) usado para corrigir o BS e as diferenças.</td><td><code>USaldamento.pas:8081-8133</code>; <code>uFuncoesSaldamento.pas:1437-1521</code></td></tr>
+<tr><td><strong>Lote de concessão / CTRLINTERFACE</strong></td><td>Folha de benefícios aberta (tipo 'B', preparada, de concessão) que recebe os acertos do saldamento.</td><td><code>FSelecionaLoteFuncef.dfm:63-71</code></td></tr>
+<tr><td><strong>Demonstrativo</strong></td><td>Arquivo TXT gerado por matrícula com o cálculo (técnico ou do usuário), aberto no Bloco de Notas.</td><td><code>USaldamento.pas:1170, 1714</code></td></tr>
+<tr><td><strong>Arquivo .bad</strong></td><td>Cópia das linhas rejeitadas/erradas do arquivo de entrada da importação do Novo Plano.</td><td><code>FInscricaoNovoPlano.pas:327-334</code></td></tr>
+</tbody></table></div>
+<p>Referência cruzada: a manutenção posterior do Benefício Saldado/FAB é documentada no módulo Contribuição Previdenciária em <a href="../contribuicao/uc206.html#PF-06">CONTRIBUICAOPREV JF006 — Portabilidade e Benefício Saldado/FAB</a>.</p>
+</section>
+<section><div class="section-title">3. Pré-condições</div>
+<p><strong>Gerais do módulo:</strong></p>
+<ul>
+<li>Usuário com acesso ao menu Novo Plano; datamodules do módulo criados <span class="ev ev-inferido">INFERIDO</span>.</li>
+<li>Pasta de arquivos da empresa configurada (<code>Sistema.RetornaCaminhoArquivos</code>) — usada para TXT de entrada e saída (<code>USaldamento.pas:872</code>; <code>uFuncoesSaldamento.pas:1223</code>; <code>FInscricaoNovoPlano.pas:750-760</code>) <span class="ev ev-comprovado">COMPROVADO</span>.</li>
+<li>As units do saldamento não estão listadas em <code>CadastroPrev.dpr</code>; entram pelo <em>uses</em> de <code>FPrincipal.pas:459-460</code> <span class="ev ev-comprovado">COMPROVADO</span>.</li>
+</ul>
+<p><strong>O que as pré-condições gerais significam na prática:</strong> as rotinas leem e gravam arquivos na pasta da empresa e dependem de parametrização (planos, contribuições, reservas, índices) já existente.</p>
+<p><strong>Por jornada:</strong></p>
+<ul>
+<li><a href="#PF-30">JF030</a>: arquivo TXT no layout de posições fixas; participantes do REPLAN (plano 2) ou pessoas novas; contribuições do evento 1 do plano 74 cadastradas em CONTPREVEVENTO.</li>
+<li><a href="#PF-31">JF031</a>: benefícios do REPLAN/REB cadastrados; cotações do INPC (moeda 7) em COTACAOMOEDA.</li>
+<li><a href="#PF-32">JF032</a>: assistidos com reserva BS (114) e/ou RM (113) carregadas (<a href="#PF-34">JF034</a>); lote de concessão aberto (assistidos); cotações INPC; parametrização das contribuições e reservas dos planos 2 e 74.</li>
+<li><a href="#PF-33">JF033</a>: participante saldado por <a href="#PF-32">JF032</a> (evento 338 / plano 74 ou evento 339).</li>
+<li><a href="#PF-34">JF034</a>: pessoas com reservas 113 e 114 já criadas em RESERVAPART; arquivo no layout de posições fixas.</li>
+</ul>
+<p><strong>Pré-condições por jornada, em termos de negócio:</strong></p>
+<ul>
+<li><a href="#PF-30">JF030</a>: existe a lista dos migrantes com nome, CPF, sexo, nascimento e percentual escolhido.</li>
+<li><a href="#PF-31">JF031</a>: há assistidos com benefício e índices de correção atualizados.</li>
+<li><a href="#PF-32">JF032</a>: as reservas de saldamento foram importadas e existe uma folha de benefícios aberta para receber os acertos.</li>
+<li><a href="#PF-33">JF033</a>: o saldamento existe e ainda não foi processado na folha.</li>
+<li><a href="#PF-34">JF034</a>: o cálculo atuarial foi entregue em arquivo e as reservas de saldamento existem para cada pessoa.</li>
+</ul>
+</section>
+
+<section><div class="section-title">4. Pós-condições</div>
+<ul>
+<li><a href="#PF-30">JF030</a>: EVENTOSPREV (334 no plano 2; inscrição no 74), PARTPREVPLAN (REPLAN situação 50; nova inscrição no 74), CONTRIBPREVPARTP (suspensas no 2; novas no 74), RESERVAPART (74, zeradas), PESSOA/DEPENTIT/PESSOAFISICA para pessoas novas; arquivo .bad e log em tela; log de operações.</li>
+<li><a href="#PF-31">JF031</a>: nenhuma alteração no banco (transação desfeita); demonstrativo TXT na pasta TEMP da empresa; arquivo “MATRICULAS PROCESSADAS NO SALDAMENTO.TXT” quando a lista é digitada.</li>
+<li><a href="#PF-32">JF032</a>: PARTPREVPLAN, EVENTOSPREV, CONTRIBPREVPARTP/CONTRIBPREVNUCLEO, HSTCONTEVENTOSPR, CONTRATOEMPTMO, RESERVAPART/HISTMOVRESERVA, BENEFBFCIARIO, PROCESSOBENEF, BFCIARIOTITPLAN, BENEFPLANOPART, MOVBENEF, HSTBENEFBFCIARIO, HSTCONTRIBPREV, HSTATRASOBENEF/HSTATRASOCONTRIB, RUBRICAINDIV, PESSOAPARAM — somente com “Gravar processo”; arquivos TXT de resultado e demonstrativo.</li>
+<li><a href="#PF-33">JF033</a>: registros do saldamento excluídos; plano, contribuições, benefícios, ELEGPATRO e PARTPREVPLAN restaurados (commit) — ou nada alterado (rollback).</li>
+<li><a href="#PF-34">JF034</a>: HISTMOVRESERVA (saída e entrada por reserva), RESERVAPART.VALORRESERVA e DATAULTALIM atualizados; ocorrências na tela.</li>
+</ul>
+<p><strong>Resultado de negócio de cada jornada:</strong></p>
+<ul>
+<li><a href="#PF-30">JF030</a> — cada migrante fica saldado no REPLAN e inscrito no Novo Plano; rejeitados ficam no arquivo .bad para correção.</li>
+<li><a href="#PF-31">JF031</a> — o usuário recebe um relatório com o BS calculado por pessoa.</li>
+<li><a href="#PF-32">JF032</a> — o participante fica saldado no novo arranjo de plano, com benefícios convertidos e diferenças lançadas para pagamento/desconto na folha; sem “Gravar processo” nada é gravado.</li>
+<li><a href="#PF-33">JF033</a> — o participante volta à situação de antes do saldamento.</li>
+<li><a href="#PF-34">JF034</a> — as reservas de saldamento ficam com os valores do cálculo atuarial e com o histórico da troca.</li>
+</ul>
+</section>
+
+<section><div class="section-title">5. Jornadas Funcionais (JF030–JF034)</div>
+<p>Cada jornada traz objetivo, ator/gatilho, pré e pós-condições, sequência operacional, ações práticas, <strong>regras de negócio da jornada</strong> (texto completo de cada regra), tratamentos e mensagens.</p>
+<p><strong>Como as jornadas deste caso de uso se relacionam:</strong> a importação do Novo Plano (JF030) salda ativos do REPLAN e inscreve no plano 74 por arquivo. Para assistidos, a sequência prevista é: importar as reservas calculadas pela COATE (JF034) → opcionalmente simular o BS (JF031) → executar o saldamento (JF032, que também atende ativos individualmente/por lote) → se necessário, desfazer (JF033).</p>
+<div class="legend"><span><span class="ev ev-comprovado">COMPROVADO</span> — no código</span><span><span class="ev ev-inferido">INFERIDO</span> — plausível</span><span><span class="ev ev-pendente">PENDENTE</span> — validar</span></div>
+</section>
+<div class="pf-block" id="PF-30"><h4>JF030 (PF-30) — Novas inscrições e ativos REPLAN</h4>
+<p><strong>Objetivo:</strong> importar, a partir de um arquivo TXT, a lista de pessoas que migram para o Novo Plano: saldar a inscrição no REPLAN dos que já são participantes e inscrever todos no Novo Plano (plano 74), com contribuições e reservas; e desfazer essa importação.</p>
+<p><strong>Necessidade de negócio:</strong> a migração em massa para o novo plano de benefícios exige registrar, de uma vez, a saída do REPLAN (saldamento) e a inscrição no novo plano com o percentual de contribuição escolhido por cada pessoa, sem digitação individual.</p>
+<p><strong>Ator / gatilho:</strong> analista de cadastro/migração. Menu <em>Novo Plano › Novas inscrições e ativos Replan</em> (<code>FPrincipal.dfm:8653-8658</code>; <code>FPrincipal.pas:2697-2701</code>).</p>
+<p><strong>Pré-condições:</strong> arquivo TXT no layout de posições fixas; participantes do REPLAN (plano 2) ou pessoas novas; contribuições do evento 1 do plano 74 cadastradas em CONTPREVEVENTO.</p>
+<p><strong>Em termos de negócio:</strong> existe a lista dos migrantes com nome, CPF, sexo, nascimento e percentual escolhido.</p>
+<p><strong>Pós-condições:</strong> EVENTOSPREV (334 no plano 2; inscrição no 74), PARTPREVPLAN (REPLAN situação 50; nova inscrição no 74), CONTRIBPREVPARTP (suspensas no 2; novas no 74), RESERVAPART (74, zeradas), PESSOA/DEPENTIT/PESSOAFISICA para pessoas novas; arquivo .bad e log em tela; log de operações.</p>
+<p><strong>Em termos de negócio:</strong> cada migrante fica saldado no REPLAN e inscrito no Novo Plano; rejeitados ficam no arquivo .bad para correção.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li><strong>Usuário:</strong> abre a tela, indica o arquivo de entrada (somente .TXT) e a pasta do arquivo .bad (por padrão a mesma do arquivo) e o valor de “Commit a cada N registros”. [<a href="#CADPREV-RN186">RS186</a>]<br><code>CADASTROPREV/Fontes/FInscricaoNovoPlano.pas:717-748, 750-760, 931-954, 1011-1015</code> <span class="ev ev-comprovado">COMPROVADO</span></li>
+<li><strong>Usuário (opcional):</strong> clica “Check prévio”: o sistema lê o arquivo, aplica a crítica de layout e mostra as quantidades de registros e de rejeitados, sem gravar. [<a href="#CADPREV-RN181">RS181</a>]<br><code>CADASTROPREV/Fontes/FInscricaoNovoPlano.pas:956-1009</code> <span class="ev ev-comprovado">COMPROVADO</span></li>
+<li><strong>Usuário:</strong> clica “Processar”.<br><code>CADASTROPREV/Fontes/FInscricaoNovoPlano.pas:166-193</code> <span class="ev ev-comprovado">COMPROVADO</span></li>
+<li><strong>Sistema:</strong> abre o arquivo e cria o .bad; confirma transação pendente e inicia uma nova; para cada linha aplica a crítica de campos. [<a href="#CADPREV-RN181">RS181</a>, <a href="#CADPREV-RN186">RS186</a>]<br><code>CADASTROPREV/Fontes/FInscricaoNovoPlano.pas:294-376</code> <span class="ev ev-comprovado">COMPROVADO</span></li>
+<li><strong>Sistema:</strong> localiza a pessoa pela matrícula e verifica a elegibilidade. [<a href="#CADPREV-RN182">RS182</a>]<br><code>CADASTROPREV/Fontes/FInscricaoNovoPlano.pas:369-380, 766-876</code> <span class="ev ev-comprovado">COMPROVADO</span></li>
+<li><strong>Sistema:</strong> se já é do REPLAN: grava evento de saldamento 334, suspende as contribuições do plano 2 e marca a inscrição como situação 50 desativada; se é pessoa nova: cria PESSOA, DEPENDENTE, DEPENTIT e PESSOAFISICA. [<a href="#CADPREV-RN183">RS183</a>, <a href="#CADPREV-RN185">RS185</a>]<br><code>CADASTROPREV/Fontes/FInscricaoNovoPlano.pas:382-515</code> <span class="ev ev-comprovado">COMPROVADO</span></li>
+<li><strong>Sistema:</strong> inscreve no plano 74, grava o evento de inscrição, cria contribuições com o percentual do arquivo e reservas zeradas. [<a href="#CADPREV-RN184">RS184</a>]<br><code>CADASTROPREV/Fontes/FInscricaoNovoPlano.pas:521-660</code> <span class="ev ev-comprovado">COMPROVADO</span></li>
+<li><strong>Sistema:</strong> a cada N registros confirma; ao fim grava o log de operações, confirma e mostra o resumo e a mensagem final. [<a href="#CADPREV-RN186">RS186</a>]<br><code>CADASTROPREV/Fontes/FInscricaoNovoPlano.pas:353-364, 663-711, 187-192</code> <span class="ev ev-comprovado">COMPROVADO</span></li>
+<li><strong>Usuário (opcional):</strong> salva ou imprime o log (botões da caixa “Log de Erro”).<br><code>CADASTROPREV/Fontes/FInscricaoNovoPlano.pas:918-929</code> <span class="ev ev-comprovado">COMPROVADO</span></li>
+<li><strong>Usuário (desfazer):</strong> clica “Desfazer” com o mesmo arquivo: o sistema devolve cada participante ao REPLAN e remove o Novo Plano (ou a pessoa criada). [<a href="#CADPREV-RN187">RS187</a>]<br><code>CADASTROPREV/Fontes/FInscricaoNovoPlano.pas:1032-1393</code> <span class="ev ev-comprovado">COMPROVADO</span></li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Check prévio</td><td>Validar o arquivo antes de gravar</td><td>Arquivo TXT</td><td>Crítica de layout, contadores</td><td>Quantidade de registros e rejeitados</td><td><a href="#CADPREV-RN181">RS181</a></td><td><a href="#MSG325">MSG325</a>, <a href="#MSG328">MSG328</a></td><td>Saldamento e Inscrição Novo Plano - Funcef</td></tr>
+<tr><td>Processar</td><td>Saldar no REPLAN e inscrever no plano 74</td><td>Arquivo TXT, pasta do .bad, N do commit</td><td>Crítica, elegibilidade, gravação por registro</td><td>Migrantes inscritos; log e .bad</td><td><a href="#CADPREV-RN181">RS181</a>, <a href="#CADPREV-RN182">RS182</a>, <a href="#CADPREV-RN183">RS183</a>, <a href="#CADPREV-RN184">RS184</a>, <a href="#CADPREV-RN185">RS185</a>, <a href="#CADPREV-RN186">RS186</a></td><td><a href="#MSG322">MSG322</a>, <a href="#MSG323">MSG323</a>, <a href="#MSG325">MSG325</a>, <a href="#MSG326">MSG326</a>, <a href="#MSG327">MSG327</a>, <a href="#MSG329">MSG329</a>, <a href="#MSG330">MSG330</a></td><td>Saldamento e Inscrição Novo Plano - Funcef</td></tr>
+<tr><td>Desfazer</td><td>Reverter a importação</td><td>Mesmo arquivo TXT</td><td>Exclusões e reativação do REPLAN</td><td>Participantes de volta ao REPLAN</td><td><a href="#CADPREV-RN187">RS187</a></td><td><a href="#MSG327">MSG327</a>, <a href="#MSG329">MSG329</a>, <a href="#MSG330">MSG330</a></td><td>Saldamento e Inscrição Novo Plano - Funcef</td></tr>
+<tr><td>Cancelar</td><td>Interromper</td><td>—</td><td>Rollback do lote corrente</td><td>Processo interrompido</td><td><a href="#CADPREV-RN186">RS186</a></td><td><a href="#MSG328">MSG328</a></td><td>Saldamento e Inscrição Novo Plano - Funcef</td></tr>
+</tbody></table></div>
+<div class="jf-rules">
+<p><strong>Regras de negócio da jornada:</strong> 7 regra(s) — texto completo abaixo.</p>
+
+<div class="rule-block" id="CADPREV-RN181"><div class="rule-id">RS181 (CADPREV-RN181) — Layout do arquivo de inscrições Novo Plano e crítica dos campos obrigatórios</div>
+<div class="rule-desc">Cada linha do arquivo TXT tem posições fixas: matrícula (1-7), nome (8-47), CPF (48-58), sexo (59), data de nascimento (60-69, DD/MM/AAAA) e percentual de contribuição (70-73). A linha é rejeitada (vai para o log e para o arquivo <em>.bad</em>) se matrícula, nome, CPF, sexo, data de nascimento ou percentual estiverem em branco, se o sexo não for M/F ou se a data começar com “00”. No “Desfazer”, apenas a matrícula é obrigatória. O botão “Check prévio” aplica a mesma crítica sem gravar nada, só contando linhas e rejeições.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul><li>MATRICULA String[7]; NOME String[40]; CPF String[11]; SEXO String[1]; DT_NASC String[10]; PERCENTUAL String[4] (registro <code>TNovoPlano</code>)</li></ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT323">TRT323</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-30">JF030</a></p>
+<p><strong>Descrição original:</strong> Critica(wLinha, sLinha, bDesfaz): ',Matrícula em branco', ',Nome em branco', ',CPF em branco', ',Sexo em branco', ',Sexo inválido', ',Data de nascimento em branco', ',Percentual em branco'.</p>
+<p><strong>Condições:</strong> campo em branco; SEXO ∉ {M,F}; copy(DT_NASC,1,2) = '00'; bDesfaz = True → resultado depende só da matrícula</p><p><strong>Dados envolvidos:</strong> Arquivo TXT de entrada; arquivo &lt;nome&gt;.bad</p><p><strong>Resultado/Exceção:</strong> <a href="#MSG325">MSG325</a>; linha gravada no .bad</p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/FInscricaoNovoPlano.pas:28-35, 219-291, 956-1009</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+
+<div class="rule-block" id="CADPREV-RN182"><div class="rule-id">RS182 (CADPREV-RN182) — Só migra quem é participante ativo do REPLAN (plano 2) e não tem vínculo de assistido</div>
+<div class="rule-desc">A pessoa é localizada pela matrícula (ELEGPATRO.MATRICULA LIKE 'matrícula%', inscrição mais recente primeiro). Se não existir, ou existir sem plano, é tratada como pessoa nova. Se existir, é recusada quando: o plano não é o REPLAN (2) — ou, no Desfazer, não é o Novo Plano (74); a situação no plano é de assistido (SITPART.FLGINTERNO = 'AS'); é funcionário da própria FUNCEF sem data de desligamento; ou é titular de algum benefício de dependente (BENEFBFCIARIO.IDTITULAR).</div>
+<p><strong>Campos de dados:</strong></p>
+<ul><li>ELEGPATRO.MATRICULA, IDPESSOA, IDPESSJUR, IDSITFUNC</li><li>PARTPREVPLAN.IDPLANOPREV, IDSITPART, IDSITPLANOPREV, INSCRICAODATA, INSCRICAONUMERO</li><li>SITPART.FLGINTERNO</li><li>FUNCIONARIO.IDPESSOA, DATADESLIGAMENTO</li><li>BENEFBFCIARIO.IDTITULAR</li></ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT324">TRT324</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-30">JF030</a></p>
+<p><strong>Descrição original:</strong> BuscaPessoa: “verificação de titular de dependentes assistidos — não pode atualizar”.</p>
+<p><strong>Condições:</strong> sIdPlanoPrev &lt;&gt; '2' (importação) / &lt;&gt; '74' (desfazer); FLGINTERNO = 'AS'; IDFUNCIONARIO preenchido e DATADESLIGAMENTO vazio; BENEFBFCIARIO não vazio</p><p><strong>Dados envolvidos:</strong> PARTPREVPLAN, ELEGPATRO, SITPART, FUNCIONARIO, BENEFBFCIARIO</p><p><strong>Resultado/Exceção:</strong> <a href="#MSG326">MSG326</a>; registro contado como erro</p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/FInscricaoNovoPlano.pas:766-876</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+
+<div class="rule-block" id="CADPREV-RN183"><div class="rule-id">RS183 (CADPREV-RN183) — Saldamento do REPLAN na importação: evento 334, situação 50 e suspensão das contribuições</div>
+<div class="rule-desc">Para participante já existente no REPLAN, a importação grava um evento de saldamento em EVENTOSPREV (evento gerador 334, plano 2, situação de participante nova 50 — comentário “saldado”, datas = hoje, não efetivado, FLGMIGRADO 0), suspende todas as contribuições do plano 2 (FLGCOBRA = 0, DATAFINAL = hoje) e marca a inscrição no REPLAN como IDSITPART = 50 e FLGDESATIVADO = 1. Patrocinadora fixa 91008.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul><li>EVENTOSPREV: IDEVENTOGERADOR 334, IDPLANOPREV 2, IDSITPARTNOVO 50, IDPESSJUR 91008, FLGEFETIVADO 0, SEQPROPOSTA 1</li><li>CONTRIBPREVPARTP.FLGCOBRA = 0, DATAFINAL = TRUNC(SYSDATE)</li><li>PARTPREVPLAN.IDSITPART = 50, FLGDESATIVADO = 1</li></ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT325">TRT325</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-30">JF030</a></p>
+<p><strong>Descrição original:</strong> “//participante já existente no Replan … //grava evento de saldamento … //suspende contribuições … //atualiza sitpart”.</p>
+<p><strong>Condições:</strong> BuscaPessoa encontrou inscrição com IDPLANOPREV = '2'</p><p><strong>Dados envolvidos:</strong> EVENTOSPREV (SEQEVENTOSPREV), CONTRIBPREVPARTP, PARTPREVPLAN</p><p><strong>Resultado/Exceção:</strong> Erro de gravação → <a href="#MSG327">MSG327</a> e linha no .bad</p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/FInscricaoNovoPlano.pas:382-452</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+
+<div class="rule-block" id="CADPREV-RN184"><div class="rule-id">RS184 (CADPREV-RN184) — Inscrição automática no Novo Plano (74) com contribuições e reservas zeradas</div>
+<div class="rule-desc">Para todo registro aceito (existente no REPLAN ou pessoa nova) o sistema: calcula o próximo número de inscrição do plano 74 (MAX+1); insere PARTPREVPLAN no plano 74 (situação 1, sit. plano 1, data de inscrição = hoje); grava evento de inscrição em EVENTOSPREV (plano 74, situação atual 8 → nova 1, <strong>IDEVENTOGERADOR nulo</strong>); cria uma CONTRIBPREVPARTP para cada contribuição associada ao evento 1 do plano 74 em CONTPREVEVENTO, com VALORBASE1 = percentual do arquivo / 100 (cobrança ativa, mensal, desconto em folha); e cria as reservas analíticas não coletivas do plano 74 ligadas a essas contribuições (RESERVAXPLANO × RESERVAXCONTRIB) com valor 0, se ainda não houver reserva.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul><li>PARTPREVPLAN.INSCRICAONUMERO = MAX+1 (plano 74)</li><li>CONTRIBPREVPARTP.VALORBASE1 = PERCENTUAL/100; FLGCOBRA 1; IDTPPERIODICIDADE 1; FLGDESCFOLHA 1</li><li>RESERVAPART.VALORRESERVA 0, FLGATIVO 1</li></ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT325">TRT325</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-30">JF030</a></p>
+<p><strong>Descrição original:</strong> “//PARTE GERAL … //associa contribuições”.</p>
+<p><strong>Condições:</strong> CONTPREVEVENTO.IDPLANOPREV = 74 AND IDEVENTOGERADOR = 1; RESERVAXPLANO.ANALITICOSINTETI = 'A' e NVL(FLGCOLETIVA,0) = 0; NOT EXISTS RESERVAPART</p><p><strong>Dados envolvidos:</strong> PARTPREVPLAN, EVENTOSPREV, CONTPREVEVENTO, CONTRIBUICAO, CONTRIBPREVPARTP, RESERVAXPLANO, RESERVAXCONTRIB, RESERVAPART</p><p><strong>Resultado/Exceção:</strong> Erro → <a href="#MSG327">MSG327</a></p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/FInscricaoNovoPlano.pas:521-660</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+
+<div class="rule-block" id="CADPREV-RN185"><div class="rule-id">RS185 (CADPREV-RN185) — Pessoa nova é cadastrada a partir do arquivo</div>
+<div class="rule-desc">Quando a matrícula não é encontrada (ou não tem plano), o sistema tenta criar a pessoa: PESSOA (nome, CPF como documento tipo 2, tipo 'F'), DEPENDENTE, DEPENTIT como próprio titular (dependência 'PRP', matrícula do arquivo) e PESSOAFISICA (sexo e data de nascimento). Em seguida segue a inscrição no plano 74 (<a href="#CADPREV-RN184">RS184</a>).</div>
+<p><strong>Campos de dados:</strong></p>
+<ul><li>PESSOA.NOME, NUMDOCUMENTO, IDDOCUMENTO = 2, TIPO = 'F'</li><li>DEPENTIT.IDDEPENDENCIA = 'PRP', MATRICULA</li><li>PESSOAFISICA.SEXO, DATANASC</li></ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT325">TRT325</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-30">JF030</a></p>
+<p><strong>Descrição original:</strong> “else //nova pessoa … //insere pessoa”.</p>
+<p><strong>Condições:</strong> BuscaPessoa retornou True sem IDPLANOPREV</p><p><strong>Dados envolvidos:</strong> PESSOA, DEPENDENTE, DEPENTIT, PESSOAFISICA</p><p><strong>Resultado/Exceção:</strong> Erro → <a href="#MSG327">MSG327</a>. Ver pontos a validar (identificador da pessoa não é gerado e o INSERT em PESSOA não tem vírgula entre CPF e 2)</p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/FInscricaoNovoPlano.pas:455-515</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+
+<div class="rule-block" id="CADPREV-RN186"><div class="rule-id">RS186 (CADPREV-RN186) — Importação com commit a cada N registros, cancelamento e log</div>
+<div class="rule-desc">Antes de começar, uma transação aberta é confirmada e outra é iniciada; a cada N registros (campo “Commit a cada”, mínimo 1, inicia em 1) o sistema confirma e abre nova transação. Erro em um passo de gravação conta o erro, grava a linha no .bad e passa para a próxima linha, sem desfazer os passos já feitos daquele registro. O botão Cancelar pede a interrupção: o lote corrente é desfeito (rollback) e o log mostra “PROCESSO CANCELADO PELO USUÁRIO”. No fim grava o log de operações (“Importação de inscrições Novo Plano.” / “Desfazer importação de inscrições Novo Plano.”, falha ignorada), confirma a transação e mostra o resumo (início, fim, tempo, nº de registros). Sair faz rollback de transação pendente.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul><li>Spin (Commit a cada N registros)</li><li>bcancela</li><li>contadores Registros processados / rejeitados / com erro</li></ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT326">TRT326</a>, <a href="#TRT327">TRT327</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-30">JF030</a></p>
+<p><strong>Descrição original:</strong> If icontaux &gt;= spin.Value then Commit; StartTransacao.</p>
+<p><strong>Condições:</strong> icontaux &gt;= spin.Value; bcancela = True</p><p><strong>Dados envolvidos:</strong> Log de operações (<code>Sistema.GravaLogOperacoes</code>)</p><p><strong>Resultado/Exceção:</strong> <a href="#MSG328">MSG328</a>, <a href="#MSG329">MSG329</a>, <a href="#MSG330">MSG330</a>, <a href="#MSG322">MSG322</a></p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/FInscricaoNovoPlano.pas:166-193, 345-363, 663-711, 1011-1030, 1360-1371, 1395-1399</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+
+<div class="rule-block" id="CADPREV-RN187"><div class="rule-id">RS187 (CADPREV-RN187) — Desfazer a importação devolve o participante ao REPLAN e remove o Novo Plano</div>
+<div class="rule-desc">O botão “Desfazer” relê o mesmo arquivo e, para cada matrícula inscrita no plano 74: recupera a situação anterior registrada no evento 334, exclui o evento 334 do plano 2, reativa as contribuições do plano 2 cuja DATAFINAL é a data de inscrição no plano 74 (FLGCOBRA = 1, DATAFINAL nula), restaura IDSITPART e FLGDESATIVADO = 0 no REPLAN e exclui reservas, contribuições, eventos e a inscrição do plano 74. Se não havia inscrição no REPLAN para restaurar (nenhuma linha atualizada), a pessoa criada pela importação é excluída (PESSOAFISICA, DEPENTIT, DEPENDENTE, PESSOA).</div>
+<p><strong>Campos de dados:</strong></p>
+<ul><li>EVENTOSPREV.IDSITPARTATUAL (evento 334)</li><li>CONTRIBPREVPARTP.DATAFINAL = INSCRICAODATA do plano 74</li><li>bExcluirDepen (RowsAffected do UPDATE no plano 2)</li></ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT325">TRT325</a>, <a href="#TRT326">TRT326</a>, <a href="#TRT327">TRT327</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-30">JF030</a></p>
+<p><strong>Descrição original:</strong> BitBtn1Click → DesfazNovoPlano.</p>
+<p><strong>Condições:</strong> BuscaPessoa(bDesfaz = True) exige plano 74; qryAux.RowsAffected &gt;= 1 → mantém a pessoa</p><p><strong>Dados envolvidos:</strong> EVENTOSPREV, CONTRIBPREVPARTP, PARTPREVPLAN, RESERVAPART, PESSOAFISICA, DEPENTIT, DEPENDENTE, PESSOA</p><p><strong>Resultado/Exceção:</strong> <a href="#MSG327">MSG327</a> (“Erro ao excluir …”), <a href="#MSG329">MSG329</a>/<a href="#MSG330">MSG330</a></p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/FInscricaoNovoPlano.pas:1032-1058, 1061-1393</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+
+<p><strong>Regras transversais do módulo</strong> (texto completo em <a href="uc401.html">UC401</a>): <a href="uc401.html#CADPREV-RN001">RS001 (CADPREV-RN001) — Dados isolados por fundação</a>, <a href="uc401.html#CADPREV-RN003">RS003 (CADPREV-RN003) — Instituto troca a nomenclatura das telas</a>, <a href="uc401.html#CADPREV-RN005">RS005 (CADPREV-RN005) — Operações registradas no log de operações do TotalPREV</a>, <a href="uc401.html#CADPREV-RN007">RS007 (CADPREV-RN007) — Ciclo de estado do evento</a>, <a href="uc401.html#CADPREV-RN009">RS009 (CADPREV-RN009) — Uma transação de banco por tela de evento</a>. Observação: estas rotinas usam fundação/patrocinadora fixas (1/91008), só a importação do Novo Plano grava log de operações e o controle de transação é próprio (commit por registro/lote).</p>
+</div>
+
+<p><strong>Tratamentos de erro:</strong> <a href="#TRT321">TRT321</a>, <a href="#TRT322">TRT322</a>, <a href="#TRT323">TRT323</a>, <a href="#TRT324">TRT324</a>, <a href="#TRT325">TRT325</a>, <a href="#TRT326">TRT326</a>, <a href="#TRT327">TRT327</a></p>
+<p><strong>Mensagens:</strong> <a href="#MSG321">MSG321</a>, <a href="#MSG322">MSG322</a>, <a href="#MSG323">MSG323</a>, <a href="#MSG324">MSG324</a>, <a href="#MSG325">MSG325</a>, <a href="#MSG326">MSG326</a>, <a href="#MSG327">MSG327</a>, <a href="#MSG328">MSG328</a>, <a href="#MSG329">MSG329</a>, <a href="#MSG330">MSG330</a></p>
+<p><strong>Telas:</strong> Saldamento e Inscrição Novo Plano - Funcef (<code>FInscricaoNovoPlano.dfm</code>)</p>
+<p><strong>Dependências:</strong> separador de arquivo financeiro <code>FSeparadorArqFinanc</code> aparece no <em>uses</em> da unit (<code>FInscricaoNovoPlano.pas:147-148</code>), mas não é chamado nela; está documentado em <a href="uc408.html#PF-28">UC408 JF028</a>. Contribuições e reservas do plano 74 dependem da parametrização CONTPREVEVENTO/RESERVAXPLANO/RESERVAXCONTRIB.</p>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span> — informações que o repositório não comprova ou que divergem entre fontes. O texto existente foi mantido; os itens abaixo dependem de validação humana.</p>
+<ul>
+<li>O evento de saldamento usa o evento gerador <strong>334</strong> e a situação 50, enquanto o saldamento de ativos da tela FSaldamento usa o evento <strong>338</strong>, plano 74 e situação no plano 25 (<code>USaldamento.pas:786-797</code>). Confirmar se as duas rotinas convivem ou se esta é uma versão anterior.</li>
+<li>Pessoa nova: <code>BuscaPessoa</code> devolve o identificador vazio quando a matrícula não existe (<code>FInscricaoNovoPlano.pas:774, 802-805</code>) e nenhuma sequência é lida antes do INSERT em PESSOA; além disso o INSERT não tem vírgula entre o CPF e o valor 2 (<code>:460-462</code>). Na prática o cadastro de pessoa nova tende a falhar — confirmar.</li>
+<li>Matrícula encontrada em ELEGPATRO mas sem plano também cai no ramo “pessoa nova” e tenta inserir PESSOA com um IDPESSOA já existente (<code>:811-816, 455-515</code>).</li>
+<li>O evento de inscrição no plano 74 é gravado com IDEVENTOGERADOR nulo (<code>:554-571</code>).</li>
+<li>Erro ao inserir uma contribuição executa <code>continue</code> dentro do laço de contribuições sem avançar o cursor (<code>:613-622</code>): risco de laço infinito.</li>
+<li>Erros em um passo não desfazem os passos anteriores do mesmo registro (sem savepoint) e o commit final confirma o que foi gravado (<code>:412-419, 691-692</code>).</li>
+<li>Busca por <code>MATRICULA LIKE 'mat%'</code> pode casar mais de uma matrícula; a condição <code>EL.IDPESSJUR = EL.IDPESSJUR</code> é tautológica (<code>:785-797</code>). Patrocinadora 91008 fixa no código.</li>
+<li>No desfazer, a comparação <code>TO_CHAR(DATAFINAL,'DD/MM/YYYY') = TO_DATE(...)</code> compara texto com data (<code>:1183</code>).</li>
+<li>A função <code>VerificaArquivo</code> (<code>:154-164</code>) não é chamada; a mensagem MSG321 nunca aparece.</li>
+</ul>
+</div>
+<div class="note note-info"><p><strong>Registro original do processo PF-30</strong></p><p><strong>Forms de entrada:</strong> <code>FPrincipal.dfm:8655-8658</code> → <code>FInscricaoNovoPlano.dfm</code></p><p><strong>Lógica de processamento:</strong> crítica de layout; elegibilidade; saldamento REPLAN; inscrição no plano 74; commit a cada N; desfazer</p><p><strong>Saídas:</strong> log em tela (salvar/imprimir), arquivo &lt;nome&gt;.bad, resumo</p><p><strong>Persistência (tabelas escritas):</strong> EVENTOSPREV, CONTRIBPREVPARTP, PARTPREVPLAN, PESSOA, DEPENDENTE, DEPENTIT, PESSOAFISICA, RESERVAPART, log de operações</p><p><strong>Evidência:</strong> <code>CADASTROPREV/Fontes/FInscricaoNovoPlano.pas:166-1399</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+</div>
+
+<div class="pf-block" id="PF-31"><h4>JF031 (PF-31) — Preparo para saldamento</h4>
+<p><strong>Objetivo:</strong> calcular previamente o valor do Benefício Saldado (BS) de cada assistido, corrigido pelo INPC até o mês informado, para conferência antes do saldamento.</p>
+<p><strong>Necessidade de negócio:</strong> a área precisa conhecer e conferir o valor saldado de cada pessoa antes de efetivar o saldamento.</p>
+<p><strong>Ator / gatilho:</strong> analista de benefícios/atuária. Menu <em>Novo Plano › Preparo para saldamento</em> (<code>FPrincipal.dfm:8659-8662</code>; <code>FPrincipal.pas:2703-2707</code>).</p>
+<p><strong>Pré-condições:</strong> benefícios do REPLAN/REB cadastrados; cotações do INPC (moeda 7) em COTACAOMOEDA.</p>
+<p><strong>Em termos de negócio:</strong> há assistidos com benefício e índices de correção atualizados.</p>
+<p><strong>Pós-condições:</strong> nenhuma alteração no banco (transação desfeita); demonstrativo TXT na pasta TEMP da empresa; arquivo “MATRICULAS PROCESSADAS NO SALDAMENTO.TXT” quando a lista é digitada.</p>
+<p><strong>Em termos de negócio:</strong> o usuário recebe um relatório com o BS calculado por pessoa.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li><strong>Usuário:</strong> informa mês e ano final do cálculo e, opcionalmente, um arquivo de matrículas ou a lista digitada separada por vírgulas; marca “Mostra evolução da correção do BS” se quiser o detalhe. [<a href="#CADPREV-RN188">RS188</a>]<br><code>CADASTROPREV/Fontes/FPreparoSaldamento.pas:66-89</code> <span class="ev ev-comprovado">COMPROVADO</span></li>
+<li><strong>Usuário:</strong> clica no ícone de processar (imagem “Cique aqui para processar”).<br><code>CADASTROPREV/Fontes/FPreparoSaldamento.pas:57-64; CADASTROPREV/Fontes/FPreparoSaldamento.dfm:15-22</code> <span class="ev ev-comprovado">COMPROVADO</span></li>
+<li><strong>Sistema:</strong> monta o mês de referência e a lista de matrículas (gravando as digitadas em arquivo). [<a href="#CADPREV-RN188">RS188</a>]<br><code>CADASTROPREV/Fontes/FPreparoSaldamento.pas:100-200</code> <span class="ev ev-comprovado">COMPROVADO</span></li>
+<li><strong>Sistema:</strong> seleciona as pessoas (ou toda a base, após confirmação), prepara o demonstrativo e a tabela de benefício mínimo e abre transação. [<a href="#CADPREV-RN188">RS188</a>]<br><code>CADASTROPREV/Fontes/uFuncoesSaldamento.pas:222-271, 75-218</code> <span class="ev ev-comprovado">COMPROVADO</span></li>
+<li><strong>Sistema:</strong> calcula o BS de cada pessoa e registra no demonstrativo; confirma a cada 1000 pessoas. [<a href="#CADPREV-RN189">RS189</a>]<br><code>CADASTROPREV/Fontes/uFuncoesSaldamento.pas:273-300, 334-455</code> <span class="ev ev-comprovado">COMPROVADO</span></li>
+<li><strong>Sistema:</strong> ao final desfaz a transação e abre o demonstrativo no Bloco de Notas. [<a href="#CADPREV-RN189">RS189</a>]<br><code>CADASTROPREV/Fontes/uFuncoesSaldamento.pas:302-328</code> <span class="ev ev-comprovado">COMPROVADO</span></li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Processar preparo</td><td>Simular o BS</td><td>Mês/ano final; lista de matrículas</td><td>Seleciona, calcula, grava TXT</td><td>Demonstrativo de saldamento</td><td><a href="#CADPREV-RN188">RS188</a>, <a href="#CADPREV-RN189">RS189</a></td><td><a href="#MSG331">MSG331</a>, <a href="#MSG332">MSG332</a>, <a href="#MSG333">MSG333</a>, <a href="#MSG334">MSG334</a>, <a href="#MSG354">MSG354</a></td><td>Preparo para saldamento</td></tr>
+</tbody></table></div>
+<div class="jf-rules">
+<p><strong>Regras de negócio da jornada:</strong> 2 regra(s) — texto completo abaixo.</p>
+
+<div class="rule-block" id="CADPREV-RN188"><div class="rule-id">RS188 (CADPREV-RN188) — Seleção do público do preparo: lista digitada, arquivo de matrículas ou base inteira</div>
+<div class="rule-desc">No “Preparo para saldamento” o usuário informa o mês/ano final do cálculo (mês inicia em outubro) e a lista de pessoas: matrículas digitadas separadas por vírgula (gravadas no arquivo “MATRICULAS PROCESSADAS NO SALDAMENTO.TXT” na pasta de arquivos da empresa) ou um arquivo com uma matrícula por linha. Sem lista, o sistema pergunta se deve processar todos os registros da base. São selecionados os benefícios do REPLAN ou do REB com vínculo ao REPLAN.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul><li>cmbMesCob / spedAnoCob (AAAA/MM)</li><li>MemoMatriculas; edListaPessoas</li><li>ChBxMostraEvolucao — mostra a evolução da correção do BS</li></ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT328">TRT328</a>, <a href="#TRT329">TRT329</a>, <a href="#TRT330">TRT330</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-31">JF031</a></p>
+<p><strong>Descrição original:</strong> “Lista de matriculas não informada. Sistema irá processar todos os registros da base.”</p>
+<p><strong>Condições:</strong> Trim(lista) = '' → confirmação; ItemIndex do mês ≤ 8 → zero à esquerda</p><p><strong>Dados envolvidos:</strong> BENEFBFCIARIO, BENEFPLANOPART, BFCIARIOTITPLAN, BENEFPLANPREV, DEPENTIT, PESSOA, PESSOAFISICA, ELEGPATRO, PARTPREVPLAN (leitura)</p><p><strong>Resultado/Exceção:</strong> <a href="#MSG331">MSG331</a>, <a href="#MSG332">MSG332</a>, <a href="#MSG333">MSG333</a>, <a href="#MSG334">MSG334</a></p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/FPreparoSaldamento.pas:57-64, 83-89, 100-200</code>; <code>CADASTROPREV/Fontes/uFuncoesSaldamento.pas:75-218</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+
+<div class="rule-block" id="CADPREV-RN189"><div class="rule-id">RS189 (CADPREV-RN189) — Cálculo prévio do Benefício Saldado (BS) — simulação sem gravação</div>
+<div class="rule-desc">Para cada pessoa o preparo calcula o BS: data de referência = maior entre início do benefício na fundação e 01/09/2001; para REB pré-78, BS = valor atual (× 1,09 se DIB ≥ 01/09/2001) corrigido pelo INPC desde 01/01/2006; para os demais, BS = ((valor do enquadramento × % FUNCEF) − valor INSS) × 1,09, com piso no benefício mínimo da tabela (136,26 em 2001 … 199,04 em 2006), corrigido pelo INPC (moeda 7) até o mês final. O resultado vai só para o demonstrativo TXT (aberto no Bloco de Notas); a transação é desfeita no final (o commit está comentado), e a gravação da reserva 114 (InsereReservaPart) nunca é chamada.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul><li>dIncentivoDeSaldamento = 1.09</li><li>VetBeneficioMinimo (31/12/2001…31/12/2006)</li><li>COTACAOMOEDA (MOECODIGO 7)</li><li>TEMP\DEMONSTRATIVO DE SALDAMENTO &lt;data&gt; AS &lt;hora&gt;.TXT</li></ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT329">TRT329</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-31">JF031</a></p>
+<p><strong>Descrição original:</strong> “dValorBS := ( ( ( dValorEnquadramento * dPercentualFUNCEF ) - dValorINSS ) * dIncentivoDeSaldamento )”.</p>
+<p><strong>Condições:</strong> tipo REB pré-78 vs demais; dValorBS &lt; benefício mínimo</p><p><strong>Dados envolvidos:</strong> COTACAOMOEDA, HSTBENEFBFCIARIO, BENEFBFCIARIO (leitura)</p><p><strong>Resultado/Exceção:</strong> Demonstrativo; erros por pessoa em <a href="#MSG354">MSG354</a></p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/uFuncoesSaldamento.pas:55, 222-330, 334-455, 1044-1106, 1110-1123, 1127-1148, 1217-1233, 1437-1521</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+
+<p><strong>Regras transversais do módulo</strong> (texto completo em <a href="uc401.html">UC401</a>): <a href="uc401.html#CADPREV-RN001">RS001 (CADPREV-RN001) — Dados isolados por fundação</a>, <a href="uc401.html#CADPREV-RN003">RS003 (CADPREV-RN003) — Instituto troca a nomenclatura das telas</a>, <a href="uc401.html#CADPREV-RN005">RS005 (CADPREV-RN005) — Operações registradas no log de operações do TotalPREV</a>, <a href="uc401.html#CADPREV-RN007">RS007 (CADPREV-RN007) — Ciclo de estado do evento</a>, <a href="uc401.html#CADPREV-RN009">RS009 (CADPREV-RN009) — Uma transação de banco por tela de evento</a>. Observação: estas rotinas usam fundação/patrocinadora fixas (1/91008), só a importação do Novo Plano grava log de operações e o controle de transação é próprio (commit por registro/lote).</p>
+</div>
+
+<p><strong>Tratamentos de erro:</strong> <a href="#TRT328">TRT328</a>, <a href="#TRT329">TRT329</a>, <a href="#TRT330">TRT330</a></p>
+<p><strong>Mensagens:</strong> <a href="#MSG331">MSG331</a>, <a href="#MSG332">MSG332</a>, <a href="#MSG333">MSG333</a>, <a href="#MSG334">MSG334</a>, <a href="#MSG354">MSG354</a></p>
+<p><strong>Telas:</strong> Preparo para saldamento (<code>FPreparoSaldamento.dfm</code>)</p>
+<p><strong>Dependências:</strong> usa a unit <code>uFuncoesSaldamento</code> (procedural) e <code>Sistema.RetornaCaminhoArquivos</code>. O valor calculado aqui não alimenta o saldamento: a tela de saldamento lê a reserva 114, carregada pela importação da COATE (<a href="#PF-34">JF034</a>).</p>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span> — informações que o repositório não comprova ou que divergem entre fontes. O texto existente foi mantido; os itens abaixo dependem de validação humana.</p>
+<ul>
+<li>O botão “Gerar acertos no histórico ” (<code>AcertaBeneficioTransfPlano</code>) está invisível (<code>FPreparoSaldamento.dfm:5089-5096</code>); a rotina usa BS fixo 2893 e tem toda a gravação comentada (<code>uFuncoesSaldamento.pas:682-684, 784-1016</code>).</li>
+<li>O enquadramento (<code>ExecutaRegraCalculoSRB</code>, regra 6105) está comentado; <code>ExecutaEnquadramento</code> devolve 0 ou -5005 com variável não inicializada (<code>uFuncoesSaldamento.pas:1044-1106</code>), o que torna o BS negativo e substituído pelo benefício mínimo.</li>
+<li><code>RetornaBeneficioMinimo</code> percorre a tabela sem parar no primeiro ano válido, devolvendo sempre o último valor (199,04) (<code>uFuncoesSaldamento.pas:1248-1261</code>).</li>
+<li>O commit final está comentado e o resultado nunca é gravado (<code>uFuncoesSaldamento.pas:310-311</code>); <code>InsereReservaPart</code> não é chamada (<code>:1110-1123</code>). Confirmar se a tela ainda tem uso.</li>
+<li>Se a seleção falhar, o bloco final tenta liberar objetos ainda não criados (<code>uFuncoesSaldamento.pas:245-249, 302-311</code>).</li>
+</ul>
+</div>
+<div class="note note-info"><p><strong>Registro original do processo PF-31</strong></p><p><strong>Forms de entrada:</strong> <code>FPrincipal.dfm:8659-8662</code> → <code>FPreparoSaldamento.dfm</code></p><p><strong>Lógica de processamento:</strong> seleção de pessoas; cálculo do BS; correção INPC; benefício mínimo; demonstrativo</p><p><strong>Saídas:</strong> TXT no Bloco de Notas</p><p><strong>Persistência (tabelas escritas):</strong> nenhuma (rollback)</p><p><strong>Evidência:</strong> <code>CADASTROPREV/Fontes/FPreparoSaldamento.pas:57-200</code>; <code>CADASTROPREV/Fontes/uFuncoesSaldamento.pas:75-455</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+</div>
+
+<div class="pf-block" id="PF-32"><h4>JF032 (PF-32) — Saldamento de ativos, aposentados e pensionistas</h4>
+<p><strong>Objetivo:</strong> efetivar o saldamento do plano: para ativos, encerrar o plano antigo e inscrever no Novo Plano; para aposentados e pensionistas, converter os benefícios em benefício saldado (e, opcionalmente, Renda Antecipada) e calcular as diferenças financeiras desde a DIB.</p>
+<p><strong>Necessidade de negócio:</strong> o saldamento muda o plano, os eventos, as contribuições e os benefícios de milhares de pessoas, com valores retroativos e corrigidos; precisa ser simulável (demonstrativo) antes de gravar.</p>
+<p><strong>Ator / gatilho:</strong> analista de benefícios. Menu <em>Novo Plano › Saldamento de ativos</em> (Tag 1, HelpContext 3360020), <em>Saldamento de aposentados</em> (Tag 0, 3360019), <em>Saldamento de Pensionistas</em> (Tag 2, 3360021) (<code>FPrincipal.dfm:8666-8684</code>; <code>FPrincipal.pas:2709-2737</code>).</p>
+<p><strong>Pré-condições:</strong> assistidos com reserva BS (114) e/ou RM (113) carregadas (<a href="#PF-34">JF034</a>); lote de concessão aberto (assistidos); cotações INPC; parametrização das contribuições e reservas dos planos 2 e 74.</p>
+<p><strong>Em termos de negócio:</strong> as reservas de saldamento foram importadas e existe uma folha de benefícios aberta para receber os acertos.</p>
+<p><strong>Pós-condições:</strong> PARTPREVPLAN, EVENTOSPREV, CONTRIBPREVPARTP/CONTRIBPREVNUCLEO, HSTCONTEVENTOSPR, CONTRATOEMPTMO, RESERVAPART/HISTMOVRESERVA, BENEFBFCIARIO, PROCESSOBENEF, BFCIARIOTITPLAN, BENEFPLANOPART, MOVBENEF, HSTBENEFBFCIARIO, HSTCONTRIBPREV, HSTATRASOBENEF/HSTATRASOCONTRIB, RUBRICAINDIV, PESSOAPARAM — somente com “Gravar processo”; arquivos TXT de resultado e demonstrativo.</p>
+<p><strong>Em termos de negócio:</strong> o participante fica saldado no novo arranjo de plano, com benefícios convertidos e diferenças lançadas para pagamento/desconto na folha; sem “Gravar processo” nada é gravado.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li><strong>Usuário:</strong> escolhe o item de menu do público; o sistema abre “Formulário de Saldamento” com o título do público e os campos próprios. [<a href="#CADPREV-RN190">RS190</a>]<br><code>CADASTROPREV/Fontes/FPrincipal.pas:2709-2737; CADASTROPREV/Fontes/FSaldamento.pas:170-221</code> <span class="ev ev-comprovado">COMPROVADO</span></li>
+<li><strong>Usuário:</strong> informa matrícula/percentual/parcelas/valor do BS (individual) ou o arquivo de matrículas (lote); mês/ano final; mês/ano início do acerto; marca “Gravar processo”, “Gerar demonstrativo” e opções financeiras; clica “Processar”. [<a href="#CADPREV-RN190">RS190</a>]<br><code>CADASTROPREV/Fontes/FSaldamento.pas:241-286</code> <span class="ev ev-comprovado">COMPROVADO</span></li>
+<li><strong>Sistema (assistidos):</strong> pede a escolha do lote de concessão aberto; sem lote, encerra. [<a href="#CADPREV-RN194">RS194</a>]<br><code>CADASTROPREV/Fontes/USaldamento.pas:3819-3833; CADASTROPREV/Fontes/FSelecionaLoteFuncef.pas:54-80, 112-125</code> <span class="ev ev-comprovado">COMPROVADO</span></li>
+<li><strong>Sistema:</strong> prepara a pasta SALDAMENTO, abre transação e, no lote, o arquivo de resultado; para cada matrícula abre o demonstrativo. [<a href="#CADPREV-RN191">RS191</a>]<br><code>CADASTROPREV/Fontes/USaldamento.pas:861-905, 1157-1187</code> <span class="ev ev-comprovado">COMPROVADO</span></li>
+<li><strong>Sistema:</strong> busca os dados e verifica a elegibilidade. [<a href="#CADPREV-RN192">RS192</a>]<br><code>CADASTROPREV/Fontes/USaldamento.pas:1017-1153, 3719-3815, 3838-3895, 8206-8270, 8365-8445</code> <span class="ev ev-comprovado">COMPROVADO</span></li>
+<li><strong>Sistema (ativo):</strong> cancela o plano antigo, inscreve no 74, grava eventos 338/1, move empréstimos, contribuições e cria reservas. [<a href="#CADPREV-RN193">RS193</a>]<br><code>CADASTROPREV/Fontes/USaldamento.pas:3346-3448</code> <span class="ev ev-comprovado">COMPROVADO</span></li>
+<li><strong>Sistema (assistido):</strong> ajusta inscrição REPLAN/REB, grava evento 339, empréstimos, contribuições, pecúlio e converte os benefícios; calcula BS/RA e o acerto mensal. [<a href="#CADPREV-RN194">RS194</a>, <a href="#CADPREV-RN195">RS195</a>, <a href="#CADPREV-RN196">RS196</a>]<br><code>CADASTROPREV/Fontes/USaldamento.pas:3897-3912, 8274-8332, 8449-8549, 4112-5080, 5111-6110</code> <span class="ev ev-comprovado">COMPROVADO</span></li>
+<li><strong>Sistema:</strong> monta o demonstrativo (técnico ou do usuário), atualiza contadores e confirma ou desfaz conforme “Gravar processo” e erros; ao final fecha arquivos e abre o demonstrativo (individual). [<a href="#CADPREV-RN191">RS191</a>]<br><code>CADASTROPREV/Fontes/USaldamento.pas:913-1007, 1684-1719; CADASTROPREV/Fontes/FSaldamento.pas:223-237</code> <span class="ev ev-comprovado">COMPROVADO</span></li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Processar individual</td><td>Saldar/simular uma matrícula</td><td>Matrícula, percentual, parcelas, valor BS, meses</td><td>Processa e mostra demonstrativo</td><td>Matrícula saldada (se gravar)</td><td><a href="#CADPREV-RN190">RS190</a>, <a href="#CADPREV-RN191">RS191</a>, <a href="#CADPREV-RN192">RS192</a>, <a href="#CADPREV-RN193">RS193</a>, <a href="#CADPREV-RN194">RS194</a>, <a href="#CADPREV-RN195">RS195</a>, <a href="#CADPREV-RN196">RS196</a></td><td><a href="#MSG331">MSG331</a>, <a href="#MSG337">MSG337</a>, <a href="#MSG338">MSG338</a>, <a href="#MSG339">MSG339</a>, <a href="#MSG340">MSG340</a>, <a href="#MSG341">MSG341</a></td><td>Formulário de Saldamento</td></tr>
+<tr><td>Processar lote</td><td>Saldar uma lista</td><td>Arquivo de matrículas (com %/parcelas)</td><td>Processa e grava resultado por matrícula</td><td>RESULTADO FINAL DO PROCESSAMENTO …TXT</td><td><a href="#CADPREV-RN190">RS190</a>, <a href="#CADPREV-RN191">RS191</a>, <a href="#CADPREV-RN192">RS192</a></td><td><a href="#MSG335">MSG335</a>, <a href="#MSG336">MSG336</a>, <a href="#MSG337">MSG337</a>, <a href="#MSG339">MSG339</a></td><td>Formulário de Saldamento</td></tr>
+<tr><td>Somente Financeiro / diferença de RA / BUA</td><td>Recalcular só o acerto financeiro</td><td>Opções marcadas</td><td>Não refaz inscrição/eventos/contribuições</td><td>Novos lançamentos de acerto</td><td><a href="#CADPREV-RN190">RS190</a>, <a href="#CADPREV-RN196">RS196</a></td><td><a href="#MSG339">MSG339</a></td><td>Formulário de Saldamento</td></tr>
+<tr><td>Escolher lote</td><td>Indicar a folha que recebe os acertos</td><td>Lote da lista</td><td>Confirmação do lote</td><td>Lote usado nos lançamentos</td><td><a href="#CADPREV-RN194">RS194</a></td><td><a href="#MSG342">MSG342</a>, <a href="#MSG343">MSG343</a></td><td>Selecione o Lote para a Concessão ...</td></tr>
+</tbody></table></div>
+<div class="jf-rules">
+<p><strong>Regras de negócio da jornada:</strong> 7 regra(s) — texto completo abaixo.</p>
+
+<div class="rule-block" id="CADPREV-RN190"><div class="rule-id">RS190 (CADPREV-RN190) — Uma tela de saldamento para três públicos (Tag) e dois modos de execução</div>
+<div class="rule-desc">O menu abre a mesma tela “Formulário de Saldamento” com Tag 1 (ativos), 0 (aposentados) ou 2 (pensionistas). Para aposentados e pensionistas aparecem também nº de parcelas, valor do BS, mês/ano de início do acerto e as opções Demonstrativo técnico, Somente Financeiro, Somente diferença de RA e Somente BUA. Modo individual: matrícula, percentual, parcelas e valor do BS digitados. Modo lote: arquivo de matrículas, uma por linha, com matrícula (posições 2-8), percentual (9-14) e, exceto para ativos, parcelas (15-16). “Somente diferença de RA” e “Somente BUA” ligam automaticamente “Somente Financeiro”.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul><li>Tag do form (1/0/2)</li><li>EdMatricula, EdPercentual, SpEdtNumeroDeParcelas (0 vira 1), EdValorBS</li><li>EdArquivoMatricula</li><li>ChBxGravarProcesso, ChBGerarDemonstrativo, ChBxSomenteFinanceiro, ChBxSomenteDiferencaRA, ChBxSomenteBUA, ChBxDemonstrativoTecnico</li><li>cmbMesCob/spedAnoCob (mês final; inicia no mês corrente); cmbMesInicio/spedAnoInicio (inicia em setembro)</li></ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT328">TRT328</a>, <a href="#TRT331">TRT331</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-32">JF032</a></p>
+<p><strong>Descrição original:</strong> FrmSaldamento.Tag := 1 { Saldamento de ativo } / 0 { Saldamento de Assistido } / 2 { Saldamento de Pensionistas }.</p>
+<p><strong>Condições:</strong> Tag = 0 → TSaldamentoAposentado; Tag = 1 → TSaldamentoAtivo; outro → TSaldamentoPensionista; EdMatricula vazio → lote</p><p><strong>Dados envolvidos:</strong> —</p><p><strong>Resultado/Exceção:</strong> <a href="#MSG331">MSG331</a>, <a href="#MSG335">MSG335</a></p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/FPrincipal.pas:2709-2737</code>; <code>CADASTROPREV/Fontes/FSaldamento.pas:100-107, 170-221, 241-286</code>; <code>CADASTROPREV/Fontes/USaldamento.pas:731-772, 849-856, 908-909</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+
+<div class="rule-block" id="CADPREV-RN191"><div class="rule-id">RS191 (CADPREV-RN191) — Saldamento grava só com “Gravar processo”; senão é simulação. Resultado e demonstrativo em TXT</div>
+<div class="rule-desc">O processamento roda numa transação: no modo individual, ao final confirma se “Gravar processo” estiver marcado e não houver erro, senão desfaz; no lote, decide commit/rollback por matrícula e reabre a transação. Os arquivos ficam na pasta &lt;caminho de arquivos da empresa&gt;\SALDAMENTO (criada se não existir): “RESULTADO FINAL DO PROCESSAMENTO &lt;data hora&gt;.TXT” (lote, uma linha por matrícula com erro) e “DEMONSTRATIVO DE SALDAMENTO DA MATRICULA &lt;m&gt;.TXT” (quando “Gerar demonstrativo”; técnico para ativos ou quando marcado, senão o demonstrativo do usuário com devido/pago/diferença/correção mês a mês). No modo individual o demonstrativo é aberto no Bloco de Notas. A tela mostra os contadores de registros processados e com erro.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul><li>FGravaProcesso; FErroProcesso</li><li>sPathArquivos = RetornaCaminhoArquivos(IdEmpresa) + '\SALDAMENTO'</li></ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT334">TRT334</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-32">JF032</a></p>
+<p><strong>Descrição original:</strong> If ( FGravaProcesso = True ) Then Commit Else Rollback.</p>
+<p><strong>Condições:</strong> FErroProcesso = True → Rollback; FGravaProcesso = False → Rollback</p><p><strong>Dados envolvidos:</strong> Arquivos TXT</p><p><strong>Resultado/Exceção:</strong> Contadores “Registos processados” / “Registros com erros”</p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/USaldamento.pas:861-1013, 1157-1187, 1684-1719, 1733-2492, 2496-3070</code>; <code>CADASTROPREV/Fontes/FSaldamento.pas:223-237</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+
+<div class="rule-block" id="CADPREV-RN192"><div class="rule-id">RS192 (CADPREV-RN192) — Elegibilidade ao saldamento por público</div>
+<div class="rule-desc">Ativo: recusado se tiver benefício de suplementação ativo (BENEFBFCIARIO FONTEPAGADORA 1, situação 1 ou 3) ou se já estiver no plano 74. Aposentado: precisa ter benefício ativo; recusado se a situação no plano já for 25 (saldado, salvo “Somente Financeiro”) ou, no REB (plano 66), se houver envio pendente na TMPDESC (SITENVIO '0', FLGDESCFOLHA 'B'). Pensionista: precisa ter reserva RM (113); recusado se houver envio pendente na TMPDESC (REB) ou se o núcleo familiar já tiver a contribuição 633 (salvo “Somente Financeiro”); cada beneficiário sem benefício ativo é pulado. Assistidos precisam ainda da reserva BS (114) / RM (113) para localizar os dados.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul><li>BENEFBFCIARIO.FONTEPAGADORA, IDSITBENEFICIO</li><li>PARTPREVPLAN.IDPLANOPREV, IDSITPLANOPREV</li><li>TMPDESC.SITENVIO, FLGDESCFOLHA</li><li>CONTRIBPREVNUCLEO.IDCONTRIBUICAO = 633</li><li>RESERVAPART.IDTIPORESERVA 113/114</li></ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT333">TRT333</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-32">JF032</a></p>
+<p><strong>Descrição original:</strong> PassouElegibilidade / PassouElegibilidadeBeneficiario.</p>
+<p><strong>Condições:</strong> ver descrição</p><p><strong>Dados envolvidos:</strong> BENEFBFCIARIO, PARTPREVPLAN, TMPDESC, NUCLEOFAMILIAR, CONTRIBPREVNUCLEO, RESERVAPART</p><p><strong>Resultado/Exceção:</strong> <a href="#MSG337">MSG337</a>, <a href="#MSG338">MSG338</a></p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/USaldamento.pas:1017-1049, 3719-3815, 8206-8270, 8365-8415, 8419-8445, 8484-8503</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+
+<div class="rule-block" id="CADPREV-RN193"><div class="rule-id">RS193 (CADPREV-RN193) — Saldamento de ativo: sai do plano antigo e entra no Novo Plano (74) em 01/09/2006</div>
+<div class="rule-desc">Para o ativo, o sistema cancela a inscrição atual (FLGDESATIVADO 1, situação no plano 25) e insere a inscrição no plano 74 com início em 01/09/2006; grava o evento de saldamento 338 e o evento de inscrição (1) — e replica o último evento quando a situação do participante não é 1; transfere contratos de empréstimo não quitados para o plano 74; desassocia/associa contribuições em HSTCONTEVENTOSPR, cria as contribuições do plano 74 (contribuição 21 com 12%) e suspende as antigas em 31/08/2006; cria as reservas 100, 101, 110 e 111 zeradas.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul><li>iIdNovoPlano = 74; iIdEventoDeSaldamento = 338; iIdEventoDeInscricao = 1; iIdSitPlanoSaldado = 25; sDataEvento = '01/09/2006'</li><li>CONTRIBPREVPARTP.VALORBASE1 (21 → 12)</li><li>RESERVAPART tipos 100, 101, 110, 111</li></ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT334">TRT334</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-32">JF032</a></p>
+<p><strong>Descrição original:</strong> TSaldamentoAtivo.ProcessarIndividuo.</p>
+<p><strong>Condições:</strong> FTipoArquivo = taAtivo</p><p><strong>Dados envolvidos:</strong> PARTPREVPLAN, EVENTOSPREV, CONTRATOEMPTMO, HSTCONTEVENTOSPR, CONTRIBPREVPARTP, RESERVAPART</p><p><strong>Resultado/Exceção:</strong> Erros → demonstrativo (<a href="#MSG339">MSG339</a>) e rollback da matrícula</p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/USaldamento.pas:781-801, 1209-1284, 1288-1328, 1332-1607, 1611-1680, 3346-3448, 3452-3524, 3528-3660</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+
+<div class="rule-block" id="CADPREV-RN194"><div class="rule-id">RS194 (CADPREV-RN194) — Saldamento de assistidos: lote de benefício aberto, REPLAN saldado e conversão dos benefícios</div>
+<div class="rule-desc">Para aposentados e pensionistas o sistema primeiro pede a escolha de um lote de concessão aberto (CTRLINTERFACE tipo 'B', preparado, de concessão, da fundação 1); sem lote, sai sem processar. Depois: REPLAN → situação no plano 25; REB → cancela o REB (situação 3) e reativa ou inscreve no REPLAN; grava o evento 339; move empréstimos; ajusta contribuições (aposentado: 1%; pensionista: CONTRIBPREVNUCLEO); cria rubricas de pecúlio (38797 da reserva 122, 38805 da reserva 123); e converte cada benefício pela tabela de-para (ex.: 149→495, 154→505, 156→503, 159→504, 164→496, 338→497; REB 324→496, 325→497, 328/329→504), encerrando o antigo (situação 3, DATAFINAL 31/08/2006, MOVBENEF tipo 4) e incluindo o novo (PROCESSOBENEF, BFCIARIOTITPLAN, BENEFBFCIARIO, BENEFPLANOPART, MOVBENEF tipo 7). Benefício INSS (fonte pagadora 2) só migra o histórico.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul><li>iIdNovoPlano = 2; iIdEventoDeSaldamento = 339</li><li>iIdLoteProcesso / sDataLoteProcesso</li><li>DeParaBeneficio</li><li>RUBRICAINDIV 38797 / 38805</li></ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT335">TRT335</a>, <a href="#TRT336">TRT336</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-32">JF032</a></p>
+<p><strong>Descrição original:</strong> TSaldamentoAssistido.Processar / ProcessarBeneficios.</p>
+<p><strong>Condições:</strong> iIdLoteProcesso = -1 ou data vazia → Exit; IDPLANOPREV 2 (REPLAN) ou 66 (REB); FONTEPAGADORA = 2 (INSS)</p><p><strong>Dados envolvidos:</strong> CTRLINTERFACE, PARTPREVPLAN, EVENTOSPREV, CONTRATOEMPTMO, CONTRIBPREVPARTP, CONTRIBPREVNUCLEO, RUBRICAINDIV, BENEFBFCIARIO, PROCESSOBENEF, BFCIARIOTITPLAN, BENEFPLANOPART, MOVBENEF</p><p><strong>Resultado/Exceção:</strong> <a href="#MSG340">MSG340</a>, <a href="#MSG342">MSG342</a>, <a href="#MSG343">MSG343</a></p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/USaldamento.pas:3819-3833, 3925-4070, 4091-4108, 4112-5080, 8274-8332, 8449-8549, 8553-8723</code>; <code>CADASTROPREV/Fontes/FSelecionaLoteFuncef.pas:54-80, 112-125</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+
+<div class="rule-block" id="CADPREV-RN195"><div class="rule-id">RS195 (CADPREV-RN195) — Valor do Benefício Saldado e da Renda Antecipada (RA/BUA)</div>
+<div class="rule-desc">O valor do benefício saldado parte da reserva BS (tipo 114) — ou do “Valor do BS” digitado, se maior que zero —, desconta o percentual P informado e aplica os índices de incentivo da tabela genérica INDICE115120. Quando P &gt; 0, gera também a Renda Antecipada (benefício RA): valor = reserva RM (113) × P%, paga em N parcelas (valor da parcela = RA / N; benefício com VALORBASE1 = P e VALORBASE2 = N). Cada leitura da reserva com P &gt; 0 debita P% de RESERVAPART e registra a saída em HISTMOVRESERVA. Quem já tem RA (benefícios 319/327) tem P zerado (exceto pensionista). O pensionista exige percentual de suspensão diferente de zero.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul><li>RESERVAPART.VALORRESERVA (113 RM, 114 BS, 122/123 pecúlio, 125/126 tábuas AT49/AT83)</li><li>FPercentual; FNumeroDeParcelas; FValorBSExterno</li><li>VALTABGENER CODTABELA 'INDICE115120'</li></ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT336">TRT336</a>, <a href="#TRT337">TRT337</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-32">JF032</a></p>
+<p><strong>Descrição original:</strong> “dValorAtual := ( dValorRMOriginal * ( Fpercentual / 100 ) ); dValorRAParcelada := ( dValorAtual / FNumeroDeParcelas )”.</p>
+<p><strong>Condições:</strong> FPercentual &gt; 0; FValorBSExterno &gt; 0; tipo ≠ 122/123 para o débito; RA prévia 319/327</p><p><strong>Dados envolvidos:</strong> RESERVAPART, HISTMOVRESERVA, VALTABGENER, BENEFBFCIARIO</p><p><strong>Resultado/Exceção:</strong> <a href="#MSG341">MSG341</a></p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/USaldamento.pas:4665-4669, 5024-5066, 5083-5106, 6263-6271, 7003-7083, 7189-7307, 7446-7463</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+
+<div class="rule-block" id="CADPREV-RN196"><div class="rule-id">RS196 (CADPREV-RN196) — Acerto financeiro mês a mês entre o devido (BS) e o pago</div>
+<div class="rule-desc">Para cada benefício o sistema percorre os meses, do mês final informado até o início (DIB/DIP, nunca antes de 2001/09; inclui o mês 13 do abono), comparando o BS devido no mês (com pro-rata de dias no mês da DIP e de meses no abono, deflacionado pelo INPC anual) com o valor efetivamente pago (histórico HSTBENEFBFCIARIO). Diferença maior que 0,01 vira lançamento de acerto (motivo 3046) com correção monetária pelo INPC acumulado (HSTATRASOBENEF); o mesmo é feito para a contribuição sobre o BS (2% até 2006/08 e 1% depois; contribuição 633) com HSTCONTRIBPREV/HSTATRASOCONTRIB. Lançamentos do mês do lote ficam não enviados (FLGENVIADO 0), os demais como enviados.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul><li>Motivos: acerto 3046, normal 3007 (benefício) / 3003 (contribuição), abono 3008 / 3034</li><li>dIndice = 0.02 / 0.01 (após 2006/08)</li><li>COTACAOMOEDA MOECODIGO 7 (INPC)</li><li>FAnoMesRefProcesso; FAnoMesInicioAcerto</li></ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT336">TRT336</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-32">JF032</a></p>
+<p><strong>Descrição original:</strong> AcertaBeneficioSaldado: While ( sAnoMesAtual &gt;= sAnoMesInicio ).</p>
+<p><strong>Condições:</strong> dDiferencaB &gt; 0.01; sAnoMesAtual &gt; '2006/08'</p><p><strong>Dados envolvidos:</strong> HSTBENEFBFCIARIO, HSTCONTRIBPREV, HSTATRASOBENEF, HSTATRASOCONTRIB, PARAMANTECIPABONO, COTACAOMOEDA, PESSOAPARAM (param 75)</p><p><strong>Resultado/Exceção:</strong> Erros → demonstrativo (<a href="#MSG339">MSG339</a>)</p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/USaldamento.pas:5111-6110, 6115-6371, 6375-6465, 6470-6759, 6766-6920, 8081-8133</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+
+<p><strong>Regras transversais do módulo</strong> (texto completo em <a href="uc401.html">UC401</a>): <a href="uc401.html#CADPREV-RN001">RS001 (CADPREV-RN001) — Dados isolados por fundação</a>, <a href="uc401.html#CADPREV-RN003">RS003 (CADPREV-RN003) — Instituto troca a nomenclatura das telas</a>, <a href="uc401.html#CADPREV-RN005">RS005 (CADPREV-RN005) — Operações registradas no log de operações do TotalPREV</a>, <a href="uc401.html#CADPREV-RN007">RS007 (CADPREV-RN007) — Ciclo de estado do evento</a>, <a href="uc401.html#CADPREV-RN009">RS009 (CADPREV-RN009) — Uma transação de banco por tela de evento</a>. Observação: estas rotinas usam fundação/patrocinadora fixas (1/91008), só a importação do Novo Plano grava log de operações e o controle de transação é próprio (commit por registro/lote).</p>
+</div>
+
+<p><strong>Tratamentos de erro:</strong> <a href="#TRT328">TRT328</a>, <a href="#TRT331">TRT331</a>, <a href="#TRT332">TRT332</a>, <a href="#TRT333">TRT333</a>, <a href="#TRT334">TRT334</a>, <a href="#TRT335">TRT335</a>, <a href="#TRT336">TRT336</a>, <a href="#TRT337">TRT337</a>, <a href="#TRT345">TRT345</a></p>
+<p><strong>Mensagens:</strong> <a href="#MSG331">MSG331</a>, <a href="#MSG335">MSG335</a>, <a href="#MSG336">MSG336</a>, <a href="#MSG337">MSG337</a>, <a href="#MSG338">MSG338</a>, <a href="#MSG339">MSG339</a>, <a href="#MSG340">MSG340</a>, <a href="#MSG341">MSG341</a>, <a href="#MSG342">MSG342</a>, <a href="#MSG343">MSG343</a></p>
+<p><strong>Telas:</strong> Formulário de Saldamento (<code>FSaldamento.dfm</code>); Selecione o Lote para a Concessão ... (<code>FSelecionaLoteFuncef.dfm</code>)</p>
+<p><strong>Dependências:</strong> núcleo em <code>USaldamento.pas</code> (classes TSaldamentoAssociado → TSaldamentoAtivo / TSaldamentoAssistido → TSaldamentoAposentado / TSaldamentoPensionista); seleção de lote em <code>FSelecionaLoteFuncef.pas</code> (CTRLINTERFACE); <code>GetSequence</code> e <code>TrazUltDiaData</code> de units do framework. Os acertos gerados são pagos pela Folha de Benefícios; o benefício saldado/FAB é mantido depois em CONTRIBUICAOPREV (<a href="../contribuicao/uc206.html#PF-06">CONTRIBUICAOPREV JF006 — Portabilidade e Benefício Saldado/FAB</a>).</p>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span> — informações que o repositório não comprova ou que divergem entre fontes. O texto existente foi mantido; os itens abaixo dependem de validação humana.</p>
+<ul>
+<li>Ativo em lote: quando a busca de dados ou a elegibilidade falha, o código só sai no modo individual; no lote segue processando a matrícula (<code>USaldamento.pas:3361-3392</code>).</li>
+<li><code>RetornaValorReserva</code> debita P% da reserva e grava HISTMOVRESERVA a cada chamada; é chamada mais de uma vez para a mesma reserva (113, 114, 125/126) no mesmo processamento (<code>USaldamento.pas:7003-7083, 5388, 5546, 7194, 7447</code>), o que pode descontar o percentual em dobro.</li>
+<li>Vários blocos <code>Except End</code> vazios escondem erros (ex.: <code>USaldamento.pas:3443-3446, 8703</code>); <code>Result := True</code> sobrescreve falha em HSTCONTEVENTOSPR (<code>:1574, 1594</code>); HSTCONTEVENTOSPR grava evento 339 também para ativos (<code>:1415, 1552</code>).</li>
+<li>Constantes fixas no código: fundação 1, patrocinadora 91008, data do evento 01/09/2006, lote padrão 19165, índices 1,09 / 1,011753 / 1,175263 / 1,619123 / 2,8134 / 1,064814, benefício mínimo 2001-2006 (<code>USaldamento.pas:781-831, 5171-5183, 5465-5471, 6074-6077</code>).</li>
+<li>Código de teste em produção: <code>iAnoDIB</code> recebe o mês da DIB para pensionistas (“Teste Renato Visoni”, <code>:5187</code>); variável de depuração em 2008/13 (<code>:5591-5592</code>); lógica de abono e de abatimento inalcançável (<code>:5582, 5712-5823</code>).</li>
+<li><code>ROWNUM = 1 ORDER BY</code> na inclusão do novo benefício não garante escolher o benefício ativo (<code>:7597-7598</code>).</li>
+<li>Sem lote aberto o saldamento de assistidos termina sem mensagem própria (<code>:3829</code>). A fundação passada à seleção de lote é fixa (1), não a do usuário (<code>:781, 3825</code>) — diverge de <a href="uc401.html#CADPREV-RN001">RS001</a>.</li>
+<li>Não há chamada ao log de operações (<code>GravaLogOperacoes</code>) no saldamento — diverge de <a href="uc401.html#CADPREV-RN005">RS005</a>.</li>
+<li>Texto após <code>End.</code> com script manual de desfazer para a pessoa 443569 e tabela de INPC (<code>USaldamento.pas:8729-8860</code>).</li>
+</ul>
+</div>
+<div class="note note-info"><p><strong>Registro original do processo PF-32</strong></p><p><strong>Forms de entrada:</strong> <code>FPrincipal.dfm:8666-8684</code> → <code>FSaldamento.dfm</code> (+ <code>FSelecionaLoteFuncef.dfm</code>)</p><p><strong>Lógica de processamento:</strong> elegibilidade; inscrição/eventos/empréstimos/contribuições/reservas; conversão de benefícios; BS/RA; acerto mês a mês com correção INPC</p><p><strong>Saídas:</strong> demonstrativo e resultado TXT; contadores</p><p><strong>Persistência (tabelas escritas):</strong> ver pós-condições</p><p><strong>Evidência:</strong> <code>CADASTROPREV/Fontes/FSaldamento.pas:85-286</code>; <code>CADASTROPREV/Fontes/USaldamento.pas:723-8726</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+</div>
+
+<div class="pf-block" id="PF-33"><h4>JF033 (PF-33) — Desfazer saldamento</h4>
+<p><strong>Objetivo:</strong> reverter o saldamento de um participante, devolvendo plano, contribuições, benefícios e situações ao estado anterior.</p>
+<p><strong>Necessidade de negócio:</strong> saldamentos gravados por engano ou desistências precisam ser desfeitos sem deixar lançamentos órfãos, desde que a folha ainda não tenha usado os valores.</p>
+<p><strong>Ator / gatilho:</strong> analista de benefícios. Menu <em>Novo Plano › Desfazer saldamento</em> (<code>FPrincipal.dfm:8687-8690</code>; <code>FPrincipal.pas:2739-2743</code>).</p>
+<p><strong>Pré-condições:</strong> participante saldado por <a href="#PF-32">JF032</a> (evento 338 / plano 74 ou evento 339).</p>
+<p><strong>Em termos de negócio:</strong> o saldamento existe e ainda não foi processado na folha.</p>
+<p><strong>Pós-condições:</strong> registros do saldamento excluídos; plano, contribuições, benefícios, ELEGPATRO e PARTPREVPLAN restaurados (commit) — ou nada alterado (rollback).</p>
+<p><strong>Em termos de negócio:</strong> o participante volta à situação de antes do saldamento.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li><strong>Usuário:</strong> clica “Seleciona Participante” e escolhe pela matrícula/nome. [<a href="#CADPREV-RN197">RS197</a>]<br><code>CADASTROPREV/Fontes/FCancSaldamento.pas:214-240; CADASTROPREV/Fontes/FCancSaldamento.dfm:180-233</code> <span class="ev ev-comprovado">COMPROVADO</span></li>
+<li><strong>Usuário:</strong> confirma; o sistema pergunta conforme o tipo (ativo, aposentado, pensionista). [<a href="#CADPREV-RN197">RS197</a>]<br><code>CADASTROPREV/Fontes/FCancSaldamento.pas:101-137</code> <span class="ev ev-comprovado">COMPROVADO</span></li>
+<li><strong>Sistema (ativo):</strong> exclui o plano 74 e reativa o plano 2 numa transação. [<a href="#CADPREV-RN198">RS198</a>]<br><code>CADASTROPREV/Fontes/FCancSaldamento.pas:243-385</code> <span class="ev ev-comprovado">COMPROVADO</span></li>
+<li><strong>Sistema (assistido):</strong> localiza o evento 339, verifica movimentos e preparo na folha, exclui lançamentos e restaura benefícios e situações. [<a href="#CADPREV-RN199">RS199</a>]<br><code>CADASTROPREV/Fontes/FCancSaldamento.pas:387-990</code> <span class="ev ev-comprovado">COMPROVADO</span></li>
+<li><strong>Sistema:</strong> mostra o resultado e limpa a tela. [<a href="#CADPREV-RN197">RS197</a>]<br><code>CADASTROPREV/Fontes/FCancSaldamento.pas:144-161</code> <span class="ev ev-comprovado">COMPROVADO</span></li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Desfazer saldamento</td><td>Reverter o saldamento</td><td>Participante</td><td>Exclusões e restaurações em transação</td><td>Saldamento desfeito</td><td><a href="#CADPREV-RN197">RS197</a>, <a href="#CADPREV-RN198">RS198</a>, <a href="#CADPREV-RN199">RS199</a></td><td><a href="#MSG344">MSG344</a>, <a href="#MSG345">MSG345</a>, <a href="#MSG346">MSG346</a>, <a href="#MSG347">MSG347</a>, <a href="#MSG348">MSG348</a></td><td>Desfazer saldamento</td></tr>
+</tbody></table></div>
+<div class="jf-rules">
+<p><strong>Regras de negócio da jornada:</strong> 3 regra(s) — texto completo abaixo.</p>
+
+<div class="rule-block" id="CADPREV-RN197"><div class="rule-id">RS197 (CADPREV-RN197) — Desfazer saldamento escolhe o tratamento pelo tipo de situação do participante</div>
+<div class="rule-desc">O usuário seleciona o participante/beneficiário (busca por matrícula e nome em DEPENTIT/ELEGPATRO/PARTPREVPLAN/SITPART) e confirma. Situação AT, MA, MP, MS ou MT → desfazer de ATIVO; AS → desfazer de APOSENTADO; CA → desfazer de PENSIONISTA. Cada caso pede confirmação própria. Ao final mostra “Saldamento desfeito.” ou a mensagem de erro do passo que falhou, e limpa a tela. A validação de preenchimento e de contribuições já recebidas existe, mas a chamada está comentada.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul><li>SITPART.FLGINTERNO (MS_Part.ValoresChave[4])</li><li>IDPessoa, IDTitular, IDPatro</li></ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT338">TRT338</a>, <a href="#TRT340">TRT340</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-33">JF033</a></p>
+<p><strong>Descrição original:</strong> bbtnConfirmarClick: “Deseja realmente desfazer o saldamento do participante ATIVO indicado?”.</p>
+<p><strong>Condições:</strong> flgInterno ∈ {AT, MA, MP, MS, MT} / 'AS' / 'CA'; outra situação → nenhuma ação, mas mostra “Saldamento desfeito.”</p><p><strong>Dados envolvidos:</strong> DEPENTIT, PESSOA, ELEGPATRO, PARTPREVPLAN, SITPART</p><p><strong>Resultado/Exceção:</strong> <a href="#MSG344">MSG344</a>, <a href="#MSG345">MSG345</a>, <a href="#MSG348">MSG348</a></p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/FCancSaldamento.pas:101-162, 164-210, 214-240</code>; <code>CADASTROPREV/Fontes/FCancSaldamento.dfm:180-233</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+
+<div class="rule-block" id="CADPREV-RN198"><div class="rule-id">RS198 (CADPREV-RN198) — Desfazer saldamento de ativo remove o plano 74 e reativa o plano 2</div>
+<div class="rule-desc">Numa transação: exclui as contribuições e reservas do plano 74, as associações de contribuição (HSTCONTEVENTOSPR) e os eventos do plano 74 ou do evento 338, e a inscrição no plano 74; reativa a inscrição no plano 2 (situação no plano 1, sem data de cancelamento, FLGDESATIVADO 0) e as contribuições do plano 2 (FLGCOBRA 1, DATAFINAL nula); devolve ao plano 2 os descontos pendentes na TMPDESC e os contratos de empréstimo do plano 74. Qualquer erro faz rollback e devolve o texto do passo.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul><li>IDPLANOPREV 74 / 2; IDEVENTOGERADOR 338; IDPATRO 91008</li></ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT340">TRT340</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-33">JF033</a></p>
+<p><strong>Descrição original:</strong> DesfazSaldamentoAtivo.</p>
+<p><strong>Condições:</strong> —</p><p><strong>Dados envolvidos:</strong> CONTRIBPREVPARTP, RESERVAPART, HSTCONTEVENTOSPR, EVENTOSPREV, PARTPREVPLAN, TMPDESC, CONTRATOEMPTMO</p><p><strong>Resultado/Exceção:</strong> <a href="#MSG348">MSG348</a></p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/FCancSaldamento.pas:243-385</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+
+<div class="rule-block" id="CADPREV-RN199"><div class="rule-id">RS199 (CADPREV-RN199) — Desfazer saldamento de assistido só antes do pagamento pela folha</div>
+<div class="rule-desc">Localiza o evento 339 do titular (sem ele, erro). Reativa as contribuições desassociadas e exclui o evento. Para cada beneficiário: se o último movimento de benefício (MOVBENEF tipos 1, 4, 7) não for do saldamento, pede confirmação para continuar; se já existir histórico do benefício em lote posterior ao mês de referência da interface (preparo na folha), recusa. Exclui rubricas, históricos de contribuição/benefício e de atraso (motivo 3046), restaura o benefício antigo (DATAFINAL/situação) e exclui o benefício, processo (evento 339), prévia e TMPDESC do saldamento, MOVBENEF, PESSOAPARAM 75 e contribuições 633/697 do núcleo; volta TMPDESC e empréstimos ao plano antigo; restaura ELEGPATRO e PARTPREVPLAN (e, no REB, reativa o plano antigo).</div>
+<p><strong>Campos de dados:</strong></p>
+<ul><li>EVENTOSPREV IDEVENTOGERADOR 339 (IDSITFUNCATUAL, IDSITPARTATUAL, IDSITPLANOATUAL, DATAVOLTA)</li><li>MOVBENEF.TIPOMOV IN (1,4,7)</li><li>HSTBENEFBFCIARIO.MESREFERENCIA &gt; CTRLINTERFACE.MESREFERENCIA</li><li>sContribSaldamento = 259, 633, 500</li></ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT339">TRT339</a>, <a href="#TRT340">TRT340</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-33">JF033</a></p>
+<p><strong>Descrição original:</strong> “Verifica se o participante possui preparo na folha”.</p>
+<p><strong>Condições:</strong> qryMOVBENEF vazio → confirmação; histórico em lote aberto → bloqueio</p><p><strong>Dados envolvidos:</strong> EVENTOSPREV, HSTCONTEVENTOSPR, CONTRIBPREVPARTP, RUBRICAINDIV, HSTATRASOCONTRIB, HSTCONTRIBPREV, HSTATRASOBENEF, HSTBENEFBFCIARIO, BENEFBFCIARIO, PROCESSOBENEF, BENEFPLANOPART, BFCIARIOTITPLAN, PREVIA, TMPDESC, MOVBENEF, PESSOAPARAM, CONTRIBPREVNUCLEO, CONTRATOEMPTMO, ELEGPATRO, PARTPREVPLAN</p><p><strong>Resultado/Exceção:</strong> <a href="#MSG346">MSG346</a>, <a href="#MSG347">MSG347</a>, <a href="#MSG348">MSG348</a></p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/FCancSaldamento.pas:387-990</code>; <code>CADASTROPREV/Fontes/FCancSaldamento.dfm:343-470</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+
+<p><strong>Regras transversais do módulo</strong> (texto completo em <a href="uc401.html">UC401</a>): <a href="uc401.html#CADPREV-RN001">RS001 (CADPREV-RN001) — Dados isolados por fundação</a>, <a href="uc401.html#CADPREV-RN003">RS003 (CADPREV-RN003) — Instituto troca a nomenclatura das telas</a>, <a href="uc401.html#CADPREV-RN005">RS005 (CADPREV-RN005) — Operações registradas no log de operações do TotalPREV</a>, <a href="uc401.html#CADPREV-RN007">RS007 (CADPREV-RN007) — Ciclo de estado do evento</a>, <a href="uc401.html#CADPREV-RN009">RS009 (CADPREV-RN009) — Uma transação de banco por tela de evento</a>. Observação: estas rotinas usam fundação/patrocinadora fixas (1/91008), só a importação do Novo Plano grava log de operações e o controle de transação é próprio (commit por registro/lote).</p>
+</div>
+
+<p><strong>Tratamentos de erro:</strong> <a href="#TRT338">TRT338</a>, <a href="#TRT339">TRT339</a>, <a href="#TRT340">TRT340</a></p>
+<p><strong>Mensagens:</strong> <a href="#MSG344">MSG344</a>, <a href="#MSG345">MSG345</a>, <a href="#MSG346">MSG346</a>, <a href="#MSG347">MSG347</a>, <a href="#MSG348">MSG348</a>, <a href="#MSG355">MSG355</a></p>
+<p><strong>Telas:</strong> Desfazer saldamento (<code>FCancSaldamento.dfm</code>)</p>
+<p><strong>Dependências:</strong> desfaz o que <a href="#PF-32">JF032</a> gravou; usa CTRLINTERFACE (lote da folha) e <code>FazQuery</code>/<code>TratarErro</code> do framework.</p>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span> — informações que o repositório não comprova ou que divergem entre fontes. O texto existente foi mantido; os itens abaixo dependem de validação humana.</p>
+<ul>
+<li>Validação de preenchimento e de contribuições recebidas está comentada (<code>FCancSaldamento.pas:109, 164-210</code>): é possível confirmar sem participante; para situações fora de AT/MA/MP/MS/MT/AS/CA aparece “Saldamento desfeito.” sem nada ser feito (<code>:114-146</code>).</li>
+<li>Em três pontos o tratamento de erro chama <code>TratarErro</code> e <code>Exit</code> dentro do bloco protegido, sem rollback (<code>:612-616, 669-673, 836-840</code>): a transação fica aberta.</li>
+<li>A seleção de participante não filtra por fundação nem por estar saldado (<code>FCancSaldamento.dfm:180-233</code>).</li>
+<li>Sem registro no log de operações (<code>GravaLogOperacoes</code> não é chamado).</li>
+<li>Constantes 91008, 74, 2, 338, 339, contribuições 259/633/500/697 fixas.</li>
+</ul>
+</div>
+<div class="note note-info"><p><strong>Registro original do processo PF-33</strong></p><p><strong>Forms de entrada:</strong> <code>FPrincipal.dfm:8687-8690</code> → <code>FCancSaldamento.dfm</code></p><p><strong>Lógica de processamento:</strong> seleção; confirmação; desfazer ativo ou assistido em transação</p><p><strong>Saídas:</strong> mensagens</p><p><strong>Persistência (tabelas escritas):</strong> ver regras RS198/RS199</p><p><strong>Evidência:</strong> <code>CADASTROPREV/Fontes/FCancSaldamento.pas:101-990</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+</div>
+
+<div class="pf-block" id="PF-34"><h4>JF034 (PF-34) — Importação de reservas da COATE</h4>
+<p><strong>Objetivo:</strong> carregar no cadastro as reservas de saldamento calculadas externamente (reserva matemática RM 113 e reserva/valor do benefício saldado 114).</p>
+<p><strong>Necessidade de negócio:</strong> o valor do benefício saldado e a reserva de cada assistido vêm de cálculo atuarial externo (COATE) e precisam ser carregados antes do saldamento.</p>
+<p><strong>Ator / gatilho:</strong> analista de benefícios/atuária. Menu <em>Novo Plano › Importação de Reservas da COATE</em> (<code>FPrincipal.dfm:8691-8694</code>; <code>FPrincipal.pas:2745-2749</code>).</p>
+<p><strong>Pré-condições:</strong> pessoas com reservas 113 e 114 já criadas em RESERVAPART; arquivo no layout de posições fixas.</p>
+<p><strong>Em termos de negócio:</strong> o cálculo atuarial foi entregue em arquivo e as reservas de saldamento existem para cada pessoa.</p>
+<p><strong>Pós-condições:</strong> HISTMOVRESERVA (saída e entrada por reserva), RESERVAPART.VALORRESERVA e DATAULTALIM atualizados; ocorrências na tela.</p>
+<p><strong>Em termos de negócio:</strong> as reservas de saldamento ficam com os valores do cálculo atuarial e com o histórico da troca.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li><strong>Usuário:</strong> indica o arquivo de reservas e a Data de Referência e avança no assistente. [<a href="#CADPREV-RN200">RS200</a>]<br><code>CADASTROPREV/Fontes/FExecImportaReserva.pas:148-154, 593-599</code> <span class="ev ev-comprovado">COMPROVADO</span></li>
+<li><strong>Sistema:</strong> valida os campos e conta as linhas do arquivo. [<a href="#CADPREV-RN200">RS200</a>]<br><code>CADASTROPREV/Fontes/FExecImportaReserva.pas:115-144, 166-176, 435-460</code> <span class="ev ev-comprovado">COMPROVADO</span></li>
+<li><strong>Sistema:</strong> para cada linha lê matrícula e valores, localiza o associado e as reservas 113/114. [<a href="#CADPREV-RN200">RS200</a>]<br><code>CADASTROPREV/Fontes/FExecImportaReserva.pas:201-248, 463-589</code> <span class="ev ev-comprovado">COMPROVADO</span></li>
+<li><strong>Sistema:</strong> em transação por linha grava saída/entrada no histórico e atualiza as duas reservas; registra a linha processada. [<a href="#CADPREV-RN200">RS200</a>]<br><code>CADASTROPREV/Fontes/FExecImportaReserva.pas:252-321, 345-430</code> <span class="ev ev-comprovado">COMPROVADO</span></li>
+<li><strong>Sistema:</strong> registra o término; o usuário pode interromper pela janela de progresso. [<a href="#CADPREV-RN200">RS200</a>]<br><code>CADASTROPREV/Fontes/FExecImportaReserva.pas:209-222, 331-338</code> <span class="ev ev-comprovado">COMPROVADO</span></li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Importar reservas</td><td>Atualizar reservas 113/114</td><td>Arquivo e Data de Referência</td><td>Lê, valida, grava histórico e saldo</td><td>Reservas atualizadas; ocorrências</td><td><a href="#CADPREV-RN200">RS200</a></td><td><a href="#MSG349">MSG349</a>, <a href="#MSG350">MSG350</a>, <a href="#MSG351">MSG351</a>, <a href="#MSG352">MSG352</a>, <a href="#MSG353">MSG353</a></td><td>Importação de Reservas da COATE</td></tr>
+</tbody></table></div>
+<div class="jf-rules">
+<p><strong>Regras de negócio da jornada:</strong> 1 regra(s) — texto completo abaixo.</p>
+
+<div class="rule-block" id="CADPREV-RN200"><div class="rule-id">RS200 (CADPREV-RN200) — Importação de reservas da COATE substitui as reservas RM (113) e BS (114)</div>
+<div class="rule-desc">O usuário informa o arquivo e a data de referência (obrigatórios). Cada linha traz matrícula (1-7), valor da reserva (8-20) e valor do benefício (21-33), em centavos (divididos por 100). A matrícula precisa identificar um único dependente/titular em DEPENTIT e a pessoa precisa ter exatamente uma reserva 113 e uma 114. Para cada reserva, numa transação por linha: grava em HISTMOVRESERVA uma saída do saldo anterior (valor negativo) e uma entrada do novo valor (mês de referência = AAAA/MM da data), e atualiza RESERVAPART.VALORRESERVA (113 = valor da reserva; 114 = valor do benefício) com DATAULTALIM = SYSDATE. Ocorrências vão para a aba “Ocorrências”; os processados para a aba de resultado.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul><li>Linha: matrícula 1-7; valor reserva 8-20; valor benefício 21-33 (÷100)</li><li>edtDataRef (Data de Referência)</li><li>HISTMOVRESERVA.FLGENTRADA 0/1, MESREFERENCIA, FLGPROCEDENCIA… (SEQHISTMOVRESERVA)</li></ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT341">TRT341</a>, <a href="#TRT342">TRT342</a>, <a href="#TRT343">TRT343</a>, <a href="#TRT344">TRT344</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-34">JF034</a></p>
+<p><strong>Descrição original:</strong> GravaReserva(IDPessoa, 113 | 114, …).</p>
+<p><strong>Condições:</strong> RecordCount = 1 em DEPENTIT e em RESERVAPART (113 e 114)</p><p><strong>Dados envolvidos:</strong> DEPENTIT, RESERVAPART, HISTMOVRESERVA</p><p><strong>Resultado/Exceção:</strong> <a href="#MSG349">MSG349</a>–<a href="#MSG353">MSG353</a></p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/FExecImportaReserva.pas:115-144, 158-341, 345-430, 463-589</code>; <code>CADASTROPREV/Fontes/FExecImportaReserva.dfm:228-440</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+
+<p><strong>Regras transversais do módulo</strong> (texto completo em <a href="uc401.html">UC401</a>): <a href="uc401.html#CADPREV-RN001">RS001 (CADPREV-RN001) — Dados isolados por fundação</a>, <a href="uc401.html#CADPREV-RN003">RS003 (CADPREV-RN003) — Instituto troca a nomenclatura das telas</a>, <a href="uc401.html#CADPREV-RN005">RS005 (CADPREV-RN005) — Operações registradas no log de operações do TotalPREV</a>, <a href="uc401.html#CADPREV-RN007">RS007 (CADPREV-RN007) — Ciclo de estado do evento</a>, <a href="uc401.html#CADPREV-RN009">RS009 (CADPREV-RN009) — Uma transação de banco por tela de evento</a>. Observação: estas rotinas usam fundação/patrocinadora fixas (1/91008), só a importação do Novo Plano grava log de operações e o controle de transação é próprio (commit por registro/lote).</p>
+</div>
+
+<p><strong>Tratamentos de erro:</strong> <a href="#TRT341">TRT341</a>, <a href="#TRT342">TRT342</a>, <a href="#TRT343">TRT343</a>, <a href="#TRT344">TRT344</a></p>
+<p><strong>Mensagens:</strong> <a href="#MSG349">MSG349</a>, <a href="#MSG350">MSG350</a>, <a href="#MSG351">MSG351</a>, <a href="#MSG352">MSG352</a>, <a href="#MSG353">MSG353</a></p>
+<p><strong>Telas:</strong> Importação de Reservas da COATE (<code>FExecImportaReserva.dfm</code>)</p>
+<p><strong>Dependências:</strong> assistente base <code>TfrmWizardMT</code> e <code>fProgresso</code> (framework); utilitários <code>uFuncoesFuncef.pas</code> (<code>CompletaInicio</code>/<code>CompletaFim</code>). As reservas carregadas são lidas pelo saldamento (<a href="#PF-32">JF032</a>, <a href="#CADPREV-RN195">RS195</a>).</p>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span> — informações que o repositório não comprova ou que divergem entre fontes. O texto existente foi mantido; os itens abaixo dependem de validação humana.</p>
+<ul>
+<li><code>GravaReserva</code> termina sempre com <code>Result := 0</code> (<code>FExecImportaReserva.pas:425</code>), anulando os códigos -1/-2/-3: falhas de gravação não geram ocorrência nem rollback (MSG353 nunca aparece).</li>
+<li>Quando o associado não é localizado (-4/-5), a rotina segue consultando reservas com o IDPESSOA do registro anterior e pode sobrescrever o código de erro (<code>:516-586</code>).</li>
+<li>Busca de associado por DEPENTIT.MATRICULA e de reservas por pessoa/tipo, sem filtro de plano, patrocinadora ou fundação (<code>FExecImportaReserva.dfm:228-268</code>).</li>
+<li>O significado da sigla COATE não aparece no código (apenas no título).</li>
+<li>Títulos das mensagens citam “Folha de Benefícios” / “Folha” (<code>:136, 218</code>) — tela herdada do módulo de folha.</li>
+</ul>
+</div>
+<div class="note note-info"><p><strong>Registro original do processo PF-34</strong></p><p><strong>Forms de entrada:</strong> <code>FPrincipal.dfm:8691-8694</code> → <code>FExecImportaReserva.dfm</code></p><p><strong>Lógica de processamento:</strong> leitura de layout; localização; histórico + atualização da reserva em transação por linha</p><p><strong>Saídas:</strong> abas de resultado e ocorrências</p><p><strong>Persistência (tabelas escritas):</strong> HISTMOVRESERVA, RESERVAPART</p><p><strong>Evidência:</strong> <code>CADASTROPREV/Fontes/FExecImportaReserva.pas:115-599</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+</div>
+
+<section id="TRT-section"><div class="section-title">6. Tratamentos (TRT)</div>
+<p>Cada tratamento traz a condição, a mensagem exibida, o resultado e a regra/jornada de origem.</p>
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Condição</th><th>Mensagem</th><th>Resultado</th><th>Regra</th><th>Jornada</th></tr></thead><tbody>
+<tr id="TRT321"><td><strong>TRT321</strong></td><td>Arquivo de inscrições não abre ou arquivo .bad não pode ser criado (<code>CADASTROPREV/Fontes/FInscricaoNovoPlano.pas:317-334, 972-977, 1085-1101</code>)</td><td><a href="#MSG323">MSG323</a></td><td>Interrompe sem gravar</td><td><a href="#CADPREV-RN186">RS186</a></td><td><a href="#PF-30">JF030</a></td></tr>
+<tr id="TRT322"><td><strong>TRT322</strong></td><td>Fim da importação / desfazer (sempre) (<code>CADASTROPREV/Fontes/FInscricaoNovoPlano.pas:187-192, 1052-1057</code>)</td><td><a href="#MSG322">MSG322</a></td><td>Mostra início, fim, tempo e nº de registros (título “Importação OK”, inclusive no desfazer)</td><td><a href="#CADPREV-RN186">RS186</a></td><td><a href="#PF-30">JF030</a></td></tr>
+<tr id="TRT323"><td><strong>TRT323</strong></td><td>Linha com campo obrigatório vazio ou inválido (<code>CADASTROPREV/Fontes/FInscricaoNovoPlano.pas:280-288</code>)</td><td><a href="#MSG325">MSG325</a></td><td>Rejeita a linha, grava no .bad, soma em rejeitados</td><td><a href="#CADPREV-RN181">RS181</a></td><td><a href="#PF-30">JF030</a></td></tr>
+<tr id="TRT324"><td><strong>TRT324</strong></td><td>Participante fora do REPLAN/Novo Plano, assistido, funcionário FUNCEF ou titular de dependente assistido (<code>CADASTROPREV/Fontes/FInscricaoNovoPlano.pas:827-871</code>)</td><td><a href="#MSG326">MSG326</a></td><td>Registro com erro, linha no .bad</td><td><a href="#CADPREV-RN182">RS182</a></td><td><a href="#PF-30">JF030</a></td></tr>
+<tr id="TRT325"><td><strong>TRT325</strong></td><td>Falha em qualquer INSERT/UPDATE/DELETE do registro (<code>CADASTROPREV/Fontes/FInscricaoNovoPlano.pas:412-419, 429-436, 446-453, 537-543, 574-580, 613-620, 651-657, 1165-1328</code>)</td><td><a href="#MSG327">MSG327</a></td><td>Conta erro, grava .bad e segue para a próxima linha (passos anteriores do registro não são desfeitos)</td><td><a href="#CADPREV-RN183">RS183</a></td><td><a href="#PF-30">JF030</a></td></tr>
+<tr id="TRT326"><td><strong>TRT326</strong></td><td>Usuário clica Cancelar durante o processamento (<code>CADASTROPREV/Fontes/FInscricaoNovoPlano.pas:670-680, 995-1001, 1017-1021, 1348-1357</code>)</td><td><a href="#MSG328">MSG328</a></td><td>Rollback do lote corrente e fim do laço</td><td><a href="#CADPREV-RN186">RS186</a></td><td><a href="#PF-30">JF030</a></td></tr>
+<tr id="TRT327"><td><strong>TRT327</strong></td><td>Término com erros ou rejeições (<code>CADASTROPREV/Fontes/FInscricaoNovoPlano.pas:691-708, 1369-1386</code>)</td><td><a href="#MSG329">MSG329</a> / <a href="#MSG330">MSG330</a></td><td>Commit do que foi gravado; resumo no log</td><td><a href="#CADPREV-RN186">RS186</a></td><td><a href="#PF-30">JF030</a></td></tr>
+<tr id="TRT328"><td><strong>TRT328</strong></td><td>Mês ou ano final não preenchido (<code>CADASTROPREV/Fontes/FPreparoSaldamento.pas:105-115; CADASTROPREV/Fontes/FSaldamento.pas:115-125</code>)</td><td><a href="#MSG331">MSG331</a></td><td>Foco no campo; a função sai sem valor e o processamento continua</td><td><a href="#CADPREV-RN188">RS188</a></td><td><a href="#PF-31">JF031</a>, <a href="#PF-32">JF032</a></td></tr>
+<tr id="TRT329"><td><strong>TRT329</strong></td><td>Preparo sem lista de matrículas / erro na seleção (<code>CADASTROPREV/Fontes/uFuncoesSaldamento.pas:81-87, 245-249</code>)</td><td><a href="#MSG332">MSG332</a> / <a href="#MSG333">MSG333</a></td><td>Confirmação para processar toda a base; erro interrompe</td><td><a href="#CADPREV-RN188">RS188</a></td><td><a href="#PF-31">JF031</a></td></tr>
+<tr id="TRT330"><td><strong>TRT330</strong></td><td>Erro ao montar arquivo de matrículas digitadas (<code>CADASTROPREV/Fontes/FPreparoSaldamento.pas:185-189</code>)</td><td><a href="#MSG334">MSG334</a></td><td>Mensagem; segue com nome de arquivo vazio</td><td><a href="#CADPREV-RN188">RS188</a></td><td><a href="#PF-31">JF031</a></td></tr>
+<tr id="TRT331"><td><strong>TRT331</strong></td><td>Saldamento em lote sem arquivo de matrículas (<code>CADASTROPREV/Fontes/FSaldamento.pas:247-253</code>)</td><td><a href="#MSG335">MSG335</a></td><td>Foco no campo; não processa</td><td><a href="#CADPREV-RN190">RS190</a></td><td><a href="#PF-32">JF032</a></td></tr>
+<tr id="TRT332"><td><strong>TRT332</strong></td><td>Arquivo de matrículas não abre (<code>CADASTROPREV/Fontes/USaldamento.pas:740-747</code>)</td><td><a href="#MSG336">MSG336</a></td><td>Mensagem de erro</td><td><a href="#CADPREV-RN191">RS191</a></td><td><a href="#PF-32">JF032</a></td></tr>
+<tr id="TRT333"><td><strong>TRT333</strong></td><td>Dados não encontrados ou participante inelegível (<code>CADASTROPREV/Fontes/USaldamento.pas:3361-3392, 3855-3890, 8484-8503</code>)</td><td><a href="#MSG337">MSG337</a> / <a href="#MSG338">MSG338</a></td><td>Individual: mensagem e sai. Lote: grava no demonstrativo e no resultado; para ativos o processamento segue (ver pontos a validar)</td><td><a href="#CADPREV-RN192">RS192</a></td><td><a href="#PF-32">JF032</a></td></tr>
+<tr id="TRT334"><td><strong>TRT334</strong></td><td>Falha em um passo de gravação da matrícula (<code>CADASTROPREV/Fontes/USaldamento.pas:3397-3438, 3897-3912, 8290-8320, 8466-8533, 940-979</code>)</td><td><a href="#MSG339">MSG339</a></td><td>Grava no demonstrativo; matrícula marcada com erro; rollback da matrícula</td><td><a href="#CADPREV-RN191">RS191</a></td><td><a href="#PF-32">JF032</a></td></tr>
+<tr id="TRT335"><td><strong>TRT335</strong></td><td>Nenhum lote de concessão aberto (assistidos) (<code>CADASTROPREV/Fontes/FSelecionaLoteFuncef.pas:66-72; CADASTROPREV/Fontes/USaldamento.pas:3825-3829</code>)</td><td><a href="#MSG342">MSG342</a></td><td>Sai sem processar e sem outro aviso</td><td><a href="#CADPREV-RN194">RS194</a></td><td><a href="#PF-32">JF032</a></td></tr>
+<tr id="TRT336"><td><strong>TRT336</strong></td><td>Sem INSS a reativar, sem de-para do benefício, diferença de tábuas negativa (<code>CADASTROPREV/Fontes/USaldamento.pas:4730-4733, 4785-4788, 4866-4869, 7419-7422</code>)</td><td><a href="#MSG340">MSG340</a></td><td>Registra no demonstrativo e interrompe o benefício</td><td><a href="#CADPREV-RN194">RS194</a></td><td><a href="#PF-32">JF032</a></td></tr>
+<tr id="TRT337"><td><strong>TRT337</strong></td><td>Percentual de suspensão igual a zero (pensionista) (<code>CADASTROPREV/Fontes/USaldamento.pas:6263-6271</code>)</td><td><a href="#MSG341">MSG341</a></td><td>Mensagem e Abort</td><td><a href="#CADPREV-RN195">RS195</a></td><td><a href="#PF-32">JF032</a></td></tr>
+<tr id="TRT338"><td><strong>TRT338</strong></td><td>Confirmação do desfazer por tipo (<code>CADASTROPREV/Fontes/FCancSaldamento.pas:114-146</code>)</td><td><a href="#MSG344">MSG344</a> / <a href="#MSG345">MSG345</a></td><td>Não → sai; Sim → executa e informa resultado</td><td><a href="#CADPREV-RN197">RS197</a></td><td><a href="#PF-33">JF033</a></td></tr>
+<tr id="TRT339"><td><strong>TRT339</strong></td><td>Benefício movimentado após o saldamento / preparo na folha (<code>CADASTROPREV/Fontes/FCancSaldamento.pas:548-563, 576-598</code>)</td><td><a href="#MSG346">MSG346</a> / <a href="#MSG347">MSG347</a></td><td>Confirmação (Não → rollback) / bloqueio com rollback</td><td><a href="#CADPREV-RN199">RS199</a></td><td><a href="#PF-33">JF033</a></td></tr>
+<tr id="TRT340"><td><strong>TRT340</strong></td><td>Erro em qualquer passo do desfazer (<code>CADASTROPREV/Fontes/FCancSaldamento.pas:376-384, 966-988</code>)</td><td><a href="#MSG348">MSG348</a></td><td>Rollback e mensagem do passo</td><td><a href="#CADPREV-RN198">RS198</a></td><td><a href="#PF-33">JF033</a></td></tr>
+<tr id="TRT341"><td><strong>TRT341</strong></td><td>Arquivo ou data de referência não informados / arquivo vazio (<code>CADASTROPREV/Fontes/FExecImportaReserva.pas:122-140, 171-176</code>)</td><td><a href="#MSG349">MSG349</a> / <a href="#MSG350">MSG350</a></td><td>Foco no campo / interrompe</td><td><a href="#CADPREV-RN200">RS200</a></td><td><a href="#PF-34">JF034</a></td></tr>
+<tr id="TRT342"><td><strong>TRT342</strong></td><td>Erro de leitura da linha, associado ou reserva não localizado/duplicado (<code>CADASTROPREV/Fontes/FExecImportaReserva.pas:226-248, 463-589</code>)</td><td><a href="#MSG352">MSG352</a></td><td>Ocorrência na aba Ocorrências; linha ignorada</td><td><a href="#CADPREV-RN200">RS200</a></td><td><a href="#PF-34">JF034</a></td></tr>
+<tr id="TRT343"><td><strong>TRT343</strong></td><td>Erro na gravação da reserva (<code>CADASTROPREV/Fontes/FExecImportaReserva.pas:265-310, 425</code>)</td><td><a href="#MSG353">MSG353</a></td><td>Rollback da linha e ocorrência (na prática não dispara — ver pontos a validar)</td><td><a href="#CADPREV-RN200">RS200</a></td><td><a href="#PF-34">JF034</a></td></tr>
+<tr id="TRT344"><td><strong>TRT344</strong></td><td>Usuário cancela a importação (<code>CADASTROPREV/Fontes/FExecImportaReserva.pas:212-222</code>)</td><td><a href="#MSG351">MSG351</a></td><td>Interrompe o laço</td><td><a href="#CADPREV-RN200">RS200</a></td><td><a href="#PF-34">JF034</a></td></tr>
+<tr id="TRT345"><td><strong>TRT345</strong></td><td>Escolha do lote de concessão (<code>CADASTROPREV/Fontes/FSelecionaLoteFuncef.pas:112-125</code>)</td><td><a href="#MSG343">MSG343</a></td><td>Não → Abort (permanece na lista)</td><td><a href="#CADPREV-RN194">RS194</a></td><td><a href="#PF-32">JF032</a></td></tr>
+</tbody></table></div>
+</section>
+
+<section id="MSG-section"><div class="section-title">7. Mensagens (MSG)</div>
+<p>Texto copiado do código (grafia original; “&lt;…&gt;” indica valor variável e “\n” quebra de linha).</p>
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Texto</th><th>Tipo</th><th>Origem</th><th>Jornada</th></tr></thead><tbody>
+<tr id="MSG321"><td><strong>MSG321</strong></td><td>“O arquivo &lt;arquivo&gt; não foi encontrado no caminho especificado. Verifique. ”</td><td>Erro</td><td><code>CADASTROPREV/Fontes/FInscricaoNovoPlano.pas:160</code></td><td><a href="#PF-30">JF030</a></td></tr>
+<tr id="MSG322"><td><strong>MSG322</strong></td><td>“Inicio.: &lt;hora&gt; / Final .: &lt;hora&gt; / Tempo .: &lt;tempo&gt; / Número de Registros.: &lt;n&gt; (título “Importação OK”)”</td><td>Informação</td><td><code>CADASTROPREV/Fontes/FInscricaoNovoPlano.pas:187-192, 1052-1057</code></td><td><a href="#PF-30">JF030</a></td></tr>
+<tr id="MSG323"><td><strong>MSG323</strong></td><td>“   Erro ao abrir o arquivo de inscrições do Novo Plano. /    Erro criar arquivo BAD.”</td><td>Erro (log)</td><td><code>CADASTROPREV/Fontes/FInscricaoNovoPlano.pas:321, 331, 976, 1089, 1099</code></td><td><a href="#PF-30">JF030</a></td></tr>
+<tr id="MSG324"><td><strong>MSG324</strong></td><td>“Importando arquivo de inscrições Novo Plano.”</td><td>Informação (rótulo)</td><td><code>CADASTROPREV/Fontes/FInscricaoNovoPlano.pas:177, 1042</code></td><td><a href="#PF-30">JF030</a></td></tr>
+<tr id="MSG325"><td><strong>MSG325</strong></td><td>“Linha &lt;n&gt;, Matrícula &lt;m&gt; - ( Matrícula em branco,Nome em branco,CPF em branco,Sexo em branco,Sexo inválido &#x27;&lt;x&gt;&#x27; ,Data de nascimento em branco,Percentual em branco )”</td><td>Erro (log)</td><td><code>CADASTROPREV/Fontes/FInscricaoNovoPlano.pas:236-284</code></td><td><a href="#PF-30">JF030</a></td></tr>
+<tr id="MSG326"><td><strong>MSG326</strong></td><td>“Linha &lt;n&gt;, Matrícula &lt;m&gt; - É participante do plano &lt;p&gt;, não do Replan(2). / … não do NovoPlano(74). / - Participante Assistido. / - Funcionário Funcef. / - Titular de Dependente Assistido.”</td><td>Erro (log)</td><td><code>CADASTROPREV/Fontes/FInscricaoNovoPlano.pas:829, 836, 845, 854, 867</code></td><td><a href="#PF-30">JF030</a></td></tr>
+<tr id="MSG327"><td><strong>MSG327</strong></td><td>“Linha &lt;n&gt;, Matrícula &lt;m&gt; - Erro ao inserir evento de saldamento. / Erro ao suspender contribuições. / Erro ao atualizar registro Replan. / Erro ao inserir como dependente. / Erro ao inserir Depentit. / Erro ao inserir PessoaFisica. / Erro ao inserir Participante. / Erro ao inserir evento de inscrição. / Erro ao inserir contribuições. / Erro ao inserir reservas. (desfazer: Erro ao excluir …, Erro ao reativar contribuições.)”</td><td>Erro (log)</td><td><code>CADASTROPREV/Fontes/FInscricaoNovoPlano.pas:415, 432, 449, 466, 479, 495, 510, 540, 577, 616, 654, 1169-1328</code></td><td><a href="#PF-30">JF030</a></td></tr>
+<tr id="MSG328"><td><strong>MSG328</strong></td><td>“PROCESSO CANCELADO PELO USUÁRIO”</td><td>Informação (log)</td><td><code>CADASTROPREV/Fontes/FInscricaoNovoPlano.pas:676, 998, 1354</code></td><td><a href="#PF-30">JF030</a></td></tr>
+<tr id="MSG329"><td><strong>MSG329</strong></td><td>“Ocorreram alguns erros durante o processo. (log: Ocorreram &lt;e&gt; erros e &lt;r&gt; rejeições no processo.)”</td><td>Aviso</td><td><code>CADASTROPREV/Fontes/FInscricaoNovoPlano.pas:696-698, 1374-1376</code></td><td><a href="#PF-30">JF030</a></td></tr>
+<tr id="MSG330"><td><strong>MSG330</strong></td><td>“Processado com sucesso. (log: Processo efetuado com sucesso. Arquivo com &lt;n&gt; registros.)”</td><td>Informação</td><td><code>CADASTROPREV/Fontes/FInscricaoNovoPlano.pas:704-706, 1382-1384</code></td><td><a href="#PF-30">JF030</a></td></tr>
+<tr id="MSG331"><td><strong>MSG331</strong></td><td>“Mês final não preenchido.  / Ano final não preenchido. ”</td><td>Erro</td><td><code>CADASTROPREV/Fontes/FPreparoSaldamento.pas:106, 112; CADASTROPREV/Fontes/FSaldamento.pas:116, 122</code></td><td><a href="#PF-31">JF031</a>, <a href="#PF-32">JF032</a></td></tr>
+<tr id="MSG332"><td><strong>MSG332</strong></td><td>“Lista de matriculas não informada. Sistema irá processar todos os registros da base.\nEste processo será demorado, Confirma ?”</td><td>Confirmação</td><td><code>CADASTROPREV/Fontes/uFuncoesSaldamento.pas:83-85</code></td><td><a href="#PF-31">JF031</a></td></tr>
+<tr id="MSG333"><td><strong>MSG333</strong></td><td>“Erro ao pesquisar pessoas para processar. ”</td><td>Erro</td><td><code>CADASTROPREV/Fontes/uFuncoesSaldamento.pas:247</code></td><td><a href="#PF-31">JF031</a></td></tr>
+<tr id="MSG334"><td><strong>MSG334</strong></td><td>“Erro ao tentar processar arquivo de matriculas. ”</td><td>Erro</td><td><code>CADASTROPREV/Fontes/FPreparoSaldamento.pas:187</code></td><td><a href="#PF-31">JF031</a></td></tr>
+<tr id="MSG335"><td><strong>MSG335</strong></td><td>“Informe o arquivo de matriculas. ”</td><td>Erro</td><td><code>CADASTROPREV/Fontes/FSaldamento.pas:250</code></td><td><a href="#PF-32">JF032</a></td></tr>
+<tr id="MSG336"><td><strong>MSG336</strong></td><td>“Erro ao abrir arquivo de matriculas. ”</td><td>Erro</td><td><code>CADASTROPREV/Fontes/USaldamento.pas:745</code></td><td><a href="#PF-32">JF032</a></td></tr>
+<tr id="MSG337"><td><strong>MSG337</strong></td><td>“Erro na matricula &lt;m&gt;. Mensagem: &lt;msg&gt; / Matricula &lt;m&gt; não passou na elegibilidade. Mensagem: &lt;msg&gt; / Matricula &lt;m&gt;, beneficiário &lt;nome&gt;  não passou na elegibilidade. Mensagem: &lt;msg&gt; (lote: &lt;m&gt;   ERRO: &lt;msg&gt;)”</td><td>Erro</td><td><code>CADASTROPREV/Fontes/USaldamento.pas:3363, 3369-3371, 3379, 3857, 3878, 8489-8490, 946</code></td><td><a href="#PF-32">JF032</a></td></tr>
+<tr id="MSG338"><td><strong>MSG338</strong></td><td>“POSSUI BENEFICIO DE SUPLEMENTAÇÂO ATIVA. / SALDAMENTO JÁ PROCESSADO PARA ESSA MATRICULA. / NÃO POSSUI BENEFICIO ATIVO. / POSSUI ENVIO NA TMPDESC . / Dados da matricula não encontrada. / Dados do Grupo Familiar da matricula não encontrada.”</td><td>Erro</td><td><code>CADASTROPREV/Fontes/USaldamento.pas:1038, 1044, 8234, 8242, 8264, 8390, 8411, 8441, 1142, 3804, 8623</code></td><td><a href="#PF-32">JF032</a></td></tr>
+<tr id="MSG339"><td><strong>MSG339</strong></td><td>“ERRO AO GRAVAR DADOS DA INSCRICAO NO PLANO DA MATRICULA -&gt; &lt;m&gt; COM A MENSAGEM: &lt;msg&gt; (variantes: DOS PLANOS / DOS EVENTOS / DOS EMPRÉSTIMOS / DOS CONTRIBUIÇÕES / DAS RESERVAS / RUBRICAS DE PECÚLIO / ERRO AO PROCESSAR BENEFICIOS / ERRO AO FAZER ACERTO FINANCEIRO / ERRO AO GRAVAR DIFERNÇA DE BENEFICIO NO HISTÓRICO …)”</td><td>Erro (demonstrativo)</td><td><code>CADASTROPREV/Fontes/USaldamento.pas:3399, 3408, 3417, 3426, 3435, 3899, 3908, 8292, 8301, 8310, 8319, 4747, 4976, 5058, 5914, 6032</code></td><td><a href="#PF-32">JF032</a></td></tr>
+<tr id="MSG340"><td><strong>MSG340</strong></td><td>“NÃO ENCONTROU INSS PARA REATIVAR  / NÃO ENCONTROU DE-PARA PARA O BENEFICIO -&gt; &lt;id&gt; / DIFERENÇA ENTRE TÁBUAS É NEGATIVA.”</td><td>Erro (demonstrativo)</td><td><code>CADASTROPREV/Fontes/USaldamento.pas:4732, 4868, 4787, 7421</code></td><td><a href="#PF-32">JF032</a></td></tr>
+<tr id="MSG341"><td><strong>MSG341</strong></td><td>“Percentual de suspensão é igual a zero!”</td><td>Erro</td><td><code>CADASTROPREV/Fontes/USaldamento.pas:6269</code></td><td><a href="#PF-32">JF032</a></td></tr>
+<tr id="MSG342"><td><strong>MSG342</strong></td><td>“Não existe lote de concessão aberto no momento. Verifique.”</td><td>Informação</td><td><code>CADASTROPREV/Fontes/FSelecionaLoteFuncef.pas:68</code></td><td><a href="#PF-32">JF032</a></td></tr>
+<tr id="MSG343"><td><strong>MSG343</strong></td><td>“Confirma o Lote Nº &lt;id&gt; referente a &quot;&lt;descrição&gt;&quot; ?”</td><td>Confirmação</td><td><code>CADASTROPREV/Fontes/FSelecionaLoteFuncef.pas:114-116</code></td><td><a href="#PF-32">JF032</a></td></tr>
+<tr id="MSG344"><td><strong>MSG344</strong></td><td>“Deseja realmente desfazer o saldamento do participante ATIVO indicado? / … do participante APOSENTADO indicado? / … do PENSIONISTA indicado?”</td><td>Confirmação</td><td><code>CADASTROPREV/Fontes/FCancSaldamento.pas:117, 126, 135</code></td><td><a href="#PF-33">JF033</a></td></tr>
+<tr id="MSG345"><td><strong>MSG345</strong></td><td>“Saldamento desfeito.”</td><td>Informação</td><td><code>CADASTROPREV/Fontes/FCancSaldamento.pas:146</code></td><td><a href="#PF-33">JF033</a></td></tr>
+<tr id="MSG346"><td><strong>MSG346</strong></td><td>“Esse benefício foi movimentado após o saldamento. \nDeseja realmente continuar o processo? ”</td><td>Confirmação</td><td><code>CADASTROPREV/Fontes/FCancSaldamento.pas:550-552</code></td><td><a href="#PF-33">JF033</a></td></tr>
+<tr id="MSG347"><td><strong>MSG347</strong></td><td>“Participante já possui um preparo na folha, no lote &lt;n&gt; / Erro ao desfazer saldamento; Benefício foi movimentado após saldamento”</td><td>Erro</td><td><code>CADASTROPREV/Fontes/FCancSaldamento.pas:576, 595, 555</code></td><td><a href="#PF-33">JF033</a></td></tr>
+<tr id="MSG348"><td><strong>MSG348</strong></td><td>“Erro ao excluir contribuições associadas ao participante no saldamento / Erro ao excluir Reservas associadas ao participante no saldamento / Erro ao excluir evento de saldamento / Erro ao atualizar dados previdenciários do novo anterior / Não foi encontrado eventos de saldamento / Não foi encontrado nenhum beneficiário / Erro ao excluir as ribrucas individuais / … (texto do passo que falhou)”</td><td>Erro</td><td><code>CADASTROPREV/Fontes/FCancSaldamento.pas:252-339, 417-825</code></td><td><a href="#PF-33">JF033</a></td></tr>
+<tr id="MSG349"><td><strong>MSG349</strong></td><td>“É necessário indicar o Arquivo de reservas a importar! / É necessário indicar a Data de Referência!”</td><td>Aviso</td><td><code>CADASTROPREV/Fontes/FExecImportaReserva.pas:123, 128, 136</code></td><td><a href="#PF-34">JF034</a></td></tr>
+<tr id="MSG350"><td><strong>MSG350</strong></td><td>“Erro ao abrir arquivo, ou arquivo vazio!”</td><td>Erro</td><td><code>CADASTROPREV/Fontes/FExecImportaReserva.pas:173</code></td><td><a href="#PF-34">JF034</a></td></tr>
+<tr id="MSG351"><td><strong>MSG351</strong></td><td>“Processo interrompido pelo usuário.”</td><td>Informação</td><td><code>CADASTROPREV/Fontes/FExecImportaReserva.pas:215, 218</code></td><td><a href="#PF-34">JF034</a></td></tr>
+<tr id="MSG352"><td><strong>MSG352</strong></td><td>“Erro na leitura da matrícula / Erro na leitura do valor da reserva / Erro na leitura do valor do benefício / Não foi localizado associado para a matrícula / Foi localizado mais de um associado para a matrícula / Não foi localizada reserva matemática para saldamento / Inconsistência na reserva matemática para saldamento / Não foi localizada reserva referente ao benefício saldado / Inconsistência na reserva referente ao benefício saldado”</td><td>Erro (ocorrência)</td><td><code>CADASTROPREV/Fontes/FExecImportaReserva.pas:231-239</code></td><td><a href="#PF-34">JF034</a></td></tr>
+<tr id="MSG353"><td><strong>MSG353</strong></td><td>“Erro ao inserir movimentação de saída/entrada da reserva (matemática | benefício saldado) / Erro ao atualizar saldo da reserva (matemática | benefício saldado)”</td><td>Erro (ocorrência)</td><td><code>CADASTROPREV/Fontes/FExecImportaReserva.pas:270-272, 299-301</code></td><td><a href="#PF-34">JF034</a></td></tr>
+<tr id="MSG354"><td><strong>MSG354</strong></td><td>“ ERRO AO CORRIGIR VALOR PELOS INPC  /  ERRO AO CALCULAR ENQUADRAMENTO  /  ERRO AO BUSCAR VALOR DO INSS  / TOTAL DE LINHAS PROCESSADAS -&gt; &lt;n&gt;”</td><td>Erro / Informação (demonstrativo)</td><td><code>CADASTROPREV/Fontes/uFuncoesSaldamento.pas:398, 409, 417, 432, 300</code></td><td><a href="#PF-31">JF031</a></td></tr>
+<tr id="MSG355"><td><strong>MSG355</strong></td><td>“É necessário indicar o Participante! / O participante possui contribuições já recebidas!”</td><td>Aviso (código inativo)</td><td><code>CADASTROPREV/Fontes/FCancSaldamento.pas:173, 190</code></td><td><a href="#PF-33">JF033</a></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">8. Tabela/API/Programa</div>
+<div class="table-wrap"><table><thead><tr><th>Tabela</th><th>Operações</th><th>Jornadas</th><th>Origem</th><th>Papel</th></tr></thead><tbody>
+<tr><td>EVENTOSPREV</td><td>I/D/S</td><td><a href="#PF-30">JF030</a>, <a href="#PF-32">JF032</a>, <a href="#PF-33">JF033</a></td><td><code>CADASTROPREV/Fontes/FInscricaoNovoPlano.pas:392, 554, 1161, 1248; CADASTROPREV/Fontes/USaldamento.pas:1237, 3577, 3623; CADASTROPREV/Fontes/FCancSaldamento.pas:297, 510</code></td><td>Eventos 334 (importação), 338 (ativo), 339 (assistido), inscrição</td></tr>
+<tr><td>PARTPREVPLAN</td><td>I/U/D/S</td><td><a href="#PF-30">JF030</a>, <a href="#PF-32">JF032</a>, <a href="#PF-33">JF033</a></td><td><code>CADASTROPREV/Fontes/FInscricaoNovoPlano.pas:442, 523, 531, 1198, 1264; CADASTROPREV/Fontes/USaldamento.pas:3467, 3480, 3979, 3996, 4012, 4045, 4913; CADASTROPREV/Fontes/FCancSaldamento.pas:311, 322, 919, 956</code></td><td>Inscrição: REPLAN saldado/desativado, plano 74</td></tr>
+<tr><td>CONTRIBPREVPARTP</td><td>I/U/D/S</td><td><a href="#PF-30">JF030</a>, <a href="#PF-32">JF032</a>, <a href="#PF-33">JF033</a></td><td><code>CADASTROPREV/Fontes/FInscricaoNovoPlano.pas:425, 604, 1179, 1233; CADASTROPREV/Fontes/USaldamento.pas:1505, 1579; CADASTROPREV/Fontes/FCancSaldamento.pas:254, 341, 455, 465</code></td><td>Contribuições suspensas/criadas</td></tr>
+<tr><td>CONTRIBPREVNUCLEO</td><td>I/U/D</td><td><a href="#PF-32">JF032</a>, <a href="#PF-33">JF033</a></td><td><code>CADASTROPREV/Fontes/USaldamento.pas:8657, 8689; CADASTROPREV/Fontes/FCancSaldamento.pas:896, 902</code></td><td>Contribuição do núcleo de pensionistas (633)</td></tr>
+<tr><td>HSTCONTEVENTOSPR</td><td>I/D/S</td><td><a href="#PF-32">JF032</a>, <a href="#PF-33">JF033</a></td><td><code>CADASTROPREV/Fontes/USaldamento.pas:1410, 1547; CADASTROPREV/Fontes/FCancSaldamento.pas:276, 482</code></td><td>Associação contribuição × evento</td></tr>
+<tr><td>RESERVAPART</td><td>I/U/D/S</td><td><a href="#PF-30">JF030</a>, <a href="#PF-32">JF032</a>, <a href="#PF-34">JF034</a></td><td><code>CADASTROPREV/Fontes/FInscricaoNovoPlano.pas:628, 1217; CADASTROPREV/Fontes/USaldamento.pas:1622, 7009, 7027; CADASTROPREV/Fontes/FCancSaldamento.pas:265; CADASTROPREV/Fontes/FExecImportaReserva.dfm:251-268, 340-352</code></td><td>Reservas 100/101/110/111 (74), 113 RM, 114 BS</td></tr>
+<tr><td>HISTMOVRESERVA</td><td>I</td><td><a href="#PF-32">JF032</a>, <a href="#PF-34">JF034</a></td><td><code>CADASTROPREV/Fontes/USaldamento.pas:7040; CADASTROPREV/Fontes/FExecImportaReserva.dfm:386-440</code></td><td>Movimentação de reserva</td></tr>
+<tr><td>PESSOA / DEPENDENTE / DEPENTIT / PESSOAFISICA</td><td>I/D/S</td><td><a href="#PF-30">JF030</a>, <a href="#PF-34">JF034</a></td><td><code>CADASTROPREV/Fontes/FInscricaoNovoPlano.pas:460, 474, 487, 503, 1283-1324; CADASTROPREV/Fontes/FExecImportaReserva.dfm:228-236</code></td><td>Cadastro de pessoa nova; localização por matrícula</td></tr>
+<tr><td>CONTRATOEMPTMO</td><td>U/S</td><td><a href="#PF-32">JF032</a>, <a href="#PF-33">JF033</a></td><td><code>CADASTROPREV/Fontes/USaldamento.pas:1297, 1307; CADASTROPREV/Fontes/FCancSaldamento.pas:368, 862</code></td><td>Empréstimos movidos de plano</td></tr>
+<tr><td>BENEFBFCIARIO</td><td>I/U/D/S</td><td><a href="#PF-30">JF030</a>, <a href="#PF-32">JF032</a>, <a href="#PF-33">JF033</a></td><td><code>CADASTROPREV/Fontes/FInscricaoNovoPlano.pas:863; CADASTROPREV/Fontes/USaldamento.pas:4240, 4409, 4685, 4996, 7204, 7513; CADASTROPREV/Fontes/FCancSaldamento.pas:700, 722, 749</code></td><td>Benefícios encerrados/criados</td></tr>
+<tr><td>PROCESSOBENEF / BFCIARIOTITPLAN / BENEFPLANOPART</td><td>I/U/D</td><td><a href="#PF-32">JF032</a>, <a href="#PF-33">JF033</a></td><td><code>CADASTROPREV/Fontes/USaldamento.pas:4328, 4394, 4449, 7117, 7137, 7172, 7314, 7606; CADASTROPREV/Fontes/FCancSaldamento.pas:713, 739, 761, 776</code></td><td>Processo, beneficiário e benefício × participante</td></tr>
+<tr><td>MOVBENEF</td><td>I/D/S</td><td><a href="#PF-32">JF032</a>, <a href="#PF-33">JF033</a></td><td><code>CADASTROPREV/Fontes/USaldamento.pas:7693; CADASTROPREV/Fontes/FCancSaldamento.pas:805; CADASTROPREV/Fontes/FCancSaldamento.dfm:424-440</code></td><td>Movimentos 1/4/7</td></tr>
+<tr><td>HSTBENEFBFCIARIO / HSTCONTRIBPREV</td><td>I/U/D/S</td><td><a href="#PF-32">JF032</a>, <a href="#PF-33">JF033</a></td><td><code>CADASTROPREV/Fontes/USaldamento.pas:4259, 4301, 6277, 6405, 6587, 6743; CADASTROPREV/Fontes/FCancSaldamento.pas:636, 661</code></td><td>Histórico de benefício e contribuição (acertos)</td></tr>
+<tr><td>HSTATRASOBENEF / HSTATRASOCONTRIB</td><td>I/U/D</td><td><a href="#PF-32">JF032</a>, <a href="#PF-33">JF033</a></td><td><code>CADASTROPREV/Fontes/USaldamento.pas:4273, 6815, 6877, 6892; CADASTROPREV/Fontes/FCancSaldamento.pas:623, 647</code></td><td>Correção monetária das diferenças</td></tr>
+<tr><td>RUBRICAINDIV</td><td>I/D</td><td><a href="#PF-32">JF032</a>, <a href="#PF-33">JF033</a></td><td><code>CADASTROPREV/Fontes/USaldamento.pas:6945; CADASTROPREV/Fontes/FCancSaldamento.pas:604, 828</code></td><td>Rubricas de pecúlio e RA</td></tr>
+<tr><td>PESSOAPARAM</td><td>I/D/S</td><td><a href="#PF-32">JF032</a>, <a href="#PF-33">JF033</a></td><td><code>CADASTROPREV/Fontes/USaldamento.pas:3707, 1370, 8144; CADASTROPREV/Fontes/FCancSaldamento.pas:819</code></td><td>Parâmetros 9, 75, 77</td></tr>
+<tr><td>TMPDESC / PREVIA</td><td>U/D/S</td><td><a href="#PF-32">JF032</a>, <a href="#PF-33">JF033</a></td><td><code>CADASTROPREV/Fontes/USaldamento.pas:8248, 8374; CADASTROPREV/Fontes/FCancSaldamento.pas:359, 785, 793, 850</code></td><td>Descontos/prévia da folha</td></tr>
+<tr><td>ELEGPATRO</td><td>U/S</td><td><a href="#PF-30">JF030</a>, <a href="#PF-32">JF032</a>, <a href="#PF-33">JF033</a></td><td><code>CADASTROPREV/Fontes/FInscricaoNovoPlano.pas:785-797; CADASTROPREV/Fontes/FCancSaldamento.pas:912</code></td><td>Situação funcional</td></tr>
+<tr><td>CTRLINTERFACE</td><td>S</td><td><a href="#PF-32">JF032</a>, <a href="#PF-33">JF033</a></td><td><code>CADASTROPREV/Fontes/FSelecionaLoteFuncef.dfm:63-71; CADASTROPREV/Fontes/FCancSaldamento.pas:581-590</code></td><td>Lote de folha aberto / preparo</td></tr>
+<tr><td>COTACAOMOEDA / VALTABGENER / PARAMANTECIPABONO</td><td>S</td><td><a href="#PF-31">JF031</a>, <a href="#PF-32">JF032</a></td><td><code>CADASTROPREV/Fontes/USaldamento.pas:5091, 5143, 6175, 8094; CADASTROPREV/Fontes/uFuncoesSaldamento.pas:1455</code></td><td>Índices INPC e incentivo</td></tr>
+<tr><td>CONTPREVEVENTO / CONTRIBUICAO / RESERVAXPLANO / RESERVAXCONTRIB</td><td>S</td><td><a href="#PF-30">JF030</a>, <a href="#PF-32">JF032</a></td><td><code>CADASTROPREV/Fontes/FInscricaoNovoPlano.pas:588-592, 628-650; CADASTROPREV/Fontes/USaldamento.pas:1431, 1622</code></td><td>Parametrização do plano 74</td></tr>
+</tbody></table></div>
+<p>Sequências: <code>SEQEVENTOSPREV</code> (<code>FInscricaoNovoPlano.pas:385, 549</code>; <code>USaldamento.pas:3621</code>), <code>CM.SEQ&lt;tabela&gt;.NEXTVAL</code> via <code>GetSequenceLocal</code> (<code>USaldamento.pas:3252-3265</code>), <code>SEQHISTMOVRESERVA</code> (<code>FExecImportaReserva.dfm:418</code>). Nenhuma stored procedure é chamada (a chamada a <code>ExecutaRegraCalculoSRB</code> está comentada em <code>uFuncoesSaldamento.pas:1057-1096</code>) <span class="ev ev-comprovado">COMPROVADO</span>.</p>
+<p><strong>Units analisadas:</strong> FInscricaoNovoPlano.pas (1402), FPreparoSaldamento.pas (202), FSaldamento.pas (287), USaldamento.pas (8860), uFuncoesSaldamento.pas (1623), FCancSaldamento.pas (994), FExecImportaReserva.pas (601), uFuncoesFuncef.pas (455 — utilitários de formatação/data/SQL: OraNumero, CompletaInicio, CompletaFim, SysDate etc.), uModuloFuncef.pas (39 — apenas <code>PreparaStr</code> e uma classe-exemplo), FSelecionaLoteFuncef.pas (134), FSelecionaLote.pas (134 — cópia idêntica, só muda o nome da unit; não é usada pelo CADASTROPREV, e sim compilada pelo <code>PARAMPREV/Fontes/ParamPrev.dpr:64</code>).</p>
+</section>
+
+<section><div class="section-title">9. Telas/Layouts</div>
+<div class="table-wrap"><table><thead><tr><th>Jornada</th><th>Tela (título)</th><th>Form (.dfm)</th></tr></thead><tbody>
+<tr><td><a href="#PF-30">JF030</a></td><td>Saldamento e Inscrição Novo Plano - Funcef</td><td><code>FInscricaoNovoPlano.dfm:5</code></td></tr>
+<tr><td><a href="#PF-31">JF031</a></td><td>Preparo para saldamento</td><td><code>FPreparoSaldamento.dfm:6</code></td></tr>
+<tr><td><a href="#PF-32">JF032</a></td><td>Formulário de Saldamento (rótulo: Saldamento de Ativos / de Aposentados / de Pensionistas)</td><td><code>FSaldamento.dfm:6; FSaldamento.pas:194, 199, 212</code></td></tr>
+<tr><td><a href="#PF-32">JF032</a></td><td>Selecione o Lote para a Concessão ...</td><td><code>FSelecionaLoteFuncef.dfm:4</code></td></tr>
+<tr><td><a href="#PF-33">JF033</a></td><td>Desfazer saldamento</td><td><code>FCancSaldamento.dfm:6</code></td></tr>
+<tr><td><a href="#PF-34">JF034</a></td><td>Importação de Reservas da COATE</td><td><code>FExecImportaReserva.dfm:5</code></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">10. Visão Consolidada das Jornadas</div>
+<div class="table-wrap"><table><thead><tr><th>Item</th><th>Jornada</th><th>Título</th><th>Critério de aceitação</th><th>Regras</th><th>Mensagens</th><th>Telas</th></tr></thead><tbody>
+<tr><td>[US] CADPREV-JF030</td><td><a href="#PF-30">JF030</a></td><td>Novas inscrições e ativos REPLAN</td><td><strong>Dado</strong> um arquivo TXT válido com um participante ativo do REPLAN, <strong>Quando</strong> o analista clica “Processar”, <strong>Então</strong> é gravado o evento 334 no plano 2, as contribuições do plano 2 são suspensas, a inscrição no REPLAN fica com situação 50 e o participante é inscrito no plano 74 com contribuições no percentual do arquivo; <strong>Quando</strong> clica “Desfazer” com o mesmo arquivo, <strong>Então</strong> o REPLAN é restaurado e o plano 74 removido.</td><td><a href="#CADPREV-RN181">RS181</a>, <a href="#CADPREV-RN182">RS182</a>, <a href="#CADPREV-RN183">RS183</a>, <a href="#CADPREV-RN184">RS184</a>, <a href="#CADPREV-RN185">RS185</a>, <a href="#CADPREV-RN186">RS186</a>, <a href="#CADPREV-RN187">RS187</a></td><td><a href="#MSG321">MSG321</a>, <a href="#MSG322">MSG322</a>, <a href="#MSG323">MSG323</a>, <a href="#MSG324">MSG324</a>, <a href="#MSG325">MSG325</a>, <a href="#MSG326">MSG326</a>, <a href="#MSG327">MSG327</a>, <a href="#MSG328">MSG328</a>, <a href="#MSG329">MSG329</a>, <a href="#MSG330">MSG330</a></td><td>Saldamento e Inscrição Novo Plano - Funcef</td></tr>
+<tr><td>[US] CADPREV-JF031</td><td><a href="#PF-31">JF031</a></td><td>Preparo para saldamento</td><td><strong>Dado</strong> o mês/ano final e uma lista de matrículas, <strong>Quando</strong> o analista processa o preparo, <strong>Então</strong> o demonstrativo TXT mostra o BS de cada pessoa e nada é gravado no banco.</td><td><a href="#CADPREV-RN188">RS188</a>, <a href="#CADPREV-RN189">RS189</a></td><td><a href="#MSG331">MSG331</a>, <a href="#MSG332">MSG332</a>, <a href="#MSG333">MSG333</a>, <a href="#MSG334">MSG334</a>, <a href="#MSG354">MSG354</a></td><td>Preparo para saldamento</td></tr>
+<tr><td>[US] CADPREV-JF032</td><td><a href="#PF-32">JF032</a></td><td>Saldamento de ativos, aposentados e pensionistas</td><td><strong>Dado</strong> um aposentado elegível com reserva 114, um lote de concessão aberto e “Gravar processo” marcado, <strong>Quando</strong> o analista processa a matrícula, <strong>Então</strong> o REPLAN fica com situação 25, é gravado o evento 339, os benefícios são convertidos pelo de-para e as diferenças mensais são lançadas no lote; sem “Gravar processo” apenas o demonstrativo é gerado.</td><td><a href="#CADPREV-RN190">RS190</a>, <a href="#CADPREV-RN191">RS191</a>, <a href="#CADPREV-RN192">RS192</a>, <a href="#CADPREV-RN193">RS193</a>, <a href="#CADPREV-RN194">RS194</a>, <a href="#CADPREV-RN195">RS195</a>, <a href="#CADPREV-RN196">RS196</a></td><td><a href="#MSG331">MSG331</a>, <a href="#MSG335">MSG335</a>, <a href="#MSG336">MSG336</a>, <a href="#MSG337">MSG337</a>, <a href="#MSG338">MSG338</a>, <a href="#MSG339">MSG339</a>, <a href="#MSG340">MSG340</a>, <a href="#MSG341">MSG341</a>, <a href="#MSG342">MSG342</a>, <a href="#MSG343">MSG343</a></td><td>Formulário de Saldamento</td></tr>
+<tr><td>[US] CADPREV-JF033</td><td><a href="#PF-33">JF033</a></td><td>Desfazer saldamento</td><td><strong>Dado</strong> um assistido saldado cujo acerto ainda não foi processado pela folha, <strong>Quando</strong> o analista confirma o desfazer, <strong>Então</strong> os registros do saldamento são excluídos, os benefícios e situações antigos restaurados e é exibido “Saldamento desfeito.”.</td><td><a href="#CADPREV-RN197">RS197</a>, <a href="#CADPREV-RN198">RS198</a>, <a href="#CADPREV-RN199">RS199</a></td><td><a href="#MSG344">MSG344</a>, <a href="#MSG345">MSG345</a>, <a href="#MSG346">MSG346</a>, <a href="#MSG347">MSG347</a>, <a href="#MSG348">MSG348</a>, <a href="#MSG355">MSG355</a></td><td>Desfazer saldamento</td></tr>
+<tr><td>[US] CADPREV-JF034</td><td><a href="#PF-34">JF034</a></td><td>Importação de reservas da COATE</td><td><strong>Dado</strong> um arquivo com matrícula, reserva e benefício e a data de referência, <strong>Quando</strong> o analista importa, <strong>Então</strong> as reservas 113 e 114 da pessoa recebem os novos valores e HISTMOVRESERVA registra a saída do saldo anterior e a entrada do novo.</td><td><a href="#CADPREV-RN200">RS200</a></td><td><a href="#MSG349">MSG349</a>, <a href="#MSG350">MSG350</a>, <a href="#MSG351">MSG351</a>, <a href="#MSG352">MSG352</a>, <a href="#MSG353">MSG353</a></td><td>Importação de Reservas da COATE</td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">11. Critérios de Aceitação por Regra</div>
+<div class="table-wrap"><table><thead><tr><th>Regra</th><th>Jornada</th><th>Critério de aceitação</th></tr></thead><tbody>
+<tr><td><a href="#CADPREV-RN181">RS181 (CADPREV-RN181)</a></td><td><a href="#PF-30">JF030</a></td><td><strong>Dado</strong> uma linha com sexo 'X', <strong>Quando</strong> é criticada, <strong>Então</strong> é rejeitada com “Sexo inválido 'X'” e copiada para o .bad.</td></tr>
+<tr><td><a href="#CADPREV-RN182">RS182 (CADPREV-RN182)</a></td><td><a href="#PF-30">JF030</a></td><td><strong>Dado</strong> uma matrícula cuja inscrição mais recente é no plano 66, <strong>Quando</strong> é importada, <strong>Então</strong> o log mostra “É participante do plano 66, não do Replan(2).” e nada é gravado para ela.</td></tr>
+<tr><td><a href="#CADPREV-RN183">RS183 (CADPREV-RN183)</a></td><td><a href="#PF-30">JF030</a></td><td><strong>Dado</strong> um participante do REPLAN aceito, <strong>Quando</strong> é importado, <strong>Então</strong> EVENTOSPREV recebe evento 334 com IDSITPARTNOVO 50 e suas contribuições do plano 2 ficam com FLGCOBRA 0.</td></tr>
+<tr><td><a href="#CADPREV-RN184">RS184 (CADPREV-RN184)</a></td><td><a href="#PF-30">JF030</a></td><td><strong>Dado</strong> percentual 0750 no arquivo, <strong>Quando</strong> o registro é inscrito, <strong>Então</strong> cada contribuição do evento 1 do plano 74 é criada com VALORBASE1 = 750/100.</td></tr>
+<tr><td><a href="#CADPREV-RN185">RS185 (CADPREV-RN185)</a></td><td><a href="#PF-30">JF030</a></td><td><strong>Dado</strong> uma matrícula inexistente, <strong>Quando</strong> é importada, <strong>Então</strong> o sistema tenta criar PESSOA, DEPENDENTE, DEPENTIT ('PRP') e PESSOAFISICA antes da inscrição.</td></tr>
+<tr><td><a href="#CADPREV-RN186">RS186 (CADPREV-RN186)</a></td><td><a href="#PF-30">JF030</a></td><td><strong>Dado</strong> “Commit a cada 100”, <strong>Quando</strong> o usuário cancela no registro 150, <strong>Então</strong> os 100 primeiros ficam gravados e os demais são desfeitos.</td></tr>
+<tr><td><a href="#CADPREV-RN187">RS187 (CADPREV-RN187)</a></td><td><a href="#PF-30">JF030</a></td><td><strong>Dado</strong> uma matrícula importada que veio do REPLAN, <strong>Quando</strong> o analista clica “Desfazer”, <strong>Então</strong> o evento 334 é excluído, as contribuições do plano 2 voltam a ser cobradas e a inscrição no plano 74 é excluída, mantendo a pessoa.</td></tr>
+<tr><td><a href="#CADPREV-RN188">RS188 (CADPREV-RN188)</a></td><td><a href="#PF-31">JF031</a></td><td><strong>Dado</strong> nenhuma lista informada, <strong>Quando</strong> o analista processa o preparo, <strong>Então</strong> o sistema pergunta se deve processar toda a base (<a href="#MSG332">MSG332</a>).</td></tr>
+<tr><td><a href="#CADPREV-RN189">RS189 (CADPREV-RN189)</a></td><td><a href="#PF-31">JF031</a></td><td><strong>Dado</strong> um REB pré-78 com DIB após 01/09/2001, <strong>Quando</strong> o preparo calcula, <strong>Então</strong> BS = valor atual × 1,09 corrigido pelo INPC desde 01/01/2006, e o banco não é alterado.</td></tr>
+<tr><td><a href="#CADPREV-RN190">RS190 (CADPREV-RN190)</a></td><td><a href="#PF-32">JF032</a></td><td><strong>Dado</strong> o item “Saldamento de ativos”, <strong>Quando</strong> a tela abre, <strong>Então</strong> o título é “Saldamento de Ativos” e não aparecem parcelas nem opções financeiras.</td></tr>
+<tr><td><a href="#CADPREV-RN191">RS191 (CADPREV-RN191)</a></td><td><a href="#PF-32">JF032</a></td><td><strong>Dado</strong> “Gravar processo” desmarcado, <strong>Quando</strong> o saldamento individual termina sem erro, <strong>Então</strong> a transação é desfeita e só o demonstrativo é gerado.</td></tr>
+<tr><td><a href="#CADPREV-RN192">RS192 (CADPREV-RN192)</a></td><td><a href="#PF-32">JF032</a></td><td><strong>Dado</strong> um aposentado com situação no plano 25, <strong>Quando</strong> é processado sem “Somente Financeiro”, <strong>Então</strong> recebe “SALDAMENTO JÁ PROCESSADO PARA ESSA MATRICULA.”.</td></tr>
+<tr><td><a href="#CADPREV-RN193">RS193 (CADPREV-RN193)</a></td><td><a href="#PF-32">JF032</a></td><td><strong>Dado</strong> um ativo elegível, <strong>Quando</strong> é saldado com gravação, <strong>Então</strong> passa a ter inscrição no plano 74 com início 01/09/2006, evento 338 e reservas 100/101/110/111 zeradas.</td></tr>
+<tr><td><a href="#CADPREV-RN194">RS194 (CADPREV-RN194)</a></td><td><a href="#PF-32">JF032</a></td><td><strong>Dado</strong> um aposentado com benefício 149, <strong>Quando</strong> é saldado, <strong>Então</strong> o benefício 149 é encerrado em 31/08/2006 e é incluído o benefício 495.</td></tr>
+<tr><td><a href="#CADPREV-RN195">RS195 (CADPREV-RN195)</a></td><td><a href="#PF-32">JF032</a></td><td><strong>Dado</strong> percentual 10 e 12 parcelas, <strong>Quando</strong> o aposentado é saldado, <strong>Então</strong> é criada a RA com valor = reserva 113 × 10% e parcela = RA / 12.</td></tr>
+<tr><td><a href="#CADPREV-RN196">RS196 (CADPREV-RN196)</a></td><td><a href="#PF-32">JF032</a></td><td><strong>Dado</strong> um mês em que o pago foi menor que o BS devido em mais de 0,01, <strong>Quando</strong> o acerto é calculado, <strong>Então</strong> é lançada a diferença com motivo 3046 e, havendo, a correção pelo INPC em HSTATRASOBENEF.</td></tr>
+<tr><td><a href="#CADPREV-RN197">RS197 (CADPREV-RN197)</a></td><td><a href="#PF-33">JF033</a></td><td><strong>Dado</strong> um participante com situação 'CA', <strong>Quando</strong> o analista confirma, <strong>Então</strong> o sistema pergunta “Deseja realmente desfazer o saldamento do PENSIONISTA indicado?”.</td></tr>
+<tr><td><a href="#CADPREV-RN198">RS198 (CADPREV-RN198)</a></td><td><a href="#PF-33">JF033</a></td><td><strong>Dado</strong> um ativo saldado, <strong>Quando</strong> o desfazer é confirmado, <strong>Então</strong> não resta inscrição no plano 74 e a inscrição no plano 2 volta a FLGDESATIVADO 0.</td></tr>
+<tr><td><a href="#CADPREV-RN199">RS199 (CADPREV-RN199)</a></td><td><a href="#PF-33">JF033</a></td><td><strong>Dado</strong> um assistido com histórico do benefício em lote posterior ao da interface, <strong>Quando</strong> o desfazer é confirmado, <strong>Então</strong> aparece “Participante já possui um preparo na folha, no lote &lt;n&gt;” e nada é alterado.</td></tr>
+<tr><td><a href="#CADPREV-RN200">RS200 (CADPREV-RN200)</a></td><td><a href="#PF-34">JF034</a></td><td><strong>Dado</strong> uma matrícula com duas reservas 113, <strong>Quando</strong> é importada, <strong>Então</strong> a ocorrência “Inconsistência na reserva matemática para saldamento” é registrada e a linha não é gravada.</td></tr>
+</tbody></table></div>
+</section>
+
+<p><a class="back-btn" href="funcionalidades.html">← Voltar à lista de Casos de Uso (Processos Funcionais)</a></p>
+</main>
+<footer>
+<p>Blueprint AS-IS — PFC-73 — Processos Funcionais organizados em Casos de Uso — Módulo CADASTROPREV | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-24</p>
+</footer>
+</body>
+</html>

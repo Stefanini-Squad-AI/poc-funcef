@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cadastro Previdenciário — UC407 – Executar Manutenções Cadastrais em Lote — Blueprint AS-IS</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<header>
+  <div class="badge">Blueprint AS-IS — PFC-73 — Processos Funcionais</div>
+  <h1>UC407 – Executar Manutenções Cadastrais em Lote</h1>
+  <p>Caso de uso do módulo Cadastro Previdenciário: 4 jornada(s) funcional(is) e 15 regra(s) de negócio descritas dentro de cada jornada.</p>
+</header>
+<nav>
+  <a href="index.html">📋 Visão Geral</a>
+  <a href="arquitetura.html">🏗️ Arquitetura</a>
+  <a href="inventario-tecnico.html">📦 Inventário</a>
+  <a href="funcionalidades.html">⚙️ Processos Funcionais</a>
+  <a href="procedures-functions.html">🔧 Procedures</a>
+  <a href="dados.html">🗄️ Dados</a>
+  <a href="relatorios.html">📄 Relatórios</a>
+  <a href="integracoes.html">🔗 Integrações</a>
+  <a href="tratamento-erros.html">⚠️ Erros</a>
+  <a href="diagramas-fluxo.html">🔀 Fluxos</a>
+  <a href="lacunas.html">🔍 Lacunas</a>
+  <a href="controle-cobertura.html">📊 Cobertura</a>
+</nav>
+<main>
+
+<a class="back-btn" href="funcionalidades.html">← Voltar à lista de Casos de Uso (Processos Funcionais)</a>
+<div class="breadcrumb"><a href="index.html">Cadastro Previdenciário</a> › <a href="funcionalidades.html">Processos Funcionais</a> › UC407</div>
+
+<section><div class="section-title">1. Identificação</div>
+<div class="table-wrap"><table><tbody>
+<tr><th>Caso de Uso</th><td><strong>UC407 – Executar Manutenções Cadastrais em Lote</strong></td></tr>
+<tr><th>Módulo</th><td>CADASTROPREV — Cadastro Previdenciário</td></tr>
+<tr><th>Sistema</th><td>CM Contabilidade / FUNCEF (Delphi 5 / VCL / MIDAS / Oracle)</td></tr>
+<tr><th>Tipo</th><td>Sistema Desktop</td></tr>
+<tr><th>Ator</th><td>Usuário operacional (analista de cadastro previdenciário)</td></tr>
+<tr><th>Jornadas</th><td><a href="#PF-23">JF023 — Cálculo de tempo de serviço em lote</a>, <a href="#PF-24">JF024 — Alteração de percentual de contribuição em lote</a>, <a href="#PF-25">JF025 — Alteração de recebedor de participante</a>, <a href="#PF-26">JF026 — Entrada manual de rubricas (item sem ação)</a></td></tr>
+<tr><th>Regras de negócio</th><td>15 regra(s) CADPREV-RN específicas (RS141–RS155), descritas na íntegra dentro de cada jornada; regras transversais em <a href="uc401.html">UC401</a></td></tr>
+<tr><th>OS - Título</th><td>PFC-73 — Blueprint Cadastro Previdenciário</td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">2. Descrição Resumida</div>
+<p>Manutenções cadastrais feitas fora das telas de evento, a maioria sobre vários participantes de uma vez. Caminhos relativos a <code>CADASTROPREV/</code>, salvo indicação. Este caso de uso reúne 4 jornada(s) funcional(is) do módulo Cadastro Previdenciário:</p>
+<ul>
+<li><a href="#PF-23"><strong>JF023 — Cálculo de tempo de serviço em lote</strong></a>: Recalcular o tempo de serviço de todos os participantes que atendem a um filtro de patrocinadora/plano e situações, numa única operação.</li>
+<li><a href="#PF-24"><strong>JF024 — Alteração de percentual de contribuição em lote</strong></a>: Montar uma lista de participantes dos planos 66 (REB) e 74 (Novo Plano) com o novo percentual de contribuição, gravar o histórico de vigências e o novo percentual, e gerar relatório e arquivos.</li>
+<li><a href="#PF-25"><strong>JF025 — Alteração de recebedor de participante</strong></a>: Indicar quem recebe o benefício de cada beneficiário do participante (o próprio beneficiário ou outra pessoa responsável), com tipo de responsável e data limite.</li>
+<li><a href="#PF-26"><strong>JF026 — Entrada manual de rubricas (item sem ação)</strong></a>: Registrar que o item de menu “Entrada Manual de Rubricas” existe no Cadastro Previdenciário mas não executa nenhuma função.</li>
+</ul>
+<p><strong>Necessidade de negócio:</strong> alguns dados cadastrais precisam ser atualizados em massa (tempo de serviço, percentual de contribuição) ou ajustados sem gerar evento (quem recebe por um beneficiário). Essas telas evitam o trabalho participante a participante e guardam histórico ou log das mudanças.</p>
+<p><strong>Quem inicia:</strong> o analista de cadastro, pelo menu Manutenção da tela principal.</p>
+<p><strong>Resultado esperado:</strong> tempos de serviço recalculados, novos percentuais vigentes com histórico e arquivos de comunicação, ou recebedores atualizados nos beneficiários.</p>
+<p><strong>Termos, siglas e componentes citados nesta página</strong> — explicados na primeira vez em que aparecem; a coluna “Fonte” indica onde a explicação foi conferida no repositório:</p>
+<div class="table-wrap"><table><thead><tr><th>Termo</th><th>O que significa</th><th>Fonte</th></tr></thead><tbody>
+<tr><td><strong>Tempo de serviço</strong></td><td>Tempo considerado para elegibilidade e cálculo de benefícios, calculado a partir do histórico do participante pelo controle de tempo de serviço do TotalPREV (TCtrlTempoServico).</td><td><code>CM/TotalPrev/Source/UConsPart.pas:390-401</code></td></tr>
+<tr><td><strong>CONTRIBPREVPARTP / VALORBASE1</strong></td><td>Contribuições do participante no plano; VALORBASE1 guarda o percentual de contribuição. Contribuições 1 e 21 são as tratadas pela alteração em lote (o código chama a 21 de “Patrocinadora”).</td><td><code>Fontes/uBuscaContribPartLote.dfm:384-396</code>; <code>Fontes/uBuscaContribPartLote.pas:431</code></td></tr>
+<tr><td><strong>HSTPERCONTRIBPREV</strong></td><td>Histórico de percentuais de contribuição, com data de início e fim de cada vigência.</td><td><a href="#CADPREV-RN150">RS150</a></td></tr>
+<tr><td><strong>Planos 66 e 74</strong></td><td>Planos tratados pela alteração de percentual: 66 = REB e 74 = Novo Plano, conforme as mensagens do código.</td><td><code>Fontes/uBuscaContribPartLote.pas:325, 333</code></td></tr>
+<tr><td><strong>Data caixa</strong></td><td>Data de referência do envio à patrocinadora, calculada como o próximo dia útil (F_Diasuteis).</td><td><code>Fontes/uAltPercContribLote.pas:763</code></td></tr>
+<tr><td><strong>Parâmetro 264 (PESSOAPARAM)</strong></td><td>Parâmetro por pessoa que libera mudança de percentual acima do limite anual.</td><td><a href="#CADPREV-RN147">RS147</a></td></tr>
+<tr><td><strong>BFCIARIOTITPLAN</strong></td><td>Vínculo do beneficiário com o titular, o plano e o benefício; guarda o recebedor (IDRESPONSAVEL), o responsável (IDRESPONNAOREC), o tipo de recebedor e a data limite.</td><td><code>Fontes/FIndicadorRecebedor.dfm:798-814</code></td></tr>
+<tr><td><strong>Recebedor / responsável</strong></td><td>Recebedor é quem recebe o pagamento; responsável é a pessoa que representa o beneficiário (por exemplo, menor) e passa a ser o recebedor quando se marca “Outra pessoa”.</td><td><a href="#CADPREV-RN153">RS153</a></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">3. Pré-condições</div>
+<p><strong>Gerais do módulo:</strong></p>
+<ul>
+<li>Módulo aberto e usuário com acesso ao menu Manutenção.</li>
+<li>Fundação do usuário definida (filtros por PATRO.IDFUNDACAO).</li>
+<li>Cadastros de participantes, vínculos, contribuições e beneficiários existentes.</li>
+</ul>
+<p><strong>O que as pré-condições gerais significam na prática:</strong> as três telas trabalham sobre dados já cadastrados; o cálculo de tempo de serviço e a indicação de recebedor respeitam a fundação do usuário, enquanto a alteração de percentual é fixa em dois planos.</p>
+<p><strong>Por jornada:</strong></p>
+<ul>
+<li><a href="#PF-23">JF023</a>: Patrocinadoras e planos da fundação (PATRO.IDFUNDACAO, PLANPREVPATRO); participantes com histórico funcional/contribuições; controle de tempo de serviço do TotalPREV disponível.</li>
+<li><a href="#PF-24">JF024</a>: Participante com situação 1, 2, 33 ou 77 e vínculo ativo no plano 66 ou 74; contribuições 1/21 em CONTRIBPREVPARTP; PLANPREV.LIMITEMUDANCAPERC configurado se houver limite.</li>
+<li><a href="#PF-25">JF025</a>: Participante da fundação com beneficiários cadastrados em BFCIARIOTITPLAN (proposta 1); responsável cadastrado como pessoa ou cadastrável pela tela de recebedor.</li>
+<li><a href="#PF-26">JF026</a>: Nenhuma.</li>
+</ul>
+<p><strong>Pré-condições por jornada, em termos de negócio:</strong></p>
+<ul>
+<li><a href="#PF-23">JF023</a>: os vínculos e históricos dos participantes estão cadastrados; o usuário sabe quais patrocinadoras, planos e situações quer recalcular.</li>
+<li><a href="#PF-24">JF024</a>: o participante está ativo num dos dois planos tratados pela tela e pediu a mudança; se o plano limita as mudanças por ano, o participante ainda não atingiu o limite ou tem a autorização (parâmetro 264).</li>
+<li><a href="#PF-25">JF025</a>: o participante já tem os beneficiários cadastrados (UC410 JF036); a tela só ajusta quem recebe por eles.</li>
+<li><a href="#PF-26">JF026</a>: nenhuma; o item está visível no menu.</li>
+</ul>
+</section>
+
+<section><div class="section-title">4. Pós-condições</div>
+<ul>
+<li><a href="#PF-23">JF023</a>: Tempos de serviço recalculados pelo controle externo; log no LOGTOTALPREV.</li>
+<li><a href="#PF-24">JF024</a>: HSTPERCONTRIBPREV com vigências; CONTRIBPREVPARTP.VALORBASE1 atualizado; arquivo de backup do SQL; PDF/TXT/XLS/relatório opcionais.</li>
+<li><a href="#PF-25">JF025</a>: BFCIARIOTITPLAN.IDRESPONSAVEL, IDRESPONNAOREC, CODTIPORECEBEDOR, DATAFIMRECEB atualizados; log.</li>
+<li><a href="#PF-26">JF026</a>: Nenhuma alteração.</li>
+</ul>
+<p><strong>Resultado de negócio de cada jornada:</strong></p>
+<ul>
+<li><a href="#PF-23">JF023</a> — <em>sucesso:</em> <a href="#MSG243">MSG243</a> após o commit (<a href="#CADPREV-RN143">RS143</a>). <em>Interrupções:</em> filtro vazio (<a href="#TRT241">TRT241</a>), erro em um participante (<a href="#TRT242">TRT242</a>).</li>
+<li><a href="#PF-24">JF024</a> — <em>sucesso:</em> percentuais gravados (<a href="#CADPREV-RN150">RS150</a>) e arquivos gerados (<a href="#CADPREV-RN151">RS151</a>). <em>Interrupções:</em> críticas da inclusão (<a href="#TRT244">TRT244</a>–<a href="#TRT250">TRT250</a>); erro de banco na gravação (<a href="#TRT251">TRT251</a>).</li>
+<li><a href="#PF-25">JF025</a> — <em>sucesso:</em> alteração aplicada e confirmada (<a href="#CADPREV-RN154">RS154</a>). <em>Interrupções:</em> “Outra pessoa” sem responsável (<a href="#TRT253">TRT253</a>).</li>
+<li><a href="#PF-26">JF026</a> — nenhum resultado: o item não tem evento de clique (<a href="#CADPREV-RN155">RS155</a>).</li>
+</ul>
+</section>
+
+<section><div class="section-title">5. Jornadas Funcionais (JF023, JF024, JF025, JF026)</div>
+<p>Cada jornada traz objetivo, ator/gatilho, pré e pós-condições, sequência operacional, ações práticas, <strong>regras de negócio da jornada</strong> (texto completo de cada regra), tratamentos e mensagens.</p>
+<p><strong>Como as jornadas deste caso de uso se relacionam:</strong> As quatro jornadas são independentes e acessadas pelo mesmo menu Manutenção. JF023 e JF024 atuam em lote; JF025 altera beneficiários de um participante; JF026 é um item sem ação. Em cada passo, o rótulo “Usuário” ou “Sistema” indica quem executa a ação.</p>
+<div class="legend"><span><span class="ev ev-comprovado">COMPROVADO</span> — no código</span><span><span class="ev ev-inferido">INFERIDO</span> — plausível</span><span><span class="ev ev-pendente">PENDENTE</span> — validar</span></div>
+</section>
+
+<div class="pf-block" id="PF-23"><h4>JF023 (PF-23) — Cálculo de tempo de serviço em lote</h4>
+<p><strong>Objetivo:</strong> Recalcular o tempo de serviço de todos os participantes que atendem a um filtro de patrocinadora/plano e situações, numa única operação.</p>
+<p><strong>Necessidade de negócio:</strong> o tempo de serviço é base de elegibilidade e de cálculo de benefícios. Depois de cargas de histórico, correções ou mudanças de regra, a fundação precisa recalcular o tempo de muitos participantes de uma vez, em vez de um a um.</p>
+<p><strong>Ator / gatilho:</strong> Analista de cadastro, pelo menu <strong>Manutenção › Cálculo de tempo de serviço em lote</strong> (<code>Fontes/FPrincipal.dfm:8593-8596</code>; <code>Fontes/FPrincipal.pas:2280-2285</code>).</p>
+<p><strong>Pré-condições:</strong> Patrocinadoras e planos da fundação (PATRO.IDFUNDACAO, PLANPREVPATRO); participantes com histórico funcional/contribuições; controle de tempo de serviço do TotalPREV disponível.</p>
+<p><strong>Em termos de negócio:</strong> os vínculos e históricos dos participantes estão cadastrados; o usuário sabe quais patrocinadoras, planos e situações quer recalcular.</p>
+<p><strong>Pós-condições:</strong> Tempos de serviço recalculados pelo controle externo; log no LOGTOTALPREV.</p>
+<p><strong>Em termos de negócio:</strong> todos os participantes do filtro ficam com o tempo de serviço recalculado, ou nenhum (se houver erro).</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li><strong>Usuário:</strong> Abrir a tela e ajustar os filtros (todos vêm marcados). [<a href="#CADPREV-RN141">RS141</a>] [<a href="#CADPREV-RN142">RS142</a>]<br>Patrocinadora/plano da fundação, situação no plano e na fundação; menus de contexto “Selecionar Tudo” e “Inverter Seleção” (<code>Fontes/FCalculaTempoServicoLote.pas:78-90, 201-278</code>).</li>
+<li><strong>Usuário:</strong> Informar a data base e clicar em Processar. [<a href="#CADPREV-RN142">RS142</a>] [<a href="#CADPREV-RN144">RS144</a>]<br>A data base é enviada à rotina, mas o cálculo usa a data do dia.</li>
+<li><strong>Sistema:</strong> Buscar os participantes do filtro. [<a href="#CADPREV-RN142">RS142</a>] [<a href="#TRT241">TRT241</a>] [<a href="#TRT243">TRT243</a>]<br><code>Fontes/FCalculaTempoServicoLote.pas:155-172</code>.</li>
+<li><strong>Sistema:</strong> Abrir transação e calcular o tempo de cada participante, com progresso. [<a href="#CADPREV-RN143">RS143</a>] [<a href="#CADPREV-RN144">RS144</a>] [<a href="#TRT242">TRT242</a>]<br><code>Fontes/FCalculaTempoServicoLote.pas:174-193</code>.</li>
+<li><strong>Sistema:</strong> Gravar o log e fazer o commit. [<a href="#CADPREV-RN143">RS143</a>] [<a href="uc401.html#CADPREV-RN005">RS005</a>]<br><code>Fontes/FCalculaTempoServicoLote.pas:194-198</code>.</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Ajustar filtros</td><td>Definir o universo</td><td>Marcações de patrocinadora/plano e situações</td><td>Todos marcados por padrão</td><td>Filtro pronto</td><td><a href="#CADPREV-RN142">RS142</a></td><td>—</td><td><code>FCalculaTempoServicoLote.dfm</code></td></tr>
+<tr><td>Processar</td><td>Recalcular tempos</td><td>Data base</td><td>Transação única; rollback no erro; log</td><td>Tempos recalculados</td><td><a href="#CADPREV-RN143">RS143</a>, <a href="#CADPREV-RN144">RS144</a></td><td><a href="#MSG241">MSG241</a>, <a href="#MSG242">MSG242</a>, <a href="#MSG243">MSG243</a></td><td><code>FCalculaTempoServicoLote.dfm</code></td></tr>
+</tbody></table></div>
+<div class="jf-rules">
+<p><strong>Regras de negócio da jornada:</strong> 4 regra(s) — texto completo abaixo.</p>
+<div class="rule-block" id="CADPREV-RN141"><div class="rule-id">RS141 (CADPREV-RN141) — Telas de manutenção em lote abertas pelo menu Manutenção, sem bloquear a tela principal</div>
+<div class="rule-desc">Os itens Cálculo de tempo de serviço em lote, Alteração de Percentual de Contribuição em Lote e Alteração de Recebedor de Participante criam os módulos de dados do sistema e abrem a tela correspondente de forma não modal (o usuário pode continuar usando o menu).</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>AbrirForm(..., False)</code> — [obrigatório] — abertura não modal</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="uc401.html#TRT001">TRT001 (UC401)</a> → <a href="uc401.html#MSG001">MSG001 (UC401)</a> (falha ao criar datamodule)</p>
+<p><strong>Jornada:</strong> <a href="#PF-23">JF023</a>, <a href="#PF-24">JF024</a>, <a href="#PF-25">JF025</a></p>
+<p><strong>Nota de verificação:</strong> Há um segundo tratador idêntico ao da alteração de percentual, <code>Button2Click</code> (<code>Fontes/FPrincipal.pas:2464-2469</code>), sem item de menu correspondente no .dfm analisado.</p>
+<p><strong>Descrição original:</strong> CriaDataModule; AbrirForm(frmCalculaTempoServicoLote, TfrmCalculaTempoServicoLote, False); ... AbrirForm(FrmAltPercContribLote, ...); ... AbrirForm(frmIndicadorRecebedor, ...).</p>
+<p><strong>Condições:</strong> Clique no item do menu</p><p><strong>Dados envolvidos:</strong> —</p><p><strong>Resultado/Exceção:</strong> Tela aberta</p>
+<div class="rule-origin">📂 Origem: <code>Fontes/FPrincipal.pas:2280-2285, 2471-2478, 2494-2500; Fontes/FPrincipal.dfm:8593-8596, 8629-8640</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<div class="rule-block" id="CADPREV-RN142"><div class="rule-id">RS142 (CADPREV-RN142) — Filtro do cálculo de tempo de serviço: patrocinadora/plano da fundação, situação no plano e na fundação</div>
+<div class="rule-desc">A tela lista todos os pares patrocinadora × plano da fundação do usuário, todas as situações no plano e todas as situações na fundação, com todos os itens já marcados. O usuário desmarca o que não quer (com opções “Selecionar Tudo” e “Inverter Seleção”) e informa a data base. Ao processar, o sistema seleciona os participantes cujo vínculo atende às listas marcadas.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>PATRO.IDFUNDACAO</code> — [obrigatório] — = Sistema.IdEmpresa</li>
+<li><code>PARTPREVPLAN.IDPESSJUR / IDPLANOPREV</code> — [obrigatório] — IN (marcados)</li>
+<li><code>PARTPREVPLAN.IDSITPLANOPREV / IDSITPART</code> — [obrigatório] — IN (marcados)</li>
+<li><code>dtProcessamento</code> — [obrigatório] — data base (ver RS144)</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT241">TRT241</a> → <a href="#MSG241">MSG241</a>; <a href="#TRT243">TRT243</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-23">JF023</a></p>
+<p><strong>Nota de verificação:</strong> As patrocinadoras e os planos marcados viram duas listas independentes (<code>Fontes/FCalculaTempoServicoLote.pas:103-127, 159-160</code>): marcar “Patro A × Plano 1” e “Patro B × Plano 2” também seleciona Patro A × Plano 2 e Patro B × Plano 1. Uma lista vazia gera <code>IN ()</code> sem crítica prévia.</p>
+<p><strong>Descrição original:</strong> qryPatro: SELECT 1 AS PROCESSA, P.IDPESSOA, ... FROM PESSOA P, PATRO PT, PLANPREVPATRO PLP, PLANPREV PL WHERE PT.IDFUNDACAO = :IDFUNDACAO ...; qry: SELECT DISTINCT EL.MATRICULA, PP.IDPESSOA FROM ELEGPATRO EL, PARTPREVPLAN PP WHERE PP.IDPESSJUR IN (...) AND PP.IDPLANOPREV IN (...) AND PP.IDSITPLANOPREV IN (...) AND PP.IDSITPART IN (...)</p>
+<p><strong>Condições:</strong> Itens com PROCESSA = 1</p><p><strong>Dados envolvidos:</strong> PESSOA, PATRO, PLANPREVPATRO, PLANPREV, SITPLANOPREV, SITPART, ELEGPATRO, PARTPREVPLAN</p><p><strong>Resultado/Exceção:</strong> Lista de participantes a processar</p>
+<div class="rule-origin">📂 Origem: <code>Fontes/FCalculaTempoServicoLote.pas:64-76, 78-90, 92-172, 201-278; Fontes/FCalculaTempoServicoLote.dfm:250-311</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<div class="rule-block" id="CADPREV-RN143"><div class="rule-id">RS143 (CADPREV-RN143) — Cálculo em lote numa transação única: erro em um participante desfaz todo o lote</div>
+<div class="rule-desc">O processamento abre uma transação, calcula o tempo de serviço de cada participante selecionado mostrando o progresso e, se ocorrer erro em qualquer participante, desfaz tudo, informa a matrícula e interrompe. Ao final, grava no log do TotalPREV a data base e as patrocinadoras/planos processados e faz o commit.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>LOGTOTALPREV</code> — [obrigatório] — 'Cálculo de Tempo de Serviço em Lote - Data Base : &lt;data&gt;[Patros.: ...-Planos: ...] '</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT242">TRT242</a> → <a href="#MSG242">MSG242</a>; sucesso → <a href="#MSG243">MSG243</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-23">JF023</a></p>
+<p><strong>Nota de verificação:</strong> No tratamento de erro, o campo é lido como <code>FieldByName('Matrícula')</code>, nome que não existe na consulta (a coluna é MATRICULA) — a montagem da mensagem tende a gerar outra exceção (<code>Fontes/FCalculaTempoServicoLote.pas:188</code>) <span class="ev ev-inferido">INFERIDO</span>. O retorno de GravaLogTOTALPREV não é verificado.</p>
+<p><strong>Descrição original:</strong> dtmBaseDados.dbBaseDados.StartTransaction; while not qry.Eof do try ProcessaHistContrib(dtmAPrev.qry, IDPESSOA, dtProcessamento.Text); except Rollback; MsgDlg('Erro ao processar matrícula ...'); Abort; end; GravaLogTOTALPREV(...); Commit;</p>
+<p><strong>Condições:</strong> Lista de participantes não vazia</p><p><strong>Dados envolvidos:</strong> ELEGPATRO (tempo de serviço, via rotina externa), LOGTOTALPREV</p><p><strong>Resultado/Exceção:</strong> Tempos recalculados e log gravado</p>
+<div class="rule-origin">📂 Origem: <code>Fontes/FCalculaTempoServicoLote.pas:174-198; CM/CMADMPREV/Fontes/UAdmPrev.pas:3140</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<div class="rule-block" id="CADPREV-RN144"><div class="rule-id">RS144 (CADPREV-RN144) — Cálculo do tempo de serviço delegado ao controle de tempo de serviço, usando a data do dia</div>
+<div class="rule-desc">Para cada participante, a tela chama ProcessaHistContrib, que cria o controle de tempo de serviço do TotalPREV e recalcula os tempos do participante. A data base informada na tela é passada à rotina, mas a rotina usa a data do dia (Date) no cálculo.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>TCtrlTempoServico.CalculaTempos</code> — [obrigatório] — (IdPessoa, Date)</li>
+<li><code>dtProcessamento</code> — [informativo] — só aparece no log</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> — (exceções sobem para <a href="#TRT242">TRT242</a>)</p>
+<p><strong>Jornada:</strong> <a href="#PF-23">JF023</a></p>
+<p><strong>Nota de verificação:</strong> Rotina em <code>CM/TotalPrev/Source/UConsPart.pas:390-401</code>; o parâmetro <code>StrDataFinal</code> não é usado e a função não atribui resultado. Os campos gravados pelo controle de tempo de serviço não foram analisados <span class="ev ev-pendente">PENDENTE</span>.</p>
+<p><strong>Descrição original:</strong> Function ProcessaHistContrib(QryAux1: TwwQuery; IdPessoa: Integer; StrDataFinal: String): Boolean; ... CtrlTempoServico.CalculaTempos(IdPessoa, Date);</p>
+<p><strong>Condições:</strong> Cada participante do lote</p><p><strong>Dados envolvidos:</strong> Tempo de serviço do participante (controle externo)</p><p><strong>Resultado/Exceção:</strong> Tempo recalculado na data do dia</p>
+<div class="rule-origin">📂 Origem: <code>Fontes/FCalculaTempoServicoLote.pas:185; CM/TotalPrev/Source/UConsPart.pas:390-401</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<p><strong>Regras transversais do módulo</strong> (texto completo em <a href="uc401.html">UC401</a>): <a href="uc401.html#CADPREV-RN001">RS001 (CADPREV-RN001) — Dados isolados por fundação</a>, <a href="uc401.html#CADPREV-RN003">RS003 (CADPREV-RN003) — Instituto troca a nomenclatura das telas</a>, <a href="uc401.html#CADPREV-RN005">RS005 (CADPREV-RN005) — Operações registradas no log de operações do TotalPREV (módulo 452)</a>.</p>
+</div>
+
+<p><strong>Tratamentos de erro:</strong> <a href="#TRT241">TRT241</a>, <a href="#TRT242">TRT242</a>, <a href="#TRT243">TRT243</a></p>
+<p><strong>Mensagens:</strong> <a href="#MSG241">MSG241</a>, <a href="#MSG242">MSG242</a>, <a href="#MSG243">MSG243</a></p>
+<p><strong>Telas:</strong> Cálculo de Tempo de Serviço em Lote (<code>FCalculaTempoServicoLote.dfm</code>).</p>
+<p><strong>Dependências:</strong> Controle de tempo de serviço do TotalPREV (<code>CM/TotalPrev/Source/UConsPart.pas:390-401</code>); GravaLogTOTALPREV (<code>CM/CMADMPREV/Fontes/UAdmPrev.pas:3140</code>). Relaciona-se com o histórico funcional (<a href="uc411.html#PF-39">UC411 JF039</a>).</p>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span> — informações que o repositório não comprova ou que divergem entre fontes. Os itens abaixo dependem de validação humana.</p>
+<ul>
+<li>A data base informada não é usada no cálculo (rotina usa Date) (<code>CM/TotalPrev/Source/UConsPart.pas:398</code>).</li>
+<li>Combinação patrocinadora × plano não preserva os pares marcados (<code>Fontes/FCalculaTempoServicoLote.pas:103-127, 159-160</code>).</li>
+<li>Lista de filtro vazia gera SQL inválido sem crítica (<code>Fontes/FCalculaTempoServicoLote.pas:155-166</code>).</li>
+<li>Mensagem de erro usa campo inexistente 'Matrícula' (<code>Fontes/FCalculaTempoServicoLote.pas:188</code>).</li>
+<li>Campos gravados pelo TCtrlTempoServico.CalculaTempos não foram analisados (dependência externa).</li>
+</ul>
+</div>
+<div class="note note-info"><p><strong>Registro original do processo PF-23</strong></p><p><strong>Forms de entrada:</strong> <code>FCalculaTempoServicoLote.dfm</code></p><p><strong>Lógica de processamento:</strong> Monta listas de IDs marcados; seleciona participantes; ProcessaHistContrib por participante em transação; GravaLogTOTALPREV</p><p><strong>Saídas:</strong> Tempos recalculados; mensagem de término</p><p><strong>Persistência (tabelas escritas):</strong> Tempo de serviço (externo); LOGTOTALPREV</p><p><strong>Evidência:</strong> <code>Fontes/FCalculaTempoServicoLote.pas:92-198</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+</div>
+
+<div class="pf-block" id="PF-24"><h4>JF024 (PF-24) — Alteração de percentual de contribuição em lote</h4>
+<p><strong>Objetivo:</strong> Montar uma lista de participantes dos planos 66 (REB) e 74 (Novo Plano) com o novo percentual de contribuição, gravar o histórico de vigências e o novo percentual, e gerar relatório e arquivos.</p>
+<p><strong>Necessidade de negócio:</strong> os participantes de planos de contribuição definida podem escolher o percentual com que contribuem, dentro de limites do regulamento e de um número máximo de mudanças por ano. A fundação recebe vários pedidos e precisa aplicá-los de uma vez, guardando a vigência anterior, e enviar o resultado (arquivo) para a folha da patrocinadora.</p>
+<p><strong>Ator / gatilho:</strong> Analista de cadastro, pelo menu <strong>Manutenção › Alteração de Percentual de Contribuição em Lote</strong> (<code>Fontes/FPrincipal.dfm:8629-8632</code>; <code>Fontes/FPrincipal.pas:2471-2478</code>); a inclusão de cada participante é feita na tela auxiliar aberta pelo botão Inserir.</p>
+<p><strong>Pré-condições:</strong> Participante com situação 1, 2, 33 ou 77 e vínculo ativo no plano 66 ou 74; contribuições 1/21 em CONTRIBPREVPARTP; PLANPREV.LIMITEMUDANCAPERC configurado se houver limite.</p>
+<p><strong>Em termos de negócio:</strong> o participante está ativo num dos dois planos tratados pela tela e pediu a mudança; se o plano limita as mudanças por ano, o participante ainda não atingiu o limite ou tem a autorização (parâmetro 264).</p>
+<p><strong>Pós-condições:</strong> HSTPERCONTRIBPREV com vigências; CONTRIBPREVPARTP.VALORBASE1 atualizado; arquivo de backup do SQL; PDF/TXT/XLS/relatório opcionais.</p>
+<p><strong>Em termos de negócio:</strong> o novo percentual passa a valer na data de vigência, com o percentual anterior guardado no histórico; os arquivos permitem informar a patrocinadora.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li><strong>Usuário:</strong> Abrir a tela e clicar em Inserir para incluir um participante. [<a href="#CADPREV-RN141">RS141</a>] [<a href="#CADPREV-RN149">RS149</a>]<br>Abre a tela auxiliar não modal com o mesmo título (<code>Fontes/uAltPercContribLote.pas:127-141</code>).</li>
+<li><strong>Usuário e sistema:</strong> Informar a matrícula; o sistema localiza o participante ativo, o plano 66/74 ativo e as contribuições. [<a href="#CADPREV-RN145">RS145</a>] [<a href="#TRT244">TRT244</a>] [<a href="#TRT245">TRT245</a>]<br>Data caixa e data de vigência sugeridas pelo próximo dia útil (<code>Fontes/uBuscaContribPartLote.pas:192-198, 223</code>).</li>
+<li><strong>Usuário:</strong> Informar o novo percentual e a data de vigência; confirmar a inclusão. [<a href="#CADPREV-RN146">RS146</a>] [<a href="#CADPREV-RN147">RS147</a>] [<a href="#CADPREV-RN148">RS148</a>] [<a href="#TRT246">TRT246</a>] [<a href="#TRT247">TRT247</a>] [<a href="#TRT249">TRT249</a>] [<a href="#TRT250">TRT250</a>]<br>Cada contribuição do participante vira uma linha da lista com o mesmo percentual.</li>
+<li><strong>Usuário:</strong> Revisar a lista, excluir participantes ou limpar. [<a href="#CADPREV-RN149">RS149</a>]<br><code>Fontes/uAltPercContribLote.pas:830-899</code>.</li>
+<li><strong>Usuário e sistema:</strong> Confirmar: o sistema grava o histórico e o novo percentual de cada linha e faz o commit. [<a href="#CADPREV-RN150">RS150</a>] [<a href="#TRT251">TRT251</a>]<br>Sem pergunta de confirmação e sem log (<code>Fontes/uAltPercContribLote.pas:450-660</code>).</li>
+<li><strong>Usuário:</strong> Gerar PDF, TXT, Excel e/ou relatório do período. [<a href="#CADPREV-RN151">RS151</a>] [<a href="#TRT252">TRT252</a>]<br><code>Fontes/uAltPercContribLote.pas:747-806</code>.</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Incluir participante</td><td>Montar a lista</td><td>Matrícula, novo percentual, data de vigência</td><td>Críticas de situação, plano, faixa e limite anual</td><td>Linhas na lista</td><td><a href="#CADPREV-RN145">RS145</a>, <a href="#CADPREV-RN146">RS146</a>, <a href="#CADPREV-RN147">RS147</a>, <a href="#CADPREV-RN148">RS148</a>, <a href="#CADPREV-RN149">RS149</a></td><td><a href="#MSG244">MSG244</a>, <a href="#MSG245">MSG245</a>, <a href="#MSG246">MSG246</a>, <a href="#MSG247">MSG247</a>, <a href="#MSG248">MSG248</a>, <a href="#MSG249">MSG249</a>, <a href="#MSG250">MSG250</a></td><td><code>uBuscaContribPartLote.dfm</code></td></tr>
+<tr><td>Confirmar</td><td>Aplicar os percentuais</td><td>Lista</td><td>Histórico de vigências + VALORBASE1; commit</td><td>Percentuais alterados</td><td><a href="#CADPREV-RN150">RS150</a></td><td>—</td><td><code>uAltPercContribLote.dfm</code></td></tr>
+<tr><td>Gerar arquivos</td><td>Comunicar a alteração</td><td>Período De/até; PDF/TXT/Excel/Relatório</td><td>TXT só patrocinadora 91008</td><td>Arquivos na pasta da empresa</td><td><a href="#CADPREV-RN151">RS151</a></td><td><a href="#MSG251">MSG251</a></td><td><code>uAltPercContribLote.dfm</code></td></tr>
+</tbody></table></div>
+<div class="jf-rules">
+<p><strong>Regras de negócio da jornada:</strong> 7 regra(s) — texto completo abaixo.</p>
+<div class="rule-block" id="CADPREV-RN145"><div class="rule-id">RS145 (CADPREV-RN145) — Alteração de percentual: participante ativo em plano 66 (REB) ou 74 (Novo Plano)</div>
+<div class="rule-desc">Na tela de inclusão, o usuário informa a matrícula (só dígitos). O sistema aceita apenas matrícula de participante com situação na fundação 1, 2, 33 ou 77 e busca o vínculo ativo (situação no plano 1) nos planos 66 ou 74. Lista as contribuições 1 e 21 do participante nesse plano com o percentual atual (o da contribuição 1 aparece no campo Percentual Atual) e sugere a data de vigência pelo próximo dia útil.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>ELEGPATRO.MATRICULA</code> — [obrigatório]</li>
+<li><code>PARTPREVPLAN.IDSITPART</code> — [obrigatório] — IN (1,2,33,77)</li>
+<li><code>PARTPREVPLAN.IDPLANOPREV / IDSITPLANOPREV</code> — [obrigatório] — IN (66,74) / = 1</li>
+<li><code>CONTRIBPREVPARTP.IDCONTRIBUICAO / VALORBASE1</code> — [obrigatório] — IN (1,21) / percentual atual</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT244">TRT244</a> → <a href="#MSG244">MSG244</a>; <a href="#TRT245">TRT245</a> → <a href="#MSG245">MSG245</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-24">JF024</a></p>
+<p><strong>Nota de verificação:</strong> Planos e situações estão fixos no código/consulta (<code>Fontes/uBuscaContribPartLote.dfm:367-368, 393</code>; <code>Fontes/uBuscaContribPartLote.pas:152</code>). Não há filtro por fundação. O significado das situações 1, 2, 33 e 77 não está descrito <span class="ev ev-pendente">PENDENTE</span>.</p>
+<p><strong>Descrição original:</strong> WHERE IDPESSOA IN (SELECT E.IDPESSOA FROM ELEGPATRO E, PARTPREVPLAN P WHERE E.MATRICULA = ... AND P.IDSITPART IN (1,2,33,77) ...); QryPlano: ... PPP.IDPLANOPREV IN (66,74) AND PPP.IDSITPLANOPREV = 1 AND ROWNUM = 1</p>
+<p><strong>Condições:</strong> Matrícula encontrada e plano ativo</p><p><strong>Dados envolvidos:</strong> PESSOA, ELEGPATRO, PARTPREVPLAN, PLANPREV, CONTRIBPREVPARTP, CONTRIBUICAO</p><p><strong>Resultado/Exceção:</strong> Participante e contribuições carregados</p>
+<div class="rule-origin">📂 Origem: <code>Fontes/uBuscaContribPartLote.pas:117-206, 256-294, 481-499; Fontes/uBuscaContribPartLote.dfm:355-396</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<div class="rule-block" id="CADPREV-RN146"><div class="rule-id">RS146 (CADPREV-RN146) — Críticas do novo percentual: obrigatório, até 100%, mínimo de 5% (plano 74) e 2% (plano 66), sem repetir participante</div>
+<div class="rule-desc">Para incluir o participante na lista, são obrigatórios matrícula, plano, novo percentual e data de vigência. O percentual não pode passar de 100%; no Novo Plano (74) não pode ser menor que 5% e no REB (66) menor que 2%. Um participante cuja contribuição já esteja na lista não pode ser incluído de novo.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>edtNovoPerc</code> — [obrigatório] — ≤ 100; ≥ 5 (74); ≥ 2 (66)</li>
+<li><code>CMDateTimePicker1 (data de vigência)</code> — [obrigatório]</li>
+<li><code>IDROWID</code> — [obrigatório] — identifica a contribuição já incluída</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT246">TRT246</a> → <a href="#MSG246">MSG246</a>; <a href="#TRT247">TRT247</a> → <a href="#MSG247">MSG247</a> / <a href="#MSG248">MSG248</a>; <a href="#TRT249">TRT249</a> → <a href="#MSG249">MSG249</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-24">JF024</a></p>
+<p><strong>Nota de verificação:</strong> A crítica “novo percentual diferente do atual” foi retirada (comentário “nao consta na EF”, <code>Fontes/uBuscaContribPartLote.pas:338-347</code>).</p>
+<p><strong>Descrição original:</strong> if (strToFloat(edtNovoPerc.Text) &gt; 100) ...; if (cboPlano.KeyValue = 74) then if ... &lt; 5 ...; if (cboPlano.KeyValue = 66) then if ... &lt; 2 ...; if FrmAltPercContribLote.ParticipanteProcessado('IDROWID = ...') then MsgDlg('Matrícula já selecionada. ' ...)</p>
+<p><strong>Condições:</strong> Botão Confirmar da tela de inclusão</p><p><strong>Dados envolvidos:</strong> Tela; lista de trabalho</p><p><strong>Resultado/Exceção:</strong> Inclusão recusada com mensagem</p>
+<div class="rule-origin">📂 Origem: <code>Fontes/uBuscaContribPartLote.pas:296-358; Fontes/uAltPercContribLote.pas:809-828</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<div class="rule-block" id="CADPREV-RN147"><div class="rule-id">RS147 (CADPREV-RN147) — Limite anual de mudanças de percentual, liberado pelo parâmetro 264</div>
+<div class="rule-desc">Se o plano tiver limite de mudanças de percentual (PLANPREV.LIMITEMUDANCAPERC &gt; 0), o sistema conta as alterações já registradas no histórico de percentuais no ano da data caixa para a contribuição. Atingido o limite, a inclusão só é aceita se o participante tiver o parâmetro 264 = 'S' com início no mesmo mês da data caixa.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>PLANPREV.LIMITEMUDANCAPERC</code> — [opcional] — 0 = sem limite</li>
+<li><code>HSTPERCONTRIBPREV.DTINICIO</code> — [obrigatório] — ano da data caixa</li>
+<li><code>PESSOAPARAM IDPARAM = 264, VALOR = 'S'</code> — [condicional] — mês de DATAINICIO = mês da data caixa</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT250">TRT250</a> → <a href="#MSG250">MSG250</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-24">JF024</a></p>
+<p><strong>Nota de verificação:</strong> Erros nessas consultas são ignorados (except vazio, <code>Fontes/uBuscaContribPartLote.pas:404-406</code>). O significado de negócio do parâmetro 264 não está descrito <span class="ev ev-pendente">PENDENTE</span>.</p>
+<p><strong>Descrição original:</strong> if iLimite &gt; 0 then if iLimite &lt;= QryAux2.Fieldbyname('QTD').AsInteger then if iParam264 = 0 then MsgDlg('Quantidade de alterações de percentual superior à estabelecida, sem parâmetro 264.' ...)</p>
+<p><strong>Condições:</strong> LIMITEMUDANCAPERC &gt; 0 e quantidade no ano ≥ limite e sem parâmetro 264</p><p><strong>Dados envolvidos:</strong> PLANPREV, HSTPERCONTRIBPREV, PESSOAPARAM</p><p><strong>Resultado/Exceção:</strong> Inclusão recusada</p>
+<div class="rule-origin">📂 Origem: <code>Fontes/uBuscaContribPartLote.pas:360-407; Fontes/uBuscaContribPartLote.dfm:421-425</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<div class="rule-block" id="CADPREV-RN148"><div class="rule-id">RS148 (CADPREV-RN148) — Teto de 12% (plano 74) e 7% (plano 66) da contribuição 21 é calculado mas não aplicado</div>
+<div class="rule-desc">O código calcula um teto para a contribuição 21 (comentário: patrocinadora) — 12% no plano 74 e 7% no plano 66 — mas, logo em seguida, o novo percentual é lido de novo do campo digitado. Na prática, a contribuição 21 recebe o mesmo percentual informado pelo usuário, sem teto.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>CONTRIBPREVPARTP.IDCONTRIBUICAO = 21</code> — [condicional]</li>
+<li><code>sNovoPercentual</code> — [calculado] — sobrescrito em :450</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> — (sem crítica ao usuário)</p>
+<p><strong>Jornada:</strong> <a href="#PF-24">JF024</a></p>
+<p><strong>Nota de verificação:</strong> Comentário da SOL 136169 (<code>Fontes/uBuscaContribPartLote.pas:430-433</code>) descreve a intenção de limitar internamente; a reatribuição da SOL 227885 (<code>Fontes/uBuscaContribPartLote.pas:448-451</code>) anula o teto. Confirmar o comportamento desejado <span class="ev ev-pendente">PENDENTE</span>.</p>
+<p><strong>Descrição original:</strong> if qryContribuicao.Fieldbyname('IDCONTRIBUICAO').Asinteger = 21 then begin if (cboPlano.KeyValue = 74) then if strtofloat(sNovoPercentual) &gt; 12 then sNovoPercentual := '12'; ... end; sNovoPercentual := StringReplace((edtNovoPerc.Text),',','.',[rfReplaceall]);</p>
+<p><strong>Condições:</strong> Contribuição 21 e percentual acima do teto</p><p><strong>Dados envolvidos:</strong> Lista de trabalho</p><p><strong>Resultado/Exceção:</strong> Percentual digitado mantido</p>
+<div class="rule-origin">📂 Origem: <code>Fontes/uBuscaContribPartLote.pas:425-451</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<div class="rule-block" id="CADPREV-RN149"><div class="rule-id">RS149 (CADPREV-RN149) — Lista de trabalho: mesmo novo percentual para todas as contribuições listadas, com cópia de segurança</div>
+<div class="rule-desc">Cada inclusão gera uma linha por contribuição (1 e 21) do participante no plano, todas com o mesmo novo percentual, o percentual atual, a data de vigência, a data caixa e o tipo de arquivo (0013 para o plano 66, 0015 para o 74). A lista fica em memória e é exibida filtrando a contribuição 1; o SQL da lista é salvo em arquivo de backup na pasta de arquivos da empresa. O usuário pode excluir um participante (todas as linhas da matrícula) ou limpar a lista.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>lstCampos</code> — [obrigatório] — SELECT ... FROM DUAL por contribuição</li>
+<li><code>TIPO_ARQUIVO</code> — [calculado] — 0013 (66) / 0015 (74)</li>
+<li><code>BackupALteracaoPercentualLote*.txt</code> — [obrigatório] — cópia do SQL</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> — (operação local)</p>
+<p><strong>Jornada:</strong> <a href="#PF-24">JF024</a></p>
+<p><strong>Descrição original:</strong> FrmAltPercContribLote.lstCampos.Add(sCampos); ... ListaHistorico: SELECT ... FROM DUAL UNION ...; QryHstContrib.Filter := 'IDCONTRIBUICAO = 1'; QryHstContrib.SQL.SaveToFile(... '\BackupALteracaoPercentualLote' ...)</p>
+<p><strong>Condições:</strong> Inclusão aceita</p><p><strong>Dados envolvidos:</strong> Memória da tela; arquivo de backup</p><p><strong>Resultado/Exceção:</strong> Participante na lista para confirmação</p>
+<div class="rule-origin">📂 Origem: <code>Fontes/uBuscaContribPartLote.pas:350-477; Fontes/uAltPercContribLote.pas:127-141, 416-448, 830-899</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<div class="rule-block" id="CADPREV-RN150"><div class="rule-id">RS150 (CADPREV-RN150) — Gravação do novo percentual: histórico de vigências e atualização da contribuição</div>
+<div class="rule-desc">Ao confirmar, para cada linha da lista o sistema verifica o histórico de percentuais (HSTPERCONTRIBPREV) da contribuição. Sem histórico: grava o percentual atual vigente da data de inscrição até o dia anterior à data de vigência e o novo percentual a partir da data de vigência. Com histórico: encerra a vigência aberta na data de vigência e grava o novo percentual a partir dela. Depois atualiza o percentual (VALORBASE1) da contribuição em CONTRIBPREVPARTP. Tudo numa transação única, com commit ao final; em seguida a lista é limpa e o relatório do período é recarregado.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>HSTPERCONTRIBPREV (DTINICIO, DTFIM, PERCENTUAL, SEQPROPOSTA = 1)</code> — [obrigatório] — sequência SEQHSTPERCONTRIBPREV</li>
+<li><code>CONTRIBPREVPARTP.VALORBASE1</code> — [obrigatório] — = novo percentual (por ROWID)</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT251">TRT251</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-24">JF024</a></p>
+<p><strong>Nota de verificação:</strong> Não há pergunta de confirmação, tratamento de exceção nem log de operações nesta gravação (<code>Fontes/uAltPercContribLote.pas:450-660</code>). A data de fim da vigência anterior é a própria data de vigência (sem “−1”) quando já existe histórico (<code>Fontes/uAltPercContribLote.pas:583</code>), mas é “data − 1” quando não existe (<code>Fontes/uAltPercContribLote.pas:547</code>). A rotina <code>insereparticipante</code> (inscrição + contribuições + reservas) está desativada (<code>Fontes/uAltPercContribLote.pas:499-514</code>).</p>
+<p><strong>Descrição original:</strong> if QryAux2.fieldbyname('qnt').asinteger = 0 then begin INSERT INTO HSTPERCONTRIBPREV ... PERCETUAL_ATUAL ...; INSERT ... PERCENTUAL_NOVO ... end else begin UPDATE HSTPERCONTRIBPREV SET DTFIM = DATA ... AND DTFIM IS NULL; INSERT ... end; UPDATE CONTRIBPREVPARTP SET VALORBASE1 = ... WHERE ROWID = ...; ... Commit.</p>
+<p><strong>Condições:</strong> Lista não vazia; botão Confirmar</p><p><strong>Dados envolvidos:</strong> HSTPERCONTRIBPREV, CONTRIBPREVPARTP</p><p><strong>Resultado/Exceção:</strong> Novo percentual vigente</p>
+<div class="rule-origin">📂 Origem: <code>Fontes/uAltPercContribLote.pas:450-660</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<div class="rule-block" id="CADPREV-RN151"><div class="rule-id">RS151 (CADPREV-RN151) — Saídas da alteração de percentual: PDF, TXT, Excel e relatório</div>
+<div class="rule-desc">Depois de confirmar, o usuário pode gerar o relatório das alterações do período (De/até) em PDF, Excel ou impresso, e um arquivo TXT. A data caixa é o próximo dia útil. No TXT, cada linha tem matrícula (sem o último dígito), data caixa, percentual × 100 com 4 dígitos e tipo de arquivo 013 (plano 66) ou 015 (plano 74); só entram linhas da patrocinadora 91008. O relatório só considera vínculos marcados como inscritos em lote (FLGINSCRICAOLOTE = 1) com vigência iniciada no período, contribuição 1.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>PARTPREVPLAN.FLGINSCRICAOLOTE</code> — [obrigatório] — = 1 (relatório)</li>
+<li><code>HSTPERCONTRIBPREV.DTINICIO</code> — [obrigatório] — entre De e até</li>
+<li><code>IDPESSJUR = 91008</code> — [obrigatório] — TXT</li>
+<li><code>Arquivo 'Alteração de Percentual'+AAAAMM</code> — [obrigatório] — PDF/TXT/XLS na pasta da empresa</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT252">TRT252</a> → <a href="#MSG251">MSG251</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-24">JF024</a></p>
+<p><strong>Nota de verificação:</strong> Patrocinadora 91008 e planos 66/74 fixos no código (<code>Fontes/uAltPercContribLote.pas:678-683, 711-716</code>). Participantes alterados que não têm FLGINSCRICAOLOTE = 1 não aparecem no relatório; quando o relatório vem vazio, o TXT usa a lista de trabalho (<code>Fontes/uAltPercContribLote.pas:673-706</code>).</p>
+<p><strong>Descrição original:</strong> sdatacaixa := uFuncoesUteis.F_Diasuteis(); ... if chkPdf.checked then QExportPDF.Execute; if chkTxt.checked then GeraArquivo(sNomeArquivo); if chkXLS.checked then QExportXLS.Execute; ... if chkRelatorio.checked then ppRelatorio.Print;</p>
+<p><strong>Condições:</strong> Botão de arquivo após a confirmação</p><p><strong>Dados envolvidos:</strong> HSTPERCONTRIBPREV, PARTPREVPLAN, CONTRIBPREVPARTP, ELEGPATRO, PLANPREV, PESSOA</p><p><strong>Resultado/Exceção:</strong> Arquivos gerados / relatório impresso</p>
+<div class="rule-origin">📂 Origem: <code>Fontes/uAltPercContribLote.pas:662-806, 901-912; Fontes/uAltPercContribLote.dfm:851-935</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<p><strong>Regras deste caso de uso compartilhadas com esta jornada</strong> (texto completo na jornada indicada): <a href="#CADPREV-RN141">RS141 (CADPREV-RN141) — Telas de manutenção em lote abertas pelo menu Manutenção, sem bloquear a tela principal</a> (em <a href="#PF-23">JF023</a>).</p>
+<p><strong>Regras transversais do módulo</strong> (texto completo em <a href="uc401.html">UC401</a>): <a href="uc401.html#CADPREV-RN001">RS001 (CADPREV-RN001) — Dados isolados por fundação</a>, <a href="uc401.html#CADPREV-RN003">RS003 (CADPREV-RN003) — Instituto troca a nomenclatura das telas</a>, <a href="uc401.html#CADPREV-RN005">RS005 (CADPREV-RN005) — Operações registradas no log de operações do TotalPREV (módulo 452)</a>.</p>
+</div>
+
+<p><strong>Tratamentos de erro:</strong> <a href="#TRT244">TRT244</a>, <a href="#TRT245">TRT245</a>, <a href="#TRT246">TRT246</a>, <a href="#TRT247">TRT247</a>, <a href="#TRT249">TRT249</a>, <a href="#TRT250">TRT250</a>, <a href="#TRT251">TRT251</a>, <a href="#TRT252">TRT252</a></p>
+<p><strong>Mensagens:</strong> <a href="#MSG244">MSG244</a>, <a href="#MSG245">MSG245</a>, <a href="#MSG246">MSG246</a>, <a href="#MSG247">MSG247</a>, <a href="#MSG248">MSG248</a>, <a href="#MSG249">MSG249</a>, <a href="#MSG250">MSG250</a>, <a href="#MSG251">MSG251</a></p>
+<p><strong>Telas:</strong> Alteração de Percentual de Contribuição em Lote (<code>uAltPercContribLote.dfm</code>) e tela de inclusão com o mesmo título (<code>uBuscaContribPartLote.dfm</code>).</p>
+<p><strong>Dependências:</strong> Contribuições do participante (CONTRIBPREVPARTP, módulo CONTRIBUICAOPREV); F_Diasuteis (uFuncoesUteis); exportadores PDF/XLS e relatório ReportBuilder da própria tela.</p>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span> — informações que o repositório não comprova ou que divergem entre fontes. Os itens abaixo dependem de validação humana.</p>
+<ul>
+<li>Teto de 12%/7% da contribuição 21 é anulado pela reatribuição do percentual (<code>Fontes/uBuscaContribPartLote.pas:425-451</code>).</li>
+<li>Gravação sem pergunta de confirmação, sem tratamento de exceção (transação pode ficar aberta) e sem log de operações (<code>Fontes/uAltPercContribLote.pas:450-660</code>).</li>
+<li>DTFIM da vigência anterior difere entre os dois caminhos (data de vigência vs. data − 1) (<code>Fontes/uAltPercContribLote.pas:547, 583</code>).</li>
+<li>Valores fixos: planos 66/74, contribuições 1/21, situações 1/2/33/77, patrocinadora 91008, parâmetro 264 — significado de negócio a confirmar.</li>
+<li>Relatório considera só vínculos com FLGINSCRICAOLOTE = 1 (<code>Fontes/uAltPercContribLote.dfm:881</code>); participantes não inscritos em lote não aparecem.</li>
+<li>Sem filtro por fundação na busca do participante (<code>Fontes/uBuscaContribPartLote.pas:135-154</code>).</li>
+</ul>
+</div>
+<div class="note note-info"><p><strong>Registro original do processo PF-24</strong></p><p><strong>Forms de entrada:</strong> <code>uAltPercContribLote.dfm</code>, <code>uBuscaContribPartLote.dfm</code></p><p><strong>Lógica de processamento:</strong> Lista em memória (lstCampos); para cada linha: HSTPERCONTRIBPREV (insert/update) e CONTRIBPREVPARTP.VALORBASE1; commit; geração de arquivos</p><p><strong>Saídas:</strong> Percentuais alterados; PDF/TXT/XLS/relatório; backup do SQL</p><p><strong>Persistência (tabelas escritas):</strong> HSTPERCONTRIBPREV, CONTRIBPREVPARTP</p><p><strong>Evidência:</strong> <code>Fontes/uAltPercContribLote.pas:450-806; Fontes/uBuscaContribPartLote.pas:296-479</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+</div>
+
+<div class="pf-block" id="PF-25"><h4>JF025 (PF-25) — Alteração de recebedor de participante</h4>
+<p><strong>Objetivo:</strong> Indicar quem recebe o benefício de cada beneficiário do participante (o próprio beneficiário ou outra pessoa responsável), com tipo de responsável e data limite.</p>
+<p><strong>Necessidade de negócio:</strong> beneficiários menores ou incapazes recebem por meio de um responsável (pai, tutor, curador). A fundação precisa registrar quem é o recebedor e até quando, para que o pagamento seja feito à pessoa correta.</p>
+<p><strong>Ator / gatilho:</strong> Analista de cadastro, pelo menu <strong>Manutenção › Alteração de Recebedor de Participante</strong> (<code>Fontes/FPrincipal.dfm:8637-8640</code>; <code>Fontes/FPrincipal.pas:2494-2500</code>).</p>
+<p><strong>Pré-condições:</strong> Participante da fundação com beneficiários cadastrados em BFCIARIOTITPLAN (proposta 1); responsável cadastrado como pessoa ou cadastrável pela tela de recebedor.</p>
+<p><strong>Em termos de negócio:</strong> o participante já tem os beneficiários cadastrados (UC410 JF036); a tela só ajusta quem recebe por eles.</p>
+<p><strong>Pós-condições:</strong> BFCIARIOTITPLAN.IDRESPONSAVEL, IDRESPONNAOREC, CODTIPORECEBEDOR, DATAFIMRECEB atualizados; log.</p>
+<p><strong>Em termos de negócio:</strong> o benefício de cada beneficiário passa a ser pago à pessoa indicada até a data limite.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li><strong>Usuário:</strong> Procurar o participante. [<a href="#CADPREV-RN141">RS141</a>] [<a href="#CADPREV-RN152">RS152</a>] [<a href="uc401.html#CADPREV-RN001">RS001</a>]<br>Seleção filtrada pela fundação; beneficiários listados (<code>Fontes/FIndicadorRecebedor.pas:130-162</code>).</li>
+<li><strong>Usuário:</strong> Editar o beneficiário: escolher “É o próprio” ou “Outra pessoa”, indicar ou cadastrar o responsável, tipo e data limite. [<a href="#CADPREV-RN153">RS153</a>] [<a href="#TRT253">TRT253</a>]<br><code>Fontes/FIndicadorRecebedor.pas:177-291</code>.</li>
+<li><strong>Usuário e sistema:</strong> Confirmar a edição e depois o cadastro. [<a href="#CADPREV-RN154">RS154</a>] [<a href="#TRT255">TRT255</a>]<br>Aplica o UPDATE em BFCIARIOTITPLAN, grava o log e faz o commit (<code>Fontes/FIndicadorRecebedor.pas:306-324, 371-377</code>).</li>
+<li><strong>Usuário:</strong> Opcionalmente, excluir o responsável de um beneficiário. [<a href="#CADPREV-RN154">RS154</a>] [<a href="#TRT254">TRT254</a>]<br><code>Fontes/FIndicadorRecebedor.pas:336-351</code>.</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Selecionar participante</td><td>Ver os beneficiários</td><td>Matrícula/nome</td><td>Filtro por fundação</td><td>Beneficiários listados</td><td><a href="#CADPREV-RN152">RS152</a></td><td>—</td><td><code>FIndicadorRecebedor.dfm</code></td></tr>
+<tr><td>Definir recebedor</td><td>Indicar quem recebe</td><td>Próprio/Outra pessoa, responsável, tipo, data limite</td><td>Exige responsável para “Outra pessoa”</td><td>Recebedor definido</td><td><a href="#CADPREV-RN153">RS153</a></td><td><a href="#MSG252">MSG252</a></td><td><code>FIndicadorRecebedor.dfm</code></td></tr>
+<tr><td>Confirmar</td><td>Gravar</td><td>—</td><td>UPDATE BFCIARIOTITPLAN, log, commit</td><td>Recebedor alterado</td><td><a href="#CADPREV-RN154">RS154</a></td><td><a href="uc401.html#MSG004">MSG004 (UC401)</a></td><td><code>FIndicadorRecebedor.dfm</code></td></tr>
+<tr><td>Excluir responsável</td><td>Retirar o responsável</td><td>Confirmação</td><td>Limpa IDRESPONNAOREC</td><td>Responsável removido</td><td><a href="#CADPREV-RN154">RS154</a></td><td><a href="#MSG253">MSG253</a></td><td><code>FIndicadorRecebedor.dfm</code></td></tr>
+</tbody></table></div>
+<div class="jf-rules">
+<p><strong>Regras de negócio da jornada:</strong> 3 regra(s) — texto completo abaixo.</p>
+<div class="rule-block" id="CADPREV-RN152"><div class="rule-id">RS152 (CADPREV-RN152) — Alteração de recebedor: seleção do participante da fundação e lista dos beneficiários</div>
+<div class="rule-desc">A tela Indicação de Recebedor procura o participante (filtrado pela fundação do usuário) e lista os beneficiários do titular no plano (BFCIARIOTITPLAN, proposta 1) com benefício, recebedor, responsável, tipo de recebedor e data limite. Os botões de inserir e apagar do cadastro e de inserir beneficiário ficam ocultos: a tela só altera dados de beneficiários existentes.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>BFCIARIOTITPLAN.IDTITULAR</code> — [obrigatório] — participante selecionado</li>
+<li><code>BFCIARIOTITPLAN.SEQPROPOSTA</code> — [obrigatório] — = 1</li>
+<li><code>PP.IDPESSJUR</code> — [obrigatório] — patrocinadora da fundação</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> — (seleção)</p>
+<p><strong>Jornada:</strong> <a href="#PF-25">JF025</a></p>
+<p><strong>Descrição original:</strong> MontaSelect.Filtro.Add('PP.IDPESSJUR IN (SELECT IDPESSOA FROM PATRO WHERE IDFUNDACAO = ...)'); qryDet.ParamByName('IDTITULAR').Value := ...; sbtnInserir.Visible := False; sbtnApagar.Visible := False; sbtnInsDet.Visible := False;</p>
+<p><strong>Condições:</strong> Participante selecionado</p><p><strong>Dados envolvidos:</strong> PARTPREVPLAN, BFCIARIOTITPLAN, DEPENTIT, PESSOA, BENEFICIO, BENEFPLANPREV, TIPORECEBEDOR</p><p><strong>Resultado/Exceção:</strong> Beneficiários listados</p>
+<div class="rule-origin">📂 Origem: <code>Fontes/FIndicadorRecebedor.pas:122-162; Fontes/FIndicadorRecebedor.dfm:698-797</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<div class="rule-block" id="CADPREV-RN153"><div class="rule-id">RS153 (CADPREV-RN153) — Recebedor é o próprio beneficiário ou outra pessoa (responsável)</div>
+<div class="rule-desc">Para cada beneficiário, o recebedor pode ser “É o próprio” (o próprio beneficiário recebe) ou “Outra pessoa”. Na segunda opção é obrigatório indicar um responsável, escolhido numa pesquisa de pessoas ou cadastrado na hora (Cadastro de Recebedor); o recebedor passa a ser esse responsável. Também se informam o tipo de responsável e a data limite para o responsável.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>BFCIARIOTITPLAN.IDRESPONSAVEL</code> — [obrigatório] — próprio = IDPESSOA do beneficiário; outro = IDRESPONNAOREC</li>
+<li><code>BFCIARIOTITPLAN.IDRESPONNAOREC</code> — [condicional] — responsável</li>
+<li><code>BFCIARIOTITPLAN.CODTIPORECEBEDOR</code> — [opcional] — TIPORECEBEDOR</li>
+<li><code>BFCIARIOTITPLAN.DATAFIMRECEB</code> — [opcional] — data limite</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT253">TRT253</a> → <a href="#MSG252">MSG252</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-25">JF025</a></p>
+<p><strong>Nota de verificação:</strong> Ao cadastrar um novo responsável, a tela usa os valores da última pesquisa (<code>MSResp.ValoresChave</code>) e não a pessoa recém-cadastrada (<code>Fontes/FIndicadorRecebedor.pas:269-281</code>) <span class="ev ev-inferido">INFERIDO</span>.</p>
+<p><strong>Descrição original:</strong> if rdbProprio.Checked then IDRESPONSAVEL := IDPESSOA else begin if Trim(dbeResponsavel.Text) = '' then MsgDlg('Indique um Responsável pelo Beneficiário.' ...); IDRESPONSAVEL := IDRESPONNAOREC; end;</p>
+<p><strong>Condições:</strong> Opção “Outra pessoa”</p><p><strong>Dados envolvidos:</strong> BFCIARIOTITPLAN, PESSOA</p><p><strong>Resultado/Exceção:</strong> Recebedor definido</p>
+<div class="rule-origin">📂 Origem: <code>Fontes/FIndicadorRecebedor.pas:171-291</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<div class="rule-block" id="CADPREV-RN154"><div class="rule-id">RS154 (CADPREV-RN154) — Gravação do recebedor em BFCIARIOTITPLAN, com log; exclusão só remove o responsável</div>
+<div class="rule-desc">A confirmação aplica as alterações pendentes do beneficiário (UPDATE de BFCIARIOTITPLAN: recebedor, data limite, tipo de recebedor e responsável), grava o log com o título da tela e o botão Confirmar faz o commit. A exclusão de um detalhe, após confirmação, apenas limpa o responsável (IDRESPONNAOREC) do beneficiário.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>BFCIARIOTITPLAN.IDRESPONSAVEL / DATAFIMRECEB / CODTIPORECEBEDOR / IDRESPONNAOREC</code> — [obrigatório] — ModifySQL</li>
+<li><code>LOGTOTALPREV</code> — [obrigatório] — 'Indicação de Recebedor'</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT254">TRT254</a> → <a href="#MSG253">MSG253</a>; <a href="#TRT255">TRT255</a> → <a href="uc401.html#MSG004">MSG004 (UC401)</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-25">JF025</a></p>
+<p><strong>Nota de verificação:</strong> O .dfm também tem InsertSQL e DeleteSQL para BFCIARIOTITPLAN, mas inserção e exclusão de registro estão desabilitadas na tela (<code>Fontes/FIndicadorRecebedor.dfm:815-835</code>; <code>Fontes/FIndicadorRecebedor.pas:125-127</code>). A exclusão faz ApplyUpdates sem commit explícito nem log (<code>Fontes/FIndicadorRecebedor.pas:336-351</code>).</p>
+<p><strong>Descrição original:</strong> CmeCadastroConfirma: AplicaAlteracoes([qryDet]); Sistema.GravaLogOperacoes(Self.Caption); bbtnConfirmarClick: CommitTransacao; updDet.ModifySQL: update BFCIARIOTITPLAN set IDRESPONSAVEL = :IDRESPONSAVEL, DATAFIMRECEB = :DATAFIMRECEB, CODTIPORECEBEDOR = :CODTIPORECEBEDOR, IDRESPONNAOREC = :IDRESPONNAOREC where ...</p>
+<p><strong>Condições:</strong> Confirmação do cadastro</p><p><strong>Dados envolvidos:</strong> BFCIARIOTITPLAN, LOGTOTALPREV</p><p><strong>Resultado/Exceção:</strong> Recebedor alterado</p>
+<div class="rule-origin">📂 Origem: <code>Fontes/FIndicadorRecebedor.pas:306-351, 371-377; Fontes/FIndicadorRecebedor.dfm:798-838</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<p><strong>Regras deste caso de uso compartilhadas com esta jornada</strong> (texto completo na jornada indicada): <a href="#CADPREV-RN141">RS141 (CADPREV-RN141) — Telas de manutenção em lote abertas pelo menu Manutenção, sem bloquear a tela principal</a> (em <a href="#PF-23">JF023</a>).</p>
+<p><strong>Regras transversais do módulo</strong> (texto completo em <a href="uc401.html">UC401</a>): <a href="uc401.html#CADPREV-RN001">RS001 (CADPREV-RN001) — Dados isolados por fundação</a>, <a href="uc401.html#CADPREV-RN003">RS003 (CADPREV-RN003) — Instituto troca a nomenclatura das telas</a>, <a href="uc401.html#CADPREV-RN005">RS005 (CADPREV-RN005) — Operações registradas no log de operações do TotalPREV (módulo 452)</a>.</p>
+</div>
+
+<p><strong>Tratamentos de erro:</strong> <a href="#TRT253">TRT253</a>, <a href="#TRT254">TRT254</a>, <a href="#TRT255">TRT255</a></p>
+<p><strong>Mensagens:</strong> <a href="#MSG252">MSG252</a>, <a href="#MSG253">MSG253</a>, <a href="uc401.html#MSG004">MSG004 (UC401)</a></p>
+<p><strong>Telas:</strong> Indicação de Recebedor (<code>FIndicadorRecebedor.dfm</code>); auxiliar: cadastro de recebedor (FCadResponsa, externo — ver <a href="uc410.html#PF-37">UC410 JF037</a>).</p>
+<p><strong>Dependências:</strong> Beneficiários cadastrados (<a href="uc410.html#PF-36">UC410 JF036</a>); cadastro de recebedor (<a href="uc410.html#PF-37">UC410 JF037</a>). Pagamento ao recebedor ocorre no BENEFICIOPREV/FOLHA.</p>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span> — informações que o repositório não comprova ou que divergem entre fontes. Os itens abaixo dependem de validação humana.</p>
+<ul>
+<li>Novo responsável cadastrado na hora é substituído pelos dados da última pesquisa (<code>Fontes/FIndicadorRecebedor.pas:269-281</code>).</li>
+<li>Exclusão aplica a alteração sem commit explícito nem log (<code>Fontes/FIndicadorRecebedor.pas:336-351</code>).</li>
+<li>Apenas a proposta 1 (SEQPROPOSTA = 1) é listada (<code>Fontes/FIndicadorRecebedor.dfm:754</code>).</li>
+<li>Confirmar se o título “Alteração de Recebedor de Participante” (menu) e “Indicação de Recebedor” (tela) designam o mesmo processo de negócio.</li>
+</ul>
+</div>
+<div class="note note-info"><p><strong>Registro original do processo PF-25</strong></p><p><strong>Forms de entrada:</strong> <code>FIndicadorRecebedor.dfm</code></p><p><strong>Lógica de processamento:</strong> Cached updates em qryDet com updDet (ModifySQL em BFCIARIOTITPLAN); log; CommitTransacao</p><p><strong>Saídas:</strong> Recebedor alterado</p><p><strong>Persistência (tabelas escritas):</strong> BFCIARIOTITPLAN, LOGTOTALPREV (externo)</p><p><strong>Evidência:</strong> <code>Fontes/FIndicadorRecebedor.pas:130-377; Fontes/FIndicadorRecebedor.dfm:698-838</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+</div>
+
+<div class="pf-block" id="PF-26"><h4>JF026 (PF-26) — Entrada manual de rubricas (item sem ação)</h4>
+<p><strong>Objetivo:</strong> Registrar que o item de menu “Entrada Manual de Rubricas” existe no Cadastro Previdenciário mas não executa nenhuma função.</p>
+<p><strong>Necessidade de negócio:</strong> o item sugere a digitação manual de rubricas (verbas salariais) do participante. Neste módulo ele não tem tela; a função equivalente fica no módulo de Contribuição Previdenciária.</p>
+<p><strong>Ator / gatilho:</strong> Usuário, pelo menu <strong>Manutenção › Entrada Manual de Rubricas</strong> (<code>Fontes/FPrincipal.dfm:8626-8628</code>).</p>
+<p><strong>Pré-condições:</strong> Nenhuma.</p>
+<p><strong>Em termos de negócio:</strong> nenhuma; o item está visível no menu.</p>
+<p><strong>Pós-condições:</strong> Nenhuma alteração.</p>
+<p><strong>Em termos de negócio:</strong> nada acontece ao clicar.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li><strong>Usuário:</strong> Clicar em Manutenção › Entrada Manual de Rubricas. [<a href="#CADPREV-RN155">RS155</a>]<br>O objeto do menu não tem OnClick; nenhuma tela é aberta (<code>Fontes/FPrincipal.dfm:8626-8628</code>; <code>Fontes/FPrincipal.pas:276</code>).</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Clicar no item</td><td>—</td><td>Clique</td><td>Sem ação</td><td>Nada acontece</td><td><a href="#CADPREV-RN155">RS155</a></td><td>—</td><td><code>FPrincipal.dfm</code></td></tr>
+</tbody></table></div>
+<div class="jf-rules">
+<p><strong>Regras de negócio da jornada:</strong> 1 regra(s) — texto completo abaixo.</p>
+<div class="rule-block" id="CADPREV-RN155"><div class="rule-id">RS155 (CADPREV-RN155) — Entrada Manual de Rubricas: item de menu sem ação no Cadastro Previdenciário</div>
+<div class="rule-desc">O menu Manutenção tem o item “Entrada Manual de Rubricas”, mas ele não tem evento de clique no Cadastro Previdenciário: clicar não abre nenhuma tela. O mesmo título existe no módulo de Contribuição Previdenciária, onde abre a tela de rubricas manuais (frmCadRubricaManualCS), e na Folha (entrada manual INSS).</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>mnuEntradaManualRubrica.OnClick</code> — [—] — não definido</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> — (sem ação)</p>
+<p><strong>Jornada:</strong> <a href="#PF-26">JF026</a></p>
+<p><strong>Nota de verificação:</strong> Declaração <code>Fontes/FPrincipal.pas:276</code>; objeto <code>Fontes/FPrincipal.dfm:8626-8628</code> sem OnClick; nenhuma outra referência no módulo. Referências cruzadas: <code>CONTRIBUICAOPREV/Fontes/FPrincipal.pas:1879-1884</code> e <code>FOLHA/Fontes/FPrincipal.pas:1485-1489</code>.</p>
+<p><strong>Descrição original:</strong> object mnuEntradaManualRubrica: TMenuItem Caption = 'Entrada Manual de Rubricas' end</p>
+<p><strong>Condições:</strong> Clique no item</p><p><strong>Dados envolvidos:</strong> —</p><p><strong>Resultado/Exceção:</strong> Nenhuma tela é aberta</p>
+<div class="rule-origin">📂 Origem: <code>Fontes/FPrincipal.pas:276; Fontes/FPrincipal.dfm:8626-8628</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<p><strong>Regras transversais do módulo</strong> (texto completo em <a href="uc401.html">UC401</a>): .</p>
+</div>
+
+<p><strong>Tratamentos de erro:</strong> —</p>
+<p><strong>Mensagens:</strong> —</p>
+<p><strong>Telas:</strong> Nenhuma no CADASTROPREV (no CONTRIBUICAOPREV o mesmo título abre <code>frmCadRubricaManualCS</code>).</p>
+<p><strong>Dependências:</strong> Função equivalente em CONTRIBUICAOPREV (<code>CONTRIBUICAOPREV/Fontes/FPrincipal.pas:1879-1884</code>) — ver documentação do módulo <a href="../contribuicao/index.html">Contribuição</a>.</p>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span> — informações que o repositório não comprova ou que divergem entre fontes. Os itens abaixo dependem de validação humana.</p>
+<ul>
+<li>Confirmar se o item deve ser removido do menu do Cadastro Previdenciário ou ligado à tela de rubricas manuais do CONTRIBUICAOPREV.</li>
+<li>Verificar se o controle de permissões (fora do módulo) oculta ou desabilita o item em produção.</li>
+</ul>
+</div>
+<div class="note note-info"><p><strong>Registro original do processo PF-26</strong></p><p><strong>Forms de entrada:</strong> <code>FPrincipal.dfm</code> (item de menu)</p><p><strong>Lógica de processamento:</strong> Nenhuma (sem OnClick)</p><p><strong>Saídas:</strong> Nenhuma</p><p><strong>Persistência (tabelas escritas):</strong> Nenhuma</p><p><strong>Evidência:</strong> <code>Fontes/FPrincipal.dfm:8626-8628; Fontes/FPrincipal.pas:276</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+</div>
+
+<section id="TRT-section"><div class="section-title">6. Tratamentos (TRT)</div>
+<p>Cada tratamento traz a condição, a mensagem exibida, o resultado e a regra/jornada de origem. Mensagens de padrão comum às telas de evento são as de <a href="uc401.html#MSG-section">UC401</a> (indicadas como “(UC401)”). “validação de tela” = crítica sem regra CADPREV-RN própria; “validação técnica” = falha técnica tratada pelo form.</p>
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Condição</th><th>Mensagem</th><th>Resultado</th><th>Regra</th><th>Jornada</th></tr></thead><tbody>
+<tr id="TRT241"><td><strong>TRT241</strong></td><td>Nenhum participante atende ao filtro do cálculo em lote</td><td><a href="#MSG241">MSG241</a></td><td>Interrompe sem abrir transação</td><td><a href="#CADPREV-RN142">RS142</a></td><td><a href="#PF-23">JF023</a></td></tr>
+<tr id="TRT242"><td><strong>TRT242</strong></td><td>Erro ao calcular o tempo de um participante do lote</td><td><a href="#MSG242">MSG242</a></td><td>Rollback de todo o lote e Abort</td><td><a href="#CADPREV-RN143">RS143</a></td><td><a href="#PF-23">JF023</a></td></tr>
+<tr id="TRT243"><td><strong>TRT243</strong></td><td>Algum grupo do filtro (patrocinadora/plano, situação no plano ou na fundação) sem nenhum item marcado</td><td>—</td><td>SQL com <code>IN ()</code> inválido; erro de banco não tratado na abertura da consulta <span class="ev ev-inferido">INFERIDO</span></td><td><a href="#CADPREV-RN142">RS142</a></td><td><a href="#PF-23">JF023</a></td></tr>
+<tr id="TRT244"><td><strong>TRT244</strong></td><td>Matrícula não encontrada ou titular sem situação 1, 2, 33 ou 77</td><td><a href="#MSG244">MSG244</a></td><td>Limpa os campos e volta à matrícula</td><td><a href="#CADPREV-RN145">RS145</a></td><td><a href="#PF-24">JF024</a></td></tr>
+<tr id="TRT245"><td><strong>TRT245</strong></td><td>Matrícula sem plano 66/74 ativo</td><td><a href="#MSG245">MSG245</a></td><td>Limpa os campos e interrompe</td><td><a href="#CADPREV-RN145">RS145</a></td><td><a href="#PF-24">JF024</a></td></tr>
+<tr id="TRT246"><td><strong>TRT246</strong></td><td>Matrícula, plano, novo percentual ou data de vigência vazios</td><td><a href="#MSG246">MSG246</a></td><td>Interrompe</td><td><a href="#CADPREV-RN146">RS146</a></td><td><a href="#PF-24">JF024</a></td></tr>
+<tr id="TRT247"><td><strong>TRT247</strong></td><td>Novo percentual acima de 100% ou abaixo do mínimo do plano (5% no 74; 2% no 66)</td><td><a href="#MSG247">MSG247</a>, <a href="#MSG248">MSG248</a></td><td>Limpa o percentual e interrompe</td><td><a href="#CADPREV-RN146">RS146</a></td><td><a href="#PF-24">JF024</a></td></tr>
+<tr id="TRT249"><td><strong>TRT249</strong></td><td>Contribuição do participante já incluída na lista</td><td><a href="#MSG249">MSG249</a></td><td>Limpa os campos e interrompe</td><td><a href="#CADPREV-RN146">RS146</a></td><td><a href="#PF-24">JF024</a></td></tr>
+<tr id="TRT250"><td><strong>TRT250</strong></td><td>Limite anual de mudanças atingido sem parâmetro 264</td><td><a href="#MSG250">MSG250</a></td><td>Limpa os campos e interrompe (erros nas consultas são ignorados)</td><td><a href="#CADPREV-RN147">RS147</a></td><td><a href="#PF-24">JF024</a></td></tr>
+<tr id="TRT251"><td><strong>TRT251</strong></td><td>Erro de banco durante a confirmação da alteração de percentual</td><td>—</td><td>Exceção não tratada: a gravação para no meio e a transação fica aberta (sem rollback explícito) <span class="ev ev-inferido">INFERIDO</span></td><td><a href="#CADPREV-RN150">RS150</a></td><td><a href="#PF-24">JF024</a></td></tr>
+<tr id="TRT252"><td><strong>TRT252</strong></td><td>Geração de PDF, TXT ou Excel</td><td><a href="#MSG251">MSG251</a></td><td>Informa a pasta dos arquivos</td><td><a href="#CADPREV-RN151">RS151</a></td><td><a href="#PF-24">JF024</a></td></tr>
+<tr id="TRT253"><td><strong>TRT253</strong></td><td>Opção “Outra pessoa” sem responsável indicado</td><td><a href="#MSG252">MSG252</a></td><td>Volta para “É o próprio”</td><td><a href="#CADPREV-RN153">RS153</a></td><td><a href="#PF-25">JF025</a></td></tr>
+<tr id="TRT254"><td><strong>TRT254</strong></td><td>Exclusão de detalhe (responsável)</td><td><a href="#MSG253">MSG253</a></td><td>“Sim”: limpa IDRESPONNAOREC e aplica</td><td><a href="#CADPREV-RN154">RS154</a></td><td><a href="#PF-25">JF025</a></td></tr>
+<tr id="TRT255"><td><strong>TRT255</strong></td><td>Falha ao gravar o log de operações na indicação de recebedor</td><td><a href="uc401.html#MSG004">MSG004 (UC401)</a></td><td>Exceção capturada por except vazio; segue sem log</td><td><a href="uc401.html#CADPREV-RN005">RS005 (CADPREV-RN005) — Operações registradas no log de operações do TotalPREV (módulo 452)</a></td><td><a href="#PF-25">JF025</a></td></tr>
+</tbody></table></div>
+</section>
+
+<section id="MSG-section"><div class="section-title">7. Mensagens (MSG)</div>
+<p>Textos conferidos no código-fonte (grafia original mantida, inclusive erros de digitação). Trechos variáveis aparecem entre &lt; &gt;. Mensagens comuns a todas as telas de evento (por exemplo “Esse Evento já foi registrado.”, “Evento efetuado com sucesso.”, “Carta do evento não emitida.”) estão em <a href="uc401.html#MSG-section">UC401</a> e são apenas referenciadas aqui.</p>
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Texto da mensagem</th><th>Tipo</th><th>Origem</th><th>Jornadas</th></tr></thead><tbody>
+<tr id="MSG241"><td><strong>MSG241</strong></td><td>“Nenhum participante encontrado com o filtro indicado. Verifique.”</td><td>Informação</td><td><code>Fontes/FCalculaTempoServicoLote.pas:170</code></td><td><a href="#PF-23">JF023</a></td></tr>
+<tr id="MSG242"><td><strong>MSG242</strong></td><td>“Erro ao processar matrícula &lt;matrícula&gt;#13Processo Interrompido.”</td><td>Erro</td><td><code>Fontes/FCalculaTempoServicoLote.pas:188-189</code></td><td><a href="#PF-23">JF023</a></td></tr>
+<tr id="MSG243"><td><strong>MSG243</strong></td><td>“Processo terminado com sucesso.”</td><td>Informação</td><td><code>Fontes/FCalculaTempoServicoLote.pas:198</code></td><td><a href="#PF-23">JF023</a></td></tr>
+<tr id="MSG244"><td><strong>MSG244</strong></td><td>“Matrícula não encontrada ou Titular não esta Ativo. ”</td><td>Informação</td><td><code>Fontes/uBuscaContribPartLote.pas:162</code></td><td><a href="#PF-24">JF024</a></td></tr>
+<tr id="MSG245"><td><strong>MSG245</strong></td><td>“Não existe plano ativo para a matrícula informada. ”</td><td>Informação</td><td><code>Fontes/uBuscaContribPartLote.pas:183</code></td><td><a href="#PF-24">JF024</a></td></tr>
+<tr id="MSG246"><td><strong>MSG246</strong></td><td>“Todos os campos devem ser preenchidos. ”</td><td>Informação</td><td><code>Fontes/uBuscaContribPartLote.pas:311</code></td><td><a href="#PF-24">JF024</a></td></tr>
+<tr id="MSG247"><td><strong>MSG247</strong></td><td>“O percentual não pode ser maior que 100%. ”</td><td>Informação</td><td><code>Fontes/uBuscaContribPartLote.pas:317</code></td><td><a href="#PF-24">JF024</a></td></tr>
+<tr id="MSG248"><td><strong>MSG248</strong></td><td>“O percentual mínimo para Novo Plano não pode ser menor que 5%. ” / “O percentual mínimo para REB não pode ser menor que 2%. ”</td><td>Informação</td><td><code>Fontes/uBuscaContribPartLote.pas:325, 333</code></td><td><a href="#PF-24">JF024</a></td></tr>
+<tr id="MSG249"><td><strong>MSG249</strong></td><td>“Matrícula já selecionada. ”</td><td>Informação</td><td><code>Fontes/uBuscaContribPartLote.pas:355</code></td><td><a href="#PF-24">JF024</a></td></tr>
+<tr id="MSG250"><td><strong>MSG250</strong></td><td>“Quantidade de alterações de percentual superior à estabelecida, sem parâmetro 264.”</td><td>Informação</td><td><code>Fontes/uBuscaContribPartLote.pas:397</code></td><td><a href="#PF-24">JF024</a></td></tr>
+<tr id="MSG251"><td><strong>MSG251</strong></td><td>“Arquivo(s) gerado(s) em &lt;pasta de arquivos da empresa&gt;”</td><td>Informação</td><td><code>Fontes/uAltPercContribLote.pas:796</code></td><td><a href="#PF-24">JF024</a></td></tr>
+<tr id="MSG252"><td><strong>MSG252</strong></td><td>“Indique um Responsável pelo Beneficiário.”</td><td>Informação</td><td><code>Fontes/FIndicadorRecebedor.pas:217</code></td><td><a href="#PF-25">JF025</a></td></tr>
+<tr id="MSG253"><td><strong>MSG253</strong></td><td>“Deseja realmente excluir este registro?” (título “Exclusão”)</td><td>Confirmação</td><td><code>Fontes/FIndicadorRecebedor.pas:341</code></td><td><a href="#PF-25">JF025</a></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">8. Tabela/API/Programa</div>
+<div class="table-wrap"><table><thead><tr><th>Jornada</th><th>Tabelas (escrita)</th><th>Tabelas (leitura principal)</th><th>Rotinas</th></tr></thead><tbody>
+<tr><td><a href="#PF-23">JF023</a></td><td>Tempo de serviço (controle externo); LOGTOTALPREV</td><td>PATRO, PLANPREVPATRO, PLANPREV, SITPLANOPREV, SITPART, PARTPREVPLAN, ELEGPATRO</td><td><code>Fontes/FCalculaTempoServicoLote.pas:64-198</code></td></tr>
+<tr><td><a href="#PF-24">JF024</a></td><td>HSTPERCONTRIBPREV, CONTRIBPREVPARTP</td><td>PESSOA, ELEGPATRO, PARTPREVPLAN, PLANPREV, CONTRIBUICAO, PESSOAPARAM</td><td><code>Fontes/uAltPercContribLote.pas:416-806; Fontes/uBuscaContribPartLote.pas:117-479</code></td></tr>
+<tr><td><a href="#PF-25">JF025</a></td><td>BFCIARIOTITPLAN; LOGTOTALPREV</td><td>PARTPREVPLAN, DEPENTIT, PESSOA, BENEFICIO, BENEFPLANPREV, TIPORECEBEDOR</td><td><code>Fontes/FIndicadorRecebedor.pas:130-377</code></td></tr>
+<tr><td><a href="#PF-26">JF026</a></td><td>—</td><td>—</td><td><code>Fontes/FPrincipal.dfm:8626-8628</code></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">9. Telas/Layouts</div>
+<div class="table-wrap"><table><thead><tr><th>Jornada</th><th>Tela (título = Caption do .dfm)</th><th>Form (.dfm)</th></tr></thead><tbody>
+<tr><td><a href="#PF-23">JF023</a></td><td>Cálculo de Tempo de Serviço em Lote</td><td><code>FCalculaTempoServicoLote.dfm</code></td></tr>
+<tr><td><a href="#PF-24">JF024</a></td><td>Alteração de Percentual de Contribuição em Lote<br>Alteração de Percentual de Contribuição em Lote (inclusão)</td><td><code>uAltPercContribLote.dfm</code><br><code>uBuscaContribPartLote.dfm</code></td></tr>
+<tr><td><a href="#PF-25">JF025</a></td><td>Indicação de Recebedor</td><td><code>FIndicadorRecebedor.dfm</code></td></tr>
+<tr><td><a href="#PF-26">JF026</a></td><td>— (sem tela)</td><td>—</td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">10. Visão Consolidada das Jornadas</div>
+<div class="table-wrap"><table><thead><tr><th>Item</th><th>Jornada</th><th>Título</th><th>Critério de aceitação</th><th>Regras</th><th>Mensagens</th><th>Telas</th></tr></thead><tbody>
+<tr><td>[US] CADPREV-JF023</td><td><a href="#PF-23">JF023</a></td><td>Cálculo de tempo de serviço em lote</td><td><strong>Dado</strong> um filtro com participantes, <strong>Quando</strong> o analista processa o lote, <strong>Então</strong> cada participante tem o tempo recalculado, o log é gravado e o sistema exibe <a href="#MSG243">MSG243</a>; um erro em qualquer participante desfaz o lote inteiro.</td><td><a href="#CADPREV-RN141">RS141</a>, <a href="#CADPREV-RN142">RS142</a>, <a href="#CADPREV-RN143">RS143</a>, <a href="#CADPREV-RN144">RS144</a></td><td><a href="#MSG241">MSG241</a>, <a href="#MSG242">MSG242</a>, <a href="#MSG243">MSG243</a></td><td>Cálculo de Tempo de Serviço em Lote</td></tr>
+<tr><td>[US] CADPREV-JF024</td><td><a href="#PF-24">JF024</a></td><td>Alteração de percentual de contribuição em lote</td><td><strong>Dado</strong> um participante ativo do plano 74 com 6% e novo percentual de 8% dentro do limite anual, <strong>Quando</strong> o analista inclui e confirma, <strong>Então</strong> HSTPERCONTRIBPREV guarda a vigência anterior e a nova e CONTRIBPREVPARTP.VALORBASE1 passa a 8; com 4% o sistema exibe <a href="#MSG248">MSG248</a>.</td><td><a href="#CADPREV-RN145">RS145</a>, <a href="#CADPREV-RN146">RS146</a>, <a href="#CADPREV-RN147">RS147</a>, <a href="#CADPREV-RN148">RS148</a>, <a href="#CADPREV-RN149">RS149</a>, <a href="#CADPREV-RN150">RS150</a>, <a href="#CADPREV-RN151">RS151</a>, <a href="#CADPREV-RN141">RS141</a></td><td><a href="#MSG244">MSG244</a>, <a href="#MSG245">MSG245</a>, <a href="#MSG246">MSG246</a>, <a href="#MSG247">MSG247</a>, <a href="#MSG248">MSG248</a>, <a href="#MSG249">MSG249</a>, <a href="#MSG250">MSG250</a>, <a href="#MSG251">MSG251</a></td><td>Alteração de Percentual de Contribuição em Lote (2 telas)</td></tr>
+<tr><td>[US] CADPREV-JF025</td><td><a href="#PF-25">JF025</a></td><td>Alteração de recebedor de participante</td><td><strong>Dado</strong> um beneficiário menor, <strong>Quando</strong> o analista indica “Outra pessoa” com o responsável legal e confirma, <strong>Então</strong> BFCIARIOTITPLAN.IDRESPONSAVEL passa a ser o responsável e o log é gravado; sem responsável o sistema exibe <a href="#MSG252">MSG252</a>.</td><td><a href="#CADPREV-RN152">RS152</a>, <a href="#CADPREV-RN153">RS153</a>, <a href="#CADPREV-RN154">RS154</a>, <a href="#CADPREV-RN141">RS141</a></td><td><a href="#MSG252">MSG252</a>, <a href="#MSG253">MSG253</a>, <a href="uc401.html#MSG004">MSG004 (UC401)</a></td><td>Indicação de Recebedor</td></tr>
+<tr><td>[US] CADPREV-JF026</td><td><a href="#PF-26">JF026</a></td><td>Entrada manual de rubricas (item sem ação)</td><td><strong>Dado</strong> o menu Manutenção, <strong>Quando</strong> o usuário clica em Entrada Manual de Rubricas, <strong>Então</strong> nenhuma tela é aberta.</td><td><a href="#CADPREV-RN155">RS155</a></td><td>—</td><td>—</td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">11. Critérios de Aceitação por Regra</div>
+<div class="table-wrap"><table><thead><tr><th>Regra</th><th>Jornada</th><th>Critério de aceitação</th></tr></thead><tbody>
+<tr><td><a href="#CADPREV-RN141">RS141 (CADPREV-RN141)</a></td><td><a href="#PF-23">JF023</a>, <a href="#PF-24">JF024</a>, <a href="#PF-25">JF025</a></td><td><strong>Dado</strong> usuário com acesso ao menu Manutenção, <strong>Quando</strong> ele clica em Alteração de Percentual de Contribuição em Lote, <strong>Então</strong> a tela abre sem bloquear a tela principal.</td></tr>
+<tr><td><a href="#CADPREV-RN142">RS142 (CADPREV-RN142)</a></td><td><a href="#PF-23">JF023</a></td><td><strong>Dado</strong> filtro que não encontra nenhum participante, <strong>Quando</strong> o analista clica em Processar, <strong>Então</strong> o sistema exibe <a href="#MSG241">MSG241</a> e não processa.</td></tr>
+<tr><td><a href="#CADPREV-RN143">RS143 (CADPREV-RN143)</a></td><td><a href="#PF-23">JF023</a></td><td><strong>Dado</strong> lote com 100 participantes em que o 50º gera erro, <strong>Quando</strong> o processamento chega ao 50º, <strong>Então</strong> toda a transação é desfeita e o processo é interrompido.</td></tr>
+<tr><td><a href="#CADPREV-RN144">RS144 (CADPREV-RN144)</a></td><td><a href="#PF-23">JF023</a></td><td><strong>Dado</strong> data base 31/12 do ano anterior informada na tela, <strong>Quando</strong> o lote é processado em 15/03, <strong>Então</strong> o cálculo usa 15/03 (data do dia) e a data base só aparece no log.</td></tr>
+<tr><td><a href="#CADPREV-RN145">RS145 (CADPREV-RN145)</a></td><td><a href="#PF-24">JF024</a></td><td><strong>Dado</strong> matrícula de participante sem plano 66/74 ativo, <strong>Quando</strong> o analista busca a matrícula, <strong>Então</strong> o sistema exibe <a href="#MSG245">MSG245</a> e limpa os campos.</td></tr>
+<tr><td><a href="#CADPREV-RN146">RS146 (CADPREV-RN146)</a></td><td><a href="#PF-24">JF024</a></td><td><strong>Dado</strong> participante do plano 74, <strong>Quando</strong> o analista informa novo percentual de 4%, <strong>Então</strong> o sistema exibe <a href="#MSG248">MSG248</a> e limpa o percentual.</td></tr>
+<tr><td><a href="#CADPREV-RN147">RS147 (CADPREV-RN147)</a></td><td><a href="#PF-24">JF024</a></td><td><strong>Dado</strong> plano com limite 1 e participante que já mudou o percentual neste ano, sem parâmetro 264, <strong>Quando</strong> o analista tenta incluir nova alteração, <strong>Então</strong> o sistema exibe <a href="#MSG250">MSG250</a> e não inclui.</td></tr>
+<tr><td><a href="#CADPREV-RN148">RS148 (CADPREV-RN148)</a></td><td><a href="#PF-24">JF024</a></td><td><strong>Dado</strong> participante do plano 66 e novo percentual de 9%, <strong>Quando</strong> a contribuição 21 é incluída na lista, <strong>Então</strong> ela entra com 9% (o teto de 7% não é aplicado).</td></tr>
+<tr><td><a href="#CADPREV-RN149">RS149 (CADPREV-RN149)</a></td><td><a href="#PF-24">JF024</a></td><td><strong>Dado</strong> participante com contribuições 1 e 21, <strong>Quando</strong> o analista inclui novo percentual de 8%, <strong>Então</strong> a lista recebe duas linhas (contribuições 1 e 21) com 8%.</td></tr>
+<tr><td><a href="#CADPREV-RN150">RS150 (CADPREV-RN150)</a></td><td><a href="#PF-24">JF024</a></td><td><strong>Dado</strong> participante sem histórico de percentual, inscrito em 01/02/2020, com 6% e novo percentual 8% vigente em 01/05, <strong>Quando</strong> a alteração é confirmada, <strong>Então</strong> HSTPERCONTRIBPREV recebe 6% de 01/02/2020 a 30/04 e 8% a partir de 01/05, e CONTRIBPREVPARTP.VALORBASE1 = 8.</td></tr>
+<tr><td><a href="#CADPREV-RN151">RS151 (CADPREV-RN151)</a></td><td><a href="#PF-24">JF024</a></td><td><strong>Dado</strong> alterações confirmadas para participantes da patrocinadora 91008, <strong>Quando</strong> o analista gera o TXT, <strong>Então</strong> cada linha traz matrícula, data caixa, percentual com 4 dígitos e tipo 013/015, e o sistema exibe <a href="#MSG251">MSG251</a>.</td></tr>
+<tr><td><a href="#CADPREV-RN152">RS152 (CADPREV-RN152)</a></td><td><a href="#PF-25">JF025</a></td><td><strong>Dado</strong> participante com dois beneficiários no plano, <strong>Quando</strong> o analista seleciona o participante, <strong>Então</strong> os dois beneficiários são listados com recebedor e responsável.</td></tr>
+<tr><td><a href="#CADPREV-RN153">RS153 (CADPREV-RN153)</a></td><td><a href="#PF-25">JF025</a></td><td><strong>Dado</strong> beneficiário menor sem responsável indicado, <strong>Quando</strong> o analista marca “Outra pessoa”, <strong>Então</strong> o sistema exibe <a href="#MSG252">MSG252</a> e volta para “É o próprio”.</td></tr>
+<tr><td><a href="#CADPREV-RN154">RS154 (CADPREV-RN154)</a></td><td><a href="#PF-25">JF025</a></td><td><strong>Dado</strong> beneficiário com recebedor alterado para outra pessoa, <strong>Quando</strong> o analista confirma, <strong>Então</strong> BFCIARIOTITPLAN.IDRESPONSAVEL recebe o responsável e o log “Indicação de Recebedor” é gravado.</td></tr>
+<tr><td><a href="#CADPREV-RN155">RS155 (CADPREV-RN155)</a></td><td><a href="#PF-26">JF026</a></td><td><strong>Dado</strong> o menu Manutenção do Cadastro Previdenciário, <strong>Quando</strong> o usuário clica em Entrada Manual de Rubricas, <strong>Então</strong> nenhuma tela é aberta.</td></tr>
+</tbody></table></div>
+</section>
+
+<p><a class="back-btn" href="funcionalidades.html">← Voltar à lista de Casos de Uso (Processos Funcionais)</a></p>
+</main>
+<footer>
+<p>Blueprint AS-IS — PFC-73 — Processos Funcionais organizados em Casos de Uso — Módulo CADASTROPREV | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-24</p>
+</footer>
+</body>
+</html>

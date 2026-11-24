@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cadastro Previdenciário — UC401 – Registrar Eventos de Benefício — Blueprint AS-IS</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<header>
+  <div class="badge">Blueprint AS-IS — PFC-73 — Processos Funcionais</div>
+  <h1>UC401 – Registrar Eventos de Benefício</h1>
+  <p>Caso de uso do módulo Cadastro Previdenciário: 4 jornada(s) funcional(is) e 29 regra(s) de negócio descritas dentro de cada jornada (10 regras transversais do módulo + 19 regras próprias).</p>
+</header>
+<nav>
+  <a href="index.html">📋 Visão Geral</a>
+  <a href="arquitetura.html">🏗️ Arquitetura</a>
+  <a href="inventario-tecnico.html">📦 Inventário</a>
+  <a href="funcionalidades.html">⚙️ Processos Funcionais</a>
+  <a href="procedures-functions.html">🔧 Procedures</a>
+  <a href="dados.html">🗄️ Dados</a>
+  <a href="relatorios.html">📄 Relatórios</a>
+  <a href="integracoes.html">🔗 Integrações</a>
+  <a href="tratamento-erros.html">⚠️ Erros</a>
+  <a href="diagramas-fluxo.html">🔀 Fluxos</a>
+  <a href="lacunas.html">🔍 Lacunas</a>
+  <a href="controle-cobertura.html">📊 Cobertura</a>
+</nav>
+<main>
+
+<a class="back-btn" href="funcionalidades.html">← Voltar à lista de Casos de Uso (Processos Funcionais)</a>
+<div class="breadcrumb"><a href="index.html">Cadastro Previdenciário</a> › <a href="funcionalidades.html">Processos Funcionais</a> › UC401</div>
+
+<section><div class="section-title">1. Identificação</div>
+<div class="table-wrap"><table><tbody>
+<tr><th>Caso de Uso</th><td><strong>UC401 – Registrar Eventos de Benefício</strong></td></tr>
+<tr><th>Módulo</th><td>CADASTROPREV — Cadastro Previdenciário</td></tr>
+<tr><th>Sistema</th><td>CM Contabilidade / FUNCEF (Delphi 5 / VCL / MIDAS / Oracle)</td></tr>
+<tr><th>Tipo</th><td>Sistema Desktop</td></tr>
+<tr><th>Ator</th><td>Usuário operacional do cadastro previdenciário (analistas de cadastro e de benefícios que registram os eventos geradores de benefício)</td></tr>
+<tr><th>Jornadas</th><td><a href="#PF-01">JF001 — Eventos de aposentadoria e assistido (TS/ID/IN/OE)</a>, <a href="#PF-02">JF002 — Evento de falecimento do participante</a>, <a href="#PF-03">JF003 — Evento de reclusão</a>, <a href="#PF-04">JF004 — Eventos assistido INSS (Aposentadoria INSS e Falecimento INSS)</a></td></tr>
+<tr><th>Regras de negócio</th><td>29 regra(s) CADPREV-RN: 10 transversais do módulo (RN001–RN010, definidas na íntegra nesta página) e 19 próprias deste caso de uso (RN021–RN039)</td></tr>
+<tr><th>OS - Título</th><td>PFC-73 — Blueprint Cadastro Previdenciário</td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">2. Descrição Resumida</div>
+<p>Registro dos <em>eventos geradores de benefício</em> do participante — aposentadoria por tempo de contribuição, por idade ou por invalidez, outros eventos temporários, falecimento, reclusão e aposentadoria/falecimento informados pelo INSS — a partir do menu <strong>Eventos › Benefícios</strong> da tela principal do módulo. Este caso de uso reúne 4 jornada(s) funcional(is):</p>
+<ul>
+<li><a href="#PF-01"><strong>JF001 — Eventos de aposentadoria e assistido (TS/ID/IN/OE)</strong></a>: abrir, para o evento escolhido, a tela de aposentadoria ou de assistido temporário, que pertence ao componente externo CMAdmPrev.</li>
+<li><a href="#PF-02"><strong>JF002 — Evento de falecimento do participante</strong></a>: registrar o falecimento do participante, atualizar situações e tempo de serviço, gravar a data da morte e preparar o requerimento de pensão.</li>
+<li><a href="#PF-03"><strong>JF003 — Evento de reclusão</strong></a>: tela de evento de reclusão existente no módulo, porém sem caminho de acesso pelo menu.</li>
+<li><a href="#PF-04"><strong>JF004 — Eventos assistido INSS</strong></a>: registrar a aposentadoria concedida pelo INSS ao participante (AI) ou o falecimento com benefício INSS ao beneficiário (BI).</li>
+</ul>
+<p><strong>Necessidade de negócio:</strong> o benefício previdenciário só pode ser concedido depois que o fato que dá direito a ele — o <em>evento</em> — está registrado. Ao registrar o evento, a entidade também atualiza a situação do participante na patrocinadora, na fundação e no plano, o tempo de serviço e, conforme o caso, a data da morte, as contribuições e a reserva. Este caso de uso faz esse registro para os eventos do grupo “Benefícios”. Além disso, esta página define as <strong>regras transversais</strong> do módulo (RN001–RN010), que valem para todos os casos de uso UC401–UC412.</p>
+<p><strong>Quem inicia:</strong> o analista, pelo menu <em>Eventos › Benefícios</em>. Os itens de cada grupo (Tempo de Contribuição, Idade, Invalidez, Falecimento, Outro Eventos Temporários, Aposentadoria INSS, Falecimento INSS) são lidos do catálogo de eventos geradores da fundação do usuário (<a href="#CADPREV-RN002">RS002</a>).</p>
+<p><strong>Resultado esperado:</strong> o evento fica gravado no histórico de eventos (EVENTOSPREV) com o estado “registrado” ou “efetivado”; as situações e os dados do participante são atualizados; a operação é registrada no log; a carta do evento é emitida quando configurada. O requerimento do benefício decorrente pode ser aberto a partir da própria tela do evento.</p>
+<p><strong>Termos, siglas e componentes citados nesta página</strong> — explicados na primeira vez em que aparecem; a coluna “Fonte” indica onde a explicação foi conferida no repositório:</p>
+<div class="table-wrap"><table><thead><tr><th>Termo</th><th>O que significa</th><th>Fonte</th></tr></thead><tbody>
+<tr><td><strong>EVENTOGERADOR</strong></td><td>Catálogo de eventos que geram benefícios ou alteram a situação do participante. Cada evento pertence a uma fundação (IDFUNDACAO) e a um grupo interno (FLGINTERNO). Também guarda se as novas situações são gravadas de imediato (FLGSITFUNCIMEDIA, FLGSITPARTIMEDIA, FLGSITPLANOIMEDI) e se o evento aceita retorno (FLGACEITARETORNO).</td><td><code>FPrincipal.pas:712-714, 1398-1399</code>; <code>FEventoMorte.pas:1272-1276</code></td></tr>
+<tr><td><strong>Grupos de evento (FLGINTERNO) deste caso de uso</strong></td><td>TS = Tempo de Contribuição; ID = Idade; IN = Invalidez; FL = Falecimento; OE = Outros Eventos Temporários; AI = Aposentadoria INSS (participante); BI = Falecimento INSS (beneficiário). O grupo RC (Reclusão) está comentado.</td><td><code>FPrincipal.pas:150-162</code>; <code>FPrincipal.dfm:8435-8478</code></td></tr>
+<tr><td><strong>EVENTOSPREV</strong></td><td>Histórico dos eventos registrados para cada participante, com data do evento, situações anteriores e novas, se o evento já foi efetivado (FLGEFETIVADO) e a data de alteração.</td><td><code>FEventoMorte.pas:1358-1427</code></td></tr>
+<tr><td><strong>Estado do evento</strong></td><td>“NAO REGISTRADO” (pode inserir), “REGISTRADO” (gravado mas não efetivado — pode alterar) e “EFETIVADO” (não pode alterar). Calculado a partir de EVENTOSPREV.FLGEFETIVADO.</td><td><code>FEventoMorte.pas:746-771</code></td></tr>
+<tr><td><strong>Situações (SITFUNC, SITPART, SITPLANOPREV)</strong></td><td>Situação do participante na patrocinadora (ELEGPATRO.IDSITFUNC), na fundação (PARTPREVPLAN.IDSITPART) e no plano (PARTPREVPLAN.IDSITPLANOPREV). As situações permitidas para cada evento ficam em EVENTOXSITFUNC, EVENTOXSITPART e EVENTOXSITPLAPREV.</td><td><code>FEventoMorte.dfm:724-733</code>; <code>CM/CMADMPREV/Fontes/FCadElegivel.pas:2374-2403</code></td></tr>
+<tr><td><strong>ELEGPATRO / PARTPREVPLAN / PESSOAFISICA</strong></td><td>ELEGPATRO: vínculo do participante com a patrocinadora (matrícula, situação funcional, tempo de serviço). PARTPREVPLAN: vínculo com o plano (situação na fundação e no plano, inscrição, datas de assistência). PESSOAFISICA: dados da pessoa, inclusive DATAMORTE.</td><td><code>FEventoMorte.pas:1253-1356, 1115-1131</code></td></tr>
+<tr><td><strong>CMAdmPrev</strong></td><td>Componente externo do framework CM (pasta <code>CM/CMADMPREV/Fontes</code>). Contém as telas de aposentadoria, assistido, desfazer evento e cadastro de elegível, além das bibliotecas de regras usadas pelas telas deste módulo (UAdmPrev, UEventos, UBeneficio, UParticipante, UMovReserva). O módulo apenas abre essas telas e chama essas rotinas.</td><td><code>FEventoMorte.pas:303-307</code>; <a href="integracoes.html">🔗 Integrações</a></td></tr>
+<tr><td><strong>PodeRegistrarEvento</strong></td><td>Rotina do CMAdmPrev que decide se o evento pode ser registrado para o participante, conforme o grupo do evento, as situações atuais e se a pessoa é falecida; quando não pode, devolve o motivo.</td><td><code>CM/CMADMPREV/Fontes/UEventos.pas:828-880</code></td></tr>
+<tr><td><strong>Requerimento de benefício</strong></td><td>Telas do CMAdmPrev abertas a partir do evento (<code>AbreRequerBfciario</code> para beneficiários; <code>AbreRequerParticip</code> para o participante) que criam os processos de benefício decorrentes do evento.</td><td><code>CM/CMADMPREV/Fontes/FCadRequerBenefBfciario.pas:2163</code>; <code>FEventoMorte.pas:952-966</code></td></tr>
+<tr><td><strong>PARAMAPREV / IntegraBack</strong></td><td>PARAMAPREV é a tabela de parâmetros do sistema previdenciário (flags de integração contábil e de contas a pagar/receber). IntegraBack é o objeto em memória que guarda se a integração contábil e a financeira estão ligadas.</td><td><code>FPrincipal.pas:1826-1855</code></td></tr>
+<tr><td><strong>Instituto (FLGTIPOPREVIDENC = 'I')</strong></td><td>Tipo de entidade lido do cadastro FUNDACAO. Quando é instituto, as telas trocam Fundação/Patrocinadora/Plano por Instituto/Entidade/Regime.</td><td><code>CM/CMADMPREV/Fontes/UAdmPrev.pas:1194</code>; <code>FPrincipal.pas:490-667</code></td></tr>
+<tr><td><strong>LOGTOTALPREV / log de operações</strong></td><td>Registro de auditoria das operações. As telas gravam pelo serviço <code>Sistema.GravaLogOperacoes</code> (implementação fora do repositório) ou pela função <code>GravaLogTOTALPREV</code>, que insere em LOGTOTALPREV com o código do módulo (452), usuário, descrição e data.</td><td><code>CM/CMADMPREV/Fontes/UAdmPrev.pas:3140-3171</code>; <code>FPrincipal.pas:2110</code></td></tr>
+<tr><td><strong>Eventos geradores 4, 346 e 387</strong></td><td>O código trata o evento 4 como “tipo evento falecimento” e os eventos 346 e 387 como “Falecimento - Resgate p/ Beneficiário Designado”. Os nomes vêm de comentários do código; o cadastro real depende da base.</td><td><code>FEventoMorte.pas:480-481, 573, 1117</code></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">3. Pré-condições</div>
+<p><strong>Gerais do módulo:</strong></p>
+<ul>
+<li>Módulo disponível (entry point <code>CADASTROPREV/Fontes/CadastroPrev.dpr</code>) e usuário com login realizado (<code>FPrincipal.pas:676</code>).</li>
+<li>Banco Oracle acessível; parâmetros carregados no login: integração (PARAMAPREV, PARAMCONTAB, PARAMCAP, PARAMGLOBAL), fundação do usuário e tipo de previdência (<code>FPrincipal.pas:669-699</code>).</li>
+<li>Catálogo EVENTOGERADOR preenchido para a fundação, com as situações permitidas por evento.</li>
+<li>Componente CMAdmPrev disponível (telas e bibliotecas de eventos, benefícios e participantes).</li>
+</ul>
+<p><strong>O que as pré-condições gerais significam na prática:</strong> o usuário precisa entrar no sistema; nesse momento o módulo descobre a fundação do usuário (que filtra tudo o que ele vê — <a href="#CADPREV-RN001">RS001</a>), monta o menu de eventos a partir do catálogo (<a href="#CADPREV-RN002">RS002</a>), troca os nomes das telas se a entidade for um instituto (<a href="#CADPREV-RN003">RS003</a>) e verifica se a integração contábil/financeira está completa (<a href="#CADPREV-RN004">RS004</a>). Sem eventos cadastrados para a fundação, o grupo do menu fica vazio.</p>
+<p><strong>Por jornada:</strong></p>
+<ul>
+<li><a href="#PF-01">JF001</a>: eventos TS/ID/IN/OE cadastrados; telas <code>FEventoAposentadoria</code>/<code>FEventoAssistido</code> do CMAdmPrev disponíveis.</li>
+<li><a href="#PF-02">JF002</a>: evento FL cadastrado; participante vinculado a plano; para requerer pensão, dependente elegível ativo.</li>
+<li><a href="#PF-03">JF003</a>: não há caminho de menu para a tela (ver <a href="#CADPREV-RN033">RS033</a>).</li>
+<li><a href="#PF-04">JF004</a>: eventos AI/BI cadastrados (sem eventos o item fica oculto); participante de plano de patrocinadora da fundação 1.</li>
+</ul>
+<p><strong>Pré-condições por jornada, em termos de negócio:</strong></p>
+<ul>
+<li><a href="#PF-01">JF001</a>: a aposentadoria e o assistido temporário são tratados por telas do componente externo; este módulo só precisa ter o evento no catálogo.</li>
+<li><a href="#PF-02">JF002</a>: o participante tem plano; se a pensão for requerida no mesmo ato, ele precisa ter dependente elegível com cadastro ativo (<a href="#CADPREV-RN027">RS027</a>); se houver pensionistas, eles precisam ter conta salário, CPF e opção de IR (<a href="#CADPREV-RN028">RS028</a>).</li>
+<li><a href="#PF-03">JF003</a>: a funcionalidade existe no código, mas o usuário não consegue abri-la pelo menu deste módulo.</li>
+<li><a href="#PF-04">JF004</a>: o evento INSS precisa estar cadastrado; a pesquisa de participante só encontra participantes de patrocinadoras da fundação 1 (<a href="#CADPREV-RN037">RS037</a>).</li>
+</ul>
+</section>
+
+<section><div class="section-title">4. Pós-condições</div>
+<ul>
+<li><a href="#PF-01">JF001</a>: evento gravado pelo CMAdmPrev (EVENTOSPREV, ELEGPATRO, PARTPREVPLAN, HISTFUNCPREV; PESSOA.FLGINVALIDO no grupo IN quando aplicável).</li>
+<li><a href="#PF-02">JF002</a>: EVENTOSPREV inserido/alterado; ELEGPATRO (tempo de serviço, situação funcional), PARTPREVPLAN (situações), PESSOAFISICA.DATAMORTE (evento 4); contribuições suspensas/associadas; log; carta.</li>
+<li><a href="#PF-03">JF003</a>: nenhuma (tela inacessível pelo menu).</li>
+<li><a href="#PF-04">JF004</a>: EVENTOSPREV inserido/alterado já efetivado; ELEGPATRO (tempo de serviço); PARTPREVPLAN.FLGFITESPECIAL; rubricas individuais associadas; log; carta.</li>
+</ul>
+<p><strong>Resultado de negócio de cada jornada:</strong></p>
+<ul>
+<li><a href="#PF-01">JF001</a> — <em>conclusão com sucesso:</em> o participante passa a assistido (aposentado) ou assistido temporário, com data de início da assistência; o processamento ocorre no componente externo <span class="ev ev-inferido">INFERIDO</span>.</li>
+<li><a href="#PF-02">JF002</a> — <em>conclusão com sucesso:</em> o falecimento fica registrado, as situações mudam conforme o catálogo, a data da morte é gravada (somente no evento 4 — <a href="#CADPREV-RN029">RS029</a>), as contribuições são suspensas e a pensão pode ser requerida. <em>Interrupções:</em> evento não permitido (<a href="#TRT005">TRT005</a>), evento efetivado (<a href="#TRT007">TRT007</a>), pendência cadastral dos pensionistas (<a href="#TRT020">TRT020</a>), falha nas contribuições (<a href="#TRT022">TRT022</a>).</li>
+<li><a href="#PF-03">JF003</a> — sem resultado observável pelo usuário (<span class="ev ev-pendente">PENDENTE</span>).</li>
+<li><a href="#PF-04">JF004</a> — <em>conclusão com sucesso:</em> o evento INSS fica gravado e efetivado sem mudar as situações; o requerimento do benefício INSS é aberto para o participante (AI) ou para os beneficiários (BI).</li>
+</ul>
+</section>
+
+<section><div class="section-title">5. Jornadas Funcionais (JF001–JF004)</div>
+<p>Cada jornada traz objetivo, ator/gatilho, pré e pós-condições, sequência operacional, ações práticas, <strong>regras de negócio da jornada</strong> (texto completo de cada regra), tratamentos e mensagens. As regras transversais RN001–RN010 estão descritas na íntegra dentro de <a href="#PF-01">JF001</a> e valem para todos os casos de uso do módulo.</p>
+<p><strong>Como as jornadas deste caso de uso se relacionam:</strong> todas começam no menu <em>Eventos › Benefícios</em>, montado a partir do catálogo de eventos (<a href="#CADPREV-RN002">RS002</a>). O grupo do evento escolhido define a tela: TS/ID/IN/OE vão para telas externas (JF001), FL abre a tela local de falecimento (JF002), AI/BI abrem a tela local de evento INSS (JF004). A tela de reclusão (JF003) existe, mas não tem item de menu. Nas telas locais, o registro segue o mesmo ciclo de estado (<a href="#CADPREV-RN007">RS007</a>) e a mesma transação (<a href="#CADPREV-RN009">RS009</a>). A versão de BENEFICIOPREV dessas telas está documentada em <a href="../beneficioprev/uc303.html#PF-05">BENEFICIOPREV JF005</a>; as diferenças são apontadas em cada regra.</p>
+<div class="legend"><span><span class="ev ev-comprovado">COMPROVADO</span> — no código</span><span><span class="ev ev-inferido">INFERIDO</span> — plausível</span><span><span class="ev ev-pendente">PENDENTE</span> — validar</span></div>
+</section>
+
+<!-- ======================================================= JF001 -->
+<div class="pf-block" id="PF-01"><h4>JF001 (PF-01) — Eventos de aposentadoria e assistido (TS/ID/IN/OE)</h4>
+<p><strong>Objetivo:</strong> Abrir, para o evento de aposentadoria (Tempo de Contribuição, Idade) ou de assistido (Invalidez, Outros Eventos Temporários) escolhido no menu, a tela correspondente do componente CMAdmPrev, com o título igual ao nome do evento.</p>
+<p><strong>Necessidade de negócio:</strong> a aposentadoria e o afastamento com benefício temporário mudam o participante de ativo para assistido. A entidade precisa registrar a data do evento, a nova situação e preparar o requerimento do benefício.</p>
+<p><strong>Ator / gatilho:</strong> Analista de cadastro/benefícios, pelo menu <em>Eventos › Benefícios › Tempo de Contribuição | Idade | Invalidez | Outro Eventos Temporários › &lt;nome do evento&gt;</em> (<code>FPrincipal.dfm:8435-8467</code>).</p>
+<p><strong>Pré-condições:</strong> Eventos TS/ID/IN/OE cadastrados em EVENTOGERADOR para a fundação; CMAdmPrev disponível.</p>
+<p><strong>Em termos de negócio:</strong> o tipo de aposentadoria ou de afastamento precisa estar no catálogo da fundação; as regras de tela (validações, gravação) são do componente externo.</p>
+<p><strong>Pós-condições:</strong> Evento e situações gravados pela tela externa.</p>
+<p><strong>Em termos de negócio:</strong> o participante fica registrado como aposentado ou assistido temporário a partir da data informada.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li><strong>Sistema:</strong> No login, monta os grupos do menu com os eventos da fundação. [<a href="#CADPREV-RN001">RS001</a>] [<a href="#CADPREV-RN002">RS002</a>]<br>Para cada grupo (TS, ID, IN, OE) lê <code>SELECT IDEVENTOGERADOR, NOME FROM EVENTOGERADOR WHERE FLGINTERNO = '&lt;grupo&gt;' AND IDFUNDACAO = &lt;fundação&gt; ORDER BY NOME</code> e cria um item por evento (<code>FPrincipal.pas:701-848</code>). No grupo OE acrescenta o item “Retorno” (<a href="#CADPREV-RN006">RS006</a>).</li>
+<li><strong>Usuário:</strong> Escolhe o evento no menu. [<a href="#CADPREV-RN021">RS021</a>]<br>O sistema cria os datamodules de relatório se ainda não existem (<a href="#TRT001">TRT001</a>), relê o evento por ID e fundação e abre a tela: TS/ID → <code>TfrmEventoAposentadoria</code>; IN/OE → <code>TfrmEventoAssistido</code> (<code>FPrincipal.pas:2516-2624</code>).</li>
+<li><strong>Usuário e sistema (tela externa):</strong> Procura o participante, informa data e novas situações e confirma. [<a href="#CADPREV-RN022">RS022</a>] [<a href="#CADPREV-RN023">RS023</a>] [<a href="#CADPREV-RN024">RS024</a>]<br>Na aposentadoria a nova situação na fundação deve ser da categoria Assistido (<a href="#MSG035">MSG035</a>); no assistido temporário o salário de assistido é obrigatório (<a href="#MSG036">MSG036</a>).</li>
+<li><strong>Sistema (tela externa):</strong> Grava o evento, registra o log e emite a carta. [<a href="#CADPREV-RN005">RS005</a>] [<a href="#CADPREV-RN010">RS010</a>]<br><code>CM/CMADMPREV/Fontes/FEventoAposentadoria.pas:1295-1312</code>; <code>CM/CMADMPREV/Fontes/FEventoAssistido.pas:1328-1347</code>.</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Escolher evento de aposentadoria</td><td>Abrir a tela do evento TS/ID</td><td>Item do menu Tempo de Contribuição / Idade</td><td>Relê EVENTOGERADOR por ID e fundação; abre FEventoAposentadoria com o nome do evento</td><td>Tela externa aberta</td><td><a href="#CADPREV-RN002">RS002</a>, <a href="#CADPREV-RN021">RS021</a></td><td><a href="#MSG001">MSG001</a></td><td><code>FPrincipal.dfm</code>; <code>CM/CMADMPREV/Fontes/FEventoAposentadoria.dfm</code></td></tr>
+<tr><td>Escolher evento de assistido</td><td>Abrir a tela do evento IN/OE</td><td>Item do menu Invalidez / Outro Eventos Temporários</td><td>Abre FEventoAssistido com o nome do evento</td><td>Tela externa aberta</td><td><a href="#CADPREV-RN021">RS021</a></td><td><a href="#MSG001">MSG001</a></td><td><code>CM/CMADMPREV/Fontes/FEventoAssistido.dfm</code></td></tr>
+<tr><td>Confirmar aposentadoria</td><td>Registrar a aposentadoria</td><td>Participante, data, novas situações</td><td>Exige categoria Assistido; encerra histórico funcional; grava início da assistência</td><td>Participante aposentado</td><td><a href="#CADPREV-RN022">RS022</a>, <a href="#CADPREV-RN023">RS023</a></td><td><a href="#MSG035">MSG035</a></td><td><code>FEventoAposentadoria.dfm</code> (externo)</td></tr>
+<tr><td>Confirmar assistido temporário</td><td>Registrar o afastamento com benefício</td><td>Data inicial/final, salário de assistido</td><td>Exige salário; exige data final se houver salário no mês</td><td>Participante assistido temporário</td><td><a href="#CADPREV-RN024">RS024</a></td><td><a href="#MSG036">MSG036</a>, <a href="#MSG037">MSG037</a>, <a href="#MSG038">MSG038</a></td><td><code>FEventoAssistido.dfm</code> (externo)</td></tr>
+<tr><td>Retorno de evento temporário</td><td>Desfazer evento OE</td><td>Item “Retorno” do grupo OE</td><td>Abre FDesfazerEvento com título “Retorno - &lt;evento&gt;”</td><td>Tela de retorno aberta</td><td><a href="#CADPREV-RN006">RS006</a></td><td>—</td><td><code>CM/CMADMPREV/Fontes/FDesfazerEvento.dfm</code></td></tr>
+</tbody></table></div>
+<div class="jf-rules">
+<p><strong>Regras de negócio da jornada:</strong> 4 regra(s) própria(s) — texto completo abaixo.</p>
+<div class="rule-block" id="CADPREV-RN021"><div class="rule-id">RS021 (CADPREV-RN021) — Grupo do evento define a tela externa aberta</div>
+<div class="rule-desc">Os eventos de Tempo de Contribuição e Idade abrem a tela de aposentadoria do CMAdmPrev; os de Invalidez e Outros Eventos Temporários abrem a tela de assistido temporário. O título da tela é o nome do evento no catálogo e a ajuda (HelpContext) é fixa por grupo.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>EVENTOGERADOR.IDEVENTOGERADOR</code> — [obrigatório] — vem do nome do item de menu (“A” + ID)</li>
+<li><code>EVENTOGERADOR.FLGINTERNO</code> — [obrigatório] — TS, ID, IN ou OE (guardado em <code>sFlgInterno</code>)</li>
+<li><code>EVENTOGERADOR.NOME</code> — [obrigatório] — título da tela</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT001">TRT001</a> → <a href="#MSG001">MSG001</a> (falha ao criar datamodule antes de abrir a tela)</p>
+<p><strong>Jornada:</strong> <a href="#PF-01">JF001</a></p>
+<p><strong>Descrição original:</strong> AbreFormEventoTS/ID criam TfrmEventoAposentadoria (Name frmEventoAposentadoriaTC/ID, HelpContext 160021/160022); AbreFormEventoIN/OE criam TfrmEventoAssistido (Name frmEventoAssistidoIN/OE, HelpContext 160023/160013).</p>
+<p><strong>Condições:</strong> SELECT IDEVENTOGERADOR, NOME, FLGINTERNO FROM EVENTOGERADOR WHERE IDEVENTOGERADOR = &lt;id do item&gt; AND IDFUNDACAO = &lt;fundação&gt;</p><p><strong>Dados envolvidos:</strong> EVENTOGERADOR; variáveis globais sIdEventoGerador e sFlgInterno</p><p><strong>Resultado/Exceção:</strong> Tela externa aberta em modo modal</p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/FPrincipal.pas:2516-2624</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<div class="rule-block" id="CADPREV-RN022"><div class="rule-id">RS022 (CADPREV-RN022) — Aposentadoria exige situação “Assistido” na fundação</div>
+<div class="rule-desc">Na tela externa de aposentadoria, a nova situação do participante na fundação precisa ser da categoria Assistido (SITPART.FLGINTERNO = 'AS'), tanto ao requerer o benefício quanto ao confirmar o evento.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>SITPART.FLGINTERNO</code> da nova situação — [obrigatório] — = 'AS'</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT033">TRT033</a> → <a href="#MSG035">MSG035</a> → bloqueia (Exit)</p>
+<p><strong>Jornada:</strong> <a href="#PF-01">JF001</a></p>
+<p><strong>Descrição original:</strong> if qrySitPart.FieldByName('FLGINTERNO').AsString &lt;&gt; 'AS' then MsgDlg(...Categoria Assistido...); Exit.</p>
+<p><strong>Condições:</strong> FLGINTERNO da situação escolhida ≠ 'AS'</p><p><strong>Dados envolvidos:</strong> SITPART</p><p><strong>Resultado/Exceção:</strong> Confirmação bloqueada</p>
+<div class="rule-origin">📂 Origem: <code>CM/CMADMPREV/Fontes/FEventoAposentadoria.pas:843-848, 1052-1057</code> (dependência externa) | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<div class="rule-block" id="CADPREV-RN023"><div class="rule-id">RS023 (CADPREV-RN023) — Aposentadoria encerra o histórico funcional e inicia a assistência</div>
+<div class="rule-desc">Ao confirmar a aposentadoria, a tela externa fecha o período funcional aberto (HISTFUNCPREV.DATAFINAL = data do evento), grava a data de início da assistência no plano (DATAINICIOASSIST, limpando DATAFIMASSIST) e a marca de situação especial; no grupo IN, marca a pessoa como inválida.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>HISTFUNCPREV.DATAFINAL</code> — [obrigatório] — data do evento, no último período sem data final</li>
+<li><code>PARTPREVPLAN.DATAINICIOASSIST / DATAFIMASSIST / FLGFITESPECIAL</code> — [obrigatório]</li>
+<li><code>PESSOA.FLGINVALIDO</code> — [condicional] — = 1 quando sFlgInterno = 'IN'</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT008">TRT008</a> → <a href="#MSG011">MSG011</a> (erro de banco); a falha no UPDATE de PARTPREVPLAN é ignorada (except vazio, <code>:1144-1145</code>)</p>
+<p><strong>Jornada:</strong> <a href="#PF-01">JF001</a></p>
+<p><strong>Nota de verificação:</strong> neste módulo a tela de aposentadoria só é aberta para TS/ID (<code>FPrincipal.pas:2529, 2550</code>); o ramo IN dela não é alcançado pelo menu de CADASTROPREV (ver <a href="#CADPREV-RN039">RS039</a>).</p>
+<p><strong>Descrição original:</strong> UPDATE HISTFUNCPREV SET DATAFINAL; UPDATE PARTPREVPLAN SET DATAINICIOASSIST, DATAFIMASSIST = NULL, FLGFITESPECIAL; if sFlgInterno = 'IN' UPDATE PESSOA SET FLGINVALIDO = 1.</p>
+<p><strong>Condições:</strong> confirmação do evento de aposentadoria</p><p><strong>Dados envolvidos:</strong> HISTFUNCPREV, PARTPREVPLAN, PESSOA</p><p><strong>Resultado/Exceção:</strong> Participante passa a assistido</p>
+<div class="rule-origin">📂 Origem: <code>CM/CMADMPREV/Fontes/FEventoAposentadoria.pas:1105-1190</code> (dependência externa) | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<div class="rule-block" id="CADPREV-RN024"><div class="rule-id">RS024 (CADPREV-RN024) — Assistido temporário exige salário de assistido e, havendo salário no mês, data final</div>
+<div class="rule-desc">Na tela externa de assistido temporário, o salário de assistido é obrigatório; se o participante tiver salário no mês do evento, a data final do evento passa a ser obrigatória. A confirmação grava salário (SALAUXDOENCA, quando o evento não gera salário virtual), início e fim da assistência no plano.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>reSalarioAssistido</code> — [obrigatório]</li>
+<li><code>dtFinalAssist</code> — [condicional] — obrigatório se há salário no mês</li>
+<li><code>PARTPREVPLAN.SALAUXDOENCA / DATAINICIOASSIST / DATAFIMASSIST / FLGSALVIRTBENEF</code></li>
+<li><code>EVENTOGERADOR.FLGGERASALVIRTUAL</code> — define se grava SALAUXDOENCA</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT034">TRT034</a> → <a href="#MSG036">MSG036</a>; <a href="#TRT035">TRT035</a> → <a href="#MSG037">MSG037</a>; <a href="#TRT036">TRT036</a> → <a href="#MSG038">MSG038</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-01">JF001</a></p>
+<p><strong>Descrição original:</strong> “Salário de Assistido deve ser informado.”; “O participante possui salário no mês … A Data Final do Evento, neste caso, é obrigatória.”; UPDATE PARTPREVPLAN SET SALAUXDOENCA/DATAINICIOASSIST/DATAFIMASSIST.</p>
+<p><strong>Condições:</strong> bPossuiSalario AND dtFinalAssist vazio; FLGGERASALVIRTUAL = 0 grava SALAUXDOENCA</p><p><strong>Dados envolvidos:</strong> PARTPREVPLAN, EVENTOGERADOR</p><p><strong>Resultado/Exceção:</strong> Assistência temporária registrada</p>
+<div class="rule-origin">📂 Origem: <code>CM/CMADMPREV/Fontes/FEventoAssistido.pas:876-880, 1051-1056, 1124-1129, 1160-1182</code> (dependência externa) | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+
+<p><strong>Regras transversais do módulo</strong> (valem para todas as jornadas de todos os casos de uso UC401–UC412): 10 regra(s) — texto completo abaixo.</p>
+<div class="rule-block" id="CADPREV-RN001"><div class="rule-id">RS001 (CADPREV-RN001) — Dados isolados por fundação</div>
+<div class="rule-desc">Cada usuário trabalha com os dados da fundação (empresa) em que fez login: o menu de eventos só mostra eventos dessa fundação e as pesquisas de participante só retornam participantes de patrocinadoras dessa fundação.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>iIdFundacao</code> — [obrigatório] — = Sistema.IdEmpresa no login</li>
+<li><code>EVENTOGERADOR.IDFUNDACAO</code>, <code>PATRO.IDFUNDACAO</code> — [obrigatório] — filtro</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> — (regra de seleção, sem crítica ao usuário)</p>
+<p><strong>Jornada:</strong> Transversal (todas)</p>
+<p><strong>Nota de verificação:</strong> exceções encontradas: a pesquisa da tela de evento INSS fixa <code>IDFUNDACAO = 1</code> (<code>FEventoAssistidoINSS.pas:1638</code>; o filtro dinâmico está comentado em <code>:274</code>); o evento de inscrição usado no retorno para nova patrocinadora é lido sem filtro de fundação (<code>FEventoRetornoMantidoParaAtivo.pas:1332-1335</code>); a inscrição em lote não filtra fundação e fixa patrocinadoras 1/91008 (<a href="uc402.html#CADPREV-RN042">RS042</a>).</p>
+<p><strong>Descrição original:</strong> iIdFundacao := Sistema.IdEmpresa; MontaSelectPatro/MontaSelectPart.Filtro.Add('... IN (SELECT IDPESSOA FROM PATRO WHERE IDFUNDACAO = ...)'); MontaMenu usa IDFUNDACAO em todas as leituras de EVENTOGERADOR.</p>
+<p><strong>Condições:</strong> IDFUNDACAO = iIdFundacao em EVENTOGERADOR; PARTPREVPLAN.IDPESSJUR IN (SELECT IDPESSOA FROM PATRO WHERE IDFUNDACAO = iIdFundacao)</p><p><strong>Dados envolvidos:</strong> EVENTOGERADOR, PATRO, PARTPREVPLAN</p><p><strong>Resultado/Exceção:</strong> Isolamento de dados por fundação</p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/FPrincipal.pas:681-682, 695-697, 701-1435</code>; <code>FEventoMorte.pas:344</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<div class="rule-block" id="CADPREV-RN002"><div class="rule-id">RS002 (CADPREV-RN002) — Menu de eventos montado a partir do catálogo EVENTOGERADOR</div>
+<div class="rule-desc">Os subitens do menu Eventos são criados no login, um por evento cadastrado para a fundação, agrupados pelo código interno do evento. Ao clicar, o sistema relê o evento (ID + fundação) e abre a tela do grupo com o nome do evento como título.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>EVENTOGERADOR.FLGINTERNO</code> — [obrigatório] — TS, ID, IN, FL, OE, AI, BI, IP, RM, MP, RA, TR, TP, TE, AF, AR, DP, DC, DM, DS, DA, PD, CP, CD, CI</li>
+<li><code>EVENTOGERADOR.IDEVENTOGERADOR / NOME</code> — [obrigatório] — nome do item = “A” + ID; título = NOME</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> — (regra de seleção)</p>
+<p><strong>Jornada:</strong> Transversal (todas)</p>
+<p><strong>Nota de verificação:</strong> só monta o grupo se o item-pai do menu estiver habilitado (<code>(ComponentAtual As TMenuItem).Enabled</code>). Os grupos Aposentadoria INSS (AI) e Falecimento INSS (BI) ficam invisíveis quando não há eventos (<code>:863-865, 894-896</code>). O item de inscrição “Reversão Aposentadoria - Inscrição Novo Plano” é criado desabilitado (<code>:931-934</code>). Diferente do BENEFICIOPREV (<a href="../beneficioprev/uc303.html#BENEF-RN003">BENEF RS003</a>), o grupo Falecimento deste módulo <strong>não</strong> exclui o evento 346.</p>
+<p><strong>Descrição original:</strong> MontaMenu: SELECT IDEVENTOGERADOR, NOME FROM EVENTOGERADOR WHERE FLGINTERNO = '&lt;grupo&gt;' AND IDFUNDACAO = &lt;fundação&gt; ORDER BY NOME; TMenuItem criado em runtime com OnClick AbreFormEvento&lt;grupo&gt;.</p>
+<p><strong>Condições:</strong> FLGINTERNO = grupo AND IDFUNDACAO = iIdFundacao</p><p><strong>Dados envolvidos:</strong> EVENTOGERADOR</p><p><strong>Resultado/Exceção:</strong> Itens de menu criados em runtime</p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/FPrincipal.pas:701-1435, 2516-2665</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<div class="rule-block" id="CADPREV-RN003"><div class="rule-id">RS003 (CADPREV-RN003) — Instituto troca a nomenclatura das telas</div>
+<div class="rule-desc">Quando a entidade é um instituto de previdência, toda tela ativada tem o título e os rótulos alterados: “Fundação” vira “Instituto”, “Patrocinadora(s)” vira “Entidade(s)” e “Plano(s)” vira “Regime(s)”.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>FUNDACAO.FLGTIPOPREVIDENC</code> → <code>prmFLGTIPOPREVIDENC</code> — [obrigatório] — = 'I' ativa a troca</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> — (regra de apresentação)</p>
+<p><strong>Jornada:</strong> Transversal (todas)</p>
+<p><strong>Descrição original:</strong> Screen.OnActiveFormChange := MudaCaptionFundacao; if prmFLGTIPOPREVIDENC = 'I' substitui textos em Caption do form, TLabel, TMenuItem, TGroupBox, TCheckBox, TPanel.</p>
+<p><strong>Condições:</strong> prmFLGTIPOPREVIDENC = 'I' (lido de FUNDACAO em <code>CM/CMADMPREV/Fontes/UAdmPrev.pas:1170-1194</code>)</p><p><strong>Dados envolvidos:</strong> FUNDACAO; componentes visuais</p><p><strong>Resultado/Exceção:</strong> Títulos alterados em tempo de execução</p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/FPrincipal.pas:490-667, 2111</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span> (equivalente a <a href="../beneficioprev/uc303.html#BENEF-RN026">BENEF RS026</a>)</div></div>
+<div class="rule-block" id="CADPREV-RN004"><div class="rule-id">RS004 (CADPREV-RN004) — Integração contábil/financeira ligada por parâmetro, com aviso se faltam dados</div>
+<div class="rule-desc">No login, o sistema lê PARAMAPREV: a integração contábil fica ligada se FLGINTCONTAB = 1; a financeira, se FLGINTCPAGARPREV = 1 ou FLGINTCRECEBERPR = 1. Se a contábil estiver ligada sem plano de contas/máscara cadastrados (PARAMCONTAB/PLANO), ou a financeira sem máscara de desembolso (PARAMCAP), o sistema avisa. Também lê PARAMGLOBAL para saber se o uso de ABC e de centro de responsabilidade é obrigatório.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>PARAMAPREV.FLGINTCONTAB, FLGINTCPAGARPREV, FLGINTCRECEBERPR</code> — [obrigatório]</li>
+<li><code>PARAMCONTAB.PLANO</code>, <code>PLANO.MASCARA</code> — [condicional]</li>
+<li><code>PARAMCAP.MASCARADESEMB</code> (RECPAG 'R' e 'P') — [condicional]</li>
+<li><code>PARAMGLOBAL.USAABC, USACRESPON, UNIDNEGOC, CODCENTRORESPON</code></li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT002">TRT002</a> → <a href="#MSG002">MSG002</a>; <a href="#TRT003">TRT003</a> → <a href="#MSG003">MSG003</a> (apenas avisos; o login continua)</p>
+<p><strong>Jornada:</strong> Transversal (todas)</p>
+<p><strong>Nota de verificação:</strong> o aviso financeiro fala em “Contas a Receber”, mas a condição testa a máscara de <em>desembolso</em> (contas a pagar) (<code>:1908-1913</code>). Sem PARAMGLOBAL, ABC e centro de responsabilidade ficam obrigatórios (<code>:1924-1929</code>). Se <code>Sistema.IdEmpresa &lt;= 0</code>, sai após ler PARAMAPREV (<code>:1857-1861</code>).</p>
+<p><strong>Descrição original:</strong> Verifica_Situacao_Empresa: IntegraBack.Contabilidade := 'S'/'N'; IntegraBack.Financeiro := 'S'/'N'; MsgDlg de aviso se faltam parâmetros.</p>
+<p><strong>Condições:</strong> FLGINTCONTAB = 1; FLGINTCPAGARPREV = 1 OR FLGINTCRECEBERPR = 1</p><p><strong>Dados envolvidos:</strong> PARAMAPREV, PARAMCONTAB, PLANO, PARAMCAP, PARAMGLOBAL</p><p><strong>Resultado/Exceção:</strong> IntegraBack configurado; avisos informativos</p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/FPrincipal.pas:1826-1948</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<div class="rule-block" id="CADPREV-RN005"><div class="rule-id">RS005 (CADPREV-RN005) — Operações registradas no log de operações do TotalPREV (módulo 452)</div>
+<div class="rule-desc">As operações de negócio são auditadas com o código do módulo 452. As telas de evento chamam <code>Sistema.GravaLogOperacoes(&lt;descrição&gt;)</code>; outras rotinas chamam <code>GravaLogTOTALPREV</code>, que insere em LOGTOTALPREV (IDMODULO, DESCOPERACAO até 100 caracteres, IDUSUARIO, DATA = SYSDATE).</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>Sistema.IdModulo</code> — [obrigatório] — = 452</li>
+<li><code>LOGTOTALPREV.IDLOGTOTALPREV, IDMODULO, DESCOPERACAO, IDUSUARIO, DATA</code></li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT004">TRT004</a> → <a href="#MSG004">MSG004</a> → nas telas de evento a exceção “Erro ao gravar Log.” é capturada por um except vazio e a operação segue sem log</p>
+<p><strong>Jornada:</strong> Transversal (todas)</p>
+<p><strong>Nota de verificação:</strong> a implementação de <code>Sistema.GravaLogOperacoes</code> (unit USistema) não está no repositório; a tabela gravada por ela é <span class="ev ev-inferido">INFERIDO</span> (mesmo log). A inscrição em lote (<a href="uc402.html#PF-05">JF005</a>) não grava log. No retorno de mantido para ativo o log é gravado <em>depois</em> do commit (<code>FEventoRetornoMantidoParaAtivo.pas:884-890</code>).</p>
+<p><strong>Descrição original:</strong> Try If Not Sistema.GravaLogOperacoes(Self.Caption) Then raise exception.Create('Erro ao gravar Log.') Except End; GravaLogTOTALPREV: INSERT INTO LOGTOTALPREV (...) VALUES (..., Sistema.IdModulo, ..., SYSDATE).</p>
+<p><strong>Condições:</strong> confirmação de cada operação</p><p><strong>Dados envolvidos:</strong> LOGTOTALPREV</p><p><strong>Resultado/Exceção:</strong> Rastreabilidade das operações</p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/FPrincipal.pas:2110, 2774-2775</code>; <code>FEventoMorte.pas:1229-1234</code>; <code>CM/CMADMPREV/Fontes/UAdmPrev.pas:3140-3171</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span> (equivalente a <a href="../beneficioprev/uc301.html#BENEF-RN025">BENEF RS025</a>, que usa o módulo 454)</div></div>
+<div class="rule-block" id="CADPREV-RN006"><div class="rule-id">RS006 (CADPREV-RN006) — Opção “Retorno” (desfazer evento) nos grupos OE, AF, AR, CP e, com FLGACEITARETORNO = 1, CI</div>
+<div class="rule-desc">O menu acrescenta, depois dos eventos, um separador e o item “Retorno” nos grupos Outros Eventos Temporários (OE), Afastamento com manutenção (AF), Afastamento sem remuneração (AR) e Cancelamento por iniciativa (CP), sempre que o grupo tiver algum evento. No Cancelamento por inadimplência (CI) o item só aparece se o evento tiver FLGACEITARETORNO = 1. Nos grupos AF e AR também é criado o item “Prorrogação do Evento”. O item abre a tela externa FDesfazerEvento com o título “Retorno - &lt;nome do evento&gt;”.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>EVENTOGERADOR.FLGACEITARETORNO</code> — [condicional] — só para CI</li>
+<li>Nome do item = “D” + IDEVENTOGERADOR</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> — (regra de montagem de menu)</p>
+<p><strong>Jornada:</strong> Transversal (todas); usado em <a href="#PF-01">JF001</a> (OE) e nos UCs de afastamento/cancelamento (<a href="uc404.html#PF-11">JF011</a>, <a href="uc405.html#PF-16">JF016</a>)</p>
+<p><strong>Nota de verificação:</strong> nos grupos OE, AF, AR e CP o ID usado no item “Retorno” é o do <em>último</em> evento lido (a query está no fim após o laço); no CI a query volta ao primeiro registro (<code>qryAux.First</code>, <code>:1417</code>) e testa a flag só desse primeiro evento. Se o grupo tiver mais de um evento, o retorno fica associado a um deles <span class="ev ev-inferido">INFERIDO</span>. Na tela externa de retorno, o desfazer é recusado quando o último evento do participante é DM ou AF, ou a situação na fundação é MA, orientando usar “Retorno de Mantido para Ativo” (<code>CM/CMADMPREV/Fontes/FDesfazerEvento.pas:219-224, 232-239</code>) — ou seja, o item “Retorno” do grupo AF existe no menu, mas o retorno de afastamento com manutenção é feito por <a href="uc402.html#PF-08">JF008</a>.</p>
+<p><strong>Descrição original:</strong> if qryAux.RecordCount &lt;&gt; 0 then cria '-' e 'Retorno' (OnClick AbreFormDesfazerEvento); CI: if (RecordCount &lt;&gt; 0) and (FLGACEITARETORNO = 1).</p>
+<p><strong>Condições:</strong> OE/AF/AR/CP: RecordCount &gt; 0; CI: RecordCount &gt; 0 AND FLGACEITARETORNO = 1</p><p><strong>Dados envolvidos:</strong> EVENTOGERADOR</p><p><strong>Resultado/Exceção:</strong> Item “Retorno” no menu; HelpContext 160008 (AF), 160009 (AR), 160027 (CI), 160028 (demais)</p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/FPrincipal.pas:834-846, 1120-1146, 1169-1195, 1353-1366, 1416-1431, 1778-1806</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<div class="rule-block" id="CADPREV-RN007"><div class="rule-id">RS007 (CADPREV-RN007) — Ciclo de estado do evento: não registrado, registrado, efetivado</div>
+<div class="rule-desc">Ao selecionar o participante, a tela do evento verifica em EVENTOSPREV se já existe evento do mesmo grupo para o mesmo vínculo (patrocinadora, plano, pessoa, proposta). Sem evento, pergunta ao CMAdmPrev se o evento pode ser registrado (PodeRegistrarEvento) e, se não puder, mostra o motivo. Com evento não efetivado (FLGEFETIVADO = '0'), avisa e permite alterar. Com evento efetivado, avisa e bloqueia a alteração.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>EVENTOSPREV.FLGEFETIVADO</code> — [obrigatório]</li>
+<li><code>EVENTOGERADOR.FLGINTERNO</code>, IDPESSJUR, IDPLANOPREV, IDPESSOA, SEQPROPOSTA — chave da verificação</li>
+<li><code>sMotivoEvento</code> — retorno de PodeRegistrarEvento</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT005">TRT005</a> → <a href="#MSG005">MSG005</a>; <a href="#TRT006">TRT006</a> → <a href="#MSG006">MSG006</a>; <a href="#TRT007">TRT007</a> → <a href="#MSG007">MSG007</a></p>
+<p><strong>Jornada:</strong> Transversal (todas as telas de evento: JF002, JF003, JF004 e UC402–UC404)</p>
+<p><strong>Nota de verificação:</strong> variações: no evento INSS o efetivado pode gerar novo evento (<a href="#CADPREV-RN038">RS038</a>); na reinscrição uma data nova posterior gera novo evento (<a href="uc402.html#CADPREV-RN050">RS050</a>); no falecimento de resgate 346/387 o usuário pode registrar outro evento (<a href="#CADPREV-RN026">RS026</a>).</p>
+<p><strong>Descrição original:</strong> VerificaEstadoEvento: IsEmpty → 'NAO REGISTRADO'; FLGEFETIVADO = '0' → 'REGISTRADO'; senão 'EFETIVADO'. PodeRegistrarEvento(..., sMotivoEvento).</p>
+<p><strong>Condições:</strong> qryEvento (EVENTOSPREV × EVENTOGERADOR por FLGINTERNO e vínculo)</p><p><strong>Dados envolvidos:</strong> EVENTOSPREV, EVENTOGERADOR, SITFUNC, SITPART, SITPLANOPREV, PESSOAFISICA.DATAMORTE</p><p><strong>Resultado/Exceção:</strong> Inserir, alterar ou bloquear</p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/FEventoMorte.pas:656-700, 746-771</code>; <code>CM/CMADMPREV/Fontes/UEventos.pas:828-880</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<div class="rule-block" id="CADPREV-RN008"><div class="rule-id">RS008 (CADPREV-RN008) — Situações oferecidas e efetivação imediata definidas pelo evento</div>
+<div class="rule-desc">As listas de nova situação (patrocinadora, fundação, plano) mostram apenas as situações associadas ao evento (EVENTOXSITFUNC, EVENTOXSITPART, EVENTOXSITPLAPREV). As marcas do evento FLGSITFUNCIMEDIA, FLGSITPARTIMEDIA e FLGSITPLANOIMEDI dizem se cada nova situação é gravada já no registro; se as três forem '1', o evento nasce efetivado (FLGEFETIVADO = 1, DATAEFETIVADO = hoje).</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>EVENTOXSITFUNC / EVENTOXSITPART / EVENTOXSITPLAPREV.IDEVENTOGERADOR</code> — [obrigatório]</li>
+<li><code>EVENTOGERADOR.FLGSITFUNCIMEDIA / FLGSITPARTIMEDIA / FLGSITPLANOIMEDI</code></li>
+<li><code>EVENTOSPREV.FLGSITFUNCIMED / FLGSITPARTIMED / FLGSITPLANOIMED / FLGEFETIVADO / DATAEFETIVADO</code></li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT008">TRT008</a> → <a href="#MSG011">MSG011</a> (erro de banco)</p>
+<p><strong>Jornada:</strong> Transversal (telas de evento)</p>
+<p><strong>Nota de verificação:</strong> exceções: o evento INSS não muda situações e sempre efetiva (<a href="#CADPREV-RN036">RS036</a>); o retorno de mantido para ativo grava as três situações de imediato (<code>FEventoRetornoMantidoParaAtivo.pas:1246-1256</code>).</p>
+<p><strong>Descrição original:</strong> qrySitFunc: SELECT ... FROM SITFUNC SIT, EVENTOXSITFUNC E WHERE SIT.IDSITFUNC = E.IDSITFUNC AND E.IDEVENTOGERADOR = :IDEVENTO; VerificaeGravaSituacoes lê FLGSITFUNCIMEDIA/FLGSITPARTIMEDIA/FLGSITPLANOIMEDI.</p>
+<p><strong>Condições:</strong> FLG...IMEDIA = '1' → UPDATE ELEGPATRO.IDSITFUNC / PARTPREVPLAN.IDSITPART, IDSITPLANOPREV</p><p><strong>Dados envolvidos:</strong> EVENTOGERADOR, EVENTOXSIT*, ELEGPATRO, PARTPREVPLAN, EVENTOSPREV</p><p><strong>Resultado/Exceção:</strong> Situações atualizadas e estado de efetivação definido</p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/FEventoMorte.dfm:724-733</code>; <code>FEventoMorte.pas:328-339, 1272-1356</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<div class="rule-block" id="CADPREV-RN009"><div class="rule-id">RS009 (CADPREV-RN009) — Uma transação de banco por tela de evento</div>
+<div class="rule-desc">A tela de evento abre uma transação ao ser exibida; tudo o que é gravado (inclusive requerimentos de benefício) fica pendente até a confirmação final, que faz o commit. Cancelar desfaz tudo (rollback) após confirmação do usuário; fechar a tela também faz rollback.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>dtmBaseDados.dbBaseDados</code> — transação</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT009">TRT009</a> → <a href="#MSG010">MSG010</a> → rollback e limpeza da tela</p>
+<p><strong>Jornada:</strong> Transversal (telas de evento)</p>
+<p><strong>Nota de verificação:</strong> vários erros de gravação usam <code>MostrarErro(E); Exit</code> dentro de rotinas auxiliares sem desfazer a transação; a tela segue com a transação aberta e, em alguns casos, a confirmação continua (<a href="#TRT008">TRT008</a>) <span class="ev ev-inferido">INFERIDO</span>. Na reinscrição, responder “Não” à confirmação final não desfaz a transação (<a href="uc402.html#CADPREV-RN054">RS054</a>).</p>
+<p><strong>Descrição original:</strong> FormShow: dtmBaseDados.dbBaseDados.StartTransaction; bbtnConfirmar: Commit; bbtnCancelar: RollBack; FormClose: if InTransaction then RollBack.</p>
+<p><strong>Condições:</strong> abrir / confirmar / cancelar / fechar</p><p><strong>Dados envolvidos:</strong> todas as tabelas gravadas pela tela</p><p><strong>Resultado/Exceção:</strong> Gravação atômica do evento</p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/FEventoMorte.pas:345, 1236-1238, 1429-1471, 1496-1509</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<div class="rule-block" id="CADPREV-RN010"><div class="rule-id">RS010 (CADPREV-RN010) — Carta do evento emitida após a confirmação</div>
+<div class="rule-desc">Depois de confirmar o evento, a tela chama a emissão da carta do evento (CartaEvento do CMAdmPrev) para o participante, patrocinadora, plano e evento. Se a carta não for emitida, apenas avisa; o evento continua gravado.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li>IDPESSOA, IDPESSJUR, IDPLANOPREV, IDEVENTOGERADOR, SEQPROPOSTA</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> → <a href="#MSG009">MSG009</a> (informativo)</p>
+<p><strong>Jornada:</strong> Transversal (telas de evento)</p>
+<p><strong>Descrição original:</strong> If Not CartaEvento(sIdPessoa, sIdPessJur, sIdPlanoPrev, sIdEventoGerador, sSeqProposta) Then MsgDlg('Carta do evento não emitida.' ...).</p>
+<p><strong>Condições:</strong> após o commit</p><p><strong>Dados envolvidos:</strong> configuração de cartas do evento (CMAdmPrev)</p><p><strong>Resultado/Exceção:</strong> Carta emitida ou aviso</p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/FEventoMorte.pas:1244-1245</code>; <code>CM/CMADMPREV/Fontes/UEventos.pas:5766</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+</div>
+
+<p><strong>Tratamentos de erro:</strong> <a href="#TRT001">TRT001</a>, <a href="#TRT002">TRT002</a>, <a href="#TRT003">TRT003</a>, <a href="#TRT004">TRT004</a>, <a href="#TRT033">TRT033</a>, <a href="#TRT034">TRT034</a>, <a href="#TRT035">TRT035</a>, <a href="#TRT036">TRT036</a></p>
+<p><strong>Mensagens:</strong> <a href="#MSG001">MSG001</a>, <a href="#MSG002">MSG002</a>, <a href="#MSG003">MSG003</a>, <a href="#MSG004">MSG004</a>, <a href="#MSG035">MSG035</a>, <a href="#MSG036">MSG036</a>, <a href="#MSG037">MSG037</a>, <a href="#MSG038">MSG038</a></p>
+<p><strong>Telas:</strong> Menu principal (<code>FPrincipal.dfm</code>), Evento Aposentadoria (<code>CM/CMADMPREV/Fontes/FEventoAposentadoria.dfm</code>, externo), Evento Assistido Temporário (<code>CM/CMADMPREV/Fontes/FEventoAssistido.dfm</code>, externo), Retornar do Evento (<code>CM/CMADMPREV/Fontes/FDesfazerEvento.dfm</code>, externo)</p>
+<p><strong>Dependências:</strong> CMAdmPrev (telas de evento e bibliotecas). O benefício decorrente é tratado no BENEFICIOPREV (<a href="../beneficioprev/uc303.html#PF-05">BENEFICIOPREV JF005</a>). O retorno de evento é detalhado em <a href="uc405.html#PF-16">JF016</a>.</p>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span> — informações que o repositório não comprova ou que divergem entre fontes. O texto existente foi mantido; os itens abaixo dependem de validação humana.</p>
+<ul>
+<li>O comportamento detalhado de <code>FEventoAposentadoria</code> (2309 linhas) e <code>FEventoAssistido</code> (2192 linhas) foi lido apenas em alto nível; requerimentos, cálculos de salário de assistido (<code>ExecutaRegraCalculo</code>) e regras de concessão não foram detalhados.</li>
+<li>Invalidez (IN) abre <code>FEventoAssistido</code>, que não grava PESSOA.FLGINVALIDO; o ramo que marca inválido está nas telas de aposentadoria e INSS, não alcançadas para IN neste módulo (<a href="#CADPREV-RN039">RS039</a>).</li>
+<li>Nas telas externas há ramos que dependem de <code>Sistema.IdModulo &lt;&gt; 454</code> (ex.: <code>FEventoAposentadoria.pas:799-850, 1130</code>, <code>FEventoAssistido.pas:782</code>); neste módulo (452) esses ramos estão ativos — confirmar se é o comportamento desejado.</li>
+<li>Associação do item “Retorno” a um único evento do grupo quando há vários eventos (<a href="#CADPREV-RN006">RS006</a>).</li>
+</ul>
+</div>
+<div class="note note-info"><p><strong>Registro original do processo PF-01</strong></p><p><strong>Forms de entrada:</strong> <code>FPrincipal.dfm</code> (menu), <code>FEventoAposentadoria.dfm</code> e <code>FEventoAssistido.dfm</code> (CMAdmPrev)</p><p><strong>Lógica de processamento:</strong> Monta menu por EVENTOGERADOR; abre tela externa por grupo; tela externa grava evento, situações e assistência</p><p><strong>Saídas:</strong> Evento de aposentadoria/assistido registrado</p><p><strong>Persistência (tabelas escritas):</strong> Delegada ao CMAdmPrev (EVENTOSPREV, ELEGPATRO, PARTPREVPLAN, HISTFUNCPREV, PESSOA)</p><p><strong>Evidência:</strong> <code>CADASTROPREV/Fontes/FPrincipal.pas:701-848, 2516-2624</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+</div>
+
+<!-- ======================================================= JF002 -->
+<div class="pf-block" id="PF-02"><h4>JF002 (PF-02) — Evento de falecimento do participante</h4>
+<p><strong>Objetivo:</strong> Registrar o falecimento do participante (ou o falecimento com resgate para beneficiário designado), atualizar tempo de serviço e situações, gravar a data da morte, suspender as contribuições e permitir requerer o benefício para os beneficiários ou para o participante.</p>
+<p><strong>Necessidade de negócio:</strong> o falecimento encerra a participação ativa e dá origem à pensão dos dependentes ou ao resgate para beneficiário designado. O registro precisa deixar o cadastro coerente (data da morte, situações) e impedir novas contribuições.</p>
+<p><strong>Ator / gatilho:</strong> Analista, pelo menu <em>Eventos › Benefícios › Falecimento › &lt;nome do evento&gt;</em> (<code>FPrincipal.dfm:8458-8461</code>; <code>FPrincipal.pas:784-809, 2579-2603</code>).</p>
+<p><strong>Pré-condições:</strong> Evento FL cadastrado para a fundação; participante com plano ativo; para requerer pensão, dependente elegível ativo; pensionistas com conta salário, CPF e opção de IR.</p>
+<p><strong>Em termos de negócio:</strong> o participante falecido precisa estar no plano, e as pessoas que vão receber a pensão precisam ter cadastro completo para pagamento.</p>
+<p><strong>Pós-condições:</strong> EVENTOSPREV inserido ou alterado; ELEGPATRO.TEMPOSERVTOTAL/MES/DIA; ELEGPATRO.IDSITFUNC e PARTPREVPLAN (situações) se imediatas; PESSOAFISICA.DATAMORTE (evento 4); contribuições suspensas e novas associadas; log; carta.</p>
+<p><strong>Em termos de negócio:</strong> o falecimento passa a constar do histórico; o participante deixa de contribuir; a pensão pode ser requerida.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li><strong>Usuário:</strong> Escolhe o evento de falecimento no menu. [<a href="#CADPREV-RN002">RS002</a>]<br>O sistema abre <code>TfrmEventoMorte</code> com o nome do evento; para os eventos 346 e 367 troca o nome interno do form (<code>FPrincipal.pas:2592-2598</code>). Ao abrir, carrega as situações permitidas para o evento e inicia a transação (<a href="#CADPREV-RN008">RS008</a>, <a href="#CADPREV-RN009">RS009</a>; <code>FEventoMorte.pas:320-346</code>).</li>
+<li><strong>Usuário e sistema:</strong> Procura o participante (pesquisa filtrada pela fundação). [<a href="#CADPREV-RN001">RS001</a>] [<a href="#CADPREV-RN031">RS031</a>]<br>Se houver evento em aberto, a procura é bloqueada (<a href="#MSG012">MSG012</a>; <code>FEventoMorte.pas:371-376</code>).</li>
+<li><strong>Sistema:</strong> Para os eventos de resgate 346/387, verifica alertas e pré-requisitos. [<a href="#CADPREV-RN026">RS026</a>]<br>Alerta de parâmetros de resgate (PESSOAPARAM/PARAMFLAGPESSOA), dívida de empréstimo (CONTRATOEMPTMO), exige evento de falecimento 4 já registrado (346) e pergunta se registra novo evento (<code>FEventoMorte.pas:439-641</code>).</li>
+<li><strong>Sistema:</strong> Verifica o estado do evento e se pode registrá-lo. [<a href="#CADPREV-RN007">RS007</a>]<br><code>FEventoMorte.pas:650-737</code>.</li>
+<li><strong>Usuário:</strong> Informa data do evento, novas situações e tempo de serviço; opcionalmente requer benefício para beneficiário ou participante. [<a href="#CADPREV-RN025">RS025</a>] [<a href="#CADPREV-RN027">RS027</a>]<br>O requerimento exige dependente elegível ativo, atualiza a reserva, valida o benefício anterior, grava situações e o evento e abre a tela de requerimento (<code>FEventoMorte.pas:773-974</code>).</li>
+<li><strong>Usuário e sistema:</strong> Confirma; o sistema verifica pendências cadastrais dos pensionistas e grava. [<a href="#CADPREV-RN028">RS028</a>] [<a href="#CADPREV-RN029">RS029</a>] [<a href="#CADPREV-RN030">RS030</a>]<br>Verifica conta salário/CPF/IR (<a href="#MSG022">MSG022</a>), campos obrigatórios, atualiza flag de empréstimo, grava situações e EVENTOSPREV, grava DATAMORTE (evento 4), suspende e associa contribuições, valida/encerra benefício anterior (<code>FEventoMorte.pas:976-1227</code>).</li>
+<li><strong>Sistema:</strong> Registra o log, faz o commit, emite a carta. [<a href="#CADPREV-RN005">RS005</a>] [<a href="#CADPREV-RN009">RS009</a>] [<a href="#CADPREV-RN010">RS010</a>]<br><code>FEventoMorte.pas:1229-1251</code>.</li>
+<li><strong>Usuário (alternativo):</strong> Cancela ou sai; requerimentos já abertos são desfeitos. [<a href="#CADPREV-RN032">RS032</a>]<br><code>FEventoMorte.pas:1429-1471, 1660-1704</code>.</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Procurar participante</td><td>Localizar o falecido</td><td>Pesquisa (MontaSelectPart)</td><td>Bloqueia se evento em aberto; verifica estado do evento e alertas de resgate</td><td>Participante carregado</td><td><a href="#CADPREV-RN031">RS031</a>, <a href="#CADPREV-RN026">RS026</a>, <a href="#CADPREV-RN007">RS007</a></td><td><a href="#MSG012">MSG012</a>, <a href="#MSG025">MSG025</a>–<a href="#MSG029">MSG029</a>, <a href="#MSG005">MSG005</a>–<a href="#MSG007">MSG007</a></td><td><code>FEventoMorte.dfm</code></td></tr>
+<tr><td>Requerer benefício p/ beneficiário</td><td>Abrir requerimento de pensão</td><td>Data do evento, situações, tempo de serviço</td><td>Exige dependente elegível ativo; atualiza reserva; grava situações e evento; abre requerimento</td><td>Requerimento aberto (pendente de confirmação)</td><td><a href="#CADPREV-RN027">RS027</a>, <a href="#CADPREV-RN025">RS025</a></td><td><a href="#MSG016">MSG016</a>, <a href="#MSG017">MSG017</a>, <a href="#MSG018">MSG018</a>, <a href="#MSG019">MSG019</a>, <a href="#MSG020">MSG020</a>, <a href="#MSG021">MSG021</a>, <a href="#MSG039">MSG039</a></td><td><code>FEventoMorte.dfm</code>; <code>FCadRequerBenefBfciario</code> (externo)</td></tr>
+<tr><td>Confirmar falecimento</td><td>Gravar o evento</td><td>Dados do evento</td><td>Checa pendências dos pensionistas; grava situações, evento, data da morte; suspende contribuições; log; commit</td><td>Evento efetuado</td><td><a href="#CADPREV-RN028">RS028</a>, <a href="#CADPREV-RN029">RS029</a>, <a href="#CADPREV-RN030">RS030</a></td><td><a href="#MSG022">MSG022</a>, <a href="#MSG023">MSG023</a>, <a href="#MSG024">MSG024</a>, <a href="#MSG008">MSG008</a>, <a href="#MSG009">MSG009</a></td><td><code>FEventoMorte.dfm</code></td></tr>
+<tr><td>Cancelar / Sair</td><td>Desistir do evento</td><td>Botão Cancelar ou Sair</td><td>Rollback; desfaz requerimentos abertos</td><td>Nada gravado</td><td><a href="#CADPREV-RN032">RS032</a>, <a href="#CADPREV-RN009">RS009</a></td><td><a href="#MSG010">MSG010</a>, <a href="#MSG013">MSG013</a>, <a href="#MSG014">MSG014</a>, <a href="#MSG015">MSG015</a></td><td><code>FEventoMorte.dfm</code></td></tr>
+</tbody></table></div>
+<div class="jf-rules">
+<p><strong>Regras de negócio da jornada:</strong> 8 regra(s) — texto completo abaixo.</p>
+<div class="rule-block" id="CADPREV-RN025"><div class="rule-id">RS025 (CADPREV-RN025) — Data do evento não pode ser futura</div>
+<div class="rule-desc">A data do evento não pode ser maior que a data atual (data do servidor Oracle). No falecimento, a crítica não vale para os eventos de resgate 346 e 387.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>dtEvento</code> — [obrigatório] — ≤ TRUNC(SYSDATE)</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT016">TRT016</a> → <a href="#MSG018">MSG018</a> → bloqueia (Exit)</p>
+<p><strong>Jornada:</strong> <a href="#PF-02">JF002</a>, <a href="#PF-04">JF004</a></p>
+<p><strong>Descrição original:</strong> SELECT trunc(sysdate) FROM DUAL WHERE trunc(sysdate) &lt; to_date(dtEvento) — se retornar linha, a data é futura (SOL 175700).</p>
+<p><strong>Condições:</strong> sIdEventoGerador ∉ {346, 387} (falecimento); sempre no INSS</p><p><strong>Dados envolvidos:</strong> DUAL</p><p><strong>Resultado/Exceção:</strong> Data futura rejeitada</p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/FEventoMorte.pas:795-806, 1068-1081</code>; <code>FEventoAssistidoINSS.pas:436-445, 653-662</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<div class="rule-block" id="CADPREV-RN026"><div class="rule-id">RS026 (CADPREV-RN026) — Falecimento com resgate para beneficiário designado (346/387)</div>
+<div class="rule-desc">Nos eventos 346 e 387 (“Falecimento - Resgate p/ Beneficiário Designado”), ao procurar o participante o sistema: (a) pede confirmação se houver mais de um parâmetro de alerta de resgate vigente, ou mostra a mensagem de alerta cadastrada quando houver um; (b) pede confirmação se houver contrato de empréstimo não quitado/cancelado; (c) no evento 346, exige que já exista evento de falecimento (4) para a matrícula (titular ou dependente); (d) se já houver evento registrado, pergunta se registra um novo — respondendo “Sim”, o evento é tratado como novo.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>PESSOAPARAM / PARAMFLAGPESSOA.FLGALERTARRESGATE, MSGALERTARRESGATE</code> — vigência sysdate &gt; DATAINICIO e (sysdate &lt; DATAFIM ou DATAFIM nula)</li>
+<li><code>CONTRATOEMPTMO.FLGSITUACAO</code> — NOT IN ('Q','C')</li>
+<li><code>EVENTOSPREV.IDEVENTOGERADOR = 4</code> por ELEGPATRO/DEPENTIT.MATRICULA</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT023">TRT023</a> → <a href="#MSG025">MSG025</a>; <a href="#TRT024">TRT024</a> → <a href="#MSG026">MSG026</a>; <a href="#TRT025">TRT025</a> → <a href="#MSG027">MSG027</a>; <a href="#TRT026">TRT026</a> → <a href="#MSG028">MSG028</a>; <a href="#TRT027">TRT027</a> → <a href="#MSG029">MSG029</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-02">JF002</a></p>
+<p><strong>Nota de verificação:</strong> a checagem de dívida fica dentro do <code>else</code> de <code>Qtde &gt; 1</code> e só dispara quando FLGALERTARRESGATE = 0; como a query de alertas filtra FLGALERTARRESGATE = 1 (<code>:451</code>), isso só acontece quando a pessoa <em>não</em> tem parâmetro de alerta vigente (consulta vazia) (<code>:512-525</code>) <span class="ev ev-inferido">INFERIDO</span>. Regra sem equivalente no BENEFICIOPREV documentado.</p>
+<p><strong>Descrição original:</strong> SIG 86058 — “Crítica ao registrar evento de Resgate complementar para Beneficiário Designado”; SOL 164235; SOL 172398.</p>
+<p><strong>Condições:</strong> sIdEventoGerador IN ('346','387')</p><p><strong>Dados envolvidos:</strong> PESSOAPARAM, PARAMFLAGPESSOA, CONTRATOEMPTMO, EVENTOSPREV, ELEGPATRO, DEPENTIT, EVENTOGERADOR</p><p><strong>Resultado/Exceção:</strong> Continua, limpa a tela (Exit) ou trata como novo evento</p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/FEventoMorte.pas:439-641, 649-656</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<div class="rule-block" id="CADPREV-RN027"><div class="rule-id">RS027 (CADPREV-RN027) — Requerer pensão exige dependente elegível ativo</div>
+<div class="rule-desc">Para requerer benefício para beneficiário a partir do evento de falecimento, o participante precisa ter beneficiário (BFCIARIOTITPLAN) de um benefício do mesmo evento gerador, diferente do titular e com cadastro de dependente ativo (DEPENTIT.DATACANCELA nula). Também exige participante selecionado, data do evento, data não futura e novas situações; pede confirmação se o tempo de serviço total estiver vazio.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>BFCIARIOTITPLAN.IDTITULAR / IDPESSOA / IDBENEFICIO</code>, <code>BENEFICIO.IDEVENTOGERADOR</code> — [obrigatório]</li>
+<li><code>DEPENTIT.DATACANCELA</code> — IS NULL</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT019">TRT019</a> → <a href="#MSG021">MSG021</a>; <a href="#TRT014">TRT014</a>, <a href="#TRT015">TRT015</a>, <a href="#TRT017">TRT017</a>, <a href="#TRT018">TRT018</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-02">JF002</a></p>
+<p><strong>Nota de verificação:</strong> a exigência está no botão de requerer benefício, não na confirmação do evento — mesmo ponto já levantado no BENEFICIOPREV (<a href="../beneficioprev/uc303.html#BENEF-RN035">BENEF RS035</a>).</p>
+<p><strong>Descrição original:</strong> SELECT BF.IDTITULAR FROM BFCIARIOTITPLAN BF, DEPENTIT DP, BENEFICIO B WHERE ... B.IDEVENTOGERADOR = evento AND BF.IDTITULAR &lt;&gt; BF.IDPESSOA AND DP.DATACANCELA IS NULL.</p>
+<p><strong>Condições:</strong> resultado vazio → bloqueia</p><p><strong>Dados envolvidos:</strong> BFCIARIOTITPLAN, DEPENTIT, BENEFICIO</p><p><strong>Resultado/Exceção:</strong> Requerimento aberto (AbreRequerBfciario) ou bloqueado</p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/FEventoMorte.pas:779-869, 952-966</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<div class="rule-block" id="CADPREV-RN028"><div class="rule-id">RS028 (CADPREV-RN028) — Pensionistas precisam de conta salário, CPF e opção de IR</div>
+<div class="rule-desc">Antes de confirmar o evento, se o participante tiver beneficiários de benefício (BENEFBFCIARIO, titular ≠ pessoa), o sistema exige que algum deles tenha conta salário (CONTABANCARIA.TIPOCONTA = 2), CPF (PESSOA.NUMDOCUMENTO) e opção de imposto de renda (PESSOAFISICA.FLGISENTOIRRF). As pendências são reunidas em uma única mensagem e a confirmação é interrompida.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>CM.CONTABANCARIA.TIPOCONTA</code> — = 2</li>
+<li><code>CM.PESSOA.NUMDOCUMENTO</code> — não nulo</li>
+<li><code>CM.PESSOAFISICA.FLGISENTOIRRF</code> — não nulo</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT020">TRT020</a> → <a href="#MSG022">MSG022</a> → interrompe a confirmação (exit)</p>
+<p><strong>Jornada:</strong> <a href="#PF-02">JF002</a>, <a href="#PF-03">JF003</a>, <a href="#PF-04">JF004</a></p>
+<p><strong>Nota de verificação:</strong> a verificação usa “existe algum” (IN sobre todos os beneficiários), não “todos”. Na reclusão a verificação é feita sobre o próprio participante, já na procura, e o confirmar fica bloqueado enquanto houver pendência (<code>FEventoReclusao.pas:296-342, 708-712</code>).</p>
+<p><strong>Descrição original:</strong> SOL 141078 / SOL 155058 / SOL 161040 — Msg := 'Conta Salário não cadastrada!' + 'Participante/Pensionita sem CPF cadastrado!' + 'Participante/Pensionista sem Opção de Imposto de Renda!'.</p>
+<p><strong>Condições:</strong> EXISTS BENEFBFCIARIO WHERE IDTITULAR = participante AND IDTITULAR &lt;&gt; IDPESSOA</p><p><strong>Dados envolvidos:</strong> BENEFBFCIARIO, CONTABANCARIA, PESSOA, PESSOAFISICA</p><p><strong>Resultado/Exceção:</strong> Confirmação interrompida com lista de pendências</p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/FEventoMorte.pas:987-1050</code>; <code>FEventoAssistidoINSS.pas:567-637</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<div class="rule-block" id="CADPREV-RN029"><div class="rule-id">RS029 (CADPREV-RN029) — Data da morte gravada somente no evento 4</div>
+<div class="rule-desc">Na confirmação, a data do evento é gravada como data de falecimento da pessoa (PESSOAFISICA.DATAMORTE) apenas quando o evento gerador é o 4. Para os demais eventos do grupo Falecimento (ex.: resgate 346/387) a data da morte não é alterada.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>PESSOAFISICA.DATAMORTE</code> — [condicional] — = dtEvento se IDEVENTOGERADOR = 4</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT008">TRT008</a> → <a href="#MSG011">MSG011</a> (MostrarErro + Exit)</p>
+<p><strong>Jornada:</strong> <a href="#PF-02">JF002</a></p>
+<p><strong>Nota de verificação:</strong> diferença em relação ao BENEFICIOPREV, onde a data da morte é gravada sem esse filtro na confirmação (<a href="../beneficioprev/uc303.html#BENEF-RN018">BENEF RS018</a>). A gravação no botão de requerer benefício está comentada (<code>FEventoMorte.pas:893-909</code>, SOL 122922).</p>
+<p><strong>Descrição original:</strong> SOL 260838 — “Ao registrar evento o sistema altera data de morte indevidamente.”; if sIdEventoGerador = '4' then UPDATE PESSOAFISICA SET DATAMORTE.</p>
+<p><strong>Condições:</strong> sIdEventoGerador = '4'</p><p><strong>Dados envolvidos:</strong> PESSOAFISICA</p><p><strong>Resultado/Exceção:</strong> Data da morte gravada</p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/FEventoMorte.pas:1115-1131</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<div class="rule-block" id="CADPREV-RN030"><div class="rule-id">RS030 (CADPREV-RN030) — Confirmação suspende contribuições e encerra benefício anterior</div>
+<div class="rule-desc">Na confirmação de um evento novo, o sistema grava o tempo de serviço (ELEGPATRO.TEMPOSERVTOTAL/MES/DIA), as situações imediatas e o evento; depois — exceto quando todos os benefícios requeridos são apenas do INSS — fecha o histórico de contribuições do evento (HSTCONTEVENTOSPR), valida/encerra o benefício anterior, suspende as contribuições do participante e associa as novas contribuições da nova situação, mostrando-as ao usuário.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>ELEGPATRO.TEMPOSERVTOTAL / TEMPOSERVTOTMES / TEMPOSERVTOTDIA</code></li>
+<li><code>sNumerosProcessos</code> — processos de benefício requeridos; tipo 'I' (INSS) × 'S'</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT022">TRT022</a> → <a href="#MSG024">MSG024</a> → rollback, limpa a tela; <a href="#TRT037">TRT037</a> → <a href="#MSG039">MSG039</a>; <a href="#TRT021">TRT021</a> → <a href="#MSG023">MSG023</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-02">JF002</a>, <a href="#PF-03">JF003</a></p>
+<p><strong>Descrição original:</strong> GravaHSTCONTEVENTOSPRFechado; ValidaBeneficioAnterior; SuspendeContribuicoes; AssociaNovasContribuicoes; MostraContribuicoes (CMAdmPrev: UEventos, UBeneficio, FMostraContribuicoes).</p>
+<p><strong>Condições:</strong> (not bAltera) and (not bRequereuSoINSS); SuspendeContribuicoes só se not bEncerrou</p><p><strong>Dados envolvidos:</strong> ELEGPATRO, EVENTOSPREV, contribuições do participante (rotinas externas)</p><p><strong>Resultado/Exceção:</strong> Contribuições suspensas/associadas ou evento desfeito</p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/FEventoMorte.pas:1110-1227, 1253-1270</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<div class="rule-block" id="CADPREV-RN031"><div class="rule-id">RS031 (CADPREV-RN031) — Evento em aberto bloqueia nova procura, consulta, opções e saída</div>
+<div class="rule-desc">Enquanto houver um evento em gravação (<code>uBeneficio.bGravaEvento</code> verdadeiro), o sistema não deixa procurar outro participante, abrir a consulta do participante, abrir as opções nem fechar a tela: o usuário precisa confirmar (OK) ou cancelar o evento.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>uBeneficio.bGravaEvento</code> — [obrigatório] — verdadeiro bloqueia</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT010">TRT010</a> → <a href="#MSG012">MSG012</a>; <a href="#TRT011">TRT011</a> → <a href="#MSG013">MSG013</a> (Abort)</p>
+<p><strong>Jornada:</strong> <a href="#PF-02">JF002</a>, <a href="#PF-03">JF003</a>, <a href="#PF-04">JF004</a></p>
+<p><strong>Descrição original:</strong> SOL 160863 — “Gravar o Evento antes de fazer uma nova pesquisa.” (equivalente a <a href="../beneficioprev/uc303.html#BENEF-RN016">BENEF RS016</a>).</p>
+<p><strong>Condições:</strong> bGravaEvento = True</p><p><strong>Dados envolvidos:</strong> estado em memória</p><p><strong>Resultado/Exceção:</strong> MsgDlg + Abort</p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/FEventoMorte.pas:371-376, 1498-1503, 1515-1520, 1663-1667, 1863-1868</code>; <code>FEventoReclusao.pas:242-247</code>; <code>FEventoAssistidoINSS.pas:280-285</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<div class="rule-block" id="CADPREV-RN032"><div class="rule-id">RS032 (CADPREV-RN032) — Cancelar ou sair desfaz os requerimentos de benefício abertos</div>
+<div class="rule-desc">Se o usuário já abriu requerimento de benefício a partir do evento e decide cancelar (ou sair sem confirmar, após confirmar a saída), o sistema desfaz o evento e apaga os requerimentos criados; se a exclusão dos requerimentos falhar, pergunta se deve desfazer apenas o evento.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>bRequerBenef</code>, <code>sNumerosProcessos</code></li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT012">TRT012</a> → <a href="#MSG014">MSG014</a>; <a href="#TRT013">TRT013</a> → <a href="#MSG015">MSG015</a>; <a href="#TRT009">TRT009</a> → <a href="#MSG010">MSG010</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-02">JF002</a>, <a href="#PF-03">JF003</a>, <a href="#PF-04">JF004</a></p>
+<p><strong>Descrição original:</strong> DesfazRequerimentos(qryAux, sNumerosProcessos) (CMAdmPrev UBeneficio) dentro de transação própria, com Commit ao final.</p>
+<p><strong>Condições:</strong> bRequerBenef = True ao cancelar/sair</p><p><strong>Dados envolvidos:</strong> processos de benefício (rotina externa)</p><p><strong>Resultado/Exceção:</strong> Requerimentos removidos ou saída abortada</p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/FEventoMorte.pas:1429-1471, 1660-1704</code>; <code>CM/CMADMPREV/Fontes/UBeneficio.pas:9564</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<p><strong>Regras transversais do módulo</strong> (valem também para esta jornada; texto completo em <a href="#PF-01">JF001</a>): <a href="#CADPREV-RN001">RS001</a>, <a href="#CADPREV-RN002">RS002</a>, <a href="#CADPREV-RN003">RS003</a>, <a href="#CADPREV-RN005">RS005</a>, <a href="#CADPREV-RN007">RS007</a>, <a href="#CADPREV-RN008">RS008</a>, <a href="#CADPREV-RN009">RS009</a>, <a href="#CADPREV-RN010">RS010</a>.</p>
+</div>
+
+<p><strong>Tratamentos de erro:</strong> <a href="#TRT004">TRT004</a>–<a href="#TRT027">TRT027</a>, <a href="#TRT037">TRT037</a></p>
+<p><strong>Mensagens:</strong> <a href="#MSG004">MSG004</a>–<a href="#MSG029">MSG029</a>, <a href="#MSG039">MSG039</a></p>
+<p><strong>Telas:</strong> Evento Falecimento (<code>FEventoMorte.dfm</code>); requerimento de benefício (<code>CM/CMADMPREV/Fontes/FCadRequerBenefBfciario</code>, <code>FCadRequerBenefParticip</code> — externos); contribuições do evento (<code>FMostraContribuicoes</code> — externo)</p>
+<p><strong>Dependências:</strong> CMAdmPrev (UEventos, UBeneficio, UParticipante, FCadRequerBenef*); empréstimo (CONTRATOEMPTMO). Equivalente em <a href="../beneficioprev/uc303.html#PF-05">BENEFICIOPREV JF005</a>.</p>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span> — informações que o repositório não comprova ou que divergem entre fontes. O texto existente foi mantido; os itens abaixo dependem de validação humana.</p>
+<ul>
+<li>Significado de negócio dos eventos 4, 346, 367 e 387 (apenas comentários do código os descrevem; o cadastro depende da base).</li>
+<li>A pergunta de dívida de empréstimo (<code>FEventoMorte.pas:512-525</code>) só aparece quando não há parâmetro de alerta de resgate vigente (<a href="#CADPREV-RN026">RS026</a>) — confirmar se é a intenção.</li>
+<li>A verificação de estado usa <code>FInscricaoNovoPlano.sFlgInterno</code> (<code>:613, 751</code>) em vez da variável global usada pelas demais telas; confirmar se ambas recebem o FLGINTERNO do evento escolhido.</li>
+<li>Em <code>VerificaeGravaSituacoes</code>, um erro de banco faz <code>Exit</code> da rotina, mas a confirmação continua (<code>:1265-1270</code>) <span class="ev ev-inferido">INFERIDO</span>.</li>
+</ul>
+</div>
+<div class="note note-info"><p><strong>Registro original do processo PF-02</strong></p><p><strong>Forms de entrada:</strong> <code>FEventoMorte.dfm</code></p><p><strong>Lógica de processamento:</strong> Estado do evento; alertas de resgate; requerimento; grava situações, EVENTOSPREV, DATAMORTE (evento 4); suspende/associa contribuições; log; commit; carta</p><p><strong>Saídas:</strong> Falecimento registrado; requerimento de pensão</p><p><strong>Persistência (tabelas escritas):</strong> EVENTOSPREV, ELEGPATRO, PARTPREVPLAN, PESSOAFISICA (+ tabelas das rotinas externas)</p><p><strong>Evidência:</strong> <code>CADASTROPREV/Fontes/FEventoMorte.pas:976-1427</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+</div>
+
+<!-- ======================================================= JF003 -->
+<div class="pf-block" id="PF-03"><h4>JF003 (PF-03) — Evento de reclusão</h4>
+<p><strong>Objetivo:</strong> Registrar o evento de reclusão (prisão) do participante e requerer o benefício para os beneficiários. A tela existe no módulo, mas não é acessível pelo menu.</p>
+<p><strong>Necessidade de negócio:</strong> a reclusão do participante pode gerar benefício aos dependentes (auxílio-reclusão); o registro segue o mesmo ciclo dos demais eventos.</p>
+<p><strong>Ator / gatilho:</strong> Nenhum gatilho de menu identificado. A tela é criada automaticamente na inicialização do programa (<code>CadastroPrev.dpr:170</code>) e está nas units usadas por <code>FPrincipal.pas:456</code>, mas nenhum item de menu ou rotina chama <code>frmEventoReclusao.Show</code>; o grupo RC está comentado (<code>FPrincipal.pas:158</code>).</p>
+<p><strong>Pré-condições:</strong> — (não acessível)</p>
+<p><strong>Em termos de negócio:</strong> o usuário de CADASTROPREV não consegue registrar reclusão por este módulo.</p>
+<p><strong>Pós-condições:</strong> — (se acionada: EVENTOSPREV, ELEGPATRO, PARTPREVPLAN, contribuições, rubricas individuais, log)</p>
+<p><strong>Em termos de negócio:</strong> nenhum efeito observável hoje.</p>
+<p><strong>Sequência operacional (comportamento da tela, caso acionada):</strong></p>
+<ol>
+<li><strong>Sistema:</strong> Ao exibir, carrega situações do evento e inicia transação. [<a href="#CADPREV-RN008">RS008</a>] [<a href="#CADPREV-RN009">RS009</a>]<br><code>FEventoReclusao.pas:216-238</code>.</li>
+<li><strong>Usuário e sistema:</strong> Procura o participante; verifica conta salário/CPF/IR do próprio participante e o estado do evento. [<a href="#CADPREV-RN028">RS028</a>] [<a href="#CADPREV-RN007">RS007</a>]<br><code>FEventoReclusao.pas:240-446</code>.</li>
+<li><strong>Usuário:</strong> Requer benefício para beneficiário. [<a href="#CADPREV-RN034">RS034</a>]<br>Exige beneficiário cadastrado (<a href="#MSG030">MSG030</a>), atualiza reserva, valida benefício anterior, grava situações e verifica cadastro dos dependentes; o bloco termina em <code>exit</code> incondicional antes de abrir o requerimento (<code>:671-680</code>).</li>
+<li><strong>Usuário e sistema:</strong> Confirma: exige data do requerimento, grava situações e evento, suspende/associa contribuições, associa rubricas individuais, log, commit, carta. [<a href="#CADPREV-RN030">RS030</a>] [<a href="#CADPREV-RN005">RS005</a>] [<a href="#CADPREV-RN010">RS010</a>]<br><code>FEventoReclusao.pas:700-874</code>.</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Abrir evento de reclusão</td><td>Registrar reclusão</td><td>—</td><td>Sem item de menu; form criado na inicialização e não exibido</td><td>Tela inacessível</td><td><a href="#CADPREV-RN033">RS033</a></td><td>—</td><td><code>FEventoReclusao.dfm</code></td></tr>
+<tr><td>Requerer benefício (se acionada)</td><td>Abrir auxílio-reclusão</td><td>Data, situações</td><td>Exige beneficiário; termina antes de abrir o requerimento</td><td>Requerimento não aberto</td><td><a href="#CADPREV-RN034">RS034</a></td><td><a href="#MSG030">MSG030</a>, <a href="#MSG022">MSG022</a></td><td><code>FEventoReclusao.dfm</code></td></tr>
+<tr><td>Confirmar (se acionada)</td><td>Gravar a reclusão</td><td>Data do evento e do requerimento</td><td>Grava evento, contribuições, rubricas; log; commit</td><td>Evento efetuado</td><td><a href="#CADPREV-RN034">RS034</a>, <a href="#CADPREV-RN030">RS030</a></td><td><a href="#MSG031">MSG031</a>, <a href="#MSG032">MSG032</a>, <a href="#MSG008">MSG008</a></td><td><code>FEventoReclusao.dfm</code></td></tr>
+</tbody></table></div>
+<div class="jf-rules">
+<p><strong>Regras de negócio da jornada:</strong> 2 regra(s) — texto completo abaixo.</p>
+<div class="rule-block" id="CADPREV-RN033"><div class="rule-id">RS033 (CADPREV-RN033) — Evento de reclusão sem acesso pelo menu</div>
+<div class="rule-desc">O grupo de menu de Reclusão (RC) está desativado: a constante do índice está comentada e não há montagem de itens nem rotina <code>AbreFormEventoRC</code>. A tela <code>TfrmEventoReclusao</code> é criada automaticamente na inicialização do programa, mas nunca é exibida por nenhuma rotina do módulo.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>indNivelEventoRC</code> — comentado</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> — </p>
+<p><strong>Jornada:</strong> <a href="#PF-03">JF003</a></p>
+<p><strong>Nota de verificação:</strong> o BENEFICIOPREV tem rotina que abre a reclusão (<code>BENEFICIOPREV/Fontes/FPrincipal.pas:1536-1538</code>); em CADASTROPREV nenhuma referência a <code>frmEventoReclusao</code> além do dpr e do uses.</p>
+<p><strong>Descrição original:</strong> //   indNivelEventoRC  =  7; Application.CreateForm(TfrmEventoReclusao, frmEventoReclusao) no .dpr.</p>
+<p><strong>Condições:</strong> —</p><p><strong>Dados envolvidos:</strong> —</p><p><strong>Resultado/Exceção:</strong> Funcionalidade inacessível</p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/FPrincipal.pas:158, 456</code>; <code>CADASTROPREV/Fontes/CadastroPrev.dpr:121, 170</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<div class="rule-block" id="CADPREV-RN034"><div class="rule-id">RS034 (CADPREV-RN034) — Reclusão: beneficiário obrigatório, data do requerimento obrigatória e rubricas individuais</div>
+<div class="rule-desc">Na tela de reclusão, requerer benefício exige beneficiário do mesmo evento (BFCIARIOTITPLAN × BENEFICIO); a confirmação exige a data do requerimento (preenchida automaticamente com a data do evento ao sair do campo) e, após contribuições, associa as rubricas individuais do evento; falhando, desfaz tudo.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>dtRequerimento</code> — [obrigatório]</li>
+<li><code>BFCIARIOTITPLAN</code>, <code>BENEFICIO.IDEVENTOGERADOR</code></li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT028">TRT028</a> → <a href="#MSG030">MSG030</a>; <a href="#TRT029">TRT029</a> → <a href="#MSG031">MSG031</a>; <a href="#TRT030">TRT030</a> → <a href="#MSG032">MSG032</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-03">JF003</a></p>
+<p><strong>Nota de verificação:</strong> no requerimento, o laço que monta a lista de dependentes usa <code>while eof do</code> (<code>:624</code>), invertido; e o <code>exit</code> da linha 673 não está dentro do <code>if</code>, então <code>AbreRequerBfciario</code> (<code>:680</code>) nunca é executado <span class="ev ev-inferido">INFERIDO</span>.</p>
+<p><strong>Descrição original:</strong> “Este Participante não possui nenhum Beneficiário cadastrado…”; “A data do requerimento deve ser preenchida.”; AssociaRubricasIndividuais (CMAdmPrev UEventos).</p>
+<p><strong>Condições:</strong> confirmação / requerimento</p><p><strong>Dados envolvidos:</strong> BFCIARIOTITPLAN, BENEFICIO, DEPENTIT, CONTABANCARIA, EVENTOSPREV</p><p><strong>Resultado/Exceção:</strong> Evento gravado ou desfeito</p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/FEventoReclusao.pas:538-565, 614-680, 740-746, 838-851, 1330-1336</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<p><strong>Regras transversais do módulo</strong> (texto completo em <a href="#PF-01">JF001</a>): <a href="#CADPREV-RN005">RS005</a>, <a href="#CADPREV-RN007">RS007</a>, <a href="#CADPREV-RN008">RS008</a>, <a href="#CADPREV-RN009">RS009</a>, <a href="#CADPREV-RN010">RS010</a>.</p>
+</div>
+
+<p><strong>Tratamentos de erro:</strong> <a href="#TRT028">TRT028</a>, <a href="#TRT029">TRT029</a>, <a href="#TRT030">TRT030</a></p>
+<p><strong>Mensagens:</strong> <a href="#MSG030">MSG030</a>, <a href="#MSG031">MSG031</a>, <a href="#MSG032">MSG032</a></p>
+<p><strong>Telas:</strong> Evento Reclusão (<code>FEventoReclusao.dfm</code>)</p>
+<p><strong>Dependências:</strong> CMAdmPrev (UEventos, UBeneficio, UParticipante). Versão equivalente no BENEFICIOPREV: <a href="../beneficioprev/uc303.html#PF-05">BENEFICIOPREV JF005</a>.</p>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span> — informações que o repositório não comprova ou que divergem entre fontes. O texto existente foi mantido; os itens abaixo dependem de validação humana.</p>
+<ul>
+<li>Confirmar se a reclusão deve ser registrada pelo BENEFICIOPREV e se a tela de CADASTROPREV é código morto.</li>
+<li>Defeitos aparentes no requerimento (<code>while eof</code> e <code>exit</code> fora do <code>if</code>, <code>FEventoReclusao.pas:624, 671-674</code>).</li>
+</ul>
+</div>
+<div class="note note-info"><p><strong>Registro original do processo PF-03</strong></p><p><strong>Forms de entrada:</strong> <code>FEventoReclusao.dfm</code></p><p><strong>Lógica de processamento:</strong> Igual ao falecimento, sem data da morte; com rubricas individuais</p><p><strong>Saídas:</strong> —</p><p><strong>Persistência (tabelas escritas):</strong> EVENTOSPREV, ELEGPATRO, PARTPREVPLAN (se acionada)</p><p><strong>Evidência:</strong> <code>CADASTROPREV/Fontes/CadastroPrev.dpr:170</code>; <code>FPrincipal.pas:158</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+</div>
+
+<!-- ======================================================= JF004 -->
+<div class="pf-block" id="PF-04"><h4>JF004 (PF-04) — Eventos assistido INSS — Aposentadoria INSS (AI) e Falecimento INSS (BI)</h4>
+<p><strong>Objetivo:</strong> Registrar que o INSS concedeu aposentadoria ao participante (AI) ou pensão por falecimento ao beneficiário (BI), sem mudar as situações do participante, e abrir o requerimento do benefício correspondente.</p>
+<p><strong>Necessidade de negócio:</strong> benefícios pagos pelo INSS, administrados pela entidade, precisam de um evento que os origine, mas não mudam a situação do participante no plano.</p>
+<p><strong>Ator / gatilho:</strong> Analista, pelo menu <em>Eventos › Benefícios › Aposentadoria INSS | Falecimento INSS › &lt;nome do evento&gt;</em> (<code>FPrincipal.dfm:8469-8477</code>; <code>FPrincipal.pas:850-910, 2626-2664</code>).</p>
+<p><strong>Pré-condições:</strong> Eventos AI/BI cadastrados para a fundação (sem eventos, o item fica oculto); participante de patrocinadora da fundação 1.</p>
+<p><strong>Em termos de negócio:</strong> o tipo de benefício INSS precisa estar no catálogo; a pesquisa só encontra participantes da fundação 1.</p>
+<p><strong>Pós-condições:</strong> ELEGPATRO (tempo de serviço); EVENTOSPREV (efetivado, situações inalteradas, data do requerimento); PARTPREVPLAN.FLGFITESPECIAL; rubricas individuais; log; carta.</p>
+<p><strong>Em termos de negócio:</strong> o evento INSS fica registrado e efetivado; o requerimento do benefício INSS é aberto.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li><strong>Usuário:</strong> Escolhe o evento AI ou BI. [<a href="#CADPREV-RN002">RS002</a>]<br>Abre <code>TfrmEventoAssistidoINSS</code> com o nome do evento; no BI o form recebe o nome interno <code>frmEventoAssistidoINSSBI</code> (<code>FPrincipal.pas:2639-2663</code>).</li>
+<li><strong>Usuário e sistema:</strong> Procura o participante pela pesquisa, pela matrícula ou pela inscrição. [<a href="#CADPREV-RN037">RS037</a>] [<a href="#CADPREV-RN031">RS031</a>]<br>Pesquisa com SQL próprio (<code>MontaSelectPartBeforeOpenCds</code>); digitação direta de matrícula/inscrição com mensagem se não encontrar (<a href="#MSG033">MSG033</a>).</li>
+<li><strong>Sistema:</strong> Verifica o estado do evento; se efetivado, oferece gerar novo evento. [<a href="#CADPREV-RN007">RS007</a>] [<a href="#CADPREV-RN038">RS038</a>]<br><code>FEventoAssistidoINSS.pas:1202-1404</code>.</li>
+<li><strong>Usuário:</strong> Informa data do evento e do requerimento, tempo de serviço, situação especial; requer o benefício. [<a href="#CADPREV-RN025">RS025</a>] [<a href="#CADPREV-RN035">RS035</a>]<br>AI → requerimento do participante; BI → requerimento dos beneficiários (<code>:417-560</code>).</li>
+<li><strong>Usuário e sistema:</strong> Confirma: verifica pensionistas, grava tempo de serviço, evento efetivado, situação especial, rubricas individuais; log; commit; carta. [<a href="#CADPREV-RN028">RS028</a>] [<a href="#CADPREV-RN036">RS036</a>] [<a href="#CADPREV-RN039">RS039</a>]<br><code>FEventoAssistidoINSS.pas:562-790</code>.</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Procurar participante</td><td>Localizar o segurado INSS</td><td>Pesquisa, matrícula ou inscrição</td><td>Pesquisa restrita à fundação 1 e a vínculos ativos ou em situações 25–29</td><td>Participante carregado</td><td><a href="#CADPREV-RN037">RS037</a>, <a href="#CADPREV-RN031">RS031</a></td><td><a href="#MSG033">MSG033</a>, <a href="#MSG012">MSG012</a></td><td><code>FEventoAssistidoINSS.dfm</code></td></tr>
+<tr><td>Gerar novo evento INSS</td><td>Registrar novo evento após um efetivado</td><td>Resposta Sim/Não</td><td>Só pergunta se não há benefício INSS ativo</td><td>Tela limpa para novo evento</td><td><a href="#CADPREV-RN038">RS038</a></td><td><a href="#MSG034">MSG034</a></td><td><code>FEventoAssistidoINSS.dfm</code></td></tr>
+<tr><td>Requerer benefício INSS</td><td>Abrir o processo do benefício</td><td>Data do evento, tempo de serviço</td><td>AI: requerimento do participante; BI: exige beneficiário</td><td>Requerimento aberto</td><td><a href="#CADPREV-RN035">RS035</a>, <a href="#CADPREV-RN025">RS025</a></td><td><a href="#MSG030">MSG030</a>, <a href="#MSG018">MSG018</a>, <a href="#MSG020">MSG020</a></td><td><code>FEventoAssistidoINSS.dfm</code></td></tr>
+<tr><td>Confirmar evento INSS</td><td>Gravar o evento</td><td>Data do evento e do requerimento</td><td>Evento efetivado sem mudança de situação; FLGFITESPECIAL; rubricas</td><td>Evento efetuado</td><td><a href="#CADPREV-RN036">RS036</a>, <a href="#CADPREV-RN028">RS028</a></td><td><a href="#MSG022">MSG022</a>, <a href="#MSG031">MSG031</a>, <a href="#MSG032">MSG032</a>, <a href="#MSG008">MSG008</a></td><td><code>FEventoAssistidoINSS.dfm</code></td></tr>
+</tbody></table></div>
+<div class="jf-rules">
+<p><strong>Regras de negócio da jornada:</strong> 5 regra(s) — texto completo abaixo.</p>
+<div class="rule-block" id="CADPREV-RN035"><div class="rule-id">RS035 (CADPREV-RN035) — Requerimento INSS: participante (AI) ou beneficiário (BI)</div>
+<div class="rule-desc">No evento Aposentadoria INSS (AI), o botão de requerer abre o requerimento de benefício do participante, passando o tempo de contribuição formatado e a data do requerimento. Nos demais (Falecimento INSS — BI), exige que o participante tenha beneficiário de benefício do mesmo evento e abre o requerimento para beneficiário.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>sFlgInterno</code> — 'AI' × outros</li>
+<li><code>BFCIARIOTITPLAN</code>, <code>BENEFICIO.IDEVENTOGERADOR</code> — [condicional] — BI</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT028">TRT028</a> → <a href="#MSG030">MSG030</a>; <a href="#TRT037">TRT037</a> → <a href="#MSG039">MSG039</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-04">JF004</a></p>
+<p><strong>Descrição original:</strong> if sFlgInterno = 'AI' then AbreRequerParticip(...) else begin SELECT BF.IDTITULAR ... ; AbreRequerBfciario(...) end.</p>
+<p><strong>Condições:</strong> sFlgInterno = 'AI'</p><p><strong>Dados envolvidos:</strong> BFCIARIOTITPLAN, BENEFICIO</p><p><strong>Resultado/Exceção:</strong> Requerimento aberto ou bloqueado</p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/FEventoAssistidoINSS.pas:484-559</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<div class="rule-block" id="CADPREV-RN036"><div class="rule-id">RS036 (CADPREV-RN036) — Evento INSS é efetivado sem mudar as situações</div>
+<div class="rule-desc">O evento INSS grava o tempo de serviço total e é inserido em EVENTOSPREV com as situações novas iguais às atuais, sem gravação imediata de situação (flags 0), já efetivado (FLGEFETIVADO = 1, DATAEFETIVADO = SYSDATE) e com a data do requerimento. Em seguida grava em PARTPREVPLAN a marca de situação especial (FLGFITESPECIAL) conforme a caixa da tela e associa as rubricas individuais do evento.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>EVENTOSPREV.IDSITFUNCNOVO/IDSITPARTNOVO/IDSITPLANONOVO</code> = atuais</li>
+<li><code>EVENTOSPREV.FLGEFETIVADO</code> = 1; <code>DATAEFETIVADO</code> = SYSDATE; <code>DATAREQUERIMENTO</code></li>
+<li><code>PARTPREVPLAN.FLGFITESPECIAL</code> — 0/1 (chkSitEspecial)</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT008">TRT008</a> → <a href="#MSG011">MSG011</a>; <a href="#TRT030">TRT030</a> → <a href="#MSG032">MSG032</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-04">JF004</a></p>
+<p><strong>Nota de verificação:</strong> diferença em relação ao BENEFICIOPREV, que grava eventos fixos 129/130 (<a href="../beneficioprev/uc303.html#BENEF-RN036">BENEF RS036</a>); aqui o evento gravado é o escolhido no menu. Não há suspensão de contribuições nesta tela.</p>
+<p><strong>Descrição original:</strong> VerificaeGravaSituacoes: UPDATE ELEGPATRO SET TEMPOSERVTOTAL...; sFlgSit*Imed := '0'; sFlgEfetivado := '1'. GravaEVENTOSPREV: INSERT ... (sIdSitFunc, sIdSitPart, sIdSitPlanoPrev repetidos), 'SYSDATE', ..., DATAREQUERIMENTO.</p>
+<p><strong>Condições:</strong> not bAltera → INSERT; senão UPDATE com DATAALTERADO</p><p><strong>Dados envolvidos:</strong> ELEGPATRO, EVENTOSPREV, PARTPREVPLAN</p><p><strong>Resultado/Exceção:</strong> Evento INSS efetivado</p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/FEventoAssistidoINSS.pas:687-708, 747-760, 792-887</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<div class="rule-block" id="CADPREV-RN037"><div class="rule-id">RS037 (CADPREV-RN037) — Pesquisa do evento INSS restrita à fundação 1 e a vínculos ativos ou nas situações 25–29</div>
+<div class="rule-desc">A tela INSS substitui o SQL padrão da pesquisa: só retorna vínculos de patrocinadoras da fundação 1 (valor fixo) e, para cada pessoa, os planos nas situações de plano 25, 26, 27, 28 ou 29, ou os planos ativos (FLGDESATIVADO = 0) quando a pessoa não tem nenhum plano nessas situações. A digitação direta de matrícula/inscrição usa outra consulta, restrita a PARTPREVPLAN.FLGDESATIVADO = 0, sem filtro de fundação.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>PATRO.IDFUNDACAO</code> — = 1 (fixo)</li>
+<li><code>PARTPREVPLAN.IDSITPLANOPREV</code> — IN (25,26,27,28,29)</li>
+<li><code>PARTPREVPLAN.FLGDESATIVADO</code> — = 0</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT031">TRT031</a> → <a href="#MSG033">MSG033</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-04">JF004</a></p>
+<p><strong>Nota de verificação:</strong> exceção à regra de isolamento por fundação (<a href="#CADPREV-RN001">RS001</a>); o filtro dinâmico está comentado em <code>:274</code>. O significado das situações 25–29 não está descrito no código.</p>
+<p><strong>Descrição original:</strong> MontaSelectPartBeforeOpenCds: sSql4 := ' WHERE (PP.IDSITPLANOPREV IN (25,26,27,28,29) OR ...) ... AND ( PARTPREVPLAN.IDPESSJUR IN (SELECT IDPESSOA FROM PATRO WHERE IDFUNDACAO = 1) )'.</p>
+<p><strong>Condições:</strong> ver descrição</p><p><strong>Dados envolvidos:</strong> PARTPREVPLAN, PATRO, BENEFBFCIARIO, ELEGPATRO, PESSOA</p><p><strong>Resultado/Exceção:</strong> Lista de participantes</p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/FEventoAssistidoINSS.pas:274, 1152-1200, 1510-1657</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<div class="rule-block" id="CADPREV-RN038"><div class="rule-id">RS038 (CADPREV-RN038) — Evento INSS efetivado pode originar novo evento</div>
+<div class="rule-desc">Se o evento INSS já está efetivado, o sistema procura benefício INSS ativo da pessoa (BENEFBFCIARIO com IDSITBENEFICIO ≠ 3, IDTPPAGTOBENEFIC = 1 e FONTEPAGADORA = 2). Sem benefício ativo, pergunta se deve gerar novo evento: “Sim” limpa data, requerimento e tempo de serviço para novo registro; “Não” mostra o evento efetivado sem permitir confirmar. Havendo benefício ativo, nada é perguntado (a crítica que existia foi comentada).</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>BENEFBFCIARIO.IDSITBENEFICIO / IDTPPAGTOBENEFIC / FONTEPAGADORA</code></li>
+<li><code>DEPENTIT.MATRICULA</code> — define a pessoa (dependente ou titular)</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT032">TRT032</a> → <a href="#MSG034">MSG034</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-04">JF004</a></p>
+<p><strong>Nota de verificação:</strong> ao escolher “Sim”, <code>bAltera</code> continua verdadeiro (<code>:1223</code>), então a confirmação faz UPDATE do evento existente em vez de INSERT de um novo (<code>:828</code>) <span class="ev ev-inferido">INFERIDO</span>.</p>
+<p><strong>Descrição original:</strong> SOL 157501 — “gerar um novo Evento Caso Evento já estiver encerrado - Aposentadoria INSS”; SOL 181948 — mensagem de erro comentada.</p>
+<p><strong>Condições:</strong> sEstadoEvento = 'EFETIVADO'</p><p><strong>Dados envolvidos:</strong> DEPENTIT, BENEFBFCIARIO, EVENTOSPREV</p><p><strong>Resultado/Exceção:</strong> sGera = 'S' ou tela em modo consulta</p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/FEventoAssistidoINSS.pas:1268-1404</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<div class="rule-block" id="CADPREV-RN039"><div class="rule-id">RS039 (CADPREV-RN039) — Marcação de pessoa inválida só ocorre em telas não alcançadas para invalidez</div>
+<div class="rule-desc">As telas de evento INSS e de aposentadoria gravam PESSOA.FLGINVALIDO = 1 quando o grupo do evento é IN (invalidez). Neste módulo, porém, o grupo IN abre a tela de assistido temporário, que não faz essa marcação; a tela INSS só é aberta para AI/BI e a de aposentadoria só para TS/ID.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>PESSOA.FLGINVALIDO</code> — = 1 se sFlgInterno = 'IN'</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT008">TRT008</a> → <a href="#MSG011">MSG011</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-04">JF004</a>, <a href="#PF-01">JF001</a></p>
+<p><strong>Nota de verificação:</strong> equivalente a <a href="../beneficioprev/uc303.html#BENEF-RN037">BENEF RS037</a>; a mesma dúvida foi registrada lá. Como a invalidez é marcada no cadastro é <span class="ev ev-pendente">PENDENTE</span>.</p>
+<p><strong>Descrição original:</strong> // Se for Aposentadoria por Incapacidade (Invalidez), Grava Participante como Inválido — if sFlgInterno = 'IN' then UPDATE PESSOA SET FLGINVALIDO = 1.</p>
+<p><strong>Condições:</strong> sFlgInterno = 'IN'</p><p><strong>Dados envolvidos:</strong> PESSOA</p><p><strong>Resultado/Exceção:</strong> Ramo não alcançado pelo menu</p>
+<div class="rule-origin">📂 Origem: <code>CADASTROPREV/Fontes/FEventoAssistidoINSS.pas:710-726</code>; <code>FPrincipal.pas:2529, 2550, 2571, 2639, 2659</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></div></div>
+<p><strong>Regras transversais do módulo</strong> (texto completo em <a href="#PF-01">JF001</a>): <a href="#CADPREV-RN001">RS001</a>, <a href="#CADPREV-RN002">RS002</a>, <a href="#CADPREV-RN005">RS005</a>, <a href="#CADPREV-RN007">RS007</a>, <a href="#CADPREV-RN009">RS009</a>, <a href="#CADPREV-RN010">RS010</a>.</p>
+</div>
+
+<p><strong>Tratamentos de erro:</strong> <a href="#TRT010">TRT010</a>, <a href="#TRT016">TRT016</a>, <a href="#TRT020">TRT020</a>, <a href="#TRT028">TRT028</a>–<a href="#TRT032">TRT032</a></p>
+<p><strong>Mensagens:</strong> <a href="#MSG012">MSG012</a>, <a href="#MSG018">MSG018</a>, <a href="#MSG022">MSG022</a>, <a href="#MSG030">MSG030</a>–<a href="#MSG034">MSG034</a></p>
+<p><strong>Telas:</strong> Evento Aposentadoria Exclusiva do INSS (<code>FEventoAssistidoINSS.dfm</code>)</p>
+<p><strong>Dependências:</strong> CMAdmPrev (requerimentos, UEventos). Equivalente em <a href="../beneficioprev/uc303.html#PF-05">BENEFICIOPREV JF005</a>; o requerimento INSS em lote está em <a href="uc405.html#PF-18">JF018</a>.</p>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span> — informações que o repositório não comprova ou que divergem entre fontes. O texto existente foi mantido; os itens abaixo dependem de validação humana.</p>
+<ul>
+<li>Fundação fixa = 1 na pesquisa (<code>FEventoAssistidoINSS.pas:1638</code>) — confirmar se a base tem uma única fundação.</li>
+<li>Significado das situações de plano 25–29 (<a href="#CADPREV-RN037">RS037</a>).</li>
+<li>“Gerar novo evento” atualiza o evento existente em vez de inserir (<a href="#CADPREV-RN038">RS038</a>).</li>
+<li>Na leitura da pesquisa, o teste usa <code>ValoresChave[22]</code> para decidir entre <code>[21]</code> e <code>[22]</code> (<code>:308-310</code>), invertendo a lógica usada nas outras telas.</li>
+</ul>
+</div>
+<div class="note note-info"><p><strong>Registro original do processo PF-04</strong></p><p><strong>Forms de entrada:</strong> <code>FEventoAssistidoINSS.dfm</code></p><p><strong>Lógica de processamento:</strong> Pesquisa própria; estado do evento; requerimento AI/BI; grava evento efetivado sem mudar situações; FLGFITESPECIAL; rubricas</p><p><strong>Saídas:</strong> Evento INSS registrado; requerimento</p><p><strong>Persistência (tabelas escritas):</strong> ELEGPATRO, EVENTOSPREV, PARTPREVPLAN</p><p><strong>Evidência:</strong> <code>CADASTROPREV/Fontes/FEventoAssistidoINSS.pas:562-887</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+</div>
+
+<section id="TRT-section"><div class="section-title">6. Tratamentos (TRT)</div>
+<p>Cada tratamento traz a condição, a mensagem exibida, o resultado e a regra/jornada de origem. TRT001–TRT011 são transversais (também referenciados pelos demais UCs). “validação de tela” = crítica sem regra CADPREV-RN correspondente; “validação técnica” = falha técnica tratada pelo form.</p>
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Condição</th><th>Mensagem</th><th>Resultado</th><th>Regra</th><th>Jornada</th></tr></thead><tbody>
+<tr id="TRT001"><td><strong>TRT001</strong></td><td>Falha ao criar um datamodule (dtmAPrev, DtmRelatorios, DtmRelatAdmPrev, DtmRelRetroRegional, DtmRelatorioGerencial, DtmRelatAdmPrev2, dtmRelTempoServicoMT, dtmRelatEspecificos, DtmRelTransfPlano) em <code>CriaDataModule</code>, chamado antes de abrir qualquer tela de evento</td><td><a href="#MSG001">MSG001</a></td><td>Mostra o erro e segue (try/except por datamodule); a tela é aberta mesmo assim</td><td>validação técnica</td><td>Transversal (todas)</td></tr>
+<tr id="TRT002"><td><strong>TRT002</strong></td><td>Integração contábil ligada e PLANO ≤ 0 ou máscara vazia</td><td><a href="#MSG002">MSG002</a></td><td>Aviso no login; segue</td><td><a href="#CADPREV-RN004">RS004</a></td><td>Transversal (todas)</td></tr>
+<tr id="TRT003"><td><strong>TRT003</strong></td><td>Integração financeira ligada e máscara de desembolso vazia</td><td><a href="#MSG003">MSG003</a></td><td>Aviso no login; segue</td><td><a href="#CADPREV-RN004">RS004</a></td><td>Transversal (todas)</td></tr>
+<tr id="TRT004"><td><strong>TRT004</strong></td><td><code>Sistema.GravaLogOperacoes</code> retorna falso</td><td><a href="#MSG004">MSG004</a></td><td>Exceção capturada por except vazio; a operação segue sem log (mensagem não chega ao usuário)</td><td><a href="#CADPREV-RN005">RS005</a></td><td>Transversal (todas)</td></tr>
+<tr id="TRT005"><td><strong>TRT005</strong></td><td><code>PodeRegistrarEvento</code> retorna falso</td><td><a href="#MSG005">MSG005</a></td><td>Limpa a tela; evento não pode ser registrado</td><td><a href="#CADPREV-RN007">RS007</a></td><td>Transversal (telas de evento)</td></tr>
+<tr id="TRT006"><td><strong>TRT006</strong></td><td>Evento já registrado e não efetivado</td><td><a href="#MSG006">MSG006</a></td><td>Carrega o evento para alteração</td><td><a href="#CADPREV-RN007">RS007</a></td><td>Transversal (telas de evento)</td></tr>
+<tr id="TRT007"><td><strong>TRT007</strong></td><td>Evento já efetivado</td><td><a href="#MSG007">MSG007</a></td><td>Tela em modo consulta; Confirmar/Cancelar desabilitados</td><td><a href="#CADPREV-RN007">RS007</a></td><td>Transversal (telas de evento)</td></tr>
+<tr id="TRT008"><td><strong>TRT008</strong></td><td>Erro de banco (EDBEngineError) em consulta ou gravação</td><td><a href="#MSG011">MSG011</a></td><td>Mostra a exceção e sai da rotina; em rotinas auxiliares a confirmação pode continuar</td><td>validação técnica</td><td>Transversal (telas de evento)</td></tr>
+<tr id="TRT009"><td><strong>TRT009</strong></td><td>Usuário clica em Cancelar</td><td><a href="#MSG010">MSG010</a></td><td>“Sim”: rollback, desfaz requerimentos, limpa a tela, nova transação</td><td><a href="#CADPREV-RN009">RS009</a></td><td>Transversal (telas de evento)</td></tr>
+<tr id="TRT010"><td><strong>TRT010</strong></td><td>Procurar participante com evento em aberto</td><td><a href="#MSG012">MSG012</a></td><td>Abort</td><td><a href="#CADPREV-RN031">RS031</a></td><td><a href="#PF-02">JF002</a>, <a href="#PF-03">JF003</a>, <a href="#PF-04">JF004</a></td></tr>
+<tr id="TRT011"><td><strong>TRT011</strong></td><td>Fechar, sair ou abrir opções com evento em aberto</td><td><a href="#MSG013">MSG013</a></td><td>Abort</td><td><a href="#CADPREV-RN031">RS031</a></td><td><a href="#PF-02">JF002</a>, <a href="#PF-03">JF003</a>, <a href="#PF-04">JF004</a></td></tr>
+<tr id="TRT012"><td><strong>TRT012</strong></td><td>Sair com requerimento aberto e evento não confirmado</td><td><a href="#MSG014">MSG014</a></td><td>“Sim”: rollback, desfaz requerimentos, commit; “Não”: Abort</td><td><a href="#CADPREV-RN032">RS032</a></td><td><a href="#PF-02">JF002</a>, <a href="#PF-03">JF003</a>, <a href="#PF-04">JF004</a></td></tr>
+<tr id="TRT013"><td><strong>TRT013</strong></td><td>Falha ao desfazer requerimentos</td><td><a href="#MSG015">MSG015</a></td><td>“Não”: rollback e permanece; “Sim”: desfaz só o evento</td><td><a href="#CADPREV-RN032">RS032</a></td><td><a href="#PF-02">JF002</a>, <a href="#PF-03">JF003</a>, <a href="#PF-04">JF004</a></td></tr>
+<tr id="TRT014"><td><strong>TRT014</strong></td><td>Requerer/confirmar sem participante</td><td><a href="#MSG016">MSG016</a></td><td>Exit</td><td>validação de tela</td><td><a href="#PF-02">JF002</a>, <a href="#PF-03">JF003</a>, <a href="#PF-04">JF004</a></td></tr>
+<tr id="TRT015"><td><strong>TRT015</strong></td><td>Data do evento vazia</td><td><a href="#MSG017">MSG017</a></td><td>Exit</td><td>validação de tela</td><td><a href="#PF-02">JF002</a>, <a href="#PF-03">JF003</a>, <a href="#PF-04">JF004</a></td></tr>
+<tr id="TRT016"><td><strong>TRT016</strong></td><td>Data do evento maior que a data atual</td><td><a href="#MSG018">MSG018</a></td><td>Exit</td><td><a href="#CADPREV-RN025">RS025</a></td><td><a href="#PF-02">JF002</a>, <a href="#PF-04">JF004</a></td></tr>
+<tr id="TRT017"><td><strong>TRT017</strong></td><td>Nova situação na patrocinadora ou no plano não informada</td><td><a href="#MSG019">MSG019</a></td><td>Exit</td><td>validação de tela</td><td><a href="#PF-02">JF002</a>, <a href="#PF-03">JF003</a></td></tr>
+<tr id="TRT018"><td><strong>TRT018</strong></td><td>Tempo de serviço total vazio ou zero ao requerer benefício</td><td><a href="#MSG020">MSG020</a></td><td>“Não”: Exit; “Sim”: segue</td><td>validação de tela</td><td><a href="#PF-02">JF002</a>, <a href="#PF-03">JF003</a>, <a href="#PF-04">JF004</a></td></tr>
+<tr id="TRT019"><td><strong>TRT019</strong></td><td>Sem dependente elegível ativo ao requerer pensão</td><td><a href="#MSG021">MSG021</a></td><td>Exit</td><td><a href="#CADPREV-RN027">RS027</a></td><td><a href="#PF-02">JF002</a></td></tr>
+<tr id="TRT020"><td><strong>TRT020</strong></td><td>Beneficiários sem conta salário, CPF ou opção de IR</td><td><a href="#MSG022">MSG022</a></td><td>Exit da confirmação</td><td><a href="#CADPREV-RN028">RS028</a></td><td><a href="#PF-02">JF002</a>, <a href="#PF-03">JF003</a>, <a href="#PF-04">JF004</a></td></tr>
+<tr id="TRT021"><td><strong>TRT021</strong></td><td>Falha em <code>AtualizaFLGPossuiEmprestimo</code></td><td><a href="#MSG023">MSG023</a></td><td>Exit</td><td>validação técnica</td><td><a href="#PF-02">JF002</a>, <a href="#PF-03">JF003</a>, <a href="#PF-04">JF004</a></td></tr>
+<tr id="TRT022"><td><strong>TRT022</strong></td><td>Falha ao suspender ou associar contribuições</td><td><a href="#MSG024">MSG024</a></td><td>Rollback, limpa a tela, nova transação</td><td><a href="#CADPREV-RN030">RS030</a></td><td><a href="#PF-02">JF002</a>, <a href="#PF-03">JF003</a></td></tr>
+<tr id="TRT023"><td><strong>TRT023</strong></td><td>Evento 346/387 e mais de um parâmetro de alerta de resgate vigente</td><td><a href="#MSG025">MSG025</a></td><td>“Não”: limpa a tela</td><td><a href="#CADPREV-RN026">RS026</a></td><td><a href="#PF-02">JF002</a></td></tr>
+<tr id="TRT024"><td><strong>TRT024</strong></td><td>Evento 346/387 e um parâmetro de alerta de resgate</td><td><a href="#MSG026">MSG026</a></td><td>“Não”: limpa a tela</td><td><a href="#CADPREV-RN026">RS026</a></td><td><a href="#PF-02">JF002</a></td></tr>
+<tr id="TRT025"><td><strong>TRT025</strong></td><td>Evento 346/387 com contrato de empréstimo aberto</td><td><a href="#MSG027">MSG027</a></td><td>“Não”: limpa a tela</td><td><a href="#CADPREV-RN026">RS026</a></td><td><a href="#PF-02">JF002</a></td></tr>
+<tr id="TRT026"><td><strong>TRT026</strong></td><td>Evento 346 sem evento de falecimento (4) registrado</td><td><a href="#MSG028">MSG028</a></td><td>Limpa a tela</td><td><a href="#CADPREV-RN026">RS026</a></td><td><a href="#PF-02">JF002</a></td></tr>
+<tr id="TRT027"><td><strong>TRT027</strong></td><td>Evento 346/387 já registrado para a pessoa</td><td><a href="#MSG029">MSG029</a></td><td>“Sim”: novo evento; “Não”: carrega o existente</td><td><a href="#CADPREV-RN026">RS026</a></td><td><a href="#PF-02">JF002</a></td></tr>
+<tr id="TRT028"><td><strong>TRT028</strong></td><td>Participante sem beneficiário do evento (reclusão, Falecimento INSS)</td><td><a href="#MSG030">MSG030</a></td><td>Exit</td><td><a href="#CADPREV-RN034">RS034</a>, <a href="#CADPREV-RN035">RS035</a></td><td><a href="#PF-03">JF003</a>, <a href="#PF-04">JF004</a></td></tr>
+<tr id="TRT029"><td><strong>TRT029</strong></td><td>Data do requerimento vazia</td><td><a href="#MSG031">MSG031</a></td><td>Exit</td><td><a href="#CADPREV-RN034">RS034</a></td><td><a href="#PF-03">JF003</a>, <a href="#PF-04">JF004</a></td></tr>
+<tr id="TRT030"><td><strong>TRT030</strong></td><td>Falha em <code>AssociaRubricasIndividuais</code></td><td><a href="#MSG032">MSG032</a></td><td>Rollback, limpa a tela</td><td><a href="#CADPREV-RN034">RS034</a>, <a href="#CADPREV-RN036">RS036</a></td><td><a href="#PF-03">JF003</a>, <a href="#PF-04">JF004</a></td></tr>
+<tr id="TRT031"><td><strong>TRT031</strong></td><td>Matrícula ou inscrição digitada não encontrada</td><td><a href="#MSG033">MSG033</a></td><td>Limpa a tela; desabilita Confirmar</td><td><a href="#CADPREV-RN037">RS037</a></td><td><a href="#PF-04">JF004</a></td></tr>
+<tr id="TRT032"><td><strong>TRT032</strong></td><td>Evento INSS efetivado sem benefício INSS ativo</td><td><a href="#MSG034">MSG034</a></td><td>“Sim”: prepara novo evento; “Não”: modo consulta</td><td><a href="#CADPREV-RN038">RS038</a></td><td><a href="#PF-04">JF004</a></td></tr>
+<tr id="TRT033"><td><strong>TRT033</strong></td><td>Aposentadoria com nova situação na fundação fora da categoria Assistido</td><td><a href="#MSG035">MSG035</a></td><td>Exit (tela externa)</td><td><a href="#CADPREV-RN022">RS022</a></td><td><a href="#PF-01">JF001</a></td></tr>
+<tr id="TRT034"><td><strong>TRT034</strong></td><td>Assistido temporário sem salário de assistido</td><td><a href="#MSG036">MSG036</a></td><td>Exit (tela externa)</td><td><a href="#CADPREV-RN024">RS024</a></td><td><a href="#PF-01">JF001</a></td></tr>
+<tr id="TRT035"><td><strong>TRT035</strong></td><td>Assistido temporário com salário no mês e sem data final</td><td><a href="#MSG037">MSG037</a></td><td>Exit (tela externa)</td><td><a href="#CADPREV-RN024">RS024</a></td><td><a href="#PF-01">JF001</a></td></tr>
+<tr id="TRT036"><td><strong>TRT036</strong></td><td>Outro evento da mesma categoria em aberto (assistido)</td><td><a href="#MSG038">MSG038</a></td><td>“Sim”: novo evento; “Não”: carrega o existente (tela externa)</td><td><a href="#CADPREV-RN024">RS024</a></td><td><a href="#PF-01">JF001</a></td></tr>
+<tr id="TRT037"><td><strong>TRT037</strong></td><td>Falha em rotina externa que devolve mensagem (ValidaBeneficioAnterior, AtualizaReservaParticipante)</td><td><a href="#MSG039">MSG039</a></td><td>Mostra a mensagem devolvida; Exit (no encerramento de benefício da confirmação do falecimento: rollback)</td><td><a href="#CADPREV-RN030">RS030</a></td><td><a href="#PF-02">JF002</a>, <a href="#PF-03">JF003</a>, <a href="#PF-04">JF004</a></td></tr>
+</tbody></table></div>
+</section>
+
+<section id="MSG-section"><div class="section-title">7. Mensagens (MSG)</div>
+<p>Textos conferidos no código-fonte (grafia original mantida). Trechos variáveis aparecem entre &lt; &gt;. MSG001–MSG013 são transversais.</p>
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Texto da mensagem</th><th>Tipo</th><th>Origem (CADASTROPREV/Fontes/)</th><th>Jornadas</th></tr></thead><tbody>
+<tr id="MSG001"><td><strong>MSG001</strong></td><td>“Erro ao criar datamodule "dtmAPrev". Mensagem de erro : &lt;mensagem da exceção&gt; Favor contatar o suporte da CM.” (mesmo texto para os demais datamodules, trocando o nome)</td><td>Erro</td><td><code>FPrincipal.pas:1965-1968 (também 1983-1986, 2000-2003, 2016-2019, 2032-2035, 2048-2051, 2064-2067, 2080-2083, 2096-2099)</code></td><td>Transversal (todas)</td></tr>
+<tr id="MSG002"><td><strong>MSG002</strong></td><td>“ O Sistema de Administração Previdenciária está integrado com o Sistema de Contabilidade.  Porém existem dados da contabilidade indispensáveis à integração que não estão cadastrados.  Favor entrar em contato com o setor responsável. ”</td><td>Informação</td><td><code>FPrincipal.pas:1881-1883</code></td><td>Transversal (todas)</td></tr>
+<tr id="MSG003"><td><strong>MSG003</strong></td><td>“ O Sistema de Administração Previdenciária está integrado com o Sistema de Contas a Receber.  Porém existem dados do Contas a Receber indispensáveis à integração que não estão cadastrados.  Favor entrar em contato com o setor responsável. ”</td><td>Informação</td><td><code>FPrincipal.pas:1910-1912</code></td><td>Transversal (todas)</td></tr>
+<tr id="MSG004"><td><strong>MSG004</strong></td><td>“Erro ao gravar Log.”</td><td>Erro (exceção, capturada)</td><td><code>FEventoMorte.pas:1231; FEventoReclusao.pas:855; FEventoAssistidoINSS.pas:768; FEventoReinscricao.pas:1039; FEventoManutParcial.pas:720; FEventoRetornoMantidoParaAtivo.pas:889</code></td><td>Transversal (todas)</td></tr>
+<tr id="MSG005"><td><strong>MSG005</strong></td><td>“Esse Evento não pode ser registrado. Motivo : &lt;motivo devolvido por PodeRegistrarEvento&gt;”</td><td>Informação</td><td><code>FEventoMorte.pas:665; FEventoReclusao.pas:357; FEventoAssistidoINSS.pas:1229; FEventoReinscricao.pas:376; FEventoManutParcial.pas:349; FEventoRetornoMantidoParaAtivo.pas:478</code></td><td>Transversal (telas de evento)</td></tr>
+<tr id="MSG006"><td><strong>MSG006</strong></td><td>“Esse Evento já foi registrado.”</td><td>Informação</td><td><code>FEventoMorte.pas:688; FEventoReclusao.pas:392; FEventoAssistidoINSS.pas:1257; FEventoReinscricao.pas:421; FEventoManutParcial.pas:383; FEventoRetornoMantidoParaAtivo.pas:500</code></td><td>Transversal (telas de evento)</td></tr>
+<tr id="MSG007"><td><strong>MSG007</strong></td><td>“Esse Evento já foi efetivado. Não pode ser alterado.”</td><td>Informação</td><td><code>FEventoMorte.pas:697; FEventoReclusao.pas:403; FEventoReinscricao.pas:437; FEventoManutParcial.pas:392; FEventoRetornoMantidoParaAtivo.pas:509</code></td><td>Transversal (telas de evento)</td></tr>
+<tr id="MSG008"><td><strong>MSG008</strong></td><td>“Evento efetuado com sucesso.”</td><td>Informação</td><td><code>FEventoMorte.pas:1238; FEventoReclusao.pas:861; FEventoAssistidoINSS.pas:776; FEventoReinscricao.pas:1070; FEventoManutParcial.pas:777; FEventoRetornoMantidoParaAtivo.pas:892</code></td><td>Transversal (telas de evento)</td></tr>
+<tr id="MSG009"><td><strong>MSG009</strong></td><td>“Carta do evento não emitida.”</td><td>Informação</td><td><code>FEventoMorte.pas:1245; FEventoReclusao.pas:864; FEventoAssistidoINSS.pas:783; FEventoReinscricao.pas:1084; FEventoManutParcial.pas:781; FEventoRetornoMantidoParaAtivo.pas:904</code></td><td>Transversal (telas de evento)</td></tr>
+<tr id="MSG010"><td><strong>MSG010</strong></td><td>“Todas as operações executadas serão canceladas. Confirma ? ”</td><td>Confirmação</td><td><code>FEventoMorte.pas:1431; FEventoReclusao.pas:1057; FEventoAssistidoINSS.pas:891; FEventoReinscricao.pas:1305; FEventoManutParcial.pas:1170; FEventoRetornoMantidoParaAtivo.pas:1414</code></td><td>Transversal (telas de evento)</td></tr>
+<tr id="MSG011"><td><strong>MSG011</strong></td><td>“&lt;mensagem da exceção de banco de dados&gt;” (exibida por <code>MostrarErro(E)</code>)<br><em>Texto dinâmico.</em></td><td>Erro (exceção)</td><td><code>FEventoMorte.pas:856, 1128, 1269; padrão try/except EDBEngineError + MostrarErro(E) em todas as telas de evento</code></td><td>Transversal (telas de evento)</td></tr>
+<tr id="MSG012"><td><strong>MSG012</strong></td><td>“Evento em aberto confirme "OK" ou "Cancelar" para fazer nova procura.”</td><td>Informação</td><td><code>FEventoMorte.pas:374; FEventoReclusao.pas:245; FEventoAssistidoINSS.pas:283</code></td><td><a href="#PF-02">JF002</a>, <a href="#PF-03">JF003</a>, <a href="#PF-04">JF004</a></td></tr>
+<tr id="MSG013"><td><strong>MSG013</strong></td><td>“Evento em aberto confirme "OK" ou "Cancelar".”</td><td>Informação</td><td><code>FEventoMorte.pas:1501, 1518, 1665; FEventoReclusao.pas:1125, 1142, 1289; FEventoAssistidoINSS.pas:950, 1112</code></td><td><a href="#PF-02">JF002</a>, <a href="#PF-03">JF003</a>, <a href="#PF-04">JF004</a></td></tr>
+<tr id="MSG014"><td><strong>MSG014</strong></td><td>“O evento ainda não foi confirmado. O Requerimento de Benefício será desfeito. Deseja realmente sair da tela ? ”</td><td>Confirmação</td><td><code>FEventoMorte.pas:1672-1674; FEventoReclusao.pas:1296; FEventoAssistidoINSS.pas:1119</code></td><td><a href="#PF-02">JF002</a>, <a href="#PF-03">JF003</a>, <a href="#PF-04">JF004</a></td></tr>
+<tr id="MSG015"><td><strong>MSG015</strong></td><td>“Ocorreram erros ao Desfazer os Requerimentos de Benefício. Deseja desfazer apenas o evento ? ”</td><td>Confirmação</td><td><code>FEventoMorte.pas:1446-1447, 1685-1686; FEventoReclusao.pas:1070, 1309; FEventoAssistidoINSS.pas:898, 1132</code></td><td><a href="#PF-02">JF002</a>, <a href="#PF-03">JF003</a>, <a href="#PF-04">JF004</a></td></tr>
+<tr id="MSG016"><td><strong>MSG016</strong></td><td>“Primeiro selecione o Participante.”</td><td>Erro</td><td><code>FEventoMorte.pas:782, 1058; FEventoReclusao.pas:476, 500, 715; FEventoAssistidoINSS.pas:424, 643</code></td><td><a href="#PF-02">JF002</a>, <a href="#PF-03">JF003</a>, <a href="#PF-04">JF004</a></td></tr>
+<tr id="MSG017"><td><strong>MSG017</strong></td><td>“A Data do Evento deve ser informada.” / “A Data do Evento deve ser informada antes desta operação.”</td><td>Erro</td><td><code>FEventoMorte.pas:1065, 789; FEventoReclusao.pas:722, 507; FEventoAssistidoINSS.pas:650, 431</code></td><td><a href="#PF-02">JF002</a>, <a href="#PF-03">JF003</a>, <a href="#PF-04">JF004</a></td></tr>
+<tr id="MSG018"><td><strong>MSG018</strong></td><td>“A data do evento não pode ser maior que a data atual.”</td><td>Informação</td><td><code>FEventoMorte.pas:802, 1077; FEventoAssistidoINSS.pas:441, 660</code></td><td><a href="#PF-02">JF002</a>, <a href="#PF-04">JF004</a></td></tr>
+<tr id="MSG019"><td><strong>MSG019</strong></td><td>“A Nova Situação do Participante na &lt;rótulo da patrocinadora&gt; deve ser informada.” / “A Nova Situação do Participante no Plano deve ser informada.”</td><td>Erro</td><td><code>FEventoMorte.pas:813, 820, 1087, 1094; FEventoReclusao.pas:514, 521, 729, 736</code></td><td><a href="#PF-02">JF002</a>, <a href="#PF-03">JF003</a></td></tr>
+<tr id="MSG020"><td><strong>MSG020</strong></td><td>“O Tempo de Serviço Total não foi informado. Confirma ?”</td><td>Confirmação</td><td><code>FEventoMorte.pas:828; FEventoReclusao.pas:529; FEventoAssistidoINSS.pas:449</code></td><td><a href="#PF-02">JF002</a>, <a href="#PF-03">JF003</a>, <a href="#PF-04">JF004</a></td></tr>
+<tr id="MSG021"><td><strong>MSG021</strong></td><td>“Este Participante não possui nenhum dependente elegível a benefício cadastrado. Para cadastrar, utilize o Cadastro de Dependentes/Beneficiários.”</td><td>Informação</td><td><code>FEventoMorte.pas:864-865</code></td><td><a href="#PF-02">JF002</a></td></tr>
+<tr id="MSG022"><td><strong>MSG022</strong></td><td>Combinação, uma por linha, de: “Conta Salário não cadastrada!” / “Participante/Pensionita sem CPF cadastrado!” / “Participante/Pensionista sem Opção de Imposto de Renda!” (na reclusão, para dependentes: “Conta preferencial não cadastrada!”)</td><td>Informação</td><td><code>FEventoMorte.pas:1009, 1023, 1038, 1046; FEventoReclusao.pas:306, 319, 333, 340, 640, 652, 666, 710; FEventoAssistidoINSS.pas:591, 609, 627, 634</code></td><td><a href="#PF-02">JF002</a>, <a href="#PF-03">JF003</a>, <a href="#PF-04">JF004</a></td></tr>
+<tr id="MSG023"><td><strong>MSG023</strong></td><td>“Erro ao verificar se participante possui empréstimo. ”</td><td>Erro</td><td><code>FEventoMorte.pas:1105; FEventoReclusao.pas:755; FEventoAssistidoINSS.pas:679</code></td><td><a href="#PF-02">JF002</a>, <a href="#PF-03">JF003</a>, <a href="#PF-04">JF004</a></td></tr>
+<tr id="MSG024"><td><strong>MSG024</strong></td><td>“Evento não efetuado.”</td><td>Informação</td><td><code>FEventoMorte.pas:1180, 1195; FEventoReclusao.pas:792, 808; FEventoManutParcial.pas:588, 682</code></td><td><a href="#PF-02">JF002</a>, <a href="#PF-03">JF003</a></td></tr>
+<tr id="MSG025"><td><strong>MSG025</strong></td><td>“Participante possui mais de um parâmetro que alertam para resgate. Deseja continuar?”</td><td>Confirmação</td><td><code>FEventoMorte.pas:485</code></td><td><a href="#PF-02">JF002</a></td></tr>
+<tr id="MSG026"><td><strong>MSG026</strong></td><td>“&lt;PARAMFLAGPESSOA.MSGALERTARRESGATE&gt;. Deseja continuar ?”</td><td>Confirmação</td><td><code>FEventoMorte.pas:499</code></td><td><a href="#PF-02">JF002</a></td></tr>
+<tr id="MSG027"><td><strong>MSG027</strong></td><td>“O participante possui dívidas de empréstimo - Deseja continuar ?”</td><td>Confirmação</td><td><code>FEventoMorte.pas:516</code></td><td><a href="#PF-02">JF002</a></td></tr>
+<tr id="MSG028"><td><strong>MSG028</strong></td><td>“Para cadastrar um evento de falecimento de resgate para beneficiário designado é preciso possuir  um evento de falecimento cadastrado”</td><td>Informação</td><td><code>FEventoMorte.pas:593</code></td><td><a href="#PF-02">JF002</a></td></tr>
+<tr id="MSG029"><td><strong>MSG029</strong></td><td>“Já Existe um evento registrado para essa pessoa. Deseja registrar um novo evento?”</td><td>Confirmação</td><td><code>FEventoMorte.pas:629</code></td><td><a href="#PF-02">JF002</a></td></tr>
+<tr id="MSG030"><td><strong>MSG030</strong></td><td>“Este Participante não possui nenhum Beneficiário cadastrado. Para Cadastrar um Beneficiário, utilize o Cadastro de Beneficiários.”</td><td>Informação</td><td><code>FEventoReclusao.pas:561-562; FEventoAssistidoINSS.pas:531-532</code></td><td><a href="#PF-03">JF003</a>, <a href="#PF-04">JF004</a></td></tr>
+<tr id="MSG031"><td><strong>MSG031</strong></td><td>“A data do requerimento deve ser preenchida.”</td><td>Erro</td><td><code>FEventoReclusao.pas:743; FEventoAssistidoINSS.pas:668</code></td><td><a href="#PF-03">JF003</a>, <a href="#PF-04">JF004</a></td></tr>
+<tr id="MSG032"><td><strong>MSG032</strong></td><td>“Evento não efetuado. &lt;mensagem de AssociaRubricasIndividuais&gt;”</td><td>Informação</td><td><code>FEventoReclusao.pas:844; FEventoAssistidoINSS.pas:754</code></td><td><a href="#PF-03">JF003</a>, <a href="#PF-04">JF004</a></td></tr>
+<tr id="MSG033"><td><strong>MSG033</strong></td><td>“Matrícula não encontrada” / “Inscrição não encontrada”</td><td>Informação</td><td><code>FEventoAssistidoINSS.pas:1189, 1472</code></td><td><a href="#PF-04">JF004</a></td></tr>
+<tr id="MSG034"><td><strong>MSG034</strong></td><td>“Esse Evento já foi efetivado. Não pode ser alterado. Deseja Gerar um Novo Evento ?”</td><td>Confirmação</td><td><code>FEventoAssistidoINSS.pas:1355</code></td><td><a href="#PF-04">JF004</a></td></tr>
+<tr id="MSG035"><td><strong>MSG035</strong></td><td>“A Nova Situação do Participante na Fundação deve ser da Categoria Assistido.”</td><td>Erro</td><td><code>CM/CMADMPREV/Fontes/FEventoAposentadoria.pas:845, 1054</code> (externo)</td><td><a href="#PF-01">JF001</a></td></tr>
+<tr id="MSG036"><td><strong>MSG036</strong></td><td>“Salário de Assistido deve ser informado.”</td><td>Informação</td><td><code>CM/CMADMPREV/Fontes/FEventoAssistido.pas:878, 1053</code> (externo)</td><td><a href="#PF-01">JF001</a></td></tr>
+<tr id="MSG037"><td><strong>MSG037</strong></td><td>“O participante possui salário no mês &lt;mês&gt;. A Data Final do Evento, neste caso, é obrigatória.”</td><td>Erro</td><td><code>CM/CMADMPREV/Fontes/FEventoAssistido.pas:1126</code> (externo)</td><td><a href="#PF-01">JF001</a></td></tr>
+<tr id="MSG038"><td><strong>MSG038</strong></td><td>“Existe um outro evento da mesma categoria em aberto. Deseja abrir um novo evento ? ”</td><td>Confirmação</td><td><code>CM/CMADMPREV/Fontes/FEventoAssistido.pas:786-787</code> (externo)</td><td><a href="#PF-01">JF001</a></td></tr>
+<tr id="MSG039"><td><strong>MSG039</strong></td><td>“&lt;mensagem devolvida pela rotina externa (sMsgErro)&gt;”<br><em>Texto dinâmico.</em></td><td>Erro</td><td><code>FEventoMorte.pas:886, 925, 1163, 1222; FEventoReclusao.pas:582, 600, 832; FEventoAssistidoINSS.pas:469, 742</code></td><td><a href="#PF-02">JF002</a>, <a href="#PF-03">JF003</a>, <a href="#PF-04">JF004</a></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">8. Tabela/API/Programa</div>
+<div class="table-wrap"><table><thead><tr><th>Jornada</th><th>Tabelas (escrita)</th><th>Rotinas (CADASTROPREV/Fontes/ e externas)</th></tr></thead><tbody>
+<tr><td>Transversal</td><td>LOGTOTALPREV (log); leitura: EVENTOGERADOR, PARAMAPREV, PARAMCONTAB, PLANO, PARAMCAP, PARAMGLOBAL, FUNDACAO</td><td><code>FPrincipal.pas:490-667 (MudaCaptionFundacao), 669-699 (AppPadraoAfterLogin), 701-1435 (MontaMenu), 1778-1806 (AbreFormDesfazerEvento), 1826-1948 (Verifica_Situacao_Empresa), 1950-2105 (CriaDataModule)</code>; <code>CM/CMADMPREV/Fontes/UAdmPrev.pas:3140-3171</code></td></tr>
+<tr><td><a href="#PF-01">JF001</a></td><td>Delegado ao CMAdmPrev: EVENTOSPREV, ELEGPATRO, PARTPREVPLAN, HISTFUNCPREV, PESSOA</td><td><code>FPrincipal.pas:2516-2624</code>; <code>CM/CMADMPREV/Fontes/FEventoAposentadoria.pas</code>; <code>CM/CMADMPREV/Fontes/FEventoAssistido.pas</code></td></tr>
+<tr><td><a href="#PF-02">JF002</a></td><td>ELEGPATRO, PARTPREVPLAN, PESSOAFISICA, EVENTOSPREV (+ rotinas externas de contribuição/benefício)</td><td><code>FEventoMorte.pas:348-744 (bbtnProcurarClick), 746-771, 773-974 (bbtnRequerBeneficioClick), 976-1251 (bbtnConfirmarClick), 1253-1356 (VerificaeGravaSituacoes), 1358-1427 (GravaEVENTOSPREV)</code></td></tr>
+<tr><td><a href="#PF-03">JF003</a></td><td>ELEGPATRO, PARTPREVPLAN, EVENTOSPREV (se acionada)</td><td><code>FEventoReclusao.pas:240-1053</code>; <code>CadastroPrev.dpr:170</code></td></tr>
+<tr><td><a href="#PF-04">JF004</a></td><td>ELEGPATRO, EVENTOSPREV, PARTPREVPLAN (FLGFITESPECIAL), PESSOA (ramo IN)</td><td><code>FEventoAssistidoINSS.pas:278-887, 1152-1404, 1510-1657</code></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">9. Telas/Layouts</div>
+<div class="table-wrap"><table><thead><tr><th>Jornada</th><th>Tela (título)</th><th>Form (.dfm)</th></tr></thead><tbody>
+<tr><td>Transversal</td><td>Menu Eventos › Benefícios (Tempo de Contribuição, Idade, Invalidez, Falecimento, Outro Eventos Temporários, Aposentadoria INSS, Falecimento INSS)</td><td><code>FPrincipal.dfm:8435-8478</code></td></tr>
+<tr><td><a href="#PF-01">JF001</a></td><td>Evento Aposentadoria (externo)<br>Evento Assistido Temporário (externo)<br>Retornar do Evento (externo)</td><td><code>CM/CMADMPREV/Fontes/FEventoAposentadoria.dfm</code><br><code>CM/CMADMPREV/Fontes/FEventoAssistido.dfm</code><br><code>CM/CMADMPREV/Fontes/FDesfazerEvento.dfm</code></td></tr>
+<tr><td><a href="#PF-02">JF002</a></td><td>Evento Falecimento (o título em execução é o nome do evento)</td><td><code>FEventoMorte.dfm</code></td></tr>
+<tr><td><a href="#PF-03">JF003</a></td><td>Evento Reclusão</td><td><code>FEventoReclusao.dfm</code></td></tr>
+<tr><td><a href="#PF-04">JF004</a></td><td>Evento Aposentadoria Exclusiva do INSS (o título em execução é o nome do evento)</td><td><code>FEventoAssistidoINSS.dfm</code></td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">10. Visão Consolidada das Jornadas</div>
+<div class="table-wrap"><table><thead><tr><th>Item</th><th>Jornada</th><th>Título</th><th>Critério de aceitação</th><th>Regras</th><th>Mensagens</th><th>Telas</th></tr></thead><tbody>
+<tr><td>[US] CADPREV-JF001</td><td><a href="#PF-01">JF001</a></td><td>Eventos de aposentadoria e assistido</td><td><strong>Dado</strong> um evento TS/ID/IN/OE cadastrado para a fundação, <strong>Quando</strong> o analista o escolhe no menu, <strong>Então</strong> a tela externa de aposentadoria (TS/ID) ou de assistido (IN/OE) abre com o nome do evento; no grupo OE existe o item “Retorno”.</td><td><a href="#CADPREV-RN002">RS002</a>, <a href="#CADPREV-RN021">RS021</a>, <a href="#CADPREV-RN006">RS006</a></td><td><a href="#MSG001">MSG001</a></td><td>FEventoAposentadoria, FEventoAssistido (externos)</td></tr>
+<tr><td>[US] CADPREV-JF002</td><td><a href="#PF-02">JF002</a></td><td>Falecimento do participante</td><td><strong>Dado</strong> um participante com pensionistas com cadastro completo, <strong>Quando</strong> o analista confirma o evento 4, <strong>Então</strong> EVENTOSPREV é gravado, a data da morte é registrada, as contribuições são suspensas e a mensagem <a href="#MSG008">MSG008</a> é exibida; com pendências cadastrais aparece <a href="#MSG022">MSG022</a> e nada é gravado.</td><td><a href="#CADPREV-RN028">RS028</a>, <a href="#CADPREV-RN029">RS029</a>, <a href="#CADPREV-RN030">RS030</a></td><td><a href="#MSG008">MSG008</a>, <a href="#MSG022">MSG022</a></td><td>Evento Falecimento</td></tr>
+<tr><td>[US] CADPREV-JF003</td><td><a href="#PF-03">JF003</a></td><td>Reclusão</td><td><strong>Dado</strong> o menu de eventos de benefício, <strong>Quando</strong> o usuário procura a reclusão, <strong>Então</strong> não há item para abri-la (funcionalidade inacessível neste módulo).</td><td><a href="#CADPREV-RN033">RS033</a></td><td>—</td><td>Evento Reclusão</td></tr>
+<tr><td>[US] CADPREV-JF004</td><td><a href="#PF-04">JF004</a></td><td>Eventos INSS</td><td><strong>Dado</strong> um participante da fundação 1, <strong>Quando</strong> o analista confirma um evento AI ou BI, <strong>Então</strong> o evento é gravado já efetivado com as situações inalteradas e a data do requerimento.</td><td><a href="#CADPREV-RN036">RS036</a>, <a href="#CADPREV-RN037">RS037</a></td><td><a href="#MSG008">MSG008</a>, <a href="#MSG031">MSG031</a></td><td>Evento Aposentadoria Exclusiva do INSS</td></tr>
+</tbody></table></div>
+</section>
+
+<section><div class="section-title">11. Critérios de Aceitação por Regra</div>
+<div class="table-wrap"><table><thead><tr><th>Regra</th><th>Jornada</th><th>Critério (Dado / Quando / Então)</th></tr></thead><tbody>
+<tr><td><a href="#CADPREV-RN001">RS001 (CADPREV-RN001)</a></td><td>Transversal (todas)</td><td><strong>Dado</strong> um usuário da fundação X, <strong>Quando</strong> o menu é montado ou um participante é pesquisado, <strong>Então</strong> só eventos e participantes de patrocinadoras da fundação X aparecem (exceto nas exceções listadas).</td></tr>
+<tr><td><a href="#CADPREV-RN002">RS002 (CADPREV-RN002)</a></td><td>Transversal (todas)</td><td><strong>Dado</strong> eventos cadastrados por FLGINTERNO para a fundação, <strong>Quando</strong> o usuário faz login, <strong>Então</strong> cada evento vira item do grupo correspondente, ordenado por nome; AI/BI sem eventos ficam ocultos.</td></tr>
+<tr><td><a href="#CADPREV-RN003">RS003 (CADPREV-RN003)</a></td><td>Transversal (todas)</td><td><strong>Dado</strong> FLGTIPOPREVIDENC = 'I', <strong>Quando</strong> uma tela é ativada, <strong>Então</strong> “Fundação/Patrocinadora/Plano” são exibidos como “Instituto/Entidade/Regime”.</td></tr>
+<tr><td><a href="#CADPREV-RN004">RS004 (CADPREV-RN004)</a></td><td>Transversal (todas)</td><td><strong>Dado</strong> FLGINTCONTAB = 1 sem PARAMCONTAB, <strong>Quando</strong> o usuário faz login, <strong>Então</strong> o sistema exibe <a href="#MSG002">MSG002</a> e segue com IntegraBack.Contabilidade = 'S'.</td></tr>
+<tr><td><a href="#CADPREV-RN005">RS005 (CADPREV-RN005)</a></td><td>Transversal (todas)</td><td><strong>Dado</strong> um evento confirmado, <strong>Quando</strong> a gravação termina, <strong>Então</strong> a operação é registrada no log do módulo 452; se o log falhar, o evento segue gravado sem log.</td></tr>
+<tr><td><a href="#CADPREV-RN006">RS006 (CADPREV-RN006)</a></td><td>Transversal (todas)</td><td><strong>Dado</strong> um grupo CI cujo evento tem FLGACEITARETORNO = 0, <strong>Quando</strong> o menu é montado, <strong>Então</strong> não há item “Retorno” nesse grupo; nos grupos OE/AF/AR/CP com eventos, há.</td></tr>
+<tr><td><a href="#CADPREV-RN007">RS007 (CADPREV-RN007)</a></td><td>Transversal</td><td><strong>Dado</strong> um evento já efetivado para o participante, <strong>Quando</strong> ele é selecionado, <strong>Então</strong> o sistema exibe <a href="#MSG007">MSG007</a> e desabilita a confirmação.</td></tr>
+<tr><td><a href="#CADPREV-RN008">RS008 (CADPREV-RN008)</a></td><td>Transversal</td><td><strong>Dado</strong> um evento com as três flags de imediatez = 1, <strong>Quando</strong> é confirmado, <strong>Então</strong> as novas situações são gravadas e EVENTOSPREV nasce com FLGEFETIVADO = 1.</td></tr>
+<tr><td><a href="#CADPREV-RN009">RS009 (CADPREV-RN009)</a></td><td>Transversal</td><td><strong>Dado</strong> alterações pendentes na tela, <strong>Quando</strong> o usuário cancela e confirma <a href="#MSG010">MSG010</a>, <strong>Então</strong> nada é gravado (rollback).</td></tr>
+<tr><td><a href="#CADPREV-RN010">RS010 (CADPREV-RN010)</a></td><td>Transversal</td><td><strong>Dado</strong> um evento confirmado sem carta configurada, <strong>Quando</strong> a confirmação termina, <strong>Então</strong> aparece <a href="#MSG009">MSG009</a> e o evento permanece gravado.</td></tr>
+<tr><td><a href="#CADPREV-RN021">RS021 (CADPREV-RN021)</a></td><td><a href="#PF-01">JF001</a></td><td><strong>Dado</strong> um evento do grupo IN, <strong>Quando</strong> é escolhido, <strong>Então</strong> abre a tela de assistido temporário com HelpContext 160023.</td></tr>
+<tr><td><a href="#CADPREV-RN022">RS022 (CADPREV-RN022)</a></td><td><a href="#PF-01">JF001</a></td><td><strong>Dado</strong> nova situação na fundação com FLGINTERNO ≠ 'AS', <strong>Quando</strong> a aposentadoria é confirmada, <strong>Então</strong> aparece <a href="#MSG035">MSG035</a> e nada é gravado.</td></tr>
+<tr><td><a href="#CADPREV-RN023">RS023 (CADPREV-RN023)</a></td><td><a href="#PF-01">JF001</a></td><td><strong>Dado</strong> uma aposentadoria confirmada, <strong>Quando</strong> a gravação ocorre, <strong>Então</strong> o último HISTFUNCPREV aberto recebe DATAFINAL e PARTPREVPLAN.DATAINICIOASSIST recebe a data do evento.</td></tr>
+<tr><td><a href="#CADPREV-RN024">RS024 (CADPREV-RN024)</a></td><td><a href="#PF-01">JF001</a></td><td><strong>Dado</strong> participante com salário no mês, <strong>Quando</strong> o assistido temporário é confirmado sem data final, <strong>Então</strong> aparece <a href="#MSG037">MSG037</a>.</td></tr>
+<tr><td><a href="#CADPREV-RN025">RS025 (CADPREV-RN025)</a></td><td><a href="#PF-02">JF002</a>, <a href="#PF-04">JF004</a></td><td><strong>Dado</strong> data do evento posterior a hoje (evento ≠ 346/387), <strong>Quando</strong> o usuário confirma, <strong>Então</strong> aparece <a href="#MSG018">MSG018</a>.</td></tr>
+<tr><td><a href="#CADPREV-RN026">RS026 (CADPREV-RN026)</a></td><td><a href="#PF-02">JF002</a></td><td><strong>Dado</strong> o evento 346 para matrícula sem evento 4, <strong>Quando</strong> o participante é selecionado, <strong>Então</strong> aparece <a href="#MSG028">MSG028</a> e a tela é limpa.</td></tr>
+<tr><td><a href="#CADPREV-RN027">RS027 (CADPREV-RN027)</a></td><td><a href="#PF-02">JF002</a></td><td><strong>Dado</strong> participante sem dependente elegível ativo, <strong>Quando</strong> o usuário requer benefício para beneficiário, <strong>Então</strong> aparece <a href="#MSG021">MSG021</a>.</td></tr>
+<tr><td><a href="#CADPREV-RN028">RS028 (CADPREV-RN028)</a></td><td><a href="#PF-02">JF002</a>, <a href="#PF-04">JF004</a></td><td><strong>Dado</strong> pensionistas sem conta salário, <strong>Quando</strong> o usuário confirma, <strong>Então</strong> aparece <a href="#MSG022">MSG022</a> com “Conta Salário não cadastrada!” e a confirmação é interrompida.</td></tr>
+<tr><td><a href="#CADPREV-RN029">RS029 (CADPREV-RN029)</a></td><td><a href="#PF-02">JF002</a></td><td><strong>Dado</strong> o evento 346, <strong>Quando</strong> é confirmado, <strong>Então</strong> PESSOAFISICA.DATAMORTE não é alterada; com o evento 4, é.</td></tr>
+<tr><td><a href="#CADPREV-RN030">RS030 (CADPREV-RN030)</a></td><td><a href="#PF-02">JF002</a></td><td><strong>Dado</strong> falha ao suspender contribuições, <strong>Quando</strong> o evento é confirmado, <strong>Então</strong> aparece <a href="#MSG024">MSG024</a> e tudo é desfeito.</td></tr>
+<tr><td><a href="#CADPREV-RN031">RS031 (CADPREV-RN031)</a></td><td><a href="#PF-02">JF002</a></td><td><strong>Dado</strong> um evento em gravação, <strong>Quando</strong> o usuário clica em Procurar, <strong>Então</strong> aparece <a href="#MSG012">MSG012</a> e a procura é abortada.</td></tr>
+<tr><td><a href="#CADPREV-RN032">RS032 (CADPREV-RN032)</a></td><td><a href="#PF-02">JF002</a></td><td><strong>Dado</strong> requerimento aberto e evento não confirmado, <strong>Quando</strong> o usuário sai e confirma <a href="#MSG014">MSG014</a>, <strong>Então</strong> os requerimentos são apagados.</td></tr>
+<tr><td><a href="#CADPREV-RN033">RS033 (CADPREV-RN033)</a></td><td><a href="#PF-03">JF003</a></td><td><strong>Dado</strong> o menu do módulo, <strong>Quando</strong> o usuário busca a reclusão, <strong>Então</strong> não encontra item que abra a tela.</td></tr>
+<tr><td><a href="#CADPREV-RN034">RS034 (CADPREV-RN034)</a></td><td><a href="#PF-03">JF003</a></td><td><strong>Dado</strong> data do requerimento vazia, <strong>Quando</strong> a reclusão é confirmada, <strong>Então</strong> aparece <a href="#MSG031">MSG031</a>.</td></tr>
+<tr><td><a href="#CADPREV-RN035">RS035 (CADPREV-RN035)</a></td><td><a href="#PF-04">JF004</a></td><td><strong>Dado</strong> um evento BI e participante sem beneficiário, <strong>Quando</strong> o usuário requer benefício, <strong>Então</strong> aparece <a href="#MSG030">MSG030</a>.</td></tr>
+<tr><td><a href="#CADPREV-RN036">RS036 (CADPREV-RN036)</a></td><td><a href="#PF-04">JF004</a></td><td><strong>Dado</strong> um evento INSS novo, <strong>Quando</strong> é confirmado, <strong>Então</strong> EVENTOSPREV recebe situações novas = atuais, FLGEFETIVADO = 1 e DATAEFETIVADO = SYSDATE.</td></tr>
+<tr><td><a href="#CADPREV-RN037">RS037 (CADPREV-RN037)</a></td><td><a href="#PF-04">JF004</a></td><td><strong>Dado</strong> um participante de patrocinadora de outra fundação, <strong>Quando</strong> é pesquisado na tela INSS, <strong>Então</strong> não aparece no resultado.</td></tr>
+<tr><td><a href="#CADPREV-RN038">RS038 (CADPREV-RN038)</a></td><td><a href="#PF-04">JF004</a></td><td><strong>Dado</strong> evento INSS efetivado e nenhum benefício INSS ativo, <strong>Quando</strong> o participante é selecionado, <strong>Então</strong> aparece <a href="#MSG034">MSG034</a>.</td></tr>
+<tr><td><a href="#CADPREV-RN039">RS039 (CADPREV-RN039)</a></td><td><a href="#PF-04">JF004</a></td><td><strong>Dado</strong> um evento do grupo IN escolhido no menu, <strong>Quando</strong> é confirmado, <strong>Então</strong> a tela usada (assistido) não grava PESSOA.FLGINVALIDO (validar se é esperado).</td></tr>
+</tbody></table></div>
+</section>
+
+<p><a class="back-btn" href="funcionalidades.html">← Voltar à lista de Casos de Uso (Processos Funcionais)</a></p>
+</main>
+<footer>
+<p>Blueprint AS-IS — PFC-73 — Processos Funcionais organizados em Casos de Uso — Módulo CADASTROPREV | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-24</p>
+</footer>
+</body>
+</html>

@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cadastro Previdenciário — UC408 – Gerar Comunicações, Conta Salário e Mapa Previc — Blueprint AS-IS</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<header>
+  <div class="badge">Blueprint AS-IS — PFC-73 — Processos Funcionais</div>
+  <h1>UC408 – Gerar Comunicações, Conta Salário e Mapa Previc</h1>
+  <p>Caso de uso do módulo Cadastro Previdenciário: 3 jornada(s) funcional(is) e 20 regra(s) de negócio descritas dentro de cada jornada.</p>
+</header>
+<nav>
+  <a href="index.html">📋 Visão Geral</a>
+  <a href="arquitetura.html">🏗️ Arquitetura</a>
+  <a href="inventario-tecnico.html">📦 Inventário</a>
+  <a href="funcionalidades.html">⚙️ Processos Funcionais</a>
+  <a href="procedures-functions.html">🔧 Procedures</a>
+  <a href="dados.html">🗄️ Dados</a>
+  <a href="relatorios.html">📄 Relatórios</a>
+  <a href="integracoes.html">🔗 Integrações</a>
+  <a href="tratamento-erros.html">⚠️ Erros</a>
+  <a href="diagramas-fluxo.html">🔀 Fluxos</a>
+  <a href="lacunas.html">🔍 Lacunas</a>
+  <a href="controle-cobertura.html">📊 Cobertura</a>
+</nav>
+<main>
+
+<a class="back-btn" href="funcionalidades.html">← Voltar à lista de Casos de Uso (Processos Funcionais)</a>
+<div class="breadcrumb"><a href="index.html">Cadastro Previdenciário</a> › <a href="funcionalidades.html">Processos Funcionais</a> › UC408</div>
+<section><div class="section-title">1. Identificação</div>
+<div class="table-wrap"><table><tbody>
+<tr><th>Caso de Uso</th><td><strong>UC408 – Gerar Comunicações, Conta Salário e Mapa Previc</strong></td></tr>
+<tr><th>Módulo</th><td>CADASTROPREV — Cadastro Previdenciário</td></tr>
+<tr><th>Sistema</th><td>CM Contabilidade / FUNCEF (Delphi 5 / VCL / MIDAS / Oracle)</td></tr>
+<tr><th>Tipo</th><td>Sistema Desktop</td></tr>
+<tr><th>Ator</th><td>Usuário operacional das áreas de cadastro, comunicação e benefícios (analistas que geram arquivos para Correios, banco e PREVIC)</td></tr>
+<tr><th>Jornadas</th><td><a href="#PF-27">JF027 — Envio de periódico</a>, <a href="#PF-28">JF028 — Solicitação de conta salário e separação de arquivo financeiro</a>, <a href="#PF-29">JF029 — Mapa Previc</a></td></tr>
+<tr><th>Regras de negócio</th><td>20 regra(s) CADPREV-RN (RN161–RN180), descritas na íntegra dentro de cada jornada; regras transversais em <a href="uc401.html">UC401</a></td></tr>
+<tr><th>OS - Título</th><td>PFC-73 — Blueprint Cadastro Previdenciário</td></tr>
+</tbody></table></div>
+</section>
+<section><div class="section-title">2. Descrição Resumida</div>
+<p>Saídas do cadastro para entidades externas: Correios (periódico), banco (abertura de conta salário), patrocinadora (arquivo financeiro) e PREVIC (mapa estatístico). Este caso de uso reúne 3 jornada(s) funcional(is) do módulo Cadastro Previdenciário:</p>
+<ul>
+<li><a href="#PF-27"><strong>JF027 — Envio de periódico</strong></a>: Seleciona participantes por categoria e opção de receber a revista, separa endereços consistentes e gera o arquivo de postagem para os Correios (.PER/.ZIP), registrando o envio.</li>
+<li><a href="#PF-28"><strong>JF028 — Solicitação de conta salário e separação de arquivo financeiro</strong></a>: Gera e envia ao banco a planilha de abertura de contas salário (037) para as pessoas com solicitação pendente, registrando a data; e separa o arquivo financeiro FUNCEF em arquivos de importação.</li>
+<li><a href="#PF-29"><strong>JF029 — Mapa Previc</strong></a>: Gera, grava e exporta (PDF/XML) os demonstrativos estatístico e de sexo e idade exigidos pela PREVIC e registra o número de protocolo do envio.</li>
+</ul>
+<p><strong>Necessidade de negócio:</strong> a entidade precisa comunicar-se com terceiros a partir do cadastro: postar a revista aos participantes que a desejam, pedir ao banco a abertura de contas salário para pagamento, organizar o arquivo financeiro recebido da patrocinadora e prestar contas estatísticas à PREVIC, controlando o que já foi enviado.</p>
+<p><strong>Quem inicia:</strong> o analista, pelo menu <strong>Manutenção</strong> (itens “Envio de Periódico”, “Solicitação de Conta Salário” e “Mapa Previc” em <code>FPrincipal.dfm:8633-8650</code>). Só o Envio de Periódico chama CriaDataModule antes de abrir a tela.</p>
+<p><strong>Resultado esperado:</strong> arquivo de postagem e registro em LOGENVIOPERIODICO; planilha enviada ao banco e data de solicitação gravada; arquivos financeiros separados; demonstrativos PREVIC gravados, exportados e protocolados.</p>
+<p><strong>Termos, siglas e componentes citados nesta página</strong> — explicados na primeira vez em que aparecem; a coluna “Fonte” indica onde a explicação foi conferida no repositório:</p>
+<div class="table-wrap"><table><thead><tr><th>Termo</th><th>O que significa</th><th>Fonte</th></tr></thead><tbody>
+<tr><td><strong>Periódico / revista</strong></td><td>Publicação da fundação enviada aos participantes; a opção de recebê-la fica no parâmetro de pessoa 129 (PESSOAPARAM).</td><td><code>fEnvioPeriodico.dfm:2207-2224</code></td></tr>
+<tr><td><strong>Arquivo PTG / .PER</strong></td><td>Arquivo de pré-postagem dos Correios, em registros de tipos 1 (cabeçalho), 2 (por UF), 3 (objeto), 6 (destinatário) e 7 (rodapé).</td><td><code>fEnvioPeriodico.pas:516-880</code></td></tr>
+<tr><td><strong>LOGENVIOPERIODICO</strong></td><td>Registro de cada arquivo de periódico gerado (sequência, data, nome, lote, sequencial dos Correios, edição).</td><td><code>fEnvioPeriodico.pas:485-514</code></td></tr>
+<tr><td><strong>Conta salário (037)</strong></td><td>Conta corrente da operação 037 (conta salário) — identificada pelos três primeiros dígitos “037”.</td><td><code>FSolContaSal.pas:18-21, 1084-1120</code></td></tr>
+<tr><td><strong>FLGSOLICITACONTASALARIO / DTSOLICITACONTASALARIO</strong></td><td>Marca de que a pessoa precisa de conta salário e data em que a solicitação foi enviada ao banco (PESSOAFISICA).</td><td><code>FSolContaSal.dfm:555-556</code>; <code>FEmailContasSol.dfm:352-354</code></td></tr>
+<tr><td><strong>Arquivo financeiro / PADV</strong></td><td>Arquivos de remuneração/descontos enviados pela patrocinadora (layouts TFinanc e TPadv), separados para importação <span class="ev ev-inferido">INFERIDO</span>.</td><td><code>FSeparadorArqFinanc.pas:146-170</code></td></tr>
+<tr><td><strong>TMPDESC</strong></td><td>Tabela de descontos enviados para cobrança (módulo 15 = empréstimo <span class="ev ev-inferido">INFERIDO</span>), marcada como recebida pelo separador.</td><td><code>FSeparadorArqFinanc.pas:1288-1295</code></td></tr>
+<tr><td><strong>PREVIC / Mapa PREVIC</strong></td><td>Superintendência Nacional de Previdência Complementar; o “mapa” reúne o Demonstrativo Estatístico (movimentação por conta) e o Demonstrativo de Sexo e Idade.</td><td><code>FMapaPrevi.dfm:5-300</code></td></tr>
+<tr><td><strong>MPREVICDEMONEST / MPREVICDEMONESTIDSEX / MPREVICARQSPC</strong></td><td>Tabelas dos demonstrativos estatístico e de sexo/idade, e dos protocolos de envio.</td><td><code>FMapaPrevi.pas:964-1030</code>; <code>FCadNumeroProtoco.pas:228-260</code></td></tr>
+<tr><td><strong>NUMPROTOCOLO</strong></td><td>Número de protocolo do envio à PREVIC; quando preenchido, o demonstrativo não pode ser alterado.</td><td><code>FMapaPrevi.pas:597-599</code></td></tr>
+</tbody></table></div>
+</section>
+<section><div class="section-title">3. Pré-condições</div>
+<p><strong>Gerais do módulo:</strong></p>
+<ul>
+<li>Módulo disponível (entry point <code>CADASTROPREV/Fontes/CadastroPrev.dpr</code>) e usuário com acesso ao menu Manutenção.</li>
+<li>Banco Oracle acessível (Solicitação de Conta Salário e Mapa Previc abrem sem CriaDataModule).</li>
+<li>Estação com Microsoft Excel e Outlook (conta salário) e diretório de arquivos da empresa configurado (Sistema.RetornaCaminhoArquivos).</li>
+<li>Cadastro de pessoas, endereços, contas bancárias, eventos e benefícios atualizado.</li>
+</ul>
+<p><strong>O que as pré-condições gerais significam na prática:</strong> além do acesso ao menu, a estação precisa dos programas Office usados na automação e de um diretório de arquivos configurado para a empresa; os dados de origem (endereços, contas, eventos) precisam estar corretos, pois são exportados como estão.</p>
+<p><strong>Por jornada:</strong></p>
+<ul>
+<li><a href="#PF-27">JF027</a>: Parâmetro de pessoa 129 (receber revista) cadastrado; endereços em ENDPESS; dados do lote/edição e do objeto postal conhecidos.</li>
+<li><a href="#PF-28">JF028</a>: Pessoas com FLGSOLICITACONTASALARIO = 1; conta preferencial cadastrada; Microsoft Excel e Outlook instalados na estação. Separador: arquivos de entrada no layout FUNCEF.</li>
+<li><a href="#PF-29">JF029</a>: Entidade cadastrada em FUNDACAO (CODFUNDSPC); eventos, planos, benefícios e contribuições do período registrados.</li>
+</ul>
+<p><strong>Pré-condições por jornada, em termos de negócio:</strong></p>
+<ul>
+<li><a href="#PF-27">JF027</a>: cada participante já tem registrada a opção de receber a revista; a edição, o lote e o sequencial dos Correios e as medidas do exemplar foram definidos.</li>
+<li><a href="#PF-28">JF028</a>: o cadastro indica quem precisa de conta salário; a estação do analista tem Excel e Outlook; para o separador, os arquivos da patrocinadora foram recebidos.</li>
+<li><a href="#PF-29">JF029</a>: o cadastro e os eventos do período estão completos; a entidade tem código SPC e e-mail.</li>
+</ul>
+</section>
+<section><div class="section-title">4. Pós-condições</div>
+<ul>
+<li><a href="#PF-27">JF027</a>: Arquivo PTG_…PER (ou .zip) no diretório de arquivos da empresa; linha em LOGENVIOPERIODICO; relatórios opcionais.</li>
+<li><a href="#PF-28">JF028</a>: Planilha ABERTURA DE CONTA 037_ddmmaaaa.xlsx salva e enviada; PESSOAFISICA.DTSOLICITACONTASALARIO preenchida. Separador: arquivos Financeiro_*.txt e TMPDESC atualizada.</li>
+<li><a href="#PF-29">JF029</a>: MPREVICDEMONEST / MPREVICDEMONESTIDSEX gravados; PDF exibido ou XML salvo; protocolo gravado (NUMPROTOCOLO e MPREVICARQSPC).</li>
+</ul>
+<p><strong>Resultado de negócio de cada jornada:</strong></p>
+<ul>
+<li><a href="#PF-27">JF027</a> — <em>conclusão com sucesso:</em> arquivo gerado e registrado (<a href="#CADPREV-RN165">RS165</a>, <a href="#CADPREV-RN166">RS166</a>), aviso <a href="#MSG289">MSG289</a>. <em>Interrupções:</em> campos inválidos (<a href="#TRT281">TRT281</a>, <a href="#TRT282">TRT282</a>), erro de gravação (<a href="#TRT284">TRT284</a>) ou nenhum destinatário (<a href="#TRT285">TRT285</a>).</li>
+<li><a href="#PF-28">JF028</a> — <em>conclusão com sucesso:</em> e-mail enviado e data registrada (<a href="#CADPREV-RN173">RS173</a>); arquivos financeiros separados (<a href="#CADPREV-RN174">RS174</a>, <a href="#CADPREV-RN175">RS175</a>). <em>Desvios:</em> linhas recusadas (<a href="#TRT292">TRT292</a>), referência vazia (<a href="#TRT293">TRT293</a>).</li>
+<li><a href="#PF-29">JF029</a> — <em>conclusão com sucesso:</em> demonstrativos gravados e exportados (<a href="#CADPREV-RN179">RS179</a>); protocolo registrado (<a href="#CADPREV-RN180">RS180</a>, <a href="#MSG320">MSG320</a>). <em>Interrupções:</em> campos obrigatórios (<a href="#TRT296">TRT296</a>), demonstrativo protocolado (<a href="#TRT298">TRT298</a>), erro de gravação (<a href="#TRT299">TRT299</a>).</li>
+</ul>
+</section>
+<section><div class="section-title">5. Jornadas Funcionais (JF027, JF028, JF029)</div>
+<p>Cada jornada traz objetivo, ator/gatilho, pré e pós-condições, sequência operacional, ações práticas, <strong>regras de negócio da jornada</strong> (texto completo de cada regra), tratamentos e mensagens.</p>
+<p><strong>Como as jornadas deste caso de uso se relacionam:</strong> As três jornadas são independentes entre si: JF027 comunica-se com os Correios, JF028 com o banco (e com a patrocinadora, pelo separador), JF029 com a PREVIC. Todas leem o cadastro mantido nos demais casos de uso. Em cada passo, o rótulo “Usuário” ou “Sistema” indica quem executa a ação.</p>
+<div class="legend"><span><span class="ev ev-comprovado">COMPROVADO</span> — no código</span><span><span class="ev ev-inferido">INFERIDO</span> — plausível</span><span><span class="ev ev-pendente">PENDENTE</span> — validar</span></div>
+</section>
+<div class="pf-block" id="PF-27"><h4>JF027 (PF-27) — Envio de periódico</h4>
+<p><strong>Objetivo:</strong> Gerar o arquivo de postagem da revista/periódico da fundação para os Correios, com os participantes que optaram por recebê-la e que têm endereço completo.</p>
+<p><strong>Necessidade de negócio:</strong> a fundação envia periodicamente sua publicação aos participantes. A postagem em lote exige um arquivo no layout do contrato com os Correios, com destinatários de endereço válido; os endereços incompletos precisam ser identificados para correção na área responsável.</p>
+<p><strong>Ator / gatilho:</strong> Analista de comunicação/cadastro, pelo menu <strong>Manutenção › Envio de Periódico</strong> (<code>FPrincipal.pas:2487-2492</code>; item em <code>FPrincipal.dfm:8633-8635</code>).</p>
+<p><strong>Pré-condições:</strong> Parâmetro de pessoa 129 (receber revista) cadastrado; endereços em ENDPESS; dados do lote/edição e do objeto postal conhecidos.</p>
+<p><strong>Em termos de negócio:</strong> cada participante já tem registrada a opção de receber a revista; a edição, o lote e o sequencial dos Correios e as medidas do exemplar foram definidos.</p>
+<p><strong>Pós-condições:</strong> Arquivo PTG_…PER (ou .zip) no diretório de arquivos da empresa; linha em LOGENVIOPERIODICO; relatórios opcionais.</p>
+<p><strong>Em termos de negócio:</strong> o arquivo de postagem está pronto para envio aos Correios e o envio fica registrado (edição, lote, sequencial); a lista de endereços inconsistentes pode ser impressa para correção.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li><strong>Usuário:</strong> Abrir a tela, marcar categorias e a opção de visualização, e clicar em Selecionar. [<a href="#CADPREV-RN161">RS161</a>] [<a href="#CADPREV-RN163">RS163</a>]<br>O sistema mostra o último envio (edição, lote, sequencial) e carrega consistentes e inconsistentes com totais (<code>fEnvioPeriodico.pas:1005-1238</code>).</li>
+<li><strong>Sistema:</strong> Separar consistentes e inconsistentes. [<a href="#CADPREV-RN162">RS162</a>] [<a href="#TRT289">TRT289</a>]<br>Consistentes: logradouro, CEP e cidade preenchidos; inconsistentes podem ser “sincronizados” se já estiverem completos (<code>fEnvioPeriodico.pas:1578-1662</code>).</li>
+<li><strong>Usuário:</strong> (Opcional) Desmarcar pessoas na coluna “Receber Revista”; imprimir os demonstrativos. [<a href="#CADPREV-RN167">RS167</a>] [<a href="#CADPREV-RN169">RS169</a>] [<a href="#TRT288">TRT288</a>]<br>A desmarcação só vale para o arquivo corrente (<a href="#MSG290">MSG290</a>); os relatórios são gerados em TXT/PDF/XLS (<code>fEnvioPeriodico.pas:1315-1329, 1423-1505</code>).</li>
+<li><strong>Usuário:</strong> Informar edição, lote, sequencial dos Correios, data de inserção, peso, dimensões e formato, e confirmar. [<a href="#CADPREV-RN163">RS163</a>] [<a href="#CADPREV-RN164">RS164</a>] [<a href="#TRT281">TRT281</a>] [<a href="#TRT282">TRT282</a>]<br>Validação numérica e de tamanho (<code>fEnvioPeriodico.pas:914-960</code>).</li>
+<li><strong>Sistema:</strong> Gerar o arquivo de postagem. [<a href="#CADPREV-RN165">RS165</a>] [<a href="#TRT283">TRT283</a>] [<a href="#TRT284">TRT284</a>] [<a href="#TRT285">TRT285</a>]<br>Registros 1, 2, 3, 6 e 7 no layout dos Correios (<code>fEnvioPeriodico.pas:516-880, 962-985</code>).</li>
+<li><strong>Sistema:</strong> Compactar (opcional) e registrar o envio. [<a href="#CADPREV-RN166">RS166</a>] [<a href="#TRT286">TRT286</a>] [<a href="#TRT287">TRT287</a>]<br>INSERT em LOGENVIOPERIODICO; <a href="#MSG289">MSG289</a> (<code>fEnvioPeriodico.pas:987-1003</code>).</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Selecionar público</td><td>Definir destinatários</td><td>Categorias e opção de revista</td><td>Consulta por categoria; separa consistentes/inconsistentes</td><td>Grades e totais</td><td><a href="#CADPREV-RN161">RS161</a>, <a href="#CADPREV-RN162">RS162</a></td><td>—</td><td><code>fEnvioPeriodico.dfm</code></td></tr>
+<tr><td>Sincronizar inconsistentes</td><td>Aproveitar endereços completos</td><td>—</td><td>Move para consistentes (só na tela)</td><td>Listas atualizadas</td><td><a href="#CADPREV-RN162">RS162</a></td><td><a href="#MSG291">MSG291</a>, <a href="#MSG292">MSG292</a></td><td><code>fEnvioPeriodico.dfm</code></td></tr>
+<tr><td>Ajustar “Receber Revista”</td><td>Excluir alguém do envio atual</td><td>Desmarcar na grade</td><td>Aviso; não grava</td><td>Pessoa fora do arquivo</td><td><a href="#CADPREV-RN167">RS167</a></td><td><a href="#MSG290">MSG290</a></td><td><code>fEnvioPeriodico.dfm</code></td></tr>
+<tr><td>Imprimir demonstrativos</td><td>Conferir e corrigir endereços</td><td>—</td><td>Gera TXT/PDF/XLS</td><td>Arquivos de relatório</td><td><a href="#CADPREV-RN169">RS169</a></td><td>—</td><td><code>fEnvioPeriodico.dfm</code></td></tr>
+<tr><td>Gerar arquivo</td><td>Postar nos Correios</td><td>Edição, lote, sequencial, data, peso, dimensões, formato</td><td>Valida, grava .PER, compacta, registra envio</td><td>Arquivo e LOGENVIOPERIODICO</td><td><a href="#CADPREV-RN163">RS163</a>, <a href="#CADPREV-RN164">RS164</a>, <a href="#CADPREV-RN165">RS165</a>, <a href="#CADPREV-RN166">RS166</a></td><td><a href="#MSG281">MSG281</a>–<a href="#MSG289">MSG289</a></td><td><code>fEnvioPeriodico.dfm</code></td></tr>
+<tr><td>Corrigir endereço</td><td>Completar inconsistentes</td><td>Duplo clique (desativado)</td><td>Nenhuma ação</td><td>—</td><td><a href="#CADPREV-RN168">RS168</a></td><td><a href="#MSG293">MSG293</a></td><td><code>FCadEndereco_EnvioPeriodico.dfm</code></td></tr>
+</tbody></table></div>
+<div class="jf-rules">
+<p><strong>Regras de negócio da jornada:</strong> 9 regra(s) — texto completo abaixo.</p>
+<div class="rule-block" id="CADPREV-RN161"><div class="rule-id">RS161 (CADPREV-RN161) — Público do periódico por categoria de participante e opção “Receber revista”</div>
+<div class="rule-desc">O usuário marca uma ou mais categorias — Ativos, Aposentados, Pensionistas, Cedidos, Facultativos, Licenciados e Não Associados (a caixa “Assistidos” existe mas está invisível) — e a opção de visualização: “Receber Revista” (S), “Não Receber Revista” (N) ou “Todos” (T). A opção de cada pessoa vem do parâmetro de pessoa 129 vigente (PESSOAPARAM); sem parâmetro, vale 'N'. Cada categoria corresponde a um bloco UNION da consulta, com situações, patrocinadora (IDPESSJUR 91008) e critérios fixos no SQL; só entram pessoas vivas e sem cancelamento no plano.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>ChkAtivo, ChkApose, ChkPensi, ChkCed, ChkFacul, ChkLicenc, ChkNaoAssis</code> — [obrigatório (≥ 1)] — parâmetros :ATIVOS, :APOSE, :PENSI, :CED, :FACULT, :LICENC, :NAOASSOC = 'S'/'N'</li>
+<li><code>DBCOpcaoVis</code> — [obrigatório] — S / N / T (:TIPO)</li>
+<li><code>PESSOAPARAM.IDPARAM = 129 / VALOR</code> — [opcional] — opção de receber a revista</li>
+<li><code>PARTPREVPLAN.IDPESSJUR</code> — [fixo] — 91008</li>
+<li><code>PARTPREVPLAN.IDSITPART / ELEGPATRO.IDSITFUNC</code> — [fixo] — listas de situações por categoria</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> — (regra de seleção; resultado mostrado nos totais de consistentes/inconsistentes)</p>
+<p><strong>Jornada:</strong> <a href="#PF-27">JF027</a></p>
+<p><strong>Descrição original:</strong> DECODE(:TIPO,'T','S',NVL((SELECT VALOR FROM PESSOASPARAM PR WHERE SYSDATE BETWEEN PR.DATAINICIO AND NVL(PR.DATAFIM,SYSDATE) AND PR.IDPARAM = 129 AND PR.IDPESSOA = PES.IDPESSOA AND ROWNUM = 1),'N')) VALOR … PP.IDPESSJUR = 91008 AND PP.IDSITPART IN (2,7,3,6,41,58,63,65) … AND (NVL(P.VALOR,'N') = :TIPO OR :TIPO = 'T') … :FACULT = 'S' UNION …</p>
+<p><strong>Condições:</strong> Botão Selecionar (btnSelecionarClick); ordenação por clique no título da coluna</p><p><strong>Dados envolvidos:</strong> PESSOA, PESSOAPARAM, ELEGPATRO, PARTPREVPLAN, ENDPESS, CIDADES, BENEFBFCIARIO, HISTRUBSAL, SITPART, SITFUNC, PESSOAFISICA</p><p><strong>Resultado/Exceção:</strong> Grades de consistentes e inconsistentes com totais</p>
+<p class="rule-origin">📂 Origem: <code>fEnvioPeriodico.pas:1005-1238; fEnvioPeriodico.dfm:41-70, 120-200, 2156-3275</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+<div class="rule-block" id="CADPREV-RN162"><div class="rule-id">RS162 (CADPREV-RN162) — Endereço consistente exige logradouro, CEP e cidade; inconsistentes ficam fora do arquivo</div>
+<div class="rule-desc">A seleção é dividida em duas listas: <strong>consistentes</strong> (logradouro, CEP e cidade preenchidos — a cidade vem do cadastro de cidades ou, na falta, do texto do endereço) e <strong>inconsistentes</strong> (falta logradouro ou cidade). O bairro não é criticado. O botão de atualização (“Sincronizar”) move para a lista de consistentes os inconsistentes que já têm logradouro, cidade, CEP e UF; a movimentação é só na tela.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>ENDPESS.LOGRADOURO / CEP</code> — [obrigatório] — não nulos</li>
+<li><code>NVL(CIDADES.NOME, ENDPESS.CIDADE)</code> — [obrigatório] — não nulo</li>
+<li><code>UF</code> — [obrigatório para sincronizar] — NVL(C.UF, EP.CODESTADO)</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT289">TRT289</a> → <a href="#MSG291">MSG291</a>, <a href="#MSG292">MSG292</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-27">JF027</a></p>
+<p><strong>Descrição original:</strong> WHERE EP.LOGRADOURO is not null and EP.CEP is not null and NVL(C.NOME,EP.CIDADE) is not null AND … | WHERE (EP.LOGRADOURO is null or NVL(C.NOME,EP.CIDADE) is null) and … ; Sincronizar_Endereco: IF (TRIM(LOGRADOURO) &lt;&gt; '') AND (TRIM(CIDADE) &lt;&gt; '') AND (TRIM(CEP) &lt;&gt; '') AND (TRIM(UF) &lt;&gt; '') THEN qryDS.Insert … cdsIncons.Delete</p>
+<p><strong>Condições:</strong> Seleção; botão de atualização (btnAtualiza) habilitado quando há inconsistentes</p><p><strong>Dados envolvidos:</strong> ENDPESS, CIDADES (leitura); datasets em memória</p><p><strong>Resultado/Exceção:</strong> Somente consistentes com VALOR = 'S' vão para o arquivo</p>
+<p class="rule-origin">📂 Origem: <code>fEnvioPeriodico.pas:1578-1668, 679-722; fEnvioPeriodico.dfm:2231-2240, 4414-4500</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+<div class="rule-block" id="CADPREV-RN163"><div class="rule-id">RS163 (CADPREV-RN163) — Botões liberados só com objeto postal, formato, edição e categoria definidos</div>
+<div class="rule-desc">O botão Confirmar (gerar arquivo) só fica habilitado com altura, comprimento, largura e peso preenchidos, formato (.ZIP ou .PER) escolhido, opção de visualização, edição e pelo menos uma categoria, e com a lista de consistentes não vazia. Selecionar exige categoria e opção. Imprimir exige alguma lista com dados. As dimensões vêm sugeridas na abertura: altura 0,2, largura 20,5 e comprimento 27,6.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>DBEAltura / DBELargura / DBEComprimento / DBEPeso</code> — [obrigatório] — dimensões e peso do objeto (MaxLength 8)</li>
+<li><code>RGFormato</code> — [obrigatório] — 0 .ZIP, 1 .PER</li>
+<li><code>DBEEdicao</code> — [obrigatório] — nº da edição (MaxLength 10)</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> — (controle de habilitação)</p>
+<p><strong>Jornada:</strong> <a href="#PF-27">JF027</a></p>
+<p><strong>Descrição original:</strong> if (trim(DBEAltura.Text) &lt;&gt; '') and … (RGFormato.ItemIndex &gt; -1) and (trim(DBCOpcaoVis.Text) &lt;&gt; '') and (trim(DBEEdicao.Text) &lt;&gt; '') and (not qryDS.IsEmpty) and (ChkAtivo.Checked or ChkApose.Checked or …) then bbtnConfirmar.enabled := true</p>
+<p><strong>Condições:</strong> Chamado em cada alteração de campo/checkbox e após a seleção</p><p><strong>Dados envolvidos:</strong> Campos da tela</p><p><strong>Resultado/Exceção:</strong> Botões habilitados/desabilitados</p>
+<p class="rule-origin">📂 Origem: <code>fEnvioPeriodico.pas:882-912, 1240-1286, 1338-1382, 1670-1680</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+<div class="rule-block" id="CADPREV-RN164"><div class="rule-id">RS164 (CADPREV-RN164) — Lote e sequencial dos Correios numéricos e completos; data de inserção válida</div>
+<div class="rule-desc">Na confirmação, o número do lote (4 dígitos) e o sequencial dos Correios (6 dígitos) são obrigatórios, numéricos e devem ter o tamanho máximo do campo; a data de inserção precisa ser uma data válida.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>DBELote</code> — [obrigatório] — numérico, 4 posições</li>
+<li><code>DBESeqCorreio</code> — [obrigatório] — numérico, 6 posições</li>
+<li><code>medtDataInsercao</code> — [obrigatório] — data válida</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT281">TRT281</a> → <a href="#MSG281">MSG281</a>, <a href="#MSG282">MSG282</a>, <a href="#MSG283">MSG283</a>; <a href="#TRT282">TRT282</a> → <a href="#MSG284">MSG284</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-27">JF027</a></p>
+<p><strong>Descrição original:</strong> if not ConsisteCampo('Número do Lote',DBELote.Text,DBELote.MaxLength) … ShowMessage('Campo &lt;' + nome + '&gt; de preenchimento OBRIGATÓRIO') … ('Tamanho do campo &lt;' + nome + '&gt; INSUFICIENTE') … ('Campo &lt;' + nome + '&gt; de preenchimento NÚMERICO')</p>
+<p><strong>Condições:</strong> Início de bbtnConfirmarClick</p><p><strong>Dados envolvidos:</strong> Campos da tela</p><p><strong>Resultado/Exceção:</strong> Foco no campo e interrupção</p>
+<p class="rule-origin">📂 Origem: <code>fEnvioPeriodico.pas:914-960; fEnvioPeriodico.dfm:576-641</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+<div class="rule-block" id="CADPREV-RN165"><div class="rule-id">RS165 (CADPREV-RN165) — Arquivo de postagem para os Correios no layout de registros 1, 2, 3, 6 e 7</div>
+<div class="rule-desc">O arquivo é gravado no diretório de arquivos da empresa com o nome <code>PTG_0000002194_FUN_&lt;edição com 10 dígitos&gt;_&lt;AAAAMMDD do servidor&gt;.PER</code>. Registro 1 (cabeçalho): códigos fixos do contrato (2194, 10025936, 60057165, 72900954, 9912249780, 00031, 31100), quantidade de objetos, lote, data/hora do servidor e data prevista de postagem (+3 dias até 17h, +4 depois, ajustada ao próximo dia útil), versão 01.00.21. Registro 2: quantidade por UF. Registro 3: objeto (código 17056, “FUN”, edição, peso e dimensões, quantidade). Registro 6: um por participante consistente com VALOR = 'S' (sequência, matrícula, nome, endereço completo, indicador comercial). Registro 7 (rodapé): quantidade e peso total. Sem nenhum participante 'S', o arquivo é apagado e o usuário é avisado.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>Sistema.RetornaCaminhoArquivos</code> — [obrigatório] — diretório de saída</li>
+<li><code>DBEEdicao / DBELote / DBEPeso / dimensões</code> — [obrigatório] — dados do objeto e do lote</li>
+<li><code>qryDS.VALOR</code> — [obrigatório] — 'S' para entrar no registro 6</li>
+<li><code>DiasUteis</code> — [obrigatório] — calendário de dias úteis da empresa</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT283">TRT283</a> → <a href="#MSG286">MSG286</a>; <a href="#TRT284">TRT284</a> → <a href="#MSG285">MSG285</a>; <a href="#TRT285">TRT285</a> → <a href="#MSG287">MSG287</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-27">JF027</a></p>
+<p><strong>Descrição original:</strong> sAux := '\PTG_0000002194_FUN_'+sEdicao+'_'+FormatDateTime('YYYYMMDD',…); … {1} sHeader := '1'; {2} 'P'; {3} CompletaString('2194','0',10,false); … if StrToInt(FormatDateTime('HH',…)) &lt;= 17 then dDataPrev := … + 3 else … + 4; if not DiasUteis.DiaUtil(…) then dDataPrev := DiasUteis.PrimeiroDiaUtilPosterior(…) … if qryDS.fieldbyname('VALOR').AsString = 'S' then … {1 }sTipo6 := '6'; … if nCont = 0 then … MessageDlg('Não foi encontrado registro para gerar o arquivo.' …</p>
+<p><strong>Condições:</strong> Confirmar com campos válidos</p><p><strong>Dados envolvidos:</strong> Datasets da seleção; DUAL (data do servidor); calendário de dias úteis</p><p><strong>Resultado/Exceção:</strong> Arquivo .PER gerado ou erro com exclusão do arquivo parcial</p>
+<p class="rule-origin">📂 Origem: <code>fEnvioPeriodico.pas:516-880, 914-1003</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+<div class="rule-block" id="CADPREV-RN166"><div class="rule-id">RS166 (CADPREV-RN166) — Compactação opcional e registro do envio em LOGENVIOPERIODICO</div>
+<div class="rule-desc">Com formato .ZIP, o .PER é compactado em .zip e o original apagado. Em seguida o envio é registrado em LOGENVIOPERIODICO com sequência anual (maior sequência do ano + 1), data de inserção informada, nome do arquivo final, usuário e data do banco, lote, sequencial dos Correios e edição. Ao abrir a seleção, a tela mostra edição, lote e sequencial do último envio e a última sequência/data de inserção.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>LOGENVIOPERIODICO.SEQENVIOPERIODICO</code> — [obrigatório] — NVL(MAX)+1 no ano corrente</li>
+<li><code>LOGENVIOPERIODICO.NOMEARQUIVO / NUMLOTE / SEQCORREIOS / EDICAO / DATAGERACAO</code> — [obrigatório] — dados do envio</li>
+<li><code>TRGUSERINCLUSAO / TRGDTINCLUSAO</code> — [obrigatório] — user / sysdate</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT286">TRT286</a> → <a href="#MSG288">MSG288</a>; <a href="#TRT287">TRT287</a> → <a href="#MSG289">MSG289</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-27">JF027</a></p>
+<p><strong>Descrição original:</strong> if RGFormato.ItemIndex = 0 then pr_zip else sNomeArqNew := sNomeArquivo; pr_AtualizaSeq(iSequencia); … 'insert into LOGENVIOPERIODICO( SEQENVIOPERIODICO, DATAGERACAO, NOMEARQUIVO, TRGUSERINCLUSAO, TRGDTINCLUSAO , numlote , seqcorreios , EDICAO ) values(…)'</p>
+<p><strong>Condições:</strong> Após fechar o arquivo gerado</p><p><strong>Dados envolvidos:</strong> LOGENVIOPERIODICO</p><p><strong>Resultado/Exceção:</strong> Envio registrado; campos de último envio atualizados</p>
+<p class="rule-origin">📂 Origem: <code>fEnvioPeriodico.pas:430-514, 987-1003, 1682-1707</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+<div class="rule-block" id="CADPREV-RN167"><div class="rule-id">RS167 (CADPREV-RN167) — Opção “Receber revista” na grade não é gravada</div>
+<div class="rule-desc">A coluna “Receber Revista” da grade de consistentes pode ser alterada pelo usuário, mas a alteração não é persistida: ao entrar em edição o sistema abre uma transação e, ao gravar, a desfaz; ao desmarcar uma pessoa que estava 'S', avisa que ela não receberá o periódico. A mudança vale apenas para a geração do arquivo corrente (registro 6 só para VALOR = 'S').</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>qryDS.VALOR</code> — [opcional] — CheckBox S/N na grade</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT288">TRT288</a> → <a href="#MSG290">MSG290</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-27">JF027</a></p>
+<p><strong>Descrição original:</strong> qryDSBeforeEdit: StartTransacao; sValor := wwDBgrid1.Selectedfield.text; qryDSBeforePost: if (sValor = 'S') and (… ('valor').Text = 'N') then MessageDlg('O participante não receberá periódico.' …); RollBackTransacao;</p>
+<p><strong>Condições:</strong> Edição da grade de consistentes</p><p><strong>Dados envolvidos:</strong> Dataset em cache (sem gravação)</p><p><strong>Resultado/Exceção:</strong> Exclusão da pessoa apenas no arquivo corrente</p>
+<p class="rule-origin">📂 Origem: <code>fEnvioPeriodico.pas:1315-1336; fEnvioPeriodico.dfm:2039-2055</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+<div class="rule-block" id="CADPREV-RN168"><div class="rule-id">RS168 (CADPREV-RN168) — Correção de endereço pela tela do periódico desativada</div>
+<div class="rule-desc">Existe a tela “Atualização de Endereço” (FCadEndereco_EnvioPeriodico) e a rotina que chama a procedure Oracle CM.PR_CADPREV_ENVPER_ATUALIZAEND, mas a abertura da tela (duplo clique na grade de inconsistentes) e o UPDATE de ENDPESS em pr_prepara estão comentados: segundo o comentário, “a área responsável não permite que esta interface altere registros”. Na prática o periódico não altera endereços.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>CM.PR_CADPREV_ENVPER_ATUALIZAEND (pIDPESSOA, pIDENDERECO, pLOGRADOURO, pCODESTADO, pNUMERO, pCOMPLEMENTO, pBAIRRO, pCIDADE, pCEP → pRESULTADO)</code> — [—] — procedure não acionada</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT290">TRT290</a> → <a href="#MSG293">MSG293</a> (código inativo)</p>
+<p><strong>Jornada:</strong> <a href="#PF-27">JF027</a></p>
+<p><strong>Descrição original:</strong> //Segundo analista da GETIF (Marimar), a área responsável não permite que //esta interface altere registros. {if cdsIncons.Active then … Frm_CadEndereco_EnvioPeriodico := TFrm_CadEndereco_EnvioPeriodico.Create(Application); …}</p>
+<p><strong>Condições:</strong> Duplo clique na grade de inconsistentes (sem efeito)</p><p><strong>Dados envolvidos:</strong> ENDPESS (não alterada)</p><p><strong>Resultado/Exceção:</strong> Nenhuma gravação</p>
+<p class="rule-origin">📂 Origem: <code>fEnvioPeriodico.pas:690-722, 1507-1576; FCadEndereco_EnvioPeriodico.pas:53-73; fEnvioPeriodico.dfm:1977-2000</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+<div class="rule-block" id="CADPREV-RN169"><div class="rule-id">RS169 (CADPREV-RN169) — Demonstrativos de consistentes e inconsistentes em TXT, PDF e XLS</div>
+<div class="rule-desc">O botão Imprimir gera, no diretório de arquivos da empresa, os relatórios de informações inconsistentes e consistentes nos formatos TXT, PDF e XLS (arquivos Periodico_Info_Incosistente.* e Periodico_Info_Cosistente.*) e abre o PDF de inconsistentes.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>rptDemonstrativo / rptDemonstrativo_Consistente</code> — [obrigatório] — relatórios ReportBuilder</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> — (sem crítica)</p>
+<p><strong>Jornada:</strong> <a href="#PF-27">JF027</a></p>
+<p><strong>Descrição original:</strong> rptDemonstrativo.TextFileName := Sistema.RetornaCaminhoArquivos(Sistema.IdEmpresa)+'\'+'Periodico_Info_Incosistente'+'.TXT'; … 'PDFFile' … 'ExcelFile' … ShellExecute(…vBuffer…)</p>
+<p><strong>Condições:</strong> Botão Imprimir habilitado</p><p><strong>Dados envolvidos:</strong> Datasets da seleção</p><p><strong>Resultado/Exceção:</strong> Seis arquivos e abertura do PDF</p>
+<p class="rule-origin">📂 Origem: <code>fEnvioPeriodico.pas:1423-1505</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+<p><strong>Regras transversais do módulo</strong> (definidas na íntegra em <a href="uc401.html">UC401</a>; valem também para esta jornada): <a href="uc401.html#CADPREV-RN001">RS001 (CADPREV-RN001) — Dados isolados por fundação</a>, <a href="uc401.html#CADPREV-RN003">RS003 (CADPREV-RN003) — Instituto troca a nomenclatura das telas</a>, <a href="uc401.html#CADPREV-RN005">RS005 (CADPREV-RN005) — Operações registradas no log de operações do TotalPREV</a>.</p>
+</div>
+
+<p><strong>Tratamentos de erro:</strong> <a href="#TRT281">TRT281</a>, <a href="#TRT282">TRT282</a>, <a href="#TRT283">TRT283</a>, <a href="#TRT284">TRT284</a>, <a href="#TRT285">TRT285</a>, <a href="#TRT286">TRT286</a>, <a href="#TRT287">TRT287</a>, <a href="#TRT288">TRT288</a>, <a href="#TRT289">TRT289</a>, <a href="#TRT290">TRT290</a>, <a href="uc401.html#TRT001">UC401 TRT001</a></p>
+<p><strong>Mensagens:</strong> <a href="#MSG281">MSG281</a>, <a href="#MSG282">MSG282</a>, <a href="#MSG283">MSG283</a>, <a href="#MSG284">MSG284</a>, <a href="#MSG285">MSG285</a>, <a href="#MSG286">MSG286</a>, <a href="#MSG287">MSG287</a>, <a href="#MSG288">MSG288</a>, <a href="#MSG289">MSG289</a>, <a href="#MSG290">MSG290</a>, <a href="#MSG291">MSG291</a>, <a href="#MSG292">MSG292</a>, <a href="#MSG293">MSG293</a></p>
+<p><strong>Telas:</strong> Envio de Periódicos (<code>fEnvioPeriodico.dfm</code>); Atualização de Endereço (<code>FCadEndereco_EnvioPeriodico.dfm</code>, não acionada)</p>
+<p><strong>Dependências:</strong> Usa o calendário de dias úteis (UDiasUteis), a compactação ZipMaster e o diretório de arquivos da empresa (Sistema.RetornaCaminhoArquivos). Endereços mantidos no cadastro de pessoas (UC410).</p>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span> — informações que o repositório não comprova ou que divergem entre fontes. Os itens abaixo dependem de validação humana.</p>
+<ul>
+<li>Patrocinadora 91008, situações por categoria, código do objeto 17056 e todos os códigos do contrato com os Correios no cabeçalho (2194, 10025936, 60057165, 72900954, 9912249780) estão fixos no código/SQL; confirmar se continuam válidos e se o módulo atende outras fundações (não há filtro por iIdFundacao).</li>
+<li>A consulta de inconsistentes (<code>fEnvioPeriodico.dfm:4414-5255</code>) não tem blocos para Ativos, Aposentados e Pensionistas (os parâmetros são passados mas não usados) — <span class="ev ev-inferido">INFERIDO</span> que inconsistentes dessas categorias não apareçam.</li>
+<li>Os registros 3 e 7 usam <code>qryDS.recordcount</code> (todos os consistentes, inclusive VALOR = 'N') para quantidade e peso total, enquanto o registro 6 só inclui VALOR = 'S' (<code>fEnvioPeriodico.pas:662, 864</code>) — <span class="ev ev-inferido">INFERIDO</span>.</li>
+<li>Nenhuma operação desta tela grava o log de operações (sem <code>GravaLogOperacoes</code>), diferente de <a href="uc401.html#CADPREV-RN005">RS005</a>. O INSERT em LOGENVIOPERIODICO não está em transação explícita (<code>fEnvioPeriodico.pas:485-514</code>).</li>
+<li>A sequência do envio é anual (<code>fEnvioPeriodico.pas:444-460</code>), mas a tela mostra o “último envio” pelo MAX global de SEQENVIOPERIODICO (<code>fEnvioPeriodico.pas:462-483</code>), o que pode exibir um envio de outro ano.</li>
+</ul>
+</div>
+<div class="note note-info"><p><strong>Registro original do processo PF-27</strong></p><p><strong>Forms de entrada:</strong> <code>fEnvioPeriodico.dfm</code> (TfrmEnvioPeriodico); <code>FCadEndereco_EnvioPeriodico.dfm</code> (inativa)</p><p><strong>Lógica de processamento:</strong> Seleção por categoria → separação consistentes/inconsistentes → validação → arquivo Correios (1/2/3/6/7) → ZIP → LOGENVIOPERIODICO</p><p><strong>Saídas:</strong> Arquivo PTG_…PER/.zip; relatórios TXT/PDF/XLS</p><p><strong>Persistência (tabelas escritas):</strong> LOGENVIOPERIODICO</p><p><strong>Evidência:</strong> <code>CADASTROPREV/Fontes/fEnvioPeriodico.pas:516-1003</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+</div>
+<div class="pf-block" id="PF-28"><h4>JF028 (PF-28) — Solicitação de conta salário e separação de arquivo financeiro</h4>
+<p><strong>Objetivo:</strong> Solicitar ao banco a abertura de contas salário (operação 037) para beneficiários que precisam dela, enviando a relação por e-mail; e preparar o arquivo financeiro da patrocinadora para importação, separando participantes, elegíveis, rejeitados, cedidos e empréstimos.</p>
+<p><strong>Necessidade de negócio:</strong> para pagar benefícios em conta salário, o banco precisa abrir a conta a partir de uma relação padronizada; o cadastro já sabe quem precisa (marca de solicitação) e quem não pode (já tem conta 037 ou não tem conta preferencial). O separador de arquivo financeiro organiza os dados de remuneração e descontos recebidos da patrocinadora antes da importação.</p>
+<p><strong>Ator / gatilho:</strong> Analista de cadastro/benefícios, pelo menu <strong>Manutenção › Solicitação de Conta Salário</strong> (<code>FPrincipal.pas:2673-2677</code>; item em <code>FPrincipal.dfm:8644-8646</code>). O separador não tem chamada localizada (ver pontos a validar).</p>
+<p><strong>Pré-condições:</strong> Pessoas com FLGSOLICITACONTASALARIO = 1; conta preferencial cadastrada; Microsoft Excel e Outlook instalados na estação. Separador: arquivos de entrada no layout FUNCEF.</p>
+<p><strong>Em termos de negócio:</strong> o cadastro indica quem precisa de conta salário; a estação do analista tem Excel e Outlook; para o separador, os arquivos da patrocinadora foram recebidos.</p>
+<p><strong>Pós-condições:</strong> Planilha ABERTURA DE CONTA 037_ddmmaaaa.xlsx salva e enviada; PESSOAFISICA.DTSOLICITACONTASALARIO preenchida. Separador: arquivos Financeiro_*.txt e TMPDESC atualizada.</p>
+<p><strong>Em termos de negócio:</strong> o banco recebeu a relação e as pessoas enviadas não voltam a aparecer; os arquivos financeiros ficam prontos para importação, com rejeições explicadas no log.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li><strong>Usuário:</strong> Abrir a tela (sem CriaDataModule) e clicar em Procurar. [<a href="#CADPREV-RN170">RS170</a>]<br>Lista as solicitações pendentes com os dados para o banco (<code>FSolContaSal.pas:323-345, 486-676</code>).</li>
+<li><strong>Sistema:</strong> Validar cada pessoa e indicar motivo de recusa. [<a href="#CADPREV-RN171">RS171</a>] [<a href="#TRT292">TRT292</a>]<br><a href="#MSG296">MSG296</a>–<a href="#MSG299">MSG299</a>; linhas recusadas ficam cinza e não podem ser marcadas (<code>FSolContaSal.pas:678-720</code>).</li>
+<li><strong>Usuário:</strong> Marcar as pessoas (individualmente ou todas) e confirmar. [<a href="#CADPREV-RN172">RS172</a>]<br>Monta a planilha Excel e abre a tela de e-mail (<code>FSolContaSal.pas:753-757, 806-897</code>).</li>
+<li><strong>Usuário e sistema:</strong> Salvar a planilha, informar destinatários e enviar. [<a href="#CADPREV-RN173">RS173</a>] [<a href="#TRT291">TRT291</a>]<br><a href="#MSG294">MSG294</a>, <a href="#MSG295">MSG295</a>; após o envio grava DTSOLICITACONTASALARIO e remove os enviados (<code>FEmailContasSol.pas:100-191</code>).</li>
+<li><strong>Usuário:</strong> (Separador) Informar arquivos, mês/ano de referência e situações a ignorar, e confirmar. [<a href="#CADPREV-RN174">RS174</a>] [<a href="#TRT293">TRT293</a>] [<a href="#TRT294">TRT294</a>]<br><code>FSeparadorArqFinanc.pas:308-375</code>.</li>
+<li><strong>Sistema:</strong> (Separador) Classificar cada linha e atualizar descontos de empréstimo. [<a href="#CADPREV-RN174">RS174</a>] [<a href="#CADPREV-RN175">RS175</a>] [<a href="#TRT295">TRT295</a>]<br>Arquivos Financeiro_*.txt, UPDATE em TMPDESC e resumo <a href="#MSG303">MSG303</a> (<code>FSeparadorArqFinanc.pas:427-1374</code>).</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Procurar solicitações</td><td>Listar quem precisa de conta salário</td><td>—</td><td>Monta dados do banco; aplica motivos de recusa</td><td>Grade com recusas destacadas</td><td><a href="#CADPREV-RN170">RS170</a>, <a href="#CADPREV-RN171">RS171</a></td><td><a href="#MSG296">MSG296</a>–<a href="#MSG299">MSG299</a></td><td><code>FSolContaSal.dfm</code></td></tr>
+<tr><td>Gerar planilha</td><td>Preparar a relação para o banco</td><td>Linhas marcadas</td><td>Excel com selecionados; campos fixos em branco</td><td>Planilha em memória</td><td><a href="#CADPREV-RN172">RS172</a></td><td>—</td><td><code>FSolContaSal.dfm</code></td></tr>
+<tr><td>Salvar e enviar e-mail</td><td>Solicitar a abertura</td><td>Para, CC, assunto</td><td>Salva .xlsx; envia pelo Outlook; grava data</td><td>Solicitação registrada</td><td><a href="#CADPREV-RN173">RS173</a></td><td><a href="#MSG294">MSG294</a>, <a href="#MSG295">MSG295</a></td><td><code>FEmailContasSol.dfm</code></td></tr>
+<tr><td>Separar arquivo financeiro</td><td>Preparar importação</td><td>Arquivos, mês/ano, situações a ignorar</td><td>Classifica linhas; atualiza TMPDESC</td><td>Arquivos Financeiro_*.txt</td><td><a href="#CADPREV-RN174">RS174</a>, <a href="#CADPREV-RN175">RS175</a></td><td><a href="#MSG300">MSG300</a>–<a href="#MSG304">MSG304</a></td><td><code>FSeparadorArqFinanc.dfm</code></td></tr>
+</tbody></table></div>
+<div class="jf-rules">
+<p><strong>Regras de negócio da jornada:</strong> 6 regra(s) — texto completo abaixo.</p>
+<div class="rule-block" id="CADPREV-RN170"><div class="rule-id">RS170 (CADPREV-RN170) — Pessoas com solicitação de conta salário pendente e dados para a abertura</div>
+<div class="rule-desc">A pesquisa lista as pessoas físicas com FLGSOLICITACONTASALARIO = 1 e sem data de solicitação (DTSOLICITACONTASALARIO nula). Se a pessoa tem um recebedor (responsável) diferente dela, todos os dados vêm do responsável. Para cada linha o sistema monta os dados exigidos pelo banco: matrícula e sequência (DEPENTIT), nome reduzido, CPF, PIS (documento 6), carteira de trabalho (9), RG (11) com órgão, UF e data, naturalidade, estado civil e sexo codificados, cônjuge, pais, cargo e admissão, endereço e telefone, renda (rubrica 32476, salário bruto) e a conta preferencial (banco, agência com 4 dígitos, conta e DV). Linhas repetidas da mesma pessoa são removidas.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>PESSOAFISICA.FLGSOLICITACONTASALARIO</code> — [obrigatório] — = 1</li>
+<li><code>PESSOAFISICA.DTSOLICITACONTASALARIO</code> — [obrigatório] — nula</li>
+<li><code>BFCIARIOTITPLAN.IDRESPONSAVEL</code> — [opcional] — substitui os dados</li>
+<li><code>DOCPESSOA (6, 9, 11)</code> — [opcional] — PIS, CTPS, RG</li>
+<li><code>HISTRUBSAL rubrica 32476</code> — [opcional] — renda</li>
+<li><code>CONTABANCARIA.FLGCONTAPREF = 1</code> — [obrigatório] — conta preferencial</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> — (motivos de recusa tratados em RS171)</p>
+<p><strong>Jornada:</strong> <a href="#PF-28">JF028</a></p>
+<p><strong>Descrição original:</strong> qryDados.ParamByName('FLGSOLICITACONTASALARIO').AsInteger := 1; … WHERE (PF.FLGSOLICITACONTASALARIO = :FLGSOLICITACONTASALARIO) AND (PF.DTSOLICITACONTASALARIO IS NULL) … qryResp … if not(qryResp.IsEmpty) then … WHERE IDPESSOA = '+ qryResp.FieldByName('IDRESPONSAVEL') … qryDocPessoa … 6 // 6 PIS … 9 // Carteira de trabalho … 11 // carteira de identidade … ('IDRUBRICA').AsInteger := 32476; //salário bruto</p>
+<p><strong>Condições:</strong> Botão Procurar (cmeDadosFind); a tela abre vazia (parâmetro -1)</p><p><strong>Dados envolvidos:</strong> PESSOAFISICA, PESSOA, BFCIARIOTITPLAN, DEPENTIT, ELEGPATRO, ENDPESS, CIDADES, DOCPESSOA, TELENDPESS, CARGOEXT, CONTABANCARIA, AGENCIABANCARIA, HISTRUBSAL</p><p><strong>Resultado/Exceção:</strong> Grade com uma linha por pessoa</p>
+<p class="rule-origin">📂 Origem: <code>FSolContaSal.pas:323-345, 486-676, 1013-1045, 1122-1170; FSolContaSal.dfm:500-570, 1073-1108</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+<div class="rule-block" id="CADPREV-RN171"><div class="rule-id">RS171 (CADPREV-RN171) — Motivos de recusa da abertura de conta salário (conta 037)</div>
+<div class="rule-desc">Cada linha é validada nesta ordem e recebe o primeiro motivo aplicável: (1) já existe conta corrente 037 (conta salário, prefixo “037”, tipo 2) para o mesmo CPF em outro benefício; (2) já tem conta preferencial e conta 037; (3) já tem conta 037; (4) não tem conta preferencial. Linhas com motivo de recusa ficam em cinza, não podem ser marcadas nem alteradas; “Selecionar todos” ignora essas linhas.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>CONTABANCARIA.CONTACORRENTE (SUBSTR 1-3 = '037')</code> — [obrigatório] — conta salário</li>
+<li><code>CONTABANCARIA.TIPOCONTA = 2</code> — [obrigatório] — na verificação por CPF</li>
+<li><code>CONTABANCARIA.FLGCONTAPREF</code> — [obrigatório] — conta preferencial</li>
+<li><code>MOTIVORECUSA</code> — [calculado] — até 118 caracteres</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT292">TRT292</a> → <a href="#MSG296">MSG296</a>…<a href="#MSG299">MSG299</a> (exibidos na coluna Motivo da Recusa)</p>
+<p><strong>Jornada:</strong> <a href="#PF-28">JF028</a></p>
+<p><strong>Descrição original:</strong> if TemContaSalOutroBenef(qryDados.FieldByName('CPF').AsString) then MotivoRecusa := MsgContCPFOutroBenef … if (qryValContaSal…CONTACORRENTE &lt;&gt; '') and (qryContaPref…CONTACORRENTE &lt;&gt; '') then MotivoRecusa := MsgValPossuiContas … if qryValContaSal… &lt;&gt; '' then MsgValContaSal … if qryContaPref… = '' then MsgValContaPref</p>
+<p><strong>Condições:</strong> Durante a pesquisa; ao trocar de linha</p><p><strong>Dados envolvidos:</strong> CONTABANCARIA, AGENCIABANCARIA, DEPENTIT, PESSOA</p><p><strong>Resultado/Exceção:</strong> Linha bloqueada para seleção</p>
+<p class="rule-origin">📂 Origem: <code>FSolContaSal.pas:303-310, 347-375, 678-720, 912-947, 1084-1120; FSolContaSal.dfm:1109-1145</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+<div class="rule-block" id="CADPREV-RN172"><div class="rule-id">RS172 (CADPREV-RN172) — Planilha “Relação de Contas Salário para Abertura em Lote” só com os selecionados</div>
+<div class="rule-desc">Confirmar exige ao menos uma linha marcada e monta, via Excel, a planilha “RELAÇÃO DE CONTAS SALÁRIO PARA ABERTURA EM LOTE” com cabeçalho na linha 4 (colunas definidas por um dataset de layout) e os selecionados a partir da linha 5, todos como texto. PIS, carteira de trabalho, cônjuge, cargo, e-mail, grau de instrução e renda são deixados em branco de propósito. O arquivo se chama <code>ABERTURA DE CONTA 037_ddmmaaaa.xlsx</code> no diretório de arquivos da empresa e é salvo na tela de e-mail.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>qryDados.SEL</code> — [obrigatório (≥ 1)] — linhas marcadas</li>
+<li><code>qryColsExcel</code> — [obrigatório] — layout das colunas</li>
+<li><code>lCamposEmBranco</code> — [fixo] — PIS, CARTEIRATRABALHO, NOMECONJUGE, CARGO, EMAIL, DESCGRINSTR, RENDAVALOR</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT291">TRT291</a> → <a href="#MSG294">MSG294</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-28">JF028</a></p>
+<p><strong>Descrição original:</strong> SheetContas.Range['H1'].Value := 'RELAÇÃO DE CONTAS SALÁRIO PARA ABERTURA EM LOTE'; … if qryDadosSEL.AsInteger = 0 then … Continue; … if lCamposEmBranco.IndexOf(…) = -1 then … NomeArquivo := 'ABERTURA DE CONTA 037_' + FormatDateTime('ddmmyyyy', Now) + '.xlsx';</p>
+<p><strong>Condições:</strong> Botão Confirmar (habilitado quando há seleção)</p><p><strong>Dados envolvidos:</strong> Dataset da tela</p><p><strong>Resultado/Exceção:</strong> Planilha montada em memória (Excel) e aberta a tela de e-mail</p>
+<p class="rule-origin">📂 Origem: <code>FSolContaSal.pas:753-757, 806-897, 962-1000, 1002-1011; FSolContaSal.dfm:1231-1430</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+<div class="rule-block" id="CADPREV-RN173"><div class="rule-id">RS173 (CADPREV-RN173) — Envio da planilha por e-mail e registro da data de solicitação</div>
+<div class="rule-desc">A tela “Enviar e-mail” traz o assunto “Abertura e vínculo de operação 037_dd/mm/aaaa” e o anexo fixo. O envio exige salvar antes a planilha (habilita o botão Enviar) e confirmação. O e-mail é montado no Outlook e exibido ao usuário; quando o envio é concluído, o sistema grava PESSOAFISICA.DTSOLICITACONTASALARIO = data atual para os selecionados e os remove da lista, para que não sejam enviados de novo.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>edtPara / edtCC / edtAssunto</code> — [obrigatório (Para)] — destinatários e assunto</li>
+<li><code>PESSOAFISICA.DTSOLICITACONTASALARIO</code> — [obrigatório] — data da solicitação</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT291">TRT291</a> → <a href="#MSG294">MSG294</a>, <a href="#MSG295">MSG295</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-28">JF028</a></p>
+<p><strong>Descrição original:</strong> edtAssunto.Text := 'Abertura e vínculo de operação 037_' + … ; if MsgDlg(MsgEnviar, …) = MrYes then EnviarEmail; … MailInspector.Display(True); try bEnviou := MailItem.Submitted; except AtualizarDataContaSol; while frmSolContaSal.qryDados.Locate('SEL', 1, []) do … Delete; … UPDATE PESSOAFISICA SET DTSOLICITACONTASALARIO = :DTSOLICITACONTASALARIO WHERE IDPESSOA = :IDPESSOA</p>
+<p><strong>Condições:</strong> Botões Salvar e Enviar da tela de e-mail</p><p><strong>Dados envolvidos:</strong> PESSOAFISICA</p><p><strong>Resultado/Exceção:</strong> E-mail enviado e solicitação registrada</p>
+<p class="rule-origin">📂 Origem: <code>FEmailContasSol.pas:61-191; FEmailContasSol.dfm:349-366</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+<div class="rule-block" id="CADPREV-RN174"><div class="rule-id">RS174 (CADPREV-RN174) — Separador do arquivo financeiro FUNCEF: referência obrigatória e classificação das linhas</div>
+<div class="rule-desc">A tela “Separador do Arquivo Financeiro da FUNCEF” lê o arquivo financeiro da patrocinadora (e, opcionalmente, os arquivos financeiro complementar, PADV e de matrículas) e distribui cada linha em arquivos de saída: Financeiro_part.txt (participantes), Financeiro_eleg.txt (elegíveis), Financeiro_Rejeitados.txt, Financeiro_Rejeitados_por_Excesso_de_Debito.txt, Financeiro_Part_Cedidos.txt e Financeiro_Emprestimo.txt. Mês e ano de referência são obrigatórios; se o PADV foi informado com “ignorar mantidos” marcado, o sistema pergunta se retira essa marca. Uma linha é rejeitada quando a matrícula não existe, a situação no plano está entre as marcadas para ignorar (AT, AS, CA, MA), a pessoa é funcionária FUNCEF ativa ou é cedida (vai para o arquivo de cedidos). Ao final mostra o tempo e os totais lidos/gerados.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>cmbMesCob / spedAnoCob</code> — [obrigatório] — mês/ano de referência (AAAA/MM)</li>
+<li><code>edTxt / edtxtfinanc / edarqpadv / edarqmat</code> — [obrigatório/opcional] — arquivos de entrada</li>
+<li><code>chkAtivos / chkAssistidos / chkCancelados / chkMantidos</code> — [opcional] — situações (SITPART.FLGINTERNO) a ignorar</li>
+<li><code>ELEGPATRO.IDPESSJURCEDIDO / FUNCIONARIO</code> — [obrigatório] — cedido / funcionário</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT293">TRT293</a> → <a href="#MSG300">MSG300</a>, <a href="#MSG301">MSG301</a>; <a href="#TRT294">TRT294</a> → <a href="#MSG302">MSG302</a>; <a href="#TRT295">TRT295</a> → <a href="#MSG303">MSG303</a>, <a href="#MSG304">MSG304</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-28">JF028</a></p>
+<p><strong>Descrição original:</strong> if Trim(cmbMesCob.Text) = '' then MsgDlg('Mês de Referência do Recebimento não preenchido. ' … if (edarqpadv.text &lt;&gt; '') and (chkMantidos.Checked) then … if (chkAtivos.Checked) and (…FLGINTERNO = 'AT') … memResult.Lines.Add('Arq. Base Calc. - Matrícula: '+…+' não encontrada no sistema.'); … if trim(sIdPessjurCedido) &lt;&gt; '' then WriteLn(wArquivoGravacaoPartCedidos, …) else if bRejeitado then WriteLn(wArquivoGravacaoBaseCalcRejeit, …)</p>
+<p><strong>Condições:</strong> Botão Confirmar da tela do separador</p><p><strong>Dados envolvidos:</strong> ELEGPATRO, PARTPREVPLAN, SITPART, FUNCIONARIO (leitura); arquivos texto</p><p><strong>Resultado/Exceção:</strong> Arquivos separados e log no memo</p>
+<p class="rule-origin">📂 Origem: <code>FSeparadorArqFinanc.pas:308-375, 427-560, 617-700, 1312-1374</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+<div class="rule-block" id="CADPREV-RN175"><div class="rule-id">RS175 (CADPREV-RN175) — Rubricas de empréstimo em arquivo prioritário e baixa em TMPDESC</div>
+<div class="rule-desc">Linhas cujas rubricas (posições 2-4 do código) sejam 331 (financiamento) ou 441, 470, 480, 490, 449, 463, 464, 465 (empréstimo) vão para Financeiro_Emprestimo.txt, “para ser importado com prioridade”. Para rubricas de empréstimo identificadas no cadastro da patrocinadora (PROVDESC.FLGTPRUBRICA contendo 'E'), o sistema atualiza TMPDESC do mês de referência, módulo 15: SITENVIO = '1', VALORRECEBIDO nulo e DATARECEBIMENTO = dia 20 do mês. Erros nesse UPDATE são ignorados; o commit é feito ao final.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>PROVDESC.FLGTPRUBRICA / RUBRICAXPESS.CODPROVDESC</code> — [obrigatório] — identifica rubrica de empréstimo</li>
+<li><code>TMPDESC.SITENVIO / VALORRECEBIDO / DATARECEBIMENTO</code> — [obrigatório] — '1' / NULL / 20/mm/aaaa</li>
+<li><code>TMPDESC.MESCOBRANCA / IDMODULO</code> — [obrigatório] — mês de referência / 15</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> Erros silenciados (try/except vazio)</p>
+<p><strong>Jornada:</strong> <a href="#PF-28">JF028</a></p>
+<p><strong>Descrição original:</strong> 'UPDATE TMPDESC SET SITENVIO = ''1'', VALORRECEBIDO = NULL, DATARECEBIMENTO = TO_DATE(''20/'+sAnoMesCobrancaTela+''',''DD/YYYY/MM'') WHERE MESCOBRANCA = … AND IDMODULO = 15 '; … Else if (copy(sRubrica,2,3) = '331') or//financiamento (copy(sRubrica,2,3) = '441') or//empréstimo …</p>
+<p><strong>Condições:</strong> Processamento de cada linha do arquivo financeiro</p><p><strong>Dados envolvidos:</strong> PROVDESC, RUBRICAXPESS (leitura); TMPDESC (escrita)</p><p><strong>Resultado/Exceção:</strong> Desconto de empréstimo marcado como enviado; arquivo de empréstimos separado</p>
+<p class="rule-origin">📂 Origem: <code>FSeparadorArqFinanc.pas:1265-1338</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+<p><strong>Regras transversais do módulo</strong> (definidas na íntegra em <a href="uc401.html">UC401</a>; valem também para esta jornada): <a href="uc401.html#CADPREV-RN001">RS001 (CADPREV-RN001) — Dados isolados por fundação</a>, <a href="uc401.html#CADPREV-RN003">RS003 (CADPREV-RN003) — Instituto troca a nomenclatura das telas</a>, <a href="uc401.html#CADPREV-RN005">RS005 (CADPREV-RN005) — Operações registradas no log de operações do TotalPREV</a>.</p>
+</div>
+
+<p><strong>Tratamentos de erro:</strong> <a href="#TRT291">TRT291</a>, <a href="#TRT292">TRT292</a>, <a href="#TRT293">TRT293</a>, <a href="#TRT294">TRT294</a>, <a href="#TRT295">TRT295</a></p>
+<p><strong>Mensagens:</strong> <a href="#MSG294">MSG294</a>, <a href="#MSG295">MSG295</a>, <a href="#MSG296">MSG296</a>, <a href="#MSG297">MSG297</a>, <a href="#MSG298">MSG298</a>, <a href="#MSG299">MSG299</a>, <a href="#MSG300">MSG300</a>, <a href="#MSG301">MSG301</a>, <a href="#MSG302">MSG302</a>, <a href="#MSG303">MSG303</a>, <a href="#MSG304">MSG304</a></p>
+<p><strong>Telas:</strong> Solicitação de Conta Salário (<code>FSolContaSal.dfm</code>); Enviar e-mail (<code>FEmailContasSol.dfm</code>); Separador do Arquivo Financeiro da FUNCEF (<code>FSeparadorArqFinanc.dfm</code>)</p>
+<p><strong>Dependências:</strong> Excel e Outlook via automação OLE na estação. Contas bancárias mantidas em <a href="uc410.html#PF-38">JF038</a> (UC410). FSeparadorArqFinanc também é referenciado pela unit da migração para o novo plano (<a href="uc409.html#PF-30">UC409 JF030</a>, <code>FInscricaoNovoPlano.pas:148</code>); TMPDESC é a interface de descontos de empréstimo (IDMODULO 15).</p>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span> — informações que o repositório não comprova ou que divergem entre fontes. Os itens abaixo dependem de validação humana.</p>
+<ul>
+<li>FSeparadorArqFinanc não tem item de menu nem chamada de abertura localizada: aparece apenas na cláusula <code>uses</code> de <code>FPrincipal.pas:459</code> e <code>FInscricaoNovoPlano.pas:148</code>, e não é criado no <code>CadastroPrev.dpr</code>. Confirmar se a tela é acessível no CADASTROPREV e qual o vínculo funcional com UC409.</li>
+<li>A pesquisa de conta salário não filtra a fundação e a tela abre sem CriaDataModule (<code>FPrincipal.pas:2673-2677</code>; <code>FSolContaSal.dfm:500-570</code>).</li>
+<li>A verificação de conta 037 “no mesmo CPF em outro benefício” não exclui a própria pessoa, então quem já tem conta 037 recebe o motivo <a href="#MSG296">MSG296</a> antes de <a href="#MSG298">MSG298</a> (<code>FSolContaSal.pas:1084-1120</code>) — <span class="ev ev-inferido">INFERIDO</span>.</li>
+<li>A data de solicitação só é gravada quando a leitura de <code>MailItem.Submitted</code> gera exceção (interpretada como “enviado”), sem transação explícita nem log de operações (<code>FEmailContasSol.pas:150-159, 167-191</code>); confirmar o comportamento com a versão do Outlook em uso.</li>
+<li>No separador, erros do UPDATE em TMPDESC são silenciados e a mensagem de sucesso dos rejeitados usa o diretório de elegíveis (<code>FSeparadorArqFinanc.pas:1301-1306, 1360-1365</code>); nenhuma das telas desta jornada grava log de operações.</li>
+</ul>
+</div>
+<div class="note note-info"><p><strong>Registro original do processo PF-28</strong></p><p><strong>Forms de entrada:</strong> <code>FSolContaSal.dfm</code>, <code>FEmailContasSol.dfm</code>, <code>FSeparadorArqFinanc.dfm</code></p><p><strong>Lógica de processamento:</strong> Pesquisa de solicitações → validação de contas → planilha Excel → e-mail Outlook → data de solicitação | separação do arquivo financeiro</p><p><strong>Saídas:</strong> Planilha .xlsx e e-mail; arquivos Financeiro_*.txt</p><p><strong>Persistência (tabelas escritas):</strong> PESSOAFISICA (DTSOLICITACONTASALARIO); TMPDESC</p><p><strong>Evidência:</strong> <code>CADASTROPREV/Fontes/FSolContaSal.pas:486-897; FEmailContasSol.pas:119-191; FSeparadorArqFinanc.pas:308-1374</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+</div>
+<div class="pf-block" id="PF-29"><h4>JF029 (PF-29) — Mapa Previc</h4>
+<p><strong>Objetivo:</strong> Produzir os demonstrativos estatísticos da população de participantes e assistidos (movimentação por conta e distribuição por sexo e idade) no formato pedido pela PREVIC, e controlar quais já foram enviados.</p>
+<p><strong>Necessidade de negócio:</strong> a PREVIC (órgão fiscalizador) exige periodicamente o mapa estatístico da entidade. Depois de enviado e protocolado, o demonstrativo não pode mais mudar, para manter a coerência com o que foi entregue.</p>
+<p><strong>Ator / gatilho:</strong> Analista de cadastro/atuarial, pelo menu <strong>Manutenção › Mapa Previc</strong> (<code>FPrincipal.pas:2685-2689</code>, sem CriaDataModule; item em <code>FPrincipal.dfm:8648-8650</code>).</p>
+<p><strong>Pré-condições:</strong> Entidade cadastrada em FUNDACAO (CODFUNDSPC); eventos, planos, benefícios e contribuições do período registrados.</p>
+<p><strong>Em termos de negócio:</strong> o cadastro e os eventos do período estão completos; a entidade tem código SPC e e-mail.</p>
+<p><strong>Pós-condições:</strong> MPREVICDEMONEST / MPREVICDEMONESTIDSEX gravados; PDF exibido ou XML salvo; protocolo gravado (NUMPROTOCOLO e MPREVICARQSPC).</p>
+<p><strong>Em termos de negócio:</strong> os demonstrativos do período ficam guardados e podem ser reimpressos; com o protocolo, ficam “congelados”.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li><strong>Usuário:</strong> Abrir a tela (entidade 01523 e ano corrente preenchidos), escolher demonstrativos, período e planos. [<a href="#CADPREV-RN176">RS176</a>] [<a href="#CADPREV-RN178">RS178</a>]<br><code>FMapaPrevi.pas:2604-2617</code>; Demonstrativo Estatístico (analítico mês a mês e/ou consolidado ano/semestre) e Demonstrativo de Sexo e Idade (mês/ano).</li>
+<li><strong>Sistema:</strong> Validar os campos obrigatórios. [<a href="#CADPREV-RN176">RS176</a>] [<a href="#TRT296">TRT296</a>]<br><a href="#MSG305">MSG305</a>–<a href="#MSG309">MSG309</a> (<code>FMapaPrevi.pas:523-551</code>).</li>
+<li><strong>Sistema:</strong> Verificar protocolo e dados já gerados. [<a href="#CADPREV-RN177">RS177</a>] [<a href="#TRT297">TRT297</a>] [<a href="#TRT298">TRT298</a>]<br><a href="#MSG311">MSG311</a> bloqueia; <a href="#MSG310">MSG310</a> pergunta se substitui (<code>FMapaPrevi.pas:570-615</code>).</li>
+<li><strong>Sistema:</strong> Calcular e gravar os demonstrativos por plano. [<a href="#CADPREV-RN179">RS179</a>] [<a href="#TRT299">TRT299</a>]<br>INSERT/UPDATE em MPREVICDEMONEST e MPREVICDEMONESTIDSEX com commit por linha (<code>FMapaPrevi.pas:964-1030, 1328-1397, 1751-1811, 2273-2400</code>).</li>
+<li><strong>Sistema:</strong> Exibir PDF (Gerar PDF) ou salvar XML (Gerar XML). [<a href="#CADPREV-RN179">RS179</a>]<br><code>FMapaPrevi.pas:781-805, 2175-2178, 1813-1907, 2184-2270</code>.</li>
+<li><strong>Usuário:</strong> (Opcional) Visualizar um demonstrativo gravado. [<a href="#CADPREV-RN179">RS179</a>] [<a href="#TRT300">TRT300</a>]<br>Pesquisa por ano/semestre/protocolo (<code>FMapaPrevi.pas:1285-1326</code>).</li>
+<li><strong>Usuário e sistema:</strong> Cadastrar o número de protocolo do envio à PREVIC. [<a href="#CADPREV-RN180">RS180</a>] [<a href="#TRT300">TRT300</a>] [<a href="#TRT301">TRT301</a>]<br><code>FMapaPrevi.pas:1207-1258</code>; <code>FCadNumeroProtoco.pas:74-270</code>; <a href="#MSG320">MSG320</a>.</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Gerar PDF</td><td>Conferir os demonstrativos</td><td>Entidade, e-mail, período, planos</td><td>Valida, verifica protocolo, grava e exibe</td><td>Relatórios na tela</td><td><a href="#CADPREV-RN176">RS176</a>, <a href="#CADPREV-RN177">RS177</a>, <a href="#CADPREV-RN178">RS178</a>, <a href="#CADPREV-RN179">RS179</a></td><td><a href="#MSG305">MSG305</a>–<a href="#MSG312">MSG312</a></td><td><code>FMapaPrevi.dfm</code></td></tr>
+<tr><td>Gerar XML</td><td>Produzir o arquivo para a PREVIC</td><td>Idem</td><td>Valida, grava e salva EST_/DSI_…xml</td><td>Arquivos XML</td><td><a href="#CADPREV-RN177">RS177</a>, <a href="#CADPREV-RN179">RS179</a></td><td><a href="#MSG310">MSG310</a>, <a href="#MSG311">MSG311</a>, <a href="#MSG312">MSG312</a></td><td><code>FMapaPrevi.dfm</code></td></tr>
+<tr><td>Visualizar demonstrativo</td><td>Reimprimir um demonstrativo gravado</td><td>Tipo e seleção na pesquisa</td><td>Lê MPREVICDEMONEST/IDSEX</td><td>Relatório</td><td><a href="#CADPREV-RN179">RS179</a></td><td><a href="#MSG313">MSG313</a></td><td><code>FMapaPrevi.dfm</code></td></tr>
+<tr><td>Cadastrar protocolo</td><td>Registrar o envio à PREVIC</td><td>Número, data, hora, ano/semestre</td><td>Valida unicidade; grava NUMPROTOCOLO e MPREVICARQSPC</td><td>Demonstrativo congelado</td><td><a href="#CADPREV-RN180">RS180</a></td><td><a href="#MSG313">MSG313</a>–<a href="#MSG320">MSG320</a></td><td><code>FCadNumeroProtoco.dfm</code></td></tr>
+</tbody></table></div>
+<div class="jf-rules">
+<p><strong>Regras de negócio da jornada:</strong> 5 regra(s) — texto completo abaixo.</p>
+<div class="rule-block" id="CADPREV-RN176"><div class="rule-id">RS176 (CADPREV-RN176) — Parâmetros obrigatórios do Mapa PREVIC e entidade padrão</div>
+<div class="rule-desc">Ao abrir, a tela carrega a entidade de código SPC 01523 (nome, CNPJ, e-mail) e o ano corrente. Para gerar PDF ou XML são obrigatórios: código da entidade, e-mail, ano e semestre de referência (Demonstrativo Estatístico analítico mês a mês ou consolidado ano/semestre) e mês e ano (Demonstrativo de Sexo e Idade).</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>ed_codigo (FUNDACAO.CODFUNDSPC)</code> — [obrigatório] — código da entidade</li>
+<li><code>ed_email</code> — [obrigatório] — e-mail</li>
+<li><code>cb_ana / cb_con1 + ed_ano1 + cb_semestre</code> — [condicional] — estatístico</li>
+<li><code>cb_con2 + ed_mes2 + ed_ano2</code> — [condicional] — sexo e idade</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT296">TRT296</a> → <a href="#MSG305">MSG305</a>…<a href="#MSG309">MSG309</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-29">JF029</a></p>
+<p><strong>Descrição original:</strong> qryEntidade.ParamByName('ENTIDADE').AsInteger := 01523; … if (ed_codigo.Text = '')then MsgDlg('É necessário preencher o campo com o Código da Entidade.' … if ((cb_ana.Checked) or (cb_con1.Checked)) and (ed_ano1.Text = '') …</p>
+<p><strong>Condições:</strong> FormShow; início de Gerar PDF e Gerar XML</p><p><strong>Dados envolvidos:</strong> FUNDACAO, PESSOA</p><p><strong>Resultado/Exceção:</strong> Interrompe com aviso quando falta campo</p>
+<p class="rule-origin">📂 Origem: <code>FMapaPrevi.pas:2604-2617, 507-551, 1919-1955; FMapaPrevi.dfm:417-434</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+<div class="rule-block" id="CADPREV-RN177"><div class="rule-id">RS177 (CADPREV-RN177) — Demonstrativo com número de protocolo não pode ser alterado; regerar pede confirmação</div>
+<div class="rule-desc">Antes de gravar, o sistema verifica se o demonstrativo do período (entidade, tipo, ano, semestre ou mês, plano) já tem NUMPROTOCOLO: se tem, foi “enviado à PREVIC” e não pode ser alterado. Se já existem dados gerados sem protocolo, pergunta se deve substituí-los; “Não” mantém os dados gravados e só exibe/gera o arquivo.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>MPREVICDEMONEST.NUMPROTOCOLO</code> — [condicional] — bloqueia alteração</li>
+<li><code>MPREVICDEMONESTIDSEX.NUMPROTOCOLO</code> — [condicional] — bloqueia alteração</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT297">TRT297</a> → <a href="#MSG310">MSG310</a>; <a href="#TRT298">TRT298</a> → <a href="#MSG311">MSG311</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-29">JF029</a></p>
+<p><strong>Descrição original:</strong> if MensagemAtualiza then begin if (MsgDlg('Já foram geradas informações para geração deste relatório, Deseja substituí-las?' … if not qryconsolidado.FieldByName('NUMPROTOCOLO').IsNull then MsgDlg('Demonstrativo enviado à PREVIC! Não poderá ser alterado!' …</p>
+<p><strong>Condições:</strong> Gerar PDF / Gerar XML</p><p><strong>Dados envolvidos:</strong> MPREVICDEMONEST, MPREVICDEMONESTIDSEX</p><p><strong>Resultado/Exceção:</strong> Bloqueio, substituição ou reaproveitamento</p>
+<p class="rule-origin">📂 Origem: <code>FMapaPrevi.pas:570-615, 1056-1075, 1965-1995, 3335-3499</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+<div class="rule-block" id="CADPREV-RN178"><div class="rule-id">RS178 (CADPREV-RN178) — Planos e contas contábeis fixos no código: REG/REPLAN (2), REB (66) e Novo Plano (74)</div>
+<div class="rule-desc">Os planos do mapa são fixos: REG/REPLAN = plano previdenciário 2 (planos contábeis 2 e 28), REB = 66 (66) e NOVO PLANO = 74 (74 e 75). Sem nenhum plano marcado, todos são processados. As contas de entrada usadas no demonstrativo (grupos 11100, 11200, 14000) também são listas fixas de códigos por plano. O demonstrativo de sexo e idade é gravado também consolidado (plano nulo).</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>cb_reg / cb_reb / cb_novo</code> — [opcional] — planos 2, 66, 74</li>
+<li><code>PLANOCONTAB, CONTA11100ENT, CONTA11200ENT, CONTA14000ENT</code> — [fixo] — listas de códigos</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> — (regra de parametrização no código)</p>
+<p><strong>Jornada:</strong> <a href="#PF-29">JF029</a></p>
+<p><strong>Descrição original:</strong> CONTA11100ENT := '149,154,156,492,495,503,505,513,514'; CONTA11200ENT := '159,504,521'; CONTA14000ENT := '164,338,496,197,522,497'; PLANOCONTAB := '2,28'; … PLANOCONTAB := '66'; … PLANOCONTAB := '74,75';</p>
+<p><strong>Condições:</strong> Gerar PDF / XML</p><p><strong>Dados envolvidos:</strong> Variáveis do form usadas nas consultas</p><p><strong>Resultado/Exceção:</strong> Demonstrativos por plano</p>
+<p class="rule-origin">📂 Origem: <code>FMapaPrevi.pas:619-625, 657-760, 826-913, 1032-1060</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+<div class="rule-block" id="CADPREV-RN179"><div class="rule-id">RS179 (CADPREV-RN179) — Geração e gravação dos demonstrativos (MPREVICDEMONEST / MPREVICDEMONESTIDSEX), PDF e XML</div>
+<div class="rule-desc">O demonstrativo estatístico é calculado a partir de eventos, planos, benefícios e contribuições (quantidades anterior, entrada, saída e atual por conta e mês) e gravado em MPREVICDEMONEST (tipo 'A' analítico ou 'C' consolidado; FLGARQUIVOGERADO = 1, FLGARQUIVOENVIADO = 0; usuário 'CM&lt;id&gt;'). O de sexo e idade (faixas até 24, 25–34, 35–54, 55–64, 65–74, 75–84, 85+) vai para MPREVICDEMONESTIDSEX. Cada linha é inserida ou atualizada com confirmação imediata; erro desfaz e avisa. “Gerar PDF” exibe os relatórios; “Gerar XML” salva EST_&lt;código&gt;_&lt;ano&gt;SEM&lt;s&gt;.xml e DSI_&lt;código&gt;_&lt;ano&gt;SEM&lt;s&gt;.xml. “Visualizar Demonstrativo” mostra um demonstrativo já gravado escolhido numa pesquisa.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>MPREVICDEMONEST.*</code> — [obrigatório] — ENTIDADE, CNPJ, PLANOPREVIDENCIARIO, CODIGOENTIDADE, TIPODEMONSTRATIVO, TIPOGRUPO, ANO/MES/SEMESTREREFERENCIA, CONTA, DESCRICAOCONTA, VALORANTERIORCONTA, ENTRADA, SAIDA, ATUAL, CPAG</li>
+<li><code>MPREVICDEMONESTIDSEX.*</code> — [obrigatório] — quantidades por faixa e sexo</li>
+<li><code>SDXML</code> — [obrigatório] — local do XML</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT299">TRT299</a> → <a href="#MSG312">MSG312</a>; <a href="#TRT300">TRT300</a> → <a href="#MSG313">MSG313</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-29">JF029</a></p>
+<p><strong>Descrição original:</strong> ' INSERT INTO MPREVICDEMONEST( ENTIDADE, CNPJ, PLANOPREVIDENCIARIO, … FLGARQUIVOGERADO, FLGARQUIVOENVIADO, CPAG, TRGUSERINCLUSAO, TRGDTINCLUSAO ) VALUES(…' ''A'',' … '1 ,'+ '0 ,' …); qryAux.ExecSQL; … CommitTransacao; except RollBackTransacao; MsgDlg('Ocorreu erro na geração ou gravação de dados, entre em contato com o Analista responsável!' … SDXML.FileName := ('EST_'+ed_codigo.Text+'_'+ed_ano1.Text+'SEM'+sSemestre+'.xml');</p>
+<p><strong>Condições:</strong> Gerar PDF (BitBtn1Click), Gerar XML (bbtnConfirmarClick), Visualizar (btn1Click)</p><p><strong>Dados envolvidos:</strong> EVENTOSPREV, PARTPREVPLAN, BENEFBFCIARIO, HSTCONTRIBPREV, PESSOAFISICA, SITPART, PLANPREV (leitura); MPREVICDEMONEST, MPREVICDEMONESTIDSEX (escrita)</p><p><strong>Resultado/Exceção:</strong> Demonstrativos gravados; PDF/XML gerados</p>
+<p class="rule-origin">📂 Origem: <code>FMapaPrevi.pas:257-500, 964-1030, 1285-1397, 1751-1811, 1813-1907, 2184-2400, 2936-3268; FMapaPrevi.dfm:435-760, 1831-1870</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+<div class="rule-block" id="CADPREV-RN180"><div class="rule-id">RS180 (CADPREV-RN180) — Cadastro do número de protocolo PREVIC: obrigatório, único e uma vez por demonstrativo</div>
+<div class="rule-desc">“Cadastrar Número de Protocolo” exige escolher o tipo de demonstrativo e um demonstrativo gravado (pesquisa). Na tela de protocolo são obrigatórios número, demonstrativo, data e hora do envio e ano (mais semestre no estatístico). O número não pode já existir em outro demonstrativo do mesmo tipo, e o demonstrativo não pode já ter protocolo. Gravando, o sistema atualiza NUMPROTOCOLO no demonstrativo (estatístico por entidade/ano/semestre; sexo e idade por entidade/ano) e registra o envio em MPREVICARQSPC.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>edtNumeroProtocolo</code> — [obrigatório] — numérico</li>
+<li><code>edtDemonstrativo / edtDataEnvio / edtHoraEnvio / edtAno / edtSemestre</code> — [obrigatório] — dados do envio</li>
+<li><code>MPREVICARQSPC.*</code> — [obrigatório] — TIPODEMONSTRATIVO, DATAENVIO, HORAENVIO, NUMEROPROTOCOLO, SEMESTREREFERENCIA, ANOREFERENCIA, CODIGOENTIDADE, TRGUSERINCLUSAO, TRGDTINCLUSAO</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT300">TRT300</a> → <a href="#MSG313">MSG313</a>; <a href="#TRT301">TRT301</a> → <a href="#MSG314">MSG314</a>…<a href="#MSG320">MSG320</a>, <a href="#MSG312">MSG312</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-29">JF029</a></p>
+<p><strong>Descrição original:</strong> if (edtNumeroProtocolo.text ='') then MsgDlg('Número de Protocolo é Obrigatório! Favor Verificar!' … ' SELECT NUMPROTOCOLO FROM MPREVICDEMONEST WHERE NUMPROTOCOLO = '+… … ' UPDATE MPREVICDEMONEST SET NUMPROTOCOLO = '+…+' WHERE CODIGOENTIDADE = '+…+' AND ANOREFERENCIA = '+…+' AND SEMESTREREFERENCIA = '+… … ' INSERT INTO MPREVICARQSPC( …</p>
+<p><strong>Condições:</strong> Botão “Cadastrar Número de Protocolo” do Mapa PREVIC</p><p><strong>Dados envolvidos:</strong> MPREVICDEMONEST, MPREVICDEMONESTIDSEX, MPREVICARQSPC</p><p><strong>Resultado/Exceção:</strong> Demonstrativo marcado como enviado à PREVIC</p>
+<p class="rule-origin">📂 Origem: <code>FMapaPrevi.pas:1207-1258; FCadNumeroProtoco.pas:74-270</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+<p><strong>Regras transversais do módulo</strong> (definidas na íntegra em <a href="uc401.html">UC401</a>; valem também para esta jornada): <a href="uc401.html#CADPREV-RN001">RS001 (CADPREV-RN001) — Dados isolados por fundação</a>, <a href="uc401.html#CADPREV-RN003">RS003 (CADPREV-RN003) — Instituto troca a nomenclatura das telas</a>, <a href="uc401.html#CADPREV-RN005">RS005 (CADPREV-RN005) — Operações registradas no log de operações do TotalPREV</a>.</p>
+</div>
+
+<p><strong>Tratamentos de erro:</strong> <a href="#TRT296">TRT296</a>, <a href="#TRT297">TRT297</a>, <a href="#TRT298">TRT298</a>, <a href="#TRT299">TRT299</a>, <a href="#TRT300">TRT300</a>, <a href="#TRT301">TRT301</a></p>
+<p><strong>Mensagens:</strong> <a href="#MSG305">MSG305</a>, <a href="#MSG306">MSG306</a>, <a href="#MSG307">MSG307</a>, <a href="#MSG308">MSG308</a>, <a href="#MSG309">MSG309</a>, <a href="#MSG310">MSG310</a>, <a href="#MSG311">MSG311</a>, <a href="#MSG312">MSG312</a>, <a href="#MSG313">MSG313</a>, <a href="#MSG314">MSG314</a>, <a href="#MSG315">MSG315</a>, <a href="#MSG316">MSG316</a>, <a href="#MSG317">MSG317</a>, <a href="#MSG318">MSG318</a>, <a href="#MSG319">MSG319</a>, <a href="#MSG320">MSG320</a></p>
+<p><strong>Telas:</strong> Mapa PREVIC (<code>FMapaPrevi.dfm</code>); Cadastrar Número de Protocolo (<code>FCadNumeroProtoco.dfm</code>)</p>
+<p><strong>Dependências:</strong> Depende dos eventos registrados (UC401–UC405) e dos benefícios/contribuições do período. Relatórios ReportBuilder e componente de pesquisa MontaSelect.</p>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span> — informações que o repositório não comprova ou que divergem entre fontes. Os itens abaixo dependem de validação humana.</p>
+<ul>
+<li>Entidade 01523 fixa na abertura, planos 2/66/74 e listas de contas contábeis fixas no código (<code>FMapaPrevi.pas:2608, 660-760</code>); confirmar se valem para outras entidades.</li>
+<li>No cadastro de protocolo do Demonstrativo de Sexo e Idade, o UPDATE filtra só entidade e ano (não o mês), aplicando o protocolo a todos os meses do ano (<code>FCadNumeroProtoco.pas:195-209</code>) — <span class="ev ev-inferido">INFERIDO</span>. O UPDATE do demonstrativo é executado antes do StartTransacao de RegistraProtocolo (<code>FCadNumeroProtoco.pas:178-181, 228-233</code>).</li>
+<li>As rotinas de exclusão (DeletaDemoConsilado/DeletaDemoSexoIdade) e SelecionaPlanoPrevMesXML estão marcadas “//tirar” e não são chamadas; os DELETE não filtram a entidade (<code>FMapaPrevi.dfm:8112-8220</code>; <code>FMapaPrevi.pas:199-204, 2404-2603, 3274-3333</code>).</li>
+<li>GravarDadosDemonstrativo faz CommitTransacao a cada linha sem StartTransacao próprio (<code>FMapaPrevi.pas:964-1030</code>); a atomicidade depende de transação aberta pelo chamador. Nenhuma operação grava log de operações.</li>
+</ul>
+</div>
+<div class="note note-info"><p><strong>Registro original do processo PF-29</strong></p><p><strong>Forms de entrada:</strong> <code>FMapaPrevi.dfm</code> (TfrmMapaPrevic); <code>FCadNumeroProtoco.dfm</code></p><p><strong>Lógica de processamento:</strong> Validação → verificação de protocolo → cálculo e gravação por plano → PDF/XML | cadastro de protocolo</p><p><strong>Saídas:</strong> Relatórios PDF; XML EST_/DSI_</p><p><strong>Persistência (tabelas escritas):</strong> MPREVICDEMONEST, MPREVICDEMONESTIDSEX, MPREVICARQSPC</p><p><strong>Evidência:</strong> <code>CADASTROPREV/Fontes/FMapaPrevi.pas:507-2400; FCadNumeroProtoco.pas:74-270</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+</div>
+<section id="TRT-section"><div class="section-title">6. Tratamentos (TRT)</div>
+<p>Cada tratamento traz a condição, a mensagem exibida, o resultado e a regra/jornada de origem. Os tratamentos transversais (falha ao criar datamodule, falha ao gravar o log de operações) estão em <a href="uc401.html#TRT001">UC401 TRT001</a> e <a href="uc401.html#TRT004">UC401 TRT004</a>. “validação de tela” = crítica sem regra CADPREV-RN correspondente; “validação técnica” = falha técnica tratada pela tela.</p>
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Condição</th><th>Mensagem</th><th>Resultado</th><th>Regra</th><th>Jornada</th></tr></thead><tbody>
+<tr id="TRT281"><td><strong>TRT281</strong></td><td>Lote ou sequencial dos Correios vazio, não numérico ou curto</td><td><a href="#MSG281">MSG281</a>, <a href="#MSG282">MSG282</a>, <a href="#MSG283">MSG283</a></td><td>Foco no campo e interrupção</td><td><a href="#CADPREV-RN164">RS164 (CADPREV-RN164)</a></td><td><a href="#PF-27">JF027</a></td></tr>
+<tr id="TRT282"><td><strong>TRT282</strong></td><td>Data de inserção inválida</td><td><a href="#MSG284">MSG284</a></td><td>Interrompe (Exit)</td><td><a href="#CADPREV-RN164">RS164 (CADPREV-RN164)</a></td><td><a href="#PF-27">JF027</a></td></tr>
+<tr id="TRT283"><td><strong>TRT283</strong></td><td>Falha ao montar o caminho/nome do arquivo</td><td><a href="#MSG286">MSG286</a></td><td>Abort</td><td><a href="#CADPREV-RN165">RS165 (CADPREV-RN165)</a></td><td><a href="#PF-27">JF027</a></td></tr>
+<tr id="TRT284"><td><strong>TRT284</strong></td><td>Falha em qualquer etapa da gravação (cabeçalho, registros 2/3/6, rodapé, preparo)</td><td><a href="#MSG285">MSG285</a></td><td>Fecha e apaga o arquivo parcial, Abort</td><td><a href="#CADPREV-RN165">RS165 (CADPREV-RN165)</a></td><td><a href="#PF-27">JF027</a></td></tr>
+<tr id="TRT285"><td><strong>TRT285</strong></td><td>Nenhum consistente com VALOR = 'S'</td><td><a href="#MSG287">MSG287</a></td><td>Apaga o arquivo, refaz a seleção e Abort</td><td><a href="#CADPREV-RN165">RS165 (CADPREV-RN165)</a></td><td><a href="#PF-27">JF027</a></td></tr>
+<tr id="TRT286"><td><strong>TRT286</strong></td><td>Falha ao compactar</td><td><a href="#MSG288">MSG288</a></td><td>Avisa e segue (registro do envio é feito)</td><td><a href="#CADPREV-RN166">RS166 (CADPREV-RN166)</a></td><td><a href="#PF-27">JF027</a></td></tr>
+<tr id="TRT287"><td><strong>TRT287</strong></td><td>Arquivo gerado</td><td><a href="#MSG289">MSG289</a></td><td>Dois avisos e nova seleção</td><td><a href="#CADPREV-RN166">RS166 (CADPREV-RN166)</a></td><td><a href="#PF-27">JF027</a></td></tr>
+<tr id="TRT288"><td><strong>TRT288</strong></td><td>Usuário desmarca “Receber Revista” na grade</td><td><a href="#MSG290">MSG290</a></td><td>Aviso; transação desfeita (nada gravado)</td><td><a href="#CADPREV-RN167">RS167 (CADPREV-RN167)</a></td><td><a href="#PF-27">JF027</a></td></tr>
+<tr id="TRT289"><td><strong>TRT289</strong></td><td>Sincronizar sem inconsistentes, ou erro ao mover registros</td><td><a href="#MSG291">MSG291</a>, <a href="#MSG292">MSG292</a></td><td>Aviso; no erro, cancela edição pendente</td><td><a href="#CADPREV-RN162">RS162 (CADPREV-RN162)</a></td><td><a href="#PF-27">JF027</a></td></tr>
+<tr id="TRT290"><td><strong>TRT290</strong></td><td>Retorno diferente de 'OK' ou exceção da procedure de endereço (código inativo)</td><td><a href="#MSG293">MSG293</a></td><td>Cancela a edição do inconsistente</td><td><a href="#CADPREV-RN168">RS168 (CADPREV-RN168)</a></td><td><a href="#PF-27">JF027</a></td></tr>
+<tr id="TRT291"><td><strong>TRT291</strong></td><td>Salvar planilha / enviar e-mail</td><td><a href="#MSG294">MSG294</a>, <a href="#MSG295">MSG295</a></td><td>Sim: salva (habilita Enviar) / envia; Não: nada</td><td><a href="#CADPREV-RN173">RS173 (CADPREV-RN173)</a></td><td><a href="#PF-28">JF028</a></td></tr>
+<tr id="TRT292"><td><strong>TRT292</strong></td><td>Linha com motivo de recusa</td><td><a href="#MSG296">MSG296</a>, <a href="#MSG297">MSG297</a>, <a href="#MSG298">MSG298</a>, <a href="#MSG299">MSG299</a></td><td>Motivo na coluna; linha cinza, não selecionável nem editável</td><td><a href="#CADPREV-RN171">RS171 (CADPREV-RN171)</a></td><td><a href="#PF-28">JF028</a></td></tr>
+<tr id="TRT293"><td><strong>TRT293</strong></td><td>Mês ou ano de referência vazio no separador</td><td><a href="#MSG300">MSG300</a>, <a href="#MSG301">MSG301</a></td><td>Foco e interrupção</td><td><a href="#CADPREV-RN174">RS174 (CADPREV-RN174)</a></td><td><a href="#PF-28">JF028</a></td></tr>
+<tr id="TRT294"><td><strong>TRT294</strong></td><td>PADV informado com “ignorar mantidos” marcado</td><td><a href="#MSG302">MSG302</a></td><td>Não: interrompe; Sim: desmarca e segue</td><td><a href="#CADPREV-RN174">RS174 (CADPREV-RN174)</a></td><td><a href="#PF-28">JF028</a></td></tr>
+<tr id="TRT295"><td><strong>TRT295</strong></td><td>Linha rejeitada / fim do processamento; falha ao abrir arquivos</td><td><a href="#MSG304">MSG304</a>, <a href="#MSG303">MSG303</a></td><td>Registra no log da tela e grava no arquivo de rejeitados/cedidos; erro de abertura registra no log e encerra</td><td><a href="#CADPREV-RN174">RS174 (CADPREV-RN174)</a></td><td><a href="#PF-28">JF028</a></td></tr>
+<tr id="TRT296"><td><strong>TRT296</strong></td><td>Campos obrigatórios do Mapa vazios</td><td><a href="#MSG305">MSG305</a>, <a href="#MSG306">MSG306</a>, <a href="#MSG307">MSG307</a>, <a href="#MSG308">MSG308</a>, <a href="#MSG309">MSG309</a></td><td>Interrompe (exit)</td><td><a href="#CADPREV-RN176">RS176 (CADPREV-RN176)</a></td><td><a href="#PF-29">JF029</a></td></tr>
+<tr id="TRT297"><td><strong>TRT297</strong></td><td>Dados do período já gerados</td><td><a href="#MSG310">MSG310</a></td><td>Sim: substitui; Não: mantém e só exibe/gera arquivo</td><td><a href="#CADPREV-RN177">RS177 (CADPREV-RN177)</a></td><td><a href="#PF-29">JF029</a></td></tr>
+<tr id="TRT298"><td><strong>TRT298</strong></td><td>Demonstrativo com protocolo</td><td><a href="#MSG311">MSG311</a></td><td>Não grava aquele demonstrativo</td><td><a href="#CADPREV-RN177">RS177 (CADPREV-RN177)</a></td><td><a href="#PF-29">JF029</a></td></tr>
+<tr id="TRT299"><td><strong>TRT299</strong></td><td>Erro ao inserir/atualizar/excluir demonstrativo</td><td><a href="#MSG312">MSG312</a></td><td>RollBackTransacao e aviso; interrompe a gravação</td><td><a href="#CADPREV-RN179">RS179 (CADPREV-RN179)</a></td><td><a href="#PF-29">JF029</a></td></tr>
+<tr id="TRT300"><td><strong>TRT300</strong></td><td>Visualizar ou cadastrar protocolo sem tipo de demonstrativo</td><td><a href="#MSG313">MSG313</a></td><td>Foco e interrupção</td><td><a href="#CADPREV-RN180">RS180 (CADPREV-RN180)</a></td><td><a href="#PF-29">JF029</a></td></tr>
+<tr id="TRT301"><td><strong>TRT301</strong></td><td>Protocolo: campos vazios, número já usado, demonstrativo já com protocolo; sucesso</td><td><a href="#MSG314">MSG314</a>, <a href="#MSG315">MSG315</a>, <a href="#MSG316">MSG316</a>, <a href="#MSG317">MSG317</a>, <a href="#MSG318">MSG318</a>, <a href="#MSG319">MSG319</a>, <a href="#MSG320">MSG320</a></td><td>Interrompe; sucesso: commit, aviso e fecha a tela</td><td><a href="#CADPREV-RN180">RS180 (CADPREV-RN180)</a></td><td><a href="#PF-29">JF029</a></td></tr>
+</tbody></table></div>
+</section>
+<section id="MSG-section"><div class="section-title">7. Mensagens (MSG)</div>
+<p>Textos conferidos no código-fonte (grafia original mantida, inclusive erros de digitação). Trechos variáveis aparecem entre &lt; &gt;. Origem relativa a <code>CADASTROPREV/Fontes/</code>, salvo caminho completo.</p>
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Texto da mensagem</th><th>Tipo</th><th>Origem</th><th>Jornadas</th></tr></thead><tbody>
+<tr id="MSG281"><td><strong>MSG281</strong></td><td>“Campo &lt;Número do Lote | Sequencial Correios&gt; de preenchimento OBRIGATÓRIO”</td><td>Aviso</td><td><code>fEnvioPeriodico.pas:921</code></td><td><a href="#PF-27">JF027</a></td></tr>
+<tr id="MSG282"><td><strong>MSG282</strong></td><td>“Tamanho do campo &lt;nome&gt; INSUFICIENTE”</td><td>Aviso</td><td><code>fEnvioPeriodico.pas:929</code></td><td><a href="#PF-27">JF027</a></td></tr>
+<tr id="MSG283"><td><strong>MSG283</strong></td><td>“Campo &lt;nome&gt; de preenchimento NÚMERICO”</td><td>Aviso</td><td><code>fEnvioPeriodico.pas:936</code></td><td><a href="#PF-27">JF027</a></td></tr>
+<tr id="MSG284"><td><strong>MSG284</strong></td><td>“Campo &lt;Data de Inserção&gt; de preenchimento NÚMERICO”</td><td>Aviso</td><td><code>fEnvioPeriodico.pas:958</code></td><td><a href="#PF-27">JF027</a></td></tr>
+<tr id="MSG285"><td><strong>MSG285</strong></td><td>“Erro ao gerar arquivo.”</td><td>Erro</td><td><code>fEnvioPeriodico.pas:596, 629, 673, 817, 849, 876</code></td><td><a href="#PF-27">JF027</a></td></tr>
+<tr id="MSG286"><td><strong>MSG286</strong></td><td>“Erro ao gerar caminho do arquivo”</td><td>Erro</td><td><code>fEnvioPeriodico.pas:535</code></td><td><a href="#PF-27">JF027</a></td></tr>
+<tr id="MSG287"><td><strong>MSG287</strong></td><td>“Não foi encontrado registro para gerar o arquivo.”</td><td>Aviso</td><td><code>fEnvioPeriodico.pas:830</code></td><td><a href="#PF-27">JF027</a></td></tr>
+<tr id="MSG288"><td><strong>MSG288</strong></td><td>“Erro ao converter arquivo para .ZIP.”</td><td>Erro</td><td><code>fEnvioPeriodico.pas:439</code></td><td><a href="#PF-27">JF027</a></td></tr>
+<tr id="MSG289"><td><strong>MSG289</strong></td><td>“Arquivo gerado em &lt;diretório de arquivos da empresa&gt; / Arquivo gerado com sucesso.”</td><td>Informação</td><td><code>fEnvioPeriodico.pas:999-1000</code></td><td><a href="#PF-27">JF027</a></td></tr>
+<tr id="MSG290"><td><strong>MSG290</strong></td><td>“O participante não receberá periódico.”</td><td>Informação</td><td><code>fEnvioPeriodico.pas:1326</code></td><td><a href="#PF-27">JF027</a></td></tr>
+<tr id="MSG291"><td><strong>MSG291</strong></td><td>“Não há informações inconsistentes.”</td><td>Aviso</td><td><code>fEnvioPeriodico.pas:1584</code></td><td><a href="#PF-27">JF027</a></td></tr>
+<tr id="MSG292"><td><strong>MSG292</strong></td><td>“Erro ao atualizar registros! &lt;mensagem da exceção&gt;”</td><td>Erro</td><td><code>fEnvioPeriodico.pas:1635</code></td><td><a href="#PF-27">JF027</a></td></tr>
+<tr id="MSG293"><td><strong>MSG293</strong></td><td>“Erro ao atualizar endereço. &lt;resultado&gt; / Ocorreu um erro ao atualizar endereço. A alteração realizada será cancelada. Tipo: &lt;classe&gt; - Msg: &lt;mensagem&gt;”</td><td>Erro (código inativo)</td><td><code>fEnvioPeriodico.pas:1535-1536, 1544-1546</code></td><td><a href="#PF-27">JF027</a></td></tr>
+<tr id="MSG294"><td><strong>MSG294</strong></td><td>“Deseja Salvar o Arquivo?”</td><td>Confirmação</td><td><code>FEmailContasSol.pas:62, 110</code></td><td><a href="#PF-28">JF028</a></td></tr>
+<tr id="MSG295"><td><strong>MSG295</strong></td><td>“Confirma envio de email?”</td><td>Confirmação</td><td><code>FEmailContasSol.pas:63, 103</code></td><td><a href="#PF-28">JF028</a></td></tr>
+<tr id="MSG296"><td><strong>MSG296</strong></td><td>“Usuário Já possui Conta preferencial e já possui conta 037 (Conta Salário) cadastrada NO MESMO CPF em outro benefício”</td><td>Motivo de recusa (coluna)</td><td><code>FSolContaSal.pas:310</code></td><td><a href="#PF-28">JF028</a></td></tr>
+<tr id="MSG297"><td><strong>MSG297</strong></td><td>“Usuário Já possui Conta preferencial e já possui conta 037 (Conta Salário) cadastrada”</td><td>Motivo de recusa (coluna)</td><td><code>FSolContaSal.pas:304</code></td><td><a href="#PF-28">JF028</a></td></tr>
+<tr id="MSG298"><td><strong>MSG298</strong></td><td>“Usuário já possui conta 037 (Conta Salário)”</td><td>Motivo de recusa (coluna)</td><td><code>FSolContaSal.pas:305</code></td><td><a href="#PF-28">JF028</a></td></tr>
+<tr id="MSG299"><td><strong>MSG299</strong></td><td>“Usuário não possui conta preferencial cadastrada”</td><td>Motivo de recusa (coluna)</td><td><code>FSolContaSal.pas:306</code></td><td><a href="#PF-28">JF028</a></td></tr>
+<tr id="MSG300"><td><strong>MSG300</strong></td><td>“Mês de Referência do Recebimento não preenchido. ”</td><td>Erro</td><td><code>FSeparadorArqFinanc.pas:317</code></td><td><a href="#PF-28">JF028</a></td></tr>
+<tr id="MSG301"><td><strong>MSG301</strong></td><td>“Ano de Referência do Recebimento não preenchido. ”</td><td>Erro</td><td><code>FSeparadorArqFinanc.pas:325</code></td><td><a href="#PF-28">JF028</a></td></tr>
+<tr id="MSG302"><td><strong>MSG302</strong></td><td>“O comando para ignorar registros de mantidos está acionado, porém o arquivo de PADV foi selecionado. Deseja retirar o comando para ignorar mantidos?”</td><td>Confirmação</td><td><code>FSeparadorArqFinanc.pas:340-342</code></td><td><a href="#PF-28">JF028</a></td></tr>
+<tr id="MSG303"><td><strong>MSG303</strong></td><td>“Inicio.: &lt;hora&gt; Final .: &lt;hora&gt; Tempo .: &lt;duração&gt; Número de Registros Lidos: &lt;n&gt; Número de Registros Gerados: &lt;n&gt; (título “Importação OK”)”</td><td>Informação</td><td><code>FSeparadorArqFinanc.pas:367-373</code></td><td><a href="#PF-28">JF028</a></td></tr>
+<tr id="MSG304"><td><strong>MSG304</strong></td><td>“Arq. Base Calc. - Matrícula: &lt;m&gt; não encontrada no sistema. / Arq. Base Calc. - Matrícula: &lt;m&gt; - Situação: &lt;descrição&gt;. /    Matrícula: &lt;m&gt; - Funcionário Funcef.”</td><td>Aviso (log da tela)</td><td><code>FSeparadorArqFinanc.pas:642, 672, 682, 690, 697</code></td><td><a href="#PF-28">JF028</a></td></tr>
+<tr id="MSG305"><td><strong>MSG305</strong></td><td>“É necessário preencher o campo com o Código da Entidade.”</td><td>Informação</td><td><code>FMapaPrevi.pas:525, 1930</code></td><td><a href="#PF-29">JF029</a></td></tr>
+<tr id="MSG306"><td><strong>MSG306</strong></td><td>“É necessário preencher o campo E-mail.”</td><td>Informação</td><td><code>FMapaPrevi.pas:530, 1935</code></td><td><a href="#PF-29">JF029</a></td></tr>
+<tr id="MSG307"><td><strong>MSG307</strong></td><td>“É necessário preencher o campo Ano de Referência.”</td><td>Informação</td><td><code>FMapaPrevi.pas:534, 548, 1939, 1953</code></td><td><a href="#PF-29">JF029</a></td></tr>
+<tr id="MSG308"><td><strong>MSG308</strong></td><td>“É necessário preencher o campo Semestre de  Referência.”</td><td>Informação</td><td><code>FMapaPrevi.pas:539, 1944</code></td><td><a href="#PF-29">JF029</a></td></tr>
+<tr id="MSG309"><td><strong>MSG309</strong></td><td>“É necessário preencher o campo Mês de Referência.”</td><td>Informação</td><td><code>FMapaPrevi.pas:544, 1949</code></td><td><a href="#PF-29">JF029</a></td></tr>
+<tr id="MSG310"><td><strong>MSG310</strong></td><td>“Já foram geradas informações para geração deste relatório, Deseja substituí-las?”</td><td>Confirmação</td><td><code>FMapaPrevi.pas:576, 1969</code></td><td><a href="#PF-29">JF029</a></td></tr>
+<tr id="MSG311"><td><strong>MSG311</strong></td><td>“Demonstrativo enviado à PREVIC! Não poderá ser alterado!”</td><td>Informação</td><td><code>FMapaPrevi.pas:598, 644, 686, 724, 763, 1070, 1119, 1168, 1991</code></td><td><a href="#PF-29">JF029</a></td></tr>
+<tr id="MSG312"><td><strong>MSG312</strong></td><td>“Ocorreu erro na geração ou gravação de dados, entre em contato com o Analista responsável!”</td><td>Erro (exibido como Informação)</td><td><code>FMapaPrevi.pas:1025, 1393, 1806, 2308, 2350, 2398; FCadNumeroProtoco.pas:186 (sem “!”), 265</code></td><td><a href="#PF-29">JF029</a></td></tr>
+<tr id="MSG313"><td><strong>MSG313</strong></td><td>“É necessário selecionar o Tipo do demonstrativo”</td><td>Informação</td><td><code>FMapaPrevi.pas:1212, 1290</code></td><td><a href="#PF-29">JF029</a></td></tr>
+<tr id="MSG314"><td><strong>MSG314</strong></td><td>“Número de Protocolo é Obrigatório! Favor Verificar!”</td><td>Informação</td><td><code>FCadNumeroProtoco.pas:83</code></td><td><a href="#PF-29">JF029</a></td></tr>
+<tr id="MSG315"><td><strong>MSG315</strong></td><td>“Demonstrativo é Obrigatório! Favor Verificar!”</td><td>Informação</td><td><code>FCadNumeroProtoco.pas:87</code></td><td><a href="#PF-29">JF029</a></td></tr>
+<tr id="MSG316"><td><strong>MSG316</strong></td><td>“Data e hora são Obrigatórios! Favor Verificar!”</td><td>Informação</td><td><code>FCadNumeroProtoco.pas:91</code></td><td><a href="#PF-29">JF029</a></td></tr>
+<tr id="MSG317"><td><strong>MSG317</strong></td><td>“Ano/Semestre são Obrigatórios! Favor Verificar!”</td><td>Informação</td><td><code>FCadNumeroProtoco.pas:95</code></td><td><a href="#PF-29">JF029</a></td></tr>
+<tr id="MSG318"><td><strong>MSG318</strong></td><td>“Número de Protocolo cadastrado para outro demonstrativo de Sexo e Idade! Favor Verificar! / Número de Protocolo cadastrado para outro demonstrativo Estatístico! Favor Verificar!”</td><td>Informação</td><td><code>FCadNumeroProtoco.pas:125, 159</code></td><td><a href="#PF-29">JF029</a></td></tr>
+<tr id="MSG319"><td><strong>MSG319</strong></td><td>“Demonstrativo já contém Número de Protocolo cadastrado! Favor Verificar!”</td><td>Informação</td><td><code>FCadNumeroProtoco.pas:141, 174</code></td><td><a href="#PF-29">JF029</a></td></tr>
+<tr id="MSG320"><td><strong>MSG320</strong></td><td>“Número de Protocolo cadastrado com sucesso!”</td><td>Informação</td><td><code>FCadNumeroProtoco.pas:182</code></td><td><a href="#PF-29">JF029</a></td></tr>
+</tbody></table></div>
+</section>
+<section><div class="section-title">8. Tabela/API/Programa</div>
+<div class="table-wrap"><table><thead><tr><th>Jornada</th><th>Tabelas (leitura)</th><th>Tabelas (escrita)</th><th>Rotinas (CADASTROPREV/Fontes/)</th></tr></thead><tbody>
+<tr><td><a href="#PF-27">JF027</a></td><td>PESSOA, PESSOAPARAM, ELEGPATRO, PARTPREVPLAN, ENDPESS, CIDADES, BENEFBFCIARIO, HISTRUBSAL, SITPART, SITFUNC, PESSOAFISICA, LOGENVIOPERIODICO</td><td>LOGENVIOPERIODICO (INSERT); ENDPESS só via procedure inativa CM.PR_CADPREV_ENVPER_ATUALIZAEND</td><td><code>fEnvioPeriodico.pas:444-1003, 1005-1238, 1507-1662</code></td></tr>
+<tr><td><a href="#PF-28">JF028</a></td><td>PESSOAFISICA, PESSOA, BFCIARIOTITPLAN, DEPENTIT, ELEGPATRO, ENDPESS, CIDADES, DOCPESSOA, TELENDPESS, CARGOEXT, CONTABANCARIA, AGENCIABANCARIA, HISTRUBSAL; PARTPREVPLAN, SITPART, FUNCIONARIO, PROVDESC, RUBRICAXPESS</td><td>PESSOAFISICA (DTSOLICITACONTASALARIO); TMPDESC</td><td><code>FSolContaSal.pas:486-897</code>; <code>FEmailContasSol.pas:119-191</code>; <code>FSeparadorArqFinanc.pas:308-1374</code></td></tr>
+<tr><td><a href="#PF-29">JF029</a></td><td>FUNDACAO, PESSOA, EVENTOSPREV, PARTPREVPLAN, BENEFBFCIARIO, HSTCONTRIBPREV, PESSOAFISICA, SITPART, PLANPREV</td><td>MPREVICDEMONEST, MPREVICDEMONESTIDSEX, MPREVICARQSPC</td><td><code>FMapaPrevi.pas:257-2400</code>; <code>FCadNumeroProtoco.pas:74-270</code></td></tr>
+</tbody></table></div>
+</section>
+<section><div class="section-title">9. Telas/Layouts</div>
+<div class="table-wrap"><table><thead><tr><th>Jornada</th><th>Tela (título — Caption do .dfm)</th><th>Form (.dfm)</th></tr></thead><tbody>
+<tr><td><a href="#PF-27">JF027</a></td><td>Envio de Periódicos<br>Atualização de Endereço (não acionada)</td><td><code>fEnvioPeriodico.dfm</code><br><code>FCadEndereco_EnvioPeriodico.dfm</code></td></tr>
+<tr><td><a href="#PF-28">JF028</a></td><td>Solicitação de Conta Salário<br>Enviar e-mail<br>Separador do Arquivo Financeiro da FUNCEF</td><td><code>FSolContaSal.dfm</code><br><code>FEmailContasSol.dfm</code><br><code>FSeparadorArqFinanc.dfm</code></td></tr>
+<tr><td><a href="#PF-29">JF029</a></td><td>Mapa PREVIC<br>Cadastrar Número de Protocolo</td><td><code>FMapaPrevi.dfm</code><br><code>FCadNumeroProtoco.dfm</code></td></tr>
+</tbody></table></div>
+</section>
+<section><div class="section-title">10. Visão Consolidada das Jornadas</div>
+<div class="table-wrap"><table><thead><tr><th>Item</th><th>Jornada</th><th>Título</th><th>Critério de aceitação</th><th>Regras</th><th>Mensagens</th><th>Telas</th></tr></thead><tbody>
+<tr><td>[US] CADPREV-JF027</td><td><a href="#PF-27">JF027</a></td><td>Envio de periódico</td><td><strong>Dado</strong> participantes ativos com opção “receber revista” e endereço completo, <strong>Quando</strong> o analista confirma com lote, sequencial e medidas válidos, <strong>Então</strong> o arquivo PTG_…PER é gerado com um registro 6 por participante e o envio é registrado em LOGENVIOPERIODICO.</td><td><a href="#CADPREV-RN161">RS161</a>, <a href="#CADPREV-RN162">RS162</a>, <a href="#CADPREV-RN163">RS163</a>, <a href="#CADPREV-RN164">RS164</a>, <a href="#CADPREV-RN165">RS165</a>, <a href="#CADPREV-RN166">RS166</a>, <a href="#CADPREV-RN167">RS167</a>, <a href="#CADPREV-RN168">RS168</a>, <a href="#CADPREV-RN169">RS169</a></td><td><a href="#MSG281">MSG281</a>, <a href="#MSG282">MSG282</a>, <a href="#MSG283">MSG283</a>, <a href="#MSG284">MSG284</a>, <a href="#MSG285">MSG285</a>, <a href="#MSG286">MSG286</a>, <a href="#MSG287">MSG287</a>, <a href="#MSG288">MSG288</a>, <a href="#MSG289">MSG289</a>, <a href="#MSG290">MSG290</a>, <a href="#MSG291">MSG291</a>, <a href="#MSG292">MSG292</a>, <a href="#MSG293">MSG293</a></td><td>Envio de Periódicos</td></tr>
+<tr><td>[US] CADPREV-JF028</td><td><a href="#PF-28">JF028</a></td><td>Solicitação de conta salário e separação de arquivo financeiro</td><td><strong>Dado</strong> pessoas com solicitação pendente e conta preferencial sem conta 037, <strong>Quando</strong> o analista gera a planilha e envia o e-mail, <strong>Então</strong> elas recebem DTSOLICITACONTASALARIO e saem da lista; pessoas sem conta preferencial ficam bloqueadas com <a href="#MSG299">MSG299</a>.</td><td><a href="#CADPREV-RN170">RS170</a>, <a href="#CADPREV-RN171">RS171</a>, <a href="#CADPREV-RN172">RS172</a>, <a href="#CADPREV-RN173">RS173</a>, <a href="#CADPREV-RN174">RS174</a>, <a href="#CADPREV-RN175">RS175</a></td><td><a href="#MSG294">MSG294</a>, <a href="#MSG295">MSG295</a>, <a href="#MSG296">MSG296</a>, <a href="#MSG297">MSG297</a>, <a href="#MSG298">MSG298</a>, <a href="#MSG299">MSG299</a>, <a href="#MSG300">MSG300</a>, <a href="#MSG301">MSG301</a>, <a href="#MSG302">MSG302</a>, <a href="#MSG303">MSG303</a>, <a href="#MSG304">MSG304</a></td><td>Solicitação de Conta Salário; Enviar e-mail; Separador do Arquivo Financeiro da FUNCEF</td></tr>
+<tr><td>[US] CADPREV-JF029</td><td><a href="#PF-29">JF029</a></td><td>Mapa Previc</td><td><strong>Dado</strong> um semestre sem protocolo, <strong>Quando</strong> o analista gera o XML e depois cadastra o protocolo, <strong>Então</strong> os demonstrativos ficam gravados e qualquer nova geração do período exibe <a href="#MSG311">MSG311</a>.</td><td><a href="#CADPREV-RN176">RS176</a>, <a href="#CADPREV-RN177">RS177</a>, <a href="#CADPREV-RN178">RS178</a>, <a href="#CADPREV-RN179">RS179</a>, <a href="#CADPREV-RN180">RS180</a></td><td><a href="#MSG305">MSG305</a>, <a href="#MSG306">MSG306</a>, <a href="#MSG307">MSG307</a>, <a href="#MSG308">MSG308</a>, <a href="#MSG309">MSG309</a>, <a href="#MSG310">MSG310</a>, <a href="#MSG311">MSG311</a>, <a href="#MSG312">MSG312</a>, <a href="#MSG313">MSG313</a>, <a href="#MSG314">MSG314</a>, <a href="#MSG315">MSG315</a>, <a href="#MSG316">MSG316</a>, <a href="#MSG317">MSG317</a>, <a href="#MSG318">MSG318</a>, <a href="#MSG319">MSG319</a>, <a href="#MSG320">MSG320</a></td><td>Mapa PREVIC; Cadastrar Número de Protocolo</td></tr>
+</tbody></table></div>
+</section>
+<section><div class="section-title">11. Critérios de Aceitação por Regra</div>
+<div class="table-wrap"><table><thead><tr><th>Regra</th><th>Jornada</th><th>Critério de aceitação</th></tr></thead><tbody>
+<tr><td><a href="#CADPREV-RN161">RS161 (CADPREV-RN161)</a></td><td><a href="#PF-27">JF027</a></td><td><strong>Dado</strong> “Ativos” marcado e opção “Receber Revista”, <strong>Quando</strong> o usuário clica em Selecionar, <strong>Então</strong> só aparecem ativos cujo parâmetro 129 vigente é 'S'.</td></tr>
+<tr><td><a href="#CADPREV-RN162">RS162 (CADPREV-RN162)</a></td><td><a href="#PF-27">JF027</a></td><td><strong>Dado</strong> um participante sem logradouro, <strong>Quando</strong> a seleção é feita, <strong>Então</strong> ele aparece na lista de inconsistentes e não é incluído no arquivo.</td></tr>
+<tr><td><a href="#CADPREV-RN163">RS163 (CADPREV-RN163)</a></td><td><a href="#PF-27">JF027</a></td><td><strong>Dado</strong> todos os campos preenchidos mas nenhuma categoria marcada, <strong>Quando</strong> a tela é atualizada, <strong>Então</strong> Confirmar e Selecionar ficam desabilitados.</td></tr>
+<tr><td><a href="#CADPREV-RN164">RS164 (CADPREV-RN164)</a></td><td><a href="#PF-27">JF027</a></td><td><strong>Dado</strong> o lote “12”, <strong>Quando</strong> o usuário confirma, <strong>Então</strong> o sistema exibe <a href="#MSG282">MSG282</a> e não gera o arquivo.</td></tr>
+<tr><td><a href="#CADPREV-RN165">RS165 (CADPREV-RN165)</a></td><td><a href="#PF-27">JF027</a></td><td><strong>Dado</strong> 10 consistentes com “Receber Revista”, <strong>Quando</strong> o arquivo é gerado, <strong>Então</strong> ele tem 1 cabeçalho, registros 2 por UF, 1 registro 3, 10 registros 6 e 1 rodapé, e o usuário vê <a href="#MSG289">MSG289</a>.</td></tr>
+<tr><td><a href="#CADPREV-RN166">RS166 (CADPREV-RN166)</a></td><td><a href="#PF-27">JF027</a></td><td><strong>Dado</strong> o formato .ZIP, <strong>Quando</strong> o arquivo é gerado, <strong>Então</strong> fica só o .zip e LOGENVIOPERIODICO recebe uma linha com o nome do .zip.</td></tr>
+<tr><td><a href="#CADPREV-RN167">RS167 (CADPREV-RN167)</a></td><td><a href="#PF-27">JF027</a></td><td><strong>Dado</strong> uma pessoa com VALOR 'S', <strong>Quando</strong> o usuário desmarca a coluna, <strong>Então</strong> aparece <a href="#MSG290">MSG290</a>, a pessoa não entra no arquivo e PESSOAPARAM não é alterado.</td></tr>
+<tr><td><a href="#CADPREV-RN168">RS168 (CADPREV-RN168)</a></td><td><a href="#PF-27">JF027</a></td><td><strong>Dado</strong> um inconsistente na grade, <strong>Quando</strong> o usuário dá duplo clique, <strong>Então</strong> nenhuma tela é aberta e o endereço não é alterado.</td></tr>
+<tr><td><a href="#CADPREV-RN169">RS169 (CADPREV-RN169)</a></td><td><a href="#PF-27">JF027</a></td><td><strong>Dado</strong> uma seleção feita, <strong>Quando</strong> o usuário clica em Imprimir, <strong>Então</strong> os arquivos TXT/PDF/XLS de consistentes e inconsistentes são gerados e o PDF de inconsistentes é aberto.</td></tr>
+<tr><td><a href="#CADPREV-RN170">RS170 (CADPREV-RN170)</a></td><td><a href="#PF-28">JF028</a></td><td><strong>Dado</strong> uma pessoa com FLGSOLICITACONTASALARIO = 1 e sem data de solicitação, <strong>Quando</strong> o usuário clica em Procurar, <strong>Então</strong> ela aparece na grade com os dados do responsável, se houver.</td></tr>
+<tr><td><a href="#CADPREV-RN171">RS171 (CADPREV-RN171)</a></td><td><a href="#PF-28">JF028</a></td><td><strong>Dado</strong> uma pessoa sem conta preferencial, <strong>Quando</strong> a pesquisa é feita, <strong>Então</strong> a linha mostra <a href="#MSG299">MSG299</a> e não pode ser selecionada.</td></tr>
+<tr><td><a href="#CADPREV-RN172">RS172 (CADPREV-RN172)</a></td><td><a href="#PF-28">JF028</a></td><td><strong>Dado</strong> duas linhas marcadas, <strong>Quando</strong> o usuário confirma, <strong>Então</strong> a planilha tem as duas pessoas com PIS e renda em branco.</td></tr>
+<tr><td><a href="#CADPREV-RN173">RS173 (CADPREV-RN173)</a></td><td><a href="#PF-28">JF028</a></td><td><strong>Dado</strong> a planilha salva, <strong>Quando</strong> o usuário confirma e envia o e-mail, <strong>Então</strong> as pessoas selecionadas recebem DTSOLICITACONTASALARIO e deixam de aparecer em novas pesquisas.</td></tr>
+<tr><td><a href="#CADPREV-RN174">RS174 (CADPREV-RN174)</a></td><td><a href="#PF-28">JF028</a></td><td><strong>Dado</strong> mês de referência vazio, <strong>Quando</strong> o usuário confirma, <strong>Então</strong> aparece <a href="#MSG300">MSG300</a> e nada é processado.</td></tr>
+<tr><td><a href="#CADPREV-RN175">RS175 (CADPREV-RN175)</a></td><td><a href="#PF-28">JF028</a></td><td><strong>Dado</strong> uma linha com rubrica de empréstimo 441, <strong>Quando</strong> o arquivo é separado, <strong>Então</strong> ela vai para Financeiro_Emprestimo.txt e o desconto correspondente em TMPDESC fica com SITENVIO = '1'.</td></tr>
+<tr><td><a href="#CADPREV-RN176">RS176 (CADPREV-RN176)</a></td><td><a href="#PF-29">JF029</a></td><td><strong>Dado</strong> o Demonstrativo de Sexo e Idade marcado sem mês, <strong>Quando</strong> o usuário gera o PDF, <strong>Então</strong> aparece <a href="#MSG309">MSG309</a>.</td></tr>
+<tr><td><a href="#CADPREV-RN177">RS177 (CADPREV-RN177)</a></td><td><a href="#PF-29">JF029</a></td><td><strong>Dado</strong> um demonstrativo do 1º semestre com protocolo cadastrado, <strong>Quando</strong> o usuário tenta gerá-lo de novo, <strong>Então</strong> aparece <a href="#MSG311">MSG311</a> e os dados não mudam.</td></tr>
+<tr><td><a href="#CADPREV-RN178">RS178 (CADPREV-RN178)</a></td><td><a href="#PF-29">JF029</a></td><td><strong>Dado</strong> nenhum plano marcado, <strong>Quando</strong> o Demonstrativo de Sexo e Idade é gerado, <strong>Então</strong> são gravados os quadros consolidado, 2, 66 e 74.</td></tr>
+<tr><td><a href="#CADPREV-RN179">RS179 (CADPREV-RN179)</a></td><td><a href="#PF-29">JF029</a></td><td><strong>Dado</strong> um semestre sem dados gravados, <strong>Quando</strong> o usuário gera o XML do Demonstrativo Estatístico, <strong>Então</strong> MPREVICDEMONEST recebe as linhas do período e o arquivo EST_&lt;código&gt;_&lt;ano&gt;SEM&lt;s&gt;.xml é salvo.</td></tr>
+<tr><td><a href="#CADPREV-RN180">RS180 (CADPREV-RN180)</a></td><td><a href="#PF-29">JF029</a></td><td><strong>Dado</strong> um demonstrativo estatístico sem protocolo, <strong>Quando</strong> o usuário informa um número inédito com data e hora, <strong>Então</strong> NUMPROTOCOLO é gravado, MPREVICARQSPC recebe o envio e aparece <a href="#MSG320">MSG320</a>.</td></tr>
+</tbody></table></div>
+</section>
+
+<p><a class="back-btn" href="funcionalidades.html">← Voltar à lista de Casos de Uso (Processos Funcionais)</a></p>
+</main>
+<footer>
+<p>Blueprint AS-IS — PFC-73 — Processos Funcionais organizados em Casos de Uso — Módulo CADASTROPREV | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-24</p>
+</footer>
+</body>
+</html>

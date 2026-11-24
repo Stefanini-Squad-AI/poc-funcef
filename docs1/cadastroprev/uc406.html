@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cadastro Previdenciário — UC406 – Recadastrar Participantes e Beneficiários — Blueprint AS-IS</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<header>
+  <div class="badge">Blueprint AS-IS — PFC-73 — Processos Funcionais</div>
+  <h1>UC406 – Recadastrar Participantes e Beneficiários</h1>
+  <p>Caso de uso do módulo Cadastro Previdenciário: 4 jornada(s) funcional(is) e 17 regra(s) de negócio descritas dentro de cada jornada.</p>
+</header>
+<nav>
+  <a href="index.html">📋 Visão Geral</a>
+  <a href="arquitetura.html">🏗️ Arquitetura</a>
+  <a href="inventario-tecnico.html">📦 Inventário</a>
+  <a href="funcionalidades.html">⚙️ Processos Funcionais</a>
+  <a href="procedures-functions.html">🔧 Procedures</a>
+  <a href="dados.html">🗄️ Dados</a>
+  <a href="relatorios.html">📄 Relatórios</a>
+  <a href="integracoes.html">🔗 Integrações</a>
+  <a href="tratamento-erros.html">⚠️ Erros</a>
+  <a href="diagramas-fluxo.html">🔀 Fluxos</a>
+  <a href="lacunas.html">🔍 Lacunas</a>
+  <a href="controle-cobertura.html">📊 Cobertura</a>
+</nav>
+<main>
+
+<a class="back-btn" href="funcionalidades.html">← Voltar à lista de Casos de Uso (Processos Funcionais)</a>
+<div class="breadcrumb"><a href="index.html">Cadastro Previdenciário</a> › <a href="funcionalidades.html">Processos Funcionais</a> › UC406</div>
+<section><div class="section-title">1. Identificação</div>
+<div class="table-wrap"><table><tbody>
+<tr><th>Caso de Uso</th><td><strong>UC406 – Recadastrar Participantes e Beneficiários</strong></td></tr>
+<tr><th>Módulo</th><td>CADASTROPREV — Cadastro Previdenciário</td></tr>
+<tr><th>Sistema</th><td>CM Contabilidade / FUNCEF (Delphi 5 / VCL / MIDAS / Oracle)</td></tr>
+<tr><th>Tipo</th><td>Sistema Desktop</td></tr>
+<tr><th>Ator</th><td>Usuário operacional das áreas de cadastro e de benefícios (analistas que conduzem o recadastramento anual/periódico e registram óbitos de beneficiários)</td></tr>
+<tr><th>Jornadas</th><td><a href="#PF-19">JF019 — Emissão de cartas para recadastramento</a>, <a href="#PF-20">JF020 — Recebimento de recadastramento por cartas e por arquivo TXT</a>, <a href="#PF-21">JF021 — Retenção por falta de recadastramento</a>, <a href="#PF-22">JF022 — Registro de falecimento de beneficiário</a></td></tr>
+<tr><th>Regras de negócio</th><td>17 regra(s) CADPREV-RN (RN121–RN137), descritas na íntegra dentro de cada jornada; regras transversais em <a href="uc401.html">UC401</a></td></tr>
+<tr><th>OS - Título</th><td>PFC-73 — Blueprint Cadastro Previdenciário</td></tr>
+</tbody></table></div>
+</section>
+<section><div class="section-title">2. Descrição Resumida</div>
+<p>Prova de vida e atualização cadastral de quem recebe benefício: a carta abre a pendência, a resposta baixa a pendência e a falta de resposta leva à retenção do benefício. Este caso de uso reúne 4 jornada(s) funcional(is) do módulo Cadastro Previdenciário:</p>
+<ul>
+<li><a href="#PF-19"><strong>JF019 — Emissão de cartas para recadastramento</strong></a>: Seleciona os recebedores de benefícios ativos, marca a pendência de recadastramento (carta, emissão, prazo) e gera as cartas impressas ou em arquivo texto, com etiquetas.</li>
+<li><a href="#PF-20"><strong>JF020 — Recebimento de recadastramento por cartas e por arquivo TXT</strong></a>: Baixa a pendência de recadastramento (FLGSTATUS 'N' e data de recebimento) digitando a carta devolvida, com atualização do cadastro, ou importando um arquivo TXT.</li>
+<li><a href="#PF-21"><strong>JF021 — Retenção por falta de recadastramento</strong></a>: Lista benefícios pendentes com prazo vencido e os retém (situação 2) em lote ou individualmente, com data final prevista.</li>
+<li><a href="#PF-22"><strong>JF022 — Registro de falecimento de beneficiário</strong></a>: Abre a tela do CMAdmPrev que registra a data de falecimento do beneficiário e cancela o dependente, exigindo antes o encerramento dos benefícios ativos.</li>
+</ul>
+<p><strong>Necessidade de negócio:</strong> a entidade só deve pagar benefícios a pessoas vivas e com cadastro correto. O recadastramento periódico cumpre esse papel: cada benefício ativo recebe uma carta com prazo (JF019); a resposta, digitada ou importada, é registrada e atualiza o cadastro (JF020); quem não responde tem o benefício retido (JF021). O falecimento informado de um beneficiário é registrado em tela própria (JF022).</p>
+<p><strong>Quem inicia:</strong> o analista de cadastro/benefícios, pelo menu <strong>Manutenção</strong> da tela principal (itens em <code>FPrincipal.dfm:8597-8621</code>). Todas as telas são abertas por <code>AbrirForm</code> após <code>CriaDataModule</code>.</p>
+<p><strong>Resultado esperado:</strong> benefícios com o ciclo de recadastramento registrado em BENEFBFCIARIO (FLGSTATUS 'P'/'N', datas de emissão, limite e recebimento); cadastro atualizado; benefícios sem resposta retidos (situação 2); óbitos de beneficiários registrados.</p>
+<p><strong>Termos, siglas e componentes citados nesta página</strong> — explicados na primeira vez em que aparecem; a coluna “Fonte” indica onde a explicação foi conferida no repositório:</p>
+<div class="table-wrap"><table><thead><tr><th>Termo</th><th>O que significa</th><th>Fonte</th></tr></thead><tbody>
+<tr><td><strong>Recadastramento</strong></td><td>Confirmação periódica de que o recebedor está vivo e com dados atualizados. No banco, é controlado em BENEFBFCIARIO pelos campos NUMCARTARECAD, DATAEMISSAORECAD, DATALIMITERECAD, DATARECEBRECAD e FLGSTATUS.</td><td><code>FEmissaoRecadastramento.pas:765-800</code>; <code>FRecebeRecadastramento.pas:513-521</code></td></tr>
+<tr><td><strong>FLGSTATUS 'P' / 'N'</strong></td><td>Situação do recadastramento no benefício: 'P' = pendente (carta emitida, sem resposta); 'N' = respondido (recebimento registrado).</td><td><code>FEmissaoRecadastramento.pas:775</code>; <code>fRecebeRecadTXT.dfm:349</code></td></tr>
+<tr><td><strong>BENEFBFCIARIO</strong></td><td>Benefício concedido a um beneficiário (ou ao próprio participante), com valores, datas e situação (IDSITBENEFICIO).</td><td><a href="dados.html">🗄️ Dados</a></td></tr>
+<tr><td><strong>IDSITBENEFICIO 1 / 2</strong></td><td>Situação do benefício: 1 = Normal (ativo), 2 = Retido, conforme o DECODE da tela de recebimento. A situação 3 é excluída da busca; seu significado não está descrito <span class="ev ev-pendente">PENDENTE</span>.</td><td><code>FRecebeRecadastramento.dfm:628, 642</code></td></tr>
+<tr><td><strong>Recebedor (IDRESPONSAVEL)</strong></td><td>Pessoa que recebe o benefício em nome do beneficiário (BFCIARIOTITPLAN.IDRESPONSAVEL); é a destinatária da carta.</td><td><code>FEmissaoRecadastramento.pas:578</code></td></tr>
+<tr><td><strong>Log de ocorrência</strong></td><td>Histórico de alterações do benefício gerado pela função CriaLogOcorrencia do CMAdmPrev; tipo '3' = retenção (comentário no código).</td><td><code>FRecebeRecadastramento.pas:800</code>; <code>CM/CMADMPREV/Fontes/UBeneficio.pas:4163</code></td></tr>
+<tr><td><strong>ULTMESPREPARO</strong></td><td>Último mês (AAAA/MM) em que o benefício foi preparado para a folha; define a data final prevista da retenção. Mantido pela folha de benefícios <span class="ev ev-inferido">INFERIDO</span>.</td><td><code>FSuspendeBeneficio.pas:206-227</code></td></tr>
+<tr><td><strong>CARTACOBRANCA / CM.REPORTS</strong></td><td>Cadastro de modelos de carta (FLGTIPOCARTA 'R' = recadastramento) e repositório de templates do ReportBuilder.</td><td><code>FEmissaoRecadastramento.dfm:1364-1380, 1712-1730</code></td></tr>
+<tr><td><strong>CMAdmPrev</strong></td><td>Componente externo do framework CM (pasta <code>CM/CMADMPREV/Fontes</code>) que fornece a janela de tipo de recebimento, a tela de falecimento de beneficiário, a regra de elegibilidade e o log de ocorrência.</td><td><a href="integracoes.html">🔗 Integrações</a></td></tr>
+<tr><td><strong>Fundação do usuário (iIdFundacao)</strong></td><td>Cada usuário só deve ver dados das patrocinadoras da sua fundação (<a href="uc401.html#CADPREV-RN001">RS001</a>).</td><td><code>FRecebeRecadastramento.pas:349</code>; <code>FSuspendeBeneficio.pas:311</code></td></tr>
+</tbody></table></div>
+</section>
+<section><div class="section-title">3. Pré-condições</div>
+<p><strong>Gerais do módulo:</strong></p>
+<ul>
+<li>Módulo disponível (entry point <code>CADASTROPREV/Fontes/CadastroPrev.dpr</code>) e usuário com acesso ao menu Manutenção.</li>
+<li>Banco Oracle acessível e datamodules criados (<code>CriaDataModule</code>; falha tratada em <a href="uc401.html#TRT001">UC401 TRT001</a>).</li>
+<li>Benefícios concedidos (BENEFBFCIARIO), beneficiários e recebedores (BFCIARIOTITPLAN), endereços e documentos cadastrados.</li>
+<li>Componentes externos CMAdmPrev (FTipoBenefConcede, FRegFalBenef, UBeneficio) e de relatório/etiqueta do framework CM.</li>
+</ul>
+<p><strong>O que as pré-condições gerais significam na prática:</strong> o analista precisa ter acesso ao menu Manutenção, e os benefícios precisam estar concedidos com recebedor e endereço. A fundação do usuário limita as patrocinadoras e participantes exibidos (com exceções apontadas nos pontos a validar).</p>
+<p><strong>Por jornada:</strong></p>
+<ul>
+<li><a href="#PF-19">JF019</a>: Benefícios ativos (situação 1) com recebedor e endereço cadastrados; modelo de carta e de etiqueta cadastrados para impressão.</li>
+<li><a href="#PF-20">JF020</a>: Benefícios com FLGSTATUS = 'P' (carta emitida em JF019); para TXT, arquivo no layout esperado.</li>
+<li><a href="#PF-21">JF021</a>: Benefícios com FLGSTATUS = 'P' e DATALIMITERECAD vencida; participante com plano ativo.</li>
+<li><a href="#PF-22">JF022</a>: Beneficiário cadastrado; tela externa FRegFalBenef disponível.</li>
+</ul>
+<p><strong>Pré-condições por jornada, em termos de negócio:</strong></p>
+<ul>
+<li><a href="#PF-19">JF019</a>: o beneficiário recebe o benefício normalmente e tem endereço do tipo escolhido; para imprimir, a entidade já cadastrou o modelo da carta (pelo próprio botão de modelo) e um modelo de etiqueta.</li>
+<li><a href="#PF-20">JF020</a>: a carta de recadastramento já foi emitida e o benefício está aguardando resposta; na importação, o arquivo de retorno segue o layout de posições fixas.</li>
+<li><a href="#PF-21">JF021</a>: a carta foi emitida, o prazo de resposta passou e o recebimento não foi registrado.</li>
+<li><a href="#PF-22">JF022</a>: a pessoa falecida é beneficiária de algum participante e o componente do CMAdmPrev está instalado.</li>
+</ul>
+</section>
+<section><div class="section-title">4. Pós-condições</div>
+<ul>
+<li><a href="#PF-19">JF019</a>: BENEFBFCIARIO com NUMCARTARECAD, DATAEMISSAORECAD, DATALIMITERECAD e FLGSTATUS = 'P'; cartas impressas ou arquivo texto gerado; log de operações.</li>
+<li><a href="#PF-20">JF020</a>: BENEFBFCIARIO.FLGSTATUS = 'N' e DATARECEBRECAD preenchida; cadastro atualizado (cartas); eventual retenção por inelegibilidade; log de operações.</li>
+<li><a href="#PF-21">JF021</a>: BENEFBFCIARIO.IDSITBENEFICIO = 2, FLGDATAPREVISTA = 1 e DATAFINALPREVISTA calculada; log de ocorrência de retenção (lote); log de operações.</li>
+<li><a href="#PF-22">JF022</a>: PESSOAFISICA.DATAMORTE, DEPENTIT.DATACANCELA e PLANODEPENDENTE.DATACANCEL gravados (pela tela externa); log de operações.</li>
+</ul>
+<p><strong>Resultado de negócio de cada jornada:</strong></p>
+<ul>
+<li><a href="#PF-19">JF019</a> — <em>conclusão com sucesso:</em> pendência gravada e cartas emitidas, com o aviso <a href="#MSG216">MSG216</a> (<a href="#CADPREV-RN124">RS124</a>, <a href="#CADPREV-RN127">RS127</a>). <em>Interrupções:</em> parâmetros inválidos (<a href="#TRT201">TRT201</a>), nenhum beneficiário (<a href="#TRT202">TRT202</a>) ou erro de banco com rollback (<a href="#TRT205">TRT205</a>).</li>
+<li><a href="#PF-20">JF020</a> — <em>conclusão com sucesso:</em> pendência baixada (<a href="#CADPREV-RN131">RS131</a>, <a href="#CADPREV-RN133">RS133</a>). <em>Interrupções/desvios:</em> benefício retido (<a href="#TRT208">TRT208</a>), sem pendência (<a href="#TRT209">TRT209</a>), linha do TXT com erro (<a href="#TRT212">TRT212</a>); mudança de estado civil pode reter o benefício (<a href="#CADPREV-RN132">RS132</a>).</li>
+<li><a href="#PF-21">JF021</a> — <em>conclusão com sucesso:</em> benefícios retidos e aviso <a href="#MSG228">MSG228</a> (<a href="#CADPREV-RN135">RS135</a>); retenção individual por duplo clique (<a href="#CADPREV-RN136">RS136</a>). <em>Interrupções:</em> usuário não confirma ou erro de banco (<a href="#TRT213">TRT213</a>).</li>
+<li><a href="#PF-22">JF022</a> — <em>conclusão com sucesso:</em> <a href="#MSG235">MSG235</a> (<a href="#CADPREV-RN137">RS137</a>). <em>Interrupções:</em> falecimento já registrado, dados ausentes, benefícios ativos não encerrados ou erro de gravação (<a href="#TRT215">TRT215</a>).</li>
+</ul>
+</section>
+<section><div class="section-title">5. Jornadas Funcionais (JF019, JF020, JF021, JF022)</div>
+<p>Cada jornada traz objetivo, ator/gatilho, pré e pós-condições, sequência operacional, ações práticas, <strong>regras de negócio da jornada</strong> (texto completo de cada regra), tratamentos e mensagens.</p>
+<p><strong>Como as jornadas deste caso de uso se relacionam:</strong> JF019 abre o ciclo (pendência 'P' com prazo); JF020 fecha o ciclo para quem respondeu ('N'); JF021 trata quem não respondeu no prazo (retenção). JF022 registra óbitos de beneficiários, informação frequentemente obtida no próprio recadastramento. Em cada passo, o rótulo “Usuário” ou “Sistema” indica quem executa a ação.</p>
+<div class="legend"><span><span class="ev ev-comprovado">COMPROVADO</span> — no código</span><span><span class="ev ev-inferido">INFERIDO</span> — plausível</span><span><span class="ev ev-pendente">PENDENTE</span> — validar</span></div>
+</section>
+<div class="pf-block" id="PF-19"><h4>JF019 (PF-19) — Emissão de cartas para recadastramento</h4>
+<p><strong>Objetivo:</strong> Enviar aos recebedores de benefício a carta de recadastramento (ou a declaração de residência, a carta de agradecimento ou a carta de falta de recadastramento) e registrar, em cada benefício, que a resposta está pendente até uma data limite.</p>
+<p><strong>Necessidade de negócio:</strong> o recadastramento periódico comprova que o beneficiário está vivo e que os dados cadastrais estão atualizados. A carta abre esse ciclo: define o prazo de resposta e deixa o benefício marcado como pendente; sem resposta no prazo, o benefício pode ser retido (JF021).</p>
+<p><strong>Ator / gatilho:</strong> Analista de cadastro/benefícios, pelo menu <strong>Manutenção › Emissão de Cartas para Recadastramento</strong> (<code>FPrincipal.pas:2154-2159</code>; item em <code>FPrincipal.dfm:8597-8600</code>).</p>
+<p><strong>Pré-condições:</strong> Benefícios ativos (situação 1) com recebedor e endereço cadastrados; modelo de carta e de etiqueta cadastrados para impressão.</p>
+<p><strong>Em termos de negócio:</strong> o beneficiário recebe o benefício normalmente e tem endereço do tipo escolhido; para imprimir, a entidade já cadastrou o modelo da carta (pelo próprio botão de modelo) e um modelo de etiqueta.</p>
+<p><strong>Pós-condições:</strong> BENEFBFCIARIO com NUMCARTARECAD, DATAEMISSAORECAD, DATALIMITERECAD e FLGSTATUS = 'P'; cartas impressas ou arquivo texto gerado; log de operações.</p>
+<p><strong>Em termos de negócio:</strong> cada benefício atingido fica “aguardando recadastramento” até a data limite; as cartas saem na impressora (ou em arquivo para gráfica) e a operação fica registrada no log.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li><strong>Usuário:</strong> Abrir a tela pelo menu; o sistema cria os datamodules e carrega as listas da fundação. [<a href="#CADPREV-RN122">RS122</a>]<br>Patrocinadoras e benefícios são filtrados pela fundação do usuário; a pesquisa de beneficiário (2ª via) também (<code>FEmissaoRecadastramento.pas:1248-1303</code>). A data de emissão vem preenchida com a data atual.</li>
+<li><strong>Usuário:</strong> Escolher o tipo de carta e informar nº da carta, datas, documento, etiqueta e filtros opcionais. [<a href="#CADPREV-RN123">RS123</a>] [<a href="#CADPREV-RN121">RS121</a>]<br>Geração: Carta de Recadastramento, Declaração de Residência, Carta de Agradecimento ou Falta de Recadastramento. Filtros: país/estado, patrocinadora, benefícios, aniversário, iniciais, tipos de pagamento, tipo de endereço, 2ª via de um beneficiário.</li>
+<li><strong>Sistema:</strong> Validar os parâmetros. [<a href="#CADPREV-RN121">RS121</a>] [<a href="#TRT201">TRT201</a>]<br>Falhas exibem <a href="#MSG201">MSG201</a>–<a href="#MSG212">MSG212</a> e põem o foco no campo (<code>FEmissaoRecadastramento.pas:1090-1172</code>).</li>
+<li><strong>Sistema:</strong> Selecionar os recebedores e preparar a marcação de pendência. [<a href="#CADPREV-RN122">RS122</a>] [<a href="#CADPREV-RN124">RS124</a>] [<a href="#TRT202">TRT202</a>]<br>Consulta de benefícios ativos da proposta 1 (exceto tipo 99) no endereço escolhido; lista vazia exibe <a href="#MSG213">MSG213</a> (<code>FEmissaoRecadastramento.pas:533-812</code>).</li>
+<li><strong>Sistema:</strong> Gravar a pendência e gerar a saída (arquivo texto ou impressão), em transação. [<a href="#CADPREV-RN125">RS125</a>] [<a href="#CADPREV-RN127">RS127</a>] [<a href="#TRT203">TRT203</a>] [<a href="#TRT204">TRT204</a>]<br>Texto: grava a linha de largura fixa por recebedor. Impressão: localiza o modelo em CARTACOBRANCA, pede o complemento do código de barras (<a href="#MSG218">MSG218</a>), imprime, oferece etiquetas (<a href="#MSG214">MSG214</a>) e avisa para conferir (<a href="#MSG215">MSG215</a>) (<code>FEmissaoRecadastramento.pas:815-1088</code>).</li>
+<li><strong>Sistema:</strong> Registrar o log e confirmar. [<a href="#CADPREV-RN127">RS127</a>] [<a href="#TRT205">TRT205</a>]<br>GravaLogOperacoes (falha ignorada), CommitTransacao e <a href="#MSG216">MSG216</a>; erro faz rollback (<code>FEmissaoRecadastramento.pas:1200-1245</code>).</li>
+<li><strong>Usuário:</strong> (Opcional) Editar os modelos de carta, declaração de residência e etiqueta. [<a href="#CADPREV-RN126">RS126</a>] [<a href="#TRT206">TRT206</a>]<br>Editor do ReportBuilder; o modelo é gravado em CARTACOBRANCA/CM.REPORTS após <a href="#MSG217">MSG217</a> (<code>FEmissaoRecadastramento.pas:1385-1496, 1601-1606, 1628-1710</code>).</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Definir parâmetros</td><td>Configurar a carta e o público</td><td>Tipo, nº, datas, documento, etiqueta, filtros</td><td>Valida obrigatoriedade e coerência</td><td>Parâmetros aceitos</td><td><a href="#CADPREV-RN121">RS121</a>, <a href="#CADPREV-RN123">RS123</a></td><td><a href="#MSG201">MSG201</a>–<a href="#MSG212">MSG212</a></td><td><code>FEmissaoRecadastramento.dfm</code></td></tr>
+<tr><td>Confirmar emissão</td><td>Selecionar e marcar pendência</td><td>Parâmetros válidos</td><td>Seleciona ativos, grava NUMCARTARECAD/datas/FLGSTATUS 'P'</td><td>Benefícios pendentes</td><td><a href="#CADPREV-RN122">RS122</a>, <a href="#CADPREV-RN124">RS124</a>, <a href="#CADPREV-RN127">RS127</a></td><td><a href="#MSG213">MSG213</a>, <a href="#MSG216">MSG216</a></td><td><code>FEmissaoRecadastramento.dfm</code></td></tr>
+<tr><td>Gerar arquivo texto</td><td>Enviar à gráfica</td><td>“Arquivo texto” marcado e nome do arquivo</td><td>Grava layout fixo por recebedor</td><td>Arquivo .txt</td><td><a href="#CADPREV-RN125">RS125</a></td><td>—</td><td><code>FEmissaoRecadastramento.dfm</code></td></tr>
+<tr><td>Imprimir cartas e etiquetas</td><td>Emitir em papel</td><td>Modelo cadastrado, complemento do código de barras</td><td>Imprime pelo modelo; oferece etiquetas</td><td>Cartas e etiquetas</td><td><a href="#CADPREV-RN125">RS125</a></td><td><a href="#MSG218">MSG218</a>, <a href="#MSG214">MSG214</a>, <a href="#MSG215">MSG215</a></td><td><code>FEmissaoRecadastramento.dfm</code></td></tr>
+<tr><td>Editar modelos</td><td>Ajustar o texto das cartas</td><td>Botões de modelo</td><td>Abre o editor e grava o template</td><td>Modelo atualizado</td><td><a href="#CADPREV-RN126">RS126</a></td><td><a href="#MSG217">MSG217</a></td><td><code>FEmissaoRecadastramento.dfm</code></td></tr>
+</tbody></table></div>
+<div class="jf-rules">
+<p><strong>Regras de negócio da jornada:</strong> 7 regra(s) — texto completo abaixo.</p>
+<div class="rule-block" id="CADPREV-RN121"><div class="rule-id">RS121 (CADPREV-RN121) — Parâmetros obrigatórios e coerentes para emitir cartas</div>
+<div class="rule-desc">Antes de selecionar os beneficiários, a tela exige número da carta, data de emissão e data limite (posterior à emissão), documento de identidade a imprimir e, para cartas de recadastramento, agradecimento e falta, o modelo de etiqueta. País e estado andam juntos; o período de aniversário precisa ter início e fim no mesmo ano; as iniciais do nome precisam de início e fim; a 2ª via exige escolher o beneficiário.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>edtCarta (NUMCARTARECAD)</code> — [obrigatório] — número da carta</li>
+<li><code>edtDataEmissao / edtDataLimite</code> — [obrigatório] — datas da carta; limite &gt; emissão</li>
+<li><code>DBcboPais / DBcboEstado</code> — [condicional] — um exige o outro</li>
+<li><code>edtDataAniIni / edtDataAniFim</code> — [opcional] — período de aniversário, mesmo ano</li>
+<li><code>edtInicialIni / edtInicialFim</code> — [opcional] — faixa de iniciais (só letras)</li>
+<li><code>DBcboDocumento</code> — [obrigatório] — tipo de documento impresso na carta</li>
+<li><code>DBcboEtiqueta</code> — [condicional] — obrigatório para tipos 0, 2 e 3</li>
+<li><code>ChBx2Via / edtNomeBenef</code> — [condicional] — 2ª via exige beneficiário</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT201">TRT201</a> → <a href="#MSG201">MSG201</a>…<a href="#MSG212">MSG212</a>: a exceção EValidacao mostra o aviso, põe o foco no campo e interrompe</p>
+<p><strong>Jornada:</strong> <a href="#PF-19">JF019</a></p>
+<p><strong>Descrição original:</strong> VerificaPreenchimento: raise EValidacao.CreateVal('É necessário preencher o Nº da Carta!', edtCarta) … if not(edtDataLimite.Date &gt; edtDataEmissao.Date) … if rdgGeracao.ItemIndex in ([0, 2, 3]) then if DBcboEtiqueta.LookupValue = '' …</p>
+<p><strong>Condições:</strong> Executada no clique de Confirmar, antes de DefineEscopo</p><p><strong>Dados envolvidos:</strong> Campos da tela (nenhuma tabela)</p><p><strong>Resultado/Exceção:</strong> Result = True libera a seleção; qualquer falha retorna False</p>
+<p class="rule-origin">📂 Origem: <code>FEmissaoRecadastramento.pas:1090-1172, 1184-1198, 1200-1202</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+<div class="rule-block" id="CADPREV-RN122"><div class="rule-id">RS122 (CADPREV-RN122) — Público das cartas: benefícios ativos, proposta 1, endereço do tipo escolhido</div>
+<div class="rule-desc">A carta vai para o <em>recebedor</em> (BFCIARIOTITPLAN.IDRESPONSAVEL) de cada benefício ativo (IDSITBENEFICIO = 1) da proposta 1, exceto benefícios do tipo 99, no endereço do tipo escolhido (correspondência, comercial, entrega, residencial ou cobrança). Filtros opcionais: país, estado, patrocinadora, benefícios marcados, período de aniversário (dia/mês), faixa de iniciais, tipos de pagamento marcados e, na 2ª via, um único beneficiário. Ordenação por nome.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>BENEFBFCIARIO.IDSITBENEFICIO</code> — [obrigatório] — = 1 (ativo)</li>
+<li><code>BFCIARIOTITPLAN.SEQPROPOSTA</code> — [obrigatório] — = 1</li>
+<li><code>BENEFICIO.TIPOBENEFICIO</code> — [obrigatório] — ≠ 99</li>
+<li><code>BFCIARIOTITPLAN.IDRESPONSAVEL</code> — [obrigatório] — pessoa que recebe a carta</li>
+<li><code>PESSOA.IDENDCORRESP…IDENDCOBRANCA</code> — [obrigatório] — endereço conforme cmbTipoEndereco</li>
+<li><code>BENEFBFCIARIO.IDTPPAGTOBENEFIC</code> — [opcional] — tipos de pagamento marcados (TPPAGTOBENEFICIO)</li>
+<li><code>DEPENTIT (contagem)</code> — [informativo] — nº de dependentes do titular</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT202">TRT202</a> → <a href="#MSG213">MSG213</a> quando nenhum beneficiário atende aos critérios</p>
+<p><strong>Jornada:</strong> <a href="#PF-19">JF019</a></p>
+<p><strong>Descrição original:</strong> SELECT DISTINCT BF.IDRESPONSAVEL AS IDPESSOA … FROM BENEFBFCIARIO B, BFCIARIOTITPLAN BF, PESSOA P, ELEGPATRO E, PESSOAFISICA PF, BENEFICIO BN, (…ENDPESS…) EP, (SELECT IDTITULAR, COUNT(*) AS NUMDEPEND FROM DEPENTIT …) ND WHERE … ( B.IDSITBENEFICIO = 1 ) AND (BF.SEQPROPOSTA = 1) … AND ( NOT BN.TIPOBENEFICIO = 99 ) … ORDER BY P.NOME</p>
+<p><strong>Condições:</strong> Montagem dinâmica de qryBeneficiarios em DefineEscopo; listas de patrocinadoras e benefícios carregadas por fundação no FormShow</p><p><strong>Dados envolvidos:</strong> BENEFBFCIARIO, BFCIARIOTITPLAN, PESSOA, PESSOAFISICA, ELEGPATRO, BENEFICIO, ENDPESS, CIDADES, ESTADO, PAIS, DEPENTIT, TPPAGTOBENEFICIO</p><p><strong>Resultado/Exceção:</strong> Lista de recebedores; vazia interrompe com aviso</p>
+<p class="rule-origin">📂 Origem: <code>FEmissaoRecadastramento.pas:533-762, 1248-1303</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+<div class="rule-block" id="CADPREV-RN123"><div class="rule-id">RS123 (CADPREV-RN123) — Tipo de carta define o público pela pendência de recadastramento</div>
+<div class="rule-desc">O campo “Geração” tem quatro opções. <strong>Carta de Recadastramento</strong> (0): todos os ativos; na 2ª via, só os pendentes (FLGSTATUS = 'P' e sem data de recebimento). <strong>Declaração de Residência</strong> (1): todos os ativos, impressa por modelo próprio. <strong>Carta de Agradecimento</strong> (2): quem já respondeu (FLGSTATUS = 'N' e DATARECEBRECAD preenchida). <strong>Falta de Recadastramento</strong> (3): quem não respondeu (FLGSTATUS = 'P' e DATARECEBRECAD vazia).</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>rdgGeracao</code> — [obrigatório] — 0 Recadastramento, 1 Declaração de Residência, 2 Agradecimento, 3 Falta</li>
+<li><code>BENEFBFCIARIO.FLGSTATUS</code> — [obrigatório] — 'P' pendente / 'N' recebido</li>
+<li><code>BENEFBFCIARIO.DATARECEBRECAD</code> — [obrigatório] — data em que o recadastramento foi recebido</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> — (regra de seleção, sem crítica ao usuário)</p>
+<p><strong>Jornada:</strong> <a href="#PF-19">JF019</a></p>
+<p><strong>Descrição original:</strong> Case rdgGeracao.ItemIndex of 0 : If ChBx2Via.Checked Then … ' AND (B.FLGSTATUS = ''P'') AND (B.DATARECEBRECAD IS NULL ) '; 2 : … ' AND (B.FLGSTATUS = ''N'') AND (B.DATARECEBRECAD IS NOT NULL ) '; 3 : … 'P' … IS NULL</p>
+<p><strong>Condições:</strong> Aplicada em DefineEscopo e repetida na consulta de impressão (qrySQL)</p><p><strong>Dados envolvidos:</strong> BENEFBFCIARIO.FLGSTATUS, DATARECEBRECAD</p><p><strong>Resultado/Exceção:</strong> Filtro adicional na seleção</p>
+<p class="rule-origin">📂 Origem: <code>FEmissaoRecadastramento.pas:707-720, 944-957; FEmissaoRecadastramento.dfm:457-468</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+<div class="rule-block" id="CADPREV-RN124"><div class="rule-id">RS124 (CADPREV-RN124) — Emitir a carta marca o benefício como pendente de recadastramento</div>
+<div class="rule-desc">Para cada recebedor selecionado, o sistema grava no benefício o número da carta, a data de emissão, a data limite e FLGSTATUS = 'P' (pendente). É essa marca que depois permite o recebimento (JF020) e a retenção por falta de resposta (JF021). Na geração em arquivo texto a marca só é gravada para a Carta de Recadastramento; na impressão, o comando é executado para qualquer tipo de carta.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>BENEFBFCIARIO.NUMCARTARECAD</code> — [obrigatório] — nº da carta</li>
+<li><code>BENEFBFCIARIO.DATAEMISSAORECAD</code> — [obrigatório] — data de emissão</li>
+<li><code>BENEFBFCIARIO.DATALIMITERECAD</code> — [obrigatório] — prazo de resposta (usado na retenção)</li>
+<li><code>BENEFBFCIARIO.FLGSTATUS</code> — [obrigatório] — 'P'</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> Erro de banco cai no except de Confirmar: <a href="#TRT205">TRT205</a> (rollback e exceção)</p>
+<p><strong>Jornada:</strong> <a href="#PF-19">JF019</a></p>
+<p><strong>Descrição original:</strong> UPDATE BENEFBFCIARIO SET NUMCARTARECAD = :NUMCARTARECAD, DATAEMISSAORECAD =:DATAEMISSAO, DATALIMITERECAD =:DATALIMITE, FLGSTATUS = 'P' WHERE ( IDPESSOA =:BENEFICIARIO ) AND ( IDSITBENEFICIO = 1 ) [AND ( IDBENEFICIO =:BENEFICIO )] [AND ( IDPESSJUR =:PATRO )]</p>
+<p><strong>Condições:</strong> Texto: If rdgGeracao.ItemIndex = 0 Then ExecSQL; impressão: ExecSQL para todos os selecionados</p><p><strong>Dados envolvidos:</strong> BENEFBFCIARIO</p><p><strong>Resultado/Exceção:</strong> Benefício pendente com prazo definido</p>
+<p class="rule-origin">📂 Origem: <code>FEmissaoRecadastramento.pas:765-800, 846-856, 893-902</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+<div class="rule-block" id="CADPREV-RN125"><div class="rule-id">RS125 (CADPREV-RN125) — Saída em arquivo texto posicional ou impressão pelo modelo cadastrado</div>
+<div class="rule-desc">Com “Arquivo texto” marcado (exceto Declaração de Residência), o sistema grava um arquivo de largura fixa, uma linha por recebedor: carta (4), data de emissão por extenso (23), matrícula (13), nome (50), identidade (10), órgão (6), CPF (11), data limite (10), logradouro (60), número (8), complemento (20), bairro (20), cidade (20), UF (3), CEP 99999-999 (9), espaço, data de nascimento (12) e nº de dependentes (3). Sem arquivo texto, a carta é impressa pelo modelo do ReportBuilder cadastrado em CARTACOBRANCA (FLGTIPOCARTA = 'R', MODELOCARTA igual ao nome do tipo) com código de barras (matrícula + sequência do dependente + nascimento + complemento digitado). Depois, o usuário pode imprimir etiquetas e recebe um aviso para conferir a impressão.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>ckbArqTexto / SaveDialog</code> — [opcional] — gera arquivo texto</li>
+<li><code>CARTACOBRANCA.MODELOCARTA / FLGTIPOCARTA</code> — [obrigatório] — modelo localizado pelo nome do tipo e 'R'</li>
+<li><code>CM.REPORTS.TEMPLATE</code> — [obrigatório] — template do relatório</li>
+<li><code>InputBox ‘Complemento’ (:ANO)</code> — [opcional] — complemento do código de barras</li>
+<li><code>ETIQUETA</code> — [condicional] — modelo de etiqueta</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT203">TRT203</a> (<a href="#MSG218">MSG218</a>) e <a href="#TRT204">TRT204</a> (<a href="#MSG214">MSG214</a>, <a href="#MSG215">MSG215</a>)</p>
+<p><strong>Jornada:</strong> <a href="#PF-19">JF019</a></p>
+<p><strong>Descrição original:</strong> if (ckbArqTexto.Checked) and (rdgGeracao.ItemIndex &lt;&gt; 1) then … WriteLn(arquivo, sLinha) … else … qryModelo.Locate('MODELOCARTA;FLGTIPOCARTA',vPar,[]) … rptImprime.Print … if MsgDlg('Deseja gerar etiquetas para acompanhar as cartas?' …</p>
+<p><strong>Condições:</strong> Ramo texto × impressão definido por ckbArqTexto e rdgGeracao</p><p><strong>Dados envolvidos:</strong> CARTACOBRANCA, CM.REPORTS, ETIQUETA, DEPENTIT, ELEGPATRO, PESSOAFISICA, ENDPESS</p><p><strong>Resultado/Exceção:</strong> Arquivo .txt ou cartas/etiquetas em tela de impressão</p>
+<p class="rule-origin">📂 Origem: <code>FEmissaoRecadastramento.pas:815-1088, 1326-1345</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+<div class="rule-block" id="CADPREV-RN126"><div class="rule-id">RS126 (CADPREV-RN126) — Modelos de Carta de Recadastramento e de Declaração de Residência editáveis</div>
+<div class="rule-desc">Os botões de modelo abrem o editor de relatórios. Se o modelo ainda não existe, o sistema cria o registro em CARTACOBRANCA (FLGTIPOCARTA = 'R') com novos identificadores; ao fechar o editor pergunta se deve salvar e grava o template em CM.REPORTS. O modelo de etiqueta é configurado no componente de etiquetas.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>CARTACOBRANCA.IDCARTACOBRANCA / IDREPORTS</code> — [obrigatório] — gerados por LeUltRegistro</li>
+<li><code>CARTACOBRANCA.MODELOCARTA</code> — [obrigatório] — 'Carta de Recadastramento' ou 'Declaração de Residência'</li>
+<li><code>CM.REPORTS.NAME / TEMPLATE</code> — [obrigatório] — nome e conteúdo do modelo</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT206">TRT206</a> → <a href="#MSG217">MSG217</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-19">JF019</a></p>
+<p><strong>Descrição original:</strong> qryModeloMODELOCARTA.AsString := 'Carta de Recadastramento'; … qryModeloFLGTIPOCARTA.AsString := 'R'; … if MsgDlg('Deseja salvar o modelo de Carta de Recadastramento criado?' … qryReports.FieldByName('TEMPLATE').asString := memReports.Lines.Text; … AplicaAlteracoes([QryModelo]);</p>
+<p><strong>Condições:</strong> Botões btnModeloCarta, btnDVR e btnModeloEtiqueta</p><p><strong>Dados envolvidos:</strong> CARTACOBRANCA, CM.REPORTS</p><p><strong>Resultado/Exceção:</strong> Modelo gravado ou mantido só no arquivo temporário</p>
+<p class="rule-origin">📂 Origem: <code>FEmissaoRecadastramento.pas:1385-1496, 1601-1606, 1628-1710; FEmissaoRecadastramento.dfm:1364-1380, 1712-1730</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+<div class="rule-block" id="CADPREV-RN127"><div class="rule-id">RS127 (CADPREV-RN127) — Emissão em transação única, com log de operações</div>
+<div class="rule-desc">A seleção, a marcação de pendência e a emissão rodam dentro de uma transação. Ao final grava-se o log de operações com o título da tela (falha de log é ignorada) e confirma-se a transação com o aviso “Operação completada.”. Qualquer exceção desfaz tudo e é repassada ao usuário.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>StartTransacao / CommitTransacao / RollBackTransacao</code> — [obrigatório] — controle de transação</li>
+<li><code>Sistema.GravaLogOperacoes(Self.Caption)</code> — [obrigatório] — log de operações</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT205">TRT205</a> → <a href="#MSG216">MSG216</a>; falha de log: <a href="uc401.html#TRT004">UC401 TRT004</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-19">JF019</a></p>
+<p><strong>Descrição original:</strong> if DefineEscopo then begin StartTransacao; try EmiteCartas; Try If Not Sistema.GravaLogOperacoes(Self.Caption) Then raise … Except End; CommitTransacao; … MsgDlg('Operação completada.' … except RollBackTransacao; … Raise;</p>
+<p><strong>Condições:</strong> Clique em Confirmar com parâmetros válidos</p><p><strong>Dados envolvidos:</strong> BENEFBFCIARIO; log de operações</p><p><strong>Resultado/Exceção:</strong> Commit + aviso, ou rollback + exceção</p>
+<p class="rule-origin">📂 Origem: <code>FEmissaoRecadastramento.pas:1200-1245</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+<p><strong>Regras transversais do módulo</strong> (definidas na íntegra em <a href="uc401.html">UC401</a>; valem também para esta jornada): <a href="uc401.html#CADPREV-RN001">RS001 (CADPREV-RN001) — Dados isolados por fundação</a>, <a href="uc401.html#CADPREV-RN003">RS003 (CADPREV-RN003) — Instituto troca a nomenclatura das telas</a>, <a href="uc401.html#CADPREV-RN005">RS005 (CADPREV-RN005) — Operações registradas no log de operações do TotalPREV</a>.</p>
+</div>
+
+<p><strong>Tratamentos de erro:</strong> <a href="#TRT201">TRT201</a>, <a href="#TRT202">TRT202</a>, <a href="#TRT203">TRT203</a>, <a href="#TRT204">TRT204</a>, <a href="#TRT205">TRT205</a>, <a href="#TRT206">TRT206</a>, <a href="uc401.html#TRT001">UC401 TRT001</a>, <a href="uc401.html#TRT004">UC401 TRT004</a></p>
+<p><strong>Mensagens:</strong> <a href="#MSG201">MSG201</a>, <a href="#MSG202">MSG202</a>, <a href="#MSG203">MSG203</a>, <a href="#MSG204">MSG204</a>, <a href="#MSG205">MSG205</a>, <a href="#MSG206">MSG206</a>, <a href="#MSG207">MSG207</a>, <a href="#MSG208">MSG208</a>, <a href="#MSG209">MSG209</a>, <a href="#MSG210">MSG210</a>, <a href="#MSG211">MSG211</a>, <a href="#MSG212">MSG212</a>, <a href="#MSG213">MSG213</a>, <a href="#MSG214">MSG214</a>, <a href="#MSG215">MSG215</a>, <a href="#MSG216">MSG216</a>, <a href="#MSG217">MSG217</a>, <a href="#MSG218">MSG218</a></p>
+<p><strong>Telas:</strong> Emissão de Cartas de Recadastramento (<code>FEmissaoRecadastramento.dfm</code>)</p>
+<p><strong>Dependências:</strong> Abre o ciclo que segue em <a href="#PF-20">JF020</a> (recebimento) e <a href="#PF-21">JF021</a> (retenção). Usa os componentes de relatório (uModeloRelatCM), etiquetas (uEtiquetaCM) e pesquisa (MontaSelect) do framework CM.</p>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span> — informações que o repositório não comprova ou que divergem entre fontes. Os itens abaixo dependem de validação humana.</p>
+<ul>
+<li>A consulta principal de seleção (<code>FEmissaoRecadastramento.pas:577-745</code>) não filtra a fundação; só as listas de patrocinadora/benefício e a pesquisa da 2ª via são filtradas. Uma versão com o filtro <code>E.IDPESSJUR IN (SELECT … IDFUNDACAO …)</code> existe apenas como texto morto após o <code>end.</code> da unit (<code>FEmissaoRecadastramento.pas:1758-1831</code>). Confirmar se usuários de uma fundação podem selecionar beneficiários de outra quando nenhuma patrocinadora é escolhida.</li>
+<li>Na impressão (sem arquivo texto) o UPDATE de pendência é executado para todos os tipos de carta, inclusive Agradecimento (que seleciona FLGSTATUS = 'N'), o que voltaria o benefício para 'P' (<code>FEmissaoRecadastramento.pas:893-902</code>) — <span class="ev ev-inferido">INFERIDO</span>.</li>
+<li>A consulta de impressão (qrySQL) acrescenta os filtros de status ao SQL antes de adicionar o SELECT (<code>SQL.Text := SQL.Text + …</code> após <code>Sql.Clear</code> e antes de <code>Sql.Add(vSql)</code>), o que gera comando inválido para 2ª via, Agradecimento e Falta (<code>FEmissaoRecadastramento.pas:907-968</code>) — <span class="ev ev-inferido">INFERIDO</span>.</li>
+<li>A marcação usa <code>IDPESSOA = :BENEFICIARIO</code> com o IDPESSOA da seleção, que é o recebedor (<code>BF.IDRESPONSAVEL AS IDPESSOA</code>); quando recebedor ≠ beneficiário a pendência pode não ser gravada (<code>FEmissaoRecadastramento.pas:578, 770-775, 851</code>) — <span class="ev ev-inferido">INFERIDO</span>.</li>
+<li>O filtro de benefícios abre “( B.IDBENEFICIO IN ( … ) ” sem fechar o primeiro parêntese e só é aplicado se o combo DBcboBeneficio tiver valor (<code>FEmissaoRecadastramento.pas:648-655</code>) — <span class="ev ev-inferido">INFERIDO</span>.</li>
+<li>Só os modelos “Carta de Recadastramento” e “Declaração de Residência” podem ser criados pela tela; para Agradecimento e Falta, o modelo precisa existir em CARTACOBRANCA com o nome exato da opção, senão nada é impresso e não há aviso (<code>FEmissaoRecadastramento.pas:978-1043</code>).</li>
+</ul>
+</div>
+<div class="note note-info"><p><strong>Registro original do processo PF-19</strong></p><p><strong>Forms de entrada:</strong> <code>FEmissaoRecadastramento.dfm</code> (TfrmEmiteRecadastramento)</p><p><strong>Lógica de processamento:</strong> VerificaPreenchimento → DefineEscopo (seleção + UPDATE preparado) → EmiteCartas (texto ou impressão) → log → commit</p><p><strong>Saídas:</strong> Arquivo texto de largura fixa; cartas/declarações e etiquetas (ReportBuilder)</p><p><strong>Persistência (tabelas escritas):</strong> BENEFBFCIARIO; CARTACOBRANCA e CM.REPORTS (modelos)</p><p><strong>Evidência:</strong> <code>CADASTROPREV/Fontes/FEmissaoRecadastramento.pas:533-1245</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+</div>
+<div class="pf-block" id="PF-20"><h4>JF020 (PF-20) — Recebimento de recadastramento por cartas e por arquivo TXT</h4>
+<p><strong>Objetivo:</strong> Registrar que o recebedor respondeu ao recadastramento e aproveitar a resposta para atualizar dados pessoais, endereço, telefone, documentos e dados do INSS.</p>
+<p><strong>Necessidade de negócio:</strong> a resposta à carta é a prova de vida e de cadastro atualizado. Registrada a resposta, o benefício sai da lista de retenção (JF021) e passa a receber, se for o caso, a carta de agradecimento (JF019).</p>
+<p><strong>Ator / gatilho:</strong> Analista de cadastro, pelo menu <strong>Manutenção › Recebimento de Recadastramento</strong> (<code>FPrincipal.pas:2161-2182</code>; item em <code>FPrincipal.dfm:8605-8608</code>), escolhendo “cartas para digitação” ou “arquivo TXT”.</p>
+<p><strong>Pré-condições:</strong> Benefícios com FLGSTATUS = 'P' (carta emitida em JF019); para TXT, arquivo no layout esperado.</p>
+<p><strong>Em termos de negócio:</strong> a carta de recadastramento já foi emitida e o benefício está aguardando resposta; na importação, o arquivo de retorno segue o layout de posições fixas.</p>
+<p><strong>Pós-condições:</strong> BENEFBFCIARIO.FLGSTATUS = 'N' e DATARECEBRECAD preenchida; cadastro atualizado (cartas); eventual retenção por inelegibilidade; log de operações.</p>
+<p><strong>Em termos de negócio:</strong> o benefício deixa de estar pendente e não será retido por falta de recadastramento; mudanças cadastrais informadas na carta ficam gravadas.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li><strong>Usuário:</strong> Escolher o tipo de recebimento. [<a href="#CADPREV-RN128">RS128</a>] [<a href="#TRT207">TRT207</a>]<br>Janela do CMAdmPrev com “Recebimento de Cartas para digitação” e “Recebimento de arquivo TXT para importação” (<code>FPrincipal.pas:2166-2180</code>).</li>
+<li><strong>Usuário:</strong> (Cartas) Informar a matrícula, o documento de busca ou a inscrição do titular. [<a href="#CADPREV-RN129">RS129</a>]<br>A busca é restrita à fundação e carrega os benefícios pendentes do titular (<code>FRecebeRecadastramento.pas:352-420, 840-870</code>).</li>
+<li><strong>Sistema:</strong> Verificar retenção e existência de pendência. [<a href="#CADPREV-RN130">RS130</a>] [<a href="#TRT208">TRT208</a>] [<a href="#TRT209">TRT209</a>]<br><a href="#MSG219">MSG219</a> para benefício retido; <a href="#MSG220">MSG220</a> sem benefício pendente (<code>FRecebeRecadastramento.pas:422-456</code>).</li>
+<li><strong>Usuário:</strong> Corrigir dados pessoais, endereço, telefone, documentos e dados do INSS conforme a carta. [<a href="#CADPREV-RN132">RS132</a>]<br>Alterar o estado civil executa a regra de elegibilidade e pode reter o benefício (<code>FRecebeRecadastramento.pas:737-838</code>).</li>
+<li><strong>Usuário e sistema:</strong> Confirmar: baixa a pendência, grava as alterações e o log. [<a href="#CADPREV-RN131">RS131</a>] [<a href="#TRT210">TRT210</a>]<br>FLGSTATUS = 'N', DATARECEBRECAD = data atual, AplicaAlteracoes e GravaLogOperacoes (<code>FRecebeRecadastramento.pas:513-563</code>). Cancelar pede <a href="#MSG221">MSG221</a>.</li>
+<li><strong>Usuário:</strong> (TXT) Escolher o arquivo; o sistema testa a primeira linha. [<a href="#CADPREV-RN133">RS133</a>] [<a href="#TRT211">TRT211</a>]<br>Mostra matrícula, titular, data da carta, limite e recebimento, ou <a href="#MSG222">MSG222</a> (<code>fRecebeRecadTXT.pas:83-119</code>).</li>
+<li><strong>Sistema:</strong> (TXT) Importar todas as linhas, uma transação por benefício, com log na tela. [<a href="#CADPREV-RN133">RS133</a>] [<a href="#TRT212">TRT212</a>]<br>Resultados <a href="#MSG224">MSG224</a>/<a href="#MSG225">MSG225</a> e <a href="#MSG226">MSG226</a>; o log pode ser salvo em arquivo (<code>fRecebeRecadTXT.pas:121-219</code>).</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Escolher tipo de recebimento</td><td>Definir o canal</td><td>Cartas ou TXT</td><td>Abre a tela correspondente</td><td>Tela aberta</td><td><a href="#CADPREV-RN128">RS128</a></td><td>—</td><td><code>CM/CMADMPREV/Fontes/FTipoBenefConcede.dfm</code></td></tr>
+<tr><td>Localizar titular</td><td>Trazer a pendência</td><td>Matrícula, documento ou inscrição</td><td>Busca na fundação; carrega benefícios 'P'</td><td>Dados na tela</td><td><a href="#CADPREV-RN129">RS129</a>, <a href="#CADPREV-RN130">RS130</a></td><td><a href="#MSG219">MSG219</a>, <a href="#MSG220">MSG220</a></td><td><code>FRecebeRecadastramento.dfm</code></td></tr>
+<tr><td>Atualizar cadastro</td><td>Registrar dados informados na carta</td><td>Pai, mãe, estado civil, endereço, telefone, documentos, INSS</td><td>Edita em cache; estado civil roda a elegibilidade</td><td>Alterações pendentes de confirmação</td><td><a href="#CADPREV-RN132">RS132</a></td><td>—</td><td><code>FRecebeRecadastramento.dfm</code></td></tr>
+<tr><td>Confirmar recebimento</td><td>Baixar a pendência</td><td>—</td><td>FLGSTATUS 'N', data, grava tudo e log</td><td>Recadastramento registrado</td><td><a href="#CADPREV-RN131">RS131</a></td><td><a href="#MSG221">MSG221</a></td><td><code>FRecebeRecadastramento.dfm</code></td></tr>
+<tr><td>Importar TXT</td><td>Baixar pendências em lote</td><td>Arquivo TXT</td><td>Testa 1ª linha; grava por benefício</td><td>Log de importação</td><td><a href="#CADPREV-RN133">RS133</a></td><td><a href="#MSG222">MSG222</a>–<a href="#MSG226">MSG226</a></td><td><code>fRecebeRecadTXT.dfm</code></td></tr>
+</tbody></table></div>
+<div class="jf-rules">
+<p><strong>Regras de negócio da jornada:</strong> 6 regra(s) — texto completo abaixo.</p>
+<div class="rule-block" id="CADPREV-RN128"><div class="rule-id">RS128 (CADPREV-RN128) — Escolha do tipo de recebimento: cartas digitadas ou arquivo TXT</div>
+<div class="rule-desc">O item de menu abre a janela de escolha do CMAdmPrev (FTipoBenefConcede) com o título “Tipo de Recebimento desejado” e duas opções: “Recebimento de Cartas para digitação” (abre a tela de recebimento manual) e “Recebimento de arquivo TXT para importação” (abre a importação). Cancelar ou Sair não abre nada.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>frmTipoBenefConcede.rgrpTipo</code> — [obrigatório] — 0 cartas, 1 TXT</li>
+<li><code>cTipoBeneficio</code> — [obrigatório] — 'C' cancelar / 'S' sair interrompem</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT207">TRT207</a> (sem mensagem)</p>
+<p><strong>Jornada:</strong> <a href="#PF-20">JF020</a></p>
+<p><strong>Descrição original:</strong> Caption := 'Tipo de Recebimento desejado'; … rgrpTipo.Items.Add('Recebimento de Cartas para digitação'); rgrpTipo.Items.Add('Recebimento de arquivo TXT para importação'); ShowModal; If (cTipoBeneficio = 'C') or (cTipoBeneficio = 'S') Then Exit; Case rgrpTipo.ItemIndex of 0: AbrirForm(frmRecebeRecadastramento…); 1: AbrirForm(frmRecebeRecadTXT…)</p>
+<p><strong>Condições:</strong> Menu Manutenção › Recebimento de Recadastramento</p><p><strong>Dados envolvidos:</strong> —</p><p><strong>Resultado/Exceção:</strong> Abre a tela escolhida</p>
+<p class="rule-origin">📂 Origem: <code>FPrincipal.pas:2161-2182; CM/CMADMPREV/Fontes/FTipoBenefConcede.pas:32, 48-77</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+<div class="rule-block" id="CADPREV-RN129"><div class="rule-id">RS129 (CADPREV-RN129) — Localização do titular e dos benefícios pendentes de recadastramento</div>
+<div class="rule-desc">O titular é localizado pela matrícula (ou pelo documento configurado em PARAMAPREV quando FLGCPOBUSCA ≠ 0), pela inscrição no plano ou pela pesquisa geral, sempre restrito às patrocinadoras da fundação. Se a matrícula tiver mais de uma admissão, vale a mais recente; pela inscrição, a mais recente. São carregados os benefícios do titular ainda pendentes (FLGSTATUS = 'P'), não encerrados e em situação diferente de 3.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>PARAMAPREV.FLGCPOBUSCA / TIPODOCBUSCA</code> — [obrigatório] — campo de busca</li>
+<li><code>ELEGPATRO.MATRICULA / PARTPREVPLAN.INSCRICAONUMERO</code> — [obrigatório] — chave de busca</li>
+<li><code>BENEFBFCIARIO.FLGSTATUS</code> — [obrigatório] — = 'P'</li>
+<li><code>BENEFBFCIARIO.DATAENCERRAMENTO</code> — [obrigatório] — nula</li>
+<li><code>BENEFBFCIARIO.IDSITBENEFICIO</code> — [obrigatório] — ≠ 3</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT209">TRT209</a> quando não há benefício pendente</p>
+<p><strong>Jornada:</strong> <a href="#PF-20">JF020</a></p>
+<p><strong>Descrição original:</strong> 'WHERE ELEGPATRO.MATRICULA = '+QuotedStr(…)+' AND ELEGPATRO.IDPESSJUR IN (SELECT IDPESSOA FROM PATRO WHERE IDFUNDACAO = '+IntToStr(iIdFundacao)+') … ORDER BY ELEGPATRO.DATAADMISSAO DESC'; qryDados: (BF.DATAENCERRAMENTO IS NULL) AND (BF.IDTITULAR = :IDPESSOA) AND (BF.FLGSTATUS = 'P') AND (BF.IDSITBENEFICIO &lt;&gt; 3)</p>
+<p><strong>Condições:</strong> Saída dos campos de busca (edtBuscaExit, EdInscricaoExit)</p><p><strong>Dados envolvidos:</strong> PARAMAPREV, ELEGPATRO, PARTPREVPLAN, DOCPESSOA, TIPODOCPESSOA, BENEFBFCIARIO, PESSOA, PLANPREV, BENEFICIO</p><p><strong>Resultado/Exceção:</strong> Dados do titular, beneficiários e benefícios na tela</p>
+<p class="rule-origin">📂 Origem: <code>FRecebeRecadastramento.pas:319-420, 422-485, 840-870; FRecebeRecadastramento.dfm:599-660</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+<div class="rule-block" id="CADPREV-RN130"><div class="rule-id">RS130 (CADPREV-RN130) — Benefício retido pede confirmação; sem benefício pendente, aviso</div>
+<div class="rule-desc">Se o benefício carregado estiver retido (IDSITBENEFICIO = 2), o sistema pergunta se deve continuar; “Não” cancela a tela. Se não houver benefício pendente para o titular, o sistema avisa e limpa a tela.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>BENEFBFCIARIO.IDSITBENEFICIO</code> — [obrigatório] — 1 Normal, 2 Retido (DECODE da consulta)</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT208">TRT208</a> → <a href="#MSG219">MSG219</a>; <a href="#TRT209">TRT209</a> → <a href="#MSG220">MSG220</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-20">JF020</a></p>
+<p><strong>Descrição original:</strong> if qrydados.fieldbyname('IDSITBENEFICIO').AsString = '2' then … MsgDlg('Este benefício está retido. Deseja continuar?' … If qryDados.RecordCount = 0 Then … ShowMessage('Este participante não possui benefício ativo.');</p>
+<p><strong>Condições:</strong> Ao montar a tela (MontaTela)</p><p><strong>Dados envolvidos:</strong> BENEFBFCIARIO</p><p><strong>Resultado/Exceção:</strong> Continua, cancela ou limpa a tela</p>
+<p class="rule-origin">📂 Origem: <code>FRecebeRecadastramento.pas:422-456; FRecebeRecadastramento.dfm:628</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+<div class="rule-block" id="CADPREV-RN131"><div class="rule-id">RS131 (CADPREV-RN131) — Confirmar o recebimento baixa a pendência e atualiza o cadastro</div>
+<div class="rule-desc">Ao confirmar, o benefício corrente recebe FLGSTATUS = 'N' e DATARECEBRECAD = data atual. Os dados alterados na carta também são gravados: dados pessoais (PESSOAFISICA: pai, mãe, nascimento, sexo, estado civil, UF/país), endereço (ENDPESS) e telefone (TELENDPESS, por UPDATE direto), documentos (DOCPESSOA) e dados do INSS do benefício (banco, nº do processo, mês/ano do recibo — replicados para todas as linhas do titular). Por fim, grava o log de operações e limpa a tela. Não há pergunta de confirmação.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>BENEFBFCIARIO.FLGSTATUS</code> — [obrigatório] — 'N'</li>
+<li><code>BENEFBFCIARIO.DATARECEBRECAD</code> — [obrigatório] — Date</li>
+<li><code>BENEFBFCIARIO.BANCOINSS / NUMPROCINSS / MESRECIBOINSS / ANORECIBOINSS</code> — [opcional] — dados do INSS</li>
+<li><code>PESSOAFISICA.*</code> — [opcional] — dados pessoais</li>
+<li><code>ENDPESS.* / TELENDPESS.DDD, NUMERO</code> — [opcional] — endereço e telefone</li>
+<li><code>DOCPESSOA.NUMDOCUMENTO, ORGAO, UF, DATAEMISSAO</code> — [opcional] — documentos</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> Cancelar: <a href="#TRT210">TRT210</a> → <a href="#MSG221">MSG221</a>; falha de log ignorada (<a href="uc401.html#TRT004">UC401 TRT004</a>)</p>
+<p><strong>Jornada:</strong> <a href="#PF-20">JF020</a></p>
+<p><strong>Descrição original:</strong> qryDados.Edit; qryDadosFLGSTATUS.AsString :='N'; qryDadosDATARECEBRECAD.AsDateTime := Date; qryDados.Post; … 'UPDATE TELENDPESS SET DDD = … NUMERO = … WHERE IDTELEFONE = … AND IDENDERECO = …' … AplicaAlteracoes([qryDados,qryPessoal,qryEnd,qryDoc,qryBciario]); … GravaLogOperacoes</p>
+<p><strong>Condições:</strong> Clique em Confirmar</p><p><strong>Dados envolvidos:</strong> BENEFBFCIARIO, PESSOAFISICA, ENDPESS, TELENDPESS, DOCPESSOA</p><p><strong>Resultado/Exceção:</strong> Pendência baixada e cadastro atualizado</p>
+<p class="rule-origin">📂 Origem: <code>FRecebeRecadastramento.pas:513-584, 678-735; FRecebeRecadastramento.dfm:1151-1180, 1214-1248, 1305-1376</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+<div class="rule-block" id="CADPREV-RN132"><div class="rule-id">RS132 (CADPREV-RN132) — Mudança de estado civil reavalia a elegibilidade e pode reter o benefício</div>
+<div class="rule-desc">Quando o estado civil é alterado na carta, o sistema executa a regra de elegibilidade de cada benefício pendente do titular (benefícios em situação 1 ou 2). Benefício que deixa de ser elegível é retido: IDSITBENEFICIO = 2 e DATAFINALPREVISTA = data atual, e é criado um log de ocorrência do tipo 3 (retenção) com motivo '4'.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>BENEFPLANPREV.IDREGRABENEFICIA</code> — [obrigatório] — regra de elegibilidade</li>
+<li><code>BENEFPLANOPART.VALORBASE1..3</code> — [obrigatório] — bases da regra</li>
+<li><code>BENEFBFCIARIO.IDSITBENEFICIO / DATAFINALPREVISTA</code> — [obrigatório] — 2 / Date na retenção</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> — (resultado da regra; sem mensagem ao usuário além do aviso de processamento)</p>
+<p><strong>Jornada:</strong> <a href="#PF-20">JF020</a></p>
+<p><strong>Descrição original:</strong> RodaRegraElegibilidade('Estado Civil','4'); … bOk := ExecutaRegraElegibilidadeBfciario(dtmAPrev.qry, …); If (Not bOk) Then … FieldByName('IDSITBENEFICIO').AsInteger := 2; FieldByName('DATAFINALPREVISTA').AsDateTime := Date; … CriaLogOcorrencia(…, '3', // TIPO = RETENÇÃO … sMotivo …)</p>
+<p><strong>Condições:</strong> Evento OnChange do estado civil (dbcEstCivilChange)</p><p><strong>Dados envolvidos:</strong> BENEFBFCIARIO, BENEFPLANPREV, BENEFPLANOPART, ELEGPATRO; log de ocorrência (UBeneficio)</p><p><strong>Resultado/Exceção:</strong> Benefício retido + log de ocorrência</p>
+<p class="rule-origin">📂 Origem: <code>FRecebeRecadastramento.pas:737-838; FRecebeRecadastramento.dfm:1459-1530, 1620-1652; CM/CMADMPREV/Fontes/UBeneficio.pas:4163</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+<div class="rule-block" id="CADPREV-RN133"><div class="rule-id">RS133 (CADPREV-RN133) — Recebimento por arquivo TXT baixa a pendência por matrícula e data de nascimento</div>
+<div class="rule-desc">O arquivo TXT tem uma linha por recebedor: matrícula nas posições 1–10, data de nascimento do recebedor em 25–32 (DDMMAAAA) e data de recebimento em 38–47 (DD/MM/AAAA). A primeira linha serve de teste: mostra matrícula, nome do titular, data da carta, data limite e data de recebimento, ou avisa que não há registro compatível. Na importação, para cada linha o sistema localiza os benefícios pendentes (FLGSTATUS = 'P') do titular com plano ativo cujo recebedor tem aquela data de nascimento e grava FLGSTATUS = 'N' e DATARECEBRECAD, uma transação por benefício, registrando o resultado em um log na tela (que pode ser salvo).</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>Linha TXT 1-10</code> — [obrigatório] — matrícula</li>
+<li><code>Linha TXT 25-32</code> — [obrigatório] — nascimento do recebedor</li>
+<li><code>Linha TXT 38-47</code> — [obrigatório] — data de recebimento</li>
+<li><code>PARTPREVPLAN.FLGDESATIVADO</code> — [obrigatório] — = 0</li>
+<li><code>BENEFBFCIARIO.IDSITBENEFICIO</code> — [obrigatório] — 1 ou 2 na gravação</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT211">TRT211</a> (<a href="#MSG222">MSG222</a>/<a href="#MSG223">MSG223</a>); <a href="#TRT212">TRT212</a> (<a href="#MSG224">MSG224</a>, <a href="#MSG225">MSG225</a>, <a href="#MSG226">MSG226</a>)</p>
+<p><strong>Jornada:</strong> <a href="#PF-20">JF020</a></p>
+<p><strong>Descrição original:</strong> qryAux.ParamByName('MATRICULA').AsString := Copy(sLinha,1,10); … ('DATANASCIMENTO').AsDate := StrToDate(Copy(sLinha,25,2)+'/'+…); StartTransacao; … qryGrava: UPDATE BENEFBFCIARIO SET DATARECEBRECAD =:DATARECEB, FLGSTATUS = 'N' WHERE … AND (IDSITBENEFICIO IN (1,2)) AND (FLGSTATUS = 'P') … CommitTransacao; Except … RollBackTransacao;</p>
+<p><strong>Condições:</strong> Botões “...” (abrir arquivo) e “Importar dados”</p><p><strong>Dados envolvidos:</strong> ELEGPATRO, PARTPREVPLAN, BENEFBFCIARIO, BFCIARIOTITPLAN, PESSOA, PESSOAFISICA</p><p><strong>Resultado/Exceção:</strong> Benefícios baixados e log de importação</p>
+<p class="rule-origin">📂 Origem: <code>fRecebeRecadTXT.pas:83-200, 214-233; fRecebeRecadTXT.dfm:318-418</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+<p><strong>Regras transversais do módulo</strong> (definidas na íntegra em <a href="uc401.html">UC401</a>; valem também para esta jornada): <a href="uc401.html#CADPREV-RN001">RS001 (CADPREV-RN001) — Dados isolados por fundação</a>, <a href="uc401.html#CADPREV-RN003">RS003 (CADPREV-RN003) — Instituto troca a nomenclatura das telas</a>, <a href="uc401.html#CADPREV-RN005">RS005 (CADPREV-RN005) — Operações registradas no log de operações do TotalPREV</a>.</p>
+</div>
+
+<p><strong>Tratamentos de erro:</strong> <a href="#TRT207">TRT207</a>, <a href="#TRT208">TRT208</a>, <a href="#TRT209">TRT209</a>, <a href="#TRT210">TRT210</a>, <a href="#TRT211">TRT211</a>, <a href="#TRT212">TRT212</a>, <a href="uc401.html#TRT004">UC401 TRT004</a></p>
+<p><strong>Mensagens:</strong> <a href="#MSG219">MSG219</a>, <a href="#MSG220">MSG220</a>, <a href="#MSG221">MSG221</a>, <a href="#MSG222">MSG222</a>, <a href="#MSG223">MSG223</a>, <a href="#MSG224">MSG224</a>, <a href="#MSG225">MSG225</a>, <a href="#MSG226">MSG226</a></p>
+<p><strong>Telas:</strong> Recebimento de Cartas de Recadastramento (<code>FRecebeRecadastramento.dfm</code>); Recebimento de Recadastramento via TXT (<code>fRecebeRecadTXT.dfm</code>); Tipo de Recebimento desejado (<code>CM/CMADMPREV/Fontes/FTipoBenefConcede.dfm</code>, externo)</p>
+<p><strong>Dependências:</strong> Depende de <a href="#PF-19">JF019</a> (pendência 'P'). Usa do CMAdmPrev a janela FTipoBenefConcede, a regra de elegibilidade (ExecutaRegraElegibilidadeBfciario) e o log de ocorrência (<code>CM/CMADMPREV/Fontes/UBeneficio.pas:4163</code>).</p>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span> — informações que o repositório não comprova ou que divergem entre fontes. Os itens abaixo dependem de validação humana.</p>
+<ul>
+<li>No FormShow, quando PARAMAPREV.FLGCPOBUSCA ≠ 0, o tipo de documento é lido de <code>qryDados</code> (ainda fechada) em vez de <code>qryAux</code> (<code>FRecebeRecadastramento.pas:335-346</code>); e a busca por documento usa a coluna <code>NUMDOCUMENO</code> (grafia) em DOCPESSOA (<code>FRecebeRecadastramento.pas:398</code>) — <span class="ev ev-inferido">INFERIDO</span> que a busca por documento falhe.</li>
+<li>A confirmação altera só o registro corrente de qryDados (FLGSTATUS = 'N'); se o titular tiver vários benefícios pendentes, os demais continuariam 'P' (<code>FRecebeRecadastramento.pas:517-521</code>) — <span class="ev ev-inferido">INFERIDO</span>. Também não há pergunta de confirmação nem transação explícita (depende de AplicaAlteracoes).</li>
+<li>O UpdateSQL updBciario (retenção por inelegibilidade) não tem “AND” antes de <code>FLGSTATUS = 'P'</code> (<code>FRecebeRecadastramento.dfm:1633-1634</code>); a gravação da retenção pode falhar — <span class="ev ev-inferido">INFERIDO</span>.</li>
+<li>A importação TXT não filtra a fundação e a variável de resultado só é inicializada dentro do laço (linha sem benefício encontrado pode ser registrada com resultado indefinido; o resultado mostrado reflete o último benefício) (<code>fRecebeRecadTXT.pas:145-188</code>).</li>
+<li>Significado dos códigos de situação (1 Normal, 2 Retido conforme o DECODE de <code>FRecebeRecadastramento.dfm:628</code>; 3 excluída da busca) e do motivo '4' do log de ocorrência não está descrito no repositório.</li>
+</ul>
+</div>
+<div class="note note-info"><p><strong>Registro original do processo PF-20</strong></p><p><strong>Forms de entrada:</strong> <code>FRecebeRecadastramento.dfm</code>, <code>fRecebeRecadTXT.dfm</code>; externo <code>FTipoBenefConcede</code></p><p><strong>Lógica de processamento:</strong> Escolha do canal → busca do titular → edição → confirmação (FLGSTATUS 'N') | leitura TXT → UPDATE por benefício</p><p><strong>Saídas:</strong> Pendência baixada; log de importação (memo, salvável)</p><p><strong>Persistência (tabelas escritas):</strong> BENEFBFCIARIO, PESSOAFISICA, ENDPESS, TELENDPESS, DOCPESSOA</p><p><strong>Evidência:</strong> <code>CADASTROPREV/Fontes/FRecebeRecadastramento.pas:513-563; fRecebeRecadTXT.pas:121-200</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+</div>
+<div class="pf-block" id="PF-21"><h4>JF021 (PF-21) — Retenção por falta de recadastramento</h4>
+<p><strong>Objetivo:</strong> Suspender (reter) o pagamento dos benefícios cujos recebedores não responderam ao recadastramento dentro do prazo.</p>
+<p><strong>Necessidade de negócio:</strong> sem prova de vida, a entidade não deve continuar pagando. A retenção interrompe o pagamento até que o recadastramento seja recebido, protegendo o plano de pagamentos indevidos.</p>
+<p><strong>Ator / gatilho:</strong> Analista de benefícios, pelo menu <strong>Manutenção › Retenção por Falta de Recadastramento</strong> (<code>FPrincipal.pas:2184-2190</code>; item em <code>FPrincipal.dfm:8610-8613</code>).</p>
+<p><strong>Pré-condições:</strong> Benefícios com FLGSTATUS = 'P' e DATALIMITERECAD vencida; participante com plano ativo.</p>
+<p><strong>Em termos de negócio:</strong> a carta foi emitida, o prazo de resposta passou e o recebimento não foi registrado.</p>
+<p><strong>Pós-condições:</strong> BENEFBFCIARIO.IDSITBENEFICIO = 2, FLGDATAPREVISTA = 1 e DATAFINALPREVISTA calculada; log de ocorrência de retenção (lote); log de operações.</p>
+<p><strong>Em termos de negócio:</strong> os benefícios ficam retidos a partir do fim do mês de preparo da folha; a retenção fica registrada no histórico de ocorrências do benefício.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li><strong>Usuário:</strong> Abrir a tela; o sistema lista os benefícios a reter na data atual. [<a href="#CADPREV-RN134">RS134</a>]<br>Título “Benefícios Pendentes de Recadastramento até &lt;data&gt;” (<code>FSuspendeBeneficio.pas:299-321</code>).</li>
+<li><strong>Usuário:</strong> (Opcional) Filtrar por benefício, inscrição, matrícula, nome ou outra data limite. [<a href="#CADPREV-RN134">RS134</a>]<br>Refaz a consulta com os filtros (<code>FSuspendeBeneficio.pas:395-449</code>).</li>
+<li><strong>Usuário e sistema:</strong> Suspender todos os listados, após confirmação. [<a href="#CADPREV-RN135">RS135</a>] [<a href="#TRT213">TRT213</a>]<br><a href="#MSG227">MSG227</a>; para cada benefício: log de ocorrência e UPDATE com DATAFINALPREVISTA no fim do mês de preparo; commit por benefício; <a href="#MSG228">MSG228</a> (<code>FSuspendeBeneficio.pas:148-295</code>).</li>
+<li><strong>Usuário e sistema:</strong> Ou reter um benefício por duplo clique. [<a href="#CADPREV-RN136">RS136</a>] [<a href="#TRT214">TRT214</a>]<br><a href="#MSG229">MSG229</a>; grava situação 2 com a data do filtro (<code>FSuspendeBeneficio.pas:377-392</code>).</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Listar pendentes vencidos</td><td>Ver quem será retido</td><td>Data de referência e filtros</td><td>Consulta ativos 'P' com prazo vencido</td><td>Grade de benefícios</td><td><a href="#CADPREV-RN134">RS134</a></td><td>—</td><td><code>FSuspendeBeneficio.dfm</code></td></tr>
+<tr><td>Suspender em lote</td><td>Reter todos os listados</td><td>Confirmação</td><td>Log de ocorrência + UPDATE situação 2 por benefício</td><td>Benefícios retidos</td><td><a href="#CADPREV-RN135">RS135</a></td><td><a href="#MSG227">MSG227</a>, <a href="#MSG228">MSG228</a></td><td><code>FSuspendeBeneficio.dfm</code></td></tr>
+<tr><td>Suspender individual</td><td>Reter um benefício</td><td>Duplo clique e Data Limite</td><td>UPDATE situação 2 com data do filtro</td><td>Benefício retido</td><td><a href="#CADPREV-RN136">RS136</a></td><td><a href="#MSG229">MSG229</a></td><td><code>FSuspendeBeneficio.dfm</code></td></tr>
+</tbody></table></div>
+<div class="jf-rules">
+<p><strong>Regras de negócio da jornada:</strong> 3 regra(s) — texto completo abaixo.</p>
+<div class="rule-block" id="CADPREV-RN134"><div class="rule-id">RS134 (CADPREV-RN134) — Benefícios a reter: pendentes com prazo de resposta vencido</div>
+<div class="rule-desc">A tela lista os benefícios ativos (IDSITBENEFICIO = 1), ainda pendentes de recadastramento (FLGSTATUS = 'P'), cuja data limite (DATALIMITERECAD) já passou em relação à data de referência — a data atual ou a “Data Limite” informada no filtro —, de participantes com plano ativo (FLGDESATIVADO = 0) das patrocinadoras da fundação. Filtros: tipo de benefício, nº de inscrição, matrícula e nome (começa com, termina com, igual a, contém).</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>BENEFBFCIARIO.DATALIMITERECAD</code> — [obrigatório] — &lt;= data de referência</li>
+<li><code>BENEFBFCIARIO.FLGSTATUS</code> — [obrigatório] — 'P'</li>
+<li><code>BENEFBFCIARIO.IDSITBENEFICIO</code> — [obrigatório] — 1</li>
+<li><code>PARTPREVPLAN.FLGDESATIVADO</code> — [obrigatório] — 0</li>
+<li><code>dblkBeneficio / edtNrInscricao / edtMatricula / EdtNome+cbOpcao / dbDataLimite</code> — [opcional] — filtros</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> — (lista vazia apenas desabilita o botão de suspensão)</p>
+<p><strong>Jornada:</strong> <a href="#PF-21">JF021</a></p>
+<p><strong>Descrição original:</strong> (E.IDPESSJUR IN (SELECT IDPESSOA FROM PATRO WHERE IDFUNDACAO = :IDFUNDACAO)) AND (BF.IDSITBENEFICIO = 1) AND (BF.FLGSTATUS = 'P') AND (BF.DATALIMITERECAD &lt;= :DATAATUAL) … AND (PP.FLGDESATIVADO = 0)</p>
+<p><strong>Condições:</strong> FormShow (data atual) e botão Filtrar</p><p><strong>Dados envolvidos:</strong> BENEFICIO, BENEFBFCIARIO, ELEGPATRO, PESSOA, PARTPREVPLAN</p><p><strong>Resultado/Exceção:</strong> Grade de benefícios a reter; botão “Suspende Benefícios” habilitado se houver linhas</p>
+<p class="rule-origin">📂 Origem: <code>FSuspendeBeneficio.pas:299-364, 395-449; FSuspendeBeneficio.dfm:270-344</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+<div class="rule-block" id="CADPREV-RN135"><div class="rule-id">RS135 (CADPREV-RN135) — Retenção em lote com data final prevista no fim do mês de preparo</div>
+<div class="rule-desc">Após confirmação, para cada benefício listado o sistema cria um log de ocorrência do tipo 3 (retenção) com motivo '2' e, em transação própria, grava IDSITBENEFICIO = 2 (retido), FLGDATAPREVISTA = 1 e DATAFINALPREVISTA = último dia do mês de ULTMESPREPARO do benefício (ou do mês corrente, se ULTMESPREPARO estiver vazio ou “0000/00”). O UPDATE repete as condições de pendência e prazo. Cada benefício é confirmado individualmente; registra-se o log de operações.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>BENEFBFCIARIO.ULTMESPREPARO</code> — [opcional] — AAAA/MM do último preparo da folha</li>
+<li><code>BENEFBFCIARIO.IDSITBENEFICIO</code> — [obrigatório] — 2</li>
+<li><code>BENEFBFCIARIO.FLGDATAPREVISTA</code> — [obrigatório] — 1</li>
+<li><code>BENEFBFCIARIO.DATAFINALPREVISTA</code> — [obrigatório] — último dia do mês calculado</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT213">TRT213</a> → <a href="#MSG227">MSG227</a>, <a href="#MSG228">MSG228</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-21">JF021</a></p>
+<p><strong>Descrição original:</strong> CriaLogOcorrencia(…, '3', DateToStr(date), …, qryAux, '2', -1, iIdCalculoGeral); StartTransacao; if (ULTMESPREPARO &lt;&gt; '') and (ULTMESPREPARO &lt;&gt; '0000/00') then iUltDiaMes := TrazUltDiaMes(…) … qryAtualiza: UPDATE BENEFBFCIARIO SET IDSITBENEFICIO = 2, DATAFINALPREVISTA = :DATARETENCAO, FLGDATAPREVISTA = 1 WHERE ( FLGSTATUS = 'P' ) AND ( DATALIMITERECAD &lt;=:DATAATUAL ) AND ( IDSITBENEFICIO = 1 ) AND … ; CommitTransacao;</p>
+<p><strong>Condições:</strong> Botão “Suspende Benefícios” com confirmação</p><p><strong>Dados envolvidos:</strong> BENEFBFCIARIO; log de ocorrência (UBeneficio); log de operações</p><p><strong>Resultado/Exceção:</strong> Benefícios retidos; lista recarregada</p>
+<p class="rule-origin">📂 Origem: <code>FSuspendeBeneficio.pas:148-295; FSuspendeBeneficio.dfm:378-400; CM/CMADMPREV/Fontes/UBeneficio.pas:4163</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+<div class="rule-block" id="CADPREV-RN136"><div class="rule-id">RS136 (CADPREV-RN136) — Retenção individual por duplo clique usa a Data Limite do filtro</div>
+<div class="rule-desc">Um duplo clique na linha pergunta “Suspender beneficio ?” e, confirmado, grava apenas aquele benefício como retido (IDSITBENEFICIO = 2, FLGDATAPREVISTA = 1) com DATAFINALPREVISTA igual à data do campo “Data Limite” do filtro. Esse caminho não cria log de ocorrência nem log de operações.</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>dbDataLimite</code> — [obrigatório na prática] — vira DATAFINALPREVISTA</li>
+<li><code>BENEFBFCIARIO.IDSITBENEFICIO / FLGDATAPREVISTA</code> — [obrigatório] — 2 / 1</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT214">TRT214</a> → <a href="#MSG229">MSG229</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-21">JF021</a></p>
+<p><strong>Descrição original:</strong> if (MsgDlg('Suspender beneficio ?', 'Suspensão', …) = mrYes) then … FieldbyName('IDSITBENEFICIO').AsInteger := 2; FieldbyName('FLGDATAPREVISTA').AsInteger := 1; FieldbyName('DATAFINALPREVISTA').AsDateTime := dbDataLimite.Date; AplicaAlteracoes([Qry]);</p>
+<p><strong>Condições:</strong> Duplo clique na grade</p><p><strong>Dados envolvidos:</strong> BENEFBFCIARIO (UpdateSQL upd)</p><p><strong>Resultado/Exceção:</strong> Um benefício retido</p>
+<p class="rule-origin">📂 Origem: <code>FSuspendeBeneficio.pas:377-392; FSuspendeBeneficio.dfm:345-377</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+<p><strong>Regras transversais do módulo</strong> (definidas na íntegra em <a href="uc401.html">UC401</a>; valem também para esta jornada): <a href="uc401.html#CADPREV-RN001">RS001 (CADPREV-RN001) — Dados isolados por fundação</a>, <a href="uc401.html#CADPREV-RN003">RS003 (CADPREV-RN003) — Instituto troca a nomenclatura das telas</a>, <a href="uc401.html#CADPREV-RN005">RS005 (CADPREV-RN005) — Operações registradas no log de operações do TotalPREV</a>.</p>
+</div>
+
+<p><strong>Tratamentos de erro:</strong> <a href="#TRT213">TRT213</a>, <a href="#TRT214">TRT214</a>, <a href="uc401.html#TRT004">UC401 TRT004</a></p>
+<p><strong>Mensagens:</strong> <a href="#MSG227">MSG227</a>, <a href="#MSG228">MSG228</a>, <a href="#MSG229">MSG229</a></p>
+<p><strong>Telas:</strong> Suspensão de Benefícios (<code>FSuspendeBeneficio.dfm</code>)</p>
+<p><strong>Dependências:</strong> Depende de <a href="#PF-19">JF019</a> (DATALIMITERECAD) e da ausência de <a href="#PF-20">JF020</a>. Usa o log de ocorrência do CMAdmPrev (<code>CM/CMADMPREV/Fontes/UBeneficio.pas:4163</code>) e o campo ULTMESPREPARO, mantido pela folha de benefícios.</p>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span> — informações que o repositório não comprova ou que divergem entre fontes. Os itens abaixo dependem de validação humana.</p>
+<ul>
+<li>O log de ocorrência é criado antes do <code>StartTransacao</code> de cada benefício (<code>FSuspendeBeneficio.pas:177-204</code>); um erro no UPDATE desfaz a retenção mas o log pode permanecer — <span class="ev ev-inferido">INFERIDO</span>.</li>
+<li>O aviso <a href="#MSG228">MSG228</a> está no bloco <code>finally</code> e aparece mesmo quando houve erro (<code>FSuspendeBeneficio.pas:266-288</code>); o formulário de progresso é aberto depois do laço (<code>FSuspendeBeneficio.pas:256</code>).</li>
+<li>A retenção individual usa a “Data Limite” do filtro (pode estar vazia) como DATAFINALPREVISTA e não cria log de ocorrência nem log de operações (<code>FSuspendeBeneficio.pas:377-392</code>).</li>
+<li>Significado do motivo '2' passado a CriaLogOcorrencia e do tipo '3' (comentado como “RETENÇÃO” em FRecebeRecadastramento) a confirmar com a área de benefícios.</li>
+</ul>
+</div>
+<div class="note note-info"><p><strong>Registro original do processo PF-21</strong></p><p><strong>Forms de entrada:</strong> <code>FSuspendeBeneficio.dfm</code> (TfrmSuspendeBeneficio)</p><p><strong>Lógica de processamento:</strong> Seleção de pendentes vencidos → confirmação → CriaLogOcorrencia + UPDATE por benefício (commit individual)</p><p><strong>Saídas:</strong> Benefícios retidos</p><p><strong>Persistência (tabelas escritas):</strong> BENEFBFCIARIO; log de ocorrência (CMAdmPrev)</p><p><strong>Evidência:</strong> <code>CADASTROPREV/Fontes/FSuspendeBeneficio.pas:148-295, 377-392</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+</div>
+<div class="pf-block" id="PF-22"><h4>JF022 (PF-22) — Registro de falecimento de beneficiário</h4>
+<p><strong>Objetivo:</strong> Registrar o falecimento de um beneficiário (pessoa que recebe benefício na condição de dependente) e encerrar os efeitos cadastrais.</p>
+<p><strong>Necessidade de negócio:</strong> o recadastramento é uma das fontes de informação de óbito; quando o beneficiário falece, o benefício dele precisa ser encerrado e o dependente cancelado para evitar pagamentos indevidos.</p>
+<p><strong>Ator / gatilho:</strong> Analista de benefícios, pelo menu <strong>Manutenção › Registro de Falecimento de Beneficiário</strong> (<code>FPrincipal.pas:2192-2198</code>; item em <code>FPrincipal.dfm:8618-8621</code>).</p>
+<p><strong>Pré-condições:</strong> Beneficiário cadastrado; tela externa FRegFalBenef disponível.</p>
+<p><strong>Em termos de negócio:</strong> a pessoa falecida é beneficiária de algum participante e o componente do CMAdmPrev está instalado.</p>
+<p><strong>Pós-condições:</strong> PESSOAFISICA.DATAMORTE, DEPENTIT.DATACANCELA e PLANODEPENDENTE.DATACANCEL gravados (pela tela externa); log de operações.</p>
+<p><strong>Em termos de negócio:</strong> a data de falecimento fica registrada, o dependente deixa de constar como ativo e os benefícios dele já foram encerrados.</p>
+<p><strong>Sequência operacional:</strong></p>
+<ol>
+<li><strong>Usuário e sistema:</strong> Acionar o menu; o sistema cria os datamodules e abre a tela externa. [<a href="#CADPREV-RN137">RS137</a>]<br><code>FPrincipal.pas:2192-2198</code>; a tela está em <code>CM/CMADMPREV/Fontes/FRegFalBenef.pas</code> (679 linhas).</li>
+<li><strong>Usuário:</strong> Procurar o beneficiário (pesquisa filtrada pela fundação). [<a href="#TRT215">TRT215</a>]<br>Se já houver data de falecimento, <a href="#MSG230">MSG230</a> (<code>CM/CMADMPREV/Fontes/FRegFalBenef.pas:211-240, 312-320</code>).</li>
+<li><strong>Usuário:</strong> Informar a data de falecimento e, se houver benefícios ativos, executar “Encerrar Benefícios”. [<a href="#TRT215">TRT215</a>]<br><a href="#MSG232">MSG232</a>, <a href="#MSG233">MSG233</a> (<code>CM/CMADMPREV/Fontes/FRegFalBenef.pas:328-345, 427-434</code>).</li>
+<li><strong>Sistema:</strong> Gravar o falecimento em transação, registrar o log e confirmar.<br>UPDATE de PESSOAFISICA, DEPENTIT e PLANODEPENDENTE; <a href="#MSG234">MSG234</a> em erro; <a href="#MSG235">MSG235</a> ao final (<code>CM/CMADMPREV/Fontes/FRegFalBenef.pas:436-520</code>).</li>
+</ol>
+<p><strong>Ações práticas:</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Ação</th><th>Objetivo</th><th>Entrada esperada</th><th>Comportamento esperado</th><th>Resultado esperado</th><th>Regras</th><th>Mensagens</th><th>Tela</th></tr></thead><tbody>
+<tr><td>Registrar falecimento de beneficiário</td><td>Encerrar o vínculo do beneficiário falecido</td><td>Beneficiário e data de falecimento</td><td>Delegado à tela externa; exige encerramento de benefícios ativos</td><td>Falecimento registrado</td><td><a href="#CADPREV-RN137">RS137</a></td><td><a href="#MSG230">MSG230</a>–<a href="#MSG235">MSG235</a></td><td><code>CM/CMADMPREV/Fontes/FRegFalBenef.dfm (externo)</code></td></tr>
+</tbody></table></div>
+<div class="jf-rules">
+<p><strong>Regras de negócio da jornada:</strong> 1 regra(s) — texto completo abaixo.</p>
+<div class="rule-block" id="CADPREV-RN137"><div class="rule-id">RS137 (CADPREV-RN137) — Registro de falecimento de beneficiário delegado à tela do CMAdmPrev</div>
+<div class="rule-desc">O item de menu cria os datamodules e abre a tela externa FRegFalBenef (CMAdmPrev). Pelo fonte externo: a pesquisa de beneficiário é filtrada pela fundação; se a pessoa já tem data de falecimento, o sistema avisa e bloqueia a data; exige beneficiário e data de falecimento; se houver benefícios ativos, obriga executar antes o “Encerrar Benefícios”; grava PESSOAFISICA.DATAMORTE, cancela o dependente (DEPENTIT.DATACANCELA) e o plano do dependente (PLANODEPENDENTE.DATACANCEL), registra o log de operações e confirma a transação. É a mesma tela documentada no BENEFICIOPREV (<a href="../beneficioprev/uc303.html#PF-18">BENEFICIOPREV JF018</a>).</div>
+<p><strong>Campos de dados:</strong></p>
+<ul>
+<li><code>EdDtFalecimento</code> — [obrigatório] — data de falecimento</li>
+<li><code>PESSOAFISICA.DATAMORTE</code> — [obrigatório] — gravada</li>
+<li><code>DEPENTIT.DATACANCELA / PLANODEPENDENTE.DATACANCEL</code> — [obrigatório] — cancelamento do dependente</li>
+</ul>
+<p><strong>Tratamento de erro:</strong> <a href="#TRT215">TRT215</a> → <a href="#MSG230">MSG230</a>…<a href="#MSG235">MSG235</a></p>
+<p><strong>Jornada:</strong> <a href="#PF-22">JF022</a></p>
+<p><strong>Descrição original:</strong> AbrirForm( frmRegFalBenef, TfrmRegFalBenef, False); — externo: MSBeneficiario.Filtro.Add('EL.IDPESSJUR IN (SELECT IDPESSOA FROM PATRO WHERE IDFUNDACAO = …)'); … If (bPossuiBenefAtivo = True) And (ExecutouDesdobramento = False) … QryAux.SQL.Add('UPDATE PESSOAFISICA SET DATAMORTE = …'); … 'UPDATE DEPENTIT SET DATACANCELA = …' … ' UPDATE PLANODEPENDENTE SET DATACANCEL = …'</p>
+<p><strong>Condições:</strong> Menu Manutenção › Registro de Falecimento de Beneficiário</p><p><strong>Dados envolvidos:</strong> PESSOAFISICA, DEPENTIT, PLANODEPENDENTE, BENEFBFCIARIO (externo)</p><p><strong>Resultado/Exceção:</strong> Falecimento registrado; transação confirmada</p>
+<p class="rule-origin">📂 Origem: <code>FPrincipal.pas:2192-2198; CM/CMADMPREV/Fontes/FRegFalBenef.pas:211-240, 312-320, 328-345, 409-520</code> | Evidência: <span class="ev ev-comprovado">COMPROVADO</span></p>
+</div>
+<p><strong>Regras transversais do módulo</strong> (definidas na íntegra em <a href="uc401.html">UC401</a>; valem também para esta jornada): <a href="uc401.html#CADPREV-RN001">RS001 (CADPREV-RN001) — Dados isolados por fundação</a>, <a href="uc401.html#CADPREV-RN003">RS003 (CADPREV-RN003) — Instituto troca a nomenclatura das telas</a>, <a href="uc401.html#CADPREV-RN005">RS005 (CADPREV-RN005) — Operações registradas no log de operações do TotalPREV</a>.</p>
+</div>
+
+<p><strong>Tratamentos de erro:</strong> <a href="#TRT215">TRT215</a>, <a href="uc401.html#TRT001">UC401 TRT001</a></p>
+<p><strong>Mensagens:</strong> <a href="#MSG230">MSG230</a>, <a href="#MSG231">MSG231</a>, <a href="#MSG232">MSG232</a>, <a href="#MSG233">MSG233</a>, <a href="#MSG234">MSG234</a>, <a href="#MSG235">MSG235</a></p>
+<p><strong>Telas:</strong> Registro de Falecimento de Beneficiário (<code>CM/CMADMPREV/Fontes/FRegFalBenef.dfm</code>, externo)</p>
+<p><strong>Dependências:</strong> Mesma tela usada no BENEFICIOPREV (<a href="../beneficioprev/uc303.html#PF-18">BENEFICIOPREV JF018</a>); no CADASTROPREV a abertura chama CriaDataModule antes (<code>FPrincipal.pas:2196</code>). Complementa o falecimento do participante (<a href="uc401.html#PF-02">JF002</a>).</p>
+<div class="note"><p><strong>🔎 Pontos a validar nesta jornada</strong> <span class="ev ev-pendente">PENDENTE</span> — informações que o repositório não comprova ou que divergem entre fontes. Os itens abaixo dependem de validação humana.</p>
+<ul>
+<li>As regras descritas para a tela externa foram lidas em alto nível; o encerramento de benefícios (BtEncerraBeneficioClick) e o requerimento de benefício a partir do falecimento (bbtnRequerBenefClick) não foram detalhados — dependência externa.</li>
+<li>Diferença em relação ao BENEFICIOPREV: aqui a abertura é precedida de CriaDataModule; no BENEFICIOPREV o comportamento interno não foi documentado (lá está como PENDENTE). Confirmar se as duas documentações devem ser harmonizadas.</li>
+</ul>
+</div>
+<div class="note note-info"><p><strong>Registro original do processo PF-22</strong></p><p><strong>Forms de entrada:</strong> <code>FRegFalBenef</code> (externo, CMAdmPrev)</p><p><strong>Lógica de processamento:</strong> Registro de falecimento de beneficiário delegado ao CMAdmPrev</p><p><strong>Saídas:</strong> Falecimento registrado</p><p><strong>Persistência (tabelas escritas):</strong> PESSOAFISICA, DEPENTIT, PLANODEPENDENTE (pela tela externa)</p><p><strong>Evidência:</strong> <code>CADASTROPREV/Fontes/FPrincipal.pas:2192-2198</code> · <span class="ev ev-comprovado">COMPROVADO</span></p></div>
+</div>
+<section id="TRT-section"><div class="section-title">6. Tratamentos (TRT)</div>
+<p>Cada tratamento traz a condição, a mensagem exibida, o resultado e a regra/jornada de origem. Os tratamentos transversais (falha ao criar datamodule, falha ao gravar o log de operações) estão em <a href="uc401.html#TRT001">UC401 TRT001</a> e <a href="uc401.html#TRT004">UC401 TRT004</a>. “validação de tela” = crítica sem regra CADPREV-RN correspondente; “validação técnica” = falha técnica tratada pela tela.</p>
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Condição</th><th>Mensagem</th><th>Resultado</th><th>Regra</th><th>Jornada</th></tr></thead><tbody>
+<tr id="TRT201"><td><strong>TRT201</strong></td><td>Parâmetro de emissão ausente ou incoerente (nº da carta, datas, país/estado, aniversário, iniciais, documento, etiqueta, 2ª via)</td><td><a href="#MSG201">MSG201</a>, <a href="#MSG202">MSG202</a>, <a href="#MSG203">MSG203</a>, <a href="#MSG204">MSG204</a>, <a href="#MSG205">MSG205</a>, <a href="#MSG206">MSG206</a>, <a href="#MSG207">MSG207</a>, <a href="#MSG208">MSG208</a>, <a href="#MSG209">MSG209</a>, <a href="#MSG210">MSG210</a>, <a href="#MSG211">MSG211</a>, <a href="#MSG212">MSG212</a></td><td>Aviso, foco no campo e interrupção (EValidacao)</td><td><a href="#CADPREV-RN121">RS121 (CADPREV-RN121)</a></td><td><a href="#PF-19">JF019</a></td></tr>
+<tr id="TRT202"><td><strong>TRT202</strong></td><td>Nenhum beneficiário atende aos filtros</td><td><a href="#MSG213">MSG213</a></td><td>Interrompe sem gravar (DefineEscopo = False)</td><td><a href="#CADPREV-RN122">RS122 (CADPREV-RN122)</a></td><td><a href="#PF-19">JF019</a></td></tr>
+<tr id="TRT203"><td><strong>TRT203</strong></td><td>Impressão de carta com código de barras</td><td><a href="#MSG218">MSG218</a></td><td>Pede o complemento do código de barras (pode ficar vazio)</td><td><a href="#CADPREV-RN125">RS125 (CADPREV-RN125)</a></td><td><a href="#PF-19">JF019</a></td></tr>
+<tr id="TRT204"><td><strong>TRT204</strong></td><td>Fim da impressão das cartas</td><td><a href="#MSG214">MSG214</a>, <a href="#MSG215">MSG215</a></td><td>Pergunta se imprime etiquetas e avisa para conferir a impressão</td><td><a href="#CADPREV-RN125">RS125 (CADPREV-RN125)</a></td><td><a href="#PF-19">JF019</a></td></tr>
+<tr id="TRT205"><td><strong>TRT205</strong></td><td>Erro durante seleção/marcação/emissão; ou conclusão normal</td><td><a href="#MSG216">MSG216</a></td><td>Erro: RollBackTransacao e a exceção é exibida; sucesso: CommitTransacao e aviso</td><td><a href="#CADPREV-RN127">RS127 (CADPREV-RN127)</a></td><td><a href="#PF-19">JF019</a></td></tr>
+<tr id="TRT206"><td><strong>TRT206</strong></td><td>Fechamento do editor de modelo de carta ou de declaração</td><td><a href="#MSG217">MSG217</a></td><td>Sim: grava em CARTACOBRANCA/CM.REPORTS; Não: mantém só o arquivo temporário</td><td><a href="#CADPREV-RN126">RS126 (CADPREV-RN126)</a></td><td><a href="#PF-19">JF019</a></td></tr>
+<tr id="TRT207"><td><strong>TRT207</strong></td><td>Usuário cancela ou sai da janela de tipo de recebimento</td><td>—</td><td>Nenhuma tela é aberta (Exit)</td><td><a href="#CADPREV-RN128">RS128 (CADPREV-RN128)</a></td><td><a href="#PF-20">JF020</a></td></tr>
+<tr id="TRT208"><td><strong>TRT208</strong></td><td>Benefício pendente do titular está retido (situação 2)</td><td><a href="#MSG219">MSG219</a></td><td>Não: cancela a tela; Sim: continua</td><td><a href="#CADPREV-RN130">RS130 (CADPREV-RN130)</a></td><td><a href="#PF-20">JF020</a></td></tr>
+<tr id="TRT209"><td><strong>TRT209</strong></td><td>Titular sem benefício pendente de recadastramento</td><td><a href="#MSG220">MSG220</a></td><td>Limpa a tela e volta o foco à busca</td><td><a href="#CADPREV-RN130">RS130 (CADPREV-RN130)</a></td><td><a href="#PF-20">JF020</a></td></tr>
+<tr id="TRT210"><td><strong>TRT210</strong></td><td>Usuário clica em Cancelar no recebimento por cartas</td><td><a href="#MSG221">MSG221</a></td><td>Não: Abort; Sim: descarta as edições e limpa a tela</td><td>validação de tela</td><td><a href="#PF-20">JF020</a></td></tr>
+<tr id="TRT211"><td><strong>TRT211</strong></td><td>Teste da primeira linha do TXT</td><td><a href="#MSG222">MSG222</a>, <a href="#MSG223">MSG223</a></td><td>Sem registro: botão Importar fica desabilitado; com registro: mostra os dados e habilita Importar</td><td><a href="#CADPREV-RN133">RS133 (CADPREV-RN133)</a></td><td><a href="#PF-20">JF020</a></td></tr>
+<tr id="TRT212"><td><strong>TRT212</strong></td><td>Erro ao gravar um benefício da linha do TXT</td><td><a href="#MSG225">MSG225</a>, <a href="#MSG224">MSG224</a>, <a href="#MSG226">MSG226</a></td><td>RollBackTransacao daquele benefício; linha registrada com “*** Erro”; o processamento segue para a próxima linha</td><td><a href="#CADPREV-RN133">RS133 (CADPREV-RN133)</a></td><td><a href="#PF-20">JF020</a></td></tr>
+<tr id="TRT213"><td><strong>TRT213</strong></td><td>Suspensão em lote: confirmação e conclusão; erro de banco</td><td><a href="#MSG227">MSG227</a>, <a href="#MSG228">MSG228</a></td><td>Não: nada é feito; erro: RollBackTransacao do benefício corrente e exceção; ao final (finally) mostra o aviso de suspensão e recarrega a lista</td><td><a href="#CADPREV-RN135">RS135 (CADPREV-RN135)</a></td><td><a href="#PF-21">JF021</a></td></tr>
+<tr id="TRT214"><td><strong>TRT214</strong></td><td>Duplo clique em benefício da grade</td><td><a href="#MSG229">MSG229</a></td><td>Sim: retém o benefício e recarrega; Não: nada</td><td><a href="#CADPREV-RN136">RS136 (CADPREV-RN136)</a></td><td><a href="#PF-21">JF021</a></td></tr>
+<tr id="TRT215"><td><strong>TRT215</strong></td><td>Falecimento já registrado, beneficiário ou data ausentes, benefício ativo não encerrado, erro de gravação (tela externa)</td><td><a href="#MSG230">MSG230</a>, <a href="#MSG231">MSG231</a>, <a href="#MSG232">MSG232</a>, <a href="#MSG233">MSG233</a>, <a href="#MSG234">MSG234</a>, <a href="#MSG235">MSG235</a></td><td>Bloqueia, exige dados, exige encerramento; erro: mensagem e exceção; sucesso: commit e aviso</td><td><a href="#CADPREV-RN137">RS137 (CADPREV-RN137)</a></td><td><a href="#PF-22">JF022</a></td></tr>
+</tbody></table></div>
+</section>
+<section id="MSG-section"><div class="section-title">7. Mensagens (MSG)</div>
+<p>Textos conferidos no código-fonte (grafia original mantida, inclusive erros de digitação). Trechos variáveis aparecem entre &lt; &gt;. Origem relativa a <code>CADASTROPREV/Fontes/</code>, salvo caminho completo.</p>
+<div class="table-wrap"><table><thead><tr><th>Código</th><th>Texto da mensagem</th><th>Tipo</th><th>Origem</th><th>Jornadas</th></tr></thead><tbody>
+<tr id="MSG201"><td><strong>MSG201</strong></td><td>“É necessário preencher o Nº da Carta!”</td><td>Aviso</td><td><code>FEmissaoRecadastramento.pas:1097</code></td><td><a href="#PF-19">JF019</a></td></tr>
+<tr id="MSG202"><td><strong>MSG202</strong></td><td>“É necessário preencher a Data de Emissão!”</td><td>Aviso</td><td><code>FEmissaoRecadastramento.pas:1102</code></td><td><a href="#PF-19">JF019</a></td></tr>
+<tr id="MSG203"><td><strong>MSG203</strong></td><td>“É necessário preencher a Data Limite!”</td><td>Aviso</td><td><code>FEmissaoRecadastramento.pas:1105</code></td><td><a href="#PF-19">JF019</a></td></tr>
+<tr id="MSG204"><td><strong>MSG204</strong></td><td>“A Data Limite deve ser posterior à Data de Emisssão!”</td><td>Aviso</td><td><code>FEmissaoRecadastramento.pas:1108</code></td><td><a href="#PF-19">JF019</a></td></tr>
+<tr id="MSG205"><td><strong>MSG205</strong></td><td>“É necessário selecionar o Estado!”</td><td>Aviso</td><td><code>FEmissaoRecadastramento.pas:1114</code></td><td><a href="#PF-19">JF019</a></td></tr>
+<tr id="MSG206"><td><strong>MSG206</strong></td><td>“É necessário selecionar o País!”</td><td>Aviso</td><td><code>FEmissaoRecadastramento.pas:1118</code></td><td><a href="#PF-19">JF019</a></td></tr>
+<tr id="MSG207"><td><strong>MSG207</strong></td><td>“É necessário preencher corretamente o Período da Data de Nascimento!”</td><td>Aviso</td><td><code>FEmissaoRecadastramento.pas:1124, 1128, 1131</code></td><td><a href="#PF-19">JF019</a></td></tr>
+<tr id="MSG208"><td><strong>MSG208</strong></td><td>“É necessário que as Datas de Aniversário pertençam ao mesmo ano!”</td><td>Aviso</td><td><code>FEmissaoRecadastramento.pas:1134</code></td><td><a href="#PF-19">JF019</a></td></tr>
+<tr id="MSG209"><td><strong>MSG209</strong></td><td>“É necessário preencher corretamente as Inicias do Nome!”</td><td>Aviso</td><td><code>FEmissaoRecadastramento.pas:1140, 1144</code></td><td><a href="#PF-19">JF019</a></td></tr>
+<tr id="MSG210"><td><strong>MSG210</strong></td><td>“É necessário selecionar o Documento de Identidade!”</td><td>Aviso</td><td><code>FEmissaoRecadastramento.pas:1149</code></td><td><a href="#PF-19">JF019</a></td></tr>
+<tr id="MSG211"><td><strong>MSG211</strong></td><td>“É necessário selecionar o Modelo de Etiquetas!”</td><td>Aviso</td><td><code>FEmissaoRecadastramento.pas:1155</code></td><td><a href="#PF-19">JF019</a></td></tr>
+<tr id="MSG212"><td><strong>MSG212</strong></td><td>“É necessário escolher beneficiário para emitir 2ª via!”</td><td>Aviso</td><td><code>FEmissaoRecadastramento.pas:1159</code></td><td><a href="#PF-19">JF019</a></td></tr>
+<tr id="MSG213"><td><strong>MSG213</strong></td><td>“Não há Beneficiários que satisfaçam os critérios selecionados.”</td><td>Informação</td><td><code>FEmissaoRecadastramento.pas:758</code></td><td><a href="#PF-19">JF019</a></td></tr>
+<tr id="MSG214"><td><strong>MSG214</strong></td><td>“Deseja gerar etiquetas para acompanhar as cartas?”</td><td>Confirmação</td><td><code>FEmissaoRecadastramento.pas:1047</code></td><td><a href="#PF-19">JF019</a></td></tr>
+<tr id="MSG215"><td><strong>MSG215</strong></td><td>“ATENÇÃO! Verifique se as cartas (e as etiquetas, se for o caso) foram impressas corretamente; em caso negativo, por favor repetir a operação.”</td><td>Aviso</td><td><code>FEmissaoRecadastramento.pas:1082-1084</code></td><td><a href="#PF-19">JF019</a></td></tr>
+<tr id="MSG216"><td><strong>MSG216</strong></td><td>“Operação completada.”</td><td>Informação</td><td><code>FEmissaoRecadastramento.pas:1227</code></td><td><a href="#PF-19">JF019</a></td></tr>
+<tr id="MSG217"><td><strong>MSG217</strong></td><td>“Deseja salvar o modelo de Carta de Recadastramento criado? / Deseja salvar o modelo de Declaração de Residência criado?”</td><td>Confirmação</td><td><code>FEmissaoRecadastramento.pas:1452, 1679</code></td><td><a href="#PF-19">JF019</a></td></tr>
+<tr id="MSG218"><td><strong>MSG218</strong></td><td>“Entre com o complemento para o código de barras (janela “Complemento”)”</td><td>Entrada de dado</td><td><code>FEmissaoRecadastramento.pas:971</code></td><td><a href="#PF-19">JF019</a></td></tr>
+<tr id="MSG219"><td><strong>MSG219</strong></td><td>“Este benefício está retido. Deseja continuar?”</td><td>Confirmação</td><td><code>FRecebeRecadastramento.pas:435</code></td><td><a href="#PF-20">JF020</a></td></tr>
+<tr id="MSG220"><td><strong>MSG220</strong></td><td>“Este participante não possui benefício ativo.”</td><td>Informação</td><td><code>FRecebeRecadastramento.pas:448</code></td><td><a href="#PF-20">JF020</a></td></tr>
+<tr id="MSG221"><td><strong>MSG221</strong></td><td>“Deseja realmente cancelar as modificações efetuadas?”</td><td>Confirmação</td><td><code>FRecebeRecadastramento.pas:567</code></td><td><a href="#PF-20">JF020</a></td></tr>
+<tr id="MSG222"><td><strong>MSG222</strong></td><td>“Não foi encontrado registro compatível. Talvez o arquivo já tenha sido importado.”</td><td>Aviso (rótulo em vermelho)</td><td><code>fRecebeRecadTXT.pas:103-104</code></td><td><a href="#PF-20">JF020</a></td></tr>
+<tr id="MSG223"><td><strong>MSG223</strong></td><td>“Confira os dados acima e clique no botão abaixo para começar a importação.”</td><td>Informação (rótulo em azul)</td><td><code>fRecebeRecadTXT.pas:113-114</code></td><td><a href="#PF-20">JF020</a></td></tr>
+<tr id="MSG224"><td><strong>MSG224</strong></td><td>“Matrícula &lt;m&gt; Titular &lt;nome&gt; Recebedor &lt;nome&gt; Recebido &lt;n&gt; beneficiário(s) com sucesso.”</td><td>Informação (log da tela)</td><td><code>fRecebeRecadTXT.pas:180-183</code></td><td><a href="#PF-20">JF020</a></td></tr>
+<tr id="MSG225"><td><strong>MSG225</strong></td><td>“*** Erro no recebimento da Matrícula &lt;m&gt; Titular &lt;nome&gt; Recebedor &lt;nome&gt;. Verifique.”</td><td>Erro (log da tela)</td><td><code>fRecebeRecadTXT.pas:184-187</code></td><td><a href="#PF-20">JF020</a></td></tr>
+<tr id="MSG226"><td><strong>MSG226</strong></td><td>“Fim da importação dos dados.”</td><td>Informação</td><td><code>fRecebeRecadTXT.pas:196</code></td><td><a href="#PF-20">JF020</a></td></tr>
+<tr id="MSG227"><td><strong>MSG227</strong></td><td>“Deseja realmente suspender TODOS os benefícios pendentes de recadastramento?”</td><td>Confirmação</td><td><code>FSuspendeBeneficio.pas:156</code></td><td><a href="#PF-21">JF021</a></td></tr>
+<tr id="MSG228"><td><strong>MSG228</strong></td><td>“Os Benefícios selecionados foram Suspensos!”</td><td>Informação</td><td><code>FSuspendeBeneficio.pas:283</code></td><td><a href="#PF-21">JF021</a></td></tr>
+<tr id="MSG229"><td><strong>MSG229</strong></td><td>“Suspender beneficio ?”</td><td>Confirmação</td><td><code>FSuspendeBeneficio.pas:380</code></td><td><a href="#PF-21">JF021</a></td></tr>
+<tr id="MSG230"><td><strong>MSG230</strong></td><td>“O falecimento deste beneficiário já foi registrado. Data do Falecimento : &lt;data&gt;.”</td><td>Erro</td><td><code>CM/CMADMPREV/Fontes/FRegFalBenef.pas:230-231</code></td><td><a href="#PF-22">JF022</a></td></tr>
+<tr id="MSG231"><td><strong>MSG231</strong></td><td>“Escolha um Beneficiário ”</td><td>Erro</td><td><code>CM/CMADMPREV/Fontes/FRegFalBenef.pas:415</code></td><td><a href="#PF-22">JF022</a></td></tr>
+<tr id="MSG232"><td><strong>MSG232</strong></td><td>“Informe a Data de Falecimento do Beneficiário.”</td><td>Erro</td><td><code>CM/CMADMPREV/Fontes/FRegFalBenef.pas:338, 422, 573</code></td><td><a href="#PF-22">JF022</a></td></tr>
+<tr id="MSG233"><td><strong>MSG233</strong></td><td>“Este beneficiário possui benefícios ATIVOS. Neste caso é OBRIGATÓRIA a execução do Encerramento de Benefícios. Clique no botão "Encerrar Benefícios" para executar o encerramento.”</td><td>Erro</td><td><code>CM/CMADMPREV/Fontes/FRegFalBenef.pas:430-432</code></td><td><a href="#PF-22">JF022</a></td></tr>
+<tr id="MSG234"><td><strong>MSG234</strong></td><td>“Houve um Erro ao executar o Registro de Falecimento. ”</td><td>Erro</td><td><code>CM/CMADMPREV/Fontes/FRegFalBenef.pas:501, 640</code></td><td><a href="#PF-22">JF022</a></td></tr>
+<tr id="MSG235"><td><strong>MSG235</strong></td><td>“Registro de Falecimento Efetuado com Sucesso.”</td><td>Informação</td><td><code>CM/CMADMPREV/Fontes/FRegFalBenef.pas:518</code></td><td><a href="#PF-22">JF022</a></td></tr>
+</tbody></table></div>
+</section>
+<section><div class="section-title">8. Tabela/API/Programa</div>
+<div class="table-wrap"><table><thead><tr><th>Jornada</th><th>Tabelas (leitura)</th><th>Tabelas (escrita)</th><th>Rotinas (CADASTROPREV/Fontes/)</th></tr></thead><tbody>
+<tr><td><a href="#PF-19">JF019</a></td><td>BENEFBFCIARIO, BFCIARIOTITPLAN, PESSOA, PESSOAFISICA, ELEGPATRO, BENEFICIO, ENDPESS, CIDADES, ESTADO, PAIS, DEPENTIT, TPPAGTOBENEFICIO, DOCPESSOA, PATRO, ETIQUETA</td><td>BENEFBFCIARIO (UPDATE); CARTACOBRANCA, CM.REPORTS (modelos)</td><td><code>FEmissaoRecadastramento.pas:533-812, 815-1088, 1090-1172, 1200-1245, 1385-1496, 1628-1710</code></td></tr>
+<tr><td><a href="#PF-20">JF020</a></td><td>PARAMAPREV, TIPODOCPESSOA, ELEGPATRO, PARTPREVPLAN, DOCPESSOA, BENEFBFCIARIO, PESSOA, PLANPREV, BENEFICIO, BENEFPLANPREV, BENEFPLANOPART, BFCIARIOTITPLAN, PESSOAFISICA</td><td>BENEFBFCIARIO, PESSOAFISICA, ENDPESS, TELENDPESS, DOCPESSOA; log de ocorrência</td><td><code>FRecebeRecadastramento.pas:319-584, 678-870</code>; <code>fRecebeRecadTXT.pas:83-200</code>; <code>FPrincipal.pas:2161-2182</code></td></tr>
+<tr><td><a href="#PF-21">JF021</a></td><td>BENEFICIO, BENEFBFCIARIO, ELEGPATRO, PESSOA, PARTPREVPLAN, BENEFPLANPREV, PLANPREVPATRO, PATRO</td><td>BENEFBFCIARIO (UPDATE); log de ocorrência</td><td><code>FSuspendeBeneficio.pas:148-295, 299-364, 377-449</code></td></tr>
+<tr><td><a href="#PF-22">JF022</a></td><td>Externo</td><td>PESSOAFISICA, DEPENTIT, PLANODEPENDENTE (externo)</td><td><code>FPrincipal.pas:2192-2198</code>; <code>CM/CMADMPREV/Fontes/FRegFalBenef.pas:409-520</code></td></tr>
+</tbody></table></div>
+</section>
+<section><div class="section-title">9. Telas/Layouts</div>
+<div class="table-wrap"><table><thead><tr><th>Jornada</th><th>Tela (título — Caption do .dfm)</th><th>Form (.dfm)</th></tr></thead><tbody>
+<tr><td><a href="#PF-19">JF019</a></td><td>Emissão de Cartas de Recadastramento</td><td><code>FEmissaoRecadastramento.dfm</code></td></tr>
+<tr><td><a href="#PF-20">JF020</a></td><td>Tipo de Recebimento desejado (Caption atribuído no código)<br>Recebimento de Cartas de Recadastramento<br>Recebimento de Recadastramento via TXT</td><td><code>CM/CMADMPREV/Fontes/FTipoBenefConcede.dfm</code> (externo)<br><code>FRecebeRecadastramento.dfm</code><br><code>fRecebeRecadTXT.dfm</code></td></tr>
+<tr><td><a href="#PF-21">JF021</a></td><td>Suspensão de Benefícios</td><td><code>FSuspendeBeneficio.dfm</code></td></tr>
+<tr><td><a href="#PF-22">JF022</a></td><td>Registro de Falecimento de Beneficiário</td><td><code>CM/CMADMPREV/Fontes/FRegFalBenef.dfm</code> (externo)</td></tr>
+</tbody></table></div>
+</section>
+<section><div class="section-title">10. Visão Consolidada das Jornadas</div>
+<div class="table-wrap"><table><thead><tr><th>Item</th><th>Jornada</th><th>Título</th><th>Critério de aceitação</th><th>Regras</th><th>Mensagens</th><th>Telas</th></tr></thead><tbody>
+<tr><td>[US] CADPREV-JF019</td><td><a href="#PF-19">JF019</a></td><td>Emissão de cartas para recadastramento</td><td><strong>Dado</strong> beneficiários ativos com endereço, <strong>Quando</strong> o analista emite a Carta de Recadastramento com data limite, <strong>Então</strong> cada benefício fica com FLGSTATUS = 'P' e prazo gravado, as cartas são geradas e aparece <a href="#MSG216">MSG216</a>.</td><td><a href="#CADPREV-RN121">RS121</a>, <a href="#CADPREV-RN122">RS122</a>, <a href="#CADPREV-RN123">RS123</a>, <a href="#CADPREV-RN124">RS124</a>, <a href="#CADPREV-RN125">RS125</a>, <a href="#CADPREV-RN126">RS126</a>, <a href="#CADPREV-RN127">RS127</a></td><td><a href="#MSG201">MSG201</a>, <a href="#MSG202">MSG202</a>, <a href="#MSG203">MSG203</a>, <a href="#MSG204">MSG204</a>, <a href="#MSG205">MSG205</a>, <a href="#MSG206">MSG206</a>, <a href="#MSG207">MSG207</a>, <a href="#MSG208">MSG208</a>, <a href="#MSG209">MSG209</a>, <a href="#MSG210">MSG210</a>, <a href="#MSG211">MSG211</a>, <a href="#MSG212">MSG212</a>, <a href="#MSG213">MSG213</a>, <a href="#MSG214">MSG214</a>, <a href="#MSG215">MSG215</a>, <a href="#MSG216">MSG216</a>, <a href="#MSG217">MSG217</a>, <a href="#MSG218">MSG218</a></td><td>Emissão de Cartas de Recadastramento</td></tr>
+<tr><td>[US] CADPREV-JF020</td><td><a href="#PF-20">JF020</a></td><td>Recebimento de recadastramento por cartas e por arquivo TXT</td><td><strong>Dado</strong> um benefício pendente de recadastramento, <strong>Quando</strong> o analista registra a carta devolvida ou importa o TXT com a matrícula e o nascimento do recebedor, <strong>Então</strong> o benefício passa a FLGSTATUS = 'N' com a data de recebimento.</td><td><a href="#CADPREV-RN128">RS128</a>, <a href="#CADPREV-RN129">RS129</a>, <a href="#CADPREV-RN130">RS130</a>, <a href="#CADPREV-RN131">RS131</a>, <a href="#CADPREV-RN132">RS132</a>, <a href="#CADPREV-RN133">RS133</a></td><td><a href="#MSG219">MSG219</a>, <a href="#MSG220">MSG220</a>, <a href="#MSG221">MSG221</a>, <a href="#MSG222">MSG222</a>, <a href="#MSG223">MSG223</a>, <a href="#MSG224">MSG224</a>, <a href="#MSG225">MSG225</a>, <a href="#MSG226">MSG226</a></td><td>Recebimento de Cartas de Recadastramento; Recebimento de Recadastramento via TXT</td></tr>
+<tr><td>[US] CADPREV-JF021</td><td><a href="#PF-21">JF021</a></td><td>Retenção por falta de recadastramento</td><td><strong>Dado</strong> benefícios pendentes com prazo vencido, <strong>Quando</strong> o analista confirma <a href="#MSG227">MSG227</a>, <strong>Então</strong> todos ficam na situação 2 com data final prevista no fim do mês de preparo.</td><td><a href="#CADPREV-RN134">RS134</a>, <a href="#CADPREV-RN135">RS135</a>, <a href="#CADPREV-RN136">RS136</a></td><td><a href="#MSG227">MSG227</a>, <a href="#MSG228">MSG228</a>, <a href="#MSG229">MSG229</a></td><td>Suspensão de Benefícios</td></tr>
+<tr><td>[US] CADPREV-JF022</td><td><a href="#PF-22">JF022</a></td><td>Registro de falecimento de beneficiário</td><td><strong>Dado</strong> um beneficiário sem benefícios ativos, <strong>Quando</strong> o analista informa a data de falecimento e confirma, <strong>Então</strong> a data é gravada, o dependente é cancelado e aparece <a href="#MSG235">MSG235</a>.</td><td><a href="#CADPREV-RN137">RS137</a></td><td><a href="#MSG230">MSG230</a>, <a href="#MSG231">MSG231</a>, <a href="#MSG232">MSG232</a>, <a href="#MSG233">MSG233</a>, <a href="#MSG234">MSG234</a>, <a href="#MSG235">MSG235</a></td><td>Registro de Falecimento de Beneficiário (externo)</td></tr>
+</tbody></table></div>
+</section>
+<section><div class="section-title">11. Critérios de Aceitação por Regra</div>
+<div class="table-wrap"><table><thead><tr><th>Regra</th><th>Jornada</th><th>Critério de aceitação</th></tr></thead><tbody>
+<tr><td><a href="#CADPREV-RN121">RS121 (CADPREV-RN121)</a></td><td><a href="#PF-19">JF019</a></td><td><strong>Dado</strong> a data limite igual ou anterior à data de emissão, <strong>Quando</strong> o usuário confirma, <strong>Então</strong> o sistema exibe <a href="#MSG204">MSG204</a> e nada é selecionado.</td></tr>
+<tr><td><a href="#CADPREV-RN122">RS122 (CADPREV-RN122)</a></td><td><a href="#PF-19">JF019</a></td><td><strong>Dado</strong> um benefício ativo da proposta 1 com endereço de correspondência, <strong>Quando</strong> o usuário emite cartas com tipo de endereço “Correspondência”, <strong>Então</strong> o recebedor do benefício entra na lista; benefícios retidos ou do tipo 99 não entram.</td></tr>
+<tr><td><a href="#CADPREV-RN123">RS123 (CADPREV-RN123)</a></td><td><a href="#PF-19">JF019</a></td><td><strong>Dado</strong> um benefício com FLGSTATUS = 'N' e data de recebimento, <strong>Quando</strong> o usuário gera “Carta de Agradecimento”, <strong>Então</strong> o benefício é selecionado; com FLGSTATUS = 'P' ele só aparece em “Falta de Recadastramento”.</td></tr>
+<tr><td><a href="#CADPREV-RN124">RS124 (CADPREV-RN124)</a></td><td><a href="#PF-19">JF019</a></td><td><strong>Dado</strong> um beneficiário ativo selecionado, <strong>Quando</strong> a Carta de Recadastramento é emitida, <strong>Então</strong> BENEFBFCIARIO recebe NUMCARTARECAD, DATAEMISSAORECAD, DATALIMITERECAD e FLGSTATUS = 'P'.</td></tr>
+<tr><td><a href="#CADPREV-RN125">RS125 (CADPREV-RN125)</a></td><td><a href="#PF-19">JF019</a></td><td><strong>Dado</strong> “Arquivo texto” marcado e tipo Carta de Recadastramento, <strong>Quando</strong> o usuário confirma, <strong>Então</strong> é gravada uma linha de largura fixa por recebedor no arquivo escolhido.</td></tr>
+<tr><td><a href="#CADPREV-RN126">RS126 (CADPREV-RN126)</a></td><td><a href="#PF-19">JF019</a></td><td><strong>Dado</strong> que não existe modelo de Carta de Recadastramento, <strong>Quando</strong> o usuário edita e responde “Sim” em <a href="#MSG217">MSG217</a>, <strong>Então</strong> CARTACOBRANCA e CM.REPORTS passam a ter o modelo.</td></tr>
+<tr><td><a href="#CADPREV-RN127">RS127 (CADPREV-RN127)</a></td><td><a href="#PF-19">JF019</a></td><td><strong>Dado</strong> um erro de banco durante a emissão, <strong>Quando</strong> o usuário confirma, <strong>Então</strong> a transação é desfeita e nenhuma pendência fica gravada; sem erro, aparece <a href="#MSG216">MSG216</a>.</td></tr>
+<tr><td><a href="#CADPREV-RN128">RS128 (CADPREV-RN128)</a></td><td><a href="#PF-20">JF020</a></td><td><strong>Dado</strong> a janela de tipo de recebimento, <strong>Quando</strong> o usuário escolhe a opção TXT e confirma, <strong>Então</strong> abre-se a tela “Recebimento de Recadastramento via TXT”; se cancelar, nada é aberto.</td></tr>
+<tr><td><a href="#CADPREV-RN129">RS129 (CADPREV-RN129)</a></td><td><a href="#PF-20">JF020</a></td><td><strong>Dado</strong> uma matrícula de outra fundação, <strong>Quando</strong> o usuário a digita, <strong>Então</strong> nenhum titular é carregado; para a fundação do usuário, só os benefícios com FLGSTATUS = 'P' aparecem.</td></tr>
+<tr><td><a href="#CADPREV-RN130">RS130 (CADPREV-RN130)</a></td><td><a href="#PF-20">JF020</a></td><td><strong>Dado</strong> um titular cujo benefício pendente está retido, <strong>Quando</strong> ele é localizado, <strong>Então</strong> o sistema exibe <a href="#MSG219">MSG219</a> e, respondendo “Não”, a tela é cancelada.</td></tr>
+<tr><td><a href="#CADPREV-RN131">RS131 (CADPREV-RN131)</a></td><td><a href="#PF-20">JF020</a></td><td><strong>Dado</strong> um benefício pendente carregado, <strong>Quando</strong> o usuário confirma o recebimento, <strong>Então</strong> FLGSTATUS passa a 'N' e DATARECEBRECAD recebe a data atual.</td></tr>
+<tr><td><a href="#CADPREV-RN132">RS132 (CADPREV-RN132)</a></td><td><a href="#PF-20">JF020</a></td><td><strong>Dado</strong> um benefício cuja regra de elegibilidade depende do estado civil, <strong>Quando</strong> o estado civil é alterado e a regra falha, <strong>Então</strong> o benefício fica retido (situação 2) e é gerado log de ocorrência de retenção.</td></tr>
+<tr><td><a href="#CADPREV-RN133">RS133 (CADPREV-RN133)</a></td><td><a href="#PF-20">JF020</a></td><td><strong>Dado</strong> uma linha com matrícula e nascimento do recebedor de um benefício pendente, <strong>Quando</strong> o arquivo é importado, <strong>Então</strong> o benefício recebe FLGSTATUS = 'N' e a data de recebimento da linha, e o log mostra “Recebido 1 beneficiário(s) com sucesso”.</td></tr>
+<tr><td><a href="#CADPREV-RN134">RS134 (CADPREV-RN134)</a></td><td><a href="#PF-21">JF021</a></td><td><strong>Dado</strong> um benefício pendente com data limite ontem, <strong>Quando</strong> a tela de retenção é aberta, <strong>Então</strong> ele aparece na lista; com data limite amanhã, não aparece.</td></tr>
+<tr><td><a href="#CADPREV-RN135">RS135 (CADPREV-RN135)</a></td><td><a href="#PF-21">JF021</a></td><td><strong>Dado</strong> um benefício listado com ULTMESPREPARO = 2026/10, <strong>Quando</strong> o usuário confirma a suspensão, <strong>Então</strong> o benefício passa à situação 2 com DATAFINALPREVISTA = 31/10/2026 e FLGDATAPREVISTA = 1.</td></tr>
+<tr><td><a href="#CADPREV-RN136">RS136 (CADPREV-RN136)</a></td><td><a href="#PF-21">JF021</a></td><td><strong>Dado</strong> uma linha da grade e a Data Limite 15/11/2026 no filtro, <strong>Quando</strong> o usuário dá duplo clique e confirma <a href="#MSG229">MSG229</a>, <strong>Então</strong> o benefício fica retido com DATAFINALPREVISTA = 15/11/2026.</td></tr>
+<tr><td><a href="#CADPREV-RN137">RS137 (CADPREV-RN137)</a></td><td><a href="#PF-22">JF022</a></td><td><strong>Dado</strong> um beneficiário com benefício ativo ainda não encerrado, <strong>Quando</strong> o usuário confirma o registro do falecimento, <strong>Então</strong> o sistema exibe <a href="#MSG233">MSG233</a> e não grava; após o encerramento, grava DATAMORTE e exibe <a href="#MSG235">MSG235</a>.</td></tr>
+</tbody></table></div>
+</section>
+
+<p><a class="back-btn" href="funcionalidades.html">← Voltar à lista de Casos de Uso (Processos Funcionais)</a></p>
+</main>
+<footer>
+<p>Blueprint AS-IS — PFC-73 — Processos Funcionais organizados em Casos de Uso — Módulo CADASTROPREV | Sistema legado Delphi 5 | pt-BR | Gerado em 2026-11-24</p>
+</footer>
+</body>
+</html>
