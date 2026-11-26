@@ -1070,14 +1070,23 @@ def sharing(used):
 def validate_migration(M):
     errors = []
     for k in ("total", "code"):
-        rows = sum(M["mods"][n][k] for n in ORDER) + M["dep"][k]
+        idx = 0 if k == "total" else 1
+        # PFC-76: a tabela lista os módulos e uma linha por dependência usada; a soma dessas linhas é o total a migrar.
+        rows = sum(M["mods"][n][k] for n in ORDER) + sum(d["eff"]["all"][idx] for d in M["used"])
         if rows != M["total"][k]:
             errors.append(f"PFC-45: linhas da tabela ({k}) não somam o total a migrar: {rows} != {M['total'][k]}")
-        idx = 0 if k == "total" else 1
         if sum(d["eff"]["all"][idx] for d in M["used"]) != M["dep"][k]:
             errors.append(f"PFC-45: dependências listadas ({k}) não somam a linha de dependências usadas")
     if any(d["eff"]["all"][0] <= 0 for d in M["used"]):
         errors.append("PFC-45: dependência sem linha usada listada")
+    # PFC-76: uma linha por dependência usada, sem linha agregada, e cabeçalho que diz o que o total inclui.
+    table = summary_table(M)
+    if table.count("<tr><td>Dependência <code>") != len(M["used"]):
+        errors.append("PFC-76: a tabela a migrar não tem uma linha por dependência usada")
+    if "Dependências diretas" in table or f"<th>{TOTAL_HEADER}</th>" not in table:
+        errors.append("PFC-76: tabela a migrar com linha agregada de dependências ou sem o cabeçalho de linhas totais")
+    if set(M["mods"]) != set(ORDER):
+        errors.append(f"PFC-76: a contagem deve cobrir só {', '.join(ORDER)}")
     # PFC-46: linhas únicas por grupo de uso
     S = M["share"]
     key = dict(zip(NOMES, KEYS))
@@ -1101,12 +1110,28 @@ def validate_migration(M):
     return errors
 
 
+# PFC-76: “Linhas totais” = linhas físicas (código + comentários + linhas vazias).
+TOTAL_HEADER = "Linhas totais (Brancos e Comentários)"
+
+
+def used_sorted(M):
+    """Dependências usadas, da maior para a menor parte usada (ordem das tabelas por dependência)."""
+    return sorted(M["used"], key=lambda x: (-x["eff"]["all"][0], x["label"].lower()))
+
+
+def dep_row_label(d):
+    return f"Dependência <code>{esc(d['label'])}</code> — só a parte usada"
+
+
 def summary_table(M):
-    o = ['<div class="table-wrap"><table><thead><tr><th>Parcela</th><th>Linhas totais</th><th>Linhas de código</th></tr></thead><tbody>']
+    """PFC-45/PFC-76: módulos + uma linha por dependência usada (só as linhas usadas pelos três módulos,
+    cada linha uma única vez) + total a migrar. Sem subtotal agregado das dependências."""
+    o = ['<div class="table-wrap"><table><thead><tr><th>Parcela</th>'
+         f'<th>{TOTAL_HEADER}</th><th>Linhas de código</th></tr></thead><tbody>']
     for n in ORDER:
         o.append(c26.module_row(n, M["mods"][n]))
-    o.append(row([f"Dependências diretas — só a parte usada pelos três módulos ({len(M['used'])} dependências)",
-                  fmt(M["dep"]["total"]), fmt(M["dep"]["code"])]))
+    for d in used_sorted(M):
+        o.append(row([dep_row_label(d), fmt(d["eff"]["all"][0]), fmt(d["eff"]["all"][1])]))
     o.append(row(["Total a migrar", fmt(M["total"]["total"]), fmt(M["total"]["code"])], strong=True))
     o.append("</tbody></table></div>")
     return "\n".join(o)
@@ -1128,7 +1153,7 @@ def unique_table(M):
     cols = " + ".join(fmt(S["per_mod"][n]["total"]) for n in ORDER)
     cols_c = " + ".join(fmt(S["per_mod"][n]["code"]) for n in ORDER)
     o.append('<div class="note-info">Cada linha usada das dependências entra em um único grupo, conforme os módulos que a usam; '
-             f'o total de linhas únicas é o mesmo da linha “Dependências diretas — só a parte usada pelos três módulos” '
+             f'o total de linhas únicas é a soma das linhas por dependência da tabela “Linhas de Código a Migrar” '
              f'({fmt(M["dep"]["total"])} linhas, {fmt(M["dep"]["code"])} de código). '
              f'<strong>Conciliação:</strong> a soma das colunas por módulo do quadro anterior ({cols} = {fmt(S["col_sum"]["total"])} linhas; '
              f'{cols_c} = {fmt(S["col_sum"]["code"])} linhas de código) menos o total de linhas únicas dá '
@@ -1147,7 +1172,8 @@ def stats(M):
         '<div class="stats">',
         card(fmt(M["total"]["total"]), f'<strong>Total a migrar</strong> — linhas ({fmt(M["total"]["code"])} de código)'),
         card(fmt(M["mod"]["total"]), f'FOLHA + CONTRIBUIÇÃO + BENEFICIOPREV — linhas ({fmt(M["mod"]["code"])} de código)'),
-        card(fmt(M["dep"]["total"]), f'Parte usada das dependências diretas — linhas ({fmt(M["dep"]["code"])} de código)'),
+        card(fmt(M["dep"]["total"]), f'Parte usada das {len(M["used"])} dependências diretas (uma linha por dependência na tabela) — '
+             f'linhas ({fmt(M["dep"]["code"])} de código)'),
         '</div>',
     ])
 
@@ -1158,7 +1184,8 @@ def render_html(res, deps):
     o.append(stats(M))
     o.append('<p style="margin-top:1rem">Tamanho do código Delphi 5 a migrar: as pastas dos três módulos e, das dependências diretas '
              '(pacotes e units CM/FUNCEF fora dessas pastas), <strong>só a parte que os módulos usam</strong>. '
-             'Cada linha entra uma única vez no total. <span class="ev ev-comprovado">COMPROVADO</span>: valores gerados e conferidos por '
+             'A tabela mostra uma linha por dependência usada, com só as linhas que os três módulos usam; '
+             'cada linha entra uma única vez. <span class="ev ev-comprovado">COMPROVADO</span>: valores gerados e conferidos por '
              '<code>docs/tools/uso_efetivo_dependencias.py</code>.</p>')
     o.append(summary_table(M))
     o.append(f'<h3 id="uso-efetivo-dependencias" style="margin-top:1.5rem">Linhas usadas por dependência ({len(M["used"])} dependências)</h3>')
@@ -1166,7 +1193,7 @@ def render_html(res, deps):
              + "".join(f"<th>Linhas usadas — {n}</th>" for n in ORDER)
              + '<th>Linhas usadas (3 módulos)</th><th>Linhas de código usadas</th></tr></thead><tbody>')
     key = dict(zip(NOMES, KEYS))
-    for d in sorted(M["used"], key=lambda x: (-x["eff"]["all"][0], x["label"].lower())):
+    for d in used_sorted(M):
         o.append(row([f"<code>{esc(d['label'])}</code>"]
                      + [fmt(d["eff"][key[n]][0]) if d["eff"][key[n]][0] else "—" for n in ORDER]
                      + [fmt(d["eff"]["all"][0]), fmt(d["eff"]["all"][1])]))
@@ -1179,7 +1206,7 @@ def render_html(res, deps):
              f'Não aparecem: {", ".join(f"<code>{esc(x)}</code>" for x in M["unused"])} (nenhuma linha usada) e '
              f'{", ".join(f"<code>{esc(x)}</code>" for x in M["inside"])} (ficam dentro da pasta FOLHA e já estão na linha FOLHA).</div>')
     o.append(unique_table(M))
-    o.append('<p><strong>Critério da contagem:</strong> linhas físicas (código + comentários + linhas vazias) dos fontes Delphi 5 '
+    o.append('<p><strong>Critério da contagem:</strong> “Linhas totais (Brancos e Comentários)” = linhas físicas (código + comentários + linhas vazias) dos fontes Delphi 5 '
              '<code>.pas</code>, <code>.dfm</code>, <code>.dpr</code> e <code>.dpk</code>, com as regras do PFC-18 (sem DFM binário, cópias, backups e duplicatas); '
              '“linhas de código” exclui comentários e linhas vazias. Módulos = pastas inteiras <code>FOLHA/</code>, <code>CONTRIBUICAOPREV/</code> e '
              '<code>BENEFICIOPREV/</code>. Dependências diretas = pacotes de runtime próprios (lista <code>Packages=</code> do <code>.dof</code> + <code>requires</code>) '
@@ -1199,7 +1226,8 @@ def render_index(res, deps):
     o.append(stats(M))
     o.append(summary_table(M))
     o.append('<p class="desc">Pastas dos três módulos + só a parte das dependências diretas (pacotes CM/FUNCEF) que os módulos usam, '
-             'cada linha uma única vez; exclui VCL/Borland e componentes de terceiros. Linhas usadas por dependência e critério de contagem: '
+             'uma linha por dependência, cada linha uma única vez; “Linhas totais (Brancos e Comentários)” inclui código, comentários e linhas vazias; '
+             'exclui VCL/Borland e componentes de terceiros. Linhas usadas por dependência e critério de contagem: '
              '<a href="visao-geral/inventario.html#linhas-de-codigo">Inventário de Artefatos → Linhas de Código</a>.</p>')
     o.append("</section>")
     o.append(END)
@@ -1264,7 +1292,7 @@ def main():
         print("ERROS DE VALIDAÇÃO:\n  " + "\n  ".join(errors))
         return 1
     print("Validação OK: 31 dependências; linha de base = PFC-26; linhas por arquivo idênticas ao PFC-26; "
-          "efetivas ≤ totais; soma das categorias = total efetivo; tabela a migrar = soma das linhas (PFC-45); linhas únicas por grupo de uso = total usado (PFC-46).")
+          "efetivas ≤ totais; soma das categorias = total efetivo; tabela a migrar = soma das linhas (PFC-45); linhas únicas por grupo de uso = total usado (PFC-46); uma linha por dependência usada, sem linha agregada (PFC-76).")
     if args.check and stale:
         print("Arquivos desatualizados: " + ", ".join(stale))
         return 1
