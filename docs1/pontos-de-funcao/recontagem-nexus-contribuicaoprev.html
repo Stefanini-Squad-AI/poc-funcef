@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Recontagem SFP Nexus — CONTRIBUICAOPREV</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+<style>
+ .rn{font-family:system-ui,Segoe UI,Arial,sans-serif;max-width:1200px;margin:0 auto;padding:16px;color:#1f2933}
+ .rn h1{font-size:1.6em}.rn h2{border-bottom:2px solid #2b6cb0;padding-bottom:4px;margin-top:32px}
+ .rn table{border-collapse:collapse;width:100%;margin:8px 0;font-size:.88em}
+ .rn th,.rn td{border:1px solid #cbd2d9;padding:4px 6px;vertical-align:top;text-align:left}
+ .rn th{background:#e4ecf7}.rn td.n,.rn th.n{text-align:right;white-space:nowrap}
+ .rn code{font-size:.92em;word-break:break-all}
+ .rn .tag{display:inline-block;padding:1px 6px;border-radius:8px;font-size:.8em;font-weight:600;white-space:nowrap}
+ .rn .ok{background:#d1fae5;color:#065f46}.rn .inf{background:#fef3c7;color:#92400e}
+ .rn .pend{background:#fee2e2;color:#991b1b}.rn .dec{background:#e0e7ff;color:#3730a3}
+ .rn .box{border-left:4px solid #d97706;background:#fffbeb;padding:8px 12px;margin:12px 0}
+ .rn .kpi{display:flex;gap:12px;flex-wrap:wrap}.rn .kpi div{border:1px solid #cbd2d9;border-radius:6px;padding:8px 14px;min-width:120px}
+ .rn .kpi b{display:block;font-size:1.5em}.rn tr.tot td{font-weight:700;background:#f1f5f9}
+ .rn nav a{margin-right:12px}
+</style>
+</head>
+<body>
+<main class="rn">
+<nav><a href="recontagem-nexus.html">← Recontagem Nexus (consolidado)</a><a href="metodologia.html">Metodologia SFP</a><a href="index.html">Índice de pontos de função</a></nav>
+<h1>Recontagem SFP — CONTRIBUICAOPREV (Migração Nexus)</h1>
+<div class="box"><b>Escopo de leitura:</b> Recontagem independente executada exclusivamente sobre os arquivos de <code>Migração NEXUS/</code>. Nenhum arquivo ou pasta fora desse diretório foi lido — inclusive as páginas existentes de <code>docs1/pontos-de-funcao/</code>, a metodologia e a folha de estilo, que foram apenas referenciadas por caminho. O layout desta página segue apenas o formato descrito na solicitação (PFC-77).</div>
+<h2>1. Identificação</h2>
+<table>
+<tr><th>Módulo</th><td>CONTRIBUICAOPREV — Contribuições Previdenciárias (cobrança, recebimento e reservas)</td></tr>
+<tr><th>Programa</th><td><code>Migração NEXUS/CONTRIBUICAOPREV/Fontes/ContribuicaoPREV.dpr</code></td></tr>
+<tr><th>Item de trabalho</th><td>PFC-77 — Contagem SFP - Migração Nexus</td></tr>
+<tr><th>Data</th><td>26/11/2026</td></tr>
+<tr><th>Método</th><td>SFP (Simple Function Points) — IFPUG SFP / Roteiro de Métricas SISP v3.0</td></tr>
+<tr><th>Pesos</th><td>4,6 SFP por Processo Elementar (PE); 7 SFP por Arquivo Lógico (AL)</td></tr>
+<tr><th>Fronteira</th><td>Funcionalidades acessíveis ao usuário a partir do programa CONTRIBUICAOPREV; cada módulo contado de forma independente.</td></tr>
+<tr><th>Fonte de evidência</th><td>Menu principal declarado em <code>CONTRIBUICAOPREV/Fontes/FPrincipal.dfm</code> (itens visíveis, incluindo menus de evento montados em <code>MontaMenu</code> a partir de EVENTOGERADOR, tipos MP/RI/TR), handlers em <code>FPrincipal.pas</code> e telas em <code>CONTRIBUICAOPREV/Fontes</code>, <code>CONTRIBUICAOPREV/Relatorios</code> e <code>CM/CMADMPREV/Fontes</code>. Tabelas extraídas de SQL.Strings, UpdateSQL, SQL.Add e StoredProc. Na coluna “PE relacionados”, Cnn = PE-Cnn.</td></tr>
+</table>
+<h2>2. Sumário executivo</h2>
+<div class="kpi"><div>PE<b>64</b></div><div>AL<b>32</b><small>19 mantidos / 13 referenciados</small></div><div>Total<b>518,4 SFP</b></div><div>Contagem anterior (PFC-48)<b>241,4 SFP</b><small>19 PE / 22 AL</small></div></div>
+<p>A recontagem independente resultou em <b>64 PE</b> e <b>32 AL</b>, totalizando <b>518,4 SFP</b> — diferença de <b>+277 SFP</b> em relação aos 241,4 SFP anteriores. Situação dos PE: 55 comprovados, 9 inferidos, 0 pendentes. Situação dos AL: 29 comprovados, 3 inferidos, 0 pendentes.</p>
+<p><b>Justificativa da divergência:</b> a contagem anterior agrupava funções por macroprocesso. Aqui cada opção visível do menu com processo de negócio próprio vira um PE: 5 em Participante, 6 em Eventos, 30 em Contribuições (cobrança, recebimento, divergências, provisões e importações), 16 em Reservas e BS/FAB e 7 em Consultas. Os estornos (Desfazer Envio, Desfazer Recebimento, Desfazer Carga) e os modos alternativos (Compra de Carência, Reservas Coletivas) foram contados separadamente e estão marcados como INFERIDO. A faixa de sensibilidade vai de 456 SFP (55 PE / 29 AL) a 536,8 SFP (68 PE / 32 AL).</p>
+<h2>3. Inventário de Processos Elementares (PE)</h2>
+<table>
+<tr><th>ID</th><th>Nome</th><th>Objetivo</th><th>Justificativa como PE</th><th>Situação</th></tr>
+<tr><td>PE-C01</td><td>Manutenção de Contribuições do Participante</td><td>Incluir, alterar e excluir as contribuições configuradas do participante</td><td>Cadastro principal do módulo</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C02</td><td>Contribuições por Núcleo Familiar</td><td>Manter as contribuições do núcleo familiar de beneficiários</td><td>Entidade própria (núcleo familiar)</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C03</td><td>Alteração de PDV</td><td>Registrar a adesão ao PDV, alterando contribuições e eventos</td><td>Regra específica de PDV</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C04</td><td>Reajuste de Salário de Manutenção</td><td>Reajustar em lote o salário de manutenção dos mantidos</td><td>Cálculo em lote próprio. FAlteraSalario é apenas o diálogo de alteração</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C05</td><td>Cadastro de Contribuições em Lote</td><td>Incluir contribuições em lote a partir de arquivo</td><td>Importação em lote distinta</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C06</td><td>Registro de Inadimplência (evento)</td><td>Registrar o evento de inadimplência do participante</td><td>Tipo de evento distinto (&#x27;RI&#x27;)</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C07</td><td>Manutenção Parcial (evento)</td><td>Registrar o evento de manutenção parcial</td><td>Tipo de evento distinto (&#x27;MP&#x27;)</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C08</td><td>Transferência de Reserva (evento)</td><td>Registrar o evento de transferência de reserva</td><td>Tipo de evento distinto (&#x27;TR&#x27;)</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C09</td><td>Requerimento de Resgate Complementar em Lote</td><td>Gerar em lote os requerimentos de resgate complementar</td><td>Processo de requerimento</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C10</td><td>Concessão de Resgate Complementar em Lote</td><td>Conceder em lote o resgate complementar</td><td>Etapa de concessão, distinta do requerimento</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C11</td><td>Cancelar Evento Registrado</td><td>Cancelar o evento e reverter os seus efeitos</td><td>Estorno de eventos</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C12</td><td>Envio de Cobrança</td><td>Preparar e enviar cobranças (folha, banco, CAR) da competência</td><td>Processo batch central</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C13</td><td>Desfazer Envio de Cobrança</td><td>Estornar um envio já processado</td><td>Estorno com rotina própria [COMPROVADO (distinção INFERIDA)]</td><td><span class="tag inf">INFERIDO</span></td></tr>
+<tr><td>PE-C14</td><td>Recebimento de Cobranças via Folha</td><td>Carregar o arquivo de retorno e dar baixa nas contribuições</td><td>Baixa por retorno da folha</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C15</td><td>Desfazer Recebimento via Folha</td><td>Estornar o documento de recebimento</td><td>Estorno com procedure própria [COMPROVADO (distinção INFERIDA)]</td><td><span class="tag inf">INFERIDO</span></td></tr>
+<tr><td>PE-C16</td><td>Recebimento de Cobranças via Banco</td><td>Dar baixa nas contribuições pagas via CAR/banco</td><td>Baixa por outro canal [COMPROVADO (gravações INFERIDAS)]</td><td><span class="tag inf">INFERIDO</span></td></tr>
+<tr><td>PE-C17</td><td>Baixa de Contribuições de Incentivo</td><td>Dar baixa nas contribuições PID/PIA</td><td>Regra de incentivo</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C18</td><td>Recebimento de Contribuições via Empréstimo</td><td>Quitar contribuições com desconto em empréstimo</td><td>Integração com empréstimo</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C19</td><td>Controle Individual de Contribuições</td><td>Consultar e ajustar individualmente o histórico de cobranças do participante</td><td>Manutenção individual do histórico</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C20</td><td>Cancelamento de Cobranças Vencidas</td><td>Cancelar boletos vencidos</td><td>Cancelamento específico</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C21</td><td>Estatísticas de Divergências</td><td>Consultar as estatísticas de divergência entre valor esperado e recebido</td><td>Consulta gerencial</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C22</td><td>Tratamento de Divergências</td><td>Tratar as divergências (ajuste, aporte, nova cobrança, cancelamento)</td><td>Processo de tratamento. Os diálogos FCancelaDiveg, FContAporte, FDataIndiceDiverg e FDivergPedeNovoMesCob foram agrupados aqui</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C23</td><td>Tratamento de Contribuições não Identificadas</td><td>Mover inconsistências de interface para descontos identificados</td><td>Tratamento distinto</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C24</td><td>Parcelamento de Dívida Previdenciária</td><td>Parcelar a dívida de contribuição</td><td>Negociação de dívida</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C25</td><td>Compra de Carência de Tempo</td><td>Calcular e parcelar a compra de carência</td><td>Mesmo formulário em outro modo, com regra de negócio distinta [INFERIDO (distinção)]</td><td><span class="tag inf">INFERIDO</span></td></tr>
+<tr><td>PE-C26</td><td>Regularização de Inadimplência</td><td>Regularizar o participante inadimplente (encerrar o evento RI)</td><td>Processo distinto do registro (PE-C06)</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C27</td><td>Cálculo Retroativo de Contribuições</td><td>Calcular e aplicar diferenças retroativas</td><td>Cálculo batch</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C28</td><td>Simulação de Contribuições</td><td>Simular contribuições futuras (evolução salarial/PCS)</td><td>Simulação, sem efeito persistente [COMPROVADO (falta confirmar se não persiste dados)]</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C29</td><td>Entrada Manual de Contribuições</td><td>Lançar manualmente o histórico de contribuição (inclui importação de arquivo)</td><td>Manutenção manual</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C30</td><td>Entrada Manual de Contribuição por Núcleo Familiar</td><td>Lançar manualmente o histórico do núcleo familiar</td><td>Outra entidade (núcleo)</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C31</td><td>Entrada Manual de Rubricas</td><td>Lançar rubricas salariais do participante</td><td>Manutenção de rubricas</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C32</td><td>Cadastro de Contribuições Portadas</td><td>Registrar contribuições recebidas por portabilidade</td><td>Entidade portabilidade</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C33</td><td>Cálculo do Saldo de Contribuições – Bitributação</td><td>Calcular o saldo de contribuições para bitributação de IR</td><td>Cálculo fiscal próprio</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C34</td><td>Provisão para Perdas Individual</td><td>Provisionar perdas de contribuição de um participante</td><td>Provisão individual</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C35</td><td>Provisão para Perdas em Lote</td><td>Provisionar perdas em lote</td><td>Processo batch distinto</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C36</td><td>Relatório de Provisão para Perdas</td><td>Emitir o relatório de provisões</td><td>Relatório</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C37</td><td>Importação – Alteração de Histórico de Contribuição</td><td>Alterar em lote, via planilha, o histórico de contribuição</td><td>Importação específica</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C38</td><td>Importação – Alterar Salário de Manutenção e Participação</td><td>Alterar salários em lote via planilha</td><td>Importação específica</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C39</td><td>Importação – Alteração de Histórico de Reserva</td><td>Alterar a movimentação de reservas em lote</td><td>Importação específica</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C40</td><td>Importação – Alteração de Histórico de Contribuição em Atraso</td><td>Alterar em lote o histórico de atraso</td><td>Importação específica</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C41</td><td>Importação – Associar Contribuições dos Participantes</td><td>Associar contribuições em lote</td><td>Importação específica</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C42</td><td>Alimentação Mensal de Reservas</td><td>Calcular e alimentar mensalmente as reservas a partir das contribuições</td><td>Cálculo batch</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C43</td><td>Alimentação de Reservas REPLAN</td><td>Alimentar as reservas do plano REPLAN</td><td>Rotina própria (SP) [COMPROVADO (tabelas INFERIDAS)]</td><td><span class="tag inf">INFERIDO</span></td></tr>
+<tr><td>PE-C44</td><td>Alimentação Manual de Reservas do Participante</td><td>Lançar movimentação manual na reserva individual</td><td>Manutenção manual</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C45</td><td>Alimentação Manual de Reservas Coletivas</td><td>Lançar movimentação manual na reserva coletiva (patrocinadora/plano)</td><td>Mesmo formulário, outro escopo de dado [INFERIDO (distinção)]</td><td><span class="tag inf">INFERIDO</span></td></tr>
+<tr><td>PE-C46</td><td>Acerto do Histórico de Reservas</td><td>Recalcular e acertar o histórico de alimentação de reservas</td><td>Acerto batch [COMPROVADO (gravações INFERIDAS)]</td><td><span class="tag inf">INFERIDO</span></td></tr>
+<tr><td>PE-C47</td><td>Atualização de Reservas por Índice</td><td>Atualizar as reservas pelo índice/cota</td><td>Cálculo batch</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C48</td><td>Consulta de Documentos do CAR</td><td>Consultar documentos de alimentação de reserva no CAR</td><td>Consulta</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C49</td><td>Gerar Arquivo para Emissão de Extrato</td><td>Gerar arquivo TXT de extrato de reserva</td><td>Saída para arquivo</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C50</td><td>Cálculo IRRF (PMP / prazo de acumulação)</td><td>Calcular PMP e prazo de acumulação para IRRF</td><td>Cálculo fiscal</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C51</td><td>Transferência de Saldo de Cota</td><td>Transferir saldo de cotas entre reservas</td><td>Movimentação distinta</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C52</td><td>BS/FAB – Carga de Arquivo</td><td>Importar a planilha do benefício saldado/FAB</td><td>Carga</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C53</td><td>BS/FAB – Desfazer Carga</td><td>Estornar a carga</td><td>Estorno com formulário próprio [COMPROVADO (distinção INFERIDA)]</td><td><span class="tag inf">INFERIDO</span></td></tr>
+<tr><td>PE-C54</td><td>BS/FAB – Atualização / Revisão de Índice</td><td>Atualizar o saldo BS/FAB por índice (PCK_BENEFSALDFAB.SP_ATUALIZASALDO)</td><td>Cálculo distinto. Os botões Atualizar e Revisão de Índice foram agrupados [INFERIDO (agrupamento)]</td><td><span class="tag inf">INFERIDO</span></td></tr>
+<tr><td>PE-C55</td><td>BS/FAB – Relatório de Saldo FAB</td><td>Emitir o saldo do FAB</td><td>Relatório</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C56</td><td>BS/FAB – Informações do Participante</td><td>Consultar o BS/FAB calculado do participante</td><td>Consulta</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C57</td><td>BS/FAB – Alteração do Benefício Saldado/FAB</td><td>Alterar os dados de BS/FAB do participante</td><td>Manutenção</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C58</td><td>Consulta de Rubricas</td><td>Consultar as rubricas por pessoa</td><td>Consulta</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C59</td><td>Consulta Reserva do Participante</td><td>Consultar a reserva individual, inclusive em outra data</td><td>Consulta (modo bConsulta)</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C60</td><td>Consulta Reserva Coletiva</td><td>Consultar a reserva coletiva</td><td>Consulta de outro escopo</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C61</td><td>Histórico de Movimentação de Reservas</td><td>Consultar HISTMOVRESERVA</td><td>Consulta</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C62</td><td>Registro de Eventos (consulta)</td><td>Consultar os eventos previdenciários do participante</td><td>Consulta</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C63</td><td>Controle de Cobranças e Pagamentos por Lote</td><td>Consultar os lotes de interface (CTRLINTERFACE)</td><td>Consulta</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C64</td><td>Provisões a Constituir</td><td>Emitir o relatório de provisões matemáticas a constituir</td><td>Relatório</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+</table>
+<h2>4. Inventário de Arquivos Lógicos (AL)</h2>
+<table>
+<tr><th>ID</th><th>Nome</th><th>Descrição (tabelas agrupadas)</th><th>Fronteira</th><th>PE relacionados</th><th>Situação</th></tr>
+<tr><td>AL-C01</td><td>Contribuições do Participante</td><td>CONTRIBPREVPARTP, CONTRIBPARTPACJUDDEFICIT, HSTPERCONTRIBPREV</td><td>Mantido</td><td>C01,C03,C05,C06,C08,C11,C12,C22,C41</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-C02</td><td>Núcleo Familiar e Contribuições do Núcleo</td><td>NUCLEOFAMILIAR, CONTRIBPREVNUCLEO, CONTRIBNUCLEOACJUDDEFICIT</td><td>Mantido</td><td>C02,C05,C30,C11,C27</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-C03</td><td>Histórico de Contribuições (cobrança/recebimento/atraso)</td><td>HSTCONTRIBPREV, HSTATRASOCONTRIB, RETORNOHSTCONTRIBPATRO, IMPORTACAOHSTCONTRIB, CONTRIBUICAOXANOBASEXPESSOA</td><td>Mantido</td><td>C01,C12–C20,C22,C24,C25,C27,C29,C30,C32,C34,C35,C37,C40 (leitura em C21,C36,C48)</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-C04</td><td>Parcelamento de Dívida</td><td>PARCELAMENTO</td><td>Mantido</td><td>C24,C25</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-C05</td><td>Reserva do Participante (saldo e movimentação)</td><td>RESERVAPART, HISTMOVRESERVA, IMPORTACAOHISTMOVRESERVA</td><td>Mantido</td><td>C10,C11,C39,C42–C47,C49,C51,C59–C61,C64</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-C06</td><td>Participação do Participante no Plano/Patrocinadora</td><td>PARTPREVPLAN (salário de manutenção/participação, situação), ELEGPATRO</td><td>Mantido (compartilhado)</td><td>C04,C06,C07,C11,C22,C26,C31,C38</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-C07</td><td>Eventos Previdenciários do Participante</td><td>EVENTOSPREV, HSTCONTEVENTOSPR</td><td>Mantido</td><td>C03,C06–C11,C26,C62</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-C08</td><td>Documentos Financeiros e Lançamentos (CAP/CAR/contábil)</td><td>DOCUMENTO, LANCAMENTO, LANCTODOCUM, RATEIODOCUM, RATEIODOCUM_ALTERADOR, DOCUMXDOCUM, PLANILHA, RECBTOPAGTO, CONTABCONTFUND</td><td>Mantido (compartilhado com o financeiro)</td><td>C12,C14–C20,C22,C24,C34,C35,C37,C40,C48</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-C09</td><td>Controle de Lotes de Interface (cobrança/pagamento)</td><td>CTRLINTERFACE</td><td>Mantido</td><td>C12,C14,C19,C22,C63</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-C10</td><td>Movimento de Descontos de Interface e Contribuições não Identificadas</td><td>TMPDESC, INCONSISTINTERF</td><td>Mantido (compartilhado com FOLHA)</td><td>C12,C19,C22,C23,C29,C30</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-C11</td><td>Histórico de Rubricas Salariais</td><td>HISTRUBSAL</td><td>Mantido</td><td>C12,C27,C31 (leitura em C11,C33)</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-C12</td><td>Portabilidade / Contribuições Portadas</td><td>PORTABILIDADEPREV</td><td>Mantido</td><td>C32 (leitura em C50,C10)</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-C13</td><td>Bitributação</td><td>BITRIBUTACAO, HSTBITRIBUTACAO</td><td>Mantido</td><td>C33</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-C14</td><td>Benefício Saldado / FAB</td><td>BENEFSALDFAB, CARGABENEFSALDFAB, HSTALTBENEFSALDFAB, BENEFSALD_TEMP</td><td>Mantido</td><td>C52–C57</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-C15</td><td>Cálculo PMP / Prazo de Acumulação (IRRF)</td><td>HSTCALCULOPMP, HSTCALCULOPMPFOLHA, PRAZOACUMULACAO, HSTPRAZOACUMULACAOFOLHA</td><td>Mantido</td><td>C50</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-C16</td><td>Benefício do Beneficiário / Processo de Benefício</td><td>PROCESSOBENEF, BENEFBFCIARIO, HSTBENEFBFCIARIO, MOVBENEF, BENEFHABILITA, DETCONCINSS, BFCIARIOTITPLAN, BENEFPLANOPART, CONTROLEDIVIDABENEFICIO, HSTDIVIDABENEFICIO, HSTATRASOBENEF</td><td>Mantido (domínio BENEFICIOPREV) [COMPROVADO (alto risco de dupla contagem)]</td><td>C09,C10,C11,C27</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-C17</td><td>Rubricas Individuais / Prévia de Folha</td><td>RUBRICAINDIV, PREVIA</td><td>Mantido (domínio FOLHA) [COMPROVADO (alto risco de dupla contagem)]</td><td>C09,C10,C11,C27 (leitura em C07,C29)</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-C18</td><td>Cálculo Retroativo</td><td>RETROATIVOPREV, RETROATIVOXALT, HSTREVISOES</td><td>Mantido</td><td>C27</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-C19</td><td>Histórico Funcional do Participante</td><td>EVOLFUNCPREV, HISTFUNCPREV</td><td>Mantido [COMPROVADO / INFERIDO para EVOLFUNCPREV]</td><td>C11 (leitura em C07,C12,C28)</td><td><span class="tag inf">INFERIDO</span></td></tr>
+<tr><td>AL-C20</td><td>Pessoa / Participante / Dependente</td><td>PESSOA, PESSOAFISICA, DEPENTIT, ENDPESS, TELENDPESS, CIDADES, ESTADO, PESSOAPARAM, PARAMFLAGPESSOA, VWPARTICIPDEPEN, PESSOAXFUND</td><td>Referenciado (há updates pontuais em PESSOAFISICA em C11 e C09/C10)</td><td>praticamente todos</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-C21</td><td>Patrocinadora</td><td>PATRO, PLANPREVPATRO, CONTPLANPATRO, CONTRIBPREVPATRO, FILIALPESSOA, FUNDACAO</td><td>Referenciado</td><td>quase todos</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-C22</td><td>Plano Previdenciário e Configuração de Reservas</td><td>PLANPREV, PLANO, PLANPREVCONTABIL, RESERVAXPLANO, RESERVAXCONTRIB</td><td>Referenciado (RESERVAXCONTRIB aparece como gravado em FCalculaReservaPart, falta confirmar)</td><td>C12,C42–C47,C59–C61,C64…</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-C23</td><td>Tipos de Contribuição e Regras</td><td>CONTRIBUICAO, CONTPREV, CONTPREVEVENTO, ALTERADORXCONTRIB, TIPOALTERADOR, REGRA</td><td>Referenciado</td><td>C01,C12,C21,C22,C28…</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-C24</td><td>Evento Gerador</td><td>EVENTOGERADOR, EVENTOXSITFUNC, EVENTOXSITPART, EVENTOXSITPLAPREV, EVENTOSPLANO</td><td>Referenciado</td><td>C06–C11,C62</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-C25</td><td>Índices Econômicos / Cotação</td><td>COTACAOMOEDA, MOEDA</td><td>Referenciado</td><td>C33,C42,C47,C49,C51,C54,C64</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-C26</td><td>Parâmetros da Administração Previdenciária</td><td>PARAMAPREV, PARAMSAL13, PARAMCONTAB, PARAMCONTABRESERVA, PARAMGLOBAL, PARAMCAP, PARAMFOLHA, CALENDDATAS, PERIODO</td><td>Referenciado</td><td>C12,C14,C19,C22,C42…</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-C27</td><td>Rubricas (Proventos/Descontos) por Pessoa</td><td>PROVDESC, RUBRICAXPESS, HSTRUBRICAXPESS, VW_RUBXEVENTO</td><td>Referenciado</td><td>C12,C31,C33,C58</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-C28</td><td>Contrato de Empréstimo</td><td>CONTRATOEMPTMO, HISTMOVEMPTMO</td><td>Referenciado</td><td>C18</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-C29</td><td>Cadastro de Benefícios do Plano</td><td>BENEFICIO, BENEFPLANPREV, BENEFPLANPATRO, BENEFXGRUPO, BENEFXTAXA, GRUPOBENEF</td><td>Referenciado</td><td>C03,C10,C27,C33,C50</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-C30</td><td>Cargos / PCS</td><td>CARGOEXT, CARGOXNIVEL, NIVEL, FAIXANIVEL, PCS, GRUPOCARGOEXT</td><td>Referenciado</td><td>C07,C28</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-C31</td><td>Provisão para Perdas de Contribuição</td><td>PROVISAOPERDASCONTRIBUICAO</td><td>Referenciado (pode ser view: nenhum INSERT encontrado)</td><td>C34,C35,C36</td><td><span class="tag inf">INFERIDO</span></td></tr>
+<tr><td>AL-C32</td><td>Lista de Folha de Benefícios</td><td>LISTAFOLHABENEF, LISTAFOLHABENEFDET</td><td>Referenciado (o frame grava LISTAFOLHABENEF como lista de seleção)</td><td>C50</td><td><span class="tag inf">INFERIDO</span></td></tr>
+</table>
+<h3>Candidatos analisados e não contados</h3>
+<table>
+<tr><th>Item</th><th>Motivo</th></tr>
+<tr><td>mnuContribRetroOld e subitens (Individual, Análise, Execução)</td><td>Visible = False; substituído por mnuContribRetro (PE-C27).</td></tr>
+<tr><td>mnuMovReservas — Movimentação de Reservas</td><td>Visible = False e sem OnClick.</td></tr>
+<tr><td>ContribuiesporPlanoAnaltico — Relatório Analítico de Contribuições por Plano</td><td>Visible = False; handler comentado (SIG59881).</td></tr>
+<tr><td>mnuCadastro, nmuConfigParametros, Button1</td><td>Itens de framework ocultos (Visible = False).</td></tr>
+<tr><td>mnuSistema, mnuAjuda, Mnu_UsoPessoal_Padrao, mnuVariacaoIndices, MnuLogdeOperaes_Padrao, MnuLogAuditoria</td><td>Herdados do framework genérico (FCMPrincipal).</td></tr>
+<tr><td>Consulta Geral de Pessoa (MnuConsPart_Padrao)</td><td>Consulta genérica herdada (TConsPart em CM/TotalPrev/Source/UConsPart.pas).</td></tr>
+<tr><td>Consulta Geral de Endereços</td><td>Abre TfrmConsEnderGeral genérico (CM/TotalPrev/Source/FConsEnderGeral.pas), comum a vários módulos — PENDENTE (+4,6 SFP se incluída).</td></tr>
+<tr><td>Registro de Operações</td><td>Consulta de log técnico (LOGTOTALPREV), duplica item herdado — PENDENTE (+4,6 SFP).</td></tr>
+<tr><td>Handlers sem item de menu no .dfm (certificado de inscrição, verificação de inconsistências, extrato de desligamento etc.)</td><td>Código sem acionamento pelo menu do módulo.</td></tr>
+<tr><td>Diálogos auxiliares (FAlteraSalario, FLerSalarios, FPedeDataVencimento, FCancelaDiveg, FContAporte, fSimContribOpcao, fFrameLista…)</td><td>Telas internas do PE que as chama; não são processos independentes.</td></tr>
+</table>
+<h2>5. Memória de cálculo</h2>
+<table>
+<tr><th>Componente</th><th class="n">Quantidade</th><th class="n">Peso</th><th class="n">SFP</th></tr>
+<tr><td>Processos Elementares (PE)</td><td class="n">64</td><td class="n">4,6</td><td class="n">294,4</td></tr>
+<tr><td>Arquivos Lógicos (AL)</td><td class="n">32</td><td class="n">7</td><td class="n">224</td></tr>
+<tr class="tot"><td>Total</td><td></td><td></td><td class="n">518,4</td></tr>
+</table>
+<p><code>Total = PE × 4,6 + AL × 7 = 64 × 4,6 + 32 × 7 = 294,4 + 224 = 518,4 SFP</code></p>
+<p>Contagem anterior (PFC-48): <code>19 × 4,6 + 22 × 7 = 87,4 + 154 = 241,4 SFP</code> — diferença: +45 PE, +10 AL, +277 SFP.</p>
+<h2>6. Rastreabilidade</h2>
+<p>Caminhos relativos a <code>Migração NEXUS/</code>.</p>
+<table>
+<tr><th>ID</th><th>Evidência (arquivo › unidade)</th><th>Situação</th></tr>
+<tr><td>PE-C01</td><td><code>CONTRIBUICAOPREV/Fontes/FPrincipal.dfm › mnuContribuicoesParticip → mnuContribuicoesParticipClick → CM/CMADMPREV/Fontes/FCadContribParticipante (grava CONTRIBPREVPARTP, CONTRIBPARTPACJUDDEFICIT, HSTCONTRIBPREV)</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C02</td><td><code>CONTRIBUICAOPREV/Fontes/FPrincipal.dfm › Contribuiesp1 → Contribuiesp1Click → CONTRIBUICAOPREV/Fontes/FCadContribNucleoFamiliar (grava NUCLEOFAMILIAR, CONTRIBPREVNUCLEO, CONTRIBNUCLEOACJUDDEFICIT)</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C03</td><td><code>CONTRIBUICAOPREV/Fontes/FPrincipal.dfm › AlteraodePDV1 → CONTRIBUICAOPREV/Fontes/FCadAlteraPdv (grava CONTRIBPREVPARTP, EVENTOSPREV, HSTCONTEVENTOSPR)</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C04</td><td><code>CONTRIBUICAOPREV/Fontes/FPrincipal.dfm › mnuReajustedeSalariodeManutencao → CONTRIBUICAOPREV/Fontes/FReajustaSalarioMantido (+FAlteraSalario) (grava PARTPREVPLAN)</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C05</td><td><code>CONTRIBUICAOPREV/Fontes/FPrincipal.dfm › mnuCadastrodeContribuiesemLote1 → CONTRIBUICAOPREV/Fontes/FCadContribuicaoLote (grava CONTRIBPREVPARTP, CONTRIBPREVNUCLEO, NUCLEOFAMILIAR)</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C06</td><td><code>CONTRIBUICAOPREV/Fontes/FPrincipal.dfm › mnuEventoRegInadimpl (itens dinâmicos) → MontaMenu/AbreFormEventoRI → CM/CMADMPREV/Fontes/FEventoRegInadimplencia (grava EVENTOSPREV, PARTPREVPLAN, CONTRIBPREVPARTP)</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C07</td><td><code>CONTRIBUICAOPREV/Fontes/FPrincipal.dfm › mnuEventoManutParcial → AbreFormEventoMP → CONTRIBUICAOPREV/Fontes/FEventoManutParcial (grava EVENTOSPREV, ELEGPATRO, PARTPREVPLAN)</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C08</td><td><code>CONTRIBUICAOPREV/Fontes/FPrincipal.dfm › mnuEventoTransfReserva → AbreFormEventoTR → CM/CMADMPREV/Fontes/FEventoTransfReserva (grava EVENTOSPREV, CONTRIBPREVPARTP)</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C09</td><td><code>CONTRIBUICAOPREV/Fontes/FPrincipal.dfm › mnuRequerimentodeResgateComplementaremLote → CM/CMADMPREV/Fontes/FCadRequerResgCompLote (grava PROCESSOBENEF, BENEFBFCIARIO, MOVBENEF, EVENTOSPREV, RUBRICAINDIV…)</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C10</td><td><code>CONTRIBUICAOPREV/Fontes/FPrincipal.dfm › mnuConcessodeResgateComplementaremLote → CM/CMADMPREV/Fontes/FCadConcederResgCompLote (grava BENEFBFCIARIO, HISTMOVRESERVA, RESERVAPART, BENEFHABILITA…)</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C11</td><td><code>CONTRIBUICAOPREV/Fontes/FPrincipal.dfm › CancelarEventoRegistrado1 → CM/CMADMPREV/Fontes/FCancelaEvento (grava EVENTOSPREV, CONTRIBPREVPARTP, PARTPREVPLAN, HISTFUNCPREV, HISTMOVRESERVA…)</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C12</td><td><code>CONTRIBUICAOPREV/Fontes/FPrincipal.dfm › mnuEnviodeContribuicoes → CONTRIBUICAOPREV/Fontes/FPreparaEnvia + CONTRIBUICAOPREV/Fontes/DPreparaContrib (+FLerSalarios, FPedeDataVencimento) (grava HSTCONTRIBPREV, CTRLINTERFACE, TMPDESC, DOCUMENTO/LANCAMENTO, HISTRUBSAL, CONTABCONTFUND)</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C13</td><td><code>CONTRIBUICAOPREV/Fontes/FPreparaEnvia.pas › bbtnDesfazerClick</code></td><td><span class="tag inf">INFERIDO</span></td></tr>
+<tr><td>PE-C14</td><td><code>CONTRIBUICAOPREV/Fontes/FPrincipal.dfm › mnuContribRecebimento → CONTRIBUICAOPREV/Fontes/FRecebeContribuicaoNovo (grava RETORNOHSTCONTRIBPATRO; SP CM.SP_CP_RECEB_PATRO/SP_CP_RECEB_ASSIS)</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C15</td><td><code>CONTRIBUICAOPREV/Fontes/FRecebeContribuicaoNovo.pas › bbtnDesfazerClick → CONTRIBUICAOPREV/Fontes/FDesfDocContribuicao (SP PR_DESFAZERDOCHSTCONTRIBPREV)</code></td><td><span class="tag inf">INFERIDO</span></td></tr>
+<tr><td>PE-C16</td><td><code>CONTRIBUICAOPREV/Fontes/FPrincipal.dfm › mnuAtualizarSaldosaReceber → CONTRIBUICAOPREV/Fontes/FBaixaContribCAR (chama BaixaContribCAR de CM/CMADMPREV/Fontes/UContribuicaoPrev. Os UPDATEs não foram detalhados)</code></td><td><span class="tag inf">INFERIDO</span></td></tr>
+<tr><td>PE-C17</td><td><code>CONTRIBUICAOPREV/Fontes/FPrincipal.dfm › mnuContribBaixaContribIncentivo → CONTRIBUICAOPREV/Fontes/FBaixaContribPIDPIA (grava HSTCONTRIBPREV)</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C18</td><td><code>CONTRIBUICAOPREV/Fontes/FPrincipal.dfm › mnuBaixaContribEmptmo → CONTRIBUICAOPREV/Fontes/FRecebeContribEmptmo (grava DOCUMENTO, LANCAMENTO, HSTCONTRIBPREV, RECBTOPAGTO; lê CONTRATOEMPTMO)</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C19</td><td><code>CONTRIBUICAOPREV/Fontes/FPrincipal.dfm › mnuControleIndividualContrib → CONTRIBUICAOPREV/Fontes/FControleIndivContrib (grava HSTCONTRIBPREV, HSTATRASOCONTRIB, DOCUMENTO, CTRLINTERFACE, TMPDESC)</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C20</td><td><code>CONTRIBUICAOPREV/Fontes/FPrincipal.dfm › CancelamentodeCobranasVencidas1 → CONTRIBUICAOPREV/Fontes/FCancelaBoleta (UPDATE HSTCONTRIBPREV SET SITRECEBIMENTO=&#x27;8&#x27;)</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C21</td><td><code>CONTRIBUICAOPREV/Fontes/FPrincipal.dfm › mnuEstatisticas → CONTRIBUICAOPREV/Fontes/FConsEstatDivergContrib (somente leitura)</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C22</td><td><code>CONTRIBUICAOPREV/Fontes/FPrincipal.dfm › mnuTratamentodeDivergencias → CONTRIBUICAOPREV/Fontes/FDivergContrib (grava HSTCONTRIBPREV, HSTATRASOCONTRIB, PARTPREVPLAN, CTRLINTERFACE, LANCAMENTO)</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C23</td><td><code>CONTRIBUICAOPREV/Fontes/FPrincipal.dfm › TratamentodeContribuiesnoIdentificadas1 → CONTRIBUICAOPREV/Fontes/FGeraContnId (grava INCONSISTINTERF, TMPDESC)</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C24</td><td><code>CONTRIBUICAOPREV/Fontes/FPrincipal.dfm › ParcelamentodeDvida1 → CM/CMADMPREV/Fontes/FParcelamento (bCompraCarencia=False) (grava PARCELAMENTO, HSTCONTRIBPREV, DOCUMENTO, LANCAMENTO)</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C25</td><td><code>CONTRIBUICAOPREV/Fontes/FPrincipal.dfm › mnuContribCompraCarencia → CM/CMADMPREV/Fontes/FParcelamento (bCompraCarencia=True)</code></td><td><span class="tag inf">INFERIDO</span></td></tr>
+<tr><td>PE-C26</td><td><code>CONTRIBUICAOPREV/Fontes/FPrincipal.dfm › mnuContribRegularizaInadimpl → CONTRIBUICAOPREV/Fontes/FRegularizaInadimplencia (grava EVENTOSPREV, PARTPREVPLAN, ELEGPATRO)</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C27</td><td><code>CONTRIBUICAOPREV/Fontes/FPrincipal.dfm › mnuContribRetro → mnuContribRetroClick (prmMenuChamadorRetroativo=&#x27;C&#x27;) → CM/CMADMPREV/Fontes/FRetroativoPrev (grava RETROATIVOPREV, RETROATIVOXALT, HSTCONTRIBPREV, HSTREVISOES…)</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C28</td><td><code>CONTRIBUICAOPREV/Fontes/FPrincipal.dfm › mnuContribEstimativa → CONTRIBUICAOPREV/Fontes/FSimulaContrib (+fSimContribOpcao; usa CachedUpdates)</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C29</td><td><code>CONTRIBUICAOPREV/Fontes/FPrincipal.dfm › EntradaManualdeContribuies1 → CONTRIBUICAOPREV/Fontes/FCadHstContribuicao (grava HSTCONTRIBPREV, HSTATRASOCONTRIB, IMPORTACAOHSTCONTRIB, CONTRIBUICAOXANOBASEXPESSOA)</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C30</td><td><code>CONTRIBUICAOPREV/Fontes/FPrincipal.dfm › EntradaManualdeContribuiesporNcleoFamiliar1 → CONTRIBUICAOPREV/Fontes/FCadHstContribuicaoBeneficiario (grava HSTATRASOCONTRIB, CONTRIBPREVNUCLEO, HSTCONTRIBPREV)</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C31</td><td><code>CONTRIBUICAOPREV/Fontes/FPrincipal.dfm › EntradaManualdeRubricas1 → CM/CMADMPREV/Fontes/FCadRubricaManualCS (grava HISTRUBSAL, PARTPREVPLAN)</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C32</td><td><code>CONTRIBUICAOPREV/Fontes/FPrincipal.dfm › Alimentacaodereservasportadas1 → CONTRIBUICAOPREV/Fontes/FCadContribuicaoPortada (grava PORTABILIDADEPREV, HSTCONTRIBPREV)</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C33</td><td><code>CONTRIBUICAOPREV/Fontes/FPrincipal.dfm › mnuClculodoSaldodeContribuiesBitributao → CONTRIBUICAOPREV/Fontes/FCalcSalContr (INSERT/UPDATE BITRIBUTACAO, HSTBITRIBUTACAO)</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C34</td><td><code>CONTRIBUICAOPREV/Fontes/FPrincipal.dfm › mnuProvisoparaPerdasIndividual → CONTRIBUICAOPREV/Fontes/FProvPerdasIndiv (grava HSTCONTRIBPREV, LANCAMENTO)</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C35</td><td><code>CONTRIBUICAOPREV/Fontes/FPrincipal.dfm › mnuProvisoparaPerdasemLote → CONTRIBUICAOPREV/Fontes/FProvPerdasLote (grava HSTCONTRIBPREV, LANCAMENTO)</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C36</td><td><code>CONTRIBUICAOPREV/Fontes/FPrincipal.dfm › mnuRelatriodeProvisoparaPerdas → CONTRIBUICAOPREV/Fontes/FFRelProvPerdas + CONTRIBUICAOPREV/Relatorios/dRelProvPerdas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C37</td><td><code>CONTRIBUICAOPREV/Fontes/FPrincipal.dfm › mnuAlteraodehistricodecontribuio → CONTRIBUICAOPREV/Fontes/FAlteracaoHistoricoContrib (grava HSTCONTRIBPREV, HSTATRASOCONTRIB, DOCUMENTO, LANCTODOCUM, RATEIODOCUM, PLANILHA)</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C38</td><td><code>CONTRIBUICAOPREV/Fontes/FPrincipal.dfm › mniAlterarSalriodeManutenoeParticipao1 → CONTRIBUICAOPREV/Fontes/FAlteraSalPart (grava PARTPREVPLAN)</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C39</td><td><code>CONTRIBUICAOPREV/Fontes/FPrincipal.dfm › mniAlteraodeHistricodeReserva1 → CONTRIBUICAOPREV/Fontes/FAlteraHistMovReserva (grava HISTMOVRESERVA)</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C40</td><td><code>CONTRIBUICAOPREV/Fontes/FPrincipal.dfm › mniAlteraodeHistoricodeContribuicaoEmAtraso1 → CONTRIBUICAOPREV/Fontes/FHistoricoDeContribuicaoEmAtraso (grava HSTATRASOCONTRIB, HSTCONTRIBPREV, LANCAMENTO, LANCTODOCUM, PLANILHA)</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C41</td><td><code>CONTRIBUICAOPREV/Fontes/FPrincipal.dfm › mniAssociarContribuicoesParticipantes → CONTRIBUICAOPREV/Fontes/FAssociarContribuicoesDosParticipantesEmLote (grava CONTRIBPREVPARTP)</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C42</td><td><code>CONTRIBUICAOPREV/Fontes/FPrincipal.dfm › mnuCalcReservaPart → CM/CMADMPREV/Fontes/FCalculaReservaPart (grava RESERVAPART, HISTMOVRESERVA, RESERVAXCONTRIB)</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C43</td><td><code>CONTRIBUICAOPREV/Fontes/FPrincipal.dfm › AlimentaodereservasREPLAN1 → CONTRIBUICAOPREV/Fontes/FAlimReservasReplan (SP SP_EXEC_ALIMENTARESERVAS)</code></td><td><span class="tag inf">INFERIDO</span></td></tr>
+<tr><td>PE-C44</td><td><code>CONTRIBUICAOPREV/Fontes/FPrincipal.dfm › mnuAlimentacaodeReservasParticipante → AlimentaReserva(&#x27;PARTICIPANTE&#x27;,False) → CM/CMADMPREV/Fontes/FAlimentaReserva (grava HISTMOVRESERVA, RESERVAPART, IMPORTACAOHISTMOVRESERVA)</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C45</td><td><code>CONTRIBUICAOPREV/Fontes/FPrincipal.dfm › AlimentaoManualdeReservasColetiva → AlimentaReserva(&#x27;COLETIVA&#x27;,False)</code></td><td><span class="tag inf">INFERIDO</span></td></tr>
+<tr><td>PE-C46</td><td><code>CONTRIBUICAOPREV/Fontes/FPrincipal.dfm › AcertodoHistricodeReservas1 → CM/CMADMPREV/Fontes/FAcertaHistmovreserva (AcertaHistMovReserva/AtualizaSaldo)</code></td><td><span class="tag inf">INFERIDO</span></td></tr>
+<tr><td>PE-C47</td><td><code>CONTRIBUICAOPREV/Fontes/FPrincipal.dfm › mnuAtualizaReservaPorIndice → CONTRIBUICAOPREV/Fontes/FAtualizaPorIndice (grava RESERVAPART, HISTMOVRESERVA)</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C48</td><td><code>CONTRIBUICAOPREV/Fontes/FPrincipal.dfm › ConsultadeDocumentosdoCAR1 → CONTRIBUICAOPREV/Fontes/FConsDOCAlimReserva (lê DOCUMENTO, LANCTODOCUM, HSTCONTRIBPREV)</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C49</td><td><code>CONTRIBUICAOPREV/Fontes/FPrincipal.dfm › Gerararquivoparaemisso1 → CONTRIBUICAOPREV/Relatorios/FPRelExtPoup (SaveDialog/AssignFile; lê RESERVAPART, HISTMOVRESERVA)</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C50</td><td><code>CONTRIBUICAOPREV/Fontes/FPrincipal.dfm › mnucalculoIrrf → CONTRIBUICAOPREV/Fontes/fCalculoIRRF (+fFrameLista) (grava HSTCALCULOPMP, HSTCALCULOPMPFOLHA, PRAZOACUMULACAO, HSTPRAZOACUMULACAOFOLHA)</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C51</td><td><code>CONTRIBUICAOPREV/Fontes/FPrincipal.dfm › mnuTransferenciadeSaldodeCota1 → CONTRIBUICAOPREV/Fontes/FTransferenciaSaldoCota (grava HISTMOVRESERVA)</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C52</td><td><code>CONTRIBUICAOPREV/Fontes/FPrincipal.dfm › mnuCargadeArquivo → CONTRIBUICAOPREV/Fontes/fCargaArquivo › bbtnProcessarClick (grava BENEFSALD_TEMP, CARGABENEFSALDFAB, BENEFSALDFAB)</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C53</td><td><code>CONTRIBUICAOPREV/Fontes/fCargaArquivo › bbtnDesfazerClick → CONTRIBUICAOPREV/Fontes/FDesfazerCarga</code></td><td><span class="tag inf">INFERIDO</span></td></tr>
+<tr><td>PE-C54</td><td><code>CONTRIBUICAOPREV/Fontes/fCargaArquivo › btnAtualizarClick, btnRevisaoIndiceClick → CONTRIBUICAOPREV/Fontes/FRevisaoIndice</code></td><td><span class="tag inf">INFERIDO</span></td></tr>
+<tr><td>PE-C55</td><td><code>CONTRIBUICAOPREV/Fontes/fCargaArquivo › btnSaldoFABClick → CONTRIBUICAOPREV/Fontes/FMesInicioRelSaldoFab + rptSaldoFAB</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C56</td><td><code>CONTRIBUICAOPREV/Fontes/FPrincipal.dfm › mnuInformacoesParticipante → CONTRIBUICAOPREV/Fontes/FBeneficioSaldadoFAB (funções pck_benefsaldfab)</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C57</td><td><code>CONTRIBUICAOPREV/Fontes/FBeneficioSaldadoFAB.pas (l.846) → CONTRIBUICAOPREV/Fontes/FAlteracaoBeneficioSaldadoFAB (grava BENEFSALDFAB, HSTALTBENEFSALDFAB)</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C58</td><td><code>CONTRIBUICAOPREV/Fontes/FPrincipal.dfm › mnuRubricas1 → CONTRIBUICAOPREV/Relatorios/FConsRubricas (RUBRICAXPESS, PROVDESC)</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C59</td><td><code>CONTRIBUICAOPREV/Fontes/FPrincipal.dfm › mnuConsReservaPart → AlimentaReserva(&#x27;PARTICIPANTE&#x27;,True) → CM/CMADMPREV/Fontes/FAlimentaReserva</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C60</td><td><code>CONTRIBUICAOPREV/Fontes/FPrincipal.dfm › mnuConsReservaColetiva → MontaSelectPatro + ConsultaReserva → CM/CMADMPREV/Fontes/FConsReservapart</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C61</td><td><code>CONTRIBUICAOPREV/Fontes/FPrincipal.dfm › HistricodeMovimentaodeReservas1 → CONTRIBUICAOPREV/Relatorios/FConsHistMovReserva</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C62</td><td><code>CONTRIBUICAOPREV/Fontes/FPrincipal.dfm › RegistrodeEventos1 → CONTRIBUICAOPREV/Relatorios/FConsEventosPrev</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C63</td><td><code>CONTRIBUICAOPREV/Fontes/FPrincipal.dfm › mnuContribControle → CONTRIBUICAOPREV/Relatorios/FCtrlInterface</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-C64</td><td><code>CONTRIBUICAOPREV/Fontes/FPrincipal.dfm › ProvisoesAConstituir → CONTRIBUICAOPREV/Relatorios/FRelProvConst (lê HISTMOVRESERVA, RESERVAXPLANO, COTACAOMOEDA)</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-C01</td><td><code>CM/CMADMPREV/Fontes/FCadContribParticipante.pas; CONTRIBUICAOPREV/Fontes/FCadContribuicaoLote.pas; CONTRIBUICAOPREV/Fontes/FAssociarContribuicoesDosParticipantesEmLote.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-C02</td><td><code>CONTRIBUICAOPREV/Fontes/FCadContribNucleoFamiliar.pas/.dfm, CONTRIBUICAOPREV/Fontes/FCadHstContribuicaoBeneficiario.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-C03</td><td><code>CONTRIBUICAOPREV/Fontes/FPreparaEnvia.pas, CONTRIBUICAOPREV/Fontes/FCancelaBoleta.pas, CONTRIBUICAOPREV/Fontes/FRecebeContribuicaoNovo.pas, CONTRIBUICAOPREV/Fontes/FCadHstContribuicao.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-C04</td><td><code>CM/CMADMPREV/Fontes/FParcelamento.pas/.dfm</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-C05</td><td><code>CM/CMADMPREV/Fontes/FCalculaReservaPart.pas, CM/CMADMPREV/Fontes/FAlimentaReserva.pas, CONTRIBUICAOPREV/Fontes/FAtualizaPorIndice.pas, CONTRIBUICAOPREV/Fontes/FTransferenciaSaldoCota.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-C06</td><td><code>CONTRIBUICAOPREV/Fontes/FReajustaSalarioMantido.pas, CONTRIBUICAOPREV/Fontes/FAlteraSalPart.pas, CONTRIBUICAOPREV/Fontes/FEventoManutParcial.pas, CONTRIBUICAOPREV/Fontes/FRegularizaInadimplencia.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-C07</td><td><code>CONTRIBUICAOPREV/Fontes/FCadAlteraPdv.pas, CM/CMADMPREV/Fontes/FEventoRegInadimplencia.pas, CM/CMADMPREV/Fontes/FCancelaEvento.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-C08</td><td><code>CONTRIBUICAOPREV/Fontes/FRecebeContribEmptmo.pas, CONTRIBUICAOPREV/Fontes/FPreparaEnvia.dfm, CONTRIBUICAOPREV/Fontes/FProvPerdasIndiv.dfm, CONTRIBUICAOPREV/Fontes/FAlteracaoHistoricoContrib.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-C09</td><td><code>CONTRIBUICAOPREV/Fontes/DPreparaContrib.dfm, CONTRIBUICAOPREV/Fontes/FDivergContrib.pas, CONTRIBUICAOPREV/Relatorios/FCtrlInterface.dfm</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-C10</td><td><code>CONTRIBUICAOPREV/Fontes/FGeraContnId.pas/.dfm, CONTRIBUICAOPREV/Fontes/FPreparaEnvia.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-C11</td><td><code>CM/CMADMPREV/Fontes/FCadRubricaManualCS.dfm, CONTRIBUICAOPREV/Fontes/FPreparaEnvia.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-C12</td><td><code>CONTRIBUICAOPREV/Fontes/FCadContribuicaoPortada.pas/.dfm</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-C13</td><td><code>CONTRIBUICAOPREV/Fontes/FCalcSalContr.pas (l.817–1222)</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-C14</td><td><code>CONTRIBUICAOPREV/Fontes/fCargaArquivo.*, CONTRIBUICAOPREV/Fontes/FDesfazerCarga.dfm, CONTRIBUICAOPREV/Fontes/FRevisaoIndice.pas, CONTRIBUICAOPREV/Fontes/FAlteracaoBeneficioSaldadoFAB.*</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-C15</td><td><code>CONTRIBUICAOPREV/Fontes/fCalculoIRRF.pas (l.691–731)</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-C16</td><td><code>CM/CMADMPREV/Fontes/FCadRequerResgCompLote.pas, CM/CMADMPREV/Fontes/FCadConcederResgCompLote.pas, CM/CMADMPREV/Fontes/FRetroativoPrev.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-C17</td><td><code>CM/CMADMPREV/Fontes/FCadRequerResgCompLote.pas, CM/CMADMPREV/Fontes/FRetroativoPrev.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-C18</td><td><code>CM/CMADMPREV/Fontes/FRetroativoPrev.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-C19</td><td><code>CM/CMADMPREV/Fontes/FCancelaEvento.pas (l.1800–1832); CONTRIBUICAOPREV/CtrlObjects/uCtrlEvolFuncPrev.pas</code></td><td><span class="tag inf">INFERIDO</span></td></tr>
+<tr><td>AL-C20</td><td><code>CONTRIBUICAOPREV/Fontes/FPreparaEnvia.pas, CM/CMADMPREV/Fontes/FCancelaEvento.pas l.1212</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-C21</td><td><code>CONTRIBUICAOPREV/Fontes/FPrincipal.pas (filtros MontaSelect), CONTRIBUICAOPREV/Fontes/FRecebeContribuicaoNovo.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-C22</td><td><code>CM/CMADMPREV/Fontes/FCalculaReservaPart.*, CONTRIBUICAOPREV/Relatorios/FRelProvConst.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-C23</td><td><code>CONTRIBUICAOPREV/Fontes/FSimulaContrib.pas, CONTRIBUICAOPREV/Fontes/FDivergContrib.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-C24</td><td><code>CONTRIBUICAOPREV/Fontes/FPrincipal.pas MontaMenu; CONTRIBUICAOPREV/Fontes/FEventoManutParcial.dfm</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-C25</td><td><code>CONTRIBUICAOPREV/Fontes/FAtualizaPorIndice.dfm, CONTRIBUICAOPREV/Fontes/FRevisaoIndice.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-C26</td><td><code>CONTRIBUICAOPREV/Fontes/FPrincipal.pas, CM/CMADMPREV/Fontes/FCalculaReservaPart.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-C27</td><td><code>CONTRIBUICAOPREV/Relatorios/FConsRubricas.dfm, CONTRIBUICAOPREV/Fontes/FPreparaEnvia.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-C28</td><td><code>CONTRIBUICAOPREV/Fontes/FRecebeContribEmptmo.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-C29</td><td><code>CONTRIBUICAOPREV/Fontes/FCadAlteraPdv.dfm, CONTRIBUICAOPREV/Fontes/FCalcSalContr.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-C30</td><td><code>CONTRIBUICAOPREV/Fontes/FSimulaContrib.dfm, CONTRIBUICAOPREV/CtrlObjects/uCtrlPCS.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-C31</td><td><code>CONTRIBUICAOPREV/Fontes/FProvPerdasLote.pas l.912–1021; CONTRIBUICAOPREV/Relatorios/dRelProvPerdas.pas</code></td><td><span class="tag inf">INFERIDO</span></td></tr>
+<tr><td>AL-C32</td><td><code>CONTRIBUICAOPREV/Fontes/fFrameLista.pas/.dfm, CONTRIBUICAOPREV/Fontes/fCalculoIRRF.pas l.1205</code></td><td><span class="tag inf">INFERIDO</span></td></tr>
+</table>
+<h2>7. Integrações e dupla contagem</h2>
+<table>
+<tr><th>Dependência / módulo</th><th>Observação</th></tr>
+<tr><td>CM/CMADMPREV (pacote CMAdmPrev)</td><td>13 telas do menu vêm do pacote compartilhado: FCadContribParticipante, FCalculaReservaPart, FAlimentaReserva, FConsReservapart, FParcelamento, FRetroativoPrev, FEventoRegInadimplencia, FEventoTransfReserva, FCancelaEvento, FAcertaHistmovreserva, FCadRubricaManualCS, FCadRequerResgCompLote, FCadConcederResgCompLote.</td></tr>
+<tr><td>BENEFICIOPREV</td><td>Usa as mesmas telas de Retroativo, Cancelar Evento e Entrada Manual de Rubricas (PE-C11, C27 e C31 ≈ PE-B16, B19 e B26). AL-C16 (Benefício/Processo) e AL-C29 (Cadastro de benefícios) pertencem ao domínio de BENEFICIOPREV. As unidades FConsLogTotalPREV, FCtrlInterface, FConsHistMovReserva, FConsEventosPrev, FConsRubricas e FPRelExtPoup têm o mesmo nome nos dois módulos.</td></tr>
+<tr><td>FOLHA</td><td>FOLHA também grava HSTCONTRIBPREV, RESERVAPART e HISTMOVRESERVA, e tem telas próprias para TMPDESC e para rubricas individuais. Os AL de maior risco são AL-C03, C05, C10, C17 e C32. AL-C17 (Rubricas individuais/Prévia) pertence ao domínio de FOLHA.</td></tr>
+<tr><td>Financeiro (CAP/CAR/contábil)</td><td>AL-C08 (DOCUMENTO, LANCAMENTO…) é gravado via integração DIntegraCAPCAR e deve ser contado uma única vez no sistema.</td></tr>
+<tr><td>Dependências externas à pasta</td><td>O .dof e o .cfg usam caminhos absolutos C:\ProjetosCM5\... (máquina Windows), que não foram lidos. O .dpr cita ..\Relatorios\FPRelHisFuncionalMT, dRelatGerencial, dRelRetroRegional, FCfgEtiqueta, fEmisEtiq e fParamRelGerencial*, que não existem em CONTRIBUICAOPREV/Relatorios: estão em CM/CMADMPREV/Relatorios ou CM/TotalPrev, dentro da pasta.</td></tr>
+</table>
+<h2>8. Pendências</h2>
+<table>
+<tr><th>Tipo</th><th>Descrição</th></tr>
+<tr><td><span class="tag inf">INFERIDO</span></td><td>Estornos (PE-C13, C15, C53) e modos alternativos do mesmo formulário (PE-C25 Compra de Carência, PE-C45 Reservas Coletivas) contados como PE próprios; se agrupados ao processo pai: −5 PE (−23 SFP).</td></tr>
+<tr><td><span class="tag dec">DECISÃO</span></td><td>Benefício Saldado/FAB decomposto em 6 PE (PE-C52 a C57); visão conservadora = 2 PE (−18,4 SFP).</td></tr>
+<tr><td><span class="tag pend">PENDENTE</span></td><td>Consulta Geral de Endereços e Registro de Operações não contados (+9,2 SFP se incluídos).</td></tr>
+<tr><td><span class="tag pend">PENDENTE</span></td><td>AL-C16 e AL-C17 só são gravados por telas CM compartilhadas; se atribuídos apenas a BENEFICIOPREV/FOLHA: −14 SFP no consolidado.</td></tr>
+<tr><td><span class="tag inf">INFERIDO</span></td><td>AL-C31 PROVISAOPERDASCONTRIBUICAO sem INSERT encontrado (possível view); AL-C32 LISTAFOLHABENEF pode ser lista técnica de seleção (−7 SFP).</td></tr>
+<tr><td><span class="tag inf">INFERIDO</span></td><td>Gravações em stored procedures/rotinas não detalhadas (SP_EXEC_ALIMENTARESERVAS, SP_CP_RECEB_PATRO/ASSIS, PR_DESFAZERDOCHSTCONTRIBPREV, BaixaContribCAR, AcertaHistMovReserva): tabelas atribuídas por inferência.</td></tr>
+<tr><td><span class="tag pend">PENDENTE</span></td><td>Relatórios sem chamador fixo (FParamRelFinanc, FParamRelMovContrib) podem ser acionados pelo catálogo de relatórios do framework (+2 PE se alcançáveis).</td></tr>
+</table>
+</main>
+</body>
+</html>

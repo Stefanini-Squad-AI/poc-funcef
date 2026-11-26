@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Recontagem SFP Nexus — FOLHA</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+<style>
+ .rn{font-family:system-ui,Segoe UI,Arial,sans-serif;max-width:1200px;margin:0 auto;padding:16px;color:#1f2933}
+ .rn h1{font-size:1.6em}.rn h2{border-bottom:2px solid #2b6cb0;padding-bottom:4px;margin-top:32px}
+ .rn table{border-collapse:collapse;width:100%;margin:8px 0;font-size:.88em}
+ .rn th,.rn td{border:1px solid #cbd2d9;padding:4px 6px;vertical-align:top;text-align:left}
+ .rn th{background:#e4ecf7}.rn td.n,.rn th.n{text-align:right;white-space:nowrap}
+ .rn code{font-size:.92em;word-break:break-all}
+ .rn .tag{display:inline-block;padding:1px 6px;border-radius:8px;font-size:.8em;font-weight:600;white-space:nowrap}
+ .rn .ok{background:#d1fae5;color:#065f46}.rn .inf{background:#fef3c7;color:#92400e}
+ .rn .pend{background:#fee2e2;color:#991b1b}.rn .dec{background:#e0e7ff;color:#3730a3}
+ .rn .box{border-left:4px solid #d97706;background:#fffbeb;padding:8px 12px;margin:12px 0}
+ .rn .kpi{display:flex;gap:12px;flex-wrap:wrap}.rn .kpi div{border:1px solid #cbd2d9;border-radius:6px;padding:8px 14px;min-width:120px}
+ .rn .kpi b{display:block;font-size:1.5em}.rn tr.tot td{font-weight:700;background:#f1f5f9}
+ .rn nav a{margin-right:12px}
+</style>
+</head>
+<body>
+<main class="rn">
+<nav><a href="recontagem-nexus.html">← Recontagem Nexus (consolidado)</a><a href="metodologia.html">Metodologia SFP</a><a href="index.html">Índice de pontos de função</a></nav>
+<h1>Recontagem SFP — FOLHA (Migração Nexus)</h1>
+<div class="box"><b>Escopo de leitura:</b> Recontagem independente executada exclusivamente sobre os arquivos de <code>Migração NEXUS/</code>. Nenhum arquivo ou pasta fora desse diretório foi lido — inclusive as páginas existentes de <code>docs1/pontos-de-funcao/</code>, a metodologia e a folha de estilo, que foram apenas referenciadas por caminho. O layout desta página segue apenas o formato descrito na solicitação (PFC-77).</div>
+<h2>1. Identificação</h2>
+<table>
+<tr><th>Módulo</th><td>FOLHA — Folha de Pagamento de Benefícios Previdenciários</td></tr>
+<tr><th>Programa</th><td><code>Migração NEXUS/FOLHA/Fontes/Folha.dpr</code></td></tr>
+<tr><th>Item de trabalho</th><td>PFC-77 — Contagem SFP - Migração Nexus</td></tr>
+<tr><th>Data</th><td>26/11/2026</td></tr>
+<tr><th>Método</th><td>SFP (Simple Function Points) — IFPUG SFP / Roteiro de Métricas SISP v3.0</td></tr>
+<tr><th>Pesos</th><td>4,6 SFP por Processo Elementar (PE); 7 SFP por Arquivo Lógico (AL)</td></tr>
+<tr><th>Fronteira</th><td>Funcionalidades acessíveis ao usuário a partir do programa FOLHA; cada módulo contado de forma independente.</td></tr>
+<tr><th>Fonte de evidência</th><td>Menu principal declarado em <code>FOLHA/Fontes/FPrincipal.dfm</code> (TfrmPrincipal herda de TfrmCMPrincipal; módulo 18), com os handlers em <code>FPrincipal.pas</code>. As telas ficam em <code>FOLHA/Fontes</code>, <code>FOLHA/FontesMT</code> e nos subpacotes do módulo (<code>CMFbComum50</code>, <code>CMFbObj50</code>, <code>CMFolhaObjMt</code>), além de <code>CM/CMADMPREV/Fontes</code> (Reembolso INSS), <code>CM/CMPrevMT50</code>, <code>CM/Forms/SourceMT</code> e <code>SHARED/Folhas</code>. Nomes de unidade sem caminho ficam em <code>FOLHA/Fontes/</code>. As tabelas foram extraídas automaticamente do SQL de todos os .pas/.dfm (incluindo 4 dfm binários) e as escritas principais foram conferidas manualmente. Na coluna “PE relacionados”, Fnn = PE-Fnn.</td></tr>
+</table>
+<h2>2. Sumário executivo</h2>
+<div class="kpi"><div>PE<b>91</b></div><div>AL<b>72</b><small>54 mantidos / 18 referenciados</small></div><div>Total<b>922,6 SFP</b></div><div>Contagem anterior (PFC-48)<b>276 SFP</b><small>25 PE / 23 AL</small></div></div>
+<p>A recontagem independente resultou em <b>91 PE</b> e <b>72 AL</b>, totalizando <b>922,6 SFP</b> — diferença de <b>+646,6 SFP</b> em relação aos 276 SFP anteriores. Situação dos PE: 90 comprovados, 1 inferidos, 0 pendentes. Situação dos AL: 71 comprovados, 1 inferidos, 0 pendentes.</p>
+<p><b>Justificativa da divergência:</b> a FOLHA é o módulo com mais funcionalidades visíveis. São 91 opções de menu com processo próprio: Sistema 2, Cálculos 23, Cadastros 35, Reembolso do INSS 17 e Consultas 14. Há também 54 AL mantidos (rubricas, prévia, base de pagamento, versão de pagamento, convênios, layouts, IR, reembolso INSS etc.). A contagem anterior agrupava esses itens em 25 PE / 23 AL. Os 40 relatórios do catálogo dinâmico (definido no banco) não foram somados, pela mesma regra aplicada aos outros dois módulos; se forem confirmados, somam +40 PE (+184 SFP). Os 17 PE do Reembolso do INSS (13 telas do pacote CMAdmPrev) estão visíveis no menu da FOLHA e foram atribuídos a ela; em BENEFICIOPREV, os handlers equivalentes não têm item de menu.</p>
+<h2>3. Inventário de Processos Elementares (PE)</h2>
+<table>
+<tr><th>ID</th><th>Nome</th><th>Objetivo</th><th>Justificativa como PE</th><th>Situação</th></tr>
+<tr><td>PE-F01</td><td>Manter Parâmetros da Folha</td><td>Manter os parâmetros do módulo (regras, rubricas-padrão, motivos, portador etc.)</td><td>O handler `nmuConfigParametros` é sobrescrito para abrir uma tela própria da Folha, que grava PARAMAPREV</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F02</td><td>Manter Bloqueio de Usuário da Folha</td><td>Bloquear ou liberar grupos/usuários na execução da folha</td><td>Cadastro próprio (BLOQUEIOFOLHA)</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F03</td><td>Preparar Folha de Benefícios</td><td>Preparar benefícios e contribuições do assistido para o mês: atualiza BENEFBFCIARIO/HSTBENEFBFCIARIO/HSTCONTRIBPREV/CONTRIBPREVPARTP/PARTPREVPLAN, gera TMPDESC, desfaz preparo</td><td>Lote de cálculo distinto. &quot;Preparo&quot; (Delphi) e &quot;Preparo‑SP&quot; (stored procedure `CM.SP_FB_PREPARO_FOLHA_BENEF`, grava PREPAROBENEF/LISTABENEFICIOPREPARO) são o **mesmo processo de negócio** com duas implementações → 1 PE [COMPROVADO (agrupamento: ver Pendências)]</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F04</td><td>Acertar Parâmetro Contábil/Financeiro</td><td>Corrigir a parametrização contábil/financeira (RUBRICAXPLANO, TMPDESC) antes da prévia</td><td>Manutenção corretiva específica</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F05</td><td>Atualizar Pensão Alimentícia de Beneficiários</td><td>Reajustar percentuais/valores de pensão (RUBRICAINDIV, FAVORECXALIMENTADOS, ESTATREAJPENSAO)</td><td>Lote próprio</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F06</td><td>Reajustar Rubricas Individuais</td><td>Reajuste em massa de RUBRICAINDIV</td><td>Lote distinto da manutenção individual</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F07</td><td>Calcular Prévia Normal da Folha</td><td>Calcular a prévia (PREVIA, PREVIABENEF, LOTESPREVIABENEF, BASEDEPAGAMENTO, `CM.SP_FB_CALCULO_RUBRICA`)</td><td>Cálculo principal da folha. Também acessível pelo botão `btnPrevia`</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F08</td><td>Calcular Folha Extra</td><td>Gerar prévia de folha extra (PREVIA, BASEDEPAGAMENTO*)</td><td>Cálculo com regras próprias</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F09</td><td>Processar Prévia de Pagamentos Pendentes</td><td>Gerar prévia de valores pendentes (restabelecimento)</td><td>Cálculo distinto</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F10</td><td>Inserir Adiantamento Extra Folha</td><td>Incluir adiantamento na PREVIA</td><td>Inclusão específica</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F11</td><td>Manter Listas de Execução da Prévia</td><td>Reprocessar ou liberar itens de PREVIA_CONTROLE por lista</td><td>Manutenção do controle de execução. Também pelo botão `btnSeqExec`</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F12</td><td>Conferir Prévia</td><td>Conferir a prévia e marcar o controle (CTRLINTERFACE)</td><td>Processo de conferência/liberação</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F13</td><td>Gerar Simulação de Arquivo Bancário da Prévia</td><td>Gerar arquivo de remessa simulado (REMESSAPREVIA/_DETALHE)</td><td>Saída distinta da remessa real</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F14</td><td>Efetivar Versão de Pagamento</td><td>Efetivar a folha: grava HSTFOLHABENEF/HISTRUBSAL, DOCUMENTO, ARQUIVOPAGTO, BITRIBUTACAO e COMPENSAIRRF; executa SPs de checklist, excesso de débito e mapa</td><td>Processo central de fechamento</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F15</td><td>Gerar Remessa Eletrônica</td><td>Gerar arquivo de pagamento eletrônico (ARQUIVOPAGTO, DOCUMENTOXCODBARRAS, TARIFAARQPAGTO)</td><td>Saída bancária distinta</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F16</td><td>Emitir Demonstrativo de Pagamento (contracheque – arquivo)</td><td>Gerar o arquivo de contracheques de uma versão</td><td>Duas telas com a mesma finalidade e o mesmo título (&quot;Emissão de Demonstrativo de Pagamento&quot;): Cálculos › Contra Cheque (`FDemPag`) e Consultas › Demonstrativo de Pagamento (`FPRelDemPag`) → 1 PE [COMPROVADO (agrupamento: ver Pendências)]</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F17</td><td>Gerar Arquivo/Documentos para Entidades Conveniadas</td><td>Gerar documentos (DOCUMENTO, ARQUIVOPAGTO, PROCCONVENIODOC, PROCONVRATEIO, CONVDOCXVERSAO)</td><td>Integração com convênios</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F18</td><td>Abater Reservas de Benefícios Pagos</td><td>Abater a reserva dos benefícios pagos (grava HSTBENEFBFCIARIO; lê RESERVAPART/HISTMOVRESERVA)</td><td>Lote próprio</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F19</td><td>Estornar Folha</td><td>Estornar uma versão efetivada (apaga/reverte HISTRUBSAL, HSTFOLHABENEF, DOCUMENTO, MAPAFOLHABENEF etc.; `CM.SP_FB_EXCESSODEBITO_ESTORNAR`)</td><td>Reversão própria</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F20</td><td>Fechar Convênios</td><td>Tratar e fechar o processamento dos convênios (PROCESSOCONVENIO/LOTE/DOC, RUBRICAINDIV, TMPDESC)</td><td>Processo distinto</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F21</td><td>Consultar Abertura da Fita de Crédito</td><td>Abrir a fita de crédito por plano (lê ARQUIVOPAGTO, REMESSAPREVIA, HSTFOLHABENEF)</td><td>Consulta/batimento distinto. Não grava (só leitura)</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F22</td><td>Manter Evento de Regularização de Pagamento</td><td>Cadastro dos eventos de regularização (CADASTROEVENTOSDEREGULARIZACAO)</td><td>Cadastro</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F23</td><td>Conciliar Crédito Efetuado</td><td>Conciliar créditos devolvidos/retornados e lançar a regularização (HSTREGULARIZACAOFOLHA, ARQUIVODERETORNOCAIXA). Subtelas: lançamento de evento, contas a pagar, contas a receber</td><td>Processo de conciliação. As subtelas fazem parte do mesmo PE</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F24</td><td>Encerrar Benefícios por Falecimento</td><td>Encerrar ou desfazer encerramento por óbito (ENCERRAFALECIDO_LISTA/DET, `CM.PCK_FB_ENCERRAFALECIDO.*`)</td><td>Lote próprio</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F25</td><td>Gerar Mapa da Folha de Benefício</td><td>Gerar e exibir o mapa (`CM.SP_FB_MAPAFOLHABENEF_V2`)</td><td>Saída gerencial distinta</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F26</td><td>Abrir/Fechar Lote de Manutenção</td><td>Abrir/fechar o lote (CTRLINTERFACE) e limpar o preparo (PREPAROBENEF, LISTABENEFICIOPREPARO)</td><td>Controle de lote</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F27</td><td>Manter Favorecido</td><td>Cadastro de favorecidos/entidades (FORNSERV/EMPRESAFORN via objetos MT)</td><td>Cadastro. A tela é compartilhada do CM [INFERIDO (escrita via CtrlObjects do CM, não rastreada até o SQL)]</td><td><span class="tag inf">INFERIDO</span></td></tr>
+<tr><td>PE-F28</td><td>Manter Banco x Contas/Caixas x Forma de Pagamento</td><td>BANCOPORTFORMA</td><td>Cadastro</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F29</td><td>Manter Parâmetros para Antecipação de Abono</td><td>PARAMANTECIPABONO</td><td>Cadastro</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F30</td><td>Manter Rubricas Salariais</td><td>PROVDESC + RUBXEVENTO</td><td>Cadastro mestre das rubricas</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F31</td><td>Manter Grupo de Rubricas</td><td>GRUPORUBRICA</td><td>Cadastro</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F32</td><td>Manter Associação de Rubricas por Regra</td><td>REGRAXRUBRICA</td><td>Associação</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F33</td><td>Manter Associação de Rubricas por Plano</td><td>RUBRICAXPLANO</td><td>Associação</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F34</td><td>Manter Rubricas De/Para</td><td>PARAMRUBRICA</td><td>Cadastro</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F35</td><td>Manter Associação Tipo de Ação Judicial x Regra</td><td>TIPOACAOXREGRA</td><td>Associação</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F36</td><td>Manter Ação Judicial de Imposto de Renda</td><td>PROCJUD + DETPROCJUD (+DEPENTIT)</td><td>Cadastro mestre-detalhe</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F37</td><td>Manter Compensação de Imposto de Renda</td><td>COMPENSAIRRF</td><td>Cadastro</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F38</td><td>Manter Contas Bancárias</td><td>CONTABANCARIA (+PESSOA)</td><td>Cadastro</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F39</td><td>Manter Rubricas Individuais</td><td>RUBRICAINDIV. Inclusão com alimentados (FAVORECXALIMENTADOS) e rubrica x pensão (RUBXPENSAOALIM)</td><td>Cadastro principal por participante</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F40</td><td>Incluir Rubricas Individuais em Lote</td><td>Inclusão em massa de RUBRICAINDIV (com desfazer)</td><td>Lote distinto do cadastro individual</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F41</td><td>Manter Informações para Benefícios em Manutenção</td><td>Isenção de IR / moléstia grave (HISTISENCAOIRRFBENF, PESSOAFISICA, BENEFBFCIARIO)</td><td>Cadastro</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F42</td><td>Alterar Portador/Forma de Pagamento</td><td>Alterar a forma de pagamento do benefício (BENEFBFCIARIO, HSTBENEFBFCIARIO, RUBRICAINDIV)</td><td>Manutenção específica</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F43</td><td>Manter Coluna do Mapa da Folha</td><td>COLUNAMAPA</td><td>Cadastro</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F44</td><td>Manter Lançamentos Manuais para a Folha</td><td>TMPDESC</td><td>Cadastro de lançamentos avulsos</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F45</td><td>Manter Histórico de Benefícios (manual)</td><td>Manutenção do histórico mensal do benefício e da base de pagamento (HSTBENEFBFCIARIO, BASEDEPAGAMENTO, MOVBENEF, `CM.SP_FB_ATUALIZAHSTBI`)</td><td>Cadastro mestre-detalhe</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F46</td><td>Lançar Histórico de Benefícios</td><td>Inclusão de lançamentos em HSTBENEFBFCIARIO</td><td>Processo distinto do PE-F45 (inclusão por lançamento)</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F47</td><td>Manter Lista de Recebedores</td><td>LISTAFOLHABENEF + LISTAFOLHABENEFDET</td><td>Cadastro. A tela fica em SHARED</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F48</td><td>Manter Layout de Descontos – Entrada</td><td>LAYOUTDESCONTO + LAYOUTXCOLUNAS</td><td>Cadastro</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F49</td><td>Manter Layout de Descontos – Saída</td><td>LAYOUTDESCONTOSAIDA</td><td>Cadastro</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F50</td><td>Manter Associação Layout Entrada x Saída</td><td>LAYOUTENTRXSAIDA</td><td>Associação</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F51</td><td>Manter Associação de Rubricas x Conta Bancária de Favorecido</td><td>RUBRICAXCONTABANCARIA(+TERC)</td><td>Associação</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F52</td><td>Importar Arquivo de Financiamento Habitacional</td><td>Importar descontos habitacionais para TMPDESC</td><td>Importação com layout específico</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F53</td><td>Importar Arquivo de Entidade Externa</td><td>Importar arquivo de desconto por layout (TMPDESC, RUBRICAINDIV, CTRLINTERFACE)</td><td>Importação genérica por layout</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F54</td><td>Exportar Arquivo para Entidade</td><td>Exportar descontos/pagamentos por layout de saída</td><td>Saída distinta</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F55</td><td>Exportar Vários Convênios</td><td>Exportar vários convênios em lote (usa LAYOUTENTRXSAIDA)</td><td>Lote distinto da exportação individual</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F56</td><td>Gerar Saída Cadastral para Entidades</td><td>Gerar arquivo cadastral (ENDPESS, MOTIVORE)</td><td>Saída distinta</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F57</td><td>Manter Estruturas de Cálculo</td><td>ESTRUTURACALCULO + ESTRUTURAXRUBRICA</td><td>Cadastro mestre-detalhe</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F58</td><td>Manter Mensagem para Contracheque</td><td>MSGCONTRACHEQUE</td><td>Cadastro</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F59</td><td>Manter Conjunto de Rubricas</td><td>CONJUNTORUBRICA</td><td>Cadastro. A tela fica no CM</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F60</td><td>Manter Associação Conjunto x Rubricas</td><td>CONJUNTORUBXRUB</td><td>Associação</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F61</td><td>Manter Órgãos do INSS</td><td>UFINSS</td><td>Cadastro</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F62</td><td>Manter Mantenedora</td><td>MANTENEDORA</td><td>Cadastro</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F63</td><td>Manter Associação de Rubricas do INSS</td><td>RUBRICAXINSS</td><td>Associação</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F64</td><td>Conciliação Mensal (importação RI)</td><td>Importar e conciliar os arquivos do INSS (CONCINSS, DETCONCINSS, TEMPCONCINSS, HSTBENEFBFPP, HISTBENEFHABILITA)</td><td>Lote de conciliação</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F65</td><td>Consultar Resultado da Importação RI</td><td>Consulta do resultado da conciliação</td><td>Consulta distinta</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F66</td><td>Acertar Valores Divergentes</td><td>Compor/acertar os valores divergentes (DETCONCINSS)</td><td>Manutenção corretiva</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F67</td><td>Identificar Participantes do INSS</td><td>Identificação (DETCONCINSS, TEMPCONCINSS)</td><td>Processo</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F68</td><td>Desfazer Identificação</td><td>Reverter a identificação</td><td>Reversão distinta</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F69</td><td>Entrada Manual de Rubricas do INSS</td><td>Inclusão manual em DETCONCINSS/TEMPCONCINSS</td><td>Cadastro</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F70</td><td>Inserir Rubricas do INSS na Folha</td><td>Gerar RUBRICAINDIV a partir da conciliação</td><td>Lote distinto</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F71</td><td>Consultar Participantes Tratados</td><td>Consulta</td><td>Consulta distinta</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F72</td><td>Emitir Extrato Individual do INSS</td><td>Extrato</td><td>Consulta/relatório distinto</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F73</td><td>Fechar Reembolso</td><td>Encerrar a conciliação (CONCINSS) e gerar o lançamento financeiro</td><td>Fechamento</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F74</td><td>Consultar Resumo Reembolso x Desembolso</td><td>Comparativo</td><td>Consulta distinta</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F75</td><td>Manter Rubricas do Reembolso do INSS e NB</td><td>Manutenção de HISTRUBSAL/HSTBENEFBFCIARIO do reembolso</td><td>Manutenção</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F76</td><td>Conciliar Reembolso do INSS</td><td>Conciliação reembolso x folha (grava PROVDESC)</td><td>Processo distinto do PE-F64</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F77</td><td>Gerar Prestação de Contas do INSS</td><td>Gerar/enviar a prestação de contas e tratar o retorno (PRESTACAOCONTASINSS*)</td><td>Processo e arquivo distintos</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F78</td><td>Estatística de Participantes por Versão de Folha (gráfico/relatório)</td><td>Quantidade de participantes por folha</td><td>O gráfico herda o filtro do relatório (`TFrmFiltroGraficoQtdPartFolha = class(TFrmFiltroRelaQtdPartFolha)`). São os mesmos dados → 1 PE</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F79</td><td>Gráfico de % por Tipo de Benefício por Folha</td><td>Gráfico</td><td>Dados/agrupamento distintos</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F80</td><td>Gráfico Demonstrativo de Descontos</td><td>Gráfico</td><td>Distinto</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F81</td><td>Gráfico de Suplementações e Descontos por Período</td><td>Gráfico</td><td>Distinto</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F82</td><td>Consultar Benefícios Preparados</td><td>Consulta do preparo</td><td>Distinta</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F83</td><td>Consultar/Ajustar Prévia de Pagamento</td><td>Consulta da prévia por participante, com alteração/exclusão de itens (PREVIA, BASEDEPAGAMENTO, RUBRICAINDIV, TMPDESC)</td><td>Consulta com manutenção embutida. Contada como 1 PE (ver Pendências)</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F84</td><td>Consultar Global da Prévia</td><td>Totais globais da prévia</td><td>Distinta</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F85</td><td>Consultar Parametrização Contábil/Financeira da Prévia</td><td>Consulta contábil</td><td>Distinta</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F86</td><td>Consultar Histórico de Pagamento da Folha</td><td>HISTRUBSAL/HSTFOLHABENEFCAP</td><td>Distinta</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F87</td><td>Consultar Histórico de Compensação de IR</td><td>COMPENSAIRRF/HSTCOMPENSAIRRF</td><td>Distinta</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F88</td><td>Consultar Histórico de Compensação de Saldo de Contribuições</td><td>Bitributação/saldo (`CM.SP_FB_ATUALIZA_SALDO_BITRIB`)</td><td>Distinta</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F89</td><td>Consultar Estornos Processados</td><td>MOTIVOESTORNOFB/HSTFOLHABENEF</td><td>Distinta</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F90</td><td>Consultar Pagamento de Convênios</td><td>PROCESSOCONVENIO/DOCUMENTO</td><td>Distinta</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F91</td><td>Visão Gerencial da Folha</td><td>Consulta gerencial (folha x lançamentos contábeis)</td><td>Distinta</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+</table>
+<h2>4. Inventário de Arquivos Lógicos (AL)</h2>
+<table>
+<tr><th>ID</th><th>Nome</th><th>Descrição (tabelas agrupadas)</th><th>Fronteira</th><th>PE relacionados</th><th>Situação</th></tr>
+<tr><td>AL-F01</td><td>Parâmetros da Folha</td><td>PARAMAPREV, PARAMFOLHA</td><td>Mantido</td><td>F01, F07, F14</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F02</td><td>Bloqueio da Folha</td><td>BLOQUEIOFOLHA</td><td>Mantido</td><td>F02</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F03</td><td>Rubrica (Provento/Desconto)</td><td>PROVDESC, RUBXEVENTO</td><td>Mantido</td><td>F30, F31, F76 + quase todos (leitura)</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F04</td><td>Grupo de Rubricas</td><td>GRUPORUBRICA</td><td>Mantido</td><td>F31, F77</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F05</td><td>Rubrica x Regra</td><td>REGRAXRUBRICA</td><td>Mantido</td><td>F32, F39, F40, F51</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F06</td><td>Rubrica x Plano (parametrização contábil)</td><td>RUBRICAXPLANO</td><td>Mantido</td><td>F33, F04, F17, F20, F25</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F07</td><td>Rubrica De/Para</td><td>PARAMRUBRICA</td><td>Mantido</td><td>F34, F14</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F08</td><td>Conjunto de Rubricas</td><td>CONJUNTORUBRICA, CONJUNTORUBXRUB</td><td>Mantido</td><td>F59, F60, F07, F64</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F09</td><td>Estrutura de Cálculo</td><td>ESTRUTURACALCULO, ESTRUTURAXRUBRICA</td><td>Mantido</td><td>F57, F07, F16</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F10</td><td>Tipo de Ação Judicial x Regra</td><td>TIPOACAOXREGRA</td><td>Mantido</td><td>F35, F36</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F11</td><td>Processo Judicial de IR</td><td>PROCJUD, DETPROCJUD</td><td>Mantido</td><td>F36, F07, F41, F88</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F12</td><td>Compensação de IR</td><td>COMPENSAIRRF, HSTCOMPENSAIRRF</td><td>Mantido</td><td>F37, F14, F19, F87</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F13</td><td>Isenção de IR do Benefício</td><td>HISTISENCAOIRRFBENF</td><td>Mantido</td><td>F41, F07, F83</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F14</td><td>Rubrica Individual</td><td>RUBRICAINDIV</td><td>Mantido</td><td>F39, F40, F05, F06, F14, F19, F20, F42, F53, F70, F83</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F15</td><td>Lançamento Manual/Desconto para Folha</td><td>TMPDESC</td><td>Mantido</td><td>F44, F03, F04, F20, F52, F53, F19, F83</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F16</td><td>Pensão Alimentícia</td><td>FAVORECXALIMENTADOS, RUBXPENSAOALIM, ESTATREAJPENSAO</td><td>Mantido</td><td>F05, F39</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F17</td><td>Conta Bancária</td><td>CONTABANCARIA</td><td>Mantido</td><td>F38 + pagamento (leitura)</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F18</td><td>Banco x Portador x Forma de Pagamento</td><td>BANCOPORTFORMA</td><td>Mantido</td><td>F28, F08, F13, F14</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F19</td><td>Rubrica x Conta Bancária de Favorecido</td><td>RUBRICAXCONTABANCARIA, RUBRICAXCONTABANCARIATERC</td><td>Mantido</td><td>F51, F17, F39, F53</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F20</td><td>Parâmetros de Antecipação de Abono</td><td>PARAMANTECIPABONO</td><td>Mantido</td><td>F29, F03</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F21</td><td>Mensagem para Contracheque</td><td>MSGCONTRACHEQUE</td><td>Mantido</td><td>F58, F16</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F22</td><td>Coluna do Mapa da Folha</td><td>COLUNAMAPA</td><td>Mantido</td><td>F43, F30</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F23</td><td>Layout de Desconto – Entrada</td><td>LAYOUTDESCONTO, LAYOUTXCOLUNAS</td><td>Mantido</td><td>F48, F53, F54, F17, F20</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F24</td><td>Layout de Desconto – Saída</td><td>LAYOUTDESCONTOSAIDA</td><td>Mantido</td><td>F49, F50, F54, F55</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F25</td><td>Associação Layout Entrada x Saída</td><td>LAYOUTENTRXSAIDA</td><td>Mantido</td><td>F50, F55</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F26</td><td>Lote de Manutenção / Controle de Interface</td><td>CTRLINTERFACE</td><td>Mantido</td><td>F26, F07, F12, F14, F19, F20, F53</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F27</td><td>Preparo da Folha</td><td>PREPAROBENEF, LISTABENEFICIOPREPARO, PREPAROCONTRIB</td><td>Mantido</td><td>F03, F26, F14</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F28</td><td>Lista de Recebedores / Listas de Execução</td><td>LISTAFOLHABENEF, LISTAFOLHABENEFDET, PREVIA_CONTROLE</td><td>Mantido</td><td>F47, F11, F07, F09</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F29</td><td>Prévia de Pagamento</td><td>PREVIA, PREVIABENEF, LOTESPREVIABENEF</td><td>Mantido</td><td>F07–F12, F14, F19, F83, F84, F92</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F30</td><td>Base de Pagamento</td><td>BASEDEPAGAMENTO, BASEDEPAGAMENTOAPOIO, BASEDEPAGAMENTOREINF</td><td>Mantido</td><td>F07, F08, F14, F19, F45, F83</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F31</td><td>Simulação de Remessa da Prévia</td><td>REMESSAPREVIA, REMESSAPREVIA_DETALHE</td><td>Mantido</td><td>F13, F21</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F32</td><td>Histórico/Versão de Pagamento da Folha</td><td>HSTFOLHABENEF (versão), HISTRUBSAL (rubricas pagas), HSTFOLHABENEFCAP, LOTEXHSTFOLHABENEF, HSTCALCULOPMPFOLHA, HSTPRAZOACUMULACAOFOLHA</td><td>Mantido</td><td>F14, F19, F09, F75 + consultas/relatórios</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F33</td><td>Estorno da Folha</td><td>MOTIVOESTORNOFB</td><td>Mantido</td><td>F19, F89, F91</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F34</td><td>Bitributação</td><td>BITRIBUTACAO, HSTBITRIBUTACAO, HSTDEDIDADEBITRIB</td><td>Mantido</td><td>F14, F19, F45, F88</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F35</td><td>Benefício do Beneficiário</td><td>BENEFBFCIARIO</td><td>Mantido (compartilhado)</td><td>F03, F14, F41, F42, F24, F45</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F36</td><td>Histórico Mensal do Benefício</td><td>HSTBENEFBFCIARIO, HSTATRASOBENEF, ALTERADORXBENEF, MOVBENEF</td><td>Mantido (compartilhado)</td><td>F03, F07, F18, F42, F45, F46, F75</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F37</td><td>Contribuição do Assistido</td><td>HSTCONTRIBPREV, CONTRIBPREVPARTP, CONTRIBPREVNUCLEO</td><td>Mantido (compartilhado)</td><td>F03, F14, F24</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F38</td><td>Participante no Plano</td><td>PARTPREVPLAN, ELEGPATRO</td><td>Mantido (compartilhado)</td><td>F03, F14</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F39</td><td>Pessoa</td><td>PESSOA, PESSOAFISICA, ENDPESS, DOCPESSOA</td><td>Mantido (compartilhado; atualização parcial)</td><td>F38, F41, F44, F39 + leitura geral</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F40</td><td>Dependente/Recebedor do Titular</td><td>DEPENTIT</td><td>Mantido (compartilhado)</td><td>F36 + leitura geral</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F41</td><td>Documento de Pagamento (integração financeira)</td><td>DOCUMENTO, DOCUMENTOXPESSOAS, DOCUMENTOXCODBARRAS, EVENTOXDOCUM</td><td>Mantido</td><td>F14, F15, F17, F19</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F42</td><td>Arquivo de Pagamento Eletrônico</td><td>ARQUIVOPAGTO, ARQUIVOXDOCUM, TARIFAARQPAGTO</td><td>Mantido</td><td>F14, F15, F17, F19, F21, F103</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F43</td><td>Processamento de Convênio</td><td>PROCESSOCONVENIO, PROCCONVENIOLOTE, PROCCONVENIODOC, PROCONVRATEIO, CONVDOCXVERSAO</td><td>Mantido</td><td>F20, F17, F90</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F44</td><td>Evento de Regularização de Pagamento</td><td>CADASTROEVENTOSDEREGULARIZACAO</td><td>Mantido</td><td>F22, F23</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F45</td><td>Regularização de Pagamento</td><td>HSTREGULARIZACAOFOLHA, ARQUIVODERETORNOCAIXA</td><td>Mantido</td><td>F23</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F46</td><td>Encerramento por Falecimento</td><td>ENCERRAFALECIDO_LISTA, ENCERRAFALECIDO_LISTADET</td><td>Mantido</td><td>F24</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F47</td><td>Órgão do INSS</td><td>UFINSS</td><td>Mantido</td><td>F61, F73, F77</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F48</td><td>Mantenedora</td><td>MANTENEDORA</td><td>Mantido</td><td>F62, F64–F74</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F49</td><td>Rubrica x INSS</td><td>RUBRICAXINSS</td><td>Mantido</td><td>F63, F64, F70, F76</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F50</td><td>Conciliação do Reembolso INSS</td><td>CONCINSS, DETCONCINSS, TEMPCONCINSS</td><td>Mantido</td><td>F64–F76</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F51</td><td>Prestação de Contas do INSS</td><td>PRESTACAOCONTASINSS, ARQUIVOPRESTACAOCONTASINSS, ENVIOPRESTACAOCONTASINSS, PRESTACAOCONTASINSSRET</td><td>Mantido</td><td>F77</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F52</td><td>Favorecido / Entidade</td><td>FORNSERV, EMPRESAFORN</td><td>Mantido [INFERIDO (escrita via objeto MT)]</td><td>F27, F17, F19, F20</td><td><span class="tag inf">INFERIDO</span></td></tr>
+<tr><td>AL-F53</td><td>Processo de Benefício</td><td>PROCESSOBENEF</td><td>Mantido (compartilhado)</td><td>F03, F07, F19 (desfazer preparo)</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F54</td><td>Benefício INSS do Beneficiário</td><td>BENEFBFPP, BENEFICIARIOPP, HSTBENEFBFPP, BENEFHABILITA, HISTBENEFHABILITA</td><td>Mantido (compartilhado)</td><td>F64, F65, F66</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F55</td><td>Benefício Concedido</td><td>BENEFICIO, BENEFPLANPREV, BENEFPLANPATRO, BENEFPLANOPART, BFCIARIOTITPLAN</td><td>Referenciado</td><td>F03, F07, F14, F45, F82–F84 + relatórios</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F56</td><td>Plano Previdenciário</td><td>PLANPREV, PLANPREVPATRO, PLANPREVCONTABIL, PLANPREVCONTABPATRO</td><td>Referenciado</td><td>F03, F07, F14, F33, F17</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F57</td><td>Patrocinadora</td><td>PATRO</td><td>Referenciado</td><td>F03, F07, F33</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F58</td><td>Regra de Cálculo</td><td>REGRA, TIPOREGRA, GRUPOREGRA, GRUPOREGRAUSUARIO</td><td>Referenciado</td><td>F01, F32, F35, F36, F39, F57</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F59</td><td>Banco/Agência</td><td>BANCO, AGENCIABANCARIA</td><td>Referenciado</td><td>F13, F14, F15, F28, F38</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F60</td><td>Portador/Forma de Pagamento</td><td>PORTADORFORMA, PORTADORCONTA, FORMARECPAG</td><td>Referenciado</td><td>F13–F15, F28, F42</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F61</td><td>Estrutura Contábil</td><td>PLANOCONTA, CENTCUST, CENTRESPON, SUBCONTA, CONTASXCC, PARAMCONTAB, TIPORECEBDESEMB, TIPODOCRECPAG, UNIDNEGOCIO</td><td>Referenciado</td><td>F01, F04, F14, F19, F85</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F62</td><td>Contribuição (definição/plano)</td><td>CONTRIBUICAO, CONTPREV, CONTPLANPATRO</td><td>Referenciado</td><td>F03, F14, F82, F88</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F63</td><td>Reserva do Participante</td><td>RESERVAPART, RESERVAXPLANO, BENEFRESERVA, HISTMOVRESERVA</td><td>Referenciado</td><td>F18</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F64</td><td>Reajuste de Benefício</td><td>REAJBENEFICIO, REAJINSS, REAJSALPATRO</td><td>Referenciado</td><td>F03</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F65</td><td>Tabela de IRRF</td><td>IRRF, PARAMIRRF, IRRFREGRESSIVA, HSTPARAMIRRF</td><td>Referenciado</td><td>F07</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F66</td><td>Perfil de Investimento</td><td>PERFILINVEST, PERFILINVXELEG</td><td>Referenciado</td><td>F07, F08, F13</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F67</td><td>Moeda/Cotação</td><td>MOEDA, COTACAOMOEDA</td><td>Referenciado</td><td>F37, F88, F07</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F68</td><td>Núcleo Familiar</td><td>NUCLEOFAMILIAR</td><td>Referenciado</td><td>F03, F82</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F69</td><td>Moléstia Grave</td><td>HSTMOLESTIAGRAVE</td><td>Referenciado</td><td>F41</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F70</td><td>Tabelas Fiscais DIRF/REINF</td><td>INFORME, NATURENDIMENTO, NATUREZA_RENDIMENTO_REINF, TIPOREINF, TIPOREINF_GRUPORUBRICA</td><td>Referenciado</td><td>F30, F31, F07, F83</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F71</td><td>Eventos Previdenciários</td><td>EVENTOSPREV, EVENTOGERADOR, CONTPREVEVENTO</td><td>Referenciado</td><td>F14, F24, F88</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F72</td><td>Lançamentos Contábeis/Financeiros</td><td>LANCTODOCUM, RATEIODOCUM, LANCAMENTO, PLANILHA</td><td>Referenciado</td><td>F14, F15, F19, F73, F91</td><td><span class="tag ok">COMPROVADO</span></td></tr>
+</table>
+<h3>Candidatos analisados e não contados</h3>
+<table>
+<tr><th>Item</th><th>Motivo</th></tr>
+<tr><td>Relatórios do catálogo dinâmico (Consultas › Relatórios; 40 relatórios: Relatório de Pagamentos da Folha (Prévia); Relatório de Pensão Alimentícia por Favorecido (agrupa `rpPAFavor` + `rpRelPensAlim`); Relatório de Pensão Alimentícia de Favorecidos por Banco; Relação de Pagamento de Benefícios por Beneficiário; Relação de Crédito de Beneficiários por Agência; Relação de Crédito de Beneficiários por Banco; Benefícios Pagos por Filial; Suplementação Maior/Menor; Benefícios por Situação (concedidos/encerrados/pendentes/retidos; agrupa rpBenConced, rpBenEncer, rpBenefPendentes, dRelBenefRetidos); Relatório de Importações de Convênios; Relatório de Preparo; Relatório de Arquivos de Pagamento Eletrônico; Rubricas por Fonte Pagadora; Histórico de Benefícios (sintético/analítico); Portador Forma por Versão; Estrutura de Rubricas; Relatório de Rubricas (mês/plano contábil); Resumo por Rubrica; Parametrização das Rubricas de Benefício (agrupa dRelParamRubricas + IdReport 20128); Emissão de Contracheque (relatório impresso); Cartas para Banco; Rubricas de Desconto Pendentes de Processamento; Entradas/Saídas da Folha (2 forms de parâmetro para o mesmo relatório); Benefícios a Preparar; Valor Líquido em Determinada Faixa; Totais de Suplementação Integral; Divergência de Contribuições; Ficha Financeira; Ficha Financeira Individual; Alteração de Benefícios Pagos; Rendas Alteradas; Valor Mensal do Benefício de INSS; Quantidade Mensal de Participantes por Benefício; Estatística de Suplementação de Benefícios; Total de Suplementação de Benefícios; Rubricas Salariais; Lançamentos Não Processados; Pagamento Individual; 2ª Via de Contracheque (IdReport 2263); Relatório de Estorno (IdReport 3281))</td><td>Não contados nesta recontagem (PENDENTE). O código dos relatórios existe e está compilado no .dpr, mas a presença no menu depende do catálogo de relatórios no banco (IDMODULO = 18). A mesma regra vale para BENEFICIOPREV e CONTRIBUICAOPREV. Dois deles (2ª via de contracheque, IdReport 2263, e estorno, IdReport 3281) têm tratamento explícito em FPrincipal.pas, mas também são acionados pelo catálogo.</td></tr>
+<tr><td>Itens ocultos (Visible = False): Gera Arquivo Entidade, Resgate de Reserva, Antecipação de Abono, Adiantamento, Gera Arquivo de Remessa Bancária, Acerto de Benefício Pós-Morte, Acerto de Benefícios Provisórios Anulados, Insere Rubricas Individuais</td><td>Ocultos e/ou sem OnClick em FOLHA/Fontes/FPrincipal.dfm.</td></tr>
+<tr><td>Reembolso INSS: Cadastro de Beneficiários das Mantenedoras, Manutenção de Processos do INSS, Contabilização do Reembolso, Sem contrapartida do INSS</td><td>Visible = False e sem OnClick.</td></tr>
+<tr><td>Apropriação Contábil (FParamRelApropContabil)</td><td>Tela compilada, mas bbtnConfirmarClick vazio (stub).</td></tr>
+<tr><td>Rubricas Individuais (tela antiga FCadRubricaIndiv)</td><td>AbrirForm comentado; substituída por FCadRubricaIndividual.</td></tr>
+<tr><td>Unidades fora do .dpr ou sem chamador (fBatimentoPrevia, FCadSaidaGenerica, FGeraArquivoConsignatario, cópias &#x27;_*&#x27; e de backup etc.)</td><td>Inalcançáveis ou duplicadas.</td></tr>
+<tr><td>Sistema, Editar, Ajuda, Consultas › Gerais, Consulta Geral de Pessoa</td><td>Framework herdado (CM/Forms/Source/FCMPrincipalForms), comum a todos os módulos.</td></tr>
+<tr><td>Botões btnPrevia, btnSeqExec e Timer1Timer</td><td>Atalhos para PE já contados (Prévia, Listas de execução e Demonstrativo).</td></tr>
+<tr><td>35 das 41 classes de FOLHA/DBObjects</td><td>Nenhuma unit do módulo as usa; não sustentam AL sozinhas.</td></tr>
+</table>
+<h2>5. Memória de cálculo</h2>
+<table>
+<tr><th>Componente</th><th class="n">Quantidade</th><th class="n">Peso</th><th class="n">SFP</th></tr>
+<tr><td>Processos Elementares (PE)</td><td class="n">91</td><td class="n">4,6</td><td class="n">418,6</td></tr>
+<tr><td>Arquivos Lógicos (AL)</td><td class="n">72</td><td class="n">7</td><td class="n">504</td></tr>
+<tr class="tot"><td>Total</td><td></td><td></td><td class="n">922,6</td></tr>
+</table>
+<p><code>Total = PE × 4,6 + AL × 7 = 91 × 4,6 + 72 × 7 = 418,6 + 504 = 922,6 SFP</code></p>
+<p>Contagem anterior (PFC-48): <code>25 × 4,6 + 23 × 7 = 115 + 161 = 276 SFP</code> — diferença: +66 PE, +49 AL, +646,6 SFP.</p>
+<h2>6. Rastreabilidade</h2>
+<p>Caminhos relativos a <code>Migração NEXUS/</code>.</p>
+<table>
+<tr><th>ID</th><th>Evidência (arquivo › unidade)</th><th>Situação</th></tr>
+<tr><td>PE-F01</td><td><code>FOLHA/Fontes/FPrincipal.dfm › nmuConfigParametros (OnClick=nmuConfigParametrosClick) → FParametroFolha.pas (TfrmParametroFolha)</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F02</td><td><code>FOLHA/Fontes/FPrincipal.dfm › mnuBloquiousuario → FcadBloqFolha.pas/.dfm (dfm binário; contém o SQL de BLOQUEIOFOLHA)</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F03</td><td><code>FOLHA/Fontes/FPrincipal.dfm › mnuPreparo → FPreparo.pas (+uDesfazerPreparo.pas, FMotivoDesfazPreparo); › mnuPreparoSP → FPreparoSP.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F04</td><td><code>FOLHA/Fontes/FPrincipal.dfm › mnuAcertaParamContab → FAcertaParamContabilFinanc.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F05</td><td><code>FOLHA/Fontes/FPrincipal.dfm › mnuReajustaPensao → FReajustaPercPensao.pas + uReajustaPercPensao.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F06</td><td><code>FOLHA/Fontes/FPrincipal.dfm › ReajustedeRubricasIndividuais1 → FReajRubIndiv.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F07</td><td><code>FOLHA/Fontes/FPrincipal.dfm › Prvia1 → FFolhaNormalPrevia.pas + dFolhaPrevia.pas, uFolhaPreviaObj.pas, UPrevia.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F08</td><td><code>FOLHA/Fontes/FPrincipal.dfm › mnuFolhaExtra (OnClick=ExtraFolha1Click) → fFolhaExtra.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F09</td><td><code>FOLHA/Fontes/FPrincipal.dfm › mnuPagamentosPendentes (OnClick=Restabelecimento1Click) → FPagamentoPendente.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F10</td><td><code>FOLHA/Fontes/FPrincipal.dfm › mnuAdiantamentoExtraFolha → FAdiantamentoExtraFolha.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F11</td><td><code>FOLHA/Fontes/FPrincipal.dfm › mnuManutenodasListasdeExecuo1 → FManutListaExecPrevia.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F12</td><td><code>FOLHA/Fontes/FPrincipal.dfm › mnuConferenciaPrevia → fConferenciaPrevia.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F13</td><td><code>FOLHA/Fontes/FPrincipal.dfm › mnuGeraSimulacaoArquivoBancriodaPrevia → fGeraArquivoRemessaPrevia.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F14</td><td><code>FOLHA/Fontes/FPrincipal.dfm › mnuFolhaNormal → fFolhaNormalEfet.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F15</td><td><code>FOLHA/Fontes/FPrincipal.dfm › mnuRemessaEletronica → FRemessaEletronica.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F16</td><td><code>FOLHA/Fontes/FPrincipal.dfm › mnuContraCheque → FDemPag.pas (dfm binário); › DemenstrativodePagamento1 → FPRelDemPag.pas; disparo automático por Timer1Timer</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F17</td><td><code>FOLHA/Fontes/FPrincipal.dfm › mnuGeraArquivoEntidade → FExecGeraDocConvenio.pas (TfrmWizardMT)</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F18</td><td><code>FOLHA/Fontes/FPrincipal.dfm › mnuExecAbateReserva → FExecAbateReserva.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F19</td><td><code>FOLHA/Fontes/FPrincipal.dfm › Estorna1 → festornafolha.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F20</td><td><code>FOLHA/Fontes/FPrincipal.dfm › mnuFechamentoConvenio → fTratamentoConvenio.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F21</td><td><code>FOLHA/Fontes/FPrincipal.dfm › MnuAberturaFitaCredito → FAberturaFitaCredit.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F22</td><td><code>FOLHA/Fontes/FPrincipal.dfm › MnuRegularizacaoPagamento › mnuEventoRegPagamento → UCadastroEventoRegularizacao.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F23</td><td><code>FOLHA/Fontes/FPrincipal.dfm › mnuConciliacaoCredito → UConciliacaoCredito.pas (abre ULancEventoRegularizacao, FLancContasPagar, FLancContasReceber)</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F24</td><td><code>FOLHA/Fontes/FPrincipal.dfm › mnuEncerramentoporFalecimento → FEncerramentoPorFalecimento.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F25</td><td><code>FOLHA/Fontes/FPrincipal.dfm › mnuMapaFolhaBen → FMapaFolhaBenef.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F26</td><td><code>FOLHA/Fontes/FPrincipal.dfm › mnuAbreLote → FAbertFechaLoteFB.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F27</td><td><code>FOLHA/Fontes/FPrincipal.dfm › mnuFavorecido → CM/Forms/SourceMT/fCadForne.pas</code></td><td><span class="tag inf">INFERIDO</span></td></tr>
+<tr><td>PE-F28</td><td><code>FOLHA/Fontes/FPrincipal.dfm › BancoXPortadorForma1 → fCadBancoPortadorCS.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F29</td><td><code>FOLHA/Fontes/FPrincipal.dfm › Abono1 › mnuParametrosparaAntecipacao → fCadParamAntecipAbono.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F30</td><td><code>FOLHA/Fontes/FPrincipal.dfm › mnuPrincRubricas › mnuRubricasSalariais → FCadProvento.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F31</td><td><code>FOLHA/Fontes/FPrincipal.dfm › mnuCadGrupoRub → FCadGrupoRubrica.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F32</td><td><code>FOLHA/Fontes/FPrincipal.dfm › MnuRegraxRub → FCadRegraxRubrica.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F33</td><td><code>FOLHA/Fontes/FPrincipal.dfm › mnuRubricasporPlano → FAssocRubricaPlano.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F34</td><td><code>FOLHA/Fontes/FPrincipal.dfm › mnuRubricasDePara1 → FOLHA/FontesMT/FParamRubricaMT.pas + CtrlObjects/uCtrlParamRubrica, DBObjects/uDbParamRubrica (TableName=PARAMRUBRICA)</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F35</td><td><code>FOLHA/Fontes/FPrincipal.dfm › mnuPrincAcaoJudicial › mnuTipoAcaoxRegra → FCadTipoAcaoxRegra.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F36</td><td><code>FOLHA/Fontes/FPrincipal.dfm › mnuAcaoJudicial → FCadDepJudicial.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F37</td><td><code>FOLHA/Fontes/FPrincipal.dfm › mnuCompensaIRRF → FCadCompensaIRRF.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F38</td><td><code>FOLHA/Fontes/FPrincipal.dfm › ContasBancrias1 → fcadcontabanco.pas (TfrmCadContaBanco)</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F39</td><td><code>FOLHA/Fontes/FPrincipal.dfm › mnuRubricasIndividuais → FCadRubricaIndividual.pas (dfm binário) → FCadRubricaIndividualInserir.pas → FCadAlimentadosRI, fCadRubXPensaoAlimenticiaRI</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F40</td><td><code>FOLHA/Fontes/FPrincipal.dfm › mnuRubricasIndividuaisEmLote → fRubricasIndividuaisEmLote.pas (+fDesfazerCadastroRubricas)</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F41</td><td><code>FOLHA/Fontes/FPrincipal.dfm › mnuINDAsist → FOLHA/Fontes/FCadExcessoesIR.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F42</td><td><code>FOLHA/Fontes/FPrincipal.dfm › mnuAlteraFormadePagto → FCadAlteraFormaPagto.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F43</td><td><code>FOLHA/Fontes/FPrincipal.dfm › mnuColunadoMapadeFolha → fColMapaFolha.pas + CtrlObjects/uCtrlColMapaFolha, DBObjects/uDbColMapaFolha (TableName=COLUNAMAPA)</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F44</td><td><code>FOLHA/Fontes/FPrincipal.dfm › mnuCadastroManualdeRubricas → FCadTmpDesc.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F45</td><td><code>FOLHA/Fontes/FPrincipal.dfm › mnuCadastroManualdeBeneficios → FCadHstBeneficio.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F46</td><td><code>FOLHA/Fontes/FPrincipal.dfm › MnuLancHistBenef → FLancHistBenef.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F47</td><td><code>FOLHA/Fontes/FPrincipal.dfm › mnuListadeRecebedores → SHARED/Folhas/FCadListaRecebedor.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F48</td><td><code>FOLHA/Fontes/FPrincipal.dfm › ArquivoTXT1 › LayOutDescontos1 → FCadLayoutDesconto.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F49</td><td><code>FOLHA/Fontes/FPrincipal.dfm › LayOutDescontosSaida1 → FCadLayoutDescontoSaida.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F50</td><td><code>FOLHA/Fontes/FPrincipal.dfm › mnuLayoutEntxSaida → FAssocLayoutEntxSaida.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F51</td><td><code>FOLHA/Fontes/FPrincipal.dfm › mnuRubricasFavorecContacc → FCadRubFavContacorrente.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F52</td><td><code>FOLHA/Fontes/FPrincipal.dfm › MnuFinancHabitacional → FfinancHabitacional.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F53</td><td><code>FOLHA/Fontes/FPrincipal.dfm › ImportaoArquivo1 → fImportaTxt.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F54</td><td><code>FOLHA/Fontes/FPrincipal.dfm › ExportaodeArquivo1 → FExportaTxT.pas (+uExportacao.pas)</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F55</td><td><code>FOLHA/Fontes/FPrincipal.dfm › mnuExportaVariosConvenios → FExportaVariosConvenios.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F56</td><td><code>FOLHA/Fontes/FPrincipal.dfm › mnuGeraSaidaCadastral → FGeraSaidaCadastral.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F57</td><td><code>FOLHA/Fontes/FPrincipal.dfm › EstruturasdeClculo1 → FEstruturaCalculo.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F58</td><td><code>FOLHA/Fontes/FPrincipal.dfm › MensagemparaContracheque1 → FmsgContraCheque.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F59</td><td><code>FOLHA/Fontes/FPrincipal.dfm › MnuConjuntoRubrica › MnuCadastroConjuntoRubrica → CM/CMPrevMT50/Source/FCadConjuntoRubrica.pas (+CM/CMPrevMT50/DBObjects/uDbConjuntoRubrica, TableName=CONJUNTORUBRICA)</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F60</td><td><code>FOLHA/Fontes/FPrincipal.dfm › MnuAssociaConjuntoRubrica → CM/CMPrevMT50/Source/FAssociaConjuntoxRubrica.pas (+uDbConjuntoRubxRub)</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F61</td><td><code>FOLHA/Fontes/FPrincipal.dfm › CadastrodergosdoINSS1 → CM/CMADMPREV/Fontes/FCadUFINSS.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F62</td><td><code>FOLHA/Fontes/FPrincipal.dfm › mnuPrismaCadMantenedora → CM/CMADMPREV/Fontes/FCadMantenedora.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F63</td><td><code>FOLHA/Fontes/FPrincipal.dfm › AssociaodeRubricasdoINSS1 → CM/CMADMPREV/Fontes/FAssocRubINSS.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F64</td><td><code>FOLHA/Fontes/FPrincipal.dfm › mnuPrismaConciliacao → CM/CMADMPREV/Fontes/FConciliacao.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F65</td><td><code>FOLHA/Fontes/FPrincipal.dfm › mnuPrismaResultadoConcilia → CM/CMADMPREV/Fontes/FResultConciliacao.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F66</td><td><code>FOLHA/Fontes/FPrincipal.dfm › AcertodeValores1 › Divergentes1 → CM/CMADMPREV/Fontes/fCompoeValoresRI.pas (TelaChamadora=1)</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F67</td><td><code>FOLHA/Fontes/FPrincipal.dfm › Identificao1 → CM/CMADMPREV/Fontes/FIdentificaINSS.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F68</td><td><code>FOLHA/Fontes/FPrincipal.dfm › mnuCancIdentificacao → CM/CMADMPREV/Fontes/FCancIdentificaINSS.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F69</td><td><code>FOLHA/Fontes/FPrincipal.dfm › EntradaManualdeRubricas2 → CM/CMADMPREV/Fontes/fCadEntrManualINSS.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F70</td><td><code>FOLHA/Fontes/FPrincipal.dfm › mnuInsereRubricasdoINSSnaFolha → FOLHA/Fontes/FInsereRubricasINSSFolha.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F71</td><td><code>FOLHA/Fontes/FPrincipal.dfm › ConsultaParticipantesTratados1 → CM/CMADMPREV/Fontes/fConsPartTratados.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F72</td><td><code>FOLHA/Fontes/FPrincipal.dfm › ExtratoIndividual1 → CM/CMADMPREV/Fontes/FExtratoINSS.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F73</td><td><code>FOLHA/Fontes/FPrincipal.dfm › MnuFechamentodeReembolso → CM/CMADMPREV/Fontes/FEncerraConciliacao.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F74</td><td><code>FOLHA/Fontes/FPrincipal.dfm › MnuItResumoREExDES → CM/CMADMPREV/Fontes/FComparaReembDesemb.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F75</td><td><code>FOLHA/Fontes/FPrincipal.dfm › mnuReemINSS → FOLHA/Fontes/FManutRubricaReembolsoINSS.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F76</td><td><code>FOLHA/Fontes/FPrincipal.dfm › mnuConciliaodoReembolsodoINSS → FOLHA/Fontes/FConciliacaoReembolsoINSS.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F77</td><td><code>FOLHA/Fontes/FPrincipal.dfm › mnuPrestaodeContasdoINSS → FOLHA/Fontes/FPrestacaoContasINSS.pas (+FPrestacaoContasINSSMotivo)</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F78</td><td><code>FOLHA/Fontes/FPrincipal.dfm › Grficos2 › EstatdeParticipantesporVersodeFolha1 → FFiltroGraficoQtdPartFolha.pas; relatório dRelaQtdPartFolha</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F79</td><td><code>FOLHA/Fontes/FPrincipal.dfm › GrficodeportipodeBenefcoporFolha1 → FFiltroGraficoFolhaBenef.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F80</td><td><code>FOLHA/Fontes/FPrincipal.dfm › GrficoDemostrativodeDescontos1 → FFiltroGraficoDescontos.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F81</td><td><code>FOLHA/Fontes/FPrincipal.dfm › GrficoDemonstrativodeSuplementaeseDescontos1 → FFiltroGraficoSuplDescFolha.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F82</td><td><code>FOLHA/Fontes/FPrincipal.dfm › mnuBeneficiosPreparados → fConsultaPreparo.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F83</td><td><code>FOLHA/Fontes/FPrincipal.dfm › mnuConsultaPrevia → FConsultaPrevia.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F84</td><td><code>FOLHA/Fontes/FPrincipal.dfm › mnuConsultaGlobalPrevia → fConsultaGlobalPrevia.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F85</td><td><code>FOLHA/Fontes/FPrincipal.dfm › mnuParametrizacaoContabilFinanceiradaPrevia → fConsultaParametrizacaoPrevia.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F86</td><td><code>FOLHA/Fontes/FPrincipal.dfm › mnuConsultaHistorico → FConsultaHistorico.pas (+CMFbComum50/Source/fFrameConsultaHistorico)</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F87</td><td><code>FOLHA/Fontes/FPrincipal.dfm › mnuConsultaHstCompensaIR → fConsHstCompensaIR.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F88</td><td><code>FOLHA/Fontes/FPrincipal.dfm › mnuHistricodeCompensaodeSaldodeContribuies → FHistCompSalContri.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F89</td><td><code>FOLHA/Fontes/FPrincipal.dfm › mnuConsultaEstornos → FConsultaEstorno.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F90</td><td><code>FOLHA/Fontes/FPrincipal.dfm › mnuPagamentoConvenio → fConsultaConvenio.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>PE-F91</td><td><code>FOLHA/Fontes/FPrincipal.dfm › mnuVisaoGerencialFolha → fVisaoGerencial.pas</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F01</td><td><code>FParametroFolha (grava PARAMAPREV); FFolhaNormalPrevia (PARAMFOLHA)</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F02</td><td><code>FcadBloqFolha.dfm (binário)</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F03</td><td><code>FCadProvento, FCadGrupoRubrica, FConciliacaoReembolsoINSS</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F04</td><td><code>FCadGrupoRubrica</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F05</td><td><code>FCadRegraxRubrica</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F06</td><td><code>FAssocRubricaPlano, FAcertaParamContabilFinanc</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F07</td><td><code>FontesMT/FParamRubricaMT + DBObjects/uDbParamRubrica (TableName)</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F08</td><td><code>CM/CMPrevMT50/DBObjects/uDbConjuntoRubrica, uDbConjuntoRubxRub (TableName)</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F09</td><td><code>FEstruturaCalculo</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F10</td><td><code>FCadTipoAcaoxRegra</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F11</td><td><code>FCadDepJudicial</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F12</td><td><code>FCadCompensaIRRF, fFolhaNormalEfet, festornafolha</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F13</td><td><code>FCadExcessoesIR</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F14</td><td><code>vários (ex.: FCadRubricaIndividualInserir, fRubricasIndividuaisEmLote, FReajRubIndiv)</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F15</td><td><code>FCadTmpDesc, FPreparo, fImportaTxt, FfinancHabitacional</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F16</td><td><code>uReajustaPercPensao, FCadAlimentadosRI, fCadRubXPensaoAlimenticiaRI</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F17</td><td><code>fcadcontabanco</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F18</td><td><code>fCadBancoPortadorCS; CtrlObjects/uCtrlBancoPortForma</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F19</td><td><code>FCadRubFavContacorrente</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F20</td><td><code>fCadParamAntecipAbono</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F21</td><td><code>FmsgContraCheque, FPRelDemPag</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F22</td><td><code>DBObjects/uDbColMapaFolha (TableName) via uCtrlColMapaFolha</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F23</td><td><code>FCadLayoutDesconto</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F24</td><td><code>FCadLayoutDescontoSaida</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F25</td><td><code>FAssocLayoutEntxSaida, FExportaVariosConvenios</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F26</td><td><code>FAbertFechaLoteFB, fConferenciaPrevia, FFolhaNormalPrevia</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F27</td><td><code>FPreparoSP, FAbertFechaLoteFB, fFolhaNormalEfet</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F28</td><td><code>SHARED/Folhas/FCadListaRecebedor, FManutListaExecPrevia, FFolhaNormalPrevia</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F29</td><td><code>FFolhaNormalPrevia, uFolhaPreviaObj, fFolhaExtra, FConsultaPrevia</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F30</td><td><code>dFolhaPrevia (INSERT INTO CM.BASEDEPAGAMENTO), FCadHstBeneficio</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F31</td><td><code>fGeraArquivoRemessaPrevia</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F32</td><td><code>fFolhaNormalEfet, festornafolha, FManutRubricaReembolsoINSS</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F33</td><td><code>festornafolha</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F34</td><td><code>fFolhaNormalEfet, festornafolha, uDesfazerPreparo</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F35</td><td><code>FPreparo, fFolhaNormalEfet, FCadAlteraFormaPagto, FEncerramentoPorFalecimento</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F36</td><td><code>FLancHistBenef, FCadHstBeneficio (insert MOVBENEF), FExecAbateReserva</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F37</td><td><code>FPreparo (INSERT INTO HSTCONTRIBPREV; UPDATE CONTRIBPREVPARTP)</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F38</td><td><code>FPreparo (update partprevplan); fFolhaNormalEfet (update ELEGPATRO)</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F39</td><td><code>fcadcontabanco (insert/update PESSOA), FCadExcessoesIR (update PESSOAFISICA)</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F40</td><td><code>FCadDepJudicial (insert/update/delete DEPENTIT), UFuncoesFolha</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F41</td><td><code>fFolhaNormalEfet, FRemessaEletronica, FExecGeraDocConvenio, festornafolha</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F42</td><td><code>idem</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F43</td><td><code>fTratamentoConvenio, FExecGeraDocConvenio</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F44</td><td><code>UCadastroEventoRegularizacao</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F45</td><td><code>UConciliacaoCredito, ULancEventoRegularizacao, FLancContasPagar/Receber</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F46</td><td><code>FEncerramentoPorFalecimento</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F47</td><td><code>CM/CMADMPREV/Fontes/FCadUFINSS</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F48</td><td><code>CM/CMADMPREV/Fontes/FCadMantenedora</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F49</td><td><code>CM/CMADMPREV/Fontes/FAssocRubINSS</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F50</td><td><code>FConciliacao, FIdentificaINSS, FCancIdentificaINSS, fCadEntrManualINSS, fCompoeValoresRI, FEncerraConciliacao</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F51</td><td><code>FPrestacaoContasINSS</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F52</td><td><code>CM/Forms/SourceMT/fCadForne → uCtrlPessoaForne; CM/Forms/DbObjects/uDbFornserv, uDbEmpresaforn</code></td><td><span class="tag inf">INFERIDO</span></td></tr>
+<tr><td>AL-F53</td><td><code>uDesfazerPreparo (UPDATE PROCESSOBENEF), chamado por FPreparo, FFolhaNormalPrevia, festornafolha</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F54</td><td><code>CM/CMADMPREV/Fontes/FConciliacao (grava HSTBENEFBFPP, HISTBENEFHABILITA)</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F55</td><td><code>FPreparo, dFolhaPrevia, FConsultaPrevia</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F56</td><td><code>FAssocRubricaPlano, uFolhaPreviaObj, FExecGeraDocConvenio</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F57</td><td><code>FPreparo, FAssocRubricaPlano</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F58</td><td><code>FCadRegraxRubrica, FEstruturaCalculo</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F59</td><td><code>fcadcontabanco, fGeraArquivoRemessaPrevia</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F60</td><td><code>DLookFolha, fCadBancoPortadorCS, FRemessaEletronica</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F61</td><td><code>FAcertaParamContabilFinanc, dContabil, DIntegracao</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F62</td><td><code>FPreparo, DAPrev</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F63</td><td><code>FExecAbateReserva (o UPDATE RESERVAPART em DFolha.qryUpdReserva é código morto)</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F64</td><td><code>FPreparo, uDesfazerPreparo</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F65</td><td><code>dFolhaPrevia</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F66</td><td><code>UPrevia, uFolhaPreviaObj</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F67</td><td><code>FCadCompensaIRRF, DFolha</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F68</td><td><code>FPreparo, fConsultaPreparo</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F69</td><td><code>FCadExcessoesIR</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F70</td><td><code>FCadProvento, dFolhaPrevia</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F71</td><td><code>fFolhaNormalEfet, FEncerramentoPorFalecimento</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+<tr><td>AL-F72</td><td><code>fFolhaNormalEfet, festornafolha, fVisaoGerencial</code></td><td><span class="tag ok">COMPROVADO</span></td></tr>
+</table>
+<h2>7. Integrações e dupla contagem</h2>
+<table>
+<tr><th>Dependência / módulo</th><th>Observação</th></tr>
+<tr><td>BENEFICIOPREV</td><td>As tabelas BENEFBFCIARIO, HSTBENEFBFCIARIO, PARTPREVPLAN, ELEGPATRO, RUBRICAINDIV, TMPDESC, HISTRUBSAL, DEPENTIT, PESSOAFISICA, CONTABANCARIA e PROCESSOBENEF são gravadas pelos dois módulos. Isso afeta os AL-F14, F15, F17, F32, F35, F36, F38, F39, F40 e F53. BENEFICIO, BENEFPLANPREV e REAJBENEFICIO são mantidas por BENEFICIOPREV e só referenciadas aqui (AL-F55 e F64). A FOLHA tem cópias locais de DAPrev, DIntegraCAPCAR, FMostraAux e FPedeInfAux, então o código é duplicado e não compartilhado.</td></tr>
+<tr><td>Reembolso do INSS (CM/CMADMPREV)</td><td>PE-F61 a F69 e F71 a F74 abrem telas do pacote compartilhado. BENEFICIOPREV compila FCadMantenedora e FCadUFINSS e tem handlers do reembolso sem item de menu visível, por isso o Reembolso foi atribuído só à FOLHA. AL exclusivos do INSS: F47 a F50 e F54.</td></tr>
+<tr><td>CONTRIBUICAOPREV</td><td>HSTCONTRIBPREV, CONTRIBPREVPARTP, PARTPREVPLAN, TMPDESC, ELEGPATRO e HISTRUBSAL são gravadas pelos dois módulos. AL-F37 (Contribuição do assistido) e AL-F38 (Participante) são do domínio de CONTRIBUICAOPREV. TMPDESC (AL-F15) é o elo do recebimento de contribuição via folha.</td></tr>
+<tr><td>Componentes comuns na pasta</td><td>CM/Forms (framework), CM/CMPrevMT50 (Conjunto de Rubricas, PE-F59/F60), CM/Forms/SourceMT/fCadForne (Favorecido, PE-F27) e SHARED/Folhas (Lista de Recebedores, PE-F47) são contados na FOLHA porque o item de menu está nela.</td></tr>
+<tr><td>Dependências externas à pasta</td><td>Todos os caminhos de unit do Folha.dpr são relativos e resolvem dentro de Migração NEXUS/. Os caminhos externos são só de ambiente (C:\ProjetosCM5\... no .dof/.cfg, C:\Planus\Temp\... em runtime). Há cerca de 12 stored procedures Oracle (SP_FB_PREPARO_FOLHA_BENEF, SP_FB_CALCULO_RUBRICA, PCK_FB_ENCERRAFALECIDO etc.); as tabelas gravadas só dentro delas não aparecem no código e não foram analisadas.</td></tr>
+</table>
+<h2>8. Pendências</h2>
+<table>
+<tr><th>Tipo</th><th>Descrição</th></tr>
+<tr><td><span class="tag pend">PENDENTE</span></td><td>Catálogo de relatórios no banco (IDMODULO = 18): 40 relatórios com código comprovado não foram contados (+184 SFP se confirmados). Há ainda 7 TppReport órfãos em dRelFolha.</td></tr>
+<tr><td><span class="tag dec">DECISÃO</span></td><td>Preparo e Preparo-SP (PE-F03) foram contados como 1 PE, porque são o mesmo processo com duas implementações. Se o negócio os tratar como processos distintos: +1 PE.</td></tr>
+<tr><td><span class="tag dec">DECISÃO</span></td><td>Contra Cheque (FDemPag) e Demonstrativo de Pagamento (FPRelDemPag) foram contados como 1 PE (PE-F16). Se a lógica for diferente: +1 PE.</td></tr>
+<tr><td><span class="tag dec">DECISÃO</span></td><td>A Consulta/Ajuste da Prévia (PE-F83) também grava dados. Pode ser desdobrada em consulta + manutenção (+1 PE).</td></tr>
+<tr><td><span class="tag dec">DECISÃO</span></td><td>AL-F32 junta HSTFOLHABENEF e HISTRUBSAL. Tratar HISTRUBSAL como AL separado daria +1 AL.</td></tr>
+<tr><td><span class="tag inf">INFERIDO</span></td><td>PE-F27 / AL-F52 Favorecido: a gravação é feita por objetos MT do CM e não foi rastreada até o SQL.</td></tr>
+<tr><td><span class="tag pend">PENDENTE</span></td><td>As tabelas mantidas apenas dentro das stored procedures não aparecem no código e podem faltar AL.</td></tr>
+</table>
+</main>
+</body>
+</html>
