@@ -1,0 +1,1335 @@
+//    Sistema.Versao := '5.01.13e'; 
+//end.
+
+package CMIntBancoMT50;
+
+{$R *.RES}
+{$R CMINTBANCOMT50_RES.RES}
+
+{$ALIGN ON}
+{$ASSERTIONS ON}
+{$BOOLEVAL OFF}
+{$DEBUGINFO ON}
+{$EXTENDEDSYNTAX ON}
+{$IMPORTEDDATA ON}
+{$IOCHECKS ON}
+{$LOCALSYMBOLS ON}
+{$LONGSTRINGS ON}
+{$OPENSTRINGS ON}
+{$OPTIMIZATION OFF}
+{$OVERFLOWCHECKS OFF}
+{$RANGECHECKS OFF}
+{$REFERENCEINFO OFF}
+{$SAFEDIVIDE OFF}
+{$STACKFRAMES OFF}
+{$TYPEDADDRESS OFF}
+{$VARSTRINGCHECKS ON}
+{$WRITEABLECONST ON}
+{$MINENUMSIZE 1}
+{$IMAGEBASE $400000}
+{$DESCRIPTION 'FUNCEF - Geração de Arquivos de Remessa e Retorno'}
+{$RUNONLY}
+{$IMPLICITBUILD OFF}
+
+requires
+  CmForms50;
+
+contains
+  uCtrlIntBanco in '..\CtrlObjects\uCtrlIntBanco.pas',
+  uDbParamintbanco in '..\DbObjects\uDbParamintbanco.pas',
+  DIntBancoMT in '..\Forms\DIntBancoMT.pas' {DtmIntBancoMT},
+  FAlteraRemessItauMT in '..\Forms\FAlteraRemessItauMT.pas' {FrmAlteraRemessItauMT},
+  FCobrNregHSBCMT in '..\Forms\FCobrNregHSBCMT.pas' {FrmCobrNregHSBCMT},
+  FCobrRemessaBradescoMT in '..\Forms\FCobrRemessaBradescoMT.pas' {FrmCobrRemessaBradescoMT},
+  FCobrRemessaItauMT in '..\Forms\FCobrRemessaItauMT.pas' {FrmCobrRemessaItauMT},
+  FCustomAguardeMT in '..\Forms\FCustomAguardeMT.pas' {FrmCustomAguardeMT},
+  fParamBancoCidadeMT in '..\Forms\fParamBancoCidadeMT.pas' {frmParamBancoCidadeMT},
+  fParamBarrasBbMT in '..\Forms\fParamBarrasBbMT.pas' {FrmParamBarrasBbMT},
+  FparamBBpagMT in '..\Forms\FparamBBpagMT.pas' {FrmparamBBpagMT},
+  fParamBostonEscrituralMT in '..\Forms\fParamBostonEscrituralMT.pas' {frmParamBostonEscrituralMT},
+  fParamCnabBbMT in '..\Forms\fParamCnabBbMT.pas' {frmParamCnabBbMT},
+  fParamCnabCEFMT in '..\Forms\fParamCnabCEFMT.pas' {frmParamCnabCEFMT},
+  FParamCnabSantanderMT in '..\Forms\FParamCnabSantanderMT.pas' {frmParamCnabSantanderMT},
+  fParamCobrancaEletronicaBanrisulMT in '..\Forms\fParamCobrancaEletronicaBanrisulMT.pas' {frmParamCobrancaEletronicaBanrisulMT},
+  fParamCobrancaEletronicaBBVMT in '..\Forms\fParamCobrancaEletronicaBBVMT.pas' {frmParamCobrancaEletronicaBBVMT},
+  fParamCobrancaRegistradaUnibancoMT in '..\Forms\fParamCobrancaRegistradaUnibancoMT.pas' {frmParamCobrancaRegistradaUnibancoMT},
+  fParamCobrancaSemRegistroUnibancoMT in '..\Forms\fParamCobrancaSemRegistroUnibancoMT.pas' {frmParamCobrancaSemRegistroUnibancoMT},
+  fParamCobRegRealMT in '..\Forms\fParamCobRegRealMT.pas' {frmParamCobRegRealMT},
+  FParamFolhaPagBradescoMT in '..\Forms\FParamFolhaPagBradescoMT.pas' {FrmParamFolhaPagBradescoMT},
+  fParamFolhaPagCEFMT in '..\Forms\fParamFolhaPagCEFMT.pas' {frmParamFolhaPagCEFMT},
+  FParamFolhaPagrealMT in '..\Forms\FParamFolhaPagrealMT.pas' {FrmParamFolhaPagrealMT},
+  fParamPagamentoFornecedorSantanderMT in '..\Forms\fParamPagamentoFornecedorSantanderMT.pas' {frmParamPagamentoFornecedorSantanderMT},
+  FParamPagBBMT in '..\Forms\FParamPagBBMT.pas' {FrmParamPagBBMT},
+  FParamPagForneBradescoMT in '..\Forms\FParamPagForneBradescoMT.pas' {FrmParamPagForneBradescoMT},
+  fParamRegistradaHSBCMT in '..\Forms\fParamRegistradaHSBCMT.pas' {frmParamRegistradaHSBCMT},
+  fParamRemBicBancoMT in '..\Forms\fParamRemBicBancoMT.pas' {frmParamRemBicBancoMT},
+  fParamSafraRegistradaMT in '..\Forms\fParamSafraRegistradaMT.pas' {frmParamSafraRegistradaMT},
+  fParamTransfBbMT in '..\Forms\fParamTransfBbMT.pas' {FrmParamTransfBbMT},
+  FParamUnibancoMT in '..\Forms\FParamUnibancoMT.pas' {FrmParamUnibancoMT},
+  uDebAutBanrisulMT in '..\Source\uDebAutBanrisulMT.pas',
+  uCnabBBMT in '..\Source\uCnabBBMT.pas',
+  uCnabCefMT in '..\Source\uCnabCefMT.pas',
+  uCnabSantanderMT in '..\Source\uCnabSantanderMT.pas',
+  uCobrancaMT in '..\Source\uCobrancaMT.pas',
+  uContaBancariaMT in '..\Source\uContaBancariaMT.pas',
+  UCheqBloqMT in '..\Source\UCheqBloqMT.pas',
+  uIntBancoManager in '..\Source\uIntBancoManager.pas',
+  uPagBanrisulMT in '..\Source\uPagBanrisulMT.pas',
+  uPagBBMT in '..\Source\uPagBBMT.pas',
+  uPagDiversosMT in '..\Source\uPagDiversosMT.pas',
+  uPagHsbcMT in '..\Source\uPagHsbcMT.pas',
+  uPagSantanderMT in '..\Source\uPagSantanderMT.pas',
+  uPagUnibancoMT in '..\Source\uPagUnibancoMT.pas',
+  uRetornoCobrMT in '..\Source\uRetornoCobrMT.pas',
+  uRetornoSispagMT in '..\Source\uRetornoSispagMT.pas',
+  uSisPagMT in '..\Source\uSisPagMT.pas',
+  DDadosBancariosMT in '..\Forms\DDadosBancariosMT.pas' {DtmDadosBancariosMT: TDataModule},
+  uCtrlINTBANCOXPORTFORM in '..\CtrlObjects\uCtrlINTBANCOXPORTFORM.pas',
+  uDbIntbancoxportform in '..\DbObjects\uDbIntbancoxportform.pas',
+  uSicovCEF in '..\Source\uSicovCEF.Pas',
+  uPagBradescoCnab240 in '..\Source\uPagBradescoCnab240.pas',
+  UPagRealCnab240 in '..\Source\UPagRealCnab240.pas',
+  uPagUnibancoCnab240 in '..\Source\uPagUnibancoCnab240.pas',
+  UPagBanespaCnab240 in '..\Source\UPagBanespaCnab240.pas',
+  uCobBanespaCNAB240 in '..\Source\uCobBanespaCNAB240.pas',
+  uFolhaPagRealCnab240MT in '..\Source\uFolhaPagRealCnab240MT.pas',
+  fParamBANESPACnab240MT in '..\Forms\fParamBANESPACnab240MT.pas' {frmParamBANESPACnab240MT},
+  uFolhaPagBanespaMT in '..\Source\uFolhaPagBanespaMT.pas',
+  UPagBescCnab240 in '..\Source\UPagBescCnab240.pas',
+  uCobBescCNAB240 in '..\Source\uCobBescCNAB240.pas',
+  fParamBESCCnab240 in '..\Forms\fParamBESCCnab240.pas',
+  uSiaccCEF in '..\Source\uSiaccCEF.pas';
+
+end.
+{CM$ALT
+================================================================================
+Histórico de alterações efetuadas no módulo CMIntBancoMT50
+================================================================================
+CM$VER      5.01.13e    23/06/2008
+--------------------------------------------------------------------------------
+pendência 28251
+Descrição: problema na geraçao do NSA do arquivo de debito gerado no contas a receber. resalto que a nao geraçoa de um novo NSA "numero"
+================================================================================
+CM$VER      5.01.13d    05/05/2008
+--------------------------------------------------------------------------------
+Pendência: 27799
+layout: sicov CEF
+Descrição: O número do campo NSA (coluna 74 a 79) do header do arquivo não está sendo incrementado. 
+Fazendo o sistema gerar 2 arquivos com o mesmo número.
+================================================================================
+CM$VER      5.01.13c    21/01/2008
+--------------------------------------------------------------------------------
+pendência: 26864
+descrição: implementação dos layousts Cnab 400 de retorno de boletos do banco BESC  e
+CNAB 240 de cobrança por débito automático do banco BESC.
+================================================================================
+CM$VER      5.01.13b    10/01/2008
+--------------------------------------------------------------------------------
+Pendência: 26895
+Layouts: Todos
+Descrição: O campo "Considera Float para Cálculo de Data de Pagto Arquivo Bancário", 
+do item Contas Bancárias/Caixas X Forma de Pagto, não está funcionando como deve. 
+Ele leva o float sempre para MENOS (dias), não importando a opção escolhida. 
+Pendência: 26926
+Layouts: Todos
+Descrição: As datas não estão sendo caulculadas corretamente nos arquivos do Banco ABN ANRO -CNAB 240.
+================================================================================
+CM$VER      5.01.13a    06/12/2007
+--------------------------------------------------------------------------------
+Pendência: 26604
+Descrição: os layouts de folha de pagamento não estão respeitando a parametrização de float.
+================================================================================
+CM$VER      5.01.13     19/11/2007
+--------------------------------------------------------------------------------
+Liberação para o padrão 5.10.18
+================================================================================
+CM$VER      5.01.12a    30/10/2007
+--------------------------------------------------------------------------------
+Pendência: 26604
+Descrição: os layouts de folha de pagamento não estão respeitando a parametrização de float.
+================================================================================
+CM$VER      5.01.12     31/07/2007
+--------------------------------------------------------------------------------
+Liberação do padrão 5.10.17
+================================================================================
+CM$VER      5.01.11a    29/06/2007
+--------------------------------------------------------------------------------
+pendência : 24978
+layout    : Banco Besc (Banco Estadual de Santa Catarina)
+descrição : Correção do arquivo de remessa de pagamento.
+================================================================================
+CM$VER      5.01.11     26/06/2007
+--------------------------------------------------------------------------------
+Pendência: 25575
+Descrição: Correção do campo do arquivo referente ao documento(CPF/CNPJ) do sacado.
+Neste campo estava gravando o CNPJ da fundação.
+Liberação para o padrão 5.10.16
+================================================================================
+CM$VER      5.01.10c    15/06/2007
+--------------------------------------------------------------------------------
+Pendência: 25538
+Descrição: Corrigido o erro de configuração de arquivo de retorno
+================================================================================
+CM$VER      5.01.10b    13/06/2007
+--------------------------------------------------------------------------------
+pendência : 24978
+layout    : Banco Besc (Banco Estadual de Santa Catarina)
+descrição : Implementação do Envio de Pagamento, Retorno do Pagamento,
+            Envio do Recebimento e Retorno do Recebimento.
+================================================================================
+CM$VER      5.01.10a    31/05/2007
+--------------------------------------------------------------------------------
+pendência 25191  (ajustes)
+Layouts Banco Real folha de pagamento e pagament a forncedores padrão cnab 240
+problema na gravação do arquivo do Banco Real, portador forma 207(REAL - FL.BENEFICIO - CRED. C/C) e 210 (REAL - FL.BENEFICIO - RECIBO/OP). Como o sistema atribuiu aos dois o mesmo nome "REALFOLPAG250410", um esta substituindo o outro. Com isso um dos portadores fica sem o arquivo texto, que deve ser enviado pra o Banco. 
+================================================================================
+CM$VER      5.01.10     26/04/2007
+--------------------------------------------------------------------------------
+pendência: 25209
+layout: banco do brasil cnab 240
+Descrição: O sistema não está emitindo o dígito verificador da agência e conta corrrente na geração de arquivos bancários.
+================================================================================
+CM$VER      5.01.09     05/04/2007
+--------------------------------------------------------------------------------
+Liberação para o padrão 5.10.15
+Pendência: 24668
+Tela: Cadastro\Contas Caixa X forma de pagamento
+Descrição: Implementar no cadastro do portador forma uma parametrização que permita calcular a data programada do pagamento com o Float.
+Pendência: 22627
+Layout : Cnab240 do banco Banespa - Pagto Fornecedores.
+Descrição: Na impressão da GPS e na geração do arquivo texto, considerar o agrupamento de GPSs de Pessoa Física, indicando a CBS como beneficiária.
+[Vide email com definição.
+================================================================================
+CM$VER      5.01.08f    08/05/2007
+--------------------------------------------------------------------------------
+pendência 25191
+Layouts Banco Real folha de pagamento e pagament a forncedores padrão cnab 240
+problema na gravação do arquivo do Banco Real, portador forma 207(REAL - FL.BENEFICIO - CRED. C/C) e 210 (REAL - FL.BENEFICIO - RECIBO/OP). Como o sistema atribuiu aos dois o mesmo nome "REALFOLPAG250410", um esta substituindo o outro. Com isso um dos portadores fica sem o arquivo texto, que deve ser enviado pra o Banco. 
+================================================================================
+CM$VER      5.01.08e    18/04/2007
+--------------------------------------------------------------------------------
+Pendência: 24942
+Descrição: Implementar o float  layouts BANESPA-FL.Pagamento Cnab240 e forma de pagamento O.P e BANESPA - PAG. FORN. - CNAB 240  e forma de pagamento O.P.
+================================================================================
+CM$VER      5.01.08d    05/04/2007
+--------------------------------------------------------------------------------
+Pendência: 22627
+Layout : Cnab240 do banco Banespa - Pagto Fornecedores.
+Descrição: Na impressão da GPS e na geração do arquivo texto, considerar o agrupamento de GPSs de Pessoa Física, indicando a CBS como beneficiária.
+[Vide email com definição.
+================================================================================
+CM$VER      =========== ==========
+--------------------------------------------------------------------------------
+pendência: 21782
+layouts: Banespa CNAB 240 (pagamento de fornecedor e folha de pagamento)
+Descrição: Implementar o portador alternativo para a geração de arquivo dos bancos  BANESPA,
+a data programada da forma de pagamento DOC deverá respeitar o Float do portador forma utilizado.
+pendência: 24327
+layouts: Banespa CNAB 240 (pagamento de fornecedor e folha de pagamento)
+Descrição do erro: Há sobreposição de arquivos gerados, os números sequenciais estão se repetindo quando a sequencia é >= 3 dígitos.
+================================================================================
+CM$VER      5.01.08b    05/03/2007
+--------------------------------------------------------------------------------
+pendência: 24635
+Layout: Banco do brasil cnab 240
+descrição: A agência HSBC não tem digito verificador e quando gera o arquivo de remessa, adiciona um 0 na frente e o ultimo número da agência cai na posição 29. (Digito Verificador). Testei na base da Refer, número do  documento nº.452145/12 - Lote.36642, arquivo anexo.
+================================================================================
+CM$VER      5.01.08a    19/12/2006
+--------------------------------------------------------------------------------
+Pendência: 23868 (ajuste)
+Tela: Rcecebimento automático (retorno)
+Descrição do problema: arquivos de retorno com mais de um cabeçalho não capta os documentos abaixo do segundo cabeçalho, por isso o sistema não os baixa.
+================================================================================
+CM$VER      5.01.08     12/12/2006
+--------------------------------------------------------------------------------
+LIberação do padrão 5.10.13
+================================================================================
+CM$VER      5.01.07     18/09/2006
+--------------------------------------------------------------------------------
+Liberação para o padrão 5.10.12
+================================================================================
+CM$VER      5.01.07a    05/12/2006
+--------------------------------------------------------------------------------
+Pendência: 23868
+Tela: Rcecebimento automático (retorno)
+Descrição do problema: arquivos de retorno com mais de um cabeçalho não capta os documentos abaixo do segundo cabeçalho, por isso o sistema não os baixa.
+================================================================================
+CM$VER      5.01.06     28/08/2006
+--------------------------------------------------------------------------------
+Liberação para o padrão 5.10.11
+Pendência 21102
+Tela: Recebimento Automático (retorno)
+Descriçaõ: Customizar forma de baixa automática onde a forma de recebimento deverá
+ser lida pelo arquivo, e não informada manualmente como é feito hoje. Desta forma
+uma única baixa sensibilizará o financeiro com N baixa que serão agrupadas pela
+forma de recebimento informada no arquivo de retorno. Verificar a data Float do
+portador forma.
+================================================================================
+CM$VER      5.01.05c    06/03/2007
+--------------------------------------------------------------------------------
+pendência: 24635
+Layout: Banco do brasil cnab 240
+descrição: A agência HSBC não tem digito verificador e quando gera o arquivo de remessa, adiciona um 0 na frente e o ultimo número da agência cai na posição 29. (Digito Verificador). Testei na base da Refer, número do  documento nº.452145/12 - Lote.36642, arquivo anexo.
+================================================================================
+CM$VER      5.01.05b    06/09/2006
+--------------------------------------------------------------------------------
+Pendência 23261
+layout banco do brasil cnab 240
+descrição: Está com erro ao gerar o arquivo tem forma de pagamento alternativo.
+================================================================================
+CM$VER      5.01.05a    28/08/2006
+--------------------------------------------------------------------------------
+Pendência: 22819
+Descrição: Acrescentar o filtro recpag='R' no update que atualiza o CAMPO EMISSBLOQ
+da tabela documento, executado no momento da geração dos arquivos intbanco. Observação
+da FUNCEF:  Acrescentar o filtro recpag='R' no update que atualiza o CAMPO EMISSBLOQ
+da tabela documento, executado no momento da geração dos arquivos intbanco.
+================================================================================
+CM$VER      5.01.05     05/04/2006
+--------------------------------------------------------------------------------
+Liberação do padrão 5.10.09
+layout: Banespa Cnab 240 - Pagto de Fornecedores
+Pendência: 21659 (CAP) - Recebimento Automático do Banco Banespa Cnab 240 - Pagto de Fornecedores
+layout: Banespa Cnab 240 - Pagto de Fornecedores
+pendencia: 21175 - implementação do pagamento de GPS
+================================================================================
+CM$VER      5.01.04b    11/01/2006
+--------------------------------------------------------------------------------
+Pendência: 21229
+Tela: Cobrança\Recebimento\Automático (retorno)
+Descrição do erro: Não está sendo posssível fazer a baixa automática do arquivo de retorno Cnab240 do Banespa.
+================================================================================
+CM$VER      5.01.04a    29/12/2005
+--------------------------------------------------------------------------------
+acerto no layout pagFor do banespa 240
+================================================================================
+CM$VER      5.01.04     19/12/2005
+--------------------------------------------------------------------------------
+Pendência 20475
+Layout Pag. Forn. Banrisul
+Descrição: colocar o delimitador de arquivo.
+Pendência 20463
+Layout Paga. de forn. banco real cnab240
+Descricao: ajuste do espaco do dv da agencia bancária.
+Pendência 20286
+Descrição: Implementação de layouts Banco Banespa CNAB 240 (Pagamento a Fornecedor, Cobrança e Folha de Pagamentos).
+Pendência 20276 - 22/09/2005 
+layout banco real cnab240
+Descriçaõ: Estava truncando o último dígito da agência.
+Pendência 18396 - 01/09/2005 
+layout banco real cnab240
+Descriçaõ: preencher o CPF ou CNPJ com zeros à esquerda
+Pendência: 19978 (ajuste)
+Layout: Bradesco Pagamento de Fornecedores 
+Descrição: exclui a possibilidade de o sequencial do 
+pagamento se repetir se utilizado o mesmo modelo de arquivo de remessa.
+================================================================================
+CM$VER      5.01.03     20/06/2005
+--------------------------------------------------------------------------------
+PendÊncia: 18808 - Reabertura
+Decrição : Acerto no preechimento na linha do arquivo de remessa do campo
+           Valor do documento.
+Pendência: 19308
+Erro de sql com a cláusula NOWAIT 
+================================================================================
+CM$VER      5.01.02     26/04/2005
+--------------------------------------------------------------------------------
+Pendência: 19024
+Layout: Recebimento do arquivo de retorno do Banco Real CNAB 240
+Descrição do erro: Não está facendo o recebimento automático com este layout.
+Pendência 19042
+Layout: Bradesco Pagamento de Fornecedores CNAB 500
+Descrição do erro: ocorre erro de cálculo do dígito verificador no recebimento pelo banco quando a forma de pagamento é uma ficha de compensação.
+Pendência 18844
+LayOut: Todos
+Descrição do erro: não permitir que usuários concorrentes que geram arquivos bancários com o mesmo nossoNumero para documentos distintos.
+Pendência 18808
+Layout: Pagamento de Fornecedores do Bradesco
+Descriçao do erro: A coluna de valor do documento está zerada. Verificar também o total da coluna.
+================================================================================
+CM$VER      5.01.01     26/01/2005
+--------------------------------------------------------------------------------
+Pendência 18543
+Layout: Sicov.
+Descriçao do erro: Na geração do arquivo de débito, a conta corrente relacionado ao cliente está vindo zerada
+Pendência 18497
+Layout: Sicov.
+Descrição do erro: O arquivo pancário está gravando a conta preferencial sempre e não está
+respeitando a conta bancária gravada no idcdocumento da tabela documento, isto aconteceu com um documento gerado pelo empréstimo.
+Pendência 18494
+Layout: Todos que utilizam o número sequencial de emissão de arquivos bancários
+Descrição: gerar a seqüência de emissão de arquivos bancários por convênio bancário.
+Pendência 18447
+Layout: sicov
+Descrição do erro: o sequancial do arquivo gerado pelo contas a receber está obedecendo 'a sequancia do contas a pagar.
+Pendência: 17884
+Layout: Todos.
+Descrição: nas telas de emissão de arquivos intbando das Folhas de Benefício e de pagamento não exibir o arquivo gerado.
+Pendência: 18093
+LayOut: Cnab 240 do banco Real.
+Descrição: incluir o tipo de serviço 03 - bloqueto eletrônico, no Tipo de pagamento.
+================================================================================
+CM$VER      5.01.00z    20/12/2004
+--------------------------------------------------------------------------------
+Aujuste no Retorno do layout do cnab240 do banco do brasil
+Pendência: 18213
+LayOut: Cnab 240 do banco do brasil
+Descrição: Implementação dos seguimentos R e S e acertos.
+Pendência: 18109
+LayOut: Cnab 240 do banco real
+Descrição: O número das agências bancárias aparecem truncados.
+================================================================================
+CM$VER      5.01.00y    06/10/2004
+--------------------------------------------------------------------------------
+Pendência: 17877
+LayOut: Pagmento de fornecedores do Bradesco
+Descrição: No contas a Pagar os documentos sem alteradores de desconto ou acréscimo estão saindo com o campo valor vazio.
+================================================================================
+CM$VER      5.01.00x    06/09/2004
+--------------------------------------------------------------------------------
+Pendência: 17531
+layout: Débito automático do banrisul
+Descrição: as contas corrente de débito estão saindo erradas(saindo sempre a conta corrente da fundação)..
+================================================================================
+CM$VER      5.01.00v    30/08/2004
+--------------------------------------------------------------------------------
+Pendência: 16682
+layout: Pagamento de fornecedores Bradesco
+Descrição: problema na composição do código de barrras de títulos de outros bancos.
+================================================================================
+CM$VER      5.01.00u    18/08/2004
+--------------------------------------------------------------------------------
+Pendência: 17399
+LayOut : Banrisul (Pagamentos de fornecedores)
+Descrição: Atualizar o layout do banrisul segundo o layout recebido  
+================================================================================
+CM$VER      5.01.00t    12/08/2004
+--------------------------------------------------------------------------------
+Pendência 16682 (ajuste)
+LayOut: pagamentos de fornecedores Bradesco.
+Descrição: o dv do código de barras de cobrançã de títulos está saindo errado.
+================================================================================
+CM$VER      5.01.00s    30/06/2004
+--------------------------------------------------------------------------------
+Pendência 17041 (ajustes)
+layout: Banrisul Cobrança Eletrônica
+descrição: gerar o arquivo de impressão de boletos com as mensagens do verso do boleto.
+Pendência: 17039 (ajustes)
+Layout: Pagamento de Fornecedores do Banrisul seguimento D (arreadações diversas DARF, LUZ, TELEFONES etc...)
+Descrição: O arquivo contem menos de 240 posiçoes.
+================================================================================
+CM$VER      5.01.00r    24/06/2004
+--------------------------------------------------------------------------------
+Pendência: 17039
+Layout: Pagamento de Fornecedores do Banrisul seguimento D (arreadações diversas DARF, LUZ, TELEFONES etc...)
+Descrição: O arquivo contem menos de 240 posiçoes.
+================================================================================
+CM$VER      5.01.00q    23/06/2004
+--------------------------------------------------------------------------------
+Pendência: 17059
+tela: geração de arquivos intabanco da folha de pagamentos
+descrição: erro 'field not found: VALORMAXIMO'
+Pendência 17041
+layout: Banrisul Cobrança Eletrônica
+descrição: gerar o arquivo de impressão de boletos com as mensagens do verso do boleto.
+================================================================================
+CM$VER      5.01.00p    16/06/2004
+--------------------------------------------------------------------------------
+Pendência: 16952
+Tela: Recebimento automatico (retorno)
+Descrição: Não está lançando devidamente alteradores na baixa de arquivos de retorno 
+do banco do Brasil (cnab240).
+Pendência: 16953
+Tela: Recebimento automatico (retorno)
+Descrição: Não está lançando devidamente alteradores na baixa de arquivos de retorno 
+do banco do Brasil (código de barras).
+================================================================================
+CM$VER      5.01.00o    11/06/2004
+--------------------------------------------------------------------------------
+Pendência 16952
+tela :Recebimento \Automático (cap)
+Descrição do erro: O sistema não está baixando os documentos retornados pelo banco em arquivo txt.
+================================================================================
+CM$VER      5.01.00n    11/06/2004
+--------------------------------------------------------------------------------
+Pendência 16682
+LayOut: pagamentos de fornecedores Bradesco.
+Descrição: o dv do código de barras de cobrançã de títulos está saindo errado.
+================================================================================
+CM$VER      5.01.00m    29/04/2004
+--------------------------------------------------------------------------------
+Pendência 16342
+tela : Tesouraria\Emissão de Documento\Remessa Eletrônica do CAP
+Descrição: validar a digitação do código de barras de Arrecadações pra que seja possível
+fazer remessa bancária de arrecadações.
+================================================================================
+CM$VER      5.01.00l    26/04/2004
+--------------------------------------------------------------------------------
+Pendência 15976
+LayOut : Cnab 240 do Banco do Brasil (uPagBBMT)
+Ajustes no LayOut.
+////////////////////////////////////////////////////////////////////////////////////
+Pendência 16655
+LayOut : Cnab 240 do Banco Real
+Implementação do layout
+================================================================================
+CM$VER      5.01.00k    26/04/2004
+--------------------------------------------------------------------------------
+Pendência: 16648
+layout: Pagamento de Fornecedores Bradesco
+Descrição: No arquivo bancario o valor do pagamento (posição 205, 219) está saindo zerado quando 
+não tem alterador para o ducumento.
+================================================================================
+CM$VER      5.01.00j    22/04/2004
+--------------------------------------------------------------------------------
+Pendência: 16648
+layout: Pagamento de Fornecedores Bradesco
+Descrição: No arquivo bancario o valor do pagamento (posição 205, 219) está saindo zerado quando 
+não tem alterador para o ducumento.
+================================================================================
+CM$VER      5.01.00i    20/04/2004
+--------------------------------------------------------------------------------
+Pendência 16160
+LayOut : Pagamento de Fornecedores do Unibanco
+Descrição: Implementar a forma de pagamento TED.
+================================================================================
+CM$VER      5.01.00h    14/04/2004
+--------------------------------------------------------------------------------
+Pendência 16244
+LayOut : Pagamento de Fornecedores Bradesco
+Descrição:  ajuste
+////////////////////////////
+Pendência 16136
+LayOut: SicovCEF
+Descrição: Implementação dos códigos de operação de cancelamento (CAR).  
+///////////////////////////
+Pendência 16136
+LayOut: Bradesco Cobrança
+Descrição: Implementação dos códigos de operação de cancelamento (CAR).  
+================================================================================
+CM$VER      5.01.00g    02/04/2004
+--------------------------------------------------------------------------------
+Pendência 16160
+LayOut : Pagamento de Fornecedores do Unibanco
+Descrição: Implementar a forma de pagamento TED.
+================================================================================
+CM$VER      5.01.00f    24/03/2004
+--------------------------------------------------------------------------------
+Pendência 16244
+LayOut : Pagamento de Fornecedores Bradesco
+Descrição: Preencher os campos valor do documento posicao (195 a 204) com o valor bruto do documento,
+valor de pagamento posicao (205 a 219) com o valor pago do documento, o campo valor do desconto posicao (220 a 234) 
+com o valor de desconto do documento e o campo valor do acrescimo posicao (235 a 249) com o valor de acréscimo do documento.
+                                   
+================================================================================
+CM$VER      5.01.00e    22/03/2004
+--------------------------------------------------------------------------------
+Pendência 16086
+Tela do Contas a Pagar: Tesouraria\Lote de documento para pagamento\Cria Lote\Procura\Contas Caixa x Forma de Pagamento.
+Layout do BanRisul
+Descrição: O sistema não exibe o form para preencher o título do banco quando a forma de pagamento do portadorforma é  'ARRECADAÇÃO'.
+Pendência 16318
+Layout SICOV
+Descrição: Criar o campo de sequência dos arquivos na tabela MODELOSCNAB, ficando
+assim a sequência dos arquivos vinculada ao modelo de layout e não ao portadorforma e evitado
+a sobreposição de arquivos.
+================================================================================
+CM$VER      5.01.00d    16/03/2004
+--------------------------------------------------------------------------------
+Pendência 15976
+LayOut : Cnab 240 do Banco do Brasil (uPagBBMT)
+Ajustes no LayOut.
+================================================================================
+CM$VER      5.01.00c    20/01/2004
+--------------------------------------------------------------------------------
+LayOut SicovCef
+Descrição: incorporação dos ajustes feitos na FUNCEF.
+================================================================================
+CM$VER      5.01.00b    20/01/2004
+--------------------------------------------------------------------------------
+pendência 15887
+LayOut Banrisul - Pagamento de Fornecedores
+Descrição: Mudar a Forma de Pagamento para TED se o valor form >= 5000 reais.
+ 
+================================================================================
+CM$VER      5.01.00a    17/12/2003
+--------------------------------------------------------------------------------
+pendência: 15819
+layout: BanRisul
+Após gerarmos os arquivos bancários, o sistema emitiu a mensagem 
+constante no anexo, sendo que os arquivos para o Banrisul = BRRs, 
+não foram gerados. 
+pendência: 15790
+layout: Pagamento de Fornecedores do Bradesco
+Na posição 266 a 273 está saindo a data errada, está assumindo a 
+data do DOC, está data tem que ser igual a data de vencimento.
+================================================================================
+CM$VER      5.01.00     10/12/2003
+--------------------------------------------------------------------------------
+>>Resolução da pendência 15780:
+- LayOut do banco Bradesco 
+  Na posição 120 a 135, o sequencial não pode se repetir 
+  num mesmo dia, ou seja, a cada arquivo enviado no mesmo 
+  tempo tem que ter o sequencial diferente.
+================================================================================
+CM$VER      5.00.33a    03/12/2003
+--------------------------------------------------------------------------------
+>>Ajuste na pendência 15675.
+================================================================================
+CM$VER      5.00.32     01/12/2003
+--------------------------------------------------------------------------------
+>> Ajustes na Resolução da pendência 15675.
+================================================================================
+CM$VER      5.00.31     23/10/2003
+--------------------------------------------------------------------------------
+>Pequeno Ajuste no convênio SICOV
+================================================================================
+CM$VER      5.00.30     10/10/2003
+--------------------------------------------------------------------------------
+>Resolução da pendência 15205: Tirar a obrigatoriedade de perenchimento do campo NOSSO NUMERO quando o modelo eletrônico for o SICOV.
+================================================================================
+CM$VER      5.00.29     06/10/2003
+--------------------------------------------------------------------------------
+>Resolução da pendência: 15146 Descrição: A folha gera arquivos BRR, outros bancos (DOC) e para o Banrisul (Crédito em conta), e mensalmente os usuários tem que manipular os arquivos, retirando uma linha a mais, que é gerada indevidamente. Esta linha assume o lugar da última e tem o símbolo do quadrado logo no primeiro registro.
+>Resolução da pendência: 15147 Descrição: Na geração dos arquivos da folha de setembro/2003,  houve problema com o número de seqüência, gravado no arquivo pelo sistema, o sistema deveria ter gravado um arquivo com o n.º 1 e o outro com o n.º 2 e gravou os dois arquivos com o n.º 1.
+>Resolução da pendência: 15155 Descrição: O envio para pagamento, o banco retornou um deles devido a posição 069 a 073 possuirem o mesmo numero, nesta posição tem que ser um sequencial.
+>Resolução da pendência: 15154 Descrição: Na Cobrança Bradesco, a posição 106 a 106 deverá vir em branco, pois não trabalham com débito automático.
+>Resolução da pendência: 15158 Descrição: Na posição 479 está vindo preenchido com 0, porém quando o tipo de pagamento for Crédito em C/C e r Crédito em C/C realtime tem que ser preenchido com 1 ou 2.
+================================================================================
+CM$VER      5.00.28     30/09/2003
+--------------------------------------------------------------------------------
+>Resolução da pendência 15099 - Erro no cadastro de contas caixas /forma de pagamento:
+não estava gravando os parâmetros corretamente.
+================================================================================
+CM$VER      5.00.27     25/09/2003
+--------------------------------------------------------------------------------
+>Resolução da pendência 15096: Colocar na posição 174 a 181 a data da emissão da Remessa.
+>Resolução da pendência 15101: O arquivo Bradesco rejeitado,pois no campo onde esta granvando o idtitular e idepessoa (Coluna 120 a 135),jamais poderá se repetir (mesmo de um mês para outro) e o arquivo está passando da posição 500
+SUGESTÃO: Talvez fosse melhor usar um sequêncial na posição 120 a 127, que
+mudaria todo mês e da posição 128 a 135 a data da geração do arquivo
+DDMMAAAA.   
+================================================================================
+CM$VER      5.00.26     19/09/2003
+--------------------------------------------------------------------------------
+> resolução da pendência 15058 - na gravação do portadorforma do banrisul está dando errpo de constraint.
+- acerto na unit uIntBancoManager.
+================================================================================
+CM$VER      5.00.25     18/09/2003
+--------------------------------------------------------------------------------
+> Resolução da pendência 14312
+================================================================================
+CM$VER      5.00.24     16/09/2003
+--------------------------------------------------------------------------------
+> Resolução da pendência 14968
+================================================================================
+CM$VER      5.00.23     12/09/2003
+--------------------------------------------------------------------------------
+> Resoluçaõ da pendência 15017
+================================================================================
+CM$VER      5.00.22     12/09/2003
+--------------------------------------------------------------------------------
+- Implementação do modelo CNAB para Cobrança Escritural do Banco de Boston.
+================================================================================
+CM$VER      5.00.21     10/09/2003
+--------------------------------------------------------------------------------
+> resloução das pendência 14643 3 15003
+================================================================================
+CM$VER      5.00.20     10/09/2003
+--------------------------------------------------------------------------------
+>Ajuste da pendência 14332
+================================================================================
+CM$VER      5.00.15     07/07/2003
+--------------------------------------------------------------------------------
+- Acerto na hora de pegar o caminha onde vai gerar o arquivo de remessa 
+  para alguns bancos.
+================================================================================
+CM$VER      5.00.14     03/07/2003
+--------------------------------------------------------------------------------
+- Acerto no DIGITO do Bradesco para Sis Lazer
+================================================================================
+CM$VER      5.00.13     16/06/2003
+--------------------------------------------------------------------------------
+- Acerto Banco Bradesco, impressão boleto e remessa eletronica.
+================================================================================
+CM$VER      5.00.12     10/06/2003
+--------------------------------------------------------------------------------
+- Acerto do Calculo do Digito BIC BANCO
+================================================================================
+CM$VER      5.00.11     30/05/2003
+--------------------------------------------------------------------------------
+- Gravação nosso número Bradesco
+================================================================================
+CM$VER      5.00.10     12/05/2003
+--------------------------------------------------------------------------------
+- Retorno CNAB 240 BB
+================================================================================
+CM$VER      5.00.09     09/05/2003
+--------------------------------------------------------------------------------
+Reliberacao com acerto CEF arquivo de retorno
+================================================================================
+CM$VER      5.00.07     16/04/2003
+--------------------------------------------------------------------------------
+- Correções no arquivo de remessa do Itaú
+================================================================================
+CM$VER      5.00.06     01/04/2003
+--------------------------------------------------------------------------------
+- BB Débito
+  Correção no modelo de Débito Automático
+- BB Código de Barras
+  Correção no autodisplay do código de barras
+================================================================================
+CM$VER      5.00.00     03/02/2003
+--------------------------------------------------------------------------------
+Liberação de Primeira Versão
+================================================================================
+CM$ALT}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
