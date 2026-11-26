@@ -79,7 +79,8 @@ def build_path_index():
         rel_dir = Path(dirpath).relative_to(ROOT).as_posix()
         if rel_dir == ".":
             rel_dir = ""
-            dirnames[:] = [d for d in dirnames if d not in (".git", "docs", "docs1")]
+            # "Migração NEXUS" (PFC-75) é cópia de parte do repositório: fora do índice para não duplicar arquivos.
+            dirnames[:] = [d for d in dirnames if d not in (".git", "docs", "docs1", "Migração NEXUS")]
         for name in filenames:
             rel = f"{rel_dir}/{name}" if rel_dir else name
             index.setdefault(rel.lower(), rel)

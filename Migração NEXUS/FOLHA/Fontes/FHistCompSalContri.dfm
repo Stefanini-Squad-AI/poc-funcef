@@ -1,0 +1,4219 @@
+inherited FrmHistCompSalContri: TFrmHistCompSalContri
+  Left = 199
+  Top = 22
+  Caption = 'Histórico de Compensação de Saldo de Contribuições'
+  ClientHeight = 621
+  ClientWidth = 1006
+  OnKeyPress = nil
+  OnMouseMove = nil
+  OnPaint = nil
+  OnShow = nil
+  PixelsPerInch = 96
+  TextHeight = 13
+  inherited pnlFundo: TPanel
+    Width = 1006
+    Height = 582
+    object Dock972: TDock97
+      Left = 1
+      Top = 1
+      Width = 1004
+      Height = 54
+      AllowDrag = False
+      Background.Data = {
+        760F0000424D760F0000000000007600000028000000800000003C0000000100
+        040000000000000F000000000000000000001000000000000000000000008080
+        80000080000000808000800000008000800080800000C0C0C000808080000000
+        FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00777777777777
+        777777777777171717777777777777177771777777777777777077F7FF7FFFF7
+        77F77F77F7F7F7F7F7F7F7F7F777777777771777177777777777777777777777
+        777777777771717717777777777777777717777777777777777777777FFFFF7F
+        7F7F77F7F7F7F7F7F7F7F7F77777777777777717177777777777777777777777
+        77777777777777171777777777777777717777777777777777777777777FF7FF
+        7F77777777F7F7FF7F7F77F77F77777777777777177777777777777777777777
+        7777777777771771777777777777777771777777777777777777777777777FFF
+        FF7F7777F7F7F7F7F7F77F777777777777777771717777777777777777777777
+        777777777777771777777777777777777777777777777777777777777777777F
+        F7F7F7F777F7F7F7F7F7F7F7F777777777777777177777777777777777777777
+        7777777777777777777777777777777777777777777777777777777777777777
+        FFFF7F7F7F7F7F7F7F7F777777777F7777777777777777777777777777777777
+        7777777777777777777777777777777777777777777777777777777777777777
+        7FF7F7F7F7F7F7FFFFF7F7F7F7F7777777777777717717177777777777777777
+        7777777777777777777777777777777777777777777777777777777777777771
+        77FFFFF7F7777F77F7F7F77F77777F7777777777777171777777777777777777
+        7777777777777177777777777777777777777777777777777777777777777777
+        777FFFFFF7F7F77F7F7FF7F7F77F777777777777777777177777777777777777
+        7777777777777777771777777777777777777777777777777777777777777777
+        7177FFFF7F7F77F7F7FF7FF7F7F7F77F77777777777171717777777777777777
+        7777777777777717771777777777777777777777777777777777777777777777
+        77777FFFFF7F7777F7F7FF7FF7F77F7777777777777777777777771777777777
+        7777777777777771777777777777777777777777777777777777777777777777
+        777777FFFF7F77F7F7F7F7F7F7F7F77F7F777777777771717771777177177777
+        7777777777777777777777777777777777777777777777777777777777777777
+        777777FFFFFF7F77F7F7F7FF7FF7F7F7777F7777777777771717717777777777
+        7777777777777777177777777777777777777777777777777777777777777777
+        7777777FFFF7F7F777F7F7F7F7F7F777F7777F77777777717771777777777777
+        7777777777777777717777777777777777777777777777777777777777777777
+        7777777F7FFF7F77F7F77F7FFF7F7F7F777F7777777777171717717777777F77
+        7777777777777777777771777777777777777777777777777777777777777777
+        7777777FFFF7F7777777F7F7F7F7F7F77F77F7777777777771771777777F7777
+        F7F7777777777777771777777777177777777777777777777777777777777777
+        77777177FFFFF7F777F77F7F7FF7F7F7F77F77F777777777171717177777F777
+        777F7F7777777777777177177771717777777777777777777777777777777777
+        77777777FFFF7F777777F7F7FF7F7F7F7F7F7F77777777777771717717777777
+        77777F7F77777777777717771777777777777777777777777777777777777777
+        777777177FFFF7F7F77F7F7FF7F7FF7F7F7F7F7F777777777717177177777777
+        1777777777777777777771717717777177777777777777777777777777777777
+        777777777FFFF7F77777777F7F7FF7F7F7F7F777F77777777771771717777771
+        7777777777771777777777177771777777777777777777777777777777777777
+        77777771777F7F7F77777F7F7F7F7F7F7F7F7F7F777777777777771717717717
+        7777777777777777777771777777777777777777777777777777777777777777
+        777777777777F7F7F7F77F7F7F7F7F7F7F7F7777777F77777777717717171717
+        7777777777171777777717777777777777777777777777777777777777777777
+        77777777777777F7F77777777F7F7F7F7F7F7F7F7F7777777777777777717777
+        7777777777777177777771777777777777777777777777777777777777777777
+        777777777777777F7F77777F7F7F7F7F7F7F7F777777F77F7777771777717777
+        7777777777777777777771177777777777777777777777777777777777777777
+        7177777777777777F7F7777777F77F7F7FF7F7F7F7F777777777777777717777
+        7777777777777777777777777777777777777777777777777777777777777777
+        7777777777777777777777777F77F7F7F7F7F7F77777F7777777777771777777
+        7777777777777777777771717777777777777777777777777777777777777777
+        777777177777771777777777777F7F7F7F7F7F7F7F7F777F7777777777717777
+        7777777777777777777777171777777777777777777777777777777777777777
+        71777777777777777777777777F7F7F7F7F7F7F7F7F77F777777777777177777
+        7777777777777777777777177777777777777777777777777777777777777717
+        77777777777777717777777777777F77F7F7F7F7F7F7F7777777777777777777
+        77777777777777777777777777777777777F7777777777777777777777777171
+        7171777777777777171777777777F77F7F7F7F7F7F7F7F777777777777777777
+        771777777777777777777777777777777177F777777777777777777777777717
+        171777177777777717771777777777F7F7F7F7FF7F7F77F77777777777777171
+        7777777777777777777777777777777777777F77777777777777777777777777
+        77717177777777777171717177777F77F7F7F7F7F7F7F77F7777777777777171
+        7177777177777777777777777777777777777FF7F77771777777777777777777
+        1717777777777777771777777777777F7F7F7F7F7F7F77F7F777777777777777
+        7777777717777777777777777777777777777777777777777777777777777777
+        717777777777777777777777717777F77F7F7F7F7F7F7F7F77F7777777777771
+        7177777777777777777777777777777777771777777777777777777777777777
+        77177777777777777777777777777777F7F77F7F7F7F7F7FF777F77777777717
+        777777F777777777777777777777777777777777717177717777777777777777
+        77177777777777777777777771777777777F77F7F7F7F7F777F7777777777777
+        171777F7F7777777777777177777777777777777777777777777777777777777
+        777777777777777777777777177177777F77F7F7F7F7F7F7F7F7F7F777777777
+        7777777F77777777777777777777777777777777777777777777777777777777
+        77777777777777777777777771777777777F77F7F7F7F7F7F7F77777F7777777
+        7717777F77777777777777717177777777777777777777777777777777777777
+        7777777777777777777777777717777777777F7F7F7F7F7F7777F7F777777777
+        777777777F777777777777777717777777777777777777777777777777777777
+        777777777777777777777777777777777777F7F7F7F7F7F7F7F7F77777777777
+        7777777777777777777777771777777777777777777777777777777777777777
+        77777777777777777777777777717771777777F7F77F7F7F7F7F77F777777777
+        7777777777777777777777777717177777777771777777777777777777777777
+        7777777777777777777777777777177777777F7F77F7F7F7F7F77F777F777777
+        7777777777777177777777777777777777777717177777777777777777777777
+        77777777777777777177777777717171777777777F7F7FF7F7F7F77F77777777
+        7777777777717777777777777717177777777777777777777777777777777777
+        777777777777777777177777777711717777777F7F7F7F7F7F77F7F7F7F77777
+        777777777717171717777777777777777777777771777777777F777777777777
+        777777777777777777777777777117117777777777F77F7F7F7F77F77777F777
+        77777777171777777777777777777777777777777777777777F7F77777777777
+        77777777777777777771777777771117177777777F77F7F7F777F7F7F7F77777
+        7777777777171777777777777777777777777777777777777777777777777777
+        777777777777777777777777777771777777777777F77F7F7F7F7F7F777F7777
+        7777777717177777777777777777777777777777777777777777777777777777
+        77777777777777777777777777777777777177777777F77F7F77F7F7F7F77F77
+        7777777777171777777777777777777777777777777777777777777777777777
+        7777777777777777777777777777777777177777777F7F7F7F7F7F7F777F7777
+        77777777777777777F7F77777717777777777777777777777777777771777777
+        7777777777777777777777777777777777717777777777F7F7F77F7F7F7F77F7
+        77777777777777777F7F7F777777777777777777777777777777771777777777
+        77777777177777777777777777771777777717777777F7F7F77F7F7F7F77F777
+        777777777777777777FFF77F7777717777777777777777777777777777177777
+        77777777777777777777777777771777777771777777777777F7F7F7F77F77F7
+        77F7777777777777777777F77777777777777777777777777777777777777777
+        77777777777777777777777777777777777777171777777F7F77F7F7F7F77F77
+        F77777777777777777777777F7F7777777777777777777777777777777777777
+        777777777717777777777777777777777777717777777777777F7F7F7F77F77F
+        77F77777777F77777717777777F7777777777777777777777777777777777777
+        77777777777177777777777777777777777777777177777777F7F7F77F7F77F7
+        7F77F77777777F77777717777777777777777777777777777777777777777777
+        7777777777771777777777777777777777777777777777777F77F7F7F777F777
+        F77F777777777777771771777777771777777777777777777777777777777777
+        777777777777777771777777777777777777777777177777777F7F7F7F7F77F7
+        F7F7777777777777777717171777777777777777777777777777777777777777
+        77777777777771777777777777777177777777777771777777777777F777F777
+        7777777777777777777171717177771777777777777777777777777777777777
+        77777777777777777777777777777777777777777777777777777F7F7F7F7777
+        F77F77F777777777777771771717177777777777777777777777777777777777
+        7777777777777777777777777777777777777777777177777777}
+      BackgroundTransparent = True
+      BoundLines = [blTop, blBottom]
+      object Toolbar971: TToolbar97
+        Left = 0
+        Top = 0
+        Caption = 'Toolbar971'
+        CloseButton = False
+        DefaultDock = Dock972
+        DockPos = 0
+        TabOrder = 0
+        object sbtnProcurar: TToolbarButton97
+          Left = 0
+          Top = 0
+          Width = 67
+          Height = 48
+          AllowAllUp = True
+          GroupIndex = 1
+          Caption = '&Procurar'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -13
+          Font.Name = 'MS Sans Serif'
+          Font.Style = [fsBold]
+          Glyph.Data = {
+            F6060000424DF606000000000000360000002800000018000000180000000100
+            180000000000C006000000000000000000000000000000000000FFFFFFFFFFFF
+            FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+            FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+            FFFF808080F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0
+            F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0
+            F0F0F0F0F0F0F0F0F0F0F0F0F0808080F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0
+            F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0
+            F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0
+            F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0
+            F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0
+            F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0
+            F0F0F0F0848484848484F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0
+            F0F0F0F0F0FFFFFFF0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0
+            F0F0F0F0F0F0000000000000FFFFFF000000F0F0F0F0F0F0F0F0F0F0F0F0F0F0
+            F0F0F0F0F0F0F0F0F0F0FFFFFFF0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0
+            F0F0F0F0F0F0F0F0000000000000FFFFFFFFFFFFFFFFFF000000F0F0F0F0F0F0
+            F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0FFFFFFF0F0F0F0F0F0F0F0F0F0F0
+            F0F0F0F0F0F0F0F0F0F0000000000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+            FFFF000000F0F0F0808080F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0
+            FFFFFFF0F0F0F0F0F0F0F0F0F0F0F0F0F0F0848484FFFFFFFFFFFFFFFFFFFFFF
+            FFFFFFFFFF0000FFFFFF000000F0F0F0F0F0F0808080F0F0F0F0F0F0F0F0F0F0
+            F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0000084F0F0F0F0F0F0848484FFFFFF
+            FFFFFFFF0000FF0000FF0000FFFFFFFFFFFFFFFFFF000000F0F0F0F0F0F0F0F0
+            F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0000084000084F0
+            F0F0F0F0F0848484FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF0000FFFFFF000000
+            F0F0F0808080F0F0F0808080F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0
+            F0000084000084000084F0F0F0848484FFFFFFFFFFFFFF0000FF0000FF0000FF
+            FFFFFFFFFFFFFFFF000000F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0
+            F0F0F0F0F0F0808080F0F0F00000840000840000840000000000000000000000
+            00FFFFFFFFFFFFFFFFFFFF0000FFFFFFFFFFFF000000F0F0F0808080F0F0F0F0
+            F0F0F0F0F0F0F0F0F0F0F0808080F0F0F0808080F0F0F0000084000000FFFF00
+            F0F0F0FFFF00F0F0F0000000848400FF0000FFFFFFFFFFFFFFFFFFFFFFFF0000
+            00F0F0F0F0F0F0F0F0F0F0F0F0808080F0F0F0808080F0F0F0F0F0F0F0F0F000
+            0000FFFF00F0F0F0FFFF00F0F0F0FFFF00F0F0F0000000FFFFFFFFFFFFFFFFFF
+            848484848484F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0808080F0F0
+            F0808080F0F0F0000000F0F0F0FFFF00F0F0F0FFFF00F0F0F0FFFF00000000FF
+            FFFF848484848484F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0808080
+            F0F0F0808080F0F0F0F0F0F0F0F0F0000000FFFF00F0F0F0FFFF00F0F0F0FFFF
+            00F0F0F0000000848484F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0
+            F0F0F0F0F0F0F0F0F0F0F0808080F0F0F0808080F0F0F0000000F0F0F0FFFF00
+            F0F0F0FFFF00F0F0F0FFFF00000000F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0
+            F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0
+            F0F0000000F0F0F0FFFF00F0F0F0FFFF00000000F0F0F0F0F0F0F0F0F0F0F0F0
+            F0F0F0808080F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0
+            F0F0F0F0F0F0F0F0F0F0F0F0F0000000000000000000000000F0F0F0FFFFFFF0
+            F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0
+            F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0FFFFFFFFFF
+            FFFFFFFFF0F0F0F0F0F0FFFFFFF0F0F0F0F0F0F0F0F0F0F0F0F0F0F0808080F0
+            F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0
+            F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0FFFFFFF0F0F0F0F0F0F0F0F0F0F0F0F0F0
+            F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0
+            F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0FFFFFF
+            F0F0F0FFFFFFF0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0FFFF
+            FFF0F0F0F0F0F0F0F0F0F0F0F0F0F0F0000000000000000000000000000000F0
+            F0F0F0F0F0F0F0F0F0F0F0FFFFFFF0F0F0F0F0F0F0F0F0F0F0F0}
+          ImageIndex = 3
+          Layout = blGlyphTop
+          Opaque = False
+          ParentFont = False
+          Spacing = 0
+          OnClick = sbtnProcurarClick
+        end
+      end
+    end
+    object pnlMestre: TPanel
+      Left = 1
+      Top = 55
+      Width = 1004
+      Height = 576
+      Align = alTop
+      BevelInner = bvRaised
+      BevelOuter = bvNone
+      TabOrder = 1
+      object Label1: TLabel
+        Left = 8
+        Top = 1
+        Width = 42
+        Height = 16
+        Caption = 'Nome'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -15
+        Font.Name = 'MS Sans Serif'
+        Font.Style = [fsBold]
+        ParentFont = False
+      end
+      object Label4: TLabel
+        Left = 408
+        Top = 1
+        Width = 64
+        Height = 16
+        Caption = 'Matrícula'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -15
+        Font.Name = 'MS Sans Serif'
+        Font.Style = [fsBold]
+        ParentFont = False
+      end
+      object Label5: TLabel
+        Left = 569
+        Top = 1
+        Width = 30
+        Height = 16
+        Caption = 'CPF'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -15
+        Font.Name = 'MS Sans Serif'
+        Font.Style = [fsBold]
+        ParentFont = False
+      end
+      object Label2: TLabel
+        Left = 792
+        Top = 1
+        Width = 156
+        Height = 16
+        Caption = 'Situação na Fundação'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -15
+        Font.Name = 'MS Sans Serif'
+        Font.Style = [fsBold]
+        ParentFont = False
+      end
+      object bt_atualizarSaldo: TSpeedButton
+        Left = 714
+        Top = 192
+        Width = 117
+        Height = 41
+        Caption = 'Atualizar Saldo'
+        Enabled = False
+        Glyph.Data = {
+          DE010000424DDE01000000000000760000002800000024000000120000000100
+          0400000000006801000000000000000000001000000000000000000000000000
+          8000008000000080800080000000800080008080000080808000C0C0C0000000
+          FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00888888888888
+          888888888888FFFFFF88888800008888844444488888888F88F7777778F88888
+          000024884222222448888877FF788888877F888800002244222222222488887F
+          7788FFFFF887F8880000222222AAAAA22248887F888F77777F887F8800002222
+          2A88888A2224887F88F7888887F887F80000222228888888A224887F8878F888
+          887FF7F80000222222888888A444887FFFF78F88887777880000AAAAAAA88888
+          8888887777777888888888880000888888888888888888888888888888FFFFFF
+          00008888888888844444488FFFF888888777777F0000A444888888A222224877
+          77F888887F88887F0000A2248888888A2222487F878F888887F8887F00008A22
+          48888844222248878878FFFF7788887F00008A222444442222224887F8877777
+          888FF87F000088A2222222222AA248887FF888888FF77F780000888AA222222A
+          A88A8888877FFFFFF7788788000088888AAAAAA8888888888887777778888888
+          0000}
+        NumGlyphs = 2
+        Visible = False
+        OnClick = bt_atualizarSaldoClick
+      end
+      object bt_ImprimirExtrato: TSpeedButton
+        Left = 714
+        Top = 144
+        Width = 117
+        Height = 41
+        Caption = 'Imprimir Extrato'
+        Enabled = False
+        Glyph.Data = {
+          36030000424D3603000000000000360000002800000010000000100000000100
+          1800000000000003000000000000000000000000000000000000F1F3F3FFFFFF
+          F7F2F3C2BCBDBFB7B8585051403839BAB4B59C9798181616F6F8F8FBFFFFE8ED
+          ECEEF0F0F0F0F0F0F0F0D8D6D6F1E9EAAFA2A43D2C2F311E21CAB5B8F7E4E7FF
+          F4F7A79A9C484243DFDDDDF4F6F6E8EAEAF0F0F0F0F0F0F0F0F0B4AEAF26181A
+          543F42DBC0C4FDDDE2FFF8FDFFFAFFFFF8FCFFEEF1B7AAAC3B3536D5D3D3FFFF
+          FFF1F1F1F1F1F1F0F0F0B3A8AA8E797CDCBEC3FFF9FFFFF8FFFFF8FF9B727995
+          7379FFF1F5BEABAE271C1EDCD7D8F9F9F9F1F1F1F1F1F1F1F1F1CEC6C6B3A2A5
+          FFF5F8FFF0F79D6D73834C55B67D85EBB6BFFFF9FEFFE4E9A18F90686263D1D1
+          D1F1F1F1F1F1F1F1F1F1DCE2DDBFBBBAD1BFBEFFF4F8C99398DE99A3FFEAF2FF
+          B3BEBC7980FFF8FEF1D7D7070000CBCCCAFFFFFFE6E6E6F2F2F2F6FFFCCDD1CC
+          867D7AFFF4F5FFF8FCE9A0A8CD7A83BE6872D38890FFF2F7FFF0F1817A776266
+          61E4E4E4FCFCFCF6F6F6E0ECE6DFE5E0B9B4B1F2D8D8FFEEF1D39399A85D65FF
+          B9C1FFE4EBD6A4A8FBDFDFFFFFFC666A656D6D6DCDCDCDF9F9F9E4F0EAF2F9F4
+          E0DFDB988483FFE1E3FFEBF0FFD4DAF2AFB6C1858B916669E6CECEFFFFFCF1F7
+          F25E5E5E838383D3D3D3EFF9F3F1FBF5E9EDE8978B89F4DADAFFF0F3D09DA16C
+          363BA9777BFFEBECFFFDFCF0EDE9F7FDF8E1E1E1636363767676E6F0EAE5F1EB
+          F3FAF5EAE7E3B9AAA8F3D4D5FFE4E6FFDDDFFFE8EAFFFCFCFEF1EFFFFEFA989D
+          9B898B8BB9B9B9F0F0F0F8FFFEE7F2EFD6E1DEF9FCFACEC9C8B2A0A1EDD2D5FF
+          FBFEFFFBFEF8E3E5908686A7A8A6C7CCCADEE0E0EFEFEFEFEFEFE9F0EDE1EFEB
+          E9F7F3EAF3F0FAFBF9E9DFDFAF9FA0B19C9EAC9A9BB8AAABD1CCCBCCCFCDECF1
+          EFF3F5F5FAFAFAF5F5F5ECF3F0E6F4F0E6F4F0E8F3F0EDF2F0FCFAF9DDD5D5BF
+          B3B3C1B5B5DED6D6F6F4F3F7FAF8ECF1EFEFF1F1F1F1F1F1F1F1EBF0EEE6F1EE
+          E4F2EEE6F1EEEAF1EEEDF0EEF5F3F2FCF7F6FAF5F4F5F1F0EFF0EEEEF3F1F3F8
+          F6EDEFEFEFEFEFEFEFEFEEF0F0E9F1F0E7F2F0E9F1F0EBF1F0E8EAEAF2F2F2FB
+          F9F9FCF7F8F3F1F1EBEBEBE8EDECECF1F0EEF0F0F0F0F0F0F0F0}
+        OnClick = bt_ImprimirExtratoClick
+      end
+      object lbl_saldo: TLabel
+        Left = 717
+        Top = 555
+        Width = 5
+        Height = 16
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -13
+        Font.Name = 'MS Sans Serif'
+        Font.Style = [fsBold]
+        ParentFont = False
+      end
+      object ed_matricula: TEdit
+        Left = 408
+        Top = 20
+        Width = 149
+        Height = 24
+        Color = clScrollBar
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Height = -13
+        Font.Name = 'MS Sans Serif'
+        Font.Style = []
+        ParentFont = False
+        ReadOnly = True
+        TabOrder = 0
+      end
+      object ed_cpf: TEdit
+        Left = 569
+        Top = 20
+        Width = 218
+        Height = 24
+        Color = clScrollBar
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Height = -13
+        Font.Name = 'MS Sans Serif'
+        Font.Style = []
+        ParentFont = False
+        ReadOnly = True
+        TabOrder = 1
+      end
+      object ed_situacao: TEdit
+        Left = 791
+        Top = 20
+        Width = 197
+        Height = 24
+        Color = clScrollBar
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Height = -13
+        Font.Name = 'MS Sans Serif'
+        Font.Style = []
+        ParentFont = False
+        ReadOnly = True
+        TabOrder = 2
+      end
+      object gb_Pg: TGroupBox
+        Left = 8
+        Top = 46
+        Width = 244
+        Height = 73
+        Caption = 'Primeiro Pagamento de Benefício'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -13
+        Font.Name = 'MS Sans Serif'
+        Font.Style = [fsBold]
+        ParentFont = False
+        TabOrder = 3
+        object ed_data_inicio: TEdit
+          Left = 30
+          Top = 29
+          Width = 149
+          Height = 24
+          ReadOnly = True
+          TabOrder = 0
+        end
+      end
+      object gb_Comp: TGroupBox
+        Left = 257
+        Top = 46
+        Width = 217
+        Height = 96
+        Caption = 'Compensação'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -13
+        Font.Name = 'MS Sans Serif'
+        Font.Style = [fsBold]
+        ParentFont = False
+        TabOrder = 4
+        object Label6: TLabel
+          Left = 8
+          Top = 30
+          Width = 38
+          Height = 16
+          Caption = 'Início'
+        end
+        object Label10: TLabel
+          Left = 8
+          Top = 70
+          Width = 58
+          Height = 16
+          Caption = 'Término'
+        end
+        object ed_inicio: TEdit
+          Left = 67
+          Top = 23
+          Width = 132
+          Height = 24
+          ReadOnly = True
+          TabOrder = 0
+        end
+        object ed_fim: TEdit
+          Left = 67
+          Top = 64
+          Width = 132
+          Height = 24
+          ReadOnly = True
+          TabOrder = 1
+        end
+      end
+      object gb_Valores: TGroupBox
+        Left = 480
+        Top = 46
+        Width = 505
+        Height = 96
+        Caption = 'Valores'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -13
+        Font.Name = 'MS Sans Serif'
+        Font.Style = [fsBold]
+        ParentFont = False
+        TabOrder = 5
+        object Label7: TLabel
+          Left = 17
+          Top = 20
+          Width = 68
+          Height = 32
+          AutoSize = False
+          Caption = 'Total  Inicial'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -13
+          Font.Name = 'MS Sans Serif'
+          Font.Style = [fsBold]
+          ParentFont = False
+          WordWrap = True
+        end
+        object Label8: TLabel
+          Left = 182
+          Top = 20
+          Width = 91
+          Height = 35
+          AutoSize = False
+          Caption = 'Total já Compensado'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -15
+          Font.Name = 'MS Sans Serif'
+          Font.Style = [fsBold]
+          ParentFont = False
+          WordWrap = True
+        end
+        object Label9: TLabel
+          Left = 342
+          Top = 20
+          Width = 147
+          Height = 55
+          AutoSize = False
+          Caption = 'Saldo Atualizado a Compensar'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -15
+          Font.Name = 'MS Sans Serif'
+          Font.Style = [fsBold]
+          ParentFont = False
+          WordWrap = True
+        end
+        object ed_saldoini: TEdit
+          Left = 17
+          Top = 56
+          Width = 132
+          Height = 24
+          BiDiMode = bdRightToLeft
+          ParentBiDiMode = False
+          ReadOnly = True
+          TabOrder = 0
+          Text = '0'
+        end
+        object ed_saldocom: TEdit
+          Left = 182
+          Top = 56
+          Width = 131
+          Height = 24
+          BiDiMode = bdRightToLeft
+          Color = clScrollBar
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clBlack
+          Font.Height = -13
+          Font.Name = 'MS Sans Serif'
+          Font.Style = []
+          ParentBiDiMode = False
+          ParentFont = False
+          ReadOnly = True
+          TabOrder = 1
+        end
+        object ed_saldo_atu: TEdit
+          Left = 342
+          Top = 56
+          Width = 131
+          Height = 24
+          BiDiMode = bdRightToLeft
+          ParentBiDiMode = False
+          ReadOnly = True
+          TabOrder = 2
+        end
+      end
+      object gb_Process: TGroupBox
+        Left = 8
+        Top = 144
+        Width = 185
+        Height = 57
+        Caption = 'Nº do Processo'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -13
+        Font.Name = 'MS Sans Serif'
+        Font.Style = [fsBold]
+        ParentFont = False
+        TabOrder = 6
+        object ed_processo: TEdit
+          Left = 8
+          Top = 21
+          Width = 149
+          Height = 24
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -13
+          Font.Name = 'MS Sans Serif'
+          Font.Style = []
+          ParentFont = False
+          ReadOnly = True
+          TabOrder = 0
+        end
+      end
+      object gb_Status: TGroupBox
+        Left = 196
+        Top = 144
+        Width = 220
+        Height = 57
+        Caption = 'Status da Ação'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -13
+        Font.Name = 'MS Sans Serif'
+        Font.Style = [fsBold]
+        ParentFont = False
+        TabOrder = 7
+        object ed_Status: TEdit
+          Left = 8
+          Top = 21
+          Width = 207
+          Height = 24
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -13
+          Font.Name = 'MS Sans Serif'
+          Font.Style = []
+          ParentFont = False
+          ReadOnly = True
+          TabOrder = 0
+        end
+      end
+      object gb_Data: TGroupBox
+        Left = 424
+        Top = 145
+        Width = 121
+        Height = 105
+        TabOrder = 8
+        object Label12: TLabel
+          Left = 8
+          Top = 16
+          Width = 75
+          Height = 16
+          Caption = 'Data Início'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -13
+          Font.Name = 'MS Sans Serif'
+          Font.Style = [fsBold]
+          ParentFont = False
+        end
+        object Label13: TLabel
+          Left = 8
+          Top = 56
+          Width = 72
+          Height = 16
+          Caption = 'Data Final'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -13
+          Font.Name = 'MS Sans Serif'
+          Font.Style = [fsBold]
+          ParentFont = False
+        end
+        object ed_DataIni: TEdit
+          Left = 8
+          Top = 32
+          Width = 103
+          Height = 21
+          ReadOnly = True
+          TabOrder = 0
+        end
+        object ed_DataFin: TEdit
+          Left = 8
+          Top = 72
+          Width = 102
+          Height = 21
+          ReadOnly = True
+          TabOrder = 1
+        end
+      end
+      object gb_Vara: TGroupBox
+        Left = 8
+        Top = 200
+        Width = 408
+        Height = 54
+        TabOrder = 9
+        object Label3: TLabel
+          Left = 8
+          Top = 11
+          Width = 70
+          Height = 16
+          Caption = 'Cód. Vara'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -13
+          Font.Name = 'MS Sans Serif'
+          Font.Style = [fsBold]
+          ParentFont = False
+        end
+        object Label11: TLabel
+          Left = 104
+          Top = 11
+          Width = 101
+          Height = 16
+          Caption = 'Nome da Vara'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -13
+          Font.Name = 'MS Sans Serif'
+          Font.Style = [fsBold]
+          ParentFont = False
+        end
+        object ed_CodVar: TEdit
+          Left = 8
+          Top = 28
+          Width = 88
+          Height = 21
+          ReadOnly = True
+          TabOrder = 0
+        end
+        object ed_NomeVar: TEdit
+          Left = 104
+          Top = 28
+          Width = 292
+          Height = 21
+          ReadOnly = True
+          TabOrder = 1
+        end
+      end
+      object chk_AcaoJud: TCheckBox
+        Left = 576
+        Top = 248
+        Width = 420
+        Height = 25
+        Caption = 
+          'Participante com Ação Judicial que compensa Saldo de Contribuiçõ' +
+          'es'
+        Enabled = False
+        TabOrder = 11
+        OnClick = chk_AcaoJudClick
+      end
+      object tbcDetalhe: TTabControl
+        Left = 1
+        Top = 270
+        Width = 1002
+        Height = 305
+        Align = alBottom
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -13
+        Font.Name = 'MS Sans Serif'
+        Font.Style = [fsBold]
+        ParentFont = False
+        TabOrder = 10
+        Tabs.Strings = (
+          'Histórico de Compensação'
+          'Histórico de Contribuições')
+        TabIndex = 0
+        OnChange = tbcDetalheChange
+        object wwDBGrid2: TwwDBGrid
+          Left = 9
+          Top = 31
+          Width = 995
+          Height = 230
+          Selected.Strings = (
+            'Mês Cobrança'#9'7'#9'Mês Pagamento'#9'F'
+            'Mês Referência'#9'7'#9'Mês Referência'#9'F'
+            'Contribuição'#9'60'#9'Contribuição'#9'F'
+            'Valor Recebido'#9'10'#9'Valor Recebido'#9'F'
+            'Índice %'#9'10'#9'Índice %'#9'F'
+            'Valor Atualizado'#9'10'#9'Valor Atualizado'#9'F'
+            'Operação'#9'1'#9'Operação'#9'F')
+          IniAttributes.Delimiter = ';;'
+          TitleColor = clBtnFace
+          FixedCols = 0
+          ShowHorzScrollBar = True
+          DataSource = dsDet
+          ReadOnly = True
+          TabOrder = 1
+          TitleAlignment = taLeftJustify
+          TitleFont.Charset = DEFAULT_CHARSET
+          TitleFont.Color = clWindowText
+          TitleFont.Height = -13
+          TitleFont.Name = 'MS Sans Serif'
+          TitleFont.Style = [fsBold]
+          TitleLines = 1
+          TitleButtons = False
+          IndicatorColor = icBlack
+        end
+        object wwDBGrid1: TwwDBGrid
+          Left = 8
+          Top = 32
+          Width = 995
+          Height = 229
+          IniAttributes.Delimiter = ';;'
+          TitleColor = clBtnFace
+          FixedCols = 0
+          ShowHorzScrollBar = True
+          DataSource = dsDet2
+          ReadOnly = True
+          TabOrder = 0
+          TitleAlignment = taLeftJustify
+          TitleFont.Charset = DEFAULT_CHARSET
+          TitleFont.Color = clWindowText
+          TitleFont.Height = -13
+          TitleFont.Name = 'MS Sans Serif'
+          TitleFont.Style = [fsBold]
+          TitleLines = 1
+          TitleButtons = False
+          IndicatorColor = icBlack
+        end
+      end
+      object cbxNome: TComboBox
+        Left = 8
+        Top = 20
+        Width = 390
+        Height = 21
+        ItemHeight = 13
+        TabOrder = 12
+        OnChange = tbcDetalheChange
+      end
+    end
+  end
+  inherited Dock971: TDock97
+    Top = 582
+    Width = 1006
+    inherited tb97Fundo: TToolbar97
+      Left = 590
+      DockPos = 773
+      inherited sep1: TToolbarSep97
+        Left = 329
+      end
+      object SpeedButton1: TSpeedButton [1]
+        Left = 0
+        Top = 0
+        Width = 86
+        Height = 33
+        Caption = 'Imprimir'
+        Glyph.Data = {
+          76010000424D7601000000000000760000002800000020000000100000000100
+          04000000000000010000130B0000130B00001000000000000000000000000000
+          800000800000008080008000000080008000808000007F7F7F00BFBFBF000000
+          FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00300000000000
+          00033FFFFFFFFFFFFFFF0888888888888880777777777777777F088888888888
+          8880777777777777777F0000000000000000FFFFFFFFFFFFFFFF0F8F8F8F8F8F
+          8F80777777777777777F08F8F8F8F8F8F9F0777777777777777F0F8F8F8F8F8F
+          8F807777777777777F7F0000000000000000777777777777777F3330FFFFFFFF
+          03333337F3FFFF3F7F333330F0000F0F03333337F77773737F333330FFFFFFFF
+          03333337F3FF3FFF7F333330F00F000003333337F773777773333330FFFF0FF0
+          33333337F3FF7F3733333330F08F0F0333333337F7737F7333333330FFFF0033
+          33333337FFFF7733333333300000033333333337777773333333}
+        NumGlyphs = 2
+        OnClick = SpeedButton1Click
+      end
+      inherited bbtnSair: TBitBtn
+        Left = 248
+      end
+      inherited bbtnAjuda: TmaHelpBitBtn
+        Left = 331
+      end
+      object bbtnConfirmar: TBitBtn
+        Left = 86
+        Top = 0
+        Width = 81
+        Height = 33
+        Caption = '&Ok'
+        Default = True
+        Enabled = False
+        ModalResult = 1
+        TabOrder = 2
+        OnClick = bbtnConfirmarClick
+        Glyph.Data = {
+          76010000424D7601000000000000760000002800000020000000100000000100
+          0400000000000001000000000000000000001000000000000000000000000000
+          8000008000000080800080000000800080008080000080808000C0C0C0000000
+          FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00888888888888
+          8888888888FFFFF8888888888000008888888888F777778FF888888002222200
+          88888887788888778F88887222222222088888788888888878F887A228822222
+          208887F88FFF888887F887A2FFF8222220888788777FF888878F7A22FFFF8222
+          22087F887777FF88887F7A22FFFFF82222087F8877777FF8887F7A22FF8FFF82
+          22087F8877F777FF887F7A22FF82FFF822087F8877F8777F887F7A22FF222FF8
+          220878F87788877FF87887A2222222FF208887F88888887787F887A222222222
+          2088878F888888888788887AA222222208888878FF88888F788888877AAAAA77
+          8888888778FFFF77888888888777778888888888877777888888}
+        NumGlyphs = 2
+      end
+      object bbtnCancelar: TBitBtn
+        Left = 167
+        Top = 0
+        Width = 81
+        Height = 33
+        Cancel = True
+        Caption = '&Cancelar'
+        Enabled = False
+        ModalResult = 2
+        TabOrder = 3
+        OnClick = bbtnCancelarClick
+        Glyph.Data = {
+          76010000424D7601000000000000760000002800000020000000100000000100
+          0400000000000001000000000000000000001000000000000000000000000000
+          8000008000000080800080000000800080008080000080808000C0C0C0000000
+          FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00888888888888
+          8888888888FFFFF8888888888000008888888888F777778FF888888009191900
+          88888887788888778F88887991919191088888788888888878F8879919191919
+          108887F888F888F887F887917F919F719088878887FF87FF878F7919FFF9FFF9
+          19087F88777F7778887F79919FFFFF9191087F8887777788887F791919FFF919
+          19087F8888777FF8887F79919FFFFF9191087F88877777FF887F7919FFF9FFF9
+          190878F877787778887887917F919F71908887F88788878887F8879919191919
+          1088878F88888888878888799191919108888878FF88888F7888888779999977
+          8888888778FFFF77888888888777778888888888877777888888}
+        NumGlyphs = 2
+      end
+    end
+  end
+  inherited ivTradutor: TIvExtendedTranslator
+    Left = 131
+  end
+  object MontaSelect: TMontaSelect
+    Template.IdConsulta = 0
+    Caption = 'Seleciona'
+    Colunas.Strings = (
+      'D.MATRICULA'
+      'P.NOME'
+      'P.NUMDOCUMENTO')
+    TipodeDado.Strings = (
+      'C'
+      'C'
+      'C')
+    Descricao.Strings = (
+      'Matrícula'
+      'Nome'
+      'CPF')
+    SensivelACaixa.Strings = (
+      'N'
+      'N'
+      'N')
+    Tabelas.Strings = (
+      'DEPENTIT D'
+      'PESSOA P'
+      'BITRIBUTACAO B')
+    CamposChave.Strings = (
+      'D.IDPESSOA'
+      'D.IDTITULAR')
+    Mascaras.Strings = (
+      ''
+      ''
+      '')
+    Larguras.Strings = (
+      '60'
+      '60'
+      '20')
+    OperComparador.Strings = (
+      '0'
+      '0'
+      '-1')
+    ApenasLetraENum.Strings = (
+      'N'
+      'N'
+      'N')
+    ComparaMaiuscula.Strings = (
+      ''
+      ''
+      '')
+    DataBaseName = 'BaseDados'
+    RepeteConsulta = False
+    UsaDistinct = True
+    SalvaConsulta = False
+    ExibePergunta = True
+    MultiSelect = False
+    AfterOpenCds = MontaSelectAfterOpenCds
+    BeforeOpenCds = MontaSelectBeforeOpenCds
+    LookupSQL.Strings = (
+      ''
+      ''
+      '')
+    LookupCampoChave.Strings = (
+      ''
+      ''
+      '')
+    LookupCampoExibe.Strings = (
+      ''
+      ''
+      '')
+    Left = 384
+    Top = 15
+  end
+  object dsDet: TwwDataSource
+    DataSet = qryDet
+    Left = 555
+    Top = 258
+  end
+  object qryDet: TwwQuery
+    CachedUpdates = True
+    DatabaseName = 'BaseDados'
+    SQL.Strings = (
+      'SELECT H.MESREFERENCIA as "Mês Referência",'
+      '       H.MESCOBRANCA as "Mês Cobrança",'
+      '       C.NOME as "Contribuição",'
+      
+        '       DECODE(HST.FLGDEVOLUCAO, 1, -HST.VALORRECEBIDO, HST.VALOR' +
+        'RECEBIDO) AS "Valor Recebido",'
+      '       (COTVALOR/100)"Índice %",'
+      '       H.VALOR "Valor Atualizado" ,'
+      '      OPERACAO "Operação"'
+      '  FROM HSTBITRIBUTACAO H,'
+      '       HSTCONTRIBPREV HST,'
+      '       CONTRIBUICAO C,'
+      '       PESSOA PES,'
+      '       BITRIBUTACAO B,'
+      '       PESSOAFISICA PF,'
+      '       PARTPREVPLAN PP,'
+      '       ELEGPATRO E,'
+      '       PLANPREV PPR,'
+      '       SITPART SP,'
+      '       (SELECT P.SITPROCESSO,'
+      '               P.IDPESSOA,'
+      '               P.NUMEROPROCESSO,'
+      '               P.CODVARA,'
+      '               P.NOMEVARA,'
+      '               P.DATAINICIO,'
+      '               P.DATAFINAL'
+      '          FROM PROCJUD P'
+      
+        '         WHERE P.SITPROCESSO = (SELECT MIN(P.SITPROCESSO) FROM P' +
+        'ROCJUD P)) PROC,'
+      '       COTACAOMOEDA CM'
+      ''
+      ' WHERE H.IDPESSOA =443106'
+      '   AND H.OPERACAO = '#39'E'#39
+      '   AND C.IDCONTRIBUICAO = HST.IDCONTRIBUICAO'
+      '   AND H.IDPESSOA = HST.IDPESSOA'
+      '   AND H.IDMOTIVO = HST.IDMOTIVO'
+      '   AND H.NUMRECEBIMENTO = HST.NUMRECEBIMENTO'
+      '   AND H.MESREFERENCIA = HST.MESREFERENCIA'
+      '   AND H.MESCOBRANCA = HST.MESCOBRANCA'
+      '   AND B.IDPESSOA = PES.IDPESSOA'
+      '   AND PF.IDPESSOA = PES.IDPESSOA'
+      '   AND PROC.IDPESSOA(+) = PES.IDPESSOA'
+      '   AND PP.IDPESSOA = E.IDPESSOA'
+      '   AND PP.IDPESSJUR = E.IDPESSJUR'
+      '   AND PP.IDSITPART = SP.IDSITPART'
+      '   AND PP.IDPESSOA =443106'
+      '   AND PP.IDPLANOPREV = 2'
+      '   AND PPR.IDPLANOPREV = PP.IDPLANOPREV'
+      '   AND E.IDPESSOA = PES.IDPESSOA'
+      '   AND H.IDPESSOA = B.IDPESSOA'
+      '   AND H.IDPESSOA = PES.IDPESSOA'
+      '   AND H.IDPESSOA = PP.IDPESSOA'
+      '   AND H.IDPESSOA = E.IDPESSOA'
+      '   AND CM.MOECODIGO = H.MOECODIGO'
+      
+        '   AND (SUBSTR((TO_CHAR((CM.COTDATA), '#39'DD/MM/YYYY'#39')), 7, 4) || '#39 +
+        '/'#39' ||'
+      '       SUBSTR((TO_CHAR((CM.COTDATA), '#39'DD/MM/YYYY'#39')), 4, 2)) ='
+      '       H.MESCOBRANCA(+)')
+    ValidateWithMask = True
+    Left = 601
+    Top = 218
+    object qryDetMsCobrana: TStringField
+      DisplayLabel = 'Mês Pagamento'
+      DisplayWidth = 7
+      FieldName = 'Mês Cobrança'
+      FixedChar = True
+      Size = 7
+    end
+    object qryDetMsReferncia: TStringField
+      DisplayWidth = 7
+      FieldName = 'Mês Referência'
+      FixedChar = True
+      Size = 7
+    end
+    object qryDetContribuio: TStringField
+      DisplayWidth = 60
+      FieldName = 'Contribuição'
+      Size = 60
+    end
+    object qryDetValorRecebido: TFloatField
+      DisplayWidth = 10
+      FieldName = 'Valor Recebido'
+      DisplayFormat = '#,##0.00'
+      EditFormat = '0.00'
+    end
+    object qryDetndice: TFloatField
+      DisplayWidth = 10
+      FieldName = 'Índice %'
+    end
+    object qryDetValorAtualizado: TFloatField
+      DisplayWidth = 10
+      FieldName = 'Valor Atualizado'
+      DisplayFormat = '#,##0.00'
+      EditFormat = '0.00'
+    end
+    object qryDetOperao: TStringField
+      DisplayWidth = 1
+      FieldName = 'Operação'
+      FixedChar = True
+      Size = 1
+    end
+  end
+  object dsDet2: TwwDataSource
+    DataSet = qryDet2
+    Left = 563
+    Top = 210
+  end
+  object qryDet2: TwwQuery
+    CachedUpdates = True
+    DatabaseName = 'BaseDados'
+    SQL.Strings = (
+      'SELECT MATRICULA"Matrícula",'
+      '       MESREFERENCIA"Mês Referência",'
+      '        MESCOBRANCA"Mês Pagamento",'
+      '       (CASE OPERACAO '
+      '                  WHEN '#39'A'#39' THEN'
+      '                   (NVL(TEMP.SALDO, 0) - NVL(TEMP.VALOR, 0)) '
+      '                  WHEN '#39'S'#39' THEN'
+      '                   (NVL(TEMP.SALDO, 0) + NVL(TEMP.VALOR, 0)) '
+      '                END) AS "Saldo Anterior",'
+      '        VALOR"Valor",'
+      '        SALDO"Saldo Atual",'
+      '       (COTVALOR / 100) "Índice %",'
+      '        MOEDESC "Referência Índice",'
+      '        OPERACAO"Operação" '
+      '  FROM (SELECT D.MATRICULA,'
+      '                H.VALOR,'
+      '                H.IDHSTBITRIBUTACAO,'
+      '                H.OPERACAO,'
+      '               CASE '
+      '                 WHEN H.OPERACAO = '#39'S'#39' AND H.IDLOTE = 0 THEN'
+      '                   DECODE(SUBSTR(H.MESREFERENCIA, 6, 2),'
+      '                                  '#39'13'#39','
+      '                                  H.MESCOBRANCA,'
+      '                                  H.MESREFERENCIA) '
+      '                 ELSE'
+      '                   H.MESCOBRANCA '
+      '               END AS MESREF,'
+      '               CASE '
+      '                 WHEN H.OPERACAO = '#39'S'#39' AND H.IDLOTE = 0 THEN'
+      '                   H.MESREFERENCIA '
+      '                 ELSE'
+      '                   H.MESCOBRANCA '
+      '               END AS MESCOBR,'
+      '                H.MESREFERENCIA,'
+      '                H.MESCOBRANCA,'
+      '                H.SALDO,'
+      '                H.IDLOTE,'
+      '                H.IDHSTFOLHABENEF,'
+      '                H.TRGDTINCLUSAO,'
+      '                H.TRGUSERINCLUSAO,'
+      '                H.MOECODIGO,'
+      '                CM.COTVALOR,'
+      '                M.MOEDESC '
+      '          FROM DEPENTIT D, HSTBITRIBUTACAO H '
+      '          JOIN MOEDA M'
+      '            ON M.MOECODIGO = H.MOECODIGO '
+      '          LEFT JOIN COTACAOMOEDA CM '
+      '            ON CM.MOECODIGO = H.MOECODIGO'
+      '         '
+      
+        '           AND (SUBSTR((TO_CHAR((CM.COTDATA), '#39'DD/MM/YYYY'#39')), 7,' +
+        ' 4) || '#39'/'#39' ||'
+      
+        '                SUBSTR((TO_CHAR((CM.COTDATA), '#39'DD/MM/YYYY'#39')), 4,' +
+        ' 2)) ='
+      '                H.MESCOBRANCA '
+      '         WHERE H.IDPESSOA IN (425396) '
+      '           AND D.IDPESSOA = H.IDPESSOA'
+      '         '
+      '           AND H.MESREFERENCIA >= '
+      '         (SELECT MIN(H.MESREFERENCIA) '
+      '                  FROM HSTBITRIBUTACAO H, BITRIBUTACAO B '
+      '                 WHERE H.OPERACAO = '#39'S'#39
+      '                   AND B.IDPESSOA = H.IDPESSOA'
+      '                 '
+      '                   AND H.IDPESSOA IN (425396))'
+      '         ORDER BY 4, 5, H.OPERACAO) TEMP '
+      
+        ' ORDER BY MESCOBRANCA, OPERACAO, MESREFERENCIA, IDHSTBITRIBUTACA' +
+        'O')
+    PictureMasks.Strings = (
+      'Saldo Anterior'#9'#,##0.00'#9'T'#9'T')
+    ValidateWithMask = True
+    Left = 641
+    Top = 216
+    object qryDet2Matrcula: TStringField
+      DisplayWidth = 20
+      FieldName = 'Matrícula'
+    end
+    object qryDet2MsPagamento: TStringField
+      DisplayWidth = 7
+      FieldName = 'Mês Pagamento'
+      FixedChar = True
+      Size = 7
+    end
+    object qryDet2MsReferncia: TStringField
+      DisplayWidth = 20
+      FieldName = 'Mês Referência'
+    end
+    object qryDet2SaldoAnterior: TFloatField
+      DisplayWidth = 10
+      FieldName = 'Saldo Anterior'
+      DisplayFormat = '#,##0.00'
+      EditFormat = '0.00'
+    end
+    object qryDet2Valor: TFloatField
+      DisplayWidth = 10
+      FieldName = 'Valor'
+      DisplayFormat = '#,##0.00'
+      EditFormat = '0.00'
+    end
+    object qryDet2SaldoAtual: TFloatField
+      DisplayWidth = 10
+      FieldName = 'Saldo Atual'
+      DisplayFormat = '#,##0.00'
+      EditFormat = '0.00'
+    end
+    object qryDet2ndice: TFloatField
+      DisplayWidth = 10
+      FieldName = 'Índice %'
+    end
+    object qryDet2Refernciandice: TStringField
+      DisplayWidth = 25
+      FieldName = 'Referência Índice'
+      Size = 61
+    end
+    object qryDet2Operao: TStringField
+      DisplayWidth = 1
+      FieldName = 'Operação'
+      FixedChar = True
+      Size = 1
+    end
+  end
+  object ppBDEHistComp: TppBDEPipeline
+    DataSource = dsDet2
+    CloseDataSource = True
+    OpenDataSource = False
+    SkipWhenNoRecords = False
+    UserName = 'BDEHistComp'
+    Left = 905
+    Top = 425
+    object ppBDEHistCompppField1: TppField
+      FieldAlias = 'Matrícula'
+      FieldName = 'Matrícula'
+      FieldLength = 0
+      DataType = dtNotKnown
+      DisplayWidth = 0
+      Position = 0
+      Searchable = False
+      Sortable = False
+    end
+    object ppBDEHistCompppField2: TppField
+      FieldAlias = 'Mês Pagamento'
+      FieldName = 'Mês Pagamento'
+      FieldLength = 0
+      DataType = dtNotKnown
+      DisplayWidth = 0
+      Position = 1
+      Searchable = False
+      Sortable = False
+    end
+    object ppBDEHistCompppField3: TppField
+      FieldAlias = 'Mês Referência'
+      FieldName = 'Mês Referência'
+      FieldLength = 0
+      DataType = dtNotKnown
+      DisplayWidth = 0
+      Position = 2
+      Searchable = False
+      Sortable = False
+    end
+    object ppBDEHistCompppField4: TppField
+      FieldAlias = 'Saldo Anterior'
+      FieldName = 'Saldo Anterior'
+      FieldLength = 0
+      DataType = dtNotKnown
+      DisplayWidth = 0
+      Position = 3
+      Searchable = False
+      Sortable = False
+    end
+    object ppBDEHistCompppField5: TppField
+      FieldAlias = 'Valor'
+      FieldName = 'Valor'
+      FieldLength = 0
+      DataType = dtNotKnown
+      DisplayWidth = 0
+      Position = 4
+      Searchable = False
+      Sortable = False
+    end
+    object ppBDEHistCompppField6: TppField
+      FieldAlias = 'Saldo Atual'
+      FieldName = 'Saldo Atual'
+      FieldLength = 0
+      DataType = dtNotKnown
+      DisplayWidth = 0
+      Position = 5
+      Searchable = False
+      Sortable = False
+    end
+    object ppBDEHistCompppField7: TppField
+      FieldAlias = 'Índice %'
+      FieldName = 'Índice %'
+      FieldLength = 0
+      DataType = dtNotKnown
+      DisplayWidth = 0
+      Position = 6
+      Searchable = False
+      Sortable = False
+    end
+    object ppBDEHistCompppField8: TppField
+      FieldAlias = 'Referência Índice'
+      FieldName = 'Referência Índice'
+      FieldLength = 0
+      DataType = dtNotKnown
+      DisplayWidth = 0
+      Position = 7
+      Searchable = False
+      Sortable = False
+    end
+    object ppBDEHistCompppField9: TppField
+      FieldAlias = 'Operação'
+      FieldName = 'Operação'
+      FieldLength = 0
+      DataType = dtNotKnown
+      DisplayWidth = 0
+      Position = 8
+      Searchable = False
+      Sortable = False
+    end
+  end
+  object ppHistComp: TppReport
+    AutoStop = False
+    DataPipeline = ppBDEHistComp
+    PassSetting = psTwoPass
+    PrinterSetup.BinName = 'Default'
+    PrinterSetup.DocumentName = 'Report'
+    PrinterSetup.PaperName = 'A4'
+    PrinterSetup.PrinterName = 'Default'
+    PrinterSetup.mmMarginBottom = 6350
+    PrinterSetup.mmMarginLeft = 6350
+    PrinterSetup.mmMarginRight = 6350
+    PrinterSetup.mmMarginTop = 6350
+    PrinterSetup.mmPaperHeight = 297000
+    PrinterSetup.mmPaperWidth = 210000
+    PrinterSetup.PaperSize = 9
+    AllowPrintToArchive = True
+    AllowPrintToFile = True
+    DeviceType = 'PDFFile'
+    OutlineSettings.CreateNode = True
+    OutlineSettings.CreatePageNodes = True
+    OutlineSettings.Enabled = True
+    OutlineSettings.Visible = True
+    TextSearchSettings.DefaultString = '<FindText>'
+    TextSearchSettings.Enabled = True
+    Left = 689
+    Top = 465
+    Version = '7.04'
+    mmColumnWidth = 0
+    DataPipelineName = 'ppBDEHistComp'
+    object ppTitleBand3: TppTitleBand
+      mmBottomOffset = 0
+      mmHeight = 30692
+      mmPrintPosition = 0
+      object ppLabel28: TppLabel
+        UserName = 'Label401'
+        Caption = 'HISTÓRICO DE COMPENSAÇÃO'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 11
+        Font.Style = [fsBold]
+        TextAlignment = taCentered
+        Transparent = True
+        mmHeight = 4657
+        mmLeft = 73097
+        mmTop = 24977
+        mmWidth = 59986
+        BandType = 1
+      end
+      object ppImage3: TppImage
+        UserName = 'Image1'
+        MaintainAspectRatio = False
+        Picture.Data = {
+          0A544A504547496D616765500C0000FFD8FFE000104A46494600010101006000
+          600000FFDB004300080606070605080707070909080A0C140D0C0B0B0C191213
+          0F141D1A1F1E1D1A1C1C20242E2720222C231C1C2837292C30313434341F2739
+          3D38323C2E333432FFDB0043010909090C0B0C180D0D1832211C213232323232
+          3232323232323232323232323232323232323232323232323232323232323232
+          32323232323232323232323232FFC00011080067007203012200021101031101
+          FFC4001F0000010501010101010100000000000000000102030405060708090A
+          0BFFC400B5100002010303020403050504040000017D01020300041105122131
+          410613516107227114328191A1082342B1C11552D1F02433627282090A161718
+          191A25262728292A3435363738393A434445464748494A535455565758595A63
+          6465666768696A737475767778797A838485868788898A92939495969798999A
+          A2A3A4A5A6A7A8A9AAB2B3B4B5B6B7B8B9BAC2C3C4C5C6C7C8C9CAD2D3D4D5D6
+          D7D8D9DAE1E2E3E4E5E6E7E8E9EAF1F2F3F4F5F6F7F8F9FAFFC4001F01000301
+          01010101010101010000000000000102030405060708090A0BFFC400B5110002
+          0102040403040705040400010277000102031104052131061241510761711322
+          328108144291A1B1C109233352F0156272D10A162434E125F11718191A262728
+          292A35363738393A434445464748494A535455565758595A636465666768696A
+          737475767778797A82838485868788898A92939495969798999AA2A3A4A5A6A7
+          A8A9AAB2B3B4B5B6B7B8B9BAC2C3C4C5C6C7C8C9CAD2D3D4D5D6D7D8D9DAE2E3
+          E4E5E6E7E8E9EAF2F3F4F5F6F7F8F9FAFFDA000C03010002110311003F00F7FA
+          2A1F31A8F31A8026A2A1F31A97CC34012D151893D4572DF11BC512F853C1D3EA
+          36A07DA5DD6084B0C8566CF27F234E3172764075267883EC32287FEE93CD499A
+          F8C67D5350B9BC6BB9EFEE64B9277199A56DD9F5CE78FC2BDE3E0BF8C6FF005D
+          B2BCD275399EE26B10AF1CF21CB346490031EE411D6BA2AE19C23CD71D8F56A2
+          A3327A52798D5CC225A2A1F31A8F31A8026A2A1F31AA4425864D003A8A28A008
+          7CB3ED4796D535713E3DF8890F815EC965D364BCFB5062364A136E31D720FAD5
+          462E4EC80EC3CB6A4208EA2BC77FE1A12CFF00E85D9FFF000297FF0089A46FDA
+          0ACCF5F0ECFF00F816BFFC4D6BF57ABD80F62AE7BC6FE1A1E2BF0ADD6961C473
+          1C49039E8245E99FCCD79EFF00C34059FF00D0BB71F85DAFFF00135734EF8EDA
+          3DCDE2C57FA5DD5942C71E7798250A7DC0038A6A8D58BBD86793DCF80BC59697
+          8D68FA05FBC8AC5434509746F70C38239EB5ED7F09FC0D75E15D3AEAF7524097
+          F7BB41881CF9718E80FBE49AF43B3BB82F6CA3BAB599268245DD1C887208F506
+          BCEBC49F19342D0EF5ACECE09754990ED90C4C1507D1B07354EAD4AAB9120B9E
+          8D462BC73FE17FD9E7FE45DB8FFC0B5FFE26957F682B31FF0032ECFF00F816BF
+          FC4D47D5EAF6158F64F2DA8F2DABC77FE1A12D3FE85D9FFF000297FF0089ADDF
+          087C5EB7F17788A0D1E3D1E5B669559BCC69D580DA33D00F6A4E8544AED01E8D
+          E5B7B53D14A8C1A514B588051451400567EA5A1E97AC18CEA36305D7979D9E6A
+          E76E7AE2B428A13B6C0601F04F863FE80765FF007E8521F05786003FF123B2FF
+          00BF42B6AE9DD2DA478C65D54951EF5C8E93A8EA126AC8AF249207243A37403F
+          A57162B32586AB0A524DF31BD2A12A909493D8BCDE09F0C3A156D0AC883C11E5
+          D7CF1F117C3B69E18F17CF61605FECC5165456EA991D33F5AFA97DABE71F8D1F
+          F23FBFFD7B47FCABD8C2CA5CF6B98A2F7843C4B7F61F077C51141211F6378E38
+          9B3CA2CCDB5B1E98EA2BCE749B21A8EB16562CE516E2658CB01D327922BADF0E
+          FF00C925F1AFFD77B2FF00D195CEF85FFE46CD27FEBED3F9D75C55B99AFEB419
+          F4BD97C3FF000B69F691DB47A35B3AC631BE45DCCDEE4D5B4F0578608FF901D9
+          7FDFB15B4DD4FD6B9DF115E5E5BC90A44EF1C2464B2F193F5AF071B8DFAAD175
+          A5776EC5D1A4EACD4132C8F04F860FFCC0EC7FEFD0AB363E17D134CBA5BAB1D2
+          ED6DE750409234C119A93429EE2E34B47B9CEFC9193D48F5AD2CD6B46BBAD4D4
+          D5ECD1138B849C5F4168A28AB2428A28A002A95FB6A0BB3EC2903673BBCD278F
+          4C63F1ABB486B3A90E78F2DDAF42A32E577B5CE7AF352D66C23135C5B5A98B38
+          2509E3F5A2EB5D820B3867B6810CD382718C631EB56BC4BFF2067FF797F9D727
+          3FFC79D97D1BF9D7CCE618AAF84AB2A709B7EEA6AFAB4EF6D0F4F0F4A9D68A93
+          56D7A75D0E912E35C7456F22D06467049FF1AF04F8C0666F1BE6E0209BECC9B8
+          274AFA3D54EC5C9EC2BE75F8D1FF0023FBFF00D7B47FCABEAF2EA0E9D4BB9B96
+          9D7FE18F3E7514B4514BD0A9E1DFF924BE35FF00AEF65FFA32B9CF0CE7FE12AD
+          271D7ED49FCEBA3F0EFF00C925F1A7FD77B2FF00D195CEF8639F15E93FF5F69F
+          CEBD55F6BFAE841F52B4BAEEF6C4366464E33BBFC6A2B2D65A5BC7B2D4608D59
+          727819191F5CD6E37DE3F5AE42E3FE4659FEA7F957C6660EA613D9CE336EF2B3
+          4F5563B30EA3579938A565D0D2835AD42FEE244D3EDA0F293BC99E076E86B46D
+          1F576B9517715AAC383931E73593E10E7ED5FF0001FEB5D456995AA988A11AF5
+          2A3BB6F4E9BF6B138AE5A7374E3156403039A01CD0466851815EC9C62D145140
+          11824507269075A90F4A6062F88FFE40D27FBCB5CB4FFF001E765F46FE75D66B
+          D1493692E91A33B6E070A326B9B9AC2ECDA5A0FB34B95073F29E39AF90CF294E
+          589938A6FDD5FF00A51EBE065154D5DF57F91D7293B17E82BE77F8D1FF0023FB
+          FF00D7B47FCABE885E117E82BC13E2FE8DAADEF8E1A6B4D2EFAE22FB3A0F321B
+          6775CFA640AFB7C2594F53C9EA63F877FE492F8D3FEBBD97FE8CAE73C31FF235
+          E93FF5F69FCEBB1D0744D5E2F85DE2FB69349D41279A6B43144D6AE19C093276
+          8C64E3DAB03C37E1ED722F13E97249A2EA491ADCA1676B4900033D49238AEC52
+          5EF6BFD580FAA09F9CFD6B93B839F12CC7DCFF002AEADBEF1E7BD73335A5CB78
+          826956090A1270C14E3A57C8679094A9D3E557F791D982694A57EC4DE12EB75F
+          45FEB5D39C9AE77C316D3C1F69F3A278F2171B8633D6BA451C56D92C5C705052
+          567AFE6C8C634EBC9A13185A54E94ADF7685E95EA1CA2D145140118EB58DE23F
+          16E8DE168E07D5EE8C0272563C216C90327A56E6D1E95E31F1FF00FE3D345E3A
+          CAFF00CAB4A51539A8B03B6D2BE2578575AD4E0D3EC350696EA73B635F29864F
+          D715A1A3F8CB43F115FDD69FA6DD34B736E09917CB65C60ED3C9F7AE63C1D61A
+          B8D4EDA4D43C1BA1585B2C0592F2D625F34360639F7E6B91F83B85F88DE228DB
+          01B130DA4F7130AD1D38D9B5D067A6D9F8CB43D435D9F45B6BB67D420DDE6446
+          3200DBF7B9A9342F19E87E25B99ED349BEF3678065D194A1C648E33D79F4AF28
+          F06E25F8E1AE327CE99B9F9872318F5AE2FC3B3EA9A26A3378A74F05A1D3AE55
+          6E94778DC9EBEC707F4AD3D845DECFA20B1F4668FE31D175CD52EF4AD3EF1E5B
+          CB5566950A30C00C14F3DF922A9EABF11FC2BA3DDBDA5E6AC82743B592305F69
+          F438AF24F87BA834BE24F196A7641C3B6957371083D41DC081F5CD6BFC1DF0FE
+          87ACF87F5ABAD52D60BA9FCEF2D9A6018C69B73919E87393BA94A8C6376FA582
+          C7A8CFE29D120F0F9D70DFC7269A3199E2F9C0C903A0FAD62A7C5EF052AE0EA8
+          D9EA7F70FF00E15C7EB569E16B0F84DAEDBF85EFCDDC2258DA7DD2162ADBC0FE
+          9DBD2B2FC1D61E269FC3169269FE0EF0D6A16A73B6E6F610D2BF3CE49342A50B
+          37AEFE8163D5B54F883E1BD1E0B19AF6F9A34BE816E2022263BA33D0F038A7E8
+          3F10BC37E23D4469FA65F19AE4A1709E5B0E075E48AF2AF8C513C7AFF86215B5
+          855D6DE3516E8A0479DFF700FEEF6FA57A2F836C3548B539A4D4FC25A2692163
+          FDDCF631A87639E991DB1512A7154D480EDD8E5684E94B8A00C573885A28A280
+          0AE47C71E02B6F1BC566971792DB7D998B02881B39FAD14538C9C5DD01D4C10F
+          910471039D8A1727BE062BCFBC41F0874BD635B9756B4D42EF4D9E6E6516C701
+          9BB91C8C67BD14538CE51774C0D1F077C3DD2FC1AB7325B4935C5DDCAEC92E25
+          EBB7D00EDCD47E18F873A7F872DB55B633BDEC1A900B2A4A800039E9CFBD1453
+          7526EF77B80CF06FC32B1F076A9777F6D7B35C0B881A0F2A64180A581FC7A62B
+          1EFF00E0B6953DF5C4FA7EAB7FA74339CB5BC272BCF51D471ED4514FDACEF7B8
+          1B03E1A69107832E7C3768F2411DC9569AE701A476041C9FF0ED5811FC0CB544
+          0B1F893528D07454E00FC035145355A6BA81B7AAFC2BB4D5BFB0FCED52E41D26
+          28E3562A18CBB5B765893D6BBFC5145439396E02D1451520145145007FFFD9}
+        mmHeight = 28152
+        mmLeft = 1905
+        mmTop = 212
+        mmWidth = 26247
+        BandType = 1
+      end
+      object ppLabel29: TppLabel
+        UserName = 'Label41'
+        Caption = 'FUNDAÇÃO DOS ECONOMIÁRIOS FEDERAIS'
+        Font.Charset = ANSI_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 18
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 7620
+        mmLeft = 28363
+        mmTop = 3598
+        mmWidth = 154729
+        BandType = 1
+      end
+      object ppLabel30: TppLabel
+        UserName = 'Label53'
+        Caption = 
+          'SCN, Quadra 2, Bloco A Edifício Corporate Financial Center 12º e' +
+          ' 13º Andares'
+        Font.Charset = ANSI_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial Narrow'
+        Font.Size = 9
+        Font.Style = [fsBold]
+        TextAlignment = taCentered
+        Transparent = True
+        mmHeight = 3810
+        mmLeft = 28363
+        mmTop = 11642
+        mmWidth = 154517
+        BandType = 1
+      end
+      object ppLabel31: TppLabel
+        UserName = 'Label54'
+        Caption = 'Brasília DF CEP 70.712-900 - (061)3329-1700 - www.funcef.com.br'
+        Font.Charset = ANSI_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial Narrow'
+        Font.Size = 9
+        Font.Style = [fsBold]
+        TextAlignment = taCentered
+        Transparent = True
+        mmHeight = 3810
+        mmLeft = 28363
+        mmTop = 15875
+        mmWidth = 154517
+        BandType = 1
+      end
+      object ppLabel56: TppLabel
+        UserName = 'Label56'
+        Caption = 'CNPJ: 00.436.923/0001-90'
+        Font.Charset = ANSI_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial Narrow'
+        Font.Size = 9
+        Font.Style = [fsBold]
+        TextAlignment = taCentered
+        Transparent = True
+        mmHeight = 3810
+        mmLeft = 28363
+        mmTop = 20108
+        mmWidth = 154517
+        BandType = 1
+      end
+    end
+    object ppHeaderBand2: TppHeaderBand
+      BeforePrint = ppHeaderBand2BeforePrint
+      mmBottomOffset = 0
+      mmHeight = 35719
+      mmPrintPosition = 0
+      object ppShape6: TppShape
+        UserName = 'Shape1'
+        mmHeight = 212
+        mmLeft = 0
+        mmTop = 0
+        mmWidth = 197274
+        BandType = 0
+      end
+      object ppLabel32: TppLabel
+        UserName = 'Label1'
+        Caption = 'NOME:'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 10
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 4191
+        mmLeft = 37465
+        mmTop = 7620
+        mmWidth = 11811
+        BandType = 0
+      end
+      object ppLabel33: TppLabel
+        UserName = 'Label2'
+        Caption = 'MATRÍCULA:'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 10
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 4191
+        mmLeft = 37465
+        mmTop = 12488
+        mmWidth = 21717
+        BandType = 0
+      end
+      object ppLabel34: TppLabel
+        UserName = 'Label3'
+        Caption = 'CPF:'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 10
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 4191
+        mmLeft = 37465
+        mmTop = 17357
+        mmWidth = 8213
+        BandType = 0
+      end
+      object ppLabel35: TppLabel
+        UserName = 'Label13'
+        Caption = 'Mês Referência'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 3598
+        mmLeft = 1693
+        mmTop = 29845
+        mmWidth = 20955
+        BandType = 0
+      end
+      object ppLabel36: TppLabel
+        UserName = 'Label14'
+        Caption = 'Mês Pagamento'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 3387
+        mmLeft = 30903
+        mmTop = 29845
+        mmWidth = 21632
+        BandType = 0
+      end
+      object ppLabel37: TppLabel
+        UserName = 'Label15'
+        Caption = 'Saldo Anterior'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 3387
+        mmLeft = 56727
+        mmTop = 29845
+        mmWidth = 19897
+        BandType = 0
+      end
+      object ppLabel38: TppLabel
+        UserName = 'Label16'
+        Caption = 'Valor'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 3387
+        mmLeft = 87630
+        mmTop = 29845
+        mmWidth = 6985
+        BandType = 0
+      end
+      object ppLabel39: TppLabel
+        UserName = 'Label17'
+        Caption = 'Referência Índice'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 3387
+        mmLeft = 153459
+        mmTop = 30056
+        mmWidth = 24130
+        BandType = 0
+      end
+      object ppShape7: TppShape
+        UserName = 'Shape4'
+        mmHeight = 212
+        mmLeft = 212
+        mmTop = 35348
+        mmWidth = 197274
+        BandType = 0
+      end
+      object plbl_nomeHisComp: TppLabel
+        UserName = 'lbl_nomeHisComp'
+        Caption = 'bl_nomeHisComp'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 10
+        Font.Style = []
+        Transparent = True
+        mmHeight = 4022
+        mmLeft = 69427
+        mmTop = 7620
+        mmWidth = 28025
+        BandType = 0
+      end
+      object pplbl_matriHistComp: TppLabel
+        UserName = 'lbl_matriHistComp'
+        Caption = 'lbl_matriHistComp'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 10
+        Font.Style = []
+        Transparent = True
+        mmHeight = 4022
+        mmLeft = 69426
+        mmTop = 12489
+        mmWidth = 28787
+        BandType = 0
+      end
+      object pplbl_cpfHistComp: TppLabel
+        UserName = 'lbl_cpfHistComp'
+        Caption = 'lbl_cpfHistComp'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 10
+        Font.Style = []
+        Transparent = True
+        mmHeight = 4022
+        mmLeft = 69426
+        mmTop = 17356
+        mmWidth = 25654
+        BandType = 0
+      end
+      object ppLabel44: TppLabel
+        UserName = 'Label27'
+        Caption = 'Índice %'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 3387
+        mmLeft = 133350
+        mmTop = 30057
+        mmWidth = 11430
+        BandType = 0
+      end
+      object ppLabel40: TppLabel
+        UserName = 'Label40'
+        Caption = 'Saldo Atual'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 3387
+        mmLeft = 103717
+        mmTop = 29845
+        mmWidth = 16510
+        BandType = 0
+      end
+      object ppLabel43: TppLabel
+        UserName = 'Label43'
+        Caption = 'Operação'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        Transparent = True
+        Visible = False
+        mmHeight = 3387
+        mmLeft = 180764
+        mmTop = 30056
+        mmWidth = 13039
+        BandType = 0
+      end
+    end
+    object ppDetailBand2: TppDetailBand
+      mmBottomOffset = 0
+      mmHeight = 3387
+      mmPrintPosition = 0
+      object ppDBText12: TppDBText
+        UserName = 'DBText1'
+        AutoSize = True
+        DataField = 'Mês Referência'
+        DataPipeline = ppBDEHistComp
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        TextAlignment = taCentered
+        Transparent = True
+        DataPipelineName = 'ppBDEHistComp'
+        mmHeight = 3260
+        mmLeft = 2117
+        mmTop = 0
+        mmWidth = 19812
+        BandType = 4
+      end
+      object ppDBText13: TppDBText
+        UserName = 'DBText2'
+        AutoSize = True
+        DataField = 'Mês Pagamento'
+        DataPipeline = ppBDEHistComp
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        TextAlignment = taCentered
+        Transparent = True
+        DataPipelineName = 'ppBDEHistComp'
+        mmHeight = 3260
+        mmLeft = 30395
+        mmTop = 0
+        mmWidth = 20659
+        BandType = 4
+      end
+      object ppDBText14: TppDBText
+        UserName = 'DBText3'
+        AutoSize = True
+        DataField = 'Saldo Anterior'
+        DataPipeline = ppBDEHistComp
+        DisplayFormat = '#,##0.00'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        TextAlignment = taRightJustified
+        Transparent = True
+        DataPipelineName = 'ppBDEHistComp'
+        mmHeight = 3260
+        mmLeft = 57573
+        mmTop = 0
+        mmWidth = 17780
+        BandType = 4
+      end
+      object ppDBText15: TppDBText
+        UserName = 'DBText4'
+        AutoSize = True
+        DataField = 'Valor'
+        DataPipeline = ppBDEHistComp
+        DisplayFormat = '#,##0.00'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        TextAlignment = taRightJustified
+        Transparent = True
+        DataPipelineName = 'ppBDEHistComp'
+        mmHeight = 3175
+        mmLeft = 87842
+        mmTop = 212
+        mmWidth = 6350
+        BandType = 4
+      end
+      object ppDBText16: TppDBText
+        UserName = 'DBText5'
+        AutoSize = True
+        DataField = 'Saldo Atual'
+        DataPipeline = ppBDEHistComp
+        DisplayFormat = '#,##0.00'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        TextAlignment = taRightJustified
+        Transparent = True
+        DataPipelineName = 'ppBDEHistComp'
+        mmHeight = 3260
+        mmLeft = 104775
+        mmTop = 0
+        mmWidth = 14351
+        BandType = 4
+      end
+      object ppDBText17: TppDBText
+        UserName = 'DBText6'
+        AutoSize = True
+        DataField = 'Índice %'
+        DataPipeline = ppBDEHistComp
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        TextAlignment = taCentered
+        Transparent = True
+        DataPipelineName = 'ppBDEHistComp'
+        mmHeight = 3175
+        mmLeft = 134144
+        mmTop = 0
+        mmWidth = 11113
+        BandType = 4
+      end
+      object ppDBText18: TppDBText
+        UserName = 'DBText7'
+        AutoSize = True
+        DataField = 'Referência Índice'
+        DataPipeline = ppBDEHistComp
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        TextAlignment = taCentered
+        Transparent = True
+        DataPipelineName = 'ppBDEHistComp'
+        mmHeight = 3175
+        mmLeft = 153459
+        mmTop = 212
+        mmWidth = 22013
+        BandType = 4
+      end
+      object ppDBText19: TppDBText
+        UserName = 'DBText19'
+        AutoSize = True
+        DataField = 'Operação'
+        DataPipeline = ppBDEHistComp
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        TextAlignment = taCentered
+        Transparent = True
+        Visible = False
+        DataPipelineName = 'ppBDEHistComp'
+        mmHeight = 3260
+        mmLeft = 181759
+        mmTop = 0
+        mmWidth = 12404
+        BandType = 4
+      end
+    end
+    object ppFooterBand3: TppFooterBand
+      mmBottomOffset = 0
+      mmHeight = 6985
+      mmPrintPosition = 0
+      object ppLabel45: TppLabel
+        UserName = 'Label26'
+        Caption = 'Folha de Benefícios'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 3387
+        mmLeft = 4233
+        mmTop = 635
+        mmWidth = 26797
+        BandType = 8
+      end
+      object ppSystemVariable6: TppSystemVariable
+        UserName = 'SystemVariable4'
+        VarType = vtPageSetDesc
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 3387
+        mmLeft = 84667
+        mmTop = 635
+        mmWidth = 18161
+        BandType = 8
+      end
+      object ppSystemVariable7: TppSystemVariable
+        UserName = 'SystemVariable5'
+        VarType = vtDateTime
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 3387
+        mmLeft = 163407
+        mmTop = 635
+        mmWidth = 26289
+        BandType = 8
+      end
+      object ppShape10: TppShape
+        UserName = 'Shape10'
+        mmHeight = 212
+        mmLeft = 212
+        mmTop = 212
+        mmWidth = 197274
+        BandType = 8
+      end
+    end
+    object ppParameterList1: TppParameterList
+    end
+  end
+  object ppBDEHistContr: TppBDEPipeline
+    DataSource = dsDet
+    CloseDataSource = True
+    OpenDataSource = False
+    SkipWhenNoRecords = False
+    UserName = 'BDEExtrato1'
+    Left = 777
+    Top = 513
+    object ppBDEHistContrppField1: TppField
+      FieldAlias = 'Mês Cobrança'
+      FieldName = 'Mês Cobrança'
+      FieldLength = 0
+      DataType = dtNotKnown
+      DisplayWidth = 0
+      Position = 0
+      Searchable = False
+      Sortable = False
+    end
+    object ppBDEHistContrppField2: TppField
+      FieldAlias = 'Mês Referência'
+      FieldName = 'Mês Referência'
+      FieldLength = 0
+      DataType = dtNotKnown
+      DisplayWidth = 0
+      Position = 1
+      Searchable = False
+      Sortable = False
+    end
+    object ppBDEHistContrppField3: TppField
+      FieldAlias = 'Contribuição'
+      FieldName = 'Contribuição'
+      FieldLength = 0
+      DataType = dtNotKnown
+      DisplayWidth = 0
+      Position = 2
+      Searchable = False
+      Sortable = False
+    end
+    object ppBDEHistContrppField4: TppField
+      FieldAlias = 'Valor Recebido'
+      FieldName = 'Valor Recebido'
+      FieldLength = 0
+      DataType = dtNotKnown
+      DisplayWidth = 0
+      Position = 3
+      Searchable = False
+      Sortable = False
+    end
+    object ppBDEHistContrppField5: TppField
+      FieldAlias = 'Índice %'
+      FieldName = 'Índice %'
+      FieldLength = 0
+      DataType = dtNotKnown
+      DisplayWidth = 0
+      Position = 4
+      Searchable = False
+      Sortable = False
+    end
+    object ppBDEHistContrppField6: TppField
+      FieldAlias = 'Valor Atualizado'
+      FieldName = 'Valor Atualizado'
+      FieldLength = 0
+      DataType = dtNotKnown
+      DisplayWidth = 0
+      Position = 5
+      Searchable = False
+      Sortable = False
+    end
+    object ppBDEHistContrppField7: TppField
+      FieldAlias = 'Operação'
+      FieldName = 'Operação'
+      FieldLength = 0
+      DataType = dtNotKnown
+      DisplayWidth = 0
+      Position = 6
+      Searchable = False
+      Sortable = False
+    end
+  end
+  object ppHistContri: TppReport
+    AutoStop = False
+    DataPipeline = ppBDEHistContr
+    PassSetting = psTwoPass
+    PrinterSetup.BinName = 'Default'
+    PrinterSetup.DocumentName = 'Report'
+    PrinterSetup.PaperName = 'A4'
+    PrinterSetup.PrinterName = 'Default'
+    PrinterSetup.mmMarginBottom = 6350
+    PrinterSetup.mmMarginLeft = 6350
+    PrinterSetup.mmMarginRight = 6350
+    PrinterSetup.mmMarginTop = 6350
+    PrinterSetup.mmPaperHeight = 297000
+    PrinterSetup.mmPaperWidth = 210000
+    PrinterSetup.PaperSize = 9
+    AllowPrintToArchive = True
+    AllowPrintToFile = True
+    DeviceType = 'PrinterFile'
+    OutlineSettings.CreateNode = True
+    OutlineSettings.CreatePageNodes = True
+    OutlineSettings.Enabled = True
+    OutlineSettings.Visible = True
+    TextSearchSettings.DefaultString = '<FindText>'
+    TextSearchSettings.Enabled = True
+    Left = 953
+    Top = 225
+    Version = '7.04'
+    mmColumnWidth = 0
+    DataPipelineName = 'ppBDEHistContr'
+    object ppTitleBand2: TppTitleBand
+      mmBottomOffset = 0
+      mmHeight = 30692
+      mmPrintPosition = 0
+      object ppLabel19: TppLabel
+        UserName = 'Label401'
+        Caption = 'HISTÓRICO DE CONTRIBUIÇÕES'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 11
+        Font.Style = [fsBold]
+        TextAlignment = taCentered
+        Transparent = True
+        mmHeight = 4657
+        mmLeft = 72227
+        mmTop = 24977
+        mmWidth = 61722
+        BandType = 1
+      end
+      object ppImage2: TppImage
+        UserName = 'Image1'
+        MaintainAspectRatio = False
+        Picture.Data = {
+          0A544A504547496D616765500C0000FFD8FFE000104A46494600010101006000
+          600000FFDB004300080606070605080707070909080A0C140D0C0B0B0C191213
+          0F141D1A1F1E1D1A1C1C20242E2720222C231C1C2837292C30313434341F2739
+          3D38323C2E333432FFDB0043010909090C0B0C180D0D1832211C213232323232
+          3232323232323232323232323232323232323232323232323232323232323232
+          32323232323232323232323232FFC00011080067007203012200021101031101
+          FFC4001F0000010501010101010100000000000000000102030405060708090A
+          0BFFC400B5100002010303020403050504040000017D01020300041105122131
+          410613516107227114328191A1082342B1C11552D1F02433627282090A161718
+          191A25262728292A3435363738393A434445464748494A535455565758595A63
+          6465666768696A737475767778797A838485868788898A92939495969798999A
+          A2A3A4A5A6A7A8A9AAB2B3B4B5B6B7B8B9BAC2C3C4C5C6C7C8C9CAD2D3D4D5D6
+          D7D8D9DAE1E2E3E4E5E6E7E8E9EAF1F2F3F4F5F6F7F8F9FAFFC4001F01000301
+          01010101010101010000000000000102030405060708090A0BFFC400B5110002
+          0102040403040705040400010277000102031104052131061241510761711322
+          328108144291A1B1C109233352F0156272D10A162434E125F11718191A262728
+          292A35363738393A434445464748494A535455565758595A636465666768696A
+          737475767778797A82838485868788898A92939495969798999AA2A3A4A5A6A7
+          A8A9AAB2B3B4B5B6B7B8B9BAC2C3C4C5C6C7C8C9CAD2D3D4D5D6D7D8D9DAE2E3
+          E4E5E6E7E8E9EAF2F3F4F5F6F7F8F9FAFFDA000C03010002110311003F00F7FA
+          2A1F31A8F31A8026A2A1F31A97CC34012D151893D4572DF11BC512F853C1D3EA
+          36A07DA5DD6084B0C8566CF27F234E3172764075267883EC32287FEE93CD499A
+          F8C67D5350B9BC6BB9EFEE64B9277199A56DD9F5CE78FC2BDE3E0BF8C6FF005D
+          B2BCD275399EE26B10AF1CF21CB346490031EE411D6BA2AE19C23CD71D8F56A2
+          A3327A52798D5CC225A2A1F31A8F31A8026A2A1F31AA4425864D003A8A28A008
+          7CB3ED4796D535713E3DF8890F815EC965D364BCFB5062364A136E31D720FAD5
+          462E4EC80EC3CB6A4208EA2BC77FE1A12CFF00E85D9FFF000297FF0089A46FDA
+          0ACCF5F0ECFF00F816BFFC4D6BF57ABD80F62AE7BC6FE1A1E2BF0ADD6961C473
+          1C49039E8245E99FCCD79EFF00C34059FF00D0BB71F85DAFFF00135734EF8EDA
+          3DCDE2C57FA5DD5942C71E7798250A7DC0038A6A8D58BBD86793DCF80BC59697
+          8D68FA05FBC8AC5434509746F70C38239EB5ED7F09FC0D75E15D3AEAF7524097
+          F7BB41881CF9718E80FBE49AF43B3BB82F6CA3BAB599268245DD1C887208F506
+          BCEBC49F19342D0EF5ACECE09754990ED90C4C1507D1B07354EAD4AAB9120B9E
+          8D462BC73FE17FD9E7FE45DB8FFC0B5FFE26957F682B31FF0032ECFF00F816BF
+          FC4D47D5EAF6158F64F2DA8F2DABC77FE1A12D3FE85D9FFF000297FF0089ADDF
+          087C5EB7F17788A0D1E3D1E5B669559BCC69D580DA33D00F6A4E8544AED01E8D
+          E5B7B53D14A8C1A514B588051451400567EA5A1E97AC18CEA36305D7979D9E6A
+          E76E7AE2B428A13B6C0601F04F863FE80765FF007E8521F05786003FF123B2FF
+          00BF42B6AE9DD2DA478C65D54951EF5C8E93A8EA126AC8AF249207243A37403F
+          A57162B32586AB0A524DF31BD2A12A909493D8BCDE09F0C3A156D0AC883C11E5
+          D7CF1F117C3B69E18F17CF61605FECC5165456EA991D33F5AFA97DABE71F8D1F
+          F23FBFFD7B47FCABD8C2CA5CF6B98A2F7843C4B7F61F077C51141211F6378E38
+          9B3CA2CCDB5B1E98EA2BCE749B21A8EB16562CE516E2658CB01D327922BADF0E
+          FF00C925F1AFFD77B2FF00D195CEF85FFE46CD27FEBED3F9D75C55B99AFEB419
+          F4BD97C3FF000B69F691DB47A35B3AC631BE45DCCDEE4D5B4F0578608FF901D9
+          7FDFB15B4DD4FD6B9DF115E5E5BC90A44EF1C2464B2F193F5AF071B8DFAAD175
+          A5776EC5D1A4EACD4132C8F04F860FFCC0EC7FEFD0AB363E17D134CBA5BAB1D2
+          ED6DE750409234C119A93429EE2E34B47B9CEFC9193D48F5AD2CD6B46BBAD4D4
+          D5ECD1138B849C5F4168A28AB2428A28A002A95FB6A0BB3EC2903673BBCD278F
+          4C63F1ABB486B3A90E78F2DDAF42A32E577B5CE7AF352D66C23135C5B5A98B38
+          2509E3F5A2EB5D820B3867B6810CD382718C631EB56BC4BFF2067FF797F9D727
+          3FFC79D97D1BF9D7CCE618AAF84AB2A709B7EEA6AFAB4EF6D0F4F0F4A9D68A93
+          56D7A75D0E912E35C7456F22D06467049FF1AF04F8C0666F1BE6E0209BECC9B8
+          274AFA3D54EC5C9EC2BE75F8D1FF0023FBFF00D7B47FCABEAF2EA0E9D4BB9B96
+          9D7FE18F3E7514B4514BD0A9E1DFF924BE35FF00AEF65FFA32B9CF0CE7FE12AD
+          271D7ED49FCEBA3F0EFF00C925F1A7FD77B2FF00D195CEF8639F15E93FF5F69F
+          CEBD55F6BFAE841F52B4BAEEF6C4366464E33BBFC6A2B2D65A5BC7B2D4608D59
+          727819191F5CD6E37DE3F5AE42E3FE4659FEA7F957C6660EA613D9CE336EF2B3
+          4F5563B30EA3579938A565D0D2835AD42FEE244D3EDA0F293BC99E076E86B46D
+          1F576B9517715AAC383931E73593E10E7ED5FF0001FEB5D456995AA988A11AF5
+          2A3BB6F4E9BF6B138AE5A7374E3156403039A01CD0466851815EC9C62D145140
+          11824507269075A90F4A6062F88FFE40D27FBCB5CB4FFF001E765F46FE75D66B
+          D1493692E91A33B6E070A326B9B9AC2ECDA5A0FB34B95073F29E39AF90CF294E
+          589938A6FDD5FF00A51EBE065154D5DF57F91D7293B17E82BE77F8D1FF0023FB
+          FF00D7B47FCABE885E117E82BC13E2FE8DAADEF8E1A6B4D2EFAE22FB3A0F321B
+          6775CFA640AFB7C2594F53C9EA63F877FE492F8D3FEBBD97FE8CAE73C31FF235
+          E93FF5F69FCEBB1D0744D5E2F85DE2FB69349D41279A6B43144D6AE19C093276
+          8C64E3DAB03C37E1ED722F13E97249A2EA491ADCA1676B4900033D49238AEC52
+          5EF6BFD580FAA09F9CFD6B93B839F12CC7DCFF002AEADBEF1E7BD73335A5CB78
+          826956090A1270C14E3A57C8679094A9D3E557F791D982694A57EC4DE12EB75F
+          45FEB5D39C9AE77C316D3C1F69F3A278F2171B8633D6BA451C56D92C5C705052
+          567AFE6C8C634EBC9A13185A54E94ADF7685E95EA1CA2D145140118EB58DE23F
+          16E8DE168E07D5EE8C0272563C216C90327A56E6D1E95E31F1FF00FE3D345E3A
+          CAFF00CAB4A51539A8B03B6D2BE2578575AD4E0D3EC350696EA73B635F29864F
+          D715A1A3F8CB43F115FDD69FA6DD34B736E09917CB65C60ED3C9F7AE63C1D61A
+          B8D4EDA4D43C1BA1585B2C0592F2D625F34360639F7E6B91F83B85F88DE228DB
+          01B130DA4F7130AD1D38D9B5D067A6D9F8CB43D435D9F45B6BB67D420DDE6446
+          3200DBF7B9A9342F19E87E25B99ED349BEF3678065D194A1C648E33D79F4AF28
+          F06E25F8E1AE327CE99B9F9872318F5AE2FC3B3EA9A26A3378A74F05A1D3AE55
+          6E94778DC9EBEC707F4AD3D845DECFA20B1F4668FE31D175CD52EF4AD3EF1E5B
+          CB5566950A30C00C14F3DF922A9EABF11FC2BA3DDBDA5E6AC82743B592305F69
+          F438AF24F87BA834BE24F196A7641C3B6957371083D41DC081F5CD6BFC1DF0FE
+          87ACF87F5ABAD52D60BA9FCEF2D9A6018C69B73919E87393BA94A8C6376FA582
+          C7A8CFE29D120F0F9D70DFC7269A3199E2F9C0C903A0FAD62A7C5EF052AE0EA8
+          D9EA7F70FF00E15C7EB569E16B0F84DAEDBF85EFCDDC2258DA7DD2162ADBC0FE
+          9DBD2B2FC1D61E269FC3169269FE0EF0D6A16A73B6E6F610D2BF3CE49342A50B
+          37AEFE8163D5B54F883E1BD1E0B19AF6F9A34BE816E2022263BA33D0F038A7E8
+          3F10BC37E23D4469FA65F19AE4A1709E5B0E075E48AF2AF8C513C7AFF86215B5
+          855D6DE3516E8A0479DFF700FEEF6FA57A2F836C3548B539A4D4FC25A2692163
+          FDDCF631A87639E991DB1512A7154D480EDD8E5684E94B8A00C573885A28A280
+          0AE47C71E02B6F1BC566971792DB7D998B02881B39FAD14538C9C5DD01D4C10F
+          910471039D8A1727BE062BCFBC41F0874BD635B9756B4D42EF4D9E6E6516C701
+          9BB91C8C67BD14538CE51774C0D1F077C3DD2FC1AB7325B4935C5DDCAEC92E25
+          EBB7D00EDCD47E18F873A7F872DB55B633BDEC1A900B2A4A800039E9CFBD1453
+          7526EF77B80CF06FC32B1F076A9777F6D7B35C0B881A0F2A64180A581FC7A62B
+          1EFF00E0B6953DF5C4FA7EAB7FA74339CB5BC272BCF51D471ED4514FDACEF7B8
+          1B03E1A69107832E7C3768F2411DC9569AE701A476041C9FF0ED5811FC0CB544
+          0B1F893528D07454E00FC035145355A6BA81B7AAFC2BB4D5BFB0FCED52E41D26
+          28E3562A18CBB5B765893D6BBFC5145439396E02D1451520145145007FFFD9}
+        mmHeight = 28152
+        mmLeft = 1905
+        mmTop = 212
+        mmWidth = 26247
+        BandType = 1
+      end
+      object ppLabel20: TppLabel
+        UserName = 'Label41'
+        Caption = 'FUNDAÇÃO DOS ECONOMIÁRIOS FEDERAIS'
+        Font.Charset = ANSI_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 18
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 7620
+        mmLeft = 28363
+        mmTop = 3598
+        mmWidth = 154729
+        BandType = 1
+      end
+      object ppLabel21: TppLabel
+        UserName = 'Label53'
+        Caption = 
+          'SCN, Quadra 2, Bloco A Edifício Corporate Financial Center 12º e' +
+          ' 13º Andares'
+        Font.Charset = ANSI_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial Narrow'
+        Font.Size = 9
+        Font.Style = [fsBold]
+        TextAlignment = taCentered
+        Transparent = True
+        mmHeight = 3810
+        mmLeft = 28363
+        mmTop = 11642
+        mmWidth = 154517
+        BandType = 1
+      end
+      object ppLabel22: TppLabel
+        UserName = 'Label54'
+        Caption = 'Brasília DF CEP 70.712-900 - (061)3329-1700 - www.funcef.com.br'
+        Font.Charset = ANSI_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial Narrow'
+        Font.Size = 9
+        Font.Style = [fsBold]
+        TextAlignment = taCentered
+        Transparent = True
+        mmHeight = 3810
+        mmLeft = 28363
+        mmTop = 15875
+        mmWidth = 154517
+        BandType = 1
+      end
+      object ppLabel55: TppLabel
+        UserName = 'Label55'
+        Caption = 'CNPJ: 00.436.923/0001-90'
+        Font.Charset = ANSI_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial Narrow'
+        Font.Size = 9
+        Font.Style = [fsBold]
+        TextAlignment = taCentered
+        Transparent = True
+        mmHeight = 3810
+        mmLeft = 28363
+        mmTop = 20108
+        mmWidth = 154517
+        BandType = 1
+      end
+    end
+    object ppHeaderBand1: TppHeaderBand
+      BeforePrint = ppHeaderBand1BeforePrint
+      mmBottomOffset = 0
+      mmHeight = 35719
+      mmPrintPosition = 0
+      object ppShape5: TppShape
+        UserName = 'Shape1'
+        mmHeight = 212
+        mmLeft = 0
+        mmTop = 0
+        mmWidth = 197274
+        BandType = 0
+      end
+      object ppLabel23: TppLabel
+        UserName = 'Label1'
+        Caption = 'NOME:'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 10
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 4191
+        mmLeft = 37465
+        mmTop = 7620
+        mmWidth = 11811
+        BandType = 0
+      end
+      object ppLabel24: TppLabel
+        UserName = 'Label2'
+        Caption = 'MATRÍCULA:'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 10
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 4191
+        mmLeft = 37465
+        mmTop = 12488
+        mmWidth = 21717
+        BandType = 0
+      end
+      object ppLabel25: TppLabel
+        UserName = 'Label3'
+        Caption = 'CPF:'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 10
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 4191
+        mmLeft = 37465
+        mmTop = 17357
+        mmWidth = 8213
+        BandType = 0
+      end
+      object ppLabel48: TppLabel
+        UserName = 'Label13'
+        Caption = 'Mês Referência'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 3598
+        mmLeft = 21960
+        mmTop = 29845
+        mmWidth = 20955
+        BandType = 0
+      end
+      object ppLabel49: TppLabel
+        UserName = 'Label14'
+        Caption = 'Mês Cobrança'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 3598
+        mmLeft = 46302
+        mmTop = 29845
+        mmWidth = 19685
+        BandType = 0
+      end
+      object ppLabel50: TppLabel
+        UserName = 'Label15'
+        Caption = 'Contribuição'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 3704
+        mmLeft = 69321
+        mmTop = 30427
+        mmWidth = 17727
+        BandType = 0
+      end
+      object ppLabel51: TppLabel
+        UserName = 'Label16'
+        Caption = 'Valor Recebido'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 3598
+        mmLeft = 111390
+        mmTop = 29845
+        mmWidth = 20743
+        BandType = 0
+      end
+      object ppLabel52: TppLabel
+        UserName = 'Label17'
+        Caption = 'Valor Atualizado'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 3704
+        mmLeft = 157692
+        mmTop = 29898
+        mmWidth = 21167
+        BandType = 0
+      end
+      object ppShape8: TppShape
+        UserName = 'Shape4'
+        mmHeight = 212
+        mmLeft = 212
+        mmTop = 35348
+        mmWidth = 197274
+        BandType = 0
+      end
+      object pplbl_nomeHisCont: TppLabel
+        UserName = 'lbl_nomeHisCont'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 10
+        Font.Style = []
+        Transparent = True
+        mmHeight = 4022
+        mmLeft = 69427
+        mmTop = 7620
+        mmWidth = 26755
+        BandType = 0
+      end
+      object pplbl_matriHistCont: TppLabel
+        UserName = 'lbl_matriHistCont'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 10
+        Font.Style = []
+        Transparent = True
+        mmHeight = 4022
+        mmLeft = 69426
+        mmTop = 12489
+        mmWidth = 26755
+        BandType = 0
+      end
+      object pplbl_cpfHistCont: TppLabel
+        UserName = 'lbl_cpfHistCont'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 10
+        Font.Style = []
+        Transparent = True
+        mmHeight = 4022
+        mmLeft = 69426
+        mmTop = 17356
+        mmWidth = 23622
+        BandType = 0
+      end
+      object ppLabel27: TppLabel
+        UserName = 'Label27'
+        Caption = 'Índice %'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 3387
+        mmLeft = 139436
+        mmTop = 29845
+        mmWidth = 10054
+        BandType = 0
+      end
+      object ppLabel46: TppLabel
+        UserName = 'Label46'
+        Caption = 'Operação'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        Transparent = True
+        Visible = False
+        mmHeight = 3387
+        mmLeft = 181187
+        mmTop = 29845
+        mmWidth = 13039
+        BandType = 0
+      end
+    end
+    object ppDetailBand1: TppDetailBand
+      mmBottomOffset = 0
+      mmHeight = 3440
+      mmPrintPosition = 0
+      object ppDBText6: TppDBText
+        UserName = 'DBText1'
+        AutoSize = True
+        DataField = 'Mês Referência'
+        DataPipeline = ppBDEHistContr
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        TextAlignment = taCentered
+        Transparent = True
+        DataPipelineName = 'ppBDEHistContr'
+        mmHeight = 3260
+        mmLeft = 22490
+        mmTop = 0
+        mmWidth = 19812
+        BandType = 4
+      end
+      object ppDBText7: TppDBText
+        UserName = 'DBText2'
+        AutoSize = True
+        DataField = 'Mês Cobrança'
+        DataPipeline = ppBDEHistContr
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        TextAlignment = taCentered
+        Transparent = True
+        DataPipelineName = 'ppBDEHistContr'
+        mmHeight = 3260
+        mmLeft = 46302
+        mmTop = 0
+        mmWidth = 18373
+        BandType = 4
+      end
+      object ppDBText8: TppDBText
+        UserName = 'DBText3'
+        DataField = 'Contribuição'
+        DataPipeline = ppBDEHistContr
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        Transparent = True
+        DataPipelineName = 'ppBDEHistContr'
+        mmHeight = 3175
+        mmLeft = 69321
+        mmTop = 0
+        mmWidth = 39952
+        BandType = 4
+      end
+      object ppDBText9: TppDBText
+        UserName = 'DBText4'
+        AutoSize = True
+        DataField = 'Valor Recebido'
+        DataPipeline = ppBDEHistContr
+        DisplayFormat = '#,##0.00'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        TextAlignment = taRightJustified
+        Transparent = True
+        DataPipelineName = 'ppBDEHistContr'
+        mmHeight = 3175
+        mmLeft = 110861
+        mmTop = 0
+        mmWidth = 19050
+        BandType = 4
+      end
+      object ppDBText10: TppDBText
+        UserName = 'DBText5'
+        AutoSize = True
+        DataField = 'Valor Atualizado'
+        DataPipeline = ppBDEHistContr
+        DisplayFormat = '#,##0.00'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        TextAlignment = taRightJustified
+        Transparent = True
+        DataPipelineName = 'ppBDEHistContr'
+        mmHeight = 3175
+        mmLeft = 157692
+        mmTop = 0
+        mmWidth = 18785
+        BandType = 4
+      end
+      object ppDBText11: TppDBText
+        UserName = 'DBText6'
+        AutoSize = True
+        DataField = 'Índice %'
+        DataPipeline = ppBDEHistContr
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        TextAlignment = taCentered
+        Transparent = True
+        DataPipelineName = 'ppBDEHistContr'
+        mmHeight = 3260
+        mmLeft = 139700
+        mmTop = 0
+        mmWidth = 9260
+        BandType = 4
+      end
+      object ppDBText20: TppDBText
+        UserName = 'DBText20'
+        AutoSize = True
+        DataField = 'Operação'
+        DataPipeline = ppBDEHistContr
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        TextAlignment = taCentered
+        Transparent = True
+        Visible = False
+        DataPipelineName = 'ppBDEHistContr'
+        mmHeight = 3260
+        mmLeft = 182034
+        mmTop = 0
+        mmWidth = 12404
+        BandType = 4
+      end
+    end
+    object ppFooterBand2: TppFooterBand
+      mmBottomOffset = 0
+      mmHeight = 4868
+      mmPrintPosition = 0
+      object ppLabel26: TppLabel
+        UserName = 'Label26'
+        Caption = 'Folha de Benefícios'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 3387
+        mmLeft = 4233
+        mmTop = 635
+        mmWidth = 26797
+        BandType = 8
+      end
+      object ppSystemVariable4: TppSystemVariable
+        UserName = 'SystemVariable4'
+        VarType = vtPageSetDesc
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 3387
+        mmLeft = 84667
+        mmTop = 635
+        mmWidth = 18161
+        BandType = 8
+      end
+      object ppSystemVariable5: TppSystemVariable
+        UserName = 'SystemVariable5'
+        VarType = vtDateTime
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 3387
+        mmLeft = 163407
+        mmTop = 635
+        mmWidth = 26289
+        BandType = 8
+      end
+      object ppShape11: TppShape
+        UserName = 'Shape11'
+        mmHeight = 212
+        mmLeft = 212
+        mmTop = 212
+        mmWidth = 197274
+        BandType = 8
+      end
+    end
+    object raCodeModule1: TraCodeModule
+      ProgramStream = {00}
+    end
+  end
+  object ppExtrato: TppReport
+    AutoStop = False
+    DataPipeline = ppBDEExtrato
+    PassSetting = psTwoPass
+    PrinterSetup.BinName = 'Default'
+    PrinterSetup.DocumentName = 'Report'
+    PrinterSetup.PaperName = 'A4'
+    PrinterSetup.PrinterName = 'Default'
+    PrinterSetup.mmMarginBottom = 6350
+    PrinterSetup.mmMarginLeft = 6350
+    PrinterSetup.mmMarginRight = 6350
+    PrinterSetup.mmMarginTop = 6350
+    PrinterSetup.mmPaperHeight = 297000
+    PrinterSetup.mmPaperWidth = 210000
+    PrinterSetup.PaperSize = 9
+    AllowPrintToArchive = True
+    AllowPrintToFile = True
+    DeviceType = 'PrinterFile'
+    OutlineSettings.CreateNode = True
+    OutlineSettings.CreatePageNodes = True
+    OutlineSettings.Enabled = True
+    OutlineSettings.Visible = True
+    TextFileType = ftCustom
+    TextSearchSettings.DefaultString = '<FindText>'
+    TextSearchSettings.Enabled = True
+    Left = 921
+    Top = 193
+    Version = '7.04'
+    mmColumnWidth = 0
+    DataPipelineName = 'ppBDEExtrato'
+    object ppTitleBand1: TppTitleBand
+      mmBottomOffset = 0
+      mmHeight = 37465
+      mmPrintPosition = 0
+      object ppLabel68: TppLabel
+        UserName = 'Label401'
+        Caption = 'HISTÓRICO DE COMPENSAÇÃO'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 14
+        Font.Style = [fsBold]
+        TextAlignment = taCentered
+        Transparent = True
+        mmHeight = 5842
+        mmLeft = 64796
+        mmTop = 24977
+        mmWidth = 76581
+        BandType = 1
+      end
+      object ppImage1: TppImage
+        UserName = 'Image1'
+        MaintainAspectRatio = False
+        Picture.Data = {
+          0A544A504547496D616765500C0000FFD8FFE000104A46494600010101006000
+          600000FFDB004300080606070605080707070909080A0C140D0C0B0B0C191213
+          0F141D1A1F1E1D1A1C1C20242E2720222C231C1C2837292C30313434341F2739
+          3D38323C2E333432FFDB0043010909090C0B0C180D0D1832211C213232323232
+          3232323232323232323232323232323232323232323232323232323232323232
+          32323232323232323232323232FFC00011080067007203012200021101031101
+          FFC4001F0000010501010101010100000000000000000102030405060708090A
+          0BFFC400B5100002010303020403050504040000017D01020300041105122131
+          410613516107227114328191A1082342B1C11552D1F02433627282090A161718
+          191A25262728292A3435363738393A434445464748494A535455565758595A63
+          6465666768696A737475767778797A838485868788898A92939495969798999A
+          A2A3A4A5A6A7A8A9AAB2B3B4B5B6B7B8B9BAC2C3C4C5C6C7C8C9CAD2D3D4D5D6
+          D7D8D9DAE1E2E3E4E5E6E7E8E9EAF1F2F3F4F5F6F7F8F9FAFFC4001F01000301
+          01010101010101010000000000000102030405060708090A0BFFC400B5110002
+          0102040403040705040400010277000102031104052131061241510761711322
+          328108144291A1B1C109233352F0156272D10A162434E125F11718191A262728
+          292A35363738393A434445464748494A535455565758595A636465666768696A
+          737475767778797A82838485868788898A92939495969798999AA2A3A4A5A6A7
+          A8A9AAB2B3B4B5B6B7B8B9BAC2C3C4C5C6C7C8C9CAD2D3D4D5D6D7D8D9DAE2E3
+          E4E5E6E7E8E9EAF2F3F4F5F6F7F8F9FAFFDA000C03010002110311003F00F7FA
+          2A1F31A8F31A8026A2A1F31A97CC34012D151893D4572DF11BC512F853C1D3EA
+          36A07DA5DD6084B0C8566CF27F234E3172764075267883EC32287FEE93CD499A
+          F8C67D5350B9BC6BB9EFEE64B9277199A56DD9F5CE78FC2BDE3E0BF8C6FF005D
+          B2BCD275399EE26B10AF1CF21CB346490031EE411D6BA2AE19C23CD71D8F56A2
+          A3327A52798D5CC225A2A1F31A8F31A8026A2A1F31AA4425864D003A8A28A008
+          7CB3ED4796D535713E3DF8890F815EC965D364BCFB5062364A136E31D720FAD5
+          462E4EC80EC3CB6A4208EA2BC77FE1A12CFF00E85D9FFF000297FF0089A46FDA
+          0ACCF5F0ECFF00F816BFFC4D6BF57ABD80F62AE7BC6FE1A1E2BF0ADD6961C473
+          1C49039E8245E99FCCD79EFF00C34059FF00D0BB71F85DAFFF00135734EF8EDA
+          3DCDE2C57FA5DD5942C71E7798250A7DC0038A6A8D58BBD86793DCF80BC59697
+          8D68FA05FBC8AC5434509746F70C38239EB5ED7F09FC0D75E15D3AEAF7524097
+          F7BB41881CF9718E80FBE49AF43B3BB82F6CA3BAB599268245DD1C887208F506
+          BCEBC49F19342D0EF5ACECE09754990ED90C4C1507D1B07354EAD4AAB9120B9E
+          8D462BC73FE17FD9E7FE45DB8FFC0B5FFE26957F682B31FF0032ECFF00F816BF
+          FC4D47D5EAF6158F64F2DA8F2DABC77FE1A12D3FE85D9FFF000297FF0089ADDF
+          087C5EB7F17788A0D1E3D1E5B669559BCC69D580DA33D00F6A4E8544AED01E8D
+          E5B7B53D14A8C1A514B588051451400567EA5A1E97AC18CEA36305D7979D9E6A
+          E76E7AE2B428A13B6C0601F04F863FE80765FF007E8521F05786003FF123B2FF
+          00BF42B6AE9DD2DA478C65D54951EF5C8E93A8EA126AC8AF249207243A37403F
+          A57162B32586AB0A524DF31BD2A12A909493D8BCDE09F0C3A156D0AC883C11E5
+          D7CF1F117C3B69E18F17CF61605FECC5165456EA991D33F5AFA97DABE71F8D1F
+          F23FBFFD7B47FCABD8C2CA5CF6B98A2F7843C4B7F61F077C51141211F6378E38
+          9B3CA2CCDB5B1E98EA2BCE749B21A8EB16562CE516E2658CB01D327922BADF0E
+          FF00C925F1AFFD77B2FF00D195CEF85FFE46CD27FEBED3F9D75C55B99AFEB419
+          F4BD97C3FF000B69F691DB47A35B3AC631BE45DCCDEE4D5B4F0578608FF901D9
+          7FDFB15B4DD4FD6B9DF115E5E5BC90A44EF1C2464B2F193F5AF071B8DFAAD175
+          A5776EC5D1A4EACD4132C8F04F860FFCC0EC7FEFD0AB363E17D134CBA5BAB1D2
+          ED6DE750409234C119A93429EE2E34B47B9CEFC9193D48F5AD2CD6B46BBAD4D4
+          D5ECD1138B849C5F4168A28AB2428A28A002A95FB6A0BB3EC2903673BBCD278F
+          4C63F1ABB486B3A90E78F2DDAF42A32E577B5CE7AF352D66C23135C5B5A98B38
+          2509E3F5A2EB5D820B3867B6810CD382718C631EB56BC4BFF2067FF797F9D727
+          3FFC79D97D1BF9D7CCE618AAF84AB2A709B7EEA6AFAB4EF6D0F4F0F4A9D68A93
+          56D7A75D0E912E35C7456F22D06467049FF1AF04F8C0666F1BE6E0209BECC9B8
+          274AFA3D54EC5C9EC2BE75F8D1FF0023FBFF00D7B47FCABEAF2EA0E9D4BB9B96
+          9D7FE18F3E7514B4514BD0A9E1DFF924BE35FF00AEF65FFA32B9CF0CE7FE12AD
+          271D7ED49FCEBA3F0EFF00C925F1A7FD77B2FF00D195CEF8639F15E93FF5F69F
+          CEBD55F6BFAE841F52B4BAEEF6C4366464E33BBFC6A2B2D65A5BC7B2D4608D59
+          727819191F5CD6E37DE3F5AE42E3FE4659FEA7F957C6660EA613D9CE336EF2B3
+          4F5563B30EA3579938A565D0D2835AD42FEE244D3EDA0F293BC99E076E86B46D
+          1F576B9517715AAC383931E73593E10E7ED5FF0001FEB5D456995AA988A11AF5
+          2A3BB6F4E9BF6B138AE5A7374E3156403039A01CD0466851815EC9C62D145140
+          11824507269075A90F4A6062F88FFE40D27FBCB5CB4FFF001E765F46FE75D66B
+          D1493692E91A33B6E070A326B9B9AC2ECDA5A0FB34B95073F29E39AF90CF294E
+          589938A6FDD5FF00A51EBE065154D5DF57F91D7293B17E82BE77F8D1FF0023FB
+          FF00D7B47FCABE885E117E82BC13E2FE8DAADEF8E1A6B4D2EFAE22FB3A0F321B
+          6775CFA640AFB7C2594F53C9EA63F877FE492F8D3FEBBD97FE8CAE73C31FF235
+          E93FF5F69FCEBB1D0744D5E2F85DE2FB69349D41279A6B43144D6AE19C093276
+          8C64E3DAB03C37E1ED722F13E97249A2EA491ADCA1676B4900033D49238AEC52
+          5EF6BFD580FAA09F9CFD6B93B839F12CC7DCFF002AEADBEF1E7BD73335A5CB78
+          826956090A1270C14E3A57C8679094A9D3E557F791D982694A57EC4DE12EB75F
+          45FEB5D39C9AE77C316D3C1F69F3A278F2171B8633D6BA451C56D92C5C705052
+          567AFE6C8C634EBC9A13185A54E94ADF7685E95EA1CA2D145140118EB58DE23F
+          16E8DE168E07D5EE8C0272563C216C90327A56E6D1E95E31F1FF00FE3D345E3A
+          CAFF00CAB4A51539A8B03B6D2BE2578575AD4E0D3EC350696EA73B635F29864F
+          D715A1A3F8CB43F115FDD69FA6DD34B736E09917CB65C60ED3C9F7AE63C1D61A
+          B8D4EDA4D43C1BA1585B2C0592F2D625F34360639F7E6B91F83B85F88DE228DB
+          01B130DA4F7130AD1D38D9B5D067A6D9F8CB43D435D9F45B6BB67D420DDE6446
+          3200DBF7B9A9342F19E87E25B99ED349BEF3678065D194A1C648E33D79F4AF28
+          F06E25F8E1AE327CE99B9F9872318F5AE2FC3B3EA9A26A3378A74F05A1D3AE55
+          6E94778DC9EBEC707F4AD3D845DECFA20B1F4668FE31D175CD52EF4AD3EF1E5B
+          CB5566950A30C00C14F3DF922A9EABF11FC2BA3DDBDA5E6AC82743B592305F69
+          F438AF24F87BA834BE24F196A7641C3B6957371083D41DC081F5CD6BFC1DF0FE
+          87ACF87F5ABAD52D60BA9FCEF2D9A6018C69B73919E87393BA94A8C6376FA582
+          C7A8CFE29D120F0F9D70DFC7269A3199E2F9C0C903A0FAD62A7C5EF052AE0EA8
+          D9EA7F70FF00E15C7EB569E16B0F84DAEDBF85EFCDDC2258DA7DD2162ADBC0FE
+          9DBD2B2FC1D61E269FC3169269FE0EF0D6A16A73B6E6F610D2BF3CE49342A50B
+          37AEFE8163D5B54F883E1BD1E0B19AF6F9A34BE816E2022263BA33D0F038A7E8
+          3F10BC37E23D4469FA65F19AE4A1709E5B0E075E48AF2AF8C513C7AFF86215B5
+          855D6DE3516E8A0479DFF700FEEF6FA57A2F836C3548B539A4D4FC25A2692163
+          FDDCF631A87639E991DB1512A7154D480EDD8E5684E94B8A00C573885A28A280
+          0AE47C71E02B6F1BC566971792DB7D998B02881B39FAD14538C9C5DD01D4C10F
+          910471039D8A1727BE062BCFBC41F0874BD635B9756B4D42EF4D9E6E6516C701
+          9BB91C8C67BD14538CE51774C0D1F077C3DD2FC1AB7325B4935C5DDCAEC92E25
+          EBB7D00EDCD47E18F873A7F872DB55B633BDEC1A900B2A4A800039E9CFBD1453
+          7526EF77B80CF06FC32B1F076A9777F6D7B35C0B881A0F2A64180A581FC7A62B
+          1EFF00E0B6953DF5C4FA7EAB7FA74339CB5BC272BCF51D471ED4514FDACEF7B8
+          1B03E1A69107832E7C3768F2411DC9569AE701A476041C9FF0ED5811FC0CB544
+          0B1F893528D07454E00FC035145355A6BA81B7AAFC2BB4D5BFB0FCED52E41D26
+          28E3562A18CBB5B765893D6BBFC5145439396E02D1451520145145007FFFD9}
+        mmHeight = 28152
+        mmLeft = 1905
+        mmTop = 212
+        mmWidth = 26247
+        BandType = 1
+      end
+      object ppLabel41: TppLabel
+        UserName = 'Label41'
+        Caption = 'FUNDAÇÃO DOS ECONOMIÁRIOS FEDERAIS'
+        Font.Charset = ANSI_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 12
+        Font.Style = [fsBold]
+        TextAlignment = taCentered
+        Transparent = True
+        mmHeight = 5080
+        mmLeft = 28363
+        mmTop = 3598
+        mmWidth = 167640
+        BandType = 1
+      end
+      object ppLabel53: TppLabel
+        UserName = 'Label53'
+        Caption = 
+          'SCN, Quadra 2, Bloco A Edifício Corporate Financial Center 12º e' +
+          ' 13º Andares'
+        Font.Charset = ANSI_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial Narrow'
+        Font.Size = 9
+        Font.Style = [fsBold]
+        TextAlignment = taCentered
+        Transparent = True
+        mmHeight = 3810
+        mmLeft = 28363
+        mmTop = 11430
+        mmWidth = 168064
+        BandType = 1
+      end
+      object ppLabel54: TppLabel
+        UserName = 'Label54'
+        Caption = 'Brasília DF CEP 70.712-900 - (061)3329-1700 - www.funcef.com.br'
+        Font.Charset = ANSI_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial Narrow'
+        Font.Size = 9
+        Font.Style = [fsBold]
+        TextAlignment = taCentered
+        Transparent = True
+        mmHeight = 3810
+        mmLeft = 28363
+        mmTop = 15875
+        mmWidth = 168487
+        BandType = 1
+      end
+      object ppSystemVariable3: TppSystemVariable
+        UserName = 'SystemVariable3'
+        VarType = vtDateTime
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        Transparent = True
+        mmHeight = 3260
+        mmLeft = 163407
+        mmTop = 33443
+        mmWidth = 25950
+        BandType = 1
+      end
+      object ppLabel42: TppLabel
+        UserName = 'Label19'
+        Caption = 'Emissão: '
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 3387
+        mmLeft = 149225
+        mmTop = 33444
+        mmWidth = 13462
+        BandType = 1
+      end
+      object ppLabel47: TppLabel
+        UserName = 'Label47'
+        Caption = 'CNPJ: 00.436.923/0001-90'
+        Font.Charset = ANSI_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial Narrow'
+        Font.Size = 9
+        Font.Style = [fsBold]
+        TextAlignment = taCentered
+        Transparent = True
+        mmHeight = 3810
+        mmLeft = 28363
+        mmTop = 20108
+        mmWidth = 168487
+        BandType = 1
+      end
+    end
+    object ppHeaderBand3: TppHeaderBand
+      BeforePrint = ppHeaderBand3BeforePrint
+      mmBottomOffset = 0
+      mmHeight = 59531
+      mmPrintPosition = 0
+      object ppShape1: TppShape
+        UserName = 'Shape1'
+        mmHeight = 212
+        mmLeft = 0
+        mmTop = 0
+        mmWidth = 197274
+        BandType = 0
+      end
+      object ppLabel1: TppLabel
+        UserName = 'Label1'
+        Caption = 
+          'Nome                                                            ' +
+          '                 '
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 3387
+        mmLeft = 1693
+        mmTop = 9737
+        mmWidth = 70485
+        BandType = 0
+      end
+      object ppLabel2: TppLabel
+        UserName = 'Label2'
+        Caption = 
+          'Matrícula                                                       ' +
+          '                '
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 3387
+        mmLeft = 1694
+        mmTop = 13970
+        mmWidth = 70485
+        BandType = 0
+      end
+      object ppLabel3: TppLabel
+        UserName = 'Label3'
+        Caption = 'Data Admissão na Patrocinadora                                '
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 3387
+        mmLeft = 1694
+        mmTop = 22437
+        mmWidth = 70485
+        BandType = 0
+      end
+      object ppLabel4: TppLabel
+        UserName = 'Label4'
+        Caption = 
+          'Primeiro Pagamento                                              ' +
+          '      '
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 3387
+        mmLeft = 1694
+        mmTop = 26670
+        mmWidth = 70485
+        BandType = 0
+      end
+      object ppLabel5: TppLabel
+        UserName = 'Label5'
+        Caption = 
+          'Situação na Fundação                                            ' +
+          '     '
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 3387
+        mmLeft = 1694
+        mmTop = 30903
+        mmWidth = 70485
+        BandType = 0
+      end
+      object ppLabel6: TppLabel
+        UserName = 'Label6'
+        Caption = 
+          'Plano                                                           ' +
+          '                   '
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 3387
+        mmLeft = 1694
+        mmTop = 35137
+        mmWidth = 70485
+        BandType = 0
+      end
+      object pplbl_nomeextrato: TppLabel
+        UserName = 'lbl_nomeextrato'
+        Caption = 'lbl_nomeextrato'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        Transparent = True
+        mmHeight = 3175
+        mmLeft = 73872
+        mmTop = 9737
+        mmWidth = 122131
+        BandType = 0
+      end
+      object pplbl_matriculaextrato: TppLabel
+        UserName = 'lbl_matriculaextrato'
+        Caption = 'lbl_matriculaextrato'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        Transparent = True
+        mmHeight = 3260
+        mmLeft = 73871
+        mmTop = 13970
+        mmWidth = 122131
+        BandType = 0
+      end
+      object pplbl_dataadmExtrato: TppLabel
+        UserName = 'lbl_dataadmExtrato'
+        Caption = 'lbl_dataadmExtrato'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        Transparent = True
+        mmHeight = 3175
+        mmLeft = 73871
+        mmTop = 22437
+        mmWidth = 122131
+        BandType = 0
+      end
+      object pplbl_dataprimExtrato: TppLabel
+        UserName = 'lbl_dataprimExtrato'
+        Caption = 'lbl_dataprimExtrato'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        Transparent = True
+        mmHeight = 3175
+        mmLeft = 73871
+        mmTop = 26670
+        mmWidth = 122131
+        BandType = 0
+      end
+      object pplbl_sitfunExtrato: TppLabel
+        UserName = 'lbl_sitfunExtrato'
+        Caption = 'lbl_sitfunExtrato'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        Transparent = True
+        mmHeight = 3175
+        mmLeft = 73871
+        mmTop = 30903
+        mmWidth = 122131
+        BandType = 0
+      end
+      object pplbl_planoExtrato: TppLabel
+        UserName = 'lbl_planoExtrato'
+        Caption = 'lbl_planoExtrato'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        Transparent = True
+        mmHeight = 3175
+        mmLeft = 73871
+        mmTop = 35137
+        mmWidth = 122131
+        BandType = 0
+      end
+      object ppShape2: TppShape
+        UserName = 'Shape2'
+        mmHeight = 212
+        mmLeft = 212
+        mmTop = 40005
+        mmWidth = 197274
+        BandType = 0
+      end
+      object ppLabel7: TppLabel
+        UserName = 'Label7'
+        Caption = 'Nº do Processo:'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 3387
+        mmLeft = 1694
+        mmTop = 41910
+        mmWidth = 21844
+        BandType = 0
+      end
+      object ppLabel8: TppLabel
+        UserName = 'Label8'
+        Caption = 'Cód. Vara:'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 3387
+        mmLeft = 1694
+        mmTop = 45932
+        mmWidth = 14055
+        BandType = 0
+      end
+      object ppLabel9: TppLabel
+        UserName = 'Label9'
+        Caption = 'Nome da Vara:'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 3387
+        mmLeft = 40217
+        mmTop = 45932
+        mmWidth = 19685
+        BandType = 0
+      end
+      object ppLabel10: TppLabel
+        UserName = 'Label10'
+        Caption = 'Status da Ação:'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 3387
+        mmLeft = 74507
+        mmTop = 41910
+        mmWidth = 21209
+        BandType = 0
+      end
+      object ppLabel11: TppLabel
+        UserName = 'Label11'
+        Caption = 'Data Início:'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 3387
+        mmLeft = 146897
+        mmTop = 41910
+        mmWidth = 15325
+        BandType = 0
+      end
+      object ppLabel12: TppLabel
+        UserName = 'Label12'
+        Caption = 'Data Final:'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 3387
+        mmLeft = 147109
+        mmTop = 45932
+        mmWidth = 14520
+        BandType = 0
+      end
+      object ppShape3: TppShape
+        UserName = 'Shape3'
+        mmHeight = 212
+        mmLeft = 212
+        mmTop = 50165
+        mmWidth = 197274
+        BandType = 0
+      end
+      object pplbl_procExtrato: TppLabel
+        UserName = 'lbl_procExtrato'
+        Caption = 'lbl_procExtrato'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        Transparent = True
+        mmHeight = 3175
+        mmLeft = 23918
+        mmTop = 41910
+        mmWidth = 18838
+        BandType = 0
+      end
+      object pplbl_codvaraExtrato: TppLabel
+        UserName = 'lbl_codvaraExtrato'
+        Caption = 'lbl_codvaraExtrato'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        Transparent = True
+        mmHeight = 3175
+        mmLeft = 16298
+        mmTop = 45932
+        mmWidth = 23368
+        BandType = 0
+      end
+      object pplbl_nomevaraExtrato: TppLabel
+        UserName = 'lbl_nomevaraExtrato'
+        Caption = 'lbl_nomevaraExtrato'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        Transparent = True
+        mmHeight = 3175
+        mmLeft = 60537
+        mmTop = 45932
+        mmWidth = 25908
+        BandType = 0
+      end
+      object pplbl_sitacaoExtrato: TppLabel
+        UserName = 'lbl_sitacaoExtrato'
+        Caption = 'lbl_sitacaoExtrato'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        Transparent = True
+        mmHeight = 3175
+        mmLeft = 97367
+        mmTop = 41910
+        mmWidth = 22352
+        BandType = 0
+      end
+      object pplbl_datainiExtrato: TppLabel
+        UserName = 'lbl_datainiExtrato'
+        Caption = 'lbl_datainiExtrato'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        Transparent = True
+        mmHeight = 3175
+        mmLeft = 162772
+        mmTop = 41910
+        mmWidth = 21675
+        BandType = 0
+      end
+      object pplbl_datafinExtrato: TppLabel
+        UserName = 'lbl_datafinExtrato'
+        Caption = 'lbl_datafinExtrato'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        Transparent = True
+        mmHeight = 3175
+        mmLeft = 162560
+        mmTop = 45932
+        mmWidth = 21844
+        BandType = 0
+      end
+      object ppLabel13: TppLabel
+        UserName = 'Label13'
+        Caption = 'Mês Referência'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 3440
+        mmLeft = 43392
+        mmTop = 53711
+        mmWidth = 20902
+        BandType = 0
+      end
+      object ppLabel14: TppLabel
+        UserName = 'Label14'
+        Caption = 'Mês Pagamento'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 3440
+        mmLeft = 18256
+        mmTop = 53181
+        mmWidth = 21696
+        BandType = 0
+      end
+      object ppLabel15: TppLabel
+        UserName = 'Label15'
+        Caption = 'Saldo Anterior'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 3440
+        mmLeft = 72231
+        mmTop = 53446
+        mmWidth = 19315
+        BandType = 0
+      end
+      object ppLabel16: TppLabel
+        UserName = 'Label16'
+        Caption = 'Índice %'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 3387
+        mmLeft = 138907
+        mmTop = 53711
+        mmWidth = 11515
+        BandType = 0
+      end
+      object ppLabel17: TppLabel
+        UserName = 'Label17'
+        Caption = 'Referência Índice'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 3387
+        mmLeft = 154252
+        mmTop = 53711
+        mmWidth = 23453
+        BandType = 0
+      end
+      object ppShape4: TppShape
+        UserName = 'Shape4'
+        mmHeight = 212
+        mmLeft = 212
+        mmTop = 58632
+        mmWidth = 197274
+        BandType = 0
+      end
+      object ppLabel57: TppLabel
+        UserName = 'Label57'
+        Caption = 
+          'Fonte Pagadora                                                  ' +
+          '           '
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 3387
+        mmLeft = 1693
+        mmTop = 1482
+        mmWidth = 70485
+        BandType = 0
+      end
+      object lbl_fontepaga: TppLabel
+        UserName = 'lbl_fontepaga'
+        Caption = 'lbl_fontepaga'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 3387
+        mmLeft = 73660
+        mmTop = 1482
+        mmWidth = 122131
+        BandType = 0
+      end
+      object ppLabel59: TppLabel
+        UserName = 'Label59'
+        Caption = 
+          'CNPJ                                                            ' +
+          '                   '
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 3387
+        mmLeft = 1482
+        mmTop = 5715
+        mmWidth = 70485
+        BandType = 0
+      end
+      object lbl_cnpf: TppLabel
+        UserName = 'lbl_cnpf'
+        Caption = 'lbl_cnpf'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 3387
+        mmLeft = 73448
+        mmTop = 5715
+        mmWidth = 122131
+        BandType = 0
+      end
+      object ppLabel58: TppLabel
+        UserName = 'Label58'
+        Caption = 
+          'CPF                                                             ' +
+          '                   '
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 3387
+        mmLeft = 1693
+        mmTop = 18203
+        mmWidth = 70019
+        BandType = 0
+      end
+      object lbl_cpf: TppLabel
+        UserName = 'lbl_cpf'
+        Caption = 'lbl_cpf'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        Transparent = True
+        mmHeight = 3260
+        mmLeft = 73660
+        mmTop = 18203
+        mmWidth = 122131
+        BandType = 0
+      end
+      object ppLabel60: TppLabel
+        UserName = 'Label20'
+        Caption = 'Matricula'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 3387
+        mmLeft = 2381
+        mmTop = 53181
+        mmWidth = 12488
+        BandType = 0
+      end
+      object ppLabel61: TppLabel
+        UserName = 'Label21'
+        Caption = 'Valor'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 3440
+        mmLeft = 98954
+        mmTop = 54240
+        mmWidth = 6879
+        BandType = 0
+      end
+      object ppLabel62: TppLabel
+        UserName = 'Label22'
+        Caption = 'Saldo Atual'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 3440
+        mmLeft = 115623
+        mmTop = 53711
+        mmWidth = 15346
+        BandType = 0
+      end
+      object ppLabel63: TppLabel
+        UserName = 'Label23'
+        Caption = 'Operação'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 3387
+        mmLeft = 179917
+        mmTop = 53711
+        mmWidth = 13039
+        BandType = 0
+      end
+    end
+    object ppDetailBand3: TppDetailBand
+      mmBottomOffset = 0
+      mmHeight = 3440
+      mmPrintPosition = 0
+      object ppDBText1: TppDBText
+        UserName = 'DBText1'
+        AutoSize = True
+        DataField = 'Mes Referencia'
+        DataPipeline = ppBDEExtrato
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        TextAlignment = taCentered
+        Transparent = True
+        DataPipelineName = 'ppBDEExtrato'
+        mmHeight = 3175
+        mmLeft = 43127
+        mmTop = 265
+        mmWidth = 19844
+        BandType = 4
+      end
+      object ppDBText2: TppDBText
+        UserName = 'DBText2'
+        AutoSize = True
+        DataField = 'Mes Pagamento'
+        DataPipeline = ppBDEExtrato
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        TextAlignment = taCentered
+        Transparent = True
+        DataPipelineName = 'ppBDEExtrato'
+        mmHeight = 3175
+        mmLeft = 18256
+        mmTop = 265
+        mmWidth = 20638
+        BandType = 4
+      end
+      object ppDBText3: TppDBText
+        UserName = 'DBText3'
+        DataField = 'Saldo Anterior'
+        DataPipeline = ppBDEExtrato
+        DisplayFormat = '#,##0.00'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        Transparent = True
+        DataPipelineName = 'ppBDEExtrato'
+        mmHeight = 3175
+        mmLeft = 72231
+        mmTop = 265
+        mmWidth = 19579
+        BandType = 4
+      end
+      object ppDBText4: TppDBText
+        UserName = 'DBText4'
+        AutoSize = True
+        DataField = 'Indice'
+        DataPipeline = ppBDEExtrato
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        TextAlignment = taRightJustified
+        Transparent = True
+        DataPipelineName = 'ppBDEExtrato'
+        mmHeight = 3260
+        mmLeft = 141912
+        mmTop = 180
+        mmWidth = 7578
+        BandType = 4
+      end
+      object ppDBText5: TppDBText
+        UserName = 'DBText5'
+        AutoSize = True
+        DataField = 'Operacao'
+        DataPipeline = ppBDEExtrato
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        TextAlignment = taRightJustified
+        Transparent = True
+        DataPipelineName = 'ppBDEExtrato'
+        mmHeight = 3260
+        mmLeft = 179948
+        mmTop = 0
+        mmWidth = 12404
+        BandType = 4
+      end
+      object ppDBText21: TppDBText
+        UserName = 'DBText21'
+        DataField = 'Valor'
+        DataPipeline = ppBDEExtrato
+        DisplayFormat = '#,##0.00'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        Transparent = True
+        DataPipelineName = 'ppBDEExtrato'
+        mmHeight = 3175
+        mmLeft = 98954
+        mmTop = 0
+        mmWidth = 14288
+        BandType = 4
+      end
+      object ppDBText22: TppDBText
+        UserName = 'DBText22'
+        DataField = 'Saldo Atual'
+        DataPipeline = ppBDEExtrato
+        DisplayFormat = '#,##0.00'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        Transparent = True
+        DataPipelineName = 'ppBDEExtrato'
+        mmHeight = 3175
+        mmLeft = 115888
+        mmTop = 0
+        mmWidth = 19579
+        BandType = 4
+      end
+      object ppDBText23: TppDBText
+        UserName = 'DBText23'
+        AutoSize = True
+        DataField = 'Referencia Indice'
+        DataPipeline = ppBDEExtrato
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        TextAlignment = taRightJustified
+        Transparent = True
+        DataPipelineName = 'ppBDEExtrato'
+        mmHeight = 3260
+        mmLeft = 153892
+        mmTop = 180
+        mmWidth = 22056
+        BandType = 4
+      end
+      object ppDBText24: TppDBText
+        UserName = 'DBText24'
+        AutoSize = True
+        DataField = 'Matricula'
+        DataPipeline = ppBDEExtrato
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = []
+        TextAlignment = taCentered
+        Transparent = True
+        DataPipelineName = 'ppBDEExtrato'
+        mmHeight = 3260
+        mmLeft = 3259
+        mmTop = 0
+        mmWidth = 11472
+        BandType = 4
+      end
+    end
+    object ppFooterBand1: TppFooterBand
+      mmBottomOffset = 0
+      mmHeight = 5503
+      mmPrintPosition = 0
+      object ppSystemVariable1: TppSystemVariable
+        UserName = 'SystemVariable1'
+        VarType = vtDateTime
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 3387
+        mmLeft = 163407
+        mmTop = 635
+        mmWidth = 26289
+        BandType = 8
+      end
+      object ppSystemVariable2: TppSystemVariable
+        UserName = 'SystemVariable2'
+        VarType = vtPageSetDesc
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 3387
+        mmLeft = 84667
+        mmTop = 635
+        mmWidth = 18161
+        BandType = 8
+      end
+      object ppLabel18: TppLabel
+        UserName = 'Label18'
+        Caption = 'Folha de Benefícios'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlack
+        Font.Name = 'Arial'
+        Font.Size = 8
+        Font.Style = [fsBold]
+        Transparent = True
+        mmHeight = 3387
+        mmLeft = 4233
+        mmTop = 635
+        mmWidth = 26797
+        BandType = 8
+      end
+      object ppShape9: TppShape
+        UserName = 'Shape9'
+        mmHeight = 212
+        mmLeft = 211
+        mmTop = 212
+        mmWidth = 197274
+        BandType = 8
+      end
+    end
+    object ppGroup1: TppGroup
+      BreakName = 'Matricula'
+      DataPipeline = ppBDEExtrato
+      OutlineSettings.CreateNode = True
+      NewPage = True
+      UserName = 'Group1'
+      mmNewColumnThreshold = 0
+      mmNewPageThreshold = 0
+      DataPipelineName = 'ppBDEExtrato'
+      object ppGroupHeaderBand1: TppGroupHeaderBand
+        mmBottomOffset = 0
+        mmHeight = 0
+        mmPrintPosition = 0
+      end
+      object ppGroupFooterBand1: TppGroupFooterBand
+        mmBottomOffset = 0
+        mmHeight = 0
+        mmPrintPosition = 0
+      end
+    end
+  end
+  object ppBDEExtrato: TppBDEPipeline
+    DataSource = dsExtrato
+    CloseDataSource = True
+    OpenDataSource = False
+    SkipWhenNoRecords = False
+    UserName = 'BDEExtrato'
+    Left = 897
+    Top = 273
+    object ppBDEExtratoppField1: TppField
+      FieldAlias = 'Mes Referencia'
+      FieldName = 'Mes Referencia'
+      FieldLength = 0
+      DataType = dtNotKnown
+      DisplayWidth = 0
+      Position = 0
+      Searchable = False
+      Sortable = False
+    end
+    object ppBDEExtratoppField2: TppField
+      FieldAlias = 'Mes Pagamento'
+      FieldName = 'Mes Pagamento'
+      FieldLength = 0
+      DataType = dtNotKnown
+      DisplayWidth = 0
+      Position = 1
+      Searchable = False
+      Sortable = False
+    end
+    object ppBDEExtratoppField3: TppField
+      FieldAlias = 'Saldo Anterior'
+      FieldName = 'Saldo Anterior'
+      FieldLength = 0
+      DataType = dtNotKnown
+      DisplayWidth = 0
+      Position = 2
+      Searchable = False
+      Sortable = False
+    end
+    object ppBDEExtratoppField4: TppField
+      FieldAlias = 'Valor'
+      FieldName = 'Valor'
+      FieldLength = 0
+      DataType = dtNotKnown
+      DisplayWidth = 0
+      Position = 3
+      Searchable = False
+      Sortable = False
+    end
+    object ppBDEExtratoppField5: TppField
+      FieldAlias = 'Saldo Atual'
+      FieldName = 'Saldo Atual'
+      FieldLength = 0
+      DataType = dtNotKnown
+      DisplayWidth = 0
+      Position = 4
+      Searchable = False
+      Sortable = False
+    end
+    object ppBDEExtratoppField6: TppField
+      FieldAlias = 'Operacao'
+      FieldName = 'Operacao'
+      FieldLength = 0
+      DataType = dtNotKnown
+      DisplayWidth = 0
+      Position = 5
+      Searchable = False
+      Sortable = False
+    end
+    object ppBDEExtratoppField7: TppField
+      FieldAlias = 'Indice'
+      FieldName = 'Indice'
+      FieldLength = 10
+      DataType = dtNotKnown
+      DisplayWidth = 0
+      Position = 6
+      Sortable = False
+    end
+    object ppBDEExtratoppField8: TppField
+      FieldAlias = 'Referencia Indice'
+      FieldName = 'Referencia Indice'
+      FieldLength = 10
+      DataType = dtNotKnown
+      DisplayWidth = 0
+      Position = 7
+      Sortable = False
+    end
+    object ppBDEExtratoppField9: TppField
+      FieldAlias = 'Matricula'
+      FieldName = 'Matricula'
+      FieldLength = 10
+      DataType = dtNotKnown
+      DisplayWidth = 0
+      Position = 8
+      Sortable = False
+    end
+  end
+  object wwClientDataSet1: TwwClientDataSet
+    Aggregates = <>
+    Params = <>
+    ValidateWithMask = True
+    Left = 672
+    Top = 256
+  end
+  object ExtraOptions1: TExtraOptions
+    About = 'TExtraDevices 3.00'
+    HTML.ItemsToExport = [reText, reImage, reLine, reShape, reRTF, reBarCode, reCheckBox]
+    HTML.BackLink = '&lt&lt'
+    HTML.ForwardLink = '&gt&gt'
+    HTML.ShowLinks = True
+    HTML.UseTextFileName = False
+    HTML.ZoomableImages = False
+    HTML.Visible = True
+    HTML.PixelFormat = pf8bit
+    HTML.SingleFileOutput = False
+    XHTML.ItemsToExport = [reText, reImage, reLine, reShape, reRTF, reBarCode, reCheckBox]
+    XHTML.BackLink = '&lt&lt'
+    XHTML.ForwardLink = '&gt&gt'
+    XHTML.ShowLinks = True
+    XHTML.UseTextFileName = False
+    XHTML.ZoomableImages = False
+    XHTML.Visible = True
+    XHTML.PixelFormat = pf8bit
+    XHTML.SingleFileOutput = False
+    RTF.ItemsToExport = [reText, reImage, reLine, reShape, reRTF, reBarCode, reCheckBox]
+    RTF.Visible = True
+    RTF.RichTextAsImage = False
+    RTF.UseTextBox = True
+    RTF.PixelFormat = pf8bit
+    RTF.PixelsPerInch = 120
+    Lotus.ItemsToExport = [reText, reImage, reLine, reShape, reRTF, reBarCode, reCheckBox]
+    Lotus.Visible = True
+    Lotus.ColSpacing = 16934
+    Quattro.ItemsToExport = [reText, reImage, reLine, reShape, reRTF, reBarCode, reCheckBox]
+    Quattro.Visible = True
+    Quattro.ColSpacing = 16934
+    Excel.ItemsToExport = [reText, reImage, reLine, reShape, reRTF, reBarCode, reCheckBox]
+    Excel.Visible = True
+    Excel.ColSpacing = 16934
+    Excel.RowSizing = False
+    Excel.AutoConvertToNumber = True
+    Graphic.ItemsToExport = [reText, reImage, reLine, reShape, reRTF, reBarCode, reCheckBox]
+    Graphic.PixelFormat = pf8bit
+    Graphic.UseTextFileName = False
+    Graphic.Visible = True
+    Graphic.PixelsPerInch = 120
+    Graphic.GrayScale = False
+    PDF.ItemsToExport = [reText, reImage, reLine, reShape, reRTF, reBarCode, reCheckBox]
+    PDF.FastCompression = False
+    PDF.CompressImages = True
+    PDF.ScaleImages = True
+    PDF.Visible = True
+    PDF.RichTextAsImage = False
+    PDF.RichEditPixelFormat = pf1bit
+    PDF.PixelFormat = pf24bit
+    PDF.PixelsPerInch = 120
+    PDF.Permissions = [ppPrint, ppModify, ppCopy, ppModifyAnnot]
+    PDF.ViewerPreferences = []
+    PDF.AutoEmbedFonts = True
+    PDF.ImageFormat = riBitmap
+    DotMatrix.ItemsToExport = [reText, reImage, reLine, reShape, reRTF, reBarCode, reCheckBox]
+    DotMatrix.Visible = True
+    DotMatrix.CharsPerInch = cs10CPI
+    DotMatrix.LinesPerInch = ls6LPI
+    DotMatrix.Port = 'LPT1'
+    DotMatrix.ContinousPaper = False
+    DotMatrix.PrinterType = ptEpson
+    Left = 697
+    Top = 351
+  end
+  object QExport3Dialog1: TQExport3Dialog
+    ShowPrintAfter = False
+    ExportSource = esCustom
+    RTFOptions.CaptionStyle.Font.Charset = DEFAULT_CHARSET
+    RTFOptions.CaptionStyle.Font.Color = clBlack
+    RTFOptions.CaptionStyle.Font.Height = -17
+    RTFOptions.CaptionStyle.Font.Name = 'Arial'
+    RTFOptions.CaptionStyle.Font.Style = [fsBold]
+    RTFOptions.CaptionStyle.Alignment = talCenter
+    RTFOptions.DataStyle.Font.Charset = DEFAULT_CHARSET
+    RTFOptions.DataStyle.Font.Color = clBlack
+    RTFOptions.DataStyle.Font.Height = -17
+    RTFOptions.DataStyle.Font.Name = 'Arial'
+    RTFOptions.DataStyle.Font.Style = []
+    RTFOptions.FooterStyle.Font.Charset = DEFAULT_CHARSET
+    RTFOptions.FooterStyle.Font.Color = clBlack
+    RTFOptions.FooterStyle.Font.Height = -17
+    RTFOptions.FooterStyle.Font.Name = 'Arial'
+    RTFOptions.FooterStyle.Font.Style = []
+    RTFOptions.HeaderStyle.Font.Charset = DEFAULT_CHARSET
+    RTFOptions.HeaderStyle.Font.Color = clBlack
+    RTFOptions.HeaderStyle.Font.Height = -17
+    RTFOptions.HeaderStyle.Font.Name = 'Arial'
+    RTFOptions.HeaderStyle.Font.Style = []
+    RTFOptions.StripStyles = <>
+    HTMLPageOptions.TextFont.Charset = DEFAULT_CHARSET
+    HTMLPageOptions.TextFont.Color = clWhite
+    HTMLPageOptions.TextFont.Height = -13
+    HTMLPageOptions.TextFont.Name = 'Arial'
+    HTMLPageOptions.TextFont.Style = []
+    CSVOptions.Comma = ';'
+    PDFOptions.PageOptions.MarginLeft = 1.17
+    PDFOptions.PageOptions.MarginRight = 0.57
+    PDFOptions.PageOptions.MarginTop = 0.78
+    PDFOptions.PageOptions.MarginBottom = 0.78
+    XLSOptions.PageFooter = 'Page &P of &N'
+    XLSOptions.SheetTitle = 'Sheet 1'
+    XLSOptions.CaptionFormat.Font.Style = [xfsBold]
+    XLSOptions.HyperlinkFormat.Font.Color = clrBlue
+    XLSOptions.HyperlinkFormat.Font.Underline = fulSingle
+    XLSOptions.NoteFormat.Alignment.Horizontal = halLeft
+    XLSOptions.NoteFormat.Alignment.Vertical = valTop
+    XLSOptions.NoteFormat.Font.Size = 8
+    XLSOptions.NoteFormat.Font.Style = [xfsBold]
+    XLSOptions.NoteFormat.Font.Name = 'Tahoma'
+    XLSOptions.FieldFormats = <>
+    XLSOptions.StripStyles = <>
+    XLSOptions.Hyperlinks = <>
+    XLSOptions.Notes = <>
+    XLSOptions.Charts = <>
+    XLSOptions.Pictures = <>
+    XLSOptions.Images = <>
+    XLSOptions.Cells = <>
+    XLSOptions.MergedCells = <>
+    Left = 881
+    Top = 223
+  end
+  object qryExtrato: TwwQuery
+    CachedUpdates = True
+    DatabaseName = 'BaseDados'
+    SQL.Strings = (
+      'SELECT MESREFERENCIA"Mes Referencia",'
+      '       MESCOBRANCA"Mes Pagamento",'
+      '      (CASE OPERACAO '
+      '           WHEN '#39'A'#39' THEN (NVL( TEMP.SALDO,0)-NVL( TEMP.VALOR,0))'
+      '           WHEN '#39'S'#39' THEN (NVL( TEMP.SALDO,0)+NVL( TEMP.VALOR,0))'
+      '         END) AS "Saldo Anterior",'
+      '        VALOR"Valor",'
+      '       SALDO"Saldo Atual",    '
+      '      ( COTVALOR / 100) "Indice",'
+      '  MOEDESC "Referencia Indice",       '
+      '        OPERACAO"Operacao" '
+      '  FROM (SELECT H.VALOR,'
+      '               H.IDHSTBITRIBUTACAO,'
+      '               H.OPERACAO,               '
+      '               CASE'
+      '                 WHEN H.OPERACAO = '#39'S'#39' AND H.IDLOTE = 0 THEN'
+      
+        '                  DECODE(SUBSTR(H.MESREFERENCIA, 6, 2), '#39'13'#39', H.' +
+        'MESCOBRANCA, H.MESREFERENCIA)'
+      '                 ELSE'
+      '                  H.MESCOBRANCA'
+      '               END AS MESREF,'
+      '               CASE'
+      '                 WHEN H.OPERACAO = '#39'S'#39' AND H.IDLOTE = 0 THEN'
+      '                  H.MESREFERENCIA'
+      '                 ELSE'
+      '                  H.MESCOBRANCA'
+      '               END AS MESCOBR,'
+      '               H.MESREFERENCIA,'
+      '               H.MESCOBRANCA,'
+      '               H.SALDO,'
+      '               H.IDLOTE,'
+      '               H.IDHSTFOLHABENEF,'
+      '               H.TRGDTINCLUSAO,'
+      '               H.TRGUSERINCLUSAO,'
+      '               H.MOECODIGO,'
+      '               CM.COTVALOR,'
+      '               M.MOEDESC'
+      '          FROM HSTBITRIBUTACAO H'
+      '           JOIN MOEDA M ON M.MOECODIGO = H.MOECODIGO '
+      '         LEFT JOIN COTACAOMOEDA CM'
+      '            ON CM.MOECODIGO = H.MOECODIGO'
+      
+        '           AND (SUBSTR((TO_CHAR((CM.COTDATA), '#39'DD/MM/YYYY'#39')), 7,' +
+        ' 4) || '#39'/'#39' ||'
+      
+        '               SUBSTR((TO_CHAR((CM.COTDATA), '#39'DD/MM/YYYY'#39')), 4, ' +
+        '2)) ='
+      '               H.MESCOBRANCA          '
+      '         WHERE H.IDPESSOA IN (425364)'
+      ''
+      '           AND H.MESREFERENCIA >='
+      '               (SELECT MIN(H.MESREFERENCIA)'
+      '                  FROM HSTBITRIBUTACAO H, BITRIBUTACAO B'
+      '                 WHERE H.OPERACAO = '#39'S'#39
+      '                   AND B.IDPESSOA = H.IDPESSOA'
+      '                   AND B.IDPESSOA = H.IDTITULAR'
+      '                   AND H.IDPESSOA IN (425364))'
+      '                   '
+      '         ORDER BY 4, 5, H.OPERACAO)TEMP'
+      'ORDER BY MESCOBRANCA,OPERACAO,MESREFERENCIA,IDHSTBITRIBUTACAO   ')
+    ValidateWithMask = True
+    Left = 793
+    Top = 106
+    object qryExtratoSaldoAnterior: TFloatField
+      FieldName = 'Saldo Anterior'
+      DisplayFormat = '##,00'
+    end
+    object qryExtratoValor: TFloatField
+      FieldName = 'Valor'
+    end
+    object qryExtratoSaldoAtual: TFloatField
+      FieldName = 'Saldo Atual'
+    end
+    object qryExtratoIndice: TFloatField
+      DisplayLabel = 'Índice %'
+      FieldName = 'Indice'
+    end
+    object qryExtratoOperao: TStringField
+      FieldName = 'Operacao'
+    end
+    object qryExtratoReferenciaIndice: TStringField
+      FieldName = 'Referencia Indice'
+    end
+    object qryExtratoMesdePagamento: TStringField
+      FieldName = 'Mes Pagamento'
+    end
+    object qryExtratoMesReferencia: TStringField
+      FieldName = 'Mes Referencia'
+    end
+    object qryExtratoMatricula: TStringField
+      FieldName = 'Matricula'
+    end
+  end
+  object dsExtrato: TwwDataSource
+    DataSet = qryExtrato
+    Left = 747
+    Top = 154
+  end
+  object qryNome: TwwQuery
+    CachedUpdates = True
+    DatabaseName = 'BaseDados'
+    PictureMasks.Strings = (
+      'Saldo Anterior'#9'#,##0.00'#9'T'#9'T')
+    ValidateWithMask = True
+    Left = 457
+    Top = 392
+  end
+end
